@@ -78,6 +78,7 @@ public partial class SettingsPanel : UserControl
         LanguageRussian.IsChecked = _settings.Language == AikoLanguage.Russian;
 
         VersionLine.Text = $"{Version()} · github.com/Slayumind/aiko";
+        ShowAccess();
 
         _filling = false;
     }
@@ -245,6 +246,95 @@ public partial class SettingsPanel : UserControl
     }
 
     private void OnClose(object sender, RoutedEventArgs e) => CloseRequested?.Invoke();
+
+    /// Whether the line that lets Claude Code report its limits is still in place, and a way to
+    /// put it back.
+    ///
+    /// Until now there was none. Answering "not now" in the wizard, or another tool overwriting
+    /// the status line afterwards, left Aiko waiting for numbers that would never come, with
+    /// nothing on screen to say so and nothing to press.
+    private bool _offeringToAdd;
+
+    private void ShowAccess()
+    {
+        var missing = FoldersWithoutOurLine();
+
+        if (missing.Count == 0)
+        {
+            AccessLine.Text = _environments.HasEnvironments
+                ? "Claude Code is set up to report its limits to Aiko."
+                : string.Empty;
+            AccessButton.Content = "Check access";
+            _offeringToAdd = false;
+            return;
+        }
+
+        AccessLine.Text = missing.Count == 1
+            ? "One environment does not report its limits to Aiko yet."
+            : $"{missing.Count} environments do not report their limits to Aiko yet.";
+        AccessButton.Content = "Set it up";
+        _offeringToAdd = true;
+    }
+
+    private List<string> FoldersWithoutOurLine()
+    {
+        var missing = new List<string>();
+
+        foreach (var environment in _environments.Environments)
+        {
+            foreach (var folder in environment.ConfigDirectories)
+            {
+                if (!HasOurLine(folder))
+                {
+                    missing.Add(folder);
+                }
+            }
+        }
+
+        return missing;
+    }
+
+    private static bool HasOurLine(string folder)
+    {
+        try
+        {
+            var path = ClaudeSettingsEditor.PathIn(folder);
+            return File.Exists(path) && SettingsJsonPatch.HasOurLine(File.ReadAllText(path));
+        }
+        catch (Exception unreadable) when (unreadable is IOException or UnauthorizedAccessException)
+        {
+            return false;
+        }
+    }
+
+    /// The first press only looks. The second one writes, and the button says so before it does:
+    /// this is somebody else's settings file, and pressing "check" should never change it.
+    private void OnCheckAccess(object sender, RoutedEventArgs e)
+    {
+        if (!_offeringToAdd)
+        {
+            ShowAccess();
+            return;
+        }
+
+        if (BridgePath.Current() is not { } bridge)
+        {
+            AccessLine.Text = "Aiko cannot find its own bridge program, so nothing was changed.";
+            return;
+        }
+
+        var problem = null as string;
+        foreach (var folder in FoldersWithoutOurLine())
+        {
+            problem ??= ClaudeSettingsFile.AddBridge(folder, bridge).Problem;
+        }
+
+        ShowAccess();
+        if (problem is not null)
+        {
+            AccessLine.Text = problem;
+        }
+    }
 
     private void OnQuit(object sender, RoutedEventArgs e) => QuitRequested?.Invoke();
 }

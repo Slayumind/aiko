@@ -135,6 +135,21 @@
           </Grid>
         </StackPanel>
 
+        <!--
+          The wizard used to end by closing itself, which left somebody looking at a taskbar with
+          nothing new on it. Windows 11 puts the icon of a new app behind the overflow arrow, and
+          under that arrow the card never opens at all, so Aiko would look broken from the first
+          minute. This is the one thing everybody needs to be told, and it was only in the readme.
+        -->
+        <StackPanel x:Name="StepDone" Margin="0,14,0,0" Visibility="Collapsed">
+          <TextBlock x:Name="DoneWhere" Style="{StaticResource RowName}" TextWrapping="Wrap" />
+          <TextBlock x:Name="DoneOverflow" Style="{StaticResource RowHint}" Margin="0,8,0,0"
+                     TextWrapping="Wrap"
+                     Text="Windows 11 hides the icon of a new app behind the arrow at the left of the tray. Open that arrow and drag Aiko out onto the taskbar, or the card will have nothing to appear from." />
+          <TextBlock x:Name="DoneFirstNumbers" Style="{StaticResource RowHint}" Margin="0,8,0,0"
+                     TextWrapping="Wrap" />
+        </StackPanel>
+
         <Border Height="1" Background="{StaticResource Hairline}" Margin="0,16,0,12" />
 
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">

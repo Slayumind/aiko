@@ -22,7 +22,7 @@
           </StackPanel>
 
           <StackPanel Grid.Column="1" Orientation="Horizontal">
-            <TextBlock Text="direct" Style="{StaticResource RowNote}" VerticalAlignment="Center"
+            <TextBlock Text="Direct mode" Style="{StaticResource RowNote}" VerticalAlignment="Center"
                        Margin="0,0,8,0" />
             <ToggleButton Style="{StaticResource Switch}" IsChecked="{Binding DirectMode}"
                           Checked="OnDirectModeChanged" Unchecked="OnDirectModeChanged"
@@ -69,6 +69,27 @@
         <ItemsControl x:Name="Environments" ItemTemplate="{StaticResource EnvironmentTemplate}" />
         <TextBlock x:Name="NoEnvironments" Text="No environments yet. Aiko finds them on the first run."
                    Style="{StaticResource RowHint}" Visibility="Collapsed" />
+
+        <!--
+          The one control in Aiko that reads your access token. It was labelled "direct" and
+          nothing else, with every word of explanation living in PRIVACY.md, which the app never
+          shows anyone. Somebody has to be able to decide before they flip it, not after.
+        -->
+        <TextBlock Style="{StaticResource RowHint}" Margin="0,2,0,0" TextWrapping="Wrap"
+                   Text="Direct mode lets Aiko ask Anthropic for your limits itself, with the token Claude Code already keeps on this computer. Aiko reads it for each request and never stores it. Turn it on if you work in the IDE panel or Claude Desktop, where there is no status line." />
+        <TextBlock Style="{StaticResource RowHint}" Margin="0,6,0,0" TextWrapping="Wrap"
+                   Text="For a work account, ask whoever runs it first." />
+
+        <Grid Margin="0,8,0,0">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <TextBlock x:Name="AccessLine" Grid.Column="0" Style="{StaticResource RowHint}"
+                     VerticalAlignment="Center" TextWrapping="Wrap" Margin="0,0,8,0" />
+          <Button x:Name="AccessButton" Grid.Column="1" Content="Check access"
+                  Style="{StaticResource QuietButton}" Click="OnCheckAccess" />
+        </Grid>
 
         <TextBlock Text="WHERE TO SHOW" Style="{StaticResource SectionLabel}" />
         <Grid>

@@ -72,4 +72,9 @@ static class CardText
     };
 
     public const string NoDataNote = "Open Claude Code. The limits show up after the first answer.";
+
+    /// For an environment where Aiko's line is not in the settings at all. Opening a terminal will
+    /// not help there, and telling somebody to do it anyway wastes their time and our credit.
+    public const string NoAccessNote =
+        "Aiko cannot read the limits of this environment. Settings, then Set it up.";
 }
