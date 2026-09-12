@@ -81,3 +81,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   Downloads is not a fixed path.
 - The --try-access log line names the Claude Code folder instead of its full path, which is what
   PRIVACY.md says the log holds.
+- Limits show up when the status line text starts with a byte order mark. Windows PowerShell 5.1
+  adds one when it pipes text into a program, and that is the shell Claude Code uses on a machine
+  without Git. The bridge started, exited cleanly and wrote nothing.
+- Removing Aiko deletes a Claude Code settings file that Aiko itself created and that holds nothing
+  else, instead of leaving an empty one behind.

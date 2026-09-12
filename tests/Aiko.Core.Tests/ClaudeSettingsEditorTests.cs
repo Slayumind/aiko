@@ -132,6 +132,50 @@ public class ClaudeSettingsEditorTests
     }
 
     [Fact]
+    public void Removal_deletes_a_settings_file_Aiko_made_from_nothing()
+    {
+        // Windows Sandbox: no settings.json before Aiko, and "{}" left behind after it.
+        var files = new FakeFiles();
+        var editor = new ClaudeSettingsEditor(files);
+        editor.Add(Folder, Command());
+
+        editor.Remove(Folder);
+
+        Assert.False(files.Has(Settings));
+    }
+
+    [Fact]
+    public void Removal_keeps_a_file_Aiko_made_once_something_else_was_written_to_it()
+    {
+        var files = new FakeFiles();
+        var editor = new ClaudeSettingsEditor(files);
+        editor.Add(Folder, Command());
+
+        var edited = System.Text.Json.Nodes.JsonNode.Parse(files.Read(Settings))!.AsObject();
+        edited["model"] = "opus";
+        files.With(Settings, edited.ToJsonString());
+
+        editor.Remove(Folder);
+
+        Assert.True(files.Has(Settings));
+        Assert.Contains("opus", files.Read(Settings));
+    }
+
+    [Fact]
+    public void Removal_keeps_an_empty_file_that_was_there_before_Aiko()
+    {
+        // It was the user's file, even if it said nothing. A copy was made of it, and that copy is
+        // what tells the two cases apart.
+        var files = new FakeFiles().With(Settings, "{}");
+        var editor = new ClaudeSettingsEditor(files);
+        editor.Add(Folder, Command());
+
+        editor.Remove(Folder);
+
+        Assert.True(files.Has(Settings));
+    }
+
+    [Fact]
     public void Removal_from_a_folder_Aiko_never_touched_changes_nothing()
     {
         var theirs = """{ "model": "sonnet" }""";
