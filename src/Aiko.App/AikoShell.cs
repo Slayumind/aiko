@@ -106,6 +106,8 @@ sealed class AikoShell : IDisposable
         {
             RepairOurStatusLines();
         }
+
+        NoteWhereWeHaveNoAccess();
     }
 
     /// Our own line goes stale on its own: reinstalling moves the bridge, and installing Git
@@ -338,7 +340,32 @@ sealed class AikoShell : IDisposable
             .ToList();
     }
 
-    private CardModel CurrentCard() => CardModel.From(Cards(), DateTimeOffset.Now);
+    private CardModel CurrentCard() => CardModel.From(Cards(), DateTimeOffset.Now, _noAccess);
+
+    /// Environments where Aiko's line is not in the Claude Code settings, so no numbers can ever
+    /// arrive. Worked out when the settings change rather than every time the card is drawn.
+    private IReadOnlySet<string> _noAccess = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+    private void NoteWhereWeHaveNoAccess()
+    {
+        var missing = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var environment in SettingsStore.LoadEnvironments().Environments)
+        {
+            // Direct mode fetches the numbers itself, so the status line is not needed there.
+            if (environment.DirectMode)
+            {
+                continue;
+            }
+
+            if (environment.ConfigDirectories.Any(folder => !ClaudeSettingsFile.HasOurLine(folder)))
+            {
+                missing.Add(environment.Name);
+            }
+        }
+
+        _noAccess = missing;
+    }
 
     /// The ring shows one environment and the dot the other. With nothing reported yet both are
     /// empty and the icon draws the dashed ring.
@@ -535,6 +562,7 @@ sealed class AikoShell : IDisposable
             _wizard = null;
             ApplyPlace();
             FollowDirectMode();
+            NoteWhereWeHaveNoAccess();
             UpdateIcon();
             _card?.Update(CurrentCard());
         };
@@ -563,9 +591,10 @@ sealed class AikoShell : IDisposable
         window.Closed += (_, _) =>
         {
             _settings = null;
-            // The place and direct mode may both have changed while the window was open.
+            // The place, direct mode and our access may all have changed while it was open.
             ApplyPlace();
             FollowDirectMode();
+            NoteWhereWeHaveNoAccess();
         };
         _settings = window;
         window.Show();

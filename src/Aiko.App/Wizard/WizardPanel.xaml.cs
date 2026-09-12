@@ -19,6 +19,10 @@ public partial class WizardPanel : UserControl
     private readonly List<WizardEnvironment> _found = [];
     private int _step;
 
+    /// Whether Aiko was allowed to add its line. "Not now" is a real answer, and the last screen
+    /// says what that means rather than letting somebody wait for numbers that cannot arrive.
+    private bool _accessGranted;
+
     public WizardPanel() : this(0)
     {
     }
@@ -65,28 +69,51 @@ public partial class WizardPanel : UserControl
         StepEnvironments.Visibility = step == 0 ? Visibility.Visible : Visibility.Collapsed;
         StepAccess.Visibility = step == 1 ? Visibility.Visible : Visibility.Collapsed;
         StepWhere.Visibility = step == 2 ? Visibility.Visible : Visibility.Collapsed;
+        StepDone.Visibility = step == 3 ? Visibility.Visible : Visibility.Collapsed;
 
         StepTitle.Text = step switch
         {
             0 => "Environments",
             1 => "Access to the limits",
-            _ => "Where to show Aiko",
+            2 => "Where to show Aiko",
+            _ => "All set",
         };
-        StepCount.Text = $"step {step + 1} of 3";
+        StepCount.Text = step == 3 ? string.Empty : $"step {step + 1} of 3";
 
-        BackButton.Visibility = step == 0 ? Visibility.Collapsed : Visibility.Visible;
+        BackButton.Visibility = step is 0 or 3 ? Visibility.Collapsed : Visibility.Visible;
         SkipButton.Visibility = step == 1 ? Visibility.Visible : Visibility.Collapsed;
         NextButton.Content = step switch
         {
             0 => "Next",
             1 => "Allow",
-            _ => "Finish",
+            2 => "Finish",
+            _ => "Close",
         };
 
         if (step == 1)
         {
             FillAccessStep();
         }
+        else if (step == 3)
+        {
+            FillDoneStep();
+        }
+    }
+
+    /// What happens next, in the order it will happen.
+    private void FillDoneStep()
+    {
+        var island = PlaceIsland.IsChecked == true;
+
+        DoneWhere.Text = island
+            ? "Aiko is at the top of your screen. Drag it anywhere and it sticks to the nearest edge."
+            : "Aiko is down by the clock. Rest the mouse on it to see the card, or click it to keep the card open.";
+
+        DoneOverflow.Visibility = island ? Visibility.Collapsed : Visibility.Visible;
+
+        DoneFirstNumbers.Text = _accessGranted
+            ? "The first numbers arrive after your next answer from Claude Code. Until then the ring is dotted."
+            : "Aiko has no way to read your limits yet. Open settings when you want to set that up.";
     }
 
     private void FillAccessStep()
@@ -112,17 +139,25 @@ public partial class WizardPanel : UserControl
             case 1:
                 Allow();
                 break;
-            default:
+            case 2:
                 Finish();
+                ShowStep(3);
+                break;
+            default:
+                Finished?.Invoke();
                 break;
         }
     }
 
     private void OnBack(object sender, RoutedEventArgs e) => ShowStep(_step - 1);
 
-    /// "Not now" is a real answer. Aiko saves the environments and shows "no data yet" until the
-    /// user changes their mind in settings.
-    private void OnSkip(object sender, RoutedEventArgs e) => ShowStep(2);
+    /// "Not now" is a real answer. Aiko saves the environments and says so on the last screen and
+    /// on the card, with a way back in settings, instead of waiting for numbers that cannot come.
+    private void OnSkip(object sender, RoutedEventArgs e)
+    {
+        _accessGranted = false;
+        ShowStep(2);
+    }
 
     private void Allow()
     {
@@ -156,6 +191,7 @@ public partial class WizardPanel : UserControl
         }
 
         Log.Write($"wizard added the bridge to {changed} settings files");
+        _accessGranted = true;
         ShowStep(2);
     }
 
@@ -183,7 +219,6 @@ public partial class WizardPanel : UserControl
         });
 
         Log.Write($"wizard finished with {environments.Environments.Count} environments");
-        Finished?.Invoke();
     }
 
     /// An empty name would leave a nameless row on the card, so the folder name steps in.

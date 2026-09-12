@@ -12,7 +12,10 @@ public sealed class CardModel
     public required string Updated { get; init; }
     public required IReadOnlyList<EnvironmentBlock> Blocks { get; init; }
 
-    public static CardModel From(IReadOnlyList<CardState> cards, DateTimeOffset now)
+    public static CardModel From(
+        IReadOnlyList<CardState> cards,
+        DateTimeOffset now,
+        IReadOnlySet<string>? noAccess = null)
     {
         var newest = cards
             .Where(card => card.UpdatedAt is not null)
@@ -22,7 +25,10 @@ public sealed class CardModel
         var blocks = new List<EnvironmentBlock>(cards.Count);
         for (var i = 0; i < cards.Count; i++)
         {
-            blocks.Add(EnvironmentBlock.From(cards[i], first: i == 0));
+            blocks.Add(EnvironmentBlock.From(
+                cards[i],
+                first: i == 0,
+                noAccess: noAccess?.Contains(cards[i].Environment) == true));
         }
 
         return new CardModel
@@ -44,7 +50,7 @@ public sealed class EnvironmentBlock
     /// A hairline between environments, but not above the first one.
     public required Visibility SeparatorVisibility { get; init; }
 
-    public static EnvironmentBlock From(CardState card, bool first)
+    public static EnvironmentBlock From(CardState card, bool first, bool noAccess)
     {
         var rows = card.Rows.Select(LimitRow.From).ToList();
         return new EnvironmentBlock
@@ -56,7 +62,9 @@ public sealed class EnvironmentBlock
             // saying "nothing here".
             Subtitle = string.Empty,
             Rows = rows,
-            Note = CardText.NoDataNote,
+            // Somebody who said "not now" in the wizard is told that, not told to open a
+            // terminal they have already opened. The advice has to match their situation.
+            Note = noAccess ? CardText.NoAccessNote : CardText.NoDataNote,
             NoteVisibility = rows.Count == 0 ? Visibility.Visible : Visibility.Collapsed,
             SeparatorVisibility = first ? Visibility.Collapsed : Visibility.Visible,
         };

@@ -39,6 +39,21 @@ static class ClaudeSettingsFile
     public static string LineFor(string bridgeExePath) =>
         BridgeCommand.For(bridgeExePath, ShellDetect.Current());
 
+    /// Whether our line is in this folder's settings. Without it Claude Code reports nothing and
+    /// no number can ever arrive, which the card has to be able to say out loud.
+    public static bool HasOurLine(string configDirectory)
+    {
+        try
+        {
+            var path = ClaudeSettingsEditor.PathIn(configDirectory);
+            return File.Exists(path) && SettingsJsonPatch.HasOurLine(File.ReadAllText(path));
+        }
+        catch (Exception unreadable) when (unreadable is IOException or UnauthorizedAccessException)
+        {
+            return false;
+        }
+    }
+
     public static PatchOutcome AddBridge(string configDirectory, string bridgeExePath) =>
         Report(configDirectory, Editor.Add(configDirectory, LineFor(bridgeExePath)));
 

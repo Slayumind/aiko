@@ -60,3 +60,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   running low. Green and red are one grey to a good many people.
 - "Copy diagnostics" is written for a person to read.
 - The island carries the numbers in its tooltip.
+- Direct mode says what it does before you turn it on: what it reads, what it never keeps, and to
+  ask first if the account belongs to somebody else. It was labelled "direct" and nothing more.
+- The first run ends with a screen instead of a window closing, and that screen says where Aiko is
+  and how to drag it out from behind the Windows 11 overflow arrow.
+- Settings can check whether Claude Code still reports its limits to Aiko, and set it up again.
+  Saying "not now" in the wizard used to be a door with no handle on the other side.
+- An environment Aiko cannot read says so, instead of telling you to open Claude Code when opening
+  Claude Code will not help.
