@@ -133,16 +133,26 @@
 
         <!-- Only worth showing when Aiko lives in the island; in the tray it changes nothing. -->
         <Grid x:Name="IslandOnly" Margin="0,12,0,0">
-          <TextBlock Text="{x:Static local:Strings.HideIslandInFullScreen}" Style="{StaticResource RowName}" />
-          <ToggleButton x:Name="HideInFullScreen" Style="{StaticResource Switch}"
-                        HorizontalAlignment="Right" Checked="OnHideChanged" Unchecked="OnHideChanged" />
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <TextBlock Text="{x:Static local:Strings.HideIslandInFullScreen}" Style="{StaticResource RowName}"
+                     TextWrapping="Wrap" Margin="0,0,12,0" />
+          <ToggleButton x:Name="HideInFullScreen" Grid.Column="1" Style="{StaticResource Switch}"
+                        Checked="OnHideChanged" Unchecked="OnHideChanged" />
         </Grid>
 
         <TextBlock Text="{x:Static local:Strings.SectionStartupAndUpdates}" Style="{StaticResource SectionLabel}" />
         <Grid Margin="0,0,0,10">
-          <TextBlock Text="{x:Static local:Strings.StartWithWindows}" Style="{StaticResource RowName}" />
-          <ToggleButton x:Name="RunAtStartup" Style="{StaticResource Switch}"
-                        HorizontalAlignment="Right" Checked="OnStartupChanged" Unchecked="OnStartupChanged" />
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <TextBlock Text="{x:Static local:Strings.StartWithWindows}" Style="{StaticResource RowName}"
+                     TextWrapping="Wrap" Margin="0,0,12,0" />
+          <ToggleButton x:Name="RunAtStartup" Grid.Column="1" Style="{StaticResource Switch}"
+                        Checked="OnStartupChanged" Unchecked="OnStartupChanged" />
         </Grid>
         <Grid>
           <Grid.ColumnDefinitions>
@@ -153,7 +163,7 @@
           <StackPanel Grid.Column="0" Margin="0,0,12,0">
             <TextBlock Text="{x:Static local:Strings.CheckUpdatesToggle}" Style="{StaticResource RowName}" />
             <TextBlock Text="{x:Static local:Strings.CheckUpdatesWhat}"
-                       Style="{StaticResource RowNote}" TextWrapping="Wrap" />
+                       Style="{StaticResource RowNote}" TextWrapping="Wrap" TextTrimming="None" />
           </StackPanel>
           <ToggleButton x:Name="CheckUpdates" Grid.Column="1" Style="{StaticResource Switch}"
                         VerticalAlignment="Center"

@@ -214,6 +214,9 @@
   <data name="WizardStepEnvironments" xml:space="preserve">
     <value>Environments</value>
   </data>
+  <data name="EnvironmentPlainName" xml:space="preserve">
+    <value>Main</value>
+  </data>
   <data name="WizardStepAccess" xml:space="preserve">
     <value>Access to the limits</value>
   </data>

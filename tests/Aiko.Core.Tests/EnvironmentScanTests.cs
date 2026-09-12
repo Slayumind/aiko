@@ -61,6 +61,15 @@ public class EnvironmentScanTests
     }
 
     [Fact]
+    public void A_plain_folder_gets_the_name_in_the_users_language()
+    {
+        // Found on the live run: a Russian wizard offered "Main" beside Russian text.
+        var found = EnvironmentScan.Pick([Folder(".claude", daysAgo: 1), Folder(".claude-work", daysAgo: 2)], "Основная");
+
+        Assert.Equal(["Основная", "Work"], found.Select(f => f.SuggestedName));
+    }
+
+    [Fact]
     public void Two_folders_that_look_the_same_are_both_offered()
     {
         // .claude-work here holds expired tokens and .claude-personal is in daily use, yet both

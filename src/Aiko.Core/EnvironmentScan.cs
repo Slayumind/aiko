@@ -27,20 +27,28 @@ public static class EnvironmentScan
     /// A folder in daily use has been touched recently. Only used for the order of the list.
     public static readonly TimeSpan RecentlyUsed = TimeSpan.FromDays(30);
 
-    public static IReadOnlyList<FoundEnvironment> Pick(IReadOnlyList<ClaudeFolder> folders) =>
+    /// The name for a folder with nothing after "claude", when the caller does not give one in the
+    /// user's language.
+    public const string PlainFolderName = "Main";
+
+    public static IReadOnlyList<FoundEnvironment> Pick(
+        IReadOnlyList<ClaudeFolder> folders,
+        string plainFolderName = PlainFolderName) =>
         folders
             .Where(folder => folder.HasCredentials)
             .OrderByDescending(folder => folder.LastUsed ?? DateTimeOffset.MinValue)
             .ThenBy(folder => folder.FolderName, StringComparer.OrdinalIgnoreCase)
-            .Select(folder => new FoundEnvironment(SuggestName(folder.FolderName), folder.FullPath)
+            .Select(folder => new FoundEnvironment(SuggestName(folder.FolderName, plainFolderName), folder.FullPath)
             {
                 LastUsed = folder.LastUsed,
             })
             .ToList();
 
     /// ".claude-personal" becomes "Personal", ".claude_work" becomes "Work", and a plain ".claude"
-    /// becomes "Main". It is only a starting point: the name belongs to the user.
-    public static string SuggestName(string folderName)
+    /// gets the plain name, "Main" unless the caller passes it in the user's language. The core
+    /// has no language, so the word comes from outside. It is only a starting point: the name
+    /// belongs to the user.
+    public static string SuggestName(string folderName, string plainFolderName = PlainFolderName)
     {
         var name = folderName.TrimStart('.');
         if (name.StartsWith("claude", StringComparison.OrdinalIgnoreCase))
@@ -51,7 +59,7 @@ public static class EnvironmentScan
         name = name.Trim('-', '_', ' ');
         if (name.Length == 0)
         {
-            return "Main";
+            return plainFolderName;
         }
 
         return char.ToUpperInvariant(name[0]) + name[1..];

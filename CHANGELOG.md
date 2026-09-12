@@ -20,8 +20,8 @@ The first release. Everything below is new.
   running low says so in a word as well as a colour. A card opened by resting the mouse on the icon
   goes away with the mouse; click the icon or the card and it stays until you close it.
 - **The island,** instead of the tray if you like: a small window at an edge of the screen with one
-  ring per environment. Drag it anywhere and it sticks to the nearest edge. It steps aside while a
-  window is full screen.
+  ring per environment. It opens the card the same way the icon does. Drag it anywhere and it
+  sticks to the nearest edge. It steps aside while a window is full screen.
 - **The first run wizard.** It finds your Claude Code folders, shows the exact line it would add and
   the exact files before asking, and keeps a copy of every file it changes. "Not now" is an answer.
   It ends by saying where Aiko is and how to bring the icon out from behind the overflow arrow.
