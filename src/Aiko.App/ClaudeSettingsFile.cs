@@ -44,9 +44,38 @@ static class ClaudeSettingsFile
             SettingsJsonPatch.TryAddBridge(json, command, out var patched) ? patched : null);
     }
 
-    public static PatchOutcome RemoveBridge(string configDirectory) =>
-        Change(configDirectory, json =>
+    public static PatchOutcome RemoveBridge(string configDirectory)
+    {
+        var outcome = Change(configDirectory, json =>
             SettingsJsonPatch.TryRemoveBridge(json, out var restored) ? restored : null);
+
+        if (outcome.Changed)
+        {
+            // The copy was insurance while Aiko was in the file. Their own status line is back
+            // now, and leaving the copy behind would be litter in someone else's folder.
+            DropBackup(configDirectory);
+        }
+
+        return outcome;
+    }
+
+    private static void DropBackup(string configDirectory)
+    {
+        try
+        {
+            var backup = BackupPathIn(configDirectory);
+            if (File.Exists(backup))
+            {
+                File.Delete(backup);
+            }
+        }
+        catch (IOException)
+        {
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
+    }
 
     private static PatchOutcome Change(string configDirectory, Func<string, string?> patch)
     {

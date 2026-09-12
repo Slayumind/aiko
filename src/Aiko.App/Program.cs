@@ -1,8 +1,9 @@
 using System.Runtime.Versioning;
 using System.Windows;
-using Aiko.Core;
 using System.Windows.Interop;
 using System.Windows.Media;
+using Aiko.Core;
+using Velopack;
 
 namespace Aiko.App;
 
@@ -12,6 +13,15 @@ static class Program
     [STAThread]
     static void Main(string[] args)
     {
+        // First thing, before anything is drawn: the installer starts Aiko with its own arguments
+        // for installing, updating and removing, and this handles them and exits.
+        //
+        // The hook before uninstalling is the reason this is here at all: it is where the status
+        // line goes back into the Claude Code settings, as promised on the first run.
+        VelopackApp.Build()
+            .OnBeforeUninstallFastCallback(_ => Uninstall.Cleanup())
+            .Run();
+
         // Software rendering: the spike measured 33 MB against 92 MB with the DirectX stack, and
         // Aiko draws a small card a few times an hour. Nobody needs the GPU for that.
         RenderOptions.ProcessRenderMode = RenderMode.SoftwareOnly;
@@ -48,6 +58,16 @@ static class Program
                 : ClaudeSettingsFile.AddBridge(folder, bridge);
 
             Log.Write($"--try-access {folder}: changed={outcome.Changed} problem={outcome.Problem ?? "none"}");
+            Environment.Exit(outcome.Changed ? 0 : 1);
+            return;
+        }
+
+        // The other half of --try-access: puts the status line back for one folder. Uninstalling
+        // does this for every folder, and that is not something to try out on a live machine.
+        if (args is ["--try-restore", var restoreFolder, ..])
+        {
+            var outcome = ClaudeSettingsFile.RemoveBridge(restoreFolder);
+            Log.Write($"--try-restore {restoreFolder}: changed={outcome.Changed} problem={outcome.Problem ?? "none"}");
             Environment.Exit(outcome.Changed ? 0 : 1);
             return;
         }
