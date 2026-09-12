@@ -26,6 +26,13 @@ sealed class DirectPoller : IDisposable
     {
         _timer = new DispatcherTimer(DispatcherPriority.Background, dispatcher) { Interval = Tick };
         _timer.Tick += async (_, _) => await RoundAsync().ConfigureAwait(true);
+
+        // What the last run found. The card shows it at once, marked with its time, instead of
+        // waiting three minutes for the first answer.
+        foreach (var (name, snapshot) in DirectCache.ReadAll())
+        {
+            _latest[name] = snapshot;
+        }
     }
 
     /// Raised when an account answered with fresh numbers.
@@ -124,7 +131,9 @@ sealed class DirectPoller : IDisposable
         switch (answer.Outcome)
         {
             case AskOutcome.Fine when answer.Report.HasData:
-                _latest[account.Name] = LimitSnapshot.FromDirectMode(account.Name, now, answer.Report);
+                var fresh = LimitSnapshot.FromDirectMode(account.Name, now, answer.Report);
+                _latest[account.Name] = fresh;
+                DirectCache.Write(fresh);
                 account.Wait(account.Backoff.AfterSuccess(), now);
 
                 // Percentages only. The token never appears here, and neither does the body.
