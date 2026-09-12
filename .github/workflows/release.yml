@@ -1,0 +1,112 @@
+# Build the installer and publish a release when a version tag is pushed.
+#
+# Actions are pinned to a commit, not to a tag: a tag can be moved, and then a release would be
+# built by somebody else's code.
+name: release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+  # Both are needed to attest where the installer was built.
+  id-token: write
+  attestations: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5
+        with:
+          global-json-file: global.json
+
+      - name: Read the version from the tag
+        id: version
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart('v')
+          "number=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Test
+        run: dotnet test Aiko.slnx --configuration Release --verbosity quiet
+
+      - name: Publish the app
+        # Self contained: most people do not have the .NET desktop runtime, and an installer that
+        # asks them to fetch one first is an installer that does not get run.
+        run: >
+          dotnet publish src/Aiko.App/Aiko.App.csproj
+          --configuration Release --runtime win-x64 --self-contained true
+          -p:Version=${{ steps.version.outputs.number }}
+          --output publish
+
+      - name: Publish the bridge beside it
+        # The status line command points at this file, so it has to live next to the app.
+        run: >
+          dotnet publish src/Aiko.Bridge/Aiko.Bridge.csproj
+          --configuration Release --runtime win-x64 --self-contained false
+          -p:Version=${{ steps.version.outputs.number }}
+          --output publish
+
+      - name: Install the Velopack tool
+        run: dotnet tool install -g vpk
+
+      - name: Pack the installer
+        # Only a Start menu shortcut. Velopack also puts one on the desktop by default, and a tray
+        # app has no business there.
+        run: >
+          vpk pack
+          --packId Slayumind.Aiko
+          --packVersion ${{ steps.version.outputs.number }}
+          --packDir publish
+          --mainExe Aiko.App.exe
+          --packTitle Aiko
+          --packAuthors "Aleksandr Fomichenko"
+          --shortcuts StartMenuRoot
+          --outputDir releases
+
+      - name: Write the checksums
+        shell: pwsh
+        run: |
+          Get-ChildItem releases -File | ForEach-Object {
+            $hash = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower()
+            "$hash  $($_.Name)"
+          } | Set-Content releases/SHA256SUMS.txt -Encoding ascii
+
+      - name: Attest where this was built
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4
+        with:
+          subject-path: releases/*Setup.exe
+
+      - name: Take the notes from the changelog
+        id: notes
+        shell: pwsh
+        run: |
+          # Everything under the heading of this version, up to the next heading.
+          $lines = Get-Content CHANGELOG.md
+          $start = ($lines | Select-String -Pattern "^## \[${{ steps.version.outputs.number }}\]" | Select-Object -First 1).LineNumber
+          if (-not $start) {
+            $start = ($lines | Select-String -Pattern '^## ' | Select-Object -First 1).LineNumber
+          }
+          $rest = $lines[$start..($lines.Count - 1)]
+          $end = ($rest | Select-String -Pattern '^## ' | Select-Object -First 1).LineNumber
+          $body = if ($end) { $rest[0..($end - 2)] } else { $rest }
+          $body | Set-Content release-notes.md -Encoding utf8
+
+      - name: Publish the release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # The paths are gathered first: passing the command a PowerShell expression would hand
+          # it objects instead of file names.
+          $files = Get-ChildItem releases -File | ForEach-Object { $_.FullName }
+          gh release create ${{ github.ref_name }} @files `
+            --title "Aiko ${{ steps.version.outputs.number }}" `
+            --notes-file release-notes.md
