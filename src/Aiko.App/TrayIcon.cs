@@ -70,6 +70,12 @@ sealed class TrayIcon : IDisposable
 
         _watcher.Updated += OnSnapshotsChanged;
         AddIcon();
+
+        // Worth a line each: if the limits never arrive, the shell we guessed and the folders we
+        // found are the first things to check, and both are invisible otherwise.
+        var folders = ClaudeFolders.Find();
+        Log.Write($"started, status line shell: {ShellDetect.Current()}");
+        Log.Write($"found {folders.Count} claude folders, {EnvironmentScan.Pick(folders).Count} usable");
     }
 
     public void Dispose()

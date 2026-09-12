@@ -40,6 +40,38 @@ public class BridgeCommandTests
     }
 
     [Fact]
+    public void PowerShell_needs_the_call_operator_or_nothing_runs()
+    {
+        // Without "&" PowerShell reads a quoted path as a plain string and the status line stays
+        // empty, with no error to explain it.
+        var command = BridgeCommand.For(@"C:\Program Files\Aiko\Aiko.Bridge.exe", ClaudeShell.PowerShell);
+
+        Assert.Equal(@"& ""C:\Program Files\Aiko\Aiko.Bridge.exe""", command);
+    }
+
+    [Fact]
+    public void Git_bash_gets_no_call_operator_because_it_would_break_the_line()
+    {
+        var command = BridgeCommand.For(@"C:\Aiko\Aiko.Bridge.exe", ClaudeShell.GitBash);
+
+        Assert.StartsWith("\"", command);
+    }
+
+    [Fact]
+    public void Git_bash_is_the_default_because_Claude_Code_prefers_it()
+    {
+        Assert.Equal(
+            BridgeCommand.For(@"C:\Aiko\Aiko.Bridge.exe", ClaudeShell.GitBash),
+            BridgeCommand.For(@"C:\Aiko\Aiko.Bridge.exe"));
+    }
+
+    [Fact]
+    public void Without_a_path_neither_shell_gets_a_command()
+    {
+        Assert.Equal(string.Empty, BridgeCommand.For("", ClaudeShell.PowerShell));
+    }
+
+    [Fact]
     public void The_line_we_write_is_recognised_as_ours()
     {
         var command = BridgeCommand.For(@"C:\Aiko\Aiko.Bridge.exe");

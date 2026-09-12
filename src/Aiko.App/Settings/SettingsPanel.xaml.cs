@@ -154,6 +154,7 @@ public partial class SettingsPanel : UserControl
             $"start with Windows: {Startup.IsEnabled()}",
             $"check for updates: {_settings.CheckUpdates}",
             $"environments: {_environments.Environments.Count}",
+            $"status line shell: {ShellDetect.Current()}",
             $"log: {Log.FilePath}");
 
         try
