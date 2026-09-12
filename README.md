@@ -71,6 +71,8 @@ dotnet run --project src/Aiko.App
 - `src/Aiko.App` — the tray icon, the windows and the network. It draws what the core decided.
 - `src/Aiko.Bridge` — the small program Claude Code runs as its status line.
 
+Want to change something? [CONTRIBUTING.md](CONTRIBUTING.md) says how, and what Aiko will not do.
+
 ## Acknowledgements
 
 Inspired by [notchi](https://github.com/sk-ruban/notchi), GPL-3.0. Aiko contains no code or assets

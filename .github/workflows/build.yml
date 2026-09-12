@@ -36,3 +36,9 @@ jobs:
         # The core tests include the ones that matter most here: the credentials object never
         # prints its token, and the snapshot format can hold nothing but numbers and times.
         run: dotnet test Aiko.slnx --configuration Release --no-build --verbosity quiet
+
+      - name: Check the code style
+        # .editorconfig holds the rules and Directory.Build.props asks the compiler to enforce
+        # them. This catches what the compiler alone does not, so the rules are real rather than
+        # written down.
+        run: dotnet format Aiko.slnx --verify-no-changes --verbosity quiet
