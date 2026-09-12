@@ -31,6 +31,7 @@ public class AppSettingsTests
             CheckUpdates = true,
             Language = AikoLanguage.Russian,
             HideIslandInFullScreen = false,
+            Island = new IslandPosition(ScreenEdge.Right, 0.25),
         };
 
         var back = AppSettings.FromJson(settings.ToJson());

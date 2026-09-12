@@ -1,0 +1,24 @@
+<UserControl x:Class="Aiko.App.IslandPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/Theme/Tokens.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </UserControl.Resources>
+
+  <!-- No shadow and no room around it, unlike the card. A shadow belongs to something that floats
+       above the page; the island is pressed against the edge of the screen and stays there. The
+       room the shadow needs showed up as a gap and kept the island from touching the edge. -->
+  <Grid>
+    <Border x:Name="Body"
+            Background="{StaticResource Surface}"
+            BorderBrush="{StaticResource Hairline}" BorderThickness="1"
+            Padding="10,7">
+      <StackPanel x:Name="Rings" Orientation="Horizontal" />
+    </Border>
+  </Grid>
+</UserControl>

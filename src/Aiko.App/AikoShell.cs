@@ -13,14 +13,15 @@ using Windows.Win32.UI.WindowsAndMessaging;
 
 namespace Aiko.App;
 
-/// The icon in the tray and everything Windows tells it: hovering, clicking, the taskbar
-/// restarting, the screen scaling changing.
+/// Everything Aiko shows: the icon in the tray or the island at the edge of the screen, the card,
+/// the settings window and the first run wizard. One owner, because all of them show the same
+/// numbers and the user swaps between the two places at will.
 ///
 /// Windows 10 1809 is the minimum, the same as in app.manifest: asking the taskbar monitor for
 /// its scaling needs it. Saying so here instead of in the project file keeps the WinRT
 /// projections, and their tens of megabytes, out of the build.
 [SupportedOSPlatform("windows10.0.17763")]
-sealed class TrayIcon : IDisposable
+sealed class AikoShell : IDisposable
 {
     private const uint IconId = 1;
     private const uint CallbackMessage = PInvoke.WM_APP + 1;
@@ -44,14 +45,16 @@ sealed class TrayIcon : IDisposable
     private CardWindow? _card;
     private SettingsWindow? _settings;
     private WizardWindow? _wizard;
+    private IslandWindow? _island;
     private HICON _icon;
     private uint _iconDpi;
     private int _iconSize;
+    private bool _iconShown;
 
     /// Which environment the ring shows. The click swaps it; settings will feed it later.
     private string? _ringEnvironment;
 
-    public TrayIcon(Application application)
+    public AikoShell(Application application)
     {
         _application = application;
         _taskbarCreatedMessage = PInvoke.RegisterWindowMessage("TaskbarCreated");
@@ -70,7 +73,8 @@ sealed class TrayIcon : IDisposable
         _hover.Tick += OnHoverFinished;
 
         _watcher.Updated += OnSnapshotsChanged;
-        AddIcon();
+
+        ApplyPlace();
 
         // Worth a line each: if the limits never arrive, the shell we guessed and the folders we
         // found are the first things to check, and both are invisible otherwise.
@@ -78,8 +82,7 @@ sealed class TrayIcon : IDisposable
         Log.Write($"started, status line shell: {ShellDetect.Current()}");
         Log.Write($"found {folders.Count} claude folders, {EnvironmentScan.Pick(folders).Count} usable");
 
-        // Nothing set up yet: this is a first run, so the wizard opens itself. After it, the icon
-        // is redrawn, because by then there are environments to show.
+        // Nothing set up yet: this is a first run, so the wizard opens itself.
         if (!SettingsStore.LoadEnvironments().HasEnvironments)
         {
             OpenWizard();
@@ -95,9 +98,9 @@ sealed class TrayIcon : IDisposable
         _card?.Close();
         _settings?.Close();
         _wizard?.Close();
+        _island?.Close();
 
-        var data = NewData();
-        PInvoke.Shell_NotifyIcon(NOTIFY_ICON_MESSAGE.NIM_DELETE, in data);
+        RemoveIcon();
         if (!_icon.IsNull)
         {
             PInvoke.DestroyIcon(_icon);
@@ -105,10 +108,55 @@ sealed class TrayIcon : IDisposable
         _source?.Dispose();
     }
 
+    /// Tray or island, whichever the settings say. Called again after the settings window or the
+    /// wizard closes, so a change takes effect at once.
+    private void ApplyPlace()
+    {
+        var settings = SettingsStore.Load();
+
+        if (settings.Place == AikoPlace.Island)
+        {
+            RemoveIcon();
+            ShowIsland(settings.Island);
+        }
+        else
+        {
+            CloseIsland();
+            AddIcon();
+        }
+    }
+
+    private void ShowIsland(IslandPosition position)
+    {
+        if (_island is null)
+        {
+            var window = new IslandWindow();
+            window.CardRequested += OpenCard;
+            window.Moved += SaveIslandPosition;
+            _island = window;
+        }
+
+        _island.Show(Cards(), position);
+    }
+
+    private void CloseIsland()
+    {
+        _island?.Close();
+        _island = null;
+    }
+
+    private void SaveIslandPosition(IslandPosition position)
+    {
+        SettingsStore.Save(SettingsStore.Load() with { Island = position });
+        Log.Write($"island moved to {position.Edge} at {position.Along:0.00}");
+    }
+
     private void OnSnapshotsChanged() =>
         _application.Dispatcher.BeginInvoke(() =>
         {
+            var cards = Cards();
             UpdateIcon();
+            _island?.Update(cards);
             _card?.Update(CurrentCard());
         });
 
@@ -125,10 +173,29 @@ sealed class TrayIcon : IDisposable
 
         data.Anonymous.uVersion = PInvoke.NOTIFYICON_VERSION_4;
         PInvoke.Shell_NotifyIcon(NOTIFY_ICON_MESSAGE.NIM_SETVERSION, in data);
+
+        _iconShown = true;
+    }
+
+    private void RemoveIcon()
+    {
+        if (!_iconShown)
+        {
+            return;
+        }
+
+        var data = NewData();
+        PInvoke.Shell_NotifyIcon(NOTIFY_ICON_MESSAGE.NIM_DELETE, in data);
+        _iconShown = false;
     }
 
     private void UpdateIcon()
     {
+        if (!_iconShown)
+        {
+            return;
+        }
+
         var old = ReplaceIcon(TaskbarDpi());
         var data = NewData();
         data.uFlags = NOTIFY_ICON_DATA_FLAGS.NIF_ICON;
@@ -152,14 +219,14 @@ sealed class TrayIcon : IDisposable
         return old;
     }
 
-    /// Every environment we know about, in a steady order. The card shows all of them, including
-    /// the ones with nothing reported yet: an empty block says so in words.
+    /// Every environment we know about, in the order the settings hold them. The card shows all of
+    /// them, including the ones with nothing reported yet: an empty block says so in words.
     private IReadOnlyList<CardState> Cards()
     {
         var now = DateTimeOffset.Now;
 
-        // Read every time: the settings window can rename an environment while the tray runs, and
-        // the file is small.
+        // Read every time: the settings window can rename an environment while Aiko runs, and the
+        // file is small.
         var environments = SettingsStore.LoadEnvironments();
 
         return EnvironmentSnapshots.Combine(environments, _watcher.ByFile)
@@ -248,6 +315,11 @@ sealed class TrayIcon : IDisposable
         {
             card.ShowAt(rect);
         }
+        else if (_island is { } island)
+        {
+            // From the island the card opens right under it.
+            card.ShowAt(new Rect(island.Left, island.Top, island.ActualWidth, island.ActualHeight));
+        }
         else
         {
             card.Show();
@@ -268,6 +340,7 @@ sealed class TrayIcon : IDisposable
         window.Closed += (_, _) =>
         {
             _wizard = null;
+            ApplyPlace();
             UpdateIcon();
             _card?.Update(CurrentCard());
         };
@@ -289,7 +362,12 @@ sealed class TrayIcon : IDisposable
 
         var window = new SettingsWindow();
         window.QuitRequested += () => _application.Shutdown();
-        window.Closed += (_, _) => _settings = null;
+        window.Closed += (_, _) =>
+        {
+            _settings = null;
+            // The place may have changed while the window was open.
+            ApplyPlace();
+        };
         _settings = window;
         window.Show();
 
@@ -300,6 +378,11 @@ sealed class TrayIcon : IDisposable
     /// overflow area, which is where Windows 11 puts a new app by default.
     private Rect? IconRect()
     {
+        if (!_iconShown)
+        {
+            return null;
+        }
+
         var id = new NOTIFYICONIDENTIFIER
         {
             cbSize = (uint)Marshal.SizeOf<NOTIFYICONIDENTIFIER>(),
@@ -347,7 +430,11 @@ sealed class TrayIcon : IDisposable
         else if (message == _taskbarCreatedMessage)
         {
             // Explorer restarted and forgot every icon; ours has to introduce itself again.
-            AddIcon();
+            if (_iconShown)
+            {
+                _iconShown = false;
+                AddIcon();
+            }
         }
         else if (message is PInvoke.WM_DPICHANGED or PInvoke.WM_DISPLAYCHANGE or PInvoke.WM_SETTINGCHANGE)
         {
@@ -373,6 +460,7 @@ sealed class TrayIcon : IDisposable
             case NinSelect:
                 SwapRing();
                 break;
+
             // Windows sends nothing that plainly means "the mouse left the icon". The two popup
             // messages are about its own tooltip and arrive in pairs on every move, so cancelling
             // on them killed the count every time. The wait simply runs out, and then we ask where
@@ -415,6 +503,7 @@ sealed class TrayIcon : IDisposable
                 break;
             case MenuRefresh:
                 UpdateIcon();
+                _island?.Update(Cards());
                 _card?.Update(CurrentCard());
                 break;
             case MenuExit:

@@ -6,14 +6,21 @@ namespace Aiko.App;
 /// every change without waiting for real limits to move.
 static class CardSnapshot
 {
+    /// The made up numbers every snapshot uses, so the card and the island show the same thing.
+    public static IReadOnlyList<CardState> Example()
+    {
+        var now = DateTimeOffset.Now;
+        return
+        [
+            Card("Personal", now, fiveHour: 42, sevenDay: 18, fiveHourLeft: 2.4, model: 61),
+            Card("Work", now, fiveHour: 82, sevenDay: 64, fiveHourLeft: 1.1, model: null),
+        ];
+    }
+
     public static void Write(string path)
     {
         var now = DateTimeOffset.Now;
-        var cards = new[]
-        {
-            Card("Personal", now, fiveHour: 42, sevenDay: 18, fiveHourLeft: 2.4, model: 61),
-            Card("Work", now, fiveHour: 82, sevenDay: 64, fiveHourLeft: 1.1, model: null),
-        };
+        var cards = Example();
 
         var panel = new CardPanel();
         panel.Show(CardModel.From(cards, now));

@@ -37,6 +37,10 @@ public sealed record AppSettings
     /// Games, video and presentations take the whole screen, and the island would sit on top.
     public bool HideIslandInFullScreen { get; init; } = true;
 
+    /// Where the island was left. Kept as an edge and a share along it, so it survives a change
+    /// of screen size.
+    public IslandPosition Island { get; init; } = IslandPosition.Default;
+
     /// A settings file we cannot read is not a reason to stop. Aiko starts with the defaults, and
     /// the next save writes a clean file.
     public static AppSettings FromJson(string json)

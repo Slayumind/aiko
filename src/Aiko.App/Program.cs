@@ -1,5 +1,6 @@
 using System.Runtime.Versioning;
 using System.Windows;
+using Aiko.Core;
 using System.Windows.Interop;
 using System.Windows.Media;
 
@@ -51,6 +52,18 @@ static class Program
             return;
         }
 
+        if (args is ["--snapshot-island", var islandPath, ..])
+        {
+            var edge = args.Length > 2 && Enum.TryParse<ScreenEdge>(args[2], true, out var asked)
+                ? asked
+                : ScreenEdge.Top;
+
+            var panel = new IslandPanel();
+            panel.Show(CardSnapshot.Example(), edge);
+            Snapshot.Write(panel, islandPath);
+            return;
+        }
+
         if (args is ["--snapshot-wizard", var wizardPath, ..])
         {
             var step = args.Length > 2 && int.TryParse(args[2], out var asked) ? asked : 0;
@@ -65,14 +78,14 @@ static class Program
         }
 
         var application = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
-        TrayIcon? tray = null;
+        AikoShell? shell = null;
 
         application.Startup += (_, _) =>
         {
-            tray = new TrayIcon(application);
-            tray.Show();
+            shell = new AikoShell(application);
+            shell.Show();
         };
-        application.Exit += (_, _) => tray?.Dispose();
+        application.Exit += (_, _) => shell?.Dispose();
 
         application.Run();
     }
