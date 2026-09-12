@@ -1,5 +1,6 @@
-# Keep line endings stable: one normalised form in the repository, native ones in the work tree.
-* text=auto
+# LF everywhere, in the repository and in the work tree. .editorconfig asks for LF and CI checks it
+# with dotnet format on a Windows runner, where native endings would be CRLF and fail every build.
+* text=auto eol=lf
 
 *.cs text diff=csharp
 *.csproj text
