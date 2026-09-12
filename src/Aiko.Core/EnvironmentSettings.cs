@@ -12,6 +12,9 @@ public sealed record AikoEnvironment(string Name, IReadOnlyList<string> ConfigDi
 
 public sealed record EnvironmentSettings(IReadOnlyList<AikoEnvironment> Environments)
 {
+    /// See AppSettings.CurrentSchema for why this is written from the start.
+    public const int CurrentSchema = 1;
+
     public static readonly EnvironmentSettings Empty = new([]);
 
     public bool HasEnvironments => Environments.Count > 0;
@@ -64,6 +67,7 @@ public sealed record EnvironmentSettings(IReadOnlyList<AikoEnvironment> Environm
         JsonSerializer.Serialize(
             new SettingsFile
             {
+                SchemaVersion = CurrentSchema,
                 RingEnvironment = RingEnvironment ?? Ring?.Name,
                 Environments = Environments
                     .Select(e => new EnvironmentFile
@@ -85,6 +89,7 @@ public sealed record EnvironmentSettings(IReadOnlyList<AikoEnvironment> Environm
 
     private sealed class SettingsFile
     {
+        public int SchemaVersion { get; set; }
         public string? RingEnvironment { get; set; }
         public List<EnvironmentFile>? Environments { get; set; }
     }

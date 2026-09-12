@@ -105,6 +105,12 @@ public static class SettingsJsonPatch
         return true;
     }
 
+    /// Whether the status line in this file is ours, whatever path or shell it names.
+    public static bool HasOurLine(string settingsJson) =>
+        TryParseObject(settingsJson, out var root)
+        && root!.TryGetPropertyValue(StatusLineKey, out var line)
+        && BridgeCommand.IsAiko(CommandIn(line));
+
     /// What the bridge should call after doing its own work, if anything.
     public static string? ReadWrappedCommand(string settingsJson)
     {

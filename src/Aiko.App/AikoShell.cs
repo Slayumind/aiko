@@ -1,3 +1,4 @@
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Windows;
@@ -93,6 +94,35 @@ sealed class AikoShell : IDisposable
         if (!SettingsStore.LoadEnvironments().HasEnvironments)
         {
             OpenWizard();
+        }
+        else
+        {
+            RepairOurStatusLines();
+        }
+    }
+
+    /// Our own line goes stale on its own: reinstalling moves the bridge, and installing Git
+    /// changes the shell the line has to be written for. A stale line runs nothing and says
+    /// nothing about it, so it is put right at startup.
+    ///
+    /// Only lines that are already ours are touched. Somebody who answered "not now" in the wizard
+    /// keeps that answer, and a settings file with no line of ours in it is not ours to write to.
+    private static void RepairOurStatusLines()
+    {
+        if (BridgePath.Current() is not { } bridge)
+        {
+            return;
+        }
+
+        foreach (var environment in SettingsStore.LoadEnvironments().Environments)
+        {
+            foreach (var folder in environment.ConfigDirectories)
+            {
+                if (ClaudeSettingsFile.RepairBridge(folder, bridge).Changed)
+                {
+                    Log.Write($"our status line was stale in {Path.GetFileName(folder)} and was put right");
+                }
+            }
         }
     }
 
