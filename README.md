@@ -32,6 +32,10 @@ Desktop, turn on **direct mode** for that environment, and Aiko asks the usage A
 needs the access token of the account, so it is off until you turn it on. See
 [PRIVACY.md](PRIVACY.md) for exactly what happens with it.
 
+Aiko counts how many copies run each day, if you let it. It is one switch with the update check,
+off until you turn it on, and the identifier it sends changes every day, so two days cannot be
+joined into one person. [PRIVACY.md](PRIVACY.md) says exactly what goes and what does not.
+
 ## What you need
 
 - Windows 10 version 1809 or newer, 64 bit.

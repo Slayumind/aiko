@@ -128,7 +128,7 @@
           <Grid Margin="0,10,0,0">
             <StackPanel>
               <TextBlock Text="Check for updates" Style="{StaticResource RowName}" />
-              <TextBlock Text="Asks slayumind.org for the latest version" Style="{StaticResource RowNote}" />
+              <TextBlock Text="Asks slayumind.org once a day for the latest version, and tells it one copy of Aiko ran today. The identifier it sends changes every day." Style="{StaticResource RowNote}" />
             </StackPanel>
             <ToggleButton x:Name="CheckUpdates" Style="{StaticResource Switch}"
                           HorizontalAlignment="Right" VerticalAlignment="Center" />

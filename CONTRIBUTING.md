@@ -72,7 +72,9 @@ These are settled, and a pull request that changes them will be turned down:
 - **Aiko never stores your Claude account token,** never refreshes it and never writes to the
   credentials file. [PRIVACY.md](PRIVACY.md) says why.
 - **Aiko does not pretend to be Claude Code.** Its user agent says Aiko and its version.
-- **No analytics service, no crash reporting service, no third party network calls.**
+- **No analytics service, no crash reporting service, no third party network calls.** The daily
+  count described in [PRIVACY.md](PRIVACY.md) is the only measurement, it rides on the update
+  check, and its identifier changes every day. Do not add a second thing to measure without asking.
 - **No code or artwork from notchi.** It is a lovely project and it is GPL-3.0; Aiko is Apache-2.0.
   Reading it to understand a behaviour is fine, copying from it is not.
 
