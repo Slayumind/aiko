@@ -75,7 +75,11 @@ jobs:
           }
 
       - name: Install the Velopack tool
-        run: dotnet tool install -g vpk
+        # Pinned, and to the same version as the Velopack package the app is built against: the
+        # tool writes the update format the library reads. Unpinned, the same tag builds a
+        # different installer next month, and the checksums people were given stop proving
+        # anything.
+        run: dotnet tool install -g vpk --version 1.2.0
 
       - name: Pack the installer
         # Only a Start menu shortcut. Velopack also puts one on the desktop by default, and a tray
@@ -109,10 +113,14 @@ jobs:
         shell: pwsh
         run: |
           # Everything under the heading of this version, up to the next heading.
+          #
+          # A missing heading stops the release. It used to fall back to the first one, which is
+          # "Unreleased" until the day of a release, so a tag pushed with the changelog not yet
+          # written would publish notes titled Unreleased and nobody would find out until after.
           $lines = Get-Content CHANGELOG.md
           $start = ($lines | Select-String -Pattern "^## \[${{ steps.version.outputs.number }}\]" | Select-Object -First 1).LineNumber
           if (-not $start) {
-            $start = ($lines | Select-String -Pattern '^## ' | Select-Object -First 1).LineNumber
+            throw "CHANGELOG.md has no section for ${{ steps.version.outputs.number }}. Write it before tagging."
           }
           $rest = $lines[$start..($lines.Count - 1)]
           $end = ($rest | Select-String -Pattern '^## ' | Select-Object -First 1).LineNumber

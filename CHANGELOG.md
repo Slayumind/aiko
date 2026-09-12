@@ -38,3 +38,4 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   before, which prints nothing for a bash line and says nothing about why.
 - A settings file of Aiko's that cannot be read is kept as a .bad file instead of being read as no
   settings at all, which let the next save write over your choices.
+- The verify command in SECURITY.md now names the file a release actually contains.

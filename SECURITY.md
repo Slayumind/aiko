@@ -29,7 +29,7 @@ Every release carries `SHA256SUMS.txt` and a build provenance attestation.
 
 ```
 sha256sum -c SHA256SUMS.txt
-gh attestation verify Aiko-win-x64-Setup.exe --repo Slayumind/aiko
+gh attestation verify Slayumind.Aiko-win-Setup.exe --repo Slayumind/aiko
 ```
 
 The attestation says the file was built by the GitHub Actions workflow in this repository, from

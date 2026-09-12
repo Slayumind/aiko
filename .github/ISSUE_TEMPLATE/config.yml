@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: A security problem
+    url: https://github.com/Slayumind/aiko/security/advisories/new
+    about: Report it privately. Please do not open a public issue for this.
+  - name: A question
+    url: https://github.com/Slayumind/aiko/discussions
+    about: Ask here if you are not sure something is a bug.
