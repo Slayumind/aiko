@@ -55,11 +55,21 @@
             </Grid>
           </Border>
 
+          <!--
+            Two columns, not two blocks in one cell. In one cell they overlapped the moment the
+            text grew, which English never did and Russian does at once. The word on the right is
+            the one that must stay whole, so the countdown on the left gives way first.
+          -->
           <Grid Margin="{StaticResource UnderBar}">
-            <TextBlock Text="{Binding Resets}"
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="{Binding Resets}" TextTrimming="CharacterEllipsis"
+                       Margin="0,0,8,0"
                        FontFamily="{StaticResource Mono}" FontSize="{StaticResource TextTiny}"
                        Foreground="{StaticResource Muted}" />
-            <TextBlock Text="{Binding Pace}" HorizontalAlignment="Right"
+            <TextBlock Grid.Column="1" Text="{Binding Pace}" HorizontalAlignment="Right"
                        FontFamily="{StaticResource Mono}" FontSize="{StaticResource TextTiny}"
                        Foreground="{Binding PaceTone}" />
           </Grid>
@@ -107,11 +117,11 @@
                      Foreground="{StaticResource Muted}" />
 
           <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Style="{StaticResource IconButton}" Click="OnSettings" ToolTip="Settings">
+            <Button Style="{StaticResource IconButton}" Click="OnSettings" ToolTip="{x:Static local:Strings.Settings}">
               <Path Data="{StaticResource GearPath}" Fill="{StaticResource Muted}"
                     Stretch="Uniform" Width="14" Height="14" />
             </Button>
-            <Button Style="{StaticResource IconButton}" Click="OnClose" ToolTip="Close">
+            <Button Style="{StaticResource IconButton}" Click="OnClose" ToolTip="{x:Static local:Strings.Close}">
               <!-- The icon set has no cross, so it is two lines. -->
               <Path Data="M 0,0 L 10,10 M 10,0 L 0,10" Stroke="{StaticResource Muted}"
                     StrokeThickness="1.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round"

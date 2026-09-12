@@ -50,6 +50,28 @@ There is also `--snapshot-icon`, `--snapshot-island`, `--snapshot-settings` and
 - No comments that repeat the code. A comment says **why**, and only when the why is not obvious.
 - English, simple words, short sentences. That holds for code, comments and commit messages.
 
+## Changing what Aiko says
+
+Every word is in `tools/strings.json`, English and Russian side by side. Edit that file and run:
+
+```
+python tools/strings.py
+```
+
+It writes both resource files and the class the code reads them through, so a key that does not
+exist is a build error rather than a blank label somebody finds months later. Do not edit
+`Strings.resx` or `Strings.Designer.cs` by hand.
+
+Two rules for the Russian, learned the hard way on the card:
+
+- **Rephrase, do not translate.** A sentence that reads like a translation is a bad sentence.
+- **Leave room.** Russian runs about a fifth longer, and it found a place where two labels sat in
+  one grid cell and overlapped the moment the text grew. Look at the window before you call it
+  done: `--snapshot`, `--snapshot-settings`, `--snapshot-wizard 3`.
+
+Never build a sentence by joining pieces. Russian words change their endings, and the pieces stop
+fitting together.
+
 ## Commits
 
 The subject line is a short action, in the present tense: `Make the bridge start from an installed

@@ -40,4 +40,15 @@
     <PackageReference Include="Velopack" />
   </ItemGroup>
 
+  <!--
+    The words of the product, in one place per language. tools/strings.py makes both resource files
+    and the class that reads them from tools/strings.json, so a key that does not exist is a build
+    error. The class is generated into the source tree because WPF compiles XAML in a second pass,
+    through a temporary project that cannot see files the first pass made.
+  -->
+  <ItemGroup>
+    <EmbeddedResource Update="Strings.resx" />
+    <EmbeddedResource Update="Strings.ru.resx" />
+  </ItemGroup>
+
 </Project>

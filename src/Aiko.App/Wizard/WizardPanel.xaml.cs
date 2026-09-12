@@ -57,8 +57,8 @@ public partial class WizardPanel : UserControl
         {
             0 => string.Empty,
             // One environment is a whole setup, not half of one. Aiko does not push for a second.
-            1 => "Aiko found one Claude Code folder. One environment is enough; another can be added later in settings.",
-            _ => "Aiko found these Claude Code folders. Give them names you will recognise, and turn off any you do not want.",
+            1 => Strings.WizardFoundOne,
+            _ => Strings.WizardFoundMany,
         };
     }
 
@@ -73,21 +73,21 @@ public partial class WizardPanel : UserControl
 
         StepTitle.Text = step switch
         {
-            0 => "Environments",
-            1 => "Access to the limits",
-            2 => "Where to show Aiko",
-            _ => "All set",
+            0 => Strings.WizardStepEnvironments,
+            1 => Strings.WizardStepAccess,
+            2 => Strings.WizardStepWhere,
+            _ => Strings.WizardStepDone,
         };
-        StepCount.Text = step == 3 ? string.Empty : $"step {step + 1} of 3";
+        StepCount.Text = step == 3 ? string.Empty : string.Format(Strings.WizardStepCount, step + 1);
 
         BackButton.Visibility = step is 0 or 3 ? Visibility.Collapsed : Visibility.Visible;
         SkipButton.Visibility = step == 1 ? Visibility.Visible : Visibility.Collapsed;
         NextButton.Content = step switch
         {
-            0 => "Next",
-            1 => "Allow",
-            2 => "Finish",
-            _ => "Close",
+            0 => Strings.Next,
+            1 => Strings.Allow,
+            2 => Strings.Finish,
+            _ => Strings.Close,
         };
 
         if (step == 1)
@@ -105,22 +105,20 @@ public partial class WizardPanel : UserControl
     {
         var island = PlaceIsland.IsChecked == true;
 
-        DoneWhere.Text = island
-            ? "Aiko is at the top of your screen. Drag it anywhere and it sticks to the nearest edge."
-            : "Aiko is down by the clock. Rest the mouse on it to see the card, or click it to keep the card open.";
+        DoneWhere.Text = island ? Strings.WizardDoneIsland : Strings.WizardDoneTray;
 
         DoneOverflow.Visibility = island ? Visibility.Collapsed : Visibility.Visible;
 
         DoneFirstNumbers.Text = _accessGranted
-            ? "The first numbers arrive after your next answer from Claude Code. Until then the ring is dotted."
-            : "Aiko has no way to read your limits yet. Open settings when you want to set that up.";
+            ? Strings.WizardDoneFirstNumbers
+            : Strings.WizardDoneNoAccess;
     }
 
     private void FillAccessStep()
     {
         var bridge = BridgePath.Current();
         LinePreview.Text = bridge is null
-            ? "Aiko could not find its own bridge program."
+            ? Strings.WizardBridgeNotFound
             : ClaudeSettingsFile.LineFor(bridge);
 
         FilesToChange.ItemsSource = Chosen().Select(e => ClaudeSettingsFile.PathIn(e.FullPath)).ToList();
@@ -164,12 +162,12 @@ public partial class WizardPanel : UserControl
         var bridge = BridgePath.Current();
         if (bridge is null)
         {
-            Tell("Aiko could not find its own bridge program, so nothing was changed.");
+            Tell(Strings.AccessNoBridge);
             return;
         }
 
         var changed = 0;
-        var problems = new List<string>();
+        var problems = new List<PatchProblem>();
 
         foreach (var environment in Chosen())
         {
@@ -178,15 +176,15 @@ public partial class WizardPanel : UserControl
             {
                 changed++;
             }
-            else if (outcome.Problem is { } problem)
+            else if (outcome.Problem != PatchProblem.None)
             {
-                problems.Add(problem);
+                problems.Add(outcome.Problem);
             }
         }
 
         if (problems.Count > 0)
         {
-            Tell(string.Join(" ", problems.Distinct()));
+            Tell(string.Join(" ", problems.Distinct().Select(ClaudeSettingsFile.Words)));
             return;
         }
 

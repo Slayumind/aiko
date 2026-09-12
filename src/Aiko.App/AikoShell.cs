@@ -590,11 +590,18 @@ sealed class AikoShell : IDisposable
         window.QuitRequested += () => _application.Shutdown();
         window.Closed += (_, _) =>
         {
+            var again = window.ShouldReopen;
             _settings = null;
             // The place, direct mode and our access may all have changed while it was open.
             ApplyPlace();
             FollowDirectMode();
             NoteWhereWeHaveNoAccess();
+            UpdateIcon();
+
+            if (again)
+            {
+                OpenSettings();
+            }
         };
         _settings = window;
         window.Show();
@@ -722,14 +729,17 @@ sealed class AikoShell : IDisposable
         // says which environment it would show, which the click never did.
         if (OtherEnvironment() is { } other)
         {
-            fixed (char* swap = $"Show {other} in the ring")
+            fixed (char* swap = string.Format(Strings.MenuShowInRing, other))
             {
                 PInvoke.AppendMenu(menu, MENU_ITEM_FLAGS.MF_STRING, MenuSwap, swap);
             }
             PInvoke.AppendMenu(menu, MENU_ITEM_FLAGS.MF_SEPARATOR, 0, null);
         }
 
-        fixed (char* settings = "Settings", refresh = "Refresh limits", updates = "Check for updates", exit = "Exit")
+        fixed (char* settings = Strings.Settings,
+                     refresh = Strings.MenuRefresh,
+                     updates = Strings.CheckForUpdates,
+                     exit = Strings.QuitAiko)
         {
             PInvoke.AppendMenu(menu, MENU_ITEM_FLAGS.MF_STRING, MenuSettings, settings);
             PInvoke.AppendMenu(menu, MENU_ITEM_FLAGS.MF_STRING, MenuRefresh, refresh);

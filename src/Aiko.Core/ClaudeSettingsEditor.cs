@@ -1,14 +1,27 @@
 namespace Aiko.Core;
 
-/// What happened to the Claude Code settings file. The wizard shows this to the user, so a
-/// failure has to say what went wrong in words, not as an exception.
-public sealed record PatchOutcome(bool Changed, string? Problem)
+/// Why a change to the settings file did not happen. A reason, not a sentence: the words belong
+/// to whichever layer is talking to a person, and the core has no language.
+public enum PatchProblem
 {
-    public static readonly PatchOutcome NothingToDo = new(false, null);
+    None,
 
-    public static readonly PatchOutcome Done = new(true, null);
+    /// Aiko cannot say where its own bridge program is, so there is no command to write.
+    BridgeUnknown,
 
-    public static PatchOutcome Failed(string problem) => new(false, problem);
+    /// The file is there and Aiko may not write it.
+    CouldNotWrite,
+}
+
+/// What happened to the Claude Code settings file. The wizard shows this to the user, so a failure
+/// has to name what went wrong rather than throw.
+public sealed record PatchOutcome(bool Changed, PatchProblem Problem)
+{
+    public static readonly PatchOutcome NothingToDo = new(false, PatchProblem.None);
+
+    public static readonly PatchOutcome Done = new(true, PatchProblem.None);
+
+    public static PatchOutcome Failed(PatchProblem problem) => new(false, problem);
 }
 
 /// Adding and removing Aiko's line in the settings file of one Claude Code environment.
@@ -34,7 +47,7 @@ public sealed class ClaudeSettingsEditor(IFileAccess files)
     {
         if (string.IsNullOrEmpty(command))
         {
-            return PatchOutcome.Failed("Aiko could not work out where its bridge is.");
+            return PatchOutcome.Failed(PatchProblem.BridgeUnknown);
         }
 
         return Change(configDirectory, json =>
@@ -117,7 +130,7 @@ public sealed class ClaudeSettingsEditor(IFileAccess files)
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException)
         {
-            return PatchOutcome.Failed("Aiko could not write the Claude Code settings file.");
+            return PatchOutcome.Failed(PatchProblem.CouldNotWrite);
         }
     }
 

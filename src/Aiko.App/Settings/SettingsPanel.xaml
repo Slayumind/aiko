@@ -22,7 +22,7 @@
           </StackPanel>
 
           <StackPanel Grid.Column="1" Orientation="Horizontal">
-            <TextBlock Text="Direct mode" Style="{StaticResource RowNote}" VerticalAlignment="Center"
+            <TextBlock Text="{x:Static local:Strings.DirectMode}" Style="{StaticResource RowNote}" VerticalAlignment="Center"
                        Margin="0,0,8,0" />
             <ToggleButton Style="{StaticResource Switch}" IsChecked="{Binding DirectMode}"
                           Checked="OnDirectModeChanged" Unchecked="OnDirectModeChanged"
@@ -42,10 +42,10 @@
       <StackPanel Margin="{StaticResource CardPad}">
 
         <Grid x:Name="HeaderRow">
-          <TextBlock Text="Settings" VerticalAlignment="Center"
+          <TextBlock Text="{x:Static local:Strings.Settings}" VerticalAlignment="Center"
                      FontFamily="{StaticResource Sans}" FontSize="{StaticResource TextName}"
                      FontWeight="Medium" Foreground="{StaticResource Ink}" />
-          <Button HorizontalAlignment="Right" Click="OnClose" ToolTip="Close"
+          <Button HorizontalAlignment="Right" Click="OnClose" ToolTip="{x:Static local:Strings.Close}"
                   Width="22" Height="22" Background="Transparent" Cursor="Hand">
             <Button.Template>
               <ControlTemplate TargetType="Button">
@@ -65,9 +65,9 @@
           </Button>
         </Grid>
 
-        <TextBlock Text="ENVIRONMENTS" Style="{StaticResource SectionLabel}" />
+        <TextBlock Text="{x:Static local:Strings.SectionEnvironments}" Style="{StaticResource SectionLabel}" />
         <ItemsControl x:Name="Environments" ItemTemplate="{StaticResource EnvironmentTemplate}" />
-        <TextBlock x:Name="NoEnvironments" Text="No environments yet. Aiko finds them on the first run."
+        <TextBlock x:Name="NoEnvironments" Text="{x:Static local:Strings.NoEnvironments}"
                    Style="{StaticResource RowHint}" Visibility="Collapsed" />
 
         <!--
@@ -76,9 +76,9 @@
           shows anyone. Somebody has to be able to decide before they flip it, not after.
         -->
         <TextBlock Style="{StaticResource RowHint}" Margin="0,2,0,0" TextWrapping="Wrap"
-                   Text="Direct mode lets Aiko ask Anthropic for your limits itself, with the token Claude Code already keeps on this computer. Aiko reads it for each request and never stores it. Turn it on if you work in the IDE panel or Claude Desktop, where there is no status line." />
+                   Text="{x:Static local:Strings.DirectModeWhat}" />
         <TextBlock Style="{StaticResource RowHint}" Margin="0,6,0,0" TextWrapping="Wrap"
-                   Text="For a work account, ask whoever runs it first." />
+                   Text="{x:Static local:Strings.DirectModeAsk}" />
 
         <Grid Margin="0,8,0,0">
           <Grid.ColumnDefinitions>
@@ -87,11 +87,11 @@
           </Grid.ColumnDefinitions>
           <TextBlock x:Name="AccessLine" Grid.Column="0" Style="{StaticResource RowHint}"
                      VerticalAlignment="Center" TextWrapping="Wrap" Margin="0,0,8,0" />
-          <Button x:Name="AccessButton" Grid.Column="1" Content="Check access"
+          <Button x:Name="AccessButton" Grid.Column="1" Content="{x:Static local:Strings.AccessCheck}"
                   Style="{StaticResource QuietButton}" Click="OnCheckAccess" />
         </Grid>
 
-        <TextBlock Text="WHERE TO SHOW" Style="{StaticResource SectionLabel}" />
+        <TextBlock Text="{x:Static local:Strings.SectionWhereToShow}" Style="{StaticResource SectionLabel}" />
         <Grid>
           <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
@@ -111,7 +111,7 @@
                            HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,6,0" />
                 </Grid>
               </Border>
-              <TextBlock Text="Tray" Style="{StaticResource RowName}" Margin="0,8,0,0"
+              <TextBlock Text="{x:Static local:Strings.PlaceTray}" Style="{StaticResource RowName}" Margin="0,8,0,0"
                          HorizontalAlignment="Center" />
             </StackPanel>
           </RadioButton>
@@ -125,7 +125,7 @@
                 <Border Width="38" Height="9" CornerRadius="0,0,5,5" Background="{StaticResource Raised}"
                         HorizontalAlignment="Center" VerticalAlignment="Top" />
               </Border>
-              <TextBlock Text="Island" Style="{StaticResource RowName}" Margin="0,8,0,0"
+              <TextBlock Text="{x:Static local:Strings.PlaceIsland}" Style="{StaticResource RowName}" Margin="0,8,0,0"
                          HorizontalAlignment="Center" />
             </StackPanel>
           </RadioButton>
@@ -133,14 +133,14 @@
 
         <!-- Only worth showing when Aiko lives in the island; in the tray it changes nothing. -->
         <Grid x:Name="IslandOnly" Margin="0,12,0,0">
-          <TextBlock Text="Hide the island in full screen" Style="{StaticResource RowName}" />
+          <TextBlock Text="{x:Static local:Strings.HideIslandInFullScreen}" Style="{StaticResource RowName}" />
           <ToggleButton x:Name="HideInFullScreen" Style="{StaticResource Switch}"
                         HorizontalAlignment="Right" Checked="OnHideChanged" Unchecked="OnHideChanged" />
         </Grid>
 
-        <TextBlock Text="STARTUP AND UPDATES" Style="{StaticResource SectionLabel}" />
+        <TextBlock Text="{x:Static local:Strings.SectionStartupAndUpdates}" Style="{StaticResource SectionLabel}" />
         <Grid Margin="0,0,0,10">
-          <TextBlock Text="Start with Windows" Style="{StaticResource RowName}" />
+          <TextBlock Text="{x:Static local:Strings.StartWithWindows}" Style="{StaticResource RowName}" />
           <ToggleButton x:Name="RunAtStartup" Style="{StaticResource Switch}"
                         HorizontalAlignment="Right" Checked="OnStartupChanged" Unchecked="OnStartupChanged" />
         </Grid>
@@ -151,8 +151,8 @@
           </Grid.ColumnDefinitions>
 
           <StackPanel Grid.Column="0" Margin="0,0,12,0">
-            <TextBlock Text="Check for updates" Style="{StaticResource RowName}" />
-            <TextBlock Text="Asks slayumind.org once a day, and tells it one copy of Aiko ran today. Downloads come from GitHub."
+            <TextBlock Text="{x:Static local:Strings.CheckUpdatesToggle}" Style="{StaticResource RowName}" />
+            <TextBlock Text="{x:Static local:Strings.CheckUpdatesWhat}"
                        Style="{StaticResource RowNote}" TextWrapping="Wrap" />
           </StackPanel>
           <ToggleButton x:Name="CheckUpdates" Grid.Column="1" Style="{StaticResource Switch}"
@@ -165,18 +165,18 @@
           <TextBlock x:Name="UpdateLine" Style="{StaticResource RowHint}" Visibility="Collapsed"
                      Margin="0,0,0,8" />
           <StackPanel Orientation="Horizontal">
-            <Button x:Name="CheckNow" Content="Check now" Style="{StaticResource QuietButton}"
+            <Button x:Name="CheckNow" Content="{x:Static local:Strings.CheckNow}" Style="{StaticResource QuietButton}"
                     Click="OnCheckNow" />
-            <Button x:Name="OpenDownload" Content="Open download page" Style="{StaticResource QuietButton}"
+            <Button x:Name="OpenDownload" Content="{x:Static local:Strings.OpenDownloadPage}" Style="{StaticResource QuietButton}"
                     Margin="8,0,0,0" Click="OnOpenDownload" Visibility="Collapsed" />
           </StackPanel>
         </StackPanel>
 
-        <TextBlock Text="LANGUAGE" Style="{StaticResource SectionLabel}" />
+        <TextBlock Text="{x:Static local:Strings.SectionLanguage}" Style="{StaticResource SectionLabel}" />
         <Border Style="{StaticResource SegmentBar}">
           <StackPanel Orientation="Horizontal">
             <RadioButton x:Name="LanguageSystem" Style="{StaticResource Segment}" GroupName="Language"
-                         Content="System" Checked="OnLanguageChanged" />
+                         Content="{x:Static local:Strings.LanguageSystem}" Checked="OnLanguageChanged" />
             <RadioButton x:Name="LanguageEnglish" Style="{StaticResource Segment}" GroupName="Language"
                          Content="English" Checked="OnLanguageChanged" />
             <RadioButton x:Name="LanguageRussian" Style="{StaticResource Segment}" GroupName="Language"
@@ -190,8 +190,8 @@
              their own line underneath instead of being cut in half. -->
         <StackPanel>
           <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="Copy diagnostics" Style="{StaticResource QuietButton}" Click="OnCopyDiagnostics" />
-            <Button Content="Quit Aiko" Style="{StaticResource QuietButton}" Margin="8,0,0,0" Click="OnQuit" />
+            <Button Content="{x:Static local:Strings.CopyDiagnostics}" Style="{StaticResource QuietButton}" Click="OnCopyDiagnostics" />
+            <Button Content="{x:Static local:Strings.QuitAiko}" Style="{StaticResource QuietButton}" Margin="8,0,0,0" Click="OnQuit" />
           </StackPanel>
           <TextBlock x:Name="VersionLine" Style="{StaticResource RowNote}" Margin="0,10,0,0" />
         </StackPanel>

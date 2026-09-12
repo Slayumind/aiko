@@ -164,7 +164,7 @@ public class ClaudeSettingsEditorTests
         var outcome = new ClaudeSettingsEditor(files).Add(Folder, Command());
 
         Assert.False(outcome.Changed);
-        Assert.NotNull(outcome.Problem);
+        Assert.NotEqual(PatchProblem.None, outcome.Problem);
         Assert.Empty(files.Writes);
     }
 
@@ -176,7 +176,7 @@ public class ClaudeSettingsEditorTests
         var outcome = new ClaudeSettingsEditor(files).Add(Folder, string.Empty);
 
         Assert.False(outcome.Changed);
-        Assert.NotNull(outcome.Problem);
+        Assert.NotEqual(PatchProblem.None, outcome.Problem);
         Assert.Empty(files.Writes);
     }
 

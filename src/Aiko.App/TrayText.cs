@@ -31,17 +31,17 @@ static class TrayText
 
         if (cards.Count > 0 && cards.All(c => c.Freshness == DataFreshness.None))
         {
-            parts.Add("open Claude Code");
+            parts.Add(Strings.TrayOpenClaudeCode);
         }
         else if (cards.Any(c => c.Freshness == DataFreshness.Stale))
         {
             var newest = cards.Where(c => c.UpdatedAt is not null).Max(c => c.UpdatedAt);
-            parts.Add($"last seen {newest:HH:mm}");
+            parts.Add(string.Format(Strings.TrayLastSeen, $"{newest:HH:mm}"));
         }
 
         if (newerVersion is not null)
         {
-            parts.Add($"Aiko {newerVersion} is out");
+            parts.Add(string.Format(Strings.TrayUpdateOut, newerVersion));
         }
 
         var text = string.Join(" · ", parts);

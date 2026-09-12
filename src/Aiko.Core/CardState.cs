@@ -27,7 +27,10 @@ public readonly record struct CardRow(
     LimitTone Tone,
     bool IsReset,
     ResetCountdown Countdown,
-    PaceEstimate Pace);
+    PaceEstimate Pace,
+    /// Only for the weekly limit of a heavy model, and only because the server names it. The card
+    /// used to say "Fable" whatever came back, which would be wrong the day that changes.
+    string? ModelName = null);
 
 /// What the card and the icon show for one environment. Everything that decides what to show
 /// lives here, so the Windows layer only draws and a macOS layer later can reuse it.
@@ -105,7 +108,8 @@ public sealed record CardState(
                 countdown.IsReset,
                 countdown,
                 // The model window length is not reported, so no honest estimate can be made.
-                new PaceEstimate(PaceVerdict.Unknown, TimeSpan.Zero)));
+                new PaceEstimate(PaceVerdict.Unknown, TimeSpan.Zero),
+                model.ModelName));
         }
 
         return new CardState(snapshot.Environment, freshness, snapshot.ReceivedAt, rows);
