@@ -16,6 +16,18 @@ public class StatusLineReportTests
         """;
 
     [Fact]
+    public void A_byte_order_mark_in_front_does_not_hide_the_limits()
+    {
+        // Windows PowerShell 5.1 puts one there when it pipes text into a program, and that is
+        // the shell Claude Code uses on a machine without Git. Found in Windows Sandbox: the
+        // bridge started, exited 0 and wrote nothing.
+        var report = StatusLineReport.FromJson("﻿" + RealPayload);
+
+        Assert.True(report.HasData);
+        Assert.Equal(28, report.Find(LimitKind.FiveHour)!.Value.Percent);
+    }
+
+    [Fact]
     public void Reads_both_windows_from_a_real_payload()
     {
         var report = StatusLineReport.FromJson(RealPayload);

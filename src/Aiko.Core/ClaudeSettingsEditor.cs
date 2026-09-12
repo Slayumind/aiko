@@ -56,6 +56,10 @@ public sealed class ClaudeSettingsEditor(IFileAccess files)
 
     public PatchOutcome Remove(string configDirectory)
     {
+        // A copy is only ever made of a file that was already there. No copy means Aiko made this
+        // file itself, from nothing, the day it added its line.
+        var aikoMadeTheFile = !files.Exists(BackupPathIn(configDirectory));
+
         var outcome = Change(configDirectory, json =>
             SettingsJsonPatch.TryRemoveBridge(json, out var restored) ? restored : null);
 
@@ -64,9 +68,32 @@ public sealed class ClaudeSettingsEditor(IFileAccess files)
             // The copy was insurance while Aiko was in the file. Their own status line is back now,
             // and leaving the copy behind would be litter in someone else's folder.
             DropBackup(configDirectory);
+
+            // A file Aiko made and that now says nothing is litter too. Windows Sandbox showed it: a
+            // folder with no settings.json before Aiko had one holding "{}" after it. Anything the
+            // user or Claude Code wrote into it since keeps it alive.
+            if (aikoMadeTheFile)
+            {
+                DeleteIfEmpty(PathIn(configDirectory));
+            }
         }
 
         return outcome;
+    }
+
+    private void DeleteIfEmpty(string path)
+    {
+        try
+        {
+            if (files.Exists(path)
+                && System.Text.Json.Nodes.JsonNode.Parse(files.ReadAllText(path)) is System.Text.Json.Nodes.JsonObject { Count: 0 })
+            {
+                files.Delete(path);
+            }
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException or System.Text.Json.JsonException)
+        {
+        }
     }
 
     /// Put our line right again, and only when it is already there.

@@ -34,12 +34,15 @@ return 0;
 
 /// Read the payload as bytes: Console.In would decode it with the OEM code page, and on a
 /// Russian Windows that turns Cyrillic paths into rubbish.
+///
+/// A leading byte order mark is dropped here as well as in the parser. The same text goes on to
+/// the status line the user already had, and a mark in front of it would break that one too.
 static string ReadAllInput()
 {
     using var stdin = Console.OpenStandardInput();
     using var buffer = new MemoryStream();
     stdin.CopyTo(buffer);
-    return Encoding.UTF8.GetString(buffer.ToArray());
+    return Encoding.UTF8.GetString(buffer.ToArray()).TrimStart('﻿');
 }
 
 static void WriteOutput(string text)

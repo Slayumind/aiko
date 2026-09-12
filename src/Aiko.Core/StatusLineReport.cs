@@ -37,6 +37,12 @@ public sealed record StatusLineReport(IReadOnlyList<LimitWindow> Windows)
             return Empty;
         }
 
+        // A byte order mark in front is not the caller's mistake to punish. Windows PowerShell 5.1
+        // puts one there when it pipes text into a program, and that is the shell Claude Code falls
+        // back to on a machine without Git. The parser refuses it as an invalid first character,
+        // the report comes back empty, and the limits never show. Found in Windows Sandbox.
+        json = json.TrimStart('﻿');
+
         try
         {
             using var document = JsonDocument.Parse(json);
