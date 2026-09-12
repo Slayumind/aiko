@@ -1,3 +1,5 @@
+using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Windows;
@@ -23,6 +25,8 @@ public partial class SettingsPanel : UserControl
     /// Setting the controls raises their own events, and those events save. This keeps the first
     /// fill from writing the file back the moment the window opens.
     private bool _filling;
+
+    private string _downloadUrl = "https://github.com/Slayumind/aiko/releases/latest";
 
     public SettingsPanel()
     {
@@ -164,6 +168,45 @@ public partial class SettingsPanel : UserControl
         catch (Exception copyFailed)
         {
             Log.Write($"could not copy diagnostics: {copyFailed.GetType().Name}");
+        }
+    }
+
+    /// Asked for by hand, so it runs whatever the switch says: the switch decides whether Aiko
+    /// checks on its own, not whether the user may ask.
+    private async void OnCheckNow(object sender, RoutedEventArgs e)
+    {
+        CheckNow.IsEnabled = false;
+        UpdateLine.Text = "Asking slayumind.org…";
+        UpdateLine.Visibility = Visibility.Visible;
+        OpenDownload.Visibility = Visibility.Collapsed;
+
+        using var client = new UpdateClient();
+        var info = await client.AskAsync(CancellationToken.None);
+        var state = info.CompareWith(Version());
+
+        UpdateLine.Text = state switch
+        {
+            UpdateState.Available => $"Version {info.Latest} is available.",
+            UpdateState.UpToDate => $"Aiko {Version()} is the latest version.",
+            // Never "you are up to date" when we do not know: that is the one answer that would
+            // keep every copy quiet after a bad deploy.
+            _ => "Could not check right now. Try again later.",
+        };
+
+        _downloadUrl = info.DownloadUrl ?? "https://github.com/Slayumind/aiko/releases/latest";
+        OpenDownload.Visibility = state == UpdateState.Available ? Visibility.Visible : Visibility.Collapsed;
+        CheckNow.IsEnabled = true;
+    }
+
+    private void OnOpenDownload(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo(_downloadUrl) { UseShellExecute = true });
+        }
+        catch (Exception failed) when (failed is Win32Exception or InvalidOperationException)
+        {
+            Log.Write($"could not open the download page: {failed.GetType().Name}");
         }
     }
 

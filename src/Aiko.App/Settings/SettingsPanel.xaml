@@ -124,10 +124,32 @@
                         HorizontalAlignment="Right" Checked="OnStartupChanged" Unchecked="OnStartupChanged" />
         </Grid>
         <Grid>
-          <TextBlock Text="Check for updates" Style="{StaticResource RowName}" />
-          <ToggleButton x:Name="CheckUpdates" Style="{StaticResource Switch}"
-                        HorizontalAlignment="Right" Checked="OnUpdatesChanged" Unchecked="OnUpdatesChanged" />
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+
+          <StackPanel Grid.Column="0" Margin="0,0,12,0">
+            <TextBlock Text="Check for updates" Style="{StaticResource RowName}" />
+            <TextBlock Text="Asks slayumind.org, downloads come from GitHub"
+                       Style="{StaticResource RowNote}" TextWrapping="Wrap" />
+          </StackPanel>
+          <ToggleButton x:Name="CheckUpdates" Grid.Column="1" Style="{StaticResource Switch}"
+                        VerticalAlignment="Center"
+                        Checked="OnUpdatesChanged" Unchecked="OnUpdatesChanged" />
         </Grid>
+
+        <StackPanel Margin="0,10,0,0">
+          <!-- Empty until something has been checked: an empty line would only leave a gap. -->
+          <TextBlock x:Name="UpdateLine" Style="{StaticResource RowHint}" Visibility="Collapsed"
+                     Margin="0,0,0,8" />
+          <StackPanel Orientation="Horizontal">
+            <Button x:Name="CheckNow" Content="Check now" Style="{StaticResource QuietButton}"
+                    Click="OnCheckNow" />
+            <Button x:Name="OpenDownload" Content="Open download page" Style="{StaticResource QuietButton}"
+                    Margin="8,0,0,0" Click="OnOpenDownload" Visibility="Collapsed" />
+          </StackPanel>
+        </StackPanel>
 
         <TextBlock Text="LANGUAGE" Style="{StaticResource SectionLabel}" />
         <Border Style="{StaticResource SegmentBar}">
