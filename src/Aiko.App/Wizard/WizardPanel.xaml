@@ -1,0 +1,151 @@
+<UserControl x:Class="Aiko.App.WizardPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:Aiko.App">
+
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/Theme/Controls.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+
+      <DataTemplate x:Key="FoundTemplate" DataType="{x:Type local:WizardEnvironment}">
+        <Grid Margin="0,0,0,10">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+
+          <StackPanel Grid.Column="0" Margin="0,0,12,0">
+            <TextBox Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                     Style="{StaticResource NameBox}" />
+            <TextBlock Text="{Binding FullPath}" Style="{StaticResource RowNote}" Margin="0,4,0,0" />
+          </StackPanel>
+
+          <ToggleButton Grid.Column="1" Style="{StaticResource Switch}"
+                        IsChecked="{Binding Use, Mode=TwoWay}" />
+        </Grid>
+      </DataTemplate>
+    </ResourceDictionary>
+  </UserControl.Resources>
+
+  <Grid Margin="20">
+    <Border Width="380"
+            Background="{StaticResource Surface}"
+            CornerRadius="{StaticResource CardRadius}"
+            BorderBrush="{StaticResource Hairline}" BorderThickness="1"
+            Effect="{StaticResource CardShadow}">
+      <StackPanel Margin="{StaticResource CardPad}">
+
+        <Grid x:Name="HeaderRow">
+          <TextBlock x:Name="StepTitle" VerticalAlignment="Center"
+                     FontFamily="{StaticResource Sans}" FontSize="{StaticResource TextName}"
+                     FontWeight="Medium" Foreground="{StaticResource Ink}" />
+          <TextBlock x:Name="StepCount" HorizontalAlignment="Right" VerticalAlignment="Center"
+                     Style="{StaticResource RowNote}" />
+        </Grid>
+
+        <!-- Step 1: the environments Aiko found. -->
+        <StackPanel x:Name="StepEnvironments" Margin="0,14,0,0">
+          <TextBlock x:Name="FoundIntro" Style="{StaticResource RowHint}" Margin="0,0,0,12" />
+          <ItemsControl x:Name="Found" ItemTemplate="{StaticResource FoundTemplate}" />
+
+          <StackPanel x:Name="NothingFound" Visibility="Collapsed">
+            <TextBlock Style="{StaticResource RowHint}" Margin="0,0,0,10"
+                       Text="Aiko did not find Claude Code on this computer. Install it and check again, or point Aiko at the folder yourself." />
+            <StackPanel Orientation="Horizontal">
+              <Button Content="Choose a folder" Style="{StaticResource QuietButton}" Click="OnChooseFolder" />
+              <Button Content="Check again" Style="{StaticResource QuietButton}" Margin="8,0,0,0" Click="OnCheckAgain" />
+            </StackPanel>
+          </StackPanel>
+        </StackPanel>
+
+        <!-- Step 2: the one line Aiko adds to the Claude Code settings. -->
+        <StackPanel x:Name="StepAccess" Margin="0,14,0,0" Visibility="Collapsed">
+          <TextBlock Style="{StaticResource RowHint}" Margin="0,0,0,10"
+                     Text="Claude Code reports its limits to a status line. Aiko adds one line to the settings file of each environment. A status line you already have keeps working: Aiko calls it and shows its output." />
+          <TextBlock Text="THE LINE AIKO ADDS" Style="{StaticResource SectionLabel}" Margin="0,0,0,6" />
+          <TextBox x:Name="LinePreview" Style="{StaticResource CodeBlock}" />
+          <TextBlock Text="FILES IT CHANGES" Style="{StaticResource SectionLabel}" />
+          <ItemsControl x:Name="FilesToChange">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <TextBlock Text="{Binding}" Style="{StaticResource RowNote}" Margin="0,0,0,4" />
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <TextBlock Style="{StaticResource RowHint}" Margin="0,10,0,0"
+                     Text="A copy of each file is kept beside it, and removing Aiko puts everything back." />
+          <TextBlock x:Name="AccessResult" Style="{StaticResource RowHint}" Margin="0,10,0,0"
+                     Visibility="Collapsed" />
+        </StackPanel>
+
+        <!-- Step 3: where Aiko lives, and the two switches. -->
+        <StackPanel x:Name="StepWhere" Margin="0,14,0,0" Visibility="Collapsed">
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="10" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <RadioButton x:Name="PlaceTray" Grid.Column="0" Style="{StaticResource PlaceCard}"
+                         GroupName="Place" IsChecked="True">
+              <StackPanel>
+                <Border Height="46" CornerRadius="4" Background="{StaticResource Background}"
+                        BorderBrush="{StaticResource Hairline}" BorderThickness="1">
+                  <Grid VerticalAlignment="Bottom">
+                    <Border Height="8" Background="{StaticResource Raised}" />
+                    <Ellipse Width="5" Height="5" Fill="{StaticResource Positive}"
+                             HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,6,0" />
+                  </Grid>
+                </Border>
+                <TextBlock Text="Tray" Style="{StaticResource RowName}" Margin="0,8,0,0"
+                           HorizontalAlignment="Center" />
+              </StackPanel>
+            </RadioButton>
+
+            <RadioButton x:Name="PlaceIsland" Grid.Column="2" Style="{StaticResource PlaceCard}"
+                         GroupName="Place">
+              <StackPanel>
+                <Border Height="46" CornerRadius="4" Background="{StaticResource Background}"
+                        BorderBrush="{StaticResource Hairline}" BorderThickness="1">
+                  <Border Width="38" Height="9" CornerRadius="0,0,5,5" Background="{StaticResource Raised}"
+                          HorizontalAlignment="Center" VerticalAlignment="Top" />
+                </Border>
+                <TextBlock Text="Island" Style="{StaticResource RowName}" Margin="0,8,0,0"
+                           HorizontalAlignment="Center" />
+              </StackPanel>
+            </RadioButton>
+          </Grid>
+
+          <Grid Margin="0,14,0,0">
+            <TextBlock Text="Start with Windows" Style="{StaticResource RowName}" />
+            <ToggleButton x:Name="RunAtStartup" Style="{StaticResource Switch}"
+                          HorizontalAlignment="Right" IsChecked="True" />
+          </Grid>
+
+          <Grid Margin="0,10,0,0">
+            <StackPanel>
+              <TextBlock Text="Check for updates" Style="{StaticResource RowName}" />
+              <TextBlock Text="Asks slayumind.org for the latest version" Style="{StaticResource RowNote}" />
+            </StackPanel>
+            <ToggleButton x:Name="CheckUpdates" Style="{StaticResource Switch}"
+                          HorizontalAlignment="Right" VerticalAlignment="Center" />
+          </Grid>
+        </StackPanel>
+
+        <Border Height="1" Background="{StaticResource Hairline}" Margin="0,16,0,12" />
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+          <Button x:Name="BackButton" Content="Back" Style="{StaticResource QuietButton}"
+                  Visibility="Collapsed" Margin="0,0,8,0" Click="OnBack" />
+          <Button x:Name="SkipButton" Content="Not now" Style="{StaticResource QuietButton}"
+                  Visibility="Collapsed" Margin="0,0,8,0" Click="OnSkip" />
+          <Button x:Name="NextButton" Content="Next" Style="{StaticResource QuietButton}" Click="OnNext" />
+        </StackPanel>
+
+      </StackPanel>
+    </Border>
+  </Grid>
+</UserControl>

@@ -37,6 +37,27 @@ static class Program
             return;
         }
 
+        // Adds the status line to one folder and says in the log what happened. For the question
+        // "why can Aiko not write to my settings file", and for trying the change on a copy.
+        if (args is ["--try-access", var folder, ..])
+        {
+            var bridge = BridgePath.Current();
+            var outcome = bridge is null
+                ? PatchOutcome.Failed("the bridge program was not found")
+                : ClaudeSettingsFile.AddBridge(folder, bridge);
+
+            Log.Write($"--try-access {folder}: changed={outcome.Changed} problem={outcome.Problem ?? "none"}");
+            Environment.Exit(outcome.Changed ? 0 : 1);
+            return;
+        }
+
+        if (args is ["--snapshot-wizard", var wizardPath, ..])
+        {
+            var step = args.Length > 2 && int.TryParse(args[2], out var asked) ? asked : 0;
+            Snapshot.Write(new WizardPanel(step), wizardPath);
+            return;
+        }
+
         if (args is ["--snapshot-settings", var settingsPath, ..])
         {
             Snapshot.Write(new SettingsPanel(), settingsPath);

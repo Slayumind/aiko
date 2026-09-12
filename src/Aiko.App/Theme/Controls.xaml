@@ -123,6 +123,51 @@
     </Setter>
   </Style>
 
+  <Style x:Key="NameBox" TargetType="TextBox">
+    <Setter Property="FontFamily" Value="{StaticResource Sans}" />
+    <Setter Property="FontSize" Value="{StaticResource TextSmall}" />
+    <Setter Property="Foreground" Value="{StaticResource Ink}" />
+    <Setter Property="CaretBrush" Value="{StaticResource Ink}" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="TextBox">
+          <Border x:Name="Back" CornerRadius="8" Background="{StaticResource Raised}"
+                  BorderBrush="{StaticResource Hairline}" BorderThickness="1" Padding="8,5">
+            <ScrollViewer x:Name="PART_ContentHost" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsKeyboardFocused" Value="True">
+              <Setter TargetName="Back" Property="BorderBrush" Value="{StaticResource InputLine}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- The exact text Aiko is about to write into someone else's file. Shown, not described. -->
+  <Style x:Key="CodeBlock" TargetType="TextBox">
+    <Setter Property="FontFamily" Value="{StaticResource Mono}" />
+    <Setter Property="FontSize" Value="{StaticResource TextTiny}" />
+    <Setter Property="Foreground" Value="{StaticResource Ink}" />
+    <Setter Property="IsReadOnly" Value="True" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="TextBox">
+          <Border CornerRadius="8" Background="{StaticResource Background}"
+                  BorderBrush="{StaticResource Hairline}" BorderThickness="1" Padding="10,8">
+            <ScrollViewer x:Name="PART_ContentHost" />
+          </Border>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
   <Style x:Key="QuietButton" TargetType="Button">
     <Setter Property="Height" Value="32" />
     <Setter Property="Cursor" Value="Hand" />

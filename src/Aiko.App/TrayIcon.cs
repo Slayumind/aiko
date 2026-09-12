@@ -43,6 +43,7 @@ sealed class TrayIcon : IDisposable
     private DispatcherTimer? _hover;
     private CardWindow? _card;
     private SettingsWindow? _settings;
+    private WizardWindow? _wizard;
     private HICON _icon;
     private uint _iconDpi;
     private int _iconSize;
@@ -76,6 +77,13 @@ sealed class TrayIcon : IDisposable
         var folders = ClaudeFolders.Find();
         Log.Write($"started, status line shell: {ShellDetect.Current()}");
         Log.Write($"found {folders.Count} claude folders, {EnvironmentScan.Pick(folders).Count} usable");
+
+        // Nothing set up yet: this is a first run, so the wizard opens itself. After it, the icon
+        // is redrawn, because by then there are environments to show.
+        if (!SettingsStore.LoadEnvironments().HasEnvironments)
+        {
+            OpenWizard();
+        }
     }
 
     public void Dispose()
@@ -86,6 +94,7 @@ sealed class TrayIcon : IDisposable
         CancelHover();
         _card?.Close();
         _settings?.Close();
+        _wizard?.Close();
 
         var data = NewData();
         PInvoke.Shell_NotifyIcon(NOTIFY_ICON_MESSAGE.NIM_DELETE, in data);
@@ -245,6 +254,27 @@ sealed class TrayIcon : IDisposable
         }
 
         Log.Write($"card opened at {card.Left},{card.Top} size {card.ActualWidth}x{card.ActualHeight}");
+    }
+
+    private void OpenWizard()
+    {
+        if (_wizard is not null)
+        {
+            _wizard.Activate();
+            return;
+        }
+
+        var window = new WizardWindow();
+        window.Closed += (_, _) =>
+        {
+            _wizard = null;
+            UpdateIcon();
+            _card?.Update(CurrentCard());
+        };
+        _wizard = window;
+        window.Show();
+
+        Log.Write("wizard opened");
     }
 
     /// One settings window at a time: asking twice brings the open one forward instead of
