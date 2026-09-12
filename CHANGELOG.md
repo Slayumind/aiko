@@ -47,3 +47,16 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - The card no longer guesses how long a limit will last until there is something to go on. Two
   minutes into a five hour window, one percent used to read as "runs out in about three hours".
 - Renaming an environment no longer leaves a second one on the card, frozen at the numbers it had.
+
+### Changed
+
+- The tray tooltip carries the numbers. Windows 11 hides a new icon behind the arrow, and under
+  that arrow the card never opens, so for some people the tooltip is all there is.
+- A left click on the tray icon opens the card. Swapping which environment the ring shows moved to
+  the menu, where it says which environment it would show.
+- A card opened by resting the mouse on the icon goes away when the mouse does. Click the icon, or
+  click the card, and it stays until you close it.
+- The card says "42% used" instead of "42%", and puts a word beside the colour when a limit is
+  running low. Green and red are one grey to a good many people.
+- "Copy diagnostics" is written for a person to read.
+- The island carries the numbers in its tooltip.

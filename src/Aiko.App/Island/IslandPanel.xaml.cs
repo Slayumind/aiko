@@ -4,8 +4,11 @@ using Aiko.Core;
 
 namespace Aiko.App;
 
-/// The island when it is folded: one ring per environment and nothing else. No percentages —
+/// The island when it is folded: one ring per environment and nothing else. No percentages on it —
 /// the numbers are in the card, and the island has to stay out of the way.
+///
+/// It does carry the numbers in its tooltip. A ring and a colour say nothing to a screen reader,
+/// and nothing at all to somebody who cannot tell the green from the red.
 public partial class IslandPanel : UserControl
 {
     private const double RingSize = 18;
@@ -30,6 +33,8 @@ public partial class IslandPanel : UserControl
             ScreenEdge.Left => new CornerRadius(0, 14, 14, 0),
             _ => new CornerRadius(14, 0, 0, 14),
         };
+
+        ToolTip = TrayText.Tooltip(cards, null);
 
         Rings.Children.Clear();
         foreach (var card in cards)

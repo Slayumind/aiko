@@ -50,7 +50,11 @@ public sealed class EnvironmentBlock
         return new EnvironmentBlock
         {
             Name = card.Environment,
-            Subtitle = card.Freshness == DataFreshness.Stale ? "waiting" : string.Empty,
+
+            // The header already says when the numbers arrived. A second word for the same thing,
+            // in a different place and a different wording, was one of five ways this card had of
+            // saying "nothing here".
+            Subtitle = string.Empty,
             Rows = rows,
             Note = CardText.NoDataNote,
             NoteVisibility = rows.Count == 0 ? Visibility.Visible : Visibility.Collapsed,
@@ -67,6 +71,10 @@ public sealed class LimitRow
     public required string Pace { get; init; }
     public required Brush Tone { get; init; }
 
+    /// The word beside the bar takes the colour of the bar when it is the tone, and stays quiet
+    /// when it is only a guess about the pace.
+    public required Brush PaceTone { get; init; }
+
     /// The bar is two columns sharing the width, so the fill follows the percentage without any
     /// measuring in code.
     public required GridLength Fill { get; init; }
@@ -77,7 +85,12 @@ public sealed class LimitRow
         Name = CardText.WindowName(row.Kind),
         Percent = CardText.Percent(row.Percent),
         Resets = CardText.Resets(row.Countdown),
-        Pace = CardText.Pace(row.Pace),
+
+        // One slot, two things that could go in it. The tone is a fact and the pace is a guess,
+        // so when a limit is running low the fact wins. The guess still shows in the ordinary
+        // case, which is where it is worth acting on.
+        Pace = CardText.Tone(row.Tone) is { Length: > 0 } word ? word : CardText.Pace(row.Pace),
+        PaceTone = CardText.Tone(row.Tone).Length > 0 ? Tokens.ToneBrush(row.Tone) : Tokens.Brush("Muted"),
         Tone = Tokens.ToneBrush(row.Tone),
         Fill = new GridLength(row.Percent, GridUnitType.Star),
         Rest = new GridLength(100 - row.Percent, GridUnitType.Star),

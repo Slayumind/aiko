@@ -84,6 +84,15 @@ public partial class SettingsPanel : UserControl
 
     private static string Version() => AppVersion.Current();
 
+    private static string YesNo(bool value) => value ? "yes" : "no";
+
+    private static string LanguageName(AikoLanguage language) => language switch
+    {
+        AikoLanguage.English => "English",
+        AikoLanguage.Russian => "Русский",
+        _ => "the one Windows uses",
+    };
+
     private void Save(AppSettings settings)
     {
         if (_filling)
@@ -151,16 +160,19 @@ public partial class SettingsPanel : UserControl
     /// limits, no paths from Claude Code.
     private void OnCopyDiagnostics(object sender, RoutedEventArgs e)
     {
+        // Written for a person to paste into a bug report, so it says yes and no and Git Bash
+        // rather than True and GitBash, which are how the code happens to spell them.
         var text = string.Join(
             Environment.NewLine,
             $"Aiko {Version()}",
             $"Windows {Environment.OSVersion.Version}",
-            $"place: {_settings.Place}",
-            $"language: {_settings.Language}",
-            $"start with Windows: {Startup.IsEnabled()}",
-            $"check for updates: {_settings.CheckUpdates}",
-            $"environments: {_environments.Environments.Count}",
-            $"status line shell: {ShellDetect.Current()}",
+            $"shown in: {(_settings.Place == AikoPlace.Island ? "the island" : "the tray")}",
+            $"language: {LanguageName(_settings.Language)}",
+            $"starts with Windows: {YesNo(Startup.IsEnabled())}",
+            $"checks for updates: {YesNo(_settings.CheckUpdates)}",
+            $"environments: {_environments.Environments.Count}"
+                + $", direct mode on for {_environments.Environments.Count(e => e.DirectMode)}",
+            $"status line shell: {(ShellDetect.Current() == ClaudeShell.GitBash ? "Git Bash" : "PowerShell")}",
             $"log: {Log.FilePath}");
 
         try
