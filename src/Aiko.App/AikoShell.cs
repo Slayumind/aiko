@@ -49,13 +49,12 @@ sealed class AikoShell : IDisposable
     private IslandWindow? _island;
     private FullScreenWatch? _fullScreen;
     private DirectPoller? _direct;
+    private UpdateWatch? _updates;
     private HICON _icon;
     private uint _iconDpi;
     private int _iconSize;
     private bool _iconShown;
 
-    /// Which environment the ring shows. The click swaps it; settings will feed it later.
-    private string? _ringEnvironment;
 
     public AikoShell(Application application)
     {
@@ -80,6 +79,10 @@ sealed class AikoShell : IDisposable
         var poller = new DirectPoller(_application.Dispatcher);
         poller.Reported += OnSnapshotsChanged;
         _direct = poller;
+
+        var updates = new UpdateWatch(_application.Dispatcher);
+        updates.Found += UpdateIcon;
+        _updates = updates;
 
         ApplyPlace();
         FollowDirectMode();
@@ -131,6 +134,7 @@ sealed class AikoShell : IDisposable
         _watcher.Updated -= OnSnapshotsChanged;
         _watcher.Dispose();
         _direct?.Dispose();
+        _updates?.Dispose();
 
         CancelHover();
         _card?.Close();
@@ -330,27 +334,27 @@ sealed class AikoShell : IDisposable
             return (null, null);
         }
 
-        var ringCard = cards.FirstOrDefault(c => c.Environment == _ringEnvironment) ?? cards[0];
-        _ringEnvironment = ringCard.Environment;
+        var chosen = SettingsStore.LoadEnvironments().RingEnvironment;
+        var ringCard = cards.FirstOrDefault(c => c.Environment == chosen) ?? cards[0];
 
         var dotCard = cards.FirstOrDefault(c => c.Environment != ringCard.Environment);
         return (ringCard.IconRow, dotCard?.IconRow);
     }
 
+    /// The chosen environment is kept in the environments file, not in a field here. It is a
+    /// choice the user made, and a choice that quietly goes back to the other environment on the
+    /// next start is worse than no choice at all.
     private void SwapRing()
     {
-        // Environments as the user named them, not the folders behind them.
-        var others = Cards()
-            .Select(card => card.Environment)
-            .Where(name => !string.Equals(name, _ringEnvironment, StringComparison.OrdinalIgnoreCase))
-            .ToList();
-
-        if (others.Count == 0)
+        var environments = SettingsStore.LoadEnvironments();
+        var swapped = environments.SwapRing();
+        if (ReferenceEquals(swapped, environments))
         {
+            // One environment: there is nothing to swap with.
             return;
         }
 
-        _ringEnvironment = others[0];
+        SettingsStore.SaveEnvironments(swapped);
         UpdateIcon();
     }
 
@@ -390,7 +394,7 @@ sealed class AikoShell : IDisposable
         }
 
         var card = new CardWindow();
-        card.SettingsRequested += OpenSettings;
+        card.SettingsRequested += () => OpenSettings();
         card.Closed += (_, _) => _card = null;
         card.Update(CurrentCard());
         _card = card;
@@ -437,11 +441,15 @@ sealed class AikoShell : IDisposable
 
     /// One settings window at a time: asking twice brings the open one forward instead of
     /// stacking a second copy on top of it.
-    private void OpenSettings()
+    private void OpenSettings(bool checkUpdates = false)
     {
         if (_settings is not null)
         {
             _settings.Activate();
+            if (checkUpdates)
+            {
+                _settings.CheckUpdatesNow();
+            }
             return;
         }
 
@@ -456,6 +464,10 @@ sealed class AikoShell : IDisposable
         };
         _settings = window;
         window.Show();
+        if (checkUpdates)
+        {
+            window.CheckUpdatesNow();
+        }
 
         Log.Write("settings opened");
     }
@@ -591,6 +603,11 @@ sealed class AikoShell : IDisposable
                 UpdateIcon();
                 _island?.Update(Cards());
                 _card?.Update(CurrentCard());
+                break;
+            case MenuUpdates:
+                // The menu had this item from the start and nothing was listening for it: the item
+                // was drawn, clicked and ignored.
+                OpenSettings(checkUpdates: true);
                 break;
             case MenuExit:
                 _application.Shutdown();
