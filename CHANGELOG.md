@@ -32,3 +32,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   an app that carries its own, so it read the install folder as a .NET install, found no framework
   there and stopped before doing anything. No limit would ever have appeared from a real install,
   on any machine.
+- Aiko knows its own status line again after the install moves or Git appears, instead of taking
+  it for somebody else's and calling a path that is gone.
+- The status line you already had runs in the shell it was written for. It went through cmd.exe
+  before, which prints nothing for a bash line and says nothing about why.
+- A settings file of Aiko's that cannot be read is kept as a .bad file instead of being read as no
+  settings at all, which let the next save write over your choices.
