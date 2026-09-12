@@ -30,7 +30,19 @@ static class SettingsStore
     {
         try
         {
-            return File.Exists(path) ? File.ReadAllText(path) : string.Empty;
+            if (!File.Exists(path))
+            {
+                return string.Empty;
+            }
+
+            var text = File.ReadAllText(path);
+            if (text.Length > 0 && !JsonText.IsObject(text))
+            {
+                SetAside(path);
+                return string.Empty;
+            }
+
+            return text;
         }
         catch (IOException)
         {
@@ -39,6 +51,25 @@ static class SettingsStore
         catch (UnauthorizedAccessException)
         {
             return string.Empty;
+        }
+    }
+
+    /// A file that will not parse is moved out of the way before Aiko carries on with the
+    /// defaults. Left where it is, the next save would write over it, and choices the user made
+    /// would be gone with no way to see what they were.
+    private static void SetAside(string path)
+    {
+        try
+        {
+            var spoiled = path + ".bad";
+            File.Move(path, spoiled, overwrite: true);
+            Log.Write($"{Path.GetFileName(path)} could not be read and was kept as {Path.GetFileName(spoiled)}");
+        }
+        catch (IOException)
+        {
+        }
+        catch (UnauthorizedAccessException)
+        {
         }
     }
 

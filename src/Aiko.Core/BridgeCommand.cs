@@ -1,23 +1,20 @@
 namespace Aiko.Core;
 
-/// The shell Claude Code runs the status line with. It uses Git Bash, and falls back to
-/// PowerShell only when Git Bash is not installed.
-public enum ClaudeShell
-{
-    GitBash,
-    PowerShell,
-}
-
 /// The one line Aiko writes into the Claude Code settings file.
 ///
 /// The bridge takes no arguments: it reads CLAUDE_CONFIG_DIR itself and names its file after that
 /// folder. So the command is only the path to the bridge, in quotes because the install path
 /// holds spaces.
 ///
-/// The exact text matters twice over: adding our line compares it against what is already there
-/// to see whether the line is ours, and removing Aiko has to recognise it again.
+/// Our line has to be recognised again later, and not only when it is character for character the
+/// same. The install path changes on a reinstall, and the shell changes the moment Git appears on
+/// a machine that had none. A line matched by exact text stops being ours after either, gets put
+/// aside as if the user had written it, and the bridge is then asked to run a path that no longer
+/// exists on every model answer. So the line is recognised by the program it points at.
 public static class BridgeCommand
 {
+    public const string ExecutableName = "Aiko.Bridge.exe";
+
     public static string For(string bridgeExePath, ClaudeShell shell = ClaudeShell.GitBash)
     {
         var path = bridgeExePath?.Trim() ?? string.Empty;
@@ -35,5 +32,47 @@ public static class BridgeCommand
         // operator makes it a command. In bash the same "&" would break the line, so the two
         // shells get different text (spike 2026-09-11 left this open).
         return shell == ClaudeShell.PowerShell ? $"& {quoted}" : quoted;
+    }
+
+    /// Whether this status line command runs our bridge, whatever path and shell it was written
+    /// for. Only the program name is compared: everything else about the line is allowed to change.
+    public static bool IsAiko(string? command)
+    {
+        var path = ExecutablePathIn(command);
+        if (path is null)
+        {
+            return false;
+        }
+
+        return string.Equals(
+            Path.GetFileName(path), ExecutableName, StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// The program a status line command runs, with the PowerShell call operator and the quotes
+    /// taken off. Null when the command is empty or names no program.
+    private static string? ExecutablePathIn(string? command)
+    {
+        var text = command?.Trim();
+        if (string.IsNullOrEmpty(text))
+        {
+            return null;
+        }
+
+        if (text.StartsWith("& ", StringComparison.Ordinal))
+        {
+            text = text[2..].TrimStart();
+        }
+
+        if (text.StartsWith('"'))
+        {
+            var closing = text.IndexOf('"', 1);
+            return closing > 1 ? text[1..closing] : null;
+        }
+
+        // An unquoted command ends at the first space. Our own line is always quoted, so this is
+        // only here to read a line somebody wrote by hand.
+        var space = text.IndexOf(' ');
+        var head = space < 0 ? text : text[..space];
+        return head.Length == 0 ? null : head;
     }
 }

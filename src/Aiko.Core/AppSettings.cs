@@ -22,7 +22,14 @@ public enum AikoLanguage
 /// because the first run wizard writes them and this window does not.
 public sealed record AppSettings
 {
+    /// The shape of the file. Nothing reads it yet. It is written from the very first version
+    /// because a version number added later says nothing about the files already on disk, and
+    /// renaming a field would then have no safe way back.
+    public const int CurrentSchema = 1;
+
     public static readonly AppSettings Default = new();
+
+    public int SchemaVersion { get; init; } = CurrentSchema;
 
     public AikoPlace Place { get; init; } = AikoPlace.Tray;
 
@@ -41,8 +48,9 @@ public sealed record AppSettings
     /// of screen size.
     public IslandPosition Island { get; init; } = IslandPosition.Default;
 
-    /// A settings file we cannot read is not a reason to stop. Aiko starts with the defaults, and
-    /// the next save writes a clean file.
+    /// A settings file we cannot read is not a reason to stop: Aiko starts with the defaults.
+    /// Putting the unreadable file aside before that happens is the store's job, so that the next
+    /// save does not quietly write over choices somebody may still want back.
     public static AppSettings FromJson(string json)
     {
         if (string.IsNullOrWhiteSpace(json))
