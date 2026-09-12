@@ -26,6 +26,10 @@ static class Program
         // Aiko draws a small card a few times an hour. Nobody needs the GPU for that.
         RenderOptions.ProcessRenderMode = RenderMode.SoftwareOnly;
 
+        // Before any window is made: the words are picked when a control is created, so a late
+        // change would leave half a window in the other language.
+        LanguageChoice.Apply(SettingsStore.Load().Language);
+
         // Draw the icon into a file and stop. Windows hides new tray icons in the overflow area,
         // so this is the only way to look at the drawing itself.
         if (args is ["--snapshot-icon", var iconPath, ..])
@@ -54,10 +58,10 @@ static class Program
         {
             var bridge = BridgePath.Current();
             var outcome = bridge is null
-                ? PatchOutcome.Failed("the bridge program was not found")
+                ? PatchOutcome.Failed(PatchProblem.BridgeUnknown)
                 : ClaudeSettingsFile.AddBridge(folder, bridge);
 
-            Log.Write($"--try-access {folder}: changed={outcome.Changed} problem={outcome.Problem ?? "none"}");
+            Log.Write($"--try-access {folder}: changed={outcome.Changed} problem={outcome.Problem}");
             Environment.Exit(outcome.Changed ? 0 : 1);
             return;
         }
@@ -67,7 +71,7 @@ static class Program
         if (args is ["--try-restore", var restoreFolder, ..])
         {
             var outcome = ClaudeSettingsFile.RemoveBridge(restoreFolder);
-            Log.Write($"--try-restore {restoreFolder}: changed={outcome.Changed} problem={outcome.Problem ?? "none"}");
+            Log.Write($"--try-restore {restoreFolder}: changed={outcome.Changed} problem={outcome.Problem}");
             Environment.Exit(outcome.Changed ? 0 : 1);
             return;
         }

@@ -4,18 +4,20 @@ namespace Aiko.App;
 
 /// The words of the card. The core hands over numbers and says which shape they take; the
 /// sentence is built here, so neither language lives in the core.
+///
+/// The words themselves are in Strings.resx, one file per language.
 static class CardText
 {
-    public static string WindowName(LimitKind kind) => kind switch
+    public static string WindowName(LimitKind kind, string? modelName = null) => kind switch
     {
-        LimitKind.FiveHour => "Session · 5 hours",
-        LimitKind.SevenDay => "Week",
-        _ => "Fable · week",
+        LimitKind.FiveHour => Strings.CardSession,
+        LimitKind.SevenDay => Strings.CardWeek,
+        _ => string.Format(Strings.CardModelWeek, modelName ?? "model"),
     };
 
-    /// The share of the limit already gone, said so. A bare "82%" reads as eighty two percent left
-    /// just as easily as eighty two percent spent, and the two are opposite news.
-    public static string Percent(int percent) => $"{percent}% used";
+    /// The share of the limit already gone, said so. A bare "42%" reads as forty two percent left
+    /// just as easily as forty two percent spent, and the two are opposite news.
+    public static string Percent(int percent) => string.Format(Strings.CardPercentUsed, percent);
 
     /// A word beside the colour.
     ///
@@ -24,28 +26,28 @@ static class CardText
     /// and to every screen reader.
     public static string Tone(LimitTone tone) => tone switch
     {
-        LimitTone.Caution => "running low",
-        LimitTone.Critical => "almost gone",
+        LimitTone.Caution => Strings.CardToneCaution,
+        LimitTone.Critical => Strings.CardToneCritical,
         _ => string.Empty,
     };
 
     public static string Resets(ResetCountdown countdown) =>
-        countdown.IsReset ? "window just reset" : $"resets in {Left(countdown)}";
+        countdown.IsReset ? Strings.CardJustReset : string.Format(Strings.CardResets, Left(countdown));
 
     private static string Left(ResetCountdown countdown) => countdown.Unit switch
     {
-        CountdownUnit.DaysAndHours => $"{countdown.Days}d {countdown.Hours}h",
-        CountdownUnit.HoursAndMinutes => $"{countdown.Hours}h {countdown.Minutes}m",
-        CountdownUnit.Minutes => $"{countdown.Minutes}m",
-        _ => "<1m",
+        CountdownUnit.DaysAndHours => string.Format(Strings.SpanDaysHours, countdown.Days, countdown.Hours),
+        CountdownUnit.HoursAndMinutes => string.Format(Strings.SpanHoursMinutes, countdown.Hours, countdown.Minutes),
+        CountdownUnit.Minutes => string.Format(Strings.SpanMinutes, countdown.Minutes),
+        _ => Strings.SpanUnderMinute,
     };
 
-    /// How long the limit lasts at the current pace. An empty answer is honest: with no spending
-    /// yet, or right after a reset, there is nothing to work it out from.
+    /// How long the limit lasts at the current pace. An empty answer is honest: early in a window
+    /// there is nothing to work it out from, and a confident wrong number is worse than none.
     public static string Pace(PaceEstimate pace) => pace.Verdict switch
     {
-        PaceVerdict.LastsPastReset => "lasts until reset",
-        PaceVerdict.RunsOutBeforeReset => $"~{Span(pace.TimeLeft)} at this pace",
+        PaceVerdict.LastsPastReset => Strings.CardLastsUntilReset,
+        PaceVerdict.RunsOutBeforeReset => string.Format(Strings.CardAtThisPace, Span(pace.TimeLeft)),
         _ => string.Empty,
     };
 
@@ -53,28 +55,32 @@ static class CardText
     {
         if (left.TotalDays >= 1)
         {
-            return $"{(int)left.TotalDays}d {left.Hours}h";
+            return string.Format(Strings.SpanDaysHours, (int)left.TotalDays, left.Hours);
         }
         if (left.TotalHours >= 1)
         {
-            return $"{(int)left.TotalHours}h {left.Minutes}m";
+            return string.Format(Strings.SpanHoursMinutes, (int)left.TotalHours, left.Minutes);
         }
-        return left.TotalMinutes >= 1 ? $"{(int)left.TotalMinutes}m" : "<1m";
+        return left.TotalMinutes >= 1
+            ? string.Format(Strings.SpanMinutes, (int)left.TotalMinutes)
+            : Strings.SpanUnderMinute;
     }
 
     /// The status line only speaks while a session is open, so the card always says how old its
     /// numbers are instead of pretending they are live.
+    ///
+    /// "Last seen" rather than anything about staleness: with Claude Code closed the numbers are
+    /// not wrong, only old, and that is the normal state of things most of the day.
     public static string Updated(DataFreshness freshness, DateTimeOffset? updatedAt) => freshness switch
     {
-        DataFreshness.None => "no data yet",
-        DataFreshness.Stale => $"data from {updatedAt:HH:mm}",
-        _ => $"updated {updatedAt:HH:mm}",
+        DataFreshness.None => Strings.CardNoDataYet,
+        DataFreshness.Stale => string.Format(Strings.CardLastSeen, $"{updatedAt:HH:mm}"),
+        _ => string.Format(Strings.CardUpdated, $"{updatedAt:HH:mm}"),
     };
 
-    public const string NoDataNote = "Open Claude Code. The limits show up after the first answer.";
+    public static string NoDataNote => Strings.CardNoDataNote;
 
     /// For an environment where Aiko's line is not in the settings at all. Opening a terminal will
     /// not help there, and telling somebody to do it anyway wastes their time and our credit.
-    public const string NoAccessNote =
-        "Aiko cannot read the limits of this environment. Settings, then Set it up.";
+    public static string NoAccessNote => Strings.CardNoAccessNote;
 }

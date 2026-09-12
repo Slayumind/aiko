@@ -72,3 +72,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   check and the same request, it is off until you turn it on, and the identifier changes every day
   so two days cannot be joined into one person. PRIVACY.md says exactly what goes and what does
   not.
+- Aiko speaks Russian. The language setting has existed since the first version and changed
+  nothing; it now does, and the window comes straight back in the other language instead of asking
+  for a restart.
+- The weekly model limit shows the model the server named, instead of always saying Fable.

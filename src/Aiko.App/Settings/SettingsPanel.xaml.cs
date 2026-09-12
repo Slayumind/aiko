@@ -122,11 +122,31 @@ public partial class SettingsPanel : UserControl
 
     private void OnLanguageChanged(object sender, RoutedEventArgs e)
     {
+        if (_filling)
+        {
+            return;
+        }
+
         var language = LanguageEnglish.IsChecked == true ? AikoLanguage.English
             : LanguageRussian.IsChecked == true ? AikoLanguage.Russian
             : AikoLanguage.System;
+
+        if (language == _settings.Language)
+        {
+            return;
+        }
+
         Save(_settings with { Language = language });
+        LanguageChoice.Apply(language);
+
+        // Every word on screen was picked when its control was made, so this window has to be
+        // built again. Aiko makes windows on demand and closes them anyway, which is what lets a
+        // language change take effect at once instead of "after a restart".
+        ReopenRequested?.Invoke();
     }
+
+    /// Raised when the window has to come back in another language.
+    public event Action? ReopenRequested;
 
     /// Startup is a key in the registry, not a line in our file, so this one writes to Windows.
     private void OnStartupChanged(object sender, RoutedEventArgs e)
@@ -203,7 +223,7 @@ public partial class SettingsPanel : UserControl
         }
 
         CheckNow.IsEnabled = false;
-        UpdateLine.Text = "Asking slayumind.org…";
+        UpdateLine.Text = Strings.UpdateAsking;
         UpdateLine.Visibility = Visibility.Visible;
         OpenDownload.Visibility = Visibility.Collapsed;
 
@@ -221,11 +241,11 @@ public partial class SettingsPanel : UserControl
 
         UpdateLine.Text = state switch
         {
-            UpdateState.Available => $"Version {info.Latest} is available.",
-            UpdateState.UpToDate => $"Aiko {Version()} is the latest version.",
+            UpdateState.Available => string.Format(Strings.UpdateAvailable, info.Latest),
+            UpdateState.UpToDate => string.Format(Strings.UpdateLatest, Version()),
             // Never "you are up to date" when we do not know: that is the one answer that would
             // keep every copy quiet after a bad deploy.
-            _ => "Could not check right now. Try again later.",
+            _ => Strings.UpdateFailed,
         };
 
         _downloadUrl = info.DownloadUrl ?? "https://github.com/Slayumind/aiko/releases/latest";
@@ -261,18 +281,16 @@ public partial class SettingsPanel : UserControl
 
         if (missing.Count == 0)
         {
-            AccessLine.Text = _environments.HasEnvironments
-                ? "Claude Code is set up to report its limits to Aiko."
-                : string.Empty;
-            AccessButton.Content = "Check access";
+            AccessLine.Text = _environments.HasEnvironments ? Strings.AccessOk : string.Empty;
+            AccessButton.Content = Strings.AccessCheck;
             _offeringToAdd = false;
             return;
         }
 
         AccessLine.Text = missing.Count == 1
-            ? "One environment does not report its limits to Aiko yet."
-            : $"{missing.Count} environments do not report their limits to Aiko yet.";
-        AccessButton.Content = "Set it up";
+            ? Strings.AccessMissingOne
+            : string.Format(Strings.AccessMissingMany, missing.Count);
+        AccessButton.Content = Strings.AccessSetUp;
         _offeringToAdd = true;
     }
 
@@ -319,20 +337,24 @@ public partial class SettingsPanel : UserControl
 
         if (BridgePath.Current() is not { } bridge)
         {
-            AccessLine.Text = "Aiko cannot find its own bridge program, so nothing was changed.";
+            AccessLine.Text = Strings.AccessNoBridge;
             return;
         }
 
-        var problem = null as string;
+        var problem = PatchProblem.None;
         foreach (var folder in FoldersWithoutOurLine())
         {
-            problem ??= ClaudeSettingsFile.AddBridge(folder, bridge).Problem;
+            var outcome = ClaudeSettingsFile.AddBridge(folder, bridge);
+            if (problem == PatchProblem.None)
+            {
+                problem = outcome.Problem;
+            }
         }
 
         ShowAccess();
-        if (problem is not null)
+        if (problem != PatchProblem.None)
         {
-            AccessLine.Text = problem;
+            AccessLine.Text = ClaudeSettingsFile.Words(problem);
         }
     }
 

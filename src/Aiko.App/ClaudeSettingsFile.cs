@@ -65,6 +65,14 @@ static class ClaudeSettingsFile
     public static PatchOutcome RepairBridge(string configDirectory, string bridgeExePath) =>
         Report(configDirectory, Editor.RepairIfOurs(configDirectory, LineFor(bridgeExePath)));
 
+    /// The reason in the user's language. The core names the reason; the words live here.
+    public static string Words(PatchProblem problem) => problem switch
+    {
+        PatchProblem.BridgeUnknown => Strings.SettingsBridgeUnknown,
+        PatchProblem.CouldNotWrite => Strings.SettingsWriteFailed,
+        _ => string.Empty,
+    };
+
     private static PatchOutcome Report(string configDirectory, PatchOutcome outcome)
     {
         var folder = Path.GetFileName(configDirectory.TrimEnd('\\', '/'));
@@ -72,7 +80,7 @@ static class ClaudeSettingsFile
         {
             Log.Write($"settings.json changed in {folder}");
         }
-        else if (outcome.Problem is not null)
+        else if (outcome.Problem != PatchProblem.None)
         {
             Log.Write($"could not change settings.json in {folder}: {outcome.Problem}");
         }

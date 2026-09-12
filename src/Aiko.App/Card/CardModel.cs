@@ -90,7 +90,7 @@ public sealed class LimitRow
 
     public static LimitRow From(CardRow row) => new()
     {
-        Name = CardText.WindowName(row.Kind),
+        Name = CardText.WindowName(row.Kind, row.ModelName),
         Percent = CardText.Percent(row.Percent),
         Resets = CardText.Resets(row.Countdown),
 

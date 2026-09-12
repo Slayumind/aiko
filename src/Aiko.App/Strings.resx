@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence><xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" /></xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="CardSession" xml:space="preserve">
+    <value>Session · 5 hours</value>
+  </data>
+  <data name="CardWeek" xml:space="preserve">
+    <value>Week</value>
+  </data>
+  <data name="CardModelWeek" xml:space="preserve">
+    <value>{0} · week</value>
+  </data>
+  <data name="CardPercentUsed" xml:space="preserve">
+    <value>{0}% used</value>
+  </data>
+  <data name="CardResets" xml:space="preserve">
+    <value>resets in {0}</value>
+  </data>
+  <data name="CardJustReset" xml:space="preserve">
+    <value>window just reset</value>
+  </data>
+  <data name="CardLastsUntilReset" xml:space="preserve">
+    <value>lasts until reset</value>
+  </data>
+  <data name="CardAtThisPace" xml:space="preserve">
+    <value>~{0} at this pace</value>
+  </data>
+  <data name="CardToneCaution" xml:space="preserve">
+    <value>running low</value>
+  </data>
+  <data name="CardToneCritical" xml:space="preserve">
+    <value>almost gone</value>
+  </data>
+  <data name="CardNoDataYet" xml:space="preserve">
+    <value>no data yet</value>
+  </data>
+  <data name="CardLastSeen" xml:space="preserve">
+    <value>last seen {0}</value>
+  </data>
+  <data name="CardUpdated" xml:space="preserve">
+    <value>updated {0}</value>
+  </data>
+  <data name="CardNoDataNote" xml:space="preserve">
+    <value>Open Claude Code. The limits show up after the first answer.</value>
+  </data>
+  <data name="CardNoAccessNote" xml:space="preserve">
+    <value>Aiko cannot read the limits of this environment. Open settings and set it up.</value>
+  </data>
+  <data name="SpanDaysHours" xml:space="preserve">
+    <value>{0}d {1}h</value>
+  </data>
+  <data name="SpanHoursMinutes" xml:space="preserve">
+    <value>{0}h {1}m</value>
+  </data>
+  <data name="SpanMinutes" xml:space="preserve">
+    <value>{0}m</value>
+  </data>
+  <data name="SpanUnderMinute" xml:space="preserve">
+    <value>&lt;1m</value>
+  </data>
+  <data name="TrayOpenClaudeCode" xml:space="preserve">
+    <value>open Claude Code</value>
+  </data>
+  <data name="TrayLastSeen" xml:space="preserve">
+    <value>last seen {0}</value>
+  </data>
+  <data name="TrayUpdateOut" xml:space="preserve">
+    <value>Aiko {0} is out</value>
+  </data>
+  <data name="MenuShowInRing" xml:space="preserve">
+    <value>Show {0} in the ring</value>
+  </data>
+  <data name="MenuRefresh" xml:space="preserve">
+    <value>Refresh limits</value>
+  </data>
+  <data name="Settings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="QuitAiko" xml:space="preserve">
+    <value>Quit Aiko</value>
+  </data>
+  <data name="CheckForUpdates" xml:space="preserve">
+    <value>Check for updates</value>
+  </data>
+  <data name="CheckUpdatesToggle" xml:space="preserve">
+    <value>Check for updates</value>
+  </data>
+  <data name="SectionEnvironments" xml:space="preserve">
+    <value>ENVIRONMENTS</value>
+  </data>
+  <data name="SectionWhereToShow" xml:space="preserve">
+    <value>WHERE TO SHOW</value>
+  </data>
+  <data name="SectionStartupAndUpdates" xml:space="preserve">
+    <value>STARTUP AND UPDATES</value>
+  </data>
+  <data name="SectionLanguage" xml:space="preserve">
+    <value>LANGUAGE</value>
+  </data>
+  <data name="DirectMode" xml:space="preserve">
+    <value>Direct mode</value>
+  </data>
+  <data name="DirectModeWhat" xml:space="preserve">
+    <value>Direct mode lets Aiko ask Anthropic for your limits itself, with the token Claude Code already keeps on this computer. Aiko reads it for each request and never stores it. Turn it on if you work in the IDE panel or Claude Desktop, where there is no status line.</value>
+  </data>
+  <data name="DirectModeAsk" xml:space="preserve">
+    <value>For a work account, ask whoever runs it first.</value>
+  </data>
+  <data name="NoEnvironments" xml:space="preserve">
+    <value>No environments yet. Aiko finds them on the first run.</value>
+  </data>
+  <data name="AccessOk" xml:space="preserve">
+    <value>Claude Code reports its limits to Aiko.</value>
+  </data>
+  <data name="AccessMissingOne" xml:space="preserve">
+    <value>One environment does not report its limits yet.</value>
+  </data>
+  <data name="AccessMissingMany" xml:space="preserve">
+    <value>{0} environments do not report their limits yet.</value>
+  </data>
+  <data name="AccessCheck" xml:space="preserve">
+    <value>Check access</value>
+  </data>
+  <data name="AccessSetUp" xml:space="preserve">
+    <value>Set it up</value>
+  </data>
+  <data name="AccessNoBridge" xml:space="preserve">
+    <value>Aiko cannot find its own bridge program, so nothing was changed.</value>
+  </data>
+  <data name="PlaceTray" xml:space="preserve">
+    <value>Tray</value>
+  </data>
+  <data name="PlaceIsland" xml:space="preserve">
+    <value>Island</value>
+  </data>
+  <data name="HideIslandInFullScreen" xml:space="preserve">
+    <value>Hide the island in full screen</value>
+  </data>
+  <data name="StartWithWindows" xml:space="preserve">
+    <value>Start with Windows</value>
+  </data>
+  <data name="CheckUpdatesWhat" xml:space="preserve">
+    <value>Asks slayumind.org once a day, and tells it one copy of Aiko ran today. Downloads come from GitHub.</value>
+  </data>
+  <data name="CheckNow" xml:space="preserve">
+    <value>Check now</value>
+  </data>
+  <data name="OpenDownloadPage" xml:space="preserve">
+    <value>Open download page</value>
+  </data>
+  <data name="UpdateAsking" xml:space="preserve">
+    <value>Asking slayumind.org…</value>
+  </data>
+  <data name="UpdateAvailable" xml:space="preserve">
+    <value>Version {0} is available.</value>
+  </data>
+  <data name="UpdateLatest" xml:space="preserve">
+    <value>Aiko {0} is the latest version.</value>
+  </data>
+  <data name="UpdateFailed" xml:space="preserve">
+    <value>Could not check right now. Try again later.</value>
+  </data>
+  <data name="LanguageSystem" xml:space="preserve">
+    <value>System</value>
+  </data>
+  <data name="LanguageEnglish" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="LanguageRussian" xml:space="preserve">
+    <value>Русский</value>
+  </data>
+  <data name="CopyDiagnostics" xml:space="preserve">
+    <value>Copy diagnostics</value>
+  </data>
+  <data name="WizardWindowTitle" xml:space="preserve">
+    <value>Welcome to Aiko</value>
+  </data>
+  <data name="SettingsWindowTitle" xml:space="preserve">
+    <value>Aiko settings</value>
+  </data>
+  <data name="WizardStepEnvironments" xml:space="preserve">
+    <value>Environments</value>
+  </data>
+  <data name="WizardStepAccess" xml:space="preserve">
+    <value>Access to the limits</value>
+  </data>
+  <data name="WizardStepWhere" xml:space="preserve">
+    <value>Where to show Aiko</value>
+  </data>
+  <data name="WizardStepDone" xml:space="preserve">
+    <value>All set</value>
+  </data>
+  <data name="WizardStepCount" xml:space="preserve">
+    <value>step {0} of 3</value>
+  </data>
+  <data name="Back" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="NotNow" xml:space="preserve">
+    <value>Not now</value>
+  </data>
+  <data name="Next" xml:space="preserve">
+    <value>Next</value>
+  </data>
+  <data name="Allow" xml:space="preserve">
+    <value>Allow</value>
+  </data>
+  <data name="Finish" xml:space="preserve">
+    <value>Finish</value>
+  </data>
+  <data name="WizardFoundOne" xml:space="preserve">
+    <value>Aiko found one Claude Code folder. One environment is enough; another can be added later in settings.</value>
+  </data>
+  <data name="WizardFoundMany" xml:space="preserve">
+    <value>Aiko found these Claude Code folders. Give them names you will recognise, and turn off any you do not want.</value>
+  </data>
+  <data name="WizardNothingFound" xml:space="preserve">
+    <value>Aiko did not find Claude Code on this computer. Install it and check again, or point Aiko at the folder yourself.</value>
+  </data>
+  <data name="WizardChooseFolder" xml:space="preserve">
+    <value>Choose a folder</value>
+  </data>
+  <data name="WizardCheckAgain" xml:space="preserve">
+    <value>Check again</value>
+  </data>
+  <data name="WizardFolderDialogTitle" xml:space="preserve">
+    <value>Choose a Claude Code folder</value>
+  </data>
+  <data name="WizardAccessExplain" xml:space="preserve">
+    <value>Claude Code reports its limits to a status line. Aiko adds one line to the settings file of each environment. A status line you already have keeps working: Aiko calls it and shows its output.</value>
+  </data>
+  <data name="WizardTheLine" xml:space="preserve">
+    <value>THE LINE AIKO ADDS</value>
+  </data>
+  <data name="WizardTheFiles" xml:space="preserve">
+    <value>FILES IT CHANGES</value>
+  </data>
+  <data name="WizardBackupNote" xml:space="preserve">
+    <value>A copy of each file is kept beside it, and removing Aiko puts everything back.</value>
+  </data>
+  <data name="WizardBridgeNotFound" xml:space="preserve">
+    <value>Aiko could not find its own bridge program.</value>
+  </data>
+  <data name="WizardUpdatesWhat" xml:space="preserve">
+    <value>Asks slayumind.org once a day for the latest version, and tells it one copy of Aiko ran today. The identifier it sends changes every day.</value>
+  </data>
+  <data name="WizardDoneTray" xml:space="preserve">
+    <value>Aiko is down by the clock. Rest the mouse on it to see the card, or click it to keep the card open.</value>
+  </data>
+  <data name="WizardDoneIsland" xml:space="preserve">
+    <value>Aiko is at the top of your screen. Drag it anywhere and it sticks to the nearest edge.</value>
+  </data>
+  <data name="WizardDoneOverflow" xml:space="preserve">
+    <value>Windows 11 hides the icon of a new app behind the arrow at the left of the tray. Open that arrow and drag Aiko out onto the taskbar, or the card will have nothing to appear from.</value>
+  </data>
+  <data name="WizardDoneFirstNumbers" xml:space="preserve">
+    <value>The first numbers arrive after your next answer from Claude Code. Until then the ring is dotted.</value>
+  </data>
+  <data name="WizardDoneNoAccess" xml:space="preserve">
+    <value>Aiko has no way to read your limits yet. Open settings when you want to set that up.</value>
+  </data>
+  <data name="SettingsWriteFailed" xml:space="preserve">
+    <value>Aiko could not write the Claude Code settings file.</value>
+  </data>
+  <data name="SettingsBridgeUnknown" xml:space="preserve">
+    <value>Aiko could not work out where its bridge is.</value>
+  </data>
+</root>
