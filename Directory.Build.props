@@ -1,0 +1,19 @@
+<Project>
+
+  <!-- One version for the whole solution. Bumped on every merge into in-progress. -->
+  <PropertyGroup>
+    <Version>0.0.1</Version>
+    <Company>Aleksandr Fomichenko</Company>
+    <Product>Aiko</Product>
+    <Copyright>Copyright 2026 Aleksandr Fomichenko</Copyright>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+
+</Project>

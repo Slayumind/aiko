@@ -1,0 +1,27 @@
+## Build output
+bin/
+obj/
+[Rr]elease/
+[Dd]ebug/
+artifacts/
+publish/
+
+## Visual Studio and Rider
+.vs/
+.idea/
+*.user
+*.suo
+*.userprefs
+
+## Test and coverage
+TestResults/
+coverage*.json
+coverage*.xml
+
+## Velopack
+Releases/
+*.nupkg
+
+## OS
+Thumbs.db
+desktop.ini

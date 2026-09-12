@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Aiko.App/Aiko.App.csproj" />
+    <Project Path="src/Aiko.Bridge/Aiko.Bridge.csproj" />
+    <Project Path="src/Aiko.Core/Aiko.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Aiko.Core.Tests/Aiko.Core.Tests.csproj" />
+  </Folder>
+</Solution>
