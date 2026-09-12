@@ -2,7 +2,7 @@
 
   <!-- One version for the whole solution. Bumped on every merge into in-progress. -->
   <PropertyGroup>
-    <Version>0.0.1</Version>
+    <Version>0.0.2</Version>
     <Company>Aleksandr Fomichenko</Company>
     <Product>Aiko</Product>
     <Copyright>Copyright 2026 Aleksandr Fomichenko</Copyright>

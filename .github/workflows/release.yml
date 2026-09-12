@@ -48,11 +48,31 @@ jobs:
 
       - name: Publish the bridge beside it
         # The status line command points at this file, so it has to live next to the app.
+        #
+        # Self contained as well, and not to save the user an install. The app drops its own
+        # hostfxr.dll in this folder. A framework dependent bridge finds that copy first, takes the
+        # folder for a .NET install, finds no shared framework in it and exits 150 without ever
+        # looking at the machine. That happens on every machine, including one with .NET 10
+        # installed, so the bridge never ran from a real install and no limit ever showed up.
+        #
+        # The runtime files are already here from the app, so this adds about one megabyte. Start
+        # time stays around 48 ms against 46 ms before.
         run: >
           dotnet publish src/Aiko.Bridge/Aiko.Bridge.csproj
-          --configuration Release --runtime win-x64 --self-contained false
+          --configuration Release --runtime win-x64 --self-contained true
           -p:Version=${{ steps.version.outputs.number }}
           --output publish
+
+      - name: Check that the bridge runs from the publish folder
+        # The bridge reads stdin and always exits 0, so any other code means it did not start at
+        # all. This guards the one failure that hides itself: a bridge that cannot find a runtime
+        # prints nothing a user would see and simply never reports a limit.
+        shell: pwsh
+        run: |
+          '{}' | & ./publish/Aiko.Bridge.exe
+          if ($LASTEXITCODE -ne 0) {
+            throw "The bridge exited with $LASTEXITCODE. It cannot start from the publish folder."
+          }
 
       - name: Install the Velopack tool
         run: dotnet tool install -g vpk
