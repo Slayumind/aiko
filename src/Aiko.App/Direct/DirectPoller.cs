@@ -22,16 +22,35 @@ sealed class DirectPoller : IDisposable
     private readonly Dictionary<string, Account> _accounts = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, LimitSnapshot> _latest = new(StringComparer.OrdinalIgnoreCase);
 
+    private bool _asking;
+
     public DirectPoller(Dispatcher dispatcher)
     {
         _timer = new DispatcherTimer(DispatcherPriority.Background, dispatcher) { Interval = Tick };
-        _timer.Tick += async (_, _) => await RoundAsync().ConfigureAwait(true);
+        _timer.Tick += OnTick;
+    }
 
-        // What the last run found. The card shows it at once, marked with its time, instead of
-        // waiting three minutes for the first answer.
-        foreach (var (name, snapshot) in DirectCache.ReadAll())
+    /// One round at a time.
+    ///
+    /// The clock ticks every twenty seconds, and a round waits on one request per due account, up
+    /// to ten seconds each. With three accounts due at once the rounds overlapped and asked the
+    /// server again while the first round was still waiting for it. The tick runs on the UI
+    /// thread, so a plain flag is enough.
+    private async void OnTick(object? sender, EventArgs e)
+    {
+        if (_asking)
         {
-            _latest[name] = snapshot;
+            return;
+        }
+
+        _asking = true;
+        try
+        {
+            await RoundAsync().ConfigureAwait(true);
+        }
+        finally
+        {
+            _asking = false;
         }
     }
 
@@ -51,6 +70,18 @@ sealed class DirectPoller : IDisposable
         {
             _accounts.Remove(gone);
             _latest.Remove(gone);
+        }
+
+        // What the last run found, for the environments that still exist. The card shows it at
+        // once, marked with its time, instead of waiting three minutes for the first answer. Read
+        // here rather than in the constructor because only now do we know which names are real:
+        // a cached file for an environment that was renamed or switched off must not come back.
+        foreach (var (name, snapshot) in DirectCache.ReadFor(wanted.Select(e => e.Name)))
+        {
+            if (!_latest.ContainsKey(name))
+            {
+                _latest[name] = snapshot;
+            }
         }
 
         var now = DateTimeOffset.Now;

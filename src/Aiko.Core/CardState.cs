@@ -133,6 +133,17 @@ public sealed record CardState(
             EstimatePace(status, windowLength, now, snapshot.WindowResetsAt(kind))));
     }
 
+    /// How much of the window has to be gone, and how much of the limit spent, before a guess is
+    /// worth making.
+    ///
+    /// The rule below stretches one measurement across the whole window. Two minutes into a five
+    /// hour window, one percent spent reads as "runs out in three hours", stated as confidently as
+    /// any other answer. A wrong number said plainly is worse than no number: somebody stops
+    /// working because of it. Below either line the card says nothing at all.
+    internal const double LeastPercentForPace = 5;
+
+    internal const double LeastShareOfWindowForPace = 0.1;
+
     /// The simple rule the card explains in words: what has been spent over the part of the window
     /// already gone keeps being spent at the same rate. If the limit would run out after the reset,
     /// the window lasts; otherwise we say how long is left.
@@ -150,6 +161,12 @@ public sealed record CardState(
         var left = reset - now;
         var spent = windowLength - left;
         if (spent <= TimeSpan.Zero)
+        {
+            return new PaceEstimate(PaceVerdict.Unknown, TimeSpan.Zero);
+        }
+
+        if (status.Percent < LeastPercentForPace
+            || spent < windowLength * LeastShareOfWindowForPace)
         {
             return new PaceEstimate(PaceVerdict.Unknown, TimeSpan.Zero);
         }

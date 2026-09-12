@@ -28,10 +28,15 @@ public partial class SettingsPanel : UserControl
 
     private string _downloadUrl = "https://github.com/Slayumind/aiko/releases/latest";
 
+    /// Cancelled when the window goes away, so a request still in the air does not come back to
+    /// controls that are gone.
+    private readonly CancellationTokenSource _closing = new();
+
     public SettingsPanel()
     {
         InitializeComponent();
         Fill();
+        Unloaded += (_, _) => _closing.Cancel();
     }
 
     public event Action? CloseRequested;
@@ -77,10 +82,7 @@ public partial class SettingsPanel : UserControl
         _filling = false;
     }
 
-    private static string Version() =>
-        Assembly.GetEntryAssembly()?.GetName().Version is { } version
-            ? $"{version.Major}.{version.Minor}.{version.Build}"
-            : "unknown";
+    private static string Version() => AppVersion.Current();
 
     private void Save(AppSettings settings)
     {
@@ -173,15 +175,35 @@ public partial class SettingsPanel : UserControl
 
     /// Asked for by hand, so it runs whatever the switch says: the switch decides whether Aiko
     /// checks on its own, not whether the user may ask.
-    private async void OnCheckNow(object sender, RoutedEventArgs e)
+    private async void OnCheckNow(object sender, RoutedEventArgs e) => await CheckAsync();
+
+    /// The tray menu has a "Check for updates" item. It opens this window and asks straight away,
+    /// so the answer appears where the version and the button already are.
+    public async void StartUpdateCheck() => await CheckAsync();
+
+    private async Task CheckAsync()
     {
+        if (!CheckNow.IsEnabled)
+        {
+            // Already asking. Two answers racing into one line is worse than one answer.
+            return;
+        }
+
         CheckNow.IsEnabled = false;
         UpdateLine.Text = "Asking slayumind.org…";
         UpdateLine.Visibility = Visibility.Visible;
         OpenDownload.Visibility = Visibility.Collapsed;
 
         using var client = new UpdateClient();
-        var info = await client.AskAsync(CancellationToken.None);
+        var info = await client.AskAsync(_closing.Token).ConfigureAwait(true);
+
+        // The window can be closed while the request is in the air, and touching its controls
+        // afterwards throws.
+        if (_closing.IsCancellationRequested)
+        {
+            return;
+        }
+
         var state = info.CompareWith(Version());
 
         UpdateLine.Text = state switch

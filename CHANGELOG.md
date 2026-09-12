@@ -39,3 +39,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - A settings file of Aiko's that cannot be read is kept as a .bad file instead of being read as no
   settings at all, which let the next save write over your choices.
 - The verify command in SECURITY.md now names the file a release actually contains.
+- The environment shown by the ring is remembered. The click used to swap it and forget by the next
+  start.
+- "Check for updates" in the tray menu does something. It was drawn, clicked and ignored.
+- Aiko checks for a new version once a day when you have asked it to. The switch for that has been
+  there from the start and nothing read it.
+- The card no longer guesses how long a limit will last until there is something to go on. Two
+  minutes into a five hour window, one percent used to read as "runs out in about three hours".
+- Renaming an environment no longer leaves a second one on the card, frozen at the numbers it had.
