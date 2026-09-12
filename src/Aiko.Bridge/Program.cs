@@ -87,9 +87,19 @@ static string? ReadWrappedCommand(string? configDirectory)
 
 /// The status line the user had before Aiko. It gets the same input and its output is printed
 /// as is, so nothing the user built is lost.
+///
+/// It runs through the shell Claude Code itself would have used, not through cmd.exe. Claude Code
+/// runs status lines with Git Bash and falls back to PowerShell, so a line the user wrote is a
+/// bash line on almost every machine. Through cmd.exe such a line prints nothing, and the promise
+/// in the readme and in the wizard that an existing status line keeps working would be false.
+///
+/// The looking only happens when there is something to run, which is never for most people.
 static string RunWrapped(string command, string input)
 {
-    var start = new ProcessStartInfo("cmd.exe", $"/d /s /c \"{command}\"")
+    var gitBash = ClaudeShellLookup.FindGitBash(File.Exists);
+    var (fileName, arguments) = ClaudeShellLookup.CallFor(gitBash, command);
+
+    var start = new ProcessStartInfo(fileName)
     {
         RedirectStandardInput = true,
         RedirectStandardOutput = true,
@@ -97,6 +107,13 @@ static string RunWrapped(string command, string input)
         CreateNoWindow = true,
         StandardOutputEncoding = Encoding.UTF8,
     };
+
+    // Handed over one by one so the runtime quotes them. The command is somebody else's text and
+    // may hold quotes of its own; escaping it by hand is a bug waiting to be written.
+    foreach (var argument in arguments)
+    {
+        start.ArgumentList.Add(argument);
+    }
 
     using var process = Process.Start(start);
     if (process is null)

@@ -38,14 +38,34 @@ public static class SettingsJsonPatch
             { "type": "command", "command": {{JsonSerializer.Serialize(bridgeCommand)}} }
             """)!;
 
-        if (root!.TryGetPropertyValue(StatusLineKey, out var existing) && existing is not null)
+        // A line kept aside that turns out to be ours is rubbish an older Aiko left behind when it
+        // failed to recognise itself after a reinstall. Putting it back on removal would hand the
+        // user a status line running a bridge that is gone.
+        var cleaned = false;
+        if (root!.TryGetPropertyValue(WrappedKey, out var alreadyAside)
+            && BridgeCommand.IsAiko(CommandIn(alreadyAside)))
         {
-            // Somebody else's status line is kept aside, so removing Aiko can put it back.
-            if (IsOurs(existing, bridgeCommand))
+            root.Remove(WrappedKey);
+            cleaned = true;
+        }
+
+        if (root.TryGetPropertyValue(StatusLineKey, out var existing) && existing is not null)
+        {
+            var existingCommand = CommandIn(existing);
+            if (BridgeCommand.IsAiko(existingCommand))
             {
-                return false;
+                // Ours already. Same text means there is nothing to do; different text means the
+                // install path or the shell changed, and it is replaced rather than kept aside.
+                if (existingCommand == bridgeCommand && !cleaned)
+                {
+                    return false;
+                }
             }
-            root[WrappedKey] = existing.DeepClone();
+            else
+            {
+                // Somebody else's status line is kept aside, so removing Aiko can put it back.
+                root[WrappedKey] = existing.DeepClone();
+            }
         }
 
         root[StatusLineKey] = ours;
@@ -66,13 +86,18 @@ public static class SettingsJsonPatch
             return false;
         }
 
-        if (root.TryGetPropertyValue(WrappedKey, out var wrapped) && wrapped is not null)
+        // A line kept aside that is ours was never the user's: it is left over from an older Aiko
+        // that did not recognise itself. It is dropped, not restored.
+        if (root.TryGetPropertyValue(WrappedKey, out var wrapped)
+            && wrapped is not null
+            && !BridgeCommand.IsAiko(CommandIn(wrapped)))
         {
             root[StatusLineKey] = wrapped.DeepClone();
             root.Remove(WrappedKey);
         }
         else
         {
+            root.Remove(WrappedKey);
             root.Remove(StatusLineKey);
         }
 
@@ -93,10 +118,30 @@ public static class SettingsJsonPatch
         return wrappedObject.TryGetPropertyValue("command", out var command) ? command?.GetValue<string>() : null;
     }
 
-    private static bool IsOurs(JsonNode statusLine, string bridgeCommand) =>
-        statusLine is JsonObject line
-        && line.TryGetPropertyValue("command", out var command)
-        && command?.GetValue<string>() == bridgeCommand;
+    /// The command a status line object runs, or null when the node is not such an object.
+    private static string? CommandIn(JsonNode? statusLine)
+    {
+        if (statusLine is not JsonObject line
+            || !line.TryGetPropertyValue("command", out var command)
+            || command is null)
+        {
+            return null;
+        }
+
+        try
+        {
+            return command.GetValue<string>();
+        }
+        catch (InvalidOperationException)
+        {
+            // The key holds something that is not a string. Not ours, and not our business.
+            return null;
+        }
+        catch (FormatException)
+        {
+            return null;
+        }
+    }
 
     private static bool TryParseObject(string json, out JsonObject? root)
     {
