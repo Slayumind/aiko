@@ -1,0 +1,16 @@
+# Keep line endings stable: one normalised form in the repository, native ones in the work tree.
+* text=auto
+
+*.cs text diff=csharp
+*.csproj text
+*.slnx text
+*.props text
+*.json text
+*.md text
+*.xaml text
+*.yml text
+
+*.png binary
+*.ico binary
+*.ttf binary
+*.otf binary
