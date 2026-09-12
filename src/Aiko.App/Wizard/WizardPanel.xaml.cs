@@ -44,7 +44,7 @@ public partial class WizardPanel : UserControl
     private void Scan()
     {
         _found.Clear();
-        foreach (var environment in EnvironmentScan.Pick(ClaudeFolders.Find()))
+        foreach (var environment in EnvironmentScan.Pick(ClaudeFolders.Find(), Strings.EnvironmentPlainName))
         {
             _found.Add(new WizardEnvironment { Name = environment.SuggestedName, FullPath = environment.FullPath });
         }
@@ -221,7 +221,7 @@ public partial class WizardPanel : UserControl
 
     /// An empty name would leave a nameless row on the card, so the folder name steps in.
     private static string Clean(string name, string fullPath) =>
-        string.IsNullOrWhiteSpace(name) ? EnvironmentScan.SuggestName(Path.GetFileName(fullPath)) : name.Trim();
+        string.IsNullOrWhiteSpace(name) ? EnvironmentScan.SuggestName(Path.GetFileName(fullPath), Strings.EnvironmentPlainName) : name.Trim();
 
     private void OnCheckAgain(object sender, RoutedEventArgs e) => Scan();
 
@@ -241,7 +241,7 @@ public partial class WizardPanel : UserControl
 
         _found.Add(new WizardEnvironment
         {
-            Name = EnvironmentScan.SuggestName(Path.GetFileName(dialog.FolderName)),
+            Name = EnvironmentScan.SuggestName(Path.GetFileName(dialog.FolderName), Strings.EnvironmentPlainName),
             FullPath = dialog.FolderName,
         });
 

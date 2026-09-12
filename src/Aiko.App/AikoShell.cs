@@ -183,7 +183,7 @@ sealed class AikoShell : IDisposable
         if (_island is null)
         {
             var window = new IslandWindow();
-            window.CardRequested += OpenCard;
+            window.CardRequested += pinned => OpenCard(pinned);
             window.Moved += SaveIslandPosition;
             _island = window;
         }
@@ -451,7 +451,9 @@ sealed class AikoShell : IDisposable
                 return;
             }
 
-            if (CursorOverIcon() || CursorOver(card))
+            // The island is home for the card the same way the icon is. Without it a card opened
+            // from the island closed half a second later, before the mouse could reach it.
+            if (CursorOverIcon() || CursorOver(card) || CursorOverIsland())
             {
                 _awayTurns = 0;
                 return;
@@ -468,6 +470,8 @@ sealed class AikoShell : IDisposable
 
         return timer;
     }
+
+    private bool CursorOverIsland() => _island is { IsVisible: true } island && CursorOver(island);
 
     private static bool CursorOver(Window window)
     {

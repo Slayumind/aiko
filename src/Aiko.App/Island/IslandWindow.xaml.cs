@@ -29,7 +29,7 @@ public partial class IslandWindow : Window
             _hover!.Stop();
             if (IsMouseOver)
             {
-                CardRequested?.Invoke();
+                CardRequested?.Invoke(false);
             }
         };
         MouseEnter += (_, _) => _hover.Start();
@@ -41,8 +41,9 @@ public partial class IslandWindow : Window
         SizeChanged += (_, _) => PlaceAt(_position);
     }
 
-    /// The card is asked for by a click, or by resting the mouse on the island.
-    public event Action? CardRequested;
+    /// The card is asked for by a click, or by resting the mouse on the island. True means a click:
+    /// the card then stays until it is closed, the same as after a click on the tray icon.
+    public event Action<bool>? CardRequested;
 
     /// Raised after a drag, with the edge the island ended up on.
     public event Action<IslandPosition>? Moved;
@@ -103,7 +104,7 @@ public partial class IslandWindow : Window
         if (Math.Abs(Left - before.X) < 3 && Math.Abs(Top - before.Y) < 3)
         {
             PlaceAt(_position);
-            CardRequested?.Invoke();
+            CardRequested?.Invoke(true);
             return;
         }
 

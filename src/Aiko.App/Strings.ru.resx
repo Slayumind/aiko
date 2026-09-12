@@ -214,6 +214,9 @@
   <data name="WizardStepEnvironments" xml:space="preserve">
     <value>Среды</value>
   </data>
+  <data name="EnvironmentPlainName" xml:space="preserve">
+    <value>Основная</value>
+  </data>
   <data name="WizardStepAccess" xml:space="preserve">
     <value>Доступ к лимитам</value>
   </data>

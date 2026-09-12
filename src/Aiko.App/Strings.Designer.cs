@@ -204,6 +204,9 @@ public static class Strings
     /// Environments
     public static string WizardStepEnvironments => Get("WizardStepEnvironments");
 
+    /// Main
+    public static string EnvironmentPlainName => Get("EnvironmentPlainName");
+
     /// Access to the limits
     public static string WizardStepAccess => Get("WizardStepAccess");
 

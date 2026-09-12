@@ -60,6 +60,7 @@
 ["WizardWindowTitle", ["Welcome to Aiko", "Знакомство с Aiko"]],
 ["SettingsWindowTitle", ["Aiko settings", "Настройки Aiko"]],
 ["WizardStepEnvironments", ["Environments", "Среды"]],
+["EnvironmentPlainName", ["Main", "Основная"]],
 ["WizardStepAccess", ["Access to the limits", "Доступ к лимитам"]],
 ["WizardStepWhere", ["Where to show Aiko", "Где показывать Aiko"]],
 ["WizardStepDone", ["All set", "Готово"]],
