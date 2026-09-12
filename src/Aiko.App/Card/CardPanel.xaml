@@ -61,7 +61,7 @@
                        Foreground="{StaticResource Muted}" />
             <TextBlock Text="{Binding Pace}" HorizontalAlignment="Right"
                        FontFamily="{StaticResource Mono}" FontSize="{StaticResource TextTiny}"
-                       Foreground="{StaticResource Muted}" />
+                       Foreground="{Binding PaceTone}" />
           </Grid>
         </StackPanel>
       </DataTemplate>

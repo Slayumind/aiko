@@ -13,9 +13,22 @@ public partial class CardWindow : Window
         Panel.CloseRequested += Close;
         Panel.SettingsRequested += () => SettingsRequested?.Invoke();
         Panel.DragHandle.MouseLeftButtonDown += OnDragHandlePressed;
+
+        // Touching the card at all keeps it: reading it, dragging it, or opening the settings from
+        // it. Somebody who reached for the card meant to use it.
+        PreviewMouseDown += (_, _) => Pin();
     }
 
     public event Action? SettingsRequested;
+
+    /// A card opened by resting the mouse on the icon goes away when the mouse goes away. A card
+    /// the user clicked for, or clicked on, stays until they close it.
+    ///
+    /// Before, every card stayed. Running the mouse along the taskbar left a window that had to be
+    /// dismissed by hand, which is a strange price for a glance.
+    public bool IsPinned { get; private set; }
+
+    public void Pin() => IsPinned = true;
 
     public void Update(CardModel model) => Panel.Show(model);
 

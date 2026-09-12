@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Windows;
 using System.Windows.Interop;
+using System.Windows.Media;
 using System.Windows.Threading;
 using Aiko.Core;
 using Windows.Win32;
@@ -31,6 +32,7 @@ sealed class AikoShell : IDisposable
     private const uint MenuRefresh = 2;
     private const uint MenuUpdates = 3;
     private const uint MenuExit = 4;
+    private const uint MenuSwap = 5;
     private const uint TpmRightButton = 0x0002;
     private const uint TpmNoNotify = 0x0080;
     private const uint TpmReturnCommand = 0x0100;
@@ -50,6 +52,8 @@ sealed class AikoShell : IDisposable
     private FullScreenWatch? _fullScreen;
     private DirectPoller? _direct;
     private UpdateWatch? _updates;
+    private DispatcherTimer? _cardWatch;
+    private int _awayTurns;
     private HICON _icon;
     private uint _iconDpi;
     private int _iconSize;
@@ -249,7 +253,7 @@ sealed class AikoShell : IDisposable
         data.uFlags = NOTIFY_ICON_DATA_FLAGS.NIF_MESSAGE | NOTIFY_ICON_DATA_FLAGS.NIF_ICON | NOTIFY_ICON_DATA_FLAGS.NIF_TIP;
         data.uCallbackMessage = CallbackMessage;
         data.hIcon = _icon;
-        "Aiko".AsSpan().CopyTo(data.szTip.AsSpan());
+        WriteTooltip(ref data);
         PInvoke.Shell_NotifyIcon(NOTIFY_ICON_MESSAGE.NIM_ADD, in data);
 
         data.Anonymous.uVersion = PInvoke.NOTIFYICON_VERSION_4;
@@ -279,14 +283,26 @@ sealed class AikoShell : IDisposable
 
         var old = ReplaceIcon(TaskbarDpi());
         var data = NewData();
-        data.uFlags = NOTIFY_ICON_DATA_FLAGS.NIF_ICON;
+        data.uFlags = NOTIFY_ICON_DATA_FLAGS.NIF_ICON | NOTIFY_ICON_DATA_FLAGS.NIF_TIP;
         data.hIcon = _icon;
+        WriteTooltip(ref data);
         PInvoke.Shell_NotifyIcon(NOTIFY_ICON_MESSAGE.NIM_MODIFY, in data);
 
         if (!old.IsNull)
         {
             PInvoke.DestroyIcon(old);
         }
+    }
+
+    /// The numbers go in the tooltip as well as in the ring. Under the Windows 11 overflow arrow
+    /// the hover card never opens, so for some people this is the whole product, and a screen
+    /// reader has nothing else to read.
+    private void WriteTooltip(ref NOTIFYICONDATAW data)
+    {
+        var text = TrayText.Tooltip(Cards(), _updates?.NewerVersion);
+        var room = data.szTip.AsSpan();
+        room.Clear();
+        text.AsSpan(0, Math.Min(text.Length, room.Length - 1)).CopyTo(room);
     }
 
     private HICON ReplaceIcon(uint dpi)
@@ -341,6 +357,10 @@ sealed class AikoShell : IDisposable
         return (ringCard.IconRow, dotCard?.IconRow);
     }
 
+    /// The environment the ring does not show, when there is one. Null with a single environment,
+    /// and then the menu leaves the item out rather than showing one that does nothing.
+    private static string? OtherEnvironment() => SettingsStore.LoadEnvironments().Dot?.Name;
+
     /// The chosen environment is kept in the environments file, not in a field here. It is a
     /// choice the user made, and a choice that quietly goes back to the other environment on the
     /// next start is worse than no choice at all.
@@ -371,6 +391,76 @@ sealed class AikoShell : IDisposable
 
     private void CancelHover() => _hover?.Stop();
 
+    /// An unpinned card follows the mouse out.
+    ///
+    /// Windows says nothing useful about the mouse leaving a tray icon, and there is a gap between
+    /// the icon and the card that the pointer crosses on its way in. So the pointer is looked at
+    /// instead, and it has to be away from both for two turns in a row before the card goes. The
+    /// watch runs only while an unpinned card is on screen, which is a few seconds at a time.
+    private void WatchForTheMouseLeaving()
+    {
+        if (_card is null || _card.IsPinned)
+        {
+            return;
+        }
+
+        _awayTurns = 0;
+        _cardWatch ??= NewCardWatch();
+        _cardWatch.Start();
+    }
+
+    private DispatcherTimer NewCardWatch()
+    {
+        var timer = new DispatcherTimer(DispatcherPriority.Background, _application.Dispatcher)
+        {
+            Interval = TimeSpan.FromMilliseconds(250),
+        };
+
+        timer.Tick += (_, _) =>
+        {
+            if (_card is not { } card || card.IsPinned)
+            {
+                timer.Stop();
+                return;
+            }
+
+            if (CursorOverIcon() || CursorOver(card))
+            {
+                _awayTurns = 0;
+                return;
+            }
+
+            if (++_awayTurns < 2)
+            {
+                return;
+            }
+
+            timer.Stop();
+            card.Close();
+        };
+
+        return timer;
+    }
+
+    private static bool CursorOver(Window window)
+    {
+        if (!PInvoke.GetCursorPos(out var point))
+        {
+            // Without an answer, assume the mouse is still there: closing a card somebody is
+            // reading is worse than leaving one up a moment longer.
+            return true;
+        }
+
+        var dpi = VisualTreeHelper.GetDpi(window);
+        var bounds = new Rect(
+            window.Left * dpi.DpiScaleX,
+            window.Top * dpi.DpiScaleY,
+            window.ActualWidth * dpi.DpiScaleX,
+            window.ActualHeight * dpi.DpiScaleY);
+
+        return bounds.Contains(point.X, point.Y);
+    }
+
     private void OnHoverFinished(object? sender, EventArgs e)
     {
         CancelHover();
@@ -385,19 +475,34 @@ sealed class AikoShell : IDisposable
         }
     }
 
-    private void OpenCard()
+    private void OpenCard() => OpenCard(pinned: false);
+
+    private void OpenCard(bool pinned)
     {
         if (_card is not null)
         {
+            if (pinned)
+            {
+                _card.Pin();
+            }
             _card.Update(CurrentCard());
             return;
         }
 
         var card = new CardWindow();
         card.SettingsRequested += () => OpenSettings();
-        card.Closed += (_, _) => _card = null;
+        card.Closed += (_, _) =>
+        {
+            _card = null;
+            _cardWatch?.Stop();
+        };
         card.Update(CurrentCard());
+        if (pinned)
+        {
+            card.Pin();
+        }
         _card = card;
+        WatchForTheMouseLeaving();
 
         if (IconRect() is { } rect)
         {
@@ -555,8 +660,12 @@ sealed class AikoShell : IDisposable
 
         switch (iconEvent)
         {
+            // A left click on a tray icon opens the thing. Swapping the ring instead left the
+            // click with no visible answer beyond two colours trading places, which reads as a
+            // glitch, and hid the card behind a gesture nobody is told about.
             case NinSelect:
-                SwapRing();
+                CancelHover();
+                OpenCard(pinned: true);
                 break;
 
             // Windows sends nothing that plainly means "the mouse left the icon". The two popup
@@ -579,6 +688,18 @@ sealed class AikoShell : IDisposable
         var y = (short)((anchor.ToInt64() >> 16) & 0xFFFF);
 
         var menu = PInvoke.CreatePopupMenu();
+
+        // The click on the icon opens the card now, so swapping the ring needs a home. Here it
+        // says which environment it would show, which the click never did.
+        if (OtherEnvironment() is { } other)
+        {
+            fixed (char* swap = $"Show {other} in the ring")
+            {
+                PInvoke.AppendMenu(menu, MENU_ITEM_FLAGS.MF_STRING, MenuSwap, swap);
+            }
+            PInvoke.AppendMenu(menu, MENU_ITEM_FLAGS.MF_SEPARATOR, 0, null);
+        }
+
         fixed (char* settings = "Settings", refresh = "Refresh limits", updates = "Check for updates", exit = "Exit")
         {
             PInvoke.AppendMenu(menu, MENU_ITEM_FLAGS.MF_STRING, MenuSettings, settings);
@@ -596,6 +717,9 @@ sealed class AikoShell : IDisposable
 
         switch (command)
         {
+            case MenuSwap:
+                SwapRing();
+                break;
             case MenuSettings:
                 OpenSettings();
                 break;

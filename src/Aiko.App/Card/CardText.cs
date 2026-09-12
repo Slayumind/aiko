@@ -13,7 +13,21 @@ static class CardText
         _ => "Fable · week",
     };
 
-    public static string Percent(int percent) => $"{percent}%";
+    /// The share of the limit already gone, said so. A bare "82%" reads as eighty two percent left
+    /// just as easily as eighty two percent spent, and the two are opposite news.
+    public static string Percent(int percent) => $"{percent}% used";
+
+    /// A word beside the colour.
+    ///
+    /// The design system says a status is a mark, a word and a colour, never a colour on its own,
+    /// and the card was breaking its own rule. Green and red are one grey to a good many people,
+    /// and to every screen reader.
+    public static string Tone(LimitTone tone) => tone switch
+    {
+        LimitTone.Caution => "running low",
+        LimitTone.Critical => "almost gone",
+        _ => string.Empty,
+    };
 
     public static string Resets(ResetCountdown countdown) =>
         countdown.IsReset ? "window just reset" : $"resets in {Left(countdown)}";
