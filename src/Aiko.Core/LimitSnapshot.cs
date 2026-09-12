@@ -32,10 +32,33 @@ public sealed record LimitSnapshot(
 
     public bool HasData => Windows.Count > 0;
 
+    /// The model limit is only known in direct mode: the status line does not carry it.
+    public ModelLimit? Model { get; init; }
+
     public static LimitSnapshot FromStatusLine(string environment, DateTimeOffset receivedAt, StatusLineReport report) =>
         report.HasData
             ? new LimitSnapshot(environment, LimitSource.StatusLine, receivedAt, report.Windows)
             : NoData(environment);
+
+    public static LimitSnapshot FromDirectMode(string environment, DateTimeOffset receivedAt, UsageReport report) =>
+        report.HasData
+            ? new LimitSnapshot(environment, LimitSource.DirectMode, receivedAt, report.Windows) { Model = report.Model }
+            : NoData(environment);
+
+    /// Two sources for one environment: the fresher answer wins. Direct mode is asked rarely,
+    /// the status line speaks on every reply, so neither is always ahead.
+    public static LimitSnapshot Newer(LimitSnapshot first, LimitSnapshot second)
+    {
+        if (!first.HasData)
+        {
+            return second;
+        }
+        if (!second.HasData)
+        {
+            return first;
+        }
+        return second.ReceivedAt > first.ReceivedAt ? second : first;
+    }
 
     public DataFreshness FreshnessAt(DateTimeOffset now, TimeSpan? staleAfter = null)
     {

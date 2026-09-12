@@ -8,6 +8,14 @@ public enum LimitKind
     SevenDay,
 }
 
+/// Percentages arrive as doubles with noise (28.000000000000004) and, behind a spend gateway,
+/// above a hundred. The card shows whole numbers and a bar cannot be longer than full.
+public static class Percentage
+{
+    public static int FromDouble(double value) =>
+        Math.Clamp((int)Math.Round(value, MidpointRounding.AwayFromZero), 0, 100);
+}
+
 public readonly record struct LimitWindow(LimitKind Kind, int Percent, DateTimeOffset ResetsAt);
 
 /// What Claude Code reports to the status line: the five hour and the seven day window.
@@ -74,11 +82,6 @@ public sealed record StatusLineReport(IReadOnlyList<LimitWindow> Windows)
             return;
         }
 
-        windows.Add(new LimitWindow(kind, ToPercent(percent.GetDouble()), DateTimeOffset.FromUnixTimeSeconds(resetsAt.GetInt64())));
+        windows.Add(new LimitWindow(kind, Percentage.FromDouble(percent.GetDouble()), DateTimeOffset.FromUnixTimeSeconds(resetsAt.GetInt64())));
     }
-
-    /// Claude Code sends values like 28.000000000000004, so the noise is rounded away.
-    /// Above 100 is clamped: a bar cannot be longer than full.
-    private static int ToPercent(double value) =>
-        Math.Clamp((int)Math.Round(value, MidpointRounding.AwayFromZero), 0, 100);
 }
