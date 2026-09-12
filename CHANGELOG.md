@@ -27,6 +27,8 @@ The first release. Everything below is new.
   It ends by saying where Aiko is and how to bring the icon out from behind the overflow arrow.
 - **Your own status line keeps working.** Aiko runs it through the same shell Claude Code uses and
   shows its output.
+- **Works with no setup at all.** Claude Code started without `CLAUDE_CONFIG_DIR` uses the
+  `.claude` folder in your home, and so does Aiko.
 - **Settings:** environments, where to show Aiko, start with Windows, update checks and language.
   A check shows whether Claude Code still reports its limits to Aiko, and sets it up again if not.
   "Copy diagnostics" gives a short summary for a bug report.

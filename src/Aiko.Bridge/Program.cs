@@ -8,7 +8,11 @@ using Aiko.Core;
 try
 {
     var input = ReadAllInput();
-    var configDirectory = Environment.GetEnvironmentVariable("CLAUDE_CONFIG_DIR");
+    // Without the variable Claude Code works in ~\.claude, so the bridge does too. Naming that case
+    // anything else made the app look for a file that was never written.
+    var configDirectory = ClaudeConfigFolder.Resolve(
+        Environment.GetEnvironmentVariable("CLAUDE_CONFIG_DIR"),
+        Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
     var environment = SnapshotName.For(configDirectory);
 
     var report = StatusLineReport.FromJson(input);
