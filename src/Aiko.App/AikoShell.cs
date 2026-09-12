@@ -47,6 +47,7 @@ sealed class AikoShell : IDisposable
     private WizardWindow? _wizard;
     private IslandWindow? _island;
     private FullScreenWatch? _fullScreen;
+    private DirectPoller? _direct;
     private HICON _icon;
     private uint _iconDpi;
     private int _iconSize;
@@ -75,7 +76,12 @@ sealed class AikoShell : IDisposable
 
         _watcher.Updated += OnSnapshotsChanged;
 
+        var poller = new DirectPoller(_application.Dispatcher);
+        poller.Reported += OnSnapshotsChanged;
+        _direct = poller;
+
         ApplyPlace();
+        FollowDirectMode();
 
         // Worth a line each: if the limits never arrive, the shell we guessed and the folders we
         // found are the first things to check, and both are invisible otherwise.
@@ -94,6 +100,7 @@ sealed class AikoShell : IDisposable
     {
         _watcher.Updated -= OnSnapshotsChanged;
         _watcher.Dispose();
+        _direct?.Dispose();
 
         CancelHover();
         _card?.Close();
@@ -108,6 +115,10 @@ sealed class AikoShell : IDisposable
         }
         _source?.Dispose();
     }
+
+    /// Direct mode is switched per environment, and the settings window and the wizard both
+    /// change it, so this is called again whenever either of them closes.
+    private void FollowDirectMode() => _direct?.Follow(SettingsStore.LoadEnvironments());
 
     /// Tray or island, whichever the settings say. Called again after the settings window or the
     /// wizard closes, so a change takes effect at once.
@@ -265,7 +276,14 @@ sealed class AikoShell : IDisposable
         // file is small.
         var environments = SettingsStore.LoadEnvironments();
 
+        var direct = _direct?.Latest;
+
         return EnvironmentSnapshots.Combine(environments, _watcher.ByFile)
+            // Two sources for one environment: the fresher answer wins. Direct mode is asked
+            // rarely, the status line speaks on every reply, so neither is always ahead.
+            .Select(snapshot => direct is not null && direct.TryGetValue(snapshot.Environment, out var fromApi)
+                ? LimitSnapshot.Newer(snapshot, fromApi)
+                : snapshot)
             .Select(snapshot => CardState.From(snapshot, now))
             .ToList();
     }
@@ -377,6 +395,7 @@ sealed class AikoShell : IDisposable
         {
             _wizard = null;
             ApplyPlace();
+            FollowDirectMode();
             UpdateIcon();
             _card?.Update(CurrentCard());
         };
@@ -401,8 +420,9 @@ sealed class AikoShell : IDisposable
         window.Closed += (_, _) =>
         {
             _settings = null;
-            // The place may have changed while the window was open.
+            // The place and direct mode may both have changed while the window was open.
             ApplyPlace();
+            FollowDirectMode();
         };
         _settings = window;
         window.Show();
