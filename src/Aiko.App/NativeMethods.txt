@@ -11,6 +11,10 @@ MonitorFromPoint
 GetMonitorInfo
 GetDpiForMonitor
 GetSystemMetricsForDpi
+SetWinEventHook
+UnhookWinEvent
+GetForegroundWindow
+GetClassName
 CreateIconFromResourceEx
 DestroyIcon
 SetWindowPos

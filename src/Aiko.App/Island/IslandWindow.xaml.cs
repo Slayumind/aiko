@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Threading;
 using Aiko.Core;
 using Windows.Win32;
 using Windows.Win32.Foundation;
@@ -11,6 +12,7 @@ namespace Aiko.App;
 
 public partial class IslandWindow : Window
 {
+    private readonly DispatcherTimer _hover;
     private IslandPosition _position = IslandPosition.Default;
 
     public IslandWindow()
@@ -18,6 +20,20 @@ public partial class IslandWindow : Window
         InitializeComponent();
 
         MouseLeftButtonDown += OnPressed;
+
+        // The island answers to resting the mouse on it as well as to a click, the same 1.5
+        // seconds as the tray icon.
+        _hover = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1.5) };
+        _hover.Tick += (_, _) =>
+        {
+            _hover!.Stop();
+            if (IsMouseOver)
+            {
+                CardRequested?.Invoke();
+            }
+        };
+        MouseEnter += (_, _) => _hover.Start();
+        MouseLeave += (_, _) => _hover.Stop();
 
         // The window sizes itself to its content, and that happens after it is shown. Placing it
         // before then puts it wherever a width of zero lands, which is beside the middle instead

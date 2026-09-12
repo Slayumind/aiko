@@ -46,6 +46,7 @@ sealed class AikoShell : IDisposable
     private SettingsWindow? _settings;
     private WizardWindow? _wizard;
     private IslandWindow? _island;
+    private FullScreenWatch? _fullScreen;
     private HICON _icon;
     private uint _iconDpi;
     private int _iconSize;
@@ -98,7 +99,7 @@ sealed class AikoShell : IDisposable
         _card?.Close();
         _settings?.Close();
         _wizard?.Close();
-        _island?.Close();
+        CloseIsland();
 
         RemoveIcon();
         if (!_icon.IsNull)
@@ -137,10 +138,45 @@ sealed class AikoShell : IDisposable
         }
 
         _island.Show(Cards(), position);
+
+        // Only watched while the island is on screen: the tray icon has nothing to hide from.
+        if (_fullScreen is null)
+        {
+            var watch = new FullScreenWatch();
+            watch.Changed += OnFullScreenChanged;
+            _fullScreen = watch;
+        }
+
+        OnFullScreenChanged(FullScreenWatch.IsFullScreenInFront());
     }
+
+    private void OnFullScreenChanged(bool fullScreen) =>
+        _application.Dispatcher.BeginInvoke(() =>
+        {
+            if (_island is not { } island)
+            {
+                return;
+            }
+
+            var hide = fullScreen && SettingsStore.Load().HideIslandInFullScreen;
+            var wanted = hide ? Visibility.Hidden : Visibility.Visible;
+
+            // Windows says which window came to the front on every switch, which is many times a
+            // minute. Only a real change is worth a line.
+            if (island.Visibility == wanted)
+            {
+                return;
+            }
+
+            island.Visibility = wanted;
+            Log.Write($"island {(hide ? "hidden behind a full screen window" : "shown again")}");
+        });
 
     private void CloseIsland()
     {
+        _fullScreen?.Dispose();
+        _fullScreen = null;
+
         _island?.Close();
         _island = null;
     }
