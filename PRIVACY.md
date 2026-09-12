@@ -3,7 +3,8 @@
 Aiko shows how much of your Claude Code limits is left. This page says what it reads, what it
 sends, and where it keeps things.
 
-There is no telemetry, no analytics and no crash reporting service. Nobody is counted.
+There is no analytics service and no crash reporting service. Aiko does count how many copies run
+each day, and only if you let it: see **Counting** below.
 
 ## What Aiko reads
 
@@ -24,10 +25,36 @@ Nothing, unless you switch one of these on.
 - **Direct mode** (off by default, per environment): Aiko asks `api.anthropic.com` for the limits
   of that account, at most once every three minutes. The request carries the access token of that
   account and an honest user agent, `Aiko/<version>`. No other address is ever contacted with it.
-- **Update checks** (off by default): Aiko asks `slayumind.org` which version is the latest. That
-  server belongs to the author of Aiko and sees your address and your version, like any web
-  request. Downloads come from GitHub. The button in settings asks once, by hand, whenever you
-  press it.
+- **Update checks** (off by default): Aiko asks `slayumind.org` which version is the latest, once a
+  day and whenever you press the button. Downloads come from GitHub. The same request does the
+  counting below, which is why there is one switch and not two.
+
+## Counting
+
+The author of Aiko would like to know roughly how many people use it. That is the only thing
+measured, and this is exactly how.
+
+**What is sent**, along with the question about the latest version:
+
+- the version of Aiko you are running;
+- the version of Windows;
+- an identifier that **changes every day**.
+
+**Nothing else.** Not your name, not your account, not your folders, not your limits, not which
+features you use, not how long Aiko has been running.
+
+**How the identifier works.** A random value is made once on this computer and kept in
+`%APPDATA%\Aiko\install-id`. It never leaves the machine. What travels is a hash of that value
+together with today's date, cut to sixteen characters. Tomorrow's is unrelated to today's, so two
+days of requests cannot be joined into one person. The count is of days, not of people followed
+over time, which is the number that was wanted anyway. Delete that file and you get a new value.
+
+**What that leaves.** `slayumind.org` receives the request, and like any web server it sees the
+address it came from. That address is not written down and not kept.
+
+**How to turn it off.** The switch in settings called "Check for updates". It is off until you turn
+it on, and turning it off stops the version check and the counting together. There is no way to
+have one without the other, and saying otherwise would be a lie about what a single request does.
 
 ## The token
 
@@ -45,9 +72,9 @@ Without direct mode Aiko never touches the token at all.
 
 ## Where Aiko keeps things
 
-- `%APPDATA%\Aiko` — your settings and the list of environments.
+- `%APPDATA%\Aiko` — your settings, the list of environments, and the random value described above.
 - `%LOCALAPPDATA%\Aiko` — the limit numbers reported by Claude Code, the last direct mode answer,
-  and a short log of what Aiko did. All of it is numbers, times and its own events.
+  and a short log of what Aiko did.
 - `%USERPROFILE%\.claude*\settings.json` — one line added by Aiko, with a copy of the original
   beside it.
 - One value under `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`, if you asked Aiko to start
@@ -58,6 +85,17 @@ You can also delete them by hand at any time; Aiko will start again with its def
 
 ## The log
 
-The log holds what Aiko did: when it started, when a card opened, when a check failed. No tokens,
-no limit numbers of yours in the text, nothing from Claude Code. The "copy diagnostics" button in
-settings copies a short summary of the same kind, for a bug report.
+The log holds what Aiko did: when it started, when a card opened, when a check failed. It is 256 KB
+at most and starts over when it fills.
+
+Three things in it are yours, and they are there because a wrong number cannot be looked into
+without them:
+
+- **limit percentages**, when direct mode is on;
+- **the names you gave your environments**;
+- **the name of a Claude Code folder** when Aiko changes its settings file — `.claude-personal`,
+  not the path to it.
+
+It holds **no tokens**, no session ids, no working folders, no model answers and nothing you wrote.
+It stays on your computer and is never sent anywhere. The "copy diagnostics" button in settings
+copies a short summary, without any of the three above, for you to paste into a bug report.

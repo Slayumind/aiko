@@ -68,3 +68,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   Saying "not now" in the wizard used to be a door with no handle on the other side.
 - An environment Aiko cannot read says so, instead of telling you to open Claude Code when opening
   Claude Code will not help.
+- Aiko counts how many copies run each day, if you let it. It is the same switch as the update
+  check and the same request, it is off until you turn it on, and the identifier changes every day
+  so two days cannot be joined into one person. PRIVACY.md says exactly what goes and what does
+  not.

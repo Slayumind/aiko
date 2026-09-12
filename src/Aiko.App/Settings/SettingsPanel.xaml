@@ -152,7 +152,7 @@
 
           <StackPanel Grid.Column="0" Margin="0,0,12,0">
             <TextBlock Text="Check for updates" Style="{StaticResource RowName}" />
-            <TextBlock Text="Asks slayumind.org, downloads come from GitHub"
+            <TextBlock Text="Asks slayumind.org once a day, and tells it one copy of Aiko ran today. Downloads come from GitHub."
                        Style="{StaticResource RowNote}" TextWrapping="Wrap" />
           </StackPanel>
           <ToggleButton x:Name="CheckUpdates" Grid.Column="1" Style="{StaticResource Switch}"
