@@ -72,6 +72,20 @@ public sealed record LimitSnapshot(
     /// A window whose reset time has passed reads as zero, without asking anyone.
     /// Usage only grows while you work, and working makes Claude Code report again — so old
     /// numbers stay true until the window turns over, and then they are simply gone.
+    /// When this window turns over, as reported. The card needs it for the pace estimate:
+    /// how much of the window is already gone decides whether the limit lasts until the reset.
+    public DateTimeOffset? WindowResetsAt(LimitKind kind)
+    {
+        foreach (var window in Windows)
+        {
+            if (window.Kind == kind)
+            {
+                return window.ResetsAt;
+            }
+        }
+        return null;
+    }
+
     public LimitStatus? StatusAt(DateTimeOffset now, LimitKind kind)
     {
         foreach (var window in Windows)

@@ -6,6 +6,9 @@ public enum LimitKind
 {
     FiveHour,
     SevenDay,
+
+    /// The weekly limit of the heavy model. Direct mode only: the status line does not carry it.
+    ModelWeek,
 }
 
 /// Percentages arrive as doubles with noise (28.000000000000004) and, behind a spend gateway,
