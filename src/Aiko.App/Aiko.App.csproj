@@ -18,6 +18,16 @@
     <StartupObject>Aiko.App.Program</StartupObject>
   </PropertyGroup>
 
+  <!--
+    Geist and Geist Mono ship inside the app. The site loads them from Google Fonts, but a tray
+    app has no browser, and without the files WPF quietly falls back to another face and the card
+    changes width. OFL.txt is the licence and has to travel with them.
+  -->
+  <ItemGroup>
+    <Resource Include="Assets\Fonts\*.ttf" />
+    <Content Include="Assets\Fonts\OFL.txt" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Aiko.Core\Aiko.Core.csproj" />
   </ItemGroup>

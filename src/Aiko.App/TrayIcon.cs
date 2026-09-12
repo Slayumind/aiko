@@ -2,6 +2,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Windows;
 using System.Windows.Interop;
+using System.Windows.Threading;
 using Aiko.Core;
 using Windows.Win32;
 using Windows.Win32.Foundation;
@@ -32,10 +33,15 @@ sealed class TrayIcon : IDisposable
     private const uint TpmNoNotify = 0x0080;
     private const uint TpmReturnCommand = 0x0100;
 
+    /// Long enough that running the mouse along the taskbar does not open the card.
+    private static readonly TimeSpan HoverDelay = TimeSpan.FromSeconds(1.5);
+
     private readonly Application _application;
     private readonly SnapshotWatcher _watcher = new();
     private readonly uint _taskbarCreatedMessage;
     private HwndSource? _source;
+    private DispatcherTimer? _hover;
+    private CardWindow? _card;
     private HICON _icon;
     private uint _iconDpi;
     private int _iconSize;
@@ -58,6 +64,9 @@ sealed class TrayIcon : IDisposable
         _source = new HwndSource(new HwndSourceParameters("AikoTray") { Width = 0, Height = 0, WindowStyle = 0 });
         _source.AddHook(WndProc);
 
+        _hover = new DispatcherTimer(DispatcherPriority.Normal, _application.Dispatcher) { Interval = HoverDelay };
+        _hover.Tick += OnHoverFinished;
+
         _watcher.Updated += OnSnapshotsChanged;
         AddIcon();
     }
@@ -66,6 +75,9 @@ sealed class TrayIcon : IDisposable
     {
         _watcher.Updated -= OnSnapshotsChanged;
         _watcher.Dispose();
+
+        CancelHover();
+        _card?.Close();
 
         var data = NewData();
         PInvoke.Shell_NotifyIcon(NOTIFY_ICON_MESSAGE.NIM_DELETE, in data);
@@ -77,7 +89,11 @@ sealed class TrayIcon : IDisposable
     }
 
     private void OnSnapshotsChanged() =>
-        _application.Dispatcher.BeginInvoke(UpdateIcon);
+        _application.Dispatcher.BeginInvoke(() =>
+        {
+            UpdateIcon();
+            _card?.Update(CurrentCard());
+        });
 
     private void AddIcon()
     {
@@ -119,17 +135,24 @@ sealed class TrayIcon : IDisposable
         return old;
     }
 
+    /// Every environment we know about, in a steady order. The card shows all of them, including
+    /// the ones with nothing reported yet: an empty block says so in words.
+    private IReadOnlyList<CardState> Cards()
+    {
+        var now = DateTimeOffset.Now;
+        return _watcher.Snapshots
+            .Select(snapshot => CardState.From(snapshot, now))
+            .OrderBy(card => card.Environment, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
+    private CardModel CurrentCard() => CardModel.From(Cards(), DateTimeOffset.Now);
+
     /// The ring shows one environment and the dot the other. With nothing reported yet both are
     /// empty and the icon draws the dashed ring.
     private (CardRow? Ring, CardRow? Dot) CurrentRows()
     {
-        var now = DateTimeOffset.Now;
-        var cards = _watcher.Snapshots
-            .Select(snapshot => CardState.From(snapshot, now))
-            .Where(card => card.HasData)
-            .OrderBy(card => card.Environment, StringComparer.OrdinalIgnoreCase)
-            .ToList();
-
+        var cards = Cards().Where(card => card.HasData).ToList();
         if (cards.Count == 0)
         {
             return (null, null);
@@ -157,6 +180,89 @@ sealed class TrayIcon : IDisposable
 
         _ringEnvironment = others[0];
         UpdateIcon();
+    }
+
+    private void StartHover()
+    {
+        // Already counting, or the card is up: nothing to start.
+        if (_card is not null || _hover is null || _hover.IsEnabled)
+        {
+            return;
+        }
+        Log.Write("hover started");
+        _hover.Start();
+    }
+
+    private void CancelHover() => _hover?.Stop();
+
+    private void OnHoverFinished(object? sender, EventArgs e)
+    {
+        CancelHover();
+
+        // Windows does not promise to say when the mouse left the icon, so the pointer is checked
+        // here. Without this the card would appear long after the user walked away.
+        var over = CursorOverIcon();
+        Log.Write($"hover finished, cursor over icon: {over}, icon at {IconRect()}");
+        if (over)
+        {
+            OpenCard();
+        }
+    }
+
+    private void OpenCard()
+    {
+        if (_card is not null)
+        {
+            _card.Update(CurrentCard());
+            return;
+        }
+
+        var card = new CardWindow();
+        card.SettingsRequested += OpenSettings;
+        card.Closed += (_, _) => _card = null;
+        card.Update(CurrentCard());
+        _card = card;
+
+        if (IconRect() is { } rect)
+        {
+            card.ShowAt(rect);
+        }
+        else
+        {
+            card.Show();
+        }
+
+        Log.Write($"card opened at {card.Left},{card.Top} size {card.ActualWidth}x{card.ActualHeight}");
+    }
+
+    // The settings window is the next piece of work; until then the gear has nothing to open.
+    private void OpenSettings()
+    {
+    }
+
+    /// Where Windows put our icon, in real pixels. It answers even when the icon sits in the
+    /// overflow area, which is where Windows 11 puts a new app by default.
+    private Rect? IconRect()
+    {
+        var id = new NOTIFYICONIDENTIFIER
+        {
+            cbSize = (uint)Marshal.SizeOf<NOTIFYICONIDENTIFIER>(),
+            hWnd = Hwnd,
+            uID = IconId,
+        };
+
+        return PInvoke.Shell_NotifyIconGetRect(in id, out var rect).Succeeded
+            ? new Rect(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top)
+            : null;
+    }
+
+    private bool CursorOverIcon()
+    {
+        if (IconRect() is not { } rect || !PInvoke.GetCursorPos(out var point))
+        {
+            return false;
+        }
+        return rect.Contains(point.X, point.Y);
     }
 
     private static uint TaskbarDpi()
@@ -200,12 +306,26 @@ sealed class TrayIcon : IDisposable
 
     private void OnIconMessage(uint iconEvent, IntPtr anchor)
     {
+        // Mouse moves arrive many times a second; the rest are rare and worth a line each.
+        if (iconEvent != PInvoke.WM_MOUSEMOVE)
+        {
+            Log.Write($"icon event {iconEvent}");
+        }
+
         switch (iconEvent)
         {
             case NinSelect:
                 SwapRing();
                 break;
+            // Windows sends nothing that plainly means "the mouse left the icon". The two popup
+            // messages are about its own tooltip and arrive in pairs on every move, so cancelling
+            // on them killed the count every time. The wait simply runs out, and then we ask where
+            // the pointer is.
+            case PInvoke.WM_MOUSEMOVE:
+                StartHover();
+                break;
             case PInvoke.WM_CONTEXTMENU:
+                CancelHover();
                 ShowMenu(anchor);
                 break;
         }
@@ -234,8 +354,12 @@ sealed class TrayIcon : IDisposable
 
         switch (command)
         {
+            case MenuSettings:
+                OpenSettings();
+                break;
             case MenuRefresh:
                 UpdateIcon();
+                _card?.Update(CurrentCard());
                 break;
             case MenuExit:
                 _application.Shutdown();

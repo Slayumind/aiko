@@ -17,9 +17,16 @@ static class Program
 
         // Draw the icon into a file and stop. Windows hides new tray icons in the overflow area,
         // so this is the only way to look at the drawing itself.
-        if (args is ["--snapshot-icon", var path, ..])
+        if (args is ["--snapshot-icon", var iconPath, ..])
         {
-            IconSheet.Write(path);
+            IconSheet.Write(iconPath);
+            return;
+        }
+
+        // The same for the card: draw it on test numbers and stop.
+        if (args is ["--snapshot", var cardPath, ..])
+        {
+            CardSnapshot.Write(cardPath);
             return;
         }
 
