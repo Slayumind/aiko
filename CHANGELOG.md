@@ -25,3 +25,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   who work in the IDE panel, where Claude Code runs no status line, and for the weekly limit of the
   heavy model.
 - Update checks against slayumind.org, off by default, with a button to check by hand.
+
+### Fixed
+
+- The bridge now starts from an installed copy of Aiko. It was published without a runtime next to
+  an app that carries its own, so it read the install folder as a .NET install, found no framework
+  there and stopped before doing anything. No limit would ever have appeared from a real install,
+  on any machine.
