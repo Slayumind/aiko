@@ -21,6 +21,23 @@ static class CardSnapshot
         Snapshot.Write(panel, path);
     }
 
+    /// The same picture, but on what Aiko really has right now: the files the bridge wrote and the
+    /// environments as they are set up. This is how to see what the user is seeing.
+    public static void WriteLive(string path)
+    {
+        using var watcher = new SnapshotWatcher();
+        var now = DateTimeOffset.Now;
+
+        var cards = EnvironmentSnapshots.Combine(SettingsStore.LoadEnvironments(), watcher.ByFile)
+            .Select(snapshot => CardState.From(snapshot, now))
+            .ToList();
+
+        var panel = new CardPanel();
+        panel.Show(CardModel.From(cards, now));
+
+        Snapshot.Write(panel, path);
+    }
+
     private static CardState Card(
         string name,
         DateTimeOffset now,

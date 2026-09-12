@@ -30,6 +30,13 @@ static class Program
             return;
         }
 
+        // Not test numbers but the real ones, to see what Aiko shows on this machine right now.
+        if (args is ["--snapshot-live", var livePath, ..])
+        {
+            CardSnapshot.WriteLive(livePath);
+            return;
+        }
+
         if (args is ["--snapshot-settings", var settingsPath, ..])
         {
             Snapshot.Write(new SettingsPanel(), settingsPath);

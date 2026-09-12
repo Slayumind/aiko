@@ -48,6 +48,19 @@ sealed class SnapshotWatcher : IDisposable
         }
     }
 
+    /// Keyed by the file name, which is the name of the Claude Code config folder. Matching those
+    /// files with the environments the user named is the core's job, not ours.
+    public IReadOnlyDictionary<string, LimitSnapshot> ByFile
+    {
+        get
+        {
+            lock (_snapshots)
+            {
+                return new Dictionary<string, LimitSnapshot>(_snapshots, StringComparer.OrdinalIgnoreCase);
+            }
+        }
+    }
+
     public LimitSnapshot For(string environment)
     {
         lock (_snapshots)

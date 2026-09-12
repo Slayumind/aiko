@@ -9,7 +9,7 @@ try
 {
     var input = ReadAllInput();
     var configDirectory = Environment.GetEnvironmentVariable("CLAUDE_CONFIG_DIR");
-    var environment = EnvironmentNameFrom(configDirectory);
+    var environment = SnapshotName.For(configDirectory);
 
     var report = StatusLineReport.FromJson(input);
     if (report.HasData)
@@ -48,20 +48,6 @@ static void WriteOutput(string text)
     var bytes = Encoding.UTF8.GetBytes(text);
     stdout.Write(bytes, 0, bytes.Length);
     stdout.Flush();
-}
-
-/// One file per environment, named after the Claude Code config folder. The tray matches it
-/// with the environment the user named; the bridge only knows the folder it was started for.
-static string EnvironmentNameFrom(string? configDirectory)
-{
-    if (string.IsNullOrWhiteSpace(configDirectory))
-    {
-        return "default";
-    }
-
-    var name = new DirectoryInfo(configDirectory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)).Name;
-    var safe = new string(name.Where(c => char.IsLetterOrDigit(c) || c is '-' or '_' or '.').ToArray()).Trim('.');
-    return safe.Length > 0 ? safe : "default";
 }
 
 static string SnapshotPath(string environment)

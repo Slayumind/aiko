@@ -142,9 +142,13 @@ sealed class TrayIcon : IDisposable
     private IReadOnlyList<CardState> Cards()
     {
         var now = DateTimeOffset.Now;
-        return _watcher.Snapshots
+
+        // Read every time: the settings window can rename an environment while the tray runs, and
+        // the file is small.
+        var environments = SettingsStore.LoadEnvironments();
+
+        return EnvironmentSnapshots.Combine(environments, _watcher.ByFile)
             .Select(snapshot => CardState.From(snapshot, now))
-            .OrderBy(card => card.Environment, StringComparer.OrdinalIgnoreCase)
             .ToList();
     }
 
@@ -169,10 +173,10 @@ sealed class TrayIcon : IDisposable
 
     private void SwapRing()
     {
-        var others = _watcher.Snapshots
-            .Select(s => s.Environment)
+        // Environments as the user named them, not the folders behind them.
+        var others = Cards()
+            .Select(card => card.Environment)
             .Where(name => !string.Equals(name, _ringEnvironment, StringComparison.OrdinalIgnoreCase))
-            .OrderBy(name => name, StringComparer.OrdinalIgnoreCase)
             .ToList();
 
         if (others.Count == 0)
