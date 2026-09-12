@@ -30,6 +30,12 @@ static class Program
             return;
         }
 
+        if (args is ["--snapshot-settings", var settingsPath, ..])
+        {
+            Snapshot.Write(new SettingsPanel(), settingsPath);
+            return;
+        }
+
         var application = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
         TrayIcon? tray = null;
 

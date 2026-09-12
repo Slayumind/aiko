@@ -42,6 +42,7 @@ sealed class TrayIcon : IDisposable
     private HwndSource? _source;
     private DispatcherTimer? _hover;
     private CardWindow? _card;
+    private SettingsWindow? _settings;
     private HICON _icon;
     private uint _iconDpi;
     private int _iconSize;
@@ -78,6 +79,7 @@ sealed class TrayIcon : IDisposable
 
         CancelHover();
         _card?.Close();
+        _settings?.Close();
 
         var data = NewData();
         PInvoke.Shell_NotifyIcon(NOTIFY_ICON_MESSAGE.NIM_DELETE, in data);
@@ -235,9 +237,23 @@ sealed class TrayIcon : IDisposable
         Log.Write($"card opened at {card.Left},{card.Top} size {card.ActualWidth}x{card.ActualHeight}");
     }
 
-    // The settings window is the next piece of work; until then the gear has nothing to open.
+    /// One settings window at a time: asking twice brings the open one forward instead of
+    /// stacking a second copy on top of it.
     private void OpenSettings()
     {
+        if (_settings is not null)
+        {
+            _settings.Activate();
+            return;
+        }
+
+        var window = new SettingsWindow();
+        window.QuitRequested += () => _application.Shutdown();
+        window.Closed += (_, _) => _settings = null;
+        _settings = window;
+        window.Show();
+
+        Log.Write("settings opened");
     }
 
     /// Where Windows put our icon, in real pixels. It answers even when the icon sits in the

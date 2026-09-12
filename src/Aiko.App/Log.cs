@@ -17,6 +17,9 @@ static class Log
         "Aiko",
         "log.txt");
 
+    /// Shown in the diagnostics, so a bug report can say where to look.
+    public static string FilePath => File;
+
     public static void Write(string message)
     {
         try
