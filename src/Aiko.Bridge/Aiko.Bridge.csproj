@@ -11,4 +11,8 @@
     <PublishReadyToRun>true</PublishReadyToRun>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Aiko.Core\Aiko.Core.csproj" />
+  </ItemGroup>
+
 </Project>
