@@ -3,6 +3,9 @@
   <!--
     x64 is required: CsWin32 does not generate Shell_NotifyIcon and NOTIFYICONDATAW for AnyCPU,
     because their layout differs between x86 and x64 (spike 2026-09-11).
+
+    There is no App.xaml: Aiko lives in the tray, so it has its own Main that creates the tray
+    icon and only opens windows on demand.
   -->
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -10,6 +13,20 @@
     <UseWPF>true</UseWPF>
     <PlatformTarget>x64</PlatformTarget>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <EnableDefaultApplicationDefinition>false</EnableDefaultApplicationDefinition>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <StartupObject>Aiko.App.Program</StartupObject>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Aiko.Core\Aiko.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.333">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
 
 </Project>
