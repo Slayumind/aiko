@@ -134,7 +134,15 @@ jobs:
         run: |
           # The paths are gathered first: passing the command a PowerShell expression would hand
           # it objects instead of file names.
-          $files = Get-ChildItem releases -File | ForEach-Object { $_.FullName }
+          #
+          # The portable zip is left out. vpk builds one and there is no flag to stop it, but the
+          # decision was installer only: the status line Aiko writes holds a fixed path to the
+          # bridge, and Velopack's install folder is stable across updates while a folder somebody
+          # unzipped into Downloads is not. Somebody who moved or deleted that folder would be left
+          # with a Claude Code status line pointing at nothing, after every answer, forever.
+          $files = Get-ChildItem releases -File |
+            Where-Object { $_.Name -notlike '*Portable*' } |
+            ForEach-Object { $_.FullName }
           gh release create ${{ github.ref_name }} @files `
             --title "Aiko ${{ steps.version.outputs.number }}" `
             --notes-file release-notes.md

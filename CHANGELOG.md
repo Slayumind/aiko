@@ -76,3 +76,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   nothing; it now does, and the window comes straight back in the other language instead of asking
   for a restart.
 - The weekly model limit shows the model the server named, instead of always saying Fable.
+- A release no longer publishes a portable zip. vpk builds one and there is no flag to stop it, but
+  the status line Aiko writes holds a fixed path to its bridge, and a folder somebody unzipped into
+  Downloads is not a fixed path.
+- The --try-access log line names the Claude Code folder instead of its full path, which is what
+  PRIVACY.md says the log holds.

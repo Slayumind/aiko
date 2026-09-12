@@ -50,7 +50,11 @@ days of requests cannot be joined into one person. The count is of days, not of 
 over time, which is the number that was wanted anyway. Delete that file and you get a new value.
 
 **What that leaves.** `slayumind.org` receives the request, and like any web server it sees the
-address it came from. That address is not written down and not kept.
+address it came from. The site's own code never reads that address and never stores it: the
+counting uses only the identifier Aiko sends. What sits in front of the site — a content network
+and a reverse proxy — sees it the way it sees every request to every website, and its access log
+is outside what this project controls. Saying more than that would be a promise about somebody
+else's machine.
 
 **How to turn it off.** The switch in settings called "Check for updates". It is off until you turn
 it on, and turning it off stops the version check and the counting together. There is no way to

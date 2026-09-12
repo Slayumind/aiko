@@ -1,3 +1,4 @@
+using System.IO;
 using System.Runtime.Versioning;
 using System.Windows;
 using System.Windows.Interop;
@@ -61,7 +62,9 @@ static class Program
                 ? PatchOutcome.Failed(PatchProblem.BridgeUnknown)
                 : ClaudeSettingsFile.AddBridge(folder, bridge);
 
-            Log.Write($"--try-access {folder}: changed={outcome.Changed} problem={outcome.Problem}");
+            // The name, not the path. PRIVACY.md says the log holds a Claude Code folder name and
+            // not the path to it, and a promise in that file has to hold for every code path.
+            Log.Write($"--try-access {FolderName(folder)}: changed={outcome.Changed} problem={outcome.Problem}");
             Environment.Exit(outcome.Changed ? 0 : 1);
             return;
         }
@@ -71,7 +74,7 @@ static class Program
         if (args is ["--try-restore", var restoreFolder, ..])
         {
             var outcome = ClaudeSettingsFile.RemoveBridge(restoreFolder);
-            Log.Write($"--try-restore {restoreFolder}: changed={outcome.Changed} problem={outcome.Problem}");
+            Log.Write($"--try-restore {FolderName(restoreFolder)}: changed={outcome.Changed} problem={outcome.Problem}");
             Environment.Exit(outcome.Changed ? 0 : 1);
             return;
         }
@@ -113,4 +116,8 @@ static class Program
 
         application.Run();
     }
+
+    /// The last part of a folder path, whichever separator it ends with.
+    private static string FolderName(string path) =>
+        Path.GetFileName(path.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
 }
