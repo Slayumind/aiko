@@ -86,6 +86,15 @@ static class Program
             return;
         }
 
+        // Where Aiko would find Claude Code, read from a fresh PATH. Opens nothing.
+        if (args is ["--try-claude", ..])
+        {
+            var claude = ClaudeLauncher.FindClaude();
+            Log.Write($"--try-claude: {(claude is null ? "not found" : Path.GetFileName(Path.GetDirectoryName(claude)) + "\\" + Path.GetFileName(claude))}");
+            Environment.Exit(claude is null ? 1 : 0);
+            return;
+        }
+
         // Sets the command folder up from the installed shim, reports what is in it and removes it
         // again. PATH is not touched: that part is checked in Windows Sandbox.
         if (args is ["--try-commands", ..])
