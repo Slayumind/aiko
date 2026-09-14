@@ -1,20 +1,28 @@
 namespace Aiko.Core;
 
-/// The numbers of the glass: how far it blurs, how much it lifts colour and light. Measured in the
-/// units WPF places windows in; the capture comes in real pixels and the scale converts.
+/// The numbers of the glass: how far it blurs, how much it lifts colour and light, and how the
+/// picture behind it bends. Measured in the units WPF places windows in; the capture comes in real
+/// pixels and the scale converts.
 ///
-/// The recipe follows Fluent acrylic (blur 30, saturation 1.25, noise 2 %) and CSS glassmorphism,
-/// which lifts saturation further. Blur alone greys colours out, and that is what made the first
-/// glass look muddy.
-public sealed record GlassRecipe(double BlurRadius, double Saturation, double Lift, int Downscale)
+/// Aiko's glass follows the owner's reference, the liquid glass of ui-layouts: blur 24, no tint, and
+/// the blurred picture bent by low-frequency noise (baseFrequency 0.003 0.007, displacement scale
+/// 200), which is what makes it read as liquid rather than frosted.
+public sealed record GlassRecipe(
+    double BlurRadius,
+    double Saturation,
+    double Lift,
+    int Downscale,
+    double BendScale = 0,
+    double BendFrequencyX = 0.003,
+    double BendFrequencyY = 0.007)
 {
-    public static readonly GlassRecipe Aiko = new(BlurRadius: 30, Saturation: 1.5, Lift: 0.05, Downscale: 4);
+    public static readonly GlassRecipe Aiko = new(BlurRadius: 24, Saturation: 1, Lift: 0, Downscale: 4, BendScale: 200);
 }
 
 /// A picture in BGRA, 8 bits a channel, rows from the top.
 public sealed record GlassImage(byte[] Pixels, int Width, int Height);
 
-/// Turns a picture of the screen into frosted glass: smaller, blurred, more saturated, a little lighter.
+/// Turns a picture of the screen into glass: smaller, blurred, toned, and bent like liquid.
 ///
 /// Aiko cannot blur the live screen (RESEARCH, glass spikes), so it takes a picture under the
 /// landing strip when the island is picked up and frosts that once.
@@ -37,7 +45,67 @@ public static class FrostedGlass
         }
 
         Tone(small, recipe.Saturation, recipe.Lift);
-        return small;
+
+        var perUnit = scale / Math.Max(1, recipe.Downscale);
+        return recipe.BendScale > 0
+            ? Bend(small, recipe.BendScale * perUnit, recipe.BendFrequencyX / perUnit, recipe.BendFrequencyY / perUnit)
+            : small;
+    }
+
+    /// Moves every pixel by smooth noise, as SVG feDisplacementMap does with feTurbulence: each pixel
+    /// shows the one up to half the scale away, in a direction that changes slowly across the picture.
+    /// Frequencies are waves per pixel. The noise is the same every time, so the glass does not
+    /// flicker between two drags.
+    public static GlassImage Bend(GlassImage image, double scale, double frequencyX, double frequencyY)
+    {
+        var bent = new byte[image.Pixels.Length];
+        for (var y = 0; y < image.Height; y++)
+        {
+            for (var x = 0; x < image.Width; x++)
+            {
+                var dx = (SmoothNoise(x * frequencyX, y * frequencyY, 11) - 0.5) * scale;
+                var dy = (SmoothNoise(x * frequencyX, y * frequencyY, 29) - 0.5) * scale;
+                var sx = Math.Clamp((int)Math.Round(x + dx), 0, image.Width - 1);
+                var sy = Math.Clamp((int)Math.Round(y + dy), 0, image.Height - 1);
+
+                var from = ((sy * image.Width) + sx) * 4;
+                var to = ((y * image.Width) + x) * 4;
+                bent[to] = image.Pixels[from];
+                bent[to + 1] = image.Pixels[from + 1];
+                bent[to + 2] = image.Pixels[from + 2];
+                bent[to + 3] = image.Pixels[from + 3];
+            }
+        }
+
+        return new GlassImage(bent, image.Width, image.Height);
+    }
+
+    /// Value noise between 0 and 1: random values on a grid of whole numbers, blended smoothly between them.
+    public static double SmoothNoise(double x, double y, int seed)
+    {
+        var x0 = (int)Math.Floor(x);
+        var y0 = (int)Math.Floor(y);
+        var tx = Fade(x - x0);
+        var ty = Fade(y - y0);
+
+        var top = Lerp(Lattice(x0, y0, seed), Lattice(x0 + 1, y0, seed), tx);
+        var bottom = Lerp(Lattice(x0, y0 + 1, seed), Lattice(x0 + 1, y0 + 1, seed), tx);
+        return Lerp(top, bottom, ty);
+    }
+
+    private static double Fade(double t) => t * t * (3 - (2 * t));
+
+    private static double Lerp(double a, double b, double t) => a + ((b - a) * t);
+
+    private static double Lattice(int x, int y, int seed)
+    {
+        unchecked
+        {
+            var h = (uint)((x * 374761393) + (y * 668265263) + (seed * 982451653));
+            h = (h ^ (h >> 13)) * 1274126177;
+            h ^= h >> 16;
+            return h / (double)uint.MaxValue;
+        }
     }
 
     /// Averages each square of factor by factor pixels into one. Alpha comes out opaque: a picture

@@ -1,39 +1,52 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
+using System.Windows.Media.Effects;
 using Aiko.Core;
 
 namespace Aiko.App;
 
-/// The landing strip: a pane of frosted glass on the edge where the island in hand will land (D-161,
-/// D-182).
+/// The landing strip: a pane of liquid glass on the edge where the island in hand will land (D-161,
+/// D-183).
 ///
 /// A window of its own, because it sits on the edge while the island is somewhere else. It never
 /// takes the focus or a click, and it exists only while the island is in hand.
 ///
-/// Windows gives a window without focus no glass that Aiko can tune (RESEARCH, glass spikes), so the
-/// glass is Aiko's own: a frosted picture of the screen taken when the island was picked up, a thin
-/// tint and grain over it, and a light rim. Being Aiko's own drawing, it can have the flat side
-/// against the edge that the island has.
+/// The glass follows the owner's reference, the liquid glass card of ui-layouts, layer by layer:
+/// the picture behind it blurred and bent (GlassBands), a face with a soft shadow and a faint white
+/// glow around it, and an edge lit from inside. It has no tint and no grain. Being Aiko's own
+/// drawing, it can have the flat side against the screen edge that the island has.
 sealed class IslandGhost : Window
 {
     private const double Radius = 14;
 
-    /// White over the frosted picture: just enough to tell the pane from what is behind it.
-    private static readonly Color Tint = Color.FromArgb(0x0A, 0xFF, 0xFF, 0xFF);
-
-    /// The light edge that makes a pane read as glass, on the sides that face into the screen.
-    private static readonly SolidColorBrush Rim = Frozen(new SolidColorBrush(Color.FromArgb(0x38, 0xFF, 0xFF, 0xFF)));
-
-    /// Grain, the way frosted glass catches light: about two percent, as in Fluent acrylic.
-    private static readonly ImageBrush Grain = MakeGrain();
+    /// Room around the pane for the shadow and the glow to spread into.
+    private const double Spread = 28;
 
     private readonly GlassBands _glass;
-    private readonly Border _picture = new();
-    private readonly Border _grain = new() { Background = Grain };
-    private readonly Border _rim = new() { BorderBrush = Rim };
+    private readonly Border _glow = new()
+    {
+        Background = Brushes.White,
+        Opacity = 0.1,
+        Effect = new BlurEffect { Radius = 24 },
+    };
+
+    private readonly Border _pane = new()
+    {
+        // box-shadow 0 4px 4px rgba(0,0,0,.15), 0 0 12px rgba(0,0,0,.08), made one.
+        Effect = new DropShadowEffect { Color = Colors.Black, BlurRadius = 12, ShadowDepth = 3, Direction = 270, Opacity = 0.22 },
+    };
+
+    private readonly Border _edgeLight = new()
+    {
+        // inset 3px 3px 3px rgba(255,255,255,.45) and the same from the other side: a lit rim inside.
+        BorderBrush = new SolidColorBrush(Color.FromArgb(0x73, 0xFF, 0xFF, 0xFF)),
+        Effect = new BlurEffect { Radius = 3 },
+    };
+
+    private readonly Grid _layers = new();
     private ScreenEdge? _edge;
+    private Size _size;
 
     public IslandGhost(GlassBands glass)
     {
@@ -49,13 +62,12 @@ sealed class IslandGhost : Window
         IsHitTestVisible = false;
 
         // The picture is a quarter of the screen's size; smooth scaling keeps the blur soft.
-        RenderOptions.SetBitmapScalingMode(_picture, BitmapScalingMode.Linear);
+        RenderOptions.SetBitmapScalingMode(_pane, BitmapScalingMode.Linear);
 
-        var layers = new Grid();
-        layers.Children.Add(_picture);
-        layers.Children.Add(_grain);
-        layers.Children.Add(_rim);
-        Content = layers;
+        _layers.Children.Add(_glow);
+        _layers.Children.Add(_pane);
+        _layers.Children.Add(_edgeLight);
+        Content = _layers;
     }
 
     /// Raised the first time the strip shows. Both windows stay above everything, and the one shown
@@ -67,27 +79,31 @@ sealed class IslandGhost : Window
     public void PlaceOn(Box box, ScreenEdge edge)
     {
         var glide = _edge is not null && _edge != edge && Motion.IsOn;
-        if (_edge != edge)
+        if (_edge != edge || _size != new Size(box.Width, box.Height))
         {
-            Shape(edge);
+            Shape(edge, box.Width, box.Height);
         }
 
         _edge = edge;
-        _picture.Background = _glass.BrushFor(edge, box) ?? (Brush)new SolidColorBrush(Color.FromArgb(0x60, 0x17, 0x17, 0x17));
-        Width = box.Width;
-        Height = box.Height;
+        _pane.Background = _glass.BrushFor(edge, box) ?? (Brush)new SolidColorBrush(Color.FromArgb(0x60, 0x17, 0x17, 0x17));
+
+        // The window reaches past the pane on the sides that face into the screen, for the shadow.
+        var room = Room(edge);
+        var window = new Box(box.X - room.Left, box.Y - room.Top, box.Width + room.Left + room.Right, box.Height + room.Top + room.Bottom);
+        Width = window.Width;
+        Height = window.Height;
 
         if (glide)
         {
-            BeginAnimation(LeftProperty, Motion.To(box.X, Motion.Expand, Motion.Standard));
-            BeginAnimation(TopProperty, Motion.To(box.Y, Motion.Expand, Motion.Standard));
+            BeginAnimation(LeftProperty, Motion.To(window.X, Motion.Expand, Motion.Standard));
+            BeginAnimation(TopProperty, Motion.To(window.Y, Motion.Expand, Motion.Standard));
         }
         else
         {
             BeginAnimation(LeftProperty, null);
             BeginAnimation(TopProperty, null);
-            Left = box.X;
-            Top = box.Y;
+            Left = window.X;
+            Top = window.Y;
         }
 
         if (!IsVisible)
@@ -97,9 +113,18 @@ sealed class IslandGhost : Window
         }
     }
 
-    /// The same shape as the island that will land here: flat and without a rim on the edge side.
-    private void Shape(ScreenEdge edge)
+    private static Thickness Room(ScreenEdge edge) => edge switch
     {
+        ScreenEdge.Top => new Thickness(Spread, 0, Spread, Spread),
+        ScreenEdge.Bottom => new Thickness(Spread, Spread, Spread, 0),
+        ScreenEdge.Left => new Thickness(0, Spread, Spread, Spread),
+        _ => new Thickness(Spread, Spread, 0, Spread),
+    };
+
+    /// The same shape as the island that will land here: flat and unlit on the edge side.
+    private void Shape(ScreenEdge edge, double width, double height)
+    {
+        _size = new Size(width, height);
         var corners = edge switch
         {
             ScreenEdge.Top => new CornerRadius(0, 0, Radius, Radius),
@@ -108,51 +133,44 @@ sealed class IslandGhost : Window
             _ => new CornerRadius(Radius, 0, 0, Radius),
         };
 
-        _picture.CornerRadius = corners;
-        _grain.CornerRadius = corners;
-        _rim.CornerRadius = corners;
-        _rim.BorderThickness = edge switch
+        var room = Room(edge);
+        foreach (var layer in new[] { _glow, _pane, _edgeLight })
         {
-            ScreenEdge.Top => new Thickness(1, 0, 1, 1),
-            ScreenEdge.Bottom => new Thickness(1, 1, 1, 0),
-            ScreenEdge.Left => new Thickness(0, 1, 1, 1),
-            _ => new Thickness(1, 1, 0, 1),
-        };
-    }
-
-    private static ImageBrush MakeGrain()
-    {
-        const int size = 96;
-        var random = new Random(7);
-        var pixels = new byte[size * size * 4];
-        for (var i = 0; i < pixels.Length; i += 4)
-        {
-            // Premultiplied BGRA: the tint everywhere, and a light or a darker speck at a few percent.
-            var speck = random.Next(0, 6);
-            var alpha = (byte)(Tint.A + speck);
-            var value = random.Next(3) != 0 ? alpha : (byte)(alpha / 3);
-            pixels[i] = value;
-            pixels[i + 1] = value;
-            pixels[i + 2] = value;
-            pixels[i + 3] = alpha;
+            layer.CornerRadius = corners;
+            layer.Margin = room;
+            layer.Width = width;
+            layer.Height = height;
         }
 
-        var tile = BitmapSource.Create(size, size, 96, 96, PixelFormats.Pbgra32, null, pixels, size * 4);
-        tile.Freeze();
-
-        return Frozen(new ImageBrush(tile)
+        _edgeLight.BorderThickness = edge switch
         {
-            TileMode = TileMode.Tile,
-            Viewport = new Rect(0, 0, size, size),
-            ViewportUnits = BrushMappingMode.Absolute,
-            Stretch = Stretch.None,
-        });
+            ScreenEdge.Top => new Thickness(3, 0, 3, 3),
+            ScreenEdge.Bottom => new Thickness(3, 3, 3, 0),
+            ScreenEdge.Left => new Thickness(0, 3, 3, 3),
+            _ => new Thickness(3, 3, 0, 3),
+        };
+
+        // Cut to the pane, so the blurred rim glows inwards only, like an inset shadow.
+        _edgeLight.Clip = Outline(width, height, corners);
     }
 
-    private static T Frozen<T>(T freezable)
-        where T : Freezable
+    private static Geometry Outline(double width, double height, CornerRadius corners)
     {
-        freezable.Freeze();
-        return freezable;
+        var outline = new StreamGeometry();
+        using (var draw = outline.Open())
+        {
+            draw.BeginFigure(new Point(corners.TopLeft, 0), isFilled: true, isClosed: true);
+            draw.LineTo(new Point(width - corners.TopRight, 0), true, false);
+            draw.ArcTo(new Point(width, corners.TopRight), new Size(corners.TopRight, corners.TopRight), 0, false, SweepDirection.Clockwise, true, false);
+            draw.LineTo(new Point(width, height - corners.BottomRight), true, false);
+            draw.ArcTo(new Point(width - corners.BottomRight, height), new Size(corners.BottomRight, corners.BottomRight), 0, false, SweepDirection.Clockwise, true, false);
+            draw.LineTo(new Point(corners.BottomLeft, height), true, false);
+            draw.ArcTo(new Point(0, height - corners.BottomLeft), new Size(corners.BottomLeft, corners.BottomLeft), 0, false, SweepDirection.Clockwise, true, false);
+            draw.LineTo(new Point(0, corners.TopLeft), true, false);
+            draw.ArcTo(new Point(corners.TopLeft, 0), new Size(corners.TopLeft, corners.TopLeft), 0, false, SweepDirection.Clockwise, true, false);
+        }
+
+        outline.Freeze();
+        return outline;
     }
 }

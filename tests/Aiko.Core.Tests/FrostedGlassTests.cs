@@ -75,6 +75,54 @@ public class FrostedGlassTests
     }
 
     [Fact]
+    public void Bending_by_nothing_changes_nothing_and_one_colour_stays_one_colour()
+    {
+        var stripes = Solid(40, 10, 0, 0, 0);
+        for (var i = 0; i < stripes.Pixels.Length; i += 4 * 3)
+        {
+            stripes.Pixels[i + 2] = 255;
+        }
+
+        Assert.Equal(stripes.Pixels, FrostedGlass.Bend(stripes, scale: 0, 0.05, 0.05).Pixels);
+
+        var solid = Solid(40, 10, 10, 20, 30);
+        Assert.Equal(solid.Pixels, FrostedGlass.Bend(solid, scale: 50, 0.05, 0.05).Pixels);
+    }
+
+    [Fact]
+    public void The_bend_moves_a_picture_and_does_it_the_same_way_each_time()
+    {
+        var ramp = Solid(200, 4, 0, 0, 0);
+        for (var x = 0; x < 200; x++)
+        {
+            for (var y = 0; y < 4; y++)
+            {
+                ramp.Pixels[(((y * 200) + x) * 4) + 2] = (byte)x;
+            }
+        }
+
+        var once = FrostedGlass.Bend(ramp, scale: 40, 0.02, 0.02);
+        var again = FrostedGlass.Bend(ramp, scale: 40, 0.02, 0.02);
+
+        Assert.NotEqual(ramp.Pixels, once.Pixels);
+        Assert.Equal(once.Pixels, again.Pixels);
+    }
+
+    [Fact]
+    public void The_noise_stays_between_nought_and_one_and_changes_smoothly()
+    {
+        for (var i = 0; i < 500; i++)
+        {
+            var x = i * 0.137;
+            var here = FrostedGlass.SmoothNoise(x, x * 0.5, 3);
+            var near = FrostedGlass.SmoothNoise(x + 0.01, x * 0.5, 3);
+
+            Assert.InRange(here, 0, 1);
+            Assert.True(Math.Abs(here - near) < 0.05);
+        }
+    }
+
+    [Fact]
     public void Lift_moves_towards_white_by_its_share()
     {
         var image = Solid(1, 1, 0, 100, 255);
