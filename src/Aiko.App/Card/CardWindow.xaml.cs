@@ -41,6 +41,7 @@ public partial class CardWindow : Window
         UpdateLayout();
         PlaceAbove(iconInPixels);
         Opacity = 1;
+        Motion.Appear(Panel);
     }
 
     /// Puts the card above the tray icon. The rectangle comes from Windows in real pixels, and
