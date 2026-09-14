@@ -24,7 +24,8 @@ public partial class FoldersPage : UserControl
         Fill();
     }
 
-    public event Action? WizardRequested;
+    /// Opens the checklist at the item that sets up what this page is missing.
+    public event Action<ChecklistItem>? ChecklistRequested;
 
     public void Leave() => _editor.Changed -= Fill;
 
@@ -128,5 +129,7 @@ public partial class FoldersPage : UserControl
         _editor.Commit(EnvironmentEdits.Bind(_editor.Current, dialog.FolderName, target.Name), "bound a folder");
     }
 
-    private void OnSetUpEnvironments(object sender, RoutedEventArgs e) => WizardRequested?.Invoke();
+    private void OnAddSecond(object sender, RoutedEventArgs e) => ChecklistRequested?.Invoke(ChecklistItem.SecondEnvironment);
+
+    private void OnSetUpCommands(object sender, RoutedEventArgs e) => ChecklistRequested?.Invoke(ChecklistItem.Commands);
 }

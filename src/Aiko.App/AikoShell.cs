@@ -47,7 +47,6 @@ sealed class AikoShell : IDisposable
     private DispatcherTimer? _hover;
     private CardWindow? _card;
     private SettingsWindow? _settings;
-    private WizardWindow? _wizard;
     private IslandWindow? _island;
     private FullScreenWatch? _fullScreen;
     private DirectPoller? _direct;
@@ -97,10 +96,10 @@ sealed class AikoShell : IDisposable
         Log.Write($"started, status line shell: {ShellDetect.Current()}");
         Log.Write($"found {folders.Count} claude folders, {EnvironmentScan.Pick(folders).Count} usable");
 
-        // Nothing set up yet: this is a first run, so the wizard opens itself.
+        // Nothing set up yet: this is a first run, so settings open themselves on the checklist.
         if (!SettingsStore.LoadEnvironments().HasEnvironments)
         {
-            OpenWizard();
+            OpenSettings(page: SettingsPanel.ChecklistPageKey);
         }
         else
         {
@@ -152,7 +151,6 @@ sealed class AikoShell : IDisposable
         CancelHover();
         _card?.Close();
         _settings?.Close();
-        _wizard?.Close();
         CloseIsland();
 
         RemoveIcon();
@@ -579,30 +577,6 @@ sealed class AikoShell : IDisposable
         _card?.Update(CurrentCard());
     }
 
-    private void OpenWizard()
-    {
-        if (_wizard is not null)
-        {
-            _wizard.Activate();
-            return;
-        }
-
-        var window = new WizardWindow();
-        window.Closed += (_, _) =>
-        {
-            _wizard = null;
-            ApplyPlace();
-            FollowDirectMode();
-            NoteWhereWeHaveNoAccess();
-            UpdateIcon();
-            _card?.Update(CurrentCard());
-        };
-        _wizard = window;
-        window.Show();
-
-        Log.Write("wizard opened");
-    }
-
     /// One settings window at a time: asking twice brings the open one forward instead of
     /// stacking a second copy on top of it.
     private void OpenSettings(bool checkUpdates = false, string? page = null)
@@ -619,7 +593,6 @@ sealed class AikoShell : IDisposable
 
         var window = new SettingsWindow(page);
         window.QuitRequested += () => _application.Shutdown();
-        window.WizardRequested += OpenWizard;
 
         // Changes apply at once (D-179): the tray or the island, direct mode and our access follow
         // each one while the window is still open.

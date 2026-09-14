@@ -5,13 +5,13 @@ using Aiko.Core;
 
 namespace Aiko.App;
 
-/// The environment wizard as a checklist (D-165).
+/// The environment checklist (D-165), a page of the settings window (D-177).
 ///
-/// The panel only gathers facts and draws them. Which item is ready, blocked or done, and which one
+/// The page only gathers facts and draws them. Which item is ready, blocked or done, and which one
 /// opens next, is decided by WizardChecklist in the core. Nothing outside Aiko's own settings is
 /// written before Finish, except the one thing the person asks for right away: signing in, which
 /// happens in Claude Code.
-public partial class WizardPanel : UserControl
+public partial class ChecklistPage : UserControl
 {
     private const string InstallCommandText = "irm https://claude.ai/install.ps1 | iex";
 
@@ -35,13 +35,9 @@ public partial class WizardPanel : UserControl
     private Waiter? _waiter;
     private ChecklistItem? _opened;
 
-    public WizardPanel() : this(null)
-    {
-    }
-
-    /// The item to open first. Only a snapshot asks for one: every item has to be looked at, and
-    /// clicking through them for a picture is not possible.
-    public WizardPanel(ChecklistItem? openFirst)
+    /// The item to open first: the second environment when the person asked to add one, and any item
+    /// for a snapshot. Null opens the next item that needs an answer.
+    public ChecklistPage(ChecklistItem? openFirst)
     {
         InitializeComponent();
 
@@ -50,9 +46,6 @@ public partial class WizardPanel : UserControl
         {
             row.HeaderClicked += OnRowClicked;
         }
-
-        // A small screen still shows the header and the button; the list scrolls in between.
-        ChecklistScroll.MaxHeight = Math.Max(360, SystemParameters.WorkArea.Height - 200);
 
         InstallCommand.Text = InstallCommandText;
         NewName.Text = "";
@@ -63,14 +56,17 @@ public partial class WizardPanel : UserControl
         FillCandidates();
         Refresh();
         Open(openFirst ?? WizardChecklist.NextToOpen(Facts()));
-
-        Unloaded += (_, _) => _waiter?.Dispose();
     }
 
-    /// Raised when the wizard is done, whether it wrote anything or not.
-    public event Action? Finished;
+    /// Raised after Finish wrote the environments, with the words for the page that comes next.
+    public event Action<string>? Finished;
 
-    public FrameworkElement DragHandle => HeaderRow;
+    /// Opens one item, for "Add a second environment" and the like.
+    public void OpenItem(ChecklistItem item) => Open(item);
+
+    /// Stops waiting for Claude Code or a sign-in. The page itself lives on while the person looks at
+    /// other pages of the window, so this is called when the window closes, not when the page hides.
+    public void Close() => _waiter?.Dispose();
 
     // ---- facts ----
 
@@ -109,16 +105,29 @@ public partial class WizardPanel : UserControl
     {
         FirstName.Text = _existing.First(Home)?.Name ?? Strings.EnvironmentPlainName;
 
+        // What is already in place counts as answered, so adding a second environment asks only
+        // about the second environment.
+        if (_existing.HasEnvironments)
+        {
+            _accessGranted = _existing.Environments.SelectMany(e => e.ConfigDirectories).All(ClaudeSettingsFile.HasOurLine) ? true : null;
+            _commandsWanted = CommandFolder.IsSetUp ? true : null;
+        }
+
         if (_existing.Second(Home) is { } second)
         {
             ChooseSecond(second.ConfigDirectories[0], second.Name);
             _projectFolders.AddRange(second.ProjectFolders);
+
+            // The default list starts at the default in use, not at environment 1.
+            DefaultChoice.Items = [FirstNameText(), SecondNameText()];
+            DefaultChoice.SelectedIndex = _existing.Default(Home) == second ? 1 : 0;
         }
 
         var settings = SettingsStore.Load();
         PlaceIsland.IsChecked = settings.Place == AikoPlace.Island;
         PlaceTray.IsChecked = settings.Place != AikoPlace.Island;
-        RunAtStartup.IsChecked = settings.RunAtStartup;
+        // What Windows holds, as on the general page: Finish writes this switch back to Windows.
+        RunAtStartup.IsChecked = _existing.HasEnvironments ? Startup.IsEnabled() : settings.RunAtStartup;
         CheckUpdates.IsChecked = settings.CheckUpdates;
 
         FillCommandFields();
@@ -140,7 +149,9 @@ public partial class WizardPanel : UserControl
         var (done, total) = WizardChecklist.Progress(facts);
         Counter.Text = string.Format(Strings.ChecklistCount, done, total);
         FinishButton.IsEnabled = WizardChecklist.CanFinish(facts);
-        FinishButton.Opacity = FinishButton.IsEnabled ? 1 : 0.5;
+        DoneView.IsOpen = FinishButton.IsEnabled;
+        DoneWhere.Text = PlaceIsland.IsChecked == true ? Strings.WizardDoneIsland : Strings.WizardDoneTray;
+        DoneOverflow.Visibility = PlaceIsland.IsChecked == true ? Visibility.Collapsed : Visibility.Visible;
 
         FillAccessPreview();
         FillCommandFields();
@@ -483,10 +494,10 @@ public partial class WizardPanel : UserControl
                 _commandFields[i] = field;
             }
 
-            var byName = LaunchCommand.FromEnvironmentName(names[i]);
-            if (field.Custom is null && field.Box.Text != byName)
+            var wanted = field.Custom ?? LaunchCommand.FromEnvironmentName(names[i]);
+            if (field.Box.Text != wanted)
             {
-                field.Box.Text = byName;
+                field.Box.Text = wanted;
             }
 
             ((TextBlock)((StackPanel)CommandFields.Children[i * 2]).Children[0]).Text = string.Format(Strings.CmdFor, names[i]);
@@ -513,7 +524,10 @@ public partial class WizardPanel : UserControl
         CommandFields.Children.Add(header);
         CommandFields.Children.Add(footer);
 
-        var field = new CommandField { Box = box, Note = note };
+        // An environment that is already set up brings its command along (D-180).
+        var existing = index == 0 ? _existing.First(Home) : _existing.Second(Home);
+        var field = new CommandField { Box = box, Note = note, Custom = EnvironmentEdits.StartingCommand(existing, CommandFolder.IsSetUp) };
+        byName.Visibility = field.Custom is null ? Visibility.Collapsed : Visibility.Visible;
         box.TextChanged += (_, _) =>
         {
             var byNameText = LaunchCommand.FromEnvironmentName(index == 0 ? FirstNameText() : SecondNameText());
@@ -644,8 +658,25 @@ public partial class WizardPanel : UserControl
         var commands = ApplyCommands(settings);
         ApplyPlace();
 
-        Log.Write($"wizard finished: {settings.Environments.Count} environments, access={_accessGranted}, commands={_commandsWanted}, bound={_projectFolders.Count}");
-        ShowDone(problems, commands);
+        Log.Write($"checklist finished: {settings.Environments.Count} environments, access={_accessGranted}, commands={_commandsWanted}, bound={_projectFolders.Count}");
+        Close();
+        Finished?.Invoke(DoneNote(problems, commands));
+    }
+
+    /// One short paragraph for the environment page that opens after Finish.
+    private string DoneNote(List<PatchProblem> problems, string? commands)
+    {
+        var parts = new List<string> { Strings.SetupDone };
+        if (commands is not null)
+        {
+            parts.Add(string.Format(Strings.DoneCommands, commands));
+        }
+
+        parts.Add(problems.Count > 0
+            ? string.Join(" ", problems.Distinct().Select(ClaudeSettingsFile.Words))
+            : _accessGranted == true ? Strings.WizardDoneFirstNumbers : Strings.WizardDoneNoAccess);
+
+        return string.Join(" ", parts);
     }
 
     private EnvironmentSettings BuildSettings()
@@ -667,10 +698,15 @@ public partial class WizardPanel : UserControl
             environments.Add(Keep(SecondNameText(), _secondFolder, 1, _projectFolders.ToList()));
         }
 
-        var defaultName = DefaultChoice.SelectedIndex > 0 && environments.Count > 1 ? environments[1].Name : null;
+        // A default that was written down stays written down, under its current name.
+        var defaultName = DefaultChoice.SelectedIndex > 0 && environments.Count > 1 ? environments[1].Name
+            : _existing.DefaultEnvironment is null ? null
+            : environments[0].Name;
+        // The ring keeps the environment the person put there, when it is still in the list.
+        var ring = environments.Any(e => e.Name == _existing.RingEnvironment) ? _existing.RingEnvironment : environments[0].Name;
         return new EnvironmentSettings(environments)
         {
-            RingEnvironment = environments[0].Name,
+            RingEnvironment = ring,
             DefaultEnvironment = defaultName,
         };
     }
@@ -694,30 +730,6 @@ public partial class WizardPanel : UserControl
             RunAtStartup = runAtStartup,
             CheckUpdates = CheckUpdates.IsChecked == true,
         });
-    }
-
-    private void OnCloseClicked(object sender, RoutedEventArgs e) => Finished?.Invoke();
-
-    private void ShowDone(List<PatchProblem> problems, string? commands)
-    {
-        var island = PlaceIsland.IsChecked == true;
-
-        ChecklistScroll.Visibility = Visibility.Collapsed;
-        Heading.Text = Strings.WizardStepDone;
-        Counter.Text = "";
-
-        DoneWhere.Text = island ? Strings.WizardDoneIsland : Strings.WizardDoneTray;
-        DoneOverflow.Visibility = island ? Visibility.Collapsed : Visibility.Visible;
-        DoneCommands.Text = commands is null ? "" : string.Format(Strings.DoneCommands, commands);
-        DoneCommands.Visibility = commands is null ? Visibility.Collapsed : Visibility.Visible;
-        DoneFirstNumbers.Text = problems.Count > 0
-            ? string.Join(" ", problems.Distinct().Select(ClaudeSettingsFile.Words))
-            : _accessGranted == true ? Strings.WizardDoneFirstNumbers : Strings.WizardDoneNoAccess;
-
-        DoneView.Visibility = Visibility.Visible;
-        FinishButton.Content = Strings.Close;
-        FinishButton.Click -= OnFinish;
-        FinishButton.Click += (_, _) => Finished?.Invoke();
     }
 
     private StackPanel TwoLines(string first, string second)

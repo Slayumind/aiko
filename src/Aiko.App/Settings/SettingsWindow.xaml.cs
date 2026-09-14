@@ -20,11 +20,6 @@ public partial class SettingsWindow : Window
         _panel.CloseRequested += Close;
         _panel.QuitRequested += () => QuitRequested?.Invoke();
         _panel.SettingsChanged += () => SettingsChanged?.Invoke();
-        _panel.WizardRequested += () =>
-        {
-            WizardRequested?.Invoke();
-            Close();
-        };
         _panel.ReopenRequested += () =>
         {
             ReopenPage = _panel.CurrentPage;
@@ -52,8 +47,6 @@ public partial class SettingsWindow : Window
     /// "Quit Aiko" closes the whole app, not this window, so the tray decides what to do.
     public event Action? QuitRequested;
 
-    public event Action? WizardRequested;
-
     /// Raised after every saved change, so Aiko can follow it while the window is still open.
     public event Action? SettingsChanged;
 
@@ -62,6 +55,8 @@ public partial class SettingsWindow : Window
 
     /// Opened from the tray menu item that asks for an update check.
     public void CheckUpdatesNow() => _panel.StartUpdateCheck();
+
+    public void OpenChecklist() => _panel.OpenChecklist();
 
     private void OnDragHandlePressed(object sender, MouseButtonEventArgs e)
     {

@@ -6,7 +6,8 @@ namespace Aiko.App;
 
 /// --try-settings: opens the settings window and uses it with the real mouse and keyboard, the way
 /// the live run that found the bugs did. It picks the other environment for the first bound folder,
-/// then renames environment 2 and presses Enter. The environments file is put back afterwards.
+/// renames environment 2 with Enter, and finishes the checklist again, which must change nothing.
+/// The environments file is put back afterwards.
 static class SettingsCheck
 {
     public static int Run()
@@ -111,9 +112,42 @@ static class SettingsCheck
         var kept = renamed?.Name == second.Name + " Check" && renamed.Command == second.Command;
         var suggested = page.SuggestionPanel.IsOpen == (Core.LaunchCommand.FromEnvironmentName(second.Name + " Check") != second.Command && CommandFolder.IsSetUp);
 
-        Log.Write($"--try-settings: folder moved={moved}, renamed with the command kept={kept}, suggestion shown right={suggested}");
-        return moved && kept && suggested;
+        // ---- the checklist, gone through again and finished, changes nothing ----
+        SettingsStore.SaveEnvironments(original);
+
+        // Finish writes the status line, the reminder hook and the startup entry for the program that
+        // runs it. From a development build they would point into bin\, so this part needs the
+        // installed Aiko, which is the one build that carries the shim.
+        if (CommandFolder.ShimInInstall() is null)
+        {
+            Log.Write($"--try-settings: folder moved={moved}, renamed with the command kept={kept}, suggestion shown right={suggested}, checklist skipped: run the installed Aiko for it");
+            return moved && kept && suggested;
+        }
+
+        var third = new SettingsPanel(panel.EnvironmentPage(0));
+        ((Window)fresh.Parent).Content = third;
+        third.OpenChecklist(Core.ChecklistItem.Commands);
+        await Task.Delay(600);
+
+        var checklist = (ChecklistPage)third.PageHost.Content;
+        checklist.FinishButton.BringIntoView();
+        await Task.Delay(300);
+        Click(checklist.FinishButton.PointToScreen(new Point(20, 14)));
+        await Task.Delay(1000);
+
+        var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        var after = SettingsStore.LoadEnvironments();
+        var unchanged = Describe(after, home) == Describe(original, home);
+        var noteShown = third.PageHost.Content is EnvironmentPage { NotePanel.IsOpen: true };
+
+        Log.Write($"--try-settings: folder moved={moved}, renamed with the command kept={kept}, suggestion shown right={suggested}, checklist kept everything={unchanged}, note shown={noteShown}");
+        return moved && kept && suggested && unchanged && noteShown;
     }
+
+    /// Everything a person would notice about the environments, in one line to compare.
+    private static string Describe(Core.EnvironmentSettings settings, string home) =>
+        string.Join(" | ", settings.Environments.Select(e => $"{e.Name}/{e.Command}/{e.DirectMode}/{string.Join(";", e.ConfigDirectories)}/{string.Join(";", e.ProjectFolders)}"))
+        + $" | ring {settings.Ring?.Name} | default {settings.Default(home)?.Name}";
 
     private static void Click(Point point)
     {

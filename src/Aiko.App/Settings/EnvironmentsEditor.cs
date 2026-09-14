@@ -66,6 +66,39 @@ public sealed class EnvironmentsEditor
         return toRecycleBin && removed.ConfigDirectories.All(RecycleBin.Send);
     }
 
+    /// Reads the file again after the checklist wrote it.
+    public void Reload()
+    {
+        Current = SettingsStore.LoadEnvironments();
+        Changed?.Invoke();
+    }
+
+    /// Takes back everything Aiko set up for the environments and forgets them. The accounts stay in
+    /// their folders.
+    public void StartOver(bool recycleSecond)
+    {
+        var before = Current;
+        foreach (var folder in before.Environments.SelectMany(e => e.ConfigDirectories))
+        {
+            ClaudeSettingsFile.RemoveBridge(folder);
+        }
+
+        EnvironmentSetup.Undo();
+        Current = EnvironmentSettings.Empty;
+        SettingsStore.SaveEnvironments(Current);
+        Log.Write("settings: started over");
+
+        if (recycleSecond && before.Second(Home) is { } second)
+        {
+            foreach (var folder in second.ConfigDirectories)
+            {
+                RecycleBin.Send(folder);
+            }
+        }
+
+        Changed?.Invoke();
+    }
+
     private static HashSet<string> Commands(EnvironmentSettings settings) =>
         settings.Environments.Select(e => e.Command).ToHashSet(StringComparer.OrdinalIgnoreCase);
 

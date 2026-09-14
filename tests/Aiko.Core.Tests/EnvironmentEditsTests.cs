@@ -101,6 +101,17 @@ public class EnvironmentEditsTests
         Assert.Equal(CommandProblem.None, EnvironmentEdits.CheckCommand(settings, "Aiko", "aiko"));
     }
 
+    [Fact]
+    public void The_checklist_starts_from_the_command_in_use_once_commands_are_installed()
+    {
+        var work = new AikoEnvironment("Work · Kodland", [@"C:\x"]);
+
+        Assert.Equal("aiko-work-kodland", EnvironmentEdits.StartingCommand(work, commandsInstalled: true));
+        Assert.Null(EnvironmentEdits.StartingCommand(work, commandsInstalled: false));
+        Assert.Equal("cc", EnvironmentEdits.StartingCommand(work with { CustomCommand = "cc" }, commandsInstalled: false));
+        Assert.Null(EnvironmentEdits.StartingCommand(null, commandsInstalled: true));
+    }
+
     // ---- folders ----
 
     [Fact]

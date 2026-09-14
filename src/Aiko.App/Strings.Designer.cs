@@ -195,9 +195,6 @@ public static class Strings
     /// Copy diagnostics
     public static string CopyDiagnostics => Get("CopyDiagnostics");
 
-    /// Welcome to Aiko
-    public static string WizardWindowTitle => Get("WizardWindowTitle");
-
     /// Aiko settings
     public static string SettingsWindowTitle => Get("SettingsWindowTitle");
 
@@ -212,9 +209,6 @@ public static class Strings
 
     /// Where to show Aiko
     public static string WizardStepWhere => Get("WizardStepWhere");
-
-    /// All set
-    public static string WizardStepDone => Get("WizardStepDone");
 
     /// step {0} of 3
     public static string WizardStepCount => Get("WizardStepCount");
@@ -638,4 +632,22 @@ public static class Strings
 
     /// Diagnostics copied.
     public static string DiagnosticsCopied => Get("DiagnosticsCopied");
+
+    /// Environments are set up.
+    public static string SetupDone => Get("SetupDone");
+
+    /// Start over
+    public static string Restart => Get("Restart");
+
+    /// Removes the environments from Aiko and opens the checklist right here.
+    public static string RestartWhat => Get("RestartWhat");
+
+    /// Aiko removes the environments, its lines in settings.json, the commands {0}, the folder b...
+    public static string RestartLine => Get("RestartLine");
+
+    /// And move {0} to the Recycle Bin
+    public static string RestartBin => Get("RestartBin");
+
+    /// .claude stays either way.
+    public static string RestartKeep => Get("RestartKeep");
 }

@@ -24,7 +24,7 @@
     <StackPanel x:Name="OneEnvironment" Margin="0,16,0,0">
       <TextBlock x:Name="OneEnvironmentText" Style="{StaticResource RowHint}" Foreground="{StaticResource Ink}" />
       <Button Content="{x:Static local:Strings.AddSecondEnvironment}" Style="{StaticResource SmallButton}" Margin="0,10,0,0"
-              Click="OnSetUpEnvironments" />
+              Click="OnAddSecond" />
     </StackPanel>
 
     <StackPanel x:Name="Table" Margin="0,16,0,0">
@@ -32,7 +32,7 @@
               Padding="12,10" Margin="0,0,0,12">
         <DockPanel>
           <Button DockPanel.Dock="Right" Content="{x:Static local:Strings.SetUpEnvironments}" Style="{StaticResource SmallButton}"
-                  VerticalAlignment="Center" Margin="12,0,0,0" Click="OnSetUpEnvironments" />
+                  VerticalAlignment="Center" Margin="12,0,0,0" Click="OnSetUpCommands" />
           <TextBlock Text="{x:Static local:Strings.FoldersNeedCommands}" Style="{StaticResource RowHint}"
                      Foreground="{StaticResource Ink}" VerticalAlignment="Center" />
         </DockPanel>

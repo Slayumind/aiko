@@ -205,9 +205,6 @@
   <data name="CopyDiagnostics" xml:space="preserve">
     <value>Copy diagnostics</value>
   </data>
-  <data name="WizardWindowTitle" xml:space="preserve">
-    <value>Welcome to Aiko</value>
-  </data>
   <data name="SettingsWindowTitle" xml:space="preserve">
     <value>Aiko settings</value>
   </data>
@@ -222,9 +219,6 @@
   </data>
   <data name="WizardStepWhere" xml:space="preserve">
     <value>Where to show Aiko</value>
-  </data>
-  <data name="WizardStepDone" xml:space="preserve">
-    <value>All set</value>
   </data>
   <data name="WizardStepCount" xml:space="preserve">
     <value>step {0} of 3</value>
@@ -648,5 +642,23 @@
   </data>
   <data name="DiagnosticsCopied" xml:space="preserve">
     <value>Diagnostics copied.</value>
+  </data>
+  <data name="SetupDone" xml:space="preserve">
+    <value>Environments are set up.</value>
+  </data>
+  <data name="Restart" xml:space="preserve">
+    <value>Start over</value>
+  </data>
+  <data name="RestartWhat" xml:space="preserve">
+    <value>Removes the environments from Aiko and opens the checklist right here.</value>
+  </data>
+  <data name="RestartLine" xml:space="preserve">
+    <value>Aiko removes the environments, its lines in settings.json, the commands {0}, the folder bindings and its folder in PATH, and turns the PowerShell profile functions back on. Accounts and history stay in the folders.</value>
+  </data>
+  <data name="RestartBin" xml:space="preserve">
+    <value>And move {0} to the Recycle Bin</value>
+  </data>
+  <data name="RestartKeep" xml:space="preserve">
+    <value>.claude stays either way.</value>
   </data>
 </root>
