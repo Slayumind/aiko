@@ -18,21 +18,34 @@ public partial class IslandPanel : UserControl
         InitializeComponent();
     }
 
-    public void Show(IReadOnlyList<CardState> cards, ScreenEdge edge)
+    /// Docked means pressed against the edge. In hand the island is a whole thing of its own: every
+    /// corner rounded and a hairline all round, with its rings already laid out for the edge below.
+    public void Show(IReadOnlyList<CardState> cards, ScreenEdge edge, bool docked = true)
     {
         // Along a top or bottom edge the rings stand in a row; along a side they stand in a
         // column, so the island takes as little of the edge as it can.
         var horizontal = IslandPlacement.IsHorizontal(edge);
         Rings.Orientation = horizontal ? Orientation.Horizontal : Orientation.Vertical;
 
-        // Only the corners facing into the screen are rounded: the others are pressed against it.
-        Body.CornerRadius = edge switch
+        // Docked, the side against the screen has no corners and no line: it reads as part of the edge.
+        Body.CornerRadius = !docked ? new CornerRadius(14) : edge switch
         {
             ScreenEdge.Top => new CornerRadius(0, 0, 14, 14),
             ScreenEdge.Bottom => new CornerRadius(14, 14, 0, 0),
             ScreenEdge.Left => new CornerRadius(0, 14, 14, 0),
             _ => new CornerRadius(14, 0, 0, 14),
         };
+        Body.BorderThickness = !docked ? new Thickness(1) : edge switch
+        {
+            ScreenEdge.Top => new Thickness(1, 0, 1, 1),
+            ScreenEdge.Bottom => new Thickness(1, 1, 1, 0),
+            ScreenEdge.Left => new Thickness(0, 1, 1, 1),
+            _ => new Thickness(1, 1, 0, 1),
+        };
+
+        // The missing line goes into the padding, so the rings do not move by a pixel on landing.
+        var line = Body.BorderThickness;
+        Body.Padding = new Thickness(11 - line.Left, 8 - line.Top, 11 - line.Right, 8 - line.Bottom);
 
         ToolTip = TrayText.Tooltip(cards, null);
 
@@ -53,6 +66,16 @@ public partial class IslandPanel : UserControl
         {
             Rings.Children.Add(new RingGauge(null, LimitTone.Unknown, RingSize));
         }
+
+        // Every element from the rings up to this panel is marked for measuring. Otherwise a measure
+        // of the panel stops at the first element that did not change, and hands back the old size:
+        // in hand, a row that turned into a column kept the width and height of the row.
+        for (DependencyObject? element = Rings; element is not null && element != this; element = System.Windows.Media.VisualTreeHelper.GetParent(element))
+        {
+            (element as UIElement)?.InvalidateMeasure();
+        }
+
+        InvalidateMeasure();
     }
 
     private static Thickness Gap(bool horizontal, bool first) => (horizontal, first) switch

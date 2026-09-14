@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using Aiko.Core;
 using Windows.Win32;
@@ -20,6 +21,9 @@ public partial class IslandWindow : Window
         InitializeComponent();
 
         MouseLeftButtonDown += OnPressed;
+        MouseMove += OnMoved;
+        MouseLeftButtonUp += OnReleased;
+        LostMouseCapture += (_, _) => EndDrag();
 
         // The island answers to resting the mouse on it as well as to a click, the same 1.5
         // seconds as the tray icon.
@@ -32,13 +36,25 @@ public partial class IslandWindow : Window
                 CardRequested?.Invoke(false);
             }
         };
-        MouseEnter += (_, _) => _hover.Start();
+        MouseEnter += (_, _) =>
+        {
+            if (!_pressed)
+            {
+                _hover.Start();
+            }
+        };
         MouseLeave += (_, _) => _hover.Stop();
 
         // The window sizes itself to its content, and that happens after it is shown. Placing it
         // before then puts it wherever a width of zero lands, which is beside the middle instead
         // of in it.
-        SizeChanged += (_, _) => PlaceAt(_position);
+        SizeChanged += (_, _) =>
+        {
+            if (!_dragging)
+            {
+                PlaceAt(_position);
+            }
+        };
     }
 
     /// The card is asked for by a click, or by resting the mouse on the island. True means a click:
@@ -75,8 +91,11 @@ public partial class IslandWindow : Window
     {
         Panel.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
 
-        Width = Panel.DesiredSize.Width;
-        Height = Panel.DesiredSize.Height;
+        // Read once: setting the width resizes the window at once, the panel is measured again inside
+        // the old height, and its size then reads as that height. A column in hand stayed one ring tall.
+        var size = Panel.DesiredSize;
+        Width = size.Width;
+        Height = size.Height;
         UpdateLayout();
     }
 
@@ -95,34 +114,154 @@ public partial class IslandWindow : Window
             $"dpi {VisualTreeHelper.GetDpi(this).DpiScaleX:0.00}");
     }
 
+    // ---- the landing strip (D-161): in hand, the island follows the mouse and a dashed strip shows
+    // where it will land; let go, and it settles there ----
+
+    /// Further than this, a press is a drag and not a click.
+    private const double DragFrom = 3;
+
+    private bool _pressed;
+    private bool _dragging;
+    private Point _pressedAt;
+
+    /// Where in the island the mouse holds it, as a share of its size: a row that turns into a
+    /// column stays in the hand at the same spot.
+    private Point _grip;
+
+    private ScreenEdge _handEdge;
+    private IslandGhost? _ghost;
+
     private void OnPressed(object sender, MouseButtonEventArgs e)
     {
-        var before = new Point(Left, Top);
-        DragMove();
+        _hover.Stop();
+        _pressed = true;
+        _pressedAt = MouseOnScreen(e);
+        _grip = new Point((_pressedAt.X - Left) / ActualWidth, (_pressedAt.Y - Top) / ActualHeight);
+        CaptureMouse();
+        e.Handled = true;
+    }
 
-        // A click that moved nothing is a click, and it opens the card.
-        if (Math.Abs(Left - before.X) < 3 && Math.Abs(Top - before.Y) < 3)
+    private void OnMoved(object sender, MouseEventArgs e)
+    {
+        if (!_pressed)
         {
-            PlaceAt(_position);
-            CardRequested?.Invoke(true);
             return;
         }
 
-        SnapToEdge();
+        var cursor = MouseOnScreen(e);
+        if (!_dragging)
+        {
+            if (Math.Abs(cursor.X - _pressedAt.X) < DragFrom && Math.Abs(cursor.Y - _pressedAt.Y) < DragFrom)
+            {
+                return;
+            }
+
+            StartDrag();
+        }
+
+        var work = WorkArea();
+        var edge = IslandPlacement.NearestEdge(cursor.X, cursor.Y, work, _handEdge);
+        if (edge != _handEdge)
+        {
+            // The rings lay themselves out for the new edge while the island is still in hand.
+            _handEdge = edge;
+            Panel.Show(Cards, edge, docked: false);
+            Fit();
+        }
+
+        Left = cursor.X - (ActualWidth * _grip.X);
+        Top = cursor.Y - (ActualHeight * _grip.Y);
+
+        var centreX = Left + (ActualWidth / 2);
+        var centreY = Top + (ActualHeight / 2);
+        var landing = IslandPlacement.DropAt(edge, centreX, centreY, ActualWidth, ActualHeight, work);
+        _ghost?.PlaceOn(IslandPlacement.Place(landing, ActualWidth, ActualHeight, work), edge);
     }
 
-    /// Dropped anywhere, the island goes to the nearest edge of the screen it was dropped on.
-    private void SnapToEdge()
+    private void OnReleased(object sender, MouseButtonEventArgs e)
     {
-        var work = WorkArea();
-        var where = new Box(Left, Top, ActualWidth, ActualHeight);
+        if (!_pressed)
+        {
+            return;
+        }
 
-        _position = IslandPlacement.Nearest(where, work);
-        Panel.Show(Cards, _position.Edge);
+        var wasDragging = _dragging;
+        EndDrag();
+
+        // A press that moved nothing is a click, and it opens the card.
+        if (!wasDragging)
+        {
+            CardRequested?.Invoke(true);
+        }
+    }
+
+    private void StartDrag()
+    {
+        _dragging = true;
+        _handEdge = _position.Edge;
+        BeginAnimation(LeftProperty, null);
+        BeginAnimation(TopProperty, null);
+
+        Panel.Show(Cards, _handEdge, docked: false);
         Fit();
-        PlaceAt(_position);
+        _ghost = new IslandGhost();
+    }
 
+    /// Lets go: the island lands on the strip, and the strip goes away.
+    private void EndDrag()
+    {
+        var wasDragging = _dragging;
+        _pressed = false;
+        _dragging = false;
+        if (IsMouseCaptured)
+        {
+            ReleaseMouseCapture();
+        }
+
+        _ghost?.Close();
+        _ghost = null;
+
+        if (!wasDragging)
+        {
+            return;
+        }
+
+        var work = WorkArea();
+        _position = IslandPlacement.DropAt(_handEdge, Left + (ActualWidth / 2), Top + (ActualHeight / 2), ActualWidth, ActualHeight, work);
+        Land(work);
         Moved?.Invoke(_position);
+    }
+
+    /// The island flattens against its edge and settles into place with a small overshoot, the
+    /// same spring as everything else Aiko moves (D-161).
+    private void Land(Box work)
+    {
+        var from = new Point(Left, Top);
+
+        Panel.Show(Cards, _position.Edge);
+        Panel.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+        var size = Panel.DesiredSize;
+        var target = IslandPlacement.Place(_position, size.Width, size.Height, work);
+
+        if (Motion.IsOn)
+        {
+            BeginAnimation(LeftProperty, new DoubleAnimation(from.X, target.X, Motion.Settle) { EasingFunction = Motion.Spring });
+            BeginAnimation(TopProperty, new DoubleAnimation(from.Y, target.Y, Motion.Settle) { EasingFunction = Motion.Spring });
+        }
+
+        // Under a running animation these only set where the island stays once it has landed.
+        Width = size.Width;
+        Height = size.Height;
+        Left = target.X;
+        Top = target.Y;
+    }
+
+    /// The mouse in the units WPF places windows in. Measured against this window while it holds the
+    /// mouse, which works just as well outside it.
+    private Point MouseOnScreen(MouseEventArgs e)
+    {
+        var inside = e.GetPosition(this);
+        return new Point(Left + inside.X, Top + inside.Y);
     }
 
     private IReadOnlyList<CardState> Cards { get; set; } = [];
@@ -130,6 +269,14 @@ public partial class IslandWindow : Window
     public void Update(IReadOnlyList<CardState> cards)
     {
         Cards = cards;
+
+        // New numbers while the island is in hand change the rings, never where it is.
+        if (_dragging)
+        {
+            Panel.Show(cards, _handEdge, docked: false);
+            return;
+        }
+
         Panel.Show(cards, _position.Edge);
         Fit();
         PlaceAt(_position);
