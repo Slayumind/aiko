@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    This file is named claude.exe and stands in PATH before the real Claude Code, and it is also
+    copied under every command name such as aiko-work.exe. People start it by hand, so the start
+    time is felt, and it lives outside the install folder, so it cannot lean on the app's runtime.
+
+    The release publishes it as one self contained file, trimmed and precompiled. The spike
+    measured the choices: untrimmed 76 ms and 70 MB, trimmed 175 ms and 12 MB, trimmed with
+    ReadyToRun 74 ms and 16 MB. Trimming removes JSON reflection, which is why the core reads the
+    environments file with generated code.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>claude</AssemblyName>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <PublishTrimmed>true</PublishTrimmed>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IsTrimmable>true</IsTrimmable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Aiko.Core\Aiko.Core.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -74,6 +74,29 @@ jobs:
             throw "The bridge exited with $LASTEXITCODE. It cannot start from the publish folder."
           }
 
+      - name: Publish the shim into its own folder
+        # The shim is claude.exe, and the app copies it out to a folder in PATH, away from the
+        # install. There it has no runtime beside it, so it is one self contained file, trimmed and
+        # precompiled: 17 MB and about 74 ms to start. A folder of its own keeps its claude.exe from
+        # ever sitting next to the app.
+        run: >
+          dotnet publish src/Aiko.Shim/Aiko.Shim.csproj
+          --configuration Release --runtime win-x64 --self-contained true
+          -p:Version=${{ steps.version.outputs.number }}
+          --output publish/shim
+
+      - name: Check that the shim starts on its own
+        # Trimming can remove something only a run would miss. The self test starts the file and
+        # stops before it looks for Claude Code, which this machine does not have.
+        shell: pwsh
+        run: |
+          $env:AIKO_SHIM_SELF_TEST = '1'
+          $out = & ./publish/shim/claude.exe
+          if ($LASTEXITCODE -ne 0 -or $out -ne 'aiko shim ok') {
+            throw "The shim did not start: exit $LASTEXITCODE, output '$out'."
+          }
+          Remove-Item publish/shim/*.pdb
+
       - name: Install the Velopack tool
         # Pinned, and to the same version as the Velopack package the app is built against: the
         # tool writes the update format the library reads. Unpinned, the same tag builds a

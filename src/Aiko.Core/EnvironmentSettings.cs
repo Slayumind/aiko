@@ -100,7 +100,7 @@ public sealed record EnvironmentSettings(IReadOnlyList<AikoEnvironment> Environm
 
         try
         {
-            var file = JsonSerializer.Deserialize<SettingsFile>(json, Options);
+            var file = JsonSerializer.Deserialize(json, EnvironmentsJson.Default.SettingsFile);
             if (file?.Environments is null)
             {
                 return Empty;
@@ -148,16 +148,9 @@ public sealed record EnvironmentSettings(IReadOnlyList<AikoEnvironment> Environm
                     })
                     .ToList(),
             },
-            Options) + Environment.NewLine;
+            EnvironmentsJson.Default.SettingsFile) + Environment.NewLine;
 
-    private static readonly JsonSerializerOptions Options = new()
-    {
-        WriteIndented = true,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-    };
-
-    private sealed class SettingsFile
+    internal sealed class SettingsFile
     {
         public int SchemaVersion { get; set; }
         public string? RingEnvironment { get; set; }
@@ -165,7 +158,7 @@ public sealed record EnvironmentSettings(IReadOnlyList<AikoEnvironment> Environm
         public List<EnvironmentFile>? Environments { get; set; }
     }
 
-    private sealed class EnvironmentFile
+    internal sealed class EnvironmentFile
     {
         public string? Name { get; set; }
         public IReadOnlyList<string>? ConfigDirectories { get; set; }
@@ -174,3 +167,12 @@ public sealed record EnvironmentSettings(IReadOnlyList<AikoEnvironment> Environm
         public IReadOnlyList<string>? ProjectFolders { get; set; }
     }
 }
+
+/// Written by the source generator instead of found by reflection at run time. The shim is
+/// published trimmed, and a trimmed program cannot read JSON through reflection at all.
+[JsonSourceGenerationOptions(
+    WriteIndented = true,
+    PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase,
+    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull)]
+[JsonSerializable(typeof(EnvironmentSettings.SettingsFile))]
+internal sealed partial class EnvironmentsJson : JsonSerializerContext;
