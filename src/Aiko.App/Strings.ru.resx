@@ -47,7 +47,7 @@
     <value>сброс через {0}</value>
   </data>
   <data name="CardJustReset" xml:space="preserve">
-    <value>окно только что сбросилось</value>
+    <value>только что сброшен</value>
   </data>
   <data name="CardLastsUntilReset" xml:space="preserve">
     <value>хватит до сброса</value>
@@ -65,7 +65,7 @@
     <value>данных пока нет</value>
   </data>
   <data name="CardLastSeen" xml:space="preserve">
-    <value>последние в {0}</value>
+    <value>данные на {0}</value>
   </data>
   <data name="CardUpdated" xml:space="preserve">
     <value>обновлено в {0}</value>
@@ -74,7 +74,7 @@
     <value>Открой Claude Code. Лимиты появятся после первого ответа.</value>
   </data>
   <data name="CardNoAccessNote" xml:space="preserve">
-    <value>Aiko не может читать лимиты этой среды. Открой настройки и настрой доступ.</value>
+    <value>Aiko пока не видит лимиты этой среды. Доступ включается в настройках.</value>
   </data>
   <data name="SpanDaysHours" xml:space="preserve">
     <value>{0} д {1} ч</value>
@@ -92,7 +92,7 @@
     <value>открой Claude Code</value>
   </data>
   <data name="TrayLastSeen" xml:space="preserve">
-    <value>последние в {0}</value>
+    <value>данные на {0}</value>
   </data>
   <data name="TrayUpdateOut" xml:space="preserve">
     <value>вышла Aiko {0}</value>
@@ -134,13 +134,13 @@
     <value>Прямой режим</value>
   </data>
   <data name="DirectModeWhat" xml:space="preserve">
-    <value>В прямом режиме Aiko сама спрашивает лимиты у Anthropic — токеном, который Claude Code уже хранит на этом компьютере. Aiko читает его перед каждым запросом и никогда не сохраняет. Включай, если работаешь в панели IDE или в Claude Desktop, где строки состояния нет.</value>
+    <value>В прямом режиме Aiko сама спрашивает лимиты у Anthropic. Для этого она берёт токен, который Claude Code уже хранит на этом компьютере: читает его перед каждым запросом и нигде не сохраняет. Включай, если работаешь в панели IDE или в Claude Desktop — там строки состояния нет.</value>
   </data>
   <data name="DirectModeAsk" xml:space="preserve">
     <value>Если аккаунт рабочий, сначала спроси того, кто им управляет.</value>
   </data>
   <data name="NoEnvironments" xml:space="preserve">
-    <value>Сред пока нет. Aiko находит их при первом запуске.</value>
+    <value>Сред пока нет. Aiko ищет их при первом запуске.</value>
   </data>
   <data name="AccessOk" xml:space="preserve">
     <value>Claude Code передаёт лимиты в Aiko.</value>
@@ -173,7 +173,7 @@
     <value>Запускать вместе с Windows</value>
   </data>
   <data name="CheckUpdatesWhat" xml:space="preserve">
-    <value>Раз в сутки спрашивает slayumind.org и сообщает, что одна копия Aiko сегодня работала. Файлы качаются с GitHub.</value>
+    <value>Раз в сутки Aiko спрашивает у slayumind.org свежую версию и сообщает, что одна копия сегодня работала. Сами файлы скачиваются с GitHub.</value>
   </data>
   <data name="CheckNow" xml:space="preserve">
     <value>Проверить сейчас</value>
@@ -182,7 +182,7 @@
     <value>Открыть страницу загрузки</value>
   </data>
   <data name="UpdateAsking" xml:space="preserve">
-    <value>Спрашиваю slayumind.org…</value>
+    <value>Aiko спрашивает slayumind.org…</value>
   </data>
   <data name="UpdateAvailable" xml:space="preserve">
     <value>Вышла версия {0}.</value>
@@ -191,7 +191,7 @@
     <value>Aiko {0} — самая свежая версия.</value>
   </data>
   <data name="UpdateFailed" xml:space="preserve">
-    <value>Сейчас проверить не вышло. Попробуй позже.</value>
+    <value>Проверить не получилось. Попробуй через несколько минут.</value>
   </data>
   <data name="LanguageSystem" xml:space="preserve">
     <value>Системный</value>
@@ -245,13 +245,13 @@
     <value>Готово</value>
   </data>
   <data name="WizardFoundOne" xml:space="preserve">
-    <value>Aiko нашла одну папку Claude Code. Одной среды достаточно, вторую можно добавить позже в настройках.</value>
+    <value>Aiko нашла одну папку Claude Code. Для начала этого хватит, вторую можно добавить позже в настройках.</value>
   </data>
   <data name="WizardFoundMany" xml:space="preserve">
-    <value>Aiko нашла эти папки Claude Code. Дай им имена, которые узнаешь, и выключи лишние.</value>
+    <value>Aiko нашла эти папки Claude Code. Дай им понятные тебе имена и выключи лишние.</value>
   </data>
   <data name="WizardNothingFound" xml:space="preserve">
-    <value>Aiko не нашла Claude Code на этом компьютере. Установи его и проверь снова или укажи папку сам.</value>
+    <value>Aiko не нашла Claude Code на этом компьютере. Установи его и проверь снова или выбери папку сам.</value>
   </data>
   <data name="WizardChooseFolder" xml:space="preserve">
     <value>Выбрать папку</value>
@@ -260,25 +260,25 @@
     <value>Проверить снова</value>
   </data>
   <data name="WizardFolderDialogTitle" xml:space="preserve">
-    <value>Выберите папку Claude Code</value>
+    <value>Выбери папку Claude Code</value>
   </data>
   <data name="WizardAccessExplain" xml:space="preserve">
-    <value>Claude Code отдаёт свои лимиты строке состояния. Aiko добавит одну строку в файл настроек каждой среды. Если своя строка состояния уже есть, она продолжит работать: Aiko вызовет её и покажет вывод.</value>
+    <value>Claude Code отдаёт лимиты строке состояния. Aiko добавит одну строку в файл настроек каждой среды. Если у тебя уже есть своя строка состояния, она продолжит работать: Aiko запустит её и покажет её вывод.</value>
   </data>
   <data name="WizardTheLine" xml:space="preserve">
-    <value>КАКУЮ СТРОКУ ДОБАВИТ</value>
+    <value>СТРОКА, КОТОРУЮ ДОБАВИТ AIKO</value>
   </data>
   <data name="WizardTheFiles" xml:space="preserve">
-    <value>КАКИЕ ФАЙЛЫ ИЗМЕНИТ</value>
+    <value>ФАЙЛЫ, КОТОРЫЕ ИЗМЕНЯТСЯ</value>
   </data>
   <data name="WizardBackupNote" xml:space="preserve">
-    <value>Рядом с каждым файлом останется копия, а удаление Aiko всё вернёт.</value>
+    <value>Aiko сохранит копию каждого файла рядом с ним. Удалишь Aiko — всё вернётся как было.</value>
   </data>
   <data name="WizardBridgeNotFound" xml:space="preserve">
     <value>Aiko не нашла свою программу-посредник.</value>
   </data>
   <data name="WizardUpdatesWhat" xml:space="preserve">
-    <value>Раз в сутки спрашивает у slayumind.org свежую версию и сообщает, что одна копия Aiko сегодня работала. Идентификатор, который уходит, меняется каждый день.</value>
+    <value>Раз в сутки Aiko спрашивает у slayumind.org свежую версию и сообщает, что одна копия сегодня работала. Идентификатор, который уходит, меняется каждый день.</value>
   </data>
   <data name="WizardDoneTray" xml:space="preserve">
     <value>Aiko внизу, рядом с часами. Наведи мышь, чтобы увидеть карточку, или кликни, чтобы карточка осталась открытой.</value>
@@ -287,18 +287,18 @@
     <value>Aiko вверху экрана. Перетащи куда угодно — она прилипнет к ближайшему краю.</value>
   </data>
   <data name="WizardDoneOverflow" xml:space="preserve">
-    <value>Windows 11 прячет значок нового приложения под стрелкой слева от часов. Открой её и вытащи Aiko на панель задач, иначе карточке будет неоткуда появиться.</value>
+    <value>Windows 11 прячет значки новых приложений под стрелку рядом с часами. Открой её и перетащи Aiko на панель задач: под стрелкой карточка не открывается.</value>
   </data>
   <data name="WizardDoneFirstNumbers" xml:space="preserve">
     <value>Первые цифры придут после следующего ответа Claude Code. До этого кольцо пунктирное.</value>
   </data>
   <data name="WizardDoneNoAccess" xml:space="preserve">
-    <value>Читать лимиты Aiko пока нечем. Открой настройки, когда захочешь это наладить.</value>
+    <value>Aiko пока не видит лимиты. Доступ можно включить в настройках в любой момент.</value>
   </data>
   <data name="SettingsWriteFailed" xml:space="preserve">
-    <value>Aiko не смогла записать файл настроек Claude Code.</value>
+    <value>Aiko не смогла записать файл настроек Claude Code. Попробуй ещё раз.</value>
   </data>
   <data name="SettingsBridgeUnknown" xml:space="preserve">
-    <value>Aiko не поняла, где лежит её посредник.</value>
+    <value>Aiko не нашла свою программу-посредник.</value>
   </data>
 </root>

@@ -53,12 +53,13 @@ static class RingDrawing
 
     private static void DrawWaiting(DrawingContext context, Point centre, double radius, double thickness)
     {
-        // Six dashes, worked out from the circle itself so they always close it evenly, whatever
-        // the radius. Twelve looked right on paper but came out as a solid ring: the gaps were
-        // thinner than the pen, and antialiasing filled them in.
-        const int dashes = 6;
+        // Five short dashes, worked out from the circle itself so they always close it evenly,
+        // whatever the radius. Twelve looked right on paper but came out as a solid ring: the gaps
+        // were thinner than the pen, and antialiasing filled them in. Six at 55% still read as
+        // busy on the live tray, so the dashes are fewer and the gaps wider than the dashes.
+        const int dashes = 5;
         var segment = 2 * Math.PI * radius / dashes;
-        var dash = segment * 0.55;
+        var dash = segment * 0.4;
 
         var pen = new Pen(new SolidColorBrush(NoDataColor), thickness)
         {
