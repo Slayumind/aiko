@@ -1,0 +1,146 @@
+<UserControl x:Class="Aiko.App.EnvironmentPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:Aiko.App">
+
+  <!--
+    One environment (D-177). The account on the left, as Claude Code knows it. What Aiko calls the
+    environment on the right: its name, its command and the folders bound to it. The folders are
+    only shown here; they change on the project folders page, where every folder is in one table.
+  -->
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/Theme/Controls.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </UserControl.Resources>
+
+  <StackPanel>
+    <WrapPanel Margin="0,0,96,0">
+      <TextBlock x:Name="Title" FontFamily="{StaticResource Sans}" FontSize="16" FontWeight="Medium"
+                 Foreground="{StaticResource Ink}" VerticalAlignment="Center" Margin="0,0,10,0" />
+      <Border x:Name="TitleChip" Style="{StaticResource Chip}" Margin="0,0,10,0">
+        <TextBlock x:Name="TitlePlan" Style="{StaticResource ChipText}" />
+      </Border>
+      <TextBlock x:Name="DefaultMark" Text="{x:Static local:Strings.ByDefault}" Style="{StaticResource RowNote}"
+                 VerticalAlignment="Center" />
+    </WrapPanel>
+
+    <local:RevealPanel x:Name="NotePanel">
+      <DockPanel Margin="0,10,0,0">
+        <Path DockPanel.Dock="Left" Data="M 0,4 L 3,7 L 9,1" Stroke="{StaticResource Positive}" StrokeThickness="1.5"
+              Width="10" Height="8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" VerticalAlignment="Top"
+              Margin="0,5,8,0" />
+        <TextBlock x:Name="NoteText" Style="{StaticResource RowHint}" Foreground="{StaticResource Ink}" />
+      </DockPanel>
+    </local:RevealPanel>
+
+    <Grid Margin="0,18,0,0">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="20" />
+        <ColumnDefinition Width="*" />
+      </Grid.ColumnDefinitions>
+
+      <StackPanel Grid.Column="0">
+        <TextBlock Text="{x:Static local:Strings.SectionAccount}" Style="{StaticResource SectionLabel}" Margin="0,0,0,6" />
+        <Border CornerRadius="10" Background="#08FFFFFF" BorderBrush="{StaticResource Hairline}" BorderThickness="1"
+                Padding="12,10">
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+              <RowDefinition Height="Auto" />
+              <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <TextBlock Text="{x:Static local:Strings.EmailLabel}" Style="{StaticResource RowNote}" VerticalAlignment="Center"
+                       Margin="0,0,12,0" />
+            <TextBlock x:Name="Email" Grid.Column="1" Style="{StaticResource RowName}" TextTrimming="CharacterEllipsis" />
+            <TextBlock Grid.Row="1" Text="{x:Static local:Strings.PlanLabel}" Style="{StaticResource RowNote}"
+                       VerticalAlignment="Center" Margin="0,8,12,0" />
+            <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Margin="0,8,0,0">
+              <Border x:Name="PlanChip" Style="{StaticResource Chip}" Margin="0,0,8,0">
+                <TextBlock x:Name="PlanText" Style="{StaticResource ChipText}" />
+              </Border>
+              <Ellipse x:Name="StateDot" Width="6" Height="6" VerticalAlignment="Center" Margin="0,0,5,0" />
+              <TextBlock x:Name="StateText" Style="{StaticResource RowHint}" VerticalAlignment="Center" />
+            </StackPanel>
+          </Grid>
+        </Border>
+        <TextBlock x:Name="FolderLine" Style="{StaticResource RowNote}" Margin="2,6,0,0" />
+        <Button x:Name="SignInButton" Style="{StaticResource SmallButton}" Margin="0,10,0,0" Click="OnSignIn" />
+        <local:RevealPanel x:Name="OpenedPanel">
+          <TextBlock Text="{x:Static local:Strings.ClaudeOpened}" Style="{StaticResource RowHint}" Margin="0,6,0,0" />
+        </local:RevealPanel>
+
+        <Grid Margin="0,22,0,0">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <TextBlock Text="{x:Static local:Strings.DirectMode}" Style="{StaticResource RowName}" FontSize="{StaticResource TextName}" />
+          <ToggleButton x:Name="DirectToggle" Grid.Column="1" Style="{StaticResource Switch}"
+                        Checked="OnDirectChanged" Unchecked="OnDirectChanged" />
+        </Grid>
+        <!--
+          The one control in Aiko that reads an access token. Somebody has to be able to decide before
+          they flip it, not after, so the whole explanation sits right under it.
+        -->
+        <TextBlock x:Name="DirectWhat" Style="{StaticResource RowHint}" Margin="0,6,0,0" />
+      </StackPanel>
+
+      <StackPanel Grid.Column="2">
+        <TextBlock Text="{x:Static local:Strings.NameInAiko}" Style="{StaticResource SectionLabel}" Margin="0,0,0,6" />
+        <TextBox x:Name="NameBox" Style="{StaticResource NameBox}" FontSize="{StaticResource TextName}"
+                 KeyDown="OnNameKeyDown" LostKeyboardFocus="OnNameLeft" />
+        <local:RevealPanel x:Name="NameProblemPanel">
+          <TextBlock x:Name="NameProblemText" Style="{StaticResource RowHint}" Foreground="{StaticResource Caution}" Margin="0,5,0,0" />
+        </local:RevealPanel>
+
+        <TextBlock Text="{x:Static local:Strings.SectionCommand}" Style="{StaticResource SectionLabel}" Margin="0,16,0,6" />
+        <TextBox x:Name="CommandBox" Style="{StaticResource NameBox}" FontFamily="{StaticResource Mono}"
+                 FontSize="{StaticResource TextNumber}" KeyDown="OnCommandKeyDown" LostKeyboardFocus="OnCommandLeft" />
+        <TextBlock x:Name="CommandNote" Style="{StaticResource RowHint}" Margin="0,5,0,0" />
+        <local:RevealPanel x:Name="SuggestionPanel">
+          <StackPanel Margin="0,5,0,0">
+            <TextBlock Text="{x:Static local:Strings.CmdKept}" Style="{StaticResource RowHint}" />
+            <Button x:Name="SuggestionButton" Style="{StaticResource SmallButton}" Margin="0,8,0,0" Click="OnTakeSuggestion" />
+          </StackPanel>
+        </local:RevealPanel>
+
+        <TextBlock Text="{x:Static local:Strings.SectionBoundFolders}" Style="{StaticResource SectionLabel}" Margin="0,16,0,6" />
+        <StackPanel x:Name="BoundList" />
+        <TextBlock x:Name="RestToo" Text="{x:Static local:Strings.RestToo}" Style="{StaticResource RowHint}" Margin="0,6,0,0" />
+        <Button x:Name="EditFolders" Content="{x:Static local:Strings.EditInFolders}" Style="{StaticResource LinkButton}"
+                Margin="0,10,0,0" Click="OnEditFolders" />
+      </StackPanel>
+    </Grid>
+
+    <Border Height="1" Background="{StaticResource Hairline}" Margin="0,22,0,14" />
+    <TextBlock x:Name="KeepClaudeNote" Text="{x:Static local:Strings.KeepClaude}" Style="{StaticResource RowHint}" />
+    <Button x:Name="RemoveButton" Content="{x:Static local:Strings.RemoveEnvironment}" Style="{StaticResource GhostDangerButton}"
+            Margin="-10,0,0,0" Click="OnRemoveAsked" />
+    <local:RevealPanel x:Name="ConfirmPanel">
+      <Border CornerRadius="10" Background="#0FFF6467" BorderBrush="#38FF6467" BorderThickness="1" Padding="12">
+        <StackPanel>
+          <TextBlock x:Name="ConfirmLine" Style="{StaticResource RowHint}" Foreground="{StaticResource Ink}" />
+          <CheckBox x:Name="RecycleBox" Style="{StaticResource Tick}" Margin="0,12,0,0"
+                    Checked="OnRecycleChanged" Unchecked="OnRecycleChanged">
+            <TextBlock Text="{x:Static local:Strings.MoveToRecycleBin}" TextWrapping="Wrap" />
+          </CheckBox>
+          <local:RevealPanel x:Name="RecycleWhyPanel">
+            <TextBlock Text="{x:Static local:Strings.RecycleWhy}" Style="{StaticResource RowHint}" Margin="24,6,0,0" />
+          </local:RevealPanel>
+          <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+            <Button Content="{x:Static local:Strings.Cancel}" Style="{StaticResource GhostButton}" Click="OnRemoveCancelled" />
+            <Button Content="{x:Static local:Strings.RemoveConfirm}" Style="{StaticResource DangerButton}" Margin="8,0,0,0"
+                    Click="OnRemoveConfirmed" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+    </local:RevealPanel>
+  </StackPanel>
+</UserControl>

@@ -1,0 +1,28 @@
+<Project>
+
+  <!--
+    Package versions for the whole solution, in one place. Scattered across project files they
+    drift apart, and two projects on two versions of the same library is a bug that only shows up
+    at run time.
+
+    Velopack and the vpk tool in the release workflow are pinned to the same version on purpose:
+    the tool writes the update format this library reads.
+  -->
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.Windows.CsWin32" Version="0.3.333" />
+    <PackageVersion Include="Velopack" Version="1.2.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="Tests">
+    <PackageVersion Include="coverlet.collector" Version="6.0.4" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageVersion Include="xunit" Version="2.9.3" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.4" />
+  </ItemGroup>
+
+</Project>

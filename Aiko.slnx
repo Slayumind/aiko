@@ -3,6 +3,7 @@
     <Project Path="src/Aiko.App/Aiko.App.csproj" />
     <Project Path="src/Aiko.Bridge/Aiko.Bridge.csproj" />
     <Project Path="src/Aiko.Core/Aiko.Core.csproj" />
+    <Project Path="src/Aiko.Shim/Aiko.Shim.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Aiko.Core.Tests/Aiko.Core.Tests.csproj" />

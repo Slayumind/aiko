@@ -3,6 +3,9 @@
   <!--
     x64 is required: CsWin32 does not generate Shell_NotifyIcon and NOTIFYICONDATAW for AnyCPU,
     because their layout differs between x86 and x64 (spike 2026-09-11).
+
+    There is no App.xaml: Aiko lives in the tray, so it has its own Main that creates the tray
+    icon and only opens windows on demand.
   -->
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -10,6 +13,44 @@
     <UseWPF>true</UseWPF>
     <PlatformTarget>x64</PlatformTarget>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <EnableDefaultApplicationDefinition>false</EnableDefaultApplicationDefinition>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <StartupObject>Aiko.App.Program</StartupObject>
+    <!-- The ring, drawn by tools/app-icon.ps1. Windows shows it in the Start menu and on Aiko's windows. -->
+    <ApplicationIcon>Assets\aiko.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <!--
+    Geist and Geist Mono ship inside the app. The site loads them from Google Fonts, but a tray
+    app has no browser, and without the files WPF quietly falls back to another face and the card
+    changes width. OFL.txt is the licence and has to travel with them.
+  -->
+  <ItemGroup>
+    <Resource Include="Assets\Fonts\*.ttf" />
+    <Content Include="Assets\Fonts\OFL.txt" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Aiko.Core\Aiko.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Windows.CsWin32">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Velopack" />
+  </ItemGroup>
+
+  <!--
+    The words of the product, in one place per language. tools/strings.py makes both resource files
+    and the class that reads them from tools/strings.json, so a key that does not exist is a build
+    error. The class is generated into the source tree because WPF compiles XAML in a second pass,
+    through a temporary project that cannot see files the first pass made.
+  -->
+  <ItemGroup>
+    <EmbeddedResource Update="Strings.resx" />
+    <EmbeddedResource Update="Strings.ru.resx" />
+  </ItemGroup>
 
 </Project>

@@ -1,0 +1,44 @@
+# Build and test on every push and pull request.
+#
+# Actions are pinned to a commit, not to a tag: a tag can be moved, and then a build would run
+# somebody else's code.
+name: build
+
+on:
+  push:
+    branches: [main, in-progress]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    # Aiko is a Windows app and its tests build the whole solution.
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5
+        with:
+          global-json-file: global.json
+
+      - name: Restore
+        run: dotnet restore Aiko.slnx
+
+      - name: Build
+        run: dotnet build Aiko.slnx --configuration Release --no-restore
+
+      - name: Test
+        # The core tests include the ones that matter most here: the credentials object never
+        # prints its token, and the snapshot format can hold nothing but numbers and times.
+        run: dotnet test Aiko.slnx --configuration Release --no-build --verbosity quiet
+
+      - name: Check the code style
+        # .editorconfig holds the rules and Directory.Build.props asks the compiler to enforce
+        # them. This catches what the compiler alone does not, so the rules are real rather than
+        # written down.
+        run: dotnet format Aiko.slnx --verify-no-changes --verbosity quiet

@@ -1,0 +1,154 @@
+<UserControl x:Class="Aiko.App.CardPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:Aiko.App">
+
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/Theme/Controls.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+
+      <!-- Header buttons carry no label, so they need a visible hover: the raised grey, the same
+           step the site uses. -->
+      <Style x:Key="IconButton" TargetType="Button">
+        <Setter Property="Width" Value="22" />
+        <Setter Property="Height" Value="22" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+          <Setter.Value>
+            <ControlTemplate TargetType="Button">
+              <Border x:Name="Back" Background="{TemplateBinding Background}" CornerRadius="6">
+                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+              </Border>
+              <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                  <Setter TargetName="Back" Property="Background" Value="{StaticResource Raised}" />
+                </Trigger>
+              </ControlTemplate.Triggers>
+            </ControlTemplate>
+          </Setter.Value>
+        </Setter>
+      </Style>
+
+      <DataTemplate x:Key="RowTemplate" DataType="{x:Type local:LimitRow}">
+        <StackPanel Margin="{StaticResource RowGap}">
+          <Grid>
+            <TextBlock Text="{Binding Name}"
+                       FontFamily="{StaticResource Sans}" FontSize="{StaticResource TextSmall}"
+                       Foreground="{StaticResource Muted}" />
+            <TextBlock Text="{Binding Percent}" HorizontalAlignment="Right"
+                       FontFamily="{StaticResource Mono}" FontSize="{StaticResource TextNumber}"
+                       Foreground="{StaticResource Ink}" />
+          </Grid>
+
+          <Border Height="{StaticResource BarHeight}" CornerRadius="{StaticResource BarRadius}"
+                  Background="{StaticResource Raised}" Margin="0,4,0,0">
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="{Binding Fill}" />
+                <ColumnDefinition Width="{Binding Rest}" />
+              </Grid.ColumnDefinitions>
+              <Border Grid.Column="0" CornerRadius="{StaticResource BarRadius}"
+                      Background="{Binding Tone}" />
+            </Grid>
+          </Border>
+
+          <!--
+            Two columns, not two blocks in one cell. In one cell they overlapped the moment the
+            text grew, which English never did and Russian does at once. The word on the right is
+            the one that must stay whole, so the countdown on the left gives way first.
+          -->
+          <Grid Margin="{StaticResource UnderBar}">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="{Binding Resets}" TextTrimming="CharacterEllipsis"
+                       Margin="0,0,8,0"
+                       FontFamily="{StaticResource Mono}" FontSize="{StaticResource TextTiny}"
+                       Foreground="{StaticResource Muted}" />
+            <TextBlock Grid.Column="1" Text="{Binding Pace}" HorizontalAlignment="Right"
+                       FontFamily="{StaticResource Mono}" FontSize="{StaticResource TextTiny}"
+                       Foreground="{Binding PaceTone}" />
+          </Grid>
+        </StackPanel>
+      </DataTemplate>
+
+      <DataTemplate x:Key="BlockTemplate" DataType="{x:Type local:EnvironmentBlock}">
+        <StackPanel Margin="{StaticResource BlockGap}">
+          <Border Height="1" Background="{StaticResource Hairline}" Margin="0,0,0,12"
+                  Visibility="{Binding SeparatorVisibility}" />
+
+          <DockPanel>
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center"
+                        Visibility="{Binding StateVisibility}">
+              <Grid Width="12" Height="12" VerticalAlignment="Center" Margin="0,0,3,0">
+                <Ellipse Width="12" Height="12" Fill="{StaticResource Positive}" Opacity="0.18"
+                         Visibility="{Binding HaloVisibility}" />
+                <Ellipse Width="6" Height="6" Fill="{Binding StateFill}" Stroke="{Binding StateRing}" StrokeThickness="1.5" />
+              </Grid>
+              <TextBlock Text="{Binding State}" FontFamily="{StaticResource Sans}" FontSize="{StaticResource TextTiny}"
+                         Foreground="{Binding StateText}" VerticalAlignment="Center" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+              <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"
+                         FontFamily="{StaticResource Sans}" FontSize="{StaticResource TextName}"
+                         FontWeight="Medium" Foreground="{StaticResource Ink}" />
+              <Border Style="{StaticResource Chip}" Margin="8,0,8,0" Visibility="{Binding PlanVisibility}">
+                <TextBlock Text="{Binding Plan}" Style="{StaticResource ChipText}" />
+              </Border>
+            </StackPanel>
+          </DockPanel>
+
+          <ItemsControl ItemsSource="{Binding Rows}" ItemTemplate="{StaticResource RowTemplate}" />
+
+          <TextBlock Text="{Binding Note}" Visibility="{Binding NoteVisibility}"
+                     Margin="{StaticResource RowGap}" TextWrapping="Wrap"
+                     FontFamily="{StaticResource Sans}" FontSize="{StaticResource TextSmall}"
+                     Foreground="{StaticResource Muted}" />
+
+          <!-- Opens Claude Code in its own window for this environment, the way its command would. -->
+          <Button Content="{Binding OpenLabel}" Tag="{Binding Name}" Visibility="{Binding OpenVisibility}"
+                  Style="{StaticResource GhostButton}" Margin="-10,6,0,0" Click="OnOpenClaude" />
+        </StackPanel>
+      </DataTemplate>
+    </ResourceDictionary>
+  </UserControl.Resources>
+
+  <!-- The margin leaves room for the shadow: the window behind it is transparent and would cut
+       the shadow off at the edge. -->
+  <Grid Margin="20">
+    <Border Width="{StaticResource CardWidth}"
+            Background="{StaticResource Surface}"
+            CornerRadius="{StaticResource CardRadius}"
+            BorderBrush="{StaticResource Hairline}" BorderThickness="1"
+            Effect="{StaticResource CardShadow}">
+      <StackPanel Margin="{StaticResource CardPad}">
+
+        <Grid x:Name="HeaderRow">
+          <TextBlock x:Name="UpdatedText" VerticalAlignment="Center"
+                     FontFamily="{StaticResource Mono}" FontSize="{StaticResource TextTiny}"
+                     Foreground="{StaticResource Muted}" />
+
+          <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Style="{StaticResource IconButton}" Click="OnSettings" ToolTip="{x:Static local:Strings.Settings}">
+              <Path Data="{StaticResource GearPath}" Fill="{StaticResource Muted}"
+                    Stretch="Uniform" Width="14" Height="14" />
+            </Button>
+            <Button Style="{StaticResource IconButton}" Click="OnClose" ToolTip="{x:Static local:Strings.Close}">
+              <!-- The icon set has no cross, so it is two lines. -->
+              <Path Data="M 0,0 L 10,10 M 10,0 L 0,10" Stroke="{StaticResource Muted}"
+                    StrokeThickness="1.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                    Width="10" Height="10" />
+            </Button>
+          </StackPanel>
+        </Grid>
+
+        <ItemsControl x:Name="Blocks" ItemTemplate="{StaticResource BlockTemplate}" />
+
+      </StackPanel>
+    </Border>
+  </Grid>
+</UserControl>

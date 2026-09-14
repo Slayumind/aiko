@@ -1,0 +1,53 @@
+name: Something is wrong
+description: Aiko does something it shouldn't, or does nothing when it should.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Found a security problem? Please don't post it here. [SECURITY.md](https://github.com/Slayumind/aiko/blob/main/SECURITY.md)
+        says how to report one privately.
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you saw, and what you expected instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: How to see it again
+      description: The shortest way to get there from a fresh start.
+      placeholder: |
+        1. Open the settings window
+        2. Turn on the island
+        3. The ring stays in the tray
+    validations:
+      required: true
+
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostics
+      description: >
+        Settings window, then **Copy diagnostics**, then paste it here. It has the Aiko version, the
+        Windows version and which options are on. It has no tokens and no limit numbers.
+      render: text
+    validations:
+      required: false
+
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where you run Claude Code
+      description: Aiko reads limits from the status line, and only the terminal runs one.
+      options:
+        - A terminal
+        - The VS Code or JetBrains panel
+        - Claude Desktop
+        - Somewhere else
+    validations:
+      required: true

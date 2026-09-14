@@ -1,0 +1,96 @@
+using System.Text.Json;
+
+namespace Aiko.Core;
+
+public enum LimitKind
+{
+    FiveHour,
+    SevenDay,
+
+    /// The weekly limit of the heavy model. Direct mode only: the status line does not carry it.
+    ModelWeek,
+}
+
+/// Percentages arrive as doubles with noise (28.000000000000004) and, behind a spend gateway,
+/// above a hundred. The card shows whole numbers and a bar cannot be longer than full.
+public static class Percentage
+{
+    public static int FromDouble(double value) =>
+        Math.Clamp((int)Math.Round(value, MidpointRounding.AwayFromZero), 0, 100);
+}
+
+public readonly record struct LimitWindow(LimitKind Kind, int Percent, DateTimeOffset ResetsAt);
+
+/// What Claude Code reports to the status line: the five hour and the seven day window.
+/// The model limit (Fable) is not here — it only comes from the usage API in direct mode.
+public sealed record StatusLineReport(IReadOnlyList<LimitWindow> Windows)
+{
+    public static readonly StatusLineReport Empty = new([]);
+
+    public bool HasData => Windows.Count > 0;
+
+    /// Never throws: a broken line must not break the tray. Anything unexpected reads as "no data".
+    public static StatusLineReport FromJson(string json)
+    {
+        if (string.IsNullOrWhiteSpace(json))
+        {
+            return Empty;
+        }
+
+        // A byte order mark in front is not the caller's mistake to punish. Windows PowerShell 5.1
+        // puts one there when it pipes text into a program, and that is the shell Claude Code falls
+        // back to on a machine without Git. The parser refuses it as an invalid first character,
+        // the report comes back empty, and the limits never show. Found in Windows Sandbox.
+        json = json.TrimStart('﻿');
+
+        try
+        {
+            using var document = JsonDocument.Parse(json);
+            if (document.RootElement.ValueKind != JsonValueKind.Object
+                || !document.RootElement.TryGetProperty("rate_limits", out var limits)
+                || limits.ValueKind != JsonValueKind.Object)
+            {
+                return Empty;
+            }
+
+            var windows = new List<LimitWindow>(2);
+            AddWindow(windows, limits, "five_hour", LimitKind.FiveHour);
+            AddWindow(windows, limits, "seven_day", LimitKind.SevenDay);
+            return windows.Count > 0 ? new StatusLineReport(windows) : Empty;
+        }
+        catch (JsonException)
+        {
+            return Empty;
+        }
+    }
+
+    public LimitWindow? Find(LimitKind kind)
+    {
+        foreach (var window in Windows)
+        {
+            if (window.Kind == kind)
+            {
+                return window;
+            }
+        }
+        return null;
+    }
+
+    private static void AddWindow(List<LimitWindow> windows, JsonElement limits, string name, LimitKind kind)
+    {
+        if (!limits.TryGetProperty(name, out var window) || window.ValueKind != JsonValueKind.Object)
+        {
+            return;
+        }
+
+        // Both fields are needed: a percentage without a reset time cannot be counted down,
+        // and a reset time without a percentage has nothing to show.
+        if (!window.TryGetProperty("used_percentage", out var percent) || percent.ValueKind != JsonValueKind.Number
+            || !window.TryGetProperty("resets_at", out var resetsAt) || resetsAt.ValueKind != JsonValueKind.Number)
+        {
+            return;
+        }
+
+        windows.Add(new LimitWindow(kind, Percentage.FromDouble(percent.GetDouble()), DateTimeOffset.FromUnixTimeSeconds(resetsAt.GetInt64())));
+    }
+}

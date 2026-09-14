@@ -3,6 +3,12 @@
   <!--
     Claude Code starts this exe on every status line update, so start time is the whole point.
     The spike measured ~46 ms with ReadyToRun and InvariantGlobalization; ICU alone costs ~7 ms.
+
+    The release publishes this project self contained. Do not turn that off to save space: the
+    app ships self contained and leaves its hostfxr.dll in the same folder, a framework
+    dependent bridge picks that copy up, reads the folder as a .NET install, finds no shared
+    framework there and exits 150 on every machine. Self contained costs about one megabyte here,
+    because the runtime files in that folder are already the app's, and about 2 ms of start time.
   -->
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -10,5 +16,9 @@
     <InvariantGlobalization>true</InvariantGlobalization>
     <PublishReadyToRun>true</PublishReadyToRun>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Aiko.Core\Aiko.Core.csproj" />
+  </ItemGroup>
 
 </Project>

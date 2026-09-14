@@ -1,0 +1,670 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence><xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" /></xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="CardSession" xml:space="preserve">
+    <value>Session · 5 hours</value>
+  </data>
+  <data name="CardWeek" xml:space="preserve">
+    <value>Week</value>
+  </data>
+  <data name="CardModelWeek" xml:space="preserve">
+    <value>{0} · week</value>
+  </data>
+  <data name="CardPercentUsed" xml:space="preserve">
+    <value>{0}% used</value>
+  </data>
+  <data name="CardResets" xml:space="preserve">
+    <value>resets in {0}</value>
+  </data>
+  <data name="CardJustReset" xml:space="preserve">
+    <value>just reset</value>
+  </data>
+  <data name="CardLastsUntilReset" xml:space="preserve">
+    <value>lasts until reset</value>
+  </data>
+  <data name="CardAtThisPace" xml:space="preserve">
+    <value>~{0} at this pace</value>
+  </data>
+  <data name="CardToneCaution" xml:space="preserve">
+    <value>running low</value>
+  </data>
+  <data name="CardToneCritical" xml:space="preserve">
+    <value>almost gone</value>
+  </data>
+  <data name="CardNoDataYet" xml:space="preserve">
+    <value>no data yet</value>
+  </data>
+  <data name="CardLastSeen" xml:space="preserve">
+    <value>as of {0}</value>
+  </data>
+  <data name="CardUpdated" xml:space="preserve">
+    <value>updated {0}</value>
+  </data>
+  <data name="CardNoDataNote" xml:space="preserve">
+    <value>Open Claude Code. Limits show up after its first answer.</value>
+  </data>
+  <data name="CardNoAccessNote" xml:space="preserve">
+    <value>Aiko can't see the limits of this environment yet. You can turn on access in settings.</value>
+  </data>
+  <data name="SpanDaysHours" xml:space="preserve">
+    <value>{0}d {1}h</value>
+  </data>
+  <data name="SpanHoursMinutes" xml:space="preserve">
+    <value>{0}h {1}m</value>
+  </data>
+  <data name="SpanMinutes" xml:space="preserve">
+    <value>{0}m</value>
+  </data>
+  <data name="SpanUnderMinute" xml:space="preserve">
+    <value>&lt;1m</value>
+  </data>
+  <data name="TrayOpenClaudeCode" xml:space="preserve">
+    <value>open Claude Code</value>
+  </data>
+  <data name="TrayLastSeen" xml:space="preserve">
+    <value>as of {0}</value>
+  </data>
+  <data name="TrayUpdateOut" xml:space="preserve">
+    <value>Aiko {0} is out</value>
+  </data>
+  <data name="MenuShowInRing" xml:space="preserve">
+    <value>Show {0} in the ring</value>
+  </data>
+  <data name="MenuRefresh" xml:space="preserve">
+    <value>Refresh limits</value>
+  </data>
+  <data name="Settings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="QuitAiko" xml:space="preserve">
+    <value>Quit Aiko</value>
+  </data>
+  <data name="CheckForUpdates" xml:space="preserve">
+    <value>Check for updates</value>
+  </data>
+  <data name="CheckUpdatesToggle" xml:space="preserve">
+    <value>Check for updates</value>
+  </data>
+  <data name="SectionEnvironments" xml:space="preserve">
+    <value>ENVIRONMENTS</value>
+  </data>
+  <data name="SectionWhereToShow" xml:space="preserve">
+    <value>WHERE TO SHOW</value>
+  </data>
+  <data name="SectionStartupAndUpdates" xml:space="preserve">
+    <value>STARTUP AND UPDATES</value>
+  </data>
+  <data name="SectionLanguage" xml:space="preserve">
+    <value>LANGUAGE</value>
+  </data>
+  <data name="DirectMode" xml:space="preserve">
+    <value>Direct mode</value>
+  </data>
+  <data name="DirectModeWhat" xml:space="preserve">
+    <value>In direct mode, Aiko asks Anthropic for your limits itself. It uses the token Claude Code already keeps on this computer: Aiko reads it before each request and never saves it. Turn it on if you work in the IDE panel or in Claude Desktop, where there's no status line.</value>
+  </data>
+  <data name="DirectModeAsk" xml:space="preserve">
+    <value>If it's a work account, ask whoever manages it first.</value>
+  </data>
+  <data name="NoEnvironments" xml:space="preserve">
+    <value>No environments yet. Aiko looks for them on the first run.</value>
+  </data>
+  <data name="AccessOk" xml:space="preserve">
+    <value>Claude Code sends its limits to Aiko.</value>
+  </data>
+  <data name="AccessMissingOne" xml:space="preserve">
+    <value>One environment doesn't send its limits yet.</value>
+  </data>
+  <data name="AccessMissingMany" xml:space="preserve">
+    <value>{0} environments don't send their limits yet.</value>
+  </data>
+  <data name="AccessCheck" xml:space="preserve">
+    <value>Check access</value>
+  </data>
+  <data name="AccessSetUp" xml:space="preserve">
+    <value>Set it up</value>
+  </data>
+  <data name="AccessNoBridge" xml:space="preserve">
+    <value>Aiko can't find its bridge program, so nothing changed.</value>
+  </data>
+  <data name="PlaceTray" xml:space="preserve">
+    <value>Tray</value>
+  </data>
+  <data name="PlaceIsland" xml:space="preserve">
+    <value>Island</value>
+  </data>
+  <data name="HideIslandInFullScreen" xml:space="preserve">
+    <value>Hide the island in full screen</value>
+  </data>
+  <data name="StartWithWindows" xml:space="preserve">
+    <value>Start with Windows</value>
+  </data>
+  <data name="CheckUpdatesWhat" xml:space="preserve">
+    <value>Once a day, Aiko asks slayumind.org for the latest version and says that one copy of Aiko ran today. Downloads come from GitHub.</value>
+  </data>
+  <data name="CheckNow" xml:space="preserve">
+    <value>Check now</value>
+  </data>
+  <data name="OpenDownloadPage" xml:space="preserve">
+    <value>Open download page</value>
+  </data>
+  <data name="UpdateAsking" xml:space="preserve">
+    <value>Aiko is asking slayumind.org…</value>
+  </data>
+  <data name="UpdateAvailable" xml:space="preserve">
+    <value>Version {0} is available.</value>
+  </data>
+  <data name="UpdateLatest" xml:space="preserve">
+    <value>Aiko {0} is the latest version.</value>
+  </data>
+  <data name="UpdateFailed" xml:space="preserve">
+    <value>Couldn't check. Try again in a few minutes.</value>
+  </data>
+  <data name="LanguageSystem" xml:space="preserve">
+    <value>System</value>
+  </data>
+  <data name="LanguageEnglish" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="LanguageRussian" xml:space="preserve">
+    <value>Русский</value>
+  </data>
+  <data name="CopyDiagnostics" xml:space="preserve">
+    <value>Copy diagnostics</value>
+  </data>
+  <data name="SettingsWindowTitle" xml:space="preserve">
+    <value>Aiko settings</value>
+  </data>
+  <data name="WizardStepEnvironments" xml:space="preserve">
+    <value>Environments</value>
+  </data>
+  <data name="EnvironmentPlainName" xml:space="preserve">
+    <value>Main</value>
+  </data>
+  <data name="WizardStepAccess" xml:space="preserve">
+    <value>Access to the limits</value>
+  </data>
+  <data name="WizardStepWhere" xml:space="preserve">
+    <value>Where to show Aiko</value>
+  </data>
+  <data name="WizardStepCount" xml:space="preserve">
+    <value>step {0} of 3</value>
+  </data>
+  <data name="Back" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="NotNow" xml:space="preserve">
+    <value>Not now</value>
+  </data>
+  <data name="Next" xml:space="preserve">
+    <value>Next</value>
+  </data>
+  <data name="Allow" xml:space="preserve">
+    <value>Allow</value>
+  </data>
+  <data name="Finish" xml:space="preserve">
+    <value>Finish</value>
+  </data>
+  <data name="WizardFoundOne" xml:space="preserve">
+    <value>Aiko found one Claude Code folder. That's enough to start, and you can add a second one later in settings.</value>
+  </data>
+  <data name="WizardFoundMany" xml:space="preserve">
+    <value>Aiko found these Claude Code folders. Give them names you'll recognise and turn off the ones you don't need.</value>
+  </data>
+  <data name="WizardNothingFound" xml:space="preserve">
+    <value>Aiko didn't find Claude Code on this computer. Install it and check again, or choose the folder yourself.</value>
+  </data>
+  <data name="WizardChooseFolder" xml:space="preserve">
+    <value>Choose a folder</value>
+  </data>
+  <data name="WizardCheckAgain" xml:space="preserve">
+    <value>Check again</value>
+  </data>
+  <data name="WizardFolderDialogTitle" xml:space="preserve">
+    <value>Choose a Claude Code folder</value>
+  </data>
+  <data name="WizardAccessExplain" xml:space="preserve">
+    <value>Claude Code sends its limits to a status line. Aiko adds one line to the settings file of each environment. If you already have a status line, it keeps working: Aiko runs it and shows what it prints.</value>
+  </data>
+  <data name="WizardTheLine" xml:space="preserve">
+    <value>THE LINE AIKO ADDS</value>
+  </data>
+  <data name="WizardTheFiles" xml:space="preserve">
+    <value>FILES AIKO CHANGES</value>
+  </data>
+  <data name="WizardBackupNote" xml:space="preserve">
+    <value>Aiko keeps a copy of each file next to it. Removing Aiko puts everything back.</value>
+  </data>
+  <data name="WizardBridgeNotFound" xml:space="preserve">
+    <value>Aiko can't find its bridge program.</value>
+  </data>
+  <data name="WizardUpdatesWhat" xml:space="preserve">
+    <value>Once a day, Aiko asks slayumind.org for the latest version and says that one copy of Aiko ran today. The ID it sends changes every day.</value>
+  </data>
+  <data name="WizardDoneTray" xml:space="preserve">
+    <value>Aiko is down by the clock. Rest the mouse on it to see the card, or click it to keep the card open.</value>
+  </data>
+  <data name="WizardDoneIsland" xml:space="preserve">
+    <value>Aiko is at the top of your screen. Drag it anywhere and it sticks to the nearest edge.</value>
+  </data>
+  <data name="WizardDoneOverflow" xml:space="preserve">
+    <value>Windows 11 hides new app icons under the arrow next to the clock. Open the arrow and drag Aiko onto the taskbar: under the arrow, the card can't open.</value>
+  </data>
+  <data name="WizardDoneFirstNumbers" xml:space="preserve">
+    <value>The first numbers arrive after your next answer from Claude Code. Until then, the ring is dashed.</value>
+  </data>
+  <data name="WizardDoneNoAccess" xml:space="preserve">
+    <value>Aiko can't see your limits yet. You can turn on access in settings at any time.</value>
+  </data>
+  <data name="SettingsWriteFailed" xml:space="preserve">
+    <value>Aiko couldn't write the Claude Code settings file. Try again.</value>
+  </data>
+  <data name="SettingsBridgeUnknown" xml:space="preserve">
+    <value>Aiko can't find its bridge program.</value>
+  </data>
+  <data name="ChecklistTitle" xml:space="preserve">
+    <value>Set up environments</value>
+  </data>
+  <data name="ChecklistCount" xml:space="preserve">
+    <value>{0} of {1} done</value>
+  </data>
+  <data name="GroupFirst" xml:space="preserve">
+    <value>ENVIRONMENT 1</value>
+  </data>
+  <data name="GroupSecond" xml:space="preserve">
+    <value>ENVIRONMENT 2</value>
+  </data>
+  <data name="GroupShared" xml:space="preserve">
+    <value>SHARED</value>
+  </data>
+  <data name="ItemInstall" xml:space="preserve">
+    <value>Install Claude Code</value>
+  </data>
+  <data name="ItemAccount" xml:space="preserve">
+    <value>Account</value>
+  </data>
+  <data name="ItemSecond" xml:space="preserve">
+    <value>Pick or create</value>
+  </data>
+  <data name="ItemCommands" xml:space="preserve">
+    <value>Launch commands</value>
+  </data>
+  <data name="ItemFolders" xml:space="preserve">
+    <value>Project folders</value>
+  </data>
+  <data name="StateInstalled" xml:space="preserve">
+    <value>installed</value>
+  </data>
+  <data name="StateWaiting" xml:space="preserve">
+    <value>waiting</value>
+  </data>
+  <data name="StateAfterInstall" xml:space="preserve">
+    <value>after install</value>
+  </data>
+  <data name="StateAfterSignIn" xml:space="preserve">
+    <value>after sign-in</value>
+  </data>
+  <data name="StateAfterSecond" xml:space="preserve">
+    <value>after environment 2</value>
+  </data>
+  <data name="StateOptional" xml:space="preserve">
+    <value>optional</value>
+  </data>
+  <data name="StateLater" xml:space="preserve">
+    <value>later</value>
+  </data>
+  <data name="StateConnected" xml:space="preserve">
+    <value>connected</value>
+  </data>
+  <data name="StateSignInNeeded" xml:space="preserve">
+    <value>sign in needed</value>
+  </data>
+  <data name="StateAdded" xml:space="preserve">
+    <value>added</value>
+  </data>
+  <data name="StateNone" xml:space="preserve">
+    <value>none</value>
+  </data>
+  <data name="StateBound" xml:space="preserve">
+    <value>{0} bound</value>
+  </data>
+  <data name="StateTray" xml:space="preserve">
+    <value>tray</value>
+  </data>
+  <data name="StateIsland" xml:space="preserve">
+    <value>island</value>
+  </data>
+  <data name="Copy" xml:space="preserve">
+    <value>Copy</value>
+  </data>
+  <data name="Copied" xml:space="preserve">
+    <value>Copied</value>
+  </data>
+  <data name="Later" xml:space="preserve">
+    <value>Later</value>
+  </data>
+  <data name="InstallFound" xml:space="preserve">
+    <value>Claude Code is already on this computer. Nothing to do here.</value>
+  </data>
+  <data name="InstallLead" xml:space="preserve">
+    <value>Claude Code isn't on this computer yet. Aiko works alongside it, so install it first.</value>
+  </data>
+  <data name="InstallHow" xml:space="preserve">
+    <value>Open PowerShell, paste the command and press Enter. Aiko notices when it's done.</value>
+  </data>
+  <data name="WaitInstall" xml:space="preserve">
+    <value>Waiting for Claude Code…</value>
+  </data>
+  <data name="Env1Lead" xml:space="preserve">
+    <value>The first environment lives in the .claude folder. The Claude Code panel in VS Code and Claude Desktop use it too.</value>
+  </data>
+  <data name="Env1Empty" xml:space="preserve">
+    <value>This folder has no account yet.</value>
+  </data>
+  <data name="Env1Found" xml:space="preserve">
+    <value>This folder already has an account.</value>
+  </data>
+  <data name="SignIn" xml:space="preserve">
+    <value>Sign in</value>
+  </data>
+  <data name="LoginHow" xml:space="preserve">
+    <value>Aiko opened Claude Code in a new window. Sign in there through your browser. Aiko waits and moves on by itself.</value>
+  </data>
+  <data name="LoginNever" xml:space="preserve">
+    <value>Aiko never sees a password or a token, only that the account is connected.</value>
+  </data>
+  <data name="WaitLogin" xml:space="preserve">
+    <value>Waiting for you to sign in…</value>
+  </data>
+  <data name="NameInAiko" xml:space="preserve">
+    <value>NAME IN AIKO</value>
+  </data>
+  <data name="AccountLabel" xml:space="preserve">
+    <value>Account</value>
+  </data>
+  <data name="PlanLabel" xml:space="preserve">
+    <value>Plan</value>
+  </data>
+  <data name="Env2LeadFound" xml:space="preserve">
+    <value>Aiko found more Claude Code folders. Pick the one for your second environment, or create a new one.</value>
+  </data>
+  <data name="Env2LeadNew" xml:space="preserve">
+    <value>The second environment is a separate folder with its own account. Name it and Aiko creates the folder.</value>
+  </data>
+  <data name="Env2Later" xml:space="preserve">
+    <value>One environment is enough to see limits. You can add the second one later in settings.</value>
+  </data>
+  <data name="CreateNew" xml:space="preserve">
+    <value>Create a new one</value>
+  </data>
+  <data name="CreateSignIn" xml:space="preserve">
+    <value>Create and sign in</value>
+  </data>
+  <data name="NameExample" xml:space="preserve">
+    <value>For example, Personal</value>
+  </data>
+  <data name="LastSession" xml:space="preserve">
+    <value>last session {0}</value>
+  </data>
+  <data name="FolderIs" xml:space="preserve">
+    <value>Folder: {0}</value>
+  </data>
+  <data name="AccessAdd" xml:space="preserve">
+    <value>Add the line</value>
+  </data>
+  <data name="CmdLead" xml:space="preserve">
+    <value>A command starts Claude Code in the right environment. It works in PowerShell, cmd and Git Bash.</value>
+  </data>
+  <data name="CmdFor" xml:space="preserve">
+    <value>COMMAND · {0}</value>
+  </data>
+  <data name="CmdFollows" xml:space="preserve">
+    <value>Follows the environment name.</value>
+  </data>
+  <data name="CmdOwn" xml:space="preserve">
+    <value>Your own command: renaming doesn't change it.</value>
+  </data>
+  <data name="CmdByName" xml:space="preserve">
+    <value>Use the name</value>
+  </data>
+  <data name="CmdEmpty" xml:space="preserve">
+    <value>Enter a command.</value>
+  </data>
+  <data name="CmdTooLong" xml:space="preserve">
+    <value>Up to 40 characters.</value>
+  </data>
+  <data name="CmdBadCharacters" xml:space="preserve">
+    <value>Only a–z, 0–9, - and _.</value>
+  </data>
+  <data name="CmdReserved" xml:space="preserve">
+    <value>claude is the name of Claude Code itself.</value>
+  </data>
+  <data name="CmdTaken" xml:space="preserve">
+    <value>The other environment has this command.</value>
+  </data>
+  <data name="FnsLead" xml:space="preserve">
+    <value>Your PowerShell profile has functions that switch accounts. They run before Aiko's commands and hide them, so they're ticked for removal.</value>
+  </data>
+  <data name="FnRemove" xml:space="preserve">
+    <value>Remove {0}</value>
+  </data>
+  <data name="FnBackup" xml:space="preserve">
+    <value>A copy of the profile stays next to it. Removing Aiko brings the functions back.</value>
+  </data>
+  <data name="PathNote" xml:space="preserve">
+    <value>Aiko puts its folder at the start of PATH so every terminal finds the commands. Restart open terminals and your IDE.</value>
+  </data>
+  <data name="PathAdd" xml:space="preserve">
+    <value>Add to PATH</value>
+  </data>
+  <data name="NoCommands" xml:space="preserve">
+    <value>No commands</value>
+  </data>
+  <data name="FoldersLead" xml:space="preserve">
+    <value>Bind project folders to {0}. In them and in every folder inside, claude starts {0}.</value>
+  </data>
+  <data name="AddProject" xml:space="preserve">
+    <value>Add a project folder</value>
+  </data>
+  <data name="PickProject" xml:space="preserve">
+    <value>Choose a project folder</value>
+  </data>
+  <data name="NoBinds" xml:space="preserve">
+    <value>Nothing is bound yet. You can do it later in settings.</value>
+  </data>
+  <data name="ExplicitWins" xml:space="preserve">
+    <value>A command beats a binding: {0} in a bound folder starts {1}, and Claude Code reminds you of the binding.</value>
+  </data>
+  <data name="Remove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="DoneCommands" xml:space="preserve">
+    <value>Commands: {0}. Open a new terminal to use them.</value>
+  </data>
+  <data name="SetUpEnvironments" xml:space="preserve">
+    <value>Set up environments</value>
+  </data>
+  <data name="NavGeneral" xml:space="preserve">
+    <value>General</value>
+  </data>
+  <data name="NavBound" xml:space="preserve">
+    <value>{0} bound</value>
+  </data>
+  <data name="AddSecondEnvironment" xml:space="preserve">
+    <value>Add a second environment</value>
+  </data>
+  <data name="Saved" xml:space="preserve">
+    <value>Saved</value>
+  </data>
+  <data name="ByDefault" xml:space="preserve">
+    <value>default</value>
+  </data>
+  <data name="SectionAccount" xml:space="preserve">
+    <value>ACCOUNT</value>
+  </data>
+  <data name="EmailLabel" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="SignInAgain" xml:space="preserve">
+    <value>Sign in again</value>
+  </data>
+  <data name="ClaudeOpened" xml:space="preserve">
+    <value>Claude Code opened in a new window.</value>
+  </data>
+  <data name="SectionCommand" xml:space="preserve">
+    <value>COMMAND</value>
+  </data>
+  <data name="CmdShells" xml:space="preserve">
+    <value>PowerShell · cmd · Git Bash</value>
+  </data>
+  <data name="CmdKept" xml:space="preserve">
+    <value>The command stays the same, since your terminals and scripts know it.</value>
+  </data>
+  <data name="RenameCommandTo" xml:space="preserve">
+    <value>Rename to {0}</value>
+  </data>
+  <data name="NameEmpty" xml:space="preserve">
+    <value>Enter a name.</value>
+  </data>
+  <data name="NameTooLong" xml:space="preserve">
+    <value>Up to 40 characters.</value>
+  </data>
+  <data name="NameTaken" xml:space="preserve">
+    <value>The other environment has this name.</value>
+  </data>
+  <data name="SectionBoundFolders" xml:space="preserve">
+    <value>BOUND FOLDERS</value>
+  </data>
+  <data name="NoneBound" xml:space="preserve">
+    <value>No folders.</value>
+  </data>
+  <data name="RestToo" xml:space="preserve">
+    <value>And every other folder: this is the default environment.</value>
+  </data>
+  <data name="EditInFolders" xml:space="preserve">
+    <value>Change in project folders</value>
+  </data>
+  <data name="RemoveEnvironment" xml:space="preserve">
+    <value>Remove environment</value>
+  </data>
+  <data name="RemoveEnvironmentLine" xml:space="preserve">
+    <value>The Aiko line leaves this folder's settings.json, and so do the command {0} and the bindings to {1}.</value>
+  </data>
+  <data name="MoveToRecycleBin" xml:space="preserve">
+    <value>And move the folder to the Recycle Bin</value>
+  </data>
+  <data name="RecycleWhy" xml:space="preserve">
+    <value>It holds the Claude Code account, history and memory. You can restore it from the Recycle Bin.</value>
+  </data>
+  <data name="KeepClaude" xml:space="preserve">
+    <value>VS Code and Claude Desktop use the .claude folder, so Aiko never removes it.</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="RemoveConfirm" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="EnvironmentRemoved" xml:space="preserve">
+    <value>{0} removed.</value>
+  </data>
+  <data name="EnvironmentRemovedToBin" xml:space="preserve">
+    <value>{0} removed. The folder is in the Recycle Bin.</value>
+  </data>
+  <data name="FoldersTableLead" xml:space="preserve">
+    <value>In a folder and in every folder inside, plain claude starts its environment. A command like {0} beats a binding, and Claude Code reminds you of it.</value>
+  </data>
+  <data name="FolderColumn" xml:space="preserve">
+    <value>FOLDER</value>
+  </data>
+  <data name="EnvironmentColumn" xml:space="preserve">
+    <value>ENVIRONMENT</value>
+  </data>
+  <data name="AllOtherFolders" xml:space="preserve">
+    <value>All other folders</value>
+  </data>
+  <data name="AddFolder" xml:space="preserve">
+    <value>Add a folder</value>
+  </data>
+  <data name="RemoveBinding" xml:space="preserve">
+    <value>Remove binding</value>
+  </data>
+  <data name="FoldersOneEnvironment" xml:space="preserve">
+    <value>Bindings matter once you have two environments. Right now every folder runs in {0}.</value>
+  </data>
+  <data name="FoldersNeedCommands" xml:space="preserve">
+    <value>Bindings work through the launch commands, and those aren't set up yet.</value>
+  </data>
+  <data name="SectionAccess" xml:space="preserve">
+    <value>ACCESS TO THE LIMITS</value>
+  </data>
+  <data name="SectionDiagnostics" xml:space="preserve">
+    <value>DIAGNOSTICS</value>
+  </data>
+  <data name="DiagnosticsWhat" xml:space="preserve">
+    <value>Version and settings for a bug report. No tokens and no email addresses.</value>
+  </data>
+  <data name="DiagnosticsCopied" xml:space="preserve">
+    <value>Diagnostics copied.</value>
+  </data>
+  <data name="SetupDone" xml:space="preserve">
+    <value>Environments are set up.</value>
+  </data>
+  <data name="Restart" xml:space="preserve">
+    <value>Start over</value>
+  </data>
+  <data name="RestartWhat" xml:space="preserve">
+    <value>Removes the environments from Aiko and opens the checklist right here.</value>
+  </data>
+  <data name="RestartLine" xml:space="preserve">
+    <value>Aiko removes the environments, its lines in settings.json, the commands {0}, the folder bindings and its folder in PATH, and turns the PowerShell profile functions back on. Accounts and history stay in the folders.</value>
+  </data>
+  <data name="RestartBin" xml:space="preserve">
+    <value>And move {0} to the Recycle Bin</value>
+  </data>
+  <data name="RestartKeep" xml:space="preserve">
+    <value>.claude stays either way.</value>
+  </data>
+  <data name="OpenClaudeCode" xml:space="preserve">
+    <value>Open Claude Code</value>
+  </data>
+  <data name="CardSignInNote" xml:space="preserve">
+    <value>Sign in so Aiko can see the limits of this environment.</value>
+  </data>
+  <data name="StateWorkingNow" xml:space="preserve">
+    <value>working now</value>
+  </data>
+</root>
