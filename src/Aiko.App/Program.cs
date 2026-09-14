@@ -31,6 +31,13 @@ static class Program
         // change would leave half a window in the other language.
         LanguageChoice.Apply(SettingsStore.Load().Language);
 
+        // A snapshot draws a window at once and reads its pixels. Anything still fading in would be
+        // caught half there.
+        if (args is [var first, ..] && first.StartsWith("--snapshot", StringComparison.Ordinal))
+        {
+            Motion.TurnOff();
+        }
+
         // Draw the icon into a file and stop. Windows hides new tray icons in the overflow area,
         // so this is the only way to look at the drawing itself.
         if (args is ["--snapshot-icon", var iconPath, ..])

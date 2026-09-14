@@ -27,8 +27,13 @@
 
   <!-- Hairlines are white at low opacity, not a grey of their own: they have to sit on both the
        card and the raised surface without becoming a line of their own colour. -->
-  <SolidColorBrush x:Key="Hairline" Color="#1AFFFFFF" />
-  <SolidColorBrush x:Key="InputLine" Color="#26FFFFFF" />
+  <Color x:Key="HairlineColor">#1AFFFFFF</Color>
+  <Color x:Key="InputLineColor">#26FFFFFF</Color>
+  <SolidColorBrush x:Key="Hairline" Color="{StaticResource HairlineColor}" />
+  <SolidColorBrush x:Key="InputLine" Color="{StaticResource InputLineColor}" />
+
+  <!-- Hover lightens whatever is under it by this much, as a layer that fades in. -->
+  <SolidColorBrush x:Key="HoverLayer" Color="#12FFFFFF" />
 
   <FontFamily x:Key="Sans">pack://application:,,,/Assets/Fonts/#Geist</FontFamily>
   <FontFamily x:Key="Mono">pack://application:,,,/Assets/Fonts/#Geist Mono</FontFamily>

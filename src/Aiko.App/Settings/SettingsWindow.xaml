@@ -14,5 +14,5 @@
         WindowStartupLocation="CenterScreen"
         SizeToContent="WidthAndHeight">
 
-  <local:SettingsPanel x:Name="Panel" />
+  <local:SettingsPanel x:Name="Panel" local:Motion.Appear="True" />
 </Window>
