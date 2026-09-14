@@ -1,62 +1,34 @@
+using System.Runtime.InteropServices;
 using System.Windows;
-using System.Windows.Controls;
+using System.Windows.Interop;
 using System.Windows.Media;
-using System.Windows.Media.Effects;
 using Aiko.Core;
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.UI.WindowsAndMessaging;
 
 namespace Aiko.App;
 
-/// The landing strip: a pane of liquid glass on the edge where the island in hand will land (D-161,
-/// D-183).
+/// The landing strip: a pane of Windows glass on the edge where the island in hand will land (D-161, D-186).
 ///
 /// A window of its own, because it sits on the edge while the island is somewhere else. It never
 /// takes the focus or a click, and it exists only while the island is in hand.
 ///
-/// The glass follows the owner's reference, the weather cards made of ui-layouts liquid glass, layer
-/// by layer: the picture behind it blurred and bent (GlassBands), white at 8 % over it, a hairline
-/// lit from inside and a shadow so faint it is felt more than seen (D-185). Being Aiko's own
-/// drawing, it can have the flat side against the screen edge that the island has.
+/// The glass is drawn by Windows, not by Aiko: WPF draws in software here and cannot blur what lies
+/// behind a window. The system backdrop only frosts the active window, and this one never is, so
+/// it uses the acrylic accent instead (RESEARCH, spike 2026-09-14). Windows then rounds all four
+/// corners, and a window region would switch the glass off, so the strip reaches past the screen
+/// edge by one corner radius: the corners on that side fall outside the screen.
 sealed class IslandGhost : Window
 {
-    /// borderRadius 8px, as in the reference, where the island has 14.
     private const double Radius = 8;
 
-    /// How much of the glass itself shows: the rest lets the real, unblurred screen through. The
-    /// rim stays at full strength. 0.7 after the owner asked for glass 20 % and then 10 % more clearer.
-    private const double GlassOpacity = 0.7;
-
-    /// Room around the pane for the shadow to spread into.
-    private const double Spread = 16;
-
-    private readonly GlassBands _glass;
-    /// bg-white/8.
-    private readonly Border _tint = new()
-    {
-        Background = new SolidColorBrush(Color.FromArgb(0x14, 0xFF, 0xFF, 0xFF)),
-    };
-
-    private readonly Border _pane = new()
-    {
-        // glowIntensity none: box-shadow 0 4px 4px rgba(0,0,0,.05), 0 0 12px rgba(0,0,0,.05), made one.
-        Effect = new DropShadowEffect { Color = Colors.Black, BlurRadius = 10, ShadowDepth = 2, Direction = 270, Opacity = 0.1 },
-    };
-
-    private readonly Border _edgeLight = new()
-    {
-        // shadowIntensity xs: inset 1px 1px 1px rgba(255,255,255,.3) and the same from the other side.
-        BorderBrush = new SolidColorBrush(Color.FromArgb(0x4D, 0xFF, 0xFF, 0xFF)),
-        Effect = new BlurEffect { Radius = 1 },
-    };
-
-    private readonly Grid _layers = new();
     private ScreenEdge? _edge;
-    private Size _size;
 
-    public IslandGhost(GlassBands glass)
+    public IslandGhost()
     {
-        _glass = glass;
         WindowStyle = WindowStyle.None;
-        AllowsTransparency = true;
+        AllowsTransparency = false;
         Background = Brushes.Transparent;
         ResizeMode = ResizeMode.NoResize;
         ShowInTaskbar = false;
@@ -64,16 +36,7 @@ sealed class IslandGhost : Window
         Topmost = true;
         Focusable = false;
         IsHitTestVisible = false;
-
-        // The picture is a quarter of the screen's size; smooth scaling keeps the blur soft.
-        RenderOptions.SetBitmapScalingMode(_pane, BitmapScalingMode.Linear);
-        _pane.Opacity = GlassOpacity;
-        _tint.Opacity = GlassOpacity;
-
-        _layers.Children.Add(_pane);
-        _layers.Children.Add(_tint);
-        _layers.Children.Add(_edgeLight);
-        Content = _layers;
+        SourceInitialized += (_, _) => MakeGlass();
     }
 
     /// Raised the first time the strip shows. Both windows stay above everything, and the one shown
@@ -85,98 +48,118 @@ sealed class IslandGhost : Window
     public void PlaceOn(Box box, ScreenEdge edge)
     {
         var glide = _edge is not null && _edge != edge && Motion.IsOn;
-        if (_edge != edge || _size != new Size(box.Width, box.Height))
-        {
-            Shape(edge, box.Width, box.Height);
-        }
-
         _edge = edge;
-        _pane.Background = _glass.BrushFor(edge, box) ?? (Brush)new SolidColorBrush(Color.FromArgb(0x60, 0x17, 0x17, 0x17));
 
-        // The window reaches past the pane on the sides that face into the screen, for the shadow.
-        var room = Room(edge);
-        var window = new Box(box.X - room.Left, box.Y - room.Top, box.Width + room.Left + room.Right, box.Height + room.Top + room.Bottom);
-        Width = window.Width;
-        Height = window.Height;
+        var pane = PastTheEdge(box, edge);
+        Width = pane.Width;
+        Height = pane.Height;
 
         if (glide)
         {
-            BeginAnimation(LeftProperty, Motion.To(window.X, Motion.Expand, Motion.Standard));
-            BeginAnimation(TopProperty, Motion.To(window.Y, Motion.Expand, Motion.Standard));
+            BeginAnimation(LeftProperty, Motion.To(pane.X, Motion.Expand, Motion.Standard));
+            BeginAnimation(TopProperty, Motion.To(pane.Y, Motion.Expand, Motion.Standard));
         }
         else
         {
             BeginAnimation(LeftProperty, null);
             BeginAnimation(TopProperty, null);
-            Left = window.X;
-            Top = window.Y;
+            Left = pane.X;
+            Top = pane.Y;
         }
 
         if (!IsVisible)
         {
             Show();
+            TuckUnderTheTaskbar();
             Shown?.Invoke();
         }
     }
 
-    private static Thickness Room(ScreenEdge edge) => edge switch
+    /// Still above every ordinary window, but just below the taskbar: over the bottom edge the part
+    /// that reaches past the edge would otherwise lie on the taskbar, rounded corners and all.
+    private void TuckUnderTheTaskbar()
     {
-        ScreenEdge.Top => new Thickness(Spread, 0, Spread, Spread),
-        ScreenEdge.Bottom => new Thickness(Spread, Spread, Spread, 0),
-        ScreenEdge.Left => new Thickness(0, Spread, Spread, Spread),
-        _ => new Thickness(Spread, Spread, 0, Spread),
+        var taskbar = PInvoke.FindWindow("Shell_TrayWnd", null);
+        if (taskbar.IsNull)
+        {
+            return;
+        }
+
+        const SET_WINDOW_POS_FLAGS keepPlaceAndFocus =
+            SET_WINDOW_POS_FLAGS.SWP_NOMOVE | SET_WINDOW_POS_FLAGS.SWP_NOSIZE | SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE;
+        PInvoke.SetWindowPos((HWND)new WindowInteropHelper(this).Handle, taskbar, 0, 0, 0, 0, keepPlaceAndFocus);
+    }
+
+    /// The same box, grown past the screen edge by one corner radius.
+    private static Box PastTheEdge(Box box, ScreenEdge edge) => edge switch
+    {
+        ScreenEdge.Top => box with { Y = box.Y - Radius, Height = box.Height + Radius },
+        ScreenEdge.Bottom => box with { Height = box.Height + Radius },
+        ScreenEdge.Left => box with { X = box.X - Radius, Width = box.Width + Radius },
+        _ => box with { Width = box.Width + Radius },
     };
 
-    /// The same shape as the island that will land here: flat and unlit on the edge side.
-    private void Shape(ScreenEdge edge, double width, double height)
+    private void MakeGlass()
     {
-        _size = new Size(width, height);
-        var corners = edge switch
-        {
-            ScreenEdge.Top => new CornerRadius(0, 0, Radius, Radius),
-            ScreenEdge.Bottom => new CornerRadius(Radius, Radius, 0, 0),
-            ScreenEdge.Left => new CornerRadius(0, Radius, Radius, 0),
-            _ => new CornerRadius(Radius, 0, 0, Radius),
-        };
+        var handle = new WindowInteropHelper(this).Handle;
+        HwndSource.FromHwnd(handle)!.CompositionTarget.BackgroundColor = Colors.Transparent;
 
-        var room = Room(edge);
-        foreach (var layer in new[] { _pane, _tint, _edgeLight })
+        var accent = new AccentPolicy { AccentState = AcrylicBlurBehind, GradientColor = AcrylicTint };
+        var size = Marshal.SizeOf<AccentPolicy>();
+        var memory = Marshal.AllocHGlobal(size);
+        try
         {
-            layer.CornerRadius = corners;
-            layer.Margin = room;
-            layer.Width = width;
-            layer.Height = height;
+            Marshal.StructureToPtr(accent, memory, false);
+            var data = new CompositionAttributeData { Attribute = AccentPolicyAttribute, Data = memory, SizeOfData = size };
+            if (!SetWindowCompositionAttribute(handle, ref data))
+            {
+                Log.Write("landing strip: Windows gave no glass");
+            }
+        }
+        finally
+        {
+            Marshal.FreeHGlobal(memory);
         }
 
-        _edgeLight.BorderThickness = edge switch
-        {
-            ScreenEdge.Top => new Thickness(1, 0, 1, 1),
-            ScreenEdge.Bottom => new Thickness(1, 1, 1, 0),
-            ScreenEdge.Left => new Thickness(0, 1, 1, 1),
-            _ => new Thickness(1, 1, 0, 1),
-        };
-
-        // Cut to the pane, so the blurred rim glows inwards only, like an inset shadow.
-        _edgeLight.Clip = Outline(width, height, corners);
+        var round = RoundCorners;
+        DwmSetWindowAttribute(handle, CornerPreference, ref round, sizeof(int));
     }
 
-    private static Geometry Outline(double width, double height, CornerRadius corners)
+    /// ACCENT_ENABLE_ACRYLICBLURBEHIND: the strongest blur Windows gives a window without focus.
+    private const int AcrylicBlurBehind = 4;
+
+    /// The colour acrylic lays over its blur, ABGR: Aiko's surface #171717 at 5 %, so the glass is 95 %
+    /// see-through, as the owner asked. Aiko draws nothing of its own over it.
+    private const int AcrylicTint = 0x0D171717;
+
+    private const int AccentPolicyAttribute = 19;
+    private const int CornerPreference = 33;
+
+    /// DWMWCP_ROUND: the 8 px corner Windows 11 gives its own windows. Radius above is the same.
+    private const int RoundCorners = 2;
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct AccentPolicy
     {
-        var outline = new StreamGeometry();
-        using (var draw = outline.Open())
-        {
-            draw.BeginFigure(new Point(corners.TopLeft, 0), isFilled: true, isClosed: true);
-            draw.LineTo(new Point(width - corners.TopRight, 0), true, false);
-            draw.ArcTo(new Point(width, corners.TopRight), new Size(corners.TopRight, corners.TopRight), 0, false, SweepDirection.Clockwise, true, false);
-            draw.LineTo(new Point(width, height - corners.BottomRight), true, false);
-            draw.ArcTo(new Point(width - corners.BottomRight, height), new Size(corners.BottomRight, corners.BottomRight), 0, false, SweepDirection.Clockwise, true, false);
-            draw.LineTo(new Point(corners.BottomLeft, height), true, false);
-            draw.ArcTo(new Point(0, height - corners.BottomLeft), new Size(corners.BottomLeft, corners.BottomLeft), 0, false, SweepDirection.Clockwise, true, false);
-            draw.LineTo(new Point(0, corners.TopLeft), true, false);
-            draw.ArcTo(new Point(corners.TopLeft, 0), new Size(corners.TopLeft, corners.TopLeft), 0, false, SweepDirection.Clockwise, true, false);
-        }
-
-        outline.Freeze();
-        return outline;
+        public int AccentState;
+        public int AccentFlags;
+        public int GradientColor;
+        public int AnimationId;
     }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct CompositionAttributeData
+    {
+        public int Attribute;
+        public nint Data;
+        public int SizeOfData;
+    }
+
+#pragma warning disable SYSLIB1054
+    [DllImport("user32.dll")]
+    private static extern bool SetWindowCompositionAttribute(nint window, ref CompositionAttributeData data);
+
+    [DllImport("dwmapi.dll")]
+    private static extern int DwmSetWindowAttribute(nint window, int attribute, ref int value, int size);
+#pragma warning restore SYSLIB1054
 }
