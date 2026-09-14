@@ -93,6 +93,46 @@ static class IslandCheck
         return 0;
     }
 
+    /// --try-unfold: shows an island at the top of the screen, unfolds it and folds it again from code,
+    /// and logs its size and place on the way. The mouse is left alone.
+    public static int TryUnfold()
+    {
+        var application = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
+        var island = new IslandWindow();
+        island.Show(CardSnapshot.Example(), IslandPosition.Default);
+
+        var step = 0;
+        var widths = new List<double>();
+        var sampler = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMilliseconds(30) };
+        sampler.Tick += (_, _) => widths.Add(island.ActualWidth);
+        sampler.Start();
+
+        var timer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMilliseconds(600) };
+        timer.Tick += (_, _) =>
+        {
+            switch (step++)
+            {
+                case 0:
+                    Log.Write($"--try-unfold: folded {island.ActualWidth:0}x{island.ActualHeight:0} centre {island.Left + (island.ActualWidth / 2):0}");
+                    widths.Clear();
+                    island.Unfold(true);
+                    break;
+                case 1:
+                    Log.Write($"--try-unfold: unfolded {island.ActualWidth:0}x{island.ActualHeight:0} centre {island.Left + (island.ActualWidth / 2):0}, widths on the way {string.Join(" ", widths.Select(w => w.ToString("0")))}");
+                    widths.Clear();
+                    island.Unfold(false);
+                    break;
+                default:
+                    Log.Write($"--try-unfold: folded again {island.ActualWidth:0}x{island.ActualHeight:0}, widths on the way {string.Join(" ", widths.Select(w => w.ToString("0")))}");
+                    application.Shutdown();
+                    break;
+            }
+        };
+        timer.Start();
+        application.Run();
+        return 0;
+    }
+
     private static async Task<bool> Walk(IslandWindow island, Func<bool> moved)
     {
         var scale = PresentationSource.FromVisual(island)!.CompositionTarget!.TransformToDevice.M11;
