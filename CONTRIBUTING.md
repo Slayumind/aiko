@@ -1,19 +1,19 @@
 # Contributing
 
-Thank you for looking. Aiko is a small project and help is welcome.
+Aiko is a small project, and help is welcome.
 
 ## Before you write code
 
-**Open an issue first** for anything larger than a typo. Aiko has a roadmap, and a change that does
-not fit it may be turned down after you have done the work. That is a waste of your time, and the
-issue costs five minutes.
+**Open an issue first** for anything bigger than a typo. Aiko has a roadmap, and a change that
+doesn't fit it may be turned down after you've done the work. An issue takes five minutes and can
+save you that time.
 
-Found a security problem? Do not open an issue. [SECURITY.md](SECURITY.md) says how to report it
+Found a security problem? Don't open an issue. [SECURITY.md](SECURITY.md) says how to report it
 privately.
 
 ## Building it
 
-You need the .NET 10 SDK. Nothing else: no Visual Studio, no C++ tools.
+You need the .NET 10 SDK and nothing else: no Visual Studio, no C++ tools.
 
 ```
 git clone https://github.com/Slayumind/aiko
@@ -24,12 +24,12 @@ dotnet run --project src/Aiko.App
 
 Three projects and one test project:
 
-- `Aiko.Core` — everything that can be decided without a screen: reading limits, counting down to a
-  reset, backing off after an error, editing the Claude Code settings file. This is where tests go.
-- `Aiko.App` — the tray icon, the windows, the timers. As little thinking as possible.
-- `Aiko.Bridge` — a tiny program Claude Code runs as its status line. It writes a file the app
+- `Aiko.Core` holds everything that can be decided without a screen: reading limits, counting down
+  to a reset, backing off after an error, editing the Claude Code settings file. Tests go here.
+- `Aiko.App` has the tray icon, the windows and the timers, with as little logic as possible.
+- `Aiko.Bridge` is a tiny program Claude Code runs as its status line. It writes a file the app
   reads.
-- `Aiko.Core.Tests` — xUnit.
+- `Aiko.Core.Tests` uses xUnit.
 
 To look at a window without running the whole app:
 
@@ -37,18 +37,19 @@ To look at a window without running the whole app:
 dotnet run --project src/Aiko.App -- --snapshot card.png
 ```
 
-There is also `--snapshot-icon`, `--snapshot-island`, `--snapshot-settings` and
+There are also `--snapshot-icon`, `--snapshot-island`, `--snapshot-settings` and
 `--snapshot-wizard <step>`.
 
-## What a change should look like
+## How a change should look
 
-- **Put the thinking in `Aiko.Core` and write a test for it.** If a change cannot be tested, ask in
-  the issue whether it can be moved.
-- **Anything that touches a disk or the network goes behind an interface**, so a test can stand in
-  for it. `IFileAccess` is the example.
+- **Put the logic in `Aiko.Core` and write a test for it.** If a change can't be tested, ask in the
+  issue whether the logic can move.
+- **Anything that touches the disk or the network goes behind an interface**, so a test can replace
+  it. `IFileAccess` is an example.
 - Keep methods small and names plain. The code is read by people learning C#.
-- No comments that repeat the code. A comment says **why**, and only when the why is not obvious.
-- English, simple words, short sentences. That holds for code, comments and commit messages.
+- Don't write comments that repeat the code. A comment says **why**, and only when that isn't
+  obvious.
+- Write in English with simple words and short sentences: code, comments and commit messages.
 
 ## Changing what Aiko says
 
@@ -58,25 +59,24 @@ Every word is in `tools/strings.json`, English and Russian side by side. Edit th
 python tools/strings.py
 ```
 
-It writes both resource files and the class the code reads them through, so a key that does not
-exist is a build error rather than a blank label somebody finds months later. Do not edit
-`Strings.resx` or `Strings.Designer.cs` by hand.
+It writes both resource files and the class the code reads them through. A missing key then breaks
+the build, so nobody finds a blank label months later. Don't edit `Strings.resx` or
+`Strings.Designer.cs` by hand.
 
-Two rules for the Russian, learned the hard way on the card:
+Three rules for Russian, all learned on real windows:
 
-- **Rephrase, do not translate.** A sentence that reads like a translation is a bad sentence.
-- **Leave room.** Russian runs about a fifth longer, and it found a place where two labels sat in
-  one grid cell and overlapped the moment the text grew. Look at the window before you call it
-  done: `--snapshot`, `--snapshot-settings`, `--snapshot-wizard 3`.
-
-Never build a sentence by joining pieces. Russian words change their endings, and the pieces stop
-fitting together.
+- **Rephrase, don't translate.** Write the sentence the way a Russian speaker would say it.
+- **Leave room.** Russian text is about a fifth longer. Once it made two labels in one grid cell
+  overlap. Look at the window before you call it done: `--snapshot`, `--snapshot-settings`,
+  `--snapshot-wizard 3`.
+- **Never build a sentence from pieces.** Russian words change their endings, and joined pieces
+  stop matching.
 
 ## Commits
 
-The subject line is a short action, in the present tense: `Make the bridge start from an installed
-copy`. The body says what was wrong and why this is the fix. Somebody will read it in a year
-wondering what you were thinking, and that somebody may be you.
+The subject line is a short action in the present tense: `Make the bridge start from an installed
+copy`. The body says what was wrong and why this change fixes it. Someone will read it a year from
+now to understand the change.
 
 No sign-offs, no co-author lines, no emoji.
 
@@ -89,16 +89,16 @@ No sign-offs, no co-author lines, no emoji.
 
 ## Things Aiko will not do
 
-These are settled, and a pull request that changes them will be turned down:
+These are settled. A pull request that changes them will be turned down.
 
 - **Aiko never stores your Claude account token,** never refreshes it and never writes to the
   credentials file. [PRIVACY.md](PRIVACY.md) says why.
-- **Aiko does not pretend to be Claude Code.** Its user agent says Aiko and its version.
-- **No analytics service, no crash reporting service, no third party network calls.** The daily
-  count described in [PRIVACY.md](PRIVACY.md) is the only measurement, it rides on the update
-  check, and its identifier changes every day. Do not add a second thing to measure without asking.
-- **No code or artwork from notchi.** It is a lovely project and it is GPL-3.0; Aiko is Apache-2.0.
-  Reading it to understand a behaviour is fine, copying from it is not.
+- **Aiko doesn't pretend to be Claude Code.** Its user agent says Aiko and its version.
+- **No analytics service, no crash reporting service, no third-party network calls.** The daily
+  count in [PRIVACY.md](PRIVACY.md) is the only measurement. It uses the update check request, and
+  its ID changes every day. Ask before you add anything else to measure.
+- **No code or artwork from notchi.** notchi is GPL-3.0 and Aiko is Apache-2.0. You can read notchi
+  to understand how something works, but don't copy from it.
 
 ## Licence
 
