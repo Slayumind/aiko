@@ -23,8 +23,10 @@ The first release. Everything below is new.
   (or **Sign in** when it isn't connected). A card opened by hovering closes when the mouse leaves.
   Click the icon or the card and it stays until you close it.
 - **Island.** If you prefer, Aiko lives in a small window at the edge of the screen instead of the
-  tray, with one ring per environment. It opens the card the same way the icon does. Drag it
-  anywhere and it sticks to the nearest edge. It hides while a window is full screen.
+  tray, with one ring per environment. It opens the card the same way the icon does. Pick it up
+  and a dashed strip shows where it will land on the nearest edge; along a side edge the rings turn
+  into a column while it is still in your hand. Let go and it settles there, flat against the edge.
+  It hides while a window is full screen.
 - **Setup checklist.** On the first run, settings open on a checklist: install Claude Code, sign
   in, pick or create the second environment, access to the limits, launch commands, project folders
   and where to show Aiko. It finds your Claude Code folders and shows the exact line and the exact

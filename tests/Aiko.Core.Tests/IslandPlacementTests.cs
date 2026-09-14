@@ -115,4 +115,47 @@ public class IslandPlacementTests
         Assert.Equal(ScreenEdge.Top, position.Edge);
         Assert.Equal(dropped.X, back.X, 3);
     }
+
+    // ---- the island in hand ----
+
+    [Theory]
+    [InlineData(960, 30, ScreenEdge.Top)]
+    [InlineData(960, 1000, ScreenEdge.Bottom)]
+    [InlineData(40, 520, ScreenEdge.Left)]
+    [InlineData(1880, 520, ScreenEdge.Right)]
+    public void The_landing_strip_goes_to_the_edge_nearest_the_middle(double x, double y, ScreenEdge edge)
+    {
+        Assert.Equal(edge, IslandPlacement.NearestEdge(x, y, Work));
+    }
+
+    [Fact]
+    public void Near_a_corner_the_edge_in_use_holds_until_another_is_clearly_closer()
+    {
+        // 60 from the top, 50 from the left: the left is closer, but by less than the stickiness.
+        Assert.Equal(ScreenEdge.Top, IslandPlacement.NearestEdge(50, 60, Work, ScreenEdge.Top));
+        Assert.Equal(ScreenEdge.Left, IslandPlacement.NearestEdge(50, 60, Work));
+
+        // 80 from the top: now the left is closer by 30, and the strip moves.
+        Assert.Equal(ScreenEdge.Left, IslandPlacement.NearestEdge(50, 80, Work, ScreenEdge.Top));
+    }
+
+    [Fact]
+    public void Letting_go_keeps_the_place_along_the_edge_where_the_middle_was()
+    {
+        var position = IslandPlacement.DropAt(ScreenEdge.Top, 960, 200, Width, Height, Work);
+        var placed = IslandPlacement.Place(position, Width, Height, Work);
+
+        Assert.Equal(ScreenEdge.Top, position.Edge);
+        Assert.Equal(960, placed.CentreX, 3);
+        Assert.Equal(0, placed.Y);
+    }
+
+    [Fact]
+    public void Letting_go_past_the_end_of_an_edge_stops_at_the_end()
+    {
+        var position = IslandPlacement.DropAt(ScreenEdge.Right, 1900, 1200, 34, 60, Work);
+
+        Assert.Equal(1, position.Along);
+        Assert.Equal(1040 - 60, IslandPlacement.Place(position, 34, 60, Work).Y, 3);
+    }
 }

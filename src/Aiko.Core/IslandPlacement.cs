@@ -56,6 +56,35 @@ public static class IslandPlacement
             : new IslandPosition(ScreenEdge.Right, AlongY(island, work));
     }
 
+    /// How far a new edge has to be closer than the current one before the island in hand switches
+    /// to it. Without it the landing strip flickers between two edges near a corner.
+    public const double EdgeStickiness = 14;
+
+    /// The edge nearest to the middle of an island in hand. The middle, not the sides: the island
+    /// changes shape when it turns from a row into a column, and the sides jump with it.
+    public static ScreenEdge NearestEdge(double centreX, double centreY, Box work, ScreenEdge? current = null)
+    {
+        double DistanceTo(ScreenEdge edge) => edge switch
+        {
+            ScreenEdge.Top => centreY - work.Y,
+            ScreenEdge.Bottom => work.Bottom - centreY,
+            ScreenEdge.Left => centreX - work.X,
+            _ => work.Right - centreX,
+        };
+
+        // Top and bottom first, so they win a tie, as in Nearest.
+        var best = new[] { ScreenEdge.Top, ScreenEdge.Bottom, ScreenEdge.Left, ScreenEdge.Right }
+            .MinBy(DistanceTo);
+
+        return current is { } held && DistanceTo(held) - DistanceTo(best) < EdgeStickiness ? held : best;
+    }
+
+    /// The saved position for an island of this size whose middle is let go here, on this edge.
+    public static IslandPosition DropAt(ScreenEdge edge, double centreX, double centreY, double width, double height, Box work) =>
+        IsHorizontal(edge)
+            ? new IslandPosition(edge, Share(centreX - (width / 2), work.X, work.Width - width))
+            : new IslandPosition(edge, Share(centreY - (height / 2), work.Y, work.Height - height));
+
     /// Where a island of this size goes for a saved position, pressed against its edge and kept
     /// inside the working area.
     public static Box Place(IslandPosition position, double width, double height, Box work)

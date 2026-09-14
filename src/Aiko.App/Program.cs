@@ -109,6 +109,13 @@ static class Program
             return;
         }
 
+        // Drags the island with the real mouse to the left edge and checks where it lands.
+        if (args is ["--try-island", ..])
+        {
+            Environment.Exit(IslandCheck.Run());
+            return;
+        }
+
         // Uses the settings window with the real mouse and keyboard, then puts the environments back.
         if (args is ["--try-settings", ..])
         {
