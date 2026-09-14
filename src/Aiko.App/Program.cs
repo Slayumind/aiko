@@ -116,6 +116,13 @@ static class Program
             return;
         }
 
+        // Drags an island to the bottom edge from code and holds it there, to look at the glass.
+        if (args is ["--try-glass", ..])
+        {
+            Environment.Exit(IslandCheck.TryGlass());
+            return;
+        }
+
         // Unfolds an island at the top of the screen from code and logs its size on the way.
         if (args is ["--try-unfold", ..])
         {

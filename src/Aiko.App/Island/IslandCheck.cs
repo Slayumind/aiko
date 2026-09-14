@@ -133,6 +133,42 @@ static class IslandCheck
         return 0;
     }
 
+    /// --try-glass: drags an island from code to the bottom edge over whatever is on the screen, holds
+    /// it there for two seconds with the glass strip showing, and lets go. The mouse is left alone.
+    public static int TryGlass()
+    {
+        var application = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
+        var island = new IslandWindow();
+
+        // Subscribed before the island shows: Loaded comes during Show, and a handler added later never runs.
+        island.Loaded += async (_, _) =>
+        {
+            await Task.Delay(400);
+            var work = SystemParameters.WorkArea;
+            var start = new Point(island.Left + (island.ActualWidth / 2), island.Top + (island.ActualHeight / 2));
+            var end = new Point(work.X + (work.Width / 2), work.Bottom - 40);
+
+            island.PressAt(start);
+            for (var i = 1; i <= 30; i++)
+            {
+                island.HoldAt(new Point(start.X + ((end.X - start.X) * i / 30), start.Y + ((end.Y - start.Y) * i / 30)));
+                await Task.Delay(15);
+            }
+
+            var strip = Application.Current.Windows.OfType<IslandGhost>().FirstOrDefault();
+            Log.Write($"--try-glass: strip {(strip is null ? "missing" : $"at {strip.Left:0},{strip.Top:0} {strip.ActualWidth:0}x{strip.ActualHeight:0}, visible {strip.IsVisible}")}");
+
+            await Task.Delay(2000);
+            island.LetGo();
+            await Task.Delay(800);
+            application.Shutdown();
+        };
+
+        island.Show(CardSnapshot.Example(), IslandPosition.Default);
+        application.Run();
+        return 0;
+    }
+
     private static async Task<bool> Walk(IslandWindow island, Func<bool> moved)
     {
         var scale = PresentationSource.FromVisual(island)!.CompositionTarget!.TransformToDevice.M11;
