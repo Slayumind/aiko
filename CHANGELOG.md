@@ -5,7 +5,7 @@ All notable changes to Aiko are listed here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and Aiko uses
 [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.0] - 2026-09-14
 
 The first release. Everything below is new.
 
@@ -38,6 +38,12 @@ The first release. Everything below is new.
   files before it changes anything. It keeps a copy of every file it changes, and "Not now" is a
   valid answer. It tells you where Aiko is and how to get the icon out from under the arrow. Later,
   **Add a second environment** and **Start over** open the same checklist in the same window.
+- **Launch commands and project folders.** Aiko can add a command for each environment, such as
+  `aiko-work`. It starts Claude Code in that account from any folder, in PowerShell, cmd and Git
+  Bash. You can also bind project folders to an environment: a plain `claude` in a bound folder, or
+  in any folder inside it, starts that account. For this, Aiko puts a small `claude.exe` of its own
+  first in your user PATH. If your PowerShell profile has functions that switch accounts, Aiko can
+  turn them off and keeps a copy of the profile.
 - **Your own status line keeps working.** Aiko runs it through the same shell Claude Code uses and
   shows its output.
 - **Works with no setup.** Claude Code started without `CLAUDE_CONFIG_DIR` uses the `.claude`
@@ -56,8 +62,10 @@ The first release. Everything below is new.
 - **Update checks,** off by default. The same request counts that one copy ran today, with an ID
   that changes every day. One switch turns off both. [PRIVACY.md](PRIVACY.md) lists what is sent.
 - **English and Russian.** When you change the language, the window reopens in it straight away.
-- **Uninstall** puts your status line back and removes the startup entry and Aiko's folders. It
-  deletes a Claude Code settings file only if Aiko created it and nothing else was added.
+- **Uninstall** puts your status line back, takes Aiko's folder out of PATH together with the launch
+  commands, turns your PowerShell profile functions back on, and removes the startup entry and
+  Aiko's folders. It deletes a Claude Code settings file only if Aiko created it and nothing else was
+  added.
 - **Aiko repairs its own line.** If Aiko is reinstalled in another folder or Git gets installed,
   Aiko fixes its line at startup. It never adds the line where you said no. If one of Aiko's
   settings files can't be read, Aiko keeps it as a `.bad` file and doesn't overwrite it.
