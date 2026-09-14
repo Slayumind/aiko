@@ -1,43 +1,45 @@
-using System.Runtime.InteropServices;
 using System.Windows;
-using System.Windows.Interop;
+using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Aiko.Core;
-using Windows.Win32;
-using Windows.Win32.Foundation;
-using Windows.Win32.UI.WindowsAndMessaging;
 
 namespace Aiko.App;
 
-/// The landing strip: a pane of frosted glass on the edge where the island in hand will land (D-161).
+/// The landing strip: a pane of frosted glass on the edge where the island in hand will land (D-161,
+/// D-182).
 ///
 /// A window of its own, because it sits on the edge while the island is somewhere else. It never
 /// takes the focus or a click, and it exists only while the island is in hand.
 ///
-/// The glass is drawn by Windows, not by Aiko: WPF draws in software here and cannot blur what lies
-/// behind a window. The system backdrop only frosts the active window, and this one never is, so
-/// it uses the acrylic accent instead (RESEARCH, spike 2026-09-14). Windows then rounds all four
-/// corners, and a window region would switch the glass off, so the strip reaches past the screen
-/// edge by one corner radius: the corners on that side fall outside the screen.
+/// Windows gives a window without focus no glass that Aiko can tune (RESEARCH, glass spikes), so the
+/// glass is Aiko's own: a frosted picture of the screen taken when the island was picked up, a thin
+/// tint and grain over it, and a light rim. Being Aiko's own drawing, it can have the flat side
+/// against the edge that the island has.
 sealed class IslandGhost : Window
 {
-    private const double Radius = 8;
+    private const double Radius = 14;
 
-    /// A thin white over the blur, just enough to tell the pane from what is behind it. Halved after
-    /// the owner asked for glass twice as clear.
-    private static readonly Color GlassTint = Color.FromArgb(0x06, 0xFF, 0xFF, 0xFF);
+    /// White over the frosted picture: just enough to tell the pane from what is behind it.
+    private static readonly Color Tint = Color.FromArgb(0x0A, 0xFF, 0xFF, 0xFF);
 
-    /// Grain on the glass, the way real frosted glass catches light. Made once, a tile of random
-    /// mostly light specks with very little alpha.
+    /// The light edge that makes a pane read as glass, on the sides that face into the screen.
+    private static readonly SolidColorBrush Rim = Frozen(new SolidColorBrush(Color.FromArgb(0x38, 0xFF, 0xFF, 0xFF)));
+
+    /// Grain, the way frosted glass catches light: about two percent, as in Fluent acrylic.
     private static readonly ImageBrush Grain = MakeGrain();
 
+    private readonly GlassBands _glass;
+    private readonly Border _picture = new();
+    private readonly Border _grain = new() { Background = Grain };
+    private readonly Border _rim = new() { BorderBrush = Rim };
     private ScreenEdge? _edge;
 
-    public IslandGhost()
+    public IslandGhost(GlassBands glass)
     {
+        _glass = glass;
         WindowStyle = WindowStyle.None;
-        AllowsTransparency = false;
+        AllowsTransparency = true;
         Background = Brushes.Transparent;
         ResizeMode = ResizeMode.NoResize;
         ShowInTaskbar = false;
@@ -45,8 +47,15 @@ sealed class IslandGhost : Window
         Topmost = true;
         Focusable = false;
         IsHitTestVisible = false;
-        Content = new System.Windows.Controls.Border { Background = Grain };
-        SourceInitialized += (_, _) => MakeGlass();
+
+        // The picture is a quarter of the screen's size; smooth scaling keeps the blur soft.
+        RenderOptions.SetBitmapScalingMode(_picture, BitmapScalingMode.Linear);
+
+        var layers = new Grid();
+        layers.Children.Add(_picture);
+        layers.Children.Add(_grain);
+        layers.Children.Add(_rim);
+        Content = layers;
     }
 
     /// Raised the first time the strip shows. Both windows stay above everything, and the one shown
@@ -58,81 +67,57 @@ sealed class IslandGhost : Window
     public void PlaceOn(Box box, ScreenEdge edge)
     {
         var glide = _edge is not null && _edge != edge && Motion.IsOn;
-        _edge = edge;
+        if (_edge != edge)
+        {
+            Shape(edge);
+        }
 
-        var pane = PastTheEdge(box, edge);
-        Width = pane.Width;
-        Height = pane.Height;
+        _edge = edge;
+        _picture.Background = _glass.BrushFor(edge, box) ?? (Brush)new SolidColorBrush(Color.FromArgb(0x60, 0x17, 0x17, 0x17));
+        Width = box.Width;
+        Height = box.Height;
 
         if (glide)
         {
-            BeginAnimation(LeftProperty, Motion.To(pane.X, Motion.Expand, Motion.Standard));
-            BeginAnimation(TopProperty, Motion.To(pane.Y, Motion.Expand, Motion.Standard));
+            BeginAnimation(LeftProperty, Motion.To(box.X, Motion.Expand, Motion.Standard));
+            BeginAnimation(TopProperty, Motion.To(box.Y, Motion.Expand, Motion.Standard));
         }
         else
         {
             BeginAnimation(LeftProperty, null);
             BeginAnimation(TopProperty, null);
-            Left = pane.X;
-            Top = pane.Y;
+            Left = box.X;
+            Top = box.Y;
         }
 
         if (!IsVisible)
         {
             Show();
-            TuckUnderTheTaskbar();
             Shown?.Invoke();
         }
     }
 
-    /// Still above every ordinary window, but just below the taskbar: over the bottom edge the part
-    /// that reaches past the edge would otherwise lie on the taskbar, rounded corners and all.
-    private void TuckUnderTheTaskbar()
+    /// The same shape as the island that will land here: flat and without a rim on the edge side.
+    private void Shape(ScreenEdge edge)
     {
-        var taskbar = PInvoke.FindWindow("Shell_TrayWnd", null);
-        if (taskbar.IsNull)
+        var corners = edge switch
         {
-            return;
-        }
+            ScreenEdge.Top => new CornerRadius(0, 0, Radius, Radius),
+            ScreenEdge.Bottom => new CornerRadius(Radius, Radius, 0, 0),
+            ScreenEdge.Left => new CornerRadius(0, Radius, Radius, 0),
+            _ => new CornerRadius(Radius, 0, 0, Radius),
+        };
 
-        const SET_WINDOW_POS_FLAGS keepPlaceAndFocus =
-            SET_WINDOW_POS_FLAGS.SWP_NOMOVE | SET_WINDOW_POS_FLAGS.SWP_NOSIZE | SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE;
-        PInvoke.SetWindowPos((HWND)new WindowInteropHelper(this).Handle, taskbar, 0, 0, 0, 0, keepPlaceAndFocus);
-    }
-
-    /// The same box, grown past the screen edge by one corner radius.
-    private static Box PastTheEdge(Box box, ScreenEdge edge) => edge switch
-    {
-        ScreenEdge.Top => box with { Y = box.Y - Radius, Height = box.Height + Radius },
-        ScreenEdge.Bottom => box with { Height = box.Height + Radius },
-        ScreenEdge.Left => box with { X = box.X - Radius, Width = box.Width + Radius },
-        _ => box with { Width = box.Width + Radius },
-    };
-
-    private void MakeGlass()
-    {
-        var handle = new WindowInteropHelper(this).Handle;
-        HwndSource.FromHwnd(handle)!.CompositionTarget.BackgroundColor = Colors.Transparent;
-
-        var accent = new AccentPolicy { AccentState = AcrylicBlurBehind, GradientColor = AcrylicTint };
-        var size = Marshal.SizeOf<AccentPolicy>();
-        var memory = Marshal.AllocHGlobal(size);
-        try
+        _picture.CornerRadius = corners;
+        _grain.CornerRadius = corners;
+        _rim.CornerRadius = corners;
+        _rim.BorderThickness = edge switch
         {
-            Marshal.StructureToPtr(accent, memory, false);
-            var data = new CompositionAttributeData { Attribute = AccentPolicyAttribute, Data = memory, SizeOfData = size };
-            if (!SetWindowCompositionAttribute(handle, ref data))
-            {
-                Log.Write("landing strip: Windows gave no glass");
-            }
-        }
-        finally
-        {
-            Marshal.FreeHGlobal(memory);
-        }
-
-        var round = RoundCorners;
-        DwmSetWindowAttribute(handle, CornerPreference, ref round, sizeof(int));
+            ScreenEdge.Top => new Thickness(1, 0, 1, 1),
+            ScreenEdge.Bottom => new Thickness(1, 1, 1, 0),
+            ScreenEdge.Left => new Thickness(0, 1, 1, 1),
+            _ => new Thickness(1, 1, 0, 1),
+        };
     }
 
     private static ImageBrush MakeGrain()
@@ -142,11 +127,10 @@ sealed class IslandGhost : Window
         var pixels = new byte[size * size * 4];
         for (var i = 0; i < pixels.Length; i += 4)
         {
-            // Premultiplied BGRA: mostly light specks at a few percent over the tint. Dark specks at
-            // half made the glass read darker than the screen behind it.
-            var light = random.Next(4) != 0;
-            var alpha = (byte)(GlassTint.A + random.Next(0, 4));
-            var value = light ? alpha : (byte)0;
+            // Premultiplied BGRA: the tint everywhere, and a light or a darker speck at a few percent.
+            var speck = random.Next(0, 6);
+            var alpha = (byte)(Tint.A + speck);
+            var value = random.Next(3) != 0 ? alpha : (byte)(alpha / 3);
             pixels[i] = value;
             pixels[i + 1] = value;
             pixels[i + 2] = value;
@@ -156,51 +140,19 @@ sealed class IslandGhost : Window
         var tile = BitmapSource.Create(size, size, 96, 96, PixelFormats.Pbgra32, null, pixels, size * 4);
         tile.Freeze();
 
-        var brush = new ImageBrush(tile)
+        return Frozen(new ImageBrush(tile)
         {
             TileMode = TileMode.Tile,
             Viewport = new Rect(0, 0, size, size),
             ViewportUnits = BrushMappingMode.Absolute,
             Stretch = Stretch.None,
-        };
-        brush.Freeze();
-        return brush;
+        });
     }
 
-    /// ACCENT_ENABLE_ACRYLICBLURBEHIND: the strongest blur Windows gives a window without focus.
-    private const int AcrylicBlurBehind = 4;
-
-    /// The colour acrylic lays over its blur, ABGR. Next to nothing: with a white tint of its own it
-    /// turned milky. The tint the owner sees comes from GlassTint and the grain instead.
-    private const int AcrylicTint = 0x01000000;
-    private const int AccentPolicyAttribute = 19;
-    private const int CornerPreference = 33;
-
-    /// DWMWCP_ROUND: the 8 px corner Windows 11 gives its own windows. Radius above is the same.
-    private const int RoundCorners = 2;
-
-    [StructLayout(LayoutKind.Sequential)]
-    private struct AccentPolicy
+    private static T Frozen<T>(T freezable)
+        where T : Freezable
     {
-        public int AccentState;
-        public int AccentFlags;
-        public int GradientColor;
-        public int AnimationId;
+        freezable.Freeze();
+        return freezable;
     }
-
-    [StructLayout(LayoutKind.Sequential)]
-    private struct CompositionAttributeData
-    {
-        public int Attribute;
-        public nint Data;
-        public int SizeOfData;
-    }
-
-#pragma warning disable SYSLIB1054
-    [DllImport("user32.dll")]
-    private static extern bool SetWindowCompositionAttribute(nint window, ref CompositionAttributeData data);
-
-    [DllImport("dwmapi.dll")]
-    private static extern int DwmSetWindowAttribute(nint window, int attribute, ref int value, int size);
-#pragma warning restore SYSLIB1054
 }
