@@ -24,7 +24,7 @@ The first release. Everything below is new.
   Click the icon or the card and it stays until you close it.
 - **Island.** If you prefer, Aiko lives in a small window at the edge of the screen instead of the
   tray, with one ring per environment. It opens the card the same way the icon does. Pick it up
-  and a dashed strip shows where it will land on the nearest edge; along a side edge the rings turn
+  and a pane of frosted glass shows where it will land on the nearest edge; along a side edge the rings turn
   into a column while it is still in your hand. Let go and it settles there, flat against the edge.
   It hides while a window is full screen.
 - **Setup checklist.** On the first run, settings open on a checklist: install Claude Code, sign
