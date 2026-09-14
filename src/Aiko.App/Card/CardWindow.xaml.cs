@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 
 namespace Aiko.App;
 
@@ -10,7 +11,7 @@ public partial class CardWindow : Window
     {
         InitializeComponent();
 
-        Panel.CloseRequested += Close;
+        Panel.CloseRequested += FadeAndClose;
         Panel.SettingsRequested += () => SettingsRequested?.Invoke();
         Panel.OpenClaudeRequested += environment => OpenClaudeRequested?.Invoke(environment);
         Panel.DragHandle.MouseLeftButtonDown += OnDragHandlePressed;
@@ -42,14 +43,60 @@ public partial class CardWindow : Window
         Opacity = 0;
         Show();
         UpdateLayout();
-        PlaceAbove(iconInPixels);
+        var above = PlaceAbove(iconInPixels);
         Opacity = 1;
-        Motion.Appear(Panel);
+        PopIn(above);
+    }
+
+    /// The card grows out of the icon: from a little smaller and a few pixels towards the icon, with
+    /// the spring everything else in Aiko uses (D-161). Above the icon it grows from its bottom edge,
+    /// below it from its top.
+    private void PopIn(bool aboveTheIcon)
+    {
+        if (!Motion.IsOn)
+        {
+            return;
+        }
+
+        var scale = new ScaleTransform(PopFrom, PopFrom);
+        var shift = new TranslateTransform(0, aboveTheIcon ? PopShift : -PopShift);
+        Panel.RenderTransformOrigin = new Point(0.5, aboveTheIcon ? 1 : 0);
+        Panel.RenderTransform = new TransformGroup { Children = { scale, shift } };
+
+        var grow = new DoubleAnimation(PopFrom, 1, Motion.Settle) { EasingFunction = Motion.Spring };
+        scale.BeginAnimation(ScaleTransform.ScaleXProperty, grow);
+        scale.BeginAnimation(ScaleTransform.ScaleYProperty, grow);
+        shift.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(0, Motion.Settle) { EasingFunction = Motion.Spring });
+        Panel.BeginAnimation(OpacityProperty, new DoubleAnimation(0, 1, Motion.Hover) { EasingFunction = Motion.Standard });
+    }
+
+    private const double PopFrom = 0.94;
+    private const double PopShift = 6;
+
+    /// True from the start of the fade: a click in that moment opens a new card instead of pinning
+    /// the one on its way out.
+    public bool IsClosing { get; private set; }
+
+    /// Goes away the way it came, quicker: a short fade, then the window is really closed.
+    public void FadeAndClose()
+    {
+        if (!Motion.IsOn || !IsVisible)
+        {
+            Close();
+            return;
+        }
+
+        IsClosing = true;
+        IsHitTestVisible = false;
+        var fade = new DoubleAnimation(0, Motion.Hover) { EasingFunction = Motion.Standard };
+        fade.Completed += (_, _) => Close();
+        BeginAnimation(OpacityProperty, fade);
     }
 
     /// Puts the card above the tray icon. The rectangle comes from Windows in real pixels, and
     /// WPF works in its own units, so it is divided by the scaling of this screen.
-    public void PlaceAbove(Rect iconInPixels)
+    /// Returns false when there was no room above and the card went below the icon.
+    public bool PlaceAbove(Rect iconInPixels)
     {
         var dpi = VisualTreeHelper.GetDpi(this);
         var icon = new Rect(
@@ -64,13 +111,15 @@ public partial class CardWindow : Window
         // The taskbar is not always at the bottom. If there is no room above the icon, the card
         // goes below it instead of hanging off the screen.
         var work = SystemParameters.WorkArea;
-        if (top < work.Top)
+        var above = top >= work.Top;
+        if (!above)
         {
             top = icon.Bottom;
         }
 
         Left = Math.Clamp(left, work.Left, Math.Max(work.Left, work.Right - ActualWidth));
         Top = Math.Clamp(top, work.Top, Math.Max(work.Top, work.Bottom - ActualHeight));
+        return above;
     }
 
     /// The card is dragged by its header. Windows moves it for us, so there is no mouse maths.
