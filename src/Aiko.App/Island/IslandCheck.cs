@@ -39,18 +39,15 @@ static class IslandCheck
         return result;
     }
 
-    /// --try-strip [folder]: shows the landing strip on the bottom edge for three seconds, over a sample
-    /// to see through and with an island sitting on it, to look at the glass. With a folder it also
-    /// saves the frosted picture of that edge, to check that the island is not in it. The mouse is
-    /// left alone.
-    public static int ShowStrip(string? saveTo)
+    /// --try-strip: only shows the landing strip on the bottom edge for three seconds, over a sample to see through,
+    /// to look at the glass and at the taskbar cutting it. The mouse is left alone.
+    public static int ShowStrip()
     {
         var application = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
         var work = SystemParameters.WorkArea;
-
-        // Something to see through: over a black terminal any glass is invisible.
+        // Something to see through: over a black terminal any glass this clear is invisible.
         var sample = new System.Windows.Controls.StackPanel { Background = new LinearGradientBrush(Color.FromRgb(0x3B, 0x2A, 0x6B), Color.FromRgb(0x0E, 0x5A, 0x4F), 0) };
-        for (var line = 0; line < 9; line++)
+        for (var line = 0; line < 8; line++)
         {
             sample.Children.Add(new System.Windows.Controls.TextBlock
             {
@@ -61,7 +58,7 @@ static class IslandCheck
             });
         }
 
-        new Window
+        var backdrop = new Window
         {
             WindowStyle = WindowStyle.None,
             ResizeMode = ResizeMode.NoResize,
@@ -74,44 +71,23 @@ static class IslandCheck
             Width = 640,
             Height = 220,
             Content = sample,
-        }.Show();
-
-        var island = new IslandWindow();
-        island.Show(CardSnapshot.Example(), new IslandPosition(ScreenEdge.Bottom, 0.5));
-
-        var timer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMilliseconds(400) };
-        var shown = false;
-        timer.Tick += async (_, _) =>
-        {
-            if (shown)
-            {
-                application.Shutdown();
-                return;
-            }
-
-            shown = true;
-            timer.Stop();
-            var scale = System.Windows.Media.VisualTreeHelper.GetDpi(island).DpiScaleX;
-            var bands = await GlassBands.TakeAsync(new Box(work.X, work.Y, work.Width, work.Height), scale, [new System.Windows.Interop.WindowInteropHelper(island).Handle]);
-            if (saveTo is not null && bands.PictureOn(ScreenEdge.Bottom) is { } picture)
-            {
-                var encoder = new System.Windows.Media.Imaging.PngBitmapEncoder();
-                encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(picture));
-                using var file = System.IO.File.Create(System.IO.Path.Combine(saveTo, "bottom-band.png"));
-                encoder.Save(file);
-            }
-
-            var strip = new IslandGhost(bands);
-            strip.Shown += () =>
-            {
-                // Back on top of the glass, as the island does for itself when it is dragged.
-                island.Topmost = false;
-                island.Topmost = true;
-            };
-            strip.PlaceOn(new Box(work.X + (work.Width / 2) - 120, work.Bottom - 60, 240, 60), ScreenEdge.Bottom);
-            timer.Interval = TimeSpan.FromSeconds(3);
-            timer.Start();
         };
+        backdrop.Show();
+
+        // Over the bottom edge, where the part past the edge has to hide under the taskbar.
+        var frosted = new IslandGhost();
+        frosted.PlaceOn(new Box(work.X + (work.Width / 2) - 120, work.Bottom - 60, 240, 60), ScreenEdge.Bottom);
+
+        // The strip sits just under the taskbar, and a window shown later lands above it, so the
+        // sample goes under the strip by hand.
+        Windows.Win32.PInvoke.SetWindowPos(
+            (Windows.Win32.Foundation.HWND)new System.Windows.Interop.WindowInteropHelper(backdrop).Handle,
+            (Windows.Win32.Foundation.HWND)new System.Windows.Interop.WindowInteropHelper(frosted).Handle,
+            0, 0, 0, 0,
+            Windows.Win32.UI.WindowsAndMessaging.SET_WINDOW_POS_FLAGS.SWP_NOMOVE | Windows.Win32.UI.WindowsAndMessaging.SET_WINDOW_POS_FLAGS.SWP_NOSIZE | Windows.Win32.UI.WindowsAndMessaging.SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE);
+
+        var timer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
+        timer.Tick += (_, _) => application.Shutdown();
         timer.Start();
         application.Run();
         return 0;
