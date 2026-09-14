@@ -658,7 +658,10 @@ public partial class WizardPanel : UserControl
                 ProjectFolders = projects,
             };
 
-        var environments = new List<AikoEnvironment> { Keep(FirstNameText(), FirstFolder, 0, []) };
+        // The wizard only edits the folders of environment 2. Those of environment 1 stay as they were:
+        // a live run lost the personal projects binding here.
+        var firstFolders = _existing.First(Home)?.ProjectFolders ?? [];
+        var environments = new List<AikoEnvironment> { Keep(FirstNameText(), FirstFolder, 0, firstFolders) };
         if (_secondFolder is not null)
         {
             environments.Add(Keep(SecondNameText(), _secondFolder, 1, _projectFolders.ToList()));
@@ -692,6 +695,8 @@ public partial class WizardPanel : UserControl
             CheckUpdates = CheckUpdates.IsChecked == true,
         });
     }
+
+    private void OnCloseClicked(object sender, RoutedEventArgs e) => Finished?.Invoke();
 
     private void ShowDone(List<PatchProblem> problems, string? commands)
     {

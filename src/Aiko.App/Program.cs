@@ -102,6 +102,13 @@ static class Program
             return;
         }
 
+        // Opens a drop-down in a small window and clicks it with the real mouse.
+        if (args is ["--try-dropdown", ..])
+        {
+            Environment.Exit(DropDownCheck.Run());
+            return;
+        }
+
         // Where Aiko would find Claude Code, read from a fresh PATH. Opens nothing.
         if (args is ["--try-claude", ..])
         {
