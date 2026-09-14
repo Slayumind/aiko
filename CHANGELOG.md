@@ -22,10 +22,12 @@ The first release. Everything below is new.
 - **Island.** If you prefer, Aiko lives in a small window at the edge of the screen instead of the
   tray, with one ring per environment. It opens the card the same way the icon does. Drag it
   anywhere and it sticks to the nearest edge. It hides while a window is full screen.
-- **First-run wizard.** It finds your Claude Code folders and shows the exact line and the exact
+- **Setup checklist.** On the first run, settings open on a checklist: install Claude Code, sign
+  in, pick or create the second environment, access to the limits, launch commands, project folders
+  and where to show Aiko. It finds your Claude Code folders and shows the exact line and the exact
   files before it changes anything. It keeps a copy of every file it changes, and "Not now" is a
-  valid answer. At the end it tells you where Aiko is and how to get the icon out from under the
-  arrow.
+  valid answer. It tells you where Aiko is and how to get the icon out from under the arrow. Later,
+  **Add a second environment** and **Start over** open the same checklist in the same window.
 - **Your own status line keeps working.** Aiko runs it through the same shell Claude Code uses and
   shows its output.
 - **Works with no setup.** Claude Code started without `CLAUDE_CONFIG_DIR` uses the `.claude`

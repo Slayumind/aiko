@@ -11,6 +11,7 @@ public partial class SettingsPanel : UserControl
 {
     public const string FoldersPageKey = "folders";
     public const string GeneralPageKey = "general";
+    public const string ChecklistPageKey = "setup";
     private const string EnvironmentPagePrefix = "env:";
 
     private static readonly string Home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
@@ -18,14 +19,18 @@ public partial class SettingsPanel : UserControl
     private readonly EnvironmentsEditor _editor = new();
     private readonly Dictionary<string, string> _plans = new(StringComparer.OrdinalIgnoreCase);
     private string _page;
+
+    /// The checklist keeps its answers while the person looks at other pages, until Finish or until
+    /// the window closes.
+    private ChecklistPage? _checklist;
     private bool _buildingNav;
 
     public SettingsPanel() : this(null)
     {
     }
 
-    /// The page to open: "general", "folders", or "env:" and an account folder. Null opens the first
-    /// environment.
+    /// The page to open: "general", "folders", "setup" or "env:" and an account folder. Null opens the
+    /// first environment, or the checklist when nothing is set up yet.
     public SettingsPanel(string? page)
     {
         InitializeComponent();
@@ -35,14 +40,14 @@ public partial class SettingsPanel : UserControl
         VersionLine.Text = $"Aiko {AppVersion.Current()}";
 
         _editor.Changed += OnEnvironmentsChanged;
-        _page = page ?? EnvironmentPage(0) ?? GeneralPageKey;
-        BuildNav();
+        _page = page ?? EnvironmentPage(0) ?? ChecklistPageKey;
+        // The page first: opening the checklist adds its item to the menu.
         ShowPage(_page, animate: false);
+        BuildNav();
     }
 
     public event Action? CloseRequested;
     public event Action? QuitRequested;
-    public event Action? WizardRequested;
 
     /// Raised when the window has to come back in another language.
     public event Action? ReopenRequested;
@@ -54,14 +59,37 @@ public partial class SettingsPanel : UserControl
 
     public string CurrentPage => _page;
 
+    /// For a snapshot of a page taller than the window: the window grows to the page instead.
+    public void GrowToPage() => Body.Height = double.NaN;
+
     /// The key of the n-th environment's page: environment 1 is always the one in .claude.
     public string? EnvironmentPage(int index) =>
         Ordered(_editor.Current).ElementAtOrDefault(index) is { } environment
             ? EnvironmentPagePrefix + environment.ConfigDirectories[0]
             : null;
 
-    /// Applies a name or a command still being typed. Called when the window closes.
-    public void Leave() => LeaveCurrentPage();
+    /// Applies a name or a command still being typed, and stops the checklist waiting for anything.
+    /// Called when the window closes.
+    public void Leave()
+    {
+        LeaveCurrentPage();
+        _checklist?.Close();
+    }
+
+    /// Opens the checklist page, at one item when asked. Answers already given stay.
+    public void OpenChecklist(ChecklistItem? item = null)
+    {
+        if (_checklist is null)
+        {
+            _checklist = NewChecklist(item);
+        }
+        else if (item is { } open)
+        {
+            _checklist.OpenItem(open);
+        }
+
+        Navigate(ChecklistPageKey);
+    }
 
     public void StartUpdateCheck()
     {
@@ -105,7 +133,11 @@ public partial class SettingsPanel : UserControl
             Nav.Children.Add(NavItem(EnvironmentPagePrefix + folder, environment.Name, sub));
         }
 
-        if (settings.Environments.Count < EnvironmentSettings.MaxEnvironments)
+        if (_checklist is not null || !settings.HasEnvironments)
+        {
+            Nav.Children.Add(NavItem(ChecklistPageKey, Strings.ChecklistTitle, null));
+        }
+        else if (settings.Environments.Count < EnvironmentSettings.MaxEnvironments)
         {
             Nav.Children.Add(AddSecondSlot());
         }
@@ -195,7 +227,7 @@ public partial class SettingsPanel : UserControl
             Margin = new Thickness(0, 4, 0, 0),
             Content = face,
         };
-        slot.Click += (_, _) => WizardRequested?.Invoke();
+        slot.Click += (_, _) => OpenChecklist(ChecklistItem.SecondEnvironment);
         return slot;
     }
 
@@ -243,7 +275,7 @@ public partial class SettingsPanel : UserControl
             var general = new GeneralPage();
             general.Saved += OnGeneralSaved;
             general.QuitRequested += () => QuitRequested?.Invoke();
-            general.WizardRequested += () => WizardRequested?.Invoke();
+            general.RestartRequested += StartOver;
             general.ReopenRequested += () => ReopenRequested?.Invoke();
             return general;
         }
@@ -251,8 +283,13 @@ public partial class SettingsPanel : UserControl
         if (key == FoldersPageKey)
         {
             var folders = new FoldersPage(_editor);
-            folders.WizardRequested += () => WizardRequested?.Invoke();
+            folders.ChecklistRequested += item => OpenChecklist(item);
             return folders;
+        }
+
+        if (key == ChecklistPageKey)
+        {
+            return _checklist ??= NewChecklist(null);
         }
 
         var folder = key.StartsWith(EnvironmentPagePrefix, StringComparison.Ordinal) ? key[EnvironmentPagePrefix.Length..] : null;
@@ -263,12 +300,36 @@ public partial class SettingsPanel : UserControl
 
         var environment = new EnvironmentPage(_editor, folder);
         environment.FoldersRequested += () => Navigate(FoldersPageKey);
-        environment.Removed += note =>
-        {
-            Navigate(EnvironmentPage(0) ?? GeneralPageKey);
-            (PageHost.Content as EnvironmentPage)?.ShowNote(note);
-        };
+        environment.Removed += ShowNoteOnFirstEnvironment;
         return environment;
+    }
+
+    private ChecklistPage NewChecklist(ChecklistItem? item)
+    {
+        var checklist = new ChecklistPage(item);
+        checklist.Finished += note =>
+        {
+            _checklist = null;
+            _editor.Reload();
+            ShowNoteOnFirstEnvironment(note);
+        };
+        return checklist;
+    }
+
+    /// Everything Aiko set up goes, and the checklist opens from the start, here in the same window.
+    private void StartOver(bool recycleSecond)
+    {
+        _checklist?.Close();
+        _checklist = null;
+
+        _editor.StartOver(recycleSecond);
+        OpenChecklist();
+    }
+
+    private void ShowNoteOnFirstEnvironment(string note)
+    {
+        Navigate(EnvironmentPage(0) ?? GeneralPageKey);
+        (PageHost.Content as EnvironmentPage)?.ShowNote(note);
     }
 
     /// Opens a page from inside another one, and moves the mark in the menu with it.

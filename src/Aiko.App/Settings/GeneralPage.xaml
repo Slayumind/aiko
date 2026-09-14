@@ -127,12 +127,37 @@
               Click="OnCopyDiagnostics" />
     </Grid>
 
-    <Border Height="1" Background="{StaticResource Hairline}" Margin="0,22,0,12" />
-    <DockPanel>
-      <Button DockPanel.Dock="Right" Content="{x:Static local:Strings.QuitAiko}" Style="{StaticResource GhostButton}"
-              Margin="0,0,-10,0" Click="OnQuit" />
-      <Button Content="{x:Static local:Strings.SetUpEnvironments}" Style="{StaticResource SmallButton}"
-              Click="OnSetUpEnvironments" />
-    </DockPanel>
+    <Border Height="1" Background="{StaticResource Hairline}" Margin="0,22,0,14" />
+
+    <!-- Starting over takes a lot away, so it asks a second time and says what goes. -->
+    <Grid x:Name="RestartRow">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="Auto" />
+      </Grid.ColumnDefinitions>
+      <TextBlock Text="{x:Static local:Strings.RestartWhat}" Style="{StaticResource RowHint}" VerticalAlignment="Center"
+                 Margin="0,0,12,0" />
+      <Button Grid.Column="1" Content="{x:Static local:Strings.Restart}" Style="{StaticResource GhostDangerButton}"
+              Margin="0,0,-10,0" Click="OnRestartAsked" />
+    </Grid>
+    <local:RevealPanel x:Name="RestartConfirm">
+      <Border CornerRadius="10" Background="#0FFF6467" BorderBrush="#38FF6467" BorderThickness="1" Padding="12">
+        <StackPanel>
+          <TextBlock x:Name="RestartLine" Style="{StaticResource RowHint}" Foreground="{StaticResource Ink}" />
+          <CheckBox x:Name="RestartBin" Style="{StaticResource Tick}" Margin="0,12,0,0">
+            <TextBlock x:Name="RestartBinText" TextWrapping="Wrap" />
+          </CheckBox>
+          <TextBlock Text="{x:Static local:Strings.RestartKeep}" Style="{StaticResource RowHint}" Margin="0,8,0,0" />
+          <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+            <Button Content="{x:Static local:Strings.Cancel}" Style="{StaticResource GhostButton}" Click="OnRestartCancelled" />
+            <Button Content="{x:Static local:Strings.Restart}" Style="{StaticResource DangerButton}" Margin="8,0,0,0"
+                    Click="OnRestartConfirmed" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+    </local:RevealPanel>
+
+    <Button Content="{x:Static local:Strings.QuitAiko}" Style="{StaticResource GhostButton}" HorizontalAlignment="Right"
+            Margin="0,14,-10,0" Click="OnQuit" />
   </StackPanel>
 </UserControl>

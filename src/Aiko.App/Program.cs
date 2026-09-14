@@ -177,13 +177,20 @@ static class Program
         {
             // The item to open, by name or number: --snapshot-wizard out.png Commands
             ChecklistItem? item = args.Length > 2 && Enum.TryParse<ChecklistItem>(args[2], true, out var asked) ? asked : null;
-            Snapshot.Write(new WizardPanel(item), wizardPath);
+            var checklist = new SettingsPanel(SettingsPanel.ChecklistPageKey);
+            if (item is { } open)
+            {
+                checklist.OpenChecklist(open);
+            }
+
+            Snapshot.Write(checklist, wizardPath);
             return;
         }
 
         if (args is ["--snapshot-settings", var settingsPath, ..])
         {
-            // The page to draw: --snapshot-settings out.png general | folders | env1 | env2
+            // The page to draw: --snapshot-settings out.png general | folders | env1 | env2 [tall]
+            // "tall" draws the whole page, not only the part that fits the window.
             var page = args.Length > 2 ? args[2] : null;
             var panel = new SettingsPanel(page switch
             {
@@ -191,6 +198,10 @@ static class Program
                 "env2" => new SettingsPanel().EnvironmentPage(1),
                 _ => page,
             });
+            if (args is [.., "tall"])
+            {
+                panel.GrowToPage();
+            }
             Snapshot.Write(panel, settingsPath);
             return;
         }

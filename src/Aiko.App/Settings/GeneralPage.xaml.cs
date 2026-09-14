@@ -10,6 +10,8 @@ public partial class GeneralPage : UserControl
 {
     private const string ReleasesPage = "https://github.com/Slayumind/aiko/releases/latest";
 
+    private static readonly string Home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+
     private static readonly AikoLanguage[] Languages = [AikoLanguage.System, AikoLanguage.Russian, AikoLanguage.English];
 
     private AppSettings _settings = SettingsStore.Load();
@@ -37,7 +39,9 @@ public partial class GeneralPage : UserControl
 
     public event Action? QuitRequested;
 
-    public event Action? WizardRequested;
+    /// Raised after the second click on "Start over", with whether the second folder goes to the
+    /// Recycle Bin.
+    public event Action<bool>? RestartRequested;
 
     /// Raised when the window has to come back in another language.
     public event Action? ReopenRequested;
@@ -290,5 +294,28 @@ public partial class GeneralPage : UserControl
 
     private void OnQuit(object sender, RoutedEventArgs e) => QuitRequested?.Invoke();
 
-    private void OnSetUpEnvironments(object sender, RoutedEventArgs e) => WizardRequested?.Invoke();
+    // ---- starting over ----
+
+    private void OnRestartAsked(object sender, RoutedEventArgs e)
+    {
+        var environments = SettingsStore.LoadEnvironments();
+        RestartLine.Text = string.Format(Strings.RestartLine, string.Join(", ", environments.Environments.Select(env => env.Command)));
+
+        // Only the second environment's folder can go: .claude belongs to VS Code and Claude Desktop too.
+        var second = environments.Second(Home);
+        RestartBin.IsChecked = false;
+        RestartBin.Visibility = second is null ? Visibility.Collapsed : Visibility.Visible;
+        RestartBinText.Text = second is null ? "" : string.Format(Strings.RestartBin, System.IO.Path.GetFileName(second.ConfigDirectories[0]));
+
+        RestartRow.Visibility = Visibility.Collapsed;
+        RestartConfirm.IsOpen = true;
+    }
+
+    private void OnRestartCancelled(object sender, RoutedEventArgs e)
+    {
+        RestartConfirm.IsOpen = false;
+        RestartRow.Visibility = Visibility.Visible;
+    }
+
+    private void OnRestartConfirmed(object sender, RoutedEventArgs e) => RestartRequested?.Invoke(RestartBin.IsChecked == true);
 }

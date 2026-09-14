@@ -61,6 +61,13 @@ public static class EnvironmentEdits
         return new Renamed(updated, suggestion);
     }
 
+    /// The command an environment brings into the checklist as the person's own. Once commands are
+    /// installed the one in use is kept, the same rule as a rename in settings (D-180), so going
+    /// through the checklist again cannot quietly turn aiko-work into aiko-work-kodland.
+    public static string? StartingCommand(AikoEnvironment? existing, bool commandsInstalled) =>
+        existing is null ? null
+        : existing.CustomCommand ?? (commandsInstalled ? existing.Command : null);
+
     public static CommandProblem CheckCommand(EnvironmentSettings settings, string environment, string command) =>
         LaunchCommand.Check(command, settings.Environments.Where(e => e.Name != environment).Select(e => e.Command));
 
