@@ -8,6 +8,7 @@ using Aiko.Core;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.Graphics.Gdi;
+using Windows.Win32.UI.WindowsAndMessaging;
 
 namespace Aiko.App;
 
@@ -114,7 +115,7 @@ public partial class IslandWindow : Window
             $"dpi {VisualTreeHelper.GetDpi(this).DpiScaleX:0.00}");
     }
 
-    // ---- the landing strip (D-161): in hand, the island follows the mouse and a dashed strip shows
+    // ---- the landing strip (D-161): in hand, the island follows the mouse and a pane of frosted glass shows
     // where it will land; let go, and it settles there ----
 
     /// Further than this, a press is a drag and not a click.
@@ -205,6 +206,15 @@ public partial class IslandWindow : Window
         Panel.Show(Cards, _handEdge, docked: false);
         Fit();
         _ghost = new IslandGhost();
+        _ghost.Shown += LiftAboveTheStrip;
+    }
+
+    /// Puts the island back on top of the other always-on-top windows, the glass strip among them.
+    private void LiftAboveTheStrip()
+    {
+        const SET_WINDOW_POS_FLAGS keepPlaceAndFocus =
+            SET_WINDOW_POS_FLAGS.SWP_NOMOVE | SET_WINDOW_POS_FLAGS.SWP_NOSIZE | SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE;
+        PInvoke.SetWindowPos((HWND)new WindowInteropHelper(this).Handle, HWND.HWND_TOPMOST, 0, 0, 0, 0, keepPlaceAndFocus);
     }
 
     /// Lets go: the island lands on the strip, and the strip goes away.
