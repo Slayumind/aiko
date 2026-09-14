@@ -110,10 +110,9 @@ sealed class IslandGhost : Window
     /// ACCENT_ENABLE_ACRYLICBLURBEHIND: the strongest blur Windows gives a window without focus.
     private const int AcrylicBlurBehind = 4;
 
-    /// The colour acrylic lays over its blur, ABGR: white at 5 %, so the glass is 95 % see-through, as
-    /// the owner asked. Aiko's dark surface colour at 5 % vanished over a dark desktop: the strip read
-    /// as a black gap. Aiko draws nothing of its own over it.
-    private const int AcrylicTint = 0x0DFFFFFF;
+    /// The colour acrylic lays over its blur, ABGR: Aiko's surface #171717 at 5 %, so the glass is 95 %
+    /// see-through, as the owner asked. Aiko draws nothing of its own over it.
+    private const int AcrylicTint = 0x0D171717;
 
     private const int AccentPolicyAttribute = 19;
     private const int CornerPreference = 33;
