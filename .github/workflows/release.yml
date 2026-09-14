@@ -106,7 +106,7 @@ jobs:
 
       - name: Pack the installer
         # Only a Start menu shortcut. Velopack also puts one on the desktop by default, and a tray
-        # app has no business there.
+        # app has no business there. The icon is the ring, the same file the app is built with.
         run: >
           vpk pack
           --packId Slayumind.Aiko
@@ -115,6 +115,7 @@ jobs:
           --mainExe Aiko.App.exe
           --packTitle Aiko
           --packAuthors "Aleksandr Fomichenko"
+          --icon src/Aiko.App/Assets/aiko.ico
           --shortcuts StartMenuRoot
           --outputDir releases
 

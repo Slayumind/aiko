@@ -16,6 +16,8 @@
     <EnableDefaultApplicationDefinition>false</EnableDefaultApplicationDefinition>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <StartupObject>Aiko.App.Program</StartupObject>
+    <!-- The ring, drawn by tools/app-icon.ps1. Windows shows it in the Start menu and on Aiko's windows. -->
+    <ApplicationIcon>Assets\aiko.ico</ApplicationIcon>
   </PropertyGroup>
 
   <!--
