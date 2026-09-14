@@ -661,4 +661,10 @@
   <data name="RestartKeep" xml:space="preserve">
     <value>.claude остаётся в любом случае.</value>
   </data>
+  <data name="OpenClaudeCode" xml:space="preserve">
+    <value>Открыть Claude Code</value>
+  </data>
+  <data name="CardSignInNote" xml:space="preserve">
+    <value>Войди, чтобы Aiko видела лимиты этой среды.</value>
+  </data>
 </root>

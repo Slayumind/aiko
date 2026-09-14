@@ -22,8 +22,14 @@ static class CardSnapshot
         var now = DateTimeOffset.Now;
         var cards = Example();
 
+        var accounts = new Dictionary<string, CardAccount>
+        {
+            ["Personal"] = new("Max 5x", SignedIn: true),
+            ["Work"] = new("Team", SignedIn: true),
+        };
+
         var panel = new CardPanel();
-        panel.Show(CardModel.From(cards, now));
+        panel.Show(CardModel.From(cards, now, accounts: accounts));
 
         Snapshot.Write(panel, path);
     }
@@ -39,8 +45,14 @@ static class CardSnapshot
             .Select(snapshot => CardState.From(snapshot, now))
             .ToList();
 
+        var accounts = SettingsStore.LoadEnvironments().Environments.ToDictionary(
+            environment => environment.Name,
+            environment => new CardAccount(
+                ClaudeAccounts.Read(environment.ConfigDirectories[0]).PlanLabel,
+                System.IO.File.Exists(ClaudeInstall.CredentialsPathIn(environment.ConfigDirectories[0]))));
+
         var panel = new CardPanel();
-        panel.Show(CardModel.From(cards, now));
+        panel.Show(CardModel.From(cards, now, accounts: accounts));
 
         Snapshot.Write(panel, path);
     }

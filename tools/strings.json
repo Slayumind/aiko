@@ -208,5 +208,7 @@
 ["RestartWhat", ["Removes the environments from Aiko and opens the checklist right here.", "Убирает среды из Aiko и открывает чек-лист здесь же."]],
 ["RestartLine", ["Aiko removes the environments, its lines in settings.json, the commands {0}, the folder bindings and its folder in PATH, and turns the PowerShell profile functions back on. Accounts and history stay in the folders.", "Из Aiko уйдут среды, строки Aiko в settings.json, команды {0}, привязки папок и папка Aiko в PATH, а функции в профиле PowerShell вернутся. Аккаунты и история в папках останутся."]],
 ["RestartBin", ["And move {0} to the Recycle Bin", "И переместить {0} в корзину"]],
-["RestartKeep", [".claude stays either way.", ".claude остаётся в любом случае."]]
+["RestartKeep", [".claude stays either way.", ".claude остаётся в любом случае."]],
+["OpenClaudeCode", ["Open Claude Code", "Открыть Claude Code"]],
+["CardSignInNote", ["Sign in so Aiko can see the limits of this environment.", "Войди, чтобы Aiko видела лимиты этой среды."]]
 ]

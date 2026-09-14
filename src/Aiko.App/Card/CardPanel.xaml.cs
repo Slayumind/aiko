@@ -15,6 +15,9 @@ public partial class CardPanel : UserControl
     /// Raised by the gear. The window above decides what to open.
     public event Action? SettingsRequested;
 
+    /// Raised by "Open Claude Code" under an environment, with its name.
+    public event Action<string>? OpenClaudeRequested;
+
     /// Raised by the cross. The card never hides by itself.
     public event Action? CloseRequested;
 
@@ -30,4 +33,12 @@ public partial class CardPanel : UserControl
     private void OnSettings(object sender, RoutedEventArgs e) => SettingsRequested?.Invoke();
 
     private void OnClose(object sender, RoutedEventArgs e) => CloseRequested?.Invoke();
+
+    private void OnOpenClaude(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button { Tag: string environment })
+        {
+            OpenClaudeRequested?.Invoke(environment);
+        }
+    }
 }
