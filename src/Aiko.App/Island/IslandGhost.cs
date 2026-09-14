@@ -2,6 +2,7 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using Aiko.Core;
 
 namespace Aiko.App;
@@ -13,15 +14,20 @@ namespace Aiko.App;
 ///
 /// The glass is drawn by Windows, not by Aiko: WPF draws in software here and cannot blur what lies
 /// behind a window. The system backdrop only frosts the active window, and this one never is, so
-/// it uses the acrylic accent instead (RESEARCH, spike 2026-09-14). Windows then rounds all four
+/// it uses the blur accent instead (RESEARCH, spike 2026-09-14). Windows then rounds all four
 /// corners, and a window region would switch the glass off, so the strip reaches past the screen
 /// edge by one corner radius: the corners on that side fall outside the screen.
 sealed class IslandGhost : Window
 {
     private const double Radius = 8;
 
-    /// White at about a fifth, over the blur: enough to see the pane on a dark screen.
-    private const uint GlassTint = 0x30FFFFFF;
+    /// A thin white over the blur, just enough to tell the pane from what is behind it. The acrylic
+    /// accent looked milky: it adds a grey layer of its own that no tint takes away.
+    private static readonly Color GlassTint = Color.FromArgb(0x0C, 0xFF, 0xFF, 0xFF);
+
+    /// Grain on the glass, the way real frosted glass catches light. Made once, a tile of random
+    /// light and dark specks with very little alpha.
+    private static readonly ImageBrush Grain = MakeGrain();
 
     private ScreenEdge? _edge;
 
@@ -36,6 +42,7 @@ sealed class IslandGhost : Window
         Topmost = true;
         Focusable = false;
         IsHitTestVisible = false;
+        Content = new System.Windows.Controls.Border { Background = Grain };
         SourceInitialized += (_, _) => MakeGlass();
     }
 
@@ -88,7 +95,7 @@ sealed class IslandGhost : Window
         var handle = new WindowInteropHelper(this).Handle;
         HwndSource.FromHwnd(handle)!.CompositionTarget.BackgroundColor = Colors.Transparent;
 
-        var accent = new AccentPolicy { AccentState = AcrylicBlurBehind, GradientColor = unchecked((int)GlassTint) };
+        var accent = new AccentPolicy { AccentState = BlurBehind };
         var size = Marshal.SizeOf<AccentPolicy>();
         var memory = Marshal.AllocHGlobal(size);
         try
@@ -109,7 +116,40 @@ sealed class IslandGhost : Window
         DwmSetWindowAttribute(handle, CornerPreference, ref round, sizeof(int));
     }
 
-    private const int AcrylicBlurBehind = 4;
+    private static ImageBrush MakeGrain()
+    {
+        const int size = 96;
+        var random = new Random(7);
+        var pixels = new byte[size * size * 4];
+        for (var i = 0; i < pixels.Length; i += 4)
+        {
+            // Premultiplied BGRA: mostly light specks at a few percent over the tint. Dark specks at
+            // half made the glass read darker than the screen behind it.
+            var light = random.Next(4) != 0;
+            var alpha = (byte)(GlassTint.A + random.Next(0, 7));
+            var value = light ? alpha : (byte)0;
+            pixels[i] = value;
+            pixels[i + 1] = value;
+            pixels[i + 2] = value;
+            pixels[i + 3] = alpha;
+        }
+
+        var tile = BitmapSource.Create(size, size, 96, 96, PixelFormats.Pbgra32, null, pixels, size * 4);
+        tile.Freeze();
+
+        var brush = new ImageBrush(tile)
+        {
+            TileMode = TileMode.Tile,
+            Viewport = new Rect(0, 0, size, size),
+            ViewportUnits = BrushMappingMode.Absolute,
+            Stretch = Stretch.None,
+        };
+        brush.Freeze();
+        return brush;
+    }
+
+    /// ACCENT_ENABLE_BLURBEHIND: blur only, without the grey layer acrylic lays over it.
+    private const int BlurBehind = 3;
     private const int AccentPolicyAttribute = 19;
     private const int CornerPreference = 33;
     /// DWMWCP_ROUND: the 8 px corner Windows 11 gives its own windows. Radius above is the same.

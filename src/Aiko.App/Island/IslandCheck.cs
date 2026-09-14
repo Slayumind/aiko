@@ -38,6 +38,22 @@ static class IslandCheck
         return result;
     }
 
+    /// --try-strip: only shows the landing strip at the top of the screen for three seconds, to look
+    /// at the glass. The mouse is left alone.
+    public static int ShowStrip()
+    {
+        var application = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
+        var work = SystemParameters.WorkArea;
+        var strip = new IslandGhost();
+        strip.PlaceOn(new Box(work.X + (work.Width / 2) - 120, work.Y, 240, 60), ScreenEdge.Top);
+
+        var timer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
+        timer.Tick += (_, _) => application.Shutdown();
+        timer.Start();
+        application.Run();
+        return 0;
+    }
+
     private static async Task<bool> Walk(IslandWindow island, Func<bool> moved)
     {
         var scale = PresentationSource.FromVisual(island)!.CompositionTarget!.TransformToDevice.M11;
