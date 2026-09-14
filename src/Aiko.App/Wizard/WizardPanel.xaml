@@ -28,8 +28,27 @@
           <TextBlock x:Name="Heading" Text="{x:Static local:Strings.ChecklistTitle}" VerticalAlignment="Center"
                      FontFamily="{StaticResource Sans}" FontSize="{StaticResource TextName}"
                      FontWeight="Medium" Foreground="{StaticResource Ink}" />
-          <TextBlock x:Name="Counter" HorizontalAlignment="Right" VerticalAlignment="Center"
-                     Style="{StaticResource RowNote}" />
+          <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+            <TextBlock x:Name="Counter" VerticalAlignment="Center" Style="{StaticResource RowNote}" Margin="0,0,10,0" />
+            <!-- Closing is an answer too: nothing is saved, and Aiko keeps what it had. -->
+            <Button Click="OnCloseClicked" ToolTip="{x:Static local:Strings.Close}" Width="22" Height="22"
+                    Background="Transparent" Cursor="Hand" local:Motion.Press="True">
+              <Button.Template>
+                <ControlTemplate TargetType="Button">
+                  <Border x:Name="Back" Background="{TemplateBinding Background}" CornerRadius="6">
+                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                  </Border>
+                  <ControlTemplate.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                      <Setter TargetName="Back" Property="Background" Value="{StaticResource Raised}" />
+                    </Trigger>
+                  </ControlTemplate.Triggers>
+                </ControlTemplate>
+              </Button.Template>
+              <Path Data="M 0,0 L 10,10 M 10,0 L 0,10" Stroke="{StaticResource Muted}"
+                    StrokeThickness="1.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Width="10" Height="10" />
+            </Button>
+          </StackPanel>
         </Grid>
 
         <ScrollViewer x:Name="ChecklistScroll" VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Disabled">

@@ -22,6 +22,13 @@ public partial class SettingsWindow : Window
             Close();
         };
         Panel.DragHandle.MouseLeftButtonDown += OnDragHandlePressed;
+        KeyDown += (_, e) =>
+        {
+            if (e.Key == Key.Escape)
+            {
+                Close();
+            }
+        };
     }
 
     /// "Quit Aiko" closes the whole app, not this window, so the tray decides what to do.
