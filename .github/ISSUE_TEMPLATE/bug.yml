@@ -1,11 +1,11 @@
 name: Something is wrong
-description: Aiko does something it should not, or does nothing when it should.
+description: Aiko does something it shouldn't, or does nothing when it should.
 labels: [bug]
 body:
   - type: markdown
     attributes:
       value: |
-        Found a security problem? Please do not write it here. [SECURITY.md](https://github.com/Slayumind/aiko/blob/main/SECURITY.md)
+        Found a security problem? Please don't post it here. [SECURITY.md](https://github.com/Slayumind/aiko/blob/main/SECURITY.md)
         says how to report one privately.
 
   - type: textarea
@@ -33,8 +33,8 @@ body:
     attributes:
       label: Diagnostics
       description: >
-        Settings window, then **Copy diagnostics**, then paste it here. It holds the version, the
-        Windows version and which options are on. No tokens and no limit numbers.
+        Settings window, then **Copy diagnostics**, then paste it here. It has the Aiko version, the
+        Windows version and which options are on. It has no tokens and no limit numbers.
       render: text
     validations:
       required: false

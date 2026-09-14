@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to Aiko are written down here.
+All notable changes to Aiko are listed here.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and Aiko uses
 [semantic versioning](https://semver.org/spec/v2.0.0.html).
@@ -11,35 +11,36 @@ The first release. Everything below is new.
 
 ### Added
 
-- **The tray icon.** A ring for one environment and a dot for the other, coloured by how much of
-  each limit is used. The tooltip carries the numbers, so they are there even when Windows 11 hides
-  the icon behind the overflow arrow. A left click opens the card; the right click menu shows the
-  other environment in the ring, opens settings, refreshes, checks for updates and quits.
-- **The card.** Session, week and model limits for every environment: how much is used, when each
-  resets, and how long it lasts at the current pace once there is enough to go on. A limit that is
-  running low says so in a word as well as a colour. A card opened by resting the mouse on the icon
-  goes away with the mouse; click the icon or the card and it stays until you close it.
-- **The island,** instead of the tray if you like: a small window at an edge of the screen with one
-  ring per environment. It opens the card the same way the icon does. Drag it anywhere and it
-  sticks to the nearest edge. It steps aside while a window is full screen.
-- **The first run wizard.** It finds your Claude Code folders, shows the exact line it would add and
-  the exact files before asking, and keeps a copy of every file it changes. "Not now" is an answer.
-  It ends by saying where Aiko is and how to bring the icon out from behind the overflow arrow.
+- **Tray icon.** A ring for one environment and a dot for the other, coloured by how much of each
+  limit is used. The tooltip shows the numbers, so you can read them even when Windows 11 hides the
+  icon under the arrow. A left click opens the card. The right-click menu swaps the environment in
+  the ring, opens settings, refreshes the limits, checks for updates and quits.
+- **Card.** Session, week and model limits for every environment: how much is used, when each one
+  resets, and how long it lasts at your current pace once there's enough data. When a limit runs
+  low, the card says so in a word as well as a colour. A card opened by hovering closes when the
+  mouse leaves. Click the icon or the card and it stays until you close it.
+- **Island.** If you prefer, Aiko lives in a small window at the edge of the screen instead of the
+  tray, with one ring per environment. It opens the card the same way the icon does. Drag it
+  anywhere and it sticks to the nearest edge. It hides while a window is full screen.
+- **First-run wizard.** It finds your Claude Code folders and shows the exact line and the exact
+  files before it changes anything. It keeps a copy of every file it changes, and "Not now" is a
+  valid answer. At the end it tells you where Aiko is and how to get the icon out from under the
+  arrow.
 - **Your own status line keeps working.** Aiko runs it through the same shell Claude Code uses and
   shows its output.
-- **Works with no setup at all.** Claude Code started without `CLAUDE_CONFIG_DIR` uses the
-  `.claude` folder in your home, and so does Aiko.
+- **Works with no setup.** Claude Code started without `CLAUDE_CONFIG_DIR` uses the `.claude`
+  folder in your home, and Aiko reads the same folder.
 - **Settings:** environments, where to show Aiko, start with Windows, update checks and language.
-  A check shows whether Claude Code still reports its limits to Aiko, and sets it up again if not.
-  "Copy diagnostics" gives a short summary for a bug report.
-- **Direct mode,** off by default and per environment, for the IDE panel and Claude Desktop, where
-  Claude Code runs no status line. It says what it reads before you turn it on, reads the token for
-  each request and never stores it.
-- **Update checks,** off by default. The same request counts that one copy ran today, with an
-  identifier that changes every day. One switch turns off both. PRIVACY.md says exactly what goes.
-- **English and Russian.** Changing the language brings the window straight back in it.
-- **Removing Aiko** puts your status line back, removes its startup entry and its own folders, and
-  deletes a Claude Code settings file only when Aiko created it and it holds nothing else.
-- **It looks after the files it touches.** If Aiko is reinstalled somewhere else or Git appears, its
-  own line is put right at startup, never added where you said no. A settings file of Aiko's that
-  cannot be read is kept as a .bad file instead of being overwritten.
+  **Check access** shows whether Claude Code still sends its limits to Aiko and sets it up again if
+  not. **Copy diagnostics** gives a short summary for a bug report.
+- **Direct mode** for the IDE panel and Claude Desktop, where Claude Code runs no status line. It's
+  off by default and set per environment. It explains what it reads before you turn it on, reads
+  the token for each request and never saves it.
+- **Update checks,** off by default. The same request counts that one copy ran today, with an ID
+  that changes every day. One switch turns off both. [PRIVACY.md](PRIVACY.md) lists what is sent.
+- **English and Russian.** When you change the language, the window reopens in it straight away.
+- **Uninstall** puts your status line back and removes the startup entry and Aiko's folders. It
+  deletes a Claude Code settings file only if Aiko created it and nothing else was added.
+- **Aiko repairs its own line.** If Aiko is reinstalled in another folder or Git gets installed,
+  Aiko fixes its line at startup. It never adds the line where you said no. If one of Aiko's
+  settings files can't be read, Aiko keeps it as a `.bad` file and doesn't overwrite it.

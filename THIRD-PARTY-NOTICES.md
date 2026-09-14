@@ -1,11 +1,11 @@
 # Third party notices
 
-Aiko ships with the work of other people. Their licences are below.
+Aiko includes work by other people. Their licences are below.
 
 ## Geist and Geist Mono
 
-Typefaces by Vercel, used for all text and numbers in the app. The font files are inside the
-program, because a tray app has no browser to load them from a web site.
+Typefaces by Vercel, used for all text and numbers in the app. The font files are built into the
+program, because a tray app has no browser to load them from a website.
 
 - Licence: SIL Open Font License 1.1
 - Source: https://github.com/vercel/geist-font
@@ -13,8 +13,8 @@ program, because a tray app has no browser to load them from a web site.
 
 ## Microsoft.Windows.CsWin32
 
-Generates the Windows API calls Aiko needs for the tray icon, the screens and the mouse. It is a
-build time tool: nothing of it ends up in the program.
+Generates the Windows API calls Aiko needs for the tray icon, the screens and the mouse. It's a
+build-time tool, and none of it ends up in the program.
 
 - Licence: MIT
 - Source: https://github.com/microsoft/CsWin32

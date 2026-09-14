@@ -5,14 +5,13 @@ body:
   - type: markdown
     attributes:
       value: |
-        Aiko has a roadmap, and it is short on purpose. An idea that does not fit it may still be a
-        good idea, but it may wait a long time. Saying what you were trying to do helps more than
-        describing the feature.
+        Aiko's roadmap is short on purpose. An idea that doesn't fit it can still be good, but it may
+        wait a long time. Say what you were trying to do: that helps more than a feature description.
 
   - type: textarea
     id: problem
     attributes:
-      label: What were you trying to do
+      label: What you were trying to do
       description: The moment it went wrong, not the solution you have in mind.
     validations:
       required: true
@@ -20,7 +19,7 @@ body:
   - type: textarea
     id: idea
     attributes:
-      label: What you would like
+      label: What you'd like
       description: What Aiko could do instead.
     validations:
       required: true
