@@ -12,6 +12,7 @@ public partial class CardWindow : Window
 
         Panel.CloseRequested += Close;
         Panel.SettingsRequested += () => SettingsRequested?.Invoke();
+        Panel.OpenClaudeRequested += environment => OpenClaudeRequested?.Invoke(environment);
         Panel.DragHandle.MouseLeftButtonDown += OnDragHandlePressed;
 
         // Touching the card at all keeps it: reading it, dragging it, or opening the settings from
@@ -20,6 +21,8 @@ public partial class CardWindow : Window
     }
 
     public event Action? SettingsRequested;
+
+    public event Action<string>? OpenClaudeRequested;
 
     /// A card opened by resting the mouse on the icon goes away when the mouse goes away. A card
     /// the user clicked for, or clicked on, stays until they close it.

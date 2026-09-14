@@ -345,7 +345,27 @@ sealed class AikoShell : IDisposable
             .ToList();
     }
 
-    private CardModel CurrentCard() => CardModel.From(Cards(), DateTimeOffset.Now, _noAccess);
+    private CardModel CurrentCard() => CardModel.From(Cards(), DateTimeOffset.Now, _noAccess, _accounts);
+
+    /// Plan and sign-in per environment. Read when the card opens, not on every new number:
+    /// .claude.json can be large, and neither the plan nor the sign-in changes between two answers.
+    private IReadOnlyDictionary<string, CardAccount> _accounts = new Dictionary<string, CardAccount>();
+
+    private static IReadOnlyDictionary<string, CardAccount> ReadAccounts() =>
+        SettingsStore.LoadEnvironments().Environments.ToDictionary(
+            environment => environment.Name,
+            environment => new CardAccount(
+                ClaudeAccounts.Read(environment.ConfigDirectories[0]).PlanLabel,
+                File.Exists(ClaudeInstall.CredentialsPathIn(environment.ConfigDirectories[0]))));
+
+    /// The card's button: Claude Code in a window of its own, for this environment.
+    private static void OpenClaude(string environment)
+    {
+        if (SettingsStore.LoadEnvironments().Environments.FirstOrDefault(e => e.Name == environment) is { } found)
+        {
+            ClaudeLauncher.Open(found.ConfigDirectories[0], Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
+        }
+    }
 
     /// Environments where Aiko's line is not in the Claude Code settings, so no numbers can ever
     /// arrive. Worked out when the settings change rather than every time the card is drawn.
@@ -515,6 +535,7 @@ sealed class AikoShell : IDisposable
 
     private void OpenCard(bool pinned)
     {
+        _accounts = ReadAccounts();
         if (_card is not null)
         {
             if (pinned)
@@ -527,6 +548,7 @@ sealed class AikoShell : IDisposable
 
         var card = new CardWindow();
         card.SettingsRequested += () => OpenSettings();
+        card.OpenClaudeRequested += OpenClaude;
         card.Closed += (_, _) =>
         {
             _card = null;

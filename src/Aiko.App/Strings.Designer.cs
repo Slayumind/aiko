@@ -650,4 +650,10 @@ public static class Strings
 
     /// .claude stays either way.
     public static string RestartKeep => Get("RestartKeep");
+
+    /// Open Claude Code
+    public static string OpenClaudeCode => Get("OpenClaudeCode");
+
+    /// Sign in so Aiko can see the limits of this environment.
+    public static string CardSignInNote => Get("CardSignInNote");
 }

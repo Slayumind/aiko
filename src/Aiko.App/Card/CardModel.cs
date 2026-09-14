@@ -15,7 +15,8 @@ public sealed class CardModel
     public static CardModel From(
         IReadOnlyList<CardState> cards,
         DateTimeOffset now,
-        IReadOnlySet<string>? noAccess = null)
+        IReadOnlySet<string>? noAccess = null,
+        IReadOnlyDictionary<string, CardAccount>? accounts = null)
     {
         var newest = cards
             .Where(card => card.UpdatedAt is not null)
@@ -28,7 +29,8 @@ public sealed class CardModel
             blocks.Add(EnvironmentBlock.From(
                 cards[i],
                 first: i == 0,
-                noAccess: noAccess?.Contains(cards[i].Environment) == true));
+                noAccess: noAccess?.Contains(cards[i].Environment) == true,
+                account: accounts?.GetValueOrDefault(cards[i].Environment)));
         }
 
         return new CardModel
@@ -42,7 +44,6 @@ public sealed class CardModel
 public sealed class EnvironmentBlock
 {
     public required string Name { get; init; }
-    public required string Subtitle { get; init; }
     public required IReadOnlyList<LimitRow> Rows { get; init; }
     public required string Note { get; init; }
     public required Visibility NoteVisibility { get; init; }
@@ -50,26 +51,51 @@ public sealed class EnvironmentBlock
     /// A hairline between environments, but not above the first one.
     public required Visibility SeparatorVisibility { get; init; }
 
-    public static EnvironmentBlock From(CardState card, bool first, bool noAccess)
+    /// The plan chip beside the name; hidden when the plan is not known.
+    public required string Plan { get; init; }
+    public required Visibility PlanVisibility { get; init; }
+
+    /// "connected" or "sign in needed", with a dot: filled when connected, an empty ring when not.
+    public required string State { get; init; }
+    public required Brush StateFill { get; init; }
+    public required Brush StateRing { get; init; }
+    public required Visibility StateVisibility { get; init; }
+
+    /// "Open Claude Code", or "Sign in" when the account is not connected. Both open Claude Code
+    /// for this environment; signing in happens there.
+    public required string OpenLabel { get; init; }
+    public required Visibility OpenVisibility { get; init; }
+
+    public static EnvironmentBlock From(CardState card, bool first, bool noAccess, CardAccount? account = null)
     {
         var rows = card.Rows.Select(LimitRow.From).ToList();
+        var signedIn = account?.SignedIn == true;
         return new EnvironmentBlock
         {
             Name = card.Environment,
-
-            // The header already says when the numbers arrived. A second word for the same thing,
-            // in a different place and a different wording, was one of five ways this card had of
-            // saying "nothing here".
-            Subtitle = string.Empty,
+            Plan = account?.Plan ?? string.Empty,
+            PlanVisibility = string.IsNullOrEmpty(account?.Plan) ? Visibility.Collapsed : Visibility.Visible,
+            State = signedIn ? Strings.StateConnected : Strings.StateSignInNeeded,
+            StateFill = signedIn ? Tokens.Brush("Positive") : Brushes.Transparent,
+            StateRing = signedIn ? Brushes.Transparent : Tokens.Brush("Muted"),
+            StateVisibility = account is null ? Visibility.Collapsed : Visibility.Visible,
+            OpenLabel = signedIn ? Strings.OpenClaudeCode : Strings.SignIn,
+            OpenVisibility = account is null ? Visibility.Collapsed : Visibility.Visible,
             Rows = rows,
             // Somebody who said "not now" in the wizard is told that, not told to open a
             // terminal they have already opened. The advice has to match their situation.
-            Note = noAccess ? CardText.NoAccessNote : CardText.NoDataNote,
+            Note = account is { SignedIn: false } ? Strings.CardSignInNote
+                : noAccess ? CardText.NoAccessNote
+                : CardText.NoDataNote,
             NoteVisibility = rows.Count == 0 ? Visibility.Visible : Visibility.Collapsed,
             SeparatorVisibility = first ? Visibility.Collapsed : Visibility.Visible,
         };
     }
 }
+
+/// What the card says about the account of one environment. Read from .claude.json and from
+/// whether the credentials file is there; the credentials file itself is never opened.
+public sealed record CardAccount(string Plan, bool SignedIn);
 
 public sealed class LimitRow
 {

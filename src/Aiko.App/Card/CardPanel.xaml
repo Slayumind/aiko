@@ -6,7 +6,7 @@
   <UserControl.Resources>
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="pack://application:,,,/Theme/Tokens.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Theme/Controls.xaml" />
       </ResourceDictionary.MergedDictionaries>
 
       <!-- Header buttons carry no label, so they need a visible hover: the raised grey, the same
@@ -81,14 +81,23 @@
           <Border Height="1" Background="{StaticResource Hairline}" Margin="0,0,0,12"
                   Visibility="{Binding SeparatorVisibility}" />
 
-          <Grid>
-            <TextBlock Text="{Binding Name}"
-                       FontFamily="{StaticResource Sans}" FontSize="{StaticResource TextName}"
-                       FontWeight="Medium" Foreground="{StaticResource Ink}" />
-            <TextBlock Text="{Binding Subtitle}" HorizontalAlignment="Right" VerticalAlignment="Center"
-                       FontFamily="{StaticResource Mono}" FontSize="{StaticResource TextTiny}"
-                       Foreground="{StaticResource Muted}" />
-          </Grid>
+          <DockPanel>
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center"
+                        Visibility="{Binding StateVisibility}">
+              <Ellipse Width="6" Height="6" Fill="{Binding StateFill}" Stroke="{Binding StateRing}" StrokeThickness="1.5"
+                       VerticalAlignment="Center" Margin="0,0,5,0" />
+              <TextBlock Text="{Binding State}" FontFamily="{StaticResource Sans}" FontSize="{StaticResource TextTiny}"
+                         Foreground="{StaticResource Muted}" VerticalAlignment="Center" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+              <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"
+                         FontFamily="{StaticResource Sans}" FontSize="{StaticResource TextName}"
+                         FontWeight="Medium" Foreground="{StaticResource Ink}" />
+              <Border Style="{StaticResource Chip}" Margin="8,0,8,0" Visibility="{Binding PlanVisibility}">
+                <TextBlock Text="{Binding Plan}" Style="{StaticResource ChipText}" />
+              </Border>
+            </StackPanel>
+          </DockPanel>
 
           <ItemsControl ItemsSource="{Binding Rows}" ItemTemplate="{StaticResource RowTemplate}" />
 
@@ -96,6 +105,10 @@
                      Margin="{StaticResource RowGap}" TextWrapping="Wrap"
                      FontFamily="{StaticResource Sans}" FontSize="{StaticResource TextSmall}"
                      Foreground="{StaticResource Muted}" />
+
+          <!-- Opens Claude Code in its own window for this environment, the way its command would. -->
+          <Button Content="{Binding OpenLabel}" Tag="{Binding Name}" Visibility="{Binding OpenVisibility}"
+                  Style="{StaticResource GhostButton}" Margin="-10,6,0,0" Click="OnOpenClaude" />
         </StackPanel>
       </DataTemplate>
     </ResourceDictionary>
