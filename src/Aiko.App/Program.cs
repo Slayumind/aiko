@@ -116,6 +116,13 @@ static class Program
             return;
         }
 
+        // Shows the landing strip at the top of the screen for a moment, without touching the mouse.
+        if (args is ["--try-strip", ..])
+        {
+            Environment.Exit(IslandCheck.ShowStrip());
+            return;
+        }
+
         // Uses the settings window with the real mouse and keyboard, then puts the environments back.
         if (args is ["--try-settings", ..])
         {
