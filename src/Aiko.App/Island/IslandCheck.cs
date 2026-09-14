@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Media;
 using Aiko.Core;
 
 namespace Aiko.App;
@@ -38,14 +39,52 @@ static class IslandCheck
         return result;
     }
 
-    /// --try-strip: only shows the landing strip at the top of the screen for three seconds, to look
-    /// at the glass. The mouse is left alone.
+    /// --try-strip: only shows the landing strip on the bottom edge for three seconds, over a sample to see through,
+    /// to look at the glass and at the taskbar cutting it. The mouse is left alone.
     public static int ShowStrip()
     {
         var application = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
         var work = SystemParameters.WorkArea;
-        var strip = new IslandGhost();
-        strip.PlaceOn(new Box(work.X + (work.Width / 2) - 120, work.Y, 240, 60), ScreenEdge.Top);
+        // Something to see through: over a black terminal any glass this clear is invisible.
+        var sample = new System.Windows.Controls.StackPanel { Background = new LinearGradientBrush(Color.FromRgb(0x3B, 0x2A, 0x6B), Color.FromRgb(0x0E, 0x5A, 0x4F), 0) };
+        for (var line = 0; line < 8; line++)
+        {
+            sample.Children.Add(new System.Windows.Controls.TextBlock
+            {
+                Text = "PS C:\\projects\\aiko> claude --resume   ● Reading src/Aiko.App/Island/IslandGhost.cs",
+                Foreground = line % 3 == 0 ? Brushes.Orange : Brushes.White,
+                FontSize = 14,
+                Margin = new Thickness(12, 2, 0, 2),
+            });
+        }
+
+        var backdrop = new Window
+        {
+            WindowStyle = WindowStyle.None,
+            ResizeMode = ResizeMode.NoResize,
+            ShowInTaskbar = false,
+            ShowActivated = false,
+            Topmost = true,
+            WindowStartupLocation = WindowStartupLocation.Manual,
+            Left = work.X + (work.Width / 2) - 320,
+            Top = work.Bottom - 220,
+            Width = 640,
+            Height = 220,
+            Content = sample,
+        };
+        backdrop.Show();
+
+        // Over the bottom edge, where the part past the edge has to hide under the taskbar.
+        var frosted = new IslandGhost();
+        frosted.PlaceOn(new Box(work.X + (work.Width / 2) - 260, work.Bottom - 60, 240, 60), ScreenEdge.Bottom);
+
+        // The strip sits just under the taskbar, and a window shown later lands above it, so the
+        // sample goes under the strip by hand.
+        Windows.Win32.PInvoke.SetWindowPos(
+            (Windows.Win32.Foundation.HWND)new System.Windows.Interop.WindowInteropHelper(backdrop).Handle,
+            (Windows.Win32.Foundation.HWND)new System.Windows.Interop.WindowInteropHelper(frosted).Handle,
+            0, 0, 0, 0,
+            Windows.Win32.UI.WindowsAndMessaging.SET_WINDOW_POS_FLAGS.SWP_NOMOVE | Windows.Win32.UI.WindowsAndMessaging.SET_WINDOW_POS_FLAGS.SWP_NOSIZE | Windows.Win32.UI.WindowsAndMessaging.SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE);
 
         var timer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
         timer.Tick += (_, _) => application.Shutdown();

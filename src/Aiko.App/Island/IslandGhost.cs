@@ -4,6 +4,9 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Aiko.Core;
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.UI.WindowsAndMessaging;
 
 namespace Aiko.App;
 
@@ -22,11 +25,12 @@ sealed class IslandGhost : Window
     private const double Radius = 8;
 
     /// A thin white over the blur, just enough to tell the pane from what is behind it. The acrylic
-    /// accent looked milky: it adds a grey layer of its own that no tint takes away.
-    private static readonly Color GlassTint = Color.FromArgb(0x0C, 0xFF, 0xFF, 0xFF);
+    /// accent looked milky: it adds a grey layer of its own that no tint takes away. Halved again
+    /// after the owner asked for twice as clear.
+    private static readonly Color GlassTint = Color.FromArgb(0x06, 0xFF, 0xFF, 0xFF);
 
     /// Grain on the glass, the way real frosted glass catches light. Made once, a tile of random
-    /// light and dark specks with very little alpha.
+    /// mostly light specks with very little alpha.
     private static readonly ImageBrush Grain = MakeGrain();
 
     private ScreenEdge? _edge;
@@ -77,8 +81,24 @@ sealed class IslandGhost : Window
         if (!IsVisible)
         {
             Show();
+            TuckUnderTheTaskbar();
             Shown?.Invoke();
         }
+    }
+
+    /// Still above every ordinary window, but just below the taskbar: over the bottom edge the part
+    /// that reaches past the edge would otherwise lie on the taskbar, rounded corners and all.
+    private void TuckUnderTheTaskbar()
+    {
+        var taskbar = PInvoke.FindWindow("Shell_TrayWnd", null);
+        if (taskbar.IsNull)
+        {
+            return;
+        }
+
+        const SET_WINDOW_POS_FLAGS keepPlaceAndFocus =
+            SET_WINDOW_POS_FLAGS.SWP_NOMOVE | SET_WINDOW_POS_FLAGS.SWP_NOSIZE | SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE;
+        PInvoke.SetWindowPos((HWND)new WindowInteropHelper(this).Handle, taskbar, 0, 0, 0, 0, keepPlaceAndFocus);
     }
 
     /// The same box, grown past the screen edge by one corner radius.
@@ -126,7 +146,7 @@ sealed class IslandGhost : Window
             // Premultiplied BGRA: mostly light specks at a few percent over the tint. Dark specks at
             // half made the glass read darker than the screen behind it.
             var light = random.Next(4) != 0;
-            var alpha = (byte)(GlassTint.A + random.Next(0, 7));
+            var alpha = (byte)(GlassTint.A + random.Next(0, 4));
             var value = light ? alpha : (byte)0;
             pixels[i] = value;
             pixels[i + 1] = value;
@@ -152,6 +172,7 @@ sealed class IslandGhost : Window
     private const int BlurBehind = 3;
     private const int AccentPolicyAttribute = 19;
     private const int CornerPreference = 33;
+
     /// DWMWCP_ROUND: the 8 px corner Windows 11 gives its own windows. Radius above is the same.
     private const int RoundCorners = 2;
 
