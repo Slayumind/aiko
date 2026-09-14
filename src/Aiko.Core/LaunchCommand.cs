@@ -50,7 +50,8 @@ public static class LaunchCommand
     private static bool IsAllowed(char c) => c is >= 'a' and <= 'z' or >= '0' and <= '9' or '-' or '_';
 
     /// Latin letters stay, Russian letters are spelled in latin, everything else becomes one hyphen.
-    private static string Slug(string name)
+    /// Also names the folder of a new environment, so a command and its folder read the same.
+    public static string Slug(string name)
     {
         var builder = new StringBuilder();
         foreach (var c in name.Trim().ToLowerInvariant())
