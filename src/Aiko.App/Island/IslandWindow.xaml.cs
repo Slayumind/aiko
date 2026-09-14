@@ -289,15 +289,7 @@ public partial class IslandWindow : Window
         Panel.Show(Cards, _handEdge, docked: false);
         Fit();
         _ghost = new IslandGhost();
-        _ghost.Shown += LiftAboveTheStrip;
-    }
-
-    /// Puts the island back on top of the other always-on-top windows, the glass strip among them.
-    private void LiftAboveTheStrip()
-    {
-        const SET_WINDOW_POS_FLAGS keepPlaceAndFocus =
-            SET_WINDOW_POS_FLAGS.SWP_NOMOVE | SET_WINDOW_POS_FLAGS.SWP_NOSIZE | SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE;
-        PInvoke.SetWindowPos((HWND)new WindowInteropHelper(this).Handle, HWND.HWND_TOPMOST, 0, 0, 0, 0, keepPlaceAndFocus);
+        _ghost.Shown += () => TaskbarOrder.PutOnTop(this);
     }
 
     /// Lets go: the island lands on the strip, and the strip goes away.
@@ -335,6 +327,10 @@ public partial class IslandWindow : Window
         Panel.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
         var size = Panel.DesiredSize;
         var target = IslandPlacement.Place(_position, size.Width, size.Height, work);
+
+        // The spring overshoots past the edge a little. At the other edges that goes off the screen;
+        // at the bottom it would land on the taskbar, so the island lands under it instead.
+        TaskbarOrder.PutUnder(this);
 
         if (Motion.IsOn)
         {

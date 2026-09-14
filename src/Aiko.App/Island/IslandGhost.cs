@@ -3,9 +3,6 @@ using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
 using Aiko.Core;
-using Windows.Win32;
-using Windows.Win32.Foundation;
-using Windows.Win32.UI.WindowsAndMessaging;
 
 namespace Aiko.App;
 
@@ -70,24 +67,9 @@ sealed class IslandGhost : Window
         if (!IsVisible)
         {
             Show();
-            TuckUnderTheTaskbar();
+            TaskbarOrder.PutUnder(this);
             Shown?.Invoke();
         }
-    }
-
-    /// Still above every ordinary window, but just below the taskbar: over the bottom edge the part
-    /// that reaches past the edge would otherwise lie on the taskbar, rounded corners and all.
-    private void TuckUnderTheTaskbar()
-    {
-        var taskbar = PInvoke.FindWindow("Shell_TrayWnd", null);
-        if (taskbar.IsNull)
-        {
-            return;
-        }
-
-        const SET_WINDOW_POS_FLAGS keepPlaceAndFocus =
-            SET_WINDOW_POS_FLAGS.SWP_NOMOVE | SET_WINDOW_POS_FLAGS.SWP_NOSIZE | SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE;
-        PInvoke.SetWindowPos((HWND)new WindowInteropHelper(this).Handle, taskbar, 0, 0, 0, 0, keepPlaceAndFocus);
     }
 
     /// The same box, grown past the screen edge by one corner radius.
