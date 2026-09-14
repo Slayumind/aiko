@@ -21,6 +21,10 @@ sealed class IslandGhost : Window
     /// borderRadius 8px, as in the reference, where the island has 14.
     private const double Radius = 8;
 
+    /// How much of the glass itself shows: the rest lets the real, unblurred screen through. The
+    /// rim stays at full strength. 0.8 after the owner asked for glass 20 % clearer.
+    private const double GlassOpacity = 0.8;
+
     /// Room around the pane for the shadow to spread into.
     private const double Spread = 16;
 
@@ -63,6 +67,8 @@ sealed class IslandGhost : Window
 
         // The picture is a quarter of the screen's size; smooth scaling keeps the blur soft.
         RenderOptions.SetBitmapScalingMode(_pane, BitmapScalingMode.Linear);
+        _pane.Opacity = GlassOpacity;
+        _tint.Opacity = GlassOpacity;
 
         _layers.Children.Add(_pane);
         _layers.Children.Add(_tint);
