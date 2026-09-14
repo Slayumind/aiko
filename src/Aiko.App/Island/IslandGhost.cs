@@ -22,8 +22,8 @@ sealed class IslandGhost : Window
     private const double Radius = 8;
 
     /// How much of the glass itself shows: the rest lets the real, unblurred screen through. The
-    /// rim stays at full strength. 0.8 after the owner asked for glass 20 % clearer.
-    private const double GlassOpacity = 0.8;
+    /// rim stays at full strength. 0.7 after the owner asked for glass 20 % and then 10 % more clearer.
+    private const double GlassOpacity = 0.7;
 
     /// Room around the pane for the shadow to spread into.
     private const double Spread = 16;
