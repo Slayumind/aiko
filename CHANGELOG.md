@@ -30,9 +30,14 @@ The first release. Everything below is new.
   shows its output.
 - **Works with no setup.** Claude Code started without `CLAUDE_CONFIG_DIR` uses the `.claude`
   folder in your home, and Aiko reads the same folder.
-- **Settings:** environments, where to show Aiko, start with Windows, update checks and language.
-  **Check access** shows whether Claude Code still sends its limits to Aiko and sets it up again if
-  not. **Copy diagnostics** gives a short summary for a bug report.
+- **Settings** in one window with a menu on the left: a page for each environment, one for project
+  folders and one for everything else. There is no Save button: changes apply at once, and a name or
+  a command applies when you press Enter or leave the field. On an environment's page you see its
+  account and plan, sign in again, rename it, change its command and remove it. Renaming keeps a
+  command you already use and offers the new one. **Project folders** is one table of folders and
+  their environments, and its last row is the environment for all other folders. **Check access**
+  shows whether Claude Code still sends its limits to Aiko and sets it up again if not. **Copy
+  diagnostics** gives a short summary for a bug report. Esc closes the window.
 - **Direct mode** for the IDE panel and Claude Desktop, where Claude Code runs no status line. It's
   off by default and set per environment. It explains what it reads before you turn it on, reads
   the token for each request and never saves it.

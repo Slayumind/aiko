@@ -109,6 +109,13 @@ static class Program
             return;
         }
 
+        // Uses the settings window with the real mouse and keyboard, then puts the environments back.
+        if (args is ["--try-settings", ..])
+        {
+            Environment.Exit(SettingsCheck.Run());
+            return;
+        }
+
         // Where Aiko would find Claude Code, read from a fresh PATH. Opens nothing.
         if (args is ["--try-claude", ..])
         {
@@ -176,7 +183,15 @@ static class Program
 
         if (args is ["--snapshot-settings", var settingsPath, ..])
         {
-            Snapshot.Write(new SettingsPanel(), settingsPath);
+            // The page to draw: --snapshot-settings out.png general | folders | env1 | env2
+            var page = args.Length > 2 ? args[2] : null;
+            var panel = new SettingsPanel(page switch
+            {
+                "env1" => new SettingsPanel().EnvironmentPage(0),
+                "env2" => new SettingsPanel().EnvironmentPage(1),
+                _ => page,
+            });
+            Snapshot.Write(panel, settingsPath);
             return;
         }
 

@@ -1,6 +1,6 @@
 <!--
   The settings window wears the same material as the card: its own frame, so every surface of
-  Aiko looks like the same thing.
+  Aiko looks like the same thing. The panel is made in code, because it is given the page to open.
 -->
 <Window x:Class="Aiko.App.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -12,7 +12,4 @@
         Background="Transparent"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
-        SizeToContent="WidthAndHeight">
-
-  <local:SettingsPanel x:Name="Panel" local:Motion.Appear="True" />
-</Window>
+        SizeToContent="WidthAndHeight" />

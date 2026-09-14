@@ -526,4 +526,127 @@
   <data name="SetUpEnvironments" xml:space="preserve">
     <value>Настроить среды</value>
   </data>
+  <data name="NavGeneral" xml:space="preserve">
+    <value>Общее</value>
+  </data>
+  <data name="NavBound" xml:space="preserve">
+    <value>привязано: {0}</value>
+  </data>
+  <data name="AddSecondEnvironment" xml:space="preserve">
+    <value>Добавить вторую среду</value>
+  </data>
+  <data name="Saved" xml:space="preserve">
+    <value>Сохранено</value>
+  </data>
+  <data name="ByDefault" xml:space="preserve">
+    <value>по умолчанию</value>
+  </data>
+  <data name="SectionAccount" xml:space="preserve">
+    <value>АККАУНТ</value>
+  </data>
+  <data name="EmailLabel" xml:space="preserve">
+    <value>Почта</value>
+  </data>
+  <data name="SignInAgain" xml:space="preserve">
+    <value>Войти заново</value>
+  </data>
+  <data name="ClaudeOpened" xml:space="preserve">
+    <value>Claude Code открылся в новом окне.</value>
+  </data>
+  <data name="SectionCommand" xml:space="preserve">
+    <value>КОМАНДА</value>
+  </data>
+  <data name="CmdShells" xml:space="preserve">
+    <value>PowerShell · cmd · Git Bash</value>
+  </data>
+  <data name="CmdKept" xml:space="preserve">
+    <value>Команда осталась прежней: терминалы и скрипты её знают.</value>
+  </data>
+  <data name="RenameCommandTo" xml:space="preserve">
+    <value>Переименовать в {0}</value>
+  </data>
+  <data name="NameEmpty" xml:space="preserve">
+    <value>Впиши имя.</value>
+  </data>
+  <data name="NameTooLong" xml:space="preserve">
+    <value>Не длиннее 40 знаков.</value>
+  </data>
+  <data name="NameTaken" xml:space="preserve">
+    <value>Это имя уже у другой среды.</value>
+  </data>
+  <data name="SectionBoundFolders" xml:space="preserve">
+    <value>ПРИВЯЗАННЫЕ ПАПКИ</value>
+  </data>
+  <data name="NoneBound" xml:space="preserve">
+    <value>Ни одной папки.</value>
+  </data>
+  <data name="RestToo" xml:space="preserve">
+    <value>И все остальные папки: это среда по умолчанию.</value>
+  </data>
+  <data name="EditInFolders" xml:space="preserve">
+    <value>Изменить в папках проектов</value>
+  </data>
+  <data name="RemoveEnvironment" xml:space="preserve">
+    <value>Удалить среду</value>
+  </data>
+  <data name="RemoveEnvironmentLine" xml:space="preserve">
+    <value>Строка Aiko уйдёт из settings.json этой папки. Вместе с ней уйдут команда {0} и привязки к {1}.</value>
+  </data>
+  <data name="MoveToRecycleBin" xml:space="preserve">
+    <value>И переместить папку в корзину</value>
+  </data>
+  <data name="RecycleWhy" xml:space="preserve">
+    <value>В ней аккаунт, история и память Claude Code. Вернуть можно из корзины Windows.</value>
+  </data>
+  <data name="KeepClaude" xml:space="preserve">
+    <value>Папку .claude используют VS Code и Claude Desktop, поэтому Aiko её не удаляет.</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Отмена</value>
+  </data>
+  <data name="RemoveConfirm" xml:space="preserve">
+    <value>Удалить</value>
+  </data>
+  <data name="EnvironmentRemoved" xml:space="preserve">
+    <value>{0} удалена.</value>
+  </data>
+  <data name="EnvironmentRemovedToBin" xml:space="preserve">
+    <value>{0} удалена, папка в корзине.</value>
+  </data>
+  <data name="FoldersTableLead" xml:space="preserve">
+    <value>В папке и во всех вложенных обычный claude запускает её среду. Команда вроде {0} сильнее привязки, но Claude Code напомнит о ней.</value>
+  </data>
+  <data name="FolderColumn" xml:space="preserve">
+    <value>ПАПКА</value>
+  </data>
+  <data name="EnvironmentColumn" xml:space="preserve">
+    <value>СРЕДА</value>
+  </data>
+  <data name="AllOtherFolders" xml:space="preserve">
+    <value>Все остальные папки</value>
+  </data>
+  <data name="AddFolder" xml:space="preserve">
+    <value>Добавить папку</value>
+  </data>
+  <data name="RemoveBinding" xml:space="preserve">
+    <value>Убрать привязку</value>
+  </data>
+  <data name="FoldersOneEnvironment" xml:space="preserve">
+    <value>Привязка нужна, когда сред две. Сейчас все папки работают в {0}.</value>
+  </data>
+  <data name="FoldersNeedCommands" xml:space="preserve">
+    <value>Привязки работают через команды запуска, а они пока не включены.</value>
+  </data>
+  <data name="SectionAccess" xml:space="preserve">
+    <value>ДОСТУП К ЛИМИТАМ</value>
+  </data>
+  <data name="SectionDiagnostics" xml:space="preserve">
+    <value>ДИАГНОСТИКА</value>
+  </data>
+  <data name="DiagnosticsWhat" xml:space="preserve">
+    <value>Версия и настройки для сообщения об ошибке. Токенов и почты там нет.</value>
+  </data>
+  <data name="DiagnosticsCopied" xml:space="preserve">
+    <value>Диагностика скопирована.</value>
+  </data>
 </root>

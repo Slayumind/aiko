@@ -559,6 +559,26 @@ sealed class AikoShell : IDisposable
         Log.Write($"card opened at {card.Left},{card.Top} size {card.ActualWidth}x{card.ActualHeight}");
     }
 
+    /// Called after every change in the settings window, so only a real move between the tray and
+    /// the island takes the icon down or puts it up.
+    private void FollowSettings()
+    {
+        var island = SettingsStore.Load().Place == AikoPlace.Island;
+        if (island != (_island is not null))
+        {
+            ApplyPlace();
+        }
+        else if (island)
+        {
+            OnFullScreenChanged(FullScreenWatch.IsFullScreenInFront());
+        }
+
+        FollowDirectMode();
+        NoteWhereWeHaveNoAccess();
+        UpdateIcon();
+        _card?.Update(CurrentCard());
+    }
+
     private void OpenWizard()
     {
         if (_wizard is not null)
@@ -585,7 +605,7 @@ sealed class AikoShell : IDisposable
 
     /// One settings window at a time: asking twice brings the open one forward instead of
     /// stacking a second copy on top of it.
-    private void OpenSettings(bool checkUpdates = false)
+    private void OpenSettings(bool checkUpdates = false, string? page = null)
     {
         if (_settings is not null)
         {
@@ -597,22 +617,22 @@ sealed class AikoShell : IDisposable
             return;
         }
 
-        var window = new SettingsWindow();
+        var window = new SettingsWindow(page);
         window.QuitRequested += () => _application.Shutdown();
         window.WizardRequested += OpenWizard;
+
+        // Changes apply at once (D-179): the tray or the island, direct mode and our access follow
+        // each one while the window is still open.
+        window.SettingsChanged += FollowSettings;
         window.Closed += (_, _) =>
         {
-            var again = window.ShouldReopen;
+            var again = window.ReopenPage;
             _settings = null;
-            // The place, direct mode and our access may all have changed while it was open.
-            ApplyPlace();
-            FollowDirectMode();
-            NoteWhereWeHaveNoAccess();
-            UpdateIcon();
+            FollowSettings();
 
-            if (again)
+            if (again is not null)
             {
-                OpenSettings();
+                OpenSettings(page: again);
             }
         };
         _settings = window;

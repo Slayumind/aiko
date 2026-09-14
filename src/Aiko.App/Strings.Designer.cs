@@ -515,4 +515,127 @@ public static class Strings
 
     /// Set up environments
     public static string SetUpEnvironments => Get("SetUpEnvironments");
+
+    /// General
+    public static string NavGeneral => Get("NavGeneral");
+
+    /// {0} bound
+    public static string NavBound => Get("NavBound");
+
+    /// Add a second environment
+    public static string AddSecondEnvironment => Get("AddSecondEnvironment");
+
+    /// Saved
+    public static string Saved => Get("Saved");
+
+    /// default
+    public static string ByDefault => Get("ByDefault");
+
+    /// ACCOUNT
+    public static string SectionAccount => Get("SectionAccount");
+
+    /// Email
+    public static string EmailLabel => Get("EmailLabel");
+
+    /// Sign in again
+    public static string SignInAgain => Get("SignInAgain");
+
+    /// Claude Code opened in a new window.
+    public static string ClaudeOpened => Get("ClaudeOpened");
+
+    /// COMMAND
+    public static string SectionCommand => Get("SectionCommand");
+
+    /// PowerShell · cmd · Git Bash
+    public static string CmdShells => Get("CmdShells");
+
+    /// The command stays the same, since your terminals and scripts know it.
+    public static string CmdKept => Get("CmdKept");
+
+    /// Rename to {0}
+    public static string RenameCommandTo => Get("RenameCommandTo");
+
+    /// Enter a name.
+    public static string NameEmpty => Get("NameEmpty");
+
+    /// Up to 40 characters.
+    public static string NameTooLong => Get("NameTooLong");
+
+    /// The other environment has this name.
+    public static string NameTaken => Get("NameTaken");
+
+    /// BOUND FOLDERS
+    public static string SectionBoundFolders => Get("SectionBoundFolders");
+
+    /// No folders.
+    public static string NoneBound => Get("NoneBound");
+
+    /// And every other folder: this is the default environment.
+    public static string RestToo => Get("RestToo");
+
+    /// Change in project folders
+    public static string EditInFolders => Get("EditInFolders");
+
+    /// Remove environment
+    public static string RemoveEnvironment => Get("RemoveEnvironment");
+
+    /// The Aiko line leaves this folder's settings.json, and so do the command {0} and the bindi...
+    public static string RemoveEnvironmentLine => Get("RemoveEnvironmentLine");
+
+    /// And move the folder to the Recycle Bin
+    public static string MoveToRecycleBin => Get("MoveToRecycleBin");
+
+    /// It holds the Claude Code account, history and memory. You can restore it from the Recycle...
+    public static string RecycleWhy => Get("RecycleWhy");
+
+    /// VS Code and Claude Desktop use the .claude folder, so Aiko never removes it.
+    public static string KeepClaude => Get("KeepClaude");
+
+    /// Cancel
+    public static string Cancel => Get("Cancel");
+
+    /// Remove
+    public static string RemoveConfirm => Get("RemoveConfirm");
+
+    /// {0} removed.
+    public static string EnvironmentRemoved => Get("EnvironmentRemoved");
+
+    /// {0} removed. The folder is in the Recycle Bin.
+    public static string EnvironmentRemovedToBin => Get("EnvironmentRemovedToBin");
+
+    /// In a folder and in every folder inside, plain claude starts its environment. A command li...
+    public static string FoldersTableLead => Get("FoldersTableLead");
+
+    /// FOLDER
+    public static string FolderColumn => Get("FolderColumn");
+
+    /// ENVIRONMENT
+    public static string EnvironmentColumn => Get("EnvironmentColumn");
+
+    /// All other folders
+    public static string AllOtherFolders => Get("AllOtherFolders");
+
+    /// Add a folder
+    public static string AddFolder => Get("AddFolder");
+
+    /// Remove binding
+    public static string RemoveBinding => Get("RemoveBinding");
+
+    /// Bindings matter once you have two environments. Right now every folder runs in {0}.
+    public static string FoldersOneEnvironment => Get("FoldersOneEnvironment");
+
+    /// Bindings work through the launch commands, and those aren't set up yet.
+    public static string FoldersNeedCommands => Get("FoldersNeedCommands");
+
+    /// ACCESS TO THE LIMITS
+    public static string SectionAccess => Get("SectionAccess");
+
+    /// DIAGNOSTICS
+    public static string SectionDiagnostics => Get("SectionDiagnostics");
+
+    /// Version and settings for a bug report. No tokens and no email addresses.
+    public static string DiagnosticsWhat => Get("DiagnosticsWhat");
+
+    /// Diagnostics copied.
+    public static string DiagnosticsCopied => Get("DiagnosticsCopied");
 }

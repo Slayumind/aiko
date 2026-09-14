@@ -1,368 +1,308 @@
-using System.ComponentModel;
-using System.Diagnostics;
-using System.IO;
-using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
+using System.Windows.Media;
+using System.Windows.Media.Animation;
+using System.Windows.Shapes;
 using Aiko.Core;
 
 namespace Aiko.App;
 
-/// One environment as the settings window shows it.
-public sealed class EnvironmentLine
-{
-    public required string Name { get; init; }
-    public required string Folders { get; init; }
-    public required bool DirectMode { get; init; }
-}
-
 public partial class SettingsPanel : UserControl
 {
-    private AppSettings _settings = AppSettings.Default;
-    private EnvironmentSettings _environments = EnvironmentSettings.Empty;
+    public const string FoldersPageKey = "folders";
+    public const string GeneralPageKey = "general";
+    private const string EnvironmentPagePrefix = "env:";
 
-    /// Setting the controls raises their own events, and those events save. This keeps the first
-    /// fill from writing the file back the moment the window opens.
-    private bool _filling;
+    private static readonly string Home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
-    private string _downloadUrl = "https://github.com/Slayumind/aiko/releases/latest";
+    private readonly EnvironmentsEditor _editor = new();
+    private readonly Dictionary<string, string> _plans = new(StringComparer.OrdinalIgnoreCase);
+    private string _page;
+    private bool _buildingNav;
 
-    /// Cancelled when the window goes away, so a request still in the air does not come back to
-    /// controls that are gone.
-    private readonly CancellationTokenSource _closing = new();
+    public SettingsPanel() : this(null)
+    {
+    }
 
-    public SettingsPanel()
+    /// The page to open: "general", "folders", or "env:" and an account folder. Null opens the first
+    /// environment.
+    public SettingsPanel(string? page)
     {
         InitializeComponent();
-        Fill();
-        Unloaded += (_, _) => _closing.Cancel();
+
+        // A small screen still shows the header; the page scrolls inside.
+        Body.Height = Math.Clamp(SystemParameters.WorkArea.Height - 160, 420, 600);
+        VersionLine.Text = $"Aiko {AppVersion.Current()}";
+
+        _editor.Changed += OnEnvironmentsChanged;
+        _page = page ?? EnvironmentPage(0) ?? GeneralPageKey;
+        BuildNav();
+        ShowPage(_page, animate: false);
     }
 
     public event Action? CloseRequested;
     public event Action? QuitRequested;
-
-    public FrameworkElement DragHandle => HeaderRow;
-
-    private void Fill()
-    {
-        _filling = true;
-
-        _settings = SettingsStore.Load();
-        _environments = SettingsStore.LoadEnvironments();
-
-        var lines = _environments.Environments
-            .Select(environment => new EnvironmentLine
-            {
-                Name = environment.Name,
-                Folders = string.Join(", ", environment.ConfigDirectories.Select(Path.GetFileName)),
-                DirectMode = environment.DirectMode,
-            })
-            .ToList();
-
-        Environments.ItemsSource = lines;
-        NoEnvironments.Visibility = lines.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-
-        PlaceTray.IsChecked = _settings.Place == AikoPlace.Tray;
-        PlaceIsland.IsChecked = _settings.Place == AikoPlace.Island;
-        HideInFullScreen.IsChecked = _settings.HideIslandInFullScreen;
-        ShowIslandOptions();
-
-        // The switch shows what Windows actually holds, not what our file remembers: the user may
-        // have removed the entry elsewhere.
-        RunAtStartup.IsChecked = Startup.IsEnabled();
-        CheckUpdates.IsChecked = _settings.CheckUpdates;
-
-        LanguageSystem.IsChecked = _settings.Language == AikoLanguage.System;
-        LanguageEnglish.IsChecked = _settings.Language == AikoLanguage.English;
-        LanguageRussian.IsChecked = _settings.Language == AikoLanguage.Russian;
-
-        VersionLine.Text = $"{Version()} · github.com/Slayumind/aiko";
-        ShowAccess();
-
-        _filling = false;
-    }
-
-    private static string Version() => AppVersion.Current();
-
-    private static string YesNo(bool value) => value ? "yes" : "no";
-
-    private static string LanguageName(AikoLanguage language) => language switch
-    {
-        AikoLanguage.English => "English",
-        AikoLanguage.Russian => "Русский",
-        _ => "the one Windows uses",
-    };
-
-    private void Save(AppSettings settings)
-    {
-        if (_filling)
-        {
-            return;
-        }
-        _settings = settings;
-        SettingsStore.Save(settings);
-    }
-
-    private void OnPlaceChanged(object sender, RoutedEventArgs e)
-    {
-        ShowIslandOptions();
-        Save(_settings with { Place = PlaceIsland.IsChecked == true ? AikoPlace.Island : AikoPlace.Tray });
-    }
-
-    /// A setting that changes nothing should not look as if it does.
-    private void ShowIslandOptions() =>
-        IslandOnly.Visibility = PlaceIsland.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
-
-    private void OnHideChanged(object sender, RoutedEventArgs e) =>
-        Save(_settings with { HideIslandInFullScreen = HideInFullScreen.IsChecked == true });
-
-    private void OnUpdatesChanged(object sender, RoutedEventArgs e) =>
-        Save(_settings with { CheckUpdates = CheckUpdates.IsChecked == true });
-
-    private void OnLanguageChanged(object sender, RoutedEventArgs e)
-    {
-        if (_filling)
-        {
-            return;
-        }
-
-        var language = LanguageEnglish.IsChecked == true ? AikoLanguage.English
-            : LanguageRussian.IsChecked == true ? AikoLanguage.Russian
-            : AikoLanguage.System;
-
-        if (language == _settings.Language)
-        {
-            return;
-        }
-
-        Save(_settings with { Language = language });
-        LanguageChoice.Apply(language);
-
-        // Every word on screen was picked when its control was made, so this window has to be
-        // built again. Aiko makes windows on demand and closes them anyway, which is what lets a
-        // language change take effect at once instead of "after a restart".
-        ReopenRequested?.Invoke();
-    }
+    public event Action? WizardRequested;
 
     /// Raised when the window has to come back in another language.
     public event Action? ReopenRequested;
 
-    /// Startup is a key in the registry, not a line in our file, so this one writes to Windows.
-    private void OnStartupChanged(object sender, RoutedEventArgs e)
+    /// Raised after any change, so the tray, the island and direct mode follow it at once.
+    public event Action? SettingsChanged;
+
+    public FrameworkElement DragHandle => HeaderRow;
+
+    public string CurrentPage => _page;
+
+    /// The key of the n-th environment's page: environment 1 is always the one in .claude.
+    public string? EnvironmentPage(int index) =>
+        Ordered(_editor.Current).ElementAtOrDefault(index) is { } environment
+            ? EnvironmentPagePrefix + environment.ConfigDirectories[0]
+            : null;
+
+    /// Applies a name or a command still being typed. Called when the window closes.
+    public void Leave() => LeaveCurrentPage();
+
+    public void StartUpdateCheck()
     {
-        if (_filling)
+        if (_page != GeneralPageKey)
         {
-            return;
+            ShowPage(GeneralPageKey, animate: false);
+            BuildNav();
         }
-        var wanted = RunAtStartup.IsChecked == true;
-        Startup.Set(wanted);
-        Save(_settings with { RunAtStartup = wanted });
+
+        (PageHost.Content as GeneralPage)?.StartUpdateCheck();
     }
 
-    private void OnDirectModeChanged(object sender, RoutedEventArgs e)
+    private static IEnumerable<AikoEnvironment> Ordered(EnvironmentSettings settings)
     {
-        if (_filling || sender is not ToggleButton { Tag: string name } toggle)
-        {
-            return;
-        }
-
-        var updated = _environments.Environments
-            .Select(environment => environment.Name == name
-                ? environment with { DirectMode = toggle.IsChecked == true }
-                : environment)
-            .ToList();
-
-        _environments = _environments with { Environments = updated };
-        SettingsStore.SaveEnvironments(_environments);
+        var first = settings.First(Home);
+        return first is null
+            ? settings.Environments
+            : settings.Environments.Where(e => e != first).Prepend(first);
     }
 
-    /// Everything a bug report needs and nothing it does not: no tokens, no numbers from the
-    /// limits, no paths from Claude Code.
-    private void OnCopyDiagnostics(object sender, RoutedEventArgs e)
-    {
-        // Written for a person to paste into a bug report, so it says yes and no and Git Bash
-        // rather than True and GitBash, which are how the code happens to spell them.
-        var text = string.Join(
-            Environment.NewLine,
-            $"Aiko {Version()}",
-            $"Windows {Environment.OSVersion.Version}",
-            $"shown in: {(_settings.Place == AikoPlace.Island ? "the island" : "the tray")}",
-            $"language: {LanguageName(_settings.Language)}",
-            $"starts with Windows: {YesNo(Startup.IsEnabled())}",
-            $"checks for updates: {YesNo(_settings.CheckUpdates)}",
-            $"environments: {_environments.Environments.Count}"
-                + $", direct mode on for {_environments.Environments.Count(e => e.DirectMode)}",
-            $"status line shell: {(ShellDetect.Current() == ClaudeShell.GitBash ? "Git Bash" : "PowerShell")}",
-            $"log: {Log.FilePath}");
+    // ---- the menu ----
 
-        try
+    private void BuildNav()
+    {
+        _buildingNav = true;
+        Nav.Children.Clear();
+
+        var settings = _editor.Current;
+        Nav.Children.Add(new TextBlock
         {
-            Clipboard.SetText(text);
-        }
-        catch (Exception copyFailed)
+            Text = Strings.SectionEnvironments,
+            Style = (Style)FindResource("SectionLabel"),
+            Margin = new Thickness(10, 4, 0, 6),
+        });
+
+        foreach (var environment in Ordered(settings))
         {
-            Log.Write($"could not copy diagnostics: {copyFailed.GetType().Name}");
+            var folder = environment.ConfigDirectories[0];
+            var plan = PlanOf(folder);
+            var sub = plan.Length > 0 ? $"{plan} · {environment.Command}" : environment.Command;
+            Nav.Children.Add(NavItem(EnvironmentPagePrefix + folder, environment.Name, sub));
         }
+
+        if (settings.Environments.Count < EnvironmentSettings.MaxEnvironments)
+        {
+            Nav.Children.Add(AddSecondSlot());
+        }
+
+        Nav.Children.Add(new Border { Height = 1, Background = Tokens.Brush("Hairline"), Margin = new Thickness(10, 8, 10, 8) });
+
+        var bound = EnvironmentEdits.Bindings(settings).Count;
+        Nav.Children.Add(NavItem(FoldersPageKey, Strings.ItemFolders, bound > 0 ? string.Format(Strings.NavBound, bound) : null));
+        Nav.Children.Add(NavItem(GeneralPageKey, Strings.NavGeneral, null));
+
+        _buildingNav = false;
     }
 
-    /// Asked for by hand, so it runs whatever the switch says: the switch decides whether Aiko
-    /// checks on its own, not whether the user may ask.
-    private async void OnCheckNow(object sender, RoutedEventArgs e) => await CheckAsync();
-
-    /// The tray menu has a "Check for updates" item. It opens this window and asks straight away,
-    /// so the answer appears where the version and the button already are.
-    public async void StartUpdateCheck() => await CheckAsync();
-
-    private async Task CheckAsync()
+    private RadioButton NavItem(string key, string title, string? sub)
     {
-        if (!CheckNow.IsEnabled)
+        var content = new StackPanel();
+        content.Children.Add(new TextBlock { Text = title, TextTrimming = TextTrimming.CharacterEllipsis });
+        if (sub is not null)
         {
-            // Already asking. Two answers racing into one line is worse than one answer.
-            return;
+            content.Children.Add(new TextBlock
+            {
+                Text = sub,
+                Style = (Style)FindResource("RowNote"),
+                Margin = new Thickness(0, 1, 0, 0),
+            });
         }
 
-        CheckNow.IsEnabled = false;
-        UpdateLine.Text = Strings.UpdateAsking;
-        UpdateLine.Visibility = Visibility.Visible;
-        OpenDownload.Visibility = Visibility.Collapsed;
-
-        using var client = new UpdateClient();
-        var info = await client.AskAsync(_closing.Token).ConfigureAwait(true);
-
-        // The window can be closed while the request is in the air, and touching its controls
-        // afterwards throws.
-        if (_closing.IsCancellationRequested)
+        var item = new RadioButton
         {
-            return;
-        }
-
-        var state = info.CompareWith(Version());
-
-        UpdateLine.Text = state switch
+            Style = (Style)FindResource("NavItem"),
+            GroupName = "SettingsNav",
+            IsChecked = key == _page,
+            Content = content,
+            Margin = new Thickness(0, 0, 0, 2),
+        };
+        item.Checked += (_, _) =>
         {
-            UpdateState.Available => string.Format(Strings.UpdateAvailable, info.Latest),
-            UpdateState.UpToDate => string.Format(Strings.UpdateLatest, Version()),
-            // Never "you are up to date" when we do not know: that is the one answer that would
-            // keep every copy quiet after a bad deploy.
-            _ => Strings.UpdateFailed,
+            if (!_buildingNav)
+            {
+                ShowPage(key, animate: true);
+            }
         };
 
-        _downloadUrl = info.DownloadUrl ?? "https://github.com/Slayumind/aiko/releases/latest";
-        OpenDownload.Visibility = state == UpdateState.Available ? Visibility.Visible : Visibility.Collapsed;
-        CheckNow.IsEnabled = true;
+        return item;
     }
 
-    private void OnOpenDownload(object sender, RoutedEventArgs e)
+    /// The empty place of environment 2, drawn with a dashed edge, which a Border cannot do.
+    private Button AddSecondSlot()
     {
-        try
+        var face = new Grid();
+        face.Children.Add(new Rectangle
         {
-            Process.Start(new ProcessStartInfo(_downloadUrl) { UseShellExecute = true });
-        }
-        catch (Exception failed) when (failed is Win32Exception or InvalidOperationException)
+            RadiusX = 8,
+            RadiusY = 8,
+            Stroke = Tokens.Brush("InputLine"),
+            StrokeThickness = 1,
+            StrokeDashArray = [4, 3],
+        });
+
+        var words = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(10, 8, 10, 8) };
+        words.Children.Add(new Path
         {
-            Log.Write($"could not open the download page: {failed.GetType().Name}");
+            Data = Geometry.Parse("M 5,0 L 5,10 M 0,5 L 10,5"),
+            Stroke = Tokens.Brush("Muted"),
+            StrokeThickness = 1.5,
+            Width = 10,
+            Height = 10,
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(0, 0, 8, 0),
+        });
+        words.Children.Add(new TextBlock
+        {
+            Text = Strings.AddSecondEnvironment,
+            Style = (Style)FindResource("RowHint"),
+            TextWrapping = TextWrapping.NoWrap,
+            TextTrimming = TextTrimming.CharacterEllipsis,
+        });
+        face.Children.Add(words);
+
+        var slot = new Button
+        {
+            Style = (Style)FindResource("GhostButton"),
+            Height = double.NaN,
+            Padding = new Thickness(0),
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            HorizontalContentAlignment = HorizontalAlignment.Stretch,
+            Margin = new Thickness(0, 4, 0, 0),
+            Content = face,
+        };
+        slot.Click += (_, _) => WizardRequested?.Invoke();
+        return slot;
+    }
+
+    private string PlanOf(string folder)
+    {
+        if (!_plans.TryGetValue(folder, out var plan))
+        {
+            plan = ClaudeAccounts.Read(folder).PlanLabel;
+            _plans[folder] = plan;
         }
+
+        return plan;
+    }
+
+    // ---- the pages ----
+
+    private void ShowPage(string key, bool animate)
+    {
+        LeaveCurrentPage();
+
+        var page = MakePage(key);
+        if (page is null)
+        {
+            key = EnvironmentPage(0) ?? GeneralPageKey;
+            page = MakePage(key)!;
+        }
+
+        _page = key;
+        PageHost.Content = page;
+        PageScroll.ScrollToTop();
+
+        if (animate && Motion.IsOn)
+        {
+            var shift = new TranslateTransform(8, 0);
+            page.RenderTransform = shift;
+            page.BeginAnimation(OpacityProperty, new DoubleAnimation(0, 1, Motion.Expand) { EasingFunction = Motion.Standard });
+            shift.BeginAnimation(TranslateTransform.XProperty, new DoubleAnimation(8, 0, Motion.Settle) { EasingFunction = Motion.Standard });
+        }
+    }
+
+    private FrameworkElement? MakePage(string key)
+    {
+        if (key == GeneralPageKey)
+        {
+            var general = new GeneralPage();
+            general.Saved += OnGeneralSaved;
+            general.QuitRequested += () => QuitRequested?.Invoke();
+            general.WizardRequested += () => WizardRequested?.Invoke();
+            general.ReopenRequested += () => ReopenRequested?.Invoke();
+            return general;
+        }
+
+        if (key == FoldersPageKey)
+        {
+            var folders = new FoldersPage(_editor);
+            folders.WizardRequested += () => WizardRequested?.Invoke();
+            return folders;
+        }
+
+        var folder = key.StartsWith(EnvironmentPagePrefix, StringComparison.Ordinal) ? key[EnvironmentPagePrefix.Length..] : null;
+        if (folder is null || !_editor.Current.Environments.Any(e => e.Holds(folder)))
+        {
+            return null;
+        }
+
+        var environment = new EnvironmentPage(_editor, folder);
+        environment.FoldersRequested += () => Navigate(FoldersPageKey);
+        environment.Removed += note =>
+        {
+            Navigate(EnvironmentPage(0) ?? GeneralPageKey);
+            (PageHost.Content as EnvironmentPage)?.ShowNote(note);
+        };
+        return environment;
+    }
+
+    /// Opens a page from inside another one, and moves the mark in the menu with it.
+    private void Navigate(string key)
+    {
+        ShowPage(key, animate: true);
+        BuildNav();
+    }
+
+    private void LeaveCurrentPage()
+    {
+        switch (PageHost.Content)
+        {
+            case EnvironmentPage environment:
+                environment.Leave();
+                break;
+            case FoldersPage folders:
+                folders.Leave();
+                break;
+        }
+    }
+
+    private void OnEnvironmentsChanged()
+    {
+        Saved.Show();
+        BuildNav();
+        SettingsChanged?.Invoke();
+    }
+
+    private void OnGeneralSaved()
+    {
+        Saved.Show();
+        SettingsChanged?.Invoke();
     }
 
     private void OnClose(object sender, RoutedEventArgs e) => CloseRequested?.Invoke();
-
-    /// Whether the line that lets Claude Code report its limits is still in place, and a way to
-    /// put it back.
-    ///
-    /// Until now there was none. Answering "not now" in the wizard, or another tool overwriting
-    /// the status line afterwards, left Aiko waiting for numbers that would never come, with
-    /// nothing on screen to say so and nothing to press.
-    private bool _offeringToAdd;
-
-    private void ShowAccess()
-    {
-        var missing = FoldersWithoutOurLine();
-
-        if (missing.Count == 0)
-        {
-            AccessLine.Text = _environments.HasEnvironments ? Strings.AccessOk : string.Empty;
-            AccessButton.Content = Strings.AccessCheck;
-            _offeringToAdd = false;
-            return;
-        }
-
-        AccessLine.Text = missing.Count == 1
-            ? Strings.AccessMissingOne
-            : string.Format(Strings.AccessMissingMany, missing.Count);
-        AccessButton.Content = Strings.AccessSetUp;
-        _offeringToAdd = true;
-    }
-
-    private List<string> FoldersWithoutOurLine()
-    {
-        var missing = new List<string>();
-
-        foreach (var environment in _environments.Environments)
-        {
-            foreach (var folder in environment.ConfigDirectories)
-            {
-                if (!HasOurLine(folder))
-                {
-                    missing.Add(folder);
-                }
-            }
-        }
-
-        return missing;
-    }
-
-    private static bool HasOurLine(string folder)
-    {
-        try
-        {
-            var path = ClaudeSettingsEditor.PathIn(folder);
-            return File.Exists(path) && SettingsJsonPatch.HasOurLine(File.ReadAllText(path));
-        }
-        catch (Exception unreadable) when (unreadable is IOException or UnauthorizedAccessException)
-        {
-            return false;
-        }
-    }
-
-    /// The first press only looks. The second one writes, and the button says so before it does:
-    /// this is somebody else's settings file, and pressing "check" should never change it.
-    private void OnCheckAccess(object sender, RoutedEventArgs e)
-    {
-        if (!_offeringToAdd)
-        {
-            ShowAccess();
-            return;
-        }
-
-        if (BridgePath.Current() is not { } bridge)
-        {
-            AccessLine.Text = Strings.AccessNoBridge;
-            return;
-        }
-
-        var problem = PatchProblem.None;
-        foreach (var folder in FoldersWithoutOurLine())
-        {
-            var outcome = ClaudeSettingsFile.AddBridge(folder, bridge);
-            if (problem == PatchProblem.None)
-            {
-                problem = outcome.Problem;
-            }
-        }
-
-        ShowAccess();
-        if (problem != PatchProblem.None)
-        {
-            AccessLine.Text = ClaudeSettingsFile.Words(problem);
-        }
-    }
-
-    private void OnQuit(object sender, RoutedEventArgs e) => QuitRequested?.Invoke();
-
-    /// Opens the environment wizard. The settings window closes first, so the two never disagree
-    /// about what is set up.
-    public event Action? WizardRequested;
-
-    private void OnSetUpEnvironments(object sender, RoutedEventArgs e) => WizardRequested?.Invoke();
 }
