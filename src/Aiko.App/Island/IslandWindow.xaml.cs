@@ -214,22 +214,31 @@ public partial class IslandWindow : Window
 
     private void OnPressed(object sender, MouseButtonEventArgs e)
     {
-        _hover.Stop();
-        _pressed = true;
-        _pressedAt = MouseOnScreen(e);
-        _grip = new Point((_pressedAt.X - Left) / ActualWidth, (_pressedAt.Y - Top) / ActualHeight);
+        PressAt(MouseOnScreen(e));
         CaptureMouse();
         e.Handled = true;
     }
 
     private void OnMoved(object sender, MouseEventArgs e)
     {
-        if (!_pressed)
+        if (_pressed)
         {
-            return;
+            HoldAt(MouseOnScreen(e));
         }
+    }
 
-        var cursor = MouseOnScreen(e);
+    /// The island taken in hand at this point of the screen. The mouse handlers call it, and so does
+    /// --try-glass, which drags the island from code without touching the person's mouse.
+    internal void PressAt(Point cursor)
+    {
+        _hover.Stop();
+        _pressed = true;
+        _pressedAt = cursor;
+        _grip = new Point((_pressedAt.X - Left) / ActualWidth, (_pressedAt.Y - Top) / ActualHeight);
+    }
+
+    internal void HoldAt(Point cursor)
+    {
         if (!_dragging)
         {
             if (Math.Abs(cursor.X - _pressedAt.X) < DragFrom && Math.Abs(cursor.Y - _pressedAt.Y) < DragFrom)
@@ -258,6 +267,9 @@ public partial class IslandWindow : Window
         var landing = IslandPlacement.DropAt(edge, centreX, centreY, ActualWidth, ActualHeight, work);
         _ghost?.PlaceOn(IslandPlacement.Place(landing, ActualWidth, ActualHeight, work), edge);
     }
+
+    /// Lets the island go where it is, as a mouse button coming up would.
+    internal void LetGo() => EndDrag();
 
     private void OnReleased(object sender, MouseButtonEventArgs e)
     {
