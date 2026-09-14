@@ -8,6 +8,13 @@ using Aiko.Core;
 try
 {
     var input = ReadAllInput();
+
+    if (args is [SessionReminder.Argument, ..])
+    {
+        RemindAboutBinding(input);
+        return 0;
+    }
+
     // Without the variable Claude Code works in ~\.claude, so the bridge does too. Naming that case
     // anything else made the app look for a file that was never written.
     var configDirectory = ClaudeConfigFolder.Resolve(
@@ -48,6 +55,35 @@ static string ReadAllInput()
     stdin.CopyTo(buffer);
     return Encoding.UTF8.GetString(buffer.ToArray()).TrimStart('﻿');
 }
+
+/// The session start hook. Prints a system message only when a command overrode a folder binding,
+/// and nothing at all otherwise: an empty hook answer changes nothing in Claude Code.
+static void RemindAboutBinding(string input)
+{
+    var folder = SessionReminder.WorkingDirectoryIn(input);
+    if (folder is null)
+    {
+        return;
+    }
+
+    var aiko = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Aiko");
+    var environments = ReadIfThere(Path.Combine(aiko, "environments.json"));
+    var language = AppSettings.FromJson(ReadIfThere(Path.Combine(aiko, "settings.json"))).Language;
+
+    var message = SessionReminder.MessageFor(
+        Environment.GetEnvironmentVariable(SessionReminder.LaunchVariable),
+        Environment.GetEnvironmentVariable(SessionReminder.EnvironmentVariable),
+        folder,
+        EnvironmentSettings.FromJson(environments),
+        SessionReminder.IsRussian(language, WindowsLanguage.UserInterface()));
+
+    if (message is not null)
+    {
+        WriteOutput(SessionReminder.HookOutput(message));
+    }
+}
+
+static string ReadIfThere(string path) => File.Exists(path) ? File.ReadAllText(path) : "";
 
 static void WriteOutput(string text)
 {

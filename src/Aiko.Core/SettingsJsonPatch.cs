@@ -73,6 +73,68 @@ public static class SettingsJsonPatch
         return true;
     }
 
+    public const string HooksKey = "hooks";
+    public const string SessionStartKey = "SessionStart";
+
+    /// Adds the bridge as a SessionStart hook, beside any hooks the person has.
+    ///
+    /// Hooks are a list of groups, each with its own list of commands. Ours goes in a group of its
+    /// own, so a group the person wrote is never edited. A hook of ours with an old path is
+    /// replaced, the same way the status line is.
+    public static bool TryAddSessionHook(string settingsJson, string hookCommand, out string patched)
+    {
+        patched = settingsJson;
+        if (string.IsNullOrWhiteSpace(hookCommand) || !TryParseObject(settingsJson, out var root))
+        {
+            return false;
+        }
+
+        if (root!.TryGetPropertyValue(HooksKey, out var hooksNode) && hooksNode is not null and not JsonObject)
+        {
+            // Something that is not an object. Claude Code would not read it either; not ours to fix.
+            return false;
+        }
+
+        var hooks = hooksNode as JsonObject;
+        if (hooks is not null
+            && hooks.TryGetPropertyValue(SessionStartKey, out var existing)
+            && existing is not null and not JsonArray)
+        {
+            return false;
+        }
+
+        var ours = hooks?[SessionStartKey] is JsonArray present ? OurHookCommands(present).ToList() : [];
+        if (ours.Count == 1 && ours[0] == hookCommand)
+        {
+            return false;
+        }
+
+        if (hooks is null)
+        {
+            hooks = [];
+            root[HooksKey] = hooks;
+        }
+
+        if (hooks[SessionStartKey] is not JsonArray groups)
+        {
+            groups = [];
+            hooks[SessionStartKey] = groups;
+        }
+
+        RemoveOurHooks(groups);
+        groups.Add(JsonNode.Parse($$"""
+            { "hooks": [ { "type": "command", "command": {{JsonSerializer.Serialize(hookCommand)}} } ] }
+            """));
+
+        patched = Write(root);
+        return true;
+    }
+
+    public static bool HasOurSessionHook(string settingsJson) =>
+        TryParseObject(settingsJson, out var root)
+        && SessionStartGroups(root!) is { } groups
+        && OurHookCommands(groups).Any();
+
     public static bool TryRemoveBridge(string settingsJson, out string restored)
     {
         restored = settingsJson;
@@ -81,9 +143,17 @@ public static class SettingsJsonPatch
             return false;
         }
 
+        // The hook goes whenever Aiko leaves a file, with or without a status line of ours in it.
+        var hookRemoved = RemoveSessionHook(root!);
+
         if (!root!.ContainsKey(StatusLineKey) && !root.ContainsKey(WrappedKey))
         {
-            return false;
+            if (hookRemoved)
+            {
+                restored = Write(root);
+            }
+
+            return hookRemoved;
         }
 
         // A line kept aside that is ours was never the user's: it is left over from an older Aiko
@@ -122,6 +192,69 @@ public static class SettingsJsonPatch
         }
 
         return wrappedObject.TryGetPropertyValue("command", out var command) ? command?.GetValue<string>() : null;
+    }
+
+    private static JsonArray? SessionStartGroups(JsonObject root) =>
+        root.TryGetPropertyValue(HooksKey, out var hooks) && hooks is JsonObject hooksObject
+        && hooksObject.TryGetPropertyValue(SessionStartKey, out var groups)
+            ? groups as JsonArray
+            : null;
+
+    private static IEnumerable<string> OurHookCommands(JsonArray groups) =>
+        groups
+            .OfType<JsonObject>()
+            .SelectMany(group => group.TryGetPropertyValue(HooksKey, out var list) && list is JsonArray array
+                ? array.OfType<JsonObject>()
+                : [])
+            .Select(hook => CommandIn(hook))
+            .Where(command => BridgeCommand.IsAiko(command))
+            .Select(command => command!);
+
+    /// Takes our commands out of every group, then drops the groups, the SessionStart list and the
+    /// hooks object that are left empty because of it. A group the person wrote keeps everything else.
+    private static bool RemoveSessionHook(JsonObject root)
+    {
+        if (SessionStartGroups(root) is not { } groups || !OurHookCommands(groups).Any())
+        {
+            return false;
+        }
+
+        RemoveOurHooks(groups);
+
+        var hooks = (JsonObject)root[HooksKey]!;
+        if (groups.Count == 0)
+        {
+            hooks.Remove(SessionStartKey);
+        }
+
+        if (hooks.Count == 0)
+        {
+            root.Remove(HooksKey);
+        }
+
+        return true;
+    }
+
+    private static void RemoveOurHooks(JsonArray groups)
+    {
+        foreach (var group in groups.OfType<JsonObject>().ToList())
+        {
+            if (!group.TryGetPropertyValue(HooksKey, out var list) || list is not JsonArray commands)
+            {
+                continue;
+            }
+
+            var had = commands.Count;
+            foreach (var hook in commands.OfType<JsonObject>().Where(h => BridgeCommand.IsAiko(CommandIn(h))).ToList())
+            {
+                commands.Remove(hook);
+            }
+
+            if (commands.Count == 0 && had > 0)
+            {
+                groups.Remove(group);
+            }
+        }
     }
 
     /// The command a status line object runs, or null when the node is not such an object.
