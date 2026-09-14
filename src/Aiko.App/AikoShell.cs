@@ -105,6 +105,13 @@ sealed class AikoShell : IDisposable
         else
         {
             RepairOurStatusLines();
+
+            // An update brings a new shim. The copy in PATH is refreshed, and only when the person
+            // set commands up: the folder never appears on its own.
+            if (CommandFolder.IsSetUp)
+            {
+                CommandFolder.Sync(SettingsStore.LoadEnvironments());
+            }
         }
 
         NoteWhereWeHaveNoAccess();

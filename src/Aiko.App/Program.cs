@@ -86,6 +86,42 @@ static class Program
             return;
         }
 
+        // Sets the command folder up from the installed shim, reports what is in it and removes it
+        // again. PATH is not touched: that part is checked in Windows Sandbox.
+        if (args is ["--try-commands", ..])
+        {
+            var ok = CommandFolder.Sync(SettingsStore.LoadEnvironments());
+            var files = ok ? Directory.EnumerateFiles(CommandFolder.Folder).Select(Path.GetFileName) : [];
+            Log.Write($"--try-commands: set up={ok}, files: {string.Join(", ", files)}");
+            if (ok)
+            {
+                Directory.Delete(CommandFolder.Folder, recursive: true);
+            }
+
+            Environment.Exit(ok ? 0 : 1);
+            return;
+        }
+
+        // Turns the account switching functions off and on again in a copy of a profile, and
+        // checks that the copy came back byte for byte. For trying it without touching the real one.
+        if (args is ["--try-profile", var profileCopy, ..])
+        {
+            var before = File.ReadAllBytes(profileCopy);
+            var found = PowerShellProfile.FindClaudeSwitchers(System.Text.Encoding.Latin1.GetString(before));
+            var turnedOff = PowerShellProfiles.TurnOff(profileCopy, found);
+            var remaining = PowerShellProfile.FindClaudeSwitchers(File.ReadAllText(profileCopy, System.Text.Encoding.Latin1)).Count;
+            var backupThere = File.Exists(profileCopy + PowerShellProfiles.BackupSuffix);
+
+            var text = System.Text.Encoding.Latin1.GetString(File.ReadAllBytes(profileCopy));
+            File.WriteAllBytes(profileCopy, System.Text.Encoding.Latin1.GetBytes(PowerShellProfile.TurnOn(text)));
+            File.Delete(profileCopy + PowerShellProfiles.BackupSuffix);
+            var same = before.AsSpan().SequenceEqual(File.ReadAllBytes(profileCopy));
+
+            Log.Write($"--try-profile: found {found.Count} ({string.Join(", ", found.Select(f => f.Name))}), turned off={turnedOff}, left after={remaining}, backup={backupThere}, same bytes after on={same}");
+            Environment.Exit(same && turnedOff && remaining == 0 ? 0 : 1);
+            return;
+        }
+
         if (args is ["--snapshot-island", var islandPath, ..])
         {
             var edge = args.Length > 2 && Enum.TryParse<ScreenEdge>(args[2], true, out var asked)

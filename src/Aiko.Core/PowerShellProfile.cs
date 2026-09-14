@@ -87,7 +87,8 @@ public static partial class PowerShellProfile
             {
                 lines.Insert(function.LastLine, EndMarker + ending);
             }
-            lines.Insert(function.FirstLine - 1, BeginMarker + function.Name + " — " + Note + ending);
+            // ASCII only: the app writes the file back byte for byte, whatever encoding it is in.
+            lines.Insert(function.FirstLine - 1, BeginMarker + function.Name + ": " + Note + ending);
         }
 
         return string.Concat(lines);

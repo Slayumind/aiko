@@ -14,6 +14,12 @@ static class Uninstall
         PutTheStatusLineBack();
         Startup.Set(false);
 
+        // Before the folders go: the commands folder is one of them, and PATH must not keep
+        // pointing at it. Profile functions come back on, because the commands that replaced them
+        // are about to disappear.
+        CommandFolder.RemoveFromPath();
+        PowerShellProfiles.TurnOnAll();
+
         Remove(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Aiko"));
         Remove(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Aiko"));
     }
