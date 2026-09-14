@@ -640,7 +640,7 @@ public partial class WizardPanel : UserControl
         var settings = BuildSettings();
         SettingsStore.SaveEnvironments(settings);
 
-        var problems = ApplyAccess();
+        var problems = ApplyAccess(settings);
         var commands = ApplyCommands(settings);
         ApplyPlace();
 
@@ -672,47 +672,13 @@ public partial class WizardPanel : UserControl
         };
     }
 
-    private List<PatchProblem> ApplyAccess()
-    {
-        var problems = new List<PatchProblem>();
-        if (_accessGranted != true || BridgePath.Current() is not { } bridge)
-        {
-            return problems;
-        }
+    private List<PatchProblem> ApplyAccess(EnvironmentSettings settings) =>
+        _accessGranted == true ? EnvironmentSetup.ApplyAccess(settings) : [];
 
-        foreach (var folder in ConfigFolders())
-        {
-            var outcome = ClaudeSettingsFile.AddBridge(folder, bridge);
-            if (outcome.Problem != PatchProblem.None)
-            {
-                problems.Add(outcome.Problem);
-            }
-
-            // The reminder about bindings needs the hook, and only once something is bound.
-            if (_projectFolders.Count > 0)
-            {
-                ClaudeSettingsFile.AddSessionHook(folder, bridge);
-            }
-        }
-
-        return problems;
-    }
-
-    private string? ApplyCommands(EnvironmentSettings settings)
-    {
-        if (_commandsWanted != true || !CommandFolder.Sync(settings))
-        {
-            return null;
-        }
-
-        CommandFolder.AddToPath();
-        foreach (var group in _functions.Where(f => f.Toggle.IsOn).GroupBy(f => f.Profile.Path))
-        {
-            PowerShellProfiles.TurnOff(group.Key, group.Select(f => f.Function).ToList());
-        }
-
-        return string.Join(", ", settings.Environments.Select(e => e.Command));
-    }
+    private string? ApplyCommands(EnvironmentSettings settings) =>
+        _commandsWanted == true
+            ? EnvironmentSetup.ApplyCommands(settings, _functions.Where(f => f.Toggle.IsOn).Select(f => (f.Profile.Path, f.Function)))
+            : null;
 
     private void ApplyPlace()
     {

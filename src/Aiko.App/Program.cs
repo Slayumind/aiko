@@ -86,6 +86,22 @@ static class Program
             return;
         }
 
+        // Puts the saved environments into effect outside Aiko, the way the wizard's Finish does:
+        // status lines and the reminder hook, the command folder in PATH, profile functions off.
+        if (args is ["--apply-environments", ..])
+        {
+            Environment.Exit(EnvironmentSetup.ApplySaved() ? 0 : 1);
+            return;
+        }
+
+        // Takes back the command folder, the PATH entry and the profile changes.
+        if (args is ["--undo-environment-setup", ..])
+        {
+            EnvironmentSetup.Undo();
+            Environment.Exit(0);
+            return;
+        }
+
         // Where Aiko would find Claude Code, read from a fresh PATH. Opens nothing.
         if (args is ["--try-claude", ..])
         {
