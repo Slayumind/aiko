@@ -119,7 +119,7 @@ static class Program
         // Shows the landing strip at the top of the screen for a moment, without touching the mouse.
         if (args is ["--try-strip", ..])
         {
-            Environment.Exit(IslandCheck.ShowStrip());
+            Environment.Exit(IslandCheck.ShowStrip(args.Length > 1 ? args[1] : null));
             return;
         }
 

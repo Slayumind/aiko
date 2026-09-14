@@ -132,6 +132,11 @@ public partial class IslandWindow : Window
     private ScreenEdge _handEdge;
     private IslandGhost? _ghost;
 
+    /// The screen the glass is being pictured for, and where the strip belongs right now: the glass
+    /// comes a moment after the island is picked up, and the strip then shows up in the right place.
+    private Box? _glassWork;
+    private (Box Box, ScreenEdge Edge)? _landing;
+
     private void OnPressed(object sender, MouseButtonEventArgs e)
     {
         _hover.Stop();
@@ -161,6 +166,13 @@ public partial class IslandWindow : Window
         }
 
         var work = WorkArea();
+
+        // Over another screen the pictures of the old one are no use.
+        if (_glassWork != work)
+        {
+            PictureGlass(work);
+        }
+
         var edge = IslandPlacement.NearestEdge(cursor.X, cursor.Y, work, _handEdge);
         if (edge != _handEdge)
         {
@@ -176,7 +188,8 @@ public partial class IslandWindow : Window
         var centreX = Left + (ActualWidth / 2);
         var centreY = Top + (ActualHeight / 2);
         var landing = IslandPlacement.DropAt(edge, centreX, centreY, ActualWidth, ActualHeight, work);
-        _ghost?.PlaceOn(IslandPlacement.Place(landing, ActualWidth, ActualHeight, work), edge);
+        _landing = (IslandPlacement.Place(landing, ActualWidth, ActualHeight, work), edge);
+        _ghost?.PlaceOn(_landing.Value.Box, edge);
     }
 
     private void OnReleased(object sender, MouseButtonEventArgs e)
@@ -203,10 +216,30 @@ public partial class IslandWindow : Window
         BeginAnimation(LeftProperty, null);
         BeginAnimation(TopProperty, null);
 
+        PictureGlass(WorkArea());
+
         Panel.Show(Cards, _handEdge, docked: false);
         Fit();
-        _ghost = new IslandGhost();
+    }
+
+    /// Pictures the screen for the glass, leaving the island itself out of the picture, and shows the
+    /// strip once the glass is ready, if the island is still in hand over the same screen.
+    private async void PictureGlass(Box work)
+    {
+        _glassWork = work;
+        var glass = await GlassBands.TakeAsync(work, VisualTreeHelper.GetDpi(this).DpiScaleX, [new WindowInteropHelper(this).Handle]);
+        if (!_dragging || _glassWork != work)
+        {
+            return;
+        }
+
+        _ghost?.Close();
+        _ghost = new IslandGhost(glass);
         _ghost.Shown += LiftAboveTheStrip;
+        if (_landing is { } landing)
+        {
+            _ghost.PlaceOn(landing.Box, landing.Edge);
+        }
     }
 
     /// Puts the island back on top of the other always-on-top windows, the glass strip among them.
@@ -230,6 +263,8 @@ public partial class IslandWindow : Window
 
         _ghost?.Close();
         _ghost = null;
+        _glassWork = null;
+        _landing = null;
 
         if (!wasDragging)
         {
