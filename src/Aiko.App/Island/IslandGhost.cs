@@ -17,16 +17,15 @@ namespace Aiko.App;
 ///
 /// The glass is drawn by Windows, not by Aiko: WPF draws in software here and cannot blur what lies
 /// behind a window. The system backdrop only frosts the active window, and this one never is, so
-/// it uses the blur accent instead (RESEARCH, spike 2026-09-14). Windows then rounds all four
+/// it uses the acrylic accent instead (RESEARCH, spike 2026-09-14). Windows then rounds all four
 /// corners, and a window region would switch the glass off, so the strip reaches past the screen
 /// edge by one corner radius: the corners on that side fall outside the screen.
 sealed class IslandGhost : Window
 {
     private const double Radius = 8;
 
-    /// A thin white over the blur, just enough to tell the pane from what is behind it. The acrylic
-    /// accent looked milky: it adds a grey layer of its own that no tint takes away. Halved again
-    /// after the owner asked for twice as clear.
+    /// A thin white over the blur, just enough to tell the pane from what is behind it. Halved after
+    /// the owner asked for glass twice as clear.
     private static readonly Color GlassTint = Color.FromArgb(0x06, 0xFF, 0xFF, 0xFF);
 
     /// Grain on the glass, the way real frosted glass catches light. Made once, a tile of random
@@ -115,7 +114,7 @@ sealed class IslandGhost : Window
         var handle = new WindowInteropHelper(this).Handle;
         HwndSource.FromHwnd(handle)!.CompositionTarget.BackgroundColor = Colors.Transparent;
 
-        var accent = new AccentPolicy { AccentState = BlurBehind };
+        var accent = new AccentPolicy { AccentState = AcrylicBlurBehind, GradientColor = AcrylicTint };
         var size = Marshal.SizeOf<AccentPolicy>();
         var memory = Marshal.AllocHGlobal(size);
         try
@@ -168,8 +167,12 @@ sealed class IslandGhost : Window
         return brush;
     }
 
-    /// ACCENT_ENABLE_BLURBEHIND: blur only, without the grey layer acrylic lays over it.
-    private const int BlurBehind = 3;
+    /// ACCENT_ENABLE_ACRYLICBLURBEHIND: the strongest blur Windows gives a window without focus.
+    private const int AcrylicBlurBehind = 4;
+
+    /// The colour acrylic lays over its blur, ABGR. Next to nothing: with a white tint of its own it
+    /// turned milky. The tint the owner sees comes from GlassTint and the grain instead.
+    private const int AcrylicTint = 0x01000000;
     private const int AccentPolicyAttribute = 19;
     private const int CornerPreference = 33;
 
