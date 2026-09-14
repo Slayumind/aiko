@@ -22,6 +22,9 @@ static class DropDownCheck
             Height = 200,
             Topmost = true,
             WindowStartupLocation = WindowStartupLocation.Manual,
+            // The same kind of window as settings and the wizard: no frame, see-through edges.
+            WindowStyle = WindowStyle.None,
+            AllowsTransparency = true,
             Background = Tokens.Brush("Surface"),
             Content = new StackPanel { Margin = new Thickness(20), Children = { dropDown } },
         };

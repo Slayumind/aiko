@@ -3,213 +3,56 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:Aiko.App">
 
+  <!--
+    One settings window (D-177): a menu on the left with each environment, the project folders and
+    the general settings, and the chosen page on the right. The window keeps its size while the
+    pages change, so nothing under the mouse moves.
+  -->
   <UserControl.Resources>
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="pack://application:,,,/Theme/Controls.xaml" />
       </ResourceDictionary.MergedDictionaries>
-
-      <DataTemplate x:Key="EnvironmentTemplate" DataType="{x:Type local:EnvironmentLine}">
-        <Grid Margin="0,0,0,10">
-          <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="Auto" />
-          </Grid.ColumnDefinitions>
-
-          <StackPanel Grid.Column="0" Margin="0,0,12,0">
-            <TextBlock Text="{Binding Name}" Style="{StaticResource RowName}" />
-            <TextBlock Text="{Binding Folders}" Style="{StaticResource RowNote}" />
-          </StackPanel>
-
-          <StackPanel Grid.Column="1" Orientation="Horizontal">
-            <TextBlock Text="{x:Static local:Strings.DirectMode}" Style="{StaticResource RowNote}" VerticalAlignment="Center"
-                       Margin="0,0,8,0" />
-            <ToggleButton Style="{StaticResource Switch}" IsChecked="{Binding DirectMode}"
-                          Checked="OnDirectModeChanged" Unchecked="OnDirectModeChanged"
-                          Tag="{Binding Name}" />
-          </StackPanel>
-        </Grid>
-      </DataTemplate>
     </ResourceDictionary>
   </UserControl.Resources>
 
   <Grid Margin="20">
-    <Border Width="360"
+    <Border Width="720"
             Background="{StaticResource Surface}"
             CornerRadius="{StaticResource CardRadius}"
             BorderBrush="{StaticResource Hairline}" BorderThickness="1"
             Effect="{StaticResource CardShadow}">
-      <StackPanel Margin="{StaticResource CardPad}">
-
-        <Grid x:Name="HeaderRow">
-          <TextBlock Text="{x:Static local:Strings.Settings}" VerticalAlignment="Center"
+      <DockPanel>
+        <Grid x:Name="HeaderRow" DockPanel.Dock="Top" Height="44" Background="Transparent">
+          <TextBlock Text="{x:Static local:Strings.Settings}" VerticalAlignment="Center" Margin="16,0,0,0"
                      FontFamily="{StaticResource Sans}" FontSize="{StaticResource TextName}"
                      FontWeight="Medium" Foreground="{StaticResource Ink}" />
-          <Button HorizontalAlignment="Right" Click="OnClose" ToolTip="{x:Static local:Strings.Close}"
-                  Width="22" Height="22" Background="Transparent" Cursor="Hand">
-            <Button.Template>
-              <ControlTemplate TargetType="Button">
-                <Border x:Name="Back" Background="{TemplateBinding Background}" CornerRadius="6">
-                  <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                </Border>
-                <ControlTemplate.Triggers>
-                  <Trigger Property="IsMouseOver" Value="True">
-                    <Setter TargetName="Back" Property="Background" Value="{StaticResource Raised}" />
-                  </Trigger>
-                </ControlTemplate.Triggers>
-              </ControlTemplate>
-            </Button.Template>
+          <Button x:Name="CloseButton" Style="{StaticResource IconButton}" HorizontalAlignment="Right" Margin="0,0,10,0"
+                  Click="OnClose">
             <Path Data="M 0,0 L 10,10 M 10,0 L 0,10" Stroke="{StaticResource Muted}"
-                  StrokeThickness="1.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
-                  Width="10" Height="10" />
+                  StrokeThickness="1.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Width="10" Height="10" />
           </Button>
+          <Border Height="1" VerticalAlignment="Bottom" Background="{StaticResource Hairline}" />
         </Grid>
 
-        <TextBlock Text="{x:Static local:Strings.SectionEnvironments}" Style="{StaticResource SectionLabel}" />
-        <ItemsControl x:Name="Environments" ItemTemplate="{StaticResource EnvironmentTemplate}" />
-        <TextBlock x:Name="NoEnvironments" Text="{x:Static local:Strings.NoEnvironments}"
-                   Style="{StaticResource RowHint}" Visibility="Collapsed" />
-        <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-          <Button Content="{x:Static local:Strings.SetUpEnvironments}" Style="{StaticResource QuietButton}" Click="OnSetUpEnvironments" />
-        </StackPanel>
-
-        <!--
-          The one control in Aiko that reads your access token. It was labelled "direct" and
-          nothing else, with every word of explanation living in PRIVACY.md, which the app never
-          shows anyone. Somebody has to be able to decide before they flip it, not after.
-        -->
-        <TextBlock Style="{StaticResource RowHint}" Margin="0,2,0,0" TextWrapping="Wrap"
-                   Text="{x:Static local:Strings.DirectModeWhat}" />
-        <TextBlock Style="{StaticResource RowHint}" Margin="0,6,0,0" TextWrapping="Wrap"
-                   Text="{x:Static local:Strings.DirectModeAsk}" />
-
-        <Grid Margin="0,8,0,0">
+        <Grid x:Name="Body" Height="600">
           <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="Auto" />
-          </Grid.ColumnDefinitions>
-          <TextBlock x:Name="AccessLine" Grid.Column="0" Style="{StaticResource RowHint}"
-                     VerticalAlignment="Center" TextWrapping="Wrap" Margin="0,0,8,0" />
-          <Button x:Name="AccessButton" Grid.Column="1" Content="{x:Static local:Strings.AccessCheck}"
-                  Style="{StaticResource QuietButton}" Click="OnCheckAccess" />
-        </Grid>
-
-        <TextBlock Text="{x:Static local:Strings.SectionWhereToShow}" Style="{StaticResource SectionLabel}" />
-        <Grid>
-          <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="10" />
+            <ColumnDefinition Width="188" />
             <ColumnDefinition Width="*" />
           </Grid.ColumnDefinitions>
 
-          <RadioButton x:Name="PlaceTray" Grid.Column="0" Style="{StaticResource PlaceCard}"
-                       GroupName="Place" Checked="OnPlaceChanged">
-            <StackPanel>
-              <!-- A screen with a dot down by the clock. -->
-              <Border Height="46" CornerRadius="4" Background="{StaticResource Background}"
-                      BorderBrush="{StaticResource Hairline}" BorderThickness="1">
-                <Grid VerticalAlignment="Bottom">
-                  <Border Height="8" Background="{StaticResource Raised}" />
-                  <Ellipse Width="5" Height="5" Fill="{StaticResource Positive}"
-                           HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,6,0" />
-                </Grid>
-              </Border>
-              <TextBlock Text="{x:Static local:Strings.PlaceTray}" Style="{StaticResource RowName}" Margin="0,8,0,0"
-                         HorizontalAlignment="Center" />
-            </StackPanel>
-          </RadioButton>
+          <DockPanel Margin="8,12,8,10">
+            <TextBlock x:Name="VersionLine" DockPanel.Dock="Bottom" Style="{StaticResource RowNote}" Margin="10,8,0,0" />
+            <StackPanel x:Name="Nav" />
+          </DockPanel>
+          <Border Width="1" HorizontalAlignment="Right" Background="{StaticResource Hairline}" />
 
-          <RadioButton x:Name="PlaceIsland" Grid.Column="2" Style="{StaticResource PlaceCard}"
-                       GroupName="Place" Checked="OnPlaceChanged">
-            <StackPanel>
-              <!-- The same screen with a small island at the top. -->
-              <Border Height="46" CornerRadius="4" Background="{StaticResource Background}"
-                      BorderBrush="{StaticResource Hairline}" BorderThickness="1">
-                <Border Width="38" Height="9" CornerRadius="0,0,5,5" Background="{StaticResource Raised}"
-                        HorizontalAlignment="Center" VerticalAlignment="Top" />
-              </Border>
-              <TextBlock Text="{x:Static local:Strings.PlaceIsland}" Style="{StaticResource RowName}" Margin="0,8,0,0"
-                         HorizontalAlignment="Center" />
-            </StackPanel>
-          </RadioButton>
+          <ScrollViewer x:Name="PageScroll" Grid.Column="1" Style="{StaticResource QuietScroll}">
+            <ContentControl x:Name="PageHost" Margin="20,18,20,20" Focusable="False" />
+          </ScrollViewer>
+          <local:SavedMark x:Name="Saved" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,23,24,0" />
         </Grid>
-
-        <!-- Only worth showing when Aiko lives in the island; in the tray it changes nothing. -->
-        <Grid x:Name="IslandOnly" Margin="0,12,0,0">
-          <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="Auto" />
-          </Grid.ColumnDefinitions>
-          <TextBlock Text="{x:Static local:Strings.HideIslandInFullScreen}" Style="{StaticResource RowName}"
-                     TextWrapping="Wrap" Margin="0,0,12,0" />
-          <ToggleButton x:Name="HideInFullScreen" Grid.Column="1" Style="{StaticResource Switch}"
-                        Checked="OnHideChanged" Unchecked="OnHideChanged" />
-        </Grid>
-
-        <TextBlock Text="{x:Static local:Strings.SectionStartupAndUpdates}" Style="{StaticResource SectionLabel}" />
-        <Grid Margin="0,0,0,10">
-          <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="Auto" />
-          </Grid.ColumnDefinitions>
-          <TextBlock Text="{x:Static local:Strings.StartWithWindows}" Style="{StaticResource RowName}"
-                     TextWrapping="Wrap" Margin="0,0,12,0" />
-          <ToggleButton x:Name="RunAtStartup" Grid.Column="1" Style="{StaticResource Switch}"
-                        Checked="OnStartupChanged" Unchecked="OnStartupChanged" />
-        </Grid>
-        <Grid>
-          <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="Auto" />
-          </Grid.ColumnDefinitions>
-
-          <StackPanel Grid.Column="0" Margin="0,0,12,0">
-            <TextBlock Text="{x:Static local:Strings.CheckUpdatesToggle}" Style="{StaticResource RowName}" />
-            <TextBlock Text="{x:Static local:Strings.CheckUpdatesWhat}"
-                       Style="{StaticResource RowNote}" TextWrapping="Wrap" TextTrimming="None" />
-          </StackPanel>
-          <ToggleButton x:Name="CheckUpdates" Grid.Column="1" Style="{StaticResource Switch}"
-                        VerticalAlignment="Center"
-                        Checked="OnUpdatesChanged" Unchecked="OnUpdatesChanged" />
-        </Grid>
-
-        <StackPanel Margin="0,10,0,0">
-          <!-- Empty until something has been checked: an empty line would only leave a gap. -->
-          <TextBlock x:Name="UpdateLine" Style="{StaticResource RowHint}" Visibility="Collapsed"
-                     Margin="0,0,0,8" />
-          <StackPanel Orientation="Horizontal">
-            <Button x:Name="CheckNow" Content="{x:Static local:Strings.CheckNow}" Style="{StaticResource QuietButton}"
-                    Click="OnCheckNow" />
-            <Button x:Name="OpenDownload" Content="{x:Static local:Strings.OpenDownloadPage}" Style="{StaticResource QuietButton}"
-                    Margin="8,0,0,0" Click="OnOpenDownload" Visibility="Collapsed" />
-          </StackPanel>
-        </StackPanel>
-
-        <TextBlock Text="{x:Static local:Strings.SectionLanguage}" Style="{StaticResource SectionLabel}" />
-        <Border Style="{StaticResource SegmentBar}">
-          <StackPanel Orientation="Horizontal">
-            <RadioButton x:Name="LanguageSystem" Style="{StaticResource Segment}" GroupName="Language"
-                         Content="{x:Static local:Strings.LanguageSystem}" Checked="OnLanguageChanged" />
-            <RadioButton x:Name="LanguageEnglish" Style="{StaticResource Segment}" GroupName="Language"
-                         Content="English" Checked="OnLanguageChanged" />
-            <RadioButton x:Name="LanguageRussian" Style="{StaticResource Segment}" GroupName="Language"
-                         Content="Русский" Checked="OnLanguageChanged" />
-          </StackPanel>
-        </Border>
-
-        <Border Height="1" Background="{StaticResource Hairline}" Margin="0,16,0,12" />
-
-        <!-- The two buttons already fill the width at 360, so the version and the address go on
-             their own line underneath instead of being cut in half. -->
-        <StackPanel>
-          <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="{x:Static local:Strings.CopyDiagnostics}" Style="{StaticResource QuietButton}" Click="OnCopyDiagnostics" />
-            <Button Content="{x:Static local:Strings.QuitAiko}" Style="{StaticResource QuietButton}" Margin="8,0,0,0" Click="OnQuit" />
-          </StackPanel>
-          <TextBlock x:Name="VersionLine" Style="{StaticResource RowNote}" Margin="0,10,0,0" />
-        </StackPanel>
-
-      </StackPanel>
+      </DockPanel>
     </Border>
   </Grid>
 </UserControl>

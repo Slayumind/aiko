@@ -244,4 +244,274 @@
     </Setter>
   </Style>
 
+  <!--
+    The small buttons of the settings window. One template for all of them: the button's own
+    Background is the face, and its BorderBrush is borrowed as the colour of the hover layer, so a
+    red button lightens in red and a clear one in white.
+  -->
+  <ControlTemplate x:Key="FlatButtonTemplate" TargetType="Button">
+    <Grid>
+      <Border CornerRadius="8" Background="{TemplateBinding Background}" />
+      <Border x:Name="Hover" CornerRadius="8" Background="{TemplateBinding BorderBrush}" Opacity="0" />
+      <ContentPresenter Margin="{TemplateBinding Padding}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+    </Grid>
+    <ControlTemplate.Triggers>
+      <Trigger Property="IsMouseOver" Value="True">
+        <Trigger.EnterActions>
+          <BeginStoryboard>
+            <Storyboard>
+              <DoubleAnimation Storyboard.TargetName="Hover" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.12" />
+            </Storyboard>
+          </BeginStoryboard>
+        </Trigger.EnterActions>
+        <Trigger.ExitActions>
+          <BeginStoryboard>
+            <Storyboard>
+              <DoubleAnimation Storyboard.TargetName="Hover" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.12" />
+            </Storyboard>
+          </BeginStoryboard>
+        </Trigger.ExitActions>
+      </Trigger>
+      <Trigger Property="IsEnabled" Value="False">
+        <Setter Property="Opacity" Value="0.5" />
+      </Trigger>
+    </ControlTemplate.Triggers>
+  </ControlTemplate>
+
+  <Style x:Key="SmallButton" TargetType="Button">
+    <Setter Property="Height" Value="28" />
+    <Setter Property="Padding" Value="10,0" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="FontFamily" Value="{StaticResource Sans}" />
+    <Setter Property="FontSize" Value="{StaticResource TextSmall}" />
+    <Setter Property="Foreground" Value="{StaticResource Ink}" />
+    <Setter Property="Background" Value="{StaticResource Raised}" />
+    <Setter Property="BorderBrush" Value="{StaticResource HoverLayer}" />
+    <Setter Property="local:Motion.Press" Value="True" />
+    <Setter Property="Template" Value="{StaticResource FlatButtonTemplate}" />
+  </Style>
+
+  <Style x:Key="GhostButton" TargetType="Button" BasedOn="{StaticResource SmallButton}">
+    <Setter Property="Foreground" Value="{StaticResource Muted}" />
+    <Setter Property="Background" Value="Transparent" />
+    <Style.Triggers>
+      <Trigger Property="IsMouseOver" Value="True">
+        <Setter Property="Foreground" Value="{StaticResource Ink}" />
+      </Trigger>
+    </Style.Triggers>
+  </Style>
+
+  <Style x:Key="DangerButton" TargetType="Button" BasedOn="{StaticResource SmallButton}">
+    <Setter Property="Foreground" Value="{StaticResource Destructive}" />
+    <Setter Property="Background" Value="#29FF6467" />
+    <Setter Property="BorderBrush" Value="#17FF6467" />
+  </Style>
+
+  <Style x:Key="GhostDangerButton" TargetType="Button" BasedOn="{StaticResource SmallButton}">
+    <Setter Property="Foreground" Value="{StaticResource Destructive}" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="#1FFF6467" />
+  </Style>
+
+  <!-- Goes somewhere else in the same window. Underlined, so it does not read as a label. -->
+  <Style x:Key="LinkButton" TargetType="Button">
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="Foreground" Value="{StaticResource Ink}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Button">
+          <TextBlock x:Name="Words" Text="{Binding Content, RelativeSource={RelativeSource TemplatedParent}}"
+                     FontFamily="{StaticResource Sans}" FontSize="{StaticResource TextSmall}"
+                     Foreground="{TemplateBinding Foreground}" Background="Transparent">
+            <TextBlock.TextDecorations>
+              <TextDecoration Location="Underline" PenOffset="2">
+                <TextDecoration.Pen>
+                  <Pen Brush="#4DFFFFFF" Thickness="1" />
+                </TextDecoration.Pen>
+              </TextDecoration>
+            </TextBlock.TextDecorations>
+          </TextBlock>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Words" Property="TextDecorations" Value="Underline" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- The close cross in a window header. -->
+  <Style x:Key="IconButton" TargetType="Button">
+    <Setter Property="Width" Value="28" />
+    <Setter Property="Height" Value="28" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="local:Motion.Press" Value="True" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Button">
+          <Grid>
+            <Border CornerRadius="6" Background="Transparent" />
+            <Border x:Name="Hover" CornerRadius="6" Background="{StaticResource Raised}" Opacity="0" />
+            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+          </Grid>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Trigger.EnterActions>
+                <BeginStoryboard>
+                  <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="Hover" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.12" />
+                  </Storyboard>
+                </BeginStoryboard>
+              </Trigger.EnterActions>
+              <Trigger.ExitActions>
+                <BeginStoryboard>
+                  <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="Hover" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.12" />
+                  </Storyboard>
+                </BeginStoryboard>
+              </Trigger.ExitActions>
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- A tick box with its words beside it. The words are a TextBlock, so they can wrap. -->
+  <Style x:Key="Tick" TargetType="CheckBox">
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="Foreground" Value="{StaticResource Ink}" />
+    <Setter Property="FontFamily" Value="{StaticResource Sans}" />
+    <Setter Property="FontSize" Value="{StaticResource TextSmall}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="CheckBox">
+          <Grid Background="Transparent">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Top" local:Motion.Press="True">
+              <Border CornerRadius="4" BorderBrush="{StaticResource InputLine}" BorderThickness="1.5" />
+              <Border x:Name="Fill" CornerRadius="4" Background="{StaticResource Ink}" Opacity="0" />
+              <Path x:Name="Mark" Data="M 4,8 L 7,11 L 12,5" Stroke="{StaticResource Background}" StrokeThickness="1.6"
+                    StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Opacity="0" />
+            </Grid>
+            <ContentPresenter Grid.Column="1" VerticalAlignment="Center" />
+          </Grid>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsChecked" Value="True">
+              <Setter TargetName="Fill" Property="Opacity" Value="1" />
+              <Setter TargetName="Mark" Property="Opacity" Value="1" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- A plan name or a count: mono on a faint plate. -->
+  <Style x:Key="Chip" TargetType="Border">
+    <Setter Property="CornerRadius" Value="5" />
+    <Setter Property="Background" Value="#12FFFFFF" />
+    <Setter Property="Padding" Value="6,1" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+
+  <Style x:Key="ChipText" TargetType="TextBlock">
+    <Setter Property="FontFamily" Value="{StaticResource Mono}" />
+    <Setter Property="FontSize" Value="{StaticResource TextTiny}" />
+    <Setter Property="Foreground" Value="{StaticResource Ink}" />
+  </Style>
+
+  <!-- One item of a side menu: the chosen one sits on a lighter plate. -->
+  <Style x:Key="NavItem" TargetType="RadioButton">
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="FontFamily" Value="{StaticResource Sans}" />
+    <Setter Property="FontSize" Value="{StaticResource TextName}" />
+    <Setter Property="Foreground" Value="{StaticResource Muted}" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="local:Motion.Press" Value="True" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="RadioButton">
+          <Grid>
+            <Border x:Name="Back" CornerRadius="8" Background="Transparent" />
+            <Border x:Name="Hover" CornerRadius="8" Background="{StaticResource HoverLayer}" Opacity="0" />
+            <ContentPresenter Margin="10,7" />
+          </Grid>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter Property="Foreground" Value="{StaticResource Ink}" />
+              <Trigger.EnterActions>
+                <BeginStoryboard>
+                  <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="Hover" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.12" />
+                  </Storyboard>
+                </BeginStoryboard>
+              </Trigger.EnterActions>
+              <Trigger.ExitActions>
+                <BeginStoryboard>
+                  <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="Hover" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.12" />
+                  </Storyboard>
+                </BeginStoryboard>
+              </Trigger.ExitActions>
+            </Trigger>
+            <Trigger Property="IsChecked" Value="True">
+              <Setter TargetName="Back" Property="Background" Value="#14FFFFFF" />
+              <Setter Property="Foreground" Value="{StaticResource Ink}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- A thin scroll bar that only shows when there is something to scroll. -->
+  <Style x:Key="ThinScrollBar" TargetType="ScrollBar">
+    <Setter Property="Width" Value="6" />
+    <Setter Property="MinWidth" Value="6" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ScrollBar">
+          <Track x:Name="PART_Track" Orientation="Vertical" IsDirectionReversed="True">
+            <Track.Thumb>
+              <Thumb>
+                <Thumb.Template>
+                  <ControlTemplate TargetType="Thumb">
+                    <Border CornerRadius="3" Background="{StaticResource InputLine}" />
+                  </ControlTemplate>
+                </Thumb.Template>
+              </Thumb>
+            </Track.Thumb>
+          </Track>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style x:Key="QuietScroll" TargetType="ScrollViewer">
+    <Setter Property="HorizontalScrollBarVisibility" Value="Disabled" />
+    <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ScrollViewer">
+          <Grid>
+            <ScrollContentPresenter CanContentScroll="{TemplateBinding CanContentScroll}" />
+            <ScrollBar x:Name="PART_VerticalScrollBar" Style="{StaticResource ThinScrollBar}"
+                       HorizontalAlignment="Right" Margin="0,8,3,8"
+                       Value="{TemplateBinding VerticalOffset}" Maximum="{TemplateBinding ScrollableHeight}"
+                       ViewportSize="{TemplateBinding ViewportHeight}"
+                       Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}" />
+          </Grid>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
 </ResourceDictionary>

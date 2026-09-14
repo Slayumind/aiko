@@ -526,4 +526,127 @@
   <data name="SetUpEnvironments" xml:space="preserve">
     <value>Set up environments</value>
   </data>
+  <data name="NavGeneral" xml:space="preserve">
+    <value>General</value>
+  </data>
+  <data name="NavBound" xml:space="preserve">
+    <value>{0} bound</value>
+  </data>
+  <data name="AddSecondEnvironment" xml:space="preserve">
+    <value>Add a second environment</value>
+  </data>
+  <data name="Saved" xml:space="preserve">
+    <value>Saved</value>
+  </data>
+  <data name="ByDefault" xml:space="preserve">
+    <value>default</value>
+  </data>
+  <data name="SectionAccount" xml:space="preserve">
+    <value>ACCOUNT</value>
+  </data>
+  <data name="EmailLabel" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="SignInAgain" xml:space="preserve">
+    <value>Sign in again</value>
+  </data>
+  <data name="ClaudeOpened" xml:space="preserve">
+    <value>Claude Code opened in a new window.</value>
+  </data>
+  <data name="SectionCommand" xml:space="preserve">
+    <value>COMMAND</value>
+  </data>
+  <data name="CmdShells" xml:space="preserve">
+    <value>PowerShell · cmd · Git Bash</value>
+  </data>
+  <data name="CmdKept" xml:space="preserve">
+    <value>The command stays the same, since your terminals and scripts know it.</value>
+  </data>
+  <data name="RenameCommandTo" xml:space="preserve">
+    <value>Rename to {0}</value>
+  </data>
+  <data name="NameEmpty" xml:space="preserve">
+    <value>Enter a name.</value>
+  </data>
+  <data name="NameTooLong" xml:space="preserve">
+    <value>Up to 40 characters.</value>
+  </data>
+  <data name="NameTaken" xml:space="preserve">
+    <value>The other environment has this name.</value>
+  </data>
+  <data name="SectionBoundFolders" xml:space="preserve">
+    <value>BOUND FOLDERS</value>
+  </data>
+  <data name="NoneBound" xml:space="preserve">
+    <value>No folders.</value>
+  </data>
+  <data name="RestToo" xml:space="preserve">
+    <value>And every other folder: this is the default environment.</value>
+  </data>
+  <data name="EditInFolders" xml:space="preserve">
+    <value>Change in project folders</value>
+  </data>
+  <data name="RemoveEnvironment" xml:space="preserve">
+    <value>Remove environment</value>
+  </data>
+  <data name="RemoveEnvironmentLine" xml:space="preserve">
+    <value>The Aiko line leaves this folder's settings.json, and so do the command {0} and the bindings to {1}.</value>
+  </data>
+  <data name="MoveToRecycleBin" xml:space="preserve">
+    <value>And move the folder to the Recycle Bin</value>
+  </data>
+  <data name="RecycleWhy" xml:space="preserve">
+    <value>It holds the Claude Code account, history and memory. You can restore it from the Recycle Bin.</value>
+  </data>
+  <data name="KeepClaude" xml:space="preserve">
+    <value>VS Code and Claude Desktop use the .claude folder, so Aiko never removes it.</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="RemoveConfirm" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="EnvironmentRemoved" xml:space="preserve">
+    <value>{0} removed.</value>
+  </data>
+  <data name="EnvironmentRemovedToBin" xml:space="preserve">
+    <value>{0} removed. The folder is in the Recycle Bin.</value>
+  </data>
+  <data name="FoldersTableLead" xml:space="preserve">
+    <value>In a folder and in every folder inside, plain claude starts its environment. A command like {0} beats a binding, and Claude Code reminds you of it.</value>
+  </data>
+  <data name="FolderColumn" xml:space="preserve">
+    <value>FOLDER</value>
+  </data>
+  <data name="EnvironmentColumn" xml:space="preserve">
+    <value>ENVIRONMENT</value>
+  </data>
+  <data name="AllOtherFolders" xml:space="preserve">
+    <value>All other folders</value>
+  </data>
+  <data name="AddFolder" xml:space="preserve">
+    <value>Add a folder</value>
+  </data>
+  <data name="RemoveBinding" xml:space="preserve">
+    <value>Remove binding</value>
+  </data>
+  <data name="FoldersOneEnvironment" xml:space="preserve">
+    <value>Bindings matter once you have two environments. Right now every folder runs in {0}.</value>
+  </data>
+  <data name="FoldersNeedCommands" xml:space="preserve">
+    <value>Bindings work through the launch commands, and those aren't set up yet.</value>
+  </data>
+  <data name="SectionAccess" xml:space="preserve">
+    <value>ACCESS TO THE LIMITS</value>
+  </data>
+  <data name="SectionDiagnostics" xml:space="preserve">
+    <value>DIAGNOSTICS</value>
+  </data>
+  <data name="DiagnosticsWhat" xml:space="preserve">
+    <value>Version and settings for a bug report. No tokens and no email addresses.</value>
+  </data>
+  <data name="DiagnosticsCopied" xml:space="preserve">
+    <value>Diagnostics copied.</value>
+  </data>
 </root>
