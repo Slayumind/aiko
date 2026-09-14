@@ -47,7 +47,7 @@
     <value>resets in {0}</value>
   </data>
   <data name="CardJustReset" xml:space="preserve">
-    <value>window just reset</value>
+    <value>just reset</value>
   </data>
   <data name="CardLastsUntilReset" xml:space="preserve">
     <value>lasts until reset</value>
@@ -65,16 +65,16 @@
     <value>no data yet</value>
   </data>
   <data name="CardLastSeen" xml:space="preserve">
-    <value>last seen {0}</value>
+    <value>as of {0}</value>
   </data>
   <data name="CardUpdated" xml:space="preserve">
     <value>updated {0}</value>
   </data>
   <data name="CardNoDataNote" xml:space="preserve">
-    <value>Open Claude Code. The limits show up after the first answer.</value>
+    <value>Open Claude Code. Limits show up after its first answer.</value>
   </data>
   <data name="CardNoAccessNote" xml:space="preserve">
-    <value>Aiko cannot read the limits of this environment. Open settings and set it up.</value>
+    <value>Aiko can't see the limits of this environment yet. You can turn on access in settings.</value>
   </data>
   <data name="SpanDaysHours" xml:space="preserve">
     <value>{0}d {1}h</value>
@@ -92,7 +92,7 @@
     <value>open Claude Code</value>
   </data>
   <data name="TrayLastSeen" xml:space="preserve">
-    <value>last seen {0}</value>
+    <value>as of {0}</value>
   </data>
   <data name="TrayUpdateOut" xml:space="preserve">
     <value>Aiko {0} is out</value>
@@ -134,22 +134,22 @@
     <value>Direct mode</value>
   </data>
   <data name="DirectModeWhat" xml:space="preserve">
-    <value>Direct mode lets Aiko ask Anthropic for your limits itself, with the token Claude Code already keeps on this computer. Aiko reads it for each request and never stores it. Turn it on if you work in the IDE panel or Claude Desktop, where there is no status line.</value>
+    <value>In direct mode, Aiko asks Anthropic for your limits itself. It uses the token Claude Code already keeps on this computer: Aiko reads it before each request and never saves it. Turn it on if you work in the IDE panel or in Claude Desktop, where there's no status line.</value>
   </data>
   <data name="DirectModeAsk" xml:space="preserve">
-    <value>For a work account, ask whoever runs it first.</value>
+    <value>If it's a work account, ask whoever manages it first.</value>
   </data>
   <data name="NoEnvironments" xml:space="preserve">
-    <value>No environments yet. Aiko finds them on the first run.</value>
+    <value>No environments yet. Aiko looks for them on the first run.</value>
   </data>
   <data name="AccessOk" xml:space="preserve">
-    <value>Claude Code reports its limits to Aiko.</value>
+    <value>Claude Code sends its limits to Aiko.</value>
   </data>
   <data name="AccessMissingOne" xml:space="preserve">
-    <value>One environment does not report its limits yet.</value>
+    <value>One environment doesn't send its limits yet.</value>
   </data>
   <data name="AccessMissingMany" xml:space="preserve">
-    <value>{0} environments do not report their limits yet.</value>
+    <value>{0} environments don't send their limits yet.</value>
   </data>
   <data name="AccessCheck" xml:space="preserve">
     <value>Check access</value>
@@ -158,7 +158,7 @@
     <value>Set it up</value>
   </data>
   <data name="AccessNoBridge" xml:space="preserve">
-    <value>Aiko cannot find its own bridge program, so nothing was changed.</value>
+    <value>Aiko can't find its bridge program, so nothing changed.</value>
   </data>
   <data name="PlaceTray" xml:space="preserve">
     <value>Tray</value>
@@ -173,7 +173,7 @@
     <value>Start with Windows</value>
   </data>
   <data name="CheckUpdatesWhat" xml:space="preserve">
-    <value>Asks slayumind.org once a day, and tells it one copy of Aiko ran today. Downloads come from GitHub.</value>
+    <value>Once a day, Aiko asks slayumind.org for the latest version and says that one copy of Aiko ran today. Downloads come from GitHub.</value>
   </data>
   <data name="CheckNow" xml:space="preserve">
     <value>Check now</value>
@@ -182,7 +182,7 @@
     <value>Open download page</value>
   </data>
   <data name="UpdateAsking" xml:space="preserve">
-    <value>Asking slayumind.org…</value>
+    <value>Aiko is asking slayumind.org…</value>
   </data>
   <data name="UpdateAvailable" xml:space="preserve">
     <value>Version {0} is available.</value>
@@ -191,7 +191,7 @@
     <value>Aiko {0} is the latest version.</value>
   </data>
   <data name="UpdateFailed" xml:space="preserve">
-    <value>Could not check right now. Try again later.</value>
+    <value>Couldn't check. Try again in a few minutes.</value>
   </data>
   <data name="LanguageSystem" xml:space="preserve">
     <value>System</value>
@@ -245,13 +245,13 @@
     <value>Finish</value>
   </data>
   <data name="WizardFoundOne" xml:space="preserve">
-    <value>Aiko found one Claude Code folder. One environment is enough; another can be added later in settings.</value>
+    <value>Aiko found one Claude Code folder. That's enough to start, and you can add a second one later in settings.</value>
   </data>
   <data name="WizardFoundMany" xml:space="preserve">
-    <value>Aiko found these Claude Code folders. Give them names you will recognise, and turn off any you do not want.</value>
+    <value>Aiko found these Claude Code folders. Give them names you'll recognise and turn off the ones you don't need.</value>
   </data>
   <data name="WizardNothingFound" xml:space="preserve">
-    <value>Aiko did not find Claude Code on this computer. Install it and check again, or point Aiko at the folder yourself.</value>
+    <value>Aiko didn't find Claude Code on this computer. Install it and check again, or choose the folder yourself.</value>
   </data>
   <data name="WizardChooseFolder" xml:space="preserve">
     <value>Choose a folder</value>
@@ -263,22 +263,22 @@
     <value>Choose a Claude Code folder</value>
   </data>
   <data name="WizardAccessExplain" xml:space="preserve">
-    <value>Claude Code reports its limits to a status line. Aiko adds one line to the settings file of each environment. A status line you already have keeps working: Aiko calls it and shows its output.</value>
+    <value>Claude Code sends its limits to a status line. Aiko adds one line to the settings file of each environment. If you already have a status line, it keeps working: Aiko runs it and shows what it prints.</value>
   </data>
   <data name="WizardTheLine" xml:space="preserve">
     <value>THE LINE AIKO ADDS</value>
   </data>
   <data name="WizardTheFiles" xml:space="preserve">
-    <value>FILES IT CHANGES</value>
+    <value>FILES AIKO CHANGES</value>
   </data>
   <data name="WizardBackupNote" xml:space="preserve">
-    <value>A copy of each file is kept beside it, and removing Aiko puts everything back.</value>
+    <value>Aiko keeps a copy of each file next to it. Removing Aiko puts everything back.</value>
   </data>
   <data name="WizardBridgeNotFound" xml:space="preserve">
-    <value>Aiko could not find its own bridge program.</value>
+    <value>Aiko can't find its bridge program.</value>
   </data>
   <data name="WizardUpdatesWhat" xml:space="preserve">
-    <value>Asks slayumind.org once a day for the latest version, and tells it one copy of Aiko ran today. The identifier it sends changes every day.</value>
+    <value>Once a day, Aiko asks slayumind.org for the latest version and says that one copy of Aiko ran today. The ID it sends changes every day.</value>
   </data>
   <data name="WizardDoneTray" xml:space="preserve">
     <value>Aiko is down by the clock. Rest the mouse on it to see the card, or click it to keep the card open.</value>
@@ -287,18 +287,18 @@
     <value>Aiko is at the top of your screen. Drag it anywhere and it sticks to the nearest edge.</value>
   </data>
   <data name="WizardDoneOverflow" xml:space="preserve">
-    <value>Windows 11 hides the icon of a new app behind the arrow at the left of the tray. Open that arrow and drag Aiko out onto the taskbar, or the card will have nothing to appear from.</value>
+    <value>Windows 11 hides new app icons under the arrow next to the clock. Open the arrow and drag Aiko onto the taskbar: under the arrow, the card can't open.</value>
   </data>
   <data name="WizardDoneFirstNumbers" xml:space="preserve">
-    <value>The first numbers arrive after your next answer from Claude Code. Until then the ring is dotted.</value>
+    <value>The first numbers arrive after your next answer from Claude Code. Until then, the ring is dashed.</value>
   </data>
   <data name="WizardDoneNoAccess" xml:space="preserve">
-    <value>Aiko has no way to read your limits yet. Open settings when you want to set that up.</value>
+    <value>Aiko can't see your limits yet. You can turn on access in settings at any time.</value>
   </data>
   <data name="SettingsWriteFailed" xml:space="preserve">
-    <value>Aiko could not write the Claude Code settings file.</value>
+    <value>Aiko couldn't write the Claude Code settings file. Try again.</value>
   </data>
   <data name="SettingsBridgeUnknown" xml:space="preserve">
-    <value>Aiko could not work out where its bridge is.</value>
+    <value>Aiko can't find its bridge program.</value>
   </data>
 </root>

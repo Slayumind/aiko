@@ -36,7 +36,7 @@ public static class Strings
     /// resets in {0}
     public static string CardResets => Get("CardResets");
 
-    /// window just reset
+    /// just reset
     public static string CardJustReset => Get("CardJustReset");
 
     /// lasts until reset
@@ -54,16 +54,16 @@ public static class Strings
     /// no data yet
     public static string CardNoDataYet => Get("CardNoDataYet");
 
-    /// last seen {0}
+    /// as of {0}
     public static string CardLastSeen => Get("CardLastSeen");
 
     /// updated {0}
     public static string CardUpdated => Get("CardUpdated");
 
-    /// Open Claude Code. The limits show up after the first answer.
+    /// Open Claude Code. Limits show up after its first answer.
     public static string CardNoDataNote => Get("CardNoDataNote");
 
-    /// Aiko cannot read the limits of this environment. Open settings and set it up.
+    /// Aiko can't see the limits of this environment yet. You can turn on access in settings.
     public static string CardNoAccessNote => Get("CardNoAccessNote");
 
     /// {0}d {1}h
@@ -81,7 +81,7 @@ public static class Strings
     /// open Claude Code
     public static string TrayOpenClaudeCode => Get("TrayOpenClaudeCode");
 
-    /// last seen {0}
+    /// as of {0}
     public static string TrayLastSeen => Get("TrayLastSeen");
 
     /// Aiko {0} is out
@@ -123,22 +123,22 @@ public static class Strings
     /// Direct mode
     public static string DirectMode => Get("DirectMode");
 
-    /// Direct mode lets Aiko ask Anthropic for your limits itself, with the token Claude Code al...
+    /// In direct mode, Aiko asks Anthropic for your limits itself. It uses the token Claude Code...
     public static string DirectModeWhat => Get("DirectModeWhat");
 
-    /// For a work account, ask whoever runs it first.
+    /// If it's a work account, ask whoever manages it first.
     public static string DirectModeAsk => Get("DirectModeAsk");
 
-    /// No environments yet. Aiko finds them on the first run.
+    /// No environments yet. Aiko looks for them on the first run.
     public static string NoEnvironments => Get("NoEnvironments");
 
-    /// Claude Code reports its limits to Aiko.
+    /// Claude Code sends its limits to Aiko.
     public static string AccessOk => Get("AccessOk");
 
-    /// One environment does not report its limits yet.
+    /// One environment doesn't send its limits yet.
     public static string AccessMissingOne => Get("AccessMissingOne");
 
-    /// {0} environments do not report their limits yet.
+    /// {0} environments don't send their limits yet.
     public static string AccessMissingMany => Get("AccessMissingMany");
 
     /// Check access
@@ -147,7 +147,7 @@ public static class Strings
     /// Set it up
     public static string AccessSetUp => Get("AccessSetUp");
 
-    /// Aiko cannot find its own bridge program, so nothing was changed.
+    /// Aiko can't find its bridge program, so nothing changed.
     public static string AccessNoBridge => Get("AccessNoBridge");
 
     /// Tray
@@ -162,7 +162,7 @@ public static class Strings
     /// Start with Windows
     public static string StartWithWindows => Get("StartWithWindows");
 
-    /// Asks slayumind.org once a day, and tells it one copy of Aiko ran today. Downloads come fr...
+    /// Once a day, Aiko asks slayumind.org for the latest version and says that one copy of Aiko...
     public static string CheckUpdatesWhat => Get("CheckUpdatesWhat");
 
     /// Check now
@@ -171,7 +171,7 @@ public static class Strings
     /// Open download page
     public static string OpenDownloadPage => Get("OpenDownloadPage");
 
-    /// Asking slayumind.org…
+    /// Aiko is asking slayumind.org…
     public static string UpdateAsking => Get("UpdateAsking");
 
     /// Version {0} is available.
@@ -180,7 +180,7 @@ public static class Strings
     /// Aiko {0} is the latest version.
     public static string UpdateLatest => Get("UpdateLatest");
 
-    /// Could not check right now. Try again later.
+    /// Couldn't check. Try again in a few minutes.
     public static string UpdateFailed => Get("UpdateFailed");
 
     /// System
@@ -234,13 +234,13 @@ public static class Strings
     /// Finish
     public static string Finish => Get("Finish");
 
-    /// Aiko found one Claude Code folder. One environment is enough; another can be added later ...
+    /// Aiko found one Claude Code folder. That's enough to start, and you can add a second one l...
     public static string WizardFoundOne => Get("WizardFoundOne");
 
-    /// Aiko found these Claude Code folders. Give them names you will recognise, and turn off an...
+    /// Aiko found these Claude Code folders. Give them names you'll recognise and turn off the o...
     public static string WizardFoundMany => Get("WizardFoundMany");
 
-    /// Aiko did not find Claude Code on this computer. Install it and check again, or point Aiko...
+    /// Aiko didn't find Claude Code on this computer. Install it and check again, or choose the ...
     public static string WizardNothingFound => Get("WizardNothingFound");
 
     /// Choose a folder
@@ -252,22 +252,22 @@ public static class Strings
     /// Choose a Claude Code folder
     public static string WizardFolderDialogTitle => Get("WizardFolderDialogTitle");
 
-    /// Claude Code reports its limits to a status line. Aiko adds one line to the settings file ...
+    /// Claude Code sends its limits to a status line. Aiko adds one line to the settings file of...
     public static string WizardAccessExplain => Get("WizardAccessExplain");
 
     /// THE LINE AIKO ADDS
     public static string WizardTheLine => Get("WizardTheLine");
 
-    /// FILES IT CHANGES
+    /// FILES AIKO CHANGES
     public static string WizardTheFiles => Get("WizardTheFiles");
 
-    /// A copy of each file is kept beside it, and removing Aiko puts everything back.
+    /// Aiko keeps a copy of each file next to it. Removing Aiko puts everything back.
     public static string WizardBackupNote => Get("WizardBackupNote");
 
-    /// Aiko could not find its own bridge program.
+    /// Aiko can't find its bridge program.
     public static string WizardBridgeNotFound => Get("WizardBridgeNotFound");
 
-    /// Asks slayumind.org once a day for the latest version, and tells it one copy of Aiko ran t...
+    /// Once a day, Aiko asks slayumind.org for the latest version and says that one copy of Aiko...
     public static string WizardUpdatesWhat => Get("WizardUpdatesWhat");
 
     /// Aiko is down by the clock. Rest the mouse on it to see the card, or click it to keep the ...
@@ -276,18 +276,18 @@ public static class Strings
     /// Aiko is at the top of your screen. Drag it anywhere and it sticks to the nearest edge.
     public static string WizardDoneIsland => Get("WizardDoneIsland");
 
-    /// Windows 11 hides the icon of a new app behind the arrow at the left of the tray. Open tha...
+    /// Windows 11 hides new app icons under the arrow next to the clock. Open the arrow and drag...
     public static string WizardDoneOverflow => Get("WizardDoneOverflow");
 
-    /// The first numbers arrive after your next answer from Claude Code. Until then the ring is ...
+    /// The first numbers arrive after your next answer from Claude Code. Until then, the ring is...
     public static string WizardDoneFirstNumbers => Get("WizardDoneFirstNumbers");
 
-    /// Aiko has no way to read your limits yet. Open settings when you want to set that up.
+    /// Aiko can't see your limits yet. You can turn on access in settings at any time.
     public static string WizardDoneNoAccess => Get("WizardDoneNoAccess");
 
-    /// Aiko could not write the Claude Code settings file.
+    /// Aiko couldn't write the Claude Code settings file. Try again.
     public static string SettingsWriteFailed => Get("SettingsWriteFailed");
 
-    /// Aiko could not work out where its bridge is.
+    /// Aiko can't find its bridge program.
     public static string SettingsBridgeUnknown => Get("SettingsBridgeUnknown");
 }
