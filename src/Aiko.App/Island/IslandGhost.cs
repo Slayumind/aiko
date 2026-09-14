@@ -12,36 +12,36 @@ namespace Aiko.App;
 /// A window of its own, because it sits on the edge while the island is somewhere else. It never
 /// takes the focus or a click, and it exists only while the island is in hand.
 ///
-/// The glass follows the owner's reference, the liquid glass card of ui-layouts, layer by layer:
-/// the picture behind it blurred and bent (GlassBands), a face with a soft shadow and a faint white
-/// glow around it, and an edge lit from inside. It has no tint and no grain. Being Aiko's own
+/// The glass follows the owner's reference, the weather cards made of ui-layouts liquid glass, layer
+/// by layer: the picture behind it blurred and bent (GlassBands), white at 8 % over it, a hairline
+/// lit from inside and a shadow so faint it is felt more than seen (D-185). Being Aiko's own
 /// drawing, it can have the flat side against the screen edge that the island has.
 sealed class IslandGhost : Window
 {
-    private const double Radius = 14;
+    /// borderRadius 8px, as in the reference, where the island has 14.
+    private const double Radius = 8;
 
-    /// Room around the pane for the shadow and the glow to spread into.
-    private const double Spread = 28;
+    /// Room around the pane for the shadow to spread into.
+    private const double Spread = 16;
 
     private readonly GlassBands _glass;
-    private readonly Border _glow = new()
+    /// bg-white/8.
+    private readonly Border _tint = new()
     {
-        Background = Brushes.White,
-        Opacity = 0.1,
-        Effect = new BlurEffect { Radius = 24 },
+        Background = new SolidColorBrush(Color.FromArgb(0x14, 0xFF, 0xFF, 0xFF)),
     };
 
     private readonly Border _pane = new()
     {
-        // box-shadow 0 4px 4px rgba(0,0,0,.15), 0 0 12px rgba(0,0,0,.08), made one.
-        Effect = new DropShadowEffect { Color = Colors.Black, BlurRadius = 12, ShadowDepth = 3, Direction = 270, Opacity = 0.22 },
+        // glowIntensity none: box-shadow 0 4px 4px rgba(0,0,0,.05), 0 0 12px rgba(0,0,0,.05), made one.
+        Effect = new DropShadowEffect { Color = Colors.Black, BlurRadius = 10, ShadowDepth = 2, Direction = 270, Opacity = 0.1 },
     };
 
     private readonly Border _edgeLight = new()
     {
-        // inset 3px 3px 3px rgba(255,255,255,.45) and the same from the other side: a lit rim inside.
-        BorderBrush = new SolidColorBrush(Color.FromArgb(0x73, 0xFF, 0xFF, 0xFF)),
-        Effect = new BlurEffect { Radius = 3 },
+        // shadowIntensity xs: inset 1px 1px 1px rgba(255,255,255,.3) and the same from the other side.
+        BorderBrush = new SolidColorBrush(Color.FromArgb(0x4D, 0xFF, 0xFF, 0xFF)),
+        Effect = new BlurEffect { Radius = 1 },
     };
 
     private readonly Grid _layers = new();
@@ -64,8 +64,8 @@ sealed class IslandGhost : Window
         // The picture is a quarter of the screen's size; smooth scaling keeps the blur soft.
         RenderOptions.SetBitmapScalingMode(_pane, BitmapScalingMode.Linear);
 
-        _layers.Children.Add(_glow);
         _layers.Children.Add(_pane);
+        _layers.Children.Add(_tint);
         _layers.Children.Add(_edgeLight);
         Content = _layers;
     }
@@ -134,7 +134,7 @@ sealed class IslandGhost : Window
         };
 
         var room = Room(edge);
-        foreach (var layer in new[] { _glow, _pane, _edgeLight })
+        foreach (var layer in new[] { _pane, _tint, _edgeLight })
         {
             layer.CornerRadius = corners;
             layer.Margin = room;
@@ -144,10 +144,10 @@ sealed class IslandGhost : Window
 
         _edgeLight.BorderThickness = edge switch
         {
-            ScreenEdge.Top => new Thickness(3, 0, 3, 3),
-            ScreenEdge.Bottom => new Thickness(3, 3, 3, 0),
-            ScreenEdge.Left => new Thickness(0, 3, 3, 3),
-            _ => new Thickness(3, 3, 0, 3),
+            ScreenEdge.Top => new Thickness(1, 0, 1, 1),
+            ScreenEdge.Bottom => new Thickness(1, 1, 1, 0),
+            ScreenEdge.Left => new Thickness(0, 1, 1, 1),
+            _ => new Thickness(1, 1, 0, 1),
         };
 
         // Cut to the pane, so the blurred rim glows inwards only, like an inset shadow.
