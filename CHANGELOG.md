@@ -23,7 +23,9 @@ The first release. Everything below is new.
   (or **Sign in** when it isn't connected). A card opened by hovering closes when the mouse leaves.
   Click the icon or the card and it stays until you close it.
 - **Island.** If you prefer, Aiko lives in a small window at the edge of the screen instead of the
-  tray, with one ring per environment. It opens the card the same way the icon does. Pick it up
+  tray, with one ring per environment. Rest the mouse on it and it unfolds along the edge to show the
+  percentage beside each ring; it also unfolds by itself for two seconds when a session crosses 75 % or
+  90 %. It opens the card the same way the icon does. Pick it up
   and a pane of frosted glass shows where it will land on the nearest edge; along a side edge the rings turn
   into a column while it is still in your hand. Let go and it settles there, flat against the edge.
   It hides while a window is full screen.

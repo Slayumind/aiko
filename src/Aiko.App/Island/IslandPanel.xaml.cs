@@ -4,14 +4,30 @@ using Aiko.Core;
 
 namespace Aiko.App;
 
-/// The island when it is folded: one ring per environment and nothing else. No percentages on it —
-/// the numbers are in the card, and the island has to stay out of the way.
+/// The island: one ring per environment. Folded it shows nothing else and stays out of the way.
+/// Unfolded, on a hover or for a moment when a limit crosses a threshold, a percentage slides out
+/// beside each ring (D-161), so the card is needed less often.
 ///
 /// It does carry the numbers in its tooltip. A ring and a colour say nothing to a screen reader,
 /// and nothing at all to somebody who cannot tell the green from the red.
 public partial class IslandPanel : UserControl
 {
     private const double RingSize = 18;
+
+    private readonly List<UnfoldPanel> _labels = [];
+    private bool _unfolded;
+
+    /// Opens or closes the percentages. The window around the panel follows the size while it moves.
+    public void Unfold(bool open, bool animate = true)
+    {
+        _unfolded = open;
+        foreach (var label in _labels)
+        {
+            label.SetOpen(open, animate);
+        }
+    }
+
+    public bool IsUnfolded => _unfolded;
 
     public IslandPanel()
     {
@@ -50,14 +66,18 @@ public partial class IslandPanel : UserControl
         ToolTip = TrayText.Tooltip(cards, null);
 
         Rings.Children.Clear();
+        _labels.Clear();
         foreach (var card in cards)
         {
             var row = card.IconRow;
-            var gauge = new RingGauge(row?.Percent, row?.Tone ?? LimitTone.Unknown, RingSize)
+            var item = new StackPanel
             {
+                Orientation = horizontal ? Orientation.Horizontal : Orientation.Vertical,
                 Margin = Gap(horizontal, Rings.Children.Count == 0),
             };
-            Rings.Children.Add(gauge);
+            item.Children.Add(new RingGauge(row?.Percent, row?.Tone ?? LimitTone.Unknown, RingSize));
+            item.Children.Add(Label(row?.Percent, horizontal));
+            Rings.Children.Add(item);
         }
 
         // With nothing set up at all the island still shows one dashed ring, so it is visible and
@@ -67,15 +87,49 @@ public partial class IslandPanel : UserControl
             Rings.Children.Add(new RingGauge(null, LimitTone.Unknown, RingSize));
         }
 
-        // Every element from the rings up to this panel is marked for measuring. Otherwise a measure
-        // of the panel stops at the first element that did not change, and hands back the old size:
-        // in hand, a row that turned into a column kept the width and height of the row.
-        for (DependencyObject? element = Rings; element is not null && element != this; element = System.Windows.Media.VisualTreeHelper.GetParent(element))
+        MarkForMeasure();
+    }
+
+    /// Every element from the rings and the percentages up to this panel is marked for measuring.
+    /// Otherwise a measure of the panel stops at the first element that did not change, and hands
+    /// back the old size: in hand, a row that turned into a column kept the size of the row, and an
+    /// unfolding percentage would not have widened the window.
+    public void MarkForMeasure()
+    {
+        foreach (var start in _labels.Cast<UIElement>().Append(Rings))
         {
-            (element as UIElement)?.InvalidateMeasure();
+            for (DependencyObject? element = start; element is not null && element != this; element = System.Windows.Media.VisualTreeHelper.GetParent(element))
+            {
+                (element as UIElement)?.InvalidateMeasure();
+            }
         }
 
         InvalidateMeasure();
+    }
+
+    /// The percentage beside a ring along a top or bottom edge, under it along a side.
+    private UnfoldPanel Label(int? percent, bool horizontal)
+    {
+        var words = new TextBlock
+        {
+            Text = percent is { } value ? $"{value}%" : "—",
+            FontFamily = Tokens.Get<System.Windows.Media.FontFamily>("Mono"),
+            FontSize = Tokens.Get<double>("TextTiny"),
+            Foreground = Tokens.Brush("Ink"),
+            VerticalAlignment = VerticalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            Margin = horizontal ? new Thickness(6, 0, 0, 0) : new Thickness(0, 4, 0, 0),
+        };
+
+        var label = new UnfoldPanel
+        {
+            Child = words,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+        label.SetOpen(_unfolded, animate: false);
+        _labels.Add(label);
+        return label;
     }
 
     private static Thickness Gap(bool horizontal, bool first) => (horizontal, first) switch

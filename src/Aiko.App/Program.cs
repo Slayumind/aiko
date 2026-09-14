@@ -116,6 +116,13 @@ static class Program
             return;
         }
 
+        // Unfolds an island at the top of the screen from code and logs its size on the way.
+        if (args is ["--try-unfold", ..])
+        {
+            Environment.Exit(IslandCheck.TryUnfold());
+            return;
+        }
+
         // Shows the landing strip at the top of the screen for a moment, without touching the mouse.
         if (args is ["--try-strip", ..])
         {
@@ -181,8 +188,14 @@ static class Program
                 ? asked
                 : ScreenEdge.Top;
 
+            // --snapshot-island out.png Left open: the island unfolded, as on a hover.
             var panel = new IslandPanel();
             panel.Show(CardSnapshot.Example(), edge);
+            if (args is [.., "open"])
+            {
+                panel.Unfold(true, animate: false);
+            }
+
             Snapshot.Write(panel, islandPath);
             return;
         }

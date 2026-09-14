@@ -42,9 +42,28 @@ public partial class IslandWindow : Window
             if (!_pressed)
             {
                 _hover.Start();
+                Unfold(true);
             }
         };
-        MouseLeave += (_, _) => _hover.Stop();
+        MouseLeave += (_, _) =>
+        {
+            _hover.Stop();
+            if (!_revealing && !_pressed)
+            {
+                Unfold(false);
+            }
+        };
+
+        _revealEnds = new DispatcherTimer { Interval = IslandReveal.For };
+        _revealEnds.Tick += (_, _) =>
+        {
+            _revealEnds.Stop();
+            _revealing = false;
+            if (!IsMouseOver)
+            {
+                Unfold(false);
+            }
+        };
 
         // The window sizes itself to its content, and that happens after it is shown. Placing it
         // before then puts it wherever a width of zero lands, which is beside the middle instead
@@ -53,9 +72,65 @@ public partial class IslandWindow : Window
         {
             if (!_dragging)
             {
-                PlaceAt(_position);
+                PlaceAt(_position, log: !_following);
             }
         };
+    }
+
+    // ---- unfolding (D-161): on a hover, and by itself for a moment when a limit crosses a threshold ----
+
+    private readonly DispatcherTimer _revealEnds;
+    private bool _revealing;
+    private bool _following;
+    private DateTime _followUntil;
+
+    /// Also used by --try-unfold, which opens the island without a mouse.
+    internal void Unfold(bool open)
+    {
+        if (Panel.IsUnfolded == open)
+        {
+            return;
+        }
+
+        Panel.Unfold(open);
+        FollowTheSize();
+    }
+
+    /// The window keeps the size of the panel while the percentages slide in or out, one frame at a
+    /// time, and stops following the moment they are done: no frames while nothing moves.
+    private void FollowTheSize()
+    {
+        _followUntil = DateTime.UtcNow + Motion.Or0(Motion.Expand).TimeSpan + TimeSpan.FromMilliseconds(60);
+        if (_following)
+        {
+            return;
+        }
+
+        _following = true;
+        CompositionTarget.Rendering += OnFollowFrame;
+    }
+
+    private void OnFollowFrame(object? sender, EventArgs e)
+    {
+        Panel.MarkForMeasure();
+        Fit();
+        PlaceAt(_position, log: false);
+
+        if (DateTime.UtcNow > _followUntil)
+        {
+            CompositionTarget.Rendering -= OnFollowFrame;
+            _following = false;
+        }
+    }
+
+    /// Opens the island for a moment without a hover, so the numbers that just crossed a threshold
+    /// are seen.
+    private void Reveal()
+    {
+        _revealing = true;
+        _revealEnds.Stop();
+        _revealEnds.Start();
+        Unfold(true);
     }
 
     /// The card is asked for by a click, or by resting the mouse on the island. True means a click:
@@ -101,13 +176,18 @@ public partial class IslandWindow : Window
     }
 
     /// Puts the island on the edge it belongs to, on the screen it is currently over.
-    public void PlaceAt(IslandPosition position)
+    public void PlaceAt(IslandPosition position, bool log = true)
     {
         var work = WorkArea();
         var placed = IslandPlacement.Place(position, ActualWidth, ActualHeight, work);
 
         Left = placed.X;
         Top = placed.Y;
+
+        if (!log)
+        {
+            return;
+        }
 
         Log.Write(
             $"island placed: work {work.X},{work.Y} {work.Width}x{work.Height}, " +
@@ -199,6 +279,9 @@ public partial class IslandWindow : Window
     private void StartDrag()
     {
         _dragging = true;
+        _revealing = false;
+        _revealEnds.Stop();
+        Panel.Unfold(false, animate: false);
         _handEdge = _position.Edge;
         BeginAnimation(LeftProperty, null);
         BeginAnimation(TopProperty, null);
@@ -278,6 +361,7 @@ public partial class IslandWindow : Window
 
     public void Update(IReadOnlyList<CardState> cards)
     {
+        var crossed = IslandReveal.ToneRose(Cards, cards);
         Cards = cards;
 
         // New numbers while the island is in hand change the rings, never where it is.
@@ -289,7 +373,12 @@ public partial class IslandWindow : Window
 
         Panel.Show(cards, _position.Edge);
         Fit();
-        PlaceAt(_position);
+        PlaceAt(_position, log: false);
+
+        if (crossed)
+        {
+            Reveal();
+        }
     }
 
     /// The working area of the monitor this window is on, in the units WPF uses. Not
