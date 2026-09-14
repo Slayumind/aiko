@@ -17,6 +17,26 @@ Many people have a work account and a personal one, in separate Claude Code fold
 only the account you're in. Aiko shows both side by side. An environment is a name you choose and
 the Claude Code folder behind it.
 
+Environment 1 is always the `.claude` folder in your home: the VS Code panel, Claude Desktop and a
+plain `claude` use it too. Environment 2 has a folder of its own, such as `.claude-work`. On the first
+run a checklist finds the folders you already have or makes a new one. You sign in through Claude Code
+itself, so Aiko never sees your password or token.
+
+## Launch commands and project folders
+
+If you want, Aiko adds a command for each environment. `aiko-work` starts Claude Code in the work
+account from any folder, in PowerShell, cmd and Git Bash. The name is up to you.
+
+You can also bind project folders to an environment. A plain `claude` in `D:\work`, or in any folder
+inside it, then starts the work account, and every other folder gets the default environment. A
+command wins over a binding, and Claude Code reminds you when the two don't match.
+
+For this, Aiko puts a small `claude.exe` of its own first in your user PATH. It picks the account and
+starts the real Claude Code. If your PowerShell profile has functions that switch accounts, Aiko can
+turn them off, since they would hide the commands. It keeps a copy of the profile.
+
+JetBrains IDEs take `claude` from PATH too, but nobody has tried Aiko with them yet.
+
 ## How Aiko gets the numbers
 
 Claude Code runs a status line command after every answer and passes it the limits. Aiko adds one
@@ -55,8 +75,10 @@ the taskbar: under the arrow, the card can't open.
 
 ## Remove
 
-Uninstall Aiko from **Installed apps**. It puts your status line back, removes its startup entry
-and deletes its own folders. There's nothing left to clean up by hand.
+Uninstall Aiko from **Installed apps**. It puts your status line back and removes the session
+reminder, takes its folder out of PATH together with the launch commands, turns your PowerShell
+profile functions back on, removes its startup entry and deletes its own folders. Your accounts and
+history stay in their Claude Code folders. There's nothing left to clean up by hand.
 
 ## Build it yourself
 
