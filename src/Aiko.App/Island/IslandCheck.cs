@@ -148,15 +148,16 @@ static class IslandCheck
             var start = new Point(island.Left + (island.ActualWidth / 2), island.Top + (island.ActualHeight / 2));
             var end = new Point(work.X + (work.Width / 2), work.Bottom - 40);
 
-            island.PressAt(start);
-            for (var i = 1; i <= 30; i++)
-            {
-                island.HoldAt(new Point(start.X + ((end.X - start.X) * i / 30), start.Y + ((end.Y - start.Y) * i / 30)));
-                await Task.Delay(15);
-            }
+            // First a drag that lands, as the person's last drag did; then the one to look at.
+            await Drag(island, start, end);
+            island.LetGo();
+            await Task.Delay(800);
+
+            var from = new Point(island.Left + (island.ActualWidth / 2), island.Top + (island.ActualHeight / 2));
+            await Drag(island, from, new Point(end.X + 200, end.Y));
 
             var strip = Application.Current.Windows.OfType<IslandGhost>().FirstOrDefault();
-            Log.Write($"--try-glass: strip {(strip is null ? "missing" : $"at {strip.Left:0},{strip.Top:0} {strip.ActualWidth:0}x{strip.ActualHeight:0}, visible {strip.IsVisible}")}");
+            Log.Write($"--try-glass: strip on the second drag {(strip is null ? "missing" : $"at {strip.Left:0},{strip.Top:0} {strip.ActualWidth:0}x{strip.ActualHeight:0}, visible {strip.IsVisible}")}");
 
             await Task.Delay(2000);
             island.LetGo();
@@ -167,6 +168,16 @@ static class IslandCheck
         island.Show(CardSnapshot.Example(), IslandPosition.Default);
         application.Run();
         return 0;
+    }
+
+    private static async Task Drag(IslandWindow island, Point from, Point to)
+    {
+        island.PressAt(from);
+        for (var i = 1; i <= 30; i++)
+        {
+            island.HoldAt(new Point(from.X + ((to.X - from.X) * i / 30), from.Y + ((to.Y - from.Y) * i / 30)));
+            await Task.Delay(15);
+        }
     }
 
     private static async Task<bool> Walk(IslandWindow island, Func<bool> moved)
