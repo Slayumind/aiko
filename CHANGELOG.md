@@ -15,6 +15,8 @@ The first release. Everything below is new.
   limit is used. The tooltip shows the numbers, so you can read them even when Windows 11 hides the
   icon under the arrow. A left click opens the card. The right-click menu swaps the environment in
   the ring, opens settings, refreshes the limits, checks for updates and quits.
+- **App icon.** Aiko's logo, a green ring, in the Start menu, on the installer and on Aiko's
+  windows.
 - **Card.** Session, week and model limits for every environment: how much is used, when each one
   resets, and how long it lasts at your current pace once there's enough data. When a limit runs
   low, the card says so in a word as well as a colour. Beside each environment it shows the plan and

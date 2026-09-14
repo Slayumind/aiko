@@ -1,3 +1,5 @@
+<img src="assets/logo.svg" alt="" width="72">
+
 # Aiko
 
 **See how much of your Claude Code limits is left, for two accounts at once, without opening a
