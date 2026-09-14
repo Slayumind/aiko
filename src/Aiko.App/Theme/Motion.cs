@@ -20,12 +20,12 @@ static class Motion
     public const double PressedScale = 0.97;
     public const double AppearShift = 4;
 
-    private static bool _turnedOff;
+    private static bool TurnedOff;
 
-    public static bool IsOn => !_turnedOff && SystemParameters.ClientAreaAnimation;
+    public static bool IsOn => !TurnedOff && SystemParameters.ClientAreaAnimation;
 
     /// For snapshots: they draw a window at once and read the pixels.
-    public static void TurnOff() => _turnedOff = true;
+    public static void TurnOff() => TurnedOff = true;
 
     public static IEasingFunction Standard { get; } = Freeze(new BezierEase(CubicBezier.Standard));
 
