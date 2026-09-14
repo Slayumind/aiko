@@ -10,7 +10,11 @@ public static class ProjectBinding
     public static AikoEnvironment? EnvironmentFor(
         string workingDirectory,
         EnvironmentSettings settings,
-        string userProfile)
+        string userProfile) =>
+        BoundEnvironmentFor(workingDirectory, settings) ?? settings.Default(userProfile);
+
+    /// Only a real binding, with no default to fall back on.
+    public static AikoEnvironment? BoundEnvironmentFor(string workingDirectory, EnvironmentSettings settings)
     {
         AikoEnvironment? best = null;
         var bestLength = -1;
@@ -28,7 +32,7 @@ public static class ProjectBinding
             }
         }
 
-        return best ?? settings.Default(userProfile);
+        return best;
     }
 
     /// D:\work contains D:\work and D:\work\app, and not D:\workshop.

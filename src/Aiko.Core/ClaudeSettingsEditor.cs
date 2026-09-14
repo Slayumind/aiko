@@ -54,6 +54,19 @@ public sealed class ClaudeSettingsEditor(IFileAccess files)
             SettingsJsonPatch.TryAddBridge(json, command, out var patched) ? patched : null);
     }
 
+    /// The session start hook that reminds about folder bindings. Added with the first binding,
+    /// and taken out by Remove together with the status line.
+    public PatchOutcome AddSessionHook(string configDirectory, string hookCommand)
+    {
+        if (string.IsNullOrEmpty(hookCommand))
+        {
+            return PatchOutcome.Failed(PatchProblem.BridgeUnknown);
+        }
+
+        return Change(configDirectory, json =>
+            SettingsJsonPatch.TryAddSessionHook(json, hookCommand, out var patched) ? patched : null);
+    }
+
     public PatchOutcome Remove(string configDirectory)
     {
         // A copy is only ever made of a file that was already there. No copy means Aiko made this

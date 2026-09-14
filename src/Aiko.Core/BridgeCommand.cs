@@ -34,6 +34,13 @@ public static class BridgeCommand
         return shell == ClaudeShell.PowerShell ? $"& {quoted}" : quoted;
     }
 
+    /// The session start hook: the same program with one argument.
+    public static string HookFor(string bridgeExePath, ClaudeShell shell = ClaudeShell.GitBash)
+    {
+        var command = For(bridgeExePath, shell);
+        return command.Length == 0 ? command : command + " " + SessionReminder.Argument;
+    }
+
     /// Whether this status line command runs our bridge, whatever path and shell it was written
     /// for. Only the program name is compared: everything else about the line is allowed to change.
     public static bool IsAiko(string? command)
