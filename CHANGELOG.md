@@ -21,7 +21,8 @@ The first release. Everything below is new.
   whether the account is connected, or "working now" while a session in it is answering. **Open
   Claude Code** starts Claude Code in that environment
   (or **Sign in** when it isn't connected). A card opened by hovering closes when the mouse leaves.
-  Click the icon or the card and it stays until you close it.
+  Click the icon or the card and it stays until you close it, or click the icon again. The card grows
+  out of the icon when it opens and fades when it closes.
 - **Island.** If you prefer, Aiko lives in a small window at the edge of the screen instead of the
   tray, with one ring per environment. Rest the mouse on it and it unfolds along the edge to show the
   percentage beside each ring; it also unfolds by itself for two seconds when a session crosses 75 % or

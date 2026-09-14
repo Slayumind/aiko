@@ -525,7 +525,7 @@ sealed class AikoShell : IDisposable
             }
 
             timer.Stop();
-            card.Close();
+            card.FadeAndClose();
         };
 
         return timer;
@@ -571,8 +571,15 @@ sealed class AikoShell : IDisposable
     private void OpenCard(bool pinned)
     {
         _accounts = ReadAccounts();
-        if (_card is not null)
+        if (_card is { IsClosing: false })
         {
+            // A second click on a card that is already pinned closes it, the way it opened.
+            if (pinned && _card.IsPinned)
+            {
+                _card.FadeAndClose();
+                return;
+            }
+
             if (pinned)
             {
                 _card.Pin();
@@ -586,6 +593,12 @@ sealed class AikoShell : IDisposable
         card.OpenClaudeRequested += OpenClaude;
         card.Closed += (_, _) =>
         {
+            // A card still fading out may close after a new one has opened.
+            if (_card != card)
+            {
+                return;
+            }
+
             _card = null;
             _cardWatch?.Stop();
             _workingEnds?.Stop();
