@@ -145,8 +145,9 @@ static class Program
 
         if (args is ["--snapshot-wizard", var wizardPath, ..])
         {
-            var step = args.Length > 2 && int.TryParse(args[2], out var asked) ? asked : 0;
-            Snapshot.Write(new WizardPanel(step), wizardPath);
+            // The item to open, by name or number: --snapshot-wizard out.png Commands
+            ChecklistItem? item = args.Length > 2 && Enum.TryParse<ChecklistItem>(args[2], true, out var asked) ? asked : null;
+            Snapshot.Write(new WizardPanel(item), wizardPath);
             return;
         }
 

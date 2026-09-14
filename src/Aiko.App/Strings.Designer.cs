@@ -290,4 +290,229 @@ public static class Strings
 
     /// Aiko can't find its bridge program.
     public static string SettingsBridgeUnknown => Get("SettingsBridgeUnknown");
+
+    /// Set up environments
+    public static string ChecklistTitle => Get("ChecklistTitle");
+
+    /// {0} of {1} done
+    public static string ChecklistCount => Get("ChecklistCount");
+
+    /// ENVIRONMENT 1
+    public static string GroupFirst => Get("GroupFirst");
+
+    /// ENVIRONMENT 2
+    public static string GroupSecond => Get("GroupSecond");
+
+    /// SHARED
+    public static string GroupShared => Get("GroupShared");
+
+    /// Install Claude Code
+    public static string ItemInstall => Get("ItemInstall");
+
+    /// Account
+    public static string ItemAccount => Get("ItemAccount");
+
+    /// Pick or create
+    public static string ItemSecond => Get("ItemSecond");
+
+    /// Launch commands
+    public static string ItemCommands => Get("ItemCommands");
+
+    /// Project folders
+    public static string ItemFolders => Get("ItemFolders");
+
+    /// installed
+    public static string StateInstalled => Get("StateInstalled");
+
+    /// waiting
+    public static string StateWaiting => Get("StateWaiting");
+
+    /// after install
+    public static string StateAfterInstall => Get("StateAfterInstall");
+
+    /// after sign-in
+    public static string StateAfterSignIn => Get("StateAfterSignIn");
+
+    /// after environment 2
+    public static string StateAfterSecond => Get("StateAfterSecond");
+
+    /// optional
+    public static string StateOptional => Get("StateOptional");
+
+    /// later
+    public static string StateLater => Get("StateLater");
+
+    /// connected
+    public static string StateConnected => Get("StateConnected");
+
+    /// sign in needed
+    public static string StateSignInNeeded => Get("StateSignInNeeded");
+
+    /// added
+    public static string StateAdded => Get("StateAdded");
+
+    /// none
+    public static string StateNone => Get("StateNone");
+
+    /// {0} bound
+    public static string StateBound => Get("StateBound");
+
+    /// tray
+    public static string StateTray => Get("StateTray");
+
+    /// island
+    public static string StateIsland => Get("StateIsland");
+
+    /// Copy
+    public static string Copy => Get("Copy");
+
+    /// Copied
+    public static string Copied => Get("Copied");
+
+    /// Later
+    public static string Later => Get("Later");
+
+    /// Claude Code isn't on this computer yet. Aiko works alongside it, so install it first.
+    public static string InstallLead => Get("InstallLead");
+
+    /// Open PowerShell, paste the command and press Enter. Aiko notices when it's done.
+    public static string InstallHow => Get("InstallHow");
+
+    /// Waiting for Claude Code…
+    public static string WaitInstall => Get("WaitInstall");
+
+    /// The first environment lives in the .claude folder. The Claude Code panel in VS Code and C...
+    public static string Env1Lead => Get("Env1Lead");
+
+    /// This folder has no account yet.
+    public static string Env1Empty => Get("Env1Empty");
+
+    /// This folder already has an account.
+    public static string Env1Found => Get("Env1Found");
+
+    /// Sign in
+    public static string SignIn => Get("SignIn");
+
+    /// Aiko opened Claude Code in a new window. Sign in there through your browser. Aiko waits a...
+    public static string LoginHow => Get("LoginHow");
+
+    /// Aiko never sees a password or a token, only that the account is connected.
+    public static string LoginNever => Get("LoginNever");
+
+    /// Waiting for you to sign in…
+    public static string WaitLogin => Get("WaitLogin");
+
+    /// NAME IN AIKO
+    public static string NameInAiko => Get("NameInAiko");
+
+    /// Account
+    public static string AccountLabel => Get("AccountLabel");
+
+    /// Plan
+    public static string PlanLabel => Get("PlanLabel");
+
+    /// Aiko found more Claude Code folders. Pick the one for your second environment, or create ...
+    public static string Env2LeadFound => Get("Env2LeadFound");
+
+    /// The second environment is a separate folder with its own account. Name it and Aiko create...
+    public static string Env2LeadNew => Get("Env2LeadNew");
+
+    /// One environment is enough to see limits. You can add the second one later in settings.
+    public static string Env2Later => Get("Env2Later");
+
+    /// Create a new one
+    public static string CreateNew => Get("CreateNew");
+
+    /// Create and sign in
+    public static string CreateSignIn => Get("CreateSignIn");
+
+    /// For example, Personal
+    public static string NameExample => Get("NameExample");
+
+    /// last session {0}
+    public static string LastSession => Get("LastSession");
+
+    /// Folder: {0}
+    public static string FolderIs => Get("FolderIs");
+
+    /// Add the line
+    public static string AccessAdd => Get("AccessAdd");
+
+    /// A command starts Claude Code in the right environment. It works in PowerShell, cmd and Gi...
+    public static string CmdLead => Get("CmdLead");
+
+    /// COMMAND · {0}
+    public static string CmdFor => Get("CmdFor");
+
+    /// Follows the environment name.
+    public static string CmdFollows => Get("CmdFollows");
+
+    /// Your own command: renaming doesn't change it.
+    public static string CmdOwn => Get("CmdOwn");
+
+    /// Use the name
+    public static string CmdByName => Get("CmdByName");
+
+    /// Enter a command.
+    public static string CmdEmpty => Get("CmdEmpty");
+
+    /// Up to 40 characters.
+    public static string CmdTooLong => Get("CmdTooLong");
+
+    /// Only a–z, 0–9, - and _.
+    public static string CmdBadCharacters => Get("CmdBadCharacters");
+
+    /// claude is the name of Claude Code itself.
+    public static string CmdReserved => Get("CmdReserved");
+
+    /// The other environment has this command.
+    public static string CmdTaken => Get("CmdTaken");
+
+    /// Your PowerShell profile has functions that switch accounts. They run before Aiko's comman...
+    public static string FnsLead => Get("FnsLead");
+
+    /// Remove {0}
+    public static string FnRemove => Get("FnRemove");
+
+    /// A copy of the profile stays next to it. Removing Aiko brings the functions back.
+    public static string FnBackup => Get("FnBackup");
+
+    /// Aiko puts its folder at the start of PATH so every terminal finds the commands. Restart o...
+    public static string PathNote => Get("PathNote");
+
+    /// Add to PATH
+    public static string PathAdd => Get("PathAdd");
+
+    /// No commands
+    public static string NoCommands => Get("NoCommands");
+
+    /// Bind project folders to {0}. In them and in every folder inside, claude starts {0}.
+    public static string FoldersLead => Get("FoldersLead");
+
+    /// Add a project folder
+    public static string AddProject => Get("AddProject");
+
+    /// Choose a project folder
+    public static string PickProject => Get("PickProject");
+
+    /// Nothing is bound yet. You can do it later in settings.
+    public static string NoBinds => Get("NoBinds");
+
+    /// DEFAULT
+    public static string DefaultLabel => Get("DefaultLabel");
+
+    /// Used everywhere without a binding.
+    public static string DefaultNote => Get("DefaultNote");
+
+    /// A command beats a binding: {0} in a bound folder starts {1}, and Claude Code reminds you ...
+    public static string ExplicitWins => Get("ExplicitWins");
+
+    /// Remove
+    public static string Remove => Get("Remove");
+
+    /// Commands: {0}. Open a new terminal to use them.
+    public static string DoneCommands => Get("DoneCommands");
+
+    /// Set up environments
+    public static string SetUpEnvironments => Get("SetUpEnvironments");
 }

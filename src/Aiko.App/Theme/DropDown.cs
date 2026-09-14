@@ -30,7 +30,7 @@ sealed class DropDown : UserControl
     {
         Focusable = true;
         FocusVisualStyle = null;
-        Loaded += (_, _) => Build();
+        Build();
         KeyDown += OnKeyDown;
         LostKeyboardFocus += (_, _) => Close();
     }
@@ -63,11 +63,6 @@ sealed class DropDown : UserControl
 
     private void Build()
     {
-        if (Content is not null)
-        {
-            return;
-        }
-
         var chevron = new Path
         {
             Data = Geometry.Parse("M0,0 L4,4 L8,0"),
@@ -81,8 +76,8 @@ sealed class DropDown : UserControl
             RenderTransform = _chevronTurn,
         };
 
-        _chosen.FontFamily = (FontFamily)FindResource("Sans");
-        _chosen.FontSize = (double)FindResource("TextSmall");
+        _chosen.FontFamily = Tokens.Get<FontFamily>("Sans");
+        _chosen.FontSize = Tokens.Get<double>("TextSmall");
         _chosen.Foreground = Brush("Ink");
         _chosen.VerticalAlignment = VerticalAlignment.Center;
         _chosen.TextTrimming = TextTrimming.CharacterEllipsis;
@@ -119,7 +114,7 @@ sealed class DropDown : UserControl
         _listFrame.CornerRadius = new CornerRadius(10);
         _listFrame.Padding = new Thickness(4);
         _listFrame.Margin = new Thickness(0, 4, 0, 12);
-        _listFrame.Effect = (System.Windows.Media.Effects.Effect)FindResource("CardShadow");
+        _listFrame.Effect = Tokens.Get<System.Windows.Media.Effects.Effect>("CardShadow");
         _listFrame.RenderTransformOrigin = new Point(0.5, 0);
         _listFrame.RenderTransform = _listScale;
         _listFrame.Child = _list;
@@ -234,8 +229,8 @@ sealed class DropDown : UserControl
         var text = new TextBlock
         {
             Text = _items[index],
-            FontFamily = (FontFamily)FindResource("Sans"),
-            FontSize = (double)FindResource("TextSmall"),
+            FontFamily = Tokens.Get<FontFamily>("Sans"),
+            FontSize = Tokens.Get<double>("TextSmall"),
             Foreground = Brush(index == _selected ? "Ink" : "Muted"),
             VerticalAlignment = VerticalAlignment.Center,
         };
@@ -289,5 +284,5 @@ sealed class DropDown : UserControl
         }
     }
 
-    private Brush Brush(string key) => (Brush)FindResource(key);
+    private Brush Brush(string key) => Tokens.Brush(key);
 }

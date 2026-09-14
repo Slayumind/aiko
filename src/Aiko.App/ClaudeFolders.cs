@@ -11,8 +11,11 @@ static class ClaudeFolders
 {
     private const string CredentialsFile = ".credentials.json";
 
-    /// Files whose age says the folder is in use. Reading their times touches no secrets.
-    private static readonly string[] SignsOfUse = [".claude.json", "settings.json", "projects"];
+    /// Files only Claude Code writes, and only while somebody uses it: the prompt history and the
+    /// session logs. settings.json and .claude.json used to be here, but Aiko edits settings.json
+    /// itself and Claude Code touches .claude.json on start, so a folder dead for a month looked
+    /// used today. Reading file times touches no secrets.
+    private static readonly string[] SignsOfUse = ["history.jsonl", "projects"];
 
     public static IReadOnlyList<ClaudeFolder> Find()
     {
@@ -59,7 +62,12 @@ static class ClaudeFolders
                     continue;
                 }
 
-                var written = new DateTimeOffset(File.GetLastWriteTimeUtc(path), TimeSpan.Zero);
+                // A project folder's time moves when a new session file appears in it; the projects
+                // folder's own time only moves when a whole new project does.
+                var time = Directory.Exists(path)
+                    ? Directory.EnumerateDirectories(path).Select(Directory.GetLastWriteTimeUtc).DefaultIfEmpty(Directory.GetLastWriteTimeUtc(path)).Max()
+                    : File.GetLastWriteTimeUtc(path);
+                var written = new DateTimeOffset(time, TimeSpan.Zero);
                 if (newest is null || written > newest)
                 {
                     newest = written;

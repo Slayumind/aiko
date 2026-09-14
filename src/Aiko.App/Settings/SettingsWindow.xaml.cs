@@ -11,6 +11,11 @@ public partial class SettingsWindow : Window
 
         Panel.CloseRequested += Close;
         Panel.QuitRequested += () => QuitRequested?.Invoke();
+        Panel.WizardRequested += () =>
+        {
+            WizardRequested?.Invoke();
+            Close();
+        };
         Panel.ReopenRequested += () =>
         {
             _reopen = true;
@@ -21,6 +26,8 @@ public partial class SettingsWindow : Window
 
     /// "Quit Aiko" closes the whole app, not this window, so the tray decides what to do.
     public event Action? QuitRequested;
+
+    public event Action? WizardRequested;
 
     /// True when the window closed only to come back in another language.
     public bool ShouldReopen => _reopen;
