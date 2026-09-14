@@ -376,6 +376,9 @@
   <data name="Later" xml:space="preserve">
     <value>Позже</value>
   </data>
+  <data name="InstallFound" xml:space="preserve">
+    <value>Claude Code уже есть на этом компьютере. Здесь ничего делать не нужно.</value>
+  </data>
   <data name="InstallLead" xml:space="preserve">
     <value>Claude Code на этом компьютере пока нет. Aiko работает вместе с ним, так что сначала установи его.</value>
   </data>
@@ -501,12 +504,6 @@
   </data>
   <data name="NoBinds" xml:space="preserve">
     <value>Пока ничего не привязано. Можно и потом, в настройках.</value>
-  </data>
-  <data name="DefaultLabel" xml:space="preserve">
-    <value>ПО УМОЛЧАНИЮ</value>
-  </data>
-  <data name="DefaultNote" xml:space="preserve">
-    <value>Работает везде, где нет привязки.</value>
   </data>
   <data name="ExplicitWins" xml:space="preserve">
     <value>Команда сильнее привязки: {0} в привязанной папке запустит {1}, а Claude Code напомнит о привязке.</value>

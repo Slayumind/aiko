@@ -73,6 +73,8 @@ public partial class ChecklistPage : UserControl
     private void GatherFacts()
     {
         _claudeInstalled = ClaudeLauncher.FindClaude() is not null;
+        InstallFound.Visibility = _claudeInstalled ? Visibility.Visible : Visibility.Collapsed;
+        InstallNeeded.Visibility = _claudeInstalled ? Visibility.Collapsed : Visibility.Visible;
         _firstSignedIn = File.Exists(ClaudeInstall.CredentialsPathIn(FirstFolder));
 
         if (_secondFolder is not null)

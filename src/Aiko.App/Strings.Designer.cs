@@ -366,6 +366,9 @@ public static class Strings
     /// Later
     public static string Later => Get("Later");
 
+    /// Claude Code is already on this computer. Nothing to do here.
+    public static string InstallFound => Get("InstallFound");
+
     /// Claude Code isn't on this computer yet. Aiko works alongside it, so install it first.
     public static string InstallLead => Get("InstallLead");
 
@@ -491,12 +494,6 @@ public static class Strings
 
     /// Nothing is bound yet. You can do it later in settings.
     public static string NoBinds => Get("NoBinds");
-
-    /// DEFAULT
-    public static string DefaultLabel => Get("DefaultLabel");
-
-    /// Used everywhere without a binding.
-    public static string DefaultNote => Get("DefaultNote");
 
     /// A command beats a binding: {0} in a bound folder starts {1}, and Claude Code reminds you ...
     public static string ExplicitWins => Get("ExplicitWins");
