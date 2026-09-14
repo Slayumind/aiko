@@ -9,9 +9,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Fixed
 
-- **Checksums.** `SHA256SUMS.txt` no longer lists the portable zip, which a release doesn't include.
-  In 0.1.0 that line made `sha256sum -c` fail even though the installer was fine. The file in the
-  0.1.0 release has been replaced.
+- **Checksums.** `SHA256SUMS.txt` no longer lists the portable zip, which a release doesn't include,
+  and it has plain LF line endings. In 0.1.0 both made `sha256sum -c` fail even though every file
+  was fine. The file in the 0.1.0 release has been replaced.
 
 ## [0.1.0] - 2026-09-14
 

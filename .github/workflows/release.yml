@@ -135,10 +135,14 @@ jobs:
       - name: Write the checksums
         shell: pwsh
         run: |
-          Get-ChildItem releases -File | ForEach-Object {
+          # LF line endings on purpose. Set-Content on this Windows runner writes CRLF, and
+          # `sha256sum -c` then reads the carriage return as part of every file name and fails
+          # on all of them. That is what the 0.1.0 file did until it was replaced by hand.
+          $lines = Get-ChildItem releases -File | ForEach-Object {
             $hash = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower()
             "$hash  $($_.Name)"
-          } | Set-Content releases/SHA256SUMS.txt -Encoding ascii
+          }
+          [IO.File]::WriteAllText("$PWD/releases/SHA256SUMS.txt", (($lines -join "`n") + "`n"), [Text.Encoding]::ASCII)
 
       - name: Attest where this was built
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4
