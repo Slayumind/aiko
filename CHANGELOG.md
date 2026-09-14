@@ -5,6 +5,14 @@ All notable changes to Aiko are listed here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and Aiko uses
 [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- **Checksums.** `SHA256SUMS.txt` no longer lists the portable zip, which a release doesn't include.
+  In 0.1.0 that line made `sha256sum -c` fail even though the installer was fine. The file in the
+  0.1.0 release has been replaced.
+
 ## [0.1.0] - 2026-09-14
 
 The first release. Everything below is new.
