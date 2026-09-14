@@ -30,7 +30,8 @@ public sealed class CardModel
                 cards[i],
                 first: i == 0,
                 noAccess: noAccess?.Contains(cards[i].Environment) == true,
-                account: accounts?.GetValueOrDefault(cards[i].Environment)));
+                account: accounts?.GetValueOrDefault(cards[i].Environment),
+                working: cards[i].IsWorkingAt(now)));
         }
 
         return new CardModel
@@ -61,21 +62,28 @@ public sealed class EnvironmentBlock
     public required Brush StateRing { get; init; }
     public required Visibility StateVisibility { get; init; }
 
+    /// "working now" is the one state worth the eye: the words go bright and the dot gets a halo.
+    public required Brush StateText { get; init; }
+    public required Visibility HaloVisibility { get; init; }
+
     /// "Open Claude Code", or "Sign in" when the account is not connected. Both open Claude Code
     /// for this environment; signing in happens there.
     public required string OpenLabel { get; init; }
     public required Visibility OpenVisibility { get; init; }
 
-    public static EnvironmentBlock From(CardState card, bool first, bool noAccess, CardAccount? account = null)
+    public static EnvironmentBlock From(CardState card, bool first, bool noAccess, CardAccount? account = null, bool working = false)
     {
         var rows = card.Rows.Select(LimitRow.From).ToList();
         var signedIn = account?.SignedIn == true;
+        working &= signedIn;
         return new EnvironmentBlock
         {
             Name = card.Environment,
             Plan = account?.Plan ?? string.Empty,
             PlanVisibility = string.IsNullOrEmpty(account?.Plan) ? Visibility.Collapsed : Visibility.Visible,
-            State = signedIn ? Strings.StateConnected : Strings.StateSignInNeeded,
+            State = working ? Strings.StateWorkingNow : signedIn ? Strings.StateConnected : Strings.StateSignInNeeded,
+            StateText = Tokens.Brush(working ? "Ink" : "Muted"),
+            HaloVisibility = working ? Visibility.Visible : Visibility.Collapsed,
             StateFill = signedIn ? Tokens.Brush("Positive") : Brushes.Transparent,
             StateRing = signedIn ? Brushes.Transparent : Tokens.Brush("Muted"),
             StateVisibility = account is null ? Visibility.Collapsed : Visibility.Visible,

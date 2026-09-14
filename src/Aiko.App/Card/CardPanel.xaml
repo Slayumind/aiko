@@ -84,10 +84,13 @@
           <DockPanel>
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center"
                         Visibility="{Binding StateVisibility}">
-              <Ellipse Width="6" Height="6" Fill="{Binding StateFill}" Stroke="{Binding StateRing}" StrokeThickness="1.5"
-                       VerticalAlignment="Center" Margin="0,0,5,0" />
+              <Grid Width="12" Height="12" VerticalAlignment="Center" Margin="0,0,3,0">
+                <Ellipse Width="12" Height="12" Fill="{StaticResource Positive}" Opacity="0.18"
+                         Visibility="{Binding HaloVisibility}" />
+                <Ellipse Width="6" Height="6" Fill="{Binding StateFill}" Stroke="{Binding StateRing}" StrokeThickness="1.5" />
+              </Grid>
               <TextBlock Text="{Binding State}" FontFamily="{StaticResource Sans}" FontSize="{StaticResource TextTiny}"
-                         Foreground="{StaticResource Muted}" VerticalAlignment="Center" />
+                         Foreground="{Binding StateText}" VerticalAlignment="Center" />
             </StackPanel>
             <StackPanel Orientation="Horizontal">
               <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"

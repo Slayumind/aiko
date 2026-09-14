@@ -667,4 +667,7 @@
   <data name="CardSignInNote" xml:space="preserve">
     <value>Sign in so Aiko can see the limits of this environment.</value>
   </data>
+  <data name="StateWorkingNow" xml:space="preserve">
+    <value>working now</value>
+  </data>
 </root>

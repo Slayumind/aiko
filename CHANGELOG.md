@@ -18,7 +18,8 @@ The first release. Everything below is new.
 - **Card.** Session, week and model limits for every environment: how much is used, when each one
   resets, and how long it lasts at your current pace once there's enough data. When a limit runs
   low, the card says so in a word as well as a colour. Beside each environment it shows the plan and
-  whether the account is connected, and **Open Claude Code** starts Claude Code in that environment
+  whether the account is connected, or "working now" while a session in it is answering. **Open
+  Claude Code** starts Claude Code in that environment
   (or **Sign in** when it isn't connected). A card opened by hovering closes when the mouse leaves.
   Click the icon or the card and it stays until you close it.
 - **Island.** If you prefer, Aiko lives in a small window at the edge of the screen instead of the

@@ -32,6 +32,25 @@ public class CardStateTests
     }
 
     [Fact]
+    public void A_session_counts_as_working_for_two_minutes_after_the_status_line_spoke()
+    {
+        var window = new LimitWindow(LimitKind.FiveHour, 30, Now.AddHours(2));
+
+        Assert.True(CardState.From(Snapshot(Now.AddSeconds(-90), window), Now).IsWorkingAt(Now));
+        Assert.False(CardState.From(Snapshot(Now.AddMinutes(-3), window), Now).IsWorkingAt(Now));
+        Assert.Equal(Now.AddSeconds(30), CardState.From(Snapshot(Now.AddSeconds(-90), window), Now).WorkingUntil);
+    }
+
+    [Fact]
+    public void A_direct_mode_answer_or_no_data_never_counts_as_working()
+    {
+        var fromApi = new LimitSnapshot("Personal", LimitSource.DirectMode, Now, [new LimitWindow(LimitKind.FiveHour, 30, Now.AddHours(2))]);
+
+        Assert.False(CardState.From(fromApi, Now).IsWorkingAt(Now));
+        Assert.False(CardState.From(LimitSnapshot.NoData("Work"), Now).IsWorkingAt(Now));
+    }
+
+    [Fact]
     public void Without_data_the_card_has_no_rows_and_no_time()
     {
         var card = CardState.From(LimitSnapshot.NoData("Work"), Now);
