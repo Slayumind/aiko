@@ -376,6 +376,9 @@
   <data name="Later" xml:space="preserve">
     <value>Later</value>
   </data>
+  <data name="InstallFound" xml:space="preserve">
+    <value>Claude Code is already on this computer. Nothing to do here.</value>
+  </data>
   <data name="InstallLead" xml:space="preserve">
     <value>Claude Code isn't on this computer yet. Aiko works alongside it, so install it first.</value>
   </data>
@@ -501,12 +504,6 @@
   </data>
   <data name="NoBinds" xml:space="preserve">
     <value>Nothing is bound yet. You can do it later in settings.</value>
-  </data>
-  <data name="DefaultLabel" xml:space="preserve">
-    <value>DEFAULT</value>
-  </data>
-  <data name="DefaultNote" xml:space="preserve">
-    <value>Used everywhere without a binding.</value>
   </data>
   <data name="ExplicitWins" xml:space="preserve">
     <value>A command beats a binding: {0} in a bound folder starts {1}, and Claude Code reminds you of the binding.</value>
