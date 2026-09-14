@@ -337,15 +337,50 @@ sealed class AikoShell : IDisposable
 
         return EnvironmentSnapshots.Combine(environments, _watcher.ByFile)
             // Two sources for one environment: the fresher answer wins. Direct mode is asked
-            // rarely, the status line speaks on every reply, so neither is always ahead.
+            // rarely, the status line speaks on every reply, so neither is always ahead. Whether a
+            // session is working comes from the status line alone, whichever answer wins.
             .Select(snapshot => direct is not null && direct.TryGetValue(snapshot.Environment, out var fromApi)
-                ? LimitSnapshot.Newer(snapshot, fromApi)
-                : snapshot)
-            .Select(snapshot => CardState.From(snapshot, now))
+                ? CardState.From(LimitSnapshot.Newer(snapshot, fromApi), now) with { WorkingUntil = CardState.WorkingUntilFor(snapshot) }
+                : CardState.From(snapshot, now))
             .ToList();
     }
 
-    private CardModel CurrentCard() => CardModel.From(Cards(), DateTimeOffset.Now, _noAccess, _accounts);
+    private CardModel CurrentCard()
+    {
+        var now = DateTimeOffset.Now;
+        var cards = Cards();
+        WakeWhenWorkingEnds(cards, now);
+        return CardModel.From(cards, now, _noAccess, _accounts);
+    }
+
+    /// "working now" has to go away by itself when a session goes quiet, and nothing else changes
+    /// then. One timer for the moment the first such mark runs out, only while the card is open.
+    private DispatcherTimer? _workingEnds;
+
+    private void WakeWhenWorkingEnds(IReadOnlyList<CardState> cards, DateTimeOffset now)
+    {
+        _workingEnds?.Stop();
+        var next = cards.Where(card => card.IsWorkingAt(now)).Min(card => card.WorkingUntil);
+        if (_card is null || next is not { } until)
+        {
+            return;
+        }
+
+        _workingEnds ??= NewWorkingEndsTimer();
+        _workingEnds.Interval = until - now + TimeSpan.FromSeconds(1);
+        _workingEnds.Start();
+    }
+
+    private DispatcherTimer NewWorkingEndsTimer()
+    {
+        var timer = new DispatcherTimer(DispatcherPriority.Background, _application.Dispatcher);
+        timer.Tick += (_, _) =>
+        {
+            timer.Stop();
+            _card?.Update(CurrentCard());
+        };
+        return timer;
+    }
 
     /// Plan and sign-in per environment. Read when the card opens, not on every new number:
     /// .claude.json can be large, and neither the plan nor the sign-in changes between two answers.
@@ -553,13 +588,14 @@ sealed class AikoShell : IDisposable
         {
             _card = null;
             _cardWatch?.Stop();
+            _workingEnds?.Stop();
         };
+        _card = card;
         card.Update(CurrentCard());
         if (pinned)
         {
             card.Pin();
         }
-        _card = card;
         WatchForTheMouseLeaving();
 
         if (IconRect() is { } rect)

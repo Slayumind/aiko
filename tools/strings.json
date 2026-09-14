@@ -210,5 +210,6 @@
 ["RestartBin", ["And move {0} to the Recycle Bin", "И переместить {0} в корзину"]],
 ["RestartKeep", [".claude stays either way.", ".claude остаётся в любом случае."]],
 ["OpenClaudeCode", ["Open Claude Code", "Открыть Claude Code"]],
-["CardSignInNote", ["Sign in so Aiko can see the limits of this environment.", "Войди, чтобы Aiko видела лимиты этой среды."]]
+["CardSignInNote", ["Sign in so Aiko can see the limits of this environment.", "Войди, чтобы Aiko видела лимиты этой среды."]],
+["StateWorkingNow", ["working now", "сейчас работает"]]
 ]

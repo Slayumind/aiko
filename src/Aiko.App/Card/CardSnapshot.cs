@@ -71,7 +71,9 @@ static class CardSnapshot
             new(LimitKind.SevenDay, sevenDay, now.AddDays(3.5)),
         };
 
-        var snapshot = new LimitSnapshot(name, LimitSource.StatusLine, now.AddMinutes(-2), windows)
+        // Personal spoke a moment ago and shows "working now"; Work went quiet a few minutes back.
+        var receivedAt = name == "Personal" ? now.AddSeconds(-20) : now.AddMinutes(-4);
+        var snapshot = new LimitSnapshot(name, LimitSource.StatusLine, receivedAt, windows)
         {
             Model = model is { } percent ? new ModelLimit("Fable", percent, now.AddDays(5)) : null,
         };

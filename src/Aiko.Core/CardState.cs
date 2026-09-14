@@ -48,6 +48,22 @@ public sealed record CardState(
     public static readonly TimeSpan FiveHourWindow = TimeSpan.FromHours(5);
     public static readonly TimeSpan SevenDayWindow = TimeSpan.FromDays(7);
 
+    /// How long after the last word from the status line a session counts as working. Claude Code
+    /// runs the status line as the conversation changes, so an idle or closed session goes quiet;
+    /// two minutes rides over a long tool call without calling a closed one "working" for long.
+    public static readonly TimeSpan WorkingFor = TimeSpan.FromMinutes(2);
+
+    /// Until when the card may say "working now". Only the status line counts: a direct mode answer
+    /// comes from Aiko asking, not from a session doing anything.
+    public DateTimeOffset? WorkingUntil { get; init; }
+
+    public bool IsWorkingAt(DateTimeOffset now) => WorkingUntil > now;
+
+    public static DateTimeOffset? WorkingUntilFor(LimitSnapshot snapshot) =>
+        snapshot.Source == LimitSource.StatusLine && snapshot.Windows.Count > 0
+            ? snapshot.ReceivedAt + WorkingFor
+            : null;
+
     public bool HasData => Rows.Count > 0;
 
     /// What the ring or the dot shows for this environment: the session window drives the icon,
@@ -112,7 +128,10 @@ public sealed record CardState(
                 model.ModelName));
         }
 
-        return new CardState(snapshot.Environment, freshness, snapshot.ReceivedAt, rows);
+        return new CardState(snapshot.Environment, freshness, snapshot.ReceivedAt, rows)
+        {
+            WorkingUntil = WorkingUntilFor(snapshot),
+        };
     }
 
     private static void AddRow(

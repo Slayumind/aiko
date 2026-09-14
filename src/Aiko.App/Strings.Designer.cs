@@ -656,4 +656,7 @@ public static class Strings
 
     /// Sign in so Aiko can see the limits of this environment.
     public static string CardSignInNote => Get("CardSignInNote");
+
+    /// working now
+    public static string StateWorkingNow => Get("StateWorkingNow");
 }
