@@ -359,4 +359,10 @@ public partial class SettingsPanel : UserControl
     }
 
     private void OnQuit(object sender, RoutedEventArgs e) => QuitRequested?.Invoke();
+
+    /// Opens the environment wizard. The settings window closes first, so the two never disagree
+    /// about what is set up.
+    public event Action? WizardRequested;
+
+    private void OnSetUpEnvironments(object sender, RoutedEventArgs e) => WizardRequested?.Invoke();
 }

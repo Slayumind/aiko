@@ -301,4 +301,229 @@
   <data name="SettingsBridgeUnknown" xml:space="preserve">
     <value>Aiko can't find its bridge program.</value>
   </data>
+  <data name="ChecklistTitle" xml:space="preserve">
+    <value>Set up environments</value>
+  </data>
+  <data name="ChecklistCount" xml:space="preserve">
+    <value>{0} of {1} done</value>
+  </data>
+  <data name="GroupFirst" xml:space="preserve">
+    <value>ENVIRONMENT 1</value>
+  </data>
+  <data name="GroupSecond" xml:space="preserve">
+    <value>ENVIRONMENT 2</value>
+  </data>
+  <data name="GroupShared" xml:space="preserve">
+    <value>SHARED</value>
+  </data>
+  <data name="ItemInstall" xml:space="preserve">
+    <value>Install Claude Code</value>
+  </data>
+  <data name="ItemAccount" xml:space="preserve">
+    <value>Account</value>
+  </data>
+  <data name="ItemSecond" xml:space="preserve">
+    <value>Pick or create</value>
+  </data>
+  <data name="ItemCommands" xml:space="preserve">
+    <value>Launch commands</value>
+  </data>
+  <data name="ItemFolders" xml:space="preserve">
+    <value>Project folders</value>
+  </data>
+  <data name="StateInstalled" xml:space="preserve">
+    <value>installed</value>
+  </data>
+  <data name="StateWaiting" xml:space="preserve">
+    <value>waiting</value>
+  </data>
+  <data name="StateAfterInstall" xml:space="preserve">
+    <value>after install</value>
+  </data>
+  <data name="StateAfterSignIn" xml:space="preserve">
+    <value>after sign-in</value>
+  </data>
+  <data name="StateAfterSecond" xml:space="preserve">
+    <value>after environment 2</value>
+  </data>
+  <data name="StateOptional" xml:space="preserve">
+    <value>optional</value>
+  </data>
+  <data name="StateLater" xml:space="preserve">
+    <value>later</value>
+  </data>
+  <data name="StateConnected" xml:space="preserve">
+    <value>connected</value>
+  </data>
+  <data name="StateSignInNeeded" xml:space="preserve">
+    <value>sign in needed</value>
+  </data>
+  <data name="StateAdded" xml:space="preserve">
+    <value>added</value>
+  </data>
+  <data name="StateNone" xml:space="preserve">
+    <value>none</value>
+  </data>
+  <data name="StateBound" xml:space="preserve">
+    <value>{0} bound</value>
+  </data>
+  <data name="StateTray" xml:space="preserve">
+    <value>tray</value>
+  </data>
+  <data name="StateIsland" xml:space="preserve">
+    <value>island</value>
+  </data>
+  <data name="Copy" xml:space="preserve">
+    <value>Copy</value>
+  </data>
+  <data name="Copied" xml:space="preserve">
+    <value>Copied</value>
+  </data>
+  <data name="Later" xml:space="preserve">
+    <value>Later</value>
+  </data>
+  <data name="InstallLead" xml:space="preserve">
+    <value>Claude Code isn't on this computer yet. Aiko works alongside it, so install it first.</value>
+  </data>
+  <data name="InstallHow" xml:space="preserve">
+    <value>Open PowerShell, paste the command and press Enter. Aiko notices when it's done.</value>
+  </data>
+  <data name="WaitInstall" xml:space="preserve">
+    <value>Waiting for Claude Code…</value>
+  </data>
+  <data name="Env1Lead" xml:space="preserve">
+    <value>The first environment lives in the .claude folder. The Claude Code panel in VS Code and Claude Desktop use it too.</value>
+  </data>
+  <data name="Env1Empty" xml:space="preserve">
+    <value>This folder has no account yet.</value>
+  </data>
+  <data name="Env1Found" xml:space="preserve">
+    <value>This folder already has an account.</value>
+  </data>
+  <data name="SignIn" xml:space="preserve">
+    <value>Sign in</value>
+  </data>
+  <data name="LoginHow" xml:space="preserve">
+    <value>Aiko opened Claude Code in a new window. Sign in there through your browser. Aiko waits and moves on by itself.</value>
+  </data>
+  <data name="LoginNever" xml:space="preserve">
+    <value>Aiko never sees a password or a token, only that the account is connected.</value>
+  </data>
+  <data name="WaitLogin" xml:space="preserve">
+    <value>Waiting for you to sign in…</value>
+  </data>
+  <data name="NameInAiko" xml:space="preserve">
+    <value>NAME IN AIKO</value>
+  </data>
+  <data name="AccountLabel" xml:space="preserve">
+    <value>Account</value>
+  </data>
+  <data name="PlanLabel" xml:space="preserve">
+    <value>Plan</value>
+  </data>
+  <data name="Env2LeadFound" xml:space="preserve">
+    <value>Aiko found more Claude Code folders. Pick the one for your second environment, or create a new one.</value>
+  </data>
+  <data name="Env2LeadNew" xml:space="preserve">
+    <value>The second environment is a separate folder with its own account. Name it and Aiko creates the folder.</value>
+  </data>
+  <data name="Env2Later" xml:space="preserve">
+    <value>One environment is enough to see limits. You can add the second one later in settings.</value>
+  </data>
+  <data name="CreateNew" xml:space="preserve">
+    <value>Create a new one</value>
+  </data>
+  <data name="CreateSignIn" xml:space="preserve">
+    <value>Create and sign in</value>
+  </data>
+  <data name="NameExample" xml:space="preserve">
+    <value>For example, Personal</value>
+  </data>
+  <data name="LastSession" xml:space="preserve">
+    <value>last session {0}</value>
+  </data>
+  <data name="FolderIs" xml:space="preserve">
+    <value>Folder: {0}</value>
+  </data>
+  <data name="AccessAdd" xml:space="preserve">
+    <value>Add the line</value>
+  </data>
+  <data name="CmdLead" xml:space="preserve">
+    <value>A command starts Claude Code in the right environment. It works in PowerShell, cmd and Git Bash.</value>
+  </data>
+  <data name="CmdFor" xml:space="preserve">
+    <value>COMMAND · {0}</value>
+  </data>
+  <data name="CmdFollows" xml:space="preserve">
+    <value>Follows the environment name.</value>
+  </data>
+  <data name="CmdOwn" xml:space="preserve">
+    <value>Your own command: renaming doesn't change it.</value>
+  </data>
+  <data name="CmdByName" xml:space="preserve">
+    <value>Use the name</value>
+  </data>
+  <data name="CmdEmpty" xml:space="preserve">
+    <value>Enter a command.</value>
+  </data>
+  <data name="CmdTooLong" xml:space="preserve">
+    <value>Up to 40 characters.</value>
+  </data>
+  <data name="CmdBadCharacters" xml:space="preserve">
+    <value>Only a–z, 0–9, - and _.</value>
+  </data>
+  <data name="CmdReserved" xml:space="preserve">
+    <value>claude is the name of Claude Code itself.</value>
+  </data>
+  <data name="CmdTaken" xml:space="preserve">
+    <value>The other environment has this command.</value>
+  </data>
+  <data name="FnsLead" xml:space="preserve">
+    <value>Your PowerShell profile has functions that switch accounts. They run before Aiko's commands and hide them, so they're ticked for removal.</value>
+  </data>
+  <data name="FnRemove" xml:space="preserve">
+    <value>Remove {0}</value>
+  </data>
+  <data name="FnBackup" xml:space="preserve">
+    <value>A copy of the profile stays next to it. Removing Aiko brings the functions back.</value>
+  </data>
+  <data name="PathNote" xml:space="preserve">
+    <value>Aiko puts its folder at the start of PATH so every terminal finds the commands. Restart open terminals and your IDE.</value>
+  </data>
+  <data name="PathAdd" xml:space="preserve">
+    <value>Add to PATH</value>
+  </data>
+  <data name="NoCommands" xml:space="preserve">
+    <value>No commands</value>
+  </data>
+  <data name="FoldersLead" xml:space="preserve">
+    <value>Bind project folders to {0}. In them and in every folder inside, claude starts {0}.</value>
+  </data>
+  <data name="AddProject" xml:space="preserve">
+    <value>Add a project folder</value>
+  </data>
+  <data name="PickProject" xml:space="preserve">
+    <value>Choose a project folder</value>
+  </data>
+  <data name="NoBinds" xml:space="preserve">
+    <value>Nothing is bound yet. You can do it later in settings.</value>
+  </data>
+  <data name="DefaultLabel" xml:space="preserve">
+    <value>DEFAULT</value>
+  </data>
+  <data name="DefaultNote" xml:space="preserve">
+    <value>Used everywhere without a binding.</value>
+  </data>
+  <data name="ExplicitWins" xml:space="preserve">
+    <value>A command beats a binding: {0} in a bound folder starts {1}, and Claude Code reminds you of the binding.</value>
+  </data>
+  <data name="Remove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="DoneCommands" xml:space="preserve">
+    <value>Commands: {0}. Open a new terminal to use them.</value>
+  </data>
+  <data name="SetUpEnvironments" xml:space="preserve">
+    <value>Set up environments</value>
+  </data>
 </root>

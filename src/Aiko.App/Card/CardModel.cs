@@ -116,6 +116,10 @@ public static class Tokens
 
     public static Brush Brush(string key) => (Brush)Dictionary[key];
 
+    /// Any token, for controls built in code: they are drawn before they sit in a window, and
+    /// FindResource finds nothing there.
+    public static T Get<T>(string key) => (T)Dictionary[key];
+
     public static Brush ToneBrush(LimitTone tone) => tone switch
     {
         LimitTone.Normal => Brush("Positive"),

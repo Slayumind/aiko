@@ -3,171 +3,264 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:Aiko.App">
 
+  <!--
+    The environment wizard as one checklist (D-165): every item on one screen, the next one opens by
+    itself on a fresh machine, and any item can be opened again to change its answer. Which item is
+    ready, blocked or done is decided in Aiko.Core.WizardChecklist.
+  -->
   <UserControl.Resources>
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="pack://application:,,,/Theme/Controls.xaml" />
       </ResourceDictionary.MergedDictionaries>
-
-      <DataTemplate x:Key="FoundTemplate" DataType="{x:Type local:WizardEnvironment}">
-        <Grid Margin="0,0,0,10">
-          <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="Auto" />
-          </Grid.ColumnDefinitions>
-
-          <StackPanel Grid.Column="0" Margin="0,0,12,0">
-            <TextBox Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                     Style="{StaticResource NameBox}" />
-            <TextBlock Text="{Binding FullPath}" Style="{StaticResource RowNote}" Margin="0,4,0,0" />
-          </StackPanel>
-
-          <ToggleButton Grid.Column="1" Style="{StaticResource Switch}"
-                        IsChecked="{Binding Use, Mode=TwoWay}" />
-        </Grid>
-      </DataTemplate>
     </ResourceDictionary>
   </UserControl.Resources>
 
   <Grid Margin="20">
-    <Border Width="380"
+    <Border Width="400"
             Background="{StaticResource Surface}"
             CornerRadius="{StaticResource CardRadius}"
             BorderBrush="{StaticResource Hairline}" BorderThickness="1"
             Effect="{StaticResource CardShadow}">
       <StackPanel Margin="{StaticResource CardPad}">
 
-        <Grid x:Name="HeaderRow">
-          <TextBlock x:Name="StepTitle" VerticalAlignment="Center"
+        <Grid x:Name="HeaderRow" Background="Transparent" Margin="0,0,0,12">
+          <TextBlock x:Name="Heading" Text="{x:Static local:Strings.ChecklistTitle}" VerticalAlignment="Center"
                      FontFamily="{StaticResource Sans}" FontSize="{StaticResource TextName}"
                      FontWeight="Medium" Foreground="{StaticResource Ink}" />
-          <TextBlock x:Name="StepCount" HorizontalAlignment="Right" VerticalAlignment="Center"
+          <TextBlock x:Name="Counter" HorizontalAlignment="Right" VerticalAlignment="Center"
                      Style="{StaticResource RowNote}" />
         </Grid>
 
-        <!-- Step 1: the environments Aiko found. -->
-        <StackPanel x:Name="StepEnvironments" Margin="0,14,0,0">
-          <TextBlock x:Name="FoundIntro" Style="{StaticResource RowHint}" Margin="0,0,0,12" />
-          <ItemsControl x:Name="Found" ItemTemplate="{StaticResource FoundTemplate}" />
+        <ScrollViewer x:Name="ChecklistScroll" VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel x:Name="Checklist">
 
-          <StackPanel x:Name="NothingFound" Visibility="Collapsed">
-            <TextBlock Style="{StaticResource RowHint}" Margin="0,0,0,10"
-                       Text="{x:Static local:Strings.WizardNothingFound}" />
-            <StackPanel Orientation="Horizontal">
-              <Button Content="{x:Static local:Strings.WizardChooseFolder}" Style="{StaticResource QuietButton}" Click="OnChooseFolder" />
-              <Button Content="{x:Static local:Strings.WizardCheckAgain}" Style="{StaticResource QuietButton}" Margin="8,0,0,0" Click="OnCheckAgain" />
+          <!-- Claude Code itself -->
+          <local:ChecklistRow x:Name="InstallRow" Item="Install" Title="{x:Static local:Strings.ItemInstall}">
+            <StackPanel>
+              <TextBlock Style="{StaticResource RowHint}" Text="{x:Static local:Strings.InstallLead}" />
+              <Grid Margin="0,10,0,0">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBox x:Name="InstallCommand" Style="{StaticResource CodeBlock}" />
+                <Button x:Name="CopyButton" Grid.Column="1" Margin="8,0,0,0" Style="{StaticResource QuietButton}"
+                        Content="{x:Static local:Strings.Copy}" Click="OnCopyInstall" />
+              </Grid>
+              <TextBlock Style="{StaticResource RowHint}" Margin="0,10,0,0" Text="{x:Static local:Strings.InstallHow}" />
+              <TextBlock Style="{StaticResource RowName}" Margin="0,8,0,0" Text="{x:Static local:Strings.WaitInstall}" />
             </StackPanel>
-          </StackPanel>
-        </StackPanel>
+          </local:ChecklistRow>
 
-        <!-- Step 2: the one line Aiko adds to the Claude Code settings. -->
-        <StackPanel x:Name="StepAccess" Margin="0,14,0,0" Visibility="Collapsed">
-          <TextBlock Style="{StaticResource RowHint}" Margin="0,0,0,10"
-                     Text="{x:Static local:Strings.WizardAccessExplain}" />
-          <TextBlock Text="{x:Static local:Strings.WizardTheLine}" Style="{StaticResource SectionLabel}" Margin="0,0,0,6" />
-          <TextBox x:Name="LinePreview" Style="{StaticResource CodeBlock}" />
-          <TextBlock Text="{x:Static local:Strings.WizardTheFiles}" Style="{StaticResource SectionLabel}" />
-          <ItemsControl x:Name="FilesToChange">
-            <ItemsControl.ItemTemplate>
-              <DataTemplate>
-                <TextBlock Text="{Binding}" Style="{StaticResource RowNote}" Margin="0,0,0,4" />
-              </DataTemplate>
-            </ItemsControl.ItemTemplate>
-          </ItemsControl>
-          <TextBlock Style="{StaticResource RowHint}" Margin="0,10,0,0"
-                     Text="{x:Static local:Strings.WizardBackupNote}" />
-          <TextBlock x:Name="AccessResult" Style="{StaticResource RowHint}" Margin="0,10,0,0"
-                     Visibility="Collapsed" />
-        </StackPanel>
+          <TextBlock Text="{x:Static local:Strings.GroupFirst}" Style="{StaticResource SectionLabel}" Margin="0,8,0,6" />
 
-        <!-- Step 3: where Aiko lives, and the two switches. -->
-        <StackPanel x:Name="StepWhere" Margin="0,14,0,0" Visibility="Collapsed">
-          <Grid>
-            <Grid.ColumnDefinitions>
-              <ColumnDefinition Width="*" />
-              <ColumnDefinition Width="10" />
-              <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
+          <local:ChecklistRow x:Name="FirstRow" Item="FirstAccount" Title="{x:Static local:Strings.ItemAccount}">
+            <StackPanel>
+              <TextBlock Style="{StaticResource RowHint}" Text="{x:Static local:Strings.Env1Lead}" />
 
-            <RadioButton x:Name="PlaceTray" Grid.Column="0" Style="{StaticResource PlaceCard}"
-                         GroupName="Place" IsChecked="True">
-              <StackPanel>
-                <Border Height="46" CornerRadius="4" Background="{StaticResource Background}"
-                        BorderBrush="{StaticResource Hairline}" BorderThickness="1">
-                  <Grid VerticalAlignment="Bottom">
-                    <Border Height="8" Background="{StaticResource Raised}" />
-                    <Ellipse Width="5" Height="5" Fill="{StaticResource Positive}"
-                             HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,6,0" />
+              <StackPanel x:Name="FirstSignedOut" Margin="0,10,0,0">
+                <TextBlock Style="{StaticResource RowName}" Text="{x:Static local:Strings.Env1Empty}" />
+                <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                  <Button Style="{StaticResource QuietButton}" Content="{x:Static local:Strings.SignIn}" Click="OnSignInFirst" />
+                </StackPanel>
+                <TextBlock x:Name="FirstWaiting" Style="{StaticResource RowHint}" Margin="0,10,0,0" Visibility="Collapsed"
+                           Text="{x:Static local:Strings.LoginHow}" />
+                <TextBlock Style="{StaticResource RowNote}" Margin="0,8,0,0" TextWrapping="Wrap" TextTrimming="None"
+                           Text="{x:Static local:Strings.LoginNever}" />
+              </StackPanel>
+
+              <StackPanel x:Name="FirstSignedIn" Margin="0,10,0,0">
+                <TextBlock Style="{StaticResource RowName}" Text="{x:Static local:Strings.Env1Found}" />
+                <TextBlock x:Name="FirstAccountLine" Style="{StaticResource RowNote}" Margin="0,4,0,0" />
+                <TextBlock Text="{x:Static local:Strings.NameInAiko}" Style="{StaticResource SectionLabel}" Margin="0,10,0,4" />
+                <TextBox x:Name="FirstName" Style="{StaticResource NameBox}" TextChanged="OnNamesChanged" />
+              </StackPanel>
+            </StackPanel>
+          </local:ChecklistRow>
+
+          <TextBlock Text="{x:Static local:Strings.GroupSecond}" Style="{StaticResource SectionLabel}" Margin="0,8,0,6" />
+
+          <local:ChecklistRow x:Name="SecondRow" Item="SecondEnvironment" Title="{x:Static local:Strings.ItemSecond}">
+            <StackPanel>
+              <TextBlock x:Name="SecondLead" Style="{StaticResource RowHint}" />
+              <StackPanel x:Name="Candidates" Margin="0,10,0,0" />
+
+              <RadioButton x:Name="CreateChoice" Style="{StaticResource PlaceCard}" GroupName="Second" Checked="OnCreateChosen">
+                <TextBlock Text="{x:Static local:Strings.CreateNew}" Style="{StaticResource RowName}" />
+              </RadioButton>
+
+              <local:RevealPanel x:Name="CreatePanel">
+                <StackPanel Margin="0,10,0,0">
+                  <Grid>
+                    <TextBox x:Name="NewName" Style="{StaticResource NameBox}" TextChanged="OnNewNameChanged" />
+                    <TextBlock x:Name="NewNameHint" Text="{x:Static local:Strings.NameExample}" Style="{StaticResource RowHint}"
+                               Margin="10,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False" />
                   </Grid>
-                </Border>
-                <TextBlock Text="{x:Static local:Strings.PlaceTray}" Style="{StaticResource RowName}" Margin="0,8,0,0"
-                           HorizontalAlignment="Center" />
+                  <TextBlock x:Name="NewFolderNote" Style="{StaticResource RowNote}" Margin="0,4,0,0" />
+                  <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                    <Button Style="{StaticResource QuietButton}" Content="{x:Static local:Strings.CreateSignIn}" Click="OnCreateSecond" />
+                  </StackPanel>
+                </StackPanel>
+              </local:RevealPanel>
+
+              <TextBlock x:Name="SecondWaiting" Style="{StaticResource RowHint}" Margin="0,10,0,0" Visibility="Collapsed"
+                         Text="{x:Static local:Strings.LoginHow}" />
+
+              <StackPanel x:Name="SecondNamePanel" Visibility="Collapsed">
+                <TextBlock Text="{x:Static local:Strings.NameInAiko}" Style="{StaticResource SectionLabel}" Margin="0,10,0,4" />
+                <TextBox x:Name="SecondName" Style="{StaticResource NameBox}" TextChanged="OnNamesChanged" />
               </StackPanel>
-            </RadioButton>
 
-            <RadioButton x:Name="PlaceIsland" Grid.Column="2" Style="{StaticResource PlaceCard}"
-                         GroupName="Place">
-              <StackPanel>
-                <Border Height="46" CornerRadius="4" Background="{StaticResource Background}"
-                        BorderBrush="{StaticResource Hairline}" BorderThickness="1">
-                  <Border Width="38" Height="9" CornerRadius="0,0,5,5" Background="{StaticResource Raised}"
-                          HorizontalAlignment="Center" VerticalAlignment="Top" />
-                </Border>
-                <TextBlock Text="{x:Static local:Strings.PlaceIsland}" Style="{StaticResource RowName}" Margin="0,8,0,0"
-                           HorizontalAlignment="Center" />
-              </StackPanel>
-            </RadioButton>
-          </Grid>
-
-          <!-- Text and switch in columns of their own: in Russian the text is longer and ran under the switch. -->
-          <Grid Margin="0,14,0,0">
-            <Grid.ColumnDefinitions>
-              <ColumnDefinition Width="*" />
-              <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-            <TextBlock Text="{x:Static local:Strings.StartWithWindows}" Style="{StaticResource RowName}"
-                       TextWrapping="Wrap" Margin="0,0,12,0" />
-            <ToggleButton x:Name="RunAtStartup" Grid.Column="1" Style="{StaticResource Switch}" IsChecked="True" />
-          </Grid>
-
-          <Grid Margin="0,10,0,0">
-            <Grid.ColumnDefinitions>
-              <ColumnDefinition Width="*" />
-              <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-            <StackPanel Margin="0,0,12,0">
-              <TextBlock Text="{x:Static local:Strings.CheckUpdatesToggle}" Style="{StaticResource RowName}" />
-              <TextBlock Text="{x:Static local:Strings.WizardUpdatesWhat}" Style="{StaticResource RowNote}"
-                         TextWrapping="Wrap" TextTrimming="None" />
+              <Grid Margin="0,12,0,0">
+                <TextBlock Style="{StaticResource RowNote}" TextWrapping="Wrap" TextTrimming="None" Margin="0,0,90,0"
+                           VerticalAlignment="Center" Text="{x:Static local:Strings.Env2Later}" />
+                <Button HorizontalAlignment="Right" Style="{StaticResource QuietButton}" Content="{x:Static local:Strings.Later}"
+                        Click="OnSecondLater" />
+              </Grid>
             </StackPanel>
-            <ToggleButton x:Name="CheckUpdates" Grid.Column="1" Style="{StaticResource Switch}"
-                          VerticalAlignment="Center" />
-          </Grid>
-        </StackPanel>
+          </local:ChecklistRow>
 
-        <!--
-          The wizard used to end by closing itself, which left somebody looking at a taskbar with
-          nothing new on it. Windows 11 puts the icon of a new app behind the overflow arrow, and
-          under that arrow the card never opens at all, so Aiko would look broken from the first
-          minute. This is the one thing everybody needs to be told, and it was only in the readme.
-        -->
-        <StackPanel x:Name="StepDone" Margin="0,14,0,0" Visibility="Collapsed">
+          <local:ChecklistRow x:Name="FoldersRow" Item="ProjectFolders" Title="{x:Static local:Strings.ItemFolders}">
+            <StackPanel>
+              <TextBlock x:Name="FoldersLead" Style="{StaticResource RowHint}" />
+              <StackPanel x:Name="BoundList" Margin="0,10,0,0" />
+              <TextBlock x:Name="NoBinds" Style="{StaticResource RowNote}" TextWrapping="Wrap" TextTrimming="None"
+                         Text="{x:Static local:Strings.NoBinds}" />
+              <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                <Button Style="{StaticResource QuietButton}" Content="{x:Static local:Strings.AddProject}" Click="OnAddProject" />
+              </StackPanel>
+              <TextBlock Text="{x:Static local:Strings.DefaultLabel}" Style="{StaticResource SectionLabel}" Margin="0,14,0,6" />
+              <local:DropDown x:Name="DefaultChoice" HorizontalAlignment="Left" MinWidth="180" />
+              <TextBlock Style="{StaticResource RowNote}" Margin="0,4,0,0" Text="{x:Static local:Strings.DefaultNote}" />
+              <TextBlock x:Name="ExplicitWins" Style="{StaticResource RowHint}" Margin="0,10,0,0" />
+            </StackPanel>
+          </local:ChecklistRow>
+
+          <TextBlock Text="{x:Static local:Strings.GroupShared}" Style="{StaticResource SectionLabel}" Margin="0,8,0,6" />
+
+          <local:ChecklistRow x:Name="AccessRow" Item="Access" Title="{x:Static local:Strings.WizardStepAccess}">
+            <StackPanel>
+              <TextBlock Style="{StaticResource RowHint}" Text="{x:Static local:Strings.WizardAccessExplain}" />
+              <TextBlock Text="{x:Static local:Strings.WizardTheLine}" Style="{StaticResource SectionLabel}" Margin="0,12,0,6" />
+              <TextBox x:Name="LinePreview" Style="{StaticResource CodeBlock}" />
+              <TextBlock Text="{x:Static local:Strings.WizardTheFiles}" Style="{StaticResource SectionLabel}" />
+              <ItemsControl x:Name="FilesToChange">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <TextBlock Text="{Binding}" Style="{StaticResource RowNote}" Margin="0,0,0,4" />
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <TextBlock Style="{StaticResource RowHint}" Margin="0,8,0,0" Text="{x:Static local:Strings.WizardBackupNote}" />
+              <TextBlock x:Name="AccessResult" Style="{StaticResource RowHint}" Margin="0,8,0,0" Visibility="Collapsed" />
+              <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+                <Button Style="{StaticResource QuietButton}" Content="{x:Static local:Strings.NotNow}" Margin="0,0,8,0" Click="OnAccessLater" />
+                <Button Style="{StaticResource QuietButton}" Content="{x:Static local:Strings.AccessAdd}" Click="OnAccessAdd" />
+              </StackPanel>
+            </StackPanel>
+          </local:ChecklistRow>
+
+          <local:ChecklistRow x:Name="CommandsRow" Item="Commands" Title="{x:Static local:Strings.ItemCommands}">
+            <StackPanel>
+              <TextBlock Style="{StaticResource RowHint}" Text="{x:Static local:Strings.CmdLead}" />
+              <StackPanel x:Name="CommandFields" Margin="0,4,0,0" />
+
+              <StackPanel x:Name="ProfilePanel" Visibility="Collapsed">
+                <TextBlock Style="{StaticResource RowHint}" Margin="0,12,0,6" Text="{x:Static local:Strings.FnsLead}" />
+                <StackPanel x:Name="ProfileFunctions" />
+                <TextBlock Style="{StaticResource RowNote}" Margin="0,6,0,0" TextWrapping="Wrap" TextTrimming="None"
+                           Text="{x:Static local:Strings.FnBackup}" />
+              </StackPanel>
+
+              <TextBlock Style="{StaticResource RowHint}" Margin="0,12,0,0" Text="{x:Static local:Strings.PathNote}" />
+              <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+                <Button Style="{StaticResource QuietButton}" Content="{x:Static local:Strings.NoCommands}" Margin="0,0,8,0" Click="OnCommandsLater" />
+                <Button x:Name="PathAddButton" Style="{StaticResource QuietButton}" Content="{x:Static local:Strings.PathAdd}" Click="OnCommandsAdd" />
+              </StackPanel>
+            </StackPanel>
+          </local:ChecklistRow>
+
+          <local:ChecklistRow x:Name="PlaceRow" Item="Place" Title="{x:Static local:Strings.WizardStepWhere}">
+            <StackPanel>
+              <Grid>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="10" />
+                  <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <RadioButton x:Name="PlaceTray" Grid.Column="0" Style="{StaticResource PlaceCard}"
+                             GroupName="Place" IsChecked="True" Checked="OnPlaceChanged">
+                  <StackPanel>
+                    <Border Height="40" CornerRadius="4" Background="{StaticResource Background}"
+                            BorderBrush="{StaticResource Hairline}" BorderThickness="1">
+                      <Grid VerticalAlignment="Bottom">
+                        <Border Height="8" Background="{StaticResource Raised}" />
+                        <Ellipse Width="5" Height="5" Fill="{StaticResource Positive}"
+                                 HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,6,0" />
+                      </Grid>
+                    </Border>
+                    <TextBlock Text="{x:Static local:Strings.PlaceTray}" Style="{StaticResource RowName}" Margin="0,8,0,0"
+                               HorizontalAlignment="Center" />
+                  </StackPanel>
+                </RadioButton>
+
+                <RadioButton x:Name="PlaceIsland" Grid.Column="2" Style="{StaticResource PlaceCard}"
+                             GroupName="Place" Checked="OnPlaceChanged">
+                  <StackPanel>
+                    <Border Height="40" CornerRadius="4" Background="{StaticResource Background}"
+                            BorderBrush="{StaticResource Hairline}" BorderThickness="1">
+                      <Border Width="38" Height="9" CornerRadius="0,0,5,5" Background="{StaticResource Raised}"
+                              HorizontalAlignment="Center" VerticalAlignment="Top" />
+                    </Border>
+                    <TextBlock Text="{x:Static local:Strings.PlaceIsland}" Style="{StaticResource RowName}" Margin="0,8,0,0"
+                               HorizontalAlignment="Center" />
+                  </StackPanel>
+                </RadioButton>
+              </Grid>
+
+              <Grid Margin="0,14,0,0">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="{x:Static local:Strings.StartWithWindows}" Style="{StaticResource RowName}"
+                           TextWrapping="Wrap" Margin="0,0,12,0" />
+                <ToggleButton x:Name="RunAtStartup" Grid.Column="1" Style="{StaticResource Switch}" IsChecked="True" />
+              </Grid>
+
+              <Grid Margin="0,10,0,0">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Margin="0,0,12,0">
+                  <TextBlock Text="{x:Static local:Strings.CheckUpdatesToggle}" Style="{StaticResource RowName}" />
+                  <TextBlock Text="{x:Static local:Strings.WizardUpdatesWhat}" Style="{StaticResource RowNote}"
+                             TextWrapping="Wrap" TextTrimming="None" />
+                </StackPanel>
+                <ToggleButton x:Name="CheckUpdates" Grid.Column="1" Style="{StaticResource Switch}"
+                              VerticalAlignment="Center" />
+              </Grid>
+            </StackPanel>
+          </local:ChecklistRow>
+        </StackPanel>
+        </ScrollViewer>
+
+        <!-- What happens next, once everything has an answer. -->
+        <StackPanel x:Name="DoneView" Visibility="Collapsed" local:Motion.Appear="True">
           <TextBlock x:Name="DoneWhere" Style="{StaticResource RowName}" TextWrapping="Wrap" />
           <TextBlock x:Name="DoneOverflow" Style="{StaticResource RowHint}" Margin="0,8,0,0"
-                     TextWrapping="Wrap"
                      Text="{x:Static local:Strings.WizardDoneOverflow}" />
-          <TextBlock x:Name="DoneFirstNumbers" Style="{StaticResource RowHint}" Margin="0,8,0,0"
-                     TextWrapping="Wrap" />
+          <TextBlock x:Name="DoneCommands" Style="{StaticResource RowHint}" Margin="0,8,0,0" Visibility="Collapsed" />
+          <TextBlock x:Name="DoneFirstNumbers" Style="{StaticResource RowHint}" Margin="0,8,0,0" />
         </StackPanel>
 
-        <Border Height="1" Background="{StaticResource Hairline}" Margin="0,16,0,12" />
+        <Border Height="1" Background="{StaticResource Hairline}" Margin="0,10,0,12" />
 
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-          <Button x:Name="BackButton" Content="{x:Static local:Strings.Back}" Style="{StaticResource QuietButton}"
-                  Visibility="Collapsed" Margin="0,0,8,0" Click="OnBack" />
-          <Button x:Name="SkipButton" Content="{x:Static local:Strings.NotNow}" Style="{StaticResource QuietButton}"
-                  Visibility="Collapsed" Margin="0,0,8,0" Click="OnSkip" />
-          <Button x:Name="NextButton" Content="{x:Static local:Strings.Next}" Style="{StaticResource QuietButton}" Click="OnNext" />
+          <Button x:Name="FinishButton" Content="{x:Static local:Strings.Finish}" Style="{StaticResource QuietButton}" Click="OnFinish" />
         </StackPanel>
 
       </StackPanel>

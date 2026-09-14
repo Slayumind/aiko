@@ -57,6 +57,10 @@ static class ClaudeSettingsFile
     public static PatchOutcome AddBridge(string configDirectory, string bridgeExePath) =>
         Report(configDirectory, Editor.Add(configDirectory, LineFor(bridgeExePath)));
 
+    /// The session start hook that reminds about folder bindings, written for the detected shell.
+    public static PatchOutcome AddSessionHook(string configDirectory, string bridgeExePath) =>
+        Report(configDirectory, Editor.AddSessionHook(configDirectory, BridgeCommand.HookFor(bridgeExePath, ShellDetect.Current())));
+
     public static PatchOutcome RemoveBridge(string configDirectory) =>
         Report(configDirectory, Editor.Remove(configDirectory));
 

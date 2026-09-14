@@ -69,6 +69,9 @@
         <ItemsControl x:Name="Environments" ItemTemplate="{StaticResource EnvironmentTemplate}" />
         <TextBlock x:Name="NoEnvironments" Text="{x:Static local:Strings.NoEnvironments}"
                    Style="{StaticResource RowHint}" Visibility="Collapsed" />
+        <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+          <Button Content="{x:Static local:Strings.SetUpEnvironments}" Style="{StaticResource QuietButton}" Click="OnSetUpEnvironments" />
+        </StackPanel>
 
         <!--
           The one control in Aiko that reads your access token. It was labelled "direct" and

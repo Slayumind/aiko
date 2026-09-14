@@ -599,6 +599,7 @@ sealed class AikoShell : IDisposable
 
         var window = new SettingsWindow();
         window.QuitRequested += () => _application.Shutdown();
+        window.WizardRequested += OpenWizard;
         window.Closed += (_, _) =>
         {
             var again = window.ShouldReopen;
