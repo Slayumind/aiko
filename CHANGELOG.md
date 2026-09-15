@@ -65,6 +65,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
     blended normals and cut shared parts, with export scripts for Blender.
   - `/aiko-texturing`: texture sizes from the game camera instead of habit, a sheet or a tile, UVs from
     world position and guides for painters, with a camera budget calculator and a density checker.
+  - `/aiko-palette`: colours checked against a palette and fixed with the smallest change, in OKLCH,
+    offline and without a key.
 - **A public marketplace in the repository.** Aiko's skills also install without the app:
   `/plugin marketplace add Slayumind/aiko`.
 
