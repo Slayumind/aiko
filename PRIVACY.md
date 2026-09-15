@@ -17,6 +17,11 @@ day, and only if you allow it: see **Counting** below.
 - **Which folders look like Claude Code accounts**, by their names and dates. Aiko doesn't open the
   credentials file for this. It only checks that the file exists.
 - **The access token, in direct mode only.** See below.
+- **Session events, where the personality is on.** Claude Code runs Aiko's hook when a session
+  starts working, waits for you, finishes, fails or ends. Aiko reads only the kind of event and the
+  session ID, keeps a small file per session with the state and the time, and hashes the session ID
+  into the file name. The prompt, tool input, paths and answers are never read or stored. The file
+  goes away when the session ends, and files older than a day are removed when Aiko starts.
 
 ## What Aiko sends
 
@@ -75,14 +80,17 @@ Without direct mode, Aiko never touches the token.
 ## Where Aiko keeps things
 
 - `%APPDATA%\Aiko`: your settings, the list of environments and the random value described above.
-- `%LOCALAPPDATA%\Aiko`: the limit numbers from Claude Code, the last direct mode answer and a short
-  log.
+- `%LOCALAPPDATA%\Aiko`: the limit numbers from Claude Code, the last direct mode answer, a short
+  log, and, where the personality is on, the session state files, the personality plugin and the
+  local marketplace with the skills.
 - `%USERPROFILE%\.claude*\settings.json`: one line added by Aiko, with a copy of the original next
-  to it.
+  to it, and Aiko's plugins and marketplace where the personality is on. Claude Code keeps its own
+  copies of those plugins in its `plugins` folder.
 - One value under `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`, if you asked Aiko to start
   with Windows.
 
-Removing Aiko puts the status line back, removes that value and deletes both of Aiko's folders. You
+Removing Aiko puts the status line back, removes its plugins from Claude Code, removes that value
+and deletes both of Aiko's folders. You
 can also delete the folders by hand at any time, and Aiko starts again with its defaults.
 
 ## The log
