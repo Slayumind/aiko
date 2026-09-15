@@ -21,7 +21,8 @@ sealed class TrayMoodPlayer : IDisposable
     public TrayMoodPlayer(Dispatcher dispatcher)
     {
         _dispatcher = dispatcher;
-        _timer = new DispatcherTimer(DispatcherPriority.Normal, dispatcher) { Interval = TrayMood.ShowFor };
+        // The face needs a moment to arrive; the two seconds count from when it is there.
+        _timer = new DispatcherTimer(DispatcherPriority.Normal, dispatcher) { Interval = TrayMood.ShowFor + TrayFaceMotion.Arrival };
         _timer.Tick += (_, _) => Hide();
     }
 

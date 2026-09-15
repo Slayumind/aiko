@@ -40,6 +40,12 @@ static class Program
 
         // Draw the icon into a file and stop. Windows hides new tray icons in the overflow area,
         // so this is the only way to look at the drawing itself.
+        if (args is ["--snapshot-icon", var faceIconPath, "faces", ..])
+        {
+            IconSheet.WriteFaces(faceIconPath);
+            return;
+        }
+
         if (args is ["--snapshot-icon", var iconPath, ..])
         {
             IconSheet.Write(iconPath);

@@ -43,6 +43,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   taskbars, with thicker lines at tray sizes. They show next to the Personality title, beside the
   sample answer and in the Meet Aiko item, and follow the face you pick. `--snapshot-faces` draws
   them all on one sheet.
+- **Aiko's face in the tray.** Where the persona is on, the face takes the place of the rings for two
+  seconds after an event: the rings shrink away, the face springs in, then fades and the rings come
+  back, eight pictures per step. The face follows a light or dark taskbar. With animations turned
+  off in Windows it switches at once. `--snapshot-icon out.png faces` draws every face and one whole
+  transition.
 
 ### Fixed
 
