@@ -152,6 +152,15 @@ static class Program
             return;
         }
 
+        // Direct mode with an expired token, on a throwaway folder with a fake credentials file:
+        // --try-direct-expired <empty folder>. Aiko must wait for Claude Code, send nothing and leave
+        // the file exactly as it was. Never pointed at a real account folder.
+        if (args is ["--try-direct-expired", var expiredFolder, ..])
+        {
+            Environment.Exit(TryDirectExpired(expiredFolder));
+            return;
+        }
+
         // The whole way from a hook to a face, on a made-up environment: the real bridge writes the
         // session file, the watcher sees it and the player shows and hides faces. Draws nothing.
         if (args is ["--try-activity", ..])
@@ -344,6 +353,43 @@ static class Program
         application.Exit += (_, _) => shell?.Dispose();
 
         application.Run();
+    }
+
+    private static int TryDirectExpired(string folder)
+    {
+        var credentials = Path.Combine(folder, ".credentials.json");
+        if (File.Exists(credentials))
+        {
+            Log.Write("--try-direct-expired: the folder already has credentials, refusing");
+            return 2;
+        }
+
+        Directory.CreateDirectory(folder);
+        var expired = DateTimeOffset.UtcNow.AddHours(-1).ToUnixTimeMilliseconds();
+        File.WriteAllText(credentials, $$"""{ "claudeAiOauth": { "accessToken": "not-a-real-token", "refreshToken": "not-a-real-token", "expiresAt": {{expired}}, "subscriptionType": "max" } }""");
+        var before = File.ReadAllBytes(credentials);
+        var logBefore = File.Exists(Log.FilePath) ? File.ReadAllLines(Log.FilePath).Length : 0;
+
+        var dispatcher = System.Windows.Threading.Dispatcher.CurrentDispatcher;
+        using var poller = new DirectPoller(dispatcher);
+        poller.Follow(new EnvironmentSettings([new AikoEnvironment("probe", [folder]) { DirectMode = true }]));
+
+        // One tick of the poller is twenty seconds.
+        var frame = new System.Windows.Threading.DispatcherFrame();
+        var stop = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(25) };
+        stop.Tick += (_, _) => { stop.Stop(); frame.Continue = false; };
+        stop.Start();
+        System.Windows.Threading.Dispatcher.PushFrame(frame);
+
+        var lines = File.ReadAllLines(Log.FilePath).Skip(logBefore).Where(l => l.Contains("direct mode for probe", StringComparison.Ordinal)).ToList();
+        var waited = lines.Any(l => l.Contains("the token has expired", StringComparison.Ordinal));
+        var asked = lines.Any(l => !l.Contains("the token has expired", StringComparison.Ordinal));
+        var untouched = before.AsSpan().SequenceEqual(File.ReadAllBytes(credentials));
+        var latest = poller.Latest.ContainsKey("probe");
+
+        File.Delete(credentials);
+        Log.Write($"--try-direct-expired: waited={waited}, asked the server={asked}, file untouched={untouched}, numbers={latest}");
+        return waited && !asked && untouched && !latest ? 0 : 1;
     }
 
     private static void TryActivity()
