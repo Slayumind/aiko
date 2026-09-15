@@ -13,6 +13,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   and the skills you switch off, and each environment remembers whether the persona is on. Nothing
   uses them yet: the Personality settings arrive in later versions. Older settings files read as
   before, with the persona off.
+- **Aiko's persona text.** The character, the four temperaments and the rules about where she stays
+  silent (code, commits, files, errors, warnings), packed as a Claude Code plugin with the hooks
+  for her face. Not installed anywhere yet.
 
 ### Fixed
 
