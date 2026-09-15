@@ -29,10 +29,21 @@ public partial class IslandPanel : UserControl
 
     public bool IsUnfolded => _unfolded;
 
+    private readonly IslandFaceAnimator _faces;
+
     public IslandPanel()
     {
         InitializeComponent();
+        _faces = new IslandFaceAnimator(Rings, Face, () => Rings.Children.OfType<Panel>().SelectMany(p => p.Children.OfType<RingGauge>())
+            .Concat(Rings.Children.OfType<RingGauge>()));
     }
+
+    public void ShowFace(System.Windows.Media.ImageSource face) => _faces.Show(face);
+
+    public void HideFace() => _faces.Hide();
+
+    /// For a snapshot: the face fully there, without the way to it.
+    public void SetFace(IconFrame frame, System.Windows.Media.ImageSource? face) => _faces.Set(frame, face);
 
     /// Docked means pressed against the edge. In hand the island is a whole thing of its own: every
     /// corner rounded and a hairline all round, with its rings already laid out for the edge below.
@@ -87,6 +98,7 @@ public partial class IslandPanel : UserControl
             Rings.Children.Add(new RingGauge(null, LimitTone.Unknown, RingSize));
         }
 
+        _faces.Reapply();
         MarkForMeasure();
     }
 

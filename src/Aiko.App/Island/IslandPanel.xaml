@@ -18,7 +18,13 @@
             Background="{StaticResource Surface}"
             BorderBrush="{StaticResource Hairline}" BorderThickness="1"
             Padding="10,7">
-      <StackPanel x:Name="Rings" Orientation="Horizontal" />
+      <!-- The face takes the place of the rings for a moment after an event (D-211). It sits over them
+           rather than instead of them, so the island keeps its size and does not move. -->
+      <Grid>
+        <StackPanel x:Name="Rings" Orientation="Horizontal" />
+        <Image x:Name="Face" Width="18" Height="18" HorizontalAlignment="Center" VerticalAlignment="Center"
+               IsHitTestVisible="False" />
+      </Grid>
     </Border>
   </Grid>
 </UserControl>
