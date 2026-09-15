@@ -184,6 +184,25 @@ public class EnvironmentEditsTests
     }
 
     [Fact]
+    public void The_persona_is_switched_in_one_environment_and_kept_through_other_edits()
+    {
+        var settings = EnvironmentEdits.SetPersona(TwoEnvironments(), "Work", true);
+        var renamed = EnvironmentEdits.Rename(settings, "Work", "Kodland", commandsInstalled: false).Settings;
+
+        Assert.True(settings.Environments[1].Persona);
+        Assert.False(settings.Environments[0].Persona);
+        Assert.True(renamed.Environments[1].Persona);
+    }
+
+    [Fact]
+    public void Switching_the_persona_of_an_unknown_environment_changes_nothing()
+    {
+        var settings = TwoEnvironments();
+
+        Assert.Same(settings, EnvironmentEdits.SetPersona(settings, "Nobody", true));
+    }
+
+    [Fact]
     public void The_environment_in_claude_cannot_be_removed()
     {
         var settings = TwoEnvironments();

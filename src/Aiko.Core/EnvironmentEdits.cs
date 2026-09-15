@@ -85,6 +85,9 @@ public static class EnvironmentEdits
     public static EnvironmentSettings SetDirectMode(EnvironmentSettings settings, string environment, bool on) =>
         Change(settings, environment, e => e with { DirectMode = on });
 
+    public static EnvironmentSettings SetPersona(EnvironmentSettings settings, string environment, bool on) =>
+        Change(settings, environment, e => e with { Persona = on });
+
     public static EnvironmentSettings SetDefault(EnvironmentSettings settings, string environment) =>
         Find(settings, environment) is null ? settings : settings with { DefaultEnvironment = environment };
 

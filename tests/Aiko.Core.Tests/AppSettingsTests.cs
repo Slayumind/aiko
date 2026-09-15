@@ -78,4 +78,22 @@ public class AppSettingsTests
 
         Assert.Equal(AppSettings.Default, settings);
     }
+
+    [Fact]
+    public void Meet_Aiko_has_not_been_shown_in_a_file_from_0_1()
+    {
+        var settings = AppSettings.FromJson("{ \"schemaVersion\": 1, \"place\": \"Island\" }");
+
+        Assert.False(settings.MeetAikoShown);
+        Assert.Equal(AikoPlace.Island, settings.Place);
+    }
+
+    [Fact]
+    public void Meet_Aiko_shown_survives_a_trip_through_the_file()
+    {
+        var back = AppSettings.FromJson((AppSettings.Default with { MeetAikoShown = true }).ToJson());
+
+        Assert.True(back.MeetAikoShown);
+        Assert.Equal(AppSettings.CurrentSchema, back.SchemaVersion);
+    }
 }

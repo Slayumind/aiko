@@ -7,6 +7,13 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Added
+
+- **Groundwork for Aiko's personality.** Aiko now keeps a persona file with the temperament, the face
+  and the skills you switch off, and each environment remembers whether the persona is on. Nothing
+  uses them yet: the Personality settings arrive in later versions. Older settings files read as
+  before, with the persona off.
+
 ### Fixed
 
 - **Checksums.** `SHA256SUMS.txt` no longer lists the portable zip, which a release doesn't include,
