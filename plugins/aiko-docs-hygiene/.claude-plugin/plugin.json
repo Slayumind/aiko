@@ -1,0 +1,16 @@
+{
+  "name": "aiko-docs-hygiene",
+  "version": "1.0.0",
+  "description": "Keep project documents honest: a state file rebuilt from measured facts, an append-only decision log, and an audit for duplicates and contradictions.",
+  "author": {
+    "name": "Aleksandr Fomichenko"
+  },
+  "homepage": "https://github.com/Slayumind/aiko",
+  "license": "Apache-2.0",
+  "keywords": [
+    "documentation",
+    "adr",
+    "decision-log",
+    "project-state"
+  ]
+}

@@ -1,12 +1,21 @@
 {
   "name": "slayumind-aiko",
-  "owner": { "name": "Aleksandr Fomichenko" },
-  "metadata": { "description": "Skills from Aiko. They work without the app; with Aiko they come and go with its personality." },
+  "owner": {
+    "name": "Aleksandr Fomichenko"
+  },
+  "metadata": {
+    "description": "Skills from Aiko. They work without the app; with Aiko they come and go with its personality."
+  },
   "plugins": [
     {
       "name": "aiko-copy",
       "source": "./plugins/aiko-copy",
       "description": "UI text, READMEs and release notes that read as written by a person. Russian and English."
+    },
+    {
+      "name": "aiko-docs-hygiene",
+      "source": "./plugins/aiko-docs-hygiene",
+      "description": "Keep project documents honest: a state file rebuilt from measured facts, an append-only decision log, and an audit for duplicates and contradictions."
     }
   ]
 }
