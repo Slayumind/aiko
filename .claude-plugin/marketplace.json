@@ -36,6 +36,11 @@
       "name": "aiko-texturing",
       "source": "./plugins/aiko-texturing",
       "description": "Texture sizes from the game camera: pixels per metre from the screen, sheet or tile, UVs from world position, guides for painters, density measured per face."
+    },
+    {
+      "name": "aiko-palette",
+      "source": "./plugins/aiko-palette",
+      "description": "Check colours against a palette and fix them with the smallest change, in OKLCH. Offline, no key."
     }
   ]
 }
