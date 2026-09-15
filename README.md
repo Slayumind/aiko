@@ -39,6 +39,41 @@ turn them off, since they would hide the commands. It keeps a copy of the profil
 
 JetBrains IDEs take `claude` from PATH too, but nobody has tried Aiko with them yet.
 
+## Aiko's personality and skills
+
+Turn on the personality for an environment, and Claude Code sessions there talk as Aiko: an indie game
+developer who works next to you. You pick how loud she is, from Quiet to 無双, and the settings show a
+sample answer for each level. She stays quiet where it matters: code, commits, files, pull requests,
+error explanations, security warnings, dangerous actions and bad news are written in a plain neutral
+voice. The switch works in new sessions; open sessions finish the way they started.
+
+With the personality come eight skills, each with its own switch:
+
+| Skill | What it is for |
+|---|---|
+| `/aiko-copy` | UI text, READMEs and release notes that read as written by a person, in Russian and English |
+| `/aiko-docs-hygiene` | a state file built from measured facts, a decision log, duplicates and contradictions found |
+| `/aiko-release-gate` | a check before a release: GO or NO-GO, irreversible changes, rollout and rollback |
+| `/aiko-glb-for-web` | a Blender model as a `.glb` that web players show correctly |
+| `/aiko-blender-to-unity` | meshes from Blender into Unity without mirrored or rotated surprises |
+| `/aiko-texturing` | texture sizes from the game camera, a sheet or a tile, UVs from world position |
+| `/aiko-palette` | colours checked against a palette and fixed with the smallest change, in OKLCH |
+| `/aiko-gamedesign-research` | one game mechanic across 30-40 games, with an illustrated review and playable stands |
+
+Aiko installs all of this as Claude Code plugins from a marketplace on your own computer, so nothing is
+downloaded. Your own plugins, output style and settings stay as they are. If you set your own output
+style, the settings page tells you that the personality's style wins while it is on.
+
+Where the personality is on, Aiko's face shows up in the tray or on the island for two seconds when a
+session starts working, waits for you, finishes, fails or runs out of limit. Chibi or emoji, your pick.
+
+The skills also work without Aiko:
+
+```
+/plugin marketplace add Slayumind/aiko
+/plugin install aiko-copy@slayumind-aiko
+```
+
 ## How Aiko gets the numbers
 
 Claude Code runs a status line command after every answer and passes it the limits. Aiko adds one
@@ -78,8 +113,9 @@ the taskbar: under the arrow, the card can't open.
 ## Remove
 
 Uninstall Aiko from **Installed apps**. It puts your status line back and removes the session
-reminder, takes its folder out of PATH together with the launch commands, turns your PowerShell
-profile functions back on, removes its startup entry and deletes its own folders. Your accounts and
+reminder, removes its plugins and their marketplace from Claude Code, takes its folder out of PATH
+together with the launch commands, turns your PowerShell profile functions back on, removes its
+startup entry and deletes its own folders. Your accounts and
 history stay in their Claude Code folders. There's nothing left to clean up by hand.
 
 ## Build it yourself
@@ -96,7 +132,11 @@ dotnet run --project src/Aiko.App
 - `src/Aiko.Core` decides what to show: parsing, thresholds, countdowns, placement. It has no
   Windows code and no UI, and every part of it has tests.
 - `src/Aiko.App` has the tray icon, the windows and the network. It draws what the core decided.
-- `src/Aiko.Bridge` is the small program Claude Code runs as its status line.
+- `src/Aiko.Bridge` is the small program Claude Code runs as its status line, for the personality's
+  hooks and to build the personality plugin.
+- `src/Aiko.Shim` is the small `claude.exe` behind launch commands and project folders.
+- `plugins/` holds the skills, one plugin each, with tests for their scripts (`node --test` and
+  `python -m unittest`).
 
 To change something, read [CONTRIBUTING.md](CONTRIBUTING.md) first. It also lists what Aiko won't do.
 
