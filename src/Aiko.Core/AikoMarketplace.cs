@@ -44,22 +44,50 @@ public static class AikoMarketplace
         && command.All(c => c is >= ' ' and <= '~')
         && !command.Contains("    ", StringComparison.Ordinal);
 
-    public static string Json(string personaCommand) =>
-        new JsonObject
+    /// The persona from the bridge, and every skill Aiko ships from a folder inside the marketplace.
+    public static string Json(string personaCommand, IEnumerable<SkillPlugin>? skills = null)
+    {
+        var plugins = new JsonArray(
+            new JsonObject
+            {
+                ["name"] = PersonaPlugin.Name,
+                ["description"] = "Aiko's persona and the hooks behind her face in the tray.",
+                ["source"] = new JsonObject { ["source"] = "command", ["command"] = personaCommand },
+            });
+
+        foreach (var skill in (skills ?? []).OrderBy(s => IndexIn(SkillCatalog.All, s.Name)))
+        {
+            plugins.Add(new JsonObject
+            {
+                ["name"] = skill.Name,
+                ["description"] = skill.Description,
+                ["source"] = skill.Source,
+            });
+        }
+
+        return new JsonObject
         {
             ["name"] = Name,
             ["owner"] = new JsonObject { ["name"] = "Aiko" },
-            ["plugins"] = new JsonArray(
-                new JsonObject
-                {
-                    ["name"] = PersonaPlugin.Name,
-                    ["description"] = "Aiko's persona and the hooks behind her face in the tray.",
-                    ["source"] = new JsonObject { ["source"] = "command", ["command"] = personaCommand },
-                }),
+            ["plugins"] = plugins,
         }.ToJsonString(Formatting) + "\n";
+    }
 
-    // The default encoder writes quotes as ", which is valid but hard to read for a person who
-    // opens the file to see the command.
+    private static int IndexIn(IReadOnlyList<string> list, string name)
+    {
+        for (var i = 0; i < list.Count; i++)
+        {
+            if (list[i] == name)
+            {
+                return i;
+            }
+        }
+
+        return list.Count;
+    }
+
+    // The default encoder writes a quote as a six-character escape, which is valid but hard to read
+    // for a person who opens the file to see the command.
     private static readonly JsonSerializerOptions Formatting = new()
     {
         WriteIndented = true,

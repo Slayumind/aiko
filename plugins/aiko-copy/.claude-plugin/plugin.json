@@ -1,0 +1,17 @@
+{
+  "name": "aiko-copy",
+  "version": "1.0.0",
+  "description": "UI text, READMEs and release notes that read as written by a person. Russian and English.",
+  "author": {
+    "name": "Aleksandr Fomichenko"
+  },
+  "homepage": "https://github.com/Slayumind/aiko",
+  "license": "Apache-2.0",
+  "keywords": [
+    "writing",
+    "ui-copy",
+    "i18n",
+    "russian",
+    "english"
+  ]
+}
