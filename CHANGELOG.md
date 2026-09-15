@@ -29,6 +29,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   Aiko's plugins and marketplace out of `settings.json` first, so they stop loading at once. Then
   Aiko asks Claude Code to uninstall them, within 20 seconds when Aiko itself is being removed. Other
   plugins stay. The copy of `settings.json` is kept while anything of Aiko's is still in the file.
+- **Meet Aiko in the checklist.** An optional item tells what the persona does and turns it on in
+  environment 1 at Finish. If you set Aiko up before this version, the checklist opens on this item
+  once. Running the checklist again keeps the persona as it was.
 
 ### Fixed
 

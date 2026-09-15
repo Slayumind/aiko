@@ -105,6 +105,15 @@ sealed class AikoShell : IDisposable
         {
             RepairOurStatusLines();
 
+            // Once, for someone who set Aiko up before the persona existed (D-200).
+            var app = SettingsStore.Load();
+            if (WizardChecklist.OpensMeetAikoOnStart(app, SettingsStore.LoadEnvironments()))
+            {
+                OpenSettings(page: SettingsPanel.ChecklistPageKey);
+                _settings?.OpenChecklist(ChecklistItem.MeetAiko);
+                SettingsStore.Save(app with { MeetAikoShown = true });
+            }
+
             // An update can bring a new persona text or move the marketplace. When the persona is
             // off everywhere this reads a few files and does nothing else.
             PluginSync.Request("startup");

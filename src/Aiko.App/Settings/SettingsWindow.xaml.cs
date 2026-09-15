@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Input;
+using Aiko.Core;
 
 namespace Aiko.App;
 
@@ -56,7 +57,7 @@ public partial class SettingsWindow : Window
     /// Opened from the tray menu item that asks for an update check.
     public void CheckUpdatesNow() => _panel.StartUpdateCheck();
 
-    public void OpenChecklist() => _panel.OpenChecklist();
+    public void OpenChecklist(ChecklistItem? item = null) => _panel.OpenChecklist(item);
 
     private void OnDragHandlePressed(object sender, MouseButtonEventArgs e)
     {

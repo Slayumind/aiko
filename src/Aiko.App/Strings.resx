@@ -793,4 +793,19 @@
   <data name="SkillAikoGamedesignResearch" xml:space="preserve">
     <value>30–40 games with the mechanic you need: an overview with screenshots, and interactive demos on request.</value>
   </data>
+  <data name="ItemMeetAiko" xml:space="preserve">
+    <value>Meet Aiko</value>
+  </data>
+  <data name="MeetAikoLead" xml:space="preserve">
+    <value>Aiko can talk in your Claude Code sessions in her own voice, and she brings eight skills. In code and commits she stays quiet.</value>
+  </data>
+  <data name="MeetAikoSettings" xml:space="preserve">
+    <value>The temperament, the face and the skills are in settings, under Personality. It works in new sessions.</value>
+  </data>
+  <data name="MeetAikoTurnOn" xml:space="preserve">
+    <value>Turn on in {0}</value>
+  </data>
+  <data name="StateOn" xml:space="preserve">
+    <value>on</value>
+  </data>
 </root>
