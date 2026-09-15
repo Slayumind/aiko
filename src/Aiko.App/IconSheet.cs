@@ -72,6 +72,71 @@ static class IconSheet
         encoder.Save(file);
     }
 
+    /// Every face as the tray draws it, on both taskbars, and one whole transition frame by frame:
+    /// rings out, face in, face out, rings back. Started with --snapshot-icon out.png faces.
+    public static void WriteFaces(string path)
+    {
+        const int timelineCell = 72;
+        var ring = Row(42, LimitTone.Normal);
+        var dot = Row(82, LimitTone.Caution);
+        var faces = Enum.GetValues<AikoFace>();
+        var styles = Enum.GetValues<FaceStyle>();
+        (int Size, Color Ground, FaceGround Face)[] rows =
+        [
+            (16, Dark, FaceGround.Dark),
+            (32, Dark, FaceGround.Dark),
+            (16, Light, FaceGround.Light),
+            (32, Light, FaceGround.Light),
+        ];
+
+        var timeline = Enum.GetValues<FacePhase>().SelectMany(TrayFaceMotion.Frames).ToList();
+        var width = Math.Max(styles.Length * faces.Length * Cell, timeline.Count * timelineCell);
+        var height = (rows.Length * Cell) + timelineCell;
+
+        var visual = new DrawingVisual();
+        RenderOptions.SetBitmapScalingMode(visual, BitmapScalingMode.NearestNeighbor);
+        using (var context = visual.RenderOpen())
+        {
+            for (var row = 0; row < rows.Length; row++)
+            {
+                var (size, ground, faceGround) = rows[row];
+                context.DrawRectangle(new SolidColorBrush(ground), null, new Rect(0, row * Cell, width, Cell));
+
+                var column = 0;
+                foreach (var style in styles)
+                {
+                    foreach (var face in faces)
+                    {
+                        var png = RingIcon.RenderPng(size, ring, dot, TrayFaceMotion.At(FacePhase.FaceIn, 1), FaceDrawing.For(style, face, faceGround, size));
+                        Place(context, png, size, column++ * Cell, row * Cell, Cell);
+                    }
+                }
+            }
+
+            var top = rows.Length * Cell;
+            context.DrawRectangle(new SolidColorBrush(Dark), null, new Rect(0, top, width, timelineCell));
+            var doneFace = FaceDrawing.For(FaceStyle.Chibi, AikoFace.Done, FaceGround.Dark, 32);
+            for (var i = 0; i < timeline.Count; i++)
+            {
+                Place(context, RingIcon.RenderPng(32, ring, dot, timeline[i], doneFace), 32, i * timelineCell, top, timelineCell);
+            }
+        }
+
+        var bitmap = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32);
+        bitmap.Render(visual);
+
+        var encoder = new PngBitmapEncoder();
+        encoder.Frames.Add(BitmapFrame.Create(bitmap));
+        using var file = File.Create(path);
+        encoder.Save(file);
+    }
+
+    private static void Place(DrawingContext context, byte[] png, int size, double left, double top, int cell)
+    {
+        var drawn = Math.Min(size * (size == 16 ? 6 : 3), cell - 8);
+        context.DrawImage(Decode(png), new Rect(left + ((cell - drawn) / 2.0), top + ((cell - drawn) / 2.0), drawn, drawn));
+    }
+
     private static CardRow Row(int percent, LimitTone tone) =>
         new(LimitKind.FiveHour, percent, tone, false, ResetCountdown.Reset, default);
 

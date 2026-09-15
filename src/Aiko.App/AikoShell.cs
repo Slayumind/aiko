@@ -45,6 +45,11 @@ sealed class AikoShell : IDisposable
 
     /// The face for two seconds after an event (D-211). Drawn by the icon and the island later.
     private TrayMoodPlayer? _mood;
+    private TrayFaceAnimator? _faceAnimator;
+
+    /// The rows the icon last drew. Frames of a face transition reuse them instead of reading the
+    /// settings and the snapshots sixteen times in half a second.
+    private (CardRow? Ring, CardRow? Dot) _iconRows;
     private readonly uint _taskbarCreatedMessage;
     private HwndSource? _source;
     private DispatcherTimer? _hover;
@@ -82,7 +87,10 @@ sealed class AikoShell : IDisposable
 
         _watcher.Updated += OnSnapshotsChanged;
 
+        _faceAnimator = new TrayFaceAnimator(_application.Dispatcher);
+        _faceAnimator.Changed += RedrawIcon;
         _mood = new TrayMoodPlayer(_application.Dispatcher);
+        _mood.FaceChanged += OnFaceChanged;
         _mood.Follow(SettingsStore.LoadEnvironments());
 
         var poller = new DirectPoller(_application.Dispatcher);
@@ -358,15 +366,57 @@ sealed class AikoShell : IDisposable
         text.AsSpan(0, Math.Min(text.Length, room.Length - 1)).CopyTo(room);
     }
 
-    private HICON ReplaceIcon(uint dpi)
+    private HICON ReplaceIcon(uint dpi, bool sameRows = false)
     {
         var old = _icon;
         _iconSize = PInvoke.GetSystemMetricsForDpi(SYSTEM_METRICS_INDEX.SM_CXSMICON, dpi);
         _iconDpi = dpi;
 
-        var (ring, dot) = CurrentRows();
-        _icon = RingIcon.Render(_iconSize, ring, dot);
+        if (!sameRows)
+        {
+            _iconRows = CurrentRows();
+        }
+
+        _icon = RingIcon.Render(_iconSize, _iconRows.Ring, _iconRows.Dot, _faceAnimator?.Frame, _faceAnimator?.Face);
         return old;
+    }
+
+    /// A face comes or goes (D-211). Only on the tray icon for now; the island follows later.
+    private void OnFaceChanged(AikoFace? face)
+    {
+        if (_faceAnimator is null || !_iconShown)
+        {
+            return;
+        }
+
+        if (face is { } shown)
+        {
+            _faceAnimator.Show(FaceDrawing.For(SettingsStore.LoadPersona().Face, shown, TaskbarTheme.Ground(), _iconSize));
+        }
+        else
+        {
+            _faceAnimator.Hide();
+        }
+    }
+
+    /// One frame of a face transition: only the picture changes, not the tooltip.
+    private void RedrawIcon()
+    {
+        if (!_iconShown)
+        {
+            return;
+        }
+
+        var old = ReplaceIcon(TaskbarDpi(), sameRows: true);
+        var data = NewData();
+        data.uFlags = NOTIFY_ICON_DATA_FLAGS.NIF_ICON;
+        data.hIcon = _icon;
+        PInvoke.Shell_NotifyIcon(NOTIFY_ICON_MESSAGE.NIM_MODIFY, in data);
+
+        if (!old.IsNull)
+        {
+            PInvoke.DestroyIcon(old);
+        }
     }
 
     /// Every environment we know about, in the order the settings hold them. The card shows all of
