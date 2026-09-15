@@ -37,6 +37,24 @@ jobs:
         # prints its token, and the snapshot format can hold nothing but numbers and times.
         run: dotnet test Aiko.slnx --configuration Release --no-build --verbosity quiet
 
+      - name: Test the skill scripts
+        # The scripts inside Aiko's skills have tests of their own. Node comes with the runner.
+        shell: pwsh
+        run: |
+          Get-ChildItem plugins -Recurse -Filter *.test.mjs | ForEach-Object { node --test $_.FullName; if ($LASTEXITCODE -ne 0) { exit 1 } }
+
+      - name: Validate the plugins
+        # Claude Code checks the marketplace and every plugin the way it would when installing them.
+        # Pinned, so a new Claude Code release cannot fail an old commit.
+        shell: pwsh
+        run: |
+          npx --yes @anthropic-ai/claude-code@2.1.272 plugin validate .
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          Get-ChildItem plugins -Directory | ForEach-Object {
+            npx --yes @anthropic-ai/claude-code@2.1.272 plugin validate $_.FullName
+            if ($LASTEXITCODE -ne 0) { exit 1 }
+          }
+
       - name: Check the code style
         # .editorconfig holds the rules and Directory.Build.props asks the compiler to enforce
         # them. This catches what the compiler alone does not, so the rules are real rather than

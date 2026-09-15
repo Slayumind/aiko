@@ -16,8 +16,8 @@ static class PluginSync
 
     private static Task Pending = Task.CompletedTask;
 
-    /// The skills that ship as plugins. Empty until the skills arrive in the product.
-    public static IReadOnlyList<string> SkillPlugins { get; } = [];
+    /// The skills that ship with this Aiko as plugins.
+    public static IReadOnlyList<string> SkillPlugins => SkillShelf.Shipped.Select(s => s.Name).ToList();
 
     /// Checks every folder and changes only what differs. Reading three small files per folder is
     /// all it costs when nothing is to be done, so it is safe to call at startup.
@@ -72,7 +72,7 @@ static class PluginSync
 
         // A new command in the marketplace, for example after moving from a build folder to the
         // installed app, is not run again until it is accepted: an update with -y accepts it.
-        if (!TryWriteMarketplace(out var marketplaceChanged))
+        if (!TryWriteMarketplace(out var marketplaceChanged, out var changedSkills))
         {
             return;
         }
@@ -80,7 +80,7 @@ static class PluginSync
         updatePersona |= marketplaceChanged;
 
         var plans = folders
-            .Select(p => (p.Folder, p.Desired, Steps: StepsFor(p.Desired, p.State, updatePersona)))
+            .Select(p => (p.Folder, p.Desired, Steps: StepsFor(p.Desired, p.State, updatePersona, changedSkills)))
             .Where(p => p.Steps.Count > 0)
             .ToList();
 
@@ -139,13 +139,19 @@ static class PluginSync
             + (failed.Count > 0 ? " (" + string.Join(", ", failed.Select(r => $"{r.Step.Kind} exit {r.Result.ExitCode}{(r.Result.TimedOut ? " timeout" : "")}")) + ")" : ""));
     }
 
-    private static IReadOnlyList<PluginStep> StepsFor(IReadOnlySet<string> desired, PluginState state, bool updatePersona)
+    private static IReadOnlyList<PluginStep> StepsFor(IReadOnlySet<string> desired, PluginState state, bool updatePersona, IReadOnlyList<string> changedSkills)
     {
         var steps = PluginPlan.Steps(desired, state, AikoMarketplace.Folder(LocalAppData)).ToList();
         var persona = AikoMarketplace.PluginId(PersonaPlugin.Name);
         if (updatePersona && desired.Contains(persona) && state.Installed.Contains(persona))
         {
             steps.Add(new PluginStep(PluginStepKind.Update, persona));
+        }
+
+        // A skill whose files changed with this Aiko: installed copies take the new version.
+        foreach (var skill in changedSkills.Select(AikoMarketplace.PluginId).Where(id => desired.Contains(id) && state.Installed.Contains(id)))
+        {
+            steps.Add(new PluginStep(PluginStepKind.Update, skill));
         }
 
         return steps;
@@ -158,9 +164,10 @@ static class PluginSync
             ReadIfThere(Path.Combine(folder, "plugins", "known_marketplaces.json")));
 
     /// Written only when the text differs, so the marketplace folder is not touched for nothing.
-    private static bool TryWriteMarketplace(out bool changed)
+    private static bool TryWriteMarketplace(out bool changed, out IReadOnlyList<string> changedSkills)
     {
         changed = false;
+        changedSkills = [];
         if (BridgePath.Current() is not { } bridge
             || AikoMarketplace.PersonaCommand(bridge, LocalAppData) is not { } command)
         {
@@ -170,8 +177,10 @@ static class PluginSync
 
         try
         {
+            changedSkills = SkillShelf.CopyTo(AikoMarketplace.Folder(LocalAppData));
+
             var path = AikoMarketplace.FilePath(LocalAppData);
-            var json = AikoMarketplace.Json(command);
+            var json = AikoMarketplace.Json(command, SkillShelf.Shipped);
             var before = ReadIfThere(path);
             if (before != json)
             {
