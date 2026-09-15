@@ -793,4 +793,19 @@
   <data name="SkillAikoGamedesignResearch" xml:space="preserve">
     <value>30–40 игр с нужной механикой: обзор со скриншотами и интерактивные стенды по запросу.</value>
   </data>
+  <data name="ItemMeetAiko" xml:space="preserve">
+    <value>Познакомься с Aiko</value>
+  </data>
+  <data name="MeetAikoLead" xml:space="preserve">
+    <value>Aiko может говорить в твоих сессиях Claude Code своим голосом и приносит восемь навыков. В коде и коммитах она молчит.</value>
+  </data>
+  <data name="MeetAikoSettings" xml:space="preserve">
+    <value>Темперамент, лицо и навыки — в настройках, в разделе «Личность». Действует в новых сессиях.</value>
+  </data>
+  <data name="MeetAikoTurnOn" xml:space="preserve">
+    <value>Включить в среде {0}</value>
+  </data>
+  <data name="StateOn" xml:space="preserve">
+    <value>включена</value>
+  </data>
 </root>

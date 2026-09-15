@@ -9,6 +9,7 @@ public enum ChecklistItem
     Access,
     Commands,
     ProjectFolders,
+    MeetAiko,
     Place,
 }
 
@@ -38,6 +39,9 @@ public sealed record WizardFacts
     public bool? CommandsWanted { get; init; }
     public bool FoldersVisited { get; init; }
     public int BoundFolders { get; init; }
+
+    /// True: turn the persona on in environment 1 at Finish. False: "Later".
+    public bool? PersonaWanted { get; init; }
 }
 
 /// Which checklist item is ready, blocked or done, and which one opens next.
@@ -49,7 +53,7 @@ public static class WizardChecklist
     public static readonly IReadOnlyList<ChecklistItem> Order = Enum.GetValues<ChecklistItem>();
 
     /// Project folders can be left empty, and where Aiko shows already has an answer: the tray.
-    public static bool IsOptional(ChecklistItem item) => item is ChecklistItem.ProjectFolders;
+    public static bool IsOptional(ChecklistItem item) => item is ChecklistItem.ProjectFolders or ChecklistItem.MeetAiko;
 
     public static ItemState StateOf(ChecklistItem item, WizardFacts facts) => item switch
     {
@@ -73,6 +77,9 @@ public static class WizardChecklist
             : facts.FoldersVisited || facts.BoundFolders > 0 ? ItemState.Done
             : ItemState.Open,
 
+        // The persona goes into an environment, so it waits for the first one.
+        ChecklistItem.MeetAiko => Answered(facts.FirstSignedIn, facts.PersonaWanted),
+
         ChecklistItem.Place => ItemState.Done,
 
         _ => ItemState.Locked,
@@ -90,6 +97,11 @@ public static class WizardChecklist
     public static bool CanFinish(WizardFacts facts) =>
         Order.Where(item => !IsOptional(item))
             .All(item => StateOf(item, facts) is ItemState.Done or ItemState.Skipped);
+
+    /// Someone who set Aiko up before 0.2 never saw "Meet Aiko", so the checklist opens on it once
+    /// at startup (D-200). Not for a person who already turned the persona on.
+    public static bool OpensMeetAikoOnStart(AppSettings app, EnvironmentSettings environments) =>
+        environments.HasEnvironments && !app.MeetAikoShown && !environments.Environments.Any(e => e.Persona);
 
     private static ItemState Answered(bool unlocked, bool? answer) =>
         !unlocked ? ItemState.Locked

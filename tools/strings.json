@@ -252,5 +252,10 @@
 ["SkillAikoTexturing", ["Texel density from the camera: when a model gets its own sheet, when to tile.", "Плотность текселей от камеры: когда свой лист, когда тайлинг."]],
 ["SkillAikoGlbForWeb", ["A .glb for the web: size, axes, compression, a blank view where the model should be.", "Файл .glb для веба: размер, оси, сжатие, пустое окно вместо модели."]],
 ["SkillAikoPalette", ["Fit a color to the palette in OKLCH with the smallest change.", "Подогнать цвет под палитру в OKLCH с самой маленькой правкой."]],
-["SkillAikoGamedesignResearch", ["30–40 games with the mechanic you need: an overview with screenshots, and interactive demos on request.", "30–40 игр с нужной механикой: обзор со скриншотами и интерактивные стенды по запросу."]]
+["SkillAikoGamedesignResearch", ["30–40 games with the mechanic you need: an overview with screenshots, and interactive demos on request.", "30–40 игр с нужной механикой: обзор со скриншотами и интерактивные стенды по запросу."]],
+["ItemMeetAiko", ["Meet Aiko", "Познакомься с Aiko"]],
+["MeetAikoLead", ["Aiko can talk in your Claude Code sessions in her own voice, and she brings eight skills. In code and commits she stays quiet.", "Aiko может говорить в твоих сессиях Claude Code своим голосом и приносит восемь навыков. В коде и коммитах она молчит."]],
+["MeetAikoSettings", ["The temperament, the face and the skills are in settings, under Personality. It works in new sessions.", "Темперамент, лицо и навыки — в настройках, в разделе «Личность». Действует в новых сессиях."]],
+["MeetAikoTurnOn", ["Turn on in {0}", "Включить в среде {0}"]],
+["StateOn", ["on", "включена"]]
 ]

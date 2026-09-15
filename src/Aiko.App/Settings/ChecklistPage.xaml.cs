@@ -32,6 +32,7 @@ public partial class ChecklistPage : UserControl
     private bool? _accessGranted;
     private bool? _commandsWanted;
     private bool _foldersVisited;
+    private bool? _personaWanted;
     private Waiter? _waiter;
     private ChecklistItem? _opened;
 
@@ -41,7 +42,7 @@ public partial class ChecklistPage : UserControl
     {
         InitializeComponent();
 
-        _rows = [InstallRow, FirstRow, SecondRow, FoldersRow, AccessRow, CommandsRow, PlaceRow];
+        _rows = [InstallRow, FirstRow, SecondRow, FoldersRow, AccessRow, CommandsRow, MeetRow, PlaceRow];
         foreach (var row in _rows)
         {
             row.HeaderClicked += OnRowClicked;
@@ -100,6 +101,7 @@ public partial class ChecklistPage : UserControl
         CommandsWanted = _commandsWanted,
         FoldersVisited = _foldersVisited,
         BoundFolders = _projectFolders.Count,
+        PersonaWanted = _personaWanted,
     };
 
     /// Going through the wizard again starts from what is set up now, not from nothing.
@@ -126,6 +128,13 @@ public partial class ChecklistPage : UserControl
         }
 
         var settings = SettingsStore.Load();
+
+        // A persona that is on stays on. Someone who has seen this item before already had their
+        // chance to say yes, so it does not ask again by opening itself.
+        _personaWanted = _existing.Environments.Any(e => e.Persona) ? true
+            : _existing.HasEnvironments && settings.MeetAikoShown ? false
+            : null;
+
         PlaceIsland.IsChecked = settings.Place == AikoPlace.Island;
         PlaceTray.IsChecked = settings.Place != AikoPlace.Island;
         // What Windows holds, as on the general page: Finish writes this switch back to Windows.
@@ -154,6 +163,8 @@ public partial class ChecklistPage : UserControl
         DoneView.IsOpen = FinishButton.IsEnabled;
         DoneWhere.Text = PlaceIsland.IsChecked == true ? Strings.WizardDoneIsland : Strings.WizardDoneTray;
         DoneOverflow.Visibility = PlaceIsland.IsChecked == true ? Visibility.Collapsed : Visibility.Visible;
+
+        MeetTurnOn.Content = string.Format(Strings.MeetAikoTurnOn, FirstNameText());
 
         FillAccessPreview();
         FillCommandFields();
@@ -187,6 +198,7 @@ public partial class ChecklistPage : UserControl
             ChecklistItem.ProjectFolders => _projectFolders.Count > 0
                 ? string.Format(Strings.StateBound, _projectFolders.Count)
                 : Strings.StateOptional,
+            ChecklistItem.MeetAiko => state is ItemState.Done ? Strings.StateOn : Strings.StateOptional,
             ChecklistItem.Place => PlaceIsland.IsChecked == true ? Strings.StateIsland : Strings.StateTray,
             _ => "",
         };
@@ -620,6 +632,20 @@ public partial class ChecklistPage : UserControl
         MoveOn();
     }
 
+    // ---- meet Aiko ----
+
+    private void OnMeetTurnOn(object sender, RoutedEventArgs e)
+    {
+        _personaWanted = true;
+        MoveOn();
+    }
+
+    private void OnMeetLater(object sender, RoutedEventArgs e)
+    {
+        _personaWanted = false;
+        MoveOn();
+    }
+
     // ---- names and place ----
 
     private void OnNamesChanged(object sender, TextChangedEventArgs e)
@@ -660,7 +686,11 @@ public partial class ChecklistPage : UserControl
         var commands = ApplyCommands(settings);
         ApplyPlace();
 
-        Log.Write($"checklist finished: {settings.Environments.Count} environments, access={_accessGranted}, commands={_commandsWanted}, bound={_projectFolders.Count}");
+        // Installs the persona plugin when it was turned on here. With the persona off everywhere it
+        // only reads a few files.
+        PluginSync.Request("checklist finished");
+
+        Log.Write($"checklist finished: {settings.Environments.Count} environments, access={_accessGranted}, commands={_commandsWanted}, bound={_projectFolders.Count}, persona={_personaWanted}");
         Close();
         Finished?.Invoke(DoneNote(problems, commands));
     }
@@ -687,6 +717,9 @@ public partial class ChecklistPage : UserControl
             new(name, [folder])
             {
                 DirectMode = _existing.Environments.FirstOrDefault(e => e.Holds(folder))?.DirectMode ?? false,
+                // "Meet Aiko" turns it on in environment 1. "Later" never turns off what is on.
+                Persona = (_existing.Environments.FirstOrDefault(e => e.Holds(folder))?.Persona ?? false)
+                    || (index == 0 && _personaWanted == true),
                 CustomCommand = _commandFields.TryGetValue(index, out var field) ? field.Custom : null,
                 ProjectFolders = projects,
             };
@@ -731,6 +764,7 @@ public partial class ChecklistPage : UserControl
             Place = PlaceIsland.IsChecked == true ? AikoPlace.Island : AikoPlace.Tray,
             RunAtStartup = runAtStartup,
             CheckUpdates = CheckUpdates.IsChecked == true,
+            MeetAikoShown = true,
         });
     }
 
