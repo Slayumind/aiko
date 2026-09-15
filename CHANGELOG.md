@@ -5,76 +5,61 @@ All notable changes to Aiko are listed here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and Aiko uses
 [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.2.0] - 2026-09-15
+
+Aiko gets a personality, eight skills and a face. All of it is off until you turn it on.
 
 ### Added
 
-- **Groundwork for Aiko's personality.** Aiko now keeps a persona file with the temperament, the face
-  and the skills you switch off, and each environment remembers whether the persona is on. Older
-  settings files read as before, with the persona off.
-- **Aiko's persona text.** The character, the four temperaments and the rules about where she stays
-  silent (code, commits, files, errors, warnings), packed as a Claude Code plugin with the hooks
-  for her face. Not installed anywhere yet.
-- **The bridge builds the persona plugin.** `Aiko.Bridge.exe plugin aiko-persona` writes the plugin
-  for the environment it runs in under `%LOCALAPPDATA%\Aiko\plugins` and prints the folder, which is
-  how Claude Code installs a plugin from a command. Old copies are cleared after an hour.
-- **Plugins follow the persona switch.** Aiko keeps its own local plugin marketplace and, for every
-  Claude Code folder, installs or turns off its own plugins to match whether the persona is on there.
-  Other plugins and settings are never touched. With the persona off everywhere Aiko writes nothing.
-- **Personality page in settings.** A switch for each environment turns Aiko's persona on, and a
-  line warns when your own output style is set there, since the persona's style wins while it is on.
-  One choice for all environments: the face (chibi or emoji), the temperament with a sample answer,
-  and the list of Aiko's skills with a switch for each. The skills themselves come in later versions.
-- **Aiko's plugins leave with Aiko.** Uninstalling Aiko, removing an environment and Start over take
-  Aiko's plugins and marketplace out of `settings.json` first, so they stop loading at once. Then
-  Aiko asks Claude Code to uninstall them, within 20 seconds when Aiko itself is being removed. Other
-  plugins stay. The copy of `settings.json` is kept while anything of Aiko's is still in the file.
-- **Meet Aiko in the checklist.** An optional item tells what the persona does and turns it on in
-  environment 1 at Finish. If you set Aiko up before this version, the checklist opens on this item
-  once. Running the checklist again keeps the persona as it was.
-- **Session activity for Aiko's face.** Where the persona is on, its hooks tell the bridge when a
-  session works, waits for you, finishes, fails or hits a rate limit. The bridge keeps one small
-  file per session under `%LOCALAPPDATA%\Aiko\activity`, with the state and the time only, and
-  removes it when the session ends. Files older than a day go at startup. The face itself comes later.
-- **When Aiko shows a face.** With the persona on somewhere, Aiko turns each new session state and
-  each limit crossing 90% or 100% (or dropping back after a reset) into a face for two seconds. A face
-  that asks for you or reports an error is not pushed away by a calmer one. The drawing comes later.
-- **Aiko's faces.** Seven faces in two styles, chibi and emoji, drawn as vectors for dark and light
-  taskbars, with thicker lines at tray sizes. They show next to the Personality title, beside the
-  sample answer and in the Meet Aiko item, and follow the face you pick. `--snapshot-faces` draws
-  them all on one sheet.
-- **Aiko's face in the tray.** Where the persona is on, the face takes the place of the rings for two
-  seconds after an event: the rings shrink away, the face springs in, then fades and the rings come
-  back, eight pictures per step. The face follows a light or dark taskbar. With animations turned
-  off in Windows it switches at once. `--snapshot-icon out.png faces` draws every face and one whole
-  transition.
-- **Aiko's face on the island.** The island does the same as the tray icon, smoothly: its rings
-  shrink away, the face springs in over them for two seconds, and the rings grow their arcs back.
-  While the face is there, the island closes in around it with the same room on every side, on a top
-  edge and on a side edge alike. `--snapshot-island out.png Right face` draws it.
-- **Aiko's skills.** Where the persona is on and a skill's switch is on, Aiko installs the skill; a
-  new version of Aiko brings a new version of the skill on its own.
+- **Personality.** Turn it on for an environment on the new Personality page, and new Claude Code
+  sessions there talk as Aiko, an indie game developer who works next to you. Open sessions finish
+  the way they started. Pick one of four temperaments, from Quiet to 無双; the page shows a sample
+  answer for each. At every temperament, code, commits, files, pull requests, error explanations,
+  security warnings, dangerous actions and bad news are written in a plain neutral voice. If you set
+  your own output style, the page tells you that the personality's style wins while it is on. Tested
+  with Claude Code 2.1.272.
+- **Eight skills.** They come with the personality, each with its own switch:
   - `/aiko-copy`: text that reads as written by a person, for UI strings, READMEs, release notes and
     bad news, in Russian and English.
-  - `/aiko-docs-hygiene`: a state file rebuilt from measured facts, an append-only decision log, and
-    an audit of the documents for duplicates, contradictions and broken links.
+  - `/aiko-docs-hygiene`: a state file built from measured facts, an append-only decision log, and an
+    audit of the documents for duplicates, contradictions and broken links.
   - `/aiko-release-gate`: a check before a release ships, for installers and web services alike: GO or
     NO-GO, irreversible changes, rollout order and rollback plan. It never pushes anything.
   - `/aiko-glb-for-web`: a Blender model as a `.glb` that web players show correctly, with an offline
     checker for size and extensions a player cannot decode.
   - `/aiko-blender-to-unity`: meshes from Blender into Unity with the right pose and handedness,
     blended normals and cut shared parts, with export scripts for Blender.
-  - `/aiko-texturing`: texture sizes from the game camera instead of habit, a sheet or a tile, UVs from
-    world position and guides for painters, with a camera budget calculator and a density checker.
+  - `/aiko-texturing`: texture sizes from the game camera instead of habit, a sheet or a tile, UVs
+    from world position and guides for painters.
   - `/aiko-palette`: colours checked against a palette and fixed with the smallest change, in OKLCH,
     offline and without a key.
-  - `/aiko-gamedesign-research`: one game mechanic studied across 30-40 games, as an illustrated review
-    with sources, and on request small interactive stands to play with the systems.
-- **A warning about skills with the same name.** If you keep an own skill named like one of Aiko's,
-  Claude Code gives the short name to yours. The Personality page now says so under that skill and
-  tells the name Aiko's skill gets instead.
-- **A public marketplace in the repository.** Aiko's skills also install without the app:
-  `/plugin marketplace add Slayumind/aiko`.
+  - `/aiko-gamedesign-research`: one game mechanic studied across 30-40 games, as an illustrated
+    review with sources, and on request small interactive stands to play with the systems.
+
+  Aiko installs the personality and the skills as Claude Code plugins from a marketplace on your own
+  computer, so nothing is downloaded. A new version of Aiko brings new versions of the skills by
+  itself. Your own plugins and settings stay as they are.
+- **Skills without Aiko.** `/plugin marketplace add Slayumind/aiko`, then
+  `/plugin install aiko-copy@slayumind-aiko` or any other skill.
+- **Aiko's face.** Seven faces, chibi or emoji. When a session starts working, waits for you,
+  finishes, fails or runs out of limit, or when a limit crosses 90% or 100%, the face takes the place
+  of the rings in the tray or on the island for two seconds, with a short animation. The island
+  closes in around the face. The face follows a light or dark taskbar, and with animations turned off
+  in Windows it switches at once. Nothing runs while nothing happens.
+- **Meet Aiko.** An optional checklist item that tells what the personality does and turns it on in
+  environment 1. If you set Aiko up before this version, the checklist opens on it once.
+- **A warning about skills with the same name.** If you keep your own skill named like one of Aiko's,
+  Claude Code gives the short name to yours. The Personality page says so under that skill.
+
+### Changed
+
+- **Removing Aiko takes its plugins with it.** Uninstalling Aiko, removing an environment and Start
+  over take Aiko's plugins and marketplace out of Claude Code. Other plugins stay. The copy of
+  `settings.json` is kept while anything of Aiko's is still in the file.
+- **Privacy.** Where the personality is on, Claude Code tells Aiko when a session changes state. Aiko
+  reads only the kind of event and the session ID, keeps the state and the time in a small local file
+  with the ID hashed, and removes the file when the session ends. Nothing leaves your computer.
+  [PRIVACY.md](PRIVACY.md) has the details.
 
 ### Fixed
 
