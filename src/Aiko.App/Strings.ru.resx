@@ -41,7 +41,7 @@
     <value>{0} · неделя</value>
   </data>
   <data name="CardPercentUsed" xml:space="preserve">
-    <value>истрачено {0}%</value>
+    <value>потрачено {0}%</value>
   </data>
   <data name="CardResets" xml:space="preserve">
     <value>сброс через {0}</value>
