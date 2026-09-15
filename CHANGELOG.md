@@ -50,7 +50,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   transition.
 - **Aiko's face on the island.** The island does the same as the tray icon, smoothly: its rings
   shrink away, the face springs in over them for two seconds, and the rings grow their arcs back.
-  The island keeps its size. `--snapshot-island out.png Top face` draws it.
+  While the face is there, the island closes in around it with the same room on every side, on a top
+  edge and on a side edge alike. `--snapshot-island out.png Right face` draws it.
 - **Aiko's skills.** Where the persona is on and a skill's switch is on, Aiko installs the skill; a
   new version of Aiko brings a new version of the skill on its own.
   - `/aiko-copy`: text that reads as written by a person, for UI strings, READMEs, release notes and

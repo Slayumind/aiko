@@ -49,6 +49,17 @@ public class TrayFaceMotionTests
     }
 
     [Fact]
+    public void The_island_shrinks_to_the_face_while_the_rings_go_and_grows_back_with_them()
+    {
+        Assert.Equal(0, TrayFaceMotion.IslandFit(FacePhase.RingsOut, 0));
+        Assert.Equal(1, TrayFaceMotion.IslandFit(FacePhase.RingsOut, 1));
+        Assert.Equal(1, TrayFaceMotion.IslandFit(FacePhase.FaceIn, 0.3));
+        Assert.Equal(1, TrayFaceMotion.IslandFit(FacePhase.FaceOut, 0.7));
+        Assert.Equal(0, TrayFaceMotion.IslandFit(FacePhase.RingsBack, 1));
+        Assert.Equal(0.5, TrayFaceMotion.IslandFit(FacePhase.RingsBack, 0.5), 6);
+    }
+
+    [Fact]
     public void The_face_is_fully_there_400_ms_after_the_event()
     {
         Assert.Equal(TimeSpan.FromMilliseconds(400), TrayFaceMotion.Arrival);

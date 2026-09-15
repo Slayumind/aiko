@@ -272,6 +272,7 @@ static class Program
             if (args is [.., "face"])
             {
                 panel.SetFace(TrayFaceMotion.At(FacePhase.FaceIn, 1), FaceDrawing.For(FaceStyle.Chibi, AikoFace.Done, FaceGround.Dark, 18));
+                panel.MarkForMeasure();
             }
 
             Snapshot.Write(panel, islandPath);
