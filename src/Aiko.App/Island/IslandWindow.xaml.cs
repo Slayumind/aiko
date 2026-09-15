@@ -367,6 +367,10 @@ public partial class IslandWindow : Window
 
     private IReadOnlyList<CardState> Cards { get; set; } = [];
 
+    public void ShowFace(System.Windows.Media.ImageSource face) => Panel.ShowFace(face);
+
+    public void HideFace() => Panel.HideFace();
+
     public void Update(IReadOnlyList<CardState> cards)
     {
         var crossed = IslandReveal.ToneRose(Cards, cards);

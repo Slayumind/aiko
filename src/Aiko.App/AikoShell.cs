@@ -381,9 +381,24 @@ sealed class AikoShell : IDisposable
         return old;
     }
 
-    /// A face comes or goes (D-211). Only on the tray icon for now; the island follows later.
+    /// A face comes or goes (D-211), on the tray icon or on the island, wherever Aiko lives.
     private void OnFaceChanged(AikoFace? face)
     {
+        var style = SettingsStore.LoadPersona().Face;
+
+        if (_island is { } island)
+        {
+            // The island is always dark, whatever the taskbar.
+            if (face is { } onIsland)
+            {
+                island.ShowFace(FaceDrawing.For(style, onIsland, FaceGround.Dark, IslandFaceSize));
+            }
+            else
+            {
+                island.HideFace();
+            }
+        }
+
         if (_faceAnimator is null || !_iconShown)
         {
             return;
@@ -391,13 +406,15 @@ sealed class AikoShell : IDisposable
 
         if (face is { } shown)
         {
-            _faceAnimator.Show(FaceDrawing.For(SettingsStore.LoadPersona().Face, shown, TaskbarTheme.Ground(), _iconSize));
+            _faceAnimator.Show(FaceDrawing.For(style, shown, TaskbarTheme.Ground(), _iconSize));
         }
         else
         {
             _faceAnimator.Hide();
         }
     }
+
+    private const double IslandFaceSize = 18;
 
     /// One frame of a face transition: only the picture changes, not the tooltip.
     private void RedrawIcon()

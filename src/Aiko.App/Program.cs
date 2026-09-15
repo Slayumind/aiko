@@ -229,11 +229,17 @@ static class Program
                 : ScreenEdge.Top;
 
             // --snapshot-island out.png Left open: the island unfolded, as on a hover.
+            // --snapshot-island out.png Top face: a face in place of the rings.
             var panel = new IslandPanel();
             panel.Show(CardSnapshot.Example(), edge);
             if (args is [.., "open"])
             {
                 panel.Unfold(true, animate: false);
+            }
+
+            if (args is [.., "face"])
+            {
+                panel.SetFace(TrayFaceMotion.At(FacePhase.FaceIn, 1), FaceDrawing.For(FaceStyle.Chibi, AikoFace.Done, FaceGround.Dark, 18));
             }
 
             Snapshot.Write(panel, islandPath);

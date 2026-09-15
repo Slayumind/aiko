@@ -48,6 +48,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   back, eight pictures per step. The face follows a light or dark taskbar. With animations turned
   off in Windows it switches at once. `--snapshot-icon out.png faces` draws every face and one whole
   transition.
+- **Aiko's face on the island.** The island does the same as the tray icon, smoothly: its rings
+  shrink away, the face springs in over them for two seconds, and the rings grow their arcs back.
+  The island keeps its size. `--snapshot-island out.png Top face` draws it.
 
 ### Fixed
 
