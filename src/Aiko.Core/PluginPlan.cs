@@ -11,6 +11,7 @@ public enum PluginStepKind
     Enable,
     Disable,
     Update,
+    Uninstall,
 }
 
 public sealed record PluginStep(PluginStepKind Kind, string Target)
@@ -23,6 +24,7 @@ public sealed record PluginStep(PluginStepKind Kind, string Target)
         PluginStepKind.Install => ["plugin", "install", Target, "-y", "--scope", "user"],
         PluginStepKind.Enable => ["plugin", "enable", Target, "--scope", "user"],
         PluginStepKind.Disable => ["plugin", "disable", Target, "--scope", "user"],
+        PluginStepKind.Uninstall => ["plugin", "uninstall", Target, "--scope", "user"],
         _ => ["plugin", "update", Target, "-y", "--scope", "user"],
     };
 }
@@ -159,6 +161,23 @@ public static class PluginPlan
         foreach (var id in state.Enabled.Where(id => !desired.Contains(id)).Order(StringComparer.Ordinal))
         {
             steps.Add(new(PluginStepKind.Disable, id));
+        }
+
+        return steps;
+    }
+
+    /// Everything of Aiko's that Claude Code keeps for a folder, for when Aiko or the environment
+    /// goes. The plugins first: without the marketplace Claude Code may not know how to remove them.
+    public static IReadOnlyList<PluginStep> Removal(PluginState state)
+    {
+        var steps = state.Installed
+            .Order(StringComparer.Ordinal)
+            .Select(id => new PluginStep(PluginStepKind.Uninstall, id))
+            .ToList();
+
+        if (state.MarketplaceFolder is not null)
+        {
+            steps.Add(new(PluginStepKind.RemoveMarketplace, AikoMarketplace.Name));
         }
 
         return steps;

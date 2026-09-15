@@ -27,6 +27,15 @@ static class PluginSync
     /// new text for the next session.
     public static void PersonaChanged() => Enqueue(() => Reconcile("persona changed", updatePersona: true));
 
+    /// For an environment that is going: its keys already left settings.json, and this takes out
+    /// what Claude Code keeps in its own plugin files.
+    public static void Remove(IReadOnlyCollection<string> folders, string why) =>
+        Enqueue(() => RemoveFrom(folders, why, DateTimeOffset.MaxValue));
+
+    /// For the uninstaller, which cannot wait long: stops at the deadline, whatever is left.
+    public static void RemoveNow(IReadOnlyCollection<string> folders, DateTimeOffset deadline) =>
+        RemoveFrom(folders, "uninstall", deadline);
+
     private static void Enqueue(Action work)
     {
         lock (Gate)
@@ -89,11 +98,45 @@ static class PluginSync
         var cli = new ClaudeCli(claude);
         foreach (var (folder, _, steps) in plans)
         {
-            var results = PluginReconciler.Apply(cli, folder, steps);
-            var failed = results.Count(r => !r.Result.Succeeded);
-            Log.Write($"plugins: {why}: {Path.GetFileName(folder)}: {results.Count} steps, {failed} failed"
-                + (failed > 0 ? " (" + string.Join(", ", results.Where(r => !r.Result.Succeeded).Select(r => $"{r.Step.Kind} exit {r.Result.ExitCode}{(r.Result.TimedOut ? " timeout" : "")}")) + ")" : ""));
+            LogResults(why, folder, PluginReconciler.Apply(cli, folder, steps));
         }
+    }
+
+    private static void RemoveFrom(IReadOnlyCollection<string> folders, string why, DateTimeOffset deadline)
+    {
+        var withPlugins = folders
+            .Where(Directory.Exists)
+            .Select(folder => (Folder: folder, Steps: PluginPlan.Removal(ReadState(folder))))
+            .Where(p => p.Steps.Count > 0)
+            .ToList();
+
+        if (withPlugins.Count == 0)
+        {
+            return;
+        }
+
+        if (ClaudeLauncher.FindClaude() is not { } claude)
+        {
+            Log.Write($"plugins: {why}: claude.exe not found, the plugins stay turned off");
+            return;
+        }
+
+        var cli = new ClaudeCli(claude);
+        foreach (var (folder, steps) in withPlugins)
+        {
+            var results = PluginReconciler.Apply(cli, folder, steps, TimeProvider.System, deadline);
+
+            // The command writes an empty enabledPlugins back into the file Aiko just cleaned.
+            ClaudeSettingsFile.TidyAfterPluginRemoval(folder);
+            LogResults(why, folder, results);
+        }
+    }
+
+    private static void LogResults(string why, string folder, IReadOnlyList<(PluginStep Step, CliResult Result)> results)
+    {
+        var failed = results.Where(r => !r.Result.Succeeded).ToList();
+        Log.Write($"plugins: {why}: {Path.GetFileName(folder)}: {results.Count} steps, {failed.Count} failed"
+            + (failed.Count > 0 ? " (" + string.Join(", ", failed.Select(r => $"{r.Step.Kind} exit {r.Result.ExitCode}{(r.Result.TimedOut ? " timeout" : "")}")) + ")" : ""));
     }
 
     private static IReadOnlyList<PluginStep> StepsFor(IReadOnlySet<string> desired, PluginState state, bool updatePersona)

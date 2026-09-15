@@ -66,12 +66,20 @@ public sealed class EnvironmentsEditor
 
         foreach (var folder in removed.ConfigDirectories)
         {
-            ClaudeSettingsFile.RemoveBridge(folder);
+            ClaudeSettingsFile.RemoveAiko(folder);
         }
 
         Commit(EnvironmentEdits.Remove(Current, environment, Home), "removed an environment");
 
-        return toRecycleBin && removed.ConfigDirectories.All(RecycleBin.Send);
+        // A folder in the Recycle Bin took its plugins with it. Only a folder that stayed gets
+        // claude.exe, so it never writes into a folder that is being moved.
+        var recycled = toRecycleBin && removed.ConfigDirectories.All(RecycleBin.Send);
+        if (!recycled)
+        {
+            PluginSync.Remove(removed.ConfigDirectories, "removed an environment");
+        }
+
+        return recycled;
     }
 
     /// Reads the file again after the checklist wrote it.
@@ -88,7 +96,7 @@ public sealed class EnvironmentsEditor
         var before = Current;
         foreach (var folder in before.Environments.SelectMany(e => e.ConfigDirectories))
         {
-            ClaudeSettingsFile.RemoveBridge(folder);
+            ClaudeSettingsFile.RemoveAiko(folder);
         }
 
         EnvironmentSetup.Undo();
@@ -96,13 +104,16 @@ public sealed class EnvironmentsEditor
         SettingsStore.SaveEnvironments(Current);
         Log.Write("settings: started over");
 
-        if (recycleSecond && before.Second(Home) is { } second)
+        var recycled = recycleSecond && before.Second(Home) is { } second ? second.ConfigDirectories : [];
+        foreach (var folder in recycled)
         {
-            foreach (var folder in second.ConfigDirectories)
-            {
-                RecycleBin.Send(folder);
-            }
+            RecycleBin.Send(folder);
         }
+
+        // The persona file stays: the temperament, the face and the skills are kept for next time.
+        PluginSync.Remove(
+            before.Environments.SelectMany(e => e.ConfigDirectories).Except(recycled, StringComparer.OrdinalIgnoreCase).ToList(),
+            "started over");
 
         Changed?.Invoke();
     }

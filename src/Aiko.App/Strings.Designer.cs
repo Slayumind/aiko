@@ -570,7 +570,7 @@ public static class Strings
     /// Remove environment
     public static string RemoveEnvironment => Get("RemoveEnvironment");
 
-    /// The Aiko line leaves this folder's settings.json, and so do the command {0} and the bindi...
+    /// Aiko's line and plugins leave this folder's settings.json, and so do the command {0} and ...
     public static string RemoveEnvironmentLine => Get("RemoveEnvironmentLine");
 
     /// And move the folder to the Recycle Bin
@@ -639,7 +639,7 @@ public static class Strings
     /// Removes the environments from Aiko and opens the checklist right here.
     public static string RestartWhat => Get("RestartWhat");
 
-    /// Aiko removes the environments, its lines in settings.json, the commands {0}, the folder b...
+    /// Aiko removes the environments, its lines and plugins in settings.json, the commands {0}, ...
     public static string RestartLine => Get("RestartLine");
 
     /// And move {0} to the Recycle Bin

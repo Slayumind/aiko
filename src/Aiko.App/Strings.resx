@@ -581,7 +581,7 @@
     <value>Remove environment</value>
   </data>
   <data name="RemoveEnvironmentLine" xml:space="preserve">
-    <value>The Aiko line leaves this folder's settings.json, and so do the command {0} and the bindings to {1}.</value>
+    <value>Aiko's line and plugins leave this folder's settings.json, and so do the command {0} and the bindings to {1}.</value>
   </data>
   <data name="MoveToRecycleBin" xml:space="preserve">
     <value>And move the folder to the Recycle Bin</value>
@@ -650,7 +650,7 @@
     <value>Removes the environments from Aiko and opens the checklist right here.</value>
   </data>
   <data name="RestartLine" xml:space="preserve">
-    <value>Aiko removes the environments, its lines in settings.json, the commands {0}, the folder bindings and its folder in PATH, and turns the PowerShell profile functions back on. Accounts and history stay in the folders.</value>
+    <value>Aiko removes the environments, its lines and plugins in settings.json, the commands {0}, the folder bindings and its folder in PATH, and turns the PowerShell profile functions back on. Accounts and history stay in the folders.</value>
   </data>
   <data name="RestartBin" xml:space="preserve">
     <value>And move {0} to the Recycle Bin</value>
