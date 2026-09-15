@@ -10,6 +10,9 @@ namespace Aiko.App;
 /// in Aiko.Core.EnvironmentEdits; this class only does the writing.
 public sealed class EnvironmentsEditor
 {
+    private static HashSet<string> PersonaSwitches(EnvironmentSettings settings) =>
+        settings.Environments.Where(e => e.Persona).SelectMany(e => e.ConfigDirectories).ToHashSet(StringComparer.OrdinalIgnoreCase);
+
     private static readonly string Home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
     public EnvironmentSettings Current { get; private set; } = SettingsStore.LoadEnvironments();
@@ -40,6 +43,11 @@ public sealed class EnvironmentsEditor
         if (!HasBindings(before) && HasBindings(next))
         {
             AddReminderHooks(next);
+        }
+
+        if (!PersonaSwitches(before).SetEquals(PersonaSwitches(next)))
+        {
+            PluginSync.Request("persona switched");
         }
 
         Log.Write($"settings: {what}");
