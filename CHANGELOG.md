@@ -36,6 +36,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   session works, waits for you, finishes, fails or hits a rate limit. The bridge keeps one small
   file per session under `%LOCALAPPDATA%\Aiko\activity`, with the state and the time only, and
   removes it when the session ends. Files older than a day go at startup. The face itself comes later.
+- **When Aiko shows a face.** With the persona on somewhere, Aiko turns each new session state and
+  each limit crossing 90% or 100% (or dropping back after a reset) into a face for two seconds. A face
+  that asks for you or reports an error is not pushed away by a calmer one. The drawing comes later.
 
 ### Fixed
 
