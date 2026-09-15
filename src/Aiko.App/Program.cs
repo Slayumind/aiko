@@ -86,6 +86,14 @@ static class Program
             return;
         }
 
+        // The whole way from a hook to a face, on a made-up environment: the real bridge writes the
+        // session file, the watcher sees it and the player shows and hides faces. Draws nothing.
+        if (args is ["--try-activity", ..])
+        {
+            TryActivity();
+            return;
+        }
+
         // What uninstalling does to the plugins of one folder: the keys, then claude.exe with the
         // same 20 second budget. Meant for a throwaway config folder, not a live one.
         if (args is ["--try-plugin-removal", var pluginFolder, ..])
@@ -263,6 +271,50 @@ static class Program
         application.Exit += (_, _) => shell?.Dispose();
 
         application.Run();
+    }
+
+    private static void TryActivity()
+    {
+        var folder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".claude-aiko-probe");
+        var clock = System.Diagnostics.Stopwatch.StartNew();
+        var faces = new List<string>();
+
+        var dispatcher = System.Windows.Threading.Dispatcher.CurrentDispatcher;
+        using var player = new TrayMoodPlayer(dispatcher);
+        player.FaceChanged += face => faces.Add($"{face?.ToString() ?? "rings"} {clock.Elapsed.TotalSeconds:0.0}s");
+        player.Follow(new EnvironmentSettings([new AikoEnvironment("probe", [folder]) { Persona = true }]));
+
+        void Send(string hookEvent)
+        {
+            var start = new System.Diagnostics.ProcessStartInfo(BridgePath.Current()!, "hook")
+            {
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardInput = true,
+            };
+            start.Environment["CLAUDE_CONFIG_DIR"] = folder;
+            using var bridge = System.Diagnostics.Process.Start(start)!;
+            bridge.StandardInput.Write($$"""{ "session_id": "aiko-probe", "hook_event_name": "{{hookEvent}}" }""");
+            bridge.StandardInput.Close();
+            bridge.WaitForExit();
+        }
+
+        var frame = new System.Windows.Threading.DispatcherFrame();
+        Task.Run(() =>
+        {
+            Send("UserPromptSubmit");
+            Thread.Sleep(3000);
+            Send("PermissionRequest");
+            Thread.Sleep(500);
+            Send("PostToolUse");
+            Thread.Sleep(3000);
+            Send("Stop");
+            Thread.Sleep(3000);
+            Send("SessionEnd");
+        }).ContinueWith(_ => dispatcher.BeginInvoke(() => frame.Continue = false));
+        System.Windows.Threading.Dispatcher.PushFrame(frame);
+
+        Log.Write($"--try-activity: {string.Join(", ", faces)}");
     }
 
     /// The last part of a folder path, whichever separator it ends with.

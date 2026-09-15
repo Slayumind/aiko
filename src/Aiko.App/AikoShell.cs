@@ -42,6 +42,9 @@ sealed class AikoShell : IDisposable
 
     private readonly Application _application;
     private readonly SnapshotWatcher _watcher = new();
+
+    /// The face for two seconds after an event (D-211). Drawn by the icon and the island later.
+    private TrayMoodPlayer? _mood;
     private readonly uint _taskbarCreatedMessage;
     private HwndSource? _source;
     private DispatcherTimer? _hover;
@@ -78,6 +81,9 @@ sealed class AikoShell : IDisposable
         _hover.Tick += OnHoverFinished;
 
         _watcher.Updated += OnSnapshotsChanged;
+
+        _mood = new TrayMoodPlayer(_application.Dispatcher);
+        _mood.Follow(SettingsStore.LoadEnvironments());
 
         var poller = new DirectPoller(_application.Dispatcher);
         poller.Reported += OnSnapshotsChanged;
@@ -183,6 +189,7 @@ sealed class AikoShell : IDisposable
     {
         _watcher.Updated -= OnSnapshotsChanged;
         _watcher.Dispose();
+        _mood?.Dispose();
         _direct?.Dispose();
         _updates?.Dispose();
 
@@ -284,6 +291,7 @@ sealed class AikoShell : IDisposable
     private void OnSnapshotsChanged() =>
         _application.Dispatcher.BeginInvoke(() =>
         {
+            _mood?.OnLimits(EnvironmentSnapshots.Combine(SettingsStore.LoadEnvironments(), _watcher.ByFile));
             var cards = Cards();
             UpdateIcon();
             _island?.Update(cards);
@@ -682,6 +690,7 @@ sealed class AikoShell : IDisposable
 
         FollowDirectMode();
         NoteWhereWeHaveNoAccess();
+        _mood?.Follow(SettingsStore.LoadEnvironments());
         UpdateIcon();
         _card?.Update(CurrentCard());
     }
