@@ -60,6 +60,7 @@ Aiko gets a personality, eight skills and a face. All of it is off until you tur
   reads only the kind of event and the session ID, keeps the state and the time in a small local file
   with the ID hashed, and removes the file when the session ends. Nothing leaves your computer.
   [PRIVACY.md](PRIVACY.md) has the details.
+- **The card in Russian** says «потрачено» instead of «истрачено». It is the everyday word.
 
 ### Fixed
 

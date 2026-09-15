@@ -2,7 +2,7 @@
 ["CardSession", ["Session · 5 hours", "Сессия · 5 часов"]],
 ["CardWeek", ["Week", "Неделя"]],
 ["CardModelWeek", ["{0} · week", "{0} · неделя"]],
-["CardPercentUsed", ["{0}% used", "истрачено {0}%"]],
+["CardPercentUsed", ["{0}% used", "потрачено {0}%"]],
 ["CardResets", ["resets in {0}", "сброс через {0}"]],
 ["CardJustReset", ["just reset", "только что сброшен"]],
 ["CardLastsUntilReset", ["lasts until reset", "хватит до сброса"]],
