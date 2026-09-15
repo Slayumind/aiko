@@ -67,6 +67,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
     world position and guides for painters, with a camera budget calculator and a density checker.
   - `/aiko-palette`: colours checked against a palette and fixed with the smallest change, in OKLCH,
     offline and without a key.
+  - `/aiko-gamedesign-research`: one game mechanic studied across 30-40 games, as an illustrated review
+    with sources, and on request small interactive stands to play with the systems.
 - **A public marketplace in the repository.** Aiko's skills also install without the app:
   `/plugin marketplace add Slayumind/aiko`.
 
