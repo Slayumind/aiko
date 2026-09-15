@@ -38,10 +38,14 @@ jobs:
         run: dotnet test Aiko.slnx --configuration Release --no-build --verbosity quiet
 
       - name: Test the skill scripts
-        # The scripts inside Aiko's skills have tests of their own. Node comes with the runner.
+        # The scripts inside Aiko's skills have tests of their own. Node and Python come with the runner.
         shell: pwsh
         run: |
           Get-ChildItem plugins -Recurse -Filter *.test.mjs | ForEach-Object { node --test $_.FullName; if ($LASTEXITCODE -ne 0) { exit 1 } }
+          Get-ChildItem plugins -Recurse -Filter test_*.py | Select-Object -ExpandProperty DirectoryName -Unique | ForEach-Object {
+            Push-Location $_; python -m unittest; $code = $LASTEXITCODE; Pop-Location
+            if ($code -ne 0) { exit 1 }
+          }
 
       - name: Validate the plugins
         # Claude Code checks the marketplace and every plugin the way it would when installing them.

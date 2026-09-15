@@ -59,6 +59,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
     an audit of the documents for duplicates, contradictions and broken links.
   - `/aiko-release-gate`: a check before a release ships, for installers and web services alike: GO or
     NO-GO, irreversible changes, rollout order and rollback plan. It never pushes anything.
+  - `/aiko-glb-for-web`: a Blender model as a `.glb` that web players show correctly, with an offline
+    checker for size and extensions a player cannot decode.
 - **A public marketplace in the repository.** Aiko's skills also install without the app:
   `/plugin marketplace add Slayumind/aiko`.
 
