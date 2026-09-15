@@ -41,7 +41,7 @@ jobs:
         # The scripts inside Aiko's skills have tests of their own. Node and Python come with the runner.
         shell: pwsh
         run: |
-          Get-ChildItem plugins -Recurse -Filter *.test.mjs | ForEach-Object { node --test $_.FullName; if ($LASTEXITCODE -ne 0) { exit 1 } }
+          Get-ChildItem plugins, tools -Recurse -Filter *.test.mjs | ForEach-Object { node --test $_.FullName; if ($LASTEXITCODE -ne 0) { exit 1 } }
           Get-ChildItem plugins -Recurse -Filter test_*.py | Select-Object -ExpandProperty DirectoryName -Unique | ForEach-Object {
             Push-Location $_; python -m unittest; $code = $LASTEXITCODE; Pop-Location
             if ($code -ne 0) { exit 1 }
