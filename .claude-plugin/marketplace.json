@@ -16,6 +16,11 @@
       "name": "aiko-docs-hygiene",
       "source": "./plugins/aiko-docs-hygiene",
       "description": "Keep project documents honest: a state file rebuilt from measured facts, an append-only decision log, and an audit for duplicates and contradictions."
+    },
+    {
+      "name": "aiko-release-gate",
+      "source": "./plugins/aiko-release-gate",
+      "description": "A release check before shipping: GO or NO-GO, irreversible changes named, rollout order and rollback plan. Nothing is pushed."
     }
   ]
 }
