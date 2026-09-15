@@ -41,6 +41,11 @@
       "name": "aiko-palette",
       "source": "./plugins/aiko-palette",
       "description": "Check colours against a palette and fix them with the smallest change, in OKLCH. Offline, no key."
+    },
+    {
+      "name": "aiko-gamedesign-research",
+      "source": "./plugins/aiko-gamedesign-research",
+      "description": "One game mechanic across 30-40 games: an illustrated review with sources, then interactive stands to play with the systems."
     }
   ]
 }
