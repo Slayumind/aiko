@@ -127,6 +127,31 @@ sealed class AikoShell : IDisposable
         }
 
         NoteWhereWeHaveNoAccess();
+        ClearStaleActivity();
+    }
+
+    /// A session that never sent SessionEnd leaves its file behind (D-206). A day later it goes.
+    private static void ClearStaleActivity()
+    {
+        var folder = ActivityRecord.Folder(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
+        if (!Directory.Exists(folder))
+        {
+            return;
+        }
+
+        foreach (var file in new DirectoryInfo(folder).EnumerateFiles())
+        {
+            if (ActivityRecord.IsStale(file.LastWriteTimeUtc, DateTimeOffset.UtcNow))
+            {
+                try
+                {
+                    file.Delete();
+                }
+                catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+                {
+                }
+            }
+        }
     }
 
     /// Our own line goes stale on its own: reinstalling moves the bridge, and installing Git

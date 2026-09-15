@@ -23,6 +23,14 @@ try
         return 0;
     }
 
+    // The persona plugin's hooks (D-206). Before this branch a hook call fell through to the status
+    // line code, which could run the person's own status line with hook input.
+    if (args is [PersonaPlugin.HookArgument, ..])
+    {
+        RecordActivity(input);
+        return 0;
+    }
+
     // Without the variable Claude Code works in ~\.claude, so the bridge does too. Naming that case
     // anything else made the app look for a file that was never written.
     var configDirectory = ClaudeConfigFolder.Resolve(
@@ -89,6 +97,41 @@ static void RemindAboutBinding(string input)
     {
         WriteOutput(SessionReminder.HookOutput(message));
     }
+}
+
+/// One small file per session for the face in the tray. An event that means nothing for the face
+/// writes nothing, and the same activity is not written again every few seconds.
+static void RecordActivity(string input)
+{
+    if (HookEvent.FromJson(input) is not { } hook)
+    {
+        return;
+    }
+
+    var configDirectory = ClaudeConfigFolder.Resolve(
+        Environment.GetEnvironmentVariable("CLAUDE_CONFIG_DIR"),
+        Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
+    var folder = ActivityRecord.Folder(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
+    var environment = SnapshotName.For(configDirectory);
+    var path = Path.Combine(folder, ActivityRecord.FileName(environment, hook.SessionId));
+
+    if (hook.Activity == SessionActivity.Ended)
+    {
+        File.Delete(path);
+        return;
+    }
+
+    var now = DateTimeOffset.Now;
+    var written = File.Exists(path) ? ActivityRecord.FromJson(File.ReadAllText(path)) : null;
+    if (!ActivityRecord.NeedsWrite(written, hook.Activity, now))
+    {
+        return;
+    }
+
+    Directory.CreateDirectory(folder);
+    var temporary = path + "." + Environment.ProcessId + ".tmp";
+    File.WriteAllText(temporary, new ActivityRecord(environment, hook.Activity, now).ToJson(), new UTF8Encoding(false));
+    File.Move(temporary, path, overwrite: true);
 }
 
 /// Writes the plugin folder for the environment this run belongs to and prints its path.
