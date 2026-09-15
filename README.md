@@ -96,6 +96,7 @@ linked to one person. [PRIVACY.md](PRIVACY.md) lists what is sent.
 
 - Windows 10 version 1809 or newer, 64-bit.
 - Claude Code 2.1.80 or newer. Older versions don't report limits.
+- For the personality and the skills, a recent Claude Code: tested with 2.1.272.
 - A Claude.ai Pro, Max or Team plan. Enterprise accounts don't report limits.
 
 ## Install
