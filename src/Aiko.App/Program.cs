@@ -46,6 +46,13 @@ static class Program
             return;
         }
 
+        // Every face in both styles, on a dark and a light taskbar, at the sizes the tray uses.
+        if (args is ["--snapshot-faces", var facesPath, ..])
+        {
+            FaceSheet.Write(facesPath);
+            return;
+        }
+
         // The same for the card: draw it on test numbers and stop.
         if (args is ["--snapshot", var cardPath, ..])
         {
