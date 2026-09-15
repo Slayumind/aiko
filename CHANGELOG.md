@@ -16,6 +16,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - **Aiko's persona text.** The character, the four temperaments and the rules about where she stays
   silent (code, commits, files, errors, warnings), packed as a Claude Code plugin with the hooks
   for her face. Not installed anywhere yet.
+- **The bridge builds the persona plugin.** `Aiko.Bridge.exe plugin aiko-persona` writes the plugin
+  for the environment it runs in under `%LOCALAPPDATA%\Aiko\plugins` and prints the folder, which is
+  how Claude Code installs a plugin from a command. Old copies are cleared after an hour.
 
 ### Fixed
 
