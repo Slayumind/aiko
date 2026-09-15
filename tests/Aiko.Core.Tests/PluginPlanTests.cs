@@ -56,6 +56,15 @@ public class PluginPlanTests
         Assert.Equal("\"x.exe\" plugin aiko-persona", plugin.GetProperty("source").GetProperty("command").GetString());
     }
 
+    [Fact]
+    public void The_marketplace_file_keeps_quotes_readable()
+    {
+        var text = AikoMarketplace.Json(@"""%LOCALAPPDATA%\x.exe"" plugin aiko-persona");
+
+        Assert.DoesNotContain(@"\u0022", text);
+        Assert.Contains(@"""\""%LOCALAPPDATA%\\x.exe\"" plugin aiko-persona""", text);
+    }
+
     // ---- what a folder has ----
 
     [Fact]

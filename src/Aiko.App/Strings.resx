@@ -667,4 +667,130 @@
   <data name="StateWorkingNow" xml:space="preserve">
     <value>working now</value>
   </data>
+  <data name="NavPersonality" xml:space="preserve">
+    <value>Personality</value>
+  </data>
+  <data name="NavPersonaOn" xml:space="preserve">
+    <value>on: {0}</value>
+  </data>
+  <data name="NavPersonaOff" xml:space="preserve">
+    <value>off</value>
+  </data>
+  <data name="SectionWhereAikoTalks" xml:space="preserve">
+    <value>WHERE AIKO TALKS</value>
+  </data>
+  <data name="PersonaNewSessions" xml:space="preserve">
+    <value>Works in new sessions. Open sessions finish the way they started.</value>
+  </data>
+  <data name="PersonaOwnStyle" xml:space="preserve">
+    <value>While the personality is on, your style {0} doesn't work. Turn it off and it comes back.</value>
+  </data>
+  <data name="SectionFace" xml:space="preserve">
+    <value>FACE</value>
+  </data>
+  <data name="FaceChibi" xml:space="preserve">
+    <value>Chibi</value>
+  </data>
+  <data name="FaceEmoji" xml:space="preserve">
+    <value>Emoji</value>
+  </data>
+  <data name="FaceWhere" xml:space="preserve">
+    <value>This is how Aiko looks in the tray, on the island and in windows.</value>
+  </data>
+  <data name="SectionTemperament" xml:space="preserve">
+    <value>TEMPERAMENT</value>
+  </data>
+  <data name="TemperamentQuiet" xml:space="preserve">
+    <value>Quiet</value>
+  </data>
+  <data name="TemperamentNormal" xml:space="preserve">
+    <value>Normal</value>
+  </data>
+  <data name="TemperamentBright" xml:space="preserve">
+    <value>Bright</value>
+  </data>
+  <data name="TemperamentQuietAbout" xml:space="preserve">
+    <value>Almost no character: one warm line at the end of an answer.</value>
+  </data>
+  <data name="TemperamentNormalAbout" xml:space="preserve">
+    <value>A short interjection at the start, a quick verdict at the end. Japanese words now and then.</value>
+  </data>
+  <data name="TemperamentBrightAbout" xml:space="preserve">
+    <value>An interjection in every answer, game metaphors, Japanese words more often.</value>
+  </data>
+  <data name="TemperamentMusouAbout" xml:space="preserve">
+    <value>Everything at full. In code, commits, files and errors she still stays quiet.</value>
+  </data>
+  <data name="SectionSampleReply" xml:space="preserve">
+    <value>HOW SHE'LL ANSWER</value>
+  </data>
+  <data name="SampleQuestion" xml:space="preserve">
+    <value>Why does the reset countdown show 0 minutes?</value>
+  </data>
+  <data name="SampleBody" xml:space="preserve">
+    <value>The limits test passed by luck: rounding went down, so a reset at 14:59:30 showed as “in 0 min”. I fixed ResetCountdown and added a test for the edge.</value>
+  </data>
+  <data name="SampleBodyBright" xml:space="preserve">
+    <value>The limits test passed by luck: rounding went down, so a reset at 14:59:30 hid behind “in 0 min”, like a mimic chest in Dark Souls. I fixed ResetCountdown and added a test for the edge.</value>
+  </data>
+  <data name="SampleBodyMusouTail" xml:space="preserve">
+    <value> Parried it, like in Elden Ring.</value>
+  </data>
+  <data name="SampleOpenNormal" xml:space="preserve">
+    <value>えへへ, got it.</value>
+  </data>
+  <data name="SampleOpenBright" xml:space="preserve">
+    <value>やった, got it!</value>
+  </data>
+  <data name="SampleOpenMusou" xml:space="preserve">
+    <value>やった〜! すごい, what a sneaky one!</value>
+  </data>
+  <data name="SampleCloseQuiet" xml:space="preserve">
+    <value>A rare bug. It was nice to find.</value>
+  </data>
+  <data name="SampleCloseNormal" xml:space="preserve">
+    <value>In my own game I'd have hunted a bug like this for half a day.</value>
+  </data>
+  <data name="SampleCloseBright" xml:space="preserve">
+    <value>お疲れ様!</value>
+  </data>
+  <data name="SampleCloseMusou" xml:space="preserve">
+    <value>よし、行くぞ! On to the next one (^_^)</value>
+  </data>
+  <data name="SampleCommit" xml:space="preserve">
+    <value>The commit for this fix has no character:</value>
+  </data>
+  <data name="SectionSkills" xml:space="preserve">
+    <value>SKILLS · {0} OF {1}</value>
+  </data>
+  <data name="SkillsWork" xml:space="preserve">
+    <value>Skills work in environments where the personality is on. Call them by name, like /aiko-copy.</value>
+  </data>
+  <data name="SkillsNeedPersona" xml:space="preserve">
+    <value>Turn the personality on in at least one environment, and the skills start working.</value>
+  </data>
+  <data name="SkillAikoCopy" xml:space="preserve">
+    <value>UI text, READMEs and release notes without stiff wording or AI tells. RU and EN.</value>
+  </data>
+  <data name="SkillAikoReleaseGate" xml:space="preserve">
+    <value>Before a release: what can't be undone, how to roll back, whether the docs match the code.</value>
+  </data>
+  <data name="SkillAikoDocsHygiene" xml:space="preserve">
+    <value>One fact in one place, a decision log, contradictions found.</value>
+  </data>
+  <data name="SkillAikoBlenderToUnity" xml:space="preserve">
+    <value>A model from Blender to Unity: axes, normals, export and import.</value>
+  </data>
+  <data name="SkillAikoTexturing" xml:space="preserve">
+    <value>Texel density from the camera: when a model gets its own sheet, when to tile.</value>
+  </data>
+  <data name="SkillAikoGlbForWeb" xml:space="preserve">
+    <value>A .glb for the web: size, axes, compression, a blank view where the model should be.</value>
+  </data>
+  <data name="SkillAikoPalette" xml:space="preserve">
+    <value>Fit a color to the palette in OKLCH with the smallest change.</value>
+  </data>
+  <data name="SkillAikoGamedesignResearch" xml:space="preserve">
+    <value>30–40 games with the mechanic you need: an overview with screenshots, and interactive demos on request.</value>
+  </data>
 </root>

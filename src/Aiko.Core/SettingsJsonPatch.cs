@@ -181,6 +181,23 @@ public static class SettingsJsonPatch
         && root!.TryGetPropertyValue(StatusLineKey, out var line)
         && BridgeCommand.IsAiko(CommandIn(line));
 
+    /// The output style the person picked for themselves, if any. While the persona is on, its style
+    /// wins over this one, and the settings page has to say so (D-207). Aiko never changes the key.
+    public static string? UserOutputStyle(string settingsJson) =>
+        TryParseObject(settingsJson, out var root)
+        && root!.TryGetPropertyValue("outputStyle", out var style)
+        && style is JsonValue value
+        && value.TryGetValue<string>(out var name)
+        && !string.IsNullOrWhiteSpace(name)
+        && !name.Equals("default", StringComparison.OrdinalIgnoreCase)
+        && !IsPersonaStyle(name)
+            ? name
+            : null;
+
+    private static bool IsPersonaStyle(string name) =>
+        name.Equals(PersonaPrompt.StyleName, StringComparison.OrdinalIgnoreCase)
+        || name.Equals($"{PersonaPlugin.Name}:{PersonaPrompt.StyleName}", StringComparison.OrdinalIgnoreCase);
+
     /// What the bridge should call after doing its own work, if anything.
     public static string? ReadWrappedCommand(string settingsJson)
     {
