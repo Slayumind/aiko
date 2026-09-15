@@ -1,0 +1,17 @@
+{
+  "name": "aiko-texturing",
+  "version": "1.0.0",
+  "description": "Texture sizes from the game camera: pixels per metre from the screen, sheet or tile, UVs from world position, guides for painters, density measured per face.",
+  "author": {
+    "name": "Aleksandr Fomichenko"
+  },
+  "homepage": "https://github.com/Slayumind/aiko",
+  "license": "Apache-2.0",
+  "keywords": [
+    "texturing",
+    "texel-density",
+    "uv",
+    "blender",
+    "gamedev"
+  ]
+}
