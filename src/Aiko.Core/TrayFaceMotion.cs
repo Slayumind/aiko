@@ -52,6 +52,20 @@ public static class TrayFaceMotion
     public static IReadOnlyList<IconFrame> Frames(FacePhase phase) =>
         Enumerable.Range(1, FramesPerStep).Select(i => At(phase, (double)i / FramesPerStep)).ToList();
 
+    /// How far the island has shrunk from the size of its rings to the size of the face, 0 to 1.
+    /// It shrinks while the rings go and grows back while they return, so the face always sits with
+    /// even room on every side.
+    public static double IslandFit(FacePhase phase, double t)
+    {
+        t = Math.Clamp(t, 0, 1);
+        return phase switch
+        {
+            FacePhase.RingsOut => EaseInOut(t),
+            FacePhase.RingsBack => 1 - EaseInOut(t),
+            _ => 1,
+        };
+    }
+
     /// The steps from what the icon shows now to a face. A face already there needs only to come in
     /// again with its new look.
     public static IReadOnlyList<FacePhase> ToFace(bool faceShown) =>
@@ -62,6 +76,8 @@ public static class TrayFaceMotion
         faceShown ? [FacePhase.FaceOut, FacePhase.RingsBack] : [FacePhase.RingsBack];
 
     private static double EaseIn(double t) => t * t;
+
+    private static double EaseInOut(double t) => t < 0.5 ? 2 * t * t : 1 - (Math.Pow(-2 * t + 2, 2) / 2);
 
     /// Overshoots a little past 1 and settles, like the spring in the mockup.
     private static double Spring(double t) =>

@@ -98,9 +98,14 @@ public partial class IslandWindow : Window
 
     /// The window keeps the size of the panel while the percentages slide in or out, one frame at a
     /// time, and stops following the moment they are done: no frames while nothing moves.
-    private void FollowTheSize()
+    private void FollowTheSize(TimeSpan? duration = null)
     {
-        _followUntil = DateTime.UtcNow + Motion.Or0(Motion.Expand).TimeSpan + TimeSpan.FromMilliseconds(60);
+        var until = DateTime.UtcNow + (Motion.IsOn ? duration ?? Motion.Expand.TimeSpan : TimeSpan.Zero) + TimeSpan.FromMilliseconds(60);
+        if (until > _followUntil)
+        {
+            _followUntil = until;
+        }
+
         if (_following)
         {
             return;
@@ -367,9 +372,18 @@ public partial class IslandWindow : Window
 
     private IReadOnlyList<CardState> Cards { get; set; } = [];
 
-    public void ShowFace(System.Windows.Media.ImageSource face) => Panel.ShowFace(face);
+    /// The island changes size with the face, so the window follows it for the length of the step.
+    public void ShowFace(System.Windows.Media.ImageSource face)
+    {
+        Panel.ShowFace(face);
+        FollowTheSize(IslandFaceAnimator.Arrival);
+    }
 
-    public void HideFace() => Panel.HideFace();
+    public void HideFace()
+    {
+        Panel.HideFace();
+        FollowTheSize(IslandFaceAnimator.Departure);
+    }
 
     public void Update(IReadOnlyList<CardState> cards)
     {

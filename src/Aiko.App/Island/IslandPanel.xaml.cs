@@ -34,7 +34,7 @@ public partial class IslandPanel : UserControl
     public IslandPanel()
     {
         InitializeComponent();
-        _faces = new IslandFaceAnimator(Rings, Face, () => Rings.Children.OfType<Panel>().SelectMany(p => p.Children.OfType<RingGauge>())
+        _faces = new IslandFaceAnimator(Rings, Face, FaceFit, () => Rings.Children.OfType<Panel>().SelectMany(p => p.Children.OfType<RingGauge>())
             .Concat(Rings.Children.OfType<RingGauge>()));
     }
 
@@ -73,6 +73,14 @@ public partial class IslandPanel : UserControl
         // The missing line goes into the padding, so the rings do not move by a pixel on landing.
         var line = Body.BorderThickness;
         Body.Padding = new Thickness(11 - line.Left, 8 - line.Top, 11 - line.Right, 8 - line.Bottom);
+
+        // Around the face the room is the same on every side: the island closes in on the side where
+        // its padding is wider, and the face overlaps that padding.
+        var across = Body.Padding.Left + Body.Padding.Right + line.Left + line.Right;
+        var along = Body.Padding.Top + Body.Padding.Bottom + line.Top + line.Bottom;
+        FaceFit.Target = new Size(
+            Math.Max(0, RingSize - Math.Max(0, across - along)),
+            Math.Max(0, RingSize - Math.Max(0, along - across)));
 
         ToolTip = TrayText.Tooltip(cards, null);
 

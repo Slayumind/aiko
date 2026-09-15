@@ -12,6 +12,7 @@ sealed class IslandFaceAnimator
 {
     private readonly FrameworkElement _rings;
     private readonly Image _face;
+    private readonly FitPanel _fit;
     private readonly Func<IEnumerable<RingGauge>> _gauges;
     private readonly Queue<FacePhase> _steps = new();
     private readonly Stopwatch _clock = new();
@@ -19,10 +20,11 @@ sealed class IslandFaceAnimator
     private FacePhase _step;
     private bool _listening;
 
-    public IslandFaceAnimator(FrameworkElement rings, Image face, Func<IEnumerable<RingGauge>> gauges)
+    public IslandFaceAnimator(FrameworkElement rings, Image face, FitPanel fit, Func<IEnumerable<RingGauge>> gauges)
     {
         _rings = rings;
         _face = face;
+        _fit = fit;
         _gauges = gauges;
 
         _rings.RenderTransformOrigin = new Point(0.5, 0.5);
@@ -49,10 +51,16 @@ sealed class IslandFaceAnimator
         Play(TrayFaceMotion.ToRings(Frame.ShowsFace));
     }
 
+    /// The time the island needs to reach the face, or to get back to its rings.
+    public static TimeSpan Arrival => TrayFaceMotion.Arrival;
+
+    public static TimeSpan Departure => TrayFaceMotion.Duration(FacePhase.FaceOut) + TrayFaceMotion.Duration(FacePhase.RingsBack);
+
     /// For a snapshot: one frame, at once.
     public void Set(IconFrame frame, ImageSource? face)
     {
         _face.Source = face;
+        _fit.Fit = frame.ShowsFace ? 1 : 0;
         Apply(frame);
     }
 
@@ -65,6 +73,7 @@ sealed class IslandFaceAnimator
 
         if (!Motion.IsOn)
         {
+            _fit.Fit = TrayFaceMotion.IslandFit(steps[^1], 1);
             Apply(TrayFaceMotion.At(steps[^1], 1));
             Finish();
             return;
@@ -92,6 +101,7 @@ sealed class IslandFaceAnimator
     private void OnRendering(object? sender, EventArgs e)
     {
         var t = _clock.Elapsed / TrayFaceMotion.Duration(_step);
+        _fit.Fit = TrayFaceMotion.IslandFit(_step, t);
         Apply(TrayFaceMotion.At(_step, t));
 
         if (t < 1)
