@@ -70,6 +70,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
     offline and without a key.
   - `/aiko-gamedesign-research`: one game mechanic studied across 30-40 games, as an illustrated review
     with sources, and on request small interactive stands to play with the systems.
+- **A warning about skills with the same name.** If you keep an own skill named like one of Aiko's,
+  Claude Code gives the short name to yours. The Personality page now says so under that skill and
+  tells the name Aiko's skill gets instead.
 - **A public marketplace in the repository.** Aiko's skills also install without the app:
   `/plugin marketplace add Slayumind/aiko`.
 

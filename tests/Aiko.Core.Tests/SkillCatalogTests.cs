@@ -12,6 +12,19 @@ public class SkillCatalogTests
     }
 
     [Fact]
+    public void An_own_skill_with_the_same_name_is_found_per_folder()
+    {
+        var files = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            Path.Combine(@"C:\u\.claude", "skills", "aiko-copy", "SKILL.md"),
+            Path.Combine(@"C:\u\.claude-work", "skills", "other", "SKILL.md"),
+        };
+
+        Assert.Equal([@"C:\u\.claude"], SkillCatalog.OwnTwinsIn("aiko-copy", [@"C:\u\.claude", @"C:\u\.claude-work"], files.Contains));
+        Assert.Empty(SkillCatalog.OwnTwinsIn("aiko-palette", [@"C:\u\.claude", @"C:\u\.claude-work"], files.Contains));
+    }
+
+    [Fact]
     public void The_count_follows_the_switches()
     {
         Assert.Equal(8, SkillCatalog.OnCount(PersonaSettings.Default));

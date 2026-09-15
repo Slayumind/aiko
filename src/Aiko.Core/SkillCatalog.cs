@@ -17,4 +17,11 @@ public static class SkillCatalog
     ];
 
     public static int OnCount(PersonaSettings persona) => All.Count(persona.IsSkillOn);
+
+    /// The folders where the person keeps an own skill with this name. Claude Code gives the short
+    /// name to that one, and Aiko's skill is then called /name:name (D-212).
+    public static IReadOnlyList<string> OwnTwinsIn(string skill, IEnumerable<string> configDirectories, Func<string, bool> fileExists) =>
+        configDirectories
+            .Where(folder => fileExists(Path.Combine(folder, "skills", skill, "SKILL.md")))
+            .ToList();
 }

@@ -289,12 +289,22 @@ public partial class PersonalityPage : UserControl
         Grid.SetColumn(toggle, 1);
         _skillSwitches.Add(toggle);
 
-        var about = new TextBlock
+        var about = new StackPanel { Margin = new Thickness(0, 2, 16, 0) };
+        about.Children.Add(new TextBlock { Text = SkillAbout.GetValueOrDefault(skill, ""), Style = (Style)FindResource("RowHint") });
+
+        // A skill of the person's own with the same name takes the short name (D-212).
+        var folders = _editor.Current.Environments.SelectMany(e => e.ConfigDirectories);
+        foreach (var twin in SkillCatalog.OwnTwinsIn(skill, folders, File.Exists))
         {
-            Text = SkillAbout.GetValueOrDefault(skill, ""),
-            Style = (Style)FindResource("RowHint"),
-            Margin = new Thickness(0, 2, 16, 0),
-        };
+            about.Children.Add(new TextBlock
+            {
+                Text = string.Format(Strings.SkillOwnTwin, Path.GetFileName(twin.TrimEnd('\\', '/')), skill),
+                Style = (Style)FindResource("RowHint"),
+                Foreground = Tokens.Brush("Caution"),
+                Margin = new Thickness(0, 4, 0, 0),
+            });
+        }
+
         Grid.SetRow(about, 1);
 
         var grid = new Grid { Margin = new Thickness(12, 9, 12, 9) };

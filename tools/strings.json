@@ -257,5 +257,6 @@
 ["MeetAikoLead", ["Aiko can talk in your Claude Code sessions in her own voice, and she brings eight skills. In code and commits she stays quiet.", "Aiko может говорить в твоих сессиях Claude Code своим голосом и приносит восемь навыков. В коде и коммитах она молчит."]],
 ["MeetAikoSettings", ["The temperament, the face and the skills are in settings, under Personality. It works in new sessions.", "Темперамент, лицо и навыки — в настройках, в разделе «Личность». Действует в новых сессиях."]],
 ["MeetAikoTurnOn", ["Turn on in {0}", "Включить в среде {0}"]],
-["StateOn", ["on", "включена"]]
+["StateOn", ["on", "включена"]],
+["SkillOwnTwin", ["Your own skill with this name in {0} takes /{1}. This one is called /{1}:{1} there.", "В {0} есть твой навык с тем же именем, и /{1} зовёт его. Этот там называется /{1}:{1}."]]
 ]

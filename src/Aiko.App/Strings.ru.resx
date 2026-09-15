@@ -808,4 +808,7 @@
   <data name="StateOn" xml:space="preserve">
     <value>включена</value>
   </data>
+  <data name="SkillOwnTwin" xml:space="preserve">
+    <value>В {0} есть твой навык с тем же именем, и /{1} зовёт его. Этот там называется /{1}:{1}.</value>
+  </data>
 </root>
