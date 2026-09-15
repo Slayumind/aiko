@@ -21,6 +21,11 @@
       "name": "aiko-release-gate",
       "source": "./plugins/aiko-release-gate",
       "description": "A release check before shipping: GO or NO-GO, irreversible changes named, rollout order and rollback plan. Nothing is pushed."
+    },
+    {
+      "name": "aiko-glb-for-web",
+      "source": "./plugins/aiko-glb-for-web",
+      "description": "A Blender model as a .glb that web players show correctly, with an offline checker for size and unsupported extensions."
     }
   ]
 }
