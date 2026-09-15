@@ -5,6 +5,14 @@ using Aiko.Core;
 // Claude Code runs this on every status line update and waits for its output, so two rules hold
 // above everything else: be quick, and never fail. Whatever goes wrong, the exit code is 0 and
 // the user's own status line still gets printed.
+// Claude Code runs "Aiko.Bridge.exe plugin aiko-persona" to get the persona plugin (D-201). It
+// sends nothing on stdin, so this is decided before any input is read: waiting for input that
+// never comes would hang the install. Unlike the status line, a failure here must show as one.
+if (PersonaPluginOutput.IsRequest(args))
+{
+    return BuildPersonaPlugin();
+}
+
 try
 {
     var input = ReadAllInput();
@@ -80,6 +88,84 @@ static void RemindAboutBinding(string input)
     if (message is not null)
     {
         WriteOutput(SessionReminder.HookOutput(message));
+    }
+}
+
+/// Writes the plugin folder for the environment this run belongs to and prints its path.
+/// Exit code 1 with a reason on stderr when that is not possible: Claude Code then keeps the
+/// version it already has.
+static int BuildPersonaPlugin()
+{
+    try
+    {
+        var configDirectory = ClaudeConfigFolder.Resolve(
+            Environment.GetEnvironmentVariable("CLAUDE_CONFIG_DIR"),
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
+        var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        var bridge = Environment.ProcessPath ?? throw new InvalidOperationException("the bridge does not know its own path");
+
+        var persona = PersonaSettings.FromJson(ReadIfThere(Path.Combine(appData, "Aiko", "persona.json")));
+        var files = PersonaPlugin.Files(persona.Temperament, bridge);
+        var hash = PersonaPlugin.ContentHash(files);
+        var folder = PersonaPluginOutput.VersionFolder(localAppData, configDirectory, hash);
+
+        if (!Directory.Exists(folder))
+        {
+            WritePluginFolder(folder, files);
+        }
+
+        ClearOldPluginFolders(Path.GetDirectoryName(folder)!, hash);
+        WriteOutput(folder + "\n");
+        return 0;
+    }
+    catch (Exception e)
+    {
+        Console.Error.WriteLine($"Aiko could not build the persona plugin: {e.Message}");
+        return 1;
+    }
+}
+
+/// Written into a temporary folder first and moved into place in one step, so Claude Code never
+/// copies a folder with half the files in it. Two runs racing for the same hash write the same
+/// content; the one that loses the move just drops its copy.
+static void WritePluginFolder(string folder, IReadOnlyDictionary<string, string> files)
+{
+    var temporary = folder + "." + Environment.ProcessId + ".tmp";
+    foreach (var (relative, content) in files)
+    {
+        var path = Path.Combine(temporary, relative.Replace('/', Path.DirectorySeparatorChar));
+        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+        File.WriteAllText(path, content, new UTF8Encoding(false));
+    }
+
+    try
+    {
+        Directory.Move(temporary, folder);
+    }
+    catch (IOException) when (Directory.Exists(folder))
+    {
+        Directory.Delete(temporary, recursive: true);
+    }
+}
+
+static void ClearOldPluginFolders(string environmentFolder, string currentHash)
+{
+    var folders = new DirectoryInfo(environmentFolder).GetDirectories()
+        .Select(d => (d.Name, (DateTimeOffset)d.LastWriteTimeUtc));
+    foreach (var stale in PersonaPluginOutput.StaleFolders(folders, currentHash, DateTimeOffset.UtcNow))
+    {
+        try
+        {
+            Directory.Delete(Path.Combine(environmentFolder, stale), recursive: true);
+        }
+        catch (IOException)
+        {
+            // Busy right now; the next run tries again.
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
     }
 }
 
