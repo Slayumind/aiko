@@ -99,6 +99,27 @@ static class Program
             return;
         }
 
+        // The persona plugin for one temperament, written into a folder for tools/persona-evals:
+        // --write-persona-plugin Musou <folder>. The real persona.json is not read or changed.
+        if (args is ["--write-persona-plugin", var temperamentName, var personaFolder, ..])
+        {
+            if (!Enum.TryParse<Temperament>(temperamentName, ignoreCase: true, out var temperament) || BridgePath.Current() is not { } bridge)
+            {
+                Environment.Exit(1);
+                return;
+            }
+
+            foreach (var (relative, content) in PersonaPlugin.Files(temperament, bridge))
+            {
+                var path = Path.Combine(personaFolder, relative.Replace('/', Path.DirectorySeparatorChar));
+                Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+                File.WriteAllText(path, content, new System.Text.UTF8Encoding(false));
+            }
+
+            Environment.Exit(0);
+            return;
+        }
+
         // Aiko's skills the way the plugin sync installs them, into throwaway folders:
         // --try-skills <marketplace folder> <config folder>. Runs twice, so the second run shows that
         // an unchanged skill is neither copied nor installed again.
