@@ -105,6 +105,10 @@ sealed class AikoShell : IDisposable
         {
             RepairOurStatusLines();
 
+            // An update can bring a new persona text or move the marketplace. When the persona is
+            // off everywhere this reads a few files and does nothing else.
+            PluginSync.Request("startup");
+
             // An update brings a new shim. The copy in PATH is refreshed, and only when the person
             // set commands up: the folder never appears on its own.
             if (CommandFolder.IsSetUp)

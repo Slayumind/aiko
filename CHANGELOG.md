@@ -19,6 +19,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - **The bridge builds the persona plugin.** `Aiko.Bridge.exe plugin aiko-persona` writes the plugin
   for the environment it runs in under `%LOCALAPPDATA%\Aiko\plugins` and prints the folder, which is
   how Claude Code installs a plugin from a command. Old copies are cleared after an hour.
+- **Plugins follow the persona switch.** Aiko keeps its own local plugin marketplace and, for every
+  Claude Code folder, installs or turns off its own plugins to match whether the persona is on there.
+  Other plugins and settings are never touched. With the persona off everywhere Aiko writes nothing.
 
 ### Fixed
 
