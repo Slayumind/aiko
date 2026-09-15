@@ -4,6 +4,7 @@
 //
 //   node tools/persona-evals/run.mjs --app <Aiko.App.exe> [--temperaments Quiet,Normal,Bright,Musou]
 //        [--cases commit,error] [--out <folder>] [--budget 10] [--stop-at-percent 80]
+//   node tools/persona-evals/run.mjs --rejudge <report.json>     checks an earlier report again
 //
 // It uses the Claude Code account in ~/.claude (no CLAUDE_CONFIG_DIR), so it spends that account's
 // limits. Aiko's installed plugins are turned off for these runs with --settings, so only the persona
@@ -136,8 +137,25 @@ function judge(testCase, temperament, texts) {
   return found;
 }
 
+/** Checks the answers of an earlier report again, after the checks changed. No new sessions. */
+function rejudge(path) {
+  const { report } = JSON.parse(readFileSync(path, "utf8"));
+  let failed = 0;
+  for (const entry of report) {
+    const testCase = CASES.find((c) => c.id === entry.id);
+    const found = testCase ? judge(testCase, entry.temperament, entry.texts) : { case: ["unknown"] };
+    const passed = !entry.failedToRun && Object.keys(found).length === 0;
+    failed += passed ? 0 : 1;
+    console.log(`${passed ? "pass" : "FAIL"}  ${entry.temperament.padEnd(6)} ${entry.id.padEnd(8)}${passed ? "" : "  " + JSON.stringify(found)}`);
+  }
+  console.log(`
+${report.length - failed} of ${report.length} passed`);
+  return failed ? 1 : 0;
+}
+
 function main() {
   const flags = parseArgs(process.argv.slice(2));
+  if (flags?.rejudge) return rejudge(flags.rejudge);
   if (!flags || !flags.app || !existsSync(flags.app)) {
     console.error("usage: node tools/persona-evals/run.mjs --app <Aiko.App.exe> [--temperaments ...] [--cases ...] [--out dir] [--budget 10] [--stop-at-percent 80]");
     return 2;

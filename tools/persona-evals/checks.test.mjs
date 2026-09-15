@@ -38,6 +38,20 @@ test("voice allows only the listed Japanese, in Japanese script", () => {
   assert.deepEqual(kinds("かわいい баг", "voice"), ["japanese not allowed"]);
 });
 
+test("brackets around words and code are not kaomoji, faces are", () => {
+  for (const text of ["Windows File Recovery (`winfr`)", "свободное место (TRIM)", "размер (`\\l+`)", "шаги (1-3)"]) {
+    assert.deepEqual(problems(text, "silent"), [], text);
+  }
+  for (const face of ["(^_^)", "(＾▽＾)", "(>_<)", "(T_T)", "(´・ω・`)"]) {
+    assert.ok(kinds(face, "silent").includes("kaomoji"), face);
+  }
+});
+
+test("a half Japanese さん is caught in any mode, a whole one and a middle dot are fine", () => {
+  assert.ok(kinds("Хм, Сашаさн, я бы делала сетку", "voice").includes("broken さん"));
+  assert.deepEqual(problems("あの・・・ Сашаさん, я бы делала сетку", "voice"), []);
+});
+
 test("the quiet temperament allows no Japanese even from the list", () => {
   assert.deepEqual(kinds("えへへ, готово", "plain"), ["japanese"]);
   assert.deepEqual(problems("Редкий баг, приятно было найти.", "plain"), []);

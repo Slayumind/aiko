@@ -5,11 +5,14 @@
 export const ALLOWED_JAPANESE = ["えへへ", "やった", "すごい", "あの", "まあまあ", "おはよう", "お疲れ様", "頑張って", "さん", "よし", "行くぞ"];
 
 const JAPANESE = /[぀-ヿㇰ-ㇿ㐀-䶿一-鿿ｦ-ﾟ]/u;
-// Punctuation that travels with the allowed words: 、 … 〜 ！ ー.
-const JAPANESE_PUNCTUATION = /[、。…〜！ー]/gu;
+// Punctuation that travels with the allowed words: 、 。 … 〜 ！ ー ・.
+const JAPANESE_PUNCTUATION = /[、。…〜！ー・]/gu;
+// さん written half in Japanese and half in another script, like "Сашаさн". It reads as a typo.
+const BROKEN_SAN = /さ(?!ん)[\p{Script=Cyrillic}\p{Script=Latin}]|(?<!さ)ん/u;
 const ROMAJI = /\b(sugoi|yatta|yosh[i]?|ganbatte|arigat\w*|nani|desu|kawaii|ohayo\w*|otsukare(\s*sama)?|sayonara|senpai|ehehe|maa\s*maa|ano+|ikuzo)\b|\b\p{L}+-san\b/iu;
 const TRANSLIT = /(?<![\p{L}])(ано+|ёси|ёсь|сугой|сугои|ятта|аригато|ганбатте|оцукаре|охайо|эхехе|ехехе|икузо)(?![\p{L}])|\p{L}+-сан(?![\p{L}])/iu;
-const KAOMOJI = /\([^\s()]{0,3}[\^;_TＴ><◕ω∀ﾉ・▽＾´`°][^()]{0,6}\)|\(\s*\^_\^\s*\)|[＼\\]\(\s*[\^＾]/u;
+// A face made of symbols. Brackets around a word or code, like (TRIM) or (`winfr`), are not faces.
+const KAOMOJI = /\((?![^()]*[A-Za-z0-9])[^()\n]{0,4}[\^;_＾▽◕ω∀ﾉ・´°≧≦＞＜><][^()\n]{0,6}\)|\(\s*[TＴ][_.][TＴ]\s*\)|[＼\\]\(\s*[\^＾]/u;
 const EMOJI = /\p{Extended_Pictographic}/u;
 // Aiko is a woman. A first-person past tense in the masculine gives the draft away.
 const MASCULINE_SELF = /(?<![\p{L}])я\s+(?:\p{L}+\s+)?(\p{L}+(?<![аеиоуыэюя])[аеиоуыяё]л)(?![\p{L}])|(?:^|[.!?\n]\s*)(проверил|сделал|создал|добавил|нашёл|нашел|исправил|поправил|посмотрел|запустил|удалил|написал|закоммитил|понял|обновил|переписал|сломал|ошибся)(?![\p{L}])/iu;
@@ -37,6 +40,8 @@ export function foreignJapanese(text) {
 export function problems(text, mode) {
   const found = [];
   const add = (kind, match) => match && found.push(`${kind}: ${match}`);
+
+  add("broken さん", firstMatch(text, BROKEN_SAN));
 
   if (mode === "silent" || mode === "plain") {
     add("japanese", firstMatch(text, new RegExp(`${JAPANESE.source}+`, "u")));
