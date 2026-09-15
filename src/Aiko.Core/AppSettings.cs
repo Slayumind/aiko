@@ -25,7 +25,8 @@ public sealed record AppSettings
     /// The shape of the file. Nothing reads it yet. It is written from the very first version
     /// because a version number added later says nothing about the files already on disk, and
     /// renaming a field would then have no safe way back.
-    public const int CurrentSchema = 1;
+    /// 2 added MeetAikoShown. A file of schema 1 comes from 0.1, so it reads as not shown yet.
+    public const int CurrentSchema = 2;
 
     public static readonly AppSettings Default = new();
 
@@ -47,6 +48,9 @@ public sealed record AppSettings
     /// Where the island was left. Kept as an edge and a share along it, so it survives a change
     /// of screen size.
     public IslandPosition Island { get; init; } = IslandPosition.Default;
+
+    /// The checklist opens once on "Meet Aiko" for people who update from 0.1 (D-200).
+    public bool MeetAikoShown { get; init; }
 
     /// A settings file we cannot read is not a reason to stop: Aiko starts with the defaults.
     /// Putting the unreadable file aside before that happens is the store's job, so that the next

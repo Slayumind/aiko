@@ -9,6 +9,10 @@ public sealed record AikoEnvironment(string Name, IReadOnlyList<string> ConfigDi
 {
     public bool DirectMode { get; init; }
 
+    /// Whether Aiko talks in this environment and brings her skills (D-196, D-197). Off until the
+    /// person turns it on.
+    public bool Persona { get; init; }
+
     /// A command name the person typed. Null means the command follows the environment name.
     public string? CustomCommand { get; init; }
 
@@ -29,7 +33,8 @@ public sealed record EnvironmentSettings(IReadOnlyList<AikoEnvironment> Environm
     /// See AppSettings.CurrentSchema for why this is written from the start.
     /// 2 added custom commands, project folders and the default environment. A file of schema 1
     /// reads as before, with none of them set.
-    public const int CurrentSchema = 2;
+    /// 3 added the persona flag. Older files read with the persona off.
+    public const int CurrentSchema = 3;
 
     /// The tray has a ring and a dot, so Aiko keeps two environments (D-152).
     public const int MaxEnvironments = 2;
@@ -111,6 +116,7 @@ public sealed record EnvironmentSettings(IReadOnlyList<AikoEnvironment> Environm
                 .Select(e => new AikoEnvironment(e.Name!, e.ConfigDirectories!)
                 {
                     DirectMode = e.DirectMode,
+                    Persona = e.Persona,
                     CustomCommand = string.IsNullOrWhiteSpace(e.Command) ? null : e.Command,
                     ProjectFolders = e.ProjectFolders?.Where(p => !string.IsNullOrWhiteSpace(p)).ToList() ?? [],
                 })
@@ -143,6 +149,7 @@ public sealed record EnvironmentSettings(IReadOnlyList<AikoEnvironment> Environm
                         Name = e.Name,
                         ConfigDirectories = e.ConfigDirectories,
                         DirectMode = e.DirectMode,
+                        Persona = e.Persona,
                         Command = e.CustomCommand,
                         ProjectFolders = e.ProjectFolders.Count > 0 ? e.ProjectFolders : null,
                     })
@@ -163,6 +170,7 @@ public sealed record EnvironmentSettings(IReadOnlyList<AikoEnvironment> Environm
         public string? Name { get; set; }
         public IReadOnlyList<string>? ConfigDirectories { get; set; }
         public bool DirectMode { get; set; }
+        public bool Persona { get; set; }
         public string? Command { get; set; }
         public IReadOnlyList<string>? ProjectFolders { get; set; }
     }

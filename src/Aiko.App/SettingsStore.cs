@@ -3,8 +3,8 @@ using Aiko.Core;
 
 namespace Aiko.App;
 
-/// Reads and writes the two files Aiko keeps for itself: the settings of the app and the list of
-/// environments. Both live in %APPDATA%, because they are the user's choices, not a cache.
+/// Reads and writes the files Aiko keeps for itself: the settings of the app, the list of
+/// environments and the persona. All live in %APPDATA%, because they are the user's choices, not a cache.
 ///
 /// Nothing here throws. A settings file that cannot be read means the defaults, and Aiko starts.
 static class SettingsStore
@@ -16,6 +16,9 @@ static class SettingsStore
     private static readonly string SettingsFile = Path.Combine(Folder, "settings.json");
     private static readonly string EnvironmentsFile = Path.Combine(Folder, "environments.json");
 
+    /// Its own file: the bridge reads the persona to build the plugin, and the shim does not need it.
+    private static readonly string PersonaFile = Path.Combine(Folder, "persona.json");
+
     public static AppSettings Load() => AppSettings.FromJson(Read(SettingsFile));
 
     public static void Save(AppSettings settings) => Write(SettingsFile, settings.ToJson());
@@ -25,6 +28,10 @@ static class SettingsStore
 
     public static void SaveEnvironments(EnvironmentSettings environments) =>
         Write(EnvironmentsFile, environments.ToJson());
+
+    public static PersonaSettings LoadPersona() => PersonaSettings.FromJson(Read(PersonaFile));
+
+    public static void SavePersona(PersonaSettings persona) => Write(PersonaFile, persona.ToJson());
 
     private static string Read(string path)
     {

@@ -170,7 +170,7 @@ public class EnvironmentModelTests
         Assert.Equal("cc", again.Environments[1].Command);
         Assert.Equal([@"D:\personal"], again.Environments[1].ProjectFolders);
         Assert.Null(again.Environments[0].CustomCommand);
-        Assert.Contains("\"schemaVersion\": 2", settings.ToJson());
+        Assert.Contains($"\"schemaVersion\": {EnvironmentSettings.CurrentSchema}", settings.ToJson());
     }
 
     [Fact]
