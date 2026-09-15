@@ -797,4 +797,7 @@ public static class Strings
 
     /// on
     public static string StateOn => Get("StateOn");
+
+    /// Your own skill with this name in {0} takes /{1}. This one is called /{1}:{1} there.
+    public static string SkillOwnTwin => Get("SkillOwnTwin");
 }
