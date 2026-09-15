@@ -1,0 +1,330 @@
+using System.IO;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using Aiko.Core;
+
+namespace Aiko.App;
+
+public partial class PersonalityPage : UserControl
+{
+    // A commit Aiko would write for the sample fix. It is English in every language, like any commit.
+    private const string SampleCommit = "Round reset countdown to the nearest minute";
+
+    private static readonly Dictionary<string, string> SkillAbout = new()
+    {
+        ["aiko-copy"] = Strings.SkillAikoCopy,
+        ["aiko-release-gate"] = Strings.SkillAikoReleaseGate,
+        ["aiko-docs-hygiene"] = Strings.SkillAikoDocsHygiene,
+        ["aiko-blender-to-unity"] = Strings.SkillAikoBlenderToUnity,
+        ["aiko-texturing"] = Strings.SkillAikoTexturing,
+        ["aiko-glb-for-web"] = Strings.SkillAikoGlbForWeb,
+        ["aiko-palette"] = Strings.SkillAikoPalette,
+        ["aiko-gamedesign-research"] = Strings.SkillAikoGamedesignResearch,
+    };
+
+    private readonly EnvironmentsEditor _editor;
+
+    private readonly List<EnvironmentRow> _environmentRows = [];
+    private readonly List<ToggleButton> _skillSwitches = [];
+
+    private PersonaSettings _persona = SettingsStore.LoadPersona();
+
+    /// Setting the controls raises their own events, and those events save.
+    private bool _filling;
+
+    public PersonalityPage(EnvironmentsEditor editor)
+    {
+        InitializeComponent();
+        _editor = editor;
+        SampleCommitLine.Text = SampleCommit;
+
+        _filling = true;
+        FaceChibi.IsChecked = _persona.Face == FaceStyle.Chibi;
+        FaceEmoji.IsChecked = _persona.Face == FaceStyle.Emoji;
+        foreach (var choice in TemperamentChoice.Children.OfType<RadioButton>())
+        {
+            choice.IsChecked = (string)choice.Tag == _persona.Temperament.ToString();
+        }
+        _filling = false;
+
+        ShowTemperament();
+        FillSkills();
+        FillEnvironments();
+        _editor.Changed += OnEnvironmentsChanged;
+    }
+
+    /// Raised after a change to persona.json was saved. Switches per environment go through the
+    /// editor, which says so itself.
+    public event Action? Saved;
+
+    public void Leave() => _editor.Changed -= OnEnvironmentsChanged;
+
+    // ---- where Aiko talks ----
+
+    private sealed record EnvironmentRow(string Name, ToggleButton Switch, RevealPanel Warning, string? OwnStyle);
+
+    private void FillEnvironments()
+    {
+        EnvironmentRows.Children.Clear();
+        _environmentRows.Clear();
+
+        _filling = true;
+        foreach (var environment in SettingsPanel.Ordered(_editor.Current))
+        {
+            EnvironmentRows.Children.Add(EnvironmentRowFor(environment, first: _environmentRows.Count == 0));
+        }
+        _filling = false;
+
+        ShowPersonaState();
+    }
+
+    private Border EnvironmentRowFor(AikoEnvironment environment, bool first)
+    {
+        var folder = environment.ConfigDirectories[0];
+
+        var title = new WrapPanel { VerticalAlignment = VerticalAlignment.Center };
+        title.Children.Add(new TextBlock
+        {
+            Text = environment.Name,
+            Style = (Style)FindResource("RowName"),
+            FontSize = Tokens.Get<double>("TextName"),
+            Margin = new Thickness(0, 0, 8, 0),
+        });
+        var plan = ClaudeAccounts.Read(folder).PlanLabel;
+        if (plan.Length > 0)
+        {
+            title.Children.Add(new Border
+            {
+                Style = (Style)FindResource("Chip"),
+                Child = new TextBlock { Text = plan, Style = (Style)FindResource("ChipText") },
+            });
+        }
+
+        var toggle = new ToggleButton { Style = (Style)FindResource("Switch"), IsChecked = environment.Persona };
+        toggle.Checked += (_, _) => SetPersona(environment.Name, true);
+        toggle.Unchecked += (_, _) => SetPersona(environment.Name, false);
+        Grid.SetColumn(toggle, 1);
+
+        var ownStyle = OwnOutputStyle(folder);
+        var warning = new RevealPanel
+        {
+            Child = new TextBlock
+            {
+                Text = string.Format(Strings.PersonaOwnStyle, ownStyle),
+                Style = (Style)FindResource("RowHint"),
+                Foreground = Tokens.Brush("Caution"),
+                Margin = new Thickness(0, 4, 0, 0),
+            },
+        };
+        Grid.SetRow(warning, 1);
+
+        var grid = new Grid { Margin = new Thickness(12, 10, 12, 10) };
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        grid.Children.Add(title);
+        grid.Children.Add(toggle);
+        grid.Children.Add(warning);
+
+        _environmentRows.Add(new EnvironmentRow(environment.Name, toggle, warning, ownStyle));
+
+        return new Border
+        {
+            BorderBrush = Tokens.Brush("Hairline"),
+            BorderThickness = new Thickness(0, first ? 0 : 1, 0, 0),
+            Child = grid,
+        };
+    }
+
+    private void SetPersona(string environment, bool on)
+    {
+        if (_filling)
+        {
+            return;
+        }
+
+        _editor.Commit(EnvironmentEdits.SetPersona(_editor.Current, environment, on), on ? "turned the persona on" : "turned the persona off");
+    }
+
+    private void OnEnvironmentsChanged()
+    {
+        var environments = SettingsPanel.Ordered(_editor.Current).ToList();
+        if (!environments.Select(e => e.Name).SequenceEqual(_environmentRows.Select(r => r.Name)))
+        {
+            FillEnvironments();
+            return;
+        }
+
+        // The same rows: only the switches move, so the one just flipped keeps its motion.
+        _filling = true;
+        foreach (var (row, environment) in _environmentRows.Zip(environments))
+        {
+            row.Switch.IsChecked = environment.Persona;
+        }
+        _filling = false;
+
+        ShowPersonaState();
+    }
+
+    /// The warning under a switch, and whether the skills can work anywhere at all.
+    private void ShowPersonaState()
+    {
+        foreach (var row in _environmentRows)
+        {
+            row.Warning.IsOpen = row.Switch.IsChecked == true && row.OwnStyle is not null;
+        }
+
+        var anyOn = _editor.Current.Environments.Any(e => e.Persona);
+        SkillsBox.Opacity = anyOn ? 1 : 0.45;
+        foreach (var skill in _skillSwitches)
+        {
+            skill.IsEnabled = anyOn;
+        }
+
+        SkillsNote.Text = anyOn ? Strings.SkillsWork : Strings.SkillsNeedPersona;
+    }
+
+    /// Read once when the page opens: the person changes it in their own settings.json, not here.
+    private static string? OwnOutputStyle(string folder)
+    {
+        try
+        {
+            var path = ClaudeSettingsFile.PathIn(folder);
+            return File.Exists(path) ? SettingsJsonPatch.UserOutputStyle(File.ReadAllText(path)) : null;
+        }
+        catch (Exception unreadable) when (unreadable is IOException or UnauthorizedAccessException)
+        {
+            return null;
+        }
+    }
+
+    // ---- face and temperament ----
+
+    private void OnFaceChanged(object sender, RoutedEventArgs e) =>
+        SavePersona(_persona with { Face = FaceEmoji.IsChecked == true ? FaceStyle.Emoji : FaceStyle.Chibi });
+
+    private void OnTemperamentChanged(object sender, RoutedEventArgs e)
+    {
+        if (_filling || !Enum.TryParse<Temperament>((string)((RadioButton)sender).Tag, out var temperament))
+        {
+            return;
+        }
+
+        SavePersona(_persona with { Temperament = temperament });
+        ShowTemperament();
+
+        // The persona text changed, so installed plugins take it for the next session.
+        PluginSync.PersonaChanged();
+    }
+
+    private void ShowTemperament()
+    {
+        var temperament = _persona.Temperament;
+        TemperamentAbout.Text = temperament switch
+        {
+            Temperament.Quiet => Strings.TemperamentQuietAbout,
+            Temperament.Bright => Strings.TemperamentBrightAbout,
+            Temperament.Musou => Strings.TemperamentMusouAbout,
+            _ => Strings.TemperamentNormalAbout,
+        };
+
+        var (open, body, close) = temperament switch
+        {
+            Temperament.Quiet => ("", Strings.SampleBody, Strings.SampleCloseQuiet),
+            Temperament.Bright => (Strings.SampleOpenBright, Strings.SampleBodyBright, Strings.SampleCloseBright),
+            Temperament.Musou => (Strings.SampleOpenMusou, Strings.SampleBody + Strings.SampleBodyMusouTail, Strings.SampleCloseMusou),
+            _ => (Strings.SampleOpenNormal, Strings.SampleBody, Strings.SampleCloseNormal),
+        };
+
+        ReplyOpen.Text = open;
+        ReplyOpen.Visibility = open.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
+        ReplyBody.Text = body;
+        ReplyClose.Text = close;
+    }
+
+    // ---- skills ----
+
+    private void FillSkills()
+    {
+        SkillRows.Children.Clear();
+        _skillSwitches.Clear();
+
+        _filling = true;
+        foreach (var skill in SkillCatalog.All)
+        {
+            SkillRows.Children.Add(SkillRow(skill, first: _skillSwitches.Count == 0));
+        }
+        _filling = false;
+
+        ShowSkillCount();
+    }
+
+    private Border SkillRow(string skill, bool first)
+    {
+        var name = new TextBlock
+        {
+            Text = "/" + skill,
+            Style = (Style)FindResource("RowName"),
+            FontFamily = Tokens.Get<System.Windows.Media.FontFamily>("Mono"),
+        };
+
+        var toggle = new ToggleButton { Style = (Style)FindResource("Switch"), IsChecked = _persona.IsSkillOn(skill) };
+        toggle.Checked += (_, _) => SetSkill(skill, true);
+        toggle.Unchecked += (_, _) => SetSkill(skill, false);
+        Grid.SetColumn(toggle, 1);
+        _skillSwitches.Add(toggle);
+
+        var about = new TextBlock
+        {
+            Text = SkillAbout.GetValueOrDefault(skill, ""),
+            Style = (Style)FindResource("RowHint"),
+            Margin = new Thickness(0, 2, 16, 0),
+        };
+        Grid.SetRow(about, 1);
+
+        var grid = new Grid { Margin = new Thickness(12, 9, 12, 9) };
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        grid.Children.Add(name);
+        grid.Children.Add(toggle);
+        grid.Children.Add(about);
+
+        return new Border
+        {
+            BorderBrush = Tokens.Brush("Hairline"),
+            BorderThickness = new Thickness(0, first ? 0 : 1, 0, 0),
+            Child = grid,
+        };
+    }
+
+    private void SetSkill(string skill, bool on)
+    {
+        if (_filling)
+        {
+            return;
+        }
+
+        SavePersona(_persona.WithSkill(skill, on));
+        ShowSkillCount();
+        PluginSync.Request("skills switched");
+    }
+
+    private void ShowSkillCount() =>
+        SkillsTitle.Text = string.Format(Strings.SectionSkills, SkillCatalog.OnCount(_persona), SkillCatalog.All.Count);
+
+    private void SavePersona(PersonaSettings next)
+    {
+        if (_filling || next == _persona)
+        {
+            return;
+        }
+
+        _persona = next;
+        SettingsStore.SavePersona(next);
+        Saved?.Invoke();
+    }
+}

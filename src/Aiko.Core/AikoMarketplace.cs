@@ -1,3 +1,5 @@
+using System.Text.Encodings.Web;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 
 namespace Aiko.Core;
@@ -54,5 +56,13 @@ public static class AikoMarketplace
                     ["description"] = "Aiko's persona and the hooks behind her face in the tray.",
                     ["source"] = new JsonObject { ["source"] = "command", ["command"] = personaCommand },
                 }),
-        }.ToJsonString(new System.Text.Json.JsonSerializerOptions { WriteIndented = true }) + "\n";
+        }.ToJsonString(Formatting) + "\n";
+
+    // The default encoder writes quotes as ", which is valid but hard to read for a person who
+    // opens the file to see the command.
+    private static readonly JsonSerializerOptions Formatting = new()
+    {
+        WriteIndented = true,
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+    };
 }

@@ -11,6 +11,7 @@ public partial class SettingsPanel : UserControl
 {
     public const string FoldersPageKey = "folders";
     public const string GeneralPageKey = "general";
+    public const string PersonalityPageKey = "personality";
     public const string ChecklistPageKey = "setup";
     private const string EnvironmentPagePrefix = "env:";
 
@@ -29,7 +30,7 @@ public partial class SettingsPanel : UserControl
     {
     }
 
-    /// The page to open: "general", "folders", "setup" or "env:" and an account folder. Null opens the
+    /// The page to open: "general", "folders", "personality", "setup" or "env:" and an account folder. Null opens the
     /// first environment, or the checklist when nothing is set up yet.
     public SettingsPanel(string? page)
     {
@@ -102,7 +103,7 @@ public partial class SettingsPanel : UserControl
         (PageHost.Content as GeneralPage)?.StartUpdateCheck();
     }
 
-    private static IEnumerable<AikoEnvironment> Ordered(EnvironmentSettings settings)
+    internal static IEnumerable<AikoEnvironment> Ordered(EnvironmentSettings settings)
     {
         var first = settings.First(Home);
         return first is null
@@ -146,6 +147,12 @@ public partial class SettingsPanel : UserControl
 
         var bound = EnvironmentEdits.Bindings(settings).Count;
         Nav.Children.Add(NavItem(FoldersPageKey, Strings.ItemFolders, bound > 0 ? string.Format(Strings.NavBound, bound) : null));
+        if (settings.HasEnvironments)
+        {
+            var talking = settings.Environments.Count(e => e.Persona);
+            Nav.Children.Add(NavItem(PersonalityPageKey, Strings.NavPersonality, talking > 0 ? string.Format(Strings.NavPersonaOn, talking) : Strings.NavPersonaOff));
+        }
+
         Nav.Children.Add(NavItem(GeneralPageKey, Strings.NavGeneral, null));
 
         _buildingNav = false;
@@ -287,6 +294,18 @@ public partial class SettingsPanel : UserControl
             return folders;
         }
 
+        if (key == PersonalityPageKey)
+        {
+            if (!_editor.Current.HasEnvironments)
+            {
+                return null;
+            }
+
+            var personality = new PersonalityPage(_editor);
+            personality.Saved += OnGeneralSaved;
+            return personality;
+        }
+
         if (key == ChecklistPageKey)
         {
             return _checklist ??= NewChecklist(null);
@@ -348,6 +367,9 @@ public partial class SettingsPanel : UserControl
                 break;
             case FoldersPage folders:
                 folders.Leave();
+                break;
+            case PersonalityPage personality:
+                personality.Leave();
                 break;
         }
     }

@@ -10,9 +10,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 ### Added
 
 - **Groundwork for Aiko's personality.** Aiko now keeps a persona file with the temperament, the face
-  and the skills you switch off, and each environment remembers whether the persona is on. Nothing
-  uses them yet: the Personality settings arrive in later versions. Older settings files read as
-  before, with the persona off.
+  and the skills you switch off, and each environment remembers whether the persona is on. Older
+  settings files read as before, with the persona off.
 - **Aiko's persona text.** The character, the four temperaments and the rules about where she stays
   silent (code, commits, files, errors, warnings), packed as a Claude Code plugin with the hooks
   for her face. Not installed anywhere yet.
@@ -22,6 +21,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - **Plugins follow the persona switch.** Aiko keeps its own local plugin marketplace and, for every
   Claude Code folder, installs or turns off its own plugins to match whether the persona is on there.
   Other plugins and settings are never touched. With the persona off everywhere Aiko writes nothing.
+- **Personality page in settings.** A switch for each environment turns Aiko's persona on, and a
+  line warns when your own output style is set there, since the persona's style wins while it is on.
+  One choice for all environments: the face (chibi or emoji), the temperament with a sample answer,
+  and the list of Aiko's skills with a switch for each. The skills themselves come in later versions.
 
 ### Fixed
 

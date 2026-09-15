@@ -667,4 +667,130 @@
   <data name="StateWorkingNow" xml:space="preserve">
     <value>сейчас работает</value>
   </data>
+  <data name="NavPersonality" xml:space="preserve">
+    <value>Личность</value>
+  </data>
+  <data name="NavPersonaOn" xml:space="preserve">
+    <value>включена: {0}</value>
+  </data>
+  <data name="NavPersonaOff" xml:space="preserve">
+    <value>выключена</value>
+  </data>
+  <data name="SectionWhereAikoTalks" xml:space="preserve">
+    <value>ГДЕ AIKO ГОВОРИТ</value>
+  </data>
+  <data name="PersonaNewSessions" xml:space="preserve">
+    <value>Действует в новых сессиях. Открытые сессии доработают как были.</value>
+  </data>
+  <data name="PersonaOwnStyle" xml:space="preserve">
+    <value>Пока личность включена, твой стиль {0} не работает. Выключишь — вернётся.</value>
+  </data>
+  <data name="SectionFace" xml:space="preserve">
+    <value>ЛИЦО</value>
+  </data>
+  <data name="FaceChibi" xml:space="preserve">
+    <value>Чиби</value>
+  </data>
+  <data name="FaceEmoji" xml:space="preserve">
+    <value>Смайлик</value>
+  </data>
+  <data name="FaceWhere" xml:space="preserve">
+    <value>Так Aiko выглядит в трее, на острове и в окнах.</value>
+  </data>
+  <data name="SectionTemperament" xml:space="preserve">
+    <value>ТЕМПЕРАМЕНТ</value>
+  </data>
+  <data name="TemperamentQuiet" xml:space="preserve">
+    <value>Тихий</value>
+  </data>
+  <data name="TemperamentNormal" xml:space="preserve">
+    <value>Обычный</value>
+  </data>
+  <data name="TemperamentBright" xml:space="preserve">
+    <value>Яркий</value>
+  </data>
+  <data name="TemperamentQuietAbout" xml:space="preserve">
+    <value>Почти без характера: одна тёплая фраза в конце ответа.</value>
+  </data>
+  <data name="TemperamentNormalAbout" xml:space="preserve">
+    <value>Короткое междометие в начале, оценка в конце. Японские слова — изредка.</value>
+  </data>
+  <data name="TemperamentBrightAbout" xml:space="preserve">
+    <value>Междометие в каждом ответе, игровые метафоры, японские слова чаще.</value>
+  </data>
+  <data name="TemperamentMusouAbout" xml:space="preserve">
+    <value>Всё на максимум. В коде, коммитах, файлах и ошибках она всё равно молчит.</value>
+  </data>
+  <data name="SectionSampleReply" xml:space="preserve">
+    <value>ТАК ОНА ОТВЕТИТ</value>
+  </data>
+  <data name="SampleQuestion" xml:space="preserve">
+    <value>Почему отсчёт до сброса показывает 0 минут?</value>
+  </data>
+  <data name="SampleBody" xml:space="preserve">
+    <value>Тест на разбор лимитов проходил случайно: округление шло вниз, и сброс в 14:59:30 показывался как «через 0 мин». Поправила ResetCountdown и добавила тест на край.</value>
+  </data>
+  <data name="SampleBodyBright" xml:space="preserve">
+    <value>Тест на разбор лимитов проходил случайно: округление шло вниз, и сброс в 14:59:30 прятался за «через 0 мин», как мимик-сундук в Dark Souls. Поправила ResetCountdown и добавила тест на край.</value>
+  </data>
+  <data name="SampleBodyMusouTail" xml:space="preserve">
+    <value> Парировала его, как в Elden Ring.</value>
+  </data>
+  <data name="SampleOpenNormal" xml:space="preserve">
+    <value>えへへ, поймала.</value>
+  </data>
+  <data name="SampleOpenBright" xml:space="preserve">
+    <value>やった, поймала!</value>
+  </data>
+  <data name="SampleOpenMusou" xml:space="preserve">
+    <value>やった〜! すごい, какой хитрый!</value>
+  </data>
+  <data name="SampleCloseQuiet" xml:space="preserve">
+    <value>Редкий баг, приятно было найти.</value>
+  </data>
+  <data name="SampleCloseNormal" xml:space="preserve">
+    <value>Такой баг я бы и в своей игре полдня искала.</value>
+  </data>
+  <data name="SampleCloseBright" xml:space="preserve">
+    <value>お疲れ様!</value>
+  </data>
+  <data name="SampleCloseMusou" xml:space="preserve">
+    <value>よし、行くぞ! Дальше (^_^)</value>
+  </data>
+  <data name="SampleCommit" xml:space="preserve">
+    <value>Коммит к этой правке — без характера:</value>
+  </data>
+  <data name="SectionSkills" xml:space="preserve">
+    <value>НАВЫКИ · {0} ИЗ {1}</value>
+  </data>
+  <data name="SkillsWork" xml:space="preserve">
+    <value>Навыки работают в средах, где включена личность. Зови их по имени, например /aiko-copy.</value>
+  </data>
+  <data name="SkillsNeedPersona" xml:space="preserve">
+    <value>Включи личность хотя бы в одной среде — тогда навыки заработают.</value>
+  </data>
+  <data name="SkillAikoCopy" xml:space="preserve">
+    <value>Интерфейс, README и релизы без канцелярита и штампов ИИ. RU и EN.</value>
+  </data>
+  <data name="SkillAikoReleaseGate" xml:space="preserve">
+    <value>Перед релизом: что необратимо, как откатить, совпадают ли документы с кодом.</value>
+  </data>
+  <data name="SkillAikoDocsHygiene" xml:space="preserve">
+    <value>Факт живёт в одном месте, журнал решений, поиск противоречий.</value>
+  </data>
+  <data name="SkillAikoBlenderToUnity" xml:space="preserve">
+    <value>Модель из Blender в Unity: оси, нормали, экспорт и импорт.</value>
+  </data>
+  <data name="SkillAikoTexturing" xml:space="preserve">
+    <value>Плотность текселей от камеры: когда свой лист, когда тайлинг.</value>
+  </data>
+  <data name="SkillAikoGlbForWeb" xml:space="preserve">
+    <value>Файл .glb для веба: размер, оси, сжатие, пустое окно вместо модели.</value>
+  </data>
+  <data name="SkillAikoPalette" xml:space="preserve">
+    <value>Подогнать цвет под палитру в OKLCH с самой маленькой правкой.</value>
+  </data>
+  <data name="SkillAikoGamedesignResearch" xml:space="preserve">
+    <value>30–40 игр с нужной механикой: обзор со скриншотами и интерактивные стенды по запросу.</value>
+  </data>
 </root>
