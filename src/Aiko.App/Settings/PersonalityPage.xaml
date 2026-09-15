@@ -34,8 +34,11 @@
   </UserControl.Resources>
 
   <StackPanel>
-    <TextBlock Text="{x:Static local:Strings.NavPersonality}" FontFamily="{StaticResource Sans}" FontSize="16"
-               FontWeight="Medium" Foreground="{StaticResource Ink}" />
+    <StackPanel Orientation="Horizontal">
+      <Image x:Name="HeaderFace" Width="24" Height="24" Margin="0,0,10,0" VerticalAlignment="Center" />
+      <TextBlock Text="{x:Static local:Strings.NavPersonality}" FontFamily="{StaticResource Sans}" FontSize="16"
+                 FontWeight="Medium" Foreground="{StaticResource Ink}" VerticalAlignment="Center" />
+    </StackPanel>
 
     <TextBlock Text="{x:Static local:Strings.SectionWhereAikoTalks}" Style="{StaticResource SectionLabel}" Margin="0,18,0,8" />
     <Border Style="{StaticResource Rows}">
@@ -78,11 +81,21 @@
                 MaxWidth="380">
           <TextBlock Text="{x:Static local:Strings.SampleQuestion}" Style="{StaticResource ChatText}" LineHeight="18" />
         </Border>
-        <TextBlock x:Name="ReplyOpen" Style="{StaticResource ChatText}" Foreground="{StaticResource VoiceInk}"
-                   Margin="0,10,0,0" />
-        <TextBlock x:Name="ReplyBody" Style="{StaticResource ChatText}" Margin="0,10,0,0" />
-        <TextBlock x:Name="ReplyClose" Style="{StaticResource ChatText}" Foreground="{StaticResource VoiceInk}"
-                   Margin="0,10,0,0" />
+        <Grid Margin="0,10,0,0">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="20" />
+            <ColumnDefinition Width="8" />
+            <ColumnDefinition Width="*" />
+          </Grid.ColumnDefinitions>
+          <Image x:Name="ReplyFace" Width="20" Height="20" VerticalAlignment="Top" />
+          <StackPanel Grid.Column="2">
+            <TextBlock x:Name="ReplyOpen" Style="{StaticResource ChatText}" Foreground="{StaticResource VoiceInk}"
+                       Margin="0,0,0,10" />
+            <TextBlock x:Name="ReplyBody" Style="{StaticResource ChatText}" />
+            <TextBlock x:Name="ReplyClose" Style="{StaticResource ChatText}" Foreground="{StaticResource VoiceInk}"
+                       Margin="0,10,0,0" />
+          </StackPanel>
+        </Grid>
       </StackPanel>
     </Border>
     <TextBlock Style="{StaticResource RowHint}" Margin="0,8,0,0">

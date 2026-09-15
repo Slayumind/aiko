@@ -49,6 +49,7 @@ public partial class ChecklistPage : UserControl
         }
 
         InstallCommand.Text = InstallCommandText;
+        MeetFace.Source = FaceDrawing.For(SettingsStore.LoadPersona().Face, AikoFace.Fresh, FaceGround.Dark, MeetFace.Width);
         NewName.Text = "";
         DefaultChoice.Picked += _ => Refresh();
 

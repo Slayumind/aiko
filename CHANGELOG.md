@@ -39,6 +39,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - **When Aiko shows a face.** With the persona on somewhere, Aiko turns each new session state and
   each limit crossing 90% or 100% (or dropping back after a reset) into a face for two seconds. A face
   that asks for you or reports an error is not pushed away by a calmer one. The drawing comes later.
+- **Aiko's faces.** Seven faces in two styles, chibi and emoji, drawn as vectors for dark and light
+  taskbars, with thicker lines at tray sizes. They show next to the Personality title, beside the
+  sample answer and in the Meet Aiko item, and follow the face you pick. `--snapshot-faces` draws
+  them all on one sheet.
 
 ### Fixed
 

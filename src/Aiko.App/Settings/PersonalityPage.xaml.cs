@@ -202,8 +202,20 @@ public partial class PersonalityPage : UserControl
 
     // ---- face and temperament ----
 
-    private void OnFaceChanged(object sender, RoutedEventArgs e) =>
+    private void OnFaceChanged(object sender, RoutedEventArgs e)
+    {
         SavePersona(_persona with { Face = FaceEmoji.IsChecked == true ? FaceStyle.Emoji : FaceStyle.Chibi });
+        ShowFaces();
+    }
+
+    /// The face next to the title and beside the sample answer, in the chosen style. A calm
+    /// temperament smiles, a loud one beams, as in the mockup.
+    private void ShowFaces()
+    {
+        var face = _persona.Temperament is Temperament.Bright or Temperament.Musou ? AikoFace.Done : AikoFace.Fresh;
+        HeaderFace.Source = FaceDrawing.For(_persona.Face, face, FaceGround.Dark, HeaderFace.Width);
+        ReplyFace.Source = FaceDrawing.For(_persona.Face, face, FaceGround.Dark, ReplyFace.Width);
+    }
 
     private void OnTemperamentChanged(object sender, RoutedEventArgs e)
     {
@@ -242,6 +254,7 @@ public partial class PersonalityPage : UserControl
         ReplyOpen.Visibility = open.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
         ReplyBody.Text = body;
         ReplyClose.Text = close;
+        ShowFaces();
     }
 
     // ---- skills ----
