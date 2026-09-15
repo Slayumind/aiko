@@ -570,7 +570,7 @@ public static class Strings
     /// Remove environment
     public static string RemoveEnvironment => Get("RemoveEnvironment");
 
-    /// The Aiko line leaves this folder's settings.json, and so do the command {0} and the bindi...
+    /// Aiko's line and plugins leave this folder's settings.json, and so do the command {0} and ...
     public static string RemoveEnvironmentLine => Get("RemoveEnvironmentLine");
 
     /// And move the folder to the Recycle Bin
@@ -639,7 +639,7 @@ public static class Strings
     /// Removes the environments from Aiko and opens the checklist right here.
     public static string RestartWhat => Get("RestartWhat");
 
-    /// Aiko removes the environments, its lines in settings.json, the commands {0}, the folder b...
+    /// Aiko removes the environments, its lines and plugins in settings.json, the commands {0}, ...
     public static string RestartLine => Get("RestartLine");
 
     /// And move {0} to the Recycle Bin
@@ -656,4 +656,148 @@ public static class Strings
 
     /// working now
     public static string StateWorkingNow => Get("StateWorkingNow");
+
+    /// Personality
+    public static string NavPersonality => Get("NavPersonality");
+
+    /// on: {0}
+    public static string NavPersonaOn => Get("NavPersonaOn");
+
+    /// off
+    public static string NavPersonaOff => Get("NavPersonaOff");
+
+    /// WHERE AIKO TALKS
+    public static string SectionWhereAikoTalks => Get("SectionWhereAikoTalks");
+
+    /// Works in new sessions. Open sessions finish the way they started.
+    public static string PersonaNewSessions => Get("PersonaNewSessions");
+
+    /// While the personality is on, your style {0} doesn't work. Turn it off and it comes back.
+    public static string PersonaOwnStyle => Get("PersonaOwnStyle");
+
+    /// FACE
+    public static string SectionFace => Get("SectionFace");
+
+    /// Chibi
+    public static string FaceChibi => Get("FaceChibi");
+
+    /// Emoji
+    public static string FaceEmoji => Get("FaceEmoji");
+
+    /// This is how Aiko looks in the tray, on the island and in windows.
+    public static string FaceWhere => Get("FaceWhere");
+
+    /// TEMPERAMENT
+    public static string SectionTemperament => Get("SectionTemperament");
+
+    /// Quiet
+    public static string TemperamentQuiet => Get("TemperamentQuiet");
+
+    /// Normal
+    public static string TemperamentNormal => Get("TemperamentNormal");
+
+    /// Bright
+    public static string TemperamentBright => Get("TemperamentBright");
+
+    /// Almost no character: one warm line at the end of an answer.
+    public static string TemperamentQuietAbout => Get("TemperamentQuietAbout");
+
+    /// A short interjection at the start, a quick verdict at the end. Japanese words now and then.
+    public static string TemperamentNormalAbout => Get("TemperamentNormalAbout");
+
+    /// An interjection in every answer, game metaphors, Japanese words more often.
+    public static string TemperamentBrightAbout => Get("TemperamentBrightAbout");
+
+    /// Everything at full. In code, commits, files and errors she still stays quiet.
+    public static string TemperamentMusouAbout => Get("TemperamentMusouAbout");
+
+    /// HOW SHE'LL ANSWER
+    public static string SectionSampleReply => Get("SectionSampleReply");
+
+    /// Why does the reset countdown show 0 minutes?
+    public static string SampleQuestion => Get("SampleQuestion");
+
+    /// The limits test passed by luck: rounding went down, so a reset at 14:59:30 showed as “in ...
+    public static string SampleBody => Get("SampleBody");
+
+    /// The limits test passed by luck: rounding went down, so a reset at 14:59:30 hid behind “in...
+    public static string SampleBodyBright => Get("SampleBodyBright");
+
+    ///  Parried it, like in Elden Ring.
+    public static string SampleBodyMusouTail => Get("SampleBodyMusouTail");
+
+    /// えへへ, got it.
+    public static string SampleOpenNormal => Get("SampleOpenNormal");
+
+    /// やった, got it!
+    public static string SampleOpenBright => Get("SampleOpenBright");
+
+    /// やった〜! すごい, what a sneaky one!
+    public static string SampleOpenMusou => Get("SampleOpenMusou");
+
+    /// A rare bug. It was nice to find.
+    public static string SampleCloseQuiet => Get("SampleCloseQuiet");
+
+    /// In my own game I'd have hunted a bug like this for half a day.
+    public static string SampleCloseNormal => Get("SampleCloseNormal");
+
+    /// お疲れ様!
+    public static string SampleCloseBright => Get("SampleCloseBright");
+
+    /// よし、行くぞ! On to the next one (^_^)
+    public static string SampleCloseMusou => Get("SampleCloseMusou");
+
+    /// The commit for this fix has no character:
+    public static string SampleCommit => Get("SampleCommit");
+
+    /// SKILLS · {0} OF {1}
+    public static string SectionSkills => Get("SectionSkills");
+
+    /// Skills work in environments where the personality is on. Call them by name, like /aiko-copy.
+    public static string SkillsWork => Get("SkillsWork");
+
+    /// Turn the personality on in at least one environment, and the skills start working.
+    public static string SkillsNeedPersona => Get("SkillsNeedPersona");
+
+    /// UI text, READMEs and release notes without stiff wording or AI tells. RU and EN.
+    public static string SkillAikoCopy => Get("SkillAikoCopy");
+
+    /// Before a release: what can't be undone, how to roll back, whether the docs match the code.
+    public static string SkillAikoReleaseGate => Get("SkillAikoReleaseGate");
+
+    /// One fact in one place, a decision log, contradictions found.
+    public static string SkillAikoDocsHygiene => Get("SkillAikoDocsHygiene");
+
+    /// A model from Blender to Unity: axes, normals, export and import.
+    public static string SkillAikoBlenderToUnity => Get("SkillAikoBlenderToUnity");
+
+    /// Texel density from the camera: when a model gets its own sheet, when to tile.
+    public static string SkillAikoTexturing => Get("SkillAikoTexturing");
+
+    /// A .glb for the web: size, axes, compression, a blank view where the model should be.
+    public static string SkillAikoGlbForWeb => Get("SkillAikoGlbForWeb");
+
+    /// Fit a color to the palette in OKLCH with the smallest change.
+    public static string SkillAikoPalette => Get("SkillAikoPalette");
+
+    /// 30–40 games with the mechanic you need: an overview with screenshots, and interactive dem...
+    public static string SkillAikoGamedesignResearch => Get("SkillAikoGamedesignResearch");
+
+    /// Meet Aiko
+    public static string ItemMeetAiko => Get("ItemMeetAiko");
+
+    /// Aiko can talk in your Claude Code sessions in her own voice, and she brings eight skills....
+    public static string MeetAikoLead => Get("MeetAikoLead");
+
+    /// The temperament, the face and the skills are in settings, under Personality. It works in ...
+    public static string MeetAikoSettings => Get("MeetAikoSettings");
+
+    /// Turn on in {0}
+    public static string MeetAikoTurnOn => Get("MeetAikoTurnOn");
+
+    /// on
+    public static string StateOn => Get("StateOn");
+
+    /// Your own skill with this name in {0} takes /{1}. This one is called /{1}:{1} there.
+    public static string SkillOwnTwin => Get("SkillOwnTwin");
 }

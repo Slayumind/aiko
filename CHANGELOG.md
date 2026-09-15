@@ -5,6 +5,69 @@ All notable changes to Aiko are listed here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and Aiko uses
 [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-09-15
+
+Aiko gets a personality, eight skills and a face. All of it is off until you turn it on.
+
+### Added
+
+- **Personality.** Turn it on for an environment on the new Personality page, and new Claude Code
+  sessions there talk as Aiko, an indie game developer who works next to you. Open sessions finish
+  the way they started. Pick one of four temperaments, from Quiet to 無双; the page shows a sample
+  answer for each. At every temperament, code, commits, files, pull requests, error explanations,
+  security warnings, dangerous actions and bad news are written in a plain neutral voice. If you set
+  your own output style, the page tells you that the personality's style wins while it is on. Tested
+  with Claude Code 2.1.272.
+- **Eight skills.** They come with the personality, each with its own switch:
+  - `/aiko-copy`: text that reads as written by a person, for UI strings, READMEs, release notes and
+    bad news, in Russian and English.
+  - `/aiko-docs-hygiene`: a state file built from measured facts, an append-only decision log, and an
+    audit of the documents for duplicates, contradictions and broken links.
+  - `/aiko-release-gate`: a check before a release ships, for installers and web services alike: GO or
+    NO-GO, irreversible changes, rollout order and rollback plan. It never pushes anything.
+  - `/aiko-glb-for-web`: a Blender model as a `.glb` that web players show correctly, with an offline
+    checker for size and extensions a player cannot decode.
+  - `/aiko-blender-to-unity`: meshes from Blender into Unity with the right pose and handedness,
+    blended normals and cut shared parts, with export scripts for Blender.
+  - `/aiko-texturing`: texture sizes from the game camera instead of habit, a sheet or a tile, UVs
+    from world position and guides for painters.
+  - `/aiko-palette`: colours checked against a palette and fixed with the smallest change, in OKLCH,
+    offline and without a key.
+  - `/aiko-gamedesign-research`: one game mechanic studied across 30-40 games, as an illustrated
+    review with sources, and on request small interactive stands to play with the systems.
+
+  Aiko installs the personality and the skills as Claude Code plugins from a marketplace on your own
+  computer, so nothing is downloaded. A new version of Aiko brings new versions of the skills by
+  itself. Your own plugins and settings stay as they are.
+- **Skills without Aiko.** `/plugin marketplace add Slayumind/aiko`, then
+  `/plugin install aiko-copy@slayumind-aiko` or any other skill.
+- **Aiko's face.** Seven faces, chibi or emoji. When a session starts working, waits for you,
+  finishes, fails or runs out of limit, or when a limit crosses 90% or 100%, the face takes the place
+  of the rings in the tray or on the island for two seconds, with a short animation. The island
+  closes in around the face. The face follows a light or dark taskbar, and with animations turned off
+  in Windows it switches at once. Nothing runs while nothing happens.
+- **Meet Aiko.** An optional checklist item that tells what the personality does and turns it on in
+  environment 1. If you set Aiko up before this version, the checklist opens on it once.
+- **A warning about skills with the same name.** If you keep your own skill named like one of Aiko's,
+  Claude Code gives the short name to yours. The Personality page says so under that skill.
+
+### Changed
+
+- **Removing Aiko takes its plugins with it.** Uninstalling Aiko, removing an environment and Start
+  over take Aiko's plugins and marketplace out of Claude Code. Other plugins stay. The copy of
+  `settings.json` is kept while anything of Aiko's is still in the file.
+- **Privacy.** Where the personality is on, Claude Code tells Aiko when a session changes state. Aiko
+  reads only the kind of event and the session ID, keeps the state and the time in a small local file
+  with the ID hashed, and removes the file when the session ends. Nothing leaves your computer.
+  [PRIVACY.md](PRIVACY.md) has the details.
+- **The card in Russian** says «потрачено» instead of «истрачено». It is the everyday word.
+
+### Fixed
+
+- **Checksums.** `SHA256SUMS.txt` no longer lists the portable zip, which a release doesn't include,
+  and it has plain LF line endings. In 0.1.0 both made `sha256sum -c` fail even though every file
+  was fine. The file in the 0.1.0 release has been replaced.
+
 ## [0.1.0] - 2026-09-14
 
 The first release. Everything below is new.

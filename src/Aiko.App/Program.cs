@@ -40,9 +40,22 @@ static class Program
 
         // Draw the icon into a file and stop. Windows hides new tray icons in the overflow area,
         // so this is the only way to look at the drawing itself.
+        if (args is ["--snapshot-icon", var faceIconPath, "faces", ..])
+        {
+            IconSheet.WriteFaces(faceIconPath);
+            return;
+        }
+
         if (args is ["--snapshot-icon", var iconPath, ..])
         {
             IconSheet.Write(iconPath);
+            return;
+        }
+
+        // Every face in both styles, on a dark and a light taskbar, at the sizes the tray uses.
+        if (args is ["--snapshot-faces", var facesPath, ..])
+        {
+            FaceSheet.Write(facesPath);
             return;
         }
 
@@ -80,9 +93,91 @@ static class Program
         // does this for every folder, and that is not something to try out on a live machine.
         if (args is ["--try-restore", var restoreFolder, ..])
         {
-            var outcome = ClaudeSettingsFile.RemoveBridge(restoreFolder);
+            var outcome = ClaudeSettingsFile.RemoveAiko(restoreFolder);
             Log.Write($"--try-restore {FolderName(restoreFolder)}: changed={outcome.Changed} problem={outcome.Problem}");
             Environment.Exit(outcome.Changed ? 0 : 1);
+            return;
+        }
+
+        // The persona plugin for one temperament, written into a folder for tools/persona-evals:
+        // --write-persona-plugin Musou <folder>. The real persona.json is not read or changed.
+        if (args is ["--write-persona-plugin", var temperamentName, var personaFolder, ..])
+        {
+            if (!Enum.TryParse<Temperament>(temperamentName, ignoreCase: true, out var temperament) || BridgePath.Current() is not { } bridge)
+            {
+                Environment.Exit(1);
+                return;
+            }
+
+            foreach (var (relative, content) in PersonaPlugin.Files(temperament, bridge))
+            {
+                var path = Path.Combine(personaFolder, relative.Replace('/', Path.DirectorySeparatorChar));
+                Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+                File.WriteAllText(path, content, new System.Text.UTF8Encoding(false));
+            }
+
+            Environment.Exit(0);
+            return;
+        }
+
+        // Aiko's skills the way the plugin sync installs them, into throwaway folders:
+        // --try-skills <marketplace folder> <config folder>. Runs twice, so the second run shows that
+        // an unchanged skill is neither copied nor installed again.
+        if (args is ["--try-skills", var marketFolder, var skillConfig, ..])
+        {
+            var cli = new ClaudeCli(ClaudeLauncher.FindClaude()!);
+            for (var run = 1; run <= 2; run++)
+            {
+                var changed = SkillShelf.CopyTo(marketFolder);
+                var file = Path.Combine(marketFolder, ".claude-plugin", "marketplace.json");
+                Directory.CreateDirectory(Path.GetDirectoryName(file)!);
+                File.WriteAllText(file, AikoMarketplace.Json(@"""C:\none\Aiko.Bridge.exe"" plugin aiko-persona", SkillShelf.Shipped));
+
+                var steps = new List<PluginStep>();
+                if (run == 1)
+                {
+                    steps.Add(new PluginStep(PluginStepKind.AddMarketplace, marketFolder));
+                    steps.AddRange(SkillShelf.Shipped.Select(s => new PluginStep(PluginStepKind.Install, AikoMarketplace.PluginId(s.Name))));
+                }
+                else
+                {
+                    steps.AddRange(changed.Select(name => new PluginStep(PluginStepKind.Update, AikoMarketplace.PluginId(name))));
+                }
+
+                var results = PluginReconciler.Apply(cli, skillConfig, steps);
+                Log.Write($"--try-skills run {run}: shipped {string.Join(", ", SkillShelf.Shipped.Select(s => s.Name))}, copied {changed.Count}, "
+                    + string.Join(", ", results.Select(r => $"{r.Step.Kind} {r.Step.Target} exit {r.Result.ExitCode}")));
+            }
+
+            return;
+        }
+
+        // Direct mode with an expired token, on a throwaway folder with a fake credentials file:
+        // --try-direct-expired <empty folder>. Aiko must wait for Claude Code, send nothing and leave
+        // the file exactly as it was. Never pointed at a real account folder.
+        if (args is ["--try-direct-expired", var expiredFolder, ..])
+        {
+            Environment.Exit(TryDirectExpired(expiredFolder));
+            return;
+        }
+
+        // The whole way from a hook to a face, on a made-up environment: the real bridge writes the
+        // session file, the watcher sees it and the player shows and hides faces. Draws nothing.
+        if (args is ["--try-activity", ..])
+        {
+            TryActivity();
+            return;
+        }
+
+        // What uninstalling does to the plugins of one folder: the keys, then claude.exe with the
+        // same 20 second budget. Meant for a throwaway config folder, not a live one.
+        if (args is ["--try-plugin-removal", var pluginFolder, ..])
+        {
+            var started = DateTimeOffset.UtcNow;
+            var keys = ClaudeSettingsFile.RemoveAiko(pluginFolder);
+            PluginSync.RemoveNow([pluginFolder], started + TimeSpan.FromSeconds(20));
+            Log.Write($"--try-plugin-removal {FolderName(pluginFolder)}: keys changed={keys.Changed}, took {(DateTimeOffset.UtcNow - started).TotalSeconds:0.0} s");
+            Environment.Exit(keys.Problem == PatchProblem.None ? 0 : 1);
             return;
         }
 
@@ -196,11 +291,18 @@ static class Program
                 : ScreenEdge.Top;
 
             // --snapshot-island out.png Left open: the island unfolded, as on a hover.
+            // --snapshot-island out.png Top face: a face in place of the rings.
             var panel = new IslandPanel();
             panel.Show(CardSnapshot.Example(), edge);
             if (args is [.., "open"])
             {
                 panel.Unfold(true, animate: false);
+            }
+
+            if (args is [.., "face"])
+            {
+                panel.SetFace(TrayFaceMotion.At(FacePhase.FaceIn, 1), FaceDrawing.For(FaceStyle.Chibi, AikoFace.Done, FaceGround.Dark, 18));
+                panel.MarkForMeasure();
             }
 
             Snapshot.Write(panel, islandPath);
@@ -223,7 +325,7 @@ static class Program
 
         if (args is ["--snapshot-settings", var settingsPath, ..])
         {
-            // The page to draw: --snapshot-settings out.png general | folders | env1 | env2 [tall]
+            // The page to draw: --snapshot-settings out.png general | folders | personality | env1 | env2 [tall]
             // "tall" draws the whole page, not only the part that fits the window.
             var page = args.Length > 2 ? args[2] : null;
             var panel = new SettingsPanel(page switch
@@ -251,6 +353,87 @@ static class Program
         application.Exit += (_, _) => shell?.Dispose();
 
         application.Run();
+    }
+
+    private static int TryDirectExpired(string folder)
+    {
+        var credentials = Path.Combine(folder, ".credentials.json");
+        if (File.Exists(credentials))
+        {
+            Log.Write("--try-direct-expired: the folder already has credentials, refusing");
+            return 2;
+        }
+
+        Directory.CreateDirectory(folder);
+        var expired = DateTimeOffset.UtcNow.AddHours(-1).ToUnixTimeMilliseconds();
+        File.WriteAllText(credentials, $$"""{ "claudeAiOauth": { "accessToken": "not-a-real-token", "refreshToken": "not-a-real-token", "expiresAt": {{expired}}, "subscriptionType": "max" } }""");
+        var before = File.ReadAllBytes(credentials);
+        var logBefore = File.Exists(Log.FilePath) ? File.ReadAllLines(Log.FilePath).Length : 0;
+
+        var dispatcher = System.Windows.Threading.Dispatcher.CurrentDispatcher;
+        using var poller = new DirectPoller(dispatcher);
+        poller.Follow(new EnvironmentSettings([new AikoEnvironment("probe", [folder]) { DirectMode = true }]));
+
+        // One tick of the poller is twenty seconds.
+        var frame = new System.Windows.Threading.DispatcherFrame();
+        var stop = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(25) };
+        stop.Tick += (_, _) => { stop.Stop(); frame.Continue = false; };
+        stop.Start();
+        System.Windows.Threading.Dispatcher.PushFrame(frame);
+
+        var lines = File.ReadAllLines(Log.FilePath).Skip(logBefore).Where(l => l.Contains("direct mode for probe", StringComparison.Ordinal)).ToList();
+        var waited = lines.Any(l => l.Contains("the token has expired", StringComparison.Ordinal));
+        var asked = lines.Any(l => !l.Contains("the token has expired", StringComparison.Ordinal));
+        var untouched = before.AsSpan().SequenceEqual(File.ReadAllBytes(credentials));
+        var latest = poller.Latest.ContainsKey("probe");
+
+        File.Delete(credentials);
+        Log.Write($"--try-direct-expired: waited={waited}, asked the server={asked}, file untouched={untouched}, numbers={latest}");
+        return waited && !asked && untouched && !latest ? 0 : 1;
+    }
+
+    private static void TryActivity()
+    {
+        var folder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".claude-aiko-probe");
+        var clock = System.Diagnostics.Stopwatch.StartNew();
+        var faces = new List<string>();
+
+        var dispatcher = System.Windows.Threading.Dispatcher.CurrentDispatcher;
+        using var player = new TrayMoodPlayer(dispatcher);
+        player.FaceChanged += face => faces.Add($"{face?.ToString() ?? "rings"} {clock.Elapsed.TotalSeconds:0.0}s");
+        player.Follow(new EnvironmentSettings([new AikoEnvironment("probe", [folder]) { Persona = true }]));
+
+        void Send(string hookEvent)
+        {
+            var start = new System.Diagnostics.ProcessStartInfo(BridgePath.Current()!, "hook")
+            {
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardInput = true,
+            };
+            start.Environment["CLAUDE_CONFIG_DIR"] = folder;
+            using var bridge = System.Diagnostics.Process.Start(start)!;
+            bridge.StandardInput.Write($$"""{ "session_id": "aiko-probe", "hook_event_name": "{{hookEvent}}" }""");
+            bridge.StandardInput.Close();
+            bridge.WaitForExit();
+        }
+
+        var frame = new System.Windows.Threading.DispatcherFrame();
+        Task.Run(() =>
+        {
+            Send("UserPromptSubmit");
+            Thread.Sleep(3000);
+            Send("PermissionRequest");
+            Thread.Sleep(500);
+            Send("PostToolUse");
+            Thread.Sleep(3000);
+            Send("Stop");
+            Thread.Sleep(3000);
+            Send("SessionEnd");
+        }).ContinueWith(_ => dispatcher.BeginInvoke(() => frame.Continue = false));
+        System.Windows.Threading.Dispatcher.PushFrame(frame);
+
+        Log.Write($"--try-activity: {string.Join(", ", faces)}");
     }
 
     /// The last part of a folder path, whichever separator it ends with.

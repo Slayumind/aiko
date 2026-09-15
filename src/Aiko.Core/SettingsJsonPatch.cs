@@ -14,6 +14,8 @@ public static class SettingsJsonPatch
 {
     public const string StatusLineKey = "statusLine";
     public const string WrappedKey = "aikoWrappedStatusLine";
+    public const string EnabledPluginsKey = "enabledPlugins";
+    public const string ExtraMarketplacesKey = "extraKnownMarketplaces";
 
     private static readonly JsonSerializerOptions Formatting = new()
     {
@@ -175,11 +177,103 @@ public static class SettingsJsonPatch
         return true;
     }
 
+    /// Takes Aiko's plugins and its marketplace out of the file (D-205). Without these keys Claude
+    /// Code loads none of them, even while its own copies of the plugins are still on disk. Other
+    /// plugins and marketplaces stay as they are.
+    public static bool TryRemovePlugins(string settingsJson, out string restored)
+    {
+        restored = settingsJson;
+        if (!TryParseObject(settingsJson, out var root))
+        {
+            return false;
+        }
+
+        var changed = false;
+        if (root![EnabledPluginsKey] is JsonObject enabled)
+        {
+            foreach (var id in enabled.Select(p => p.Key).Where(AikoMarketplace.IsOurs).ToList())
+            {
+                changed |= enabled.Remove(id);
+            }
+        }
+
+        if (root[ExtraMarketplacesKey] is JsonObject marketplaces)
+        {
+            changed |= marketplaces.Remove(AikoMarketplace.Name);
+        }
+
+        if (!changed)
+        {
+            return false;
+        }
+
+        DropIfEmpty(root, EnabledPluginsKey);
+        DropIfEmpty(root, ExtraMarketplacesKey);
+        restored = Write(root);
+        return true;
+    }
+
+    /// "claude plugin uninstall" writes an empty enabledPlugins back after Aiko took its own keys
+    /// out. Called only for a folder where it just ran.
+    public static bool TryDropEmptyPluginKeys(string settingsJson, out string restored)
+    {
+        restored = settingsJson;
+        if (!TryParseObject(settingsJson, out var root))
+        {
+            return false;
+        }
+
+        var enabled = DropIfEmpty(root!, EnabledPluginsKey);
+        var marketplaces = DropIfEmpty(root!, ExtraMarketplacesKey);
+        if (!enabled && !marketplaces)
+        {
+            return false;
+        }
+
+        restored = Write(root!);
+        return true;
+    }
+
+    /// Anything of Aiko's in the file. The backup lives while this is true.
+    public static bool HasAnyAikoEntries(string settingsJson)
+    {
+        if (!TryParseObject(settingsJson, out var root))
+        {
+            return false;
+        }
+
+        return BridgeCommand.IsAiko(CommandIn(root![StatusLineKey]))
+            || root.ContainsKey(WrappedKey)
+            || (SessionStartGroups(root) is { } groups && OurHookCommands(groups).Any())
+            || (root[EnabledPluginsKey] is JsonObject enabled && enabled.Any(p => AikoMarketplace.IsOurs(p.Key)))
+            || (root[ExtraMarketplacesKey] is JsonObject marketplaces && marketplaces.ContainsKey(AikoMarketplace.Name));
+    }
+
+    private static bool DropIfEmpty(JsonObject root, string key) =>
+        root[key] is JsonObject { Count: 0 } && root.Remove(key);
+
     /// Whether the status line in this file is ours, whatever path or shell it names.
     public static bool HasOurLine(string settingsJson) =>
         TryParseObject(settingsJson, out var root)
         && root!.TryGetPropertyValue(StatusLineKey, out var line)
         && BridgeCommand.IsAiko(CommandIn(line));
+
+    /// The output style the person picked for themselves, if any. While the persona is on, its style
+    /// wins over this one, and the settings page has to say so (D-207). Aiko never changes the key.
+    public static string? UserOutputStyle(string settingsJson) =>
+        TryParseObject(settingsJson, out var root)
+        && root!.TryGetPropertyValue("outputStyle", out var style)
+        && style is JsonValue value
+        && value.TryGetValue<string>(out var name)
+        && !string.IsNullOrWhiteSpace(name)
+        && !name.Equals("default", StringComparison.OrdinalIgnoreCase)
+        && !IsPersonaStyle(name)
+            ? name
+            : null;
+
+    private static bool IsPersonaStyle(string name) =>
+        name.Equals(PersonaPrompt.StyleName, StringComparison.OrdinalIgnoreCase)
+        || name.Equals($"{PersonaPlugin.Name}:{PersonaPrompt.StyleName}", StringComparison.OrdinalIgnoreCase);
 
     /// What the bridge should call after doing its own work, if anything.
     public static string? ReadWrappedCommand(string settingsJson)

@@ -111,4 +111,19 @@ public class SettingsJsonPatchTests
         Assert.False(SettingsJsonPatch.TryAddBridge(PlainSettings, "   ", out var patched));
         Assert.Equal(PlainSettings, patched);
     }
+
+    [Theory]
+    [InlineData("""{ "outputStyle": "Explanatory" }""", "Explanatory")]
+    [InlineData("""{ "outputStyle": "my-plugin:Terse" }""", "my-plugin:Terse")]
+    [InlineData("""{ "outputStyle": "default" }""", null)]
+    [InlineData("""{ "outputStyle": "Aiko" }""", null)]
+    [InlineData("""{ "outputStyle": "aiko-persona:Aiko" }""", null)]
+    [InlineData("""{ "outputStyle": "" }""", null)]
+    [InlineData("""{ "outputStyle": 3 }""", null)]
+    [InlineData("""{ "model": "opus" }""", null)]
+    [InlineData("not json", null)]
+    public void Only_a_style_the_person_picked_counts_as_their_own(string json, string? expected)
+    {
+        Assert.Equal(expected, SettingsJsonPatch.UserOutputStyle(json));
+    }
 }

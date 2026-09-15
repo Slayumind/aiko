@@ -42,6 +42,14 @@ sealed class AikoShell : IDisposable
 
     private readonly Application _application;
     private readonly SnapshotWatcher _watcher = new();
+
+    /// The face for two seconds after an event (D-211). Drawn by the icon and the island later.
+    private TrayMoodPlayer? _mood;
+    private TrayFaceAnimator? _faceAnimator;
+
+    /// The rows the icon last drew. Frames of a face transition reuse them instead of reading the
+    /// settings and the snapshots sixteen times in half a second.
+    private (CardRow? Ring, CardRow? Dot) _iconRows;
     private readonly uint _taskbarCreatedMessage;
     private HwndSource? _source;
     private DispatcherTimer? _hover;
@@ -79,6 +87,12 @@ sealed class AikoShell : IDisposable
 
         _watcher.Updated += OnSnapshotsChanged;
 
+        _faceAnimator = new TrayFaceAnimator(_application.Dispatcher);
+        _faceAnimator.Changed += RedrawIcon;
+        _mood = new TrayMoodPlayer(_application.Dispatcher);
+        _mood.FaceChanged += OnFaceChanged;
+        _mood.Follow(SettingsStore.LoadEnvironments());
+
         var poller = new DirectPoller(_application.Dispatcher);
         poller.Reported += OnSnapshotsChanged;
         _direct = poller;
@@ -105,6 +119,19 @@ sealed class AikoShell : IDisposable
         {
             RepairOurStatusLines();
 
+            // Once, for someone who set Aiko up before the persona existed (D-200).
+            var app = SettingsStore.Load();
+            if (WizardChecklist.OpensMeetAikoOnStart(app, SettingsStore.LoadEnvironments()))
+            {
+                OpenSettings(page: SettingsPanel.ChecklistPageKey);
+                _settings?.OpenChecklist(ChecklistItem.MeetAiko);
+                SettingsStore.Save(app with { MeetAikoShown = true });
+            }
+
+            // An update can bring a new persona text or move the marketplace. When the persona is
+            // off everywhere this reads a few files and does nothing else.
+            PluginSync.Request("startup");
+
             // An update brings a new shim. The copy in PATH is refreshed, and only when the person
             // set commands up: the folder never appears on its own.
             if (CommandFolder.IsSetUp)
@@ -114,6 +141,31 @@ sealed class AikoShell : IDisposable
         }
 
         NoteWhereWeHaveNoAccess();
+        ClearStaleActivity();
+    }
+
+    /// A session that never sent SessionEnd leaves its file behind (D-206). A day later it goes.
+    private static void ClearStaleActivity()
+    {
+        var folder = ActivityRecord.Folder(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
+        if (!Directory.Exists(folder))
+        {
+            return;
+        }
+
+        foreach (var file in new DirectoryInfo(folder).EnumerateFiles())
+        {
+            if (ActivityRecord.IsStale(file.LastWriteTimeUtc, DateTimeOffset.UtcNow))
+            {
+                try
+                {
+                    file.Delete();
+                }
+                catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+                {
+                }
+            }
+        }
     }
 
     /// Our own line goes stale on its own: reinstalling moves the bridge, and installing Git
@@ -145,6 +197,7 @@ sealed class AikoShell : IDisposable
     {
         _watcher.Updated -= OnSnapshotsChanged;
         _watcher.Dispose();
+        _mood?.Dispose();
         _direct?.Dispose();
         _updates?.Dispose();
 
@@ -246,6 +299,7 @@ sealed class AikoShell : IDisposable
     private void OnSnapshotsChanged() =>
         _application.Dispatcher.BeginInvoke(() =>
         {
+            _mood?.OnLimits(EnvironmentSnapshots.Combine(SettingsStore.LoadEnvironments(), _watcher.ByFile));
             var cards = Cards();
             UpdateIcon();
             _island?.Update(cards);
@@ -312,15 +366,74 @@ sealed class AikoShell : IDisposable
         text.AsSpan(0, Math.Min(text.Length, room.Length - 1)).CopyTo(room);
     }
 
-    private HICON ReplaceIcon(uint dpi)
+    private HICON ReplaceIcon(uint dpi, bool sameRows = false)
     {
         var old = _icon;
         _iconSize = PInvoke.GetSystemMetricsForDpi(SYSTEM_METRICS_INDEX.SM_CXSMICON, dpi);
         _iconDpi = dpi;
 
-        var (ring, dot) = CurrentRows();
-        _icon = RingIcon.Render(_iconSize, ring, dot);
+        if (!sameRows)
+        {
+            _iconRows = CurrentRows();
+        }
+
+        _icon = RingIcon.Render(_iconSize, _iconRows.Ring, _iconRows.Dot, _faceAnimator?.Frame, _faceAnimator?.Face);
         return old;
+    }
+
+    /// A face comes or goes (D-211), on the tray icon or on the island, wherever Aiko lives.
+    private void OnFaceChanged(AikoFace? face)
+    {
+        var style = SettingsStore.LoadPersona().Face;
+
+        if (_island is { } island)
+        {
+            // The island is always dark, whatever the taskbar.
+            if (face is { } onIsland)
+            {
+                island.ShowFace(FaceDrawing.For(style, onIsland, FaceGround.Dark, IslandFaceSize));
+            }
+            else
+            {
+                island.HideFace();
+            }
+        }
+
+        if (_faceAnimator is null || !_iconShown)
+        {
+            return;
+        }
+
+        if (face is { } shown)
+        {
+            _faceAnimator.Show(FaceDrawing.For(style, shown, TaskbarTheme.Ground(), _iconSize));
+        }
+        else
+        {
+            _faceAnimator.Hide();
+        }
+    }
+
+    private const double IslandFaceSize = 18;
+
+    /// One frame of a face transition: only the picture changes, not the tooltip.
+    private void RedrawIcon()
+    {
+        if (!_iconShown)
+        {
+            return;
+        }
+
+        var old = ReplaceIcon(TaskbarDpi(), sameRows: true);
+        var data = NewData();
+        data.uFlags = NOTIFY_ICON_DATA_FLAGS.NIF_ICON;
+        data.hIcon = _icon;
+        PInvoke.Shell_NotifyIcon(NOTIFY_ICON_MESSAGE.NIM_MODIFY, in data);
+
+        if (!old.IsNull)
+        {
+            PInvoke.DestroyIcon(old);
+        }
     }
 
     /// Every environment we know about, in the order the settings hold them. The card shows all of
@@ -644,6 +757,7 @@ sealed class AikoShell : IDisposable
 
         FollowDirectMode();
         NoteWhereWeHaveNoAccess();
+        _mood?.Follow(SettingsStore.LoadEnvironments());
         UpdateIcon();
         _card?.Update(CurrentCard());
     }

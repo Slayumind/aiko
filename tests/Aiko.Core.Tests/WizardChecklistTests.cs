@@ -36,7 +36,7 @@ public class WizardChecklistTests
     public void With_two_accounts_already_there_the_wizard_goes_straight_to_access()
     {
         Assert.Equal(ChecklistItem.Access, WizardChecklist.NextToOpen(TwoAccountsFound));
-        Assert.Equal((4, 7), WizardChecklist.Progress(TwoAccountsFound));
+        Assert.Equal((4, 8), WizardChecklist.Progress(TwoAccountsFound));
     }
 
     [Fact]
@@ -63,7 +63,7 @@ public class WizardChecklistTests
 
         Assert.True(WizardChecklist.CanFinish(facts));
         Assert.Equal(ItemState.Locked, WizardChecklist.StateOf(ChecklistItem.ProjectFolders, facts));
-        Assert.Null(WizardChecklist.NextToOpen(facts));
+        Assert.Equal(ChecklistItem.MeetAiko, WizardChecklist.NextToOpen(facts));
     }
 
     [Fact]
@@ -77,9 +77,39 @@ public class WizardChecklistTests
     [Fact]
     public void Every_item_is_answered_at_the_end()
     {
-        var facts = TwoAccountsFound with { AccessGranted = true, CommandsWanted = true, FoldersVisited = true };
+        var facts = TwoAccountsFound with { AccessGranted = true, CommandsWanted = true, FoldersVisited = true, PersonaWanted = false };
 
-        Assert.Equal((7, 7), WizardChecklist.Progress(facts));
+        Assert.Equal((8, 8), WizardChecklist.Progress(facts));
         Assert.Null(WizardChecklist.NextToOpen(facts));
+    }
+
+    [Fact]
+    public void Meet_Aiko_waits_for_the_first_account_and_does_not_block_Finish()
+    {
+        var ready = FreshMachine with { ClaudeInstalled = true, FirstSignedIn = true, SecondSkipped = true, AccessGranted = true, CommandsWanted = true };
+
+        Assert.Equal(ItemState.Locked, WizardChecklist.StateOf(ChecklistItem.MeetAiko, FreshMachine));
+        Assert.Equal(ItemState.Open, WizardChecklist.StateOf(ChecklistItem.MeetAiko, ready));
+        Assert.True(WizardChecklist.IsOptional(ChecklistItem.MeetAiko));
+        Assert.True(WizardChecklist.CanFinish(ready));
+        Assert.Equal(ItemState.Done, WizardChecklist.StateOf(ChecklistItem.MeetAiko, ready with { PersonaWanted = true }));
+        Assert.Equal(ItemState.Skipped, WizardChecklist.StateOf(ChecklistItem.MeetAiko, ready with { PersonaWanted = false }));
+    }
+
+    private static EnvironmentSettings OneEnvironment(bool persona) =>
+        new([new AikoEnvironment("Aiko", ["C:/Users/someone/.claude"]) { Persona = persona }]);
+
+    [Fact]
+    public void Meet_Aiko_opens_once_for_someone_who_set_Aiko_up_before()
+    {
+        Assert.True(WizardChecklist.OpensMeetAikoOnStart(AppSettings.Default, OneEnvironment(persona: false)));
+        Assert.False(WizardChecklist.OpensMeetAikoOnStart(AppSettings.Default with { MeetAikoShown = true }, OneEnvironment(persona: false)));
+    }
+
+    [Fact]
+    public void Meet_Aiko_does_not_open_on_a_first_run_or_when_the_persona_is_already_on()
+    {
+        Assert.False(WizardChecklist.OpensMeetAikoOnStart(AppSettings.Default, EnvironmentSettings.Empty));
+        Assert.False(WizardChecklist.OpensMeetAikoOnStart(AppSettings.Default, OneEnvironment(persona: true)));
     }
 }

@@ -67,6 +67,7 @@ public sealed class ClaudeSettingsEditor(IFileAccess files)
             SettingsJsonPatch.TryAddSessionHook(json, hookCommand, out var patched) ? patched : null);
     }
 
+    /// Everything of Aiko's in the file: the status line, the hook, the plugins and the marketplace.
     public PatchOutcome Remove(string configDirectory)
     {
         // A copy is only ever made of a file that was already there. No copy means Aiko made this
@@ -74,13 +75,20 @@ public sealed class ClaudeSettingsEditor(IFileAccess files)
         var aikoMadeTheFile = !files.Exists(BackupPathIn(configDirectory));
 
         var outcome = Change(configDirectory, json =>
-            SettingsJsonPatch.TryRemoveBridge(json, out var restored) ? restored : null);
+        {
+            var bridge = SettingsJsonPatch.TryRemoveBridge(json, out var withoutBridge);
+            var plugins = SettingsJsonPatch.TryRemovePlugins(withoutBridge, out var withoutPlugins);
+            return bridge || plugins ? withoutPlugins : null;
+        });
 
         if (outcome.Changed)
         {
-            // The copy was insurance while Aiko was in the file. Their own status line is back now,
-            // and leaving the copy behind would be litter in someone else's folder.
-            DropBackup(configDirectory);
+            // The copy was insurance while Aiko was in the file. Once nothing of ours is left,
+            // leaving the copy behind would be litter in someone else's folder.
+            if (!HasAnyAikoEntries(configDirectory))
+            {
+                DropBackup(configDirectory);
+            }
 
             // A file Aiko made and that now says nothing is litter too. Windows Sandbox showed it: a
             // folder with no settings.json before Aiko had one holding "{}" after it. Anything the
@@ -92,6 +100,25 @@ public sealed class ClaudeSettingsEditor(IFileAccess files)
         }
 
         return outcome;
+    }
+
+    /// After "claude plugin uninstall": the empty keys it leaves. The backup and the file stay.
+    public PatchOutcome TidyAfterPluginRemoval(string configDirectory) =>
+        Change(configDirectory, json =>
+            SettingsJsonPatch.TryDropEmptyPluginKeys(json, out var tidy) ? tidy : null);
+
+    private bool HasAnyAikoEntries(string configDirectory)
+    {
+        try
+        {
+            var path = PathIn(configDirectory);
+            return files.Exists(path) && SettingsJsonPatch.HasAnyAikoEntries(files.ReadAllText(path));
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            // Unreadable now: keeping the copy costs nothing.
+            return true;
+        }
     }
 
     private void DeleteIfEmpty(string path)

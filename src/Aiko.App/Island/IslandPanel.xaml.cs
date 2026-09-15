@@ -29,10 +29,21 @@ public partial class IslandPanel : UserControl
 
     public bool IsUnfolded => _unfolded;
 
+    private readonly IslandFaceAnimator _faces;
+
     public IslandPanel()
     {
         InitializeComponent();
+        _faces = new IslandFaceAnimator(Rings, Face, FaceFit, () => Rings.Children.OfType<Panel>().SelectMany(p => p.Children.OfType<RingGauge>())
+            .Concat(Rings.Children.OfType<RingGauge>()));
     }
+
+    public void ShowFace(System.Windows.Media.ImageSource face) => _faces.Show(face);
+
+    public void HideFace() => _faces.Hide();
+
+    /// For a snapshot: the face fully there, without the way to it.
+    public void SetFace(IconFrame frame, System.Windows.Media.ImageSource? face) => _faces.Set(frame, face);
 
     /// Docked means pressed against the edge. In hand the island is a whole thing of its own: every
     /// corner rounded and a hairline all round, with its rings already laid out for the edge below.
@@ -63,6 +74,14 @@ public partial class IslandPanel : UserControl
         var line = Body.BorderThickness;
         Body.Padding = new Thickness(11 - line.Left, 8 - line.Top, 11 - line.Right, 8 - line.Bottom);
 
+        // Around the face the room is the same on every side: the island closes in on the side where
+        // its padding is wider, and the face overlaps that padding.
+        var across = Body.Padding.Left + Body.Padding.Right + line.Left + line.Right;
+        var along = Body.Padding.Top + Body.Padding.Bottom + line.Top + line.Bottom;
+        FaceFit.Target = new Size(
+            Math.Max(0, RingSize - Math.Max(0, across - along)),
+            Math.Max(0, RingSize - Math.Max(0, along - across)));
+
         ToolTip = TrayText.Tooltip(cards, null);
 
         Rings.Children.Clear();
@@ -87,6 +106,7 @@ public partial class IslandPanel : UserControl
             Rings.Children.Add(new RingGauge(null, LimitTone.Unknown, RingSize));
         }
 
+        _faces.Reapply();
         MarkForMeasure();
     }
 

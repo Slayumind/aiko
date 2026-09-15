@@ -108,4 +108,29 @@ public class EnvironmentSettingsTests
         Assert.False(settings.HasEnvironments);
         Assert.Null(settings.Ring);
     }
+
+    [Fact]
+    public void A_file_from_before_the_persona_reads_with_the_persona_off()
+    {
+        var settings = EnvironmentSettings.FromJson(TwoEnvironments);
+
+        Assert.All(settings.Environments, e => Assert.False(e.Persona));
+    }
+
+    [Fact]
+    public void The_persona_flag_survives_a_trip_through_the_file()
+    {
+        var settings = EnvironmentSettings.FromJson(TwoEnvironments);
+        var withPersona = settings with
+        {
+            Environments = [settings.Environments[0] with { Persona = true }, settings.Environments[1]],
+        };
+
+        var json = withPersona.ToJson();
+        var back = EnvironmentSettings.FromJson(json);
+
+        Assert.True(back.Environments[0].Persona);
+        Assert.False(back.Environments[1].Persona);
+        Assert.Contains($"\"schemaVersion\": {EnvironmentSettings.CurrentSchema}", json);
+    }
 }

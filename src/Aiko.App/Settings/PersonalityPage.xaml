@@ -1,0 +1,113 @@
+<UserControl x:Class="Aiko.App.PersonalityPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:Aiko.App">
+
+  <!--
+    Aiko's personality (D-207). Where she talks is a switch per environment; the face, the
+    temperament and the skills are one choice for all of them. A sample answer shows what the
+    temperament means, so nobody has to guess from a word.
+  -->
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/Theme/Controls.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+
+      <!-- Her own words in the sample, a little apart from the work in the middle. -->
+      <SolidColorBrush x:Key="VoiceInk" Color="#FFCFE9DF" />
+
+      <Style x:Key="Rows" TargetType="Border">
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="BorderBrush" Value="{StaticResource Hairline}" />
+        <Setter Property="BorderThickness" Value="1" />
+      </Style>
+
+      <Style x:Key="ChatText" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource Sans}" />
+        <Setter Property="FontSize" Value="{StaticResource TextNumber}" />
+        <Setter Property="Foreground" Value="{StaticResource Ink}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+        <Setter Property="LineHeight" Value="19" />
+      </Style>
+    </ResourceDictionary>
+  </UserControl.Resources>
+
+  <StackPanel>
+    <StackPanel Orientation="Horizontal">
+      <Image x:Name="HeaderFace" Width="24" Height="24" Margin="0,0,10,0" VerticalAlignment="Center" />
+      <TextBlock Text="{x:Static local:Strings.NavPersonality}" FontFamily="{StaticResource Sans}" FontSize="16"
+                 FontWeight="Medium" Foreground="{StaticResource Ink}" VerticalAlignment="Center" />
+    </StackPanel>
+
+    <TextBlock Text="{x:Static local:Strings.SectionWhereAikoTalks}" Style="{StaticResource SectionLabel}" Margin="0,18,0,8" />
+    <Border Style="{StaticResource Rows}">
+      <StackPanel x:Name="EnvironmentRows" />
+    </Border>
+    <TextBlock Text="{x:Static local:Strings.PersonaNewSessions}" Style="{StaticResource RowHint}" Margin="0,8,0,0" />
+
+    <TextBlock Text="{x:Static local:Strings.SectionFace}" Style="{StaticResource SectionLabel}" Margin="0,22,0,8" />
+    <Border Style="{StaticResource SegmentBar}">
+      <StackPanel Orientation="Horizontal">
+        <RadioButton x:Name="FaceChibi" Style="{StaticResource Segment}" GroupName="Face"
+                     Content="{x:Static local:Strings.FaceChibi}" Checked="OnFaceChanged" />
+        <RadioButton x:Name="FaceEmoji" Style="{StaticResource Segment}" GroupName="Face"
+                     Content="{x:Static local:Strings.FaceEmoji}" Checked="OnFaceChanged" />
+      </StackPanel>
+    </Border>
+    <TextBlock Text="{x:Static local:Strings.FaceWhere}" Style="{StaticResource RowHint}" Margin="0,8,0,0" />
+
+    <TextBlock Text="{x:Static local:Strings.SectionTemperament}" Style="{StaticResource SectionLabel}" Margin="0,22,0,8" />
+    <Border Style="{StaticResource SegmentBar}">
+      <StackPanel x:Name="TemperamentChoice" Orientation="Horizontal">
+        <RadioButton Style="{StaticResource Segment}" GroupName="Temperament" Tag="Quiet"
+                     Content="{x:Static local:Strings.TemperamentQuiet}" Checked="OnTemperamentChanged" />
+        <RadioButton Style="{StaticResource Segment}" GroupName="Temperament" Tag="Normal"
+                     Content="{x:Static local:Strings.TemperamentNormal}" Checked="OnTemperamentChanged" />
+        <RadioButton Style="{StaticResource Segment}" GroupName="Temperament" Tag="Bright"
+                     Content="{x:Static local:Strings.TemperamentBright}" Checked="OnTemperamentChanged" />
+        <!-- The same word in every language. -->
+        <RadioButton Style="{StaticResource Segment}" GroupName="Temperament" Tag="Musou"
+                     Content="無双" Checked="OnTemperamentChanged" />
+      </StackPanel>
+    </Border>
+    <TextBlock x:Name="TemperamentAbout" Style="{StaticResource RowHint}" Margin="0,8,0,0" />
+
+    <TextBlock Text="{x:Static local:Strings.SectionSampleReply}" Style="{StaticResource SectionLabel}" Margin="0,22,0,8" />
+    <Border CornerRadius="12" Background="{StaticResource Background}" BorderBrush="{StaticResource Hairline}"
+            BorderThickness="1" Padding="12,10">
+      <StackPanel>
+        <Border CornerRadius="10" Background="{StaticResource Raised}" Padding="10,7" HorizontalAlignment="Right"
+                MaxWidth="380">
+          <TextBlock Text="{x:Static local:Strings.SampleQuestion}" Style="{StaticResource ChatText}" LineHeight="18" />
+        </Border>
+        <Grid Margin="0,10,0,0">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="20" />
+            <ColumnDefinition Width="8" />
+            <ColumnDefinition Width="*" />
+          </Grid.ColumnDefinitions>
+          <Image x:Name="ReplyFace" Width="20" Height="20" VerticalAlignment="Top" />
+          <StackPanel Grid.Column="2">
+            <TextBlock x:Name="ReplyOpen" Style="{StaticResource ChatText}" Foreground="{StaticResource VoiceInk}"
+                       Margin="0,0,0,10" />
+            <TextBlock x:Name="ReplyBody" Style="{StaticResource ChatText}" />
+            <TextBlock x:Name="ReplyClose" Style="{StaticResource ChatText}" Foreground="{StaticResource VoiceInk}"
+                       Margin="0,10,0,0" />
+          </StackPanel>
+        </Grid>
+      </StackPanel>
+    </Border>
+    <TextBlock Style="{StaticResource RowHint}" Margin="0,8,0,0">
+      <Run Text="{x:Static local:Strings.SampleCommit}" />
+      <LineBreak />
+      <Run x:Name="SampleCommitLine" FontFamily="{StaticResource Mono}" Foreground="{StaticResource Ink}" />
+    </TextBlock>
+
+    <TextBlock x:Name="SkillsTitle" Style="{StaticResource SectionLabel}" Margin="0,22,0,8" />
+    <Border x:Name="SkillsBox" Style="{StaticResource Rows}">
+      <StackPanel x:Name="SkillRows" />
+    </Border>
+    <TextBlock x:Name="SkillsNote" Style="{StaticResource RowHint}" Margin="0,8,0,0" />
+  </StackPanel>
+</UserControl>

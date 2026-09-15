@@ -25,3 +25,6 @@ Releases/
 ## OS
 Thumbs.db
 desktop.ini
+
+# Python caches from running the skill script tests
+__pycache__/

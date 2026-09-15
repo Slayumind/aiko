@@ -61,8 +61,12 @@ static class ClaudeSettingsFile
     public static PatchOutcome AddSessionHook(string configDirectory, string bridgeExePath) =>
         Report(configDirectory, Editor.AddSessionHook(configDirectory, BridgeCommand.HookFor(bridgeExePath, ShellDetect.Current())));
 
-    public static PatchOutcome RemoveBridge(string configDirectory) =>
+    /// Aiko's line, its hook, its plugins and its marketplace (D-205).
+    public static PatchOutcome RemoveAiko(string configDirectory) =>
         Report(configDirectory, Editor.Remove(configDirectory));
+
+    public static PatchOutcome TidyAfterPluginRemoval(string configDirectory) =>
+        Report(configDirectory, Editor.TidyAfterPluginRemoval(configDirectory));
 
     /// Called at startup for the folders Aiko already writes to. It never adds a line that is not
     /// there: a person who said "not now" keeps that answer.

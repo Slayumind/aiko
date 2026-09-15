@@ -9,9 +9,20 @@ namespace Aiko.App;
 /// that promise is kept. Nothing here asks anything: the user already answered by uninstalling.
 static class Uninstall
 {
+    /// Velopack gives the whole hook 30 seconds and then ends the process (D-205). The fast file
+    /// work runs first, so a slow claude.exe can only cost the last, optional step.
+    private static readonly TimeSpan PluginBudget = TimeSpan.FromSeconds(20);
+
     public static void Cleanup()
     {
-        PutTheStatusLineBack();
+        var deadline = DateTimeOffset.UtcNow + PluginBudget;
+
+        var folders = ClaudeFoldersAikoMayHaveTouched();
+        foreach (var folder in folders)
+        {
+            ClaudeSettingsFile.RemoveAiko(folder);
+        }
+
         Startup.Set(false);
 
         // Before the folders go: the commands folder is one of them, and PATH must not keep
@@ -19,6 +30,10 @@ static class Uninstall
         // are about to disappear.
         CommandFolder.RemoveFromPath();
         PowerShellProfiles.TurnOnAll();
+
+        // Without their keys in settings.json the plugins already do not load. This also removes
+        // Claude Code's own record of them, as far as the time allows.
+        PluginSync.RemoveNow(folders, deadline);
 
         Remove(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Aiko"));
         Remove(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Aiko"));
@@ -28,7 +43,7 @@ static class Uninstall
     ///
     /// The settings may be gone or may never have listed a folder the user added by hand, and a
     /// status line pointing at a program that no longer exists would break their prompt.
-    private static void PutTheStatusLineBack()
+    private static List<string> ClaudeFoldersAikoMayHaveTouched()
     {
         var folders = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -45,10 +60,7 @@ static class Uninstall
             folders.Add(folder.FullPath);
         }
 
-        foreach (var folder in folders)
-        {
-            ClaudeSettingsFile.RemoveBridge(folder);
-        }
+        return [.. folders];
     }
 
     /// Only Aiko's own folders, and only ever these two.

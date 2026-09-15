@@ -28,6 +28,8 @@
   <ItemGroup>
     <Resource Include="Assets\Fonts\*.ttf" />
     <Content Include="Assets\Fonts\OFL.txt" CopyToOutputDirectory="PreserveNewest" />
+    <!-- Aiko's skills ship next to the app and are copied into the local marketplace from there. -->
+    <Content Include="..\..\plugins\**\*" Exclude="..\..\plugins\**\__pycache__\**" Link="plugins\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>
