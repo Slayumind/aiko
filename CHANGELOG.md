@@ -32,6 +32,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - **Meet Aiko in the checklist.** An optional item tells what the persona does and turns it on in
   environment 1 at Finish. If you set Aiko up before this version, the checklist opens on this item
   once. Running the checklist again keeps the persona as it was.
+- **Session activity for Aiko's face.** Where the persona is on, its hooks tell the bridge when a
+  session works, waits for you, finishes, fails or hits a rate limit. The bridge keeps one small
+  file per session under `%LOCALAPPDATA%\Aiko\activity`, with the state and the time only, and
+  removes it when the session ends. Files older than a day go at startup. The face itself comes later.
 
 ### Fixed
 
