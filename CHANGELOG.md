@@ -61,6 +61,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
     NO-GO, irreversible changes, rollout order and rollback plan. It never pushes anything.
   - `/aiko-glb-for-web`: a Blender model as a `.glb` that web players show correctly, with an offline
     checker for size and extensions a player cannot decode.
+  - `/aiko-blender-to-unity`: meshes from Blender into Unity with the right pose and handedness,
+    blended normals and cut shared parts, with export scripts for Blender.
 - **A public marketplace in the repository.** Aiko's skills also install without the app:
   `/plugin marketplace add Slayumind/aiko`.
 
