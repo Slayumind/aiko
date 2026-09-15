@@ -92,4 +92,14 @@ public class FaceArtTests
         Assert.Contains(picture.Groups[^1].Shapes, s => s.Fill == color);
         Assert.DoesNotContain(picture.Groups[1].Shapes, s => s.Fill == color);
     }
+
+    [Fact]
+    public void A_small_emoji_draws_thicker_lines_too()
+    {
+        var big = FaceArt.Draw(FaceStyle.Emoji, AikoFace.Fresh, FaceGround.Dark, small: false).Groups[0].Shapes.Where(s => s.Stroke is not null).ToList();
+        var small = FaceArt.Draw(FaceStyle.Emoji, AikoFace.Fresh, FaceGround.Dark, small: true).Groups[0].Shapes.Where(s => s.Stroke is not null).ToList();
+
+        Assert.Equal(big.Count, small.Count);
+        Assert.All(big.Zip(small), pair => Assert.True(pair.Second.StrokeWidth > pair.First.StrokeWidth));
+    }
 }

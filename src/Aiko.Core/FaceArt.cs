@@ -51,7 +51,7 @@ public static class FaceArt
     public const double SmallUpTo = 48;
 
     public static FacePicture Draw(FaceStyle style, AikoFace face, FaceGround ground, bool small) =>
-        style == FaceStyle.Emoji ? Emoji.Draw(face, ground) : Chibi.Draw(face, ground, small);
+        style == FaceStyle.Emoji ? Emoji.Draw(face, ground, small) : Chibi.Draw(face, ground, small);
 
     private static string N(double value) => Math.Round(value, 2).ToString(CultureInfo.InvariantCulture);
 
@@ -224,8 +224,11 @@ public static class FaceArt
         private const double LX = 18;
         private const double RX = 46;
 
-        public static FacePicture Draw(AikoFace face, FaceGround ground)
+        public static FacePicture Draw(AikoFace face, FaceGround ground, bool small)
         {
+            // At 16 to 32 px the emoji's thin lines fall under a pixel and turn grey. The chibi solves it
+            // the same way.
+            var k = small ? 1.35 : 1;
             var light = ground == FaceGround.Light;
             var ink = light ? Ink : Paper;
             var caution = light ? CautionOnLight : Caution;
@@ -239,42 +242,42 @@ public static class FaceArt
             switch (face)
             {
                 case AikoFace.Fresh:
-                    Brows(shapes, "soft", ink);
+                    Brows(shapes, "soft", ink, k);
                     Dome(shapes, LX, 29, ink);
                     Dome(shapes, RX, 29, ink);
-                    shapes.Add(Line("M24.6 44 Q28.3 49.4 32 44.8 Q35.7 49.4 39.4 44", 3.4, ink));
+                    shapes.Add(Line("M24.6 44 Q28.3 49.4 32 44.8 Q35.7 49.4 39.4 44", 3.4 * k, ink));
                     Blush(shapes, blushK);
                     break;
 
                 case AikoFace.Tired:
-                    Brows(shapes, "sad", ink);
-                    Lidded(shapes, LX, 28.6, -1.8, ink);
-                    Lidded(shapes, RX, 28.6, 1.8, ink);
-                    shapes.Add(Line("M25 47 Q27.4 44.4 29.8 47 T34.6 47 T39.2 46.6", 3.2, ink));
+                    Brows(shapes, "sad", ink, k);
+                    Lidded(shapes, LX, 28.6, -1.8, ink, k);
+                    Lidded(shapes, RX, 28.6, 1.8, ink, k);
+                    shapes.Add(Line("M25 47 Q27.4 44.4 29.8 47 T34.6 47 T39.2 46.6", 3.2 * k, ink));
                     Blush(shapes, blushK, 0.35);
                     extras.Add(DropShape());
                     break;
 
                 case AikoFace.Asleep:
-                    Brows(shapes, "soft", ink);
-                    shapes.Add(Line($"M{N(LX - 7)} 28.4 Q{N(LX)} 35.4 {N(LX + 7)} 28.4", 3.6, ink));
-                    shapes.Add(Line($"M{N(RX - 7)} 28.4 Q{N(RX)} 35.4 {N(RX + 7)} 28.4", 3.6, ink));
+                    Brows(shapes, "soft", ink, k);
+                    shapes.Add(Line($"M{N(LX - 7)} 28.4 Q{N(LX)} 35.4 {N(LX + 7)} 28.4", 3.6 * k, ink));
+                    shapes.Add(Line($"M{N(RX - 7)} 28.4 Q{N(RX)} 35.4 {N(RX + 7)} 28.4", 3.6 * k, ink));
                     shapes.Add(new FaceShape(Ellipse(32, 46, 2.6, 3), Fill: ink));
                     Blush(shapes, blushK, 0.5);
                     break;
 
                 case AikoFace.Working:
-                    Brows(shapes, "focused", ink);
+                    Brows(shapes, "focused", ink, k);
                     Dome(shapes, LX, 30, ink, 0.6, 1.6);
                     Dome(shapes, RX, 30, ink, 0.6, 1.6);
                     shapes.Add(new FaceShape("M31 45.8 L30.8 49.8 Q34.6 56.6 38.6 50.2 L38.6 46.6 Z", Fill: Pink));
-                    shapes.Add(Line("M24 45.2 L37.6 46.4", 3.4, ink));
+                    shapes.Add(Line("M24 45.2 L37.6 46.4", 3.4 * k, ink));
                     Blush(shapes, blushK, 0.4);
-                    extras.Add(Line("M56 6 L59.6 1.8 M58 11.6 L62.6 10.2 M51.8 3.6 L52.4 -0.2", 2.8, ink));
+                    extras.Add(Line("M56 6 L59.6 1.8 M58 11.6 L62.6 10.2 M51.8 3.6 L52.4 -0.2", 2.8 * k, ink));
                     break;
 
                 case AikoFace.Waiting:
-                    Brows(shapes, "raised", ink);
+                    Brows(shapes, "raised", ink, k);
                     RoundEye(shapes, LX, 28.6, ink);
                     RoundEye(shapes, RX, 28.6, ink);
                     shapes.Add(new FaceShape(Ellipse(32, 46.4, 4.2, 5), Fill: Pink));
@@ -284,17 +287,17 @@ public static class FaceArt
                     break;
 
                 case AikoFace.Done:
-                    Brows(shapes, "soft", ink);
-                    shapes.Add(Line($"M{N(LX - 7)} 31 Q{N(LX)} 21.6 {N(LX + 7)} 31", 3.8, ink));
-                    shapes.Add(Line($"M{N(RX - 7)} 31 Q{N(RX)} 21.6 {N(RX + 7)} 31", 3.8, ink));
+                    Brows(shapes, "soft", ink, k);
+                    shapes.Add(Line($"M{N(LX - 7)} 31 Q{N(LX)} 21.6 {N(LX + 7)} 31", 3.8 * k, ink));
+                    shapes.Add(Line($"M{N(RX - 7)} 31 Q{N(RX)} 21.6 {N(RX + 7)} 31", 3.8 * k, ink));
                     shapes.Add(new FaceShape("M23.4 41 L40.6 41 Q40.6 54.2 32 54.2 Q23.4 54.2 23.4 41 Z", Fill: Pink));
                     Blush(shapes, blushK);
                     break;
 
                 default:
-                    Brows(shapes, "sad", ink);
-                    shapes.Add(Line("M12.6 23.4 L22.6 28.4 L12.6 33.4", 3.6, ink));
-                    shapes.Add(Line("M51.4 23.4 L41.4 28.4 L51.4 33.4", 3.6, ink));
+                    Brows(shapes, "sad", ink, k);
+                    shapes.Add(Line("M12.6 23.4 L22.6 28.4 L12.6 33.4", 3.6 * k, ink));
+                    shapes.Add(Line("M51.4 23.4 L41.4 28.4 L51.4 33.4", 3.6 * k, ink));
                     shapes.Add(new FaceShape("M23.6 51.4 Q23.6 41.2 32 41.2 Q40.4 41.2 40.4 51.4 Q32 48.6 23.6 51.4 Z", Fill: Pink));
                     extras.Add(DropShape());
                     break;
@@ -306,7 +309,7 @@ public static class FaceArt
         private static FaceShape DropShape() =>
             new("M57.4 1 C51.4 9.8 51.4 16.2 57.4 16.2 C63.4 16.2 63.4 9.8 57.4 1 Z", Fill: Drop);
 
-        private static void Brows(List<FaceShape> shapes, string kind, string ink)
+        private static void Brows(List<FaceShape> shapes, string kind, string ink, double k)
         {
             foreach (var (x, side) in new[] { (LX, -1.0), (RX, 1.0) })
             {
@@ -318,7 +321,7 @@ public static class FaceArt
                     "raised" => $"M{O(-6)} 12.4 Q{O(0)} 6.4 {O(6)} 11.4",
                     _ => $"M{O(-6.4)} 17 Q{O(0)} 13.8 {O(6.6)} 13.2",
                 };
-                shapes.Add(Line(data, 2.6, ink));
+                shapes.Add(Line(data, 2.6 * k, ink));
             }
         }
 
@@ -331,13 +334,13 @@ public static class FaceArt
         private static void RoundEye(List<FaceShape> shapes, double x, double y, string ink) =>
             shapes.Add(new FaceShape(Circle(x, y, 7), Fill: ink, Holes: [Circle(x + 2, y - 2.2, 2.9), Circle(x - 2.6, y + 2.4, 1.3)]));
 
-        private static void Lidded(List<FaceShape> shapes, double x, double y, double tilt, string ink)
+        private static void Lidded(List<FaceShape> shapes, double x, double y, double tilt, string ink, double k)
         {
             shapes.Add(new FaceShape(
                 $"M{N(x - 6.6)} {N(y - tilt)} L{N(x + 6.6)} {N(y + tilt)} C{N(x + 6.2)} {N(y + 8)} {N(x - 6.2)} {N(y + 8)} {N(x - 6.6)} {N(y - tilt)} Z",
                 Fill: ink,
                 Holes: [Circle(x + 1.6, y + 3.2, 1.7)]));
-            shapes.Add(Line($"M{N(x - 8)} {N(y - tilt - 0.3)} L{N(x + 8)} {N(y + tilt + 0.3)}", 3.2, ink));
+            shapes.Add(Line($"M{N(x - 8)} {N(y - tilt - 0.3)} L{N(x + 8)} {N(y + tilt + 0.3)}", 3.2 * k, ink));
         }
 
         private static void Blush(List<FaceShape> shapes, double blushK, double opacity = 0.55)
