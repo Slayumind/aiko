@@ -19,12 +19,24 @@ public static class PluginReconciler
 
     /// Runs the steps in order. Without the marketplace no install can work, so a failed
     /// marketplace step ends the run; one plugin that fails does not stop the others.
-    public static IReadOnlyList<(PluginStep Step, CliResult Result)> Apply(IClaudeCli cli, string configDirectory, IReadOnlyList<PluginStep> steps)
+    public static IReadOnlyList<(PluginStep Step, CliResult Result)> Apply(IClaudeCli cli, string configDirectory, IReadOnlyList<PluginStep> steps) =>
+        Apply(cli, configDirectory, steps, TimeProvider.System, DateTimeOffset.MaxValue);
+
+    /// With a deadline, for the uninstaller: Velopack stops waiting after 30 seconds (D-205). A step
+    /// never gets more time than is left, and no step starts after the deadline.
+    public static IReadOnlyList<(PluginStep Step, CliResult Result)> Apply(
+        IClaudeCli cli, string configDirectory, IReadOnlyList<PluginStep> steps, TimeProvider clock, DateTimeOffset deadline)
     {
         var results = new List<(PluginStep, CliResult)>();
         foreach (var step in steps)
         {
-            var result = cli.Run(configDirectory, step.Arguments, StepTimeout);
+            var left = deadline == DateTimeOffset.MaxValue ? StepTimeout : deadline - clock.GetUtcNow();
+            if (left <= TimeSpan.Zero)
+            {
+                break;
+            }
+
+            var result = cli.Run(configDirectory, step.Arguments, left < StepTimeout ? left : StepTimeout);
             results.Add((step, result));
 
             if (!result.Succeeded && step.Kind is PluginStepKind.AddMarketplace or PluginStepKind.RemoveMarketplace)

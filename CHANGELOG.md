@@ -25,6 +25,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   line warns when your own output style is set there, since the persona's style wins while it is on.
   One choice for all environments: the face (chibi or emoji), the temperament with a sample answer,
   and the list of Aiko's skills with a switch for each. The skills themselves come in later versions.
+- **Aiko's plugins leave with Aiko.** Uninstalling Aiko, removing an environment and Start over take
+  Aiko's plugins and marketplace out of `settings.json` first, so they stop loading at once. Then
+  Aiko asks Claude Code to uninstall them, within 20 seconds when Aiko itself is being removed. Other
+  plugins stay. The copy of `settings.json` is kept while anything of Aiko's is still in the file.
 
 ### Fixed
 

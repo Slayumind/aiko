@@ -581,7 +581,7 @@
     <value>Удалить среду</value>
   </data>
   <data name="RemoveEnvironmentLine" xml:space="preserve">
-    <value>Строка Aiko уйдёт из settings.json этой папки. Вместе с ней уйдут команда {0} и привязки к {1}.</value>
+    <value>Строка и плагины Aiko уйдут из settings.json этой папки. Вместе с ними уйдут команда {0} и привязки к {1}.</value>
   </data>
   <data name="MoveToRecycleBin" xml:space="preserve">
     <value>И переместить папку в корзину</value>
@@ -650,7 +650,7 @@
     <value>Убирает среды из Aiko и открывает чек-лист здесь же.</value>
   </data>
   <data name="RestartLine" xml:space="preserve">
-    <value>Из Aiko уйдут среды, строки Aiko в settings.json, команды {0}, привязки папок и папка Aiko в PATH, а функции в профиле PowerShell вернутся. Аккаунты и история в папках останутся.</value>
+    <value>Из Aiko уйдут среды, строки и плагины Aiko в settings.json, команды {0}, привязки папок и папка Aiko в PATH, а функции в профиле PowerShell вернутся. Аккаунты и история в папках останутся.</value>
   </data>
   <data name="RestartBin" xml:space="preserve">
     <value>И переместить {0} в корзину</value>

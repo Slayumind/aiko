@@ -80,9 +80,21 @@ static class Program
         // does this for every folder, and that is not something to try out on a live machine.
         if (args is ["--try-restore", var restoreFolder, ..])
         {
-            var outcome = ClaudeSettingsFile.RemoveBridge(restoreFolder);
+            var outcome = ClaudeSettingsFile.RemoveAiko(restoreFolder);
             Log.Write($"--try-restore {FolderName(restoreFolder)}: changed={outcome.Changed} problem={outcome.Problem}");
             Environment.Exit(outcome.Changed ? 0 : 1);
+            return;
+        }
+
+        // What uninstalling does to the plugins of one folder: the keys, then claude.exe with the
+        // same 20 second budget. Meant for a throwaway config folder, not a live one.
+        if (args is ["--try-plugin-removal", var pluginFolder, ..])
+        {
+            var started = DateTimeOffset.UtcNow;
+            var keys = ClaudeSettingsFile.RemoveAiko(pluginFolder);
+            PluginSync.RemoveNow([pluginFolder], started + TimeSpan.FromSeconds(20));
+            Log.Write($"--try-plugin-removal {FolderName(pluginFolder)}: keys changed={keys.Changed}, took {(DateTimeOffset.UtcNow - started).TotalSeconds:0.0} s");
+            Environment.Exit(keys.Problem == PatchProblem.None ? 0 : 1);
             return;
         }
 
