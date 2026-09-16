@@ -85,7 +85,12 @@ public sealed record AppSettings
         }
     }
 
-    public string ToJson() => JsonSerializer.Serialize(this, Options) + Environment.NewLine;
+    /// The file is stamped with the schema that wrote it, not with the one it was read as.
+    /// Without this the number sticks at whatever version first made the file: a settings.json
+    /// created by 0.1 keeps saying 1 while holding fields from 0.2.1, and the one thing the
+    /// number exists for — telling a future migration what shape the file is in — becomes a lie.
+    public string ToJson() =>
+        JsonSerializer.Serialize(this with { SchemaVersion = CurrentSchema }, Options) + Environment.NewLine;
 
     private static readonly JsonSerializerOptions Options = new()
     {
