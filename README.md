@@ -88,9 +88,10 @@ Desktop, turn on **direct mode** for that environment, and Aiko asks the usage A
 mode needs the account's access token, so it's off until you turn it on.
 [PRIVACY.md](PRIVACY.md) describes exactly what happens with the token.
 
-If you allow it, Aiko also counts how many copies run each day. The count shares one switch with the
-update check, which is off by default. The ID it sends changes every day, so two days can't be
-linked to one person. [PRIVACY.md](PRIVACY.md) lists what is sent.
+If you allow it, Aiko also counts how many copies run each day. It has its own switch on the
+**Privacy** page, off by default and separate from the update check. The ID it sends changes every
+day, so two days can't be linked to one person, and the rows are deleted after 90 days. That page
+lists the six things that go, line by line; so does [PRIVACY.md](PRIVACY.md).
 
 ## What you need
 

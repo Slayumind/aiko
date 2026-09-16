@@ -1,0 +1,52 @@
+# Once a day, ask slayumind.org to take its own housekeeping step for the Aiko numbers.
+#
+# The site does the work: it reads the download totals from this repository's releases
+# and deletes the ping rows that have outlived what PRIVACY.md promises. This workflow is
+# only the alarm clock, so there is nothing here to keep in step with the site.
+#
+# GitHub turns a schedule off in a repository with no pushes for 60 days. The admin page
+# takes the snapshot itself when the day has none, so a sleeping schedule costs nothing
+# but a slightly later number.
+#
+# No action is used, so there is nothing to pin here. Everything else in this repository
+# pins by commit, and that rule stands.
+name: stats
+
+on:
+  schedule:
+    # 04:17 UTC. Not on the hour: every cron in the world fires then, and GitHub delays
+    # a busy minute by however long it likes.
+    - cron: "17 4 * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Ask the site to take today's snapshot
+        env:
+          KEY: ${{ secrets.SLAYUMIND_API_KEY }}
+        run: |
+          if [ -z "$KEY" ]; then
+            echo "No SLAYUMIND_API_KEY set, nothing to do."
+            exit 0
+          fi
+
+          code=$(curl --silent --show-error --fail-with-body \
+            --max-time 30 \
+            --output response.json \
+            --write-out '%{http_code}' \
+            --request POST \
+            --header "Authorization: Bearer $KEY" \
+            https://slayumind.org/api/v1/aiko/snapshot) || true
+
+          echo "HTTP $code"
+          cat response.json || true
+
+          # A failure here loses one day of the downloads chart and nothing else, but it
+          # should be red rather than silent: a schedule that fails quietly is a schedule
+          # nobody notices has stopped.
+          [ "$code" = "200" ]
