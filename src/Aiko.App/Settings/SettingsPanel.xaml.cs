@@ -12,6 +12,7 @@ public partial class SettingsPanel : UserControl
     public const string FoldersPageKey = "folders";
     public const string GeneralPageKey = "general";
     public const string PersonalityPageKey = "personality";
+    public const string PrivacyPageKey = "privacy";
     public const string ChecklistPageKey = "setup";
     private const string EnvironmentPagePrefix = "env:";
 
@@ -152,6 +153,9 @@ public partial class SettingsPanel : UserControl
             var talking = settings.Environments.Count(e => e.Persona);
             Nav.Children.Add(NavItem(PersonalityPageKey, Strings.NavPersonality, talking > 0 ? string.Format(Strings.NavPersonaOn, talking) : Strings.NavPersonaOff));
         }
+
+        var stats = SettingsStore.Load().SendStats;
+        Nav.Children.Add(NavItem(PrivacyPageKey, Strings.NavPrivacy, stats ? Strings.NavPrivacyStatsOn : Strings.NavPrivacyStatsOff));
 
         Nav.Children.Add(NavItem(GeneralPageKey, Strings.NavGeneral, null));
 
@@ -304,6 +308,13 @@ public partial class SettingsPanel : UserControl
             var personality = new PersonalityPage(_editor);
             personality.Saved += OnGeneralSaved;
             return personality;
+        }
+
+        if (key == PrivacyPageKey)
+        {
+            var privacy = new PrivacyPage();
+            privacy.Saved += OnGeneralSaved;
+            return privacy;
         }
 
         if (key == ChecklistPageKey)

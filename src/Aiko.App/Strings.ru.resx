@@ -173,7 +173,7 @@
     <value>Запускать вместе с Windows</value>
   </data>
   <data name="CheckUpdatesWhat" xml:space="preserve">
-    <value>Раз в сутки Aiko спрашивает у slayumind.org свежую версию и сообщает, что одна копия сегодня работала. Сами файлы скачиваются с GitHub.</value>
+    <value>Раз в сутки Aiko спрашивает у slayumind.org свежую версию. Сами файлы скачиваются с GitHub.</value>
   </data>
   <data name="CheckNow" xml:space="preserve">
     <value>Проверить сейчас</value>
@@ -675,6 +675,96 @@
   </data>
   <data name="NavPersonaOff" xml:space="preserve">
     <value>выключена</value>
+  </data>
+  <data name="NavPrivacy" xml:space="preserve">
+    <value>Приватность</value>
+  </data>
+  <data name="NavPrivacyStatsOn" xml:space="preserve">
+    <value>статистика: включена</value>
+  </data>
+  <data name="NavPrivacyStatsOff" xml:space="preserve">
+    <value>статистика: выключена</value>
+  </data>
+  <data name="SectionConnection" xml:space="preserve">
+    <value>СВЯЗЬ С SLAYUMIND.ORG</value>
+  </data>
+  <data name="SendStatsToggle" xml:space="preserve">
+    <value>Отправлять анонимную статистику</value>
+  </data>
+  <data name="SendStatsWhat" xml:space="preserve">
+    <value>Тем же запросом Aiko сообщает, что одна копия сегодня работала. Автор Aiko видит только числа.</value>
+  </data>
+  <data name="SectionWhatIsSent" xml:space="preserve">
+    <value>ЧТО ОТПРАВЛЯЕТСЯ</value>
+  </data>
+  <data name="SentVersion" xml:space="preserve">
+    <value>версия Aiko: доходят ли обновления</value>
+  </data>
+  <data name="SentWindows" xml:space="preserve">
+    <value>версия Windows: что проверять первым</value>
+  </data>
+  <data name="SentDayId" xml:space="preserve">
+    <value>ID, который меняется каждый день</value>
+  </data>
+  <data name="SentWeekFlag" xml:space="preserve">
+    <value>первый запуск на этой неделе</value>
+  </data>
+  <data name="SentMonthFlag" xml:space="preserve">
+    <value>первый запуск в этом месяце</value>
+  </data>
+  <data name="SentPersona" xml:space="preserve">
+    <value>личность включена хотя бы в одной среде</value>
+  </data>
+  <data name="NothingSentYet" xml:space="preserve">
+    <value>Сейчас не отправляется ничего из этого.</value>
+  </data>
+  <data name="SectionNeverSent" xml:space="preserve">
+    <value>ЧТО НЕ ОТПРАВЛЯЕТСЯ НИКОГДА</value>
+  </data>
+  <data name="NeverSentWhat" xml:space="preserve">
+    <value>Имя, почта, папки проектов, лимиты, токен и тексты сессий. IP-адрес сайт не читает и не хранит.</value>
+  </data>
+  <data name="StatsKeptFor" xml:space="preserve">
+    <value>Строки удаляются через 90 дней.</value>
+  </data>
+  <data name="ResetInstallId" xml:space="preserve">
+    <value>Сбросить ID</value>
+  </data>
+  <data name="ResetInstallIdWhat" xml:space="preserve">
+    <value>Aiko придумает новое значение, и прежние сутки с ним не свяжутся.</value>
+  </data>
+  <data name="ResetInstallIdDone" xml:space="preserve">
+    <value>ID теперь новый.</value>
+  </data>
+  <data name="OpenPrivacyDoc" xml:space="preserve">
+    <value>Открыть PRIVACY.md</value>
+  </data>
+  <data name="PrivacyLinkFromGeneral" xml:space="preserve">
+    <value>Что Aiko отправляет и кому — раздел «Приватность».</value>
+  </data>
+  <data name="WizardStats" xml:space="preserve">
+    <value>Анонимная статистика</value>
+  </data>
+  <data name="WizardStatsWhat" xml:space="preserve">
+    <value>Автор Aiko не знает, сколько людей ею пользуется. Раз в сутки Aiko может сообщить, что одна копия работала, и отправить шесть значений — вот они целиком.</value>
+  </data>
+  <data name="WizardStatsLater" xml:space="preserve">
+    <value>Решение меняется в настройках, в разделе «Приватность».</value>
+  </data>
+  <data name="StatsDecline" xml:space="preserve">
+    <value>Не отправлять</value>
+  </data>
+  <data name="StatsAccept" xml:space="preserve">
+    <value>Отправлять</value>
+  </data>
+  <data name="StatsStateOn" xml:space="preserve">
+    <value>включена</value>
+  </data>
+  <data name="StatsStateOff" xml:space="preserve">
+    <value>выключена</value>
+  </data>
+  <data name="StatsStateUnset" xml:space="preserve">
+    <value>не выбрано</value>
   </data>
   <data name="SectionWhereAikoTalks" xml:space="preserve">
     <value>ГДЕ AIKO ГОВОРИТ</value>

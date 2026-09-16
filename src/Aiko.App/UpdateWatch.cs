@@ -3,7 +3,8 @@ using Aiko.Core;
 
 namespace Aiko.App;
 
-/// Asks slayumind.org once a day whether a newer Aiko exists, when the user has said it may.
+/// Asks slayumind.org once a day whether a newer Aiko exists, and says that one copy ran — each
+/// when the user has said it may. Two switches, one request (D-228).
 ///
 /// The switch for this has existed since the first version and nothing ever read it: the only
 /// check was the button in the settings window. A switch that does nothing is worse than no
@@ -48,7 +49,12 @@ sealed class UpdateWatch : IDisposable
         // The first interval is short; every one after it is a day.
         _timer.Interval = BetweenChecks;
 
-        if (_asking || !SettingsStore.Load().CheckUpdates)
+        var settings = SettingsStore.Load();
+
+        // Either switch is a reason to make the request, and the request is the same one. With
+        // update checks off and the count on, the version in the answer is simply not read: the
+        // switch promises that Aiko does not go looking for a new version, and it does not.
+        if (_asking || (!settings.CheckUpdates && !settings.SendStats))
         {
             return;
         }
@@ -56,10 +62,9 @@ sealed class UpdateWatch : IDisposable
         _asking = true;
         try
         {
-            using var client = new UpdateClient();
-            var info = await client.AskAsync(_stopping.Token).ConfigureAwait(true);
+            var info = await UpdateRun.AskAsync(_stopping.Token).ConfigureAwait(true);
 
-            if (_stopping.IsCancellationRequested)
+            if (_stopping.IsCancellationRequested || !settings.CheckUpdates)
             {
                 return;
             }

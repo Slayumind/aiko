@@ -34,6 +34,15 @@
     <Setter Property="TextTrimming" Value="CharacterEllipsis" />
   </Style>
 
+  <!-- The name of a field in the privacy ledger: it is a literal piece of the request, so it is
+       mono and coloured like a value, not like a label. -->
+  <Style x:Key="LedgerKey" TargetType="TextBlock">
+    <Setter Property="FontFamily" Value="{StaticResource Mono}" />
+    <Setter Property="FontSize" Value="{StaticResource TextTiny}" />
+    <Setter Property="Foreground" Value="{StaticResource Positive}" />
+    <Setter Property="Margin" Value="0,0,0,6" />
+  </Style>
+
   <!-- A sentence, not a number: mono is for figures and metadata. -->
   <Style x:Key="RowHint" TargetType="TextBlock">
     <Setter Property="FontFamily" Value="{StaticResource Sans}" />

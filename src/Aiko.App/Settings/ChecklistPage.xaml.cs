@@ -33,6 +33,8 @@ public partial class ChecklistPage : UserControl
     private bool? _commandsWanted;
     private bool _foldersVisited;
     private bool? _personaWanted;
+    private bool? _statsWanted;
+
     private Waiter? _waiter;
     private ChecklistItem? _opened;
 
@@ -42,7 +44,7 @@ public partial class ChecklistPage : UserControl
     {
         InitializeComponent();
 
-        _rows = [InstallRow, FirstRow, SecondRow, FoldersRow, AccessRow, CommandsRow, MeetRow, PlaceRow];
+        _rows = [InstallRow, FirstRow, SecondRow, FoldersRow, AccessRow, CommandsRow, MeetRow, PrivacyRow, PlaceRow];
         foreach (var row in _rows)
         {
             row.HeaderClicked += OnRowClicked;
@@ -103,6 +105,7 @@ public partial class ChecklistPage : UserControl
         FoldersVisited = _foldersVisited,
         BoundFolders = _projectFolders.Count,
         PersonaWanted = _personaWanted,
+        StatsWanted = _statsWanted,
     };
 
     /// Going through the wizard again starts from what is set up now, not from nothing.
@@ -135,6 +138,9 @@ public partial class ChecklistPage : UserControl
         _personaWanted = _existing.Environments.Any(e => e.Persona) ? true
             : _existing.HasEnvironments && settings.MeetAikoShown ? false
             : null;
+
+        // Answered once is answered: going through the wizard again does not reopen the consent.
+        _statsWanted = settings.PrivacyAsked ? settings.SendStats : null;
 
         PlaceIsland.IsChecked = settings.Place == AikoPlace.Island;
         PlaceTray.IsChecked = settings.Place != AikoPlace.Island;
@@ -186,7 +192,8 @@ public partial class ChecklistPage : UserControl
 
         if (state is ItemState.Skipped)
         {
-            return Strings.StateLater;
+            // "Don't send" is an answer, not a postponement, so this item says so plainly.
+            return item is ChecklistItem.Privacy ? Strings.StatsStateOff : Strings.StateLater;
         }
 
         return item switch
@@ -200,6 +207,7 @@ public partial class ChecklistPage : UserControl
                 ? string.Format(Strings.StateBound, _projectFolders.Count)
                 : Strings.StateOptional,
             ChecklistItem.MeetAiko => state is ItemState.Done ? Strings.StateOn : Strings.StateOptional,
+            ChecklistItem.Privacy => state is ItemState.Done ? Strings.StatsStateOn : Strings.StatsStateUnset,
             ChecklistItem.Place => PlaceIsland.IsChecked == true ? Strings.StateIsland : Strings.StateTray,
             _ => "",
         };
@@ -647,6 +655,20 @@ public partial class ChecklistPage : UserControl
         MoveOn();
     }
 
+    // ---- statistics ----
+
+    private void OnStatsAccept(object sender, RoutedEventArgs e)
+    {
+        _statsWanted = true;
+        MoveOn();
+    }
+
+    private void OnStatsDecline(object sender, RoutedEventArgs e)
+    {
+        _statsWanted = false;
+        MoveOn();
+    }
+
     // ---- names and place ----
 
     private void OnNamesChanged(object sender, TextChangedEventArgs e)
@@ -691,7 +713,7 @@ public partial class ChecklistPage : UserControl
         // only reads a few files.
         PluginSync.Request("checklist finished");
 
-        Log.Write($"checklist finished: {settings.Environments.Count} environments, access={_accessGranted}, commands={_commandsWanted}, bound={_projectFolders.Count}, persona={_personaWanted}");
+        Log.Write($"checklist finished: {settings.Environments.Count} environments, access={_accessGranted}, commands={_commandsWanted}, bound={_projectFolders.Count}, persona={_personaWanted}, stats={_statsWanted}");
         Close();
         Finished?.Invoke(DoneNote(problems, commands));
     }
@@ -765,6 +787,10 @@ public partial class ChecklistPage : UserControl
             Place = PlaceIsland.IsChecked == true ? AikoPlace.Island : AikoPlace.Tray,
             RunAtStartup = runAtStartup,
             CheckUpdates = CheckUpdates.IsChecked == true,
+            SendStats = _statsWanted == true,
+            // The question was put, whichever way it was answered. Leaving it unanswered is not
+            // possible: the wizard does not finish until the item has a state.
+            PrivacyAsked = _statsWanted is not null,
             MeetAikoShown = true,
         });
     }

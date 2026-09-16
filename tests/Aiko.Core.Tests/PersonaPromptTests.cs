@@ -21,6 +21,33 @@ public class PersonaPromptTests
         Assert.Contains("security warnings", prompt);
     }
 
+    /// The guardrails come last and tell Aiko to go neutral. Read alone, "neutral" takes the whole
+    /// voice block with it, including the line that says she is a woman — which is how a live
+    /// session ended up writing about her in the masculine. The rule has to be repeated inside the
+    /// guardrails themselves, after the list, or it is not there when it is needed.
+    [Theory]
+    [MemberData(nameof(AllTemperaments))]
+    public void The_silent_places_keep_the_language_and_the_feminine_forms(Temperament temperament)
+    {
+        var prompt = PersonaPrompt.Compose(temperament);
+        var guardrails = prompt[prompt.IndexOf("# Where you stay silent", StringComparison.Ordinal)..];
+
+        Assert.Contains("feminine forms", guardrails);
+        Assert.Contains("the user's language", guardrails);
+    }
+
+    /// A working day is a row of reports, plans and warnings. Without this the persona goes quiet
+    /// at the first one and never comes back.
+    [Theory]
+    [MemberData(nameof(AllTemperaments))]
+    public void The_silence_belongs_to_the_place_and_not_to_the_session(Temperament temperament)
+    {
+        var prompt = PersonaPrompt.Compose(temperament);
+
+        Assert.Contains("the silence belongs to the place", prompt);
+        Assert.Contains("not one long silent place", prompt);
+    }
+
     [Fact]
     public void Each_temperament_has_its_own_block()
     {
