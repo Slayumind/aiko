@@ -26,7 +26,10 @@ public sealed record AppSettings
     /// because a version number added later says nothing about the files already on disk, and
     /// renaming a field would then have no safe way back.
     /// 2 added MeetAikoShown. A file of schema 1 comes from 0.1, so it reads as not shown yet.
-    public const int CurrentSchema = 2;
+    /// 3 split the counting off the update check. A file of schema 2 reads as "not asked, not
+    /// sending": the consent given to the old single switch covered a smaller thing than 0.2.1
+    /// sends, so it is asked again rather than carried over.
+    public const int CurrentSchema = 3;
 
     public static readonly AppSettings Default = new();
 
@@ -39,6 +42,16 @@ public sealed record AppSettings
 
     /// Off by default: checking asks slayumind.org and that is a connection the user agrees to.
     public bool CheckUpdates { get; init; }
+
+    /// Off by default, and its own switch since 0.2.1. It used to ride on CheckUpdates, so turning
+    /// off the count meant turning off update checks with it, and there was no way to keep one
+    /// without the other. The request is still one request: with this off, the identifier and the
+    /// three flags are simply left out of it and the server writes nothing.
+    public bool SendStats { get; init; }
+
+    /// Whether the privacy question has been answered at all. Without it, "off" cannot be told
+    /// apart from "never asked", and somebody updating from 0.2.0 would never see the question.
+    public bool PrivacyAsked { get; init; }
 
     public AikoLanguage Language { get; init; } = AikoLanguage.System;
 
@@ -72,7 +85,12 @@ public sealed record AppSettings
         }
     }
 
-    public string ToJson() => JsonSerializer.Serialize(this, Options) + Environment.NewLine;
+    /// The file is stamped with the schema that wrote it, not with the one it was read as.
+    /// Without this the number sticks at whatever version first made the file: a settings.json
+    /// created by 0.1 keeps saying 1 while holding fields from 0.2.1, and the one thing the
+    /// number exists for — telling a future migration what shape the file is in — becomes a lie.
+    public string ToJson() =>
+        JsonSerializer.Serialize(this with { SchemaVersion = CurrentSchema }, Options) + Environment.NewLine;
 
     private static readonly JsonSerializerOptions Options = new()
     {

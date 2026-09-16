@@ -1,7 +1,6 @@
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Reflection;
 using Aiko.Core;
 
 namespace Aiko.App;
@@ -39,12 +38,10 @@ sealed class UsageClient : IDisposable
 
     public UsageClient()
     {
-        _http = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
-
-        // An honest name. Other tools send the name of the official client; we do not pretend to
-        // be Claude Code, and the spike proved the server is happy with ours.
-        _http.DefaultRequestHeaders.UserAgent.ParseAdd($"Aiko/{Version()}");
-        _http.DefaultRequestHeaders.Accept.ParseAdd("application/json");
+        // The factory sets the honest user agent — other tools send the name of the official
+        // client; we do not pretend to be Claude Code, and the spike proved the server is happy
+        // with ours — and refuses any host outside AllowedHosts.
+        _http = AikoHttp.Client(TimeSpan.FromSeconds(10));
         _http.DefaultRequestHeaders.Add("anthropic-beta", "oauth-2025-04-20");
     }
 
@@ -80,11 +77,6 @@ sealed class UsageClient : IDisposable
             return UsageAnswer.Failed("no connection");
         }
     }
-
-    private static string Version() =>
-        Assembly.GetEntryAssembly()?.GetName().Version is { } version
-            ? $"{version.Major}.{version.Minor}.{version.Build}"
-            : "0.0.0";
 
     public void Dispose() => _http.Dispose();
 }

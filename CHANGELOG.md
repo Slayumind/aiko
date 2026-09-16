@@ -5,6 +5,44 @@ All notable changes to Aiko are listed here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and Aiko uses
 [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - 2026-09-16
+
+Privacy gets its own page, and the count that was hidden behind the update switch gets its own
+switch and its own question.
+
+### Added
+
+- **A Privacy page in settings.** It lists what leaves your computer field by field: the value, and
+  what it is for. The list is there whether the count is on or off, because a list you only see
+  after you agree is a list nobody read. **Reset ID** throws away the random value Aiko keeps, and
+  **Open PRIVACY.md** goes to the full text.
+- **A separate switch for the count.** Update checks and the count used to share one switch, so
+  hearing about a new version meant being counted for it. Now they are two. It is still one request:
+  with the count off, the identifier and the flags are not in it and the site writes nothing.
+- **A question in the setup checklist.** The wizard asks about the count as its own step and will
+  not finish without an answer. "Don't send" is an answer and it sticks.
+- **A week and a month in the count.** Aiko remembers on your computer which week and month it has
+  already reported and sends one flag for each, so the author can see how many copies come back
+  without an ID that outlives a day. The weeks and months are calendar ones.
+- **Whether the personality is on**, as a single yes or no, with the same daily ping.
+
+### Changed
+
+- The count now keeps its rows for 90 days and then deletes them. PRIVACY.md says so.
+- Consent given in 0.2.0 is not carried over. It covered three values and this sends six, so Aiko
+  asks again, once, and sends nothing until you answer.
+- Diagnostics now reports whether statistics are on, next to whether update checks are.
+
+### Fixed
+
+- **The day is UTC on both sides.** Aiko hashed its identifier with the computer's own date while
+  the site stored the row under its UTC date. East of Greenwich one copy could send two different
+  identifiers inside one server day and be counted twice.
+- **The personality no longer fades out during a working session.** The block that tells Aiko to go
+  quiet in commits, plans and warnings was also switching off the rule that she is a woman, so she
+  wrote about herself in the masculine in Russian. It also read as covering a whole day of work
+  rather than the report in front of her, so the character never came back.
+
 ## [0.2.0] - 2026-09-15
 
 Aiko gets a personality, eight skills and a face. All of it is off until you turn it on.

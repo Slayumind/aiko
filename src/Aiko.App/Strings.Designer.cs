@@ -162,7 +162,7 @@ public static class Strings
     /// Start with Windows
     public static string StartWithWindows => Get("StartWithWindows");
 
-    /// Once a day, Aiko asks slayumind.org for the latest version and says that one copy of Aiko...
+    /// Once a day Aiko asks slayumind.org for the latest version. Downloads come from GitHub.
     public static string CheckUpdatesWhat => Get("CheckUpdatesWhat");
 
     /// Check now
@@ -665,6 +665,96 @@ public static class Strings
 
     /// off
     public static string NavPersonaOff => Get("NavPersonaOff");
+
+    /// Privacy
+    public static string NavPrivacy => Get("NavPrivacy");
+
+    /// statistics: on
+    public static string NavPrivacyStatsOn => Get("NavPrivacyStatsOn");
+
+    /// statistics: off
+    public static string NavPrivacyStatsOff => Get("NavPrivacyStatsOff");
+
+    /// CONNECTION TO SLAYUMIND.ORG
+    public static string SectionConnection => Get("SectionConnection");
+
+    /// Send anonymous statistics
+    public static string SendStatsToggle => Get("SendStatsToggle");
+
+    /// The same request says that one copy ran today. The author of Aiko sees numbers and nothin...
+    public static string SendStatsWhat => Get("SendStatsWhat");
+
+    /// WHAT IS SENT
+    public static string SectionWhatIsSent => Get("SectionWhatIsSent");
+
+    /// the version of Aiko: whether updates arrive
+    public static string SentVersion => Get("SentVersion");
+
+    /// the version of Windows: what to test first
+    public static string SentWindows => Get("SentWindows");
+
+    /// an ID that changes every day
+    public static string SentDayId => Get("SentDayId");
+
+    /// the first run this week
+    public static string SentWeekFlag => Get("SentWeekFlag");
+
+    /// the first run this month
+    public static string SentMonthFlag => Get("SentMonthFlag");
+
+    /// the personality is on in at least one environment
+    public static string SentPersona => Get("SentPersona");
+
+    /// None of this is sent right now.
+    public static string NothingSentYet => Get("NothingSentYet");
+
+    /// WHAT NEVER LEAVES
+    public static string SectionNeverSent => Get("SectionNeverSent");
+
+    /// Your name, email, project folders, limits, token and session texts. The site doesn't read...
+    public static string NeverSentWhat => Get("NeverSentWhat");
+
+    /// The rows are deleted after 90 days.
+    public static string StatsKeptFor => Get("StatsKeptFor");
+
+    /// Reset ID
+    public static string ResetInstallId => Get("ResetInstallId");
+
+    /// Aiko makes a new value, and the days before it can't be linked to it.
+    public static string ResetInstallIdWhat => Get("ResetInstallIdWhat");
+
+    /// The ID is new.
+    public static string ResetInstallIdDone => Get("ResetInstallIdDone");
+
+    /// Open PRIVACY.md
+    public static string OpenPrivacyDoc => Get("OpenPrivacyDoc");
+
+    /// What Aiko sends and to whom — Privacy.
+    public static string PrivacyLinkFromGeneral => Get("PrivacyLinkFromGeneral");
+
+    /// Anonymous statistics
+    public static string WizardStats => Get("WizardStats");
+
+    /// The author of Aiko doesn't know how many people use it. Once a day Aiko can say that one ...
+    public static string WizardStatsWhat => Get("WizardStatsWhat");
+
+    /// You can change this later in settings, under Privacy.
+    public static string WizardStatsLater => Get("WizardStatsLater");
+
+    /// Don't send
+    public static string StatsDecline => Get("StatsDecline");
+
+    /// Send
+    public static string StatsAccept => Get("StatsAccept");
+
+    /// on
+    public static string StatsStateOn => Get("StatsStateOn");
+
+    /// off
+    public static string StatsStateOff => Get("StatsStateOff");
+
+    /// not chosen
+    public static string StatsStateUnset => Get("StatsStateUnset");
 
     /// WHERE AIKO TALKS
     public static string SectionWhereAikoTalks => Get("SectionWhereAikoTalks");

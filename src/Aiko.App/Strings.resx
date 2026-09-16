@@ -173,7 +173,7 @@
     <value>Start with Windows</value>
   </data>
   <data name="CheckUpdatesWhat" xml:space="preserve">
-    <value>Once a day, Aiko asks slayumind.org for the latest version and says that one copy of Aiko ran today. Downloads come from GitHub.</value>
+    <value>Once a day Aiko asks slayumind.org for the latest version. Downloads come from GitHub.</value>
   </data>
   <data name="CheckNow" xml:space="preserve">
     <value>Check now</value>
@@ -675,6 +675,96 @@
   </data>
   <data name="NavPersonaOff" xml:space="preserve">
     <value>off</value>
+  </data>
+  <data name="NavPrivacy" xml:space="preserve">
+    <value>Privacy</value>
+  </data>
+  <data name="NavPrivacyStatsOn" xml:space="preserve">
+    <value>statistics: on</value>
+  </data>
+  <data name="NavPrivacyStatsOff" xml:space="preserve">
+    <value>statistics: off</value>
+  </data>
+  <data name="SectionConnection" xml:space="preserve">
+    <value>CONNECTION TO SLAYUMIND.ORG</value>
+  </data>
+  <data name="SendStatsToggle" xml:space="preserve">
+    <value>Send anonymous statistics</value>
+  </data>
+  <data name="SendStatsWhat" xml:space="preserve">
+    <value>The same request says that one copy ran today. The author of Aiko sees numbers and nothing else.</value>
+  </data>
+  <data name="SectionWhatIsSent" xml:space="preserve">
+    <value>WHAT IS SENT</value>
+  </data>
+  <data name="SentVersion" xml:space="preserve">
+    <value>the version of Aiko: whether updates arrive</value>
+  </data>
+  <data name="SentWindows" xml:space="preserve">
+    <value>the version of Windows: what to test first</value>
+  </data>
+  <data name="SentDayId" xml:space="preserve">
+    <value>an ID that changes every day</value>
+  </data>
+  <data name="SentWeekFlag" xml:space="preserve">
+    <value>the first run this week</value>
+  </data>
+  <data name="SentMonthFlag" xml:space="preserve">
+    <value>the first run this month</value>
+  </data>
+  <data name="SentPersona" xml:space="preserve">
+    <value>the personality is on in at least one environment</value>
+  </data>
+  <data name="NothingSentYet" xml:space="preserve">
+    <value>None of this is sent right now.</value>
+  </data>
+  <data name="SectionNeverSent" xml:space="preserve">
+    <value>WHAT NEVER LEAVES</value>
+  </data>
+  <data name="NeverSentWhat" xml:space="preserve">
+    <value>Your name, email, project folders, limits, token and session texts. The site doesn't read or store the IP address.</value>
+  </data>
+  <data name="StatsKeptFor" xml:space="preserve">
+    <value>The rows are deleted after 90 days.</value>
+  </data>
+  <data name="ResetInstallId" xml:space="preserve">
+    <value>Reset ID</value>
+  </data>
+  <data name="ResetInstallIdWhat" xml:space="preserve">
+    <value>Aiko makes a new value, and the days before it can't be linked to it.</value>
+  </data>
+  <data name="ResetInstallIdDone" xml:space="preserve">
+    <value>The ID is new.</value>
+  </data>
+  <data name="OpenPrivacyDoc" xml:space="preserve">
+    <value>Open PRIVACY.md</value>
+  </data>
+  <data name="PrivacyLinkFromGeneral" xml:space="preserve">
+    <value>What Aiko sends and to whom — Privacy.</value>
+  </data>
+  <data name="WizardStats" xml:space="preserve">
+    <value>Anonymous statistics</value>
+  </data>
+  <data name="WizardStatsWhat" xml:space="preserve">
+    <value>The author of Aiko doesn't know how many people use it. Once a day Aiko can say that one copy ran and send six values. Here they are, all of them.</value>
+  </data>
+  <data name="WizardStatsLater" xml:space="preserve">
+    <value>You can change this later in settings, under Privacy.</value>
+  </data>
+  <data name="StatsDecline" xml:space="preserve">
+    <value>Don't send</value>
+  </data>
+  <data name="StatsAccept" xml:space="preserve">
+    <value>Send</value>
+  </data>
+  <data name="StatsStateOn" xml:space="preserve">
+    <value>on</value>
+  </data>
+  <data name="StatsStateOff" xml:space="preserve">
+    <value>off</value>
+  </data>
+  <data name="StatsStateUnset" xml:space="preserve">
+    <value>not chosen</value>
   </data>
   <data name="SectionWhereAikoTalks" xml:space="preserve">
     <value>WHERE AIKO TALKS</value>

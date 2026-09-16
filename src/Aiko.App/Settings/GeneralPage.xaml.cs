@@ -58,7 +58,6 @@ public partial class GeneralPage : UserControl
         // The switch shows what Windows actually holds, not what our file remembers: the person may
         // have removed the entry elsewhere.
         RunAtStartup.IsChecked = Startup.IsEnabled();
-        CheckUpdates.IsChecked = _settings.CheckUpdates;
 
         LanguageChoiceDrop.Items = [Strings.LanguageSystem, "Русский", "English"];
         LanguageChoiceDrop.SelectedIndex = Array.IndexOf(Languages, _settings.Language);
@@ -89,9 +88,6 @@ public partial class GeneralPage : UserControl
 
     private void OnHideChanged(object sender, RoutedEventArgs e) =>
         Save(_settings with { HideIslandInFullScreen = HideInFullScreen.IsChecked == true });
-
-    private void OnUpdatesChanged(object sender, RoutedEventArgs e) =>
-        Save(_settings with { CheckUpdates = CheckUpdates.IsChecked == true });
 
     /// Startup is a key in the registry, not a line in our file, so this one writes to Windows.
     private void OnStartupChanged(object sender, RoutedEventArgs e)
@@ -139,6 +135,7 @@ public partial class GeneralPage : UserControl
             $"language: {LanguageName(_settings.Language)}",
             $"starts with Windows: {YesNo(Startup.IsEnabled())}",
             $"checks for updates: {YesNo(_settings.CheckUpdates)}",
+            $"sends statistics: {YesNo(_settings.SendStats)}",
             $"environments: {environments.Environments.Count}"
                 + $", direct mode on for {environments.Environments.Count(env => env.DirectMode)}"
                 + $", bound folders {EnvironmentEdits.Bindings(environments).Count}",
@@ -187,8 +184,7 @@ public partial class GeneralPage : UserControl
         UpdateLine.Visibility = Visibility.Visible;
         OpenDownload.Visibility = Visibility.Collapsed;
 
-        using var client = new UpdateClient();
-        var info = await client.AskAsync(_closing.Token).ConfigureAwait(true);
+        var info = await UpdateRun.AskAsync(_closing.Token).ConfigureAwait(true);
 
         // The window can be closed while the request is in the air, and touching its controls
         // afterwards throws.

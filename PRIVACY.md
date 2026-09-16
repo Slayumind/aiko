@@ -4,7 +4,8 @@ Aiko shows how much of your Claude Code limits is left. This page lists what it 
 sends and where it keeps things.
 
 Aiko has no analytics service and no crash reporting service. It counts how many copies run each
-day, and only if you allow it: see **Counting** below.
+day, and only if you allow it: see **Counting** below. That count has its own switch, separate from
+the update check.
 
 ## What Aiko reads
 
@@ -31,8 +32,12 @@ Nothing, unless you turn on one of these.
   limits of that account, at most once every three minutes. The request carries that account's
   access token and an honest user agent, `Aiko/<version>`. Aiko never sends the token anywhere else.
 - **Update checks** (off by default): Aiko asks `slayumind.org` for the latest version once a day
-  and whenever you press the button. Downloads come from GitHub. The same request does the counting
-  below, so there's one switch for both.
+  and whenever you press the button. Downloads come from GitHub.
+- **Counting** (off by default, its own switch): the same request also says that one copy ran today.
+  One request, two switches. With counting off, the identifier and the flags below are not in the
+  address at all, and the site writes nothing. With update checks off and counting on, Aiko still
+  makes that one request, because the count rides on it. It just doesn't read the version out of
+  the answer.
 
 ## Counting
 
@@ -41,27 +46,39 @@ measures, and this is how.
 
 **What is sent**, together with the question about the latest version:
 
-- the version of Aiko you run;
-- the version of Windows;
-- an ID that **changes every day**.
+- `v`: the version of Aiko you run;
+- `os`: the version of Windows;
+- `day`: an ID that **changes every day**;
+- `w`: a single 1, when this is the first run of this week;
+- `m`: a single 1, when this is the first run of this month;
+- `p`: 1 or 0: whether the personality is on in at least one environment.
 
-**Nothing else.** No name, account, folders or limits. Nothing about which features you use or how
-long Aiko has been running.
+**Nothing else.** No name, account, folders or limits. Nothing about which skills you use, which
+projects you work on, or how long Aiko has been running. The settings page lists these six lines
+and says what each one is for.
 
 **How the ID works.** Aiko makes a random value once and keeps it in `%APPDATA%\Aiko\install-id`.
 That value never leaves your computer. Aiko sends a hash of the value and today's date, cut to
 sixteen characters. Tomorrow's hash has no link to today's, so two days of requests can't be joined
-into one person. The site counts copies per day, and it never follows one copy over time. Delete the
-file and Aiko makes a new value.
+into one person. The site counts copies per day, and it never follows one copy over time. **Reset
+ID** on the privacy page throws the value away, and so does deleting the file.
+
+**How a week and a month are counted.** They can't be worked out from the daily ID, because two
+days of it don't join up. So Aiko answers the question itself: it remembers on your computer which
+week and which month it has already reported, in `%APPDATA%\Aiko\reported.json`, and sets `w` or
+`m` once per period. The site adds those up. That file never leaves your computer either, and the
+weeks and months are calendar ones.
+
+**How long it's kept.** The rows are deleted after 90 days.
 
 **What the server sees.** `slayumind.org` receives the request, and like any web server it sees the
 IP address it came from. The site's code never reads or stores that address: the count uses only the
 ID Aiko sends. The content network and reverse proxy in front of the site see the address the way
 they see every request, and their access logs are outside this project's control.
 
-**How to turn it off.** Use the **Check for updates** switch in settings. It's off until you turn it
-on, and turning it off stops both the version check and the count. You can't have one without the
-other, because both come from the same single request.
+**How to turn it off.** Use **Send anonymous statistics** on the **Privacy** page in settings. It's
+off until you turn it on, and turning it off stops the count. **Check for updates** sits next to it
+and is a separate switch, so you can keep one and drop the other.
 
 ## The token
 
@@ -79,7 +96,8 @@ Without direct mode, Aiko never touches the token.
 
 ## Where Aiko keeps things
 
-- `%APPDATA%\Aiko`: your settings, the list of environments and the random value described above.
+- `%APPDATA%\Aiko`: your settings, the list of environments, the random value described above, and
+  which week and month have already been reported.
 - `%LOCALAPPDATA%\Aiko`: the limit numbers from Claude Code, the last direct mode answer, a short
   log, and, where the personality is on, the session state files, the personality plugin and the
   local marketplace with the skills.

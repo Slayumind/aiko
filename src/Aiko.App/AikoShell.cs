@@ -125,7 +125,16 @@ sealed class AikoShell : IDisposable
             {
                 OpenSettings(page: SettingsPanel.ChecklistPageKey);
                 _settings?.OpenChecklist(ChecklistItem.MeetAiko);
-                SettingsStore.Save(app with { MeetAikoShown = true });
+                app = app with { MeetAikoShown = true };
+                SettingsStore.Save(app);
+            }
+
+            // Once, for someone who set Aiko up before the count had its own switch. Not asking
+            // would leave them sending nothing and never learning the question existed.
+            else if (WizardChecklist.OpensPrivacyOnStart(app, SettingsStore.LoadEnvironments()))
+            {
+                OpenSettings(page: SettingsPanel.ChecklistPageKey);
+                _settings?.OpenChecklist(ChecklistItem.Privacy);
             }
 
             // An update can bring a new persona text or move the marketplace. When the persona is
