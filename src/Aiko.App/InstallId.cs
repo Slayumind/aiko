@@ -39,4 +39,17 @@ static class InstallId
             return string.Empty;
         }
     }
+
+    /// Deleting the file gives a fresh value on the next request. The privacy page offers it, and
+    /// deleting the file by hand has always done the same thing.
+    public static void Forget()
+    {
+        try
+        {
+            File.Delete(Path);
+        }
+        catch (Exception undeletable) when (undeletable is IOException or UnauthorizedAccessException)
+        {
+        }
+    }
 }

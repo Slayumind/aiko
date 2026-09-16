@@ -10,6 +10,7 @@ public enum ChecklistItem
     Commands,
     ProjectFolders,
     MeetAiko,
+    Privacy,
     Place,
 }
 
@@ -42,6 +43,10 @@ public sealed record WizardFacts
 
     /// True: turn the persona on in environment 1 at Finish. False: "Later".
     public bool? PersonaWanted { get; init; }
+
+    /// True: send the daily count. False: don't. Null: the question has not been answered, and
+    /// "don't" is what happens until it is.
+    public bool? StatsWanted { get; init; }
 }
 
 /// Which checklist item is ready, blocked or done, and which one opens next.
@@ -80,6 +85,10 @@ public static class WizardChecklist
         // The persona goes into an environment, so it waits for the first one.
         ChecklistItem.MeetAiko => Answered(facts.FirstSignedIn, facts.PersonaWanted),
 
+        // Asking before there is an account would be asking a stranger, and the answer mentions
+        // the personality, which the item above has just offered.
+        ChecklistItem.Privacy => Answered(facts.FirstSignedIn, facts.StatsWanted),
+
         ChecklistItem.Place => ItemState.Done,
 
         _ => ItemState.Locked,
@@ -102,6 +111,12 @@ public static class WizardChecklist
     /// at startup (D-200). Not for a person who already turned the persona on.
     public static bool OpensMeetAikoOnStart(AppSettings app, EnvironmentSettings environments) =>
         environments.HasEnvironments && !app.MeetAikoShown && !environments.Environments.Any(e => e.Persona);
+
+    /// Somebody updating from 0.2.0 never saw the privacy question: their old yes covered a
+    /// smaller thing, so it was not carried over. The checklist opens on it once, the same way it
+    /// did for "Meet Aiko" (D-200).
+    public static bool OpensPrivacyOnStart(AppSettings app, EnvironmentSettings environments) =>
+        environments.HasEnvironments && !app.PrivacyAsked;
 
     private static ItemState Answered(bool unlocked, bool? answer) =>
         !unlocked ? ItemState.Locked

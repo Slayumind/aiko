@@ -80,16 +80,8 @@
       <ToggleButton x:Name="RunAtStartup" Grid.Column="1" Style="{StaticResource Switch}"
                     Checked="OnStartupChanged" Unchecked="OnStartupChanged" />
     </Grid>
-    <Grid>
-      <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="*" />
-        <ColumnDefinition Width="Auto" />
-      </Grid.ColumnDefinitions>
-      <TextBlock Text="{x:Static local:Strings.CheckUpdatesToggle}" Style="{StaticResource RowName}" Margin="0,0,12,0" />
-      <ToggleButton x:Name="CheckUpdates" Grid.Column="1" Style="{StaticResource Switch}"
-                    Checked="OnUpdatesChanged" Unchecked="OnUpdatesChanged" />
-    </Grid>
-    <TextBlock Text="{x:Static local:Strings.CheckUpdatesWhat}" Style="{StaticResource RowHint}" Margin="0,6,56,0" />
+    <!-- The switch itself lives on the privacy page: it is a consent, not a preference. The
+         button stays here, because pressing it is the person's own action (D-113). -->
 
     <WrapPanel Margin="0,10,0,0">
       <Button x:Name="CheckNow" Content="{x:Static local:Strings.CheckNow}" Style="{StaticResource SmallButton}"
@@ -100,6 +92,7 @@
       <TextBlock x:Name="UpdateLine" Style="{StaticResource RowHint}" VerticalAlignment="Center" Visibility="Collapsed"
                  local:Motion.Appear="True" />
     </WrapPanel>
+    <TextBlock Text="{x:Static local:Strings.PrivacyLinkFromGeneral}" Style="{StaticResource RowHint}" Margin="0,8,56,0" />
 
     <TextBlock Text="{x:Static local:Strings.SectionLanguage}" Style="{StaticResource SectionLabel}" Margin="0,22,0,8" />
     <local:DropDown x:Name="LanguageChoiceDrop" Width="220" HorizontalAlignment="Left" />

@@ -1,262 +1,2032 @@
 [
-["CardSession", ["Session · 5 hours", "Сессия · 5 часов"]],
-["CardWeek", ["Week", "Неделя"]],
-["CardModelWeek", ["{0} · week", "{0} · неделя"]],
-["CardPercentUsed", ["{0}% used", "потрачено {0}%"]],
-["CardResets", ["resets in {0}", "сброс через {0}"]],
-["CardJustReset", ["just reset", "только что сброшен"]],
-["CardLastsUntilReset", ["lasts until reset", "хватит до сброса"]],
-["CardAtThisPace", ["~{0} at this pace", "хватит на ~{0}"]],
-["CardToneCaution", ["running low", "на исходе"]],
-["CardToneCritical", ["almost gone", "почти не осталось"]],
-["CardNoDataYet", ["no data yet", "данных пока нет"]],
-["CardLastSeen", ["as of {0}", "данные на {0}"]],
-["CardUpdated", ["updated {0}", "обновлено в {0}"]],
-["CardNoDataNote", ["Open Claude Code. Limits show up after its first answer.", "Открой Claude Code. Лимиты появятся после первого ответа."]],
-["CardNoAccessNote", ["Aiko can't see the limits of this environment yet. You can turn on access in settings.", "Aiko пока не видит лимиты этой среды. Доступ включается в настройках."]],
-["SpanDaysHours", ["{0}d {1}h", "{0} д {1} ч"]],
-["SpanHoursMinutes", ["{0}h {1}m", "{0} ч {1} м"]],
-["SpanMinutes", ["{0}m", "{0} м"]],
-["SpanUnderMinute", ["<1m", "<1 м"]],
-["TrayOpenClaudeCode", ["open Claude Code", "открой Claude Code"]],
-["TrayLastSeen", ["as of {0}", "данные на {0}"]],
-["TrayUpdateOut", ["Aiko {0} is out", "вышла Aiko {0}"]],
-["MenuShowInRing", ["Show {0} in the ring", "Показать в кольце: {0}"]],
-["MenuRefresh", ["Refresh limits", "Обновить лимиты"]],
-["Settings", ["Settings", "Настройки"]],
-["Close", ["Close", "Закрыть"]],
-["QuitAiko", ["Quit Aiko", "Выйти из Aiko"]],
-["CheckForUpdates", ["Check for updates", "Проверить обновления"]],
-["CheckUpdatesToggle", ["Check for updates", "Проверять обновления"]],
-["SectionEnvironments", ["ENVIRONMENTS", "СРЕДЫ"]],
-["SectionWhereToShow", ["WHERE TO SHOW", "ГДЕ ПОКАЗЫВАТЬ"]],
-["SectionStartupAndUpdates", ["STARTUP AND UPDATES", "ЗАПУСК И ОБНОВЛЕНИЯ"]],
-["SectionLanguage", ["LANGUAGE", "ЯЗЫК"]],
-["DirectMode", ["Direct mode", "Прямой режим"]],
-["DirectModeWhat", ["In direct mode, Aiko asks Anthropic for your limits itself. It uses the token Claude Code already keeps on this computer: Aiko reads it before each request and never saves it. Turn it on if you work in the IDE panel or in Claude Desktop, where there's no status line.", "В прямом режиме Aiko сама спрашивает лимиты у Anthropic. Для этого она берёт токен, который Claude Code уже хранит на этом компьютере: читает его перед каждым запросом и нигде не сохраняет. Включай, если работаешь в панели IDE или в Claude Desktop — там строки состояния нет."]],
-["DirectModeAsk", ["If it's a work account, ask whoever manages it first.", "Если аккаунт рабочий, сначала спроси того, кто им управляет."]],
-["NoEnvironments", ["No environments yet. Aiko looks for them on the first run.", "Сред пока нет. Aiko ищет их при первом запуске."]],
-["AccessOk", ["Claude Code sends its limits to Aiko.", "Claude Code передаёт лимиты в Aiko."]],
-["AccessMissingOne", ["One environment doesn't send its limits yet.", "Одна среда пока не передаёт лимиты."]],
-["AccessMissingMany", ["{0} environments don't send their limits yet.", "Сред, которые пока не передают лимиты: {0}."]],
-["AccessCheck", ["Check access", "Проверить доступ"]],
-["AccessSetUp", ["Set it up", "Настроить"]],
-["AccessNoBridge", ["Aiko can't find its bridge program, so nothing changed.", "Aiko не нашла свою программу-посредник, поэтому ничего не изменилось."]],
-["PlaceTray", ["Tray", "Трей"]],
-["PlaceIsland", ["Island", "Остров"]],
-["HideIslandInFullScreen", ["Hide the island in full screen", "Прятать остров в полноэкранных окнах"]],
-["StartWithWindows", ["Start with Windows", "Запускать вместе с Windows"]],
-["CheckUpdatesWhat", ["Once a day, Aiko asks slayumind.org for the latest version and says that one copy of Aiko ran today. Downloads come from GitHub.", "Раз в сутки Aiko спрашивает у slayumind.org свежую версию и сообщает, что одна копия сегодня работала. Сами файлы скачиваются с GitHub."]],
-["CheckNow", ["Check now", "Проверить сейчас"]],
-["OpenDownloadPage", ["Open download page", "Открыть страницу загрузки"]],
-["UpdateAsking", ["Aiko is asking slayumind.org…", "Aiko спрашивает slayumind.org…"]],
-["UpdateAvailable", ["Version {0} is available.", "Вышла версия {0}."]],
-["UpdateLatest", ["Aiko {0} is the latest version.", "Aiko {0} — самая свежая версия."]],
-["UpdateFailed", ["Couldn't check. Try again in a few minutes.", "Проверить не получилось. Попробуй через несколько минут."]],
-["LanguageSystem", ["System", "Системный"]],
-["LanguageEnglish", ["English", "English"]],
-["LanguageRussian", ["Русский", "Русский"]],
-["CopyDiagnostics", ["Copy diagnostics", "Скопировать диагностику"]],
-["SettingsWindowTitle", ["Aiko settings", "Настройки Aiko"]],
-["WizardStepEnvironments", ["Environments", "Среды"]],
-["EnvironmentPlainName", ["Main", "Основная"]],
-["WizardStepAccess", ["Access to the limits", "Доступ к лимитам"]],
-["WizardStepWhere", ["Where to show Aiko", "Где показывать Aiko"]],
-["WizardStepCount", ["step {0} of 3", "шаг {0} из 3"]],
-["Back", ["Back", "Назад"]],
-["NotNow", ["Not now", "Не сейчас"]],
-["Next", ["Next", "Дальше"]],
-["Allow", ["Allow", "Разрешить"]],
-["Finish", ["Finish", "Готово"]],
-["WizardFoundOne", ["Aiko found one Claude Code folder. That's enough to start, and you can add a second one later in settings.", "Aiko нашла одну папку Claude Code. Для начала этого хватит, вторую можно добавить позже в настройках."]],
-["WizardFoundMany", ["Aiko found these Claude Code folders. Give them names you'll recognise and turn off the ones you don't need.", "Aiko нашла эти папки Claude Code. Дай им понятные тебе имена и выключи лишние."]],
-["WizardNothingFound", ["Aiko didn't find Claude Code on this computer. Install it and check again, or choose the folder yourself.", "Aiko не нашла Claude Code на этом компьютере. Установи его и проверь снова или выбери папку сам."]],
-["WizardChooseFolder", ["Choose a folder", "Выбрать папку"]],
-["WizardCheckAgain", ["Check again", "Проверить снова"]],
-["WizardFolderDialogTitle", ["Choose a Claude Code folder", "Выбери папку Claude Code"]],
-["WizardAccessExplain", ["Claude Code sends its limits to a status line. Aiko adds one line to the settings file of each environment. If you already have a status line, it keeps working: Aiko runs it and shows what it prints.", "Claude Code отдаёт лимиты строке состояния. Aiko добавит одну строку в файл настроек каждой среды. Если у тебя уже есть своя строка состояния, она продолжит работать: Aiko запустит её и покажет её вывод."]],
-["WizardTheLine", ["THE LINE AIKO ADDS", "СТРОКА, КОТОРУЮ ДОБАВИТ AIKO"]],
-["WizardTheFiles", ["FILES AIKO CHANGES", "ФАЙЛЫ, КОТОРЫЕ ИЗМЕНЯТСЯ"]],
-["WizardBackupNote", ["Aiko keeps a copy of each file next to it. Removing Aiko puts everything back.", "Aiko сохранит копию каждого файла рядом с ним. Удалишь Aiko — всё вернётся как было."]],
-["WizardBridgeNotFound", ["Aiko can't find its bridge program.", "Aiko не нашла свою программу-посредник."]],
-["WizardUpdatesWhat", ["Once a day, Aiko asks slayumind.org for the latest version and says that one copy of Aiko ran today. The ID it sends changes every day.", "Раз в сутки Aiko спрашивает у slayumind.org свежую версию и сообщает, что одна копия сегодня работала. Идентификатор, который уходит, меняется каждый день."]],
-["WizardDoneTray", ["Aiko is down by the clock. Rest the mouse on it to see the card, or click it to keep the card open.", "Aiko внизу, рядом с часами. Наведи мышь, чтобы увидеть карточку, или кликни, чтобы карточка осталась открытой."]],
-["WizardDoneIsland", ["Aiko is at the top of your screen. Drag it anywhere and it sticks to the nearest edge.", "Aiko вверху экрана. Перетащи куда угодно — она прилипнет к ближайшему краю."]],
-["WizardDoneOverflow", ["Windows 11 hides new app icons under the arrow next to the clock. Open the arrow and drag Aiko onto the taskbar: under the arrow, the card can't open.", "Windows 11 прячет значки новых приложений под стрелку рядом с часами. Открой её и перетащи Aiko на панель задач: под стрелкой карточка не открывается."]],
-["WizardDoneFirstNumbers", ["The first numbers arrive after your next answer from Claude Code. Until then, the ring is dashed.", "Первые цифры придут после следующего ответа Claude Code. До этого кольцо пунктирное."]],
-["WizardDoneNoAccess", ["Aiko can't see your limits yet. You can turn on access in settings at any time.", "Aiko пока не видит лимиты. Доступ можно включить в настройках в любой момент."]],
-["SettingsWriteFailed", ["Aiko couldn't write the Claude Code settings file. Try again.", "Aiko не смогла записать файл настроек Claude Code. Попробуй ещё раз."]],
-["SettingsBridgeUnknown", ["Aiko can't find its bridge program.", "Aiko не нашла свою программу-посредник."]],
-["ChecklistTitle", ["Set up environments", "Настройка сред"]],
-["ChecklistCount", ["{0} of {1} done", "готово {0} из {1}"]],
-["GroupFirst", ["ENVIRONMENT 1", "СРЕДА 1"]],
-["GroupSecond", ["ENVIRONMENT 2", "СРЕДА 2"]],
-["GroupShared", ["SHARED", "ОБЩЕЕ"]],
-["ItemInstall", ["Install Claude Code", "Установить Claude Code"]],
-["ItemAccount", ["Account", "Аккаунт"]],
-["ItemSecond", ["Pick or create", "Выбрать или создать"]],
-["ItemCommands", ["Launch commands", "Команды запуска"]],
-["ItemFolders", ["Project folders", "Папки проектов"]],
-["StateInstalled", ["installed", "установлен"]],
-["StateWaiting", ["waiting", "ждём"]],
-["StateAfterInstall", ["after install", "после установки"]],
-["StateAfterSignIn", ["after sign-in", "после входа"]],
-["StateAfterSecond", ["after environment 2", "после второй среды"]],
-["StateOptional", ["optional", "по желанию"]],
-["StateLater", ["later", "позже"]],
-["StateConnected", ["connected", "подключён"]],
-["StateSignInNeeded", ["sign in needed", "нужно войти"]],
-["StateAdded", ["added", "добавлена"]],
-["StateNone", ["none", "нет"]],
-["StateBound", ["{0} bound", "привязано: {0}"]],
-["StateTray", ["tray", "трей"]],
-["StateIsland", ["island", "остров"]],
-["Copy", ["Copy", "Скопировать"]],
-["Copied", ["Copied", "Скопировано"]],
-["Later", ["Later", "Позже"]],
-["InstallFound", ["Claude Code is already on this computer. Nothing to do here.", "Claude Code уже есть на этом компьютере. Здесь ничего делать не нужно."]],
-["InstallLead",["Claude Code isn't on this computer yet. Aiko works alongside it, so install it first.", "Claude Code на этом компьютере пока нет. Aiko работает вместе с ним, так что сначала установи его."]],
-["InstallHow", ["Open PowerShell, paste the command and press Enter. Aiko notices when it's done.", "Открой PowerShell, вставь команду и нажми Enter. Aiko заметит, когда установка закончится."]],
-["WaitInstall", ["Waiting for Claude Code…", "Ждём Claude Code…"]],
-["Env1Lead", ["The first environment lives in the .claude folder. The Claude Code panel in VS Code and Claude Desktop use it too.", "Первая среда живёт в папке .claude. С ней же работают панель Claude Code в VS Code и Claude Desktop."]],
-["Env1Empty", ["This folder has no account yet.", "В этой папке ещё нет аккаунта."]],
-["Env1Found", ["This folder already has an account.", "В этой папке уже есть аккаунт."]],
-["SignIn", ["Sign in", "Войти"]],
-["LoginHow", ["Aiko opened Claude Code in a new window. Sign in there through your browser. Aiko waits and moves on by itself.", "Aiko открыла Claude Code в новом окне. Войди там через браузер — Aiko дождётся и пойдёт дальше сама."]],
-["LoginNever", ["Aiko never sees a password or a token, only that the account is connected.", "Aiko не видит ни пароля, ни токена. Только то, что аккаунт подключён."]],
-["WaitLogin", ["Waiting for you to sign in…", "Ждём, пока войдёшь в аккаунт…"]],
-["NameInAiko", ["NAME IN AIKO", "ИМЯ В AIKO"]],
-["AccountLabel", ["Account", "Аккаунт"]],
-["PlanLabel", ["Plan", "План"]],
-["Env2LeadFound", ["Aiko found more Claude Code folders. Pick the one for your second environment, or create a new one.", "Aiko нашла ещё папки Claude Code. Выбери ту, что станет второй средой, или создай новую."]],
-["Env2LeadNew", ["The second environment is a separate folder with its own account. Name it and Aiko creates the folder.", "Вторая среда — отдельная папка со своим аккаунтом. Назови её, и Aiko создаст папку."]],
-["Env2Later", ["One environment is enough to see limits. You can add the second one later in settings.", "Чтобы видеть лимиты, хватит и одной среды. Вторую можно добавить позже в настройках."]],
-["CreateNew", ["Create a new one", "Создать новую"]],
-["CreateSignIn", ["Create and sign in", "Создать и войти"]],
-["NameExample", ["For example, Personal", "Например, Personal"]],
-["LastSession", ["last session {0}", "последняя сессия {0}"]],
-["FolderIs", ["Folder: {0}", "Папка: {0}"]],
-["AccessAdd", ["Add the line", "Добавить строку"]],
-["CmdLead", ["A command starts Claude Code in the right environment. It works in PowerShell, cmd and Git Bash.", "Команда запускает Claude Code сразу под нужной средой. Работает в PowerShell, cmd и Git Bash."]],
-["CmdFor", ["COMMAND · {0}", "КОМАНДА · {0}"]],
-["CmdFollows", ["Follows the environment name.", "Меняется вместе с именем среды."]],
-["CmdOwn", ["Your own command: renaming doesn't change it.", "Своя команда: переименование её не трогает."]],
-["CmdByName", ["Use the name", "По имени среды"]],
-["CmdEmpty", ["Enter a command.", "Впиши команду."]],
-["CmdTooLong", ["Up to 40 characters.", "Не длиннее 40 знаков."]],
-["CmdBadCharacters", ["Only a–z, 0–9, - and _.", "Только a–z, 0–9, - и _."]],
-["CmdReserved", ["claude is the name of Claude Code itself.", "claude — имя самого Claude Code."]],
-["CmdTaken", ["The other environment has this command.", "Эта команда уже у другой среды."]],
-["FnsLead", ["Your PowerShell profile has functions that switch accounts. They run before Aiko's commands and hide them, so they're ticked for removal.", "В профиле PowerShell нашлись функции, которые переключают аккаунт. Они срабатывают раньше команд Aiko и перекрывают их, поэтому отмечены к удалению."]],
-["FnRemove", ["Remove {0}", "Убрать {0}"]],
-["FnBackup", ["A copy of the profile stays next to it. Removing Aiko brings the functions back.", "Копия профиля останется рядом, а удаление Aiko вернёт функции."]],
-["PathNote", ["Aiko puts its folder at the start of PATH so every terminal finds the commands. Restart open terminals and your IDE.", "Aiko поставит свою папку в начало PATH, чтобы команды нашлись в любом терминале. Открытые терминалы и IDE нужно перезапустить."]],
-["PathAdd", ["Add to PATH", "Добавить в PATH"]],
-["NoCommands", ["No commands", "Без команд"]],
-["FoldersLead", ["Bind project folders to {0}. In them and in every folder inside, claude starts {0}.", "Привяжи папки проектов к {0}. В них и во всех вложенных папках claude запустит {0}."]],
-["AddProject", ["Add a project folder", "Добавить папку проекта"]],
-["PickProject", ["Choose a project folder", "Выбери папку проекта"]],
-["NoBinds", ["Nothing is bound yet. You can do it later in settings.", "Пока ничего не привязано. Можно и потом, в настройках."]],
-["ExplicitWins", ["A command beats a binding: {0} in a bound folder starts {1}, and Claude Code reminds you of the binding.", "Команда сильнее привязки: {0} в привязанной папке запустит {1}, а Claude Code напомнит о привязке."]],
-["Remove", ["Remove", "Убрать"]],
-["DoneCommands", ["Commands: {0}. Open a new terminal to use them.", "Команды: {0}. Они заработают в новом окне терминала."]],
-["SetUpEnvironments", ["Set up environments", "Настроить среды"]],
-["NavGeneral", ["General", "Общее"]],
-["NavBound", ["{0} bound", "привязано: {0}"]],
-["AddSecondEnvironment", ["Add a second environment", "Добавить вторую среду"]],
-["Saved", ["Saved", "Сохранено"]],
-["ByDefault", ["default", "по умолчанию"]],
-["SectionAccount", ["ACCOUNT", "АККАУНТ"]],
-["EmailLabel", ["Email", "Почта"]],
-["SignInAgain", ["Sign in again", "Войти заново"]],
-["ClaudeOpened", ["Claude Code opened in a new window.", "Claude Code открылся в новом окне."]],
-["SectionCommand", ["COMMAND", "КОМАНДА"]],
-["CmdShells", ["PowerShell · cmd · Git Bash", "PowerShell · cmd · Git Bash"]],
-["CmdKept", ["The command stays the same, since your terminals and scripts know it.", "Команда осталась прежней: терминалы и скрипты её знают."]],
-["RenameCommandTo", ["Rename to {0}", "Переименовать в {0}"]],
-["NameEmpty", ["Enter a name.", "Впиши имя."]],
-["NameTooLong", ["Up to 40 characters.", "Не длиннее 40 знаков."]],
-["NameTaken", ["The other environment has this name.", "Это имя уже у другой среды."]],
-["SectionBoundFolders", ["BOUND FOLDERS", "ПРИВЯЗАННЫЕ ПАПКИ"]],
-["NoneBound", ["No folders.", "Ни одной папки."]],
-["RestToo", ["And every other folder: this is the default environment.", "И все остальные папки: это среда по умолчанию."]],
-["EditInFolders", ["Change in project folders", "Изменить в папках проектов"]],
-["RemoveEnvironment", ["Remove environment", "Удалить среду"]],
-["RemoveEnvironmentLine", ["Aiko's line and plugins leave this folder's settings.json, and so do the command {0} and the bindings to {1}.", "Строка и плагины Aiko уйдут из settings.json этой папки. Вместе с ними уйдут команда {0} и привязки к {1}."]],
-["MoveToRecycleBin", ["And move the folder to the Recycle Bin", "И переместить папку в корзину"]],
-["RecycleWhy", ["It holds the Claude Code account, history and memory. You can restore it from the Recycle Bin.", "В ней аккаунт, история и память Claude Code. Вернуть можно из корзины Windows."]],
-["KeepClaude", ["VS Code and Claude Desktop use the .claude folder, so Aiko never removes it.", "Папку .claude используют VS Code и Claude Desktop, поэтому Aiko её не удаляет."]],
-["Cancel", ["Cancel", "Отмена"]],
-["RemoveConfirm", ["Remove", "Удалить"]],
-["EnvironmentRemoved", ["{0} removed.", "{0} удалена."]],
-["EnvironmentRemovedToBin", ["{0} removed. The folder is in the Recycle Bin.", "{0} удалена, папка в корзине."]],
-["FoldersTableLead", ["In a folder and in every folder inside, plain claude starts its environment. A command like {0} beats a binding, and Claude Code reminds you of it.", "В папке и во всех вложенных обычный claude запускает её среду. Команда вроде {0} сильнее привязки, но Claude Code напомнит о ней."]],
-["FolderColumn", ["FOLDER", "ПАПКА"]],
-["EnvironmentColumn", ["ENVIRONMENT", "СРЕДА"]],
-["AllOtherFolders", ["All other folders", "Все остальные папки"]],
-["AddFolder", ["Add a folder", "Добавить папку"]],
-["RemoveBinding", ["Remove binding", "Убрать привязку"]],
-["FoldersOneEnvironment", ["Bindings matter once you have two environments. Right now every folder runs in {0}.", "Привязка нужна, когда сред две. Сейчас все папки работают в {0}."]],
-["FoldersNeedCommands", ["Bindings work through the launch commands, and those aren't set up yet.", "Привязки работают через команды запуска, а они пока не включены."]],
-["SectionAccess", ["ACCESS TO THE LIMITS", "ДОСТУП К ЛИМИТАМ"]],
-["SectionDiagnostics", ["DIAGNOSTICS", "ДИАГНОСТИКА"]],
-["DiagnosticsWhat", ["Version and settings for a bug report. No tokens and no email addresses.", "Версия и настройки для сообщения об ошибке. Токенов и почты там нет."]],
-["DiagnosticsCopied", ["Diagnostics copied.", "Диагностика скопирована."]],
-["SetupDone", ["Environments are set up.", "Среды настроены."]],
-["Restart", ["Start over", "Начать заново"]],
-["RestartWhat", ["Removes the environments from Aiko and opens the checklist right here.", "Убирает среды из Aiko и открывает чек-лист здесь же."]],
-["RestartLine", ["Aiko removes the environments, its lines and plugins in settings.json, the commands {0}, the folder bindings and its folder in PATH, and turns the PowerShell profile functions back on. Accounts and history stay in the folders.", "Из Aiko уйдут среды, строки и плагины Aiko в settings.json, команды {0}, привязки папок и папка Aiko в PATH, а функции в профиле PowerShell вернутся. Аккаунты и история в папках останутся."]],
-["RestartBin", ["And move {0} to the Recycle Bin", "И переместить {0} в корзину"]],
-["RestartKeep", [".claude stays either way.", ".claude остаётся в любом случае."]],
-["OpenClaudeCode", ["Open Claude Code", "Открыть Claude Code"]],
-["CardSignInNote", ["Sign in so Aiko can see the limits of this environment.", "Войди, чтобы Aiko видела лимиты этой среды."]],
-["StateWorkingNow", ["working now", "сейчас работает"]],
-["NavPersonality", ["Personality", "Личность"]],
-["NavPersonaOn", ["on: {0}", "включена: {0}"]],
-["NavPersonaOff", ["off", "выключена"]],
-["SectionWhereAikoTalks", ["WHERE AIKO TALKS", "ГДЕ AIKO ГОВОРИТ"]],
-["PersonaNewSessions", ["Works in new sessions. Open sessions finish the way they started.", "Действует в новых сессиях. Открытые сессии доработают как были."]],
-["PersonaOwnStyle", ["While the personality is on, your style {0} doesn't work. Turn it off and it comes back.", "Пока личность включена, твой стиль {0} не работает. Выключишь — вернётся."]],
-["SectionFace", ["FACE", "ЛИЦО"]],
-["FaceChibi", ["Chibi", "Чиби"]],
-["FaceEmoji", ["Emoji", "Смайлик"]],
-["FaceWhere", ["This is how Aiko looks in the tray, on the island and in windows.", "Так Aiko выглядит в трее, на острове и в окнах."]],
-["SectionTemperament", ["TEMPERAMENT", "ТЕМПЕРАМЕНТ"]],
-["TemperamentQuiet", ["Quiet", "Тихий"]],
-["TemperamentNormal", ["Normal", "Обычный"]],
-["TemperamentBright", ["Bright", "Яркий"]],
-["TemperamentQuietAbout", ["Almost no character: one warm line at the end of an answer.", "Почти без характера: одна тёплая фраза в конце ответа."]],
-["TemperamentNormalAbout", ["A short interjection at the start, a quick verdict at the end. Japanese words now and then.", "Короткое междометие в начале, оценка в конце. Японские слова — изредка."]],
-["TemperamentBrightAbout", ["An interjection in every answer, game metaphors, Japanese words more often.", "Междометие в каждом ответе, игровые метафоры, японские слова чаще."]],
-["TemperamentMusouAbout", ["Everything at full. In code, commits, files and errors she still stays quiet.", "Всё на максимум. В коде, коммитах, файлах и ошибках она всё равно молчит."]],
-["SectionSampleReply", ["HOW SHE'LL ANSWER", "ТАК ОНА ОТВЕТИТ"]],
-["SampleQuestion", ["Why does the reset countdown show 0 minutes?", "Почему отсчёт до сброса показывает 0 минут?"]],
-["SampleBody", ["The limits test passed by luck: rounding went down, so a reset at 14:59:30 showed as “in 0 min”. I fixed ResetCountdown and added a test for the edge.", "Тест на разбор лимитов проходил случайно: округление шло вниз, и сброс в 14:59:30 показывался как «через 0 мин». Поправила ResetCountdown и добавила тест на край."]],
-["SampleBodyBright", ["The limits test passed by luck: rounding went down, so a reset at 14:59:30 hid behind “in 0 min”, like a mimic chest in Dark Souls. I fixed ResetCountdown and added a test for the edge.", "Тест на разбор лимитов проходил случайно: округление шло вниз, и сброс в 14:59:30 прятался за «через 0 мин», как мимик-сундук в Dark Souls. Поправила ResetCountdown и добавила тест на край."]],
-["SampleBodyMusouTail", [" Parried it, like in Elden Ring.", " Парировала его, как в Elden Ring."]],
-["SampleOpenNormal", ["えへへ, got it.", "えへへ, поймала."]],
-["SampleOpenBright", ["やった, got it!", "やった, поймала!"]],
-["SampleOpenMusou", ["やった〜! すごい, what a sneaky one!", "やった〜! すごい, какой хитрый!"]],
-["SampleCloseQuiet", ["A rare bug. It was nice to find.", "Редкий баг, приятно было найти."]],
-["SampleCloseNormal", ["In my own game I'd have hunted a bug like this for half a day.", "Такой баг я бы и в своей игре полдня искала."]],
-["SampleCloseBright", ["お疲れ様!", "お疲れ様!"]],
-["SampleCloseMusou", ["よし、行くぞ! On to the next one (^_^)", "よし、行くぞ! Дальше (^_^)"]],
-["SampleCommit", ["The commit for this fix has no character:", "Коммит к этой правке — без характера:"]],
-["SectionSkills", ["SKILLS · {0} OF {1}", "НАВЫКИ · {0} ИЗ {1}"]],
-["SkillsWork", ["Skills work in environments where the personality is on. Call them by name, like /aiko-copy.", "Навыки работают в средах, где включена личность. Зови их по имени, например /aiko-copy."]],
-["SkillsNeedPersona", ["Turn the personality on in at least one environment, and the skills start working.", "Включи личность хотя бы в одной среде — тогда навыки заработают."]],
-["SkillAikoCopy", ["UI text, READMEs and release notes without stiff wording or AI tells. RU and EN.", "Интерфейс, README и релизы без канцелярита и штампов ИИ. RU и EN."]],
-["SkillAikoReleaseGate", ["Before a release: what can't be undone, how to roll back, whether the docs match the code.", "Перед релизом: что необратимо, как откатить, совпадают ли документы с кодом."]],
-["SkillAikoDocsHygiene", ["One fact in one place, a decision log, contradictions found.", "Факт живёт в одном месте, журнал решений, поиск противоречий."]],
-["SkillAikoBlenderToUnity", ["A model from Blender to Unity: axes, normals, export and import.", "Модель из Blender в Unity: оси, нормали, экспорт и импорт."]],
-["SkillAikoTexturing", ["Texel density from the camera: when a model gets its own sheet, when to tile.", "Плотность текселей от камеры: когда свой лист, когда тайлинг."]],
-["SkillAikoGlbForWeb", ["A .glb for the web: size, axes, compression, a blank view where the model should be.", "Файл .glb для веба: размер, оси, сжатие, пустое окно вместо модели."]],
-["SkillAikoPalette", ["Fit a color to the palette in OKLCH with the smallest change.", "Подогнать цвет под палитру в OKLCH с самой маленькой правкой."]],
-["SkillAikoGamedesignResearch", ["30–40 games with the mechanic you need: an overview with screenshots, and interactive demos on request.", "30–40 игр с нужной механикой: обзор со скриншотами и интерактивные стенды по запросу."]],
-["ItemMeetAiko", ["Meet Aiko", "Познакомься с Aiko"]],
-["MeetAikoLead", ["Aiko can talk in your Claude Code sessions in her own voice, and she brings eight skills. In code and commits she stays quiet.", "Aiko может говорить в твоих сессиях Claude Code своим голосом и приносит восемь навыков. В коде и коммитах она молчит."]],
-["MeetAikoSettings", ["The temperament, the face and the skills are in settings, under Personality. It works in new sessions.", "Темперамент, лицо и навыки — в настройках, в разделе «Личность». Действует в новых сессиях."]],
-["MeetAikoTurnOn", ["Turn on in {0}", "Включить в среде {0}"]],
-["StateOn", ["on", "включена"]],
-["SkillOwnTwin", ["Your own skill with this name in {0} takes /{1}. This one is called /{1}:{1} there.", "В {0} есть твой навык с тем же именем, и /{1} зовёт его. Этот там называется /{1}:{1}."]]
+  [
+    "CardSession",
+    [
+      "Session · 5 hours",
+      "Сессия · 5 часов"
+    ]
+  ],
+  [
+    "CardWeek",
+    [
+      "Week",
+      "Неделя"
+    ]
+  ],
+  [
+    "CardModelWeek",
+    [
+      "{0} · week",
+      "{0} · неделя"
+    ]
+  ],
+  [
+    "CardPercentUsed",
+    [
+      "{0}% used",
+      "потрачено {0}%"
+    ]
+  ],
+  [
+    "CardResets",
+    [
+      "resets in {0}",
+      "сброс через {0}"
+    ]
+  ],
+  [
+    "CardJustReset",
+    [
+      "just reset",
+      "только что сброшен"
+    ]
+  ],
+  [
+    "CardLastsUntilReset",
+    [
+      "lasts until reset",
+      "хватит до сброса"
+    ]
+  ],
+  [
+    "CardAtThisPace",
+    [
+      "~{0} at this pace",
+      "хватит на ~{0}"
+    ]
+  ],
+  [
+    "CardToneCaution",
+    [
+      "running low",
+      "на исходе"
+    ]
+  ],
+  [
+    "CardToneCritical",
+    [
+      "almost gone",
+      "почти не осталось"
+    ]
+  ],
+  [
+    "CardNoDataYet",
+    [
+      "no data yet",
+      "данных пока нет"
+    ]
+  ],
+  [
+    "CardLastSeen",
+    [
+      "as of {0}",
+      "данные на {0}"
+    ]
+  ],
+  [
+    "CardUpdated",
+    [
+      "updated {0}",
+      "обновлено в {0}"
+    ]
+  ],
+  [
+    "CardNoDataNote",
+    [
+      "Open Claude Code. Limits show up after its first answer.",
+      "Открой Claude Code. Лимиты появятся после первого ответа."
+    ]
+  ],
+  [
+    "CardNoAccessNote",
+    [
+      "Aiko can't see the limits of this environment yet. You can turn on access in settings.",
+      "Aiko пока не видит лимиты этой среды. Доступ включается в настройках."
+    ]
+  ],
+  [
+    "SpanDaysHours",
+    [
+      "{0}d {1}h",
+      "{0} д {1} ч"
+    ]
+  ],
+  [
+    "SpanHoursMinutes",
+    [
+      "{0}h {1}m",
+      "{0} ч {1} м"
+    ]
+  ],
+  [
+    "SpanMinutes",
+    [
+      "{0}m",
+      "{0} м"
+    ]
+  ],
+  [
+    "SpanUnderMinute",
+    [
+      "<1m",
+      "<1 м"
+    ]
+  ],
+  [
+    "TrayOpenClaudeCode",
+    [
+      "open Claude Code",
+      "открой Claude Code"
+    ]
+  ],
+  [
+    "TrayLastSeen",
+    [
+      "as of {0}",
+      "данные на {0}"
+    ]
+  ],
+  [
+    "TrayUpdateOut",
+    [
+      "Aiko {0} is out",
+      "вышла Aiko {0}"
+    ]
+  ],
+  [
+    "MenuShowInRing",
+    [
+      "Show {0} in the ring",
+      "Показать в кольце: {0}"
+    ]
+  ],
+  [
+    "MenuRefresh",
+    [
+      "Refresh limits",
+      "Обновить лимиты"
+    ]
+  ],
+  [
+    "Settings",
+    [
+      "Settings",
+      "Настройки"
+    ]
+  ],
+  [
+    "Close",
+    [
+      "Close",
+      "Закрыть"
+    ]
+  ],
+  [
+    "QuitAiko",
+    [
+      "Quit Aiko",
+      "Выйти из Aiko"
+    ]
+  ],
+  [
+    "CheckForUpdates",
+    [
+      "Check for updates",
+      "Проверить обновления"
+    ]
+  ],
+  [
+    "CheckUpdatesToggle",
+    [
+      "Check for updates",
+      "Проверять обновления"
+    ]
+  ],
+  [
+    "SectionEnvironments",
+    [
+      "ENVIRONMENTS",
+      "СРЕДЫ"
+    ]
+  ],
+  [
+    "SectionWhereToShow",
+    [
+      "WHERE TO SHOW",
+      "ГДЕ ПОКАЗЫВАТЬ"
+    ]
+  ],
+  [
+    "SectionStartupAndUpdates",
+    [
+      "STARTUP AND UPDATES",
+      "ЗАПУСК И ОБНОВЛЕНИЯ"
+    ]
+  ],
+  [
+    "SectionLanguage",
+    [
+      "LANGUAGE",
+      "ЯЗЫК"
+    ]
+  ],
+  [
+    "DirectMode",
+    [
+      "Direct mode",
+      "Прямой режим"
+    ]
+  ],
+  [
+    "DirectModeWhat",
+    [
+      "In direct mode, Aiko asks Anthropic for your limits itself. It uses the token Claude Code already keeps on this computer: Aiko reads it before each request and never saves it. Turn it on if you work in the IDE panel or in Claude Desktop, where there's no status line.",
+      "В прямом режиме Aiko сама спрашивает лимиты у Anthropic. Для этого она берёт токен, который Claude Code уже хранит на этом компьютере: читает его перед каждым запросом и нигде не сохраняет. Включай, если работаешь в панели IDE или в Claude Desktop — там строки состояния нет."
+    ]
+  ],
+  [
+    "DirectModeAsk",
+    [
+      "If it's a work account, ask whoever manages it first.",
+      "Если аккаунт рабочий, сначала спроси того, кто им управляет."
+    ]
+  ],
+  [
+    "NoEnvironments",
+    [
+      "No environments yet. Aiko looks for them on the first run.",
+      "Сред пока нет. Aiko ищет их при первом запуске."
+    ]
+  ],
+  [
+    "AccessOk",
+    [
+      "Claude Code sends its limits to Aiko.",
+      "Claude Code передаёт лимиты в Aiko."
+    ]
+  ],
+  [
+    "AccessMissingOne",
+    [
+      "One environment doesn't send its limits yet.",
+      "Одна среда пока не передаёт лимиты."
+    ]
+  ],
+  [
+    "AccessMissingMany",
+    [
+      "{0} environments don't send their limits yet.",
+      "Сред, которые пока не передают лимиты: {0}."
+    ]
+  ],
+  [
+    "AccessCheck",
+    [
+      "Check access",
+      "Проверить доступ"
+    ]
+  ],
+  [
+    "AccessSetUp",
+    [
+      "Set it up",
+      "Настроить"
+    ]
+  ],
+  [
+    "AccessNoBridge",
+    [
+      "Aiko can't find its bridge program, so nothing changed.",
+      "Aiko не нашла свою программу-посредник, поэтому ничего не изменилось."
+    ]
+  ],
+  [
+    "PlaceTray",
+    [
+      "Tray",
+      "Трей"
+    ]
+  ],
+  [
+    "PlaceIsland",
+    [
+      "Island",
+      "Остров"
+    ]
+  ],
+  [
+    "HideIslandInFullScreen",
+    [
+      "Hide the island in full screen",
+      "Прятать остров в полноэкранных окнах"
+    ]
+  ],
+  [
+    "StartWithWindows",
+    [
+      "Start with Windows",
+      "Запускать вместе с Windows"
+    ]
+  ],
+  [
+    "CheckUpdatesWhat",
+    [
+      "Once a day Aiko asks slayumind.org for the latest version. Downloads come from GitHub.",
+      "Раз в сутки Aiko спрашивает у slayumind.org свежую версию. Сами файлы скачиваются с GitHub."
+    ]
+  ],
+  [
+    "CheckNow",
+    [
+      "Check now",
+      "Проверить сейчас"
+    ]
+  ],
+  [
+    "OpenDownloadPage",
+    [
+      "Open download page",
+      "Открыть страницу загрузки"
+    ]
+  ],
+  [
+    "UpdateAsking",
+    [
+      "Aiko is asking slayumind.org…",
+      "Aiko спрашивает slayumind.org…"
+    ]
+  ],
+  [
+    "UpdateAvailable",
+    [
+      "Version {0} is available.",
+      "Вышла версия {0}."
+    ]
+  ],
+  [
+    "UpdateLatest",
+    [
+      "Aiko {0} is the latest version.",
+      "Aiko {0} — самая свежая версия."
+    ]
+  ],
+  [
+    "UpdateFailed",
+    [
+      "Couldn't check. Try again in a few minutes.",
+      "Проверить не получилось. Попробуй через несколько минут."
+    ]
+  ],
+  [
+    "LanguageSystem",
+    [
+      "System",
+      "Системный"
+    ]
+  ],
+  [
+    "LanguageEnglish",
+    [
+      "English",
+      "English"
+    ]
+  ],
+  [
+    "LanguageRussian",
+    [
+      "Русский",
+      "Русский"
+    ]
+  ],
+  [
+    "CopyDiagnostics",
+    [
+      "Copy diagnostics",
+      "Скопировать диагностику"
+    ]
+  ],
+  [
+    "SettingsWindowTitle",
+    [
+      "Aiko settings",
+      "Настройки Aiko"
+    ]
+  ],
+  [
+    "WizardStepEnvironments",
+    [
+      "Environments",
+      "Среды"
+    ]
+  ],
+  [
+    "EnvironmentPlainName",
+    [
+      "Main",
+      "Основная"
+    ]
+  ],
+  [
+    "WizardStepAccess",
+    [
+      "Access to the limits",
+      "Доступ к лимитам"
+    ]
+  ],
+  [
+    "WizardStepWhere",
+    [
+      "Where to show Aiko",
+      "Где показывать Aiko"
+    ]
+  ],
+  [
+    "WizardStepCount",
+    [
+      "step {0} of 3",
+      "шаг {0} из 3"
+    ]
+  ],
+  [
+    "Back",
+    [
+      "Back",
+      "Назад"
+    ]
+  ],
+  [
+    "NotNow",
+    [
+      "Not now",
+      "Не сейчас"
+    ]
+  ],
+  [
+    "Next",
+    [
+      "Next",
+      "Дальше"
+    ]
+  ],
+  [
+    "Allow",
+    [
+      "Allow",
+      "Разрешить"
+    ]
+  ],
+  [
+    "Finish",
+    [
+      "Finish",
+      "Готово"
+    ]
+  ],
+  [
+    "WizardFoundOne",
+    [
+      "Aiko found one Claude Code folder. That's enough to start, and you can add a second one later in settings.",
+      "Aiko нашла одну папку Claude Code. Для начала этого хватит, вторую можно добавить позже в настройках."
+    ]
+  ],
+  [
+    "WizardFoundMany",
+    [
+      "Aiko found these Claude Code folders. Give them names you'll recognise and turn off the ones you don't need.",
+      "Aiko нашла эти папки Claude Code. Дай им понятные тебе имена и выключи лишние."
+    ]
+  ],
+  [
+    "WizardNothingFound",
+    [
+      "Aiko didn't find Claude Code on this computer. Install it and check again, or choose the folder yourself.",
+      "Aiko не нашла Claude Code на этом компьютере. Установи его и проверь снова или выбери папку сам."
+    ]
+  ],
+  [
+    "WizardChooseFolder",
+    [
+      "Choose a folder",
+      "Выбрать папку"
+    ]
+  ],
+  [
+    "WizardCheckAgain",
+    [
+      "Check again",
+      "Проверить снова"
+    ]
+  ],
+  [
+    "WizardFolderDialogTitle",
+    [
+      "Choose a Claude Code folder",
+      "Выбери папку Claude Code"
+    ]
+  ],
+  [
+    "WizardAccessExplain",
+    [
+      "Claude Code sends its limits to a status line. Aiko adds one line to the settings file of each environment. If you already have a status line, it keeps working: Aiko runs it and shows what it prints.",
+      "Claude Code отдаёт лимиты строке состояния. Aiko добавит одну строку в файл настроек каждой среды. Если у тебя уже есть своя строка состояния, она продолжит работать: Aiko запустит её и покажет её вывод."
+    ]
+  ],
+  [
+    "WizardTheLine",
+    [
+      "THE LINE AIKO ADDS",
+      "СТРОКА, КОТОРУЮ ДОБАВИТ AIKO"
+    ]
+  ],
+  [
+    "WizardTheFiles",
+    [
+      "FILES AIKO CHANGES",
+      "ФАЙЛЫ, КОТОРЫЕ ИЗМЕНЯТСЯ"
+    ]
+  ],
+  [
+    "WizardBackupNote",
+    [
+      "Aiko keeps a copy of each file next to it. Removing Aiko puts everything back.",
+      "Aiko сохранит копию каждого файла рядом с ним. Удалишь Aiko — всё вернётся как было."
+    ]
+  ],
+  [
+    "WizardBridgeNotFound",
+    [
+      "Aiko can't find its bridge program.",
+      "Aiko не нашла свою программу-посредник."
+    ]
+  ],
+  [
+    "WizardUpdatesWhat",
+    [
+      "Once a day, Aiko asks slayumind.org for the latest version and says that one copy of Aiko ran today. The ID it sends changes every day.",
+      "Раз в сутки Aiko спрашивает у slayumind.org свежую версию и сообщает, что одна копия сегодня работала. Идентификатор, который уходит, меняется каждый день."
+    ]
+  ],
+  [
+    "WizardDoneTray",
+    [
+      "Aiko is down by the clock. Rest the mouse on it to see the card, or click it to keep the card open.",
+      "Aiko внизу, рядом с часами. Наведи мышь, чтобы увидеть карточку, или кликни, чтобы карточка осталась открытой."
+    ]
+  ],
+  [
+    "WizardDoneIsland",
+    [
+      "Aiko is at the top of your screen. Drag it anywhere and it sticks to the nearest edge.",
+      "Aiko вверху экрана. Перетащи куда угодно — она прилипнет к ближайшему краю."
+    ]
+  ],
+  [
+    "WizardDoneOverflow",
+    [
+      "Windows 11 hides new app icons under the arrow next to the clock. Open the arrow and drag Aiko onto the taskbar: under the arrow, the card can't open.",
+      "Windows 11 прячет значки новых приложений под стрелку рядом с часами. Открой её и перетащи Aiko на панель задач: под стрелкой карточка не открывается."
+    ]
+  ],
+  [
+    "WizardDoneFirstNumbers",
+    [
+      "The first numbers arrive after your next answer from Claude Code. Until then, the ring is dashed.",
+      "Первые цифры придут после следующего ответа Claude Code. До этого кольцо пунктирное."
+    ]
+  ],
+  [
+    "WizardDoneNoAccess",
+    [
+      "Aiko can't see your limits yet. You can turn on access in settings at any time.",
+      "Aiko пока не видит лимиты. Доступ можно включить в настройках в любой момент."
+    ]
+  ],
+  [
+    "SettingsWriteFailed",
+    [
+      "Aiko couldn't write the Claude Code settings file. Try again.",
+      "Aiko не смогла записать файл настроек Claude Code. Попробуй ещё раз."
+    ]
+  ],
+  [
+    "SettingsBridgeUnknown",
+    [
+      "Aiko can't find its bridge program.",
+      "Aiko не нашла свою программу-посредник."
+    ]
+  ],
+  [
+    "ChecklistTitle",
+    [
+      "Set up environments",
+      "Настройка сред"
+    ]
+  ],
+  [
+    "ChecklistCount",
+    [
+      "{0} of {1} done",
+      "готово {0} из {1}"
+    ]
+  ],
+  [
+    "GroupFirst",
+    [
+      "ENVIRONMENT 1",
+      "СРЕДА 1"
+    ]
+  ],
+  [
+    "GroupSecond",
+    [
+      "ENVIRONMENT 2",
+      "СРЕДА 2"
+    ]
+  ],
+  [
+    "GroupShared",
+    [
+      "SHARED",
+      "ОБЩЕЕ"
+    ]
+  ],
+  [
+    "ItemInstall",
+    [
+      "Install Claude Code",
+      "Установить Claude Code"
+    ]
+  ],
+  [
+    "ItemAccount",
+    [
+      "Account",
+      "Аккаунт"
+    ]
+  ],
+  [
+    "ItemSecond",
+    [
+      "Pick or create",
+      "Выбрать или создать"
+    ]
+  ],
+  [
+    "ItemCommands",
+    [
+      "Launch commands",
+      "Команды запуска"
+    ]
+  ],
+  [
+    "ItemFolders",
+    [
+      "Project folders",
+      "Папки проектов"
+    ]
+  ],
+  [
+    "StateInstalled",
+    [
+      "installed",
+      "установлен"
+    ]
+  ],
+  [
+    "StateWaiting",
+    [
+      "waiting",
+      "ждём"
+    ]
+  ],
+  [
+    "StateAfterInstall",
+    [
+      "after install",
+      "после установки"
+    ]
+  ],
+  [
+    "StateAfterSignIn",
+    [
+      "after sign-in",
+      "после входа"
+    ]
+  ],
+  [
+    "StateAfterSecond",
+    [
+      "after environment 2",
+      "после второй среды"
+    ]
+  ],
+  [
+    "StateOptional",
+    [
+      "optional",
+      "по желанию"
+    ]
+  ],
+  [
+    "StateLater",
+    [
+      "later",
+      "позже"
+    ]
+  ],
+  [
+    "StateConnected",
+    [
+      "connected",
+      "подключён"
+    ]
+  ],
+  [
+    "StateSignInNeeded",
+    [
+      "sign in needed",
+      "нужно войти"
+    ]
+  ],
+  [
+    "StateAdded",
+    [
+      "added",
+      "добавлена"
+    ]
+  ],
+  [
+    "StateNone",
+    [
+      "none",
+      "нет"
+    ]
+  ],
+  [
+    "StateBound",
+    [
+      "{0} bound",
+      "привязано: {0}"
+    ]
+  ],
+  [
+    "StateTray",
+    [
+      "tray",
+      "трей"
+    ]
+  ],
+  [
+    "StateIsland",
+    [
+      "island",
+      "остров"
+    ]
+  ],
+  [
+    "Copy",
+    [
+      "Copy",
+      "Скопировать"
+    ]
+  ],
+  [
+    "Copied",
+    [
+      "Copied",
+      "Скопировано"
+    ]
+  ],
+  [
+    "Later",
+    [
+      "Later",
+      "Позже"
+    ]
+  ],
+  [
+    "InstallFound",
+    [
+      "Claude Code is already on this computer. Nothing to do here.",
+      "Claude Code уже есть на этом компьютере. Здесь ничего делать не нужно."
+    ]
+  ],
+  [
+    "InstallLead",
+    [
+      "Claude Code isn't on this computer yet. Aiko works alongside it, so install it first.",
+      "Claude Code на этом компьютере пока нет. Aiko работает вместе с ним, так что сначала установи его."
+    ]
+  ],
+  [
+    "InstallHow",
+    [
+      "Open PowerShell, paste the command and press Enter. Aiko notices when it's done.",
+      "Открой PowerShell, вставь команду и нажми Enter. Aiko заметит, когда установка закончится."
+    ]
+  ],
+  [
+    "WaitInstall",
+    [
+      "Waiting for Claude Code…",
+      "Ждём Claude Code…"
+    ]
+  ],
+  [
+    "Env1Lead",
+    [
+      "The first environment lives in the .claude folder. The Claude Code panel in VS Code and Claude Desktop use it too.",
+      "Первая среда живёт в папке .claude. С ней же работают панель Claude Code в VS Code и Claude Desktop."
+    ]
+  ],
+  [
+    "Env1Empty",
+    [
+      "This folder has no account yet.",
+      "В этой папке ещё нет аккаунта."
+    ]
+  ],
+  [
+    "Env1Found",
+    [
+      "This folder already has an account.",
+      "В этой папке уже есть аккаунт."
+    ]
+  ],
+  [
+    "SignIn",
+    [
+      "Sign in",
+      "Войти"
+    ]
+  ],
+  [
+    "LoginHow",
+    [
+      "Aiko opened Claude Code in a new window. Sign in there through your browser. Aiko waits and moves on by itself.",
+      "Aiko открыла Claude Code в новом окне. Войди там через браузер — Aiko дождётся и пойдёт дальше сама."
+    ]
+  ],
+  [
+    "LoginNever",
+    [
+      "Aiko never sees a password or a token, only that the account is connected.",
+      "Aiko не видит ни пароля, ни токена. Только то, что аккаунт подключён."
+    ]
+  ],
+  [
+    "WaitLogin",
+    [
+      "Waiting for you to sign in…",
+      "Ждём, пока войдёшь в аккаунт…"
+    ]
+  ],
+  [
+    "NameInAiko",
+    [
+      "NAME IN AIKO",
+      "ИМЯ В AIKO"
+    ]
+  ],
+  [
+    "AccountLabel",
+    [
+      "Account",
+      "Аккаунт"
+    ]
+  ],
+  [
+    "PlanLabel",
+    [
+      "Plan",
+      "План"
+    ]
+  ],
+  [
+    "Env2LeadFound",
+    [
+      "Aiko found more Claude Code folders. Pick the one for your second environment, or create a new one.",
+      "Aiko нашла ещё папки Claude Code. Выбери ту, что станет второй средой, или создай новую."
+    ]
+  ],
+  [
+    "Env2LeadNew",
+    [
+      "The second environment is a separate folder with its own account. Name it and Aiko creates the folder.",
+      "Вторая среда — отдельная папка со своим аккаунтом. Назови её, и Aiko создаст папку."
+    ]
+  ],
+  [
+    "Env2Later",
+    [
+      "One environment is enough to see limits. You can add the second one later in settings.",
+      "Чтобы видеть лимиты, хватит и одной среды. Вторую можно добавить позже в настройках."
+    ]
+  ],
+  [
+    "CreateNew",
+    [
+      "Create a new one",
+      "Создать новую"
+    ]
+  ],
+  [
+    "CreateSignIn",
+    [
+      "Create and sign in",
+      "Создать и войти"
+    ]
+  ],
+  [
+    "NameExample",
+    [
+      "For example, Personal",
+      "Например, Personal"
+    ]
+  ],
+  [
+    "LastSession",
+    [
+      "last session {0}",
+      "последняя сессия {0}"
+    ]
+  ],
+  [
+    "FolderIs",
+    [
+      "Folder: {0}",
+      "Папка: {0}"
+    ]
+  ],
+  [
+    "AccessAdd",
+    [
+      "Add the line",
+      "Добавить строку"
+    ]
+  ],
+  [
+    "CmdLead",
+    [
+      "A command starts Claude Code in the right environment. It works in PowerShell, cmd and Git Bash.",
+      "Команда запускает Claude Code сразу под нужной средой. Работает в PowerShell, cmd и Git Bash."
+    ]
+  ],
+  [
+    "CmdFor",
+    [
+      "COMMAND · {0}",
+      "КОМАНДА · {0}"
+    ]
+  ],
+  [
+    "CmdFollows",
+    [
+      "Follows the environment name.",
+      "Меняется вместе с именем среды."
+    ]
+  ],
+  [
+    "CmdOwn",
+    [
+      "Your own command: renaming doesn't change it.",
+      "Своя команда: переименование её не трогает."
+    ]
+  ],
+  [
+    "CmdByName",
+    [
+      "Use the name",
+      "По имени среды"
+    ]
+  ],
+  [
+    "CmdEmpty",
+    [
+      "Enter a command.",
+      "Впиши команду."
+    ]
+  ],
+  [
+    "CmdTooLong",
+    [
+      "Up to 40 characters.",
+      "Не длиннее 40 знаков."
+    ]
+  ],
+  [
+    "CmdBadCharacters",
+    [
+      "Only a–z, 0–9, - and _.",
+      "Только a–z, 0–9, - и _."
+    ]
+  ],
+  [
+    "CmdReserved",
+    [
+      "claude is the name of Claude Code itself.",
+      "claude — имя самого Claude Code."
+    ]
+  ],
+  [
+    "CmdTaken",
+    [
+      "The other environment has this command.",
+      "Эта команда уже у другой среды."
+    ]
+  ],
+  [
+    "FnsLead",
+    [
+      "Your PowerShell profile has functions that switch accounts. They run before Aiko's commands and hide them, so they're ticked for removal.",
+      "В профиле PowerShell нашлись функции, которые переключают аккаунт. Они срабатывают раньше команд Aiko и перекрывают их, поэтому отмечены к удалению."
+    ]
+  ],
+  [
+    "FnRemove",
+    [
+      "Remove {0}",
+      "Убрать {0}"
+    ]
+  ],
+  [
+    "FnBackup",
+    [
+      "A copy of the profile stays next to it. Removing Aiko brings the functions back.",
+      "Копия профиля останется рядом, а удаление Aiko вернёт функции."
+    ]
+  ],
+  [
+    "PathNote",
+    [
+      "Aiko puts its folder at the start of PATH so every terminal finds the commands. Restart open terminals and your IDE.",
+      "Aiko поставит свою папку в начало PATH, чтобы команды нашлись в любом терминале. Открытые терминалы и IDE нужно перезапустить."
+    ]
+  ],
+  [
+    "PathAdd",
+    [
+      "Add to PATH",
+      "Добавить в PATH"
+    ]
+  ],
+  [
+    "NoCommands",
+    [
+      "No commands",
+      "Без команд"
+    ]
+  ],
+  [
+    "FoldersLead",
+    [
+      "Bind project folders to {0}. In them and in every folder inside, claude starts {0}.",
+      "Привяжи папки проектов к {0}. В них и во всех вложенных папках claude запустит {0}."
+    ]
+  ],
+  [
+    "AddProject",
+    [
+      "Add a project folder",
+      "Добавить папку проекта"
+    ]
+  ],
+  [
+    "PickProject",
+    [
+      "Choose a project folder",
+      "Выбери папку проекта"
+    ]
+  ],
+  [
+    "NoBinds",
+    [
+      "Nothing is bound yet. You can do it later in settings.",
+      "Пока ничего не привязано. Можно и потом, в настройках."
+    ]
+  ],
+  [
+    "ExplicitWins",
+    [
+      "A command beats a binding: {0} in a bound folder starts {1}, and Claude Code reminds you of the binding.",
+      "Команда сильнее привязки: {0} в привязанной папке запустит {1}, а Claude Code напомнит о привязке."
+    ]
+  ],
+  [
+    "Remove",
+    [
+      "Remove",
+      "Убрать"
+    ]
+  ],
+  [
+    "DoneCommands",
+    [
+      "Commands: {0}. Open a new terminal to use them.",
+      "Команды: {0}. Они заработают в новом окне терминала."
+    ]
+  ],
+  [
+    "SetUpEnvironments",
+    [
+      "Set up environments",
+      "Настроить среды"
+    ]
+  ],
+  [
+    "NavGeneral",
+    [
+      "General",
+      "Общее"
+    ]
+  ],
+  [
+    "NavBound",
+    [
+      "{0} bound",
+      "привязано: {0}"
+    ]
+  ],
+  [
+    "AddSecondEnvironment",
+    [
+      "Add a second environment",
+      "Добавить вторую среду"
+    ]
+  ],
+  [
+    "Saved",
+    [
+      "Saved",
+      "Сохранено"
+    ]
+  ],
+  [
+    "ByDefault",
+    [
+      "default",
+      "по умолчанию"
+    ]
+  ],
+  [
+    "SectionAccount",
+    [
+      "ACCOUNT",
+      "АККАУНТ"
+    ]
+  ],
+  [
+    "EmailLabel",
+    [
+      "Email",
+      "Почта"
+    ]
+  ],
+  [
+    "SignInAgain",
+    [
+      "Sign in again",
+      "Войти заново"
+    ]
+  ],
+  [
+    "ClaudeOpened",
+    [
+      "Claude Code opened in a new window.",
+      "Claude Code открылся в новом окне."
+    ]
+  ],
+  [
+    "SectionCommand",
+    [
+      "COMMAND",
+      "КОМАНДА"
+    ]
+  ],
+  [
+    "CmdShells",
+    [
+      "PowerShell · cmd · Git Bash",
+      "PowerShell · cmd · Git Bash"
+    ]
+  ],
+  [
+    "CmdKept",
+    [
+      "The command stays the same, since your terminals and scripts know it.",
+      "Команда осталась прежней: терминалы и скрипты её знают."
+    ]
+  ],
+  [
+    "RenameCommandTo",
+    [
+      "Rename to {0}",
+      "Переименовать в {0}"
+    ]
+  ],
+  [
+    "NameEmpty",
+    [
+      "Enter a name.",
+      "Впиши имя."
+    ]
+  ],
+  [
+    "NameTooLong",
+    [
+      "Up to 40 characters.",
+      "Не длиннее 40 знаков."
+    ]
+  ],
+  [
+    "NameTaken",
+    [
+      "The other environment has this name.",
+      "Это имя уже у другой среды."
+    ]
+  ],
+  [
+    "SectionBoundFolders",
+    [
+      "BOUND FOLDERS",
+      "ПРИВЯЗАННЫЕ ПАПКИ"
+    ]
+  ],
+  [
+    "NoneBound",
+    [
+      "No folders.",
+      "Ни одной папки."
+    ]
+  ],
+  [
+    "RestToo",
+    [
+      "And every other folder: this is the default environment.",
+      "И все остальные папки: это среда по умолчанию."
+    ]
+  ],
+  [
+    "EditInFolders",
+    [
+      "Change in project folders",
+      "Изменить в папках проектов"
+    ]
+  ],
+  [
+    "RemoveEnvironment",
+    [
+      "Remove environment",
+      "Удалить среду"
+    ]
+  ],
+  [
+    "RemoveEnvironmentLine",
+    [
+      "Aiko's line and plugins leave this folder's settings.json, and so do the command {0} and the bindings to {1}.",
+      "Строка и плагины Aiko уйдут из settings.json этой папки. Вместе с ними уйдут команда {0} и привязки к {1}."
+    ]
+  ],
+  [
+    "MoveToRecycleBin",
+    [
+      "And move the folder to the Recycle Bin",
+      "И переместить папку в корзину"
+    ]
+  ],
+  [
+    "RecycleWhy",
+    [
+      "It holds the Claude Code account, history and memory. You can restore it from the Recycle Bin.",
+      "В ней аккаунт, история и память Claude Code. Вернуть можно из корзины Windows."
+    ]
+  ],
+  [
+    "KeepClaude",
+    [
+      "VS Code and Claude Desktop use the .claude folder, so Aiko never removes it.",
+      "Папку .claude используют VS Code и Claude Desktop, поэтому Aiko её не удаляет."
+    ]
+  ],
+  [
+    "Cancel",
+    [
+      "Cancel",
+      "Отмена"
+    ]
+  ],
+  [
+    "RemoveConfirm",
+    [
+      "Remove",
+      "Удалить"
+    ]
+  ],
+  [
+    "EnvironmentRemoved",
+    [
+      "{0} removed.",
+      "{0} удалена."
+    ]
+  ],
+  [
+    "EnvironmentRemovedToBin",
+    [
+      "{0} removed. The folder is in the Recycle Bin.",
+      "{0} удалена, папка в корзине."
+    ]
+  ],
+  [
+    "FoldersTableLead",
+    [
+      "In a folder and in every folder inside, plain claude starts its environment. A command like {0} beats a binding, and Claude Code reminds you of it.",
+      "В папке и во всех вложенных обычный claude запускает её среду. Команда вроде {0} сильнее привязки, но Claude Code напомнит о ней."
+    ]
+  ],
+  [
+    "FolderColumn",
+    [
+      "FOLDER",
+      "ПАПКА"
+    ]
+  ],
+  [
+    "EnvironmentColumn",
+    [
+      "ENVIRONMENT",
+      "СРЕДА"
+    ]
+  ],
+  [
+    "AllOtherFolders",
+    [
+      "All other folders",
+      "Все остальные папки"
+    ]
+  ],
+  [
+    "AddFolder",
+    [
+      "Add a folder",
+      "Добавить папку"
+    ]
+  ],
+  [
+    "RemoveBinding",
+    [
+      "Remove binding",
+      "Убрать привязку"
+    ]
+  ],
+  [
+    "FoldersOneEnvironment",
+    [
+      "Bindings matter once you have two environments. Right now every folder runs in {0}.",
+      "Привязка нужна, когда сред две. Сейчас все папки работают в {0}."
+    ]
+  ],
+  [
+    "FoldersNeedCommands",
+    [
+      "Bindings work through the launch commands, and those aren't set up yet.",
+      "Привязки работают через команды запуска, а они пока не включены."
+    ]
+  ],
+  [
+    "SectionAccess",
+    [
+      "ACCESS TO THE LIMITS",
+      "ДОСТУП К ЛИМИТАМ"
+    ]
+  ],
+  [
+    "SectionDiagnostics",
+    [
+      "DIAGNOSTICS",
+      "ДИАГНОСТИКА"
+    ]
+  ],
+  [
+    "DiagnosticsWhat",
+    [
+      "Version and settings for a bug report. No tokens and no email addresses.",
+      "Версия и настройки для сообщения об ошибке. Токенов и почты там нет."
+    ]
+  ],
+  [
+    "DiagnosticsCopied",
+    [
+      "Diagnostics copied.",
+      "Диагностика скопирована."
+    ]
+  ],
+  [
+    "SetupDone",
+    [
+      "Environments are set up.",
+      "Среды настроены."
+    ]
+  ],
+  [
+    "Restart",
+    [
+      "Start over",
+      "Начать заново"
+    ]
+  ],
+  [
+    "RestartWhat",
+    [
+      "Removes the environments from Aiko and opens the checklist right here.",
+      "Убирает среды из Aiko и открывает чек-лист здесь же."
+    ]
+  ],
+  [
+    "RestartLine",
+    [
+      "Aiko removes the environments, its lines and plugins in settings.json, the commands {0}, the folder bindings and its folder in PATH, and turns the PowerShell profile functions back on. Accounts and history stay in the folders.",
+      "Из Aiko уйдут среды, строки и плагины Aiko в settings.json, команды {0}, привязки папок и папка Aiko в PATH, а функции в профиле PowerShell вернутся. Аккаунты и история в папках останутся."
+    ]
+  ],
+  [
+    "RestartBin",
+    [
+      "And move {0} to the Recycle Bin",
+      "И переместить {0} в корзину"
+    ]
+  ],
+  [
+    "RestartKeep",
+    [
+      ".claude stays either way.",
+      ".claude остаётся в любом случае."
+    ]
+  ],
+  [
+    "OpenClaudeCode",
+    [
+      "Open Claude Code",
+      "Открыть Claude Code"
+    ]
+  ],
+  [
+    "CardSignInNote",
+    [
+      "Sign in so Aiko can see the limits of this environment.",
+      "Войди, чтобы Aiko видела лимиты этой среды."
+    ]
+  ],
+  [
+    "StateWorkingNow",
+    [
+      "working now",
+      "сейчас работает"
+    ]
+  ],
+  [
+    "NavPersonality",
+    [
+      "Personality",
+      "Личность"
+    ]
+  ],
+  [
+    "NavPersonaOn",
+    [
+      "on: {0}",
+      "включена: {0}"
+    ]
+  ],
+  [
+    "NavPersonaOff",
+    [
+      "off",
+      "выключена"
+    ]
+  ],
+  [
+    "NavPrivacy",
+    [
+      "Privacy",
+      "Приватность"
+    ]
+  ],
+  [
+    "NavPrivacyStatsOn",
+    [
+      "statistics: on",
+      "статистика: включена"
+    ]
+  ],
+  [
+    "NavPrivacyStatsOff",
+    [
+      "statistics: off",
+      "статистика: выключена"
+    ]
+  ],
+  [
+    "SectionConnection",
+    [
+      "CONNECTION TO SLAYUMIND.ORG",
+      "СВЯЗЬ С SLAYUMIND.ORG"
+    ]
+  ],
+  [
+    "SendStatsToggle",
+    [
+      "Send anonymous statistics",
+      "Отправлять анонимную статистику"
+    ]
+  ],
+  [
+    "SendStatsWhat",
+    [
+      "The same request says that one copy ran today. The author of Aiko sees numbers and nothing else.",
+      "Тем же запросом Aiko сообщает, что одна копия сегодня работала. Автор Aiko видит только числа."
+    ]
+  ],
+  [
+    "SectionWhatIsSent",
+    [
+      "WHAT IS SENT",
+      "ЧТО ОТПРАВЛЯЕТСЯ"
+    ]
+  ],
+  [
+    "SentVersion",
+    [
+      "the version of Aiko: whether updates arrive",
+      "версия Aiko: доходят ли обновления"
+    ]
+  ],
+  [
+    "SentWindows",
+    [
+      "the version of Windows: what to test first",
+      "версия Windows: что проверять первым"
+    ]
+  ],
+  [
+    "SentDayId",
+    [
+      "an ID that changes every day",
+      "ID, который меняется каждый день"
+    ]
+  ],
+  [
+    "SentWeekFlag",
+    [
+      "the first run this week",
+      "первый запуск на этой неделе"
+    ]
+  ],
+  [
+    "SentMonthFlag",
+    [
+      "the first run this month",
+      "первый запуск в этом месяце"
+    ]
+  ],
+  [
+    "SentPersona",
+    [
+      "the personality is on in at least one environment",
+      "личность включена хотя бы в одной среде"
+    ]
+  ],
+  [
+    "NothingSentYet",
+    [
+      "None of this is sent right now.",
+      "Сейчас не отправляется ничего из этого."
+    ]
+  ],
+  [
+    "SectionNeverSent",
+    [
+      "WHAT NEVER LEAVES",
+      "ЧТО НЕ ОТПРАВЛЯЕТСЯ НИКОГДА"
+    ]
+  ],
+  [
+    "NeverSentWhat",
+    [
+      "Your name, email, project folders, limits, token and session texts. The site doesn't read or store the IP address.",
+      "Имя, почта, папки проектов, лимиты, токен и тексты сессий. IP-адрес сайт не читает и не хранит."
+    ]
+  ],
+  [
+    "StatsKeptFor",
+    [
+      "The rows are deleted after 90 days.",
+      "Строки удаляются через 90 дней."
+    ]
+  ],
+  [
+    "ResetInstallId",
+    [
+      "Reset ID",
+      "Сбросить ID"
+    ]
+  ],
+  [
+    "ResetInstallIdWhat",
+    [
+      "Aiko makes a new value, and the days before it can't be linked to it.",
+      "Aiko придумает новое значение, и прежние сутки с ним не свяжутся."
+    ]
+  ],
+  [
+    "ResetInstallIdDone",
+    [
+      "The ID is new.",
+      "ID теперь новый."
+    ]
+  ],
+  [
+    "OpenPrivacyDoc",
+    [
+      "Open PRIVACY.md",
+      "Открыть PRIVACY.md"
+    ]
+  ],
+  [
+    "PrivacyLinkFromGeneral",
+    [
+      "What Aiko sends and to whom — Privacy.",
+      "Что Aiko отправляет и кому — раздел «Приватность»."
+    ]
+  ],
+  [
+    "WizardStats",
+    [
+      "Anonymous statistics",
+      "Анонимная статистика"
+    ]
+  ],
+  [
+    "WizardStatsWhat",
+    [
+      "The author of Aiko doesn't know how many people use it. Once a day Aiko can say that one copy ran and send six values. Here they are, all of them.",
+      "Автор Aiko не знает, сколько людей ею пользуется. Раз в сутки Aiko может сообщить, что одна копия работала, и отправить шесть значений — вот они целиком."
+    ]
+  ],
+  [
+    "WizardStatsLater",
+    [
+      "You can change this later in settings, under Privacy.",
+      "Решение меняется в настройках, в разделе «Приватность»."
+    ]
+  ],
+  [
+    "StatsDecline",
+    [
+      "Don't send",
+      "Не отправлять"
+    ]
+  ],
+  [
+    "StatsAccept",
+    [
+      "Send",
+      "Отправлять"
+    ]
+  ],
+  [
+    "StatsStateOn",
+    [
+      "on",
+      "включена"
+    ]
+  ],
+  [
+    "StatsStateOff",
+    [
+      "off",
+      "выключена"
+    ]
+  ],
+  [
+    "StatsStateUnset",
+    [
+      "not chosen",
+      "не выбрано"
+    ]
+  ],
+  [
+    "SectionWhereAikoTalks",
+    [
+      "WHERE AIKO TALKS",
+      "ГДЕ AIKO ГОВОРИТ"
+    ]
+  ],
+  [
+    "PersonaNewSessions",
+    [
+      "Works in new sessions. Open sessions finish the way they started.",
+      "Действует в новых сессиях. Открытые сессии доработают как были."
+    ]
+  ],
+  [
+    "PersonaOwnStyle",
+    [
+      "While the personality is on, your style {0} doesn't work. Turn it off and it comes back.",
+      "Пока личность включена, твой стиль {0} не работает. Выключишь — вернётся."
+    ]
+  ],
+  [
+    "SectionFace",
+    [
+      "FACE",
+      "ЛИЦО"
+    ]
+  ],
+  [
+    "FaceChibi",
+    [
+      "Chibi",
+      "Чиби"
+    ]
+  ],
+  [
+    "FaceEmoji",
+    [
+      "Emoji",
+      "Смайлик"
+    ]
+  ],
+  [
+    "FaceWhere",
+    [
+      "This is how Aiko looks in the tray, on the island and in windows.",
+      "Так Aiko выглядит в трее, на острове и в окнах."
+    ]
+  ],
+  [
+    "SectionTemperament",
+    [
+      "TEMPERAMENT",
+      "ТЕМПЕРАМЕНТ"
+    ]
+  ],
+  [
+    "TemperamentQuiet",
+    [
+      "Quiet",
+      "Тихий"
+    ]
+  ],
+  [
+    "TemperamentNormal",
+    [
+      "Normal",
+      "Обычный"
+    ]
+  ],
+  [
+    "TemperamentBright",
+    [
+      "Bright",
+      "Яркий"
+    ]
+  ],
+  [
+    "TemperamentQuietAbout",
+    [
+      "Almost no character: one warm line at the end of an answer.",
+      "Почти без характера: одна тёплая фраза в конце ответа."
+    ]
+  ],
+  [
+    "TemperamentNormalAbout",
+    [
+      "A short interjection at the start, a quick verdict at the end. Japanese words now and then.",
+      "Короткое междометие в начале, оценка в конце. Японские слова — изредка."
+    ]
+  ],
+  [
+    "TemperamentBrightAbout",
+    [
+      "An interjection in every answer, game metaphors, Japanese words more often.",
+      "Междометие в каждом ответе, игровые метафоры, японские слова чаще."
+    ]
+  ],
+  [
+    "TemperamentMusouAbout",
+    [
+      "Everything at full. In code, commits, files and errors she still stays quiet.",
+      "Всё на максимум. В коде, коммитах, файлах и ошибках она всё равно молчит."
+    ]
+  ],
+  [
+    "SectionSampleReply",
+    [
+      "HOW SHE'LL ANSWER",
+      "ТАК ОНА ОТВЕТИТ"
+    ]
+  ],
+  [
+    "SampleQuestion",
+    [
+      "Why does the reset countdown show 0 minutes?",
+      "Почему отсчёт до сброса показывает 0 минут?"
+    ]
+  ],
+  [
+    "SampleBody",
+    [
+      "The limits test passed by luck: rounding went down, so a reset at 14:59:30 showed as “in 0 min”. I fixed ResetCountdown and added a test for the edge.",
+      "Тест на разбор лимитов проходил случайно: округление шло вниз, и сброс в 14:59:30 показывался как «через 0 мин». Поправила ResetCountdown и добавила тест на край."
+    ]
+  ],
+  [
+    "SampleBodyBright",
+    [
+      "The limits test passed by luck: rounding went down, so a reset at 14:59:30 hid behind “in 0 min”, like a mimic chest in Dark Souls. I fixed ResetCountdown and added a test for the edge.",
+      "Тест на разбор лимитов проходил случайно: округление шло вниз, и сброс в 14:59:30 прятался за «через 0 мин», как мимик-сундук в Dark Souls. Поправила ResetCountdown и добавила тест на край."
+    ]
+  ],
+  [
+    "SampleBodyMusouTail",
+    [
+      " Parried it, like in Elden Ring.",
+      " Парировала его, как в Elden Ring."
+    ]
+  ],
+  [
+    "SampleOpenNormal",
+    [
+      "えへへ, got it.",
+      "えへへ, поймала."
+    ]
+  ],
+  [
+    "SampleOpenBright",
+    [
+      "やった, got it!",
+      "やった, поймала!"
+    ]
+  ],
+  [
+    "SampleOpenMusou",
+    [
+      "やった〜! すごい, what a sneaky one!",
+      "やった〜! すごい, какой хитрый!"
+    ]
+  ],
+  [
+    "SampleCloseQuiet",
+    [
+      "A rare bug. It was nice to find.",
+      "Редкий баг, приятно было найти."
+    ]
+  ],
+  [
+    "SampleCloseNormal",
+    [
+      "In my own game I'd have hunted a bug like this for half a day.",
+      "Такой баг я бы и в своей игре полдня искала."
+    ]
+  ],
+  [
+    "SampleCloseBright",
+    [
+      "お疲れ様!",
+      "お疲れ様!"
+    ]
+  ],
+  [
+    "SampleCloseMusou",
+    [
+      "よし、行くぞ! On to the next one (^_^)",
+      "よし、行くぞ! Дальше (^_^)"
+    ]
+  ],
+  [
+    "SampleCommit",
+    [
+      "The commit for this fix has no character:",
+      "Коммит к этой правке — без характера:"
+    ]
+  ],
+  [
+    "SectionSkills",
+    [
+      "SKILLS · {0} OF {1}",
+      "НАВЫКИ · {0} ИЗ {1}"
+    ]
+  ],
+  [
+    "SkillsWork",
+    [
+      "Skills work in environments where the personality is on. Call them by name, like /aiko-copy.",
+      "Навыки работают в средах, где включена личность. Зови их по имени, например /aiko-copy."
+    ]
+  ],
+  [
+    "SkillsNeedPersona",
+    [
+      "Turn the personality on in at least one environment, and the skills start working.",
+      "Включи личность хотя бы в одной среде — тогда навыки заработают."
+    ]
+  ],
+  [
+    "SkillAikoCopy",
+    [
+      "UI text, READMEs and release notes without stiff wording or AI tells. RU and EN.",
+      "Интерфейс, README и релизы без канцелярита и штампов ИИ. RU и EN."
+    ]
+  ],
+  [
+    "SkillAikoReleaseGate",
+    [
+      "Before a release: what can't be undone, how to roll back, whether the docs match the code.",
+      "Перед релизом: что необратимо, как откатить, совпадают ли документы с кодом."
+    ]
+  ],
+  [
+    "SkillAikoDocsHygiene",
+    [
+      "One fact in one place, a decision log, contradictions found.",
+      "Факт живёт в одном месте, журнал решений, поиск противоречий."
+    ]
+  ],
+  [
+    "SkillAikoBlenderToUnity",
+    [
+      "A model from Blender to Unity: axes, normals, export and import.",
+      "Модель из Blender в Unity: оси, нормали, экспорт и импорт."
+    ]
+  ],
+  [
+    "SkillAikoTexturing",
+    [
+      "Texel density from the camera: when a model gets its own sheet, when to tile.",
+      "Плотность текселей от камеры: когда свой лист, когда тайлинг."
+    ]
+  ],
+  [
+    "SkillAikoGlbForWeb",
+    [
+      "A .glb for the web: size, axes, compression, a blank view where the model should be.",
+      "Файл .glb для веба: размер, оси, сжатие, пустое окно вместо модели."
+    ]
+  ],
+  [
+    "SkillAikoPalette",
+    [
+      "Fit a color to the palette in OKLCH with the smallest change.",
+      "Подогнать цвет под палитру в OKLCH с самой маленькой правкой."
+    ]
+  ],
+  [
+    "SkillAikoGamedesignResearch",
+    [
+      "30–40 games with the mechanic you need: an overview with screenshots, and interactive demos on request.",
+      "30–40 игр с нужной механикой: обзор со скриншотами и интерактивные стенды по запросу."
+    ]
+  ],
+  [
+    "ItemMeetAiko",
+    [
+      "Meet Aiko",
+      "Познакомься с Aiko"
+    ]
+  ],
+  [
+    "MeetAikoLead",
+    [
+      "Aiko can talk in your Claude Code sessions in her own voice, and she brings eight skills. In code and commits she stays quiet.",
+      "Aiko может говорить в твоих сессиях Claude Code своим голосом и приносит восемь навыков. В коде и коммитах она молчит."
+    ]
+  ],
+  [
+    "MeetAikoSettings",
+    [
+      "The temperament, the face and the skills are in settings, under Personality. It works in new sessions.",
+      "Темперамент, лицо и навыки — в настройках, в разделе «Личность». Действует в новых сессиях."
+    ]
+  ],
+  [
+    "MeetAikoTurnOn",
+    [
+      "Turn on in {0}",
+      "Включить в среде {0}"
+    ]
+  ],
+  [
+    "StateOn",
+    [
+      "on",
+      "включена"
+    ]
+  ],
+  [
+    "SkillOwnTwin",
+    [
+      "Your own skill with this name in {0} takes /{1}. This one is called /{1}:{1} there.",
+      "В {0} есть твой навык с тем же именем, и /{1} зовёт его. Этот там называется /{1}:{1}."
+    ]
+  ]
 ]
