@@ -24,9 +24,7 @@ sealed class UpdateClient : IDisposable
     public UpdateClient()
     {
         // Short: nobody should wait for a version check, and a silent failure is fine here.
-        _http = new HttpClient { Timeout = TimeSpan.FromSeconds(2.5) };
-        _http.DefaultRequestHeaders.UserAgent.ParseAdd($"Aiko/{CurrentVersion()}");
-        _http.DefaultRequestHeaders.Accept.ParseAdd("application/json");
+        _http = AikoHttp.Client(TimeSpan.FromSeconds(2.5));
     }
 
     public async Task<UpdateAnswer> AskAsync(StatsChoice stats, CancellationToken cancel)
