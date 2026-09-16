@@ -55,10 +55,6 @@ sealed class UpdateClient : IDisposable
         }
     }
 
-    /// The exact address that would go out today. The privacy page shows it, so that the promise
-    /// can be read off the screen instead of taken on trust.
-    public static string Preview(StatsChoice stats) => Build(stats).Address.ToString();
-
     /// The day is UTC on both sides. It used to be the computer's own day while the site wrote the
     /// row under its UTC day; east of Greenwich one copy could then send two different identifiers
     /// inside one server day, and the unique index counted it twice.
