@@ -30,7 +30,7 @@ public static class ClaudeInstall
     public static string NewConfigFolder(string environmentName, string userProfile, Func<string, bool> folderExists)
     {
         var slug = LaunchCommand.Slug(environmentName);
-        var stem = Path.Combine(userProfile, ClaudeConfigFolder.DefaultFolderName + "-" + (slug.Length > 0 ? slug : "env"));
+        var stem = Path.Combine(userProfile, ClaudeConfigFolder.NamedFolderName(slug.Length > 0 ? slug : "env"));
 
         var candidate = stem;
         for (var n = 2; folderExists(candidate); n++)

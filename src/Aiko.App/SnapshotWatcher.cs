@@ -12,10 +12,7 @@ sealed class SnapshotWatcher : IDisposable
 
     public SnapshotWatcher()
     {
-        Folder = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "Aiko",
-            "environments");
+        Folder = ThisComputer.Folders.SnapshotsFolder;
         Directory.CreateDirectory(Folder);
 
         foreach (var file in Directory.EnumerateFiles(Folder, "*.json"))

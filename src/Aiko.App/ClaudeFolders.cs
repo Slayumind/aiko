@@ -29,7 +29,7 @@ static class ClaudeFolders
 
         try
         {
-            foreach (var directory in Directory.EnumerateDirectories(home, ".claude*"))
+            foreach (var directory in Directory.EnumerateDirectories(home, ClaudeConfigFolder.SearchPattern))
             {
                 folders.Add(new ClaudeFolder(directory, Path.GetFileName(directory))
                 {

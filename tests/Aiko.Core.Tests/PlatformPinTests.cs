@@ -45,18 +45,8 @@ public class PlatformPinTests
     {
         Assert.Equal(
             "\"C:\\Users\\someone\\AppData\\Local\\Other\\Aiko.Bridge.exe\" plugin aiko-persona",
-            AikoMarketplace.PersonaCommand(@"C:\Users\someone\AppData\Local\Other\Aiko.Bridge.exe", @"C:\Users\someone\AppData\Local"));
-    }
-
-    [Fact]
-    public void Aiko_keeps_its_local_files_under_LOCALAPPDATA_Aiko()
-    {
-        const string local = @"C:\Users\someone\AppData\Local";
-
-        Assert.Equal(@"C:\Users\someone\AppData\Local\Aiko\marketplace", AikoMarketplace.Folder(local));
-        Assert.Equal(
-            @"C:\Users\someone\AppData\Local\Aiko\marketplace\.claude-plugin\marketplace.json",
-            AikoMarketplace.FilePath(local));
-        Assert.Equal(@"C:\Users\someone\AppData\Local\Aiko\activity", ActivityRecord.Folder(local));
+            AikoMarketplace.PersonaCommand(
+                @"C:\Users\someone\AppData\Local\Other\Aiko.Bridge.exe",
+                new AikoFolders(@"C:\Users\someone\AppData\Roaming", @"C:\Users\someone\AppData\Local")));
     }
 }

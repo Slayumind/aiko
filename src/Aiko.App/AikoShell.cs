@@ -156,7 +156,7 @@ sealed class AikoShell : IDisposable
     /// A session that never sent SessionEnd leaves its file behind (D-206). A day later it goes.
     private static void ClearStaleActivity()
     {
-        var folder = ActivityRecord.Folder(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
+        var folder = ThisComputer.Folders.ActivityFolder;
         if (!Directory.Exists(folder))
         {
             return;

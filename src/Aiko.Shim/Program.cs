@@ -54,7 +54,9 @@ static ShimPlan PlanFor(string self)
     try
     {
         var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-        var file = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Aiko", "environments.json");
+        var file = new AikoFolders(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)).EnvironmentsFile;
         var settings = File.Exists(file) ? EnvironmentSettings.FromJson(File.ReadAllText(file)) : EnvironmentSettings.Empty;
 
         return ShimLaunch.Decide(self, Directory.GetCurrentDirectory(), settings, home);

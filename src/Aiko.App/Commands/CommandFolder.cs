@@ -17,8 +17,7 @@ namespace Aiko.App;
 /// takes the folder out of PATH again.
 static class CommandFolder
 {
-    public static readonly string Folder = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Aiko", "bin");
+    public static readonly string Folder = ThisComputer.Folders.CommandsFolder;
 
     private const string EnvironmentKey = "Environment";
     private const string PathValue = "Path";

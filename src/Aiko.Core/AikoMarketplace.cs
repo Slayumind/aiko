@@ -10,27 +10,22 @@ public static class AikoMarketplace
 {
     public const string Name = "aiko";
 
-    /// Velopack keeps the installed app here across updates, so a command that points into this
-    /// folder never has to change. A changed command stops Claude Code from running it until the
-    /// person accepts it again.
-    public const string InstallFolder = "Slayumind.Aiko";
-
     public static string PluginId(string plugin) => $"{plugin}@{Name}";
 
     public static bool IsOurs(string pluginId) => pluginId.EndsWith("@" + Name, StringComparison.Ordinal);
 
-    public static string Folder(string localAppData) => Path.Combine(localAppData, "Aiko", "marketplace");
-
-    public static string FilePath(string localAppData) => Path.Combine(Folder(localAppData), ".claude-plugin", "marketplace.json");
+    /// Where Claude Code looks for the marketplace file inside a marketplace folder.
+    public static string FileIn(string marketplaceFolder) =>
+        Path.Combine(marketplaceFolder, ".claude-plugin", "marketplace.json");
 
     /// The command Claude Code runs to get the persona plugin. For the installed app it goes
     /// through %LOCALAPPDATA%, which cmd.exe expands: the command stays plain ASCII even when the
     /// user name has Cyrillic letters or spaces. Null when no command fits Claude Code's rules.
-    public static string? PersonaCommand(string bridgeExePath, string localAppData)
+    public static string? PersonaCommand(string bridgeExePath, AikoFolders folders)
     {
-        var installed = Path.Combine(localAppData, InstallFolder, "current") + Path.DirectorySeparatorChar;
+        var installed = folders.InstalledAppFolder + Path.DirectorySeparatorChar;
         var path = bridgeExePath.StartsWith(installed, StringComparison.OrdinalIgnoreCase)
-            ? "%LOCALAPPDATA%" + Path.DirectorySeparatorChar + bridgeExePath[(localAppData.TrimEnd('\\', '/').Length + 1)..]
+            ? "%LOCALAPPDATA%" + Path.DirectorySeparatorChar + bridgeExePath[(folders.LocalBase.TrimEnd('\\', '/').Length + 1)..]
             : bridgeExePath;
 
         var command = $"\"{path}\" {PersonaPluginOutput.Verb} {PersonaPlugin.Name}";

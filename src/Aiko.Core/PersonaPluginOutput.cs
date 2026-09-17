@@ -14,11 +14,11 @@ public static class PersonaPluginOutput
     public static readonly TimeSpan KeepOldFor = TimeSpan.FromHours(1);
 
     /// One folder per environment, named like its limit snapshot, so the two never disagree.
-    public static string EnvironmentFolder(string localAppData, string configDirectory) =>
-        Path.Combine(localAppData, "Aiko", "plugins", SnapshotName.For(configDirectory));
+    public static string EnvironmentFolder(AikoFolders folders, string configDirectory) =>
+        Path.Combine(folders.PersonaPluginsFolder, SnapshotName.For(configDirectory));
 
-    public static string VersionFolder(string localAppData, string configDirectory, string contentHash) =>
-        Path.Combine(EnvironmentFolder(localAppData, configDirectory), contentHash);
+    public static string VersionFolder(AikoFolders folders, string configDirectory, string contentHash) =>
+        Path.Combine(EnvironmentFolder(folders, configDirectory), contentHash);
 
     /// Whether the command asks for a plugin this bridge can build.
     public static bool IsRequest(IReadOnlyList<string> args) =>

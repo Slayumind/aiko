@@ -4,17 +4,18 @@ namespace Aiko.Core.Tests;
 
 public class PersonaPluginOutputTests
 {
-    private const string LocalAppData = @"C:\Users\someone\AppData\Local";
+    private static readonly AikoFolders Folders = new(
+        @"C:\Users\someone\AppData\Roaming", @"C:\Users\someone\AppData\Local");
 
     [Fact]
     public void Each_environment_gets_its_own_folder_named_like_its_snapshot()
     {
         Assert.Equal(
             @"C:\Users\someone\AppData\Local\Aiko\plugins\claude",
-            PersonaPluginOutput.EnvironmentFolder(LocalAppData, @"C:\Users\someone\.claude"));
+            PersonaPluginOutput.EnvironmentFolder(Folders, @"C:\Users\someone\.claude"));
         Assert.Equal(
             @"C:\Users\someone\AppData\Local\Aiko\plugins\claude-work\0123456789ab",
-            PersonaPluginOutput.VersionFolder(LocalAppData, @"C:\Users\someone\.claude-work\", "0123456789ab"));
+            PersonaPluginOutput.VersionFolder(Folders, @"C:\Users\someone\.claude-work\", "0123456789ab"));
     }
 
     [Theory]

@@ -10,7 +10,7 @@ namespace Aiko.App;
 /// folder after another: two claude processes writing the same settings.json would lose a change.
 static class PluginSync
 {
-    private static readonly string LocalAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+    private static readonly AikoFolders Folders = ThisComputer.Folders;
 
     private static readonly object Gate = new();
 
@@ -138,7 +138,7 @@ static class PluginSync
 
     private static IReadOnlyList<PluginStep> StepsFor(IReadOnlySet<string> desired, PluginState state, bool updatePersona, bool skillsChanged)
     {
-        var steps = PluginPlan.Steps(desired, state, AikoMarketplace.Folder(LocalAppData)).ToList();
+        var steps = PluginPlan.Steps(desired, state, Folders.MarketplaceFolder).ToList();
         var persona = AikoMarketplace.PluginId(PersonaPlugin.Name);
         if (updatePersona && desired.Contains(persona) && state.Installed.Contains(persona))
         {
@@ -167,7 +167,7 @@ static class PluginSync
         changed = false;
         skillsChanged = false;
         if (BridgePath.Current() is not { } bridge
-            || AikoMarketplace.PersonaCommand(bridge, LocalAppData) is not { } command)
+            || AikoMarketplace.PersonaCommand(bridge, Folders) is not { } command)
         {
             Log.Write("plugins: no command Claude Code would accept for the bridge path, nothing changed");
             return false;
@@ -175,9 +175,9 @@ static class PluginSync
 
         try
         {
-            skillsChanged = SkillShelf.CopyTo(AikoMarketplace.Folder(LocalAppData));
+            skillsChanged = SkillShelf.CopyTo(Folders.MarketplaceFolder);
 
-            var path = AikoMarketplace.FilePath(LocalAppData);
+            var path = Folders.MarketplaceFile;
             var json = AikoMarketplace.Json(command, SkillShelf.Shipped);
             var before = ReadIfThere(path);
             if (before != json)
