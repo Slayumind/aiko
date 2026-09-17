@@ -843,7 +843,7 @@ public static class Strings
     /// SKILLS · {0}
     public static string SectionSkills => Get("SectionSkills");
 
-    /// Skills work in environments where the personality is on. Call them by their full name, li...
+    /// Skills work in environments where the personality is on.
     public static string SkillsWork => Get("SkillsWork");
 
     /// Aiko's skills

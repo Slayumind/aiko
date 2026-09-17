@@ -854,7 +854,7 @@
     <value>SKILLS · {0}</value>
   </data>
   <data name="SkillsWork" xml:space="preserve">
-    <value>Skills work in environments where the personality is on. Call them by their full name, like /aiko:copy.</value>
+    <value>Skills work in environments where the personality is on.</value>
   </data>
   <data name="SkillsSwitch" xml:space="preserve">
     <value>Aiko's skills</value>
