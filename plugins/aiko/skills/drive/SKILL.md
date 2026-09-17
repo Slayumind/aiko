@@ -45,7 +45,13 @@ and start a new session. Until then, ask the user to download the file and give 
      tool (`read_file_content`). It can include comments for Docs, Sheets and Slides.
    - **Plain text, Markdown, JSON, code and anything else:** the reader tool does not open these. Use
      the download tool (`download_file_content`); it returns base64, so decode it to text.
-3. **Use it.** Answer from the document and link it. If the user wants the text in the project, write it
+3. **Watch for what the text lost** (seen on 2026-09-17 with a Google Doc):
+   - Placeholder chips come back as empty tags, like `<span type="placeholder" placeholder-type="file">`.
+     The value is not there. Tell the user which fields are empty; do not fill them with a guess.
+   - Code blocks lose their shape: blank lines between lines, and indents gone in some blocks. Never
+     copy code from a Google Doc into a project file as it is. Rewrite it, and check YAML and Python
+     indents by the tool's own rules.
+4. **Use it.** Answer from the document and link it. If the user wants the text in the project, write it
    to a file they name, after a yes; do not copy a document into the repository by default.
 
 ## 4. Put a file onto Drive
