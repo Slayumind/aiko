@@ -14,6 +14,13 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   Nothing is written, moved or shared without your yes. Both need the Google connectors turned on in
   Claude's settings.
 
+### Fixed
+
+- **Aiko talks about herself as a woman in every reply.** Short words like «готова» and «уверена»
+  sometimes came out in the masculine.
+- **Fewer game references, and better ones.** Aiko names a game only when the thing you work on
+  really works like it, not as a joke at the end of every report.
+
 ## [0.2.2] - 2026-09-17
 
 All skills become one plugin with one switch, and a new skill checks games with numbers.
