@@ -1920,8 +1920,8 @@
   [
     "SkillsWork",
     [
-      "Skills work in environments where the personality is on. Call them by name, like /aiko-copy.",
-      "Навыки работают в средах, где включена личность. Зови их по имени, например /aiko-copy."
+      "Skills work in environments where the personality is on. Call them by their full name, like /aiko:copy.",
+      "Навыки работают в средах, где включена личность. Зови их полным именем, например /aiko:copy."
     ]
   ],
   [
@@ -1950,6 +1950,13 @@
     [
       "One fact in one place, a decision log, contradictions found.",
       "Факт живёт в одном месте, журнал решений, поиск противоречий."
+    ]
+  ],
+  [
+    "SkillAikoPlaytest",
+    [
+      "Game feel in numbers: named test scenes, game state the tools can read, before and after.",
+      "Ощущение от игры в цифрах: тестовые сцены, состояние игры для проверок, замеры до и после."
     ]
   ],
   [
@@ -1997,8 +2004,8 @@
   [
     "MeetAikoLead",
     [
-      "Aiko can talk in your Claude Code sessions in her own voice, and she brings eight skills. In code and commits she stays quiet.",
-      "Aiko может говорить в твоих сессиях Claude Code своим голосом и приносит восемь навыков. В коде и коммитах она молчит."
+      "Aiko can talk in your Claude Code sessions in her own voice, and she brings nine skills. In code and commits she stays quiet.",
+      "Aiko может говорить в твоих сессиях Claude Code своим голосом и приносит девять навыков. В коде и коммитах она молчит."
     ]
   ],
   [
@@ -2020,13 +2027,6 @@
     [
       "on",
       "включена"
-    ]
-  ],
-  [
-    "SkillOwnTwin",
-    [
-      "Your own skill with this name in {0} takes /{1}. This one is called /{1}:{1} there.",
-      "В {0} есть твой навык с тем же именем, и /{1} зовёт его. Этот там называется /{1}:{1}."
     ]
   ]
 ]

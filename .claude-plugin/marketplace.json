@@ -8,44 +8,9 @@
   },
   "plugins": [
     {
-      "name": "aiko-copy",
-      "source": "./plugins/aiko-copy",
-      "description": "UI text, READMEs and release notes that read as written by a person. Russian and English."
-    },
-    {
-      "name": "aiko-docs-hygiene",
-      "source": "./plugins/aiko-docs-hygiene",
-      "description": "Keep project documents honest: a state file rebuilt from measured facts, an append-only decision log, and an audit for duplicates and contradictions."
-    },
-    {
-      "name": "aiko-release-gate",
-      "source": "./plugins/aiko-release-gate",
-      "description": "A release check before shipping: GO or NO-GO, irreversible changes named, rollout order and rollback plan. Nothing is pushed."
-    },
-    {
-      "name": "aiko-glb-for-web",
-      "source": "./plugins/aiko-glb-for-web",
-      "description": "A Blender model as a .glb that web players show correctly, with an offline checker for size and unsupported extensions."
-    },
-    {
-      "name": "aiko-blender-to-unity",
-      "source": "./plugins/aiko-blender-to-unity",
-      "description": "Meshes from Blender into Unity without mirrored or rotated surprises: pose, FBX settings, the measured axis rule, blended normals, cut shared parts."
-    },
-    {
-      "name": "aiko-texturing",
-      "source": "./plugins/aiko-texturing",
-      "description": "Texture sizes from the game camera: pixels per metre from the screen, sheet or tile, UVs from world position, guides for painters, density measured per face."
-    },
-    {
-      "name": "aiko-palette",
-      "source": "./plugins/aiko-palette",
-      "description": "Check colours against a palette and fix them with the smallest change, in OKLCH. Offline, no key."
-    },
-    {
-      "name": "aiko-gamedesign-research",
-      "source": "./plugins/aiko-gamedesign-research",
-      "description": "One game mechanic across 30-40 games: an illustrated review with sources, then interactive stands to play with the systems."
+      "name": "aiko",
+      "source": "./plugins/aiko",
+      "description": "Aiko's skills: human-sounding text, honest project docs, release checks, Blender to Unity and the web, textures, palettes, game design research and playtests."
     }
   ]
 }
