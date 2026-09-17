@@ -2002,6 +2002,20 @@
     ]
   ],
   [
+    "SkillAikoCalendar",
+    [
+      "Plan the day in Google Calendar, find free time, add events after your yes.",
+      "План дня по Google Calendar, свободное время, события — после твоего «да»."
+    ]
+  ],
+  [
+    "SkillAikoDrive",
+    [
+      "Documents from Google Drive into the work, and files from the project onto Drive.",
+      "Документы с Google Drive в работу и файлы проекта — на Drive."
+    ]
+  ],
+  [
     "ItemMeetAiko",
     [
       "Meet Aiko",
@@ -2011,8 +2025,8 @@
   [
     "MeetAikoLead",
     [
-      "Aiko can talk in your Claude Code sessions in her own voice, and she brings nine skills. In code and commits she stays quiet.",
-      "Aiko может говорить в твоих сессиях Claude Code своим голосом и приносит девять навыков. В коде и коммитах она молчит."
+      "Aiko can talk in your Claude Code sessions in her own voice, and she brings eleven skills. In code and commits she stays quiet.",
+      "Aiko может говорить в твоих сессиях Claude Code своим голосом и приносит одиннадцать навыков. В коде и коммитах она молчит."
     ]
   ],
   [

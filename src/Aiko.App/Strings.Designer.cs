@@ -879,10 +879,16 @@ public static class Strings
     /// 30–40 games with the mechanic you need: an overview with screenshots, and interactive dem...
     public static string SkillAikoGamedesignResearch => Get("SkillAikoGamedesignResearch");
 
+    /// Plan the day in Google Calendar, find free time, add events after your yes.
+    public static string SkillAikoCalendar => Get("SkillAikoCalendar");
+
+    /// Documents from Google Drive into the work, and files from the project onto Drive.
+    public static string SkillAikoDrive => Get("SkillAikoDrive");
+
     /// Meet Aiko
     public static string ItemMeetAiko => Get("ItemMeetAiko");
 
-    /// Aiko can talk in your Claude Code sessions in her own voice, and she brings nine skills. ...
+    /// Aiko can talk in your Claude Code sessions in her own voice, and she brings eleven skills...
     public static string MeetAikoLead => Get("MeetAikoLead");
 
     /// The temperament, the face and the skills are in settings, under Personality. It works in ...

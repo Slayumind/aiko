@@ -39,6 +39,10 @@ Nothing, unless you turn on one of these.
   makes that one request, because the count rides on it. It just doesn't read the version out of
   the answer.
 
+The `calendar` and `drive` skills don't change this. They are instructions for Claude: Claude reads
+and writes your Google Calendar and Drive through the connectors you set up in Claude, and the Aiko
+app itself sends nothing to Google.
+
 ## Counting
 
 The author of Aiko wants to know roughly how many people use it. That's the only thing Aiko

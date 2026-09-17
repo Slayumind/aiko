@@ -7,6 +7,13 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Added
+
+- **The calendar and drive skills.** Claude plans your day around Google Calendar, finds free time and
+  adds events, and brings documents from Google Drive into the work or puts project files onto Drive.
+  Nothing is written, moved or shared without your yes. Both need the Google connectors turned on in
+  Claude's settings.
+
 ## [0.2.2] - 2026-09-17
 
 All skills become one plugin with one switch, and a new skill checks games with numbers.
