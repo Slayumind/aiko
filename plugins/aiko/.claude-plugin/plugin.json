@@ -1,7 +1,7 @@
 {
   "name": "aiko",
   "version": "1.0.0",
-  "description": "Aiko's skills: human-sounding text, honest project docs, release checks, Blender to Unity and the web, textures, palettes, game design research and playtests.",
+  "description": "Aiko's skills: human-sounding text, honest project docs, release checks, Blender to Unity and the web, textures, palettes, game design research, playtests, Google Calendar and Google Drive.",
   "author": {
     "name": "Aleksandr Fomichenko"
   },
@@ -17,6 +17,8 @@
     "textures",
     "palette",
     "game-design",
-    "playtest"
+    "playtest",
+    "calendar",
+    "google-drive"
   ]
 }

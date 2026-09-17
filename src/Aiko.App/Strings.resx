@@ -889,11 +889,17 @@
   <data name="SkillAikoGamedesignResearch" xml:space="preserve">
     <value>30–40 games with the mechanic you need: an overview with screenshots, and interactive demos on request.</value>
   </data>
+  <data name="SkillAikoCalendar" xml:space="preserve">
+    <value>Plan the day in Google Calendar, find free time, add events after your yes.</value>
+  </data>
+  <data name="SkillAikoDrive" xml:space="preserve">
+    <value>Documents from Google Drive into the work, and files from the project onto Drive.</value>
+  </data>
   <data name="ItemMeetAiko" xml:space="preserve">
     <value>Meet Aiko</value>
   </data>
   <data name="MeetAikoLead" xml:space="preserve">
-    <value>Aiko can talk in your Claude Code sessions in her own voice, and she brings nine skills. In code and commits she stays quiet.</value>
+    <value>Aiko can talk in your Claude Code sessions in her own voice, and she brings eleven skills. In code and commits she stays quiet.</value>
   </data>
   <data name="MeetAikoSettings" xml:space="preserve">
     <value>The temperament, the face and the skills are in settings, under Personality. It works in new sessions.</value>

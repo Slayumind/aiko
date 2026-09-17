@@ -22,6 +22,8 @@ public partial class PersonalityPage : UserControl
         ["glb-for-web"] = Strings.SkillAikoGlbForWeb,
         ["palette"] = Strings.SkillAikoPalette,
         ["gamedesign-research"] = Strings.SkillAikoGamedesignResearch,
+        ["calendar"] = Strings.SkillAikoCalendar,
+        ["drive"] = Strings.SkillAikoDrive,
     };
 
     private readonly EnvironmentsEditor _editor;
