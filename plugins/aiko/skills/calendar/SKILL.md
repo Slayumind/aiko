@@ -37,13 +37,23 @@ settings and start a new session. Until then, work from a schedule the user past
   today" only when the call succeeded; otherwise "I could not read the calendar", with the error.
 - **Recurring events** come back as separate instances with a `recurringEventId`. Before changing one,
   ask: this time only, or the whole series.
+- **Busy-only calendars.** A calendar with `accessRole` `freeBusyReader` (often a work calendar shared
+  to a personal account) returns events with no title, attendees or place, marked `private`. Show them
+  as "busy" with the calendar's name. Do not guess what they are.
+- **Many calendars.** The user sees all their calendars at once, so read all of them for a day or a
+  free-time question. Every event says which calendar it is from. A calendar with no `events` in a
+  successful response has nothing in that range.
 
 ## 3. Plan the day
 
-1. List today's events on the primary calendar, from local midnight to midnight, ordered by start
-   time. Ask for other calendars only if the user mentions them (`list_calendars` resolves a name).
-2. Build the day: busy blocks in order, then the free windows between them, within the hours the user
-   works. Do not guess working hours; ask once if they matter.
+1. List the calendars (`list_calendars`), then today's events on **each** of them, from local midnight
+   to midnight, ordered by start time. Reading only the primary calendar can hide a whole working day
+   kept in another calendar. Skip a calendar only when the user says so (for example an imported
+   calendar of public events).
+2. Build the day: all events in one timeline, overlapping busy blocks shown together, then the free
+   windows between them, within the hours the user works. Do not guess working hours; ask once if they
+   matter. You do not know the current time unless the user or a tool says it: do not drop windows that
+   may have passed, say that they may have.
 3. Find what to work on. If the project has a plan or state file (`docs/PLAN.md`, `docs/STATE.md` or
    what `CLAUDE.md` names), take the next open items from it. Place them into free windows that are
    long enough; say which items did not fit.
@@ -52,18 +62,24 @@ settings and start a new session. Until then, work from a schedule the user past
 
 ## 4. Find free time
 
-The Google Calendar connector has `suggest_time`, not a free/busy call. It needs the attendee emails,
-including the user's own address. What it returns needs checking (seen on 2026-09-17):
+The Google Calendar connector has `suggest_time`, not a free/busy call. It takes attendee email
+addresses, and **it only sees the calendars of the addresses you pass.** With only the personal address
+it called a morning of work meetings free. Pass the ID of every calendar from `list_calendars` that
+looks like an email address (a work calendar shared to the account counts). Calendars with other IDs
+(`…@group.calendar.google.com`, `…@import.calendar.google.com`) cannot be passed: list their events for
+the range and remove those times from the slots yourself.
+
+What it returns needs checking too (seen on 2026-09-17):
 
 - It returns whole **free windows**, not slots of the length you asked for: a request for 60 minutes
   gave windows of 8 and 9 hours. Cut the windows into slots yourself.
-- It can return a window **after the end** of the range you gave. Drop anything outside the range.
-- With times in UTC (`Z`) the answer is in UTC too, and the preferred hours did not match local time.
-  Pass `timeZone` with the calendar's zone, and check each slot against the events of that day and the
-  hours the user asked for.
+- With the range in UTC (`Z`) it returned a window **after the end** of the range, and the preferred
+  hours did not match local time. Give the range with the local offset (`2026-09-17T09:00:00+02:00`) and
+  `timeZone` set to the calendar's zone; that way the windows stayed inside the range. Still drop
+  anything outside it.
 
-If `suggest_time` fails or looks wrong, list the events in the range and find the gaps yourself; say
-that you did.
+If `suggest_time` fails or looks wrong, list the events of every calendar in the range and find the
+gaps yourself; say that you did.
 
 Offer two or three slots, on different days when the user gave a range of days. Each slot: day, start
 and end, time zone.
