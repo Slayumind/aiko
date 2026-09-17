@@ -75,11 +75,6 @@ switch and its own question.
   asks again, once, and sends nothing until you answer.
 - Diagnostics now reports whether statistics are on, next to whether update checks are.
 
-### Changed
-
-- **Skills are grouped by what they are for:** project management and game development, in
-  settings and in this README.
-
 ### Fixed
 
 - **The day is UTC on both sides.** Aiko hashed its identifier with the computer's own date while
