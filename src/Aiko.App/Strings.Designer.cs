@@ -843,7 +843,7 @@ public static class Strings
     /// SKILLS · {0}
     public static string SectionSkills => Get("SectionSkills");
 
-    /// Skills work in environments where the personality is on. Call them by their full name, li...
+    /// Skills work in environments where the personality is on.
     public static string SkillsWork => Get("SkillsWork");
 
     /// Aiko's skills
@@ -851,6 +851,12 @@ public static class Strings
 
     /// Turn the personality on in at least one environment, and the skills start working.
     public static string SkillsNeedPersona => Get("SkillsNeedPersona");
+
+    /// PROJECT MANAGEMENT
+    public static string SkillDomainProjects => Get("SkillDomainProjects");
+
+    /// GAME DEVELOPMENT
+    public static string SkillDomainGames => Get("SkillDomainGames");
 
     /// UI text, READMEs and release notes without stiff wording or AI tells. RU and EN.
     public static string SkillAikoCopy => Get("SkillAikoCopy");
@@ -879,10 +885,16 @@ public static class Strings
     /// 30–40 games with the mechanic you need: an overview with screenshots, and interactive dem...
     public static string SkillAikoGamedesignResearch => Get("SkillAikoGamedesignResearch");
 
+    /// Plan the day in Google Calendar, find free time, add events after your yes.
+    public static string SkillAikoCalendar => Get("SkillAikoCalendar");
+
+    /// Documents from Google Drive into the work, and files from the project onto Drive.
+    public static string SkillAikoDrive => Get("SkillAikoDrive");
+
     /// Meet Aiko
     public static string ItemMeetAiko => Get("ItemMeetAiko");
 
-    /// Aiko can talk in your Claude Code sessions in her own voice, and she brings nine skills. ...
+    /// Aiko can talk in your Claude Code sessions in her own voice, and she brings eleven skills...
     public static string MeetAikoLead => Get("MeetAikoLead");
 
     /// The temperament, the face and the skills are in settings, under Personality. It works in ...

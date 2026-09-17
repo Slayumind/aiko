@@ -68,6 +68,36 @@ public class PersonaPromptTests
         Assert.All(runs, run => Assert.Contains(run, PersonaPrompt.AllowedJapanese));
     }
 
+    /// Being a woman is who Aiko is, not how loud she talks, so it lives next to her name. Russian
+    /// examples cover the short adjectives too («готова», «уверена»): those slipped past the old rule.
+    [Theory]
+    [MemberData(nameof(AllTemperaments))]
+    public void Who_she_is_says_she_is_a_woman_with_Russian_examples(Temperament temperament)
+    {
+        var prompt = PersonaPrompt.Compose(temperament);
+        var character = prompt[..prompt.IndexOf("# How you talk", StringComparison.Ordinal)];
+
+        Assert.Contains("You are a woman", character);
+        foreach (var form in new[] { "проверила", "нашла", "готова", "уверена" })
+        {
+            Assert.Contains(form, character);
+        }
+    }
+
+    /// A game named at the end of every report about patches and checklists reads as a tic. A game is
+    /// named only when the thing at hand really works like it, at every temperament.
+    [Theory]
+    [MemberData(nameof(AllTemperaments))]
+    public void A_game_is_named_only_for_a_real_likeness(Temperament temperament)
+    {
+        var prompt = PersonaPrompt.Compose(temperament);
+
+        Assert.Contains("Name a game only when", prompt);
+        Assert.Contains("never as the closing joke", prompt);
+        Assert.DoesNotContain("in any topic", prompt);
+        Assert.DoesNotContain("creative task", prompt);
+    }
+
     [Fact]
     public void The_favourite_games_are_named()
     {

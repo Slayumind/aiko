@@ -854,13 +854,19 @@
     <value>НАВЫКИ · {0}</value>
   </data>
   <data name="SkillsWork" xml:space="preserve">
-    <value>Навыки работают в средах, где включена личность. Зови их полным именем, например /aiko:copy.</value>
+    <value>Навыки работают в средах, где включена личность.</value>
   </data>
   <data name="SkillsSwitch" xml:space="preserve">
     <value>Навыки Aiko</value>
   </data>
   <data name="SkillsNeedPersona" xml:space="preserve">
     <value>Включи личность хотя бы в одной среде — тогда навыки заработают.</value>
+  </data>
+  <data name="SkillDomainProjects" xml:space="preserve">
+    <value>УПРАВЛЕНИЕ ПРОЕКТАМИ</value>
+  </data>
+  <data name="SkillDomainGames" xml:space="preserve">
+    <value>РАЗРАБОТКА ИГР</value>
   </data>
   <data name="SkillAikoCopy" xml:space="preserve">
     <value>Интерфейс, README и релизы без канцелярита и штампов ИИ. RU и EN.</value>
@@ -889,11 +895,17 @@
   <data name="SkillAikoGamedesignResearch" xml:space="preserve">
     <value>30–40 игр с нужной механикой: обзор со скриншотами и интерактивные стенды по запросу.</value>
   </data>
+  <data name="SkillAikoCalendar" xml:space="preserve">
+    <value>План дня по Google Calendar, свободное время, события — после твоего «да».</value>
+  </data>
+  <data name="SkillAikoDrive" xml:space="preserve">
+    <value>Документы с Google Drive в работу и файлы проекта — на Drive.</value>
+  </data>
   <data name="ItemMeetAiko" xml:space="preserve">
     <value>Познакомься с Aiko</value>
   </data>
   <data name="MeetAikoLead" xml:space="preserve">
-    <value>Aiko может говорить в твоих сессиях Claude Code своим голосом и приносит девять навыков. В коде и коммитах она молчит.</value>
+    <value>Aiko может говорить в твоих сессиях Claude Code своим голосом и приносит одиннадцать навыков. В коде и коммитах она молчит.</value>
   </data>
   <data name="MeetAikoSettings" xml:space="preserve">
     <value>Темперамент, лицо и навыки — в настройках, в разделе «Личность». Действует в новых сессиях.</value>

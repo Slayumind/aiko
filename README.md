@@ -47,20 +47,32 @@ sample answer for each level. She stays quiet where it matters: code, commits, f
 error explanations, security warnings, dangerous actions and bad news are written in a plain neutral
 voice. The switch works in new sessions; open sessions finish the way they started.
 
-With the personality come nine skills, with one switch for all of them. They live in one plugin
+With the personality come eleven skills, with one switch for all of them. They live in one plugin
 called `aiko`, so you call a skill by its full name:
+
+**Project management**
 
 | Skill | What it is for |
 |---|---|
 | `/aiko:copy` | UI text, READMEs and release notes that read as written by a person, in Russian and English |
 | `/aiko:docs-hygiene` | a state file built from measured facts, a decision log, duplicates and contradictions found |
 | `/aiko:release-gate` | a check before a release: GO or NO-GO, irreversible changes, rollout and rollback |
+| `/aiko:calendar` | a day planned around Google Calendar, free time found, events added after your yes |
+| `/aiko:drive` | documents from Google Drive read into the work, project files put onto Drive |
+
+**Game development**
+
+| Skill | What it is for |
+|---|---|
+| `/aiko:gamedesign-research` | one game mechanic across 30-40 games, with an illustrated review and playable stands |
 | `/aiko:playtest` | a game checked with numbers: the same test scene before and after a change |
-| `/aiko:glb-for-web` | a Blender model as a `.glb` that web players show correctly |
 | `/aiko:blender-to-unity` | meshes from Blender into Unity without mirrored or rotated surprises |
 | `/aiko:texturing` | ready files for textures: a size that fits the camera, and sheets to paint over |
+| `/aiko:glb-for-web` | a Blender model as a `.glb` that web players show correctly |
 | `/aiko:palette` | colours checked against a palette and fixed with the smallest change, in OKLCH |
-| `/aiko:gamedesign-research` | one game mechanic across 30-40 games, with an illustrated review and playable stands |
+
+The `calendar` and `drive` skills need the Google Calendar and Google Drive connectors, turned on in
+Claude's connector settings.
 
 Aiko installs all of this as Claude Code plugins from a marketplace on your own computer, so nothing is
 downloaded. Your own plugins, output style and settings stay as they are. If you set your own output

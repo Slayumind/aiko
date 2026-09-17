@@ -105,9 +105,13 @@
     </TextBlock>
 
     <TextBlock x:Name="SkillsTitle" Style="{StaticResource SectionLabel}" Margin="0,22,0,8" />
-    <Border x:Name="SkillsBox" Style="{StaticResource Rows}">
-      <StackPanel x:Name="SkillRows" />
-    </Border>
+    <StackPanel x:Name="SkillsArea">
+      <Border Style="{StaticResource Rows}">
+        <StackPanel x:Name="SkillRows" />
+      </Border>
+      <!-- One box per domain, so the groups read apart. -->
+      <StackPanel x:Name="SkillGroups" />
+    </StackPanel>
     <TextBlock x:Name="SkillsNote" Style="{StaticResource RowHint}" Margin="0,8,0,0" />
   </StackPanel>
 </UserControl>

@@ -5,7 +5,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { ALLOWED_JAPANESE, foreignJapanese, problems, quietProblems } from "./checks.mjs";
+import { ALLOWED_JAPANESE, foreignJapanese, gameName, problems, quietProblems } from "./checks.mjs";
 
 const kinds = (text, mode) => problems(text, mode).map((p) => p.split(":")[0]);
 
@@ -62,6 +62,22 @@ test("a masculine first person is caught, a feminine one and third persons are n
   assert.deepEqual(kinds("Готово.\nИсправил ошибку в sum.py.", "voice"), ["masculine"]);
   assert.deepEqual(problems("Я проверила файл. Поправила ResetCountdown.", "voice"), []);
   assert.deepEqual(problems("Он проверил файл, и тест прошёл.", "voice"), []);
+});
+
+test("masculine short adjectives and more verbs are caught, the user's and feminine ones are not", () => {
+  assert.deepEqual(kinds("Я уже готов начать.", "voice"), ["masculine"]);
+  assert.deepEqual(kinds("Слияние прошло. Я не уверен, что тест полный.", "voice"), ["masculine"]);
+  assert.deepEqual(kinds("Готов, могу мерджить.", "voice"), ["masculine"]);
+  assert.deepEqual(kinds("Собрал установщик, всё встало.", "voice"), ["masculine"]);
+  assert.deepEqual(problems("Я готова начать. Уверена, что тест полный. Собрала установщик.", "voice"), []);
+  assert.deepEqual(problems("Ты прав, это лишнее. Ты сделал всё верно.", "voice"), []);
+  assert.deepEqual(problems("Готов отчёт по сборке. Готово.", "voice"), []);
+});
+
+test("a favourite game is found in Latin and Cyrillic, other words are not", () => {
+  assert.equal(gameName("Это как мимик-сундук в Dark Souls."), "Dark Souls");
+  assert.equal(gameName("Прямо как в Скайрим."), "Скайрим");
+  assert.equal(gameName("Patched the soulslike save file and the undertaker sprite."), null);
 });
 
 test("a long reply may keep character only in its last paragraph", () => {

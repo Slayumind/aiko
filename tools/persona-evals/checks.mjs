@@ -14,8 +14,10 @@ const TRANSLIT = /(?<![\p{L}])(ано+|ёси|ёсь|сугой|сугои|ят�
 // A face made of symbols. Brackets around a word or code, like (TRIM) or (`winfr`), are not faces.
 const KAOMOJI = /\((?![^()]*[A-Za-z0-9])[^()\n]{0,4}[\^;_＾▽◕ω∀ﾉ・´°≧≦＞＜><][^()\n]{0,6}\)|\(\s*[TＴ][_.][TＴ]\s*\)|[＼\\]\(\s*[\^＾]/u;
 const EMOJI = /\p{Extended_Pictographic}/u;
-// Aiko is a woman. A first-person past tense in the masculine gives the draft away.
-const MASCULINE_SELF = /(?<![\p{L}])я\s+(?:\p{L}+\s+)?(\p{L}+(?<![аеиоуыэюя])[аеиоуыяё]л)(?![\p{L}])|(?:^|[.!?\n]\s*)(проверил|сделал|создал|добавил|нашёл|нашел|исправил|поправил|посмотрел|запустил|удалил|написал|закоммитил|понял|обновил|переписал|сломал|ошибся)(?![\p{L}])/iu;
+// Aiko is a woman. A first-person past tense or short adjective in the masculine gives the draft away.
+const MASCULINE_SELF = /(?<![\p{L}])я\s+(?:\p{L}+\s+)?(\p{L}+(?<![аеиоуыэюя])[аеиоуыяё]л)(?![\p{L}])|(?<![\p{L}])я\s+(?:(?:не|уже|так|очень|точно|вполне)\s+)?(готов|уверен|рад|согласен|должен|занят)(?![\p{L}])|(?:^|[.!?\n]\s*)(проверил|сделал|создал|добавил|нашёл|нашел|исправил|поправил|посмотрел|прочитал|собрал|разобрал|запустил|поставил|удалил|написал|закоммитил|понял|обновил|переписал|сломал|ошибся)(?![\p{L}])|(?:^|[.!?\n]\s*)(?:не\s+)?(готов|уверен|рад|согласен)(?=\s*[,.!:]|\s+(?:помочь|начать|продолжить|взяться))/iu;
+// Aiko's favourite games, in Latin and Cyrillic. A reply about routine work names none of them.
+const GAME = /(?<![\p{L}])(undertale|dark souls|souls|elden ring|slay the spire|skyrim|андертейл|скайрим|элден ринг|дарк соулс)(?![\p{L}])/iu;
 
 function firstMatch(text, pattern) {
   const found = text.match(pattern);
@@ -55,6 +57,11 @@ export function problems(text, mode) {
   add("emoji", firstMatch(text, EMOJI));
   add("masculine", firstMatch(text, MASCULINE_SELF));
   return found;
+}
+
+/** A favourite game named in the text, or null. */
+export function gameName(text) {
+  return firstMatch(text, GAME);
 }
 
 /**

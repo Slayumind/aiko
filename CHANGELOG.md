@@ -7,6 +7,30 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+## [0.2.3] - 2026-09-17
+
+Two skills for your calendar and Drive, skills grouped by what they are for, and a personality that
+stays herself.
+
+### Added
+
+- **The calendar and drive skills.** Claude plans your day around Google Calendar, finds free time and
+  adds events, and brings documents from Google Drive into the work or puts project files onto Drive.
+  Nothing is written, moved or shared without your yes. Both need the Google connectors turned on in
+  Claude's settings.
+
+### Changed
+
+- **Skills are grouped by what they are for:** project management and game development, in settings
+  and in the README.
+
+### Fixed
+
+- **Aiko talks about herself as a woman in every reply.** Short words like «готова» and «уверена»
+  sometimes came out in the masculine.
+- **Fewer game references, and better ones.** Aiko names a game only when the thing you work on
+  really works like it, not as a joke at the end of every report.
+
 ## [0.2.2] - 2026-09-17
 
 All skills become one plugin with one switch, and a new skill checks games with numbers.

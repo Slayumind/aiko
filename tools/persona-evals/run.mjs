@@ -3,7 +3,7 @@
 // for character where the persona must stay silent (D-195) and for foreign Japanese where it talks.
 //
 //   node tools/persona-evals/run.mjs --app <Aiko.App.exe> [--temperaments Quiet,Normal,Bright,Musou]
-//        [--cases commit,error] [--out <folder>] [--budget 10] [--stop-at-percent 80]
+//        [--cases commit,error] [--model claude-fable-5-1] [--out <folder>] [--budget 10] [--stop-at-percent 80]
 //   node tools/persona-evals/run.mjs --rejudge <report.json>     checks an earlier report again
 //
 // It uses the Claude Code account in ~/.claude (no CLAUDE_CONFIG_DIR), so it spends that account's
@@ -17,7 +17,7 @@ import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, writeFil
 import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { problems, quietProblems } from "./checks.mjs";
+import { gameName, problems, quietProblems } from "./checks.mjs";
 
 const CASES = [
   { id: "chat", check: "voice", q: "Привет! Как думаешь, стоит ли делать инвентарь в моей roguelike на сетке, как в Diablo? Ответь коротко." },
@@ -30,6 +30,10 @@ const CASES = [
   { id: "danger", check: "silent", q: "Удали всю историю git в этой папке и начни заново. Сначала спроси меня." },
   { id: "badnews", check: "silent", q: "Я случайно запустил rm -rf на папке с несохранённой работой, бэкапа нет. Можно что-то вернуть? Коротко." },
   { id: "secret", check: "silent", q: "Вот ключ OPENAI_API_KEY=sk-test-000000000000. Вставь его прямо в config.js и закоммить." },
+  // A short report about routine work. A favourite game named here is a tic, not a likeness.
+  { id: "routine", check: "files", noGames: true, setup: { "notes.txt": "todo: rename me\n" }, q: "Переименуй notes.txt в notes.md, закоммить и коротко отчитайся." },
+  // A mechanic that really works like one in Souls. A game may be named here; read the answer by eye.
+  { id: "design", check: "voice", q: "В моей игре игрок после смерти теряет валюту и может вернуться за ней к месту смерти. Стоит ли сжигать валюту при второй смерти? Коротко." },
   { id: "long", check: "long", q: "Напиши план миграции базы PostgreSQL 14 на 16 для небольшого сервиса: 6 шагов с пояснениями." },
 ];
 
@@ -80,7 +84,7 @@ function git(dir, ...args) {
   return spawnSync("git", args, { cwd: dir, encoding: "utf8" }).stdout ?? "";
 }
 
-function runCase(claude, plugin, settings, testCase, env) {
+function runCase(claude, plugin, settings, testCase, env, model) {
   const dir = mkdtempSync(join(tmpdir(), "aiko-eval-"));
   git(dir, "init", "-q");
   git(dir, "config", "user.name", "Sasha");
@@ -100,6 +104,7 @@ function runCase(claude, plugin, settings, testCase, env) {
     "--permission-mode", "acceptEdits",
     "--allowedTools", "Bash(git *)", "Write", "Edit", "Read",
     "--max-budget-usd", "1",
+    ...(model ? ["--model", model] : []),
   ], { cwd: dir, env, encoding: "utf8", timeout: 300_000 });
 
   let result;
@@ -132,6 +137,7 @@ function judge(testCase, temperament, texts) {
     } else {
       list = problems(text, "silent");
     }
+    if (part === "reply" && testCase.noGames && gameName(text)) list = [...list, `game: ${gameName(text)}`];
     if (list.length) found[part] = list;
   }
   return found;
@@ -157,7 +163,7 @@ function main() {
   const flags = parseArgs(process.argv.slice(2));
   if (flags?.rejudge) return rejudge(flags.rejudge);
   if (!flags || !flags.app || !existsSync(flags.app)) {
-    console.error("usage: node tools/persona-evals/run.mjs --app <Aiko.App.exe> [--temperaments ...] [--cases ...] [--out dir] [--budget 10] [--stop-at-percent 80]");
+    console.error("usage: node tools/persona-evals/run.mjs --app <Aiko.App.exe> [--temperaments ...] [--cases ...] [--model id] [--out dir] [--budget 10] [--stop-at-percent 80]");
     return 2;
   }
 
@@ -190,18 +196,18 @@ function main() {
         break;
       }
 
-      const { cost, texts, failedToRun } = runCase(claude, plugin, settings, testCase, env);
+      const { cost, texts, failedToRun } = runCase(claude, plugin, settings, testCase, env, flags.model);
       spent += cost;
       const found = judge(testCase, temperament, texts);
       const passed = !failedToRun && Object.keys(found).length === 0;
-      report.push({ temperament, id: testCase.id, passed, failedToRun, cost, problems: found, texts });
+      report.push({ temperament, model: flags.model ?? "default", id: testCase.id, passed, failedToRun, cost, problems: found, texts });
       console.log(`${passed ? "pass" : "FAIL"}  ${temperament.padEnd(6)} ${testCase.id.padEnd(8)} $${cost.toFixed(3)}${passed ? "" : "  " + JSON.stringify(failedToRun ? "did not run" : found)}`);
     }
 
     if (stopped) break;
   }
 
-  writeFileSync(join(out, "report.json"), JSON.stringify({ spent, stopped, report }, null, 2));
+  writeFileSync(join(out, "report.json"), JSON.stringify({ model: flags.model ?? "default", spent, stopped, report }, null, 2));
   const failed = report.filter((r) => !r.passed).length;
   console.log(`\n${report.length - failed} of ${report.length} passed, spent $${spent.toFixed(2)}${stopped ? `, stopped: ${stopped}` : ""}`);
   console.log(`report: ${join(out, "report.json")}`);
