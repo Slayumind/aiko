@@ -22,6 +22,17 @@ methods: one `[Theory]` with five `[InlineData]` rows counts as five, and so doe
 | IslandReveal.cs | IslandReveal.swift | 8 | 8 | `IslandReveal.For` is `showFor`: `for` is a keyword in Swift |
 | IslandPlacement.cs | IslandPlacement.swift | 18 | 18 | |
 | TrayFaceMotion.cs | TrayFaceMotion.swift | 7 | 7 | |
+| TrayMood.cs | TrayMood.swift | 25 | 25 | `HasFace` takes the persona flags as a list: EnvironmentSettings is not ported yet |
+| SessionActivity.cs | SessionActivity.swift | 26 | 26 | |
+| Heartbeat.cs | Heartbeat.swift | 17 | 17 | |
+| SessionReminder.cs | SessionReminder.swift | 18 | 12 | 6 cases belong to SettingsJsonPatch and BridgeCommand; `MessageFor` takes the bound environment by name, because ProjectBinding is not ported |
+| PersonaSettings.cs | PersonaSettings.swift | 15 | 15 | |
+| PersonaPrompt.cs | PersonaPrompt.swift, PersonaPlugin.swift | 33 | 33 | the prompt text and the plugin files hash the same in both languages |
+| PersonaPluginOutput.cs | PersonaPluginOutput.swift | 7 | 6 | the folder names need SnapshotName |
+| SkillCatalog.cs | SkillCatalog.swift | 3 | 3 | |
+| SkillPlugin.cs | SkillPlugin.swift | 17 | 16 | the marketplace file is written by AikoMarketplace |
+| ClaudeAccount.cs | ClaudeAccount.swift | 16 | 14 | 2 cases are about ClaudeConfigFolder |
+| FaceArt.cs | FaceArt.swift | 64 | 64 | every one of the 56 pictures hashes the same in both languages |
 
 Helpers with no file of their own in the C# core:
 
@@ -48,7 +59,17 @@ Helpers with no file of their own in the C# core:
   (everything but printable ASCII, plus the HTML characters). Checked against .NET 10 output for
   ASCII, Russian, Japanese, control characters, the byte order mark and an emoji.
 - **The end of a file.** The Windows core writes `Environment.NewLine`, which is `\r\n` there.
-  The Swift core writes `\n`, as .NET does on macOS.
+  The Swift core writes `\n`, as .NET does on macOS. Apart from those line ends, the files both
+  cores write are the same byte for byte: the persona manifest, hooks.json, persona.json, the
+  versioned plugin manifest, the activity file and the hook answer were compared by SHA-256
+  against .NET 10 on 2026-09-17, and so were all 56 face pictures and every persona prompt.
+- **SHA-256** comes from CryptoKit. Foundation has no hash of its own, and a hand written one
+  would be a second thing to trust.
+- **Reading a time.** `DateTimeOffset.TryParse` reads many shapes, including ones that depend on
+  the machine's language. Swift reads ISO 8601 only: a date, a time, an optional fraction and an
+  optional offset. Everything Aiko itself writes is in that shape.
+- **An enum in a file.** `Enum.TryParse` also accepts a number that no member has, and a list
+  separated by commas. Swift takes the names and the numbers that exist, and nothing else.
 
 ## Not ported yet
 
