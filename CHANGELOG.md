@@ -14,6 +14,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   Nothing is written, moved or shared without your yes. Both need the Google connectors turned on in
   Claude's settings.
 
+### Changed
+
+- **Skills are grouped by what they are for:** project management and game development, in settings
+  and in the README.
+
 ## [0.2.2] - 2026-09-17
 
 All skills become one plugin with one switch, and a new skill checks games with numbers.
@@ -69,6 +74,11 @@ switch and its own question.
 - Consent given in 0.2.0 is not carried over. It covered three values and this sends six, so Aiko
   asks again, once, and sends nothing until you answer.
 - Diagnostics now reports whether statistics are on, next to whether update checks are.
+
+### Changed
+
+- **Skills are grouped by what they are for:** project management and game development, in
+  settings and in this README.
 
 ### Fixed
 

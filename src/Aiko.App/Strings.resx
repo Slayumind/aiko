@@ -862,6 +862,12 @@
   <data name="SkillsNeedPersona" xml:space="preserve">
     <value>Turn the personality on in at least one environment, and the skills start working.</value>
   </data>
+  <data name="SkillDomainProjects" xml:space="preserve">
+    <value>PROJECT MANAGEMENT</value>
+  </data>
+  <data name="SkillDomainGames" xml:space="preserve">
+    <value>GAME DEVELOPMENT</value>
+  </data>
   <data name="SkillAikoCopy" xml:space="preserve">
     <value>UI text, READMEs and release notes without stiff wording or AI tells. RU and EN.</value>
   </data>

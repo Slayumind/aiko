@@ -852,6 +852,12 @@ public static class Strings
     /// Turn the personality on in at least one environment, and the skills start working.
     public static string SkillsNeedPersona => Get("SkillsNeedPersona");
 
+    /// PROJECT MANAGEMENT
+    public static string SkillDomainProjects => Get("SkillDomainProjects");
+
+    /// GAME DEVELOPMENT
+    public static string SkillDomainGames => Get("SkillDomainGames");
+
     /// UI text, READMEs and release notes without stiff wording or AI tells. RU and EN.
     public static string SkillAikoCopy => Get("SkillAikoCopy");
 

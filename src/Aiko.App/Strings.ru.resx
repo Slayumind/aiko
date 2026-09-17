@@ -862,6 +862,12 @@
   <data name="SkillsNeedPersona" xml:space="preserve">
     <value>Включи личность хотя бы в одной среде — тогда навыки заработают.</value>
   </data>
+  <data name="SkillDomainProjects" xml:space="preserve">
+    <value>УПРАВЛЕНИЕ ПРОЕКТАМИ</value>
+  </data>
+  <data name="SkillDomainGames" xml:space="preserve">
+    <value>РАЗРАБОТКА ИГР</value>
+  </data>
   <data name="SkillAikoCopy" xml:space="preserve">
     <value>Интерфейс, README и релизы без канцелярита и штампов ИИ. RU и EN.</value>
   </data>
