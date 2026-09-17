@@ -25,7 +25,7 @@ methods: one `[Theory]` with five `[InlineData]` rows counts as five, and so doe
 | TrayMood.cs | TrayMood.swift | 25 | 25 | `HasFace` takes the persona flags as a list: EnvironmentSettings is not ported yet |
 | SessionActivity.cs | SessionActivity.swift | 26 | 26 | |
 | Heartbeat.cs | Heartbeat.swift | 17 | 17 | |
-| SessionReminder.cs | SessionReminder.swift | 18 | 12 | 6 cases belong to SettingsJsonPatch and BridgeCommand; `MessageFor` takes the bound environment by name, because ProjectBinding is not ported |
+| SessionReminder.cs | SessionReminder.swift | 18 | 12 | its other 6 cases are about SettingsJsonPatch and BridgeCommand and sit in SettingsJsonPatchTests; `MessageFor` takes the bound environment by name, because ProjectBinding is not ported |
 | PersonaSettings.cs | PersonaSettings.swift | 15 | 15 | |
 | PersonaPrompt.cs | PersonaPrompt.swift, PersonaPlugin.swift | 33 | 33 | the prompt text and the plugin files hash the same in both languages |
 | PersonaPluginOutput.cs | PersonaPluginOutput.swift | 7 | 6 | the folder names need SnapshotName |
@@ -33,6 +33,10 @@ methods: one `[Theory]` with five `[InlineData]` rows counts as five, and so doe
 | SkillPlugin.cs | SkillPlugin.swift | 17 | 16 | the marketplace file is written by AikoMarketplace |
 | ClaudeAccount.cs | ClaudeAccount.swift | 16 | 14 | 2 cases are about ClaudeConfigFolder |
 | FaceArt.cs | FaceArt.swift | 64 | 64 | every one of the 56 pictures hashes the same in both languages |
+| SettingsJsonPatch.cs | SettingsJsonPatch.swift | 39 | 39 | 6 cases come from SessionReminderTests and 13 from PluginRemovalTests; a method answers "nothing to change" with nil instead of a bool and an out parameter; the test for "is this our own bridge" comes in as a function, because BridgeCommand is not ported |
+| ClaudeSettingsEditor.cs | ClaudeSettingsEditor.swift | 22 | 22 | ClaudeSettingsEditorTests and the file half of PluginRemovalTests; `FileAccess` is IFileAccess with Swift errors in place of exceptions |
+| PluginPlan.cs | PluginPlan.swift | 35 | 27 | 8 cases are about AikoMarketplace (the command, the marketplace file); `Desired` takes the persona flag on its own |
+| PluginReconciler.cs | PluginReconciler.swift | 4 | 4 | the clock comes in as a function instead of TimeProvider |
 
 Helpers with no file of their own in the C# core:
 
@@ -40,6 +44,8 @@ Helpers with no file of their own in the C# core:
 |---|---|
 | JsonNode.swift | System.Text.Json keeps the order of keys and the text of numbers when it writes a file back; `JSONSerialization` keeps neither, and Aiko rewrites files that belong to Claude Code |
 | CivilTime.swift | `DateOnly`, ISO weeks and the round-trip ("O") time format |
+| `AikoMarketplaceIds` in SettingsJsonPatch.swift | the name of the marketplace and the plugin ids under it: the only part of AikoMarketplace the ported files need |
+| `FileAccess` in ClaudeSettingsEditor.swift | IFileAccess, which is on the list of files to leave alone; the editor cannot be ported without the seam |
 
 ## Differences we could not avoid
 
@@ -78,3 +84,14 @@ CommandLinks, RealClaude, ClaudeShell, ClaudeInstall, UserPathList, AikoMarketpl
 PowerShellProfile, LaunchCommand, SnapshotName, SnapshotFile, EnvironmentSnapshots,
 EnvironmentSettings, EnvironmentEdits, EnvironmentScan, ClaudeConfigFolder, ProjectBinding,
 ShimLaunch, AppSettings, IFileAccess, CredentialFile, WizardChecklist.
+
+What the ported files still want from them:
+
+- **BridgeCommand** — how to tell our own status line and hook from somebody else's. It comes into
+  `SettingsJsonPatch` as a function for now, and the tests pass the Windows rule.
+- **EnvironmentSettings and AikoEnvironment** — the persona flag of an environment, used by
+  `TrayMood.hasFace` and `PluginPlan.desired`, which take it as a plain value for now.
+- **ProjectBinding** — which environment a folder belongs to, for `SessionReminder.messageFor`.
+- **SnapshotName** — the folder name of an environment, for `PersonaPluginOutput`.
+- **AikoMarketplace** — the persona command and the marketplace file.
+- **ClaudeConfigFolder** — where the account file of a folder is.
