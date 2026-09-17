@@ -108,11 +108,15 @@ Without direct mode, Aiko never touches the token.
 - `%USERPROFILE%\.claude*\settings.json`: one line added by Aiko, with a copy of the original next
   to it, and Aiko's plugins and marketplace where the personality is on. Claude Code keeps its own
   copies of those plugins in its `plugins` folder.
+- Your user `PATH`: Aiko's command folder at the start, if you agreed in the setup checklist.
+- Your PowerShell profile: the account-switching functions you ticked are turned off, with a copy of
+  the profile next to it.
 - One value under `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`, if you asked Aiko to start
   with Windows.
 
-Removing Aiko puts the status line back, removes its plugins from Claude Code, removes that value
-and deletes both of Aiko's folders. You
+Removing Aiko puts the status line back, removes its plugins from Claude Code, takes its folder out
+of `PATH`, turns the profile functions back on, removes that value and deletes both of Aiko's
+folders. You
 can also delete the folders by hand at any time, and Aiko starts again with its defaults.
 
 ## The log
