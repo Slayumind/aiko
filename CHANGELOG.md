@@ -28,11 +28,6 @@ All skills become one plugin with one switch, and a new skill checks games with 
   If you had switched off every skill, they stay off; if any skill was on, they are all on now.
 - **Simpler texts for the texturing and playtest skills** in settings.
 
-### Fixed
-
-- **The schema number in `settings.json`.** A file first written by 0.1 kept saying schema 1 after a
-  newer Aiko added its settings to it. Now every save writes the schema of the version that saved it.
-
 ### Removed
 
 - **A switch for each skill.** One switch for all of them took its place.
