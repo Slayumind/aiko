@@ -15,3 +15,8 @@
 *.ico binary
 *.ttf binary
 *.otf binary
+
+# The update manifest test vector is checked byte for byte: a changed line ending breaks the signature.
+spec/cases/update-manifest/SHA256SUMS.txt -text
+*.sig binary
+*.bin binary
