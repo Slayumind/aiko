@@ -79,7 +79,12 @@ public sealed record PersonaSettings
             var settings = JsonSerializer.Deserialize<PersonaSettings>(json, Options) ?? Default;
             return settings with
             {
-                DisabledSkills = (settings.DisabledSkills ?? []).Where(s => !string.IsNullOrWhiteSpace(s)).Distinct().ToList(),
+                DisabledSkills = (settings.DisabledSkills ?? [])
+                    .Where(s => !string.IsNullOrWhiteSpace(s))
+                    .Select(WithoutOldPrefix)
+                    .Distinct()
+                    .Order(StringComparer.Ordinal)
+                    .ToList(),
             };
         }
         catch (JsonException)
@@ -89,6 +94,14 @@ public sealed record PersonaSettings
     }
 
     public string ToJson() => JsonSerializer.Serialize(this, Options) + Environment.NewLine;
+
+    /// Up to 0.2.1 every skill was a plugin of its own named aiko-copy, aiko-palette and so on
+    /// (D-202). A file written then still says so; without this a skill switched off then would
+    /// quietly come back on.
+    private static string WithoutOldPrefix(string skill) =>
+        skill.StartsWith(OldPrefix, StringComparison.Ordinal) ? skill[OldPrefix.Length..] : skill;
+
+    private const string OldPrefix = "aiko-";
 
     private static readonly JsonSerializerOptions Options = new()
     {

@@ -854,7 +854,7 @@
     <value>НАВЫКИ · {0} ИЗ {1}</value>
   </data>
   <data name="SkillsWork" xml:space="preserve">
-    <value>Навыки работают в средах, где включена личность. Зови их по имени, например /aiko-copy.</value>
+    <value>Навыки работают в средах, где включена личность. Зови их полным именем, например /aiko:copy.</value>
   </data>
   <data name="SkillsNeedPersona" xml:space="preserve">
     <value>Включи личность хотя бы в одной среде — тогда навыки заработают.</value>
@@ -867,6 +867,9 @@
   </data>
   <data name="SkillAikoDocsHygiene" xml:space="preserve">
     <value>Факт живёт в одном месте, журнал решений, поиск противоречий.</value>
+  </data>
+  <data name="SkillAikoPlaytest" xml:space="preserve">
+    <value>Ощущение от игры в цифрах: тестовые сцены, состояние игры для проверок, замеры до и после.</value>
   </data>
   <data name="SkillAikoBlenderToUnity" xml:space="preserve">
     <value>Модель из Blender в Unity: оси, нормали, экспорт и импорт.</value>
@@ -887,7 +890,7 @@
     <value>Познакомься с Aiko</value>
   </data>
   <data name="MeetAikoLead" xml:space="preserve">
-    <value>Aiko может говорить в твоих сессиях Claude Code своим голосом и приносит восемь навыков. В коде и коммитах она молчит.</value>
+    <value>Aiko может говорить в твоих сессиях Claude Code своим голосом и приносит девять навыков. В коде и коммитах она молчит.</value>
   </data>
   <data name="MeetAikoSettings" xml:space="preserve">
     <value>Темперамент, лицо и навыки — в настройках, в разделе «Личность». Действует в новых сессиях.</value>
@@ -897,8 +900,5 @@
   </data>
   <data name="StateOn" xml:space="preserve">
     <value>включена</value>
-  </data>
-  <data name="SkillOwnTwin" xml:space="preserve">
-    <value>В {0} есть твой навык с тем же именем, и /{1} зовёт его. Этот там называется /{1}:{1}.</value>
   </data>
 </root>

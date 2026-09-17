@@ -843,7 +843,7 @@ public static class Strings
     /// SKILLS · {0} OF {1}
     public static string SectionSkills => Get("SectionSkills");
 
-    /// Skills work in environments where the personality is on. Call them by name, like /aiko-copy.
+    /// Skills work in environments where the personality is on. Call them by their full name, li...
     public static string SkillsWork => Get("SkillsWork");
 
     /// Turn the personality on in at least one environment, and the skills start working.
@@ -857,6 +857,9 @@ public static class Strings
 
     /// One fact in one place, a decision log, contradictions found.
     public static string SkillAikoDocsHygiene => Get("SkillAikoDocsHygiene");
+
+    /// Game feel in numbers: named test scenes, game state the tools can read, before and after.
+    public static string SkillAikoPlaytest => Get("SkillAikoPlaytest");
 
     /// A model from Blender to Unity: axes, normals, export and import.
     public static string SkillAikoBlenderToUnity => Get("SkillAikoBlenderToUnity");
@@ -876,7 +879,7 @@ public static class Strings
     /// Meet Aiko
     public static string ItemMeetAiko => Get("ItemMeetAiko");
 
-    /// Aiko can talk in your Claude Code sessions in her own voice, and she brings eight skills....
+    /// Aiko can talk in your Claude Code sessions in her own voice, and she brings nine skills. ...
     public static string MeetAikoLead => Get("MeetAikoLead");
 
     /// The temperament, the face and the skills are in settings, under Personality. It works in ...
@@ -887,7 +890,4 @@ public static class Strings
 
     /// on
     public static string StateOn => Get("StateOn");
-
-    /// Your own skill with this name in {0} takes /{1}. This one is called /{1}:{1} there.
-    public static string SkillOwnTwin => Get("SkillOwnTwin");
 }

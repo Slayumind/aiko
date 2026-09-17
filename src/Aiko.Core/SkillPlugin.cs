@@ -5,19 +5,29 @@ using System.Text.Json.Nodes;
 
 namespace Aiko.Core;
 
-/// One of Aiko's skills as a plugin (D-202): the plugin and the skill inside share the name, so the
-/// person calls it /aiko-copy (D-212). The files ship with Aiko in its "plugins" folder and are
-/// copied into the local marketplace, from where Claude Code installs them.
+/// The one plugin with all of Aiko's skills (D-234). The files ship with Aiko in its "plugins" folder
+/// and are copied into the local marketplace with only the skills the person left on, from where
+/// Claude Code installs them.
 public sealed record SkillPlugin(string Name, string Description)
 {
     public const string FolderName = "plugins";
 
+    public const string SkillsFolder = "skills";
+
     /// Where the marketplace lists it: a path inside the marketplace folder.
     public string Source => $"./{FolderName}/{Name}";
 
-    /// Claude Code updates a plugin from a folder only when its version changes. The skill keeps its
-    /// own version and gets the hash of its files as build metadata, so every change of a file is a
-    /// new version and an unchanged skill is never installed again.
+    /// Whether a file of the plugin goes into the copy. A file of a skill goes only while that skill
+    /// is on; the manifest and anything outside the skills folder always go.
+    public static bool Includes(string relativePath, Func<string, bool> isSkillOn)
+    {
+        var parts = relativePath.Replace('\\', '/').Split('/');
+        return parts is not [SkillsFolder, var skill, _, ..] || isSkillOn(skill);
+    }
+
+    /// Claude Code updates a plugin from a folder only when its version changes. The plugin keeps its
+    /// own version and gets the hash of the copied files as build metadata, so switching a skill or
+    /// changing a file is a new version, and an unchanged copy is never installed again.
     public static string ContentHash(IEnumerable<(string Path, byte[] Content)> files)
     {
         using var sha = SHA256.Create();
@@ -49,11 +59,11 @@ public sealed record SkillPlugin(string Name, string Description)
     public static string? VersionOf(string? manifestJson) =>
         Parse(manifestJson)?["version"] is JsonValue value && value.TryGetValue<string>(out var text) ? text : null;
 
-    /// Name and description from a manifest, for the marketplace list. Null for anything else.
+    /// Name and description from the manifest, for the marketplace list. Null for any other plugin.
     public static SkillPlugin? FromManifest(string? manifestJson) =>
         Parse(manifestJson) is { } manifest
         && manifest["name"] is JsonValue name && name.TryGetValue<string>(out var text)
-        && SkillCatalog.All.Contains(text)
+        && text == SkillCatalog.PluginName
             ? new SkillPlugin(text, manifest["description"] is JsonValue d && d.TryGetValue<string>(out var about) ? about : "")
             : null;
 

@@ -13,14 +13,15 @@ public partial class PersonalityPage : UserControl
 
     private static readonly Dictionary<string, string> SkillAbout = new()
     {
-        ["aiko-copy"] = Strings.SkillAikoCopy,
-        ["aiko-release-gate"] = Strings.SkillAikoReleaseGate,
-        ["aiko-docs-hygiene"] = Strings.SkillAikoDocsHygiene,
-        ["aiko-blender-to-unity"] = Strings.SkillAikoBlenderToUnity,
-        ["aiko-texturing"] = Strings.SkillAikoTexturing,
-        ["aiko-glb-for-web"] = Strings.SkillAikoGlbForWeb,
-        ["aiko-palette"] = Strings.SkillAikoPalette,
-        ["aiko-gamedesign-research"] = Strings.SkillAikoGamedesignResearch,
+        ["copy"] = Strings.SkillAikoCopy,
+        ["release-gate"] = Strings.SkillAikoReleaseGate,
+        ["docs-hygiene"] = Strings.SkillAikoDocsHygiene,
+        ["playtest"] = Strings.SkillAikoPlaytest,
+        ["blender-to-unity"] = Strings.SkillAikoBlenderToUnity,
+        ["texturing"] = Strings.SkillAikoTexturing,
+        ["glb-for-web"] = Strings.SkillAikoGlbForWeb,
+        ["palette"] = Strings.SkillAikoPalette,
+        ["gamedesign-research"] = Strings.SkillAikoGamedesignResearch,
     };
 
     private readonly EnvironmentsEditor _editor;
@@ -278,7 +279,7 @@ public partial class PersonalityPage : UserControl
     {
         var name = new TextBlock
         {
-            Text = "/" + skill,
+            Text = SkillCatalog.Call(skill),
             Style = (Style)FindResource("RowName"),
             FontFamily = Tokens.Get<System.Windows.Media.FontFamily>("Mono"),
         };
@@ -291,20 +292,6 @@ public partial class PersonalityPage : UserControl
 
         var about = new StackPanel { Margin = new Thickness(0, 2, 16, 0) };
         about.Children.Add(new TextBlock { Text = SkillAbout.GetValueOrDefault(skill, ""), Style = (Style)FindResource("RowHint") });
-
-        // A skill of the person's own with the same name takes the short name (D-212).
-        var folders = _editor.Current.Environments.SelectMany(e => e.ConfigDirectories);
-        foreach (var twin in SkillCatalog.OwnTwinsIn(skill, folders, File.Exists))
-        {
-            about.Children.Add(new TextBlock
-            {
-                Text = string.Format(Strings.SkillOwnTwin, Path.GetFileName(twin.TrimEnd('\\', '/')), skill),
-                Style = (Style)FindResource("RowHint"),
-                Foreground = Tokens.Brush("Caution"),
-                Margin = new Thickness(0, 4, 0, 0),
-            });
-        }
-
         Grid.SetRow(about, 1);
 
         var grid = new Grid { Margin = new Thickness(12, 9, 12, 9) };

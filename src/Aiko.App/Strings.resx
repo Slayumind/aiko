@@ -854,7 +854,7 @@
     <value>SKILLS · {0} OF {1}</value>
   </data>
   <data name="SkillsWork" xml:space="preserve">
-    <value>Skills work in environments where the personality is on. Call them by name, like /aiko-copy.</value>
+    <value>Skills work in environments where the personality is on. Call them by their full name, like /aiko:copy.</value>
   </data>
   <data name="SkillsNeedPersona" xml:space="preserve">
     <value>Turn the personality on in at least one environment, and the skills start working.</value>
@@ -867,6 +867,9 @@
   </data>
   <data name="SkillAikoDocsHygiene" xml:space="preserve">
     <value>One fact in one place, a decision log, contradictions found.</value>
+  </data>
+  <data name="SkillAikoPlaytest" xml:space="preserve">
+    <value>Game feel in numbers: named test scenes, game state the tools can read, before and after.</value>
   </data>
   <data name="SkillAikoBlenderToUnity" xml:space="preserve">
     <value>A model from Blender to Unity: axes, normals, export and import.</value>
@@ -887,7 +890,7 @@
     <value>Meet Aiko</value>
   </data>
   <data name="MeetAikoLead" xml:space="preserve">
-    <value>Aiko can talk in your Claude Code sessions in her own voice, and she brings eight skills. In code and commits she stays quiet.</value>
+    <value>Aiko can talk in your Claude Code sessions in her own voice, and she brings nine skills. In code and commits she stays quiet.</value>
   </data>
   <data name="MeetAikoSettings" xml:space="preserve">
     <value>The temperament, the face and the skills are in settings, under Personality. It works in new sessions.</value>
@@ -897,8 +900,5 @@
   </data>
   <data name="StateOn" xml:space="preserve">
     <value>on</value>
-  </data>
-  <data name="SkillOwnTwin" xml:space="preserve">
-    <value>Your own skill with this name in {0} takes /{1}. This one is called /{1}:{1} there.</value>
   </data>
 </root>
