@@ -14,6 +14,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   Nothing is written, moved or shared without your yes. Both need the Google connectors turned on in
   Claude's settings.
 
+### Changed
+
+- **Skills are grouped by what they are for:** project management and game development, in settings
+  and in the README.
+
 ### Fixed
 
 - **Aiko talks about herself as a woman in every reply.** Short words like «готова» and «уверена»

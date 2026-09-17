@@ -290,9 +290,13 @@ public partial class PersonalityPage : UserControl
         header.Children.Add(_skillsSwitch);
         SkillRows.Children.Add(header);
 
-        foreach (var skill in SkillCatalog.All)
+        foreach (var group in SkillCatalog.Groups)
         {
-            _skillList.Children.Add(SkillRow(skill));
+            _skillList.Children.Add(DomainLabel(group.Domain));
+            for (var i = 0; i < group.Skills.Count; i++)
+            {
+                _skillList.Children.Add(SkillRow(group.Skills[i], topLine: i > 0));
+            }
         }
 
         SkillRows.Children.Add(_skillList);
@@ -300,7 +304,20 @@ public partial class PersonalityPage : UserControl
         ShowSkillsOn();
     }
 
-    private Border SkillRow(string skill)
+    /// The domain name above its skills, with a line that separates it from the group before.
+    private Border DomainLabel(SkillDomain domain) => new()
+    {
+        BorderBrush = Tokens.Brush("Hairline"),
+        BorderThickness = new Thickness(0, 1, 0, 0),
+        Child = new TextBlock
+        {
+            Text = domain == SkillDomain.Projects ? Strings.SkillDomainProjects : Strings.SkillDomainGames,
+            Style = (Style)FindResource("SectionLabel"),
+            Margin = new Thickness(12, 10, 12, 0),
+        },
+    };
+
+    private Border SkillRow(string skill, bool topLine)
     {
         var rows = new StackPanel { Margin = new Thickness(12, 9, 28, 9) };
         rows.Children.Add(new TextBlock
@@ -319,7 +336,7 @@ public partial class PersonalityPage : UserControl
         return new Border
         {
             BorderBrush = Tokens.Brush("Hairline"),
-            BorderThickness = new Thickness(0, 1, 0, 0),
+            BorderThickness = new Thickness(0, topLine ? 1 : 0, 0, 0),
             Child = rows,
         };
     }

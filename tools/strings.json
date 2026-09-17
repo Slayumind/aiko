@@ -1939,6 +1939,20 @@
     ]
   ],
   [
+    "SkillDomainProjects",
+    [
+      "PROJECT MANAGEMENT",
+      "УПРАВЛЕНИЕ ПРОЕКТАМИ"
+    ]
+  ],
+  [
+    "SkillDomainGames",
+    [
+      "GAME DEVELOPMENT",
+      "РАЗРАБОТКА ИГР"
+    ]
+  ],
+  [
     "SkillAikoCopy",
     [
       "UI text, READMEs and release notes without stiff wording or AI tells. RU and EN.",

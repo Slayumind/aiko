@@ -12,6 +12,16 @@ public class SkillCatalogTests
     }
 
     [Fact]
+    public void Every_skill_is_in_exactly_one_domain_and_the_list_follows_the_domains()
+    {
+        Assert.Equal([SkillDomain.Projects, SkillDomain.Games], SkillCatalog.Groups.Select(g => g.Domain));
+        Assert.All(SkillCatalog.Groups, group => Assert.NotEmpty(group.Skills));
+        Assert.Equal(SkillCatalog.Groups.SelectMany(g => g.Skills), SkillCatalog.All);
+        Assert.Contains("calendar", SkillCatalog.Groups[0].Skills);
+        Assert.Contains("playtest", SkillCatalog.Groups[1].Skills);
+    }
+
+    [Fact]
     public void A_skill_is_called_through_the_plugin_name()
     {
         Assert.Equal("/aiko:copy", SkillCatalog.Call("copy"));
