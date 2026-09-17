@@ -108,23 +108,33 @@ public sealed record PluginState(
     }
 }
 
-/// Which of Aiko's plugins a folder should have, and the steps from what it has (D-197, D-202).
+/// Which of Aiko's plugins a folder should have, and the steps from what it has (D-197, D-234).
 public static class PluginPlan
 {
-    /// The persona and every skill the person left on, only where the persona is on.
-    public static IReadOnlySet<string> Desired(AikoEnvironment environment, PersonaSettings persona, IEnumerable<string> skillPlugins)
+    /// The persona, and the skills plugin while the skills are on and this Aiko ships any. Only where
+    /// the persona is on.
+    public static IReadOnlySet<string> Desired(AikoEnvironment environment, PersonaSettings persona, IEnumerable<string> skills)
     {
+        var desired = new HashSet<string>(StringComparer.Ordinal);
         if (!environment.Persona)
         {
-            return new HashSet<string>();
+            return desired;
         }
 
-        return skillPlugins
-            .Where(persona.IsSkillOn)
-            .Prepend(PersonaPlugin.Name)
-            .Select(AikoMarketplace.PluginId)
-            .ToHashSet(StringComparer.Ordinal);
+        desired.Add(AikoMarketplace.PluginId(PersonaPlugin.Name));
+        if (persona.SkillsOn && skills.Any())
+        {
+            desired.Add(AikoMarketplace.PluginId(SkillCatalog.PluginName));
+        }
+
+        return desired;
     }
+
+    /// A plugin of ours that this Aiko no longer ships, like the one-skill plugins before D-234.
+    public static bool IsRetired(string pluginId) =>
+        AikoMarketplace.IsOurs(pluginId)
+        && pluginId != AikoMarketplace.PluginId(PersonaPlugin.Name)
+        && pluginId != AikoMarketplace.PluginId(SkillCatalog.PluginName);
 
     public static IReadOnlyList<PluginStep> Steps(IReadOnlySet<string> desired, PluginState state, string marketplaceFolder)
     {
@@ -158,9 +168,16 @@ public static class PluginPlan
         }
 
         // Turned off, never uninstalled: the files stay, and turning the persona on again is quick.
-        foreach (var id in state.Enabled.Where(id => !desired.Contains(id)).Order(StringComparer.Ordinal))
+        foreach (var id in state.Enabled.Where(id => !desired.Contains(id) && !(IsRetired(id) && state.Installed.Contains(id))).Order(StringComparer.Ordinal))
         {
             steps.Add(new(PluginStepKind.Disable, id));
+        }
+
+        // A retired plugin is the exception: nothing would ever turn it on again. Claude Code removes
+        // it even after it left the marketplace (checked 2026-09-17).
+        foreach (var id in state.Installed.Where(IsRetired).Order(StringComparer.Ordinal))
+        {
+            steps.Add(new(PluginStepKind.Uninstall, id));
         }
 
         return steps;

@@ -5,19 +5,21 @@ using System.Text.Json.Nodes;
 
 namespace Aiko.Core;
 
-/// One of Aiko's skills as a plugin (D-202): the plugin and the skill inside share the name, so the
-/// person calls it /aiko-copy (D-212). The files ship with Aiko in its "plugins" folder and are
-/// copied into the local marketplace, from where Claude Code installs them.
+/// The one plugin with all of Aiko's skills (D-234). The files ship with Aiko in its "plugins" folder
+/// and are copied into the local marketplace, from where Claude Code installs them. The skills are
+/// switched on and off together, by enabling the plugin (D-237).
 public sealed record SkillPlugin(string Name, string Description)
 {
     public const string FolderName = "plugins";
 
+    public const string SkillsFolder = "skills";
+
     /// Where the marketplace lists it: a path inside the marketplace folder.
     public string Source => $"./{FolderName}/{Name}";
 
-    /// Claude Code updates a plugin from a folder only when its version changes. The skill keeps its
-    /// own version and gets the hash of its files as build metadata, so every change of a file is a
-    /// new version and an unchanged skill is never installed again.
+    /// Claude Code updates a plugin from a folder only when its version changes. The plugin keeps its
+    /// own version and gets the hash of its files as build metadata, so every change of a file is a new
+    /// version, and an unchanged copy is never installed again.
     public static string ContentHash(IEnumerable<(string Path, byte[] Content)> files)
     {
         using var sha = SHA256.Create();
@@ -49,11 +51,11 @@ public sealed record SkillPlugin(string Name, string Description)
     public static string? VersionOf(string? manifestJson) =>
         Parse(manifestJson)?["version"] is JsonValue value && value.TryGetValue<string>(out var text) ? text : null;
 
-    /// Name and description from a manifest, for the marketplace list. Null for anything else.
+    /// Name and description from the manifest, for the marketplace list. Null for any other plugin.
     public static SkillPlugin? FromManifest(string? manifestJson) =>
         Parse(manifestJson) is { } manifest
         && manifest["name"] is JsonValue name && name.TryGetValue<string>(out var text)
-        && SkillCatalog.All.Contains(text)
+        && text == SkillCatalog.PluginName
             ? new SkillPlugin(text, manifest["description"] is JsonValue d && d.TryGetValue<string>(out var about) ? about : "")
             : null;
 

@@ -1913,15 +1913,22 @@
   [
     "SectionSkills",
     [
-      "SKILLS · {0} OF {1}",
-      "НАВЫКИ · {0} ИЗ {1}"
+      "SKILLS · {0}",
+      "НАВЫКИ · {0}"
     ]
   ],
   [
     "SkillsWork",
     [
-      "Skills work in environments where the personality is on. Call them by name, like /aiko-copy.",
-      "Навыки работают в средах, где включена личность. Зови их по имени, например /aiko-copy."
+      "Skills work in environments where the personality is on. Call them by their full name, like /aiko:copy.",
+      "Навыки работают в средах, где включена личность. Зови их полным именем, например /aiko:copy."
+    ]
+  ],
+  [
+    "SkillsSwitch",
+    [
+      "Aiko's skills",
+      "Навыки Aiko"
     ]
   ],
   [
@@ -1953,6 +1960,13 @@
     ]
   ],
   [
+    "SkillAikoPlaytest",
+    [
+      "Checks a game with numbers: the same test scene before and after a change.",
+      "Проверяет игру цифрами: одна и та же тестовая сцена до и после правки."
+    ]
+  ],
+  [
     "SkillAikoBlenderToUnity",
     [
       "A model from Blender to Unity: axes, normals, export and import.",
@@ -1962,8 +1976,8 @@
   [
     "SkillAikoTexturing",
     [
-      "Texel density from the camera: when a model gets its own sheet, when to tile.",
-      "Плотность текселей от камеры: когда свой лист, когда тайлинг."
+      "Ready files for textures: a size that fits the camera, and sheets to paint over.",
+      "Готовые файлы для текстур: размер под камеру и шаблоны листов для отрисовки."
     ]
   ],
   [
@@ -1997,8 +2011,8 @@
   [
     "MeetAikoLead",
     [
-      "Aiko can talk in your Claude Code sessions in her own voice, and she brings eight skills. In code and commits she stays quiet.",
-      "Aiko может говорить в твоих сессиях Claude Code своим голосом и приносит восемь навыков. В коде и коммитах она молчит."
+      "Aiko can talk in your Claude Code sessions in her own voice, and she brings nine skills. In code and commits she stays quiet.",
+      "Aiko может говорить в твоих сессиях Claude Code своим голосом и приносит девять навыков. В коде и коммитах она молчит."
     ]
   ],
   [
@@ -2020,13 +2034,6 @@
     [
       "on",
       "включена"
-    ]
-  ],
-  [
-    "SkillOwnTwin",
-    [
-      "Your own skill with this name in {0} takes /{1}. This one is called /{1}:{1} there.",
-      "В {0} есть твой навык с тем же именем, и /{1} зовёт его. Этот там называется /{1}:{1}."
     ]
   ]
 ]

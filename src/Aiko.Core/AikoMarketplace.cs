@@ -4,7 +4,7 @@ using System.Text.Json.Nodes;
 
 namespace Aiko.Core;
 
-/// Aiko's own plugin marketplace: a folder on this computer with one marketplace.json (D-201, D-202).
+/// Aiko's own plugin marketplace: a folder on this computer with one marketplace.json (D-201, D-234).
 /// Claude Code reads a local marketplace in place, so nothing is downloaded from anywhere.
 public static class AikoMarketplace
 {
@@ -44,8 +44,8 @@ public static class AikoMarketplace
         && command.All(c => c is >= ' ' and <= '~')
         && !command.Contains("    ", StringComparison.Ordinal);
 
-    /// The persona from the bridge, and every skill Aiko ships from a folder inside the marketplace.
-    public static string Json(string personaCommand, IEnumerable<SkillPlugin>? skills = null)
+    /// The persona from the bridge, and the skills plugin from a folder inside the marketplace.
+    public static string Json(string personaCommand, SkillPlugin? skills = null)
     {
         var plugins = new JsonArray(
             new JsonObject
@@ -55,13 +55,13 @@ public static class AikoMarketplace
                 ["source"] = new JsonObject { ["source"] = "command", ["command"] = personaCommand },
             });
 
-        foreach (var skill in (skills ?? []).OrderBy(s => IndexIn(SkillCatalog.All, s.Name)))
+        if (skills is not null)
         {
             plugins.Add(new JsonObject
             {
-                ["name"] = skill.Name,
-                ["description"] = skill.Description,
-                ["source"] = skill.Source,
+                ["name"] = skills.Name,
+                ["description"] = skills.Description,
+                ["source"] = skills.Source,
             });
         }
 
@@ -71,19 +71,6 @@ public static class AikoMarketplace
             ["owner"] = new JsonObject { ["name"] = "Aiko" },
             ["plugins"] = plugins,
         }.ToJsonString(Formatting) + "\n";
-    }
-
-    private static int IndexIn(IReadOnlyList<string> list, string name)
-    {
-        for (var i = 0; i < list.Count; i++)
-        {
-            if (list[i] == name)
-            {
-                return i;
-            }
-        }
-
-        return list.Count;
     }
 
     // The default encoder writes a quote as a six-character escape, which is valid but hard to read

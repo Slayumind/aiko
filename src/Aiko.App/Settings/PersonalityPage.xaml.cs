@@ -13,20 +13,22 @@ public partial class PersonalityPage : UserControl
 
     private static readonly Dictionary<string, string> SkillAbout = new()
     {
-        ["aiko-copy"] = Strings.SkillAikoCopy,
-        ["aiko-release-gate"] = Strings.SkillAikoReleaseGate,
-        ["aiko-docs-hygiene"] = Strings.SkillAikoDocsHygiene,
-        ["aiko-blender-to-unity"] = Strings.SkillAikoBlenderToUnity,
-        ["aiko-texturing"] = Strings.SkillAikoTexturing,
-        ["aiko-glb-for-web"] = Strings.SkillAikoGlbForWeb,
-        ["aiko-palette"] = Strings.SkillAikoPalette,
-        ["aiko-gamedesign-research"] = Strings.SkillAikoGamedesignResearch,
+        ["copy"] = Strings.SkillAikoCopy,
+        ["release-gate"] = Strings.SkillAikoReleaseGate,
+        ["docs-hygiene"] = Strings.SkillAikoDocsHygiene,
+        ["playtest"] = Strings.SkillAikoPlaytest,
+        ["blender-to-unity"] = Strings.SkillAikoBlenderToUnity,
+        ["texturing"] = Strings.SkillAikoTexturing,
+        ["glb-for-web"] = Strings.SkillAikoGlbForWeb,
+        ["palette"] = Strings.SkillAikoPalette,
+        ["gamedesign-research"] = Strings.SkillAikoGamedesignResearch,
     };
 
     private readonly EnvironmentsEditor _editor;
 
     private readonly List<EnvironmentRow> _environmentRows = [];
-    private readonly List<ToggleButton> _skillSwitches = [];
+    private readonly ToggleButton _skillsSwitch = new();
+    private readonly StackPanel _skillList = new();
 
     private PersonaSettings _persona = SettingsStore.LoadPersona();
 
@@ -178,10 +180,7 @@ public partial class PersonalityPage : UserControl
 
         var anyOn = _editor.Current.Environments.Any(e => e.Persona);
         SkillsBox.Opacity = anyOn ? 1 : 0.45;
-        foreach (var skill in _skillSwitches)
-        {
-            skill.IsEnabled = anyOn;
-        }
+        _skillsSwitch.IsEnabled = anyOn;
 
         SkillsNote.Text = anyOn ? Strings.SkillsWork : Strings.SkillsNeedPersona;
     }
@@ -259,85 +258,83 @@ public partial class PersonalityPage : UserControl
 
     // ---- skills ----
 
+    /// One switch for all skills, then the skills themselves: they are one plugin in Claude Code and
+    /// come and go together (D-237).
     private void FillSkills()
     {
         SkillRows.Children.Clear();
-        _skillSwitches.Clear();
+        _skillList.Children.Clear();
 
         _filling = true;
-        foreach (var skill in SkillCatalog.All)
-        {
-            SkillRows.Children.Add(SkillRow(skill, first: _skillSwitches.Count == 0));
-        }
+        _skillsSwitch.Style = (Style)FindResource("Switch");
+        _skillsSwitch.IsChecked = _persona.SkillsOn;
         _filling = false;
+        _skillsSwitch.Checked += (_, _) => SetSkills(true);
+        _skillsSwitch.Unchecked += (_, _) => SetSkills(false);
+        Grid.SetColumn(_skillsSwitch, 1);
 
-        ShowSkillCount();
-    }
-
-    private Border SkillRow(string skill, bool first)
-    {
-        var name = new TextBlock
+        var title = new TextBlock
         {
-            Text = "/" + skill,
+            Text = Strings.SkillsSwitch,
             Style = (Style)FindResource("RowName"),
-            FontFamily = Tokens.Get<System.Windows.Media.FontFamily>("Mono"),
+            FontSize = Tokens.Get<double>("TextName"),
+            VerticalAlignment = VerticalAlignment.Center,
         };
 
-        var toggle = new ToggleButton { Style = (Style)FindResource("Switch"), IsChecked = _persona.IsSkillOn(skill) };
-        toggle.Checked += (_, _) => SetSkill(skill, true);
-        toggle.Unchecked += (_, _) => SetSkill(skill, false);
-        Grid.SetColumn(toggle, 1);
-        _skillSwitches.Add(toggle);
+        var header = new Grid { Margin = new Thickness(12, 10, 12, 10) };
+        header.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        header.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        header.Children.Add(title);
+        header.Children.Add(_skillsSwitch);
+        SkillRows.Children.Add(header);
 
-        var about = new StackPanel { Margin = new Thickness(0, 2, 16, 0) };
-        about.Children.Add(new TextBlock { Text = SkillAbout.GetValueOrDefault(skill, ""), Style = (Style)FindResource("RowHint") });
-
-        // A skill of the person's own with the same name takes the short name (D-212).
-        var folders = _editor.Current.Environments.SelectMany(e => e.ConfigDirectories);
-        foreach (var twin in SkillCatalog.OwnTwinsIn(skill, folders, File.Exists))
+        foreach (var skill in SkillCatalog.All)
         {
-            about.Children.Add(new TextBlock
-            {
-                Text = string.Format(Strings.SkillOwnTwin, Path.GetFileName(twin.TrimEnd('\\', '/')), skill),
-                Style = (Style)FindResource("RowHint"),
-                Foreground = Tokens.Brush("Caution"),
-                Margin = new Thickness(0, 4, 0, 0),
-            });
+            _skillList.Children.Add(SkillRow(skill));
         }
 
-        Grid.SetRow(about, 1);
+        SkillRows.Children.Add(_skillList);
+        SkillsTitle.Text = string.Format(Strings.SectionSkills, SkillCatalog.All.Count);
+        ShowSkillsOn();
+    }
 
-        var grid = new Grid { Margin = new Thickness(12, 9, 12, 9) };
-        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-        grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-        grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-        grid.Children.Add(name);
-        grid.Children.Add(toggle);
-        grid.Children.Add(about);
+    private Border SkillRow(string skill)
+    {
+        var rows = new StackPanel { Margin = new Thickness(12, 9, 28, 9) };
+        rows.Children.Add(new TextBlock
+        {
+            Text = SkillCatalog.Call(skill),
+            Style = (Style)FindResource("RowName"),
+            FontFamily = Tokens.Get<System.Windows.Media.FontFamily>("Mono"),
+        });
+        rows.Children.Add(new TextBlock
+        {
+            Text = SkillAbout.GetValueOrDefault(skill, ""),
+            Style = (Style)FindResource("RowHint"),
+            Margin = new Thickness(0, 2, 0, 0),
+        });
 
         return new Border
         {
             BorderBrush = Tokens.Brush("Hairline"),
-            BorderThickness = new Thickness(0, first ? 0 : 1, 0, 0),
-            Child = grid,
+            BorderThickness = new Thickness(0, 1, 0, 0),
+            Child = rows,
         };
     }
 
-    private void SetSkill(string skill, bool on)
+    private void SetSkills(bool on)
     {
         if (_filling)
         {
             return;
         }
 
-        SavePersona(_persona.WithSkill(skill, on));
-        ShowSkillCount();
-        PluginSync.Request("skills switched");
+        SavePersona(_persona with { SkillsOn = on });
+        ShowSkillsOn();
+        PluginSync.Request(on ? "skills switched on" : "skills switched off");
     }
 
-    private void ShowSkillCount() =>
-        SkillsTitle.Text = string.Format(Strings.SectionSkills, SkillCatalog.OnCount(_persona), SkillCatalog.All.Count);
+    private void ShowSkillsOn() => _skillList.Opacity = _persona.SkillsOn ? 1 : 0.45;
 
     private void SavePersona(PersonaSettings next)
     {

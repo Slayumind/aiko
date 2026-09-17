@@ -129,7 +129,7 @@ public partial class GeneralPage : UserControl
         // rather than True and GitBash, which are how the code happens to spell them.
         var text = string.Join(
             Environment.NewLine,
-            $"Aiko {AppVersion.Current()}",
+            $"Aiko {AppVersion.WithCommit()}",
             $"Windows {Environment.OSVersion.Version}",
             $"shown in: {(_settings.Place == AikoPlace.Island ? "the island" : "the tray")}",
             $"language: {LanguageName(_settings.Language)}",

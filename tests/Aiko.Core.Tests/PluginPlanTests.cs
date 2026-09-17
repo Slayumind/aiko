@@ -71,11 +71,11 @@ public class PluginPlanTests
     public void Only_our_plugins_are_read_and_only_user_installs_count()
     {
         var state = PluginState.Read(
-            """{ "enabledPlugins": { "aiko-persona@aiko": true, "aiko-copy@aiko": false, "frontend-design@claude-plugins-official": true } }""",
+            """{ "enabledPlugins": { "aiko-persona@aiko": true, "aiko@aiko": false, "frontend-design@claude-plugins-official": true } }""",
             """
             { "version": 2, "plugins": {
                 "aiko-persona@aiko": [ { "scope": "user" } ],
-                "aiko-copy@aiko": [ { "scope": "project", "projectPath": "C:\\x" } ],
+                "aiko@aiko": [ { "scope": "project", "projectPath": "C:\\x" } ],
                 "frontend-design@claude-plugins-official": [ { "scope": "user" } ] } }
             """,
             """{ "aiko": { "installLocation": "C:\\m" }, "claude-plugins-official": { "installLocation": "C:\\o" } }""");
@@ -104,17 +104,35 @@ public class PluginPlanTests
     [Fact]
     public void Without_the_persona_a_folder_wants_nothing_not_even_skills()
     {
-        Assert.Empty(PluginPlan.Desired(Env(persona: false), PersonaSettings.Default, ["aiko-copy"]));
+        Assert.Empty(PluginPlan.Desired(Env(persona: false), PersonaSettings.Default, ["copy"]));
     }
 
     [Fact]
-    public void With_the_persona_a_folder_wants_it_and_every_skill_left_on()
+    public void With_the_persona_a_folder_wants_it_and_the_skills_plugin()
     {
-        var persona = PersonaSettings.Default.WithSkill("aiko-palette", false);
+        var desired = PluginPlan.Desired(Env(persona: true), PersonaSettings.Default, ["copy", "palette"]);
 
-        var desired = PluginPlan.Desired(Env(persona: true), persona, ["aiko-copy", "aiko-palette"]);
+        Assert.Equal([Persona, "aiko@aiko"], desired.Order(StringComparer.Ordinal));
+    }
 
-        Assert.Equal(["aiko-copy@aiko", Persona], desired.Order(StringComparer.Ordinal));
+    [Fact]
+    public void With_the_skills_off_or_none_shipped_a_folder_wants_only_the_persona()
+    {
+        var skillsOff = PersonaSettings.Default with { SkillsOn = false };
+
+        Assert.Equal([Persona], PluginPlan.Desired(Env(persona: true), skillsOff, ["copy", "palette"]));
+        Assert.Equal([Persona], PluginPlan.Desired(Env(persona: true), PersonaSettings.Default, []));
+    }
+
+    [Theory]
+    [InlineData("aiko-copy@aiko", true)]
+    [InlineData("aiko-gamedesign-research@aiko", true)]
+    [InlineData("aiko@aiko", false)]
+    [InlineData("aiko-persona@aiko", false)]
+    [InlineData("aiko-copy@someone-else", false)]
+    public void Only_our_plugins_this_version_does_not_ship_are_retired(string id, bool retired)
+    {
+        Assert.Equal(retired, PluginPlan.IsRetired(id));
     }
 
     // ---- the steps ----
@@ -146,11 +164,38 @@ public class PluginPlanTests
     [Fact]
     public void Switching_off_disables_and_keeps_the_files()
     {
-        var steps = PluginPlan.Steps(new HashSet<string>(), State(Marketplace, installed: [Persona, "aiko-copy@aiko"], enabled: [Persona, "aiko-copy@aiko"]), Marketplace);
+        var steps = PluginPlan.Steps(new HashSet<string>(), State(Marketplace, installed: [Persona, "aiko@aiko"], enabled: [Persona, "aiko@aiko"]), Marketplace);
 
         Assert.Equal(
-            [new PluginStep(PluginStepKind.Disable, "aiko-copy@aiko"), new PluginStep(PluginStepKind.Disable, Persona)],
+            [new PluginStep(PluginStepKind.Disable, Persona), new PluginStep(PluginStepKind.Disable, "aiko@aiko")],
             steps);
+    }
+
+    [Fact]
+    public void The_one_skill_plugins_of_older_versions_are_uninstalled_while_the_new_one_comes_in()
+    {
+        var state = State(
+            Marketplace,
+            installed: [Persona, "aiko-copy@aiko", "aiko-palette@aiko"],
+            enabled: [Persona, "aiko-copy@aiko"]);
+
+        var steps = PluginPlan.Steps(new HashSet<string> { Persona, "aiko@aiko" }, state, Marketplace);
+
+        Assert.Equal(
+            [
+                new PluginStep(PluginStepKind.Install, "aiko@aiko"),
+                new PluginStep(PluginStepKind.Uninstall, "aiko-copy@aiko"),
+                new PluginStep(PluginStepKind.Uninstall, "aiko-palette@aiko"),
+            ],
+            steps);
+    }
+
+    [Fact]
+    public void Old_plugins_go_even_where_the_persona_is_off()
+    {
+        var steps = PluginPlan.Steps(new HashSet<string>(), State(Marketplace, installed: ["aiko-copy@aiko"]), Marketplace);
+
+        Assert.Equal([new PluginStep(PluginStepKind.Uninstall, "aiko-copy@aiko")], steps);
     }
 
     [Fact]
@@ -225,7 +270,7 @@ public class PluginPlanTests
         var steps = new[]
         {
             new PluginStep(PluginStepKind.Enable, Persona),
-            new PluginStep(PluginStepKind.Install, "aiko-copy@aiko"),
+            new PluginStep(PluginStepKind.Install, "aiko@aiko"),
             new PluginStep(PluginStepKind.Disable, "aiko-palette@aiko"),
         };
 
