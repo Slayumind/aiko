@@ -7,13 +7,17 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-09-17
+
+All skills become one plugin with one switch, and a new skill checks games with numbers.
+
 ### Added
 
 - **The playtest skill.** It helps Claude test a game with numbers instead of a feeling: named test
   scenes, game state the tools can read, before and after tables, and short tests that use the real
   controls. It works with any engine and has notes for the web, Unity and Godot.
 - **The commit in the version line.** Settings and the diagnostics text show the build as
-  `0.2.1+42cb34b`, so two builds of one version can be told apart in a bug report.
+  `0.2.2+42cb34b`, so two builds of one version can be told apart in a bug report.
 
 ### Changed
 
@@ -23,6 +27,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - **One switch for all skills.** The skills come and go together, like the plugin in Claude Code.
   If you had switched off every skill, they stay off; if any skill was on, they are all on now.
 - **Simpler texts for the texturing and playtest skills** in settings.
+
+### Fixed
+
+- **The schema number in `settings.json`.** A file first written by 0.1 kept saying schema 1 after a
+  newer Aiko added its settings to it. Now every save writes the schema of the version that saved it.
 
 ### Removed
 
