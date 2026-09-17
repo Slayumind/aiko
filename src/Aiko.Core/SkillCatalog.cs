@@ -20,8 +20,6 @@ public static class SkillCatalog
         "gamedesign-research",
     ];
 
-    public static int OnCount(PersonaSettings persona) => All.Count(persona.IsSkillOn);
-
     /// What the person types to call the skill. The short /name may belong to Claude Code itself or
     /// to a skill of the person's own; the full name always reaches this one.
     public static string Call(string skill) => $"/{PluginName}:{skill}";

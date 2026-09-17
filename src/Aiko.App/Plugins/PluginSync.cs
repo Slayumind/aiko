@@ -69,7 +69,7 @@ static class PluginSync
 
         // A new command in the marketplace, for example after moving from a build folder to the
         // installed app, is not run again until it is accepted: an update with -y accepts it.
-        if (!TryWriteMarketplace(persona, out var marketplaceChanged, out var skillsChanged))
+        if (!TryWriteMarketplace(out var marketplaceChanged, out var skillsChanged))
         {
             return;
         }
@@ -145,8 +145,7 @@ static class PluginSync
             steps.Add(new PluginStep(PluginStepKind.Update, persona));
         }
 
-        // The skills plugin got other files, from a new Aiko or a switched skill: installed copies
-        // take the new version.
+        // The skills plugin got other files with a new Aiko: installed copies take the new version.
         var skills = AikoMarketplace.PluginId(SkillCatalog.PluginName);
         if (skillsChanged && desired.Contains(skills) && state.Installed.Contains(skills))
         {
@@ -163,7 +162,7 @@ static class PluginSync
             ReadIfThere(Path.Combine(folder, "plugins", "known_marketplaces.json")));
 
     /// Written only when the text differs, so the marketplace folder is not touched for nothing.
-    private static bool TryWriteMarketplace(PersonaSettings persona, out bool changed, out bool skillsChanged)
+    private static bool TryWriteMarketplace(out bool changed, out bool skillsChanged)
     {
         changed = false;
         skillsChanged = false;
@@ -176,7 +175,7 @@ static class PluginSync
 
         try
         {
-            skillsChanged = SkillShelf.CopyTo(AikoMarketplace.Folder(LocalAppData), persona);
+            skillsChanged = SkillShelf.CopyTo(AikoMarketplace.Folder(LocalAppData));
 
             var path = AikoMarketplace.FilePath(LocalAppData);
             var json = AikoMarketplace.Json(command, SkillShelf.Shipped);

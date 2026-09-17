@@ -851,10 +851,13 @@
     <value>Коммит к этой правке — без характера:</value>
   </data>
   <data name="SectionSkills" xml:space="preserve">
-    <value>НАВЫКИ · {0} ИЗ {1}</value>
+    <value>НАВЫКИ · {0}</value>
   </data>
   <data name="SkillsWork" xml:space="preserve">
     <value>Навыки работают в средах, где включена личность. Зови их полным именем, например /aiko:copy.</value>
+  </data>
+  <data name="SkillsSwitch" xml:space="preserve">
+    <value>Навыки Aiko</value>
   </data>
   <data name="SkillsNeedPersona" xml:space="preserve">
     <value>Включи личность хотя бы в одной среде — тогда навыки заработают.</value>
@@ -869,13 +872,13 @@
     <value>Факт живёт в одном месте, журнал решений, поиск противоречий.</value>
   </data>
   <data name="SkillAikoPlaytest" xml:space="preserve">
-    <value>Ощущение от игры в цифрах: тестовые сцены, состояние игры для проверок, замеры до и после.</value>
+    <value>Проверяет игру цифрами: одна и та же тестовая сцена до и после правки.</value>
   </data>
   <data name="SkillAikoBlenderToUnity" xml:space="preserve">
     <value>Модель из Blender в Unity: оси, нормали, экспорт и импорт.</value>
   </data>
   <data name="SkillAikoTexturing" xml:space="preserve">
-    <value>Плотность текселей от камеры: когда свой лист, когда тайлинг.</value>
+    <value>Готовые файлы для текстур: размер под камеру и шаблоны листов для отрисовки.</value>
   </data>
   <data name="SkillAikoGlbForWeb" xml:space="preserve">
     <value>Файл .glb для веба: размер, оси, сжатие, пустое окно вместо модели.</value>

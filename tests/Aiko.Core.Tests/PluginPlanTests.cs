@@ -108,21 +108,19 @@ public class PluginPlanTests
     }
 
     [Fact]
-    public void With_the_persona_a_folder_wants_it_and_the_skills_plugin_while_one_skill_is_on()
+    public void With_the_persona_a_folder_wants_it_and_the_skills_plugin()
     {
-        var persona = PersonaSettings.Default.WithSkill("palette", false);
-
-        var desired = PluginPlan.Desired(Env(persona: true), persona, ["copy", "palette"]);
+        var desired = PluginPlan.Desired(Env(persona: true), PersonaSettings.Default, ["copy", "palette"]);
 
         Assert.Equal([Persona, "aiko@aiko"], desired.Order(StringComparer.Ordinal));
     }
 
     [Fact]
-    public void With_every_skill_off_a_folder_wants_only_the_persona()
+    public void With_the_skills_off_or_none_shipped_a_folder_wants_only_the_persona()
     {
-        var persona = PersonaSettings.Default.WithSkill("copy", false).WithSkill("palette", false);
+        var skillsOff = PersonaSettings.Default with { SkillsOn = false };
 
-        Assert.Equal([Persona], PluginPlan.Desired(Env(persona: true), persona, ["copy", "palette"]));
+        Assert.Equal([Persona], PluginPlan.Desired(Env(persona: true), skillsOff, ["copy", "palette"]));
         Assert.Equal([Persona], PluginPlan.Desired(Env(persona: true), PersonaSettings.Default, []));
     }
 
