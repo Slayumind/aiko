@@ -15,6 +15,9 @@ public sealed record ProfileFunction(string Name, int FirstLine, int LastLine);
 ///
 /// Turning off comments the lines out with a marker, and turning on removes exactly that, so the
 /// file comes back byte for byte. A profile this scanner cannot read with confidence is left alone.
+///
+/// Windows only: only the Windows app calls it. It is plain text work, so it stays in the core
+/// where tests reach it; no platform-neutral rule depends on it.
 public static partial class PowerShellProfile
 {
     public const string Prefix = "# aiko-off ";

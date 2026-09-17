@@ -14,7 +14,10 @@ namespace Aiko.App;
 /// through PowerShell.
 static class ShellDetect
 {
-    public static ClaudeShell Current() => ClaudeShellLookup.ShellFor(GitBashPath());
+    public static ClaudeShell Current() => ClaudeShellLookup.ShellFor(ThisComputer.Platform, GitBashPath());
 
-    public static string? GitBashPath() => ClaudeShellLookup.FindGitBash(File.Exists);
+    public static string? GitBashPath() =>
+        WindowsGitBash.Find(
+            File.Exists,
+            WindowsGitBash.Places(ThisComputer.SystemFolders, Environment.GetEnvironmentVariable("PATH") ?? string.Empty));
 }

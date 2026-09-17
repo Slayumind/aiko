@@ -10,6 +10,9 @@ namespace Aiko.Core;
 /// Two rules the spike taught us. First, find our key by parsing the JSON, never by matching
 /// text: a search string assembled in the wrong order silently matches nothing. Second, if the
 /// user already has a status line, keep it — the bridge calls it and shows its output.
+///
+/// A line is ours when it runs the bridge program, and the platform says how that program file
+/// is named.
 public static class SettingsJsonPatch
 {
     public const string StatusLineKey = "statusLine";
@@ -23,7 +26,7 @@ public static class SettingsJsonPatch
         Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
     };
 
-    public static bool TryAddBridge(string settingsJson, string bridgeCommand, out string patched)
+    public static bool TryAddBridge(PlatformConventions platform, string settingsJson, string bridgeCommand, out string patched)
     {
         patched = settingsJson;
         if (string.IsNullOrWhiteSpace(bridgeCommand))
@@ -45,7 +48,7 @@ public static class SettingsJsonPatch
         // user a status line running a bridge that is gone.
         var cleaned = false;
         if (root!.TryGetPropertyValue(WrappedKey, out var alreadyAside)
-            && BridgeCommand.IsAiko(CommandIn(alreadyAside)))
+            && BridgeCommand.IsAiko(platform, CommandIn(alreadyAside)))
         {
             root.Remove(WrappedKey);
             cleaned = true;
@@ -54,7 +57,7 @@ public static class SettingsJsonPatch
         if (root.TryGetPropertyValue(StatusLineKey, out var existing) && existing is not null)
         {
             var existingCommand = CommandIn(existing);
-            if (BridgeCommand.IsAiko(existingCommand))
+            if (BridgeCommand.IsAiko(platform, existingCommand))
             {
                 // Ours already. Same text means there is nothing to do; different text means the
                 // install path or the shell changed, and it is replaced rather than kept aside.
@@ -83,7 +86,7 @@ public static class SettingsJsonPatch
     /// Hooks are a list of groups, each with its own list of commands. Ours goes in a group of its
     /// own, so a group the person wrote is never edited. A hook of ours with an old path is
     /// replaced, the same way the status line is.
-    public static bool TryAddSessionHook(string settingsJson, string hookCommand, out string patched)
+    public static bool TryAddSessionHook(PlatformConventions platform, string settingsJson, string hookCommand, out string patched)
     {
         patched = settingsJson;
         if (string.IsNullOrWhiteSpace(hookCommand) || !TryParseObject(settingsJson, out var root))
@@ -105,7 +108,7 @@ public static class SettingsJsonPatch
             return false;
         }
 
-        var ours = hooks?[SessionStartKey] is JsonArray present ? OurHookCommands(present).ToList() : [];
+        var ours = hooks?[SessionStartKey] is JsonArray present ? OurHookCommands(platform, present).ToList() : [];
         if (ours.Count == 1 && ours[0] == hookCommand)
         {
             return false;
@@ -123,7 +126,7 @@ public static class SettingsJsonPatch
             hooks[SessionStartKey] = groups;
         }
 
-        RemoveOurHooks(groups);
+        RemoveOurHooks(platform, groups);
         groups.Add(JsonNode.Parse($$"""
             { "hooks": [ { "type": "command", "command": {{JsonSerializer.Serialize(hookCommand)}} } ] }
             """));
@@ -132,12 +135,12 @@ public static class SettingsJsonPatch
         return true;
     }
 
-    public static bool HasOurSessionHook(string settingsJson) =>
+    public static bool HasOurSessionHook(PlatformConventions platform, string settingsJson) =>
         TryParseObject(settingsJson, out var root)
         && SessionStartGroups(root!) is { } groups
-        && OurHookCommands(groups).Any();
+        && OurHookCommands(platform, groups).Any();
 
-    public static bool TryRemoveBridge(string settingsJson, out string restored)
+    public static bool TryRemoveBridge(PlatformConventions platform, string settingsJson, out string restored)
     {
         restored = settingsJson;
         if (!TryParseObject(settingsJson, out var root))
@@ -146,7 +149,7 @@ public static class SettingsJsonPatch
         }
 
         // The hook goes whenever Aiko leaves a file, with or without a status line of ours in it.
-        var hookRemoved = RemoveSessionHook(root!);
+        var hookRemoved = RemoveSessionHook(platform, root!);
 
         if (!root!.ContainsKey(StatusLineKey) && !root.ContainsKey(WrappedKey))
         {
@@ -162,7 +165,7 @@ public static class SettingsJsonPatch
         // that did not recognise itself. It is dropped, not restored.
         if (root.TryGetPropertyValue(WrappedKey, out var wrapped)
             && wrapped is not null
-            && !BridgeCommand.IsAiko(CommandIn(wrapped)))
+            && !BridgeCommand.IsAiko(platform, CommandIn(wrapped)))
         {
             root[StatusLineKey] = wrapped.DeepClone();
             root.Remove(WrappedKey);
@@ -235,16 +238,16 @@ public static class SettingsJsonPatch
     }
 
     /// Anything of Aiko's in the file. The backup lives while this is true.
-    public static bool HasAnyAikoEntries(string settingsJson)
+    public static bool HasAnyAikoEntries(PlatformConventions platform, string settingsJson)
     {
         if (!TryParseObject(settingsJson, out var root))
         {
             return false;
         }
 
-        return BridgeCommand.IsAiko(CommandIn(root![StatusLineKey]))
+        return BridgeCommand.IsAiko(platform, CommandIn(root![StatusLineKey]))
             || root.ContainsKey(WrappedKey)
-            || (SessionStartGroups(root) is { } groups && OurHookCommands(groups).Any())
+            || (SessionStartGroups(root) is { } groups && OurHookCommands(platform, groups).Any())
             || (root[EnabledPluginsKey] is JsonObject enabled && enabled.Any(p => AikoMarketplace.IsOurs(p.Key)))
             || (root[ExtraMarketplacesKey] is JsonObject marketplaces && marketplaces.ContainsKey(AikoMarketplace.Name));
     }
@@ -253,10 +256,10 @@ public static class SettingsJsonPatch
         root[key] is JsonObject { Count: 0 } && root.Remove(key);
 
     /// Whether the status line in this file is ours, whatever path or shell it names.
-    public static bool HasOurLine(string settingsJson) =>
+    public static bool HasOurLine(PlatformConventions platform, string settingsJson) =>
         TryParseObject(settingsJson, out var root)
         && root!.TryGetPropertyValue(StatusLineKey, out var line)
-        && BridgeCommand.IsAiko(CommandIn(line));
+        && BridgeCommand.IsAiko(platform, CommandIn(line));
 
     /// The output style the person picked for themselves, if any. While the persona is on, its style
     /// wins over this one, and the settings page has to say so (D-207). Aiko never changes the key.
@@ -294,26 +297,26 @@ public static class SettingsJsonPatch
             ? groups as JsonArray
             : null;
 
-    private static IEnumerable<string> OurHookCommands(JsonArray groups) =>
+    private static IEnumerable<string> OurHookCommands(PlatformConventions platform, JsonArray groups) =>
         groups
             .OfType<JsonObject>()
             .SelectMany(group => group.TryGetPropertyValue(HooksKey, out var list) && list is JsonArray array
                 ? array.OfType<JsonObject>()
                 : [])
             .Select(hook => CommandIn(hook))
-            .Where(command => BridgeCommand.IsAiko(command))
+            .Where(command => BridgeCommand.IsAiko(platform, command))
             .Select(command => command!);
 
     /// Takes our commands out of every group, then drops the groups, the SessionStart list and the
     /// hooks object that are left empty because of it. A group the person wrote keeps everything else.
-    private static bool RemoveSessionHook(JsonObject root)
+    private static bool RemoveSessionHook(PlatformConventions platform, JsonObject root)
     {
-        if (SessionStartGroups(root) is not { } groups || !OurHookCommands(groups).Any())
+        if (SessionStartGroups(root) is not { } groups || !OurHookCommands(platform, groups).Any())
         {
             return false;
         }
 
-        RemoveOurHooks(groups);
+        RemoveOurHooks(platform, groups);
 
         var hooks = (JsonObject)root[HooksKey]!;
         if (groups.Count == 0)
@@ -329,7 +332,7 @@ public static class SettingsJsonPatch
         return true;
     }
 
-    private static void RemoveOurHooks(JsonArray groups)
+    private static void RemoveOurHooks(PlatformConventions platform, JsonArray groups)
     {
         foreach (var group in groups.OfType<JsonObject>().ToList())
         {
@@ -339,7 +342,7 @@ public static class SettingsJsonPatch
             }
 
             var had = commands.Count;
-            foreach (var hook in commands.OfType<JsonObject>().Where(h => BridgeCommand.IsAiko(CommandIn(h))).ToList())
+            foreach (var hook in commands.OfType<JsonObject>().Where(h => BridgeCommand.IsAiko(platform, CommandIn(h))).ToList())
             {
                 commands.Remove(hook);
             }

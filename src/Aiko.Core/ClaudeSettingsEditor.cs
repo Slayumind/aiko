@@ -34,7 +34,7 @@ public sealed record PatchOutcome(bool Changed, PatchProblem Problem)
 /// own edit and lose what the user had. Write through a temporary file, because a half written
 /// settings file breaks Claude Code, not just Aiko. And never write at all when the patch changed
 /// nothing.
-public sealed class ClaudeSettingsEditor(IFileAccess files)
+public sealed class ClaudeSettingsEditor(IFileAccess files, PlatformConventions platform)
 {
     public const string FileName = "settings.json";
     public const string BackupName = "settings.json.aiko-backup";
@@ -51,7 +51,7 @@ public sealed class ClaudeSettingsEditor(IFileAccess files)
         }
 
         return Change(configDirectory, json =>
-            SettingsJsonPatch.TryAddBridge(json, command, out var patched) ? patched : null);
+            SettingsJsonPatch.TryAddBridge(platform, json, command, out var patched) ? patched : null);
     }
 
     /// The session start hook that reminds about folder bindings. Added with the first binding,
@@ -64,7 +64,7 @@ public sealed class ClaudeSettingsEditor(IFileAccess files)
         }
 
         return Change(configDirectory, json =>
-            SettingsJsonPatch.TryAddSessionHook(json, hookCommand, out var patched) ? patched : null);
+            SettingsJsonPatch.TryAddSessionHook(platform, json, hookCommand, out var patched) ? patched : null);
     }
 
     /// Everything of Aiko's in the file: the status line, the hook, the plugins and the marketplace.
@@ -76,7 +76,7 @@ public sealed class ClaudeSettingsEditor(IFileAccess files)
 
         var outcome = Change(configDirectory, json =>
         {
-            var bridge = SettingsJsonPatch.TryRemoveBridge(json, out var withoutBridge);
+            var bridge = SettingsJsonPatch.TryRemoveBridge(platform, json, out var withoutBridge);
             var plugins = SettingsJsonPatch.TryRemovePlugins(withoutBridge, out var withoutPlugins);
             return bridge || plugins ? withoutPlugins : null;
         });
@@ -112,7 +112,7 @@ public sealed class ClaudeSettingsEditor(IFileAccess files)
         try
         {
             var path = PathIn(configDirectory);
-            return files.Exists(path) && SettingsJsonPatch.HasAnyAikoEntries(files.ReadAllText(path));
+            return files.Exists(path) && SettingsJsonPatch.HasAnyAikoEntries(platform, files.ReadAllText(path));
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException)
         {
@@ -151,12 +151,12 @@ public sealed class ClaudeSettingsEditor(IFileAccess files)
 
         return Change(configDirectory, json =>
         {
-            if (!SettingsJsonPatch.HasOurLine(json))
+            if (!SettingsJsonPatch.HasOurLine(platform, json))
             {
                 return null;
             }
 
-            return SettingsJsonPatch.TryAddBridge(json, command, out var patched) ? patched : null;
+            return SettingsJsonPatch.TryAddBridge(platform, json, command, out var patched) ? patched : null;
         });
     }
 

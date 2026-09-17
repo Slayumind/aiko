@@ -167,7 +167,7 @@ static class PluginSync
         changed = false;
         skillsChanged = false;
         if (BridgePath.Current() is not { } bridge
-            || AikoMarketplace.PersonaCommand(bridge, Folders) is not { } command)
+            || AikoMarketplace.PersonaCommand(ThisComputer.Platform, bridge, Folders) is not { } command)
         {
             Log.Write("plugins: no command Claude Code would accept for the bridge path, nothing changed");
             return false;

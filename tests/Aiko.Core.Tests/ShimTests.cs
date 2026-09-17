@@ -76,7 +76,7 @@ public class ShimTests
             @"C:\aiko\bin\claude.exe", @"C:\Users\someone\.local\bin\claude.exe",
         };
 
-        var real = RealClaude.Find(
+        var real = RealClaude.Find(Windows,
             @"C:\aiko\bin;C:\Windows;C:\Users\someone\.local\bin",
             [@"C:\aiko\bin\"],
             files.Contains);
@@ -94,11 +94,11 @@ public class ShimTests
         };
         var path = @"C:\new;C:\old;C:\real";
 
-        var fromNew = RealClaude.Find(path, [@"C:\new"], files.Contains);
+        var fromNew = RealClaude.Find(Windows, path, [@"C:\new"], files.Contains);
         Assert.Equal(@"C:\old\claude.exe", fromNew);
 
         // The old shim was started by the new one, so it inherits the list with both in it.
-        var fromOld = RealClaude.Find(path, RealClaude.ParseSeen(RealClaude.FormatSeen([@"C:\new", @"C:\old"])), files.Contains);
+        var fromOld = RealClaude.Find(Windows, path, RealClaude.ParseSeen(Windows, RealClaude.FormatSeen(Windows, [@"C:\new", @"C:\old"])), files.Contains);
         Assert.Equal(@"C:\real\claude.exe", fromOld);
     }
 
@@ -107,14 +107,14 @@ public class ShimTests
     {
         var seen = Enumerable.Range(0, RealClaude.MaxChain + 1).Select(i => $@"C:\s{i}").ToList();
 
-        Assert.Null(RealClaude.Find(@"C:\real", seen, _ => true));
+        Assert.Null(RealClaude.Find(Windows, @"C:\real", seen, _ => true));
     }
 
     [Fact]
     public void Quoted_and_empty_path_entries_are_fine()
     {
         Assert.Equal(@"C:\Program Files\x\claude.exe",
-            RealClaude.Find(@";""C:\Program Files\x"";;", [], p => p == @"C:\Program Files\x\claude.exe"));
+            RealClaude.Find(Windows, @";""C:\Program Files\x"";;", [], p => p == @"C:\Program Files\x\claude.exe"));
     }
 
     // ---- the user PATH ----
@@ -126,7 +126,7 @@ public class ShimTests
 
         Assert.Equal(
             @"C:\aiko\bin;%USERPROFILE%\AppData\Local\Microsoft\WindowsApps;C:\Users\someone\.local\bin",
-            UserPathList.AddToFront(value, @"C:\aiko\bin"));
+            UserPathList.AddToFront(Windows, value, @"C:\aiko\bin"));
     }
 
     [Fact]
@@ -134,8 +134,8 @@ public class ShimTests
     {
         var before = @"C:\One;%TWO%\x;c:\THREE";
 
-        Assert.Equal(before, UserPathList.Remove(UserPathList.AddToFront(before, @"C:\aiko\bin"), @"C:\aiko\bin"));
-        Assert.Equal(@"C:\aiko\bin", UserPathList.AddToFront(null, @"C:\aiko\bin"));
+        Assert.Equal(before, UserPathList.Remove(Windows, UserPathList.AddToFront(Windows, before, @"C:\aiko\bin"), @"C:\aiko\bin"));
+        Assert.Equal(@"C:\aiko\bin", UserPathList.AddToFront(Windows, null, @"C:\aiko\bin"));
     }
 
     // ---- the PowerShell profile ----

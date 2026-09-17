@@ -19,16 +19,19 @@ static class CommandFolder
 {
     public static readonly string Folder = ThisComputer.Folders.CommandsFolder;
 
+    private static readonly PlatformConventions Platform = ThisComputer.Platform;
+    private static readonly string ShimFileName = CommandLinks.ShimFileName(Platform);
+
     private const string EnvironmentKey = "Environment";
     private const string PathValue = "Path";
 
-    public static bool IsSetUp => File.Exists(Path.Combine(Folder, CommandLinks.ShimFileName));
+    public static bool IsSetUp => File.Exists(Path.Combine(Folder, ShimFileName));
 
     /// The shim published with this version of the app, or null while developing.
     public static string? ShimInInstall()
     {
         var folder = Path.GetDirectoryName(Environment.ProcessPath);
-        var path = folder is null ? null : Path.Combine(folder, "shim", CommandLinks.ShimFileName);
+        var path = folder is null ? null : Path.Combine(folder, "shim", ShimFileName);
         return path is not null && File.Exists(path) ? path : null;
     }
 
@@ -48,16 +51,16 @@ static class CommandFolder
             Directory.CreateDirectory(Folder);
             ClearLeftovers();
 
-            var shim = Path.Combine(Folder, CommandLinks.ShimFileName);
+            var shim = Path.Combine(Folder, ShimFileName);
             var shimChanged = CopyIfDifferent(source, shim);
 
-            var plan = CommandLinks.Plan(settings, Directory.EnumerateFiles(Folder));
+            var plan = CommandLinks.Plan(Platform, settings, Directory.EnumerateFiles(Folder));
 
             // A new shim means every link still points at the old file's content. Links are cheap,
             // so all of them are made again.
             var toRemove = shimChanged ? LinksIn(Folder) : plan.ToRemove;
             var toAdd = shimChanged
-                ? settings.Environments.Select(e => CommandLinks.FileNameFor(e.Command)).Distinct(StringComparer.OrdinalIgnoreCase).ToList()
+                ? settings.Environments.Select(e => CommandLinks.FileNameFor(Platform, e.Command)).Distinct(StringComparer.OrdinalIgnoreCase).ToList()
                 : plan.ToAdd;
 
             foreach (var name in toRemove)
@@ -82,11 +85,11 @@ static class CommandFolder
 
     /// Puts the folder first in the user PATH. New terminals and newly started IDEs see it; the
     /// ones already open keep the PATH they started with.
-    public static void AddToPath() => ChangeUserPath(value => UserPathList.AddToFront(value, Folder));
+    public static void AddToPath() => ChangeUserPath(value => UserPathList.AddToFront(Platform, value, Folder));
 
-    public static void RemoveFromPath() => ChangeUserPath(value => UserPathList.Remove(value, Folder));
+    public static void RemoveFromPath() => ChangeUserPath(value => UserPathList.Remove(Platform, value, Folder));
 
-    public static bool IsInPath() => UserPathList.Contains(ReadUserPath(), Folder);
+    public static bool IsInPath() => UserPathList.Contains(Platform, ReadUserPath(), Folder);
 
     /// Everything Aiko put here goes: the PATH entry and the folder.
     public static void Remove()
@@ -171,9 +174,9 @@ static class CommandFolder
     }
 
     private static IReadOnlyList<string> LinksIn(string folder) =>
-        Directory.EnumerateFiles(folder, "*.exe")
+        Directory.EnumerateFiles(folder, "*" + Platform.ExecutableSuffix)
             .Select(Path.GetFileName)
-            .Where(n => n is not null && !n.Equals(CommandLinks.ShimFileName, StringComparison.OrdinalIgnoreCase))
+            .Where(n => n is not null && !n.Equals(ShimFileName, StringComparison.OrdinalIgnoreCase))
             .Select(n => n!)
             .ToList();
 

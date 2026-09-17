@@ -261,8 +261,10 @@ static string? ReadWrappedCommand(string? configDirectory)
 /// The looking only happens when there is something to run, which is never for most people.
 static string RunWrapped(string command, string input)
 {
-    var gitBash = ClaudeShellLookup.FindGitBash(File.Exists);
-    var (fileName, arguments) = ClaudeShellLookup.CallFor(gitBash, command);
+    var gitBash = WindowsGitBash.Find(
+        File.Exists,
+        WindowsGitBash.Places(ThisComputer.SystemFolders, Environment.GetEnvironmentVariable("PATH") ?? string.Empty));
+    var (fileName, arguments) = ClaudeShellLookup.CallFor(ThisComputer.Platform, gitBash, command);
 
     var start = new ProcessStartInfo(fileName)
     {
@@ -312,11 +314,19 @@ static string RunWrapped(string command, string input)
     return output.GetAwaiter().GetResult();
 }
 
-/// Where Aiko's folders are on this Windows computer. The core describes the layout; the bridge
-/// only says where the user's base folders are.
+/// What the core needs to know about this Windows computer. The core describes the rules; the
+/// bridge only fills them in from Windows.
 static class ThisComputer
 {
+    public static readonly PlatformConventions Platform = PlatformConventions.Windows;
+
     public static readonly AikoFolders Folders = new(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
+
+    public static readonly WindowsSystemFolders SystemFolders = new(
+        Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
+        Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        Environment.GetFolderPath(Environment.SpecialFolder.Windows));
 }

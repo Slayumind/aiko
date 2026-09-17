@@ -20,7 +20,7 @@ public class PluginPlanTests
     [Fact]
     public void The_installed_bridge_is_named_through_LOCALAPPDATA_so_the_command_stays_ASCII()
     {
-        var command = AikoMarketplace.PersonaCommand(LocalAppData + @"\Slayumind.Aiko\current\Aiko.Bridge.exe", Folders);
+        var command = AikoMarketplace.PersonaCommand(Windows, LocalAppData + @"\Slayumind.Aiko\current\Aiko.Bridge.exe", Folders);
 
         Assert.Equal("\"%LOCALAPPDATA%\\Slayumind.Aiko\\current\\Aiko.Bridge.exe\" plugin aiko-persona", command);
     }
@@ -30,8 +30,8 @@ public class PluginPlanTests
     {
         Assert.Equal(
             "\"D:\\src\\Aiko.Bridge.exe\" plugin aiko-persona",
-            AikoMarketplace.PersonaCommand(@"D:\src\Aiko.Bridge.exe", Folders));
-        Assert.Null(AikoMarketplace.PersonaCommand(LocalAppData + @"\dev\Aiko.Bridge.exe", Folders));
+            AikoMarketplace.PersonaCommand(Windows, @"D:\src\Aiko.Bridge.exe", Folders));
+        Assert.Null(AikoMarketplace.PersonaCommand(Windows, LocalAppData + @"\dev\Aiko.Bridge.exe", Folders));
     }
 
     [Theory]
