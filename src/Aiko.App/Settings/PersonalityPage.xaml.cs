@@ -30,7 +30,6 @@ public partial class PersonalityPage : UserControl
 
     private readonly List<EnvironmentRow> _environmentRows = [];
     private readonly ToggleButton _skillsSwitch = new();
-    private readonly StackPanel _skillList = new();
 
     private PersonaSettings _persona = SettingsStore.LoadPersona();
 
@@ -181,7 +180,7 @@ public partial class PersonalityPage : UserControl
         }
 
         var anyOn = _editor.Current.Environments.Any(e => e.Persona);
-        SkillsBox.Opacity = anyOn ? 1 : 0.45;
+        SkillsArea.Opacity = anyOn ? 1 : 0.45;
         _skillsSwitch.IsEnabled = anyOn;
 
         SkillsNote.Text = anyOn ? Strings.SkillsWork : Strings.SkillsNeedPersona;
@@ -265,7 +264,7 @@ public partial class PersonalityPage : UserControl
     private void FillSkills()
     {
         SkillRows.Children.Clear();
-        _skillList.Children.Clear();
+        SkillGroups.Children.Clear();
 
         _filling = true;
         _skillsSwitch.Style = (Style)FindResource("Switch");
@@ -292,30 +291,32 @@ public partial class PersonalityPage : UserControl
 
         foreach (var group in SkillCatalog.Groups)
         {
-            _skillList.Children.Add(DomainLabel(group.Domain));
-            for (var i = 0; i < group.Skills.Count; i++)
-            {
-                _skillList.Children.Add(SkillRow(group.Skills[i], topLine: i > 0));
-            }
+            SkillGroups.Children.Add(DomainLabel(group));
+            SkillGroups.Children.Add(DomainBox(group));
         }
 
-        SkillRows.Children.Add(_skillList);
         SkillsTitle.Text = string.Format(Strings.SectionSkills, SkillCatalog.All.Count);
         ShowSkillsOn();
     }
 
-    /// The domain name above its skills, with a line that separates it from the group before.
-    private Border DomainLabel(SkillDomain domain) => new()
+    /// The domain name and how many skills it has, above its own box.
+    private TextBlock DomainLabel(SkillGroup group) => new()
     {
-        BorderBrush = Tokens.Brush("Hairline"),
-        BorderThickness = new Thickness(0, 1, 0, 0),
-        Child = new TextBlock
-        {
-            Text = domain == SkillDomain.Projects ? Strings.SkillDomainProjects : Strings.SkillDomainGames,
-            Style = (Style)FindResource("SectionLabel"),
-            Margin = new Thickness(12, 10, 12, 0),
-        },
+        Text = $"{(group.Domain == SkillDomain.Projects ? Strings.SkillDomainProjects : Strings.SkillDomainGames)} · {group.Skills.Count}",
+        Style = (Style)FindResource("SectionLabel"),
+        Margin = new Thickness(0, 18, 0, 8),
     };
+
+    private Border DomainBox(SkillGroup group)
+    {
+        var rows = new StackPanel();
+        for (var i = 0; i < group.Skills.Count; i++)
+        {
+            rows.Children.Add(SkillRow(group.Skills[i], topLine: i > 0));
+        }
+
+        return new Border { Style = (Style)FindResource("Rows"), Child = rows };
+    }
 
     private Border SkillRow(string skill, bool topLine)
     {
@@ -353,7 +354,7 @@ public partial class PersonalityPage : UserControl
         PluginSync.Request(on ? "skills switched on" : "skills switched off");
     }
 
-    private void ShowSkillsOn() => _skillList.Opacity = _persona.SkillsOn ? 1 : 0.45;
+    private void ShowSkillsOn() => SkillGroups.Opacity = _persona.SkillsOn ? 1 : 0.45;
 
     private void SavePersona(PersonaSettings next)
     {
