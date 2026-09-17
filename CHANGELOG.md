@@ -7,6 +7,15 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Added
+
+- **Code signing policy.** [CODE-SIGNING.md](CODE-SIGNING.md) says which files will be signed through
+  SignPath Foundation and who approves each release.
+
+### Changed
+
+- **PRIVACY.md** now also lists the `PATH` folder and the PowerShell profile change.
+
 ## [0.2.3] - 2026-09-17
 
 Two skills for your calendar and Drive, skills grouped by what they are for, and a personality that
