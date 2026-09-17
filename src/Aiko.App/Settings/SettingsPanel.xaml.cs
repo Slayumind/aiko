@@ -39,7 +39,7 @@ public partial class SettingsPanel : UserControl
 
         // A small screen still shows the header; the page scrolls inside.
         Body.Height = Math.Clamp(SystemParameters.WorkArea.Height - 160, 420, 600);
-        VersionLine.Text = $"Aiko {AppVersion.Current()}";
+        VersionLine.Text = $"Aiko {AppVersion.WithCommit()}";
 
         _editor.Changed += OnEnvironmentsChanged;
         _page = page ?? EnvironmentPage(0) ?? ChecklistPageKey;
