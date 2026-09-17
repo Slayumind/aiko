@@ -47,18 +47,20 @@ sample answer for each level. She stays quiet where it matters: code, commits, f
 error explanations, security warnings, dangerous actions and bad news are written in a plain neutral
 voice. The switch works in new sessions; open sessions finish the way they started.
 
-With the personality come eight skills, each with its own switch:
+With the personality come nine skills, each with its own switch. They live in one plugin called
+`aiko`, so you call a skill by its full name:
 
 | Skill | What it is for |
 |---|---|
-| `/aiko-copy` | UI text, READMEs and release notes that read as written by a person, in Russian and English |
-| `/aiko-docs-hygiene` | a state file built from measured facts, a decision log, duplicates and contradictions found |
-| `/aiko-release-gate` | a check before a release: GO or NO-GO, irreversible changes, rollout and rollback |
-| `/aiko-glb-for-web` | a Blender model as a `.glb` that web players show correctly |
-| `/aiko-blender-to-unity` | meshes from Blender into Unity without mirrored or rotated surprises |
-| `/aiko-texturing` | texture sizes from the game camera, a sheet or a tile, UVs from world position |
-| `/aiko-palette` | colours checked against a palette and fixed with the smallest change, in OKLCH |
-| `/aiko-gamedesign-research` | one game mechanic across 30-40 games, with an illustrated review and playable stands |
+| `/aiko:copy` | UI text, READMEs and release notes that read as written by a person, in Russian and English |
+| `/aiko:docs-hygiene` | a state file built from measured facts, a decision log, duplicates and contradictions found |
+| `/aiko:release-gate` | a check before a release: GO or NO-GO, irreversible changes, rollout and rollback |
+| `/aiko:playtest` | a game tested with numbers: named test scenes, readable game state, before and after tables |
+| `/aiko:glb-for-web` | a Blender model as a `.glb` that web players show correctly |
+| `/aiko:blender-to-unity` | meshes from Blender into Unity without mirrored or rotated surprises |
+| `/aiko:texturing` | texture sizes from the game camera, a sheet or a tile, UVs from world position |
+| `/aiko:palette` | colours checked against a palette and fixed with the smallest change, in OKLCH |
+| `/aiko:gamedesign-research` | one game mechanic across 30-40 games, with an illustrated review and playable stands |
 
 Aiko installs all of this as Claude Code plugins from a marketplace on your own computer, so nothing is
 downloaded. Your own plugins, output style and settings stay as they are. If you set your own output
@@ -71,7 +73,7 @@ The skills also work without Aiko:
 
 ```
 /plugin marketplace add Slayumind/aiko
-/plugin install aiko-copy@slayumind-aiko
+/plugin install aiko@slayumind-aiko
 ```
 
 ## How Aiko gets the numbers
@@ -137,7 +139,7 @@ dotnet run --project src/Aiko.App
 - `src/Aiko.Bridge` is the small program Claude Code runs as its status line, for the personality's
   hooks and to build the personality plugin.
 - `src/Aiko.Shim` is the small `claude.exe` behind launch commands and project folders.
-- `plugins/` holds the skills, one plugin each, with tests for their scripts (`node --test` and
+- `plugins/aiko` is the skills plugin, one folder per skill, with tests for their scripts (`node --test` and
   `python -m unittest`).
 
 To change something, read [CONTRIBUTING.md](CONTRIBUTING.md) first. It also lists what Aiko won't do.

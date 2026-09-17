@@ -5,6 +5,31 @@ All notable changes to Aiko are listed here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and Aiko uses
 [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **The playtest skill.** It helps Claude test a game with numbers instead of a feeling: named test
+  scenes, game state the tools can read, before and after tables, and short tests that use the real
+  controls. It works with any engine and has notes for the web, Unity and Godot.
+- **The commit in the version line.** Settings and the diagnostics text show the build as
+  `0.2.1+42cb34b`, so two builds of one version can be told apart in a bug report.
+
+### Changed
+
+- **All skills are one plugin, `aiko`.** Claude Code used to list every skill twice, like
+  `aiko-copy:aiko-copy`. Now it lists `aiko:copy`, `aiko:palette` and so on, and you call a skill by
+  that full name. The switches in settings still work one by one: a skill you turn off is left out of
+  the plugin. The settings page shows the full name next to each switch.
+- **Skills you switched off stay off.** Aiko reads the old names from your settings and keeps them off
+  under the new ones.
+
+### Removed
+
+- **The eight one-skill plugins.** Aiko uninstalls them from every environment when it installs `aiko`.
+- **The warning about an own skill with the same name.** The full name always reaches Aiko's skill,
+  so there is nothing to warn about.
+
 ## [0.2.1] - 2026-09-16
 
 Privacy gets its own page, and the count that was hidden behind the update switch gets its own
