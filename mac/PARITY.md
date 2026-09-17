@@ -18,6 +18,10 @@ methods: one `[Theory]` with five `[InlineData]` rows counts as five, and so doe
 | CardState.cs | CardState.swift | 26 | 26 | CardStateTests (18) and PaceEstimateTests (8) |
 | UpdateInfo.cs | UpdateInfo.swift | 12 | 12 | `System.Version` is ported as `VersionNumber` |
 | AllowedHosts.cs | AllowedHosts.swift | 12 | 12 | the source scan looks for `URLSession` outside `AikoHttp.swift` instead of `new HttpClient` |
+| CubicBezier.cs | CubicBezier.swift | 9 | 9 | |
+| IslandReveal.cs | IslandReveal.swift | 8 | 8 | `IslandReveal.For` is `showFor`: `for` is a keyword in Swift |
+| IslandPlacement.cs | IslandPlacement.swift | 18 | 18 | |
+| TrayFaceMotion.cs | TrayFaceMotion.swift | 7 | 7 | |
 
 Helpers with no file of their own in the C# core:
 
