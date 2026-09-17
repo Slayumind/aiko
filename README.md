@@ -47,18 +47,18 @@ sample answer for each level. She stays quiet where it matters: code, commits, f
 error explanations, security warnings, dangerous actions and bad news are written in a plain neutral
 voice. The switch works in new sessions; open sessions finish the way they started.
 
-With the personality come nine skills, each with its own switch. They live in one plugin called
-`aiko`, so you call a skill by its full name:
+With the personality come nine skills, with one switch for all of them. They live in one plugin
+called `aiko`, so you call a skill by its full name:
 
 | Skill | What it is for |
 |---|---|
 | `/aiko:copy` | UI text, READMEs and release notes that read as written by a person, in Russian and English |
 | `/aiko:docs-hygiene` | a state file built from measured facts, a decision log, duplicates and contradictions found |
 | `/aiko:release-gate` | a check before a release: GO or NO-GO, irreversible changes, rollout and rollback |
-| `/aiko:playtest` | a game tested with numbers: named test scenes, readable game state, before and after tables |
+| `/aiko:playtest` | a game checked with numbers: the same test scene before and after a change |
 | `/aiko:glb-for-web` | a Blender model as a `.glb` that web players show correctly |
 | `/aiko:blender-to-unity` | meshes from Blender into Unity without mirrored or rotated surprises |
-| `/aiko:texturing` | texture sizes from the game camera, a sheet or a tile, UVs from world position |
+| `/aiko:texturing` | ready files for textures: a size that fits the camera, and sheets to paint over |
 | `/aiko:palette` | colours checked against a palette and fixed with the smallest change, in OKLCH |
 | `/aiko:gamedesign-research` | one game mechanic across 30-40 games, with an illustrated review and playable stands |
 

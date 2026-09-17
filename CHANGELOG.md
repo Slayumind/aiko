@@ -19,13 +19,14 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 - **All skills are one plugin, `aiko`.** Claude Code used to list every skill twice, like
   `aiko-copy:aiko-copy`. Now it lists `aiko:copy`, `aiko:palette` and so on, and you call a skill by
-  that full name. The switches in settings still work one by one: a skill you turn off is left out of
-  the plugin. The settings page shows the full name next to each switch.
-- **Skills you switched off stay off.** Aiko reads the old names from your settings and keeps them off
-  under the new ones.
+  that full name. The settings page shows the full names.
+- **One switch for all skills.** The skills come and go together, like the plugin in Claude Code.
+  If you had switched off every skill, they stay off; if any skill was on, they are all on now.
+- **Simpler texts for the texturing and playtest skills** in settings.
 
 ### Removed
 
+- **A switch for each skill.** One switch for all of them took its place.
 - **The eight one-skill plugins.** Aiko uninstalls them from every environment when it installs `aiko`.
 - **The warning about an own skill with the same name.** The full name always reaches Aiko's skill,
   so there is nothing to warn about.
