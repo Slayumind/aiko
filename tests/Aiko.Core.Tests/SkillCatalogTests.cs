@@ -17,11 +17,4 @@ public class SkillCatalogTests
         Assert.Equal("/aiko:copy", SkillCatalog.Call("copy"));
         Assert.Equal("/aiko:gamedesign-research", SkillCatalog.Call("gamedesign-research"));
     }
-
-    [Fact]
-    public void The_count_follows_the_switches()
-    {
-        Assert.Equal(9, SkillCatalog.OnCount(PersonaSettings.Default));
-        Assert.Equal(8, SkillCatalog.OnCount(PersonaSettings.Default.WithSkill("palette", false)));
-    }
 }

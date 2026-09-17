@@ -4,8 +4,8 @@ using Aiko.Core;
 namespace Aiko.App;
 
 /// The skills plugin that ships with this copy of Aiko, in the "plugins" folder next to the app, and
-/// its copy in the local marketplace (D-234). The copy holds only the skills the person left on;
-/// Claude Code installs from it, and it is renewed only when that set of files changed.
+/// its copy in the local marketplace (D-234). Claude Code installs from the copy; the copy is renewed
+/// only when a file of the plugin changed.
 static class SkillShelf
 {
     private static readonly string Source = Path.Combine(AppContext.BaseDirectory, SkillPlugin.FolderName, SkillCatalog.PluginName);
@@ -18,17 +18,17 @@ static class SkillShelf
     /// The skills inside the shipped plugin, by folder name.
     public static IReadOnlyList<string> Skills => (Found ??= FindShipped()).Skills;
 
-    /// Copies the plugin with the skills that are on into the marketplace folder when that differs
-    /// from the copy already there, and removes every other plugin folder, such as the one-skill
-    /// plugins of older versions. Returns whether the copy changed.
-    public static bool CopyTo(string marketplaceFolder, PersonaSettings persona)
+    /// Copies the plugin into the marketplace folder when its files differ from the copy already
+    /// there, and removes every other plugin folder, such as the one-skill plugins of older
+    /// versions. Returns whether the copy changed.
+    public static bool CopyTo(string marketplaceFolder)
     {
         var target = Path.Combine(marketplaceFolder, SkillPlugin.FolderName);
         var changed = false;
 
         if (Shipped is { } plugin)
         {
-            changed = Copy(plugin, Path.Combine(target, plugin.Name), persona);
+            changed = Copy(Path.Combine(target, plugin.Name));
         }
 
         if (Directory.Exists(target))
@@ -42,11 +42,10 @@ static class SkillShelf
         return changed;
     }
 
-    private static bool Copy(SkillPlugin plugin, string to, PersonaSettings persona)
+    private static bool Copy(string to)
     {
         var files = Directory.EnumerateFiles(Source, "*", SearchOption.AllDirectories)
             .Select(path => (Relative: Path.GetRelativePath(Source, path), Path: path))
-            .Where(f => SkillPlugin.Includes(f.Relative, persona.IsSkillOn))
             .ToList();
 
         var hash = SkillPlugin.ContentHash(files.Select(f => (f.Relative, File.ReadAllBytes(f.Path))));

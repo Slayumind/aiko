@@ -1913,8 +1913,8 @@
   [
     "SectionSkills",
     [
-      "SKILLS · {0} OF {1}",
-      "НАВЫКИ · {0} ИЗ {1}"
+      "SKILLS · {0}",
+      "НАВЫКИ · {0}"
     ]
   ],
   [
@@ -1922,6 +1922,13 @@
     [
       "Skills work in environments where the personality is on. Call them by their full name, like /aiko:copy.",
       "Навыки работают в средах, где включена личность. Зови их полным именем, например /aiko:copy."
+    ]
+  ],
+  [
+    "SkillsSwitch",
+    [
+      "Aiko's skills",
+      "Навыки Aiko"
     ]
   ],
   [
@@ -1955,8 +1962,8 @@
   [
     "SkillAikoPlaytest",
     [
-      "Game feel in numbers: named test scenes, game state the tools can read, before and after.",
-      "Ощущение от игры в цифрах: тестовые сцены, состояние игры для проверок, замеры до и после."
+      "Checks a game with numbers: the same test scene before and after a change.",
+      "Проверяет игру цифрами: одна и та же тестовая сцена до и после правки."
     ]
   ],
   [
@@ -1969,8 +1976,8 @@
   [
     "SkillAikoTexturing",
     [
-      "Texel density from the camera: when a model gets its own sheet, when to tile.",
-      "Плотность текселей от камеры: когда свой лист, когда тайлинг."
+      "Ready files for textures: a size that fits the camera, and sheets to paint over.",
+      "Готовые файлы для текстур: размер под камеру и шаблоны листов для отрисовки."
     ]
   ],
   [

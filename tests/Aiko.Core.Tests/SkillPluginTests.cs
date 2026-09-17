@@ -46,34 +46,6 @@ public class SkillPluginTests
         Assert.Null(SkillPlugin.FromManifest(null));
     }
 
-    [Theory]
-    [InlineData(".claude-plugin/plugin.json", true)]
-    [InlineData("skills/copy/SKILL.md", true)]
-    [InlineData(@"skills\copy\references\voice.md", true)]
-    [InlineData("skills/palette/SKILL.md", false)]
-    [InlineData(@"skills\palette\scripts\palette.mjs", false)]
-    [InlineData("skills/README.md", true)]
-    public void A_switched_off_skill_is_left_out_of_the_copy(string path, bool included)
-    {
-        var persona = PersonaSettings.Default.WithSkill("palette", false);
-
-        Assert.Equal(included, SkillPlugin.Includes(path, persona.IsSkillOn));
-    }
-
-    [Fact]
-    public void Switching_a_skill_changes_the_hash_of_the_copy()
-    {
-        var files = new[] { File(".claude-plugin/plugin.json", "{}"), File("skills/copy/SKILL.md", "c"), File("skills/palette/SKILL.md", "p") };
-        string HashFor(PersonaSettings persona) =>
-            SkillPlugin.ContentHash(files.Where(f => SkillPlugin.Includes(f.Item1, persona.IsSkillOn)));
-
-        var allOn = HashFor(PersonaSettings.Default);
-        var paletteOff = HashFor(PersonaSettings.Default.WithSkill("palette", false));
-
-        Assert.NotEqual(allOn, paletteOff);
-        Assert.Equal(allOn, HashFor(PersonaSettings.Default.WithSkill("palette", false).WithSkill("palette", true)));
-    }
-
     [Fact]
     public void The_marketplace_lists_the_persona_and_then_the_skills_plugin()
     {

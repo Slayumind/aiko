@@ -851,10 +851,13 @@
     <value>The commit for this fix has no character:</value>
   </data>
   <data name="SectionSkills" xml:space="preserve">
-    <value>SKILLS · {0} OF {1}</value>
+    <value>SKILLS · {0}</value>
   </data>
   <data name="SkillsWork" xml:space="preserve">
     <value>Skills work in environments where the personality is on. Call them by their full name, like /aiko:copy.</value>
+  </data>
+  <data name="SkillsSwitch" xml:space="preserve">
+    <value>Aiko's skills</value>
   </data>
   <data name="SkillsNeedPersona" xml:space="preserve">
     <value>Turn the personality on in at least one environment, and the skills start working.</value>
@@ -869,13 +872,13 @@
     <value>One fact in one place, a decision log, contradictions found.</value>
   </data>
   <data name="SkillAikoPlaytest" xml:space="preserve">
-    <value>Game feel in numbers: named test scenes, game state the tools can read, before and after.</value>
+    <value>Checks a game with numbers: the same test scene before and after a change.</value>
   </data>
   <data name="SkillAikoBlenderToUnity" xml:space="preserve">
     <value>A model from Blender to Unity: axes, normals, export and import.</value>
   </data>
   <data name="SkillAikoTexturing" xml:space="preserve">
-    <value>Texel density from the camera: when a model gets its own sheet, when to tile.</value>
+    <value>Ready files for textures: a size that fits the camera, and sheets to paint over.</value>
   </data>
   <data name="SkillAikoGlbForWeb" xml:space="preserve">
     <value>A .glb for the web: size, axes, compression, a blank view where the model should be.</value>

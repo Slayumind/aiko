@@ -121,16 +121,15 @@ static class Program
         }
 
         // Aiko's skills the way the plugin sync installs them, into throwaway folders:
-        // --try-skills <marketplace folder> <config folder>. Three runs: all skills on; the same again,
-        // so nothing is copied or updated; then with palette switched off, so one update.
+        // --try-skills <marketplace folder> <config folder>. Three runs: install; the same again, so
+        // nothing is copied or updated; then the skills switched off, so the plugin is disabled.
         if (args is ["--try-skills", var marketFolder, var skillConfig, ..])
         {
             var cli = new ClaudeCli(ClaudeLauncher.FindClaude()!);
             var plugin = AikoMarketplace.PluginId(SkillCatalog.PluginName);
             for (var run = 1; run <= 3; run++)
             {
-                var persona = run < 3 ? PersonaSettings.Default : PersonaSettings.Default.WithSkill("palette", false);
-                var changed = SkillShelf.CopyTo(marketFolder, persona);
+                var changed = SkillShelf.CopyTo(marketFolder);
                 var file = Path.Combine(marketFolder, ".claude-plugin", "marketplace.json");
                 Directory.CreateDirectory(Path.GetDirectoryName(file)!);
                 File.WriteAllText(file, AikoMarketplace.Json(@"""C:\none\Aiko.Bridge.exe"" plugin aiko-persona", SkillShelf.Shipped));
@@ -146,8 +145,13 @@ static class Program
                     steps.Add(new PluginStep(PluginStepKind.Update, plugin));
                 }
 
+                if (run == 3)
+                {
+                    steps.Add(new PluginStep(PluginStepKind.Disable, plugin));
+                }
+
                 var results = PluginReconciler.Apply(cli, skillConfig, steps);
-                Log.Write($"--try-skills run {run}: skills {string.Join(", ", SkillShelf.Skills.Where(persona.IsSkillOn))}, copied {changed}, "
+                Log.Write($"--try-skills run {run}: skills {string.Join(", ", SkillShelf.Skills)}, copied {changed}, "
                     + string.Join(", ", results.Select(r => $"{r.Step.Kind} {r.Step.Target} exit {r.Result.ExitCode}")));
             }
 

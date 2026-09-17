@@ -840,11 +840,14 @@ public static class Strings
     /// The commit for this fix has no character:
     public static string SampleCommit => Get("SampleCommit");
 
-    /// SKILLS · {0} OF {1}
+    /// SKILLS · {0}
     public static string SectionSkills => Get("SectionSkills");
 
     /// Skills work in environments where the personality is on. Call them by their full name, li...
     public static string SkillsWork => Get("SkillsWork");
+
+    /// Aiko's skills
+    public static string SkillsSwitch => Get("SkillsSwitch");
 
     /// Turn the personality on in at least one environment, and the skills start working.
     public static string SkillsNeedPersona => Get("SkillsNeedPersona");
@@ -858,13 +861,13 @@ public static class Strings
     /// One fact in one place, a decision log, contradictions found.
     public static string SkillAikoDocsHygiene => Get("SkillAikoDocsHygiene");
 
-    /// Game feel in numbers: named test scenes, game state the tools can read, before and after.
+    /// Checks a game with numbers: the same test scene before and after a change.
     public static string SkillAikoPlaytest => Get("SkillAikoPlaytest");
 
     /// A model from Blender to Unity: axes, normals, export and import.
     public static string SkillAikoBlenderToUnity => Get("SkillAikoBlenderToUnity");
 
-    /// Texel density from the camera: when a model gets its own sheet, when to tile.
+    /// Ready files for textures: a size that fits the camera, and sheets to paint over.
     public static string SkillAikoTexturing => Get("SkillAikoTexturing");
 
     /// A .glb for the web: size, axes, compression, a blank view where the model should be.
