@@ -20,7 +20,9 @@ version="${version:-0.0.0}"
 
 # Between releases the version does not change (D-236), so the commit is what tells two builds
 # apart in a bug report. The Windows build gets the same from the .NET SDK.
-commit="$(git rev-parse --short HEAD 2>/dev/null || true)"
+# A tree copied to the Mac without its .git says nothing to `git`, so the caller can pass the
+# commit in. tools/local-install-mac.ps1 does that.
+commit="${AIKO_COMMIT:-$(git rev-parse --short HEAD 2>/dev/null || true)}"
 
 swift build -c release --arch arm64 --arch x86_64
 
