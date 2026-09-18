@@ -18,6 +18,13 @@ enum SettingsCheck {
             ? shell.openSettings(at: .checklist, item: item(value))
             : shell.openSettings(at: page(value, shell: shell))
 
+        // AIKO_TRY_GROW makes the window as tall as the page; "end" keeps its bottom on screen
+        // when the page is taller than the screen itself.
+        if let grow = ProcessInfo.processInfo.environment["AIKO_TRY_GROW"] {
+            window.show()
+            window.growToPage(showingTheEnd: grow == "end")
+        }
+
         Log.write("self test: settings at \(window.state.page.key), "
             + "window \(size(window.frame)) at \(place(window.frame)), "
             + "panel \(size(window.panelFrame)) at \(place(window.panelFrame)), "

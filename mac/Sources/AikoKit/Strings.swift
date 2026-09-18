@@ -308,6 +308,7 @@ public enum Strings {
         "FaceChibi": ("Chibi", "Чиби"),
         "FaceEmoji": ("Emoji", "Смайлик"),
         "FaceWhere": ("This is how Aiko looks in the tray, on the island and in windows.", "Так Aiko выглядит в трее, на острове и в окнах."),
+        "FaceWhereMac": ("That's how Aiko looks in the menu bar, on the island and in the windows.", "Так Aiko выглядит в строке меню, на острове и в окнах."),
         "SectionTemperament": ("TEMPERAMENT", "ТЕМПЕРАМЕНТ"),
         "TemperamentQuiet": ("Quiet", "Тихий"),
         "TemperamentNormal": ("Normal", "Обычный"),
@@ -1156,6 +1157,9 @@ public enum Strings {
 
     /// This is how Aiko looks in the tray, on the island and in windows.
     public static var faceWhere: String { Strings.get("FaceWhere") }
+
+    /// That's how Aiko looks in the menu bar, on the island and in the windows.
+    public static var faceWhereMac: String { Strings.get("FaceWhereMac") }
 
     /// TEMPERAMENT
     public static var sectionTemperament: String { Strings.get("SectionTemperament") }

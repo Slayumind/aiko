@@ -65,6 +65,22 @@ final class SettingsWindow {
 
     var frame: NSRect { window.frame }
 
+    /// For a picture of a page taller than the window: the window grows to the page instead of
+    /// scrolling, so one screenshot holds the whole of it. The twin of SettingsPanel.GrowToPage.
+    /// A page taller than the screen cannot be shown whole, so the caller says which end to keep.
+    func growToPage(showingTheEnd: Bool = false) {
+        let hosting = NSHostingView(rootView: SettingsPanelView(state: state, bodyHeight: nil))
+        window.contentView = hosting
+        hosting.layoutSubtreeIfNeeded()
+        window.setContentSize(hosting.fittingSize)
+
+        guard let room = NSScreen.main?.visibleFrame else { return }
+        let bottom = showingTheEnd
+            ? room.minY
+            : max(room.minY, room.maxY - window.frame.height)
+        window.setFrameOrigin(NSPoint(x: room.midX - (window.frame.width / 2), y: bottom))
+    }
+
     /// The body of the panel inside the window, which is what a check measures.
     var panelFrame: NSRect {
         window.frame.insetBy(dx: Theme.shadowRoom, dy: Theme.shadowRoom)
@@ -127,7 +143,9 @@ final class EscapeWindow: NSWindow {
 /// size while the pages change, so nothing under the mouse moves.
 struct SettingsPanelView: View {
     @ObservedObject var state: SettingsState
-    let bodyHeight: Double
+
+    /// Nil lets the window grow to the page, which only a self test asks for.
+    let bodyHeight: Double?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -140,7 +158,7 @@ struct SettingsPanelView: View {
                 Rectangle().fill(Theme.hairline).frame(width: 1)
                 page
             }
-            .frame(height: bodyHeight)
+            .frame(height: bodyHeight.map { CGFloat($0) })
         }
         .frame(width: SettingsLayout.width)
         .background(Theme.surface)

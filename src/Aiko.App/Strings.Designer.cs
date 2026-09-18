@@ -825,6 +825,9 @@ public static class Strings
     /// This is how Aiko looks in the tray, on the island and in windows.
     public static string FaceWhere => Get("FaceWhere");
 
+    /// That's how Aiko looks in the menu bar, on the island and in the windows.
+    public static string FaceWhereMac => Get("FaceWhereMac");
+
     /// TEMPERAMENT
     public static string SectionTemperament => Get("SectionTemperament");
 

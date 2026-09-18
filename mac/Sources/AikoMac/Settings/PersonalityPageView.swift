@@ -57,7 +57,7 @@ struct PersonalityPageView: View {
                     next.face = face
                     state.savePersona(next)
                 }
-            Control.rowHint(Strings.faceWhere).padding(.top, 8)
+            Control.rowHint(Strings.faceWhereMac).padding(.top, 8)
 
             Control.sectionLabel(Strings.sectionTemperament).padding(.top, 22).padding(.bottom, 8)
             SegmentBar(
@@ -167,7 +167,7 @@ struct PersonalityPageView: View {
         return VStack(alignment: .leading, spacing: 10) {
             HStack {
                 Spacer(minLength: 40)
-                chat(Strings.sampleQuestion)
+                chat(Strings.sampleQuestion, Theme.ink)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 7)
                     .background(Theme.raised)
@@ -179,10 +179,10 @@ struct PersonalityPageView: View {
                 FaceView(style: state.persona.face, face: face, size: 20)
                 VStack(alignment: .leading, spacing: 10) {
                     if !answer.open.isEmpty {
-                        chat(answer.open).foregroundStyle(Self.voiceInk)
+                        chat(answer.open, Self.voiceInk)
                     }
-                    chat(answer.body)
-                    chat(answer.close).foregroundStyle(Self.voiceInk)
+                    chat(answer.body, Theme.ink)
+                    chat(answer.close, Self.voiceInk)
                 }
             }
         }
@@ -196,10 +196,15 @@ struct PersonalityPageView: View {
                 .strokeBorder(Theme.hairline, lineWidth: 1))
     }
 
-    private func chat(_ text: String) -> Text {
+    /// The colour comes in rather than being set here and overridden from outside: a Text that
+    /// already has a foreground style keeps it, and her own words would come out the same grey as
+    /// the work in the middle.
+    private func chat(_ text: String, _ colour: Color) -> some View {
         Text(text)
             .font(Theme.sans(Theme.textNumber))
-            .foregroundStyle(Theme.ink)
+            .foregroundStyle(colour)
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var commitLine: some View {

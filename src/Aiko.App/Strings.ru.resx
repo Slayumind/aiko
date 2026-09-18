@@ -835,6 +835,9 @@
   <data name="FaceWhere" xml:space="preserve">
     <value>Так Aiko выглядит в трее, на острове и в окнах.</value>
   </data>
+  <data name="FaceWhereMac" xml:space="preserve">
+    <value>Так Aiko выглядит в строке меню, на острове и в окнах.</value>
+  </data>
   <data name="SectionTemperament" xml:space="preserve">
     <value>ТЕМПЕРАМЕНТ</value>
   </data>
