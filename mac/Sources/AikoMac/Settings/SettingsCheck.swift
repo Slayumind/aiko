@@ -33,7 +33,10 @@ enum SettingsCheck {
         if let checklist = window.state.checklist {
             Log.write("self test: checklist \(checklist.progress.done) of \(checklist.progress.total) done, "
                 + "open item \(checklist.opened.map(String.init(describing:)) ?? "none"), "
-                + "finish enabled: \(checklist.canFinish)")
+                + "finish enabled: \(checklist.canFinish), "
+                // A model made outside SettingsState.newChecklist has nobody listening, so Finish
+                // writes everything and the window stays where it is.
+                + "finish wired: \(checklist.onFinished != nil)")
 
             for item in ChecklistLayout.order {
                 Log.write("self test: item \(item) \(checklist.state(of: item)) "

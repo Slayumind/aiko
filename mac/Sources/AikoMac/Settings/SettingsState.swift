@@ -204,8 +204,12 @@ final class SettingsState: ObservableObject {
         self.page = page ?? SettingsNav.firstPage(environments, .macOS, Store.home)
 
         editor.onChanged = { [weak self] in self?.onEnvironmentsChanged() }
+
+        // Through newChecklist, never ChecklistModel directly: a model made without it has no
+        // onFinished, so Finish did all the work and the window stayed on the checklist. That is
+        // the path a fresh machine takes, where the window opens on the checklist right away.
         if self.page == .checklist {
-            checklist = ChecklistModel(openFirst: nil)
+            checklist = newChecklist(at: nil)
         }
     }
 

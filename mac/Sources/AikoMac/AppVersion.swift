@@ -44,6 +44,10 @@ enum LoginItem {
     }
 
     static func set(_ enabled: Bool) {
+        // Turning off what is already off asks macOS to unregister a service it never had, which
+        // fails with "Operation not permitted" and wrote an error line after every Finish.
+        guard enabled != isEnabled() else { return }
+
         do {
             if enabled {
                 try SMAppService.mainApp.register()
