@@ -155,9 +155,12 @@ enum CommandFolder {
     private static func copyIfDifferent(_ source: String, _ target: String) throws -> Bool {
         let manager = FileManager.default
         let from = try manager.attributesOfItem(atPath: source)
+        // The times are compared to the second, not exactly: the file system keeps nanoseconds and
+        // setAttributes below writes microseconds, so an exact test never matched and the shim was
+        // copied and every command relinked at every start.
         if let to = try? manager.attributesOfItem(atPath: target),
            to[.size] as? Int == from[.size] as? Int,
-           to[.modificationDate] as? Date == from[.modificationDate] as? Date {
+           sameSecond(to[.modificationDate] as? Date, from[.modificationDate] as? Date) {
             return false
         }
 
@@ -165,6 +168,11 @@ enum CommandFolder {
         try manager.copyItem(atPath: source, toPath: target)
         try? manager.setAttributes([.modificationDate: from[.modificationDate] as Any], ofItemAtPath: target)
         return true
+    }
+
+    private static func sameSecond(_ one: Date?, _ other: Date?) -> Bool {
+        guard let one, let other else { return false }
+        return abs(one.timeIntervalSince(other)) < 1
     }
 
     private static func link(_ shim: String, _ link: String) {
