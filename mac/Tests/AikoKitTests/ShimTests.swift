@@ -75,6 +75,54 @@ struct ShimTests {
                 settings: .empty, userProfile: Self.home) == .passThrough)
     }
 
+    // ---- what the shim changes for the Claude Code it starts ----
+
+    static let macSettings = EnvironmentSettings([
+        AikoEnvironment("Work", ["/Users/someone/.claude"]),
+        AikoEnvironment("Personal", ["/Users/someone/.claude-personal"], projectFolders: ["/Users/someone/personal"]),
+    ])
+
+    static func macPlan(_ invokedAs: String, _ workingDirectory: String) -> ShimPlan {
+        ShimLaunch.decide(
+            .macOS, invokedAs: invokedAs, workingDirectory: workingDirectory,
+            settings: macSettings, userProfile: "/Users/someone")
+    }
+
+    @Test
+    func aBoundFolderSetsTheConfigFolderAndNamesTheEnvironment() {
+        let changes = Self.macPlan("/Users/someone/Library/Caches/Aiko/bin/claude", "/Users/someone/personal/app")
+            .variableChanges
+
+        #expect(changes == [
+            VariableChange("CLAUDE_CONFIG_DIR", "/Users/someone/.claude-personal"),
+            VariableChange("AIKO_ENVIRONMENT", "Personal"),
+            VariableChange("AIKO_LAUNCH", "binding"),
+        ])
+    }
+
+    @Test
+    func environment1TakesTheVariableOutInsteadOfSettingIt() {
+        // Claude Code pointed at .claude by hand keeps .claude.json somewhere else, so an empty
+        // value is not the same as no value at all.
+        let changes = Self.macPlan("claude", "/tmp").variableChanges
+
+        #expect(changes.first == VariableChange("CLAUDE_CONFIG_DIR", nil))
+        #expect(changes.first?.value == nil)
+    }
+
+    @Test
+    func aCommandSaysItWasAnExplicitChoice() {
+        let changes = Self.macPlan("aiko-work", "/Users/someone/personal/app").variableChanges
+
+        #expect(changes.contains(VariableChange("AIKO_LAUNCH", "command")))
+        #expect(changes.contains(VariableChange("AIKO_ENVIRONMENT", "Work")))
+    }
+
+    @Test
+    func aStartAikoKnowsNothingAboutChangesNothing() {
+        #expect(ShimPlan.passThrough.variableChanges.isEmpty)
+    }
+
     // ---- the real claude.exe ----
 
     @Test

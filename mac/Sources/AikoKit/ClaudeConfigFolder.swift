@@ -12,6 +12,10 @@ import Foundation
 /// Here the platform says how a path is spelled, so a Windows path and a Mac path both come out
 /// the way their own system writes them.
 public enum ClaudeConfigFolder {
+    /// The variable Claude Code reads, which the shim sets and the bridge asks about. Both
+    /// executables used to spell it themselves, and a typo in one of them is silent.
+    public static let variableName = "CLAUDE_CONFIG_DIR"
+
     public static let defaultFolderName = ".claude"
 
     public static let accountFileName = ".claude.json"
