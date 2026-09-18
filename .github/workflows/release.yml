@@ -144,6 +144,54 @@ jobs:
           }
           [IO.File]::WriteAllText("$PWD/releases/SHA256SUMS.txt", (($lines -join "`n") + "`n"), [Text.Encoding]::ASCII)
 
+      - name: Decide whether the checksums get signed
+        # Auto-update installs a file only when SHA256SUMS.txt carries a good signature. The real
+        # public key replaces the placeholder in update-public-key.pem, and from then on a release
+        # without the signing secret stops here. Until then the release goes out unsigned, as before.
+        id: signing
+        shell: pwsh
+        env:
+          HAS_UPDATE_KEY: ${{ secrets.AIKO_UPDATE_SIGNING_KEY != '' }}
+        run: |
+          $hasPublicKey = (Get-Content update-public-key.pem -Raw).Contains('-----BEGIN PUBLIC KEY-----')
+          $hasSecret = $env:HAS_UPDATE_KEY -eq 'true'
+          if ($hasPublicKey -and -not $hasSecret) {
+            throw "update-public-key.pem holds a real key, but the secret AIKO_UPDATE_SIGNING_KEY is not set."
+          }
+          if (-not $hasSecret) {
+            Write-Output "::warning::No update signing key yet. SHA256SUMS.txt is not signed."
+          }
+          elseif (-not $hasPublicKey) {
+            Write-Output "::warning::update-public-key.pem is still a placeholder. The signature is not checked."
+          }
+          "sign=$($hasSecret.ToString().ToLower())" >> $env:GITHUB_OUTPUT
+          "verify=$(($hasSecret -and $hasPublicKey).ToString().ToLower())" >> $env:GITHUB_OUTPUT
+
+      - name: Sign the checksums
+        # DER ECDSA P-256 over the raw bytes of the file, the format both apps check. The key is
+        # written only for the one openssl call, readable by this user only, and removed on exit
+        # even when signing fails. It is never printed.
+        if: steps.signing.outputs.sign == 'true'
+        shell: bash
+        env:
+          AIKO_UPDATE_SIGNING_KEY: ${{ secrets.AIKO_UPDATE_SIGNING_KEY }}
+        run: |
+          set -euo pipefail
+          umask 077
+          key="$RUNNER_TEMP/update-signing-key.pem"
+          trap 'rm -f "$key"' EXIT
+          printf '%s\n' "$AIKO_UPDATE_SIGNING_KEY" > "$key"
+          openssl dgst -sha256 -sign "$key" -out releases/SHA256SUMS.txt.sig releases/SHA256SUMS.txt
+
+      - name: Check the signature with the key in the repository
+        # Catches a secret and a public key that are not a pair before anybody downloads the
+        # release. The app would refuse every update signed like that.
+        if: steps.signing.outputs.verify == 'true'
+        shell: bash
+        run: |
+          openssl dgst -sha256 -verify update-public-key.pem \
+            -signature releases/SHA256SUMS.txt.sig releases/SHA256SUMS.txt
+
       - name: Attest where this was built
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4
         with:

@@ -32,3 +32,16 @@ gh attestation verify Slayumind.Aiko-win-Setup.exe --repo Slayumind/aiko
 
 The attestation shows that the GitHub Actions workflow in this repository built the file from the
 commit named in the release.
+
+## Update signatures
+
+This prepares automatic updates, planned for 0.3. The release workflow signs `SHA256SUMS.txt` with
+an ECDSA P-256 key and adds the signature as `SHA256SUMS.txt.sig`. The public key is
+`update-public-key.pem` in this repository. Aiko will install an update only when the signature is
+good and the file matches its line in `SHA256SUMS.txt`. Releases made before the key existed have
+no signature. To check a signed release yourself:
+
+```
+openssl dgst -sha256 -verify update-public-key.pem -signature SHA256SUMS.txt.sig SHA256SUMS.txt
+sha256sum -c SHA256SUMS.txt
+```
