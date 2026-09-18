@@ -94,8 +94,8 @@ public struct UpdateInstaller {
             return refuse(opened.verdict, version)
         }
 
-        // The workflow gives the zip its own name and Aiko does not need to know it: one release,
-        // one zip.
+        // The workflow puts the version in the name of the zip and Aiko does not need to know
+        // it: one release, one zip.
         guard let zipName = list.onlyFileEndingWith(".zip") else {
             return refuse(.notListed, version)
         }

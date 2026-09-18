@@ -86,9 +86,10 @@ public struct UpdateManifest: Sendable {
     /// The one file of the release whose name ends this way, or nil when there is none or more
     /// than one.
     ///
-    /// It is how the macOS app finds its zip without knowing what the workflow called it: the
-    /// release carries one installer and one zip, so ".zip" names it. Two of them mean the release
-    /// changed shape, and then Aiko installs nothing rather than guessing which one is the app.
+    /// It is how the macOS app finds its zip without knowing what the workflow called it. A
+    /// release carries the Windows installer, a disk image and one zip, so ".zip" names that zip.
+    /// Two of them mean the release changed shape, and then Aiko installs nothing rather than
+    /// guessing which one is the app.
     public func onlyFileEndingWith(_ suffix: String) -> String? {
         var found: String?
         for name in hashes.keys where name.hasSuffix(suffix) {
