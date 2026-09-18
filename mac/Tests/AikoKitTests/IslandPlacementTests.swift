@@ -155,4 +155,16 @@ struct IslandPlacementTests {
         #expect(position.along == 1)
         expectClose(1040 - 60, IslandPlacement.place(position, 34, 60, Self.work).y, places: 3)
     }
+
+    /// The landing strip reaches past the screen edge by its own corner radius, so the corners on
+    /// that side fall outside the screen and the edge reads flat (D-186).
+    @Test
+    func theLandingStripReachesPastTheEdgeItSitsOn() {
+        let strip = Box(100, 0, 200, 60)
+
+        #expect(IslandPlacement.pastTheEdge(strip, .top, by: 8) == Box(100, -8, 200, 68))
+        #expect(IslandPlacement.pastTheEdge(strip, .bottom, by: 8) == Box(100, 0, 200, 68))
+        #expect(IslandPlacement.pastTheEdge(strip, .left, by: 8) == Box(92, 0, 208, 60))
+        #expect(IslandPlacement.pastTheEdge(strip, .right, by: 8) == Box(100, 0, 208, 60))
+    }
 }

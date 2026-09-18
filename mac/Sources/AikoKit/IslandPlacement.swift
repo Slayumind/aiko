@@ -121,6 +121,17 @@ public enum IslandPlacement {
         }
     }
 
+    /// The landing strip reaches past the screen edge by its own corner radius, so the two corners
+    /// on that side fall outside the screen and the edge reads flat (D-186).
+    public static func pastTheEdge(_ box: Box, _ edge: ScreenEdge, by radius: Double) -> Box {
+        switch edge {
+        case .top: return Box(box.x, box.y - radius, box.width, box.height + radius)
+        case .bottom: return Box(box.x, box.y, box.width, box.height + radius)
+        case .left: return Box(box.x - radius, box.y, box.width + radius, box.height)
+        case .right: return Box(box.x, box.y, box.width + radius, box.height)
+        }
+    }
+
     /// Along a top or bottom edge the rings stand in a row; along a left or right edge they stand
     /// in a column, so the island takes less room along the edge.
     public static func isHorizontal(_ edge: ScreenEdge) -> Bool {
