@@ -54,11 +54,19 @@ enum Screens {
         let menuBar = max(menuBarHeight, screen.safeAreaInsets.top)
         let underTheMenuBar = screen.frame.maxY - (menuBar > 0 ? menuBar : screen.frame.maxY - visible.maxY)
 
+        // macOS leaves two points between a window and the Dock. The island is meant to touch the
+        // edge it sits on, the way it touches the taskbar on Windows, so that gap is taken back
+        // wherever the Dock actually is. With no Dock on a side there is nothing to take.
+        let toTheDock: CGFloat = 2
+        let left = visible.minX > screen.frame.minX ? visible.minX - toTheDock : visible.minX
+        let right = visible.maxX < screen.frame.maxX ? visible.maxX + toTheDock : visible.maxX
+        let bottom = visible.minY > screen.frame.minY ? visible.minY - toTheDock : visible.minY
+
         return box(NSRect(
-            x: visible.minX,
-            y: visible.minY,
-            width: visible.width,
-            height: max(0, underTheMenuBar - visible.minY)))
+            x: left,
+            y: bottom,
+            width: max(0, right - left),
+            height: max(0, underTheMenuBar - bottom)))
     }
 
     /// The room on the screen an island is over, taken from its middle: a window that hangs over

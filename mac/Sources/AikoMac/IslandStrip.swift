@@ -10,9 +10,8 @@ import AppKit
 /// NSVisualEffectView, so the glass itself is three lines.
 @MainActor
 final class IslandStrip {
-    /// The corner macOS gives its own panes. The strip reaches past the screen edge by exactly
-    /// this, so the two corners on that side fall outside the screen and the edge reads flat.
-    private static let radius: CGFloat = 8
+    /// The corners of the pane come from the island's own rule: the side against the screen edge is
+    /// flat, the others carry the radius macOS gives its panes.
 
     /// How see-through the whole pane is, on top of the material. The owner picks it by eye:
     /// AIKO_STRIP_ALPHA=0.6 and so on.
@@ -20,20 +19,6 @@ final class IslandStrip {
         guard let text = ProcessInfo.processInfo.environment["AIKO_STRIP_ALPHA"],
               let value = Double(text) else { return 0.5 }
         return CGFloat(min(max(value, 0.1), 1))
-    }
-
-    /// A rounded rectangle for NSVisualEffectView.maskImage: the documented way to give one
-    /// corners. The image stretches from the middle, so it fits any size of the strip.
-    private static func mask(radius: CGFloat) -> NSImage {
-        let side = radius * 2 + 1
-        let image = NSImage(size: NSSize(width: side, height: side), flipped: false) { rect in
-            NSColor.black.setFill()
-            NSBezierPath(roundedRect: rect, xRadius: radius, yRadius: radius).fill()
-            return true
-        }
-        image.capInsets = NSEdgeInsets(top: radius, left: radius, bottom: radius, right: radius)
-        image.resizingMode = .stretch
-        return image
     }
 
     /// Which of the system's own glasses to use. The owner picks it by eye, so it can be changed
@@ -53,6 +38,8 @@ final class IslandStrip {
     private let panel: NSPanel
     private let glass = NSVisualEffectView()
     private let edging = NSView()
+    private let line = CAShapeLayer()
+    private let shape = CAShapeLayer()
     private let glide = Tween()
     private var edge: ScreenEdge?
 
@@ -69,7 +56,9 @@ final class IslandStrip {
         panel.level = .floating
         panel.backgroundColor = .clear
         panel.isOpaque = false
-        panel.hasShadow = false
+        // Windows draws the edge of a rounded window itself, and the strip there has no line of its
+        // own. The same on macOS: the shadow gives the pane the system's own edge.
+        panel.hasShadow = true
         panel.ignoresMouseEvents = true
         panel.hidesOnDeactivate = false
         panel.isReleasedWhenClosed = false
@@ -85,16 +74,17 @@ final class IslandStrip {
         glass.blendingMode = .behindWindow
         glass.state = .active
         glass.appearance = NSAppearance(named: .darkAqua)
-        glass.maskImage = IslandStrip.mask(radius: IslandStrip.radius)
         glass.autoresizingMask = [.width, .height]
+        glass.wantsLayer = true
 
         // The hairline the island and the card carry, drawn in a view of its own so the glass
         // itself keeps no layer of ours.
         edging.autoresizingMask = [.width, .height]
         edging.wantsLayer = true
-        edging.layer?.borderWidth = 1
-        edging.layer?.borderColor = Theme.nsHairline.cgColor
-        edging.layer?.cornerRadius = IslandStrip.radius
+        edging.layer?.addSublayer(line)
+        line.fillColor = nil
+        line.strokeColor = NSColor.white.withAlphaComponent(0.14).cgColor
+        line.lineWidth = 1
         glass.addSubview(edging)
 
 
@@ -103,18 +93,55 @@ final class IslandStrip {
 
     /// Moves the strip to where the island would land. A new edge glides there; sliding along the
     /// same edge follows the pointer at once, which is what keeps it feeling attached.
-    /// Keeps the hairline on the pane when it is resized. The glide moves the window frame by
-    /// frame, so the edging is laid out on every step, not only at the end.
-    private func layOutEdging() {
-        edging.frame = NSRect(origin: .zero, size: panel.frame.size)
+    /// Lays out the shape of the pane: the side against the screen edge is flat and has no line,
+    /// exactly like the island (IslandLayout.corners). The glide moves the window frame by frame,
+    /// so this runs on every step, not only at the end.
+    private func layOutPane() {
+        let size = panel.frame.size
+        edging.frame = NSRect(origin: .zero, size: size)
+
+        let corners = IslandLayout.corners(edge ?? .top, docked: true)
+        let path = IslandStrip.path(NSRect(origin: .zero, size: size), corners)
+
+        shape.path = path
+        glass.layer?.mask = shape
+
+        // The line follows the same shape, half a point inside so it is not cut in half by the mask.
+        line.frame = edging.bounds
+        line.path = IslandStrip.path(NSRect(origin: .zero, size: size).insetBy(dx: 0.5, dy: 0.5), corners)
+    }
+
+    /// A rounded rectangle with a radius per corner, clockwise from the top left.
+    private static func path(_ rect: NSRect, _ corners: Corners) -> CGPath {
+        let path = CGMutablePath()
+        let topLeft = CGFloat(corners.topLeft)
+        let topRight = CGFloat(corners.topRight)
+        let bottomRight = CGFloat(corners.bottomRight)
+        let bottomLeft = CGFloat(corners.bottomLeft)
+
+        // AppKit counts from the bottom left, so the corner named top is drawn at maxY.
+        path.move(to: CGPoint(x: rect.minX + bottomLeft, y: rect.minY))
+        path.addLine(to: CGPoint(x: rect.maxX - bottomRight, y: rect.minY))
+        path.addArc(tangent1End: CGPoint(x: rect.maxX, y: rect.minY),
+                    tangent2End: CGPoint(x: rect.maxX, y: rect.minY + bottomRight), radius: bottomRight)
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY - topRight))
+        path.addArc(tangent1End: CGPoint(x: rect.maxX, y: rect.maxY),
+                    tangent2End: CGPoint(x: rect.maxX - topRight, y: rect.maxY), radius: topRight)
+        path.addLine(to: CGPoint(x: rect.minX + topLeft, y: rect.maxY))
+        path.addArc(tangent1End: CGPoint(x: rect.minX, y: rect.maxY),
+                    tangent2End: CGPoint(x: rect.minX, y: rect.maxY - topLeft), radius: topLeft)
+        path.addLine(to: CGPoint(x: rect.minX, y: rect.minY + bottomLeft))
+        path.addArc(tangent1End: CGPoint(x: rect.minX, y: rect.minY),
+                    tangent2End: CGPoint(x: rect.minX + bottomLeft, y: rect.minY), radius: bottomLeft)
+        path.closeSubpath()
+        return path
     }
 
     func place(on landing: Box, edge: ScreenEdge) {
         let moving = self.edge != nil && self.edge != edge
         self.edge = edge
 
-        let pane = Screens.rect(
-            IslandPlacement.pastTheEdge(landing, edge, by: Double(IslandStrip.radius)))
+        let pane = Screens.rect(landing)
 
         if panel.isVisible, moving, !Motion.reduceMotion {
             let from = panel.frame.origin
@@ -126,14 +153,14 @@ final class IslandStrip {
                         width: pane.width,
                         height: pane.height),
                     display: true)
-                self?.layOutEdging()
+                self?.layOutPane()
             }
             return
         }
 
         glide.stop()
         panel.setFrame(pane, display: true)
-        layOutEdging()
+        layOutPane()
 
         if !panel.isVisible {
             panel.orderFrontRegardless()
