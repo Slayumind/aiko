@@ -98,11 +98,11 @@ public enum Strings {
         "UpdateFailed": ("Couldn't check. Try again in a few minutes.", "Проверить не получилось. Попробуй через несколько минут."),
         "UpdateInstallNow": ("Download and install", "Скачать и установить"),
         "UpdateDownloading": ("Aiko is downloading {0}…", "Aiko скачивает {0}…"),
-        "UpdateReady": ("Aiko {0} is ready. Restart to start using it.", "Aiko {0} готова. Перезапусти, чтобы её включить."),
+        "UpdateReady": ("Aiko {0} is ready. Restart to start using it.", "Aiko {0} готова. Перезапусти, чтобы перейти на неё."),
         "UpdateRestartNow": ("Restart now", "Перезапустить"),
         "UpdateNotInstalled": ("This copy wasn't put here by the installer, so Aiko can't replace it. Use the download page.", "Эту копию поставил не установщик, поэтому Aiko не может её заменить. Открой страницу загрузки."),
         "UpdateDownloadFailed": ("The download didn't finish. Nothing was installed.", "Скачать не удалось. Ничего не установлено."),
-        "UpdateNoKeyYet": ("This build has no update key yet, so it can't install updates. Use the download page.", "В этой сборке ещё нет ключа обновлений, поэтому она не ставит обновления. Открой страницу загрузки."),
+        "UpdateNoKeyYet": ("This build has no update key yet, so it can't install updates. Use the download page.", "В этой сборке ещё нет ключа проверки, поэтому обновления она не ставит. Открой страницу загрузки."),
         "UpdateBadSignature": ("The release didn't pass the signature check. Nothing was installed.", "Релиз не прошёл проверку подписи. Ничего не установлено."),
         "UpdateBadFile": ("The downloaded file doesn't match the release list. Nothing was installed.", "Скачанный файл не совпадает со списком релиза. Ничего не установлено."),
         "LanguageSystem": ("System", "Системный"),
@@ -122,7 +122,7 @@ public enum Strings {
         "WizardBridgeNotFound": ("Aiko can't find its bridge program.", "Aiko не нашла свою программу-посредник."),
         "WizardUpdatesWhat": ("Once a day, Aiko asks slayumind.org for the latest version and says that one copy of Aiko ran today. The ID it sends changes every day.", "Раз в сутки Aiko спрашивает у slayumind.org свежую версию и сообщает, что одна копия сегодня работала. ID меняется каждый день."),
         "WizardDoneTray": ("Aiko is down by the clock. Rest the mouse on it for the card, click to keep it open.", "Aiko внизу, рядом с часами. Наведи мышь — покажется карточка, кликни — останется открытой."),
-        "WizardDoneMenuBar": ("Aiko is up by the clock. Rest the mouse on it to see the card, or click it to keep the card open.", "Aiko наверху, рядом с часами. Наведи мышь, чтобы увидеть карточку, или щёлкни, чтобы она осталась открытой."),
+        "WizardDoneMenuBar": ("Aiko is up by the clock. Rest the mouse on it for the card, click to keep it open.", "Aiko наверху, рядом с часами. Наведи мышь — покажется карточка, кликни — останется открытой."),
         "WizardDoneIsland": ("Aiko is at the top of your screen. Drag it anywhere and it sticks to the nearest edge.", "Aiko вверху экрана. Перетащи куда угодно — она прилипнет к ближайшему краю."),
         "WizardDoneOverflow": ("Windows 11 hides new app icons under the arrow next to the clock. Open the arrow and drag Aiko onto the taskbar: under the arrow, the card can't open.", "Windows 11 прячет значки новых приложений под стрелку рядом с часами. Открой её и перетащи Aiko на панель задач: под стрелкой карточка не открывается."),
         "WizardDoneMenuBarRoom": ("A full menu bar hides the icons furthest from the clock. Close a menu bar app if Aiko doesn't fit.", "Если в строке меню нет места, macOS прячет значки, что дальше от часов. Закрой лишнее приложение, если Aiko не помещается."),
@@ -254,8 +254,8 @@ public enum Strings {
         "SetupDone": ("Environments are set up.", "Среды настроены."),
         "Restart": ("Start over", "Начать заново"),
         "RestartWhat": ("Removes the environments from Aiko and opens the checklist right here.", "Убирает среды из Aiko и открывает чек-лист здесь же."),
-        "RestartLine": ("Aiko removes the environments, its lines and plugins in settings.json, the commands {0}, the folder bindings and its folder in PATH, and turns the PowerShell profile functions back on. Accounts and history stay in the folders.", "Из Aiko уйдут среды, строки и плагины Aiko в settings.json, команды {0}, привязки папок и папка Aiko в PATH, а функции в профиле PowerShell вернутся. Аккаунты и история в папках останутся."),
-        "RestartLineMac": ("Aiko removes the environments, its lines and plugins in settings.json, the commands {0}, the folder bindings and its line in ~/.zshrc. Accounts and history stay in the folders.", "Из Aiko уйдут среды, строки и плагины Aiko в settings.json, команды {0}, привязки папок и строка Aiko в ~/.zshrc. Аккаунты и история в папках останутся."),
+        "RestartLine": ("Aiko forgets the environments and puts back everything it changed: the lines and plugins in settings.json, the commands {0}, the folder bindings, its folder in PATH and the functions in the PowerShell profile. Accounts and history stay in the folders.", "Aiko забудет среды и вернёт всё, что меняла: строки и плагины в settings.json, команды {0}, привязки папок, свою папку в PATH и функции в профиле PowerShell. Аккаунты и история в папках останутся."),
+        "RestartLineMac": ("Aiko forgets the environments and puts back everything it changed: the lines and plugins in settings.json, the commands {0}, the folder bindings and its line in ~/.zshrc. Accounts and history stay in the folders.", "Aiko забудет среды и вернёт всё, что меняла: строки и плагины в settings.json, команды {0}, привязки папок и свою строку в ~/.zshrc. Аккаунты и история в папках останутся."),
         "RestartBin": ("And move {0} to the Recycle Bin", "И переместить {0} в Корзину"),
         "RestartTrash": ("And move {0} to the Trash", "И переместить {0} в Корзину"),
         "RestartKeep": (".claude stays either way.", ".claude остаётся в любом случае."),
@@ -346,7 +346,7 @@ public enum Strings {
         "SkillAikoPlaytest": ("Checks a game with numbers: the same test scene before and after a change.", "Проверяет игру цифрами: одна и та же тестовая сцена до и после правки."),
         "SkillAikoBlenderToUnity": ("A model from Blender to Unity: axes, normals, export and import.", "Модель из Blender в Unity: оси, нормали, экспорт и импорт."),
         "SkillAikoTexturing": ("Ready files for textures: a size that fits the camera, and sheets to paint over.", "Готовые файлы для текстур: размер под камеру и шаблоны листов для отрисовки."),
-        "SkillAikoGlbForWeb": ("A .glb for the web: size, axes, compression, a blank view where the model should be.", "Файл .glb для веба: размер, оси, сжатие, пустое окно вместо модели."),
+        "SkillAikoGlbForWeb": ("A .glb for the web: size, axes, compression, and why the model shows as a blank view.", "Файл .glb для веба: размер, оси, сжатие и почему вместо модели пустое окно."),
         "SkillAikoPalette": ("Fit a color to the palette in OKLCH with the smallest change.", "Подогнать цвет под палитру в OKLCH с самой маленькой правкой."),
         "SkillAikoGamedesignResearch": ("30–40 games with the mechanic you need: an overview with screenshots, and interactive demos on request.", "30–40 игр с нужной механикой: обзор со скриншотами и интерактивные стенды по запросу."),
         "SkillAikoCalendar": ("Plan the day in Google Calendar, find free time, add events after your yes.", "План дня по Google Calendar, свободное время, события — после твоего «да»."),
@@ -604,7 +604,7 @@ public enum Strings {
     /// Aiko is down by the clock. Rest the mouse on it for the card, click to keep it open.
     public static var wizardDoneTray: String { Strings.get("WizardDoneTray") }
 
-    /// Aiko is up by the clock. Rest the mouse on it to see the card, or click it to keep the ca...
+    /// Aiko is up by the clock. Rest the mouse on it for the card, click to keep it open.
     public static var wizardDoneMenuBar: String { Strings.get("WizardDoneMenuBar") }
 
     /// Aiko is at the top of your screen. Drag it anywhere and it sticks to the nearest edge.
@@ -1000,10 +1000,10 @@ public enum Strings {
     /// Removes the environments from Aiko and opens the checklist right here.
     public static var restartWhat: String { Strings.get("RestartWhat") }
 
-    /// Aiko removes the environments, its lines and plugins in settings.json, the commands {0}, ...
+    /// Aiko forgets the environments and puts back everything it changed: the lines and plugins ...
     public static var restartLine: String { Strings.get("RestartLine") }
 
-    /// Aiko removes the environments, its lines and plugins in settings.json, the commands {0}, ...
+    /// Aiko forgets the environments and puts back everything it changed: the lines and plugins ...
     public static var restartLineMac: String { Strings.get("RestartLineMac") }
 
     /// And move {0} to the Recycle Bin
@@ -1276,7 +1276,7 @@ public enum Strings {
     /// Ready files for textures: a size that fits the camera, and sheets to paint over.
     public static var skillAikoTexturing: String { Strings.get("SkillAikoTexturing") }
 
-    /// A .glb for the web: size, axes, compression, a blank view where the model should be.
+    /// A .glb for the web: size, axes, compression, and why the model shows as a blank view.
     public static var skillAikoGlbForWeb: String { Strings.get("SkillAikoGlbForWeb") }
 
     /// Fit a color to the palette in OKLCH with the smallest change.

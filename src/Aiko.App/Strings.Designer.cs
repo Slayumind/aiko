@@ -267,7 +267,7 @@ public static class Strings
     /// Aiko is down by the clock. Rest the mouse on it for the card, click to keep it open.
     public static string WizardDoneTray => Get("WizardDoneTray");
 
-    /// Aiko is up by the clock. Rest the mouse on it to see the card, or click it to keep the ca...
+    /// Aiko is up by the clock. Rest the mouse on it for the card, click to keep it open.
     public static string WizardDoneMenuBar => Get("WizardDoneMenuBar");
 
     /// Aiko is at the top of your screen. Drag it anywhere and it sticks to the nearest edge.
@@ -663,10 +663,10 @@ public static class Strings
     /// Removes the environments from Aiko and opens the checklist right here.
     public static string RestartWhat => Get("RestartWhat");
 
-    /// Aiko removes the environments, its lines and plugins in settings.json, the commands {0}, ...
+    /// Aiko forgets the environments and puts back everything it changed: the lines and plugins ...
     public static string RestartLine => Get("RestartLine");
 
-    /// Aiko removes the environments, its lines and plugins in settings.json, the commands {0}, ...
+    /// Aiko forgets the environments and puts back everything it changed: the lines and plugins ...
     public static string RestartLineMac => Get("RestartLineMac");
 
     /// And move {0} to the Recycle Bin
@@ -939,7 +939,7 @@ public static class Strings
     /// Ready files for textures: a size that fits the camera, and sheets to paint over.
     public static string SkillAikoTexturing => Get("SkillAikoTexturing");
 
-    /// A .glb for the web: size, axes, compression, a blank view where the model should be.
+    /// A .glb for the web: size, axes, compression, and why the model shows as a blank view.
     public static string SkillAikoGlbForWeb => Get("SkillAikoGlbForWeb");
 
     /// Fit a color to the palette in OKLCH with the smallest change.

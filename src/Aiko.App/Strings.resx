@@ -278,7 +278,7 @@
     <value>Aiko is down by the clock. Rest the mouse on it for the card, click to keep it open.</value>
   </data>
   <data name="WizardDoneMenuBar" xml:space="preserve">
-    <value>Aiko is up by the clock. Rest the mouse on it to see the card, or click it to keep the card open.</value>
+    <value>Aiko is up by the clock. Rest the mouse on it for the card, click to keep it open.</value>
   </data>
   <data name="WizardDoneIsland" xml:space="preserve">
     <value>Aiko is at the top of your screen. Drag it anywhere and it sticks to the nearest edge.</value>
@@ -674,10 +674,10 @@
     <value>Removes the environments from Aiko and opens the checklist right here.</value>
   </data>
   <data name="RestartLine" xml:space="preserve">
-    <value>Aiko removes the environments, its lines and plugins in settings.json, the commands {0}, the folder bindings and its folder in PATH, and turns the PowerShell profile functions back on. Accounts and history stay in the folders.</value>
+    <value>Aiko forgets the environments and puts back everything it changed: the lines and plugins in settings.json, the commands {0}, the folder bindings, its folder in PATH and the functions in the PowerShell profile. Accounts and history stay in the folders.</value>
   </data>
   <data name="RestartLineMac" xml:space="preserve">
-    <value>Aiko removes the environments, its lines and plugins in settings.json, the commands {0}, the folder bindings and its line in ~/.zshrc. Accounts and history stay in the folders.</value>
+    <value>Aiko forgets the environments and puts back everything it changed: the lines and plugins in settings.json, the commands {0}, the folder bindings and its line in ~/.zshrc. Accounts and history stay in the folders.</value>
   </data>
   <data name="RestartBin" xml:space="preserve">
     <value>And move {0} to the Recycle Bin</value>
@@ -950,7 +950,7 @@
     <value>Ready files for textures: a size that fits the camera, and sheets to paint over.</value>
   </data>
   <data name="SkillAikoGlbForWeb" xml:space="preserve">
-    <value>A .glb for the web: size, axes, compression, a blank view where the model should be.</value>
+    <value>A .glb for the web: size, axes, compression, and why the model shows as a blank view.</value>
   </data>
   <data name="SkillAikoPalette" xml:space="preserve">
     <value>Fit a color to the palette in OKLCH with the smallest change.</value>

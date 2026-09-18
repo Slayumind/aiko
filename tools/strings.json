@@ -409,7 +409,7 @@
     "UpdateReady",
     [
       "Aiko {0} is ready. Restart to start using it.",
-      "Aiko {0} готова. Перезапусти, чтобы её включить."
+      "Aiko {0} готова. Перезапусти, чтобы перейти на неё."
     ]
   ],
   [
@@ -437,7 +437,7 @@
     "UpdateNoKeyYet",
     [
       "This build has no update key yet, so it can't install updates. Use the download page.",
-      "В этой сборке ещё нет ключа обновлений, поэтому она не ставит обновления. Открой страницу загрузки."
+      "В этой сборке ещё нет ключа проверки, поэтому обновления она не ставит. Открой страницу загрузки."
     ]
   ],
   [
@@ -576,8 +576,8 @@
   [
     "WizardDoneMenuBar",
     [
-      "Aiko is up by the clock. Rest the mouse on it to see the card, or click it to keep the card open.",
-      "Aiko наверху, рядом с часами. Наведи мышь, чтобы увидеть карточку, или щёлкни, чтобы она осталась открытой."
+      "Aiko is up by the clock. Rest the mouse on it for the card, click to keep it open.",
+      "Aiko наверху, рядом с часами. Наведи мышь — покажется карточка, кликни — останется открытой."
     ]
   ],
   [
@@ -1500,15 +1500,15 @@
   [
     "RestartLine",
     [
-      "Aiko removes the environments, its lines and plugins in settings.json, the commands {0}, the folder bindings and its folder in PATH, and turns the PowerShell profile functions back on. Accounts and history stay in the folders.",
-      "Из Aiko уйдут среды, строки и плагины Aiko в settings.json, команды {0}, привязки папок и папка Aiko в PATH, а функции в профиле PowerShell вернутся. Аккаунты и история в папках останутся."
+      "Aiko forgets the environments and puts back everything it changed: the lines and plugins in settings.json, the commands {0}, the folder bindings, its folder in PATH and the functions in the PowerShell profile. Accounts and history stay in the folders.",
+      "Aiko забудет среды и вернёт всё, что меняла: строки и плагины в settings.json, команды {0}, привязки папок, свою папку в PATH и функции в профиле PowerShell. Аккаунты и история в папках останутся."
     ]
   ],
   [
     "RestartLineMac",
     [
-      "Aiko removes the environments, its lines and plugins in settings.json, the commands {0}, the folder bindings and its line in ~/.zshrc. Accounts and history stay in the folders.",
-      "Из Aiko уйдут среды, строки и плагины Aiko в settings.json, команды {0}, привязки папок и строка Aiko в ~/.zshrc. Аккаунты и история в папках останутся."
+      "Aiko forgets the environments and puts back everything it changed: the lines and plugins in settings.json, the commands {0}, the folder bindings and its line in ~/.zshrc. Accounts and history stay in the folders.",
+      "Aiko забудет среды и вернёт всё, что меняла: строки и плагины в settings.json, команды {0}, привязки папок и свою строку в ~/.zshrc. Аккаунты и история в папках останутся."
     ]
   ],
   [
@@ -2144,8 +2144,8 @@
   [
     "SkillAikoGlbForWeb",
     [
-      "A .glb for the web: size, axes, compression, a blank view where the model should be.",
-      "Файл .glb для веба: размер, оси, сжатие, пустое окно вместо модели."
+      "A .glb for the web: size, axes, compression, and why the model shows as a blank view.",
+      "Файл .glb для веба: размер, оси, сжатие и почему вместо модели пустое окно."
     ]
   ],
   [

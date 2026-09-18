@@ -206,7 +206,7 @@
     <value>Aiko скачивает {0}…</value>
   </data>
   <data name="UpdateReady" xml:space="preserve">
-    <value>Aiko {0} готова. Перезапусти, чтобы её включить.</value>
+    <value>Aiko {0} готова. Перезапусти, чтобы перейти на неё.</value>
   </data>
   <data name="UpdateRestartNow" xml:space="preserve">
     <value>Перезапустить</value>
@@ -218,7 +218,7 @@
     <value>Скачать не удалось. Ничего не установлено.</value>
   </data>
   <data name="UpdateNoKeyYet" xml:space="preserve">
-    <value>В этой сборке ещё нет ключа обновлений, поэтому она не ставит обновления. Открой страницу загрузки.</value>
+    <value>В этой сборке ещё нет ключа проверки, поэтому обновления она не ставит. Открой страницу загрузки.</value>
   </data>
   <data name="UpdateBadSignature" xml:space="preserve">
     <value>Релиз не прошёл проверку подписи. Ничего не установлено.</value>
@@ -278,7 +278,7 @@
     <value>Aiko внизу, рядом с часами. Наведи мышь — покажется карточка, кликни — останется открытой.</value>
   </data>
   <data name="WizardDoneMenuBar" xml:space="preserve">
-    <value>Aiko наверху, рядом с часами. Наведи мышь, чтобы увидеть карточку, или щёлкни, чтобы она осталась открытой.</value>
+    <value>Aiko наверху, рядом с часами. Наведи мышь — покажется карточка, кликни — останется открытой.</value>
   </data>
   <data name="WizardDoneIsland" xml:space="preserve">
     <value>Aiko вверху экрана. Перетащи куда угодно — она прилипнет к ближайшему краю.</value>
@@ -674,10 +674,10 @@
     <value>Убирает среды из Aiko и открывает чек-лист здесь же.</value>
   </data>
   <data name="RestartLine" xml:space="preserve">
-    <value>Из Aiko уйдут среды, строки и плагины Aiko в settings.json, команды {0}, привязки папок и папка Aiko в PATH, а функции в профиле PowerShell вернутся. Аккаунты и история в папках останутся.</value>
+    <value>Aiko забудет среды и вернёт всё, что меняла: строки и плагины в settings.json, команды {0}, привязки папок, свою папку в PATH и функции в профиле PowerShell. Аккаунты и история в папках останутся.</value>
   </data>
   <data name="RestartLineMac" xml:space="preserve">
-    <value>Из Aiko уйдут среды, строки и плагины Aiko в settings.json, команды {0}, привязки папок и строка Aiko в ~/.zshrc. Аккаунты и история в папках останутся.</value>
+    <value>Aiko забудет среды и вернёт всё, что меняла: строки и плагины в settings.json, команды {0}, привязки папок и свою строку в ~/.zshrc. Аккаунты и история в папках останутся.</value>
   </data>
   <data name="RestartBin" xml:space="preserve">
     <value>И переместить {0} в Корзину</value>
@@ -950,7 +950,7 @@
     <value>Готовые файлы для текстур: размер под камеру и шаблоны листов для отрисовки.</value>
   </data>
   <data name="SkillAikoGlbForWeb" xml:space="preserve">
-    <value>Файл .glb для веба: размер, оси, сжатие, пустое окно вместо модели.</value>
+    <value>Файл .glb для веба: размер, оси, сжатие и почему вместо модели пустое окно.</value>
   </data>
   <data name="SkillAikoPalette" xml:space="preserve">
     <value>Подогнать цвет под палитру в OKLCH с самой маленькой правкой.</value>
