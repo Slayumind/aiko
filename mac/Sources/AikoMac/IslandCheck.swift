@@ -19,6 +19,8 @@ enum IslandCheck {
             unfold(shell.islandForCheck())
         case "drag", "glass":
             drag(shell.islandForCheck())
+        case "strip":
+            strip(shell.islandForCheck())
         case "face":
             face(shell, shell.islandForCheck())
         case "face-icon":
@@ -26,6 +28,28 @@ enum IslandCheck {
         default:
             Log.write("self test: there is no check called \(what)")
             quit(after: 0.2)
+        }
+    }
+
+    /// Holds the landing strip on screen so a person, or a screenshot from another computer, can
+    /// look at the glass. The twin of --try-strip on Windows. AIKO_TRY_SECONDS sets how long, and
+    /// AIKO_TRY_EDGE which edge: top, bottom, left, right.
+    private static func strip(_ island: IslandWindow) {
+        let seconds = Double(ProcessInfo.processInfo.environment["AIKO_TRY_SECONDS"] ?? "") ?? 3
+        let edge: ScreenEdge = switch ProcessInfo.processInfo.environment["AIKO_TRY_EDGE"] {
+        case "bottom": .bottom
+        case "left": .left
+        case "right": .right
+        default: .top
+        }
+
+        island.showStripForCheck(on: edge)
+        Log.write("self test: strip held on the \(edge) edge for \(seconds) s")
+
+        after(seconds) {
+            island.hideStripForCheck()
+            Log.write("self test: strip gone")
+            quit(after: 0.3)
         }
     }
 
