@@ -3,8 +3,8 @@
 The macOS app repeats the Windows core, so every ported file keeps its behaviour and every xUnit
 case has a Swift case with the same name and the same numbers. Test counts below are cases, not
 methods: one `[Theory]` with five `[InlineData]` rows counts as five, and so does the Swift
-`@Test(arguments:)` that mirrors it. 835 cases in `dotnet test`, 1009 in `swift test` (637 test
-methods). The 49 the Swift side does not have are named at the bottom; the ones it has and Windows
+`@Test(arguments:)` that mirrors it. `dotnet test` prints cases and says 811; `swift test` prints
+methods, not cases, and says 613. The 49 the Swift side does not have are named at the bottom; the ones it has and Windows
 does not belong to the two small programs, whose decisions sit inline in `Program.cs` on Windows,
 and to the card words, the island and the settings window, which sit in `Aiko.App` on Windows
 where no test can reach them.
@@ -46,9 +46,9 @@ a row cannot change in one core and stay as it was in the other. See `spec/cases
 | SettingsJsonPatch.cs | SettingsJsonPatch.swift | 20 | 26 | the 6 extra come from SessionReminderTests; a method answers "nothing to change" with nil instead of a bool and an out parameter |
 | ClaudeSettingsEditor.cs, IFileAccess.cs | ClaudeSettingsEditor.swift | 38 | 38 | ClaudeSettingsEditorTests (19) and PluginRemovalTests (19); `FileAccess` is IFileAccess with Swift errors in place of exceptions |
 | PluginPlan.cs, PluginReconciler.cs | PluginPlan.swift, PluginReconciler.swift | 33 | 33 | the reconciler's clock comes in as a function instead of TimeProvider |
-| PlatformConventions.cs | PlatformConventions.swift | 26 | 27 | PlatformConventionsTests (7), PlatformPinTests (6), MacPlatformTests (13 against 14) |
-| ClaudeShell.cs | PlatformConventions.swift | 12 | 4 | the other 8 cases are about WindowsGitBash |
-| AikoFolders.cs | AikoFolders.swift | 5 | 5 | the macOS layout is pinned in MacPlatformTests and in `spec/cases/folder-layout/` |
+| PlatformConventions.cs | PlatformConventions.swift | 2 | 2 | what each system names and where it puts things moved to `spec/cases/platform-paths/`, three systems side by side; what is left needs a settings object or this computer |
+| ClaudeShell.cs | PlatformConventions.swift | 4 | 4 | the shell of each system is in `spec/cases/platform-paths/`; the 8 cases left over are about WindowsGitBash |
+| AikoFolders.cs | AikoFolders.swift | 5 | 5 | both layouts, the trailing separator included, are pinned in `spec/cases/folder-layout/` |
 | SnapshotName.cs | SnapshotName.swift | 23 | 23 | SnapshotNameTests (10) and SnapshotNamePinTests (13) |
 | SnapshotFile.cs | SnapshotFile.swift | 9 | 9 | |
 | EnvironmentSnapshots.cs | EnvironmentSnapshots.swift | 6 | 6 | |
@@ -64,7 +64,7 @@ a row cannot change in one core and stay as it was in the other. See `spec/cases
 | AppSettings.cs | AppSettings.swift | 15 | 15 | |
 | WizardChecklist.cs | WizardChecklist.swift | 13 | 13 | |
 | CredentialFile.cs | CredentialFile.swift | 10 | 10 | `TryParse` with an out parameter is `parse`, which answers nil |
-| — | SharedCaseTests.swift | 4 | 4 | the case files under `spec/cases/`, read by both suites |
+| — | SharedCaseTests.swift | 5 | 5 | the case files under `spec/cases/`, read by both suites |
 | — | UpdateInstaller.swift | — | 6 | the macOS half of an update: the zip, `ditto` and the bundle swap. Windows has Velopack instead, and UpdateInstall.cs holds the same steps around it where no xUnit case can reach them |
 
 The words and the numbers of the card sit in `src/Aiko.App` on Windows, where no xUnit case can

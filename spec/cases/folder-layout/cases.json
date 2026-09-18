@@ -50,6 +50,26 @@
         "personaPluginsFolder": "/Users/someone/Library/Caches/Aiko/plugins",
         "logFile": "/Users/someone/Library/Caches/Aiko/log.txt"
       }
+    },
+    {
+      "comment": "A base folder written with a separator at its end does not double it.",
+      "platform": "macos",
+      "settingsBase": "/Users/someone/Library/Application Support/",
+      "localBase": "/Users/someone/Library/Caches/",
+      "paths": {
+        "settingsFolder": "/Users/someone/Library/Application Support/Aiko",
+        "localFolder": "/Users/someone/Library/Caches/Aiko"
+      }
+    },
+    {
+      "comment": "The same on Windows, where the separator is a backslash.",
+      "platform": "windows",
+      "settingsBase": "C:\\Users\\someone\\AppData\\Roaming\\",
+      "localBase": "C:\\Users\\someone\\AppData\\Local\\",
+      "paths": {
+        "settingsFolder": "C:\\Users\\someone\\AppData\\Roaming\\Aiko",
+        "localFolder": "C:\\Users\\someone\\AppData\\Local\\Aiko"
+      }
     }
   ]
 }
