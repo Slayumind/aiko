@@ -14,6 +14,18 @@ enum Store {
         AppSettings.fromJson(read(folders.settingsFile))
     }
 
+    /// The settings file is written back whole, so a field this version does not know about would
+    /// be lost. Only the island's place is saved from here, and only after the person moved it.
+    static func saveSettings(_ settings: AppSettings) {
+        write(folders.settingsFile, settings.toJson())
+    }
+
+    /// Which face Aiko wears (D-215). Read when a face is about to be drawn: the file is tiny and
+    /// the settings window can change it while Aiko runs.
+    static func persona() -> PersonaSettings {
+        PersonaSettings.fromJson(read(folders.personaFile) ?? "")
+    }
+
     static func environments() -> EnvironmentSettings {
         EnvironmentSettings.fromJson(read(folders.environmentsFile))
     }
