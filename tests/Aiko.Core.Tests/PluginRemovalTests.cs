@@ -78,7 +78,7 @@ public class PluginRemovalTests
     [InlineData("{}", false)]
     public void Anything_of_ours_counts_as_Aiko_being_in_the_file(string json, bool ours)
     {
-        Assert.Equal(ours, SettingsJsonPatch.HasAnyAikoEntries(json));
+        Assert.Equal(ours, SettingsJsonPatch.HasAnyAikoEntries(Windows, json));
     }
 
     // ---- the file and its copy ----
@@ -87,7 +87,7 @@ public class PluginRemovalTests
     public void Removal_takes_the_plugins_out_with_the_status_line()
     {
         var files = new FakeFiles().With(Settings, WithPlugins);
-        var editor = new ClaudeSettingsEditor(files);
+        var editor = new ClaudeSettingsEditor(files, Windows);
         editor.Add(Folder, BridgeCommand.For(@"C:\a\Aiko.Bridge.exe"));
 
         Assert.True(editor.Remove(Folder).Changed);
@@ -103,7 +103,7 @@ public class PluginRemovalTests
     {
         var files = new FakeFiles().With(Settings, WithPlugins);
 
-        Assert.True(new ClaudeSettingsEditor(files).Remove(Folder).Changed);
+        Assert.True(new ClaudeSettingsEditor(files, Windows).Remove(Folder).Changed);
         Assert.DoesNotContain("@aiko", files.Read(Settings));
     }
 
@@ -112,7 +112,7 @@ public class PluginRemovalTests
     {
         var files = new FakeFiles().With(Settings, """{ "enabledPlugins": {} }""").With(Backup, "{}");
 
-        Assert.True(new ClaudeSettingsEditor(files).TidyAfterPluginRemoval(Folder).Changed);
+        Assert.True(new ClaudeSettingsEditor(files, Windows).TidyAfterPluginRemoval(Folder).Changed);
 
         Assert.True(files.Has(Settings));
         Assert.True(files.Has(Backup));

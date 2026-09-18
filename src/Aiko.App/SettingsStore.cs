@@ -9,15 +9,10 @@ namespace Aiko.App;
 /// Nothing here throws. A settings file that cannot be read means the defaults, and Aiko starts.
 static class SettingsStore
 {
-    private static readonly string Folder = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-        "Aiko");
-
-    private static readonly string SettingsFile = Path.Combine(Folder, "settings.json");
-    private static readonly string EnvironmentsFile = Path.Combine(Folder, "environments.json");
-
-    /// Its own file: the bridge reads the persona to build the plugin, and the shim does not need it.
-    private static readonly string PersonaFile = Path.Combine(Folder, "persona.json");
+    private static readonly string Folder = ThisComputer.Folders.SettingsFolder;
+    private static readonly string SettingsFile = ThisComputer.Folders.SettingsFile;
+    private static readonly string EnvironmentsFile = ThisComputer.Folders.EnvironmentsFile;
+    private static readonly string PersonaFile = ThisComputer.Folders.PersonaFile;
 
     public static AppSettings Load() => AppSettings.FromJson(Read(SettingsFile));
 

@@ -1,4 +1,5 @@
 using System.IO;
+using Aiko.Core;
 
 namespace Aiko.App;
 
@@ -6,7 +7,7 @@ namespace Aiko.App;
 /// to be the path that will still work tomorrow.
 static class BridgePath
 {
-    private const string BridgeExe = "Aiko.Bridge.exe";
+    private static readonly string BridgeExe = ThisComputer.Platform.ExecutableName(BridgeCommand.ProgramName);
 
     public static string? Current() => NextToTheApp() ?? InTheBuildFolder();
 

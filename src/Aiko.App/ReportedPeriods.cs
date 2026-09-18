@@ -11,10 +11,7 @@ namespace Aiko.App;
 /// a whole week of counting, and the file is cheaper to write twice than to write too early.
 static class ReportedPeriods
 {
-    private static readonly string Path = System.IO.Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-        "Aiko",
-        "reported.json");
+    private static readonly string Path = ThisComputer.Folders.ReportedPeriodsFile;
 
     public static Reported Read()
     {

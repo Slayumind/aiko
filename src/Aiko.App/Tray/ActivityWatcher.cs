@@ -12,7 +12,7 @@ sealed class ActivityWatcher : IDisposable
 
     public ActivityWatcher()
     {
-        var folder = ActivityRecord.Folder(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
+        var folder = ThisComputer.Folders.ActivityFolder;
         Directory.CreateDirectory(folder);
 
         // What is already there is history: it is remembered, so the next change compares with it,

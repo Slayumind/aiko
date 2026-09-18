@@ -10,32 +10,32 @@ public static class AikoMarketplace
 {
     public const string Name = "aiko";
 
-    /// Velopack keeps the installed app here across updates, so a command that points into this
-    /// folder never has to change. A changed command stops Claude Code from running it until the
-    /// person accepts it again.
-    public const string InstallFolder = "Slayumind.Aiko";
-
     public static string PluginId(string plugin) => $"{plugin}@{Name}";
 
     public static bool IsOurs(string pluginId) => pluginId.EndsWith("@" + Name, StringComparison.Ordinal);
 
-    public static string Folder(string localAppData) => Path.Combine(localAppData, "Aiko", "marketplace");
+    /// Where Claude Code looks for the marketplace file inside a marketplace folder.
+    public static string FileIn(string marketplaceFolder) =>
+        Path.Combine(marketplaceFolder, ".claude-plugin", "marketplace.json");
 
-    public static string FilePath(string localAppData) => Path.Combine(Folder(localAppData), ".claude-plugin", "marketplace.json");
-
-    /// The command Claude Code runs to get the persona plugin. For the installed app it goes
-    /// through %LOCALAPPDATA%, which cmd.exe expands: the command stays plain ASCII even when the
-    /// user name has Cyrillic letters or spaces. Null when no command fits Claude Code's rules.
-    public static string? PersonaCommand(string bridgeExePath, string localAppData)
+    /// The command Claude Code runs to get the persona plugin. For the installed app it names the
+    /// local data folder through the platform's variable, %LOCALAPPDATA% on Windows, which the
+    /// shell expands: the command stays plain ASCII even when the user name has Cyrillic letters or
+    /// spaces. Null when no command fits Claude Code's rules.
+    public static string? PersonaCommand(PlatformConventions platform, string bridgeExePath, AikoFolders folders)
     {
-        var installed = Path.Combine(localAppData, InstallFolder, "current") + Path.DirectorySeparatorChar;
-        var path = bridgeExePath.StartsWith(installed, StringComparison.OrdinalIgnoreCase)
-            ? "%LOCALAPPDATA%" + Path.DirectorySeparatorChar + bridgeExePath[(localAppData.TrimEnd('\\', '/').Length + 1)..]
+        var installed = folders.InstalledAppFolder + Path.DirectorySeparatorChar;
+        var path = platform.LocalDataVariable is { } variable
+            && bridgeExePath.StartsWith(installed, StringComparison.OrdinalIgnoreCase)
+            ? variable + Path.DirectorySeparatorChar + bridgeExePath[(TrimSeparators(folders.LocalBase).Length + 1)..]
             : bridgeExePath;
 
         var command = $"\"{path}\" {PersonaPluginOutput.Verb} {PersonaPlugin.Name}";
         return IsValidCommand(command) ? command : null;
     }
+
+    private static string TrimSeparators(string folder) =>
+        folder.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
 
     /// Claude Code's rules for a command source: printable ASCII, at most 500 characters, and no
     /// run of four spaces, so the person can read the whole command they are asked to accept.

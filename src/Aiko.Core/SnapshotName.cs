@@ -18,10 +18,21 @@ public static class SnapshotName
             return Default;
         }
 
-        var trimmed = configDirectory.TrimEnd('\\', '/');
-        var folder = Path.GetFileName(trimmed);
-        return Clean(folder);
+        return Clean(LastFolderName(configDirectory));
     }
+
+    /// The last part of the path, cut by hand. Path.GetFileName follows the separators of the
+    /// computer it runs on, so the same Windows path would give another name on a Mac. A drive
+    /// such as "C:" counts as a separator too, the way Windows reads it.
+    private static string LastFolderName(string path)
+    {
+        var trimmed = path.TrimEnd(Separators);
+        return trimmed[(trimmed.LastIndexOfAny(SeparatorsAndDrive) + 1)..];
+    }
+
+    private static readonly char[] Separators = ['\\', '/'];
+
+    private static readonly char[] SeparatorsAndDrive = ['\\', '/', ':'];
 
     /// A file name, not a folder name: the leading dot goes, and anything that does not belong in
     /// a file name goes with it.

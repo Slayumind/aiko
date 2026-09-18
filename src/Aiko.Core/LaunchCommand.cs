@@ -6,8 +6,8 @@ namespace Aiko.Core;
 ///
 /// Until the person types a name of their own, the command follows the environment name, so
 /// renaming Work to Job makes it aiko-job. The command is a file in PATH, which is why the name
-/// is plain latin letters, digits and hyphens: it has to be typed in PowerShell, cmd and Git Bash
-/// alike.
+/// is plain latin letters, digits and hyphens: it has to be typed in every shell alike (on Windows
+/// that is PowerShell, cmd and Git Bash).
 public static class LaunchCommand
 {
     public const string Prefix = "aiko-";
@@ -36,8 +36,8 @@ public static class LaunchCommand
             return CommandProblem.BadCharacters;
         }
 
-        // The shim itself is claude.exe. A command with that name would start itself forever.
-        if (command.Equals("claude", StringComparison.OrdinalIgnoreCase))
+        // The shim itself is named claude. A command with that name would start itself forever.
+        if (command.Equals(ShimLaunch.ClaudeName, StringComparison.OrdinalIgnoreCase))
         {
             return CommandProblem.Reserved;
         }

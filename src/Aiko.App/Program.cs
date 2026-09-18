@@ -130,7 +130,7 @@ static class Program
             for (var run = 1; run <= 3; run++)
             {
                 var changed = SkillShelf.CopyTo(marketFolder);
-                var file = Path.Combine(marketFolder, ".claude-plugin", "marketplace.json");
+                var file = AikoMarketplace.FileIn(marketFolder);
                 Directory.CreateDirectory(Path.GetDirectoryName(file)!);
                 File.WriteAllText(file, AikoMarketplace.Json(@"""C:\none\Aiko.Bridge.exe"" plugin aiko-persona", SkillShelf.Shipped));
 
@@ -400,7 +400,8 @@ static class Program
 
     private static void TryActivity()
     {
-        var folder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".claude-aiko-probe");
+        var folder = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ClaudeConfigFolder.NamedFolderName("aiko-probe"));
         var clock = System.Diagnostics.Stopwatch.StartNew();
         var faces = new List<string>();
 

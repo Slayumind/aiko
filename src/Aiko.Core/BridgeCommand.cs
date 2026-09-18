@@ -13,7 +13,8 @@ namespace Aiko.Core;
 /// exists on every model answer. So the line is recognised by the program it points at.
 public static class BridgeCommand
 {
-    public const string ExecutableName = "Aiko.Bridge.exe";
+    /// The bridge program without the suffix the system adds to program files.
+    public const string ProgramName = "Aiko.Bridge";
 
     public static string For(string bridgeExePath, ClaudeShell shell = ClaudeShell.GitBash)
     {
@@ -43,7 +44,7 @@ public static class BridgeCommand
 
     /// Whether this status line command runs our bridge, whatever path and shell it was written
     /// for. Only the program name is compared: everything else about the line is allowed to change.
-    public static bool IsAiko(string? command)
+    public static bool IsAiko(PlatformConventions platform, string? command)
     {
         var path = ExecutablePathIn(command);
         if (path is null)
@@ -52,7 +53,7 @@ public static class BridgeCommand
         }
 
         return string.Equals(
-            Path.GetFileName(path), ExecutableName, StringComparison.OrdinalIgnoreCase);
+            Path.GetFileName(path), platform.ExecutableName(ProgramName), StringComparison.OrdinalIgnoreCase);
     }
 
     /// The program a status line command runs, with the PowerShell call operator and the quotes

@@ -13,31 +13,48 @@ public class ClaudeShellLookupTests
     private const string GitExe = @"D:\dev\git\cmd\git.exe";
     private const string BashBesideGit = @"D:\dev\git\cmd\..\bin\bash.exe";
 
+    private static readonly WindowsSystemFolders SystemFolders = new(
+        @"C:\Program Files", @"C:\Program Files (x86)", @"C:\Users\someone\AppData\Local", @"C:\Windows");
+
+    [Fact]
+    public void The_Git_installer_folders_are_looked_at_first()
+    {
+        var places = WindowsGitBash.Places(SystemFolders, "").Select(p => p.Bash).ToList();
+
+        Assert.Equal(
+            [
+                @"C:\Program Files\Git\bin\bash.exe",
+                @"C:\Program Files (x86)\Git\bin\bash.exe",
+                @"C:\Users\someone\AppData\Local\Programs\Git\bin\bash.exe",
+            ],
+            places);
+    }
+
     [Fact]
     public void Git_bash_is_found_where_the_installer_puts_it()
     {
-        var places = new[] { new ClaudeShellLookup.Place(GitBash, null) };
+        var places = new[] { new WindowsGitBash.Place(GitBash, null) };
 
-        Assert.Equal(GitBash, ClaudeShellLookup.FindGitBash(p => p == GitBash, places));
+        Assert.Equal(GitBash, WindowsGitBash.Find(p => p == GitBash, places));
     }
 
     [Fact]
     public void Without_Git_there_is_no_bash()
     {
-        var places = new[] { new ClaudeShellLookup.Place(GitBash, null) };
+        var places = new[] { new WindowsGitBash.Place(GitBash, null) };
 
-        Assert.Null(ClaudeShellLookup.FindGitBash(_ => false, places));
+        Assert.Null(WindowsGitBash.Find(_ => false, places));
     }
 
     [Fact]
     public void A_bash_on_the_path_counts_only_with_its_git_beside_it()
     {
-        var places = new[] { new ClaudeShellLookup.Place(BashBesideGit, GitExe) };
+        var places = new[] { new WindowsGitBash.Place(BashBesideGit, GitExe) };
 
         // The WSL launcher at System32\bash.exe is exactly this case: a bash with no git. Taking it
         // for Git Bash would write the bash form of the line while Claude Code ran PowerShell.
-        Assert.Null(ClaudeShellLookup.FindGitBash(p => p == BashBesideGit, places));
-        Assert.Equal(BashBesideGit, ClaudeShellLookup.FindGitBash(_ => true, places));
+        Assert.Null(WindowsGitBash.Find(p => p == BashBesideGit, places));
+        Assert.Equal(BashBesideGit, WindowsGitBash.Find(_ => true, places));
     }
 
     [Fact]
@@ -45,11 +62,11 @@ public class ClaudeShellLookupTests
     {
         var places = new[]
         {
-            new ClaudeShellLookup.Place(@"C:\nope\bash.exe", null),
-            new ClaudeShellLookup.Place(GitBash, null),
+            new WindowsGitBash.Place(@"C:\nope\bash.exe", null),
+            new WindowsGitBash.Place(GitBash, null),
         };
 
-        Assert.Equal(GitBash, ClaudeShellLookup.FindGitBash(p => p == GitBash, places));
+        Assert.Equal(GitBash, WindowsGitBash.Find(p => p == GitBash, places));
     }
 
     [Fact]
@@ -57,11 +74,11 @@ public class ClaudeShellLookupTests
     {
         var places = new[]
         {
-            new ClaudeShellLookup.Place(@"\\gone\share\bash.exe", null),
-            new ClaudeShellLookup.Place(GitBash, null),
+            new WindowsGitBash.Place(@"\\gone\share\bash.exe", null),
+            new WindowsGitBash.Place(GitBash, null),
         };
 
-        var found = ClaudeShellLookup.FindGitBash(
+        var found = WindowsGitBash.Find(
             p => p.StartsWith(@"\\", StringComparison.Ordinal)
                 ? throw new IOException("the network share is not there")
                 : p == GitBash,
@@ -73,14 +90,14 @@ public class ClaudeShellLookupTests
     [Fact]
     public void The_shell_follows_whether_bash_was_found()
     {
-        Assert.Equal(ClaudeShell.GitBash, ClaudeShellLookup.ShellFor(GitBash));
-        Assert.Equal(ClaudeShell.PowerShell, ClaudeShellLookup.ShellFor(null));
+        Assert.Equal(ClaudeShell.GitBash, ClaudeShellLookup.ShellFor(Windows, GitBash));
+        Assert.Equal(ClaudeShell.PowerShell, ClaudeShellLookup.ShellFor(Windows, null));
     }
 
     [Fact]
     public void With_Git_the_wrapped_command_runs_in_bash()
     {
-        var (fileName, arguments) = ClaudeShellLookup.CallFor(GitBash, "~/bin/my-line.sh");
+        var (fileName, arguments) = ClaudeShellLookup.CallFor(Windows, GitBash, "~/bin/my-line.sh");
 
         Assert.Equal(GitBash, fileName);
         Assert.Equal(["-c", "~/bin/my-line.sh"], arguments);
@@ -89,7 +106,7 @@ public class ClaudeShellLookupTests
     [Fact]
     public void Without_Git_the_wrapped_command_runs_in_PowerShell()
     {
-        var (fileName, arguments) = ClaudeShellLookup.CallFor(null, "& my-line.ps1");
+        var (fileName, arguments) = ClaudeShellLookup.CallFor(Windows, null, "& my-line.ps1");
 
         Assert.Equal("powershell.exe", fileName);
         Assert.Contains("-NoProfile", arguments);
@@ -104,7 +121,7 @@ public class ClaudeShellLookupTests
         // argument on its own, so nothing here has to escape anything.
         const string awkward = """jq -r '.model.display_name + " ok"' """;
 
-        var (_, arguments) = ClaudeShellLookup.CallFor(GitBash, awkward);
+        var (_, arguments) = ClaudeShellLookup.CallFor(Windows, GitBash, awkward);
 
         Assert.Equal(awkward, arguments[^1]);
     }
@@ -112,7 +129,7 @@ public class ClaudeShellLookupTests
     [Fact]
     public void The_well_known_places_come_before_the_path()
     {
-        var places = ClaudeShellLookup.Places(searchPath: @"D:\dev\git\cmd", windowsFolder: @"C:\Windows").ToList();
+        var places = WindowsGitBash.Places(SystemFolders, @"D:\dev\git\cmd").ToList();
 
         Assert.Equal(4, places.Count);
         Assert.All(places.Take(3), p => Assert.Null(p.Guard));
@@ -122,8 +139,7 @@ public class ClaudeShellLookupTests
     [Fact]
     public void Folders_inside_Windows_are_skipped()
     {
-        var places = ClaudeShellLookup.Places(
-            searchPath: @"C:\Windows\System32;D:\dev\git\cmd", windowsFolder: @"C:\Windows").ToList();
+        var places = WindowsGitBash.Places(SystemFolders, @"C:\Windows\System32;D:\dev\git\cmd").ToList();
 
         Assert.DoesNotContain(places, p => p.Bash.Contains("System32", StringComparison.OrdinalIgnoreCase));
     }

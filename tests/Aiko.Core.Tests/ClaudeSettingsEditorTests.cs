@@ -25,7 +25,7 @@ public class ClaudeSettingsEditorTests
         var original = """{ "statusLine": { "type": "command", "command": "mine.sh" } }""";
         var files = new FakeFiles().With(Settings, original);
 
-        new ClaudeSettingsEditor(files).Add(Folder, Command());
+        new ClaudeSettingsEditor(files, Windows).Add(Folder, Command());
 
         Assert.True(files.Has(Backup));
         Assert.Equal(original, files.Read(Backup));
@@ -39,7 +39,7 @@ public class ClaudeSettingsEditorTests
             .With(Settings, """{ "statusLine": { "type": "command", "command": "new.sh" } }""")
             .With(Backup, """{ "statusLine": { "type": "command", "command": "original.sh" } }""");
 
-        new ClaudeSettingsEditor(files).Add(Folder, Command());
+        new ClaudeSettingsEditor(files, Windows).Add(Folder, Command());
 
         Assert.Contains("original.sh", files.Read(Backup));
     }
@@ -49,7 +49,7 @@ public class ClaudeSettingsEditorTests
     {
         var files = new FakeFiles();
 
-        var outcome = new ClaudeSettingsEditor(files).Add(Folder, Command());
+        var outcome = new ClaudeSettingsEditor(files, Windows).Add(Folder, Command());
 
         Assert.True(outcome.Changed);
         Assert.True(files.Has(Settings));
@@ -63,7 +63,7 @@ public class ClaudeSettingsEditorTests
         // A half written settings file breaks Claude Code, not just Aiko.
         var files = new FakeFiles();
 
-        new ClaudeSettingsEditor(files).Add(Folder, Command());
+        new ClaudeSettingsEditor(files, Windows).Add(Folder, Command());
 
         Assert.Contains(files.Writes, w => w.EndsWith(".aiko.tmp", StringComparison.Ordinal));
         Assert.DoesNotContain(files.Writes, w => w == Settings);
@@ -73,7 +73,7 @@ public class ClaudeSettingsEditorTests
     public void Adding_our_line_twice_writes_nothing_the_second_time()
     {
         var files = new FakeFiles();
-        var editor = new ClaudeSettingsEditor(files);
+        var editor = new ClaudeSettingsEditor(files, Windows);
         editor.Add(Folder, Command());
         files.Writes.Clear();
 
@@ -88,7 +88,7 @@ public class ClaudeSettingsEditorTests
     {
         var files = new FakeFiles()
             .With(Settings, """{ "statusLine": { "type": "command", "command": "mine.sh" } }""");
-        var editor = new ClaudeSettingsEditor(files);
+        var editor = new ClaudeSettingsEditor(files, Windows);
         editor.Add(Folder, Command());
 
         var outcome = editor.Remove(Folder);
@@ -103,7 +103,7 @@ public class ClaudeSettingsEditorTests
     {
         var files = new FakeFiles()
             .With(Settings, """{ "statusLine": { "type": "command", "command": "mine.sh" } }""");
-        var editor = new ClaudeSettingsEditor(files);
+        var editor = new ClaudeSettingsEditor(files, Windows);
         editor.Add(Folder, Command());
 
         editor.Remove(Folder);
@@ -117,7 +117,7 @@ public class ClaudeSettingsEditorTests
     public void Removal_keeps_what_the_user_changed_after_installing()
     {
         var files = new FakeFiles();
-        var editor = new ClaudeSettingsEditor(files);
+        var editor = new ClaudeSettingsEditor(files, Windows);
         editor.Add(Folder, Command());
 
         // They edited the file themselves while Aiko was in it.
@@ -136,7 +136,7 @@ public class ClaudeSettingsEditorTests
     {
         // Windows Sandbox: no settings.json before Aiko, and "{}" left behind after it.
         var files = new FakeFiles();
-        var editor = new ClaudeSettingsEditor(files);
+        var editor = new ClaudeSettingsEditor(files, Windows);
         editor.Add(Folder, Command());
 
         editor.Remove(Folder);
@@ -148,7 +148,7 @@ public class ClaudeSettingsEditorTests
     public void Removal_keeps_a_file_Aiko_made_once_something_else_was_written_to_it()
     {
         var files = new FakeFiles();
-        var editor = new ClaudeSettingsEditor(files);
+        var editor = new ClaudeSettingsEditor(files, Windows);
         editor.Add(Folder, Command());
 
         var edited = System.Text.Json.Nodes.JsonNode.Parse(files.Read(Settings))!.AsObject();
@@ -167,7 +167,7 @@ public class ClaudeSettingsEditorTests
         // It was the user's file, even if it said nothing. A copy was made of it, and that copy is
         // what tells the two cases apart.
         var files = new FakeFiles().With(Settings, "{}");
-        var editor = new ClaudeSettingsEditor(files);
+        var editor = new ClaudeSettingsEditor(files, Windows);
         editor.Add(Folder, Command());
 
         editor.Remove(Folder);
@@ -181,7 +181,7 @@ public class ClaudeSettingsEditorTests
         var theirs = """{ "model": "sonnet" }""";
         var files = new FakeFiles().With(Settings, theirs);
 
-        var outcome = new ClaudeSettingsEditor(files).Remove(Folder);
+        var outcome = new ClaudeSettingsEditor(files, Windows).Remove(Folder);
 
         Assert.False(outcome.Changed);
         Assert.Equal(theirs, files.Read(Settings));
@@ -193,7 +193,7 @@ public class ClaudeSettingsEditorTests
     {
         var files = new FakeFiles();
 
-        var outcome = new ClaudeSettingsEditor(files).Remove(Folder);
+        var outcome = new ClaudeSettingsEditor(files, Windows).Remove(Folder);
 
         Assert.False(outcome.Changed);
         Assert.False(files.Has(Settings));
@@ -205,7 +205,7 @@ public class ClaudeSettingsEditorTests
         var files = new FakeFiles().With(Settings, """{ "model": "opus" }""");
         files.Unreadable.Add(Settings);
 
-        var outcome = new ClaudeSettingsEditor(files).Add(Folder, Command());
+        var outcome = new ClaudeSettingsEditor(files, Windows).Add(Folder, Command());
 
         Assert.False(outcome.Changed);
         Assert.NotEqual(PatchProblem.None, outcome.Problem);
@@ -217,7 +217,7 @@ public class ClaudeSettingsEditorTests
     {
         var files = new FakeFiles();
 
-        var outcome = new ClaudeSettingsEditor(files).Add(Folder, string.Empty);
+        var outcome = new ClaudeSettingsEditor(files, Windows).Add(Folder, string.Empty);
 
         Assert.False(outcome.Changed);
         Assert.NotEqual(PatchProblem.None, outcome.Problem);
@@ -228,7 +228,7 @@ public class ClaudeSettingsEditorTests
     public void Repair_fixes_our_line_after_a_reinstall_elsewhere()
     {
         var files = new FakeFiles();
-        var editor = new ClaudeSettingsEditor(files);
+        var editor = new ClaudeSettingsEditor(files, Windows);
         editor.Add(Folder, Command());
 
         var outcome = editor.RepairIfOurs(Folder, Command(Moved));
@@ -243,7 +243,7 @@ public class ClaudeSettingsEditorTests
         // The wizard's "not now" is an answer, and startup is not the place to overrule it.
         var files = new FakeFiles().With(Settings, """{ "model": "opus" }""");
 
-        var outcome = new ClaudeSettingsEditor(files).RepairIfOurs(Folder, Command());
+        var outcome = new ClaudeSettingsEditor(files, Windows).RepairIfOurs(Folder, Command());
 
         Assert.False(outcome.Changed);
         Assert.Empty(files.Writes);
@@ -256,7 +256,7 @@ public class ClaudeSettingsEditorTests
         var theirs = """{ "statusLine": { "type": "command", "command": "mine.sh" } }""";
         var files = new FakeFiles().With(Settings, theirs);
 
-        var outcome = new ClaudeSettingsEditor(files).RepairIfOurs(Folder, Command());
+        var outcome = new ClaudeSettingsEditor(files, Windows).RepairIfOurs(Folder, Command());
 
         Assert.False(outcome.Changed);
         Assert.Equal(theirs, files.Read(Settings));
@@ -266,7 +266,7 @@ public class ClaudeSettingsEditorTests
     public void Repair_with_nothing_to_fix_writes_nothing()
     {
         var files = new FakeFiles();
-        var editor = new ClaudeSettingsEditor(files);
+        var editor = new ClaudeSettingsEditor(files, Windows);
         editor.Add(Folder, Command());
         files.Writes.Clear();
 

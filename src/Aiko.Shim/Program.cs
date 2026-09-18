@@ -3,10 +3,11 @@ using Aiko.Core;
 
 // Somebody typed claude or aiko-work and is waiting for Claude Code. Two rules hold above the rest:
 // start the real Claude Code whatever happens here, and never start another shim.
-var self = Environment.ProcessPath ?? "claude.exe";
+var platform = PlatformConventions.Windows;
+var self = Environment.ProcessPath ?? RealClaude.ExecutableName(platform);
 var selfFolder = Path.GetDirectoryName(self) ?? "";
 
-var seen = RealClaude.ParseSeen(Environment.GetEnvironmentVariable(RealClaude.SeenVariable))
+var seen = RealClaude.ParseSeen(platform, Environment.GetEnvironmentVariable(RealClaude.SeenVariable))
     .Append(selfFolder)
     .ToList();
 
@@ -17,7 +18,7 @@ if (Environment.GetEnvironmentVariable("AIKO_SHIM_SELF_TEST") == "1")
     return 0;
 }
 
-var real = RealClaude.Find(Environment.GetEnvironmentVariable("PATH"), seen, File.Exists);
+var real = RealClaude.Find(platform, Environment.GetEnvironmentVariable("PATH"), seen, File.Exists);
 if (real is null)
 {
     Console.Error.WriteLine(
@@ -31,7 +32,7 @@ foreach (var argument in args)
     start.ArgumentList.Add(argument);
 }
 
-start.Environment[RealClaude.SeenVariable] = RealClaude.FormatSeen(seen);
+start.Environment[RealClaude.SeenVariable] = RealClaude.FormatSeen(platform, seen);
 Apply(PlanFor(self), start);
 
 // Ctrl+C reaches every process in the console. Claude Code handles it; the shim must not quit
@@ -54,7 +55,9 @@ static ShimPlan PlanFor(string self)
     try
     {
         var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-        var file = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Aiko", "environments.json");
+        var file = new AikoFolders(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)).EnvironmentsFile;
         var settings = File.Exists(file) ? EnvironmentSettings.FromJson(File.ReadAllText(file)) : EnvironmentSettings.Empty;
 
         return ShimLaunch.Decide(self, Directory.GetCurrentDirectory(), settings, home);

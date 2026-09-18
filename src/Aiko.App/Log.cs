@@ -12,10 +12,7 @@ static class Log
 
     private static readonly object Gate = new();
 
-    private static readonly string File = System.IO.Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "Aiko",
-        "log.txt");
+    private static readonly string File = ThisComputer.Folders.LogFile;
 
     /// Shown in the diagnostics, so a bug report can say where to look.
     public static string FilePath => File;
