@@ -3,8 +3,9 @@
 The macOS app repeats the Windows core, so every ported file keeps its behaviour and every xUnit
 case has a Swift case with the same name and the same numbers. Test counts below are cases, not
 methods: one `[Theory]` with five `[InlineData]` rows counts as five, and so does the Swift
-`@Test(arguments:)` that mirrors it. The numbers are what the two runners report: 785 cases in
-`dotnet test`, 736 in `swift test`. The 49 the Swift side does not have are named at the bottom.
+`@Test(arguments:)` that mirrors it. 785 cases in `dotnet test`, 777 in `swift test`. The 49 the
+Swift side does not have are named at the bottom; the 41 it has and Windows does not belong to the
+two small programs, whose decisions sit inline in `Program.cs` on Windows and in AikoKit here.
 
 Rules that are a table of inputs and answers live in `spec/cases/` and are read by both suites, so
 a row cannot change in one core and stay as it was in the other. See `spec/cases/README.md`.
@@ -29,7 +30,7 @@ a row cannot change in one core and stay as it was in the other. See `spec/cases
 | TrayMood.cs | TrayMood.swift | 25 | 25 | `hasFace` takes the environments, as on Windows |
 | SessionActivity.cs | SessionActivity.swift | 26 | 26 | |
 | Heartbeat.cs | Heartbeat.swift | 17 | 17 | |
-| SessionReminder.cs | SessionReminder.swift | 18 | 12 | its other 6 cases are about the hook in settings.json and sit in SettingsJsonPatchTests |
+| SessionReminder.cs | SessionReminder.swift | 18 | 20 | its other 6 C# cases are about the hook in settings.json and sit in SettingsJsonPatchTests; 8 Swift cases of its own read the system language from a tag (MacLanguageTests) |
 | PersonaSettings.cs | PersonaSettings.swift | 15 | 15 | |
 | PersonaPrompt.cs | PersonaPrompt.swift, PersonaPlugin.swift | 33 | 33 | the prompt text and the plugin files hash the same in both languages |
 | PersonaPluginOutput.cs | PersonaPluginOutput.swift | 7 | 7 | |
@@ -51,7 +52,7 @@ a row cannot change in one core and stay as it was in the other. See `spec/cases
 | EnvironmentScan.cs | EnvironmentScan.swift | 12 | 12 | |
 | ClaudeConfigFolder.cs | ClaudeConfigFolder.swift | 7 | 7 | |
 | ClaudeInstall.cs | ClaudeInstall.swift | 7 | 7 | |
-| ShimLaunch.cs, RealClaude.cs, UserPathList.cs | ShimLaunch.swift, RealClaude.swift, UserPathList.swift | 18 | 12 | the other 6 cases are about PowerShellProfile |
+| ShimLaunch.cs, RealClaude.cs, UserPathList.cs | ShimLaunch.swift, RealClaude.swift, UserPathList.swift | 18 | 16 | the other 6 C# cases are about PowerShellProfile; 4 Swift cases of their own cover what the shim sets in the environment of Claude Code, which Aiko.Shim does inline |
 | BridgeCommand.cs | BridgeCommand.swift | 29 | 29 | BridgeCommandTests (11) and BridgeRecognitionTests (18) |
 | CommandLinks.cs | CommandLinks.swift | 3 | 3 | |
 | AikoMarketplace.cs | AikoMarketplace.swift | — | — | its cases sit in PluginPlanTests and SkillPluginTests |
@@ -64,9 +65,52 @@ Helpers with no file of their own in the C# core:
 
 | Swift file | Why it exists |
 |---|---|
+| BridgeWork.swift | what one run of the bridge does: which job it was started for, the snapshot to write, the activity file of a session, the reminder at session start, the persona plugin folder. On Windows the same choices sit inline in `Aiko.Bridge/Program.cs`, where no test can reach them (29 cases in BridgeWorkTests) |
 | JsonNode.swift | System.Text.Json keeps the order of keys and the text of numbers when it writes a file back; `JSONSerialization` keeps neither, and Aiko rewrites files that belong to Claude Code |
 | CivilTime.swift | `DateOnly`, ISO weeks and the round-trip ("O") time format |
 | `PathText` in PlatformConventions.swift | reading a path without asking the machine it runs on: `Path.GetFileName` and `Path.TrimEndingDirectorySeparator` answer differently on Windows and on macOS, and Aiko reads paths written for the other system all the time |
+
+## The two programs
+
+`Sources/aiko-bridge` and `Sources/aiko-shim` are the Swift twins of `src/Aiko.Bridge` and
+`src/Aiko.Shim`. They hold no rules: every choice comes from AikoKit, and what is left is reading
+stdin, touching the disk and starting a process.
+
+| Job | Windows | macOS | Where the rule lives |
+|---|---|---|---|
+| status line | `Aiko.Bridge.exe` | `aiko-bridge` | `BridgeWork.statusLine`, `StatusLineReport`, `SnapshotFile` |
+| the line the user already had | `RunWrapped` | `WrappedStatusLine` | `ClaudeShellLookup.callFor`, `SettingsJsonPatch.readWrappedCommand` |
+| session events behind the face | `hook` | the same | `BridgeWork.activity`, `HookEvent`, `ActivityRecord` |
+| the reminder at session start | `--session-start` | the same | `BridgeWork.sessionStart`, `SessionReminder` |
+| the persona plugin | `plugin aiko-persona` | the same | `BridgeWork.personaPlugin`, `PersonaPlugin`, `PersonaPluginOutput` |
+| which environment a start belongs to | `claude.exe` | `aiko-shim` | `ShimLaunch.decide`, `ShimPlan.variableChanges` |
+| never start another shim | `AIKO_SHIM_SEEN` | the same | `RealClaude` |
+
+Where they differ from the Windows pair:
+
+- **The file names.** SwiftPM builds `aiko-bridge` and `aiko-shim`. The app bundle has to ship the
+  bridge as `Aiko.Bridge`, because that is the program name `BridgeCommand.isAiko` reads a status
+  line by, and the shim as `claude` plus a copy or a link per command name. Nothing in the two
+  targets depends on the name they were built under: the shim reads the name it was called by.
+- **The shell.** The wrapped status line runs through `/bin/zsh -lc`; Git Bash and PowerShell are
+  Windows ideas. A command that hangs is given the same two seconds and then killed — only the
+  command itself, not the tree below it, because the shell shares the bridge's process group and
+  killing the group would kill the bridge. Windows kills the whole tree.
+- **Claude Code missing.** The shim answers 127, which is what a shell answers for a command it
+  cannot find; the Windows shim answers 9009, which is cmd's number for the same thing. Whether a
+  file in PATH is Claude Code is asked with `isExecutableFile` instead of `File.Exists`.
+- **Ctrl+C** is ignored with `signal(SIGINT, SIG_IGN)` instead of `Console.CancelKeyPress`, for the
+  same reason: Claude Code handles it, and the shim must not quit first. A Claude Code killed by a
+  signal is reported as 128 plus the signal, the way a shell reports it.
+- **The language of the reminder.** macOS says its language as a tag (`ru-RU`), Windows as a
+  number, so `SessionReminder.isRussian` has an overload for each.
+- **Proof that they start.** The shim keeps `AIKO_SHIM_SELF_TEST=1`. The bridge has no such
+  variable on either system: fed `{}` it writes nothing, prints nothing and exits 0, and CI runs
+  exactly that.
+
+Not there yet: the app around them (tray, windows, the wizard), installing the shim into PATH and
+the commands folder, the marketplace and plugin install, the update check, and signing the two
+programs for release.
 
 ## Names that had to change
 

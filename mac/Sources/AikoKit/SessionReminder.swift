@@ -51,6 +51,21 @@ public enum SessionReminder {
         language == .russian || (language == .system && (systemLanguageId & 0x3FF) == 0x19)
     }
 
+    /// The same answer on macOS, where the system says its language as a tag such as "ru-RU".
+    /// Windows hands out a number instead, so the two bridges ask this in their own way.
+    public static func isRussian(_ language: AikoLanguage, systemLanguageTag: String?) -> Bool {
+        if language == .russian {
+            return true
+        }
+
+        guard language == .system, let tag = systemLanguageTag else {
+            return false
+        }
+
+        let base = tag.prefix { $0 != "-" && $0 != "_" }
+        return base.caseInsensitiveCompare("ru") == .orderedSame
+    }
+
     /// The working folder from the JSON Claude Code gives a hook on stdin.
     public static func workingDirectoryIn(_ hookInput: String) -> String? {
         JsonNode.parse(hookInput)?.objectValue?["cwd"]?.stringValue

@@ -27,6 +27,49 @@ public struct ShimPlan: Sendable, Equatable {
     }
 
     public static let passThrough = ShimPlan(nil, .keep, nil, false)
+
+    /// What the shim changes in the environment of the Claude Code it starts.
+    ///
+    /// CLAUDE_CONFIG_DIR points Claude Code at the folder of this environment. AIKO_ENVIRONMENT and
+    /// AIKO_LAUNCH are read back by the session start hook, which says so when a command overrode a
+    /// folder binding (D-163).
+    public var variableChanges: [VariableChange] {
+        var changes: [VariableChange] = []
+
+        switch variable {
+        case .set:
+            if let configDirectory {
+                changes.append(VariableChange(ClaudeConfigFolder.variableName, configDirectory))
+            }
+        case .clear:
+            changes.append(VariableChange(ClaudeConfigFolder.variableName, nil))
+        case .keep:
+            break
+        }
+
+        if let environment {
+            changes.append(VariableChange(SessionReminder.environmentVariable, environment.name))
+            changes.append(
+                VariableChange(
+                    SessionReminder.launchVariable,
+                    isExplicit ? SessionReminder.launchedByCommand : "binding"))
+        }
+
+        return changes
+    }
+}
+
+/// One environment variable of the process the shim starts. A nil value means the variable is
+/// removed rather than set to an empty string: Claude Code reads an empty CLAUDE_CONFIG_DIR as a
+/// folder it should use.
+public struct VariableChange: Sendable, Equatable {
+    public let name: String
+    public let value: String?
+
+    public init(_ name: String, _ value: String?) {
+        self.name = name
+        self.value = value
+    }
 }
 
 /// Decides which environment a start of Claude Code belongs to.
