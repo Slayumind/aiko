@@ -62,6 +62,18 @@ final class AikoShell: NSResponder {
             + (Store.settings().place == .island ? "island" : "menu bar icon"))
 
         openChecklistIfNothingIsSetUp(environments, Store.settings())
+
+        // An update can bring a new persona text, and on macOS the app itself moves: the marketplace
+        // names the bridge by its full path, so a copy dragged from the disk image into Applications
+        // leaves Claude Code with a command that points at nothing. When the persona is off
+        // everywhere this reads a few files and does nothing else. The twin of AikoShell.cs.
+        PluginSync.request("startup")
+
+        // An update brings a new shim. The copies in PATH are refreshed, and only when the person
+        // set commands up: the folder never appears on its own.
+        if CommandFolder.isSetUp {
+            CommandFolder.sync(environments)
+        }
     }
 
     /// On a fresh machine the checklist opens by itself: there is nothing for the icon to show and
