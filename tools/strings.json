@@ -240,8 +240,8 @@
   [
     "DirectModeWhat",
     [
-      "In direct mode, Aiko asks Anthropic for your limits itself. It uses the token Claude Code already keeps on this computer: Aiko reads it before each request and never saves it. Turn it on if you work in the IDE panel or in Claude Desktop, where there's no status line.",
-      "В прямом режиме Aiko сама спрашивает лимиты у Anthropic. Для этого она берёт токен, который Claude Code уже хранит на этом компьютере: читает его перед каждым запросом и нигде не сохраняет. Включай, если работаешь в панели IDE или в Claude Desktop — там строки состояния нет."
+      "In direct mode, Aiko asks Anthropic for your limits itself. That needs the token Claude Code keeps on this computer: Aiko reads it before each request and never saves it. Turn it on if you work in the IDE panel or in Claude Desktop, where there's no status line.",
+      "В прямом режиме Aiko спрашивает лимиты у Anthropic сама. Для этого нужен токен, который Claude Code хранит на этом компьютере: Aiko читает его перед каждым запросом и нигде не сохраняет. Включи, если работаешь в панели IDE или в Claude Desktop — там строки состояния нет."
     ]
   ],
   [
@@ -563,14 +563,14 @@
     "WizardUpdatesWhat",
     [
       "Once a day, Aiko asks slayumind.org for the latest version and says that one copy of Aiko ran today. The ID it sends changes every day.",
-      "Раз в сутки Aiko спрашивает у slayumind.org свежую версию и сообщает, что одна копия сегодня работала. Идентификатор, который уходит, меняется каждый день."
+      "Раз в сутки Aiko спрашивает у slayumind.org свежую версию и сообщает, что одна копия сегодня работала. ID меняется каждый день."
     ]
   ],
   [
     "WizardDoneTray",
     [
-      "Aiko is down by the clock. Rest the mouse on it to see the card, or click it to keep the card open.",
-      "Aiko внизу, рядом с часами. Наведи мышь, чтобы увидеть карточку, или кликни, чтобы карточка осталась открытой."
+      "Aiko is down by the clock. Rest the mouse on it for the card, click to keep it open.",
+      "Aiko внизу, рядом с часами. Наведи мышь — покажется карточка, кликни — останется открытой."
     ]
   ],
   [
@@ -611,8 +611,8 @@
   [
     "WizardDoneNoAccess",
     [
-      "Aiko can't see your limits yet. You can turn on access in settings at any time.",
-      "Aiko пока не видит лимиты. Доступ можно включить в настройках в любой момент."
+      "Aiko can't see your limits yet. You can turn on access at any time on the General page.",
+      "Aiko пока не видит лимиты. Доступ можно включить в любой момент на странице «Общие»."
     ]
   ],
   [
@@ -1319,14 +1319,14 @@
     "RemoveEnvironmentLine",
     [
       "Aiko's line and plugins leave this folder's settings.json, and so do the command {0} and the bindings to {1}.",
-      "Строка и плагины Aiko уйдут из settings.json этой папки. Вместе с ними уйдут команда {0} и привязки к {1}."
+      "Из settings.json этой папки уйдут строка и плагины Aiko, а с ними команда {0} и привязки к {1}."
     ]
   ],
   [
     "MoveToRecycleBin",
     [
       "And move the folder to the Recycle Bin",
-      "И переместить папку в корзину"
+      "И переместить папку в Корзину"
     ]
   ],
   [
@@ -1340,7 +1340,7 @@
     "RecycleWhy",
     [
       "It holds the Claude Code account, history and memory. You can restore it from the Recycle Bin.",
-      "В ней аккаунт, история и память Claude Code. Вернуть можно из корзины Windows."
+      "В ней аккаунт, история и память Claude Code. Вернуть её можно из Корзины."
     ]
   ],
   [
@@ -1382,7 +1382,7 @@
     "EnvironmentRemovedToBin",
     [
       "{0} removed. The folder is in the Recycle Bin.",
-      "{0} удалена, папка в корзине."
+      "{0} удалена, папка в Корзине."
     ]
   ],
   [
@@ -1515,7 +1515,7 @@
     "RestartBin",
     [
       "And move {0} to the Recycle Bin",
-      "И переместить {0} в корзину"
+      "И переместить {0} в Корзину"
     ]
   ],
   [
@@ -1815,8 +1815,8 @@
   [
     "WizardStatsLater",
     [
-      "You can change this later in settings, under Privacy.",
-      "Решение меняется в настройках, в разделе «Приватность»."
+      "You can change this later on the Privacy page.",
+      "Это можно поменять потом на странице «Приватность»."
     ]
   ],
   [

@@ -74,7 +74,7 @@ public enum Strings {
         "SectionStartupAndUpdates": ("STARTUP AND UPDATES", "ЗАПУСК И ОБНОВЛЕНИЯ"),
         "SectionLanguage": ("LANGUAGE", "ЯЗЫК"),
         "DirectMode": ("Direct mode", "Прямой режим"),
-        "DirectModeWhat": ("In direct mode, Aiko asks Anthropic for your limits itself. It uses the token Claude Code already keeps on this computer: Aiko reads it before each request and never saves it. Turn it on if you work in the IDE panel or in Claude Desktop, where there's no status line.", "В прямом режиме Aiko сама спрашивает лимиты у Anthropic. Для этого она берёт токен, который Claude Code уже хранит на этом компьютере: читает его перед каждым запросом и нигде не сохраняет. Включай, если работаешь в панели IDE или в Claude Desktop — там строки состояния нет."),
+        "DirectModeWhat": ("In direct mode, Aiko asks Anthropic for your limits itself. That needs the token Claude Code keeps on this computer: Aiko reads it before each request and never saves it. Turn it on if you work in the IDE panel or in Claude Desktop, where there's no status line.", "В прямом режиме Aiko спрашивает лимиты у Anthropic сама. Для этого нужен токен, который Claude Code хранит на этом компьютере: Aiko читает его перед каждым запросом и нигде не сохраняет. Включи, если работаешь в панели IDE или в Claude Desktop — там строки состояния нет."),
         "DirectModeMac": ("Direct mode is on Windows only. On macOS Claude Code keeps the token in the Keychain, and Aiko does not read it, so the IDE panel and Claude Desktop stay without numbers here.", "Прямой режим есть только на Windows. На macOS Claude Code держит токен в Связке ключей, а Aiko её не читает, поэтому панель IDE и Claude Desktop здесь остаются без цифр."),
         "DirectModeAsk": ("If it's a work account, ask whoever manages it first.", "Если аккаунт рабочий, сначала спроси того, кто им управляет."),
         "AccessOk": ("Claude Code sends its limits to Aiko.", "Claude Code передаёт лимиты в Aiko."),
@@ -120,14 +120,14 @@ public enum Strings {
         "WizardTheFiles": ("FILES AIKO CHANGES", "ФАЙЛЫ, КОТОРЫЕ ИЗМЕНЯТСЯ"),
         "WizardBackupNote": ("Aiko keeps a copy of each file next to it. Removing Aiko puts everything back.", "Aiko сохранит копию каждого файла рядом с ним. Удалишь Aiko — всё вернётся как было."),
         "WizardBridgeNotFound": ("Aiko can't find its bridge program.", "Aiko не нашла свою программу-посредник."),
-        "WizardUpdatesWhat": ("Once a day, Aiko asks slayumind.org for the latest version and says that one copy of Aiko ran today. The ID it sends changes every day.", "Раз в сутки Aiko спрашивает у slayumind.org свежую версию и сообщает, что одна копия сегодня работала. Идентификатор, который уходит, меняется каждый день."),
-        "WizardDoneTray": ("Aiko is down by the clock. Rest the mouse on it to see the card, or click it to keep the card open.", "Aiko внизу, рядом с часами. Наведи мышь, чтобы увидеть карточку, или кликни, чтобы карточка осталась открытой."),
+        "WizardUpdatesWhat": ("Once a day, Aiko asks slayumind.org for the latest version and says that one copy of Aiko ran today. The ID it sends changes every day.", "Раз в сутки Aiko спрашивает у slayumind.org свежую версию и сообщает, что одна копия сегодня работала. ID меняется каждый день."),
+        "WizardDoneTray": ("Aiko is down by the clock. Rest the mouse on it for the card, click to keep it open.", "Aiko внизу, рядом с часами. Наведи мышь — покажется карточка, кликни — останется открытой."),
         "WizardDoneMenuBar": ("Aiko is up by the clock. Rest the mouse on it to see the card, or click it to keep the card open.", "Aiko наверху, рядом с часами. Наведи мышь, чтобы увидеть карточку, или щёлкни, чтобы она осталась открытой."),
         "WizardDoneIsland": ("Aiko is at the top of your screen. Drag it anywhere and it sticks to the nearest edge.", "Aiko вверху экрана. Перетащи куда угодно — она прилипнет к ближайшему краю."),
         "WizardDoneOverflow": ("Windows 11 hides new app icons under the arrow next to the clock. Open the arrow and drag Aiko onto the taskbar: under the arrow, the card can't open.", "Windows 11 прячет значки новых приложений под стрелку рядом с часами. Открой её и перетащи Aiko на панель задач: под стрелкой карточка не открывается."),
         "WizardDoneMenuBarRoom": ("A full menu bar hides the icons furthest from the clock. Close a menu bar app if Aiko doesn't fit.", "Если в строке меню нет места, macOS прячет значки, что дальше от часов. Закрой лишнее приложение, если Aiko не помещается."),
         "WizardDoneFirstNumbers": ("The first numbers arrive after your next answer from Claude Code. Until then, the ring is dashed.", "Первые цифры придут после следующего ответа Claude Code. До этого кольцо пунктирное."),
-        "WizardDoneNoAccess": ("Aiko can't see your limits yet. You can turn on access in settings at any time.", "Aiko пока не видит лимиты. Доступ можно включить в настройках в любой момент."),
+        "WizardDoneNoAccess": ("Aiko can't see your limits yet. You can turn on access at any time on the General page.", "Aiko пока не видит лимиты. Доступ можно включить в любой момент на странице «Общие»."),
         "SettingsWriteFailed": ("Aiko couldn't write the Claude Code settings file. Try again.", "Aiko не смогла записать файл настроек Claude Code. Попробуй ещё раз."),
         "SettingsBridgeUnknown": ("Aiko can't find its bridge program.", "Aiko не нашла свою программу-посредник."),
         "ChecklistTitle": ("Set up environments", "Настройка сред"),
@@ -228,16 +228,16 @@ public enum Strings {
         "RestToo": ("And every other folder: this is the default environment.", "И все остальные папки: это среда по умолчанию."),
         "EditInFolders": ("Change in project folders", "Изменить в папках проектов"),
         "RemoveEnvironment": ("Remove environment", "Удалить среду"),
-        "RemoveEnvironmentLine": ("Aiko's line and plugins leave this folder's settings.json, and so do the command {0} and the bindings to {1}.", "Строка и плагины Aiko уйдут из settings.json этой папки. Вместе с ними уйдут команда {0} и привязки к {1}."),
-        "MoveToRecycleBin": ("And move the folder to the Recycle Bin", "И переместить папку в корзину"),
+        "RemoveEnvironmentLine": ("Aiko's line and plugins leave this folder's settings.json, and so do the command {0} and the bindings to {1}.", "Из settings.json этой папки уйдут строка и плагины Aiko, а с ними команда {0} и привязки к {1}."),
+        "MoveToRecycleBin": ("And move the folder to the Recycle Bin", "И переместить папку в Корзину"),
         "MoveToTrash": ("And move the folder to the Trash", "И переместить папку в Корзину"),
-        "RecycleWhy": ("It holds the Claude Code account, history and memory. You can restore it from the Recycle Bin.", "В ней аккаунт, история и память Claude Code. Вернуть можно из корзины Windows."),
+        "RecycleWhy": ("It holds the Claude Code account, history and memory. You can restore it from the Recycle Bin.", "В ней аккаунт, история и память Claude Code. Вернуть её можно из Корзины."),
         "TrashWhy": ("It holds the Claude Code account, history and memory. You can put it back from the Trash.", "В ней аккаунт, история и память Claude Code. Вернуть её можно из Корзины."),
         "KeepClaude": ("VS Code and Claude Desktop use the .claude folder, so Aiko never removes it.", "Папку .claude используют VS Code и Claude Desktop, поэтому Aiko её не удаляет."),
         "Cancel": ("Cancel", "Отмена"),
         "RemoveConfirm": ("Remove", "Удалить"),
         "EnvironmentRemoved": ("{0} removed.", "{0} удалена."),
-        "EnvironmentRemovedToBin": ("{0} removed. The folder is in the Recycle Bin.", "{0} удалена, папка в корзине."),
+        "EnvironmentRemovedToBin": ("{0} removed. The folder is in the Recycle Bin.", "{0} удалена, папка в Корзине."),
         "EnvironmentRemovedToTrash": ("{0} removed. The folder is in the Trash.", "{0} удалена, папка в Корзине."),
         "FoldersTableLead": ("In a folder and in every folder inside, plain claude starts its environment. A command like {0} beats a binding, and Claude Code reminds you of it.", "В папке и во всех вложенных обычный claude запускает её среду. Команда вроде {0} сильнее привязки, но Claude Code напомнит о ней."),
         "FolderColumn": ("FOLDER", "ПАПКА"),
@@ -256,7 +256,7 @@ public enum Strings {
         "RestartWhat": ("Removes the environments from Aiko and opens the checklist right here.", "Убирает среды из Aiko и открывает чек-лист здесь же."),
         "RestartLine": ("Aiko removes the environments, its lines and plugins in settings.json, the commands {0}, the folder bindings and its folder in PATH, and turns the PowerShell profile functions back on. Accounts and history stay in the folders.", "Из Aiko уйдут среды, строки и плагины Aiko в settings.json, команды {0}, привязки папок и папка Aiko в PATH, а функции в профиле PowerShell вернутся. Аккаунты и история в папках останутся."),
         "RestartLineMac": ("Aiko removes the environments, its lines and plugins in settings.json, the commands {0}, the folder bindings and its line in ~/.zshrc. Accounts and history stay in the folders.", "Из Aiko уйдут среды, строки и плагины Aiko в settings.json, команды {0}, привязки папок и строка Aiko в ~/.zshrc. Аккаунты и история в папках останутся."),
-        "RestartBin": ("And move {0} to the Recycle Bin", "И переместить {0} в корзину"),
+        "RestartBin": ("And move {0} to the Recycle Bin", "И переместить {0} в Корзину"),
         "RestartTrash": ("And move {0} to the Trash", "И переместить {0} в Корзину"),
         "RestartKeep": (".claude stays either way.", ".claude остаётся в любом случае."),
         "Delete": ("Remove Aiko", "Удалить Aiko"),
@@ -299,7 +299,7 @@ public enum Strings {
         "PrivacyLinkFromGeneral": ("What Aiko sends and to whom — Privacy.", "Что Aiko отправляет и кому — раздел «Приватность»."),
         "WizardStats": ("Anonymous statistics", "Анонимная статистика"),
         "WizardStatsWhat": ("The author of Aiko doesn't know how many people use it. Once a day Aiko can say that one copy ran and send six values. All six are below.", "Автор Aiko не знает, сколько людей ею пользуется. Раз в сутки Aiko может сообщить, что одна копия работала, и отправить шесть значений. Вот все шесть."),
-        "WizardStatsLater": ("You can change this later in settings, under Privacy.", "Решение меняется в настройках, в разделе «Приватность»."),
+        "WizardStatsLater": ("You can change this later on the Privacy page.", "Это можно поменять потом на странице «Приватность»."),
         "StatsDecline": ("Don't send", "Не отправлять"),
         "StatsAccept": ("Send", "Отправлять"),
         "StatsStateOn": ("on", "включена"),
@@ -460,7 +460,7 @@ public enum Strings {
     /// Direct mode
     public static var directMode: String { Strings.get("DirectMode") }
 
-    /// In direct mode, Aiko asks Anthropic for your limits itself. It uses the token Claude Code...
+    /// In direct mode, Aiko asks Anthropic for your limits itself. That needs the token Claude C...
     public static var directModeWhat: String { Strings.get("DirectModeWhat") }
 
     /// Direct mode is on Windows only. On macOS Claude Code keeps the token in the Keychain, and...
@@ -601,7 +601,7 @@ public enum Strings {
     /// Once a day, Aiko asks slayumind.org for the latest version and says that one copy of Aiko...
     public static var wizardUpdatesWhat: String { Strings.get("WizardUpdatesWhat") }
 
-    /// Aiko is down by the clock. Rest the mouse on it to see the card, or click it to keep the ...
+    /// Aiko is down by the clock. Rest the mouse on it for the card, click to keep it open.
     public static var wizardDoneTray: String { Strings.get("WizardDoneTray") }
 
     /// Aiko is up by the clock. Rest the mouse on it to see the card, or click it to keep the ca...
@@ -619,7 +619,7 @@ public enum Strings {
     /// The first numbers arrive after your next answer from Claude Code. Until then, the ring is...
     public static var wizardDoneFirstNumbers: String { Strings.get("WizardDoneFirstNumbers") }
 
-    /// Aiko can't see your limits yet. You can turn on access in settings at any time.
+    /// Aiko can't see your limits yet. You can turn on access at any time on the General page.
     public static var wizardDoneNoAccess: String { Strings.get("WizardDoneNoAccess") }
 
     /// Aiko couldn't write the Claude Code settings file. Try again.
@@ -1135,7 +1135,7 @@ public enum Strings {
     /// The author of Aiko doesn't know how many people use it. Once a day Aiko can say that one ...
     public static var wizardStatsWhat: String { Strings.get("WizardStatsWhat") }
 
-    /// You can change this later in settings, under Privacy.
+    /// You can change this later on the Privacy page.
     public static var wizardStatsLater: String { Strings.get("WizardStatsLater") }
 
     /// Don't send

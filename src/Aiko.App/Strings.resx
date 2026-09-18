@@ -134,7 +134,7 @@
     <value>Direct mode</value>
   </data>
   <data name="DirectModeWhat" xml:space="preserve">
-    <value>In direct mode, Aiko asks Anthropic for your limits itself. It uses the token Claude Code already keeps on this computer: Aiko reads it before each request and never saves it. Turn it on if you work in the IDE panel or in Claude Desktop, where there's no status line.</value>
+    <value>In direct mode, Aiko asks Anthropic for your limits itself. That needs the token Claude Code keeps on this computer: Aiko reads it before each request and never saves it. Turn it on if you work in the IDE panel or in Claude Desktop, where there's no status line.</value>
   </data>
   <data name="DirectModeMac" xml:space="preserve">
     <value>Direct mode is on Windows only. On macOS Claude Code keeps the token in the Keychain, and Aiko does not read it, so the IDE panel and Claude Desktop stay without numbers here.</value>
@@ -275,7 +275,7 @@
     <value>Once a day, Aiko asks slayumind.org for the latest version and says that one copy of Aiko ran today. The ID it sends changes every day.</value>
   </data>
   <data name="WizardDoneTray" xml:space="preserve">
-    <value>Aiko is down by the clock. Rest the mouse on it to see the card, or click it to keep the card open.</value>
+    <value>Aiko is down by the clock. Rest the mouse on it for the card, click to keep it open.</value>
   </data>
   <data name="WizardDoneMenuBar" xml:space="preserve">
     <value>Aiko is up by the clock. Rest the mouse on it to see the card, or click it to keep the card open.</value>
@@ -293,7 +293,7 @@
     <value>The first numbers arrive after your next answer from Claude Code. Until then, the ring is dashed.</value>
   </data>
   <data name="WizardDoneNoAccess" xml:space="preserve">
-    <value>Aiko can't see your limits yet. You can turn on access in settings at any time.</value>
+    <value>Aiko can't see your limits yet. You can turn on access at any time on the General page.</value>
   </data>
   <data name="SettingsWriteFailed" xml:space="preserve">
     <value>Aiko couldn't write the Claude Code settings file. Try again.</value>
@@ -809,7 +809,7 @@
     <value>The author of Aiko doesn't know how many people use it. Once a day Aiko can say that one copy ran and send six values. All six are below.</value>
   </data>
   <data name="WizardStatsLater" xml:space="preserve">
-    <value>You can change this later in settings, under Privacy.</value>
+    <value>You can change this later on the Privacy page.</value>
   </data>
   <data name="StatsDecline" xml:space="preserve">
     <value>Don't send</value>

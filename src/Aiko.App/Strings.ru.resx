@@ -134,7 +134,7 @@
     <value>Прямой режим</value>
   </data>
   <data name="DirectModeWhat" xml:space="preserve">
-    <value>В прямом режиме Aiko сама спрашивает лимиты у Anthropic. Для этого она берёт токен, который Claude Code уже хранит на этом компьютере: читает его перед каждым запросом и нигде не сохраняет. Включай, если работаешь в панели IDE или в Claude Desktop — там строки состояния нет.</value>
+    <value>В прямом режиме Aiko спрашивает лимиты у Anthropic сама. Для этого нужен токен, который Claude Code хранит на этом компьютере: Aiko читает его перед каждым запросом и нигде не сохраняет. Включи, если работаешь в панели IDE или в Claude Desktop — там строки состояния нет.</value>
   </data>
   <data name="DirectModeMac" xml:space="preserve">
     <value>Прямой режим есть только на Windows. На macOS Claude Code держит токен в Связке ключей, а Aiko её не читает, поэтому панель IDE и Claude Desktop здесь остаются без цифр.</value>
@@ -272,10 +272,10 @@
     <value>Aiko не нашла свою программу-посредник.</value>
   </data>
   <data name="WizardUpdatesWhat" xml:space="preserve">
-    <value>Раз в сутки Aiko спрашивает у slayumind.org свежую версию и сообщает, что одна копия сегодня работала. Идентификатор, который уходит, меняется каждый день.</value>
+    <value>Раз в сутки Aiko спрашивает у slayumind.org свежую версию и сообщает, что одна копия сегодня работала. ID меняется каждый день.</value>
   </data>
   <data name="WizardDoneTray" xml:space="preserve">
-    <value>Aiko внизу, рядом с часами. Наведи мышь, чтобы увидеть карточку, или кликни, чтобы карточка осталась открытой.</value>
+    <value>Aiko внизу, рядом с часами. Наведи мышь — покажется карточка, кликни — останется открытой.</value>
   </data>
   <data name="WizardDoneMenuBar" xml:space="preserve">
     <value>Aiko наверху, рядом с часами. Наведи мышь, чтобы увидеть карточку, или щёлкни, чтобы она осталась открытой.</value>
@@ -293,7 +293,7 @@
     <value>Первые цифры придут после следующего ответа Claude Code. До этого кольцо пунктирное.</value>
   </data>
   <data name="WizardDoneNoAccess" xml:space="preserve">
-    <value>Aiko пока не видит лимиты. Доступ можно включить в настройках в любой момент.</value>
+    <value>Aiko пока не видит лимиты. Доступ можно включить в любой момент на странице «Общие».</value>
   </data>
   <data name="SettingsWriteFailed" xml:space="preserve">
     <value>Aiko не смогла записать файл настроек Claude Code. Попробуй ещё раз.</value>
@@ -596,16 +596,16 @@
     <value>Удалить среду</value>
   </data>
   <data name="RemoveEnvironmentLine" xml:space="preserve">
-    <value>Строка и плагины Aiko уйдут из settings.json этой папки. Вместе с ними уйдут команда {0} и привязки к {1}.</value>
+    <value>Из settings.json этой папки уйдут строка и плагины Aiko, а с ними команда {0} и привязки к {1}.</value>
   </data>
   <data name="MoveToRecycleBin" xml:space="preserve">
-    <value>И переместить папку в корзину</value>
+    <value>И переместить папку в Корзину</value>
   </data>
   <data name="MoveToTrash" xml:space="preserve">
     <value>И переместить папку в Корзину</value>
   </data>
   <data name="RecycleWhy" xml:space="preserve">
-    <value>В ней аккаунт, история и память Claude Code. Вернуть можно из корзины Windows.</value>
+    <value>В ней аккаунт, история и память Claude Code. Вернуть её можно из Корзины.</value>
   </data>
   <data name="TrashWhy" xml:space="preserve">
     <value>В ней аккаунт, история и память Claude Code. Вернуть её можно из Корзины.</value>
@@ -623,7 +623,7 @@
     <value>{0} удалена.</value>
   </data>
   <data name="EnvironmentRemovedToBin" xml:space="preserve">
-    <value>{0} удалена, папка в корзине.</value>
+    <value>{0} удалена, папка в Корзине.</value>
   </data>
   <data name="EnvironmentRemovedToTrash" xml:space="preserve">
     <value>{0} удалена, папка в Корзине.</value>
@@ -680,7 +680,7 @@
     <value>Из Aiko уйдут среды, строки и плагины Aiko в settings.json, команды {0}, привязки папок и строка Aiko в ~/.zshrc. Аккаунты и история в папках останутся.</value>
   </data>
   <data name="RestartBin" xml:space="preserve">
-    <value>И переместить {0} в корзину</value>
+    <value>И переместить {0} в Корзину</value>
   </data>
   <data name="RestartTrash" xml:space="preserve">
     <value>И переместить {0} в Корзину</value>
@@ -809,7 +809,7 @@
     <value>Автор Aiko не знает, сколько людей ею пользуется. Раз в сутки Aiko может сообщить, что одна копия работала, и отправить шесть значений. Вот все шесть.</value>
   </data>
   <data name="WizardStatsLater" xml:space="preserve">
-    <value>Решение меняется в настройках, в разделе «Приватность».</value>
+    <value>Это можно поменять потом на странице «Приватность».</value>
   </data>
   <data name="StatsDecline" xml:space="preserve">
     <value>Не отправлять</value>

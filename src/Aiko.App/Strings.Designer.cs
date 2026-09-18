@@ -123,7 +123,7 @@ public static class Strings
     /// Direct mode
     public static string DirectMode => Get("DirectMode");
 
-    /// In direct mode, Aiko asks Anthropic for your limits itself. It uses the token Claude Code...
+    /// In direct mode, Aiko asks Anthropic for your limits itself. That needs the token Claude C...
     public static string DirectModeWhat => Get("DirectModeWhat");
 
     /// Direct mode is on Windows only. On macOS Claude Code keeps the token in the Keychain, and...
@@ -264,7 +264,7 @@ public static class Strings
     /// Once a day, Aiko asks slayumind.org for the latest version and says that one copy of Aiko...
     public static string WizardUpdatesWhat => Get("WizardUpdatesWhat");
 
-    /// Aiko is down by the clock. Rest the mouse on it to see the card, or click it to keep the ...
+    /// Aiko is down by the clock. Rest the mouse on it for the card, click to keep it open.
     public static string WizardDoneTray => Get("WizardDoneTray");
 
     /// Aiko is up by the clock. Rest the mouse on it to see the card, or click it to keep the ca...
@@ -282,7 +282,7 @@ public static class Strings
     /// The first numbers arrive after your next answer from Claude Code. Until then, the ring is...
     public static string WizardDoneFirstNumbers => Get("WizardDoneFirstNumbers");
 
-    /// Aiko can't see your limits yet. You can turn on access in settings at any time.
+    /// Aiko can't see your limits yet. You can turn on access at any time on the General page.
     public static string WizardDoneNoAccess => Get("WizardDoneNoAccess");
 
     /// Aiko couldn't write the Claude Code settings file. Try again.
@@ -798,7 +798,7 @@ public static class Strings
     /// The author of Aiko doesn't know how many people use it. Once a day Aiko can say that one ...
     public static string WizardStatsWhat => Get("WizardStatsWhat");
 
-    /// You can change this later in settings, under Privacy.
+    /// You can change this later on the Privacy page.
     public static string WizardStatsLater => Get("WizardStatsLater");
 
     /// Don't send
