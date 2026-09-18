@@ -125,9 +125,12 @@ Where they differ from the Windows pair:
 - **Claude Code missing.** The shim answers 127, which is what a shell answers for a command it
   cannot find; the Windows shim answers 9009, which is cmd's number for the same thing. Whether a
   file in PATH is Claude Code is asked with `isExecutableFile` instead of `File.Exists`.
-- **Ctrl+C** is ignored with `signal(SIGINT, SIG_IGN)` instead of `Console.CancelKeyPress`, for the
-  same reason: Claude Code handles it, and the shim must not quit first. A Claude Code killed by a
-  signal is reported as 128 plus the signal, the way a shell reports it.
+- **Claude Code replaces the shim** with `execve`, where the Windows shim starts a child and waits.
+  A child of a Foundation `Process` gets a process group of its own, and a process outside the
+  terminal's foreground group is stopped by SIGTTIN as soon as it reads the keyboard, so the
+  session never started. After exec there is one process: the terminal, the exit code and Ctrl+C
+  are Claude Code's own, and nothing has to be handed back — which is why there is no
+  `Console.CancelKeyPress` twin and no "128 plus the signal" here.
 - **The language of the reminder.** macOS says its language as a tag (`ru-RU`), Windows as a
   number, so `SessionReminder.isRussian` has an overload for each.
 - **Proof that they start.** The shim keeps `AIKO_SHIM_SELF_TEST=1`. The bridge has no such
