@@ -21,7 +21,7 @@ struct SettingsJsonPatchTests {
         }
         """
 
-    private var patch: SettingsJsonPatch { TestBridge.patch }
+    private var patch: SettingsJsonPatch { SettingsJsonPatch(.windows) }
 
     @Test
     func addsOurStatusLineAndKeepsEverythingElse() throws {
@@ -178,10 +178,10 @@ struct SettingsJsonPatchTests {
 
     @Test
     func theHookCommandIsTheBridgeWithOneArgument() {
-        #expect(TestBridge.hookCommand(#"C:\A\Aiko.Bridge.exe"#) == #""C:\A\Aiko.Bridge.exe" --session-start"#)
+        #expect(BridgeCommand.hookFor(#"C:\A\Aiko.Bridge.exe"#) == #""C:\A\Aiko.Bridge.exe" --session-start"#)
         #expect(
-            TestBridge.hookCommand(#"C:\A\Aiko.Bridge.exe"#, powerShell: true)
+            BridgeCommand.hookFor(#"C:\A\Aiko.Bridge.exe"#, .powerShell)
                 == #"& "C:\A\Aiko.Bridge.exe" --session-start"#)
-        #expect(TestBridge.isAiko(TestBridge.hookCommand(#"C:\A\Aiko.Bridge.exe"#)))
+        #expect(BridgeCommand.isAiko(.windows, BridgeCommand.hookFor(#"C:\A\Aiko.Bridge.exe"#)))
     }
 }

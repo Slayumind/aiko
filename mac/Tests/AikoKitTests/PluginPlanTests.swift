@@ -5,9 +5,63 @@ import Testing
 
 struct PluginPlanTests {
     static let marketplace = #"C:\Users\Тест Юзер\AppData\Local\Aiko\marketplace"#
+    static let localAppData = #"C:\Users\Тест Юзер\AppData\Local"#
+    static let folders = AikoFolders.windows(#"C:\Users\Тест Юзер\AppData\Roaming"#, localAppData)
     static let persona = "aiko-persona@aiko"
 
-    // The command and the marketplace file are written by AikoMarketplace, which is not ported yet.
+    private func env(persona: Bool) -> AikoEnvironment {
+        AikoEnvironment("Aiko", [#"C:\Users\someone\.claude"#], persona: persona)
+    }
+
+    // ---- the command and the marketplace file ----
+
+    @Test
+    func theInstalledBridgeIsNamedThroughLocalAppDataSoTheCommandStaysAscii() {
+        let command = AikoMarketplace.personaCommand(
+            .windows, Self.localAppData + #"\Slayumind.Aiko\current\Aiko.Bridge.exe"#, Self.folders)
+
+        #expect(command == #""%LOCALAPPDATA%\Slayumind.Aiko\current\Aiko.Bridge.exe" plugin aiko-persona"#)
+    }
+
+    @Test
+    func aBuildFolderIsNamedAsItIsAndRefusedWhenItIsNotAscii() {
+        #expect(
+            AikoMarketplace.personaCommand(.windows, #"D:\src\Aiko.Bridge.exe"#, Self.folders)
+                == #""D:\src\Aiko.Bridge.exe" plugin aiko-persona"#)
+        #expect(
+            AikoMarketplace.personaCommand(.windows, Self.localAppData + #"\dev\Aiko.Bridge.exe"#, Self.folders)
+                == nil)
+    }
+
+    @Test(arguments: [
+        (#""C:\x\a.exe" plugin p"#, true),
+        ("", false),
+        ("a    b", false),
+        ("tab\there", false),
+    ] as [(String, Bool)])
+    func commandsFollowTheClaudeCodeRules(command: String, valid: Bool) {
+        #expect(AikoMarketplace.isValidCommand(command) == valid)
+        #expect(!AikoMarketplace.isValidCommand(String(repeating: "a", count: 501)))
+    }
+
+    @Test
+    func theMarketplaceListsThePersonaAsACommandSource() {
+        let root = JsonNode.parse(AikoMarketplace.json(#""x.exe" plugin aiko-persona"#))
+        let plugin = root?["plugins"]?.arrayValue?.first
+
+        #expect(root?["name"]?.stringValue == "aiko")
+        #expect(plugin?["name"]?.stringValue == "aiko-persona")
+        #expect(plugin?["source"]?["source"]?.stringValue == "command")
+        #expect(plugin?["source"]?["command"]?.stringValue == #""x.exe" plugin aiko-persona"#)
+    }
+
+    @Test
+    func theMarketplaceFileKeepsQuotesReadable() {
+        let text = AikoMarketplace.json(##""%LOCALAPPDATA%\x.exe" plugin aiko-persona"##)
+
+        #expect(!text.contains(##"\u0022"##))
+        #expect(text.contains(##""\"%LOCALAPPDATA%\\x.exe\" plugin aiko-persona""##))
+    }
 
     private func state(
         _ marketplace: String? = nil, installed: [String] = [], enabled: [String] = []
@@ -49,12 +103,12 @@ struct PluginPlanTests {
 
     @Test
     func withoutThePersonaAFolderWantsNothingNotEvenSkills() {
-        #expect(PluginPlan.desired(personaOn: false, persona: .default, skills: ["copy"]).isEmpty)
+        #expect(PluginPlan.desired(env(persona: false), persona: .default, skills: ["copy"]).isEmpty)
     }
 
     @Test
     func withThePersonaAFolderWantsItAndTheSkillsPlugin() {
-        let desired = PluginPlan.desired(personaOn: true, persona: .default, skills: ["copy", "palette"])
+        let desired = PluginPlan.desired(env(persona: true), persona: .default, skills: ["copy", "palette"])
 
         #expect(desired.sorted() == [Self.persona, "aiko@aiko"].sorted())
     }
@@ -64,8 +118,8 @@ struct PluginPlanTests {
         var skillsOff = PersonaSettings.default
         skillsOff.skillsOn = false
 
-        #expect(PluginPlan.desired(personaOn: true, persona: skillsOff, skills: ["copy", "palette"]) == [Self.persona])
-        #expect(PluginPlan.desired(personaOn: true, persona: .default, skills: []) == [Self.persona])
+        #expect(PluginPlan.desired(env(persona: true), persona: skillsOff, skills: ["copy", "palette"]) == [Self.persona])
+        #expect(PluginPlan.desired(env(persona: true), persona: .default, skills: []) == [Self.persona])
     }
 
     @Test(arguments: [

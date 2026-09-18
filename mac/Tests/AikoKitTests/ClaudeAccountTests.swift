@@ -70,4 +70,21 @@ struct ClaudeAccountTests {
         #expect(!account.isKnown)
         #expect(account.planLabel == "")
     }
+
+    @Test
+    func theDefaultFolderReadsTheHomeFileFirst() {
+        let home = #"C:\Users\someone"#
+
+        #expect(
+            ClaudeConfigFolder.accountFileCandidates(.windows, #"C:\Users\someone\.claude\"#, home)
+                == [#"C:\Users\someone\.claude.json"#, #"C:\Users\someone\.claude\.claude.json"#])
+    }
+
+    @Test
+    func anyOtherFolderReadsItsOwnFile() {
+        #expect(
+            ClaudeConfigFolder.accountFileCandidates(
+                .windows, #"C:\Users\someone\.claude-personal"#, #"C:\Users\someone"#)
+                == [#"C:\Users\someone\.claude-personal\.claude.json"#])
+    }
 }

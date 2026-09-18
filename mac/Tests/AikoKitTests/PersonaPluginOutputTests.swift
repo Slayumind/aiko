@@ -4,7 +4,19 @@ import Testing
 @testable import AikoKit
 
 struct PersonaPluginOutputTests {
-    // The folder tests need SnapshotName, which is not ported yet.
+    static let folders = AikoFolders.windows(
+        #"C:\Users\someone\AppData\Roaming"#, #"C:\Users\someone\AppData\Local"#)
+
+    @Test
+    func eachEnvironmentGetsItsOwnFolderNamedLikeItsSnapshot() {
+        #expect(
+            PersonaPluginOutput.environmentFolder(Self.folders, #"C:\Users\someone\.claude"#)
+                == #"C:\Users\someone\AppData\Local\Aiko\plugins\claude"#)
+        #expect(
+            PersonaPluginOutput.versionFolder(
+                Self.folders, #"C:\Users\someone\.claude-work\"#, "0123456789ab")
+                == #"C:\Users\someone\AppData\Local\Aiko\plugins\claude-work\0123456789ab"#)
+    }
 
     @Test(arguments: [
         (["plugin", "aiko-persona"], true),

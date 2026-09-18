@@ -60,7 +60,7 @@ public struct PluginState: Sendable, Equatable {
     }
 
     private static func marketplaceIn(_ json: String?) -> String? {
-        parse(json)?[AikoMarketplaceIds.name]?.objectValue?["installLocation"]?.stringValue
+        parse(json)?[AikoMarketplace.name]?.objectValue?["installLocation"]?.stringValue
     }
 
     private static func installedIn(_ json: String?) -> Set<String> {
@@ -69,7 +69,7 @@ public struct PluginState: Sendable, Equatable {
             return ours
         }
 
-        for member in plugins.members where AikoMarketplaceIds.isOurs(member.key) {
+        for member in plugins.members where AikoMarketplace.isOurs(member.key) {
             let entries = member.value.arrayValue ?? []
             if entries.contains(where: { $0["scope"]?.stringValue == "user" }) {
                 ours.insert(member.key)
@@ -85,7 +85,7 @@ public struct PluginState: Sendable, Equatable {
             return ours
         }
 
-        for member in enabled.members where AikoMarketplaceIds.isOurs(member.key) {
+        for member in enabled.members where AikoMarketplace.isOurs(member.key) {
             if member.value.boolValue == true {
                 ours.insert(member.key)
             }
@@ -105,16 +105,18 @@ public struct PluginState: Sendable, Equatable {
 /// Which of Aiko's plugins a folder should have, and the steps from what it has (D-197, D-234).
 public enum PluginPlan {
     /// The persona, and the skills plugin while the skills are on and this Aiko ships any. Only where
-    /// the persona is on. EnvironmentSettings is not ported yet, so the flag comes in on its own.
-    public static func desired(personaOn: Bool, persona: PersonaSettings, skills: [String]) -> Set<String> {
+    /// the persona is on.
+    public static func desired(
+        _ environment: AikoEnvironment, persona: PersonaSettings, skills: [String]
+    ) -> Set<String> {
         var desired: Set<String> = []
-        if !personaOn {
+        if !environment.persona {
             return desired
         }
 
-        desired.insert(AikoMarketplaceIds.pluginId(PersonaPlugin.name))
+        desired.insert(AikoMarketplace.pluginId(PersonaPlugin.name))
         if persona.skillsOn && !skills.isEmpty {
-            desired.insert(AikoMarketplaceIds.pluginId(SkillCatalog.pluginName))
+            desired.insert(AikoMarketplace.pluginId(SkillCatalog.pluginName))
         }
 
         return desired
@@ -122,9 +124,9 @@ public enum PluginPlan {
 
     /// A plugin of ours that this Aiko no longer ships, like the one-skill plugins before D-234.
     public static func isRetired(_ pluginId: String) -> Bool {
-        AikoMarketplaceIds.isOurs(pluginId)
-            && pluginId != AikoMarketplaceIds.pluginId(PersonaPlugin.name)
-            && pluginId != AikoMarketplaceIds.pluginId(SkillCatalog.pluginName)
+        AikoMarketplace.isOurs(pluginId)
+            && pluginId != AikoMarketplace.pluginId(PersonaPlugin.name)
+            && pluginId != AikoMarketplace.pluginId(SkillCatalog.pluginName)
     }
 
     public static func steps(
@@ -138,7 +140,7 @@ public enum PluginPlan {
             } else if !sameFolder(state.marketplaceFolder!, marketplaceFolder) {
                 // A marketplace of the same name from another place, for example a build run from
                 // the source folder. Claude Code keeps one place per name.
-                steps.append(PluginStep(.removeMarketplace, AikoMarketplaceIds.name))
+                steps.append(PluginStep(.removeMarketplace, AikoMarketplace.name))
                 steps.append(PluginStep(.addMarketplace, marketplaceFolder))
             }
         }
@@ -172,7 +174,7 @@ public enum PluginPlan {
         var steps = ordered(state.installed).map { PluginStep(.uninstall, $0) }
 
         if state.marketplaceFolder != nil {
-            steps.append(PluginStep(.removeMarketplace, AikoMarketplaceIds.name))
+            steps.append(PluginStep(.removeMarketplace, AikoMarketplace.name))
         }
 
         return steps

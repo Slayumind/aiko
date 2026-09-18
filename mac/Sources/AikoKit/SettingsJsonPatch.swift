@@ -1,15 +1,5 @@
 import Foundation
 
-/// The pure part of AikoMarketplace: the name of Aiko's marketplace and the plugin ids under it.
-/// The rest of that file is about Windows paths and is not ported yet.
-public enum AikoMarketplaceIds {
-    public static let name = "aiko"
-
-    public static func pluginId(_ plugin: String) -> String { "\(plugin)@\(name)" }
-
-    public static func isOurs(_ pluginId: String) -> Bool { pluginId.hasSuffix("@" + name) }
-}
-
 /// Adding and removing our one line in the Claude Code settings file. Text in, text out:
 /// reading and writing the file, and its backup, belong to the app.
 ///
@@ -20,13 +10,15 @@ public enum AikoMarketplaceIds {
 /// Every method answers "nothing to change" with nil instead of the bool and the out parameter
 /// the Windows core uses.
 public struct SettingsJsonPatch: Sendable {
-    /// Whether a status line or hook command runs our own bridge. BridgeCommand is not ported yet,
-    /// and the answer will differ on macOS anyway, so it comes in from outside.
-    public let isAiko: @Sendable (String?) -> Bool
+    /// The system whose program names our own line is recognised by: Aiko.Bridge.exe on Windows,
+    /// Aiko.Bridge on macOS.
+    public let platform: PlatformConventions
 
-    public init(isAiko: @escaping @Sendable (String?) -> Bool) {
-        self.isAiko = isAiko
+    public init(_ platform: PlatformConventions) {
+        self.platform = platform
     }
+
+    func isAiko(_ command: String?) -> Bool { BridgeCommand.isAiko(platform, command) }
 
     public static let statusLineKey = "statusLine"
     public static let wrappedKey = "aikoWrappedStatusLine"
@@ -158,14 +150,14 @@ public struct SettingsJsonPatch: Sendable {
 
         var changed = false
         if var enabled = root[SettingsJsonPatch.enabledPluginsKey]?.objectValue {
-            for id in enabled.keys where AikoMarketplaceIds.isOurs(id) {
+            for id in enabled.keys where AikoMarketplace.isOurs(id) {
                 changed = enabled.remove(id) || changed
             }
             root[SettingsJsonPatch.enabledPluginsKey] = .object(enabled)
         }
 
         if var marketplaces = root[SettingsJsonPatch.extraMarketplacesKey]?.objectValue {
-            changed = marketplaces.remove(AikoMarketplaceIds.name) || changed
+            changed = marketplaces.remove(AikoMarketplace.name) || changed
             root[SettingsJsonPatch.extraMarketplacesKey] = .object(marketplaces)
         }
 
@@ -204,11 +196,11 @@ public struct SettingsJsonPatch: Sendable {
         if root.contains(SettingsJsonPatch.wrappedKey) { return true }
         if let groups = sessionStartGroups(root), !ourHookCommands(groups).isEmpty { return true }
         if let enabled = root[SettingsJsonPatch.enabledPluginsKey]?.objectValue,
-           enabled.keys.contains(where: AikoMarketplaceIds.isOurs) {
+           enabled.keys.contains(where: AikoMarketplace.isOurs) {
             return true
         }
         if let marketplaces = root[SettingsJsonPatch.extraMarketplacesKey]?.objectValue,
-           marketplaces.contains(AikoMarketplaceIds.name) {
+           marketplaces.contains(AikoMarketplace.name) {
             return true
         }
         return false

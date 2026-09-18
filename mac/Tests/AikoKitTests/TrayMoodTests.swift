@@ -111,9 +111,11 @@ struct TrayMoodTests {
 
     @Test
     func noPersonaAnywhereMeansNoFace() {
-        // The environment file is not ported yet, so the persona flags come in as a list.
-        #expect(!TrayMood.hasFace([false]))
-        #expect(TrayMood.hasFace([true]))
-        #expect(!TrayMood.hasFace([]))
+        let off = EnvironmentSettings([AikoEnvironment("Work", [#"C:\x"#])])
+        let on = EnvironmentSettings([AikoEnvironment("Work", [#"C:\x"#], persona: true)])
+
+        #expect(!TrayMood.hasFace(off))
+        #expect(TrayMood.hasFace(on))
+        #expect(!TrayMood.hasFace(.empty))
     }
 }

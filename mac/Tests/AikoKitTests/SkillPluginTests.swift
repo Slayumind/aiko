@@ -57,9 +57,18 @@ struct SkillPluginTests {
         #expect(SkillPlugin.fromManifest(nil) == nil)
     }
 
+    @Test
+    func theMarketplaceListsThePersonaAndThenTheSkillsPlugin() {
+        let json = AikoMarketplace.json(
+            #""x.exe" plugin aiko-persona"#, skills: SkillPlugin(name: "aiko", description: "All skills."))
+
+        let plugins = JsonNode.parse(json)?["plugins"]?.arrayValue ?? []
+        #expect(plugins.compactMap { $0["name"]?.stringValue } == ["aiko-persona", "aiko"])
+        #expect(plugins[1]["source"]?.stringValue == "./plugins/aiko")
+        #expect(JsonNode.parse(AikoMarketplace.json(#""x.exe" plugin aiko-persona"#))?["plugins"]?.arrayValue?.count == 1)
+    }
+
     // ---- the plugin in the repository ----
-    //
-    // The marketplace file itself is written by AikoMarketplace, which is not ported yet.
 
     static func repository() -> URL {
         var folder = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
