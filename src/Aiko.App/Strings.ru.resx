@@ -47,7 +47,7 @@
     <value>сброс через {0}</value>
   </data>
   <data name="CardJustReset" xml:space="preserve">
-    <value>только что сброшен</value>
+    <value>сброс только что</value>
   </data>
   <data name="CardLastsUntilReset" xml:space="preserve">
     <value>хватит до сброса</value>
@@ -629,7 +629,7 @@
     <value>{0} удалена, папка в Корзине.</value>
   </data>
   <data name="FoldersTableLead" xml:space="preserve">
-    <value>В папке и во всех вложенных обычный claude запускает её среду. Команда вроде {0} сильнее привязки, но Claude Code напомнит о ней.</value>
+    <value>В папке и во всех вложенных обычный claude запускает её среду. Команда вроде {0} сильнее привязки, но Claude Code напомнит о привязке.</value>
   </data>
   <data name="FolderColumn" xml:space="preserve">
     <value>ПАПКА</value>
@@ -776,7 +776,7 @@
     <value>личность включена хотя бы в одной среде</value>
   </data>
   <data name="NothingSentYet" xml:space="preserve">
-    <value>Сейчас не отправляется ничего из этого.</value>
+    <value>Сейчас ничего из этого не отправляется.</value>
   </data>
   <data name="SectionNeverSent" xml:space="preserve">
     <value>ЧТО НЕ ОТПРАВЛЯЕТСЯ НИКОГДА</value>
@@ -785,13 +785,13 @@
     <value>Имя, почта, папки проектов, лимиты, токен и тексты сессий. IP-адрес сайт не читает и не хранит.</value>
   </data>
   <data name="StatsKeptFor" xml:space="preserve">
-    <value>Строки удаляются через 90 дней.</value>
+    <value>Записи удаляются через 90 дней.</value>
   </data>
   <data name="ResetInstallId" xml:space="preserve">
     <value>Сбросить ID</value>
   </data>
   <data name="ResetInstallIdWhat" xml:space="preserve">
-    <value>Aiko придумает новое значение, и прежние сутки с ним не свяжутся.</value>
+    <value>Aiko придумает новое значение. Прежние дни с новым ID уже не связать.</value>
   </data>
   <data name="ResetInstallIdDone" xml:space="preserve">
     <value>ID теперь новый.</value>

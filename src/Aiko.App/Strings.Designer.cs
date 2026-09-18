@@ -774,13 +774,13 @@ public static class Strings
     /// Your name, email, project folders, limits, token and session texts. The site doesn't read...
     public static string NeverSentWhat => Get("NeverSentWhat");
 
-    /// The rows are deleted after 90 days.
+    /// The records are deleted after 90 days.
     public static string StatsKeptFor => Get("StatsKeptFor");
 
     /// Reset ID
     public static string ResetInstallId => Get("ResetInstallId");
 
-    /// Aiko makes a new value, and the days before it can't be linked to it.
+    /// Aiko makes a new value. The days before it cannot be linked to the new one.
     public static string ResetInstallIdWhat => Get("ResetInstallIdWhat");
 
     /// The ID is new.

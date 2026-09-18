@@ -38,7 +38,7 @@
     "CardJustReset",
     [
       "just reset",
-      "только что сброшен"
+      "сброс только что"
     ]
   ],
   [
@@ -1395,8 +1395,8 @@
   [
     "FoldersTableLead",
     [
-      "In a folder and in every folder inside, plain claude starts its environment. A command like {0} beats a binding, and Claude Code reminds you of it.",
-      "В папке и во всех вложенных обычный claude запускает её среду. Команда вроде {0} сильнее привязки, но Claude Code напомнит о ней."
+      "In a folder and in every folder inside, plain claude starts its environment. A command like {0} beats a binding, and Claude Code reminds you of the binding.",
+      "В папке и во всех вложенных обычный claude запускает её среду. Команда вроде {0} сильнее привязки, но Claude Code напомнит о привязке."
     ]
   ],
   [
@@ -1739,7 +1739,7 @@
     "NothingSentYet",
     [
       "None of this is sent right now.",
-      "Сейчас не отправляется ничего из этого."
+      "Сейчас ничего из этого не отправляется."
     ]
   ],
   [
@@ -1759,8 +1759,8 @@
   [
     "StatsKeptFor",
     [
-      "The rows are deleted after 90 days.",
-      "Строки удаляются через 90 дней."
+      "The records are deleted after 90 days.",
+      "Записи удаляются через 90 дней."
     ]
   ],
   [
@@ -1773,8 +1773,8 @@
   [
     "ResetInstallIdWhat",
     [
-      "Aiko makes a new value, and the days before it can't be linked to it.",
-      "Aiko придумает новое значение, и прежние сутки с ним не свяжутся."
+      "Aiko makes a new value. The days before it cannot be linked to the new one.",
+      "Aiko придумает новое значение. Прежние дни с новым ID уже не связать."
     ]
   ],
   [

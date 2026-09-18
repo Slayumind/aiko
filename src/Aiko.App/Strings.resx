@@ -629,7 +629,7 @@
     <value>{0} removed. The folder is in the Trash.</value>
   </data>
   <data name="FoldersTableLead" xml:space="preserve">
-    <value>In a folder and in every folder inside, plain claude starts its environment. A command like {0} beats a binding, and Claude Code reminds you of it.</value>
+    <value>In a folder and in every folder inside, plain claude starts its environment. A command like {0} beats a binding, and Claude Code reminds you of the binding.</value>
   </data>
   <data name="FolderColumn" xml:space="preserve">
     <value>FOLDER</value>
@@ -785,13 +785,13 @@
     <value>Your name, email, project folders, limits, token and session texts. The site doesn't read or store the IP address.</value>
   </data>
   <data name="StatsKeptFor" xml:space="preserve">
-    <value>The rows are deleted after 90 days.</value>
+    <value>The records are deleted after 90 days.</value>
   </data>
   <data name="ResetInstallId" xml:space="preserve">
     <value>Reset ID</value>
   </data>
   <data name="ResetInstallIdWhat" xml:space="preserve">
-    <value>Aiko makes a new value, and the days before it can't be linked to it.</value>
+    <value>Aiko makes a new value. The days before it cannot be linked to the new one.</value>
   </data>
   <data name="ResetInstallIdDone" xml:space="preserve">
     <value>The ID is new.</value>

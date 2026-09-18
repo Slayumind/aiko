@@ -45,7 +45,7 @@ public enum Strings {
         "CardModelWeek": ("{0} · week", "{0} · неделя"),
         "CardPercentUsed": ("{0}% used", "потрачено {0}%"),
         "CardResets": ("resets in {0}", "сброс через {0}"),
-        "CardJustReset": ("just reset", "только что сброшен"),
+        "CardJustReset": ("just reset", "сброс только что"),
         "CardLastsUntilReset": ("lasts until reset", "хватит до сброса"),
         "CardAtThisPace": ("~{0} at this pace", "хватит на ~{0}"),
         "CardToneCaution": ("running low", "на исходе"),
@@ -239,7 +239,7 @@ public enum Strings {
         "EnvironmentRemoved": ("{0} removed.", "{0} удалена."),
         "EnvironmentRemovedToBin": ("{0} removed. The folder is in the Recycle Bin.", "{0} удалена, папка в Корзине."),
         "EnvironmentRemovedToTrash": ("{0} removed. The folder is in the Trash.", "{0} удалена, папка в Корзине."),
-        "FoldersTableLead": ("In a folder and in every folder inside, plain claude starts its environment. A command like {0} beats a binding, and Claude Code reminds you of it.", "В папке и во всех вложенных обычный claude запускает её среду. Команда вроде {0} сильнее привязки, но Claude Code напомнит о ней."),
+        "FoldersTableLead": ("In a folder and in every folder inside, plain claude starts its environment. A command like {0} beats a binding, and Claude Code reminds you of the binding.", "В папке и во всех вложенных обычный claude запускает её среду. Команда вроде {0} сильнее привязки, но Claude Code напомнит о привязке."),
         "FolderColumn": ("FOLDER", "ПАПКА"),
         "EnvironmentColumn": ("ENVIRONMENT", "СРЕДА"),
         "AllOtherFolders": ("All other folders", "Все остальные папки"),
@@ -288,12 +288,12 @@ public enum Strings {
         "SentWeekFlag": ("the first run this week", "первый запуск на этой неделе"),
         "SentMonthFlag": ("the first run this month", "первый запуск в этом месяце"),
         "SentPersona": ("the personality is on in at least one environment", "личность включена хотя бы в одной среде"),
-        "NothingSentYet": ("None of this is sent right now.", "Сейчас не отправляется ничего из этого."),
+        "NothingSentYet": ("None of this is sent right now.", "Сейчас ничего из этого не отправляется."),
         "SectionNeverSent": ("WHAT NEVER LEAVES", "ЧТО НЕ ОТПРАВЛЯЕТСЯ НИКОГДА"),
         "NeverSentWhat": ("Your name, email, project folders, limits, token and session texts. The site doesn't read or store the IP address.", "Имя, почта, папки проектов, лимиты, токен и тексты сессий. IP-адрес сайт не читает и не хранит."),
-        "StatsKeptFor": ("The rows are deleted after 90 days.", "Строки удаляются через 90 дней."),
+        "StatsKeptFor": ("The records are deleted after 90 days.", "Записи удаляются через 90 дней."),
         "ResetInstallId": ("Reset ID", "Сбросить ID"),
-        "ResetInstallIdWhat": ("Aiko makes a new value, and the days before it can't be linked to it.", "Aiko придумает новое значение, и прежние сутки с ним не свяжутся."),
+        "ResetInstallIdWhat": ("Aiko makes a new value. The days before it cannot be linked to the new one.", "Aiko придумает новое значение. Прежние дни с новым ID уже не связать."),
         "ResetInstallIdDone": ("The ID is new.", "ID теперь новый."),
         "OpenPrivacyDoc": ("Open PRIVACY.md", "Открыть PRIVACY.md"),
         "PrivacyLinkFromGeneral": ("What Aiko sends and to whom — Privacy.", "Что Aiko отправляет и кому — раздел «Приватность»."),
@@ -1111,13 +1111,13 @@ public enum Strings {
     /// Your name, email, project folders, limits, token and session texts. The site doesn't read...
     public static var neverSentWhat: String { Strings.get("NeverSentWhat") }
 
-    /// The rows are deleted after 90 days.
+    /// The records are deleted after 90 days.
     public static var statsKeptFor: String { Strings.get("StatsKeptFor") }
 
     /// Reset ID
     public static var resetInstallId: String { Strings.get("ResetInstallId") }
 
-    /// Aiko makes a new value, and the days before it can't be linked to it.
+    /// Aiko makes a new value. The days before it cannot be linked to the new one.
     public static var resetInstallIdWhat: String { Strings.get("ResetInstallIdWhat") }
 
     /// The ID is new.
