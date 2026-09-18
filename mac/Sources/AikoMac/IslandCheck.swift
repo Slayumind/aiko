@@ -21,6 +21,8 @@ enum IslandCheck {
             drag(shell.islandForCheck())
         case "face":
             face(shell, shell.islandForCheck())
+        case "face-icon":
+            faceOnTheIcon(shell)
         default:
             Log.write("self test: there is no check called \(what)")
             quit(after: 0.2)
@@ -123,6 +125,39 @@ enum IslandCheck {
             tell("from the bottom edge", island, shell.cardFrameForCheck)
             shell.closeCardForCheck()
             quit(after: 0.4)
+        }
+    }
+
+    /// The same face on the menu bar icon, where there is no window to measure: the picture itself
+    /// is counted instead. Windows hands the tray eight pictures per step; this one has to draw
+    /// many more than that, because it is smooth.
+    private static func faceOnTheIcon(_ shell: AikoShell) {
+        // The pictures themselves, not their hashes: Foundation hashes only a part of a large
+        // value, and two icons a frame apart differ in very few bytes.
+        var pictures: [Data] = []
+        let timer = Timer(timeInterval: 0.02, repeats: true) { _ in
+            MainActor.assumeIsolated {
+                if let picture = shell.iconPictureForCheck {
+                    pictures.append(picture)
+                }
+            }
+        }
+
+        RunLoop.main.add(timer, forMode: .common)
+        shell.showFaceForCheck(.working)
+
+        after(0.8) {
+            Log.write("self test: face on the icon, \(Set(pictures).count) different pictures "
+                + "in \(pictures.count) looks")
+            pictures = []
+            shell.showFaceForCheck(nil)
+        }
+
+        after(1.8) {
+            timer.invalidate()
+            Log.write("self test: back to the rings, \(Set(pictures).count) different pictures "
+                + "in \(pictures.count) looks")
+            quit(after: 0.2)
         }
     }
 

@@ -203,6 +203,9 @@ final class AikoShell: NSResponder {
 
     var cardFrameForCheck: NSRect? { card?.frame }
 
+    /// The picture the menu bar holds right now, so a self test can see it change.
+    var iconPictureForCheck: Data? { statusItem?.button?.image?.tiffRepresentation }
+
     func placeIslandForCheck(_ position: IslandPosition) {
         island?.show(cards(), at: position)
     }
