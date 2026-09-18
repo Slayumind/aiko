@@ -124,6 +124,12 @@ final class AikoShell: NSResponder {
     }
 
     private func saveIslandPosition(_ position: IslandPosition) {
+        // A self test drags the island about; the person's settings are not its to change.
+        guard !selfTesting else {
+            Log.write("island would be saved at \(position.edge) \(String(format: "%.2f", position.along))")
+            return
+        }
+
         var settings = Store.settings()
         settings.island = position
         Store.saveSettings(settings)
@@ -183,6 +189,22 @@ final class AikoShell: NSResponder {
     /// One face, without waiting for a session to do anything. Only the self test calls it.
     func showFaceForCheck(_ face: AikoFace?) {
         onFace(face)
+    }
+
+    /// The card as the island would open it, and where it ended up. Only the self test calls these.
+    func openCardForCheck(pinned: Bool) {
+        openCard(pinned: pinned)
+    }
+
+    func closeCardForCheck() {
+        card?.fadeAndClose()
+        card = nil
+    }
+
+    var cardFrameForCheck: NSRect? { card?.frame }
+
+    func placeIslandForCheck(_ position: IslandPosition) {
+        island?.show(cards(), at: position)
     }
 
     private func describe(_ row: CardRow?) -> String {

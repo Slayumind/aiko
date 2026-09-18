@@ -9,9 +9,12 @@ import AppKit
 @MainActor
 enum IslandCheck {
     static func run(_ what: String, shell: AikoShell) {
-        Log.write("self test: \(what), fewer animations: \(Motion.reduceMotion)")
+        Log.write("self test: \(what), fewer animations: \(Motion.reduceMotion), "
+            + "a full screen window in front: \(FullScreenWatch.isFullScreenInFront())")
 
         switch what {
+        case "card-island":
+            card(shell, shell.islandForCheck())
         case "island", "unfold":
             unfold(shell.islandForCheck())
         case "drag", "glass":
@@ -100,6 +103,40 @@ enum IslandCheck {
             Log.write("self test: back to the rings \(size(island)), on the way \(sampler.takeSizes())")
             quit(after: 0.2)
         }
+    }
+
+    /// The card opens from the island: under it on a top edge, over it on a bottom one (D-148).
+    private static func card(_ shell: AikoShell, _ island: IslandWindow) {
+        shell.openCardForCheck(pinned: true)
+
+        after(0.6) {
+            tell("from the top edge", island, shell.cardFrameForCheck)
+            shell.closeCardForCheck()
+            shell.placeIslandForCheck(IslandPosition(.bottom, 0.5))
+        }
+
+        after(1.2) {
+            shell.openCardForCheck(pinned: true)
+        }
+
+        after(1.8) {
+            tell("from the bottom edge", island, shell.cardFrameForCheck)
+            shell.closeCardForCheck()
+            quit(after: 0.4)
+        }
+    }
+
+    private static func tell(_ what: String, _ island: IslandWindow, _ card: NSRect?) {
+        guard let card else {
+            Log.write("self test: card \(what) is missing")
+            return
+        }
+
+        let island = island.frame
+        Log.write("self test: card \(what): island \(Int(island.minY))..\(Int(island.maxY)), "
+            + "card \(Int(card.minY))..\(Int(card.maxY)), "
+            + "card under the island: \(Int(card.maxY) == Int(island.minY)), "
+            + "card over the island: \(Int(card.minY) == Int(island.maxY))")
     }
 
     /// Writes down the size of the island every 30 ms, so a check can say what it did on the way

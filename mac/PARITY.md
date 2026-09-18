@@ -3,10 +3,11 @@
 The macOS app repeats the Windows core, so every ported file keeps its behaviour and every xUnit
 case has a Swift case with the same name and the same numbers. Test counts below are cases, not
 methods: one `[Theory]` with five `[InlineData]` rows counts as five, and so does the Swift
-`@Test(arguments:)` that mirrors it. 785 cases in `dotnet test`, 835 in `swift test` (516 test
+`@Test(arguments:)` that mirrors it. 785 cases in `dotnet test`, 888 in `swift test` (557 test
 methods). The 49 the Swift side does not have are named at the bottom; the ones it has and Windows
 does not belong to the two small programs, whose decisions sit inline in `Program.cs` on Windows,
-and to the card words, which sit in `Aiko.App` on Windows where no test can reach them.
+and to the card words and the island, which sit in `Aiko.App` on Windows where no test can reach
+them.
 
 Rules that are a table of inputs and answers live in `spec/cases/` and are read by both suites, so
 a row cannot change in one core and stay as it was in the other. See `spec/cases/README.md`.
@@ -73,6 +74,9 @@ reach them. In Swift they are part of AikoKit and have cases of their own:
 | TrayText.cs | TrayText.swift | — | 6 | the 127 character limit is Windows', and one text for both is one text to translate |
 | RingIcon.cs, RingDrawing.cs | RingArt.swift | — | 13 | the 16 unit grid, the tones and the dashed ring as numbers; the drawing itself is `AikoMac/StatusIcon.swift` |
 | Theme/Motion.cs | Motion.swift, CardLifetime.swift | — | 6 | the durations and the curves, plus the hover delay and the two away turns that AikoShell.cs keeps inline |
+| Island/IslandPanel.xaml.cs, Island/UnfoldPanel.cs, Island/FitPanel.cs | IslandLayout.swift | — | 28 | the size of the island, its line and corners per edge, the padding that keeps the rings still when the docked side loses its line, where every ring and percentage sits, and the 34 point square it closes into around the face |
+| Island/IslandWindow.xaml.cs | IslandDrag.swift | — | 7 | the 3 point threshold and the grip kept as a share of the size |
+| Island/RingGauge.cs | RingArt.swift | — | 2 | the island ring: the pen is 18 % of the ring, as RingGauge draws it |
 
 Helpers with no file of their own in the C# core:
 
@@ -81,6 +85,7 @@ Helpers with no file of their own in the C# core:
 | BridgeWork.swift | what one run of the bridge does: which job it was started for, the snapshot to write, the activity file of a session, the reminder at session start, the persona plugin folder. On Windows the same choices sit inline in `Aiko.Bridge/Program.cs`, where no test can reach them (29 cases in BridgeWorkTests) |
 | JsonNode.swift | System.Text.Json keeps the order of keys and the text of numbers when it writes a file back; `JSONSerialization` keeps neither, and Aiko rewrites files that belong to Claude Code |
 | CivilTime.swift | `DateOnly`, ISO weeks and the round-trip ("O") time format |
+| SvgPath.swift | reads the SVG path data FaceArt writes. WPF parses it itself with `Geometry.Parse`; AppKit has nothing of the kind, so the core reads it and hands the drawing layer moves, lines and cubic curves. Arcs and quadratic curves become cubics here (15 cases in SvgPathTests, one of which reads every shape of all 56 faces) |
 | `PathText` in PlatformConventions.swift | reading a path without asking the machine it runs on: `Path.GetFileName` and `Path.TrimEndingDirectorySeparator` answer differently on Windows and on macOS, and Aiko reads paths written for the other system all the time |
 
 ## The two programs
@@ -135,6 +140,19 @@ AikoKit decided, and it answers the mouse.
 | Card/CardPanel.xaml | CardView.swift | the card: header, blocks, rows, bars |
 | Card/CardWindow.xaml.cs | CardWindow.swift | the panel it lives in, where it is placed and how it arrives |
 | SnapshotWatcher.cs | SnapshotWatch.swift | watches the snapshots folder; a `DispatchSource` in place of `FileSystemWatcher` |
+| Island/IslandWindow.xaml.cs | IslandWindow.swift | the island's window: where it goes, the hover, the drag and the landing |
+| Island/IslandPanel.xaml(.cs), RingGauge.cs, UnfoldPanel.cs, FitPanel.cs | IslandView.swift | draws the island: the chrome, the rings, the percentages and the face |
+| Island/IslandGhost.cs | IslandStrip.swift | the landing strip, `NSVisualEffectView` in place of the acrylic accent |
+| Island/IslandCheck.cs | IslandCheck.swift | the self test doors: `--try-island`, `--try-drag`, `--try-face`, `--try-card-island` |
+| Island/IslandFaceAnimator.cs, Tray/TrayFaceAnimator.cs | FacePlay.swift | the steps between the rings and a face, once for both surfaces |
+| Faces/FaceDrawing.cs | FacePaint.swift | turns the shapes of FaceArt into AppKit drawing |
+| RingDrawing.cs | RingPaint.swift | one arc, drawn the same by the menu bar icon and by the island |
+| Tray/TrayMoodPlayer.cs | MoodPlay.swift | which face an event brings, and the one short timer |
+| Tray/ActivityWatcher.cs | ActivityWatch.swift | watches the session files the bridge writes |
+| FullScreenWatch.cs | FullScreenWatch.swift | says when a window owns the screen; macOS has no foreground event, so it looks at what is in front when the space or the front app changes |
+| — | Screens.swift | AppKit counts screen points from the bottom left, the core from the top left: the turn happens here and nowhere else |
+| — | Tween.swift | one short animation on a timer that exists only while something moves. WPF has `CompositionTarget.Rendering`; AppKit cannot animate a window that changes its whole shape every frame |
+| TaskbarOrder.cs | — | window levels do the same work: the island sits at `.statusBar` and the landing strip at `.floating`, under both the island and the menu bar |
 | SettingsStore.cs, ClaudeAccounts.cs | Store.swift | reads the settings, the environments and the plan of an account |
 | Log.cs | Log.swift | the same file, the same line format |
 
@@ -144,16 +162,25 @@ AikoKit decided, and it answers the mouse.
 Where it differs from Windows:
 
 - **The card always hangs under the status item.** The Windows taskbar can sit on any edge, so the
-  card asks whether there is room above. The macOS menu bar is always at the top.
+  card asks whether there is room above. The macOS menu bar is always at the top. From the island
+  the card still opens above when the island sits on the bottom edge.
 - **The gear and the cross** are system symbols. The Windows build carries the gear of the user's
   own icon set as a path in Tokens.xaml.
+- **The face is drawn, not handed over.** Windows gives the tray a picture, so a transition there is
+  eight pictures per step; macOS draws the menu bar icon itself, so the island and the icon play the
+  same smooth steps from one `FacePlay`.
 - **Proof that it starts.** `AIKO_MAC_SELF_TEST=1` opens the card, writes what it says and what
-  size it came out, and quits after three seconds. The Windows app has `--snapshot` instead, which
-  saves a picture; over SSH a picture shows only the wallpaper.
+  size it came out, and quits after three seconds. The island has its own doors, the twins of
+  `--try-island` and friends: `--try-island` unfolds and folds it, `--try-drag` drags it to the left
+  edge with the landing strip, `--try-face` plays a face, `--try-card-island` opens the card from
+  both a top and a bottom island. The Windows app has `--snapshot` as well, which saves a picture;
+  over SSH a picture shows only the wallpaper, so nothing here draws one.
 
-Not there yet: the island, the settings window and the wizard, the "Open Claude Code" button of the
-card, direct mode, the face (D-211), installing the shim into PATH and the commands folder, the
-marketplace and plugin install, the update check, and signing for release.
+Not there yet: the settings window and the wizard, the "Open Claude Code" button of the card,
+direct mode, installing the shim into PATH and the commands folder, the marketplace and plugin
+install, the update check, and signing for release. Until the settings window is there, the surface
+is chosen by hand in `settings.json`: `"place": "Island"` puts Aiko on the edge of the screen, and
+the default stays the menu bar icon (D-250).
 
 ## Names that had to change
 
