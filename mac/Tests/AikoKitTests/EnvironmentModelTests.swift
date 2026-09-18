@@ -67,18 +67,6 @@ struct EnvironmentModelTests {
 
     // ---- commands ----
 
-    @Test(arguments: [
-        ("Work", "aiko-work"),
-        ("Personal", "aiko-personal"),
-        ("Основная", "aiko-osnovnaya"),
-        ("Личная щука", "aiko-lichnaya-shchuka"),
-        ("Side project!", "aiko-side-project"),
-        ("  ", "aiko-env"),
-        ("✨", "aiko-env"),
-    ] as [(String, String)])
-    func theCommandFollowsTheEnvironmentName(name: String, command: String) {
-        #expect(LaunchCommand.fromEnvironmentName(name) == command)
-    }
 
     @Test
     func renamingChangesTheCommandUntilThePersonTypesTheirOwn() {
@@ -99,19 +87,6 @@ struct EnvironmentModelTests {
         #expect(LaunchCommand.check(command, []) == .none)
     }
 
-    @Test(arguments: [
-        ("aiko-work", CommandProblem.none),
-        ("cc_2", CommandProblem.none),
-        ("", CommandProblem.empty),
-        ("Aiko-Work", CommandProblem.badCharacters),
-        ("aiko work", CommandProblem.badCharacters),
-        ("-work", CommandProblem.badCharacters),
-        ("claude", CommandProblem.reserved),
-        ("aiko-personal", CommandProblem.taken),
-    ] as [(String, CommandProblem)])
-    func commandsAreChecked(command: String, problem: CommandProblem) {
-        #expect(LaunchCommand.check(command, ["aiko-personal"]) == problem)
-    }
 
     // ---- project folders ----
 

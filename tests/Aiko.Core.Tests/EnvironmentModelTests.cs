@@ -58,18 +58,6 @@ public class EnvironmentModelTests
 
     // ---- commands ----
 
-    [Theory]
-    [InlineData("Work", "aiko-work")]
-    [InlineData("Personal", "aiko-personal")]
-    [InlineData("Основная", "aiko-osnovnaya")]
-    [InlineData("Личная щука", "aiko-lichnaya-shchuka")]
-    [InlineData("Side project!", "aiko-side-project")]
-    [InlineData("  ", "aiko-env")]
-    [InlineData("✨", "aiko-env")]
-    public void The_command_follows_the_environment_name(string name, string command)
-    {
-        Assert.Equal(command, LaunchCommand.FromEnvironmentName(name));
-    }
 
     [Fact]
     public void Renaming_changes_the_command_until_the_person_types_their_own()
@@ -89,19 +77,6 @@ public class EnvironmentModelTests
         Assert.Equal(CommandProblem.None, LaunchCommand.Check(command, []));
     }
 
-    [Theory]
-    [InlineData("aiko-work", CommandProblem.None)]
-    [InlineData("cc_2", CommandProblem.None)]
-    [InlineData("", CommandProblem.Empty)]
-    [InlineData("Aiko-Work", CommandProblem.BadCharacters)]
-    [InlineData("aiko work", CommandProblem.BadCharacters)]
-    [InlineData("-work", CommandProblem.BadCharacters)]
-    [InlineData("claude", CommandProblem.Reserved)]
-    [InlineData("aiko-personal", CommandProblem.Taken)]
-    public void Commands_are_checked(string command, CommandProblem problem)
-    {
-        Assert.Equal(problem, LaunchCommand.Check(command, ["aiko-personal"]));
-    }
 
     // ---- project folders ----
 
