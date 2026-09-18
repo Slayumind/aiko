@@ -5,9 +5,9 @@
 **See how much of your Claude Code limits is left, for two accounts at once, without opening a
 terminal.**
 
-Aiko sits in the Windows tray. Rest the mouse on it and a card shows every environment you set up:
-the five-hour window, the week, and the weekly limit of the heavy model. For each one you see when
-it resets and how long it lasts at your current pace.
+Aiko sits in the Windows tray and in the macOS menu bar. Rest the mouse on it and a card shows every
+environment you set up: the five-hour window, the week, and the weekly limit of the heavy model. For
+each one you see when it resets and how long it lasts at your current pace.
 
 ![The Aiko card](assets/card.png)
 
@@ -145,11 +145,14 @@ the taskbar: under the arrow, the card can't open.
 
 ## Remove
 
-Uninstall Aiko from **Installed apps**. It puts your status line back and removes the session
-reminder, removes its plugins and their marketplace from Claude Code, takes its folder out of PATH
-together with the launch commands, turns your PowerShell profile functions back on, removes its
-startup entry and deletes its own folders. Your accounts and
-history stay in their Claude Code folders. There's nothing left to clean up by hand.
+**Windows:** uninstall Aiko from **Installed apps**. **macOS:** press **Start over** on the General
+page of settings, quit Aiko and drag the app to the Bin.
+
+Either way Aiko puts your status line back and removes the session reminder, removes its plugins and
+their marketplace from Claude Code, takes its folder out of the PATH together with the launch
+commands and puts the shell profile back as it was. Your accounts and history stay in their Claude
+Code folders. On Windows the uninstaller also removes the startup entry and Aiko's own folders; on
+macOS those two go with the app and its folders in `~/Library`.
 
 ## Build it yourself
 
