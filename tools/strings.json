@@ -527,8 +527,8 @@
   [
     "WizardAccessExplain",
     [
-      "Claude Code sends its limits to a status line. Aiko adds one line to the settings file of each environment. If you already have a status line, it keeps working: Aiko runs it and shows what it prints.",
-      "Claude Code отдаёт лимиты строке состояния. Aiko добавит одну строку в файл настроек каждой среды. Если у тебя уже есть своя строка состояния, она продолжит работать: Aiko запустит её и покажет её вывод."
+      "Claude Code sends its limits to a status line. Aiko adds one line to the settings file of each environment. If you already have a status line, Aiko runs it and shows what it prints.",
+      "Claude Code отдаёт лимиты строке состояния. Aiko добавит одну строку в файл настроек каждой среды. Если у тебя уже есть своя строка состояния, Aiko запустит её и покажет её вывод."
     ]
   ],
   [
@@ -821,15 +821,15 @@
   [
     "InstallFound",
     [
-      "Claude Code is already on this computer. Nothing to do here.",
-      "Claude Code уже есть на этом компьютере. Здесь ничего делать не нужно."
+      "Claude Code is already on this computer.",
+      "Claude Code уже есть на этом компьютере."
     ]
   ],
   [
     "InstallLead",
     [
-      "Claude Code isn't on this computer yet. Aiko works alongside it, so install it first.",
-      "Claude Code на этом компьютере пока нет. Aiko работает вместе с ним, так что сначала установи его."
+      "Claude Code isn't on this computer yet. Aiko shows its limits, so install it first.",
+      "Claude Code на этом компьютере пока нет. Aiko показывает его лимиты, поэтому сначала установи его."
     ]
   ],
   [
@@ -856,8 +856,8 @@
   [
     "Env1Lead",
     [
-      "The first environment lives in the .claude folder. The Claude Code panel in VS Code and Claude Desktop use it too.",
-      "Первая среда живёт в папке .claude. С ней же работают панель Claude Code в VS Code и Claude Desktop."
+      "Environment 1 is the .claude folder. VS Code and Claude Desktop use it too.",
+      "Среда 1 — это папка .claude. Ею же пользуются VS Code и Claude Desktop."
     ]
   ],
   [
@@ -884,15 +884,15 @@
   [
     "LoginHow",
     [
-      "Aiko opened Claude Code in a new window. Sign in there through your browser. Aiko waits and moves on by itself.",
-      "Aiko открыла Claude Code в новом окне. Войди там через браузер — Aiko дождётся и пойдёт дальше сама."
+      "Aiko opened Claude Code in a new window. Sign in there, and Aiko moves on by itself.",
+      "Aiko открыла Claude Code в новом окне. Войди там — дальше Aiko всё сделает сама."
     ]
   ],
   [
     "LoginNever",
     [
       "Aiko never sees a password or a token, only that the account is connected.",
-      "Aiko не видит ни пароля, ни токена. Только то, что аккаунт подключён."
+      "Aiko не видит ни пароля, ни токена — только то, что аккаунт подключён."
     ]
   ],
   [
@@ -926,8 +926,8 @@
   [
     "Env2Later",
     [
-      "One environment is enough to see limits. You can add the second one later in settings.",
-      "Чтобы видеть лимиты, хватит и одной среды. Вторую можно добавить позже в настройках."
+      "One environment is enough to see limits. You can add a second one later.",
+      "Чтобы видеть лимиты, хватит одной среды. Вторую можно добавить позже."
     ]
   ],
   [
@@ -1052,22 +1052,22 @@
   [
     "FnsLead",
     [
-      "Your PowerShell profile has functions that switch accounts. They run before Aiko's commands and hide them, so they're ticked for removal.",
-      "В профиле PowerShell нашлись функции, которые переключают аккаунт. Они срабатывают раньше команд Aiko и перекрывают их, поэтому отмечены к удалению."
+      "Your PowerShell profile has functions that switch accounts. They run before Aiko's commands and hide them, so Aiko offers to turn them off.",
+      "В профиле PowerShell есть функции, которые переключают аккаунт. Они срабатывают раньше команд Aiko и перекрывают их, поэтому Aiko предлагает их выключить."
     ]
   ],
   [
     "FnRemove",
     [
-      "Remove {0}",
-      "Убрать {0}"
+      "Turn off {0}",
+      "Выключить {0}"
     ]
   ],
   [
     "FnBackup",
     [
       "A copy of the profile stays next to it. Removing Aiko brings the functions back.",
-      "Копия профиля останется рядом, а удаление Aiko вернёт функции."
+      "Копия профиля останется рядом. Удалишь Aiko — функции вернутся."
     ]
   ],
   [
@@ -1129,8 +1129,8 @@
   [
     "NoBinds",
     [
-      "Nothing is bound yet. You can do it later in settings.",
-      "Пока ничего не привязано. Можно и потом, в настройках."
+      "Nothing is bound yet. You can do it later.",
+      "Пока ничего не привязано. Можно и потом."
     ]
   ],
   [
@@ -1808,8 +1808,8 @@
   [
     "WizardStatsWhat",
     [
-      "The author of Aiko doesn't know how many people use it. Once a day Aiko can say that one copy ran and send six values. Here they are, all of them.",
-      "Автор Aiko не знает, сколько людей ею пользуется. Раз в сутки Aiko может сообщить, что одна копия работала, и отправить шесть значений — вот они целиком."
+      "The author of Aiko doesn't know how many people use it. Once a day Aiko can say that one copy ran and send six values. All six are below.",
+      "Автор Aiko не знает, сколько людей ею пользуется. Раз в сутки Aiko может сообщить, что одна копия работала, и отправить шесть значений. Вот все шесть."
     ]
   ],
   [
@@ -1878,8 +1878,8 @@
   [
     "SectionFace",
     [
-      "FACE",
-      "ЛИЦО"
+      "MOOD",
+      "НАСТРОЕНИЕ"
     ]
   ],
   [
@@ -1899,15 +1899,15 @@
   [
     "FaceWhere",
     [
-      "This is how Aiko looks in the tray, on the island and in windows.",
-      "Так Aiko выглядит в трее, на острове и в окнах."
+      "Aiko shows her mood in the tray, on the island and in windows, as a drawing or an emoji.",
+      "Aiko показывает настроение в трее, на острове и в окнах — рисунком или смайликом."
     ]
   ],
   [
     "FaceWhereMac",
     [
-      "That's how Aiko looks in the menu bar, on the island and in the windows.",
-      "Так Aiko выглядит в строке меню, на острове и в окнах."
+      "Aiko shows her mood in the menu bar, on the island and in windows, as a drawing or an emoji.",
+      "Aiko показывает настроение в строке меню, на острове и в окнах — рисунком или смайликом."
     ]
   ],
   [
@@ -2193,8 +2193,8 @@
   [
     "MeetAikoSettings",
     [
-      "The temperament, the face and the skills are in settings, under Personality. It works in new sessions.",
-      "Темперамент, лицо и навыки — в настройках, в разделе «Личность». Действует в новых сессиях."
+      "The temperament, the mood and the skills are on the Personality page. It works in new sessions.",
+      "Темперамент, настроение и навыки — на странице «Личность». Действует в новых сессиях."
     ]
   ],
   [

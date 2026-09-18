@@ -372,10 +372,10 @@ public static class Strings
     /// Later
     public static string Later => Get("Later");
 
-    /// Claude Code is already on this computer. Nothing to do here.
+    /// Claude Code is already on this computer.
     public static string InstallFound => Get("InstallFound");
 
-    /// Claude Code isn't on this computer yet. Aiko works alongside it, so install it first.
+    /// Claude Code isn't on this computer yet. Aiko shows its limits, so install it first.
     public static string InstallLead => Get("InstallLead");
 
     /// Open PowerShell, paste the command and press Enter. Aiko notices when it's done.
@@ -387,7 +387,7 @@ public static class Strings
     /// Waiting for Claude Code…
     public static string WaitInstall => Get("WaitInstall");
 
-    /// The first environment lives in the .claude folder. The Claude Code panel in VS Code and C...
+    /// Environment 1 is the .claude folder. VS Code and Claude Desktop use it too.
     public static string Env1Lead => Get("Env1Lead");
 
     /// This folder has no account yet.
@@ -399,7 +399,7 @@ public static class Strings
     /// Sign in
     public static string SignIn => Get("SignIn");
 
-    /// Aiko opened Claude Code in a new window. Sign in there through your browser. Aiko waits a...
+    /// Aiko opened Claude Code in a new window. Sign in there, and Aiko moves on by itself.
     public static string LoginHow => Get("LoginHow");
 
     /// Aiko never sees a password or a token, only that the account is connected.
@@ -417,7 +417,7 @@ public static class Strings
     /// The second environment is a separate folder with its own account. Name it and Aiko create...
     public static string Env2LeadNew => Get("Env2LeadNew");
 
-    /// One environment is enough to see limits. You can add the second one later in settings.
+    /// One environment is enough to see limits. You can add a second one later.
     public static string Env2Later => Get("Env2Later");
 
     /// Create a new one
@@ -474,7 +474,7 @@ public static class Strings
     /// Your PowerShell profile has functions that switch accounts. They run before Aiko's comman...
     public static string FnsLead => Get("FnsLead");
 
-    /// Remove {0}
+    /// Turn off {0}
     public static string FnRemove => Get("FnRemove");
 
     /// A copy of the profile stays next to it. Removing Aiko brings the functions back.
@@ -504,7 +504,7 @@ public static class Strings
     /// Choose a project folder
     public static string PickProject => Get("PickProject");
 
-    /// Nothing is bound yet. You can do it later in settings.
+    /// Nothing is bound yet. You can do it later.
     public static string NoBinds => Get("NoBinds");
 
     /// A command beats a binding: {0} in a bound folder starts {1}, and Claude Code reminds you ...
@@ -825,7 +825,7 @@ public static class Strings
     /// While the personality is on, your style {0} doesn't work. Turn it off and it comes back.
     public static string PersonaOwnStyle => Get("PersonaOwnStyle");
 
-    /// FACE
+    /// MOOD
     public static string SectionFace => Get("SectionFace");
 
     /// Chibi
@@ -834,10 +834,10 @@ public static class Strings
     /// Emoji
     public static string FaceEmoji => Get("FaceEmoji");
 
-    /// This is how Aiko looks in the tray, on the island and in windows.
+    /// Aiko shows her mood in the tray, on the island and in windows, as a drawing or an emoji.
     public static string FaceWhere => Get("FaceWhere");
 
-    /// That's how Aiko looks in the menu bar, on the island and in the windows.
+    /// Aiko shows her mood in the menu bar, on the island and in windows, as a drawing or an emoji.
     public static string FaceWhereMac => Get("FaceWhereMac");
 
     /// TEMPERAMENT
@@ -960,7 +960,7 @@ public static class Strings
     /// Aiko can talk in your Claude Code sessions in her own voice, and she brings eleven skills...
     public static string MeetAikoLead => Get("MeetAikoLead");
 
-    /// The temperament, the face and the skills are in settings, under Personality. It works in ...
+    /// The temperament, the mood and the skills are on the Personality page. It works in new ses...
     public static string MeetAikoSettings => Get("MeetAikoSettings");
 
     /// Turn on in {0}

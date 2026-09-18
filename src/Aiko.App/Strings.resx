@@ -257,7 +257,7 @@
     <value>Finish</value>
   </data>
   <data name="WizardAccessExplain" xml:space="preserve">
-    <value>Claude Code sends its limits to a status line. Aiko adds one line to the settings file of each environment. If you already have a status line, it keeps working: Aiko runs it and shows what it prints.</value>
+    <value>Claude Code sends its limits to a status line. Aiko adds one line to the settings file of each environment. If you already have a status line, Aiko runs it and shows what it prints.</value>
   </data>
   <data name="WizardTheLine" xml:space="preserve">
     <value>THE LINE AIKO ADDS</value>
@@ -383,10 +383,10 @@
     <value>Later</value>
   </data>
   <data name="InstallFound" xml:space="preserve">
-    <value>Claude Code is already on this computer. Nothing to do here.</value>
+    <value>Claude Code is already on this computer.</value>
   </data>
   <data name="InstallLead" xml:space="preserve">
-    <value>Claude Code isn't on this computer yet. Aiko works alongside it, so install it first.</value>
+    <value>Claude Code isn't on this computer yet. Aiko shows its limits, so install it first.</value>
   </data>
   <data name="InstallHow" xml:space="preserve">
     <value>Open PowerShell, paste the command and press Enter. Aiko notices when it's done.</value>
@@ -398,7 +398,7 @@
     <value>Waiting for Claude Code…</value>
   </data>
   <data name="Env1Lead" xml:space="preserve">
-    <value>The first environment lives in the .claude folder. The Claude Code panel in VS Code and Claude Desktop use it too.</value>
+    <value>Environment 1 is the .claude folder. VS Code and Claude Desktop use it too.</value>
   </data>
   <data name="Env1Empty" xml:space="preserve">
     <value>This folder has no account yet.</value>
@@ -410,7 +410,7 @@
     <value>Sign in</value>
   </data>
   <data name="LoginHow" xml:space="preserve">
-    <value>Aiko opened Claude Code in a new window. Sign in there through your browser. Aiko waits and moves on by itself.</value>
+    <value>Aiko opened Claude Code in a new window. Sign in there, and Aiko moves on by itself.</value>
   </data>
   <data name="LoginNever" xml:space="preserve">
     <value>Aiko never sees a password or a token, only that the account is connected.</value>
@@ -428,7 +428,7 @@
     <value>The second environment is a separate folder with its own account. Name it and Aiko creates the folder.</value>
   </data>
   <data name="Env2Later" xml:space="preserve">
-    <value>One environment is enough to see limits. You can add the second one later in settings.</value>
+    <value>One environment is enough to see limits. You can add a second one later.</value>
   </data>
   <data name="CreateNew" xml:space="preserve">
     <value>Create a new one</value>
@@ -482,10 +482,10 @@
     <value>The other environment has this command.</value>
   </data>
   <data name="FnsLead" xml:space="preserve">
-    <value>Your PowerShell profile has functions that switch accounts. They run before Aiko's commands and hide them, so they're ticked for removal.</value>
+    <value>Your PowerShell profile has functions that switch accounts. They run before Aiko's commands and hide them, so Aiko offers to turn them off.</value>
   </data>
   <data name="FnRemove" xml:space="preserve">
-    <value>Remove {0}</value>
+    <value>Turn off {0}</value>
   </data>
   <data name="FnBackup" xml:space="preserve">
     <value>A copy of the profile stays next to it. Removing Aiko brings the functions back.</value>
@@ -515,7 +515,7 @@
     <value>Choose a project folder</value>
   </data>
   <data name="NoBinds" xml:space="preserve">
-    <value>Nothing is bound yet. You can do it later in settings.</value>
+    <value>Nothing is bound yet. You can do it later.</value>
   </data>
   <data name="ExplicitWins" xml:space="preserve">
     <value>A command beats a binding: {0} in a bound folder starts {1}, and Claude Code reminds you of the binding.</value>
@@ -806,7 +806,7 @@
     <value>Anonymous statistics</value>
   </data>
   <data name="WizardStatsWhat" xml:space="preserve">
-    <value>The author of Aiko doesn't know how many people use it. Once a day Aiko can say that one copy ran and send six values. Here they are, all of them.</value>
+    <value>The author of Aiko doesn't know how many people use it. Once a day Aiko can say that one copy ran and send six values. All six are below.</value>
   </data>
   <data name="WizardStatsLater" xml:space="preserve">
     <value>You can change this later in settings, under Privacy.</value>
@@ -836,7 +836,7 @@
     <value>While the personality is on, your style {0} doesn't work. Turn it off and it comes back.</value>
   </data>
   <data name="SectionFace" xml:space="preserve">
-    <value>FACE</value>
+    <value>MOOD</value>
   </data>
   <data name="FaceChibi" xml:space="preserve">
     <value>Chibi</value>
@@ -845,10 +845,10 @@
     <value>Emoji</value>
   </data>
   <data name="FaceWhere" xml:space="preserve">
-    <value>This is how Aiko looks in the tray, on the island and in windows.</value>
+    <value>Aiko shows her mood in the tray, on the island and in windows, as a drawing or an emoji.</value>
   </data>
   <data name="FaceWhereMac" xml:space="preserve">
-    <value>That's how Aiko looks in the menu bar, on the island and in the windows.</value>
+    <value>Aiko shows her mood in the menu bar, on the island and in windows, as a drawing or an emoji.</value>
   </data>
   <data name="SectionTemperament" xml:space="preserve">
     <value>TEMPERAMENT</value>
@@ -971,7 +971,7 @@
     <value>Aiko can talk in your Claude Code sessions in her own voice, and she brings eleven skills. In code and commits she stays quiet.</value>
   </data>
   <data name="MeetAikoSettings" xml:space="preserve">
-    <value>The temperament, the face and the skills are in settings, under Personality. It works in new sessions.</value>
+    <value>The temperament, the mood and the skills are on the Personality page. It works in new sessions.</value>
   </data>
   <data name="MeetAikoTurnOn" xml:space="preserve">
     <value>Turn on in {0}</value>

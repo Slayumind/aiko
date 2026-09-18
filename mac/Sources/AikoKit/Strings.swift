@@ -115,7 +115,7 @@ public enum Strings {
         "WizardStepWhere": ("Where to show Aiko", "Где показывать Aiko"),
         "NotNow": ("Not now", "Не сейчас"),
         "Finish": ("Finish", "Готово"),
-        "WizardAccessExplain": ("Claude Code sends its limits to a status line. Aiko adds one line to the settings file of each environment. If you already have a status line, it keeps working: Aiko runs it and shows what it prints.", "Claude Code отдаёт лимиты строке состояния. Aiko добавит одну строку в файл настроек каждой среды. Если у тебя уже есть своя строка состояния, она продолжит работать: Aiko запустит её и покажет её вывод."),
+        "WizardAccessExplain": ("Claude Code sends its limits to a status line. Aiko adds one line to the settings file of each environment. If you already have a status line, Aiko runs it and shows what it prints.", "Claude Code отдаёт лимиты строке состояния. Aiko добавит одну строку в файл настроек каждой среды. Если у тебя уже есть своя строка состояния, Aiko запустит её и покажет её вывод."),
         "WizardTheLine": ("THE LINE AIKO ADDS", "СТРОКА, КОТОРУЮ ДОБАВИТ AIKO"),
         "WizardTheFiles": ("FILES AIKO CHANGES", "ФАЙЛЫ, КОТОРЫЕ ИЗМЕНЯТСЯ"),
         "WizardBackupNote": ("Aiko keeps a copy of each file next to it. Removing Aiko puts everything back.", "Aiko сохранит копию каждого файла рядом с ним. Удалишь Aiko — всё вернётся как было."),
@@ -157,22 +157,22 @@ public enum Strings {
         "Copy": ("Copy", "Скопировать"),
         "Copied": ("Copied", "Скопировано"),
         "Later": ("Later", "Позже"),
-        "InstallFound": ("Claude Code is already on this computer. Nothing to do here.", "Claude Code уже есть на этом компьютере. Здесь ничего делать не нужно."),
-        "InstallLead": ("Claude Code isn't on this computer yet. Aiko works alongside it, so install it first.", "Claude Code на этом компьютере пока нет. Aiko работает вместе с ним, так что сначала установи его."),
+        "InstallFound": ("Claude Code is already on this computer.", "Claude Code уже есть на этом компьютере."),
+        "InstallLead": ("Claude Code isn't on this computer yet. Aiko shows its limits, so install it first.", "Claude Code на этом компьютере пока нет. Aiko показывает его лимиты, поэтому сначала установи его."),
         "InstallHow": ("Open PowerShell, paste the command and press Enter. Aiko notices when it's done.", "Открой PowerShell, вставь команду и нажми Enter. Aiko заметит, когда установка закончится."),
         "InstallHowMac": ("Open Terminal, paste the command and press Enter. Aiko notices when it's done.", "Открой Терминал, вставь команду и нажми Enter. Aiko заметит, когда установка закончится."),
         "WaitInstall": ("Waiting for Claude Code…", "Ждём Claude Code…"),
-        "Env1Lead": ("The first environment lives in the .claude folder. The Claude Code panel in VS Code and Claude Desktop use it too.", "Первая среда живёт в папке .claude. С ней же работают панель Claude Code в VS Code и Claude Desktop."),
+        "Env1Lead": ("Environment 1 is the .claude folder. VS Code and Claude Desktop use it too.", "Среда 1 — это папка .claude. Ею же пользуются VS Code и Claude Desktop."),
         "Env1Empty": ("This folder has no account yet.", "В этой папке ещё нет аккаунта."),
         "Env1Found": ("This folder already has an account.", "В этой папке уже есть аккаунт."),
         "SignIn": ("Sign in", "Войти"),
-        "LoginHow": ("Aiko opened Claude Code in a new window. Sign in there through your browser. Aiko waits and moves on by itself.", "Aiko открыла Claude Code в новом окне. Войди там через браузер — Aiko дождётся и пойдёт дальше сама."),
-        "LoginNever": ("Aiko never sees a password or a token, only that the account is connected.", "Aiko не видит ни пароля, ни токена. Только то, что аккаунт подключён."),
+        "LoginHow": ("Aiko opened Claude Code in a new window. Sign in there, and Aiko moves on by itself.", "Aiko открыла Claude Code в новом окне. Войди там — дальше Aiko всё сделает сама."),
+        "LoginNever": ("Aiko never sees a password or a token, only that the account is connected.", "Aiko не видит ни пароля, ни токена — только то, что аккаунт подключён."),
         "NameInAiko": ("NAME IN AIKO", "ИМЯ В AIKO"),
         "PlanLabel": ("Plan", "План"),
         "Env2LeadFound": ("Aiko found more Claude Code folders. Pick the one for your second environment, or create a new one.", "Aiko нашла ещё папки Claude Code. Выбери ту, что станет второй средой, или создай новую."),
         "Env2LeadNew": ("The second environment is a separate folder with its own account. Name it and Aiko creates the folder.", "Вторая среда — отдельная папка со своим аккаунтом. Назови её, и Aiko создаст папку."),
-        "Env2Later": ("One environment is enough to see limits. You can add the second one later in settings.", "Чтобы видеть лимиты, хватит и одной среды. Вторую можно добавить позже в настройках."),
+        "Env2Later": ("One environment is enough to see limits. You can add a second one later.", "Чтобы видеть лимиты, хватит одной среды. Вторую можно добавить позже."),
         "CreateNew": ("Create a new one", "Создать новую"),
         "CreateSignIn": ("Create and sign in", "Создать и войти"),
         "NameExample": ("For example, Personal", "Например, Personal"),
@@ -190,9 +190,9 @@ public enum Strings {
         "CmdBadCharacters": ("Only a–z, 0–9, - and _.", "Только a–z, 0–9, - и _."),
         "CmdReserved": ("claude is the name of Claude Code itself.", "claude — имя самого Claude Code."),
         "CmdTaken": ("The other environment has this command.", "Эта команда уже у другой среды."),
-        "FnsLead": ("Your PowerShell profile has functions that switch accounts. They run before Aiko's commands and hide them, so they're ticked for removal.", "В профиле PowerShell нашлись функции, которые переключают аккаунт. Они срабатывают раньше команд Aiko и перекрывают их, поэтому отмечены к удалению."),
-        "FnRemove": ("Remove {0}", "Убрать {0}"),
-        "FnBackup": ("A copy of the profile stays next to it. Removing Aiko brings the functions back.", "Копия профиля останется рядом, а удаление Aiko вернёт функции."),
+        "FnsLead": ("Your PowerShell profile has functions that switch accounts. They run before Aiko's commands and hide them, so Aiko offers to turn them off.", "В профиле PowerShell есть функции, которые переключают аккаунт. Они срабатывают раньше команд Aiko и перекрывают их, поэтому Aiko предлагает их выключить."),
+        "FnRemove": ("Turn off {0}", "Выключить {0}"),
+        "FnBackup": ("A copy of the profile stays next to it. Removing Aiko brings the functions back.", "Копия профиля останется рядом. Удалишь Aiko — функции вернутся."),
         "PathNote": ("Aiko puts its folder at the start of PATH so every terminal finds the commands. Restart open terminals and your IDE.", "Aiko поставит свою папку в начало PATH, чтобы команды нашлись в любом терминале. Открытые терминалы и IDE нужно перезапустить."),
         "PathLineMac": ("THE LINE AIKO ADDS TO ~/.ZSHRC", "СТРОКА, КОТОРУЮ AIKO ДОБАВИТ В ~/.ZSHRC"),
         "PathNoteMac": ("macOS puts a folder of your own on PATH only when your shell profile says so, so Aiko adds this line to ~/.zshrc. A copy of the file stays next to it, and removing Aiko takes the line out. Terminals that are already open keep the PATH they started with.", "macOS добавляет твою папку в PATH, только если об этом сказано в профиле оболочки, поэтому Aiko допишет эту строку в ~/.zshrc. Рядом останется копия файла, а при удалении Aiko строка уйдёт. Уже открытые терминалы сохранят прежний PATH."),
@@ -201,7 +201,7 @@ public enum Strings {
         "FoldersLead": ("Bind project folders to {0}. In them and in every folder inside, claude starts {0}.", "Привяжи папки проектов к {0}. В них и во всех вложенных папках claude запустит {0}."),
         "AddProject": ("Add a project folder", "Добавить папку проекта"),
         "PickProject": ("Choose a project folder", "Выбери папку проекта"),
-        "NoBinds": ("Nothing is bound yet. You can do it later in settings.", "Пока ничего не привязано. Можно и потом, в настройках."),
+        "NoBinds": ("Nothing is bound yet. You can do it later.", "Пока ничего не привязано. Можно и потом."),
         "ExplicitWins": ("A command beats a binding: {0} in a bound folder starts {1}, and Claude Code reminds you of the binding.", "Команда сильнее привязки: {0} в привязанной папке запустит {1}, а Claude Code напомнит о привязке."),
         "Remove": ("Remove", "Убрать"),
         "DoneCommands": ("Commands: {0}. Open a new terminal to use them.", "Команды: {0}. Они заработают в новом окне терминала."),
@@ -298,7 +298,7 @@ public enum Strings {
         "OpenPrivacyDoc": ("Open PRIVACY.md", "Открыть PRIVACY.md"),
         "PrivacyLinkFromGeneral": ("What Aiko sends and to whom — Privacy.", "Что Aiko отправляет и кому — раздел «Приватность»."),
         "WizardStats": ("Anonymous statistics", "Анонимная статистика"),
-        "WizardStatsWhat": ("The author of Aiko doesn't know how many people use it. Once a day Aiko can say that one copy ran and send six values. Here they are, all of them.", "Автор Aiko не знает, сколько людей ею пользуется. Раз в сутки Aiko может сообщить, что одна копия работала, и отправить шесть значений — вот они целиком."),
+        "WizardStatsWhat": ("The author of Aiko doesn't know how many people use it. Once a day Aiko can say that one copy ran and send six values. All six are below.", "Автор Aiko не знает, сколько людей ею пользуется. Раз в сутки Aiko может сообщить, что одна копия работала, и отправить шесть значений. Вот все шесть."),
         "WizardStatsLater": ("You can change this later in settings, under Privacy.", "Решение меняется в настройках, в разделе «Приватность»."),
         "StatsDecline": ("Don't send", "Не отправлять"),
         "StatsAccept": ("Send", "Отправлять"),
@@ -308,11 +308,11 @@ public enum Strings {
         "SectionWhereAikoTalks": ("WHERE AIKO TALKS", "ГДЕ AIKO ГОВОРИТ"),
         "PersonaNewSessions": ("Works in new sessions. Open sessions finish the way they started.", "Действует в новых сессиях. Открытые сессии доработают как были."),
         "PersonaOwnStyle": ("While the personality is on, your style {0} doesn't work. Turn it off and it comes back.", "Пока личность включена, твой стиль {0} не работает. Выключишь — вернётся."),
-        "SectionFace": ("FACE", "ЛИЦО"),
+        "SectionFace": ("MOOD", "НАСТРОЕНИЕ"),
         "FaceChibi": ("Chibi", "Чиби"),
         "FaceEmoji": ("Emoji", "Смайлик"),
-        "FaceWhere": ("This is how Aiko looks in the tray, on the island and in windows.", "Так Aiko выглядит в трее, на острове и в окнах."),
-        "FaceWhereMac": ("That's how Aiko looks in the menu bar, on the island and in the windows.", "Так Aiko выглядит в строке меню, на острове и в окнах."),
+        "FaceWhere": ("Aiko shows her mood in the tray, on the island and in windows, as a drawing or an emoji.", "Aiko показывает настроение в трее, на острове и в окнах — рисунком или смайликом."),
+        "FaceWhereMac": ("Aiko shows her mood in the menu bar, on the island and in windows, as a drawing or an emoji.", "Aiko показывает настроение в строке меню, на острове и в окнах — рисунком или смайликом."),
         "SectionTemperament": ("TEMPERAMENT", "ТЕМПЕРАМЕНТ"),
         "TemperamentQuiet": ("Quiet", "Тихий"),
         "TemperamentNormal": ("Normal", "Обычный"),
@@ -353,7 +353,7 @@ public enum Strings {
         "SkillAikoDrive": ("Documents from Google Drive into the work, and files from the project onto Drive.", "Документы с Google Drive в работу и файлы проекта — на Drive."),
         "ItemMeetAiko": ("Meet Aiko", "Познакомься с Aiko"),
         "MeetAikoLead": ("Aiko can talk in your Claude Code sessions in her own voice, and she brings eleven skills. In code and commits she stays quiet.", "Aiko может говорить в твоих сессиях Claude Code своим голосом и приносит одиннадцать навыков. В коде и коммитах она молчит."),
-        "MeetAikoSettings": ("The temperament, the face and the skills are in settings, under Personality. It works in new sessions.", "Темперамент, лицо и навыки — в настройках, в разделе «Личность». Действует в новых сессиях."),
+        "MeetAikoSettings": ("The temperament, the mood and the skills are on the Personality page. It works in new sessions.", "Темперамент, настроение и навыки — на странице «Личность». Действует в новых сессиях."),
         "MeetAikoTurnOn": ("Turn on in {0}", "Включить в среде {0}"),
         "StateOn": ("on", "включена"),
     ]
@@ -709,10 +709,10 @@ public enum Strings {
     /// Later
     public static var later: String { Strings.get("Later") }
 
-    /// Claude Code is already on this computer. Nothing to do here.
+    /// Claude Code is already on this computer.
     public static var installFound: String { Strings.get("InstallFound") }
 
-    /// Claude Code isn't on this computer yet. Aiko works alongside it, so install it first.
+    /// Claude Code isn't on this computer yet. Aiko shows its limits, so install it first.
     public static var installLead: String { Strings.get("InstallLead") }
 
     /// Open PowerShell, paste the command and press Enter. Aiko notices when it's done.
@@ -724,7 +724,7 @@ public enum Strings {
     /// Waiting for Claude Code…
     public static var waitInstall: String { Strings.get("WaitInstall") }
 
-    /// The first environment lives in the .claude folder. The Claude Code panel in VS Code and C...
+    /// Environment 1 is the .claude folder. VS Code and Claude Desktop use it too.
     public static var env1Lead: String { Strings.get("Env1Lead") }
 
     /// This folder has no account yet.
@@ -736,7 +736,7 @@ public enum Strings {
     /// Sign in
     public static var signIn: String { Strings.get("SignIn") }
 
-    /// Aiko opened Claude Code in a new window. Sign in there through your browser. Aiko waits a...
+    /// Aiko opened Claude Code in a new window. Sign in there, and Aiko moves on by itself.
     public static var loginHow: String { Strings.get("LoginHow") }
 
     /// Aiko never sees a password or a token, only that the account is connected.
@@ -754,7 +754,7 @@ public enum Strings {
     /// The second environment is a separate folder with its own account. Name it and Aiko create...
     public static var env2LeadNew: String { Strings.get("Env2LeadNew") }
 
-    /// One environment is enough to see limits. You can add the second one later in settings.
+    /// One environment is enough to see limits. You can add a second one later.
     public static var env2Later: String { Strings.get("Env2Later") }
 
     /// Create a new one
@@ -811,7 +811,7 @@ public enum Strings {
     /// Your PowerShell profile has functions that switch accounts. They run before Aiko's comman...
     public static var fnsLead: String { Strings.get("FnsLead") }
 
-    /// Remove {0}
+    /// Turn off {0}
     public static var fnRemove: String { Strings.get("FnRemove") }
 
     /// A copy of the profile stays next to it. Removing Aiko brings the functions back.
@@ -841,7 +841,7 @@ public enum Strings {
     /// Choose a project folder
     public static var pickProject: String { Strings.get("PickProject") }
 
-    /// Nothing is bound yet. You can do it later in settings.
+    /// Nothing is bound yet. You can do it later.
     public static var noBinds: String { Strings.get("NoBinds") }
 
     /// A command beats a binding: {0} in a bound folder starts {1}, and Claude Code reminds you ...
@@ -1162,7 +1162,7 @@ public enum Strings {
     /// While the personality is on, your style {0} doesn't work. Turn it off and it comes back.
     public static var personaOwnStyle: String { Strings.get("PersonaOwnStyle") }
 
-    /// FACE
+    /// MOOD
     public static var sectionFace: String { Strings.get("SectionFace") }
 
     /// Chibi
@@ -1171,10 +1171,10 @@ public enum Strings {
     /// Emoji
     public static var faceEmoji: String { Strings.get("FaceEmoji") }
 
-    /// This is how Aiko looks in the tray, on the island and in windows.
+    /// Aiko shows her mood in the tray, on the island and in windows, as a drawing or an emoji.
     public static var faceWhere: String { Strings.get("FaceWhere") }
 
-    /// That's how Aiko looks in the menu bar, on the island and in the windows.
+    /// Aiko shows her mood in the menu bar, on the island and in windows, as a drawing or an emoji.
     public static var faceWhereMac: String { Strings.get("FaceWhereMac") }
 
     /// TEMPERAMENT
@@ -1297,7 +1297,7 @@ public enum Strings {
     /// Aiko can talk in your Claude Code sessions in her own voice, and she brings eleven skills...
     public static var meetAikoLead: String { Strings.get("MeetAikoLead") }
 
-    /// The temperament, the face and the skills are in settings, under Personality. It works in ...
+    /// The temperament, the mood and the skills are on the Personality page. It works in new ses...
     public static var meetAikoSettings: String { Strings.get("MeetAikoSettings") }
 
     /// Turn on in {0}

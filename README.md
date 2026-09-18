@@ -78,8 +78,9 @@ Aiko installs all of this as Claude Code plugins from a marketplace on your own 
 downloaded. Your own plugins, output style and settings stay as they are. If you set your own output
 style, the settings page tells you that the personality's style wins while it is on.
 
-Where the personality is on, Aiko's face shows up in the tray or on the island for two seconds when a
-session starts working, waits for you, finishes, fails or runs out of limit. Chibi or emoji, your pick.
+Where the personality is on, Aiko shows her mood in the tray or on the island for two seconds when a
+session starts working, waits for you, finishes, fails or runs out of limit. A chibi drawing or an
+emoji, your pick.
 
 The skills also work without Aiko:
 

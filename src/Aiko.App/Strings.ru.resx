@@ -257,7 +257,7 @@
     <value>Готово</value>
   </data>
   <data name="WizardAccessExplain" xml:space="preserve">
-    <value>Claude Code отдаёт лимиты строке состояния. Aiko добавит одну строку в файл настроек каждой среды. Если у тебя уже есть своя строка состояния, она продолжит работать: Aiko запустит её и покажет её вывод.</value>
+    <value>Claude Code отдаёт лимиты строке состояния. Aiko добавит одну строку в файл настроек каждой среды. Если у тебя уже есть своя строка состояния, Aiko запустит её и покажет её вывод.</value>
   </data>
   <data name="WizardTheLine" xml:space="preserve">
     <value>СТРОКА, КОТОРУЮ ДОБАВИТ AIKO</value>
@@ -383,10 +383,10 @@
     <value>Позже</value>
   </data>
   <data name="InstallFound" xml:space="preserve">
-    <value>Claude Code уже есть на этом компьютере. Здесь ничего делать не нужно.</value>
+    <value>Claude Code уже есть на этом компьютере.</value>
   </data>
   <data name="InstallLead" xml:space="preserve">
-    <value>Claude Code на этом компьютере пока нет. Aiko работает вместе с ним, так что сначала установи его.</value>
+    <value>Claude Code на этом компьютере пока нет. Aiko показывает его лимиты, поэтому сначала установи его.</value>
   </data>
   <data name="InstallHow" xml:space="preserve">
     <value>Открой PowerShell, вставь команду и нажми Enter. Aiko заметит, когда установка закончится.</value>
@@ -398,7 +398,7 @@
     <value>Ждём Claude Code…</value>
   </data>
   <data name="Env1Lead" xml:space="preserve">
-    <value>Первая среда живёт в папке .claude. С ней же работают панель Claude Code в VS Code и Claude Desktop.</value>
+    <value>Среда 1 — это папка .claude. Ею же пользуются VS Code и Claude Desktop.</value>
   </data>
   <data name="Env1Empty" xml:space="preserve">
     <value>В этой папке ещё нет аккаунта.</value>
@@ -410,10 +410,10 @@
     <value>Войти</value>
   </data>
   <data name="LoginHow" xml:space="preserve">
-    <value>Aiko открыла Claude Code в новом окне. Войди там через браузер — Aiko дождётся и пойдёт дальше сама.</value>
+    <value>Aiko открыла Claude Code в новом окне. Войди там — дальше Aiko всё сделает сама.</value>
   </data>
   <data name="LoginNever" xml:space="preserve">
-    <value>Aiko не видит ни пароля, ни токена. Только то, что аккаунт подключён.</value>
+    <value>Aiko не видит ни пароля, ни токена — только то, что аккаунт подключён.</value>
   </data>
   <data name="NameInAiko" xml:space="preserve">
     <value>ИМЯ В AIKO</value>
@@ -428,7 +428,7 @@
     <value>Вторая среда — отдельная папка со своим аккаунтом. Назови её, и Aiko создаст папку.</value>
   </data>
   <data name="Env2Later" xml:space="preserve">
-    <value>Чтобы видеть лимиты, хватит и одной среды. Вторую можно добавить позже в настройках.</value>
+    <value>Чтобы видеть лимиты, хватит одной среды. Вторую можно добавить позже.</value>
   </data>
   <data name="CreateNew" xml:space="preserve">
     <value>Создать новую</value>
@@ -482,13 +482,13 @@
     <value>Эта команда уже у другой среды.</value>
   </data>
   <data name="FnsLead" xml:space="preserve">
-    <value>В профиле PowerShell нашлись функции, которые переключают аккаунт. Они срабатывают раньше команд Aiko и перекрывают их, поэтому отмечены к удалению.</value>
+    <value>В профиле PowerShell есть функции, которые переключают аккаунт. Они срабатывают раньше команд Aiko и перекрывают их, поэтому Aiko предлагает их выключить.</value>
   </data>
   <data name="FnRemove" xml:space="preserve">
-    <value>Убрать {0}</value>
+    <value>Выключить {0}</value>
   </data>
   <data name="FnBackup" xml:space="preserve">
-    <value>Копия профиля останется рядом, а удаление Aiko вернёт функции.</value>
+    <value>Копия профиля останется рядом. Удалишь Aiko — функции вернутся.</value>
   </data>
   <data name="PathNote" xml:space="preserve">
     <value>Aiko поставит свою папку в начало PATH, чтобы команды нашлись в любом терминале. Открытые терминалы и IDE нужно перезапустить.</value>
@@ -515,7 +515,7 @@
     <value>Выбери папку проекта</value>
   </data>
   <data name="NoBinds" xml:space="preserve">
-    <value>Пока ничего не привязано. Можно и потом, в настройках.</value>
+    <value>Пока ничего не привязано. Можно и потом.</value>
   </data>
   <data name="ExplicitWins" xml:space="preserve">
     <value>Команда сильнее привязки: {0} в привязанной папке запустит {1}, а Claude Code напомнит о привязке.</value>
@@ -806,7 +806,7 @@
     <value>Анонимная статистика</value>
   </data>
   <data name="WizardStatsWhat" xml:space="preserve">
-    <value>Автор Aiko не знает, сколько людей ею пользуется. Раз в сутки Aiko может сообщить, что одна копия работала, и отправить шесть значений — вот они целиком.</value>
+    <value>Автор Aiko не знает, сколько людей ею пользуется. Раз в сутки Aiko может сообщить, что одна копия работала, и отправить шесть значений. Вот все шесть.</value>
   </data>
   <data name="WizardStatsLater" xml:space="preserve">
     <value>Решение меняется в настройках, в разделе «Приватность».</value>
@@ -836,7 +836,7 @@
     <value>Пока личность включена, твой стиль {0} не работает. Выключишь — вернётся.</value>
   </data>
   <data name="SectionFace" xml:space="preserve">
-    <value>ЛИЦО</value>
+    <value>НАСТРОЕНИЕ</value>
   </data>
   <data name="FaceChibi" xml:space="preserve">
     <value>Чиби</value>
@@ -845,10 +845,10 @@
     <value>Смайлик</value>
   </data>
   <data name="FaceWhere" xml:space="preserve">
-    <value>Так Aiko выглядит в трее, на острове и в окнах.</value>
+    <value>Aiko показывает настроение в трее, на острове и в окнах — рисунком или смайликом.</value>
   </data>
   <data name="FaceWhereMac" xml:space="preserve">
-    <value>Так Aiko выглядит в строке меню, на острове и в окнах.</value>
+    <value>Aiko показывает настроение в строке меню, на острове и в окнах — рисунком или смайликом.</value>
   </data>
   <data name="SectionTemperament" xml:space="preserve">
     <value>ТЕМПЕРАМЕНТ</value>
@@ -971,7 +971,7 @@
     <value>Aiko может говорить в твоих сессиях Claude Code своим голосом и приносит одиннадцать навыков. В коде и коммитах она молчит.</value>
   </data>
   <data name="MeetAikoSettings" xml:space="preserve">
-    <value>Темперамент, лицо и навыки — в настройках, в разделе «Личность». Действует в новых сессиях.</value>
+    <value>Темперамент, настроение и навыки — на странице «Личность». Действует в новых сессиях.</value>
   </data>
   <data name="MeetAikoTurnOn" xml:space="preserve">
     <value>Включить в среде {0}</value>
