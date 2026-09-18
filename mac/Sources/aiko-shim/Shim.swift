@@ -33,26 +33,35 @@ enum Shim {
             return claudeMissing
         }
 
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: real)
-        process.arguments = Array(CommandLine.arguments.dropFirst())
-        process.environment = environmentFor(plan(platform, invokedAs: invokedAs), seen: seen, platform: platform)
+        // Claude Code takes the place of the shim instead of running under it. A child started by
+        // Foundation.Process gets a process group of its own, and a process outside the terminal's
+        // foreground group is stopped by SIGTTIN the moment it reads the keyboard: `claude`
+        // printed nothing and the session never started, while `claude --version`, which reads
+        // nothing, worked. After exec there is one process, in the right group, with the terminal
+        // and Ctrl+C its own — which is also why SIGINT is left alone here. Windows has no such
+        // thing and starts a child there.
+        let environment = environmentFor(plan(platform, invokedAs: invokedAs), seen: seen, platform: platform)
+        becomeClaudeCode(real, Array(CommandLine.arguments.dropFirst()), environment)
 
-        // Ctrl+C reaches every process in the terminal. Claude Code handles it; the shim must not
-        // quit first and leave the terminal waiting on nothing.
-        signal(SIGINT, SIG_IGN)
+        // Only a failed exec comes back.
+        FileHandle.standardError.write(Data("Aiko: could not start \(real).\n".utf8))
+        return 1
+    }
 
-        guard (try? process.run()) != nil else {
-            return 1
+    /// Replaces this process with Claude Code. Returns only when the system refused to start it.
+    private static func becomeClaudeCode(
+        _ path: String, _ arguments: [String], _ environment: [String: String]
+    ) {
+        var argv = ([path] + arguments).map { strdup($0) }
+        argv.append(nil)
+        var envp = environment.map { strdup("\($0.key)=\($0.value)") }
+        envp.append(nil)
+
+        execve(path, &argv, &envp)
+
+        for pointer in argv + envp {
+            free(pointer)
         }
-
-        process.waitUntilExit()
-
-        // A program killed by a signal has no exit code of its own; shells report it as 128 plus
-        // the signal, and whatever started the shim expects the same.
-        return process.terminationReason == .uncaughtSignal
-            ? 128 + process.terminationStatus
-            : process.terminationStatus
     }
 
     /// The folders this shim was started from. A shim never runs Claude Code from a folder in this
