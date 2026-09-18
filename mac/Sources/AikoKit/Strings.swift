@@ -75,6 +75,7 @@ public enum Strings {
         "SectionLanguage": ("LANGUAGE", "ЯЗЫК"),
         "DirectMode": ("Direct mode", "Прямой режим"),
         "DirectModeWhat": ("In direct mode, Aiko asks Anthropic for your limits itself. It uses the token Claude Code already keeps on this computer: Aiko reads it before each request and never saves it. Turn it on if you work in the IDE panel or in Claude Desktop, where there's no status line.", "В прямом режиме Aiko сама спрашивает лимиты у Anthropic. Для этого она берёт токен, который Claude Code уже хранит на этом компьютере: читает его перед каждым запросом и нигде не сохраняет. Включай, если работаешь в панели IDE или в Claude Desktop — там строки состояния нет."),
+        "DirectModeMac": ("Direct mode is on Windows only. On macOS Claude Code keeps the token in the Keychain, and Aiko does not read it, so the IDE panel and Claude Desktop stay without numbers here.", "Прямой режим есть только на Windows. На macOS Claude Code держит токен в Связке ключей, а Aiko её не читает, поэтому панель IDE и Claude Desktop здесь остаются без цифр."),
         "DirectModeAsk": ("If it's a work account, ask whoever manages it first.", "Если аккаунт рабочий, сначала спроси того, кто им управляет."),
         "NoEnvironments": ("No environments yet. Aiko looks for them on the first run.", "Сред пока нет. Aiko ищет их при первом запуске."),
         "AccessOk": ("Claude Code sends its limits to Aiko.", "Claude Code передаёт лимиты в Aiko."),
@@ -467,6 +468,9 @@ public enum Strings {
 
     /// In direct mode, Aiko asks Anthropic for your limits itself. It uses the token Claude Code...
     public static var directModeWhat: String { Strings.get("DirectModeWhat") }
+
+    /// Direct mode is on Windows only. On macOS Claude Code keeps the token in the Keychain, and...
+    public static var directModeMac: String { Strings.get("DirectModeMac") }
 
     /// If it's a work account, ask whoever manages it first.
     public static var directModeAsk: String { Strings.get("DirectModeAsk") }

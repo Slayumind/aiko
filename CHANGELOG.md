@@ -12,7 +12,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - **Aiko for macOS.** The same app on the other system: the ring in the menu bar, the island on any
   edge of the screen, the card with the limits of both environments, the first run checklist and the
   settings. It reads the numbers from Claude Code the same way, keeps environments apart the same way
-  and speaks the same two languages. macOS 14 or newer, Apple silicon and Intel.
+  and speaks the same two languages. macOS 14 or newer, Apple silicon and Intel. Direct mode is the
+  one thing it does not have: the token lives in the Keychain there, and Aiko does not read it.
 - **A macOS download.** One version tag now builds both systems and publishes one release. The macOS
   app comes as a disk image, signed with an Apple Developer ID and notarized by Apple, so it opens
   the normal way. [SECURITY.md](SECURITY.md) shows how to check it.

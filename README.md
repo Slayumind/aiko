@@ -102,6 +102,9 @@ Desktop, turn on **direct mode** for that environment, and Aiko asks the usage A
 mode needs the account's access token, so it's off until you turn it on.
 [PRIVACY.md](PRIVACY.md) describes exactly what happens with the token.
 
+Direct mode is on Windows only. On macOS Claude Code keeps the token in the Keychain, and Aiko does
+not read it, so there the numbers come from the status line and the CLI.
+
 If you allow it, Aiko also counts how many copies run each day. It has its own switch on the
 **Privacy** page, off by default and separate from the update check. The ID it sends changes every
 day, so two days can't be linked to one person, and the rows are deleted after 90 days. That page

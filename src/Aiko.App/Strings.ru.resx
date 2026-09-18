@@ -136,6 +136,9 @@
   <data name="DirectModeWhat" xml:space="preserve">
     <value>В прямом режиме Aiko сама спрашивает лимиты у Anthropic. Для этого она берёт токен, который Claude Code уже хранит на этом компьютере: читает его перед каждым запросом и нигде не сохраняет. Включай, если работаешь в панели IDE или в Claude Desktop — там строки состояния нет.</value>
   </data>
+  <data name="DirectModeMac" xml:space="preserve">
+    <value>Прямой режим есть только на Windows. На macOS Claude Code держит токен в Связке ключей, а Aiko её не читает, поэтому панель IDE и Claude Desktop здесь остаются без цифр.</value>
+  </data>
   <data name="DirectModeAsk" xml:space="preserve">
     <value>Если аккаунт рабочий, сначала спроси того, кто им управляет.</value>
   </data>
