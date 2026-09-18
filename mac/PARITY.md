@@ -52,9 +52,9 @@ Helpers with no file of their own in the C# core:
 - **Time.** `DateTimeOffset` counts in 100 ns ticks; Swift `Date` counts in seconds as a double.
   Every value the tests use is exact in both. `ResetCountdown` and the pace estimate cut at the
   same tick as `TimeSpan.FromSeconds` does.
-- **A number that cannot be read.** `JsonElement.GetInt64` on `"resets_at": 1.5` throws
-  `FormatException`, which is not caught in `StatusLineReport.FromJson`, so the whole status line
-  is lost. Swift returns an empty report instead of crashing. Same outcome for the user, no crash.
+- **A reset time with a fraction** is read down to the second in both cores now, with the same test
+  case. Before the fix `JsonElement.GetInt64` threw out of `StatusLineReport.FromJson` on Windows and
+  the whole status line was lost, while Swift returned an empty report.
 - **A repeated key.** `JsonDocument` reads the last one; `JsonNode` throws. Swift always reads the
   last one.
 - **A lone surrogate** (`"\ud800"`) makes the Windows parser throw `InvalidOperationException`;
