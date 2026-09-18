@@ -49,7 +49,7 @@ static class CardSnapshot
             environment => environment.Name,
             environment => new CardAccount(
                 ClaudeAccounts.Read(environment.ConfigDirectories[0]).PlanLabel,
-                System.IO.File.Exists(ClaudeInstall.CredentialsPathIn(environment.ConfigDirectories[0]))));
+                System.IO.File.Exists(ClaudeInstall.CredentialsPathIn(ThisComputer.Platform, environment.ConfigDirectories[0]))));
 
         var panel = new CardPanel();
         panel.Show(CardModel.From(cards, now, accounts: accounts));

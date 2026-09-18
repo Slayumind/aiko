@@ -64,3 +64,34 @@ jobs:
         # them. This catches what the compiler alone does not, so the rules are real rather than
         # written down.
         run: dotnet format Aiko.slnx --verify-no-changes --verbosity quiet
+
+  mac:
+    # The Swift core of the coming macOS app. It repeats the rules of Aiko.Core case for case, and
+    # some of those cases come from the shared files in spec/, so the whole repository is checked out.
+    runs-on: macos-15
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Show the toolchain
+        run: swift --version
+
+      - name: Build
+        working-directory: mac
+        run: swift build
+
+      - name: Test
+        working-directory: mac
+        run: swift test
+
+      - name: Run the two programs
+        working-directory: mac
+        # Proof that the built files start and their runtime is complete. The bridge answers an
+        # empty status line payload with nothing at all and exit 0, as it does on Windows. The
+        # config folder is an empty one of ours, so the runner's own ~/.claude is never read.
+        run: |
+          bin=$(swift build --show-bin-path)
+          mkdir -p "$RUNNER_TEMP/claude"
+          echo '{}' | CLAUDE_CONFIG_DIR="$RUNNER_TEMP/claude" "$bin/aiko-bridge"
+          AIKO_SHIM_SELF_TEST=1 "$bin/aiko-shim"

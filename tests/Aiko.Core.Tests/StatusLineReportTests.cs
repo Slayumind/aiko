@@ -28,6 +28,20 @@ public class StatusLineReportTests
     }
 
     [Fact]
+    public void A_reset_time_with_a_fraction_is_read_down_to_the_second()
+    {
+        // JSON has one number type, so a sender may write the seconds with a fraction. Reading it
+        // as a whole number threw and the whole report was lost, status line and all.
+        var report = StatusLineReport.FromJson(
+            """
+            { "rate_limits": { "five_hour": { "used_percentage": 42, "resets_at": 1789170600.5 } } }
+            """);
+
+        Assert.True(report.HasData);
+        Assert.Equal(DateTimeOffset.FromUnixTimeSeconds(1789170600), report.Find(LimitKind.FiveHour)!.Value.ResetsAt);
+    }
+
+    [Fact]
     public void Reads_both_windows_from_a_real_payload()
     {
         var report = StatusLineReport.FromJson(RealPayload);

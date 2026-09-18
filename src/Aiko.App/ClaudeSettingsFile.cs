@@ -27,7 +27,7 @@ sealed class RealFiles : IFileAccess
 /// here is the wiring: the real file system, the shell we detected, and the log.
 static class ClaudeSettingsFile
 {
-    private static readonly ClaudeSettingsEditor Editor = new(RealFiles.Instance);
+    private static readonly ClaudeSettingsEditor Editor = new(RealFiles.Instance, ThisComputer.Platform);
 
     public static string PathIn(string configDirectory) => ClaudeSettingsEditor.PathIn(configDirectory);
 
@@ -46,7 +46,7 @@ static class ClaudeSettingsFile
         try
         {
             var path = ClaudeSettingsEditor.PathIn(configDirectory);
-            return File.Exists(path) && SettingsJsonPatch.HasOurLine(File.ReadAllText(path));
+            return File.Exists(path) && SettingsJsonPatch.HasOurLine(ThisComputer.Platform, File.ReadAllText(path));
         }
         catch (Exception unreadable) when (unreadable is IOException or UnauthorizedAccessException)
         {

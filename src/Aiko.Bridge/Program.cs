@@ -82,9 +82,8 @@ static void RemindAboutBinding(string input)
         return;
     }
 
-    var aiko = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Aiko");
-    var environments = ReadIfThere(Path.Combine(aiko, "environments.json"));
-    var language = AppSettings.FromJson(ReadIfThere(Path.Combine(aiko, "settings.json"))).Language;
+    var environments = ReadIfThere(ThisComputer.Folders.EnvironmentsFile);
+    var language = AppSettings.FromJson(ReadIfThere(ThisComputer.Folders.SettingsFile)).Language;
 
     var message = SessionReminder.MessageFor(
         Environment.GetEnvironmentVariable(SessionReminder.LaunchVariable),
@@ -111,7 +110,7 @@ static void RecordActivity(string input)
     var configDirectory = ClaudeConfigFolder.Resolve(
         Environment.GetEnvironmentVariable("CLAUDE_CONFIG_DIR"),
         Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
-    var folder = ActivityRecord.Folder(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
+    var folder = ThisComputer.Folders.ActivityFolder;
     var environment = SnapshotName.For(configDirectory);
     var path = Path.Combine(folder, ActivityRecord.FileName(environment, hook.SessionId));
 
@@ -144,14 +143,12 @@ static int BuildPersonaPlugin()
         var configDirectory = ClaudeConfigFolder.Resolve(
             Environment.GetEnvironmentVariable("CLAUDE_CONFIG_DIR"),
             Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
-        var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-        var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
         var bridge = Environment.ProcessPath ?? throw new InvalidOperationException("the bridge does not know its own path");
 
-        var persona = PersonaSettings.FromJson(ReadIfThere(Path.Combine(appData, "Aiko", "persona.json")));
+        var persona = PersonaSettings.FromJson(ReadIfThere(ThisComputer.Folders.PersonaFile));
         var files = PersonaPlugin.Files(persona.Temperament, bridge);
         var hash = PersonaPlugin.ContentHash(files);
-        var folder = PersonaPluginOutput.VersionFolder(localAppData, configDirectory, hash);
+        var folder = PersonaPluginOutput.VersionFolder(ThisComputer.Folders, configDirectory, hash);
 
         if (!Directory.Exists(folder))
         {
@@ -224,12 +221,8 @@ static void WriteOutput(string text)
 
 static string SnapshotPath(string environment)
 {
-    var folder = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "Aiko",
-        "environments");
-    Directory.CreateDirectory(folder);
-    return Path.Combine(folder, environment + ".json");
+    Directory.CreateDirectory(ThisComputer.Folders.SnapshotsFolder);
+    return ThisComputer.Folders.SnapshotFile(environment);
 }
 
 /// Write to a temporary file and move it over the old one, so the tray never sees half a file.
@@ -268,8 +261,10 @@ static string? ReadWrappedCommand(string? configDirectory)
 /// The looking only happens when there is something to run, which is never for most people.
 static string RunWrapped(string command, string input)
 {
-    var gitBash = ClaudeShellLookup.FindGitBash(File.Exists);
-    var (fileName, arguments) = ClaudeShellLookup.CallFor(gitBash, command);
+    var gitBash = WindowsGitBash.Find(
+        File.Exists,
+        WindowsGitBash.Places(ThisComputer.SystemFolders, Environment.GetEnvironmentVariable("PATH") ?? string.Empty));
+    var (fileName, arguments) = ClaudeShellLookup.CallFor(ThisComputer.Platform, gitBash, command);
 
     var start = new ProcessStartInfo(fileName)
     {
@@ -317,4 +312,21 @@ static string RunWrapped(string command, string input)
     }
 
     return output.GetAwaiter().GetResult();
+}
+
+/// What the core needs to know about this Windows computer. The core describes the rules; the
+/// bridge only fills them in from Windows.
+static class ThisComputer
+{
+    public static readonly PlatformConventions Platform = PlatformConventions.Windows;
+
+    public static readonly AikoFolders Folders = AikoFolders.Windows(
+        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
+
+    public static readonly WindowsSystemFolders SystemFolders = new(
+        Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
+        Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        Environment.GetFolderPath(Environment.SpecialFolder.Windows));
 }

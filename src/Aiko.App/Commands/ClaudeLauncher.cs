@@ -16,11 +16,12 @@ static class ClaudeLauncher
     {
         var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         var path = ClaudeInstall.FreshPath(
+            ThisComputer.Platform,
             ReadPath(Registry.LocalMachine, @"SYSTEM\CurrentControlSet\Control\Session Manager\Environment"),
             ReadPath(Registry.CurrentUser, "Environment"),
             Environment.ExpandEnvironmentVariables);
 
-        return ClaudeInstall.Find(path, CommandFolder.Folder, home, SafeExists);
+        return ClaudeInstall.Find(ThisComputer.Platform, path, CommandFolder.Folder, home, SafeExists);
     }
 
     /// Opens Claude Code in its own console window. The folder of environment 1 is used by leaving
@@ -112,7 +113,7 @@ sealed class Waiter : IDisposable
 
     /// Only that the credentials file exists is checked; it is never opened.
     public static Waiter ForSignIn(string configFolder, Action signedIn) =>
-        Start(() => File.Exists(ClaudeInstall.CredentialsPathIn(configFolder)), signedIn);
+        Start(() => File.Exists(ClaudeInstall.CredentialsPathIn(ThisComputer.Platform, configFolder)), signedIn);
 
     private static Waiter Start(Func<bool> isDone, Action done)
     {

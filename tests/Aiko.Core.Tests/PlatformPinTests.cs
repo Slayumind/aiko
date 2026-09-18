@@ -1,0 +1,52 @@
+using Aiko.Core;
+
+namespace Aiko.Core.Tests;
+
+/// What the Windows build writes and looks for today. These names are on people's disks and in
+/// their PATH, so moving the platform details out of the core must keep every one of them.
+public class PlatformPinTests
+{
+    [Fact]
+    public void The_shim_and_the_commands_are_exe_files()
+    {
+        Assert.Equal("claude.exe", CommandLinks.ShimFileName(Windows));
+        Assert.Equal("aiko-work.exe", CommandLinks.FileNameFor(Windows, "aiko-work"));
+    }
+
+    [Fact]
+    public void The_list_of_seen_shim_folders_is_joined_with_a_semicolon()
+    {
+        Assert.Equal(@"C:\new;C:\old", RealClaude.FormatSeen(Windows, [@"C:\new", @"C:\old"]));
+        Assert.Equal([@"C:\new", @"C:\old"], RealClaude.ParseSeen(Windows, @" C:\new ;;C:\old;"));
+    }
+
+    [Fact]
+    public void The_real_claude_is_an_exe_file()
+    {
+        Assert.Equal(@"C:\tools\claude.exe", RealClaude.Find(Windows, @"C:\tools", [], _ => true));
+    }
+
+    [Fact]
+    public void A_bridge_without_the_exe_suffix_is_not_ours()
+    {
+        Assert.False(BridgeCommand.IsAiko(Windows, @"""C:\Aiko\Aiko.Bridge"""));
+        Assert.False(BridgeCommand.IsAiko(Windows, @"""C:\Aiko\Aiko.Bridge.cmd"""));
+    }
+
+    [Fact]
+    public void The_user_path_keeps_entries_with_spaces_and_joins_with_a_semicolon()
+    {
+        Assert.Equal(@"C:\aiko\bin; C:\x ;C:\y", UserPathList.AddToFront(Windows, @" C:\x ;;C:\y", @"C:\aiko\bin"));
+        Assert.True(UserPathList.Contains(Windows, @"C:\x;C:\aiko\bin\", @"C:\aiko\bin"));
+    }
+
+    [Fact]
+    public void The_persona_command_outside_the_install_uses_the_full_path()
+    {
+        Assert.Equal(
+            "\"C:\\Users\\someone\\AppData\\Local\\Other\\Aiko.Bridge.exe\" plugin aiko-persona",
+            AikoMarketplace.PersonaCommand(Windows,
+                @"C:\Users\someone\AppData\Local\Other\Aiko.Bridge.exe",
+                AikoFolders.Windows(@"C:\Users\someone\AppData\Roaming", @"C:\Users\someone\AppData\Local")));
+    }
+}

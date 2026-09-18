@@ -33,7 +33,7 @@ public class BridgeCommandTests
     public void An_empty_command_is_refused_by_the_settings_patch()
     {
         // The two belong together: no path means no line in the user's settings file.
-        var added = SettingsJsonPatch.TryAddBridge("{}", BridgeCommand.For(""), out var patched);
+        var added = SettingsJsonPatch.TryAddBridge(Windows, "{}", BridgeCommand.For(""), out var patched);
 
         Assert.False(added);
         Assert.Equal("{}", patched);
@@ -75,9 +75,9 @@ public class BridgeCommandTests
     public void The_line_we_write_is_recognised_as_ours()
     {
         var command = BridgeCommand.For(@"C:\Aiko\Aiko.Bridge.exe");
-        SettingsJsonPatch.TryAddBridge("{}", command, out var patched);
+        SettingsJsonPatch.TryAddBridge(Windows, "{}", command, out var patched);
 
         // Adding it a second time changes nothing: it is already our line.
-        Assert.False(SettingsJsonPatch.TryAddBridge(patched, command, out _));
+        Assert.False(SettingsJsonPatch.TryAddBridge(Windows, patched, command, out _));
     }
 }

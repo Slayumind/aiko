@@ -13,10 +13,7 @@ namespace Aiko.App;
 /// test in the core asserts that no path, session or token can appear in it.
 static class DirectCache
 {
-    private static readonly string Folder = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "Aiko",
-        "direct");
+    private static readonly string Folder = ThisComputer.Folders.DirectCacheFolder;
 
     /// The cached answers for the environments that exist right now, and nothing else.
     ///

@@ -68,12 +68,10 @@ public sealed record HookEvent(string SessionId, SessionActivity Activity)
         root?[key] is JsonValue value && value.TryGetValue<string>(out var text) ? text : null;
 }
 
-/// The file one session reports its activity into: %LOCALAPPDATA%\Aiko\activity\<environment>.<session>.json.
-/// A folder of its own, because the tray reads every file in environments\ as a limit snapshot.
+/// The file one session reports its activity into: <environment>.<session>.json in
+/// AikoFolders.ActivityFolder.
 public sealed record ActivityRecord(string Environment, SessionActivity Activity, DateTimeOffset At)
 {
-    public const string FolderName = "activity";
-
     /// PostToolUse comes after every tool. The same activity within this time is not written again:
     /// the tray only needs to know the session is still alive, and 10 minutes is when it stops
     /// believing that (D-206).
@@ -85,8 +83,6 @@ public sealed record ActivityRecord(string Environment, SessionActivity Activity
 
     /// Files left by sessions that never sent SessionEnd are cleared after this.
     public static readonly TimeSpan KeepFor = TimeSpan.FromDays(1);
-
-    public static string Folder(string localAppData) => Path.Combine(localAppData, "Aiko", FolderName);
 
     /// The session id is hashed: the file name says which session it is without keeping the id.
     public static string FileName(string environment, string sessionId) =>

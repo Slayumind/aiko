@@ -1,0 +1,35 @@
+{
+  "comment": "The command is a file in PATH, so it has to be typable in every shell: plain latin letters, digits, hyphen and underscore. Russian names are spelled in latin.",
+  "prefix": "aiko-",
+  "maxLength": 40,
+  "fromEnvironmentName": [
+    { "name": "Work", "command": "aiko-work" },
+    { "name": "Personal", "command": "aiko-personal" },
+    { "name": "Основная", "command": "aiko-osnovnaya" },
+    { "name": "Личная щука", "command": "aiko-lichnaya-shchuka" },
+    { "name": "Side project!", "command": "aiko-side-project" },
+    { "name": "Work · Kodland", "command": "aiko-work-kodland" },
+    { "name": "  ", "command": "aiko-env" },
+    { "name": "✨", "command": "aiko-env" }
+  ],
+  "slug": [
+    { "name": "Work", "slug": "work" },
+    { "name": "Основная", "slug": "osnovnaya" },
+    { "name": "!!", "slug": "" },
+    { "name": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "slug": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" }
+  ],
+  "check": [
+    { "command": "aiko-work", "takenByOthers": ["aiko-personal"], "problem": "None" },
+    { "command": "cc_2", "takenByOthers": ["aiko-personal"], "problem": "None" },
+    { "command": "", "takenByOthers": ["aiko-personal"], "problem": "Empty" },
+    { "command": "   ", "takenByOthers": [], "problem": "Empty" },
+    { "command": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "takenByOthers": [], "problem": "TooLong" },
+    { "command": "Aiko-Work", "takenByOthers": ["aiko-personal"], "problem": "BadCharacters" },
+    { "command": "aiko work", "takenByOthers": ["aiko-personal"], "problem": "BadCharacters" },
+    { "command": "-work", "takenByOthers": ["aiko-personal"], "problem": "BadCharacters" },
+    { "command": "claude", "takenByOthers": ["aiko-personal"], "problem": "Reserved" },
+    { "command": "CLAUDE", "takenByOthers": [], "problem": "BadCharacters" },
+    { "command": "aiko-personal", "takenByOthers": ["aiko-personal"], "problem": "Taken" },
+    { "command": "aiko-personal", "takenByOthers": ["AIKO-PERSONAL"], "problem": "Taken" }
+  ]
+}

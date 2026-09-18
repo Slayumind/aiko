@@ -9,10 +9,7 @@ namespace Aiko.App;
 /// Deleting the file gives a fresh one, which is the whole undo anybody needs.
 static class InstallId
 {
-    private static readonly string Path = System.IO.Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-        "Aiko",
-        "install-id");
+    private static readonly string Path = ThisComputer.Folders.InstallIdFile;
 
     public static string Current()
     {

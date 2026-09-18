@@ -14,6 +14,12 @@ public static class ClaudeConfigFolder
 
     public const string AccountFileName = ".claude.json";
 
+    /// Every Claude Code folder in a home folder: .claude and the .claude-<name> folders beside it.
+    public const string SearchPattern = DefaultFolderName + "*";
+
+    /// The folder of a second environment: .claude-work for "work".
+    public static string NamedFolderName(string name) => DefaultFolderName + "-" + name;
+
     public static string Resolve(string? fromEnvironment, string userProfile)
     {
         var set = fromEnvironment?.Trim();

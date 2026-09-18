@@ -91,6 +91,10 @@ public sealed record StatusLineReport(IReadOnlyList<LimitWindow> Windows)
             return;
         }
 
-        windows.Add(new LimitWindow(kind, Percentage.FromDouble(percent.GetDouble()), DateTimeOffset.FromUnixTimeSeconds(resetsAt.GetInt64())));
+        // JSON has one number type, so the seconds can arrive with a fraction. Reading them as a
+        // whole number threw and took the whole report with it, so they are cut down to the second.
+        var seconds = (long)Math.Floor(resetsAt.GetDouble());
+
+        windows.Add(new LimitWindow(kind, Percentage.FromDouble(percent.GetDouble()), DateTimeOffset.FromUnixTimeSeconds(seconds)));
     }
 }

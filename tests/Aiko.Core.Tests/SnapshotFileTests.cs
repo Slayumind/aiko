@@ -71,6 +71,21 @@ public class SnapshotFileTests
         Assert.Contains("\"SevenDay\"", json);
     }
 
+    [Fact]
+    public void A_time_is_written_the_way_the_Mac_core_writes_it()
+    {
+        // System.Text.Json writes a DateTimeOffset with the seconds and the offset, and drops a
+        // fraction that is zero. Its strict encoder also escapes the plus of the offset, so both
+        // cores put the same bytes in the file.
+        var json = SnapshotFile.ToJson(new LimitSnapshot(
+            "Work",
+            LimitSource.StatusLine,
+            Now,
+            [new LimitWindow(LimitKind.FiveHour, 1, Now)]));
+
+        Assert.Contains(@"""2026-09-12T12:00:00+00:00""", json);
+    }
+
     [Theory]
     [InlineData("")]
     [InlineData("half written {")]

@@ -9,13 +9,13 @@ public class ClaudeInstallTests
     [Fact]
     public void Fresh_path_joins_machine_and_user_and_expands_them()
     {
-        var path = ClaudeInstall.FreshPath(
+        var path = ClaudeInstall.FreshPath(Windows,
             @"C:\Windows",
             @"%USERPROFILE%\.local\bin",
             text => text.Replace("%USERPROFILE%", Home));
 
         Assert.Equal(@"C:\Windows;C:\Users\someone\.local\bin", path);
-        Assert.Equal(@"C:\Windows", ClaudeInstall.FreshPath(@"C:\Windows", null, t => t));
+        Assert.Equal(@"C:\Windows", ClaudeInstall.FreshPath(Windows, @"C:\Windows", null, t => t));
     }
 
     [Fact]
@@ -26,7 +26,7 @@ public class ClaudeInstallTests
             @"C:\aiko\bin\claude.exe", @"C:\tools\claude.exe",
         };
 
-        Assert.Equal(@"C:\tools\claude.exe", ClaudeInstall.Find(@"C:\aiko\bin;C:\tools", @"C:\aiko\bin", Home, files.Contains));
+        Assert.Equal(@"C:\tools\claude.exe", ClaudeInstall.Find(Windows, @"C:\aiko\bin;C:\tools", @"C:\aiko\bin", Home, files.Contains));
     }
 
     [Fact]
@@ -34,8 +34,8 @@ public class ClaudeInstallTests
     {
         var native = Home + @"\.local\bin\claude.exe";
 
-        Assert.Equal(native, ClaudeInstall.Find(@"C:\Windows", @"C:\aiko\bin", Home, p => p == native));
-        Assert.Null(ClaudeInstall.Find(@"C:\Windows", @"C:\aiko\bin", Home, _ => false));
+        Assert.Equal(native, ClaudeInstall.Find(Windows, @"C:\Windows", @"C:\aiko\bin", Home, p => p == native));
+        Assert.Null(ClaudeInstall.Find(Windows, @"C:\Windows", @"C:\aiko\bin", Home, _ => false));
     }
 
     [Theory]
@@ -44,7 +44,7 @@ public class ClaudeInstallTests
     [InlineData("!!", @"C:\Users\someone\.claude-env")]
     public void A_new_folder_is_named_after_the_environment(string name, string folder)
     {
-        Assert.Equal(folder, ClaudeInstall.NewConfigFolder(name, Home, _ => false));
+        Assert.Equal(folder, ClaudeInstall.NewConfigFolder(Windows, name, Home, _ => false));
     }
 
     [Fact]
@@ -55,6 +55,6 @@ public class ClaudeInstallTests
             Home + @"\.claude-work", Home + @"\.claude-work-2",
         };
 
-        Assert.Equal(Home + @"\.claude-work-3", ClaudeInstall.NewConfigFolder("Work", Home, taken.Contains));
+        Assert.Equal(Home + @"\.claude-work-3", ClaudeInstall.NewConfigFolder(Windows, "Work", Home, taken.Contains));
     }
 }

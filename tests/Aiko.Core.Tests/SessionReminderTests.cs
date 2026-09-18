@@ -81,24 +81,24 @@ public class SessionReminderTests
             }
             """;
 
-        Assert.True(SettingsJsonPatch.TryAddSessionHook(before, Hook, out var after));
+        Assert.True(SettingsJsonPatch.TryAddSessionHook(Windows, before, Hook, out var after));
 
         var groups = JsonNode.Parse(after)!["hooks"]!["SessionStart"]!.AsArray();
         Assert.Equal(2, groups.Count);
         Assert.Equal("echo hi", groups[0]!["hooks"]![0]!["command"]!.GetValue<string>());
         Assert.Equal(Hook, groups[1]!["hooks"]![0]!["command"]!.GetValue<string>());
         Assert.NotNull(JsonNode.Parse(after)!["hooks"]!["Stop"]);
-        Assert.True(SettingsJsonPatch.HasOurSessionHook(after));
+        Assert.True(SettingsJsonPatch.HasOurSessionHook(Windows, after));
     }
 
     [Fact]
     public void Adding_twice_changes_nothing_and_an_old_path_is_replaced()
     {
-        Assert.True(SettingsJsonPatch.TryAddSessionHook("{}", Hook, out var once));
-        Assert.False(SettingsJsonPatch.TryAddSessionHook(once, Hook, out _));
+        Assert.True(SettingsJsonPatch.TryAddSessionHook(Windows, "{}", Hook, out var once));
+        Assert.False(SettingsJsonPatch.TryAddSessionHook(Windows, once, Hook, out _));
 
         const string moved = "\"D:\\Aiko\\Aiko.Bridge.exe\" --session-start";
-        Assert.True(SettingsJsonPatch.TryAddSessionHook(once, moved, out var replaced));
+        Assert.True(SettingsJsonPatch.TryAddSessionHook(Windows, once, moved, out var replaced));
 
         var commands = JsonNode.Parse(replaced)!["hooks"]!["SessionStart"]!.AsArray();
         Assert.Equal(moved, Assert.Single(commands)!["hooks"]![0]!["command"]!.GetValue<string>());
@@ -109,27 +109,27 @@ public class SessionReminderTests
     {
         const string before = """{ "hooks": { "SessionStart": [ { "hooks": [ { "type": "command", "command": "echo hi" } ] } ] } }""";
 
-        SettingsJsonPatch.TryAddBridge(before, "\"C:\\A\\Aiko.Bridge.exe\"", out var withLine);
-        SettingsJsonPatch.TryAddSessionHook(withLine, Hook, out var withBoth);
+        SettingsJsonPatch.TryAddBridge(Windows, before, "\"C:\\A\\Aiko.Bridge.exe\"", out var withLine);
+        SettingsJsonPatch.TryAddSessionHook(Windows, withLine, Hook, out var withBoth);
 
-        Assert.True(SettingsJsonPatch.TryRemoveBridge(withBoth, out var restored));
+        Assert.True(SettingsJsonPatch.TryRemoveBridge(Windows, withBoth, out var restored));
         Assert.True(JsonNode.DeepEquals(JsonNode.Parse(before), JsonNode.Parse(restored)));
     }
 
     [Fact]
     public void A_file_with_only_our_hook_loses_the_empty_hooks_object()
     {
-        SettingsJsonPatch.TryAddSessionHook("""{ "model": "opus" }""", Hook, out var withHook);
+        SettingsJsonPatch.TryAddSessionHook(Windows, """{ "model": "opus" }""", Hook, out var withHook);
 
-        Assert.True(SettingsJsonPatch.TryRemoveBridge(withHook, out var restored));
+        Assert.True(SettingsJsonPatch.TryRemoveBridge(Windows, withHook, out var restored));
         Assert.True(JsonNode.DeepEquals(JsonNode.Parse("""{ "model": "opus" }"""), JsonNode.Parse(restored)));
     }
 
     [Fact]
     public void Hooks_that_are_not_the_expected_shape_are_not_touched()
     {
-        Assert.False(SettingsJsonPatch.TryAddSessionHook("""{ "hooks": "oops" }""", Hook, out _));
-        Assert.False(SettingsJsonPatch.TryAddSessionHook("""{ "hooks": { "SessionStart": {} } }""", Hook, out _));
+        Assert.False(SettingsJsonPatch.TryAddSessionHook(Windows, """{ "hooks": "oops" }""", Hook, out _));
+        Assert.False(SettingsJsonPatch.TryAddSessionHook(Windows, """{ "hooks": { "SessionStart": {} } }""", Hook, out _));
     }
 
     [Fact]
@@ -137,6 +137,6 @@ public class SessionReminderTests
     {
         Assert.Equal("\"C:\\A\\Aiko.Bridge.exe\" --session-start", BridgeCommand.HookFor(@"C:\A\Aiko.Bridge.exe"));
         Assert.Equal("& \"C:\\A\\Aiko.Bridge.exe\" --session-start", BridgeCommand.HookFor(@"C:\A\Aiko.Bridge.exe", ClaudeShell.PowerShell));
-        Assert.True(BridgeCommand.IsAiko(BridgeCommand.HookFor(@"C:\A\Aiko.Bridge.exe")));
+        Assert.True(BridgeCommand.IsAiko(Windows, BridgeCommand.HookFor(@"C:\A\Aiko.Bridge.exe")));
     }
 }

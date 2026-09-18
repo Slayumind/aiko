@@ -16,15 +16,15 @@ public class BridgeRecognitionTests
     [Fact]
     public void Our_line_is_ours_whatever_folder_it_points_at()
     {
-        Assert.True(BridgeCommand.IsAiko(BridgeCommand.For(Here)));
-        Assert.True(BridgeCommand.IsAiko(BridgeCommand.For(Elsewhere)));
+        Assert.True(BridgeCommand.IsAiko(Windows, BridgeCommand.For(Here)));
+        Assert.True(BridgeCommand.IsAiko(Windows, BridgeCommand.For(Elsewhere)));
     }
 
     [Fact]
     public void Our_line_is_ours_in_either_shell()
     {
-        Assert.True(BridgeCommand.IsAiko(BridgeCommand.For(Here, ClaudeShell.GitBash)));
-        Assert.True(BridgeCommand.IsAiko(BridgeCommand.For(Here, ClaudeShell.PowerShell)));
+        Assert.True(BridgeCommand.IsAiko(Windows, BridgeCommand.For(Here, ClaudeShell.GitBash)));
+        Assert.True(BridgeCommand.IsAiko(Windows, BridgeCommand.For(Here, ClaudeShell.PowerShell)));
     }
 
     [Theory]
@@ -38,22 +38,22 @@ public class BridgeRecognitionTests
     [InlineData(@"& ""C:\tools\aiko-bridge-helper.exe""")]
     public void Somebody_elses_line_is_not_ours(string? command)
     {
-        Assert.False(BridgeCommand.IsAiko(command));
+        Assert.False(BridgeCommand.IsAiko(Windows, command));
     }
 
     [Fact]
     public void An_unquoted_line_is_read_too()
     {
-        Assert.True(BridgeCommand.IsAiko(@"C:\Aiko\Aiko.Bridge.exe"));
-        Assert.True(BridgeCommand.IsAiko(@"C:\Aiko\aiko.bridge.EXE"));
+        Assert.True(BridgeCommand.IsAiko(Windows, @"C:\Aiko\Aiko.Bridge.exe"));
+        Assert.True(BridgeCommand.IsAiko(Windows, @"C:\Aiko\aiko.bridge.EXE"));
     }
 
     [Fact]
     public void A_reinstall_elsewhere_replaces_our_line_instead_of_hiding_it()
     {
-        SettingsJsonPatch.TryAddBridge("{}", BridgeCommand.For(Here), out var after);
+        SettingsJsonPatch.TryAddBridge(Windows, "{}", BridgeCommand.For(Here), out var after);
 
-        var moved = SettingsJsonPatch.TryAddBridge(after, BridgeCommand.For(Elsewhere), out var patched);
+        var moved = SettingsJsonPatch.TryAddBridge(Windows, after, BridgeCommand.For(Elsewhere), out var patched);
 
         Assert.True(moved);
         Assert.Contains(Elsewhere.Replace(@"\", @"\\"), patched);
@@ -64,10 +64,10 @@ public class BridgeRecognitionTests
     [Fact]
     public void A_shell_change_replaces_our_line_instead_of_hiding_it()
     {
-        SettingsJsonPatch.TryAddBridge(
+        SettingsJsonPatch.TryAddBridge(Windows,
             "{}", BridgeCommand.For(Here, ClaudeShell.PowerShell), out var after);
 
-        var rewritten = SettingsJsonPatch.TryAddBridge(
+        var rewritten = SettingsJsonPatch.TryAddBridge(Windows,
             after, BridgeCommand.For(Here, ClaudeShell.GitBash), out var patched);
 
         Assert.True(rewritten);
@@ -79,7 +79,7 @@ public class BridgeRecognitionTests
     {
         var mine = """{ "statusLine": { "type": "command", "command": "my-line.sh" } }""";
 
-        SettingsJsonPatch.TryAddBridge(mine, BridgeCommand.For(Here), out var patched);
+        SettingsJsonPatch.TryAddBridge(Windows, mine, BridgeCommand.For(Here), out var patched);
 
         Assert.Contains(SettingsJsonPatch.WrappedKey, patched);
         Assert.Equal("my-line.sh", SettingsJsonPatch.ReadWrappedCommand(patched));
@@ -97,11 +97,11 @@ public class BridgeRecognitionTests
             }
             """;
 
-        var repaired = SettingsJsonPatch.TryAddBridge(damaged, BridgeCommand.For(Here), out var patched);
+        var repaired = SettingsJsonPatch.TryAddBridge(Windows, damaged, BridgeCommand.For(Here), out var patched);
 
         Assert.True(repaired);
         Assert.DoesNotContain(SettingsJsonPatch.WrappedKey, patched);
-        Assert.True(BridgeCommand.IsAiko(
+        Assert.True(BridgeCommand.IsAiko(Windows,
             System.Text.Json.Nodes.JsonNode.Parse(patched)!["statusLine"]!["command"]!.GetValue<string>()));
     }
 
@@ -115,7 +115,7 @@ public class BridgeRecognitionTests
             }
             """;
 
-        var removed = SettingsJsonPatch.TryRemoveBridge(damaged, out var restored);
+        var removed = SettingsJsonPatch.TryRemoveBridge(Windows, damaged, out var restored);
 
         Assert.True(removed);
         var root = System.Text.Json.Nodes.JsonNode.Parse(restored)!.AsObject();
@@ -127,9 +127,9 @@ public class BridgeRecognitionTests
     public void Removing_Aiko_still_puts_back_the_line_the_user_had()
     {
         var mine = """{ "statusLine": { "type": "command", "command": "my-line.sh" } }""";
-        SettingsJsonPatch.TryAddBridge(mine, BridgeCommand.For(Here), out var patched);
+        SettingsJsonPatch.TryAddBridge(Windows, mine, BridgeCommand.For(Here), out var patched);
 
-        SettingsJsonPatch.TryRemoveBridge(patched, out var restored);
+        SettingsJsonPatch.TryRemoveBridge(Windows, patched, out var restored);
 
         var root = System.Text.Json.Nodes.JsonNode.Parse(restored)!.AsObject();
         Assert.Equal("my-line.sh", root["statusLine"]!["command"]!.GetValue<string>());
@@ -141,7 +141,7 @@ public class BridgeRecognitionTests
     {
         var odd = """{ "statusLine": { "type": "command", "command": 42 } }""";
 
-        var added = SettingsJsonPatch.TryAddBridge(odd, BridgeCommand.For(Here), out var patched);
+        var added = SettingsJsonPatch.TryAddBridge(Windows, odd, BridgeCommand.For(Here), out var patched);
 
         Assert.True(added);
         // Not ours, so it is kept aside like anyone else's line rather than thrown away.

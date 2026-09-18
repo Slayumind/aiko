@@ -35,8 +35,8 @@ static class Uninstall
         // Claude Code's own record of them, as far as the time allows.
         PluginSync.RemoveNow(folders, deadline);
 
-        Remove(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Aiko"));
-        Remove(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Aiko"));
+        Remove(ThisComputer.Folders.SettingsFolder);
+        Remove(ThisComputer.Folders.LocalFolder);
     }
 
     /// Every folder Aiko knows about, and then every Claude Code folder on the machine.
