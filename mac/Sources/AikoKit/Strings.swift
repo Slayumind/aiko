@@ -85,8 +85,10 @@ public enum Strings {
         "AccessNoBridge": ("Aiko can't find its bridge program, so nothing changed.", "Aiko не нашла свою программу-посредник, поэтому ничего не изменилось."),
         "PlaceTray": ("Tray", "Трей"),
         "PlaceIsland": ("Island", "Остров"),
+        "PlaceMenuBar": ("Menu bar", "Строка меню"),
         "HideIslandInFullScreen": ("Hide the island in full screen", "Прятать остров в полноэкранных окнах"),
         "StartWithWindows": ("Start with Windows", "Запускать вместе с Windows"),
+        "StartAtLogin": ("Start at login", "Запускать при входе"),
         "CheckUpdatesWhat": ("Once a day Aiko asks slayumind.org for the latest version. Downloads come from GitHub.", "Раз в сутки Aiko спрашивает у slayumind.org свежую версию. Сами файлы скачиваются с GitHub."),
         "CheckNow": ("Check now", "Проверить сейчас"),
         "OpenDownloadPage": ("Open download page", "Открыть страницу загрузки"),
@@ -122,8 +124,10 @@ public enum Strings {
         "WizardBridgeNotFound": ("Aiko can't find its bridge program.", "Aiko не нашла свою программу-посредник."),
         "WizardUpdatesWhat": ("Once a day, Aiko asks slayumind.org for the latest version and says that one copy of Aiko ran today. The ID it sends changes every day.", "Раз в сутки Aiko спрашивает у slayumind.org свежую версию и сообщает, что одна копия сегодня работала. Идентификатор, который уходит, меняется каждый день."),
         "WizardDoneTray": ("Aiko is down by the clock. Rest the mouse on it to see the card, or click it to keep the card open.", "Aiko внизу, рядом с часами. Наведи мышь, чтобы увидеть карточку, или кликни, чтобы карточка осталась открытой."),
+        "WizardDoneMenuBar": ("Aiko is up by the clock. Rest the mouse on it to see the card, or click it to keep the card open.", "Aiko наверху, рядом с часами. Наведи мышь, чтобы увидеть карточку, или щёлкни, чтобы она осталась открытой."),
         "WizardDoneIsland": ("Aiko is at the top of your screen. Drag it anywhere and it sticks to the nearest edge.", "Aiko вверху экрана. Перетащи куда угодно — она прилипнет к ближайшему краю."),
         "WizardDoneOverflow": ("Windows 11 hides new app icons under the arrow next to the clock. Open the arrow and drag Aiko onto the taskbar: under the arrow, the card can't open.", "Windows 11 прячет значки новых приложений под стрелку рядом с часами. Открой её и перетащи Aiko на панель задач: под стрелкой карточка не открывается."),
+        "WizardDoneMenuBarRoom": ("A full menu bar hides the icons furthest from the clock. Close a menu bar app if Aiko doesn't fit.", "Если в строке меню нет места, macOS прячет значки, что дальше от часов. Закрой лишнее приложение, если Aiko не помещается."),
         "WizardDoneFirstNumbers": ("The first numbers arrive after your next answer from Claude Code. Until then, the ring is dashed.", "Первые цифры придут после следующего ответа Claude Code. До этого кольцо пунктирное."),
         "WizardDoneNoAccess": ("Aiko can't see your limits yet. You can turn on access in settings at any time.", "Aiko пока не видит лимиты. Доступ можно включить в настройках в любой момент."),
         "SettingsWriteFailed": ("Aiko couldn't write the Claude Code settings file. Try again.", "Aiko не смогла записать файл настроек Claude Code. Попробуй ещё раз."),
@@ -152,12 +156,14 @@ public enum Strings {
         "StateBound": ("{0} bound", "привязано: {0}"),
         "StateTray": ("tray", "трей"),
         "StateIsland": ("island", "остров"),
+        "StateMenuBar": ("menu bar", "строка меню"),
         "Copy": ("Copy", "Скопировать"),
         "Copied": ("Copied", "Скопировано"),
         "Later": ("Later", "Позже"),
         "InstallFound": ("Claude Code is already on this computer. Nothing to do here.", "Claude Code уже есть на этом компьютере. Здесь ничего делать не нужно."),
         "InstallLead": ("Claude Code isn't on this computer yet. Aiko works alongside it, so install it first.", "Claude Code на этом компьютере пока нет. Aiko работает вместе с ним, так что сначала установи его."),
         "InstallHow": ("Open PowerShell, paste the command and press Enter. Aiko notices when it's done.", "Открой PowerShell, вставь команду и нажми Enter. Aiko заметит, когда установка закончится."),
+        "InstallHowMac": ("Open Terminal, paste the command and press Enter. Aiko notices when it's done.", "Открой Терминал, вставь команду и нажми Enter. Aiko заметит, когда установка закончится."),
         "WaitInstall": ("Waiting for Claude Code…", "Ждём Claude Code…"),
         "Env1Lead": ("The first environment lives in the .claude folder. The Claude Code panel in VS Code and Claude Desktop use it too.", "Первая среда живёт в папке .claude. С ней же работают панель Claude Code в VS Code и Claude Desktop."),
         "Env1Empty": ("This folder has no account yet.", "В этой папке ещё нет аккаунта."),
@@ -179,6 +185,7 @@ public enum Strings {
         "FolderIs": ("Folder: {0}", "Папка: {0}"),
         "AccessAdd": ("Add the line", "Добавить строку"),
         "CmdLead": ("A command starts Claude Code in the right environment. It works in PowerShell, cmd and Git Bash.", "Команда запускает Claude Code сразу под нужной средой. Работает в PowerShell, cmd и Git Bash."),
+        "CmdLeadMac": ("A command starts Claude Code in the right environment. It works in Terminal and in any zsh shell.", "Команда запускает Claude Code сразу в нужной среде. Работает в Терминале и в любой оболочке zsh."),
         "CmdFor": ("COMMAND · {0}", "КОМАНДА · {0}"),
         "CmdFollows": ("Follows the environment name.", "Меняется вместе с именем среды."),
         "CmdOwn": ("Your own command: renaming doesn't change it.", "Своя команда: переименование её не трогает."),
@@ -192,6 +199,8 @@ public enum Strings {
         "FnRemove": ("Remove {0}", "Убрать {0}"),
         "FnBackup": ("A copy of the profile stays next to it. Removing Aiko brings the functions back.", "Копия профиля останется рядом, а удаление Aiko вернёт функции."),
         "PathNote": ("Aiko puts its folder at the start of PATH so every terminal finds the commands. Restart open terminals and your IDE.", "Aiko поставит свою папку в начало PATH, чтобы команды нашлись в любом терминале. Открытые терминалы и IDE нужно перезапустить."),
+        "PathLineMac": ("THE LINE AIKO ADDS TO ~/.ZSHRC", "СТРОКА, КОТОРУЮ AIKO ДОБАВИТ В ~/.ZSHRC"),
+        "PathNoteMac": ("macOS puts a folder of your own on PATH only when your shell profile says so, so Aiko adds this line to ~/.zshrc. A copy of the file stays next to it, and removing Aiko takes the line out. Terminals that are already open keep the PATH they started with.", "macOS добавляет твою папку в PATH, только если об этом сказано в профиле оболочки, поэтому Aiko допишет эту строку в ~/.zshrc. Рядом останется копия файла, а при удалении Aiko строка уйдёт. Уже открытые терминалы сохранят прежний PATH."),
         "PathAdd": ("Add to PATH", "Добавить в PATH"),
         "NoCommands": ("No commands", "Без команд"),
         "FoldersLead": ("Bind project folders to {0}. In them and in every folder inside, claude starts {0}.", "Привяжи папки проектов к {0}. В них и во всех вложенных папках claude запустит {0}."),
@@ -213,6 +222,7 @@ public enum Strings {
         "ClaudeOpened": ("Claude Code opened in a new window.", "Claude Code открылся в новом окне."),
         "SectionCommand": ("COMMAND", "КОМАНДА"),
         "CmdShells": ("PowerShell · cmd · Git Bash", "PowerShell · cmd · Git Bash"),
+        "CmdShellsMac": ("zsh · bash", "zsh · bash"),
         "CmdKept": ("The command stays the same, since your terminals and scripts know it.", "Команда осталась прежней: терминалы и скрипты её знают."),
         "RenameCommandTo": ("Rename to {0}", "Переименовать в {0}"),
         "NameEmpty": ("Enter a name.", "Впиши имя."),
@@ -225,12 +235,15 @@ public enum Strings {
         "RemoveEnvironment": ("Remove environment", "Удалить среду"),
         "RemoveEnvironmentLine": ("Aiko's line and plugins leave this folder's settings.json, and so do the command {0} and the bindings to {1}.", "Строка и плагины Aiko уйдут из settings.json этой папки. Вместе с ними уйдут команда {0} и привязки к {1}."),
         "MoveToRecycleBin": ("And move the folder to the Recycle Bin", "И переместить папку в корзину"),
+        "MoveToTrash": ("And move the folder to the Trash", "И переместить папку в Корзину"),
         "RecycleWhy": ("It holds the Claude Code account, history and memory. You can restore it from the Recycle Bin.", "В ней аккаунт, история и память Claude Code. Вернуть можно из корзины Windows."),
+        "TrashWhy": ("It holds the Claude Code account, history and memory. You can put it back from the Trash.", "В ней аккаунт, история и память Claude Code. Вернуть её можно из Корзины."),
         "KeepClaude": ("VS Code and Claude Desktop use the .claude folder, so Aiko never removes it.", "Папку .claude используют VS Code и Claude Desktop, поэтому Aiko её не удаляет."),
         "Cancel": ("Cancel", "Отмена"),
         "RemoveConfirm": ("Remove", "Удалить"),
         "EnvironmentRemoved": ("{0} removed.", "{0} удалена."),
         "EnvironmentRemovedToBin": ("{0} removed. The folder is in the Recycle Bin.", "{0} удалена, папка в корзине."),
+        "EnvironmentRemovedToTrash": ("{0} removed. The folder is in the Trash.", "{0} удалена, папка в Корзине."),
         "FoldersTableLead": ("In a folder and in every folder inside, plain claude starts its environment. A command like {0} beats a binding, and Claude Code reminds you of it.", "В папке и во всех вложенных обычный claude запускает её среду. Команда вроде {0} сильнее привязки, но Claude Code напомнит о ней."),
         "FolderColumn": ("FOLDER", "ПАПКА"),
         "EnvironmentColumn": ("ENVIRONMENT", "СРЕДА"),
@@ -247,7 +260,9 @@ public enum Strings {
         "Restart": ("Start over", "Начать заново"),
         "RestartWhat": ("Removes the environments from Aiko and opens the checklist right here.", "Убирает среды из Aiko и открывает чек-лист здесь же."),
         "RestartLine": ("Aiko removes the environments, its lines and plugins in settings.json, the commands {0}, the folder bindings and its folder in PATH, and turns the PowerShell profile functions back on. Accounts and history stay in the folders.", "Из Aiko уйдут среды, строки и плагины Aiko в settings.json, команды {0}, привязки папок и папка Aiko в PATH, а функции в профиле PowerShell вернутся. Аккаунты и история в папках останутся."),
+        "RestartLineMac": ("Aiko removes the environments, its lines and plugins in settings.json, the commands {0}, the folder bindings and its line in ~/.zshrc. Accounts and history stay in the folders.", "Из Aiko уйдут среды, строки и плагины Aiko в settings.json, команды {0}, привязки папок и строка Aiko в ~/.zshrc. Аккаунты и история в папках останутся."),
         "RestartBin": ("And move {0} to the Recycle Bin", "И переместить {0} в корзину"),
+        "RestartTrash": ("And move {0} to the Trash", "И переместить {0} в Корзину"),
         "RestartKeep": (".claude stays either way.", ".claude остаётся в любом случае."),
         "OpenClaudeCode": ("Open Claude Code", "Открыть Claude Code"),
         "CardSignInNote": ("Sign in so Aiko can see the limits of this environment.", "Войди, чтобы Aiko видела лимиты этой среды."),
@@ -264,6 +279,7 @@ public enum Strings {
         "SectionWhatIsSent": ("WHAT IS SENT", "ЧТО ОТПРАВЛЯЕТСЯ"),
         "SentVersion": ("the version of Aiko: whether updates arrive", "версия Aiko: доходят ли обновления"),
         "SentWindows": ("the version of Windows: what to test first", "версия Windows: что проверять первым"),
+        "SentMacOS": ("the version of macOS: what to test first", "версия macOS: что проверять первым"),
         "SentDayId": ("an ID that changes every day", "ID, который меняется каждый день"),
         "SentWeekFlag": ("the first run this week", "первый запуск на этой неделе"),
         "SentMonthFlag": ("the first run this month", "первый запуск в этом месяце"),
@@ -472,11 +488,17 @@ public enum Strings {
     /// Island
     public static var placeIsland: String { Strings.get("PlaceIsland") }
 
+    /// Menu bar
+    public static var placeMenuBar: String { Strings.get("PlaceMenuBar") }
+
     /// Hide the island in full screen
     public static var hideIslandInFullScreen: String { Strings.get("HideIslandInFullScreen") }
 
     /// Start with Windows
     public static var startWithWindows: String { Strings.get("StartWithWindows") }
+
+    /// Start at login
+    public static var startAtLogin: String { Strings.get("StartAtLogin") }
 
     /// Once a day Aiko asks slayumind.org for the latest version. Downloads come from GitHub.
     public static var checkUpdatesWhat: String { Strings.get("CheckUpdatesWhat") }
@@ -583,11 +605,17 @@ public enum Strings {
     /// Aiko is down by the clock. Rest the mouse on it to see the card, or click it to keep the ...
     public static var wizardDoneTray: String { Strings.get("WizardDoneTray") }
 
+    /// Aiko is up by the clock. Rest the mouse on it to see the card, or click it to keep the ca...
+    public static var wizardDoneMenuBar: String { Strings.get("WizardDoneMenuBar") }
+
     /// Aiko is at the top of your screen. Drag it anywhere and it sticks to the nearest edge.
     public static var wizardDoneIsland: String { Strings.get("WizardDoneIsland") }
 
     /// Windows 11 hides new app icons under the arrow next to the clock. Open the arrow and drag...
     public static var wizardDoneOverflow: String { Strings.get("WizardDoneOverflow") }
+
+    /// A full menu bar hides the icons furthest from the clock. Close a menu bar app if Aiko doe...
+    public static var wizardDoneMenuBarRoom: String { Strings.get("WizardDoneMenuBarRoom") }
 
     /// The first numbers arrive after your next answer from Claude Code. Until then, the ring is...
     public static var wizardDoneFirstNumbers: String { Strings.get("WizardDoneFirstNumbers") }
@@ -673,6 +701,9 @@ public enum Strings {
     /// island
     public static var stateIsland: String { Strings.get("StateIsland") }
 
+    /// menu bar
+    public static var stateMenuBar: String { Strings.get("StateMenuBar") }
+
     /// Copy
     public static var copy: String { Strings.get("Copy") }
 
@@ -690,6 +721,9 @@ public enum Strings {
 
     /// Open PowerShell, paste the command and press Enter. Aiko notices when it's done.
     public static var installHow: String { Strings.get("InstallHow") }
+
+    /// Open Terminal, paste the command and press Enter. Aiko notices when it's done.
+    public static var installHowMac: String { Strings.get("InstallHowMac") }
 
     /// Waiting for Claude Code…
     public static var waitInstall: String { Strings.get("WaitInstall") }
@@ -754,6 +788,9 @@ public enum Strings {
     /// A command starts Claude Code in the right environment. It works in PowerShell, cmd and Gi...
     public static var cmdLead: String { Strings.get("CmdLead") }
 
+    /// A command starts Claude Code in the right environment. It works in Terminal and in any zs...
+    public static var cmdLeadMac: String { Strings.get("CmdLeadMac") }
+
     /// COMMAND · {0}
     public static var cmdFor: String { Strings.get("CmdFor") }
 
@@ -792,6 +829,12 @@ public enum Strings {
 
     /// Aiko puts its folder at the start of PATH so every terminal finds the commands. Restart o...
     public static var pathNote: String { Strings.get("PathNote") }
+
+    /// THE LINE AIKO ADDS TO ~/.ZSHRC
+    public static var pathLineMac: String { Strings.get("PathLineMac") }
+
+    /// macOS puts a folder of your own on PATH only when your shell profile says so, so Aiko add...
+    public static var pathNoteMac: String { Strings.get("PathNoteMac") }
 
     /// Add to PATH
     public static var pathAdd: String { Strings.get("PathAdd") }
@@ -856,6 +899,9 @@ public enum Strings {
     /// PowerShell · cmd · Git Bash
     public static var cmdShells: String { Strings.get("CmdShells") }
 
+    /// zsh · bash
+    public static var cmdShellsMac: String { Strings.get("CmdShellsMac") }
+
     /// The command stays the same, since your terminals and scripts know it.
     public static var cmdKept: String { Strings.get("CmdKept") }
 
@@ -892,8 +938,14 @@ public enum Strings {
     /// And move the folder to the Recycle Bin
     public static var moveToRecycleBin: String { Strings.get("MoveToRecycleBin") }
 
+    /// And move the folder to the Trash
+    public static var moveToTrash: String { Strings.get("MoveToTrash") }
+
     /// It holds the Claude Code account, history and memory. You can restore it from the Recycle...
     public static var recycleWhy: String { Strings.get("RecycleWhy") }
+
+    /// It holds the Claude Code account, history and memory. You can put it back from the Trash.
+    public static var trashWhy: String { Strings.get("TrashWhy") }
 
     /// VS Code and Claude Desktop use the .claude folder, so Aiko never removes it.
     public static var keepClaude: String { Strings.get("KeepClaude") }
@@ -909,6 +961,9 @@ public enum Strings {
 
     /// {0} removed. The folder is in the Recycle Bin.
     public static var environmentRemovedToBin: String { Strings.get("EnvironmentRemovedToBin") }
+
+    /// {0} removed. The folder is in the Trash.
+    public static var environmentRemovedToTrash: String { Strings.get("EnvironmentRemovedToTrash") }
 
     /// In a folder and in every folder inside, plain claude starts its environment. A command li...
     public static var foldersTableLead: String { Strings.get("FoldersTableLead") }
@@ -958,8 +1013,14 @@ public enum Strings {
     /// Aiko removes the environments, its lines and plugins in settings.json, the commands {0}, ...
     public static var restartLine: String { Strings.get("RestartLine") }
 
+    /// Aiko removes the environments, its lines and plugins in settings.json, the commands {0}, ...
+    public static var restartLineMac: String { Strings.get("RestartLineMac") }
+
     /// And move {0} to the Recycle Bin
     public static var restartBin: String { Strings.get("RestartBin") }
+
+    /// And move {0} to the Trash
+    public static var restartTrash: String { Strings.get("RestartTrash") }
 
     /// .claude stays either way.
     public static var restartKeep: String { Strings.get("RestartKeep") }
@@ -1008,6 +1069,9 @@ public enum Strings {
 
     /// the version of Windows: what to test first
     public static var sentWindows: String { Strings.get("SentWindows") }
+
+    /// the version of macOS: what to test first
+    public static var sentMacOS: String { Strings.get("SentMacOS") }
 
     /// an ID that changes every day
     public static var sentDayId: String { Strings.get("SentDayId") }

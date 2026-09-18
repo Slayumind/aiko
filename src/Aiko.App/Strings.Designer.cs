@@ -156,11 +156,17 @@ public static class Strings
     /// Island
     public static string PlaceIsland => Get("PlaceIsland");
 
+    /// Menu bar
+    public static string PlaceMenuBar => Get("PlaceMenuBar");
+
     /// Hide the island in full screen
     public static string HideIslandInFullScreen => Get("HideIslandInFullScreen");
 
     /// Start with Windows
     public static string StartWithWindows => Get("StartWithWindows");
+
+    /// Start at login
+    public static string StartAtLogin => Get("StartAtLogin");
 
     /// Once a day Aiko asks slayumind.org for the latest version. Downloads come from GitHub.
     public static string CheckUpdatesWhat => Get("CheckUpdatesWhat");
@@ -267,11 +273,17 @@ public static class Strings
     /// Aiko is down by the clock. Rest the mouse on it to see the card, or click it to keep the ...
     public static string WizardDoneTray => Get("WizardDoneTray");
 
+    /// Aiko is up by the clock. Rest the mouse on it to see the card, or click it to keep the ca...
+    public static string WizardDoneMenuBar => Get("WizardDoneMenuBar");
+
     /// Aiko is at the top of your screen. Drag it anywhere and it sticks to the nearest edge.
     public static string WizardDoneIsland => Get("WizardDoneIsland");
 
     /// Windows 11 hides new app icons under the arrow next to the clock. Open the arrow and drag...
     public static string WizardDoneOverflow => Get("WizardDoneOverflow");
+
+    /// A full menu bar hides the icons furthest from the clock. Close a menu bar app if Aiko doe...
+    public static string WizardDoneMenuBarRoom => Get("WizardDoneMenuBarRoom");
 
     /// The first numbers arrive after your next answer from Claude Code. Until then, the ring is...
     public static string WizardDoneFirstNumbers => Get("WizardDoneFirstNumbers");
@@ -357,6 +369,9 @@ public static class Strings
     /// island
     public static string StateIsland => Get("StateIsland");
 
+    /// menu bar
+    public static string StateMenuBar => Get("StateMenuBar");
+
     /// Copy
     public static string Copy => Get("Copy");
 
@@ -374,6 +389,9 @@ public static class Strings
 
     /// Open PowerShell, paste the command and press Enter. Aiko notices when it's done.
     public static string InstallHow => Get("InstallHow");
+
+    /// Open Terminal, paste the command and press Enter. Aiko notices when it's done.
+    public static string InstallHowMac => Get("InstallHowMac");
 
     /// Waiting for Claude Code…
     public static string WaitInstall => Get("WaitInstall");
@@ -438,6 +456,9 @@ public static class Strings
     /// A command starts Claude Code in the right environment. It works in PowerShell, cmd and Gi...
     public static string CmdLead => Get("CmdLead");
 
+    /// A command starts Claude Code in the right environment. It works in Terminal and in any zs...
+    public static string CmdLeadMac => Get("CmdLeadMac");
+
     /// COMMAND · {0}
     public static string CmdFor => Get("CmdFor");
 
@@ -476,6 +497,12 @@ public static class Strings
 
     /// Aiko puts its folder at the start of PATH so every terminal finds the commands. Restart o...
     public static string PathNote => Get("PathNote");
+
+    /// THE LINE AIKO ADDS TO ~/.ZSHRC
+    public static string PathLineMac => Get("PathLineMac");
+
+    /// macOS puts a folder of your own on PATH only when your shell profile says so, so Aiko add...
+    public static string PathNoteMac => Get("PathNoteMac");
 
     /// Add to PATH
     public static string PathAdd => Get("PathAdd");
@@ -540,6 +567,9 @@ public static class Strings
     /// PowerShell · cmd · Git Bash
     public static string CmdShells => Get("CmdShells");
 
+    /// zsh · bash
+    public static string CmdShellsMac => Get("CmdShellsMac");
+
     /// The command stays the same, since your terminals and scripts know it.
     public static string CmdKept => Get("CmdKept");
 
@@ -576,8 +606,14 @@ public static class Strings
     /// And move the folder to the Recycle Bin
     public static string MoveToRecycleBin => Get("MoveToRecycleBin");
 
+    /// And move the folder to the Trash
+    public static string MoveToTrash => Get("MoveToTrash");
+
     /// It holds the Claude Code account, history and memory. You can restore it from the Recycle...
     public static string RecycleWhy => Get("RecycleWhy");
+
+    /// It holds the Claude Code account, history and memory. You can put it back from the Trash.
+    public static string TrashWhy => Get("TrashWhy");
 
     /// VS Code and Claude Desktop use the .claude folder, so Aiko never removes it.
     public static string KeepClaude => Get("KeepClaude");
@@ -593,6 +629,9 @@ public static class Strings
 
     /// {0} removed. The folder is in the Recycle Bin.
     public static string EnvironmentRemovedToBin => Get("EnvironmentRemovedToBin");
+
+    /// {0} removed. The folder is in the Trash.
+    public static string EnvironmentRemovedToTrash => Get("EnvironmentRemovedToTrash");
 
     /// In a folder and in every folder inside, plain claude starts its environment. A command li...
     public static string FoldersTableLead => Get("FoldersTableLead");
@@ -642,8 +681,14 @@ public static class Strings
     /// Aiko removes the environments, its lines and plugins in settings.json, the commands {0}, ...
     public static string RestartLine => Get("RestartLine");
 
+    /// Aiko removes the environments, its lines and plugins in settings.json, the commands {0}, ...
+    public static string RestartLineMac => Get("RestartLineMac");
+
     /// And move {0} to the Recycle Bin
     public static string RestartBin => Get("RestartBin");
+
+    /// And move {0} to the Trash
+    public static string RestartTrash => Get("RestartTrash");
 
     /// .claude stays either way.
     public static string RestartKeep => Get("RestartKeep");
@@ -692,6 +737,9 @@ public static class Strings
 
     /// the version of Windows: what to test first
     public static string SentWindows => Get("SentWindows");
+
+    /// the version of macOS: what to test first
+    public static string SentMacOS => Get("SentMacOS");
 
     /// an ID that changes every day
     public static string SentDayId => Get("SentDayId");

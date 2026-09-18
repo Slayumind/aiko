@@ -166,11 +166,17 @@
   <data name="PlaceIsland" xml:space="preserve">
     <value>Остров</value>
   </data>
+  <data name="PlaceMenuBar" xml:space="preserve">
+    <value>Строка меню</value>
+  </data>
   <data name="HideIslandInFullScreen" xml:space="preserve">
     <value>Прятать остров в полноэкранных окнах</value>
   </data>
   <data name="StartWithWindows" xml:space="preserve">
     <value>Запускать вместе с Windows</value>
+  </data>
+  <data name="StartAtLogin" xml:space="preserve">
+    <value>Запускать при входе</value>
   </data>
   <data name="CheckUpdatesWhat" xml:space="preserve">
     <value>Раз в сутки Aiko спрашивает у slayumind.org свежую версию. Сами файлы скачиваются с GitHub.</value>
@@ -277,11 +283,17 @@
   <data name="WizardDoneTray" xml:space="preserve">
     <value>Aiko внизу, рядом с часами. Наведи мышь, чтобы увидеть карточку, или кликни, чтобы карточка осталась открытой.</value>
   </data>
+  <data name="WizardDoneMenuBar" xml:space="preserve">
+    <value>Aiko наверху, рядом с часами. Наведи мышь, чтобы увидеть карточку, или щёлкни, чтобы она осталась открытой.</value>
+  </data>
   <data name="WizardDoneIsland" xml:space="preserve">
     <value>Aiko вверху экрана. Перетащи куда угодно — она прилипнет к ближайшему краю.</value>
   </data>
   <data name="WizardDoneOverflow" xml:space="preserve">
     <value>Windows 11 прячет значки новых приложений под стрелку рядом с часами. Открой её и перетащи Aiko на панель задач: под стрелкой карточка не открывается.</value>
+  </data>
+  <data name="WizardDoneMenuBarRoom" xml:space="preserve">
+    <value>Если в строке меню нет места, macOS прячет значки, что дальше от часов. Закрой лишнее приложение, если Aiko не помещается.</value>
   </data>
   <data name="WizardDoneFirstNumbers" xml:space="preserve">
     <value>Первые цифры придут после следующего ответа Claude Code. До этого кольцо пунктирное.</value>
@@ -367,6 +379,9 @@
   <data name="StateIsland" xml:space="preserve">
     <value>остров</value>
   </data>
+  <data name="StateMenuBar" xml:space="preserve">
+    <value>строка меню</value>
+  </data>
   <data name="Copy" xml:space="preserve">
     <value>Скопировать</value>
   </data>
@@ -384,6 +399,9 @@
   </data>
   <data name="InstallHow" xml:space="preserve">
     <value>Открой PowerShell, вставь команду и нажми Enter. Aiko заметит, когда установка закончится.</value>
+  </data>
+  <data name="InstallHowMac" xml:space="preserve">
+    <value>Открой Терминал, вставь команду и нажми Enter. Aiko заметит, когда установка закончится.</value>
   </data>
   <data name="WaitInstall" xml:space="preserve">
     <value>Ждём Claude Code…</value>
@@ -448,6 +466,9 @@
   <data name="CmdLead" xml:space="preserve">
     <value>Команда запускает Claude Code сразу под нужной средой. Работает в PowerShell, cmd и Git Bash.</value>
   </data>
+  <data name="CmdLeadMac" xml:space="preserve">
+    <value>Команда запускает Claude Code сразу в нужной среде. Работает в Терминале и в любой оболочке zsh.</value>
+  </data>
   <data name="CmdFor" xml:space="preserve">
     <value>КОМАНДА · {0}</value>
   </data>
@@ -486,6 +507,12 @@
   </data>
   <data name="PathNote" xml:space="preserve">
     <value>Aiko поставит свою папку в начало PATH, чтобы команды нашлись в любом терминале. Открытые терминалы и IDE нужно перезапустить.</value>
+  </data>
+  <data name="PathLineMac" xml:space="preserve">
+    <value>СТРОКА, КОТОРУЮ AIKO ДОБАВИТ В ~/.ZSHRC</value>
+  </data>
+  <data name="PathNoteMac" xml:space="preserve">
+    <value>macOS добавляет твою папку в PATH, только если об этом сказано в профиле оболочки, поэтому Aiko допишет эту строку в ~/.zshrc. Рядом останется копия файла, а при удалении Aiko строка уйдёт. Уже открытые терминалы сохранят прежний PATH.</value>
   </data>
   <data name="PathAdd" xml:space="preserve">
     <value>Добавить в PATH</value>
@@ -550,6 +577,9 @@
   <data name="CmdShells" xml:space="preserve">
     <value>PowerShell · cmd · Git Bash</value>
   </data>
+  <data name="CmdShellsMac" xml:space="preserve">
+    <value>zsh · bash</value>
+  </data>
   <data name="CmdKept" xml:space="preserve">
     <value>Команда осталась прежней: терминалы и скрипты её знают.</value>
   </data>
@@ -586,8 +616,14 @@
   <data name="MoveToRecycleBin" xml:space="preserve">
     <value>И переместить папку в корзину</value>
   </data>
+  <data name="MoveToTrash" xml:space="preserve">
+    <value>И переместить папку в Корзину</value>
+  </data>
   <data name="RecycleWhy" xml:space="preserve">
     <value>В ней аккаунт, история и память Claude Code. Вернуть можно из корзины Windows.</value>
+  </data>
+  <data name="TrashWhy" xml:space="preserve">
+    <value>В ней аккаунт, история и память Claude Code. Вернуть её можно из Корзины.</value>
   </data>
   <data name="KeepClaude" xml:space="preserve">
     <value>Папку .claude используют VS Code и Claude Desktop, поэтому Aiko её не удаляет.</value>
@@ -603,6 +639,9 @@
   </data>
   <data name="EnvironmentRemovedToBin" xml:space="preserve">
     <value>{0} удалена, папка в корзине.</value>
+  </data>
+  <data name="EnvironmentRemovedToTrash" xml:space="preserve">
+    <value>{0} удалена, папка в Корзине.</value>
   </data>
   <data name="FoldersTableLead" xml:space="preserve">
     <value>В папке и во всех вложенных обычный claude запускает её среду. Команда вроде {0} сильнее привязки, но Claude Code напомнит о ней.</value>
@@ -652,8 +691,14 @@
   <data name="RestartLine" xml:space="preserve">
     <value>Из Aiko уйдут среды, строки и плагины Aiko в settings.json, команды {0}, привязки папок и папка Aiko в PATH, а функции в профиле PowerShell вернутся. Аккаунты и история в папках останутся.</value>
   </data>
+  <data name="RestartLineMac" xml:space="preserve">
+    <value>Из Aiko уйдут среды, строки и плагины Aiko в settings.json, команды {0}, привязки папок и строка Aiko в ~/.zshrc. Аккаунты и история в папках останутся.</value>
+  </data>
   <data name="RestartBin" xml:space="preserve">
     <value>И переместить {0} в корзину</value>
+  </data>
+  <data name="RestartTrash" xml:space="preserve">
+    <value>И переместить {0} в Корзину</value>
   </data>
   <data name="RestartKeep" xml:space="preserve">
     <value>.claude остаётся в любом случае.</value>
@@ -702,6 +747,9 @@
   </data>
   <data name="SentWindows" xml:space="preserve">
     <value>версия Windows: что проверять первым</value>
+  </data>
+  <data name="SentMacOS" xml:space="preserve">
+    <value>версия macOS: что проверять первым</value>
   </data>
   <data name="SentDayId" xml:space="preserve">
     <value>ID, который меняется каждый день</value>

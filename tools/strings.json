@@ -315,6 +315,13 @@
     ]
   ],
   [
+    "PlaceMenuBar",
+    [
+      "Menu bar",
+      "Строка меню"
+    ]
+  ],
+  [
     "HideIslandInFullScreen",
     [
       "Hide the island in full screen",
@@ -326,6 +333,13 @@
     [
       "Start with Windows",
       "Запускать вместе с Windows"
+    ]
+  ],
+  [
+    "StartAtLogin",
+    [
+      "Start at login",
+      "Запускать при входе"
     ]
   ],
   [
@@ -574,6 +588,13 @@
     ]
   ],
   [
+    "WizardDoneMenuBar",
+    [
+      "Aiko is up by the clock. Rest the mouse on it to see the card, or click it to keep the card open.",
+      "Aiko наверху, рядом с часами. Наведи мышь, чтобы увидеть карточку, или щёлкни, чтобы она осталась открытой."
+    ]
+  ],
+  [
     "WizardDoneIsland",
     [
       "Aiko is at the top of your screen. Drag it anywhere and it sticks to the nearest edge.",
@@ -585,6 +606,13 @@
     [
       "Windows 11 hides new app icons under the arrow next to the clock. Open the arrow and drag Aiko onto the taskbar: under the arrow, the card can't open.",
       "Windows 11 прячет значки новых приложений под стрелку рядом с часами. Открой её и перетащи Aiko на панель задач: под стрелкой карточка не открывается."
+    ]
+  ],
+  [
+    "WizardDoneMenuBarRoom",
+    [
+      "A full menu bar hides the icons furthest from the clock. Close a menu bar app if Aiko doesn't fit.",
+      "Если в строке меню нет места, macOS прячет значки, что дальше от часов. Закрой лишнее приложение, если Aiko не помещается."
     ]
   ],
   [
@@ -784,6 +812,13 @@
     ]
   ],
   [
+    "StateMenuBar",
+    [
+      "menu bar",
+      "строка меню"
+    ]
+  ],
+  [
     "Copy",
     [
       "Copy",
@@ -823,6 +858,13 @@
     [
       "Open PowerShell, paste the command and press Enter. Aiko notices when it's done.",
       "Открой PowerShell, вставь команду и нажми Enter. Aiko заметит, когда установка закончится."
+    ]
+  ],
+  [
+    "InstallHowMac",
+    [
+      "Open Terminal, paste the command and press Enter. Aiko notices when it's done.",
+      "Открой Терминал, вставь команду и нажми Enter. Aiko заметит, когда установка закончится."
     ]
   ],
   [
@@ -973,6 +1015,13 @@
     ]
   ],
   [
+    "CmdLeadMac",
+    [
+      "A command starts Claude Code in the right environment. It works in Terminal and in any zsh shell.",
+      "Команда запускает Claude Code сразу в нужной среде. Работает в Терминале и в любой оболочке zsh."
+    ]
+  ],
+  [
     "CmdFor",
     [
       "COMMAND · {0}",
@@ -1061,6 +1110,20 @@
     [
       "Aiko puts its folder at the start of PATH so every terminal finds the commands. Restart open terminals and your IDE.",
       "Aiko поставит свою папку в начало PATH, чтобы команды нашлись в любом терминале. Открытые терминалы и IDE нужно перезапустить."
+    ]
+  ],
+  [
+    "PathLineMac",
+    [
+      "THE LINE AIKO ADDS TO ~/.ZSHRC",
+      "СТРОКА, КОТОРУЮ AIKO ДОБАВИТ В ~/.ZSHRC"
+    ]
+  ],
+  [
+    "PathNoteMac",
+    [
+      "macOS puts a folder of your own on PATH only when your shell profile says so, so Aiko adds this line to ~/.zshrc. A copy of the file stays next to it, and removing Aiko takes the line out. Terminals that are already open keep the PATH they started with.",
+      "macOS добавляет твою папку в PATH, только если об этом сказано в профиле оболочки, поэтому Aiko допишет эту строку в ~/.zshrc. Рядом останется копия файла, а при удалении Aiko строка уйдёт. Уже открытые терминалы сохранят прежний PATH."
     ]
   ],
   [
@@ -1211,6 +1274,13 @@
     ]
   ],
   [
+    "CmdShellsMac",
+    [
+      "zsh · bash",
+      "zsh · bash"
+    ]
+  ],
+  [
     "CmdKept",
     [
       "The command stays the same, since your terminals and scripts know it.",
@@ -1295,10 +1365,24 @@
     ]
   ],
   [
+    "MoveToTrash",
+    [
+      "And move the folder to the Trash",
+      "И переместить папку в Корзину"
+    ]
+  ],
+  [
     "RecycleWhy",
     [
       "It holds the Claude Code account, history and memory. You can restore it from the Recycle Bin.",
       "В ней аккаунт, история и память Claude Code. Вернуть можно из корзины Windows."
+    ]
+  ],
+  [
+    "TrashWhy",
+    [
+      "It holds the Claude Code account, history and memory. You can put it back from the Trash.",
+      "В ней аккаунт, история и память Claude Code. Вернуть её можно из Корзины."
     ]
   ],
   [
@@ -1334,6 +1418,13 @@
     [
       "{0} removed. The folder is in the Recycle Bin.",
       "{0} удалена, папка в корзине."
+    ]
+  ],
+  [
+    "EnvironmentRemovedToTrash",
+    [
+      "{0} removed. The folder is in the Trash.",
+      "{0} удалена, папка в Корзине."
     ]
   ],
   [
@@ -1449,10 +1540,24 @@
     ]
   ],
   [
+    "RestartLineMac",
+    [
+      "Aiko removes the environments, its lines and plugins in settings.json, the commands {0}, the folder bindings and its line in ~/.zshrc. Accounts and history stay in the folders.",
+      "Из Aiko уйдут среды, строки и плагины Aiko в settings.json, команды {0}, привязки папок и строка Aiko в ~/.zshrc. Аккаунты и история в папках останутся."
+    ]
+  ],
+  [
     "RestartBin",
     [
       "And move {0} to the Recycle Bin",
       "И переместить {0} в корзину"
+    ]
+  ],
+  [
+    "RestartTrash",
+    [
+      "And move {0} to the Trash",
+      "И переместить {0} в Корзину"
     ]
   ],
   [
@@ -1565,6 +1670,13 @@
     [
       "the version of Windows: what to test first",
       "версия Windows: что проверять первым"
+    ]
+  ],
+  [
+    "SentMacOS",
+    [
+      "the version of macOS: what to test first",
+      "версия macOS: что проверять первым"
     ]
   ],
   [
