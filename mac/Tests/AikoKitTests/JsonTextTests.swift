@@ -23,4 +23,35 @@ struct JsonTextTests {
     func rubbishIsNotAnObject(json: String) {
         #expect(!JsonText.isObject(json))
     }
+
+    @Test
+    func halfAFileFromAPowerCutIsNotAnObject() {
+        var whole = AppSettings.default
+        whole.place = .island
+        let half = String(whole.toJson().prefix(20))
+
+        #expect(!JsonText.isObject(half))
+    }
+
+    @Test
+    func whatWeWriteIsAlwaysReadableAgain() {
+        #expect(JsonText.isObject(AppSettings.default.toJson()))
+        #expect(JsonText.isObject(EnvironmentSettings.empty.toJson()))
+    }
+
+    @Test
+    func bothFilesCarryTheShapeTheyWereWrittenIn() {
+        #expect(AppSettings.default.toJson().contains("schemaVersion"))
+        #expect(EnvironmentSettings.empty.toJson().contains("schemaVersion"))
+    }
+
+    @Test
+    func aFileWrittenBeforeTheVersionExistedStillReads() {
+        let old = #"{ "place": "Island", "runAtStartup": false }"#
+
+        let settings = AppSettings.fromJson(old)
+
+        #expect(settings.place == .island)
+        #expect(!settings.runAtStartup)
+    }
 }

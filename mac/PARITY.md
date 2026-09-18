@@ -3,40 +3,62 @@
 The macOS app repeats the Windows core, so every ported file keeps its behaviour and every xUnit
 case has a Swift case with the same name and the same numbers. Test counts below are cases, not
 methods: one `[Theory]` with five `[InlineData]` rows counts as five, and so does the Swift
-`@Test(arguments:)` that mirrors it.
+`@Test(arguments:)` that mirrors it. The numbers are what the two runners report: 785 cases in
+`dotnet test`, 736 in `swift test`. The 49 the Swift side does not have are named at the bottom.
+
+Rules that are a table of inputs and answers live in `spec/cases/` and are read by both suites, so
+a row cannot change in one core and stay as it was in the other. See `spec/cases/README.md`.
 
 ## Ported
 
 | C# file | Swift file | C# cases | Swift cases | Notes |
 |---|---|---|---|---|
-| JsonText.cs | JsonText.swift | 15 | 11 | 4 cases need AppSettings and EnvironmentSettings, which are not ported yet |
+| JsonText.cs | JsonText.swift | 15 | 15 | |
 | LimitSnapshot.cs | LimitSnapshot.swift | 8 | 8 | |
-| StatusLineReport.cs | StatusLineReport.swift | 13 | 13 | |
+| StatusLineReport.cs | StatusLineReport.swift | 14 | 14 | |
 | UsageReport.cs | UsageReport.swift | 10 | 10 | |
 | ResetCountdown.cs | ResetCountdown.swift | 7 | 7 | |
 | PollBackoff.cs | PollBackoff.swift | 9 | 9 | |
-| CardState.cs | CardState.swift | 26 | 26 | CardStateTests (18) and PaceEstimateTests (8) |
+| CardState.cs | CardState.swift | 25 | 25 | CardStateTests (17) and PaceEstimateTests (8) |
 | UpdateInfo.cs | UpdateInfo.swift | 12 | 12 | `System.Version` is ported as `VersionNumber` |
 | AllowedHosts.cs | AllowedHosts.swift | 12 | 12 | the source scan looks for `URLSession` outside `AikoHttp.swift` instead of `new HttpClient` |
 | CubicBezier.cs | CubicBezier.swift | 9 | 9 | |
-| IslandReveal.cs | IslandReveal.swift | 8 | 8 | `IslandReveal.For` is `showFor`: `for` is a keyword in Swift |
+| IslandReveal.cs | IslandReveal.swift | 8 | 8 | |
 | IslandPlacement.cs | IslandPlacement.swift | 18 | 18 | |
 | TrayFaceMotion.cs | TrayFaceMotion.swift | 7 | 7 | |
-| TrayMood.cs | TrayMood.swift | 25 | 25 | `HasFace` takes the persona flags as a list: EnvironmentSettings is not ported yet |
+| TrayMood.cs | TrayMood.swift | 25 | 25 | `hasFace` takes the environments, as on Windows |
 | SessionActivity.cs | SessionActivity.swift | 26 | 26 | |
 | Heartbeat.cs | Heartbeat.swift | 17 | 17 | |
-| SessionReminder.cs | SessionReminder.swift | 18 | 12 | its other 6 cases are about SettingsJsonPatch and BridgeCommand and sit in SettingsJsonPatchTests; `MessageFor` takes the bound environment by name, because ProjectBinding is not ported |
+| SessionReminder.cs | SessionReminder.swift | 18 | 12 | its other 6 cases are about the hook in settings.json and sit in SettingsJsonPatchTests |
 | PersonaSettings.cs | PersonaSettings.swift | 15 | 15 | |
 | PersonaPrompt.cs | PersonaPrompt.swift, PersonaPlugin.swift | 33 | 33 | the prompt text and the plugin files hash the same in both languages |
-| PersonaPluginOutput.cs | PersonaPluginOutput.swift | 7 | 6 | the folder names need SnapshotName |
+| PersonaPluginOutput.cs | PersonaPluginOutput.swift | 7 | 7 | |
 | SkillCatalog.cs | SkillCatalog.swift | 3 | 3 | |
-| SkillPlugin.cs | SkillPlugin.swift | 17 | 16 | the marketplace file is written by AikoMarketplace |
-| ClaudeAccount.cs | ClaudeAccount.swift | 16 | 14 | 2 cases are about ClaudeConfigFolder |
-| FaceArt.cs | FaceArt.swift | 64 | 64 | every one of the 56 pictures hashes the same in both languages |
-| SettingsJsonPatch.cs | SettingsJsonPatch.swift | 39 | 39 | 6 cases come from SessionReminderTests and 13 from PluginRemovalTests; a method answers "nothing to change" with nil instead of a bool and an out parameter; the test for "is this our own bridge" comes in as a function, because BridgeCommand is not ported |
-| ClaudeSettingsEditor.cs | ClaudeSettingsEditor.swift | 22 | 22 | ClaudeSettingsEditorTests and the file half of PluginRemovalTests; `FileAccess` is IFileAccess with Swift errors in place of exceptions |
-| PluginPlan.cs | PluginPlan.swift | 35 | 27 | 8 cases are about AikoMarketplace (the command, the marketplace file); `Desired` takes the persona flag on its own |
-| PluginReconciler.cs | PluginReconciler.swift | 4 | 4 | the clock comes in as a function instead of TimeProvider |
+| SkillPlugin.cs | SkillPlugin.swift | 17 | 17 | |
+| ClaudeAccount.cs | ClaudeAccount.swift | 16 | 16 | 2 of them are about ClaudeConfigFolder, as in the xUnit file |
+| FaceArt.cs | FaceArt.swift | 63 | 63 | every one of the 56 pictures hashes the same in both languages |
+| SettingsJsonPatch.cs | SettingsJsonPatch.swift | 20 | 26 | the 6 extra come from SessionReminderTests; a method answers "nothing to change" with nil instead of a bool and an out parameter |
+| ClaudeSettingsEditor.cs, IFileAccess.cs | ClaudeSettingsEditor.swift | 38 | 38 | ClaudeSettingsEditorTests (19) and PluginRemovalTests (19); `FileAccess` is IFileAccess with Swift errors in place of exceptions |
+| PluginPlan.cs, PluginReconciler.cs | PluginPlan.swift, PluginReconciler.swift | 33 | 33 | the reconciler's clock comes in as a function instead of TimeProvider |
+| PlatformConventions.cs | PlatformConventions.swift | 26 | 27 | PlatformConventionsTests (7), PlatformPinTests (6), MacPlatformTests (13 against 14) |
+| ClaudeShell.cs | PlatformConventions.swift | 12 | 4 | the other 8 cases are about WindowsGitBash |
+| AikoFolders.cs | AikoFolders.swift | 5 | 5 | the macOS layout is pinned in MacPlatformTests and in `spec/cases/folder-layout/` |
+| SnapshotName.cs | SnapshotName.swift | 23 | 23 | SnapshotNameTests (10) and SnapshotNamePinTests (13) |
+| SnapshotFile.cs | SnapshotFile.swift | 9 | 9 | |
+| EnvironmentSnapshots.cs | EnvironmentSnapshots.swift | 6 | 6 | |
+| EnvironmentSettings.cs, LaunchCommand.cs, ProjectBinding.cs | EnvironmentSettings.swift, LaunchCommand.swift, ProjectBinding.swift | 41 | 41 | EnvironmentSettingsTests (13) and EnvironmentModelTests (28) |
+| EnvironmentEdits.cs | EnvironmentEdits.swift | 24 | 24 | |
+| EnvironmentScan.cs | EnvironmentScan.swift | 12 | 12 | |
+| ClaudeConfigFolder.cs | ClaudeConfigFolder.swift | 7 | 7 | |
+| ClaudeInstall.cs | ClaudeInstall.swift | 7 | 7 | |
+| ShimLaunch.cs, RealClaude.cs, UserPathList.cs | ShimLaunch.swift, RealClaude.swift, UserPathList.swift | 18 | 12 | the other 6 cases are about PowerShellProfile |
+| BridgeCommand.cs | BridgeCommand.swift | 29 | 29 | BridgeCommandTests (11) and BridgeRecognitionTests (18) |
+| CommandLinks.cs | CommandLinks.swift | 3 | 3 | |
+| AikoMarketplace.cs | AikoMarketplace.swift | — | — | its cases sit in PluginPlanTests and SkillPluginTests |
+| AppSettings.cs | AppSettings.swift | 15 | 15 | |
+| WizardChecklist.cs | WizardChecklist.swift | 13 | 13 | |
+| CredentialFile.cs | CredentialFile.swift | 10 | 10 | `TryParse` with an out parameter is `parse`, which answers nil |
+| — | SharedCaseTests.swift | 4 | 4 | the case files under `spec/cases/`, read by both suites |
 
 Helpers with no file of their own in the C# core:
 
@@ -44,8 +66,27 @@ Helpers with no file of their own in the C# core:
 |---|---|
 | JsonNode.swift | System.Text.Json keeps the order of keys and the text of numbers when it writes a file back; `JSONSerialization` keeps neither, and Aiko rewrites files that belong to Claude Code |
 | CivilTime.swift | `DateOnly`, ISO weeks and the round-trip ("O") time format |
-| `AikoMarketplaceIds` in SettingsJsonPatch.swift | the name of the marketplace and the plugin ids under it: the only part of AikoMarketplace the ported files need |
-| `FileAccess` in ClaudeSettingsEditor.swift | IFileAccess, which is on the list of files to leave alone; the editor cannot be ported without the seam |
+| `PathText` in PlatformConventions.swift | reading a path without asking the machine it runs on: `Path.GetFileName` and `Path.TrimEndingDirectorySeparator` answer differently on Windows and on macOS, and Aiko reads paths written for the other system all the time |
+
+## Names that had to change
+
+`for` and `default` are keywords in Swift. `SnapshotName.For` is `forConfigDirectory`,
+`BridgeCommand.For` is `forPath`, `IslandReveal.For` is `showFor`, and
+`EnvironmentSettings.Default(userProfile)` is `defaultEnvironmentIn(_:_:)`.
+
+## Where the two cores take different arguments
+
+The Windows core builds paths with `Path.Combine` and `Path.TrimEndingDirectorySeparator`, which
+follow the machine the code runs on. That is enough for a program that ships on Windows only. The
+Swift core has to spell a Windows path and a Mac path alike, so these take a `PlatformConventions`
+where the C# ones do not: `ClaudeConfigFolder`, `ClaudeInstall`, `ProjectBinding`, `ShimLaunch`,
+`SettingsJsonPatch`, `SessionReminder.messageFor`,
+`EnvironmentSettings.first/second/extras/defaultEnvironmentIn` and
+`EnvironmentEdits.forNewBinding/canRemove/remove`. Passing `.windows` reproduces every xUnit case
+exactly, which is what the Swift tests do; the Mac app passes `.macOS`.
+
+`PlatformConventions`, `AikoFolders`, `AikoMarketplace`, `CommandLinks`, `RealClaude`,
+`UserPathList` and `BridgeCommand.isAiko` take the platform in both cores.
 
 ## Differences we could not avoid
 
@@ -63,7 +104,9 @@ Helpers with no file of their own in the C# core:
   every language stay readable, control, separator, private use and unassigned characters, the
   byte order mark and everything above the basic plane are escaped) and the strict default one
   (everything but printable ASCII, plus the HTML characters). Checked against .NET 10 output for
-  ASCII, Russian, Japanese, control characters, the byte order mark and an emoji.
+  ASCII, Russian, Japanese, control characters, the byte order mark and an emoji. The strict
+  encoder also escapes the plus of a time offset, so both cores write
+  `"2026-09-12T12:00:00+00:00"` into a snapshot file; a case in each suite pins it.
 - **The end of a file.** The Windows core writes `Environment.NewLine`, which is `\r\n` there.
   The Swift core writes `\n`, as .NET does on macOS. Apart from those line ends, the files both
   cores write are the same byte for byte: the persona manifest, hooks.json, persona.json, the
@@ -76,22 +119,23 @@ Helpers with no file of their own in the C# core:
   optional offset. Everything Aiko itself writes is in that shape.
 - **An enum in a file.** `Enum.TryParse` also accepts a number that no member has, and a list
   separated by commas. Swift takes the names and the numbers that exist, and nothing else.
+- **Sorting text.** `StringComparer.OrdinalIgnoreCase` compares code unit by code unit; Swift's
+  `caseInsensitiveCompare` folds case the Unicode way. The lists these rules sort — folders,
+  commands, environment names — agree on everything the tests hold. Only a pair that differs by a
+  letter outside ASCII could come out in another order.
 
-## Not ported yet
+## Not ported, on purpose
 
-Another agent is refactoring the Windows-only files, so these are left alone for now: BridgeCommand,
-CommandLinks, RealClaude, ClaudeShell, ClaudeInstall, UserPathList, AikoMarketplace,
-PowerShellProfile, LaunchCommand, SnapshotName, SnapshotFile, EnvironmentSnapshots,
-EnvironmentSettings, EnvironmentEdits, EnvironmentScan, ClaudeConfigFolder, ProjectBinding,
-ShimLaunch, AppSettings, IFileAccess, CredentialFile, WizardChecklist.
+Together these are the 49 cases the Swift suite does not have, less the one case it has and the
+Windows suite does not (the folders `FileManager` hands this Mac).
 
-What the ported files still want from them:
-
-- **BridgeCommand** — how to tell our own status line and hook from somebody else's. It comes into
-  `SettingsJsonPatch` as a function for now, and the tests pass the Windows rule.
-- **EnvironmentSettings and AikoEnvironment** — the persona flag of an environment, used by
-  `TrayMood.hasFace` and `PluginPlan.desired`, which take it as a plain value for now.
-- **ProjectBinding** — which environment a folder belongs to, for `SessionReminder.messageFor`.
-- **SnapshotName** — the folder name of an environment, for `PersonaPluginOutput`.
-- **AikoMarketplace** — the persona command and the marketplace file.
-- **ClaudeConfigFolder** — where the account file of a folder is.
+- **PowerShellProfile.cs** — 6 cases in ShimTests. It reads and rewrites a PowerShell profile so
+  that a `function claude` in it stops fighting the shim. macOS has no such file, and a zsh
+  function is not the same problem: the shim sits in PATH, and a shell function that shadows it is
+  the person's own choice.
+- **WindowsGitBash.cs** — 8 cases in ClaudeShellLookupTests. Git Bash only exists on Windows. On
+  macOS `ClaudeShellLookup` is always asked with no path, so it always answers with the fallback
+  shell of the platform, `/bin/zsh -lc`.
+- **UpdateManifest.cs** — 36 cases. Checking the signature of a release needs a key API of its own,
+  `Security` on macOS against `System.Security.Cryptography` on Windows, and the Mac app has no
+  updater yet. The openssl vector in `spec/cases/update-manifest/` is ready for whoever writes it.

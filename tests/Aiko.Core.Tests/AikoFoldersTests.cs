@@ -7,7 +7,7 @@ namespace Aiko.Core.Tests;
 /// the bridge from the tray.
 public class AikoFoldersTests
 {
-    private static readonly AikoFolders Folders = new(
+    private static readonly AikoFolders Folders = AikoFolders.Windows(
         @"C:\Users\someone\AppData\Roaming", @"C:\Users\someone\AppData\Local");
 
     [Fact]

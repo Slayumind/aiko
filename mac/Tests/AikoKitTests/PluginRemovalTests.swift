@@ -24,7 +24,7 @@ struct PluginRemovalTests {
         }
         """
 
-    private var patch: SettingsJsonPatch { TestBridge.patch }
+    private var patch: SettingsJsonPatch { SettingsJsonPatch(.windows) }
 
     private func editor(_ files: FakeFiles) -> ClaudeSettingsEditor {
         ClaudeSettingsEditor(files: files, patch: patch)
@@ -88,7 +88,7 @@ struct PluginRemovalTests {
     func removalTakesThePluginsOutWithTheStatusLine() {
         let files = FakeFiles().with(Self.settings, Self.withPlugins)
         let editor = editor(files)
-        _ = editor.add(Self.folder, TestBridge.command(#"C:\a\Aiko.Bridge.exe"#))
+        _ = editor.add(Self.folder, BridgeCommand.forPath(#"C:\a\Aiko.Bridge.exe"#))
 
         #expect(editor.remove(Self.folder).changed)
 

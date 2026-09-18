@@ -7,7 +7,7 @@ public class PluginPlanTests
 {
     private const string LocalAppData = @"C:\Users\Тест Юзер\AppData\Local";
     private const string Marketplace = @"C:\Users\Тест Юзер\AppData\Local\Aiko\marketplace";
-    private static readonly AikoFolders Folders = new(@"C:\Users\Тест Юзер\AppData\Roaming", LocalAppData);
+    private static readonly AikoFolders Folders = AikoFolders.Windows(@"C:\Users\Тест Юзер\AppData\Roaming", LocalAppData);
     private const string Persona = "aiko-persona@aiko";
 
     private static AikoEnvironment Env(bool persona) => new("Aiko", [@"C:\Users\someone\.claude"]) { Persona = persona };

@@ -23,16 +23,17 @@ public static class ClaudeInstall
             return onPath;
         }
 
-        var native = Path.Combine(userProfile, ".local", "bin", RealClaude.ExecutableName(platform));
+        var native = platform.Join(userProfile, ".local", "bin", RealClaude.ExecutableName(platform));
         return exists(native) ? native : null;
     }
 
     /// .claude-work for "Work", .claude-osnovnaya for "Основная". A name already taken gets a
     /// number, so a new environment never lands in somebody's existing account folder.
-    public static string NewConfigFolder(string environmentName, string userProfile, Func<string, bool> folderExists)
+    public static string NewConfigFolder(
+        PlatformConventions platform, string environmentName, string userProfile, Func<string, bool> folderExists)
     {
         var slug = LaunchCommand.Slug(environmentName);
-        var stem = Path.Combine(userProfile, ClaudeConfigFolder.NamedFolderName(slug.Length > 0 ? slug : "env"));
+        var stem = platform.Join(userProfile, ClaudeConfigFolder.NamedFolderName(slug.Length > 0 ? slug : "env"));
 
         var candidate = stem;
         for (var n = 2; folderExists(candidate); n++)
@@ -47,5 +48,6 @@ public static class ClaudeInstall
 
     /// Signed in means Claude Code wrote its credentials file. Only that the file exists is looked
     /// at; it is never opened here.
-    public static string CredentialsPathIn(string configFolder) => Path.Combine(configFolder, CredentialsFileName);
+    public static string CredentialsPathIn(PlatformConventions platform, string configFolder) =>
+        platform.Join(configFolder, CredentialsFileName);
 }

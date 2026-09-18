@@ -17,11 +17,11 @@ struct ClaudeSettingsEditorTests {
     static var backup: String { ClaudeSettingsEditor.backupPathIn(folder) }
 
     private func command(_ path: String = ClaudeSettingsEditorTests.bridge) -> String {
-        TestBridge.command(path)
+        BridgeCommand.forPath(path)
     }
 
     private func editor(_ files: FakeFiles) -> ClaudeSettingsEditor {
-        ClaudeSettingsEditor(files: files, patch: TestBridge.patch)
+        ClaudeSettingsEditor(files: files, patch: SettingsJsonPatch(.windows))
     }
 
     @Test

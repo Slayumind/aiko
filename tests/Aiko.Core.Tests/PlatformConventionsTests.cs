@@ -3,13 +3,15 @@ using Aiko.Core;
 namespace Aiko.Core.Tests;
 
 /// The core takes the platform as a description, so its rules must follow whatever description
-/// it gets. The second system here is made up for the test; only Windows ships.
+/// it gets. The system here is made up on purpose: it is neither Windows nor macOS, so a rule
+/// that only works for the two we ship fails these cases.
 public class PlatformConventionsTests
 {
     private static readonly PlatformConventions Other = new()
     {
         ExecutableSuffix = "",
         PathListSeparator = ':',
+        DirectorySeparator = '/',
         LocalDataVariable = null,
         FallbackShell = new ShellProgram(ClaudeShell.GitBash, "/bin/sh", ["-c"]),
     };
@@ -37,7 +39,7 @@ public class PlatformConventionsTests
     {
         var found = RealClaude.Find(Other, "/opt/aiko/bin:/usr/local/bin", ["/opt/aiko/bin"], p => p.EndsWith("claude"));
 
-        Assert.Equal(Path.Combine("/usr/local/bin", "claude"), found);
+        Assert.Equal("/usr/local/bin/claude", found);
         Assert.Equal("/a:/b", RealClaude.FormatSeen(Other, ["/a", "/b"]));
     }
 
@@ -59,8 +61,8 @@ public class PlatformConventionsTests
     [Fact]
     public void Without_a_variable_for_the_local_folder_the_persona_command_uses_the_full_path()
     {
-        var folders = new AikoFolders("/home/someone/settings", "/home/someone/local");
-        var bridge = Path.Combine(folders.InstalledAppFolder, "Aiko.Bridge");
+        var folders = new AikoFolders(Other, "/home/someone/settings", "/home/someone/local");
+        var bridge = Other.Join(folders.InstalledAppFolder, "Aiko.Bridge");
 
         Assert.Equal($"\"{bridge}\" plugin aiko-persona", AikoMarketplace.PersonaCommand(Other, bridge, folders));
     }

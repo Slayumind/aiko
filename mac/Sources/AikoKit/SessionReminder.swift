@@ -1,13 +1,5 @@
 import Foundation
 
-/// Which language the interface speaks. The settings file is not ported yet, so the enum lives
-/// here until AppSettings arrives.
-public enum AikoLanguage: Sendable, Equatable {
-    case system
-    case english
-    case russian
-}
-
 /// The line Claude Code shows at the start of a session when a command overrode a folder binding.
 ///
 /// An explicit command wins over a binding, and the person may mean it (D-159). But limits are
@@ -22,12 +14,12 @@ public enum SessionReminder {
     public static let environmentVariable = "AIKO_ENVIRONMENT"
     public static let launchedByCommand = "command"
 
-    /// ProjectBinding is not ported yet, so the environment the folder belongs to comes in as a
-    /// name instead of being looked up here.
     public static func messageFor(
+        _ platform: PlatformConventions,
         launch: String?,
         runningEnvironment: String?,
-        boundEnvironment: String?,
+        workingDirectory: String,
+        settings: EnvironmentSettings,
         russian: Bool
     ) -> String? {
         guard launch == launchedByCommand,
@@ -36,7 +28,9 @@ public enum SessionReminder {
             return nil
         }
 
-        guard let bound = boundEnvironment, bound != running else {
+        let found = ProjectBinding.boundEnvironmentFor(
+            platform, workingDirectory: workingDirectory, settings: settings)
+        guard let bound = found?.name, bound != running else {
             return nil
         }
 

@@ -12,6 +12,17 @@ public enum PersonaPluginOutput {
     /// right now; an hour is far longer than any copy takes.
     public static let keepOldFor: TimeInterval = 3600
 
+    /// One folder per environment, named like its limit snapshot, so the two never disagree.
+    public static func environmentFolder(_ folders: AikoFolders, _ configDirectory: String) -> String {
+        folders.platform.join(folders.personaPluginsFolder, SnapshotName.forConfigDirectory(configDirectory))
+    }
+
+    public static func versionFolder(
+        _ folders: AikoFolders, _ configDirectory: String, _ contentHash: String
+    ) -> String {
+        folders.platform.join(environmentFolder(folders, configDirectory), contentHash)
+    }
+
     /// Whether the command asks for a plugin this bridge can build.
     public static func isRequest(_ args: [String]) -> Bool {
         args == [verb, PersonaPlugin.name]

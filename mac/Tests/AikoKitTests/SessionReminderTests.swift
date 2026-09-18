@@ -3,15 +3,21 @@ import Testing
 @testable import AikoKit
 
 struct SessionReminderTests {
+    static let home = #"C:\Users\someone"#
+
+    static let settings = EnvironmentSettings([
+        AikoEnvironment("Work", [home + #"\.claude"#]),
+        AikoEnvironment(
+            "Personal", [home + #"\.claude-personal"#], projectFolders: [#"C:\projects\aiko"#]),
+    ])
+
     // ---- the message ----
-    //
-    // ProjectBinding is not ported yet, so the environment a folder belongs to is passed in.
-    // The bound environment of C:\projects\aiko is Personal, and C:\temp is bound to nothing.
 
     @Test
     func aCommandInAFolderBoundElsewhereSaysWhoseLimitsGo() {
         let message = SessionReminder.messageFor(
-            launch: "command", runningEnvironment: "Work", boundEnvironment: "Personal", russian: true)
+            .windows, launch: "command", runningEnvironment: "Work",
+            workingDirectory: #"C:\projects\aiko\src"#, settings: Self.settings, russian: true)
 
         #expect(message == "Aiko: эта папка относится к Personal, а сессия запущена в Work. Лимиты тратятся из Work.")
     }
@@ -19,7 +25,8 @@ struct SessionReminderTests {
     @Test
     func englishSaysTheSame() {
         let message = SessionReminder.messageFor(
-            launch: "command", runningEnvironment: "Work", boundEnvironment: "Personal", russian: false)
+            .windows, launch: "command", runningEnvironment: "Work",
+            workingDirectory: #"C:\projects\aiko"#, settings: Self.settings, russian: false)
 
         #expect(
             message
@@ -27,15 +34,16 @@ struct SessionReminderTests {
     }
 
     @Test(arguments: [
-        ("binding", "Personal", "Personal"),  // started by the binding itself
-        ("command", "Personal", "Personal"),  // the command matches the binding
-        ("command", "Work", nil),  // no binding here, so nothing to remind about
-        (nil, nil, "Personal"),  // not started through the shim at all
-    ] as [(String?, String?, String?)])
-    func quietWhenThereIsNothingToSay(launch: String?, running: String?, bound: String?) {
+        ("binding", "Personal", #"C:\projects\aiko"#),  // started by the binding itself
+        ("command", "Personal", #"C:\projects\aiko"#),  // the command matches the binding
+        ("command", "Work", #"C:\temp"#),  // no binding here, so nothing to remind about
+        (nil, nil, #"C:\projects\aiko"#),  // not started through the shim at all
+    ] as [(String?, String?, String)])
+    func quietWhenThereIsNothingToSay(launch: String?, running: String?, folder: String) {
         #expect(
             SessionReminder.messageFor(
-                launch: launch, runningEnvironment: running, boundEnvironment: bound, russian: false) == nil)
+                .windows, launch: launch, runningEnvironment: running,
+                workingDirectory: folder, settings: Self.settings, russian: false) == nil)
     }
 
     @Test

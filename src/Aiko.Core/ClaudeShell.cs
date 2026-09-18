@@ -1,11 +1,12 @@
 namespace Aiko.Core;
 
 /// The shell Claude Code runs the status line with. On Windows it uses Git Bash, and falls back to
-/// PowerShell only when Git Bash is not installed.
+/// PowerShell only when Git Bash is not installed. On macOS it is always zsh.
 public enum ClaudeShell
 {
     GitBash,
     PowerShell,
+    Zsh,
 }
 
 /// How to call a status line command with the shell Claude Code uses.

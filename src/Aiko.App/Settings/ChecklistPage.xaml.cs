@@ -79,11 +79,11 @@ public partial class ChecklistPage : UserControl
         _claudeInstalled = ClaudeLauncher.FindClaude() is not null;
         InstallFound.Visibility = _claudeInstalled ? Visibility.Visible : Visibility.Collapsed;
         InstallNeeded.Visibility = _claudeInstalled ? Visibility.Collapsed : Visibility.Visible;
-        _firstSignedIn = File.Exists(ClaudeInstall.CredentialsPathIn(FirstFolder));
+        _firstSignedIn = File.Exists(ClaudeInstall.CredentialsPathIn(ThisComputer.Platform, FirstFolder));
 
         if (_secondFolder is not null)
         {
-            _secondSignedIn = File.Exists(ClaudeInstall.CredentialsPathIn(_secondFolder));
+            _secondSignedIn = File.Exists(ClaudeInstall.CredentialsPathIn(ThisComputer.Platform, _secondFolder));
         }
 
         var account = ClaudeAccounts.Read(FirstFolder);
@@ -347,7 +347,7 @@ public partial class ChecklistPage : UserControl
         NewNameHint.Visibility = name.Length == 0 ? Visibility.Visible : Visibility.Collapsed;
         NewFolderNote.Text = name.Length == 0
             ? ""
-            : string.Format(Strings.FolderIs, Path.GetFileName(ClaudeInstall.NewConfigFolder(name, Home, Directory.Exists)));
+            : string.Format(Strings.FolderIs, Path.GetFileName(ClaudeInstall.NewConfigFolder(ThisComputer.Platform, name, Home, Directory.Exists)));
     }
 
     private void ChooseSecond(string folder, string name)
@@ -355,7 +355,7 @@ public partial class ChecklistPage : UserControl
         _secondFolder = folder;
         _secondSkipped = false;
         CreatePanel.IsOpen = false;
-        _secondSignedIn = File.Exists(ClaudeInstall.CredentialsPathIn(folder));
+        _secondSignedIn = File.Exists(ClaudeInstall.CredentialsPathIn(ThisComputer.Platform, folder));
         SecondName.Text = _existing.Environments.FirstOrDefault(e => e.Holds(folder))?.Name ?? name;
         SecondNamePanel.Visibility = Visibility.Visible;
     }
@@ -369,7 +369,7 @@ public partial class ChecklistPage : UserControl
             return;
         }
 
-        var folder = ClaudeInstall.NewConfigFolder(name, Home, Directory.Exists);
+        var folder = ClaudeInstall.NewConfigFolder(ThisComputer.Platform, name, Home, Directory.Exists);
         try
         {
             Directory.CreateDirectory(folder);

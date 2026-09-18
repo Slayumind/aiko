@@ -113,7 +113,7 @@ sealed class Waiter : IDisposable
 
     /// Only that the credentials file exists is checked; it is never opened.
     public static Waiter ForSignIn(string configFolder, Action signedIn) =>
-        Start(() => File.Exists(ClaudeInstall.CredentialsPathIn(configFolder)), signedIn);
+        Start(() => File.Exists(ClaudeInstall.CredentialsPathIn(ThisComputer.Platform, configFolder)), signedIn);
 
     private static Waiter Start(Func<bool> isDone, Action done)
     {

@@ -43,7 +43,7 @@ public static class RealClaude
                 continue;
             }
 
-            var candidate = Path.Combine(folder, ExecutableName(platform));
+            var candidate = platform.Join(folder, ExecutableName(platform));
             if (fileExists(candidate))
             {
                 return candidate;
@@ -53,9 +53,10 @@ public static class RealClaude
         return null;
     }
 
+    /// Both separators are trimmed, whatever system the path was written for: a folder list can
+    /// hold either, and the answer must not depend on the machine reading it.
     public static bool SameFolder(string a, string b) =>
-        string.Equals(
-            Path.TrimEndingDirectorySeparator(a.Trim()),
-            Path.TrimEndingDirectorySeparator(b.Trim()),
-            StringComparison.OrdinalIgnoreCase);
+        string.Equals(TrimEnd(a), TrimEnd(b), StringComparison.OrdinalIgnoreCase);
+
+    private static string TrimEnd(string path) => path.Trim().TrimEnd('\\', '/');
 }

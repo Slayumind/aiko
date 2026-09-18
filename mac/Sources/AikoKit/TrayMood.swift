@@ -92,10 +92,9 @@ public enum TrayMood {
         now.timeIntervalSince(moment.since) >= showFor
     }
 
-    /// Faces come only from environments where the persona is on (D-199). The environment file is
-    /// not ported yet, so the flags come in as a list.
-    public static func hasFace(_ personaPerEnvironment: [Bool]) -> Bool {
-        personaPerEnvironment.contains(true)
+    /// Faces come only from environments where the persona is on (D-199).
+    public static func hasFace(_ environments: EnvironmentSettings) -> Bool {
+        environments.environments.contains(where: \.persona)
     }
 
     private static func weight(_ face: AikoFace) -> Int {
