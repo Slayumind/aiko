@@ -15,12 +15,16 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   and speaks the same two languages. macOS 14 or newer, Apple silicon and Intel.
 - **Code signing policy.** [CODE-SIGNING.md](CODE-SIGNING.md) says which files will be signed through
   SignPath Foundation and who approves each release.
+- **A macOS download.** One version tag now builds both systems and publishes one release. The macOS
+  app comes as a disk image, signed with an Apple Developer ID and notarized by Apple, so it opens
+  the normal way. [SECURITY.md](SECURITY.md) shows how to check it.
 
 ### Changed
 
 - **The limits survive a fractional reset time.** A reset time with a fraction in it used to throw
   and take the whole status line report with it; it is now read down to the second.
 - **PRIVACY.md** now also lists the `PATH` folder and the PowerShell profile change.
+- **Every file in a release is attested**, not only the Windows installer.
 
 ## [0.2.3] - 2026-09-17
 

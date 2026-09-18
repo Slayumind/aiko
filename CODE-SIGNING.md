@@ -21,7 +21,11 @@ On Windows these files are signed:
 - `claude.exe`, the small launcher that picks the right Claude Code folder for a project.
 
 Third-party files that come with the app, such as the .NET runtime, keep the signature of their
-own authors. The macOS build is not signed.
+own authors.
+
+The macOS build is not signed by SignPath. It is signed with an Apple Developer ID and notarized by
+Apple, in the same workflow: the app, the two small programs inside it and the disk image.
+[SECURITY.md](SECURITY.md) shows how to check that.
 
 ## Team
 

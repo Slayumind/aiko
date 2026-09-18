@@ -72,10 +72,20 @@ cat > "$app/Contents/Info.plist" <<PLIST
 </dict></plist>
 PLIST
 
-# The two small programs are signed first: signing the bundle does not reach inside MacOS.
-codesign --force --sign - "$app/Contents/MacOS/Aiko.Bridge"
-codesign --force --sign - "$app/Contents/MacOS/claude"
-codesign --force --sign - "$app"
+# Who signs this build. The default "-" is ad-hoc, which is enough to run the app on this machine.
+# The release workflow passes the hash of the Developer ID certificate it imported.
+identity="${AIKO_CODESIGN_IDENTITY:--}"
+flags=(--force --sign "$identity")
+if [ "$identity" != "-" ]; then
+  # Notarization takes nothing else: a trusted timestamp and the hardened runtime.
+  flags+=(--timestamp --options runtime)
+fi
+
+# The two small programs are signed first: signing the bundle does not reach inside MacOS. This is
+# why --deep is never used here; it would sign them in one pass and hide a file that was missed.
+codesign "${flags[@]}" "$app/Contents/MacOS/Aiko.Bridge"
+codesign "${flags[@]}" "$app/Contents/MacOS/claude"
+codesign "${flags[@]}" "$app"
 
 lipo -info "$app/Contents/MacOS/Aiko"
 codesign -dv "$app" 2>&1 | grep -E "Signature|Identifier"
