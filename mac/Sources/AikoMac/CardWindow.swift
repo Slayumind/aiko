@@ -70,16 +70,17 @@ final class CardWindow {
     /// Somebody who reached for the card meant to use it.
     func pin() { isPinned = true }
 
-    /// Shows the card already in place, under the status item. The size is asked for again first:
-    /// a hosting view measures a little differently once it belongs to a window, and a card placed
-    /// on the old size would sit a few points off.
-    func show(under item: NSRect?) {
+    /// Shows the card already in place: under the status item, under the island, or over the island
+    /// when it sits on the bottom edge. The size is asked for again first: a hosting view measures
+    /// a little differently once it belongs to a window, and a card placed on the old size would
+    /// sit a few points off.
+    func show(from anchor: NSRect?, above: Bool = false) {
         if let hosting = panel.contentView as? NSHostingView<CardHost> {
             hosting.layoutSubtreeIfNeeded()
             panel.setContentSize(hosting.fittingSize)
         }
 
-        place(under: item)
+        place(from: anchor, above: above)
         panel.alphaValue = 1
         panel.orderFrontRegardless()
 
@@ -117,9 +118,10 @@ final class CardWindow {
         onClosed?()
     }
 
-    /// The menu bar is at the top of every Mac screen, so the card hangs under the status item and
-    /// is only nudged sideways to stay on screen.
-    private func place(under item: NSRect?) {
+    /// The menu bar is at the top of every Mac screen, so a card from the status item always hangs
+    /// under it and is only nudged sideways to stay on screen. The island can sit on any edge, and
+    /// at the bottom the card opens above it instead.
+    private func place(from item: NSRect?, above: Bool) {
         let size = panel.frame.size
         let screen = item.flatMap { rect in NSScreen.screens.first { $0.frame.intersects(rect) } }
             ?? NSScreen.main
@@ -133,7 +135,8 @@ final class CardWindow {
             max(anchor.midX - (size.width / 2), room.minX),
             max(room.minX, room.maxX - size.width))
 
-        panel.setFrameOrigin(NSPoint(x: left, y: anchor.minY - size.height))
+        let bottom = above ? anchor.maxY : anchor.minY - size.height
+        panel.setFrameOrigin(NSPoint(x: left, y: min(max(bottom, room.minY), max(room.minY, room.maxY - size.height))))
     }
 
     /// Whether the pointer, in screen points, is on the card.

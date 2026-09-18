@@ -1,21 +1,35 @@
 import AikoKit
 import AppKit
 
-/// Everything Aiko shows on macOS: the icon in the menu bar and the card under it. One owner,
-/// because both show the same numbers.
+/// Everything Aiko shows on macOS: the icon in the menu bar or the island at the edge of the
+/// screen, and the card under whichever of them is there. One owner, because both show the same
+/// numbers and the user swaps between them at will.
 ///
-/// The twin of AikoShell.cs on Windows. The island, the settings window and the wizard are not
-/// here yet; the menu items that would open them are marked below.
+/// The twin of AikoShell.cs on Windows. The settings window and the wizard are not here yet; the
+/// menu items that would open them are marked below.
 @MainActor
 final class AikoShell: NSResponder {
     private static let iconSize: CGFloat = 18
 
+    /// The face on the island is drawn at the size of a ring.
+    private static let islandFaceSize = IslandLayout.ringSize
+
     private var statusItem: NSStatusItem?
+    private var island: IslandWindow?
+    private var fullScreen: FullScreenWatch?
     private var watch: SnapshotWatch?
     private var hover: Timer?
     private var cardWatch: Timer?
     private var away = AwayWatch()
     private var card: CardWindow?
+
+    /// The face for two seconds after a session event (D-211), and the way to it and back.
+    private let faces = FacePlay()
+    private var mood: MoodPlay?
+
+    /// The rows the icon last drew. Frames of a face transition reuse them instead of reading the
+    /// settings and the snapshots sixty times a second.
+    private var iconRows: (ring: CardRow?, dot: CardRow?) = (nil, nil)
 
     /// Plan and sign-in per environment. Read when the card opens, not on every new number:
     /// .claude.json can be large, and neither the plan nor the sign-in changes between two answers.
@@ -26,30 +40,23 @@ final class AikoShell: NSResponder {
     private var noAccess: Set<String> = []
 
     func show() {
-        let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
-        statusItem = item
-
-        if let button = item.button {
-            button.target = self
-            button.action = #selector(onClick)
-            button.sendAction(on: [.leftMouseUp, .rightMouseUp])
-            button.addTrackingArea(NSTrackingArea(
-                rect: .zero,
-                options: [.mouseEnteredAndExited, .activeAlways, .inVisibleRect],
-                owner: self,
-                userInfo: nil))
-        }
-
         let watcher = SnapshotWatch(folder: Store.folders.snapshotsFolder)
         watcher.updated = { [weak self] in self?.onSnapshotsChanged() }
         watch = watcher
 
+        faces.changed = { [weak self] in self?.onFaceStep() }
+        let player = MoodPlay()
+        player.faceChanged = { [weak self] face in self?.onFace(face) }
+        player.follow(Store.environments())
+        mood = player
+
         noteWhereWeHaveNoAccess()
-        updateIcon()
+        applyPlace()
 
         let environments = Store.environments()
         Log.write("found \(environments.environments.count) environments, "
-            + "\(watcher.byFile.count) snapshot files")
+            + "\(watcher.byFile.count) snapshot files, showing the "
+            + (Store.settings().place == .island ? "island" : "menu bar icon"))
     }
 
     func stop() {
@@ -57,16 +64,82 @@ final class AikoShell: NSResponder {
         cardWatch?.invalidate()
         card?.fadeAndClose()
         watch?.stop()
+        mood?.stop()
+        closeIsland()
+        removeIcon()
+    }
 
-        if let statusItem {
-            NSStatusBar.system.removeStatusItem(statusItem)
+    // ---- Where Aiko sits: the menu bar icon or the island ----
+
+    /// The icon or the island, whichever the settings say. Called again after a settings change,
+    /// so a change takes effect at once. The default on macOS is the menu bar icon (D-250).
+    private func applyPlace() {
+        let settings = Store.settings()
+
+        if settings.place == .island {
+            removeIcon()
+            showIsland(settings.island)
+        } else {
+            closeIsland()
+            addIcon()
         }
+    }
+
+    private func showIsland(_ position: IslandPosition) {
+        if island == nil {
+            let window = IslandWindow()
+            window.onCard = { [weak self] pinned in self?.openCard(pinned: pinned) }
+            window.onMoved = { [weak self] moved in self?.saveIslandPosition(moved) }
+            island = window
+        }
+
+        island?.show(cards(), at: position)
+
+        // Only watched while the island is on screen: the menu bar icon has nothing to hide from.
+        if fullScreen == nil {
+            let watch = FullScreenWatch()
+            watch.changed = { [weak self] full in self?.onFullScreen(full) }
+            fullScreen = watch
+        }
+
+        onFullScreen(FullScreenWatch.isFullScreenInFront())
+    }
+
+    private func onFullScreen(_ full: Bool) {
+        guard let island else { return }
+
+        let hide = full && Store.settings().hideIslandInFullScreen
+        guard island.isVisible == hide else { return }
+
+        // Only a real change is worth a line: the space changes many times a minute.
+        island.hide(hide)
+        Log.write("island \(hide ? "hidden behind a full screen window" : "shown again")")
+    }
+
+    private func closeIsland() {
+        fullScreen?.stop()
+        fullScreen = nil
+        island?.close()
+        island = nil
+    }
+
+    private func saveIslandPosition(_ position: IslandPosition) {
+        var settings = Store.settings()
+        settings.island = position
+        Store.saveSettings(settings)
+        Log.write("island moved to \(position.edge) at \(String(format: "%.2f", position.along))")
     }
 
     /// Proof that the app starts, reads the snapshots and lays the card out, for a machine nobody
     /// is looking at. The shim has the same door under AIKO_SHIM_SELF_TEST.
-    func selfTest() {
+    func selfTest(_ what: String) {
         selfTesting = true
+
+        if what != "1", what != "card" {
+            IslandCheck.run(what, shell: self)
+            return
+        }
+
         openCard(pinned: true)
 
         let rows = currentRows()
@@ -97,6 +170,21 @@ final class AikoShell: NSResponder {
 
     private var selfTesting = false
 
+    /// The island the self test drives, made if the settings have Aiko in the menu bar.
+    func islandForCheck() -> IslandWindow {
+        if island == nil {
+            removeIcon()
+            showIsland(Store.settings().island)
+        }
+
+        return island!
+    }
+
+    /// One face, without waiting for a session to do anything. Only the self test calls it.
+    func showFaceForCheck(_ face: AikoFace?) {
+        onFace(face)
+    }
+
     private func describe(_ row: CardRow?) -> String {
         guard let row else { return "none" }
         return "\(row.percent)% \(row.tone)"
@@ -110,16 +198,54 @@ final class AikoShell: NSResponder {
 
     // ---- The icon ----
 
+    private func addIcon() {
+        guard statusItem == nil else { return }
+
+        let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
+        statusItem = item
+
+        if let button = item.button {
+            button.target = self
+            button.action = #selector(onClick)
+            button.sendAction(on: [.leftMouseUp, .rightMouseUp])
+            button.addTrackingArea(NSTrackingArea(
+                rect: .zero,
+                options: [.mouseEnteredAndExited, .activeAlways, .inVisibleRect],
+                owner: self,
+                userInfo: nil))
+        }
+
+        updateIcon()
+    }
+
+    private func removeIcon() {
+        guard let statusItem else { return }
+        NSStatusBar.system.removeStatusItem(statusItem)
+        self.statusItem = nil
+    }
+
     private func updateIcon() {
         guard let button = statusItem?.button else { return }
 
-        let rows = currentRows()
-        button.image = StatusIcon.image(size: Self.iconSize, ring: rows.ring, dot: rows.dot)
+        iconRows = currentRows()
+        redrawIcon()
 
         // The numbers go in the tooltip as well as in the ring: a screen reader has nothing else
         // to read, and the ring says nothing to one.
         // TODO: the newer version comes from the update check, which is not built yet.
         button.toolTip = TrayText.tooltip(cards(), newerVersion: nil)
+    }
+
+    /// One frame of a face transition: only the picture changes, not the tooltip.
+    private func redrawIcon() {
+        guard let button = statusItem?.button else { return }
+
+        button.image = StatusIcon.image(
+            size: Self.iconSize,
+            ring: iconRows.ring,
+            dot: iconRows.dot,
+            frame: faces.frame,
+            face: faces.picture)
     }
 
     /// The ring shows one environment and the dot the other. With nothing reported yet both are
@@ -132,6 +258,37 @@ final class AikoShell: NSResponder {
         let ring = withData.first { $0.environment == chosen } ?? withData[0]
         let dot = withData.first { $0.environment != ring.environment }
         return (ring.iconRow, dot?.iconRow)
+    }
+
+    // ---- The face (D-211) ----
+
+    /// A face comes or goes, on the menu bar icon or on the island, wherever Aiko lives.
+    private func onFace(_ face: AikoFace?) {
+        guard let face else {
+            faces.hide()
+            return
+        }
+
+        let style = Store.persona().face
+
+        // The island is always dark, whatever the menu bar is. The icon follows the menu bar, which
+        // follows the person's appearance.
+        let ground: FaceGround = island != nil || isDarkMenuBar ? .dark : .light
+        let size = island != nil ? Self.islandFaceSize : Double(Self.iconSize)
+        faces.show(FaceArt.draw(style, face, ground, size <= FaceArt.smallUpTo))
+    }
+
+    private var isDarkMenuBar: Bool {
+        NSApp.effectiveAppearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua
+    }
+
+    /// One step of the way to a face and back. Only the picture changes, nothing is read again.
+    private func onFaceStep() {
+        if let island {
+            island.face(faces.frame, fit: faces.fit, picture: faces.picture)
+        } else {
+            redrawIcon()
+        }
     }
 
     // ---- The numbers ----
@@ -169,7 +326,11 @@ final class AikoShell: NSResponder {
     }
 
     private func onSnapshotsChanged() {
+        mood?.onLimits(EnvironmentSnapshots.combine(Store.environments(), watch?.byFile ?? [:]))
+
+        let cards = cards()
         updateIcon()
+        island?.update(cards)
         card?.update(currentCard())
 
         if selfTesting {
@@ -255,16 +416,22 @@ final class AikoShell: NSResponder {
             window.pin()
         }
 
-        window.show(under: iconFrame())
+        if let island, statusItem == nil {
+            // From the island the card opens right under it, or over it at the bottom edge.
+            window.show(from: island.frame, above: island.edge == .bottom)
+        } else {
+            window.show(from: iconFrame())
+        }
+
         watchForTheMouseLeaving()
 
         Log.write("card opened at \(Int(window.frame.origin.x)),\(Int(window.frame.origin.y)) "
             + "size \(Int(window.frame.width))x\(Int(window.frame.height)), pinned: \(pinned)")
     }
 
-    /// An unpinned card follows the mouse out. The pointer has to be away from both the icon and
-    /// the card for two turns in a row, because there is a gap between them that it crosses on its
-    /// way in. The watch runs only while an unpinned card is on screen, a few seconds at a time.
+    /// An unpinned card follows the mouse out. The pointer has to be away from the icon, the island
+    /// and the card for two turns in a row, because there is a gap between them that it crosses on
+    /// its way in. The watch runs only while an unpinned card is on screen, a few seconds at a time.
     private func watchForTheMouseLeaving() {
         guard let card, !card.isPinned else { return }
 
@@ -283,7 +450,10 @@ final class AikoShell: NSResponder {
             return
         }
 
-        let home = pointerOverIcon() || card.holds(NSEvent.mouseLocation)
+        // The island is home for the card the same way the icon is (D-148). Without it a card
+        // opened from the island closed half a second later, before the mouse could reach it.
+        let pointer = NSEvent.mouseLocation
+        let home = pointerOverIcon() || card.holds(pointer) || island?.holds(pointer) == true
         if away.turn(pointerIsHome: home) {
             stopCardWatch()
             card.fadeAndClose()
@@ -295,7 +465,8 @@ final class AikoShell: NSResponder {
         cardWatch = nil
     }
 
-    /// Where the menu bar put our icon, in screen points. Empty before the menu bar has placed it.
+    /// Where the menu bar put our icon, in screen points. Empty before the menu bar has placed it,
+    /// and while Aiko lives on the island instead.
     private func iconFrame() -> NSRect? {
         guard let frame = statusItem?.button?.window?.frame, frame.width > 0 else { return nil }
         return frame
@@ -351,7 +522,10 @@ final class AikoShell: NSResponder {
 
     @objc private func onRefresh() {
         noteWhereWeHaveNoAccess()
+        mood?.follow(Store.environments())
+        applyPlace()
         updateIcon()
+        island?.update(cards())
         card?.update(currentCard())
     }
 
