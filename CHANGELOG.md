@@ -13,18 +13,25 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   edge of the screen, the card with the limits of both environments, the first run checklist and the
   settings. It reads the numbers from Claude Code the same way, keeps environments apart the same way
   and speaks the same two languages. macOS 14 or newer, Apple silicon and Intel.
-- **Code signing policy.** [CODE-SIGNING.md](CODE-SIGNING.md) says which files will be signed through
-  SignPath Foundation and who approves each release.
 - **A macOS download.** One version tag now builds both systems and publishes one release. The macOS
   app comes as a disk image, signed with an Apple Developer ID and notarized by Apple, so it opens
   the normal way. [SECURITY.md](SECURITY.md) shows how to check it.
+- **Aiko installs its own updates, when you ask it to.** Press **Download and install** on the
+  General page and Aiko downloads the new version from GitHub; press **Restart now** and it starts.
+  Windows and macOS both do this. Nothing is downloaded or replaced until you press the button.
+- **Every update is checked before it is installed.** A release carries a list of its files signed
+  with an ECDSA P-256 key, and Aiko ships the public half. If the signature or the file does not
+  match, nothing is replaced and the log says why. A build with no key installs nothing at all.
+- **Code signing policy.** [CODE-SIGNING.md](CODE-SIGNING.md) says which files will be signed through
+  SignPath Foundation and who approves each release.
 
 ### Changed
 
 - **The limits survive a fractional reset time.** A reset time with a fraction in it used to throw
   and take the whole status line report with it; it is now read down to the second.
-- **PRIVACY.md** now also lists the `PATH` folder and the PowerShell profile change.
 - **Every file in a release is attested**, not only the Windows installer.
+- **PRIVACY.md** now also lists the `PATH` folder and the shell profile change, and describes what
+  the update path does on each system.
 
 ## [0.2.3] - 2026-09-17
 

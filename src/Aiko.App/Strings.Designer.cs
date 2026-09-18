@@ -168,7 +168,7 @@ public static class Strings
     /// Start at login
     public static string StartAtLogin => Get("StartAtLogin");
 
-    /// Once a day Aiko asks slayumind.org for the latest version. Downloads come from GitHub.
+    /// Once a day Aiko asks slayumind.org for the latest version. The files come from GitHub, an...
     public static string CheckUpdatesWhat => Get("CheckUpdatesWhat");
 
     /// Check now
@@ -188,6 +188,33 @@ public static class Strings
 
     /// Couldn't check. Try again in a few minutes.
     public static string UpdateFailed => Get("UpdateFailed");
+
+    /// Download and install
+    public static string UpdateInstallNow => Get("UpdateInstallNow");
+
+    /// Aiko is downloading {0}…
+    public static string UpdateDownloading => Get("UpdateDownloading");
+
+    /// Aiko {0} is ready. Restart to start using it.
+    public static string UpdateReady => Get("UpdateReady");
+
+    /// Restart now
+    public static string UpdateRestartNow => Get("UpdateRestartNow");
+
+    /// This copy wasn't put here by the installer, so Aiko can't replace it. Use the download page.
+    public static string UpdateNotInstalled => Get("UpdateNotInstalled");
+
+    /// The download didn't finish. Nothing was installed.
+    public static string UpdateDownloadFailed => Get("UpdateDownloadFailed");
+
+    /// This build has no update key yet, so it can't install updates. Use the download page.
+    public static string UpdateNoKeyYet => Get("UpdateNoKeyYet");
+
+    /// The release didn't pass the signature check. Nothing was installed.
+    public static string UpdateBadSignature => Get("UpdateBadSignature");
+
+    /// The downloaded file doesn't match the release list. Nothing was installed.
+    public static string UpdateBadFile => Get("UpdateBadFile");
 
     /// System
     public static string LanguageSystem => Get("LanguageSystem");

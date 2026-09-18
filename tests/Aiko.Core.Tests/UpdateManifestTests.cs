@@ -232,6 +232,30 @@ public class UpdateManifestTests
         Assert.Equal(ManifestStatus.Ok, result.Status);
     }
 
+    [Fact]
+    public void The_one_file_with_an_ending_is_found()
+    {
+        // How the macOS app finds its zip without knowing the name the workflow gave it.
+        var manifest = Verified(VectorFile("SHA256SUMS.txt"));
+
+        Assert.Equal("payload.bin", manifest.OnlyFileEndingWith(".bin"));
+        Assert.Equal("payload.bin", manifest.OnlyFileEndingWith("payload.bin"));
+        Assert.Null(manifest.OnlyFileEndingWith(".zip"));
+        Assert.Null(manifest.OnlyFileEndingWith(".BIN"));
+    }
+
+    [Fact]
+    public void Two_files_with_the_same_ending_are_no_answer()
+    {
+        // A release that changed shape. Guessing which zip is the app is how the wrong one gets
+        // installed, so Aiko answers nothing at all.
+        var text = $"{PayloadHash}  Aiko-mac.zip\n{PayloadHash}  Aiko-mac-debug.zip\n";
+
+        Assert.True(UpdateManifest.TryParse(Encoding.ASCII.GetBytes(text), out var manifest));
+        Assert.Null(manifest!.OnlyFileEndingWith(".zip"));
+        Assert.Equal("Aiko-mac-debug.zip", manifest.OnlyFileEndingWith("debug.zip"));
+    }
+
     private static UpdateManifest Verified(byte[] manifest)
     {
         var result = UpdateManifest.Verify(manifest, VectorFile("SHA256SUMS.txt.sig"), VectorKey);

@@ -60,11 +60,12 @@ grep Aiko- SHA256SUMS.txt
 
 ## Update signatures
 
-This prepares automatic updates, planned for 0.3. The release workflow signs `SHA256SUMS.txt` with
-an ECDSA P-256 key and adds the signature as `SHA256SUMS.txt.sig`. The public key is
-`update-public-key.pem` in this repository. Aiko will install an update only when the signature is
-good and the file matches its line in `SHA256SUMS.txt`. Releases made before the key existed have
-no signature. To check a signed release yourself:
+The release workflow signs `SHA256SUMS.txt` with an ECDSA P-256 key and adds the signature as
+`SHA256SUMS.txt.sig`. The public key is `update-public-key.pem` in this repository, and Aiko ships
+it. Aiko installs an update only when the signature is good and the downloaded file matches its
+line in `SHA256SUMS.txt`; otherwise the file is thrown away, nothing is replaced and the log says
+why. While the key in this repository is still a placeholder, Aiko installs nothing at all.
+Releases made before the key existed have no signature. To check a signed release yourself:
 
 ```
 openssl dgst -sha256 -verify update-public-key.pem -signature SHA256SUMS.txt.sig SHA256SUMS.txt

@@ -5,4 +5,11 @@
     <TargetFramework>net10.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <!-- The key that checks update signatures has one home, the file at the root of the
+         repository, and the build carries it into the assembly. A copy typed into the code would
+         be one more place to forget on the day the owner makes the real key. -->
+    <EmbeddedResource Include="..\..\update-public-key.pem" LogicalName="update-public-key.pem" />
+  </ItemGroup>
+
 </Project>

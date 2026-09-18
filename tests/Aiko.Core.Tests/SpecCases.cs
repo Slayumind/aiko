@@ -22,7 +22,7 @@ public static class SpecCases
         JsonDocument.Parse(Text(name, file)).RootElement.Clone();
 
     /// The tests run from bin/, so the repository is the first folder above with the solution in it.
-    private static string Repository()
+    public static string Repository()
     {
         var folder = new DirectoryInfo(AppContext.BaseDirectory);
         while (folder is not null && !System.IO.File.Exists(Path.Combine(folder.FullName, "Aiko.slnx")))

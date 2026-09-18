@@ -89,13 +89,22 @@ public enum Strings {
         "HideIslandInFullScreen": ("Hide the island in full screen", "Прятать остров в полноэкранных окнах"),
         "StartWithWindows": ("Start with Windows", "Запускать вместе с Windows"),
         "StartAtLogin": ("Start at login", "Запускать при входе"),
-        "CheckUpdatesWhat": ("Once a day Aiko asks slayumind.org for the latest version. Downloads come from GitHub.", "Раз в сутки Aiko спрашивает у slayumind.org свежую версию. Сами файлы скачиваются с GitHub."),
+        "CheckUpdatesWhat": ("Once a day Aiko asks slayumind.org for the latest version. The files come from GitHub, and Aiko checks their signature before it replaces anything.", "Раз в сутки Aiko спрашивает у slayumind.org последнюю версию. Файлы приходят с GitHub, и Aiko проверяет их подпись, прежде чем что-то заменить."),
         "CheckNow": ("Check now", "Проверить сейчас"),
         "OpenDownloadPage": ("Open download page", "Открыть страницу загрузки"),
         "UpdateAsking": ("Aiko is asking slayumind.org…", "Aiko спрашивает slayumind.org…"),
         "UpdateAvailable": ("Version {0} is available.", "Вышла версия {0}."),
         "UpdateLatest": ("Aiko {0} is the latest version.", "Aiko {0} — самая свежая версия."),
         "UpdateFailed": ("Couldn't check. Try again in a few minutes.", "Проверить не получилось. Попробуй через несколько минут."),
+        "UpdateInstallNow": ("Download and install", "Скачать и установить"),
+        "UpdateDownloading": ("Aiko is downloading {0}…", "Aiko скачивает {0}…"),
+        "UpdateReady": ("Aiko {0} is ready. Restart to start using it.", "Aiko {0} готова. Перезапусти, чтобы её включить."),
+        "UpdateRestartNow": ("Restart now", "Перезапустить"),
+        "UpdateNotInstalled": ("This copy wasn't put here by the installer, so Aiko can't replace it. Use the download page.", "Эту копию поставил не установщик, поэтому Aiko не может её заменить. Открой страницу загрузки."),
+        "UpdateDownloadFailed": ("The download didn't finish. Nothing was installed.", "Скачать не удалось. Ничего не установлено."),
+        "UpdateNoKeyYet": ("This build has no update key yet, so it can't install updates. Use the download page.", "В этой сборке ещё нет ключа обновлений, поэтому она не ставит обновления. Открой страницу загрузки."),
+        "UpdateBadSignature": ("The release didn't pass the signature check. Nothing was installed.", "Релиз не прошёл проверку подписи. Ничего не установлено."),
+        "UpdateBadFile": ("The downloaded file doesn't match the release list. Nothing was installed.", "Скачанный файл не совпадает со списком релиза. Ничего не установлено."),
         "LanguageSystem": ("System", "Системный"),
         "LanguageEnglish": ("English", "English"),
         "LanguageRussian": ("Русский", "Русский"),
@@ -501,7 +510,7 @@ public enum Strings {
     /// Start at login
     public static var startAtLogin: String { Strings.get("StartAtLogin") }
 
-    /// Once a day Aiko asks slayumind.org for the latest version. Downloads come from GitHub.
+    /// Once a day Aiko asks slayumind.org for the latest version. The files come from GitHub, an...
     public static var checkUpdatesWhat: String { Strings.get("CheckUpdatesWhat") }
 
     /// Check now
@@ -521,6 +530,33 @@ public enum Strings {
 
     /// Couldn't check. Try again in a few minutes.
     public static var updateFailed: String { Strings.get("UpdateFailed") }
+
+    /// Download and install
+    public static var updateInstallNow: String { Strings.get("UpdateInstallNow") }
+
+    /// Aiko is downloading {0}…
+    public static var updateDownloading: String { Strings.get("UpdateDownloading") }
+
+    /// Aiko {0} is ready. Restart to start using it.
+    public static var updateReady: String { Strings.get("UpdateReady") }
+
+    /// Restart now
+    public static var updateRestartNow: String { Strings.get("UpdateRestartNow") }
+
+    /// This copy wasn't put here by the installer, so Aiko can't replace it. Use the download page.
+    public static var updateNotInstalled: String { Strings.get("UpdateNotInstalled") }
+
+    /// The download didn't finish. Nothing was installed.
+    public static var updateDownloadFailed: String { Strings.get("UpdateDownloadFailed") }
+
+    /// This build has no update key yet, so it can't install updates. Use the download page.
+    public static var updateNoKeyYet: String { Strings.get("UpdateNoKeyYet") }
+
+    /// The release didn't pass the signature check. Nothing was installed.
+    public static var updateBadSignature: String { Strings.get("UpdateBadSignature") }
+
+    /// The downloaded file doesn't match the release list. Nothing was installed.
+    public static var updateBadFile: String { Strings.get("UpdateBadFile") }
 
     /// System
     public static var languageSystem: String { Strings.get("LanguageSystem") }
