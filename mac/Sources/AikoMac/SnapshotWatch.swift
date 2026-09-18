@@ -12,7 +12,7 @@ final class SnapshotWatch {
     var updated: (() -> Void)?
 
     private let folder: String
-    private var source: DispatchSourceFileSystemObject?
+    private var stream: FSEventStreamRef?
 
     init(folder: String) {
         self.folder = folder
@@ -22,31 +22,54 @@ final class SnapshotWatch {
     }
 
     func stop() {
-        source?.cancel()
-        source = nil
+        guard let stream else { return }
+        FSEventStreamStop(stream)
+        FSEventStreamInvalidate(stream)
+        FSEventStreamRelease(stream)
+        self.stream = nil
     }
 
     private func watch() {
-        let descriptor = open(folder, O_EVTONLY)
-        guard descriptor >= 0 else {
+        // FSEvents, not a folder descriptor: the bridge moves a ready file over the old one, but a
+        // writer that changes a file in place leaves the folder itself untouched, and a descriptor
+        // on the folder would say nothing. Windows hears both, and so must this (D-244).
+        var context = FSEventStreamContext(
+            version: 0,
+            info: Unmanaged.passUnretained(self).toOpaque(),
+            retain: nil,
+            release: nil,
+            copyDescription: nil)
+
+        let callback: FSEventStreamCallback = { _, info, _, _, _, _ in
+            guard let info else { return }
+            let watch = Unmanaged<SnapshotWatch>.fromOpaque(info).takeUnretainedValue()
+            MainActor.assumeIsolated {
+                watch.reload()
+            }
+        }
+
+        guard let stream = FSEventStreamCreate(
+            nil,
+            callback,
+            &context,
+            [folder] as CFArray,
+            FSEventStreamEventId(kFSEventStreamEventIdSinceNow),
+            0.05,
+            UInt32(kFSEventStreamCreateFlagFileEvents | kFSEventStreamCreateFlagNoDefer | kFSEventStreamCreateFlagUseCFTypes))
+        else {
             Log.write("could not watch \(folder)")
             return
         }
 
-        // The bridge moves a temporary file over the old one, so every new answer changes the
-        // folder itself. Watching the folder is enough, and it survives a file being replaced.
-        let source = DispatchSource.makeFileSystemObjectSource(
-            fileDescriptor: descriptor,
-            eventMask: [.write, .rename, .delete],
-            queue: .main)
+        FSEventStreamSetDispatchQueue(stream, .main)
+        FSEventStreamStart(stream)
+        self.stream = stream
+    }
 
-        source.setEventHandler { [weak self] in
-            self?.readAll()
-            self?.updated?()
-        }
-        source.setCancelHandler { close(descriptor) }
-        source.resume()
-        self.source = source
+    private func reload() {
+        readAll()
+        Log.write("snapshots read again: \(byFile.count)")
+        updated?()
     }
 
     /// Reading every file costs nothing: there are one or two of them, and they are a few hundred
