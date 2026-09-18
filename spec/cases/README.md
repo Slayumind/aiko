@@ -6,7 +6,9 @@ core and stay as it was in the other.
 
 Only rules that earn it live here. A rule with a shape (a name, a path, a command, a decision) and
 many rows earns a file. A rule that needs a fake clock, a fake disk or a hand written object does
-not: it stays a test in its own language.
+not: it stays a test in its own language. Reading a settings file is the clearest example of the
+second kind — what is checked there is the defaults, the trip through the file and the schema
+stamp, not a table (D-255).
 
 | Folder | Rule |
 |---|---|
