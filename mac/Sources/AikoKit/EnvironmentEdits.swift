@@ -17,7 +17,7 @@ public struct Renamed: Sendable, Equatable {
     }
 }
 
-public struct Binding: Sendable, Equatable {
+public struct FolderBinding: Sendable, Equatable {
     public let folder: String
     public let environment: String
 
@@ -146,9 +146,9 @@ public enum EnvironmentEdits {
 
     /// Every bound folder with its environment, sorted by folder. The order does not depend on the
     /// environment, so a row stays where it is when its environment changes.
-    public static func bindings(_ settings: EnvironmentSettings) -> [Binding] {
+    public static func bindings(_ settings: EnvironmentSettings) -> [FolderBinding] {
         settings.environments
-            .flatMap { environment in environment.projectFolders.map { Binding($0, environment.name) } }
+            .flatMap { environment in environment.projectFolders.map { FolderBinding($0, environment.name) } }
             .enumerated()
             .sorted { left, right in
                 let order = left.element.folder.caseInsensitiveCompare(right.element.folder)

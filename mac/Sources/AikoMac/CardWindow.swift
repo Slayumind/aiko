@@ -14,6 +14,9 @@ final class CardWindow {
     var onSettings: (() -> Void)?
     var onClosed: (() -> Void)?
 
+    /// "Open Claude Code" on a block, with the name of the environment it belongs to.
+    var onOpenClaude: ((String) -> Void)?
+
     /// A card opened by resting the mouse on the icon goes away when the mouse goes away. A card
     /// the user clicked for, or clicked on, stays until they close it.
     private(set) var isPinned = false
@@ -44,6 +47,7 @@ final class CardWindow {
 
         state.onSettings = { [weak self] in self?.onSettings?() }
         state.onClose = { [weak self] in self?.fadeAndClose() }
+        state.onOpenClaude = { [weak self] name in self?.onOpenClaude?(name) }
 
         let hosting = NSHostingView(rootView: CardHost(state: state))
         panel.setContentSize(hosting.fittingSize)
@@ -154,6 +158,7 @@ final class CardViewState: ObservableObject {
 
     var onSettings: () -> Void = {}
     var onClose: () -> Void = {}
+    var onOpenClaude: (String) -> Void = { _ in }
 }
 
 /// The card plus the way it arrives: it grows out of the status item, from a little smaller and a
@@ -162,7 +167,11 @@ struct CardHost: View {
     @ObservedObject var state: CardViewState
 
     var body: some View {
-        CardView(model: state.model, onSettings: state.onSettings, onClose: state.onClose)
+        CardView(
+            model: state.model,
+            onSettings: state.onSettings,
+            onClose: state.onClose,
+            onOpenClaude: state.onOpenClaude)
             .opacity(state.shown ? 1 : 0)
             .animation(Motion.curve(Motion.standard, Motion.hover), value: state.shown)
             .scaleEffect(state.shown ? 1 : Motion.popFrom, anchor: .top)

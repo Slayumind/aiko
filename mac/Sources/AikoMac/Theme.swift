@@ -20,6 +20,15 @@ enum Theme {
     /// card and the raised surface without becoming a line of their own colour.
     static let hairline = Color.white.opacity(0.10)
 
+    /// The edge of a field and the track of a switch, one step lighter than a hairline.
+    static let inputLine = Color.white.opacity(0.149)
+
+    /// Hover lightens whatever is under it by this much.
+    static let hoverLayer = Color.white.opacity(0.071)
+
+    /// The plate under the chosen menu item, and under a plan chip.
+    static let chosenLayer = Color.white.opacity(0.078)
+
     static func tone(_ tone: LimitTone) -> Color {
         colour(RingArt.colour(for: tone))
     }

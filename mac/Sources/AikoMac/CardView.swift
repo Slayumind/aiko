@@ -7,13 +7,14 @@ struct CardView: View {
     let model: CardModel
     let onSettings: () -> Void
     let onClose: () -> Void
+    let onOpenClaude: (String) -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             header
 
             ForEach(Array(model.blocks.enumerated()), id: \.offset) { _, block in
-                EnvironmentBlockView(block: block)
+                EnvironmentBlockView(block: block, onOpenClaude: onOpenClaude)
                     .padding(.top, Theme.blockGap)
             }
         }
@@ -51,6 +52,7 @@ struct CardView: View {
 
 private struct EnvironmentBlockView: View {
     let block: EnvironmentBlock
+    let onOpenClaude: (String) -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -98,8 +100,13 @@ private struct EnvironmentBlockView: View {
                     .padding(.top, Theme.rowGap)
             }
 
-            // TODO: "Open Claude Code" and "Sign in" wait for the launcher, which comes with the
-            // settings part. CardModel already carries the label and whether to show it.
+            // Both open Claude Code for this environment; signing in happens there, because
+            // Anthropic does not allow another program to offer the login (D-157).
+            if block.showsOpen {
+                FlatButton(title: block.openLabel, look: .ghost) { onOpenClaude(block.name) }
+                    .padding(.top, Theme.rowGap)
+                    .padding(.leading, -10)
+            }
         }
     }
 

@@ -17,18 +17,23 @@ final class AikoDelegate: NSObject, NSApplicationDelegate {
 
         // The self test is asked for by a variable, or by an argument: `open Aiko.app --args
         // --try-island` is the only way to pass anything to an app that is opened, not run.
-        if let what = selfTestAskedFor() {
-            shell.selfTest(what)
+        if let asked = selfTestAskedFor() {
+            shell.selfTest(asked.what, value: asked.value)
         }
     }
 
-    private func selfTestAskedFor() -> String? {
+    /// `--try-settings general` and `--try-wizard commands` take a value; the island doors take
+    /// none. A value that starts with a dash belongs to the next door, not to this one.
+    private func selfTestAskedFor() -> (what: String, value: String?)? {
         if let asked = ProcessInfo.processInfo.environment["AIKO_MAC_SELF_TEST"], !asked.isEmpty {
-            return asked
+            return (asked, ProcessInfo.processInfo.environment["AIKO_TRY_VALUE"])
         }
 
-        for argument in ProcessInfo.processInfo.arguments where argument.hasPrefix("--try-") {
-            return String(argument.dropFirst("--try-".count))
+        let arguments = ProcessInfo.processInfo.arguments
+        for (at, argument) in arguments.enumerated() where argument.hasPrefix("--try-") {
+            let next = arguments.count > at + 1 ? arguments[at + 1] : nil
+            return (String(argument.dropFirst("--try-".count)),
+                    next?.hasPrefix("-") == false ? next : nil)
         }
 
         return nil
