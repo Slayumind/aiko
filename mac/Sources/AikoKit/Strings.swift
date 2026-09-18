@@ -274,6 +274,15 @@ public enum Strings {
         "RestartBin": ("And move {0} to the Recycle Bin", "И переместить {0} в корзину"),
         "RestartTrash": ("And move {0} to the Trash", "И переместить {0} в Корзину"),
         "RestartKeep": (".claude stays either way.", ".claude остаётся в любом случае."),
+        "Delete": ("Remove Aiko", "Удалить Aiko"),
+        "DeleteWhat": ("Removes Aiko itself, with everything it set up.", "Убирает саму Aiko и всё, что она настроила."),
+        "DeleteLine": ("Aiko puts back everything it changed: the lines and plugins in settings.json, the commands {0}, its folder in PATH and the functions in the PowerShell profile. Then its own folders go, and the uninstaller removes the program.", "Aiko вернёт всё, что меняла: строки и плагины в settings.json, команды {0}, свою папку в PATH и функции в профиле PowerShell. Потом уйдут её папки, а программу снимет деинсталлятор."),
+        "DeleteLineMac": ("Aiko puts back everything it changed: the lines and plugins in settings.json, the commands {0} and its line in ~/.zshrc. Then its own folders and the login item go, and the app moves to the Bin.", "Aiko вернёт всё, что меняла: строки и плагины в settings.json, команды {0} и свою строку в ~/.zshrc. Потом уйдут её папки и автозапуск, а программа отправится в Корзину."),
+        "DeleteKeep": ("Your accounts and history stay: Aiko never made them.", "Аккаунты и история останутся: Aiko их не создавала."),
+        "DeleteKeepMac": ("Your accounts and history stay, and so does the copy of ~/.zshrc Aiko made.", "Аккаунты и история останутся, и копия ~/.zshrc, которую сделала Aiko, тоже."),
+        "DeleteWorking": ("Removing Aiko. Claude Code may take a few seconds to answer.", "Убираю Aiko. Claude Code может отвечать несколько секунд."),
+        "DeleteAppStays": ("Aiko cannot move itself to the Bin from here. Drag the app there when it quits.", "Отсюда Aiko не может отправить себя в Корзину. Перетащи программу туда, когда она закроется."),
+        "DeletePortable": ("This copy was unpacked from a zip, so it has no uninstaller. The folder with Aiko stays, and Aiko opens it for you.", "Эта копия распакована из zip, деинсталлятора у неё нет. Папка с Aiko останется, и Aiko её откроет."),
         "OpenClaudeCode": ("Open Claude Code", "Открыть Claude Code"),
         "CardSignInNote": ("Sign in so Aiko can see the limits of this environment.", "Войди, чтобы Aiko видела лимиты этой среды."),
         "StateWorkingNow": ("working now", "сейчас работает"),
@@ -1065,6 +1074,33 @@ public enum Strings {
 
     /// .claude stays either way.
     public static var restartKeep: String { Strings.get("RestartKeep") }
+
+    /// Remove Aiko
+    public static var delete: String { Strings.get("Delete") }
+
+    /// Removes Aiko itself, with everything it set up.
+    public static var deleteWhat: String { Strings.get("DeleteWhat") }
+
+    /// Aiko puts back everything it changed: the lines and plugins in settings.json, the command...
+    public static var deleteLine: String { Strings.get("DeleteLine") }
+
+    /// Aiko puts back everything it changed: the lines and plugins in settings.json, the command...
+    public static var deleteLineMac: String { Strings.get("DeleteLineMac") }
+
+    /// Your accounts and history stay: Aiko never made them.
+    public static var deleteKeep: String { Strings.get("DeleteKeep") }
+
+    /// Your accounts and history stay, and so does the copy of ~/.zshrc Aiko made.
+    public static var deleteKeepMac: String { Strings.get("DeleteKeepMac") }
+
+    /// Removing Aiko. Claude Code may take a few seconds to answer.
+    public static var deleteWorking: String { Strings.get("DeleteWorking") }
+
+    /// Aiko cannot move itself to the Bin from here. Drag the app there when it quits.
+    public static var deleteAppStays: String { Strings.get("DeleteAppStays") }
+
+    /// This copy was unpacked from a zip, so it has no uninstaller. The folder with Aiko stays, ...
+    public static var deletePortable: String { Strings.get("DeletePortable") }
 
     /// Open Claude Code
     public static var openClaudeCode: String { Strings.get("OpenClaudeCode") }

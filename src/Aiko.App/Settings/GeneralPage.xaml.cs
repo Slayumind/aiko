@@ -47,6 +47,9 @@ public partial class GeneralPage : UserControl
     /// Recycle Bin.
     public event Action<bool>? RestartRequested;
 
+    /// Raised after the second click on "Remove Aiko". Nothing here can be undone afterwards.
+    public event Action? DeleteRequested;
+
     /// Raised when the window has to come back in another language.
     public event Action? ReopenRequested;
 
@@ -383,4 +386,35 @@ public partial class GeneralPage : UserControl
     }
 
     private void OnRestartConfirmed(object sender, RoutedEventArgs e) => RestartRequested?.Invoke(RestartBin.IsChecked == true);
+
+    // ---- removing Aiko ----
+
+    private void OnDeleteAsked(object sender, RoutedEventArgs e)
+    {
+        var environments = SettingsStore.LoadEnvironments();
+        DeleteLine.Text = string.Format(
+            Strings.DeleteLine, string.Join(", ", environments.Environments.Select(env => env.Command)));
+
+        // A copy unpacked from the zip has no uninstaller to call, and Windows will not let a
+        // running program delete itself. The person is told before they agree, not after.
+        DeletePortable.Visibility = Uninstall.HasUninstaller ? Visibility.Collapsed : Visibility.Visible;
+
+        DeleteRow.Visibility = Visibility.Collapsed;
+        DeleteConfirm.IsOpen = true;
+    }
+
+    private void OnDeleteCancelled(object sender, RoutedEventArgs e)
+    {
+        DeleteConfirm.IsOpen = false;
+        DeleteRow.Visibility = Visibility.Visible;
+    }
+
+    /// Claude Code can take seconds to forget the plugins, so the page says what is happening and
+    /// takes no second press while it happens.
+    private void OnDeleteConfirmed(object sender, RoutedEventArgs e)
+    {
+        DeleteButtons.Visibility = Visibility.Collapsed;
+        DeleteWorking.Visibility = Visibility.Visible;
+        DeleteRequested?.Invoke();
+    }
 }

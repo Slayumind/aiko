@@ -3,7 +3,7 @@
 The macOS app repeats the Windows core, so every ported file keeps its behaviour and every xUnit
 case has a Swift case with the same name and the same numbers. Test counts below are cases, not
 methods: one `[Theory]` with five `[InlineData]` rows counts as five, and so does the Swift
-`@Test(arguments:)` that mirrors it. 809 cases in `dotnet test`, 983 in `swift test` (625 test
+`@Test(arguments:)` that mirrors it. 835 cases in `dotnet test`, 1009 in `swift test` (637 test
 methods). The 49 the Swift side does not have are named at the bottom; the ones it has and Windows
 does not belong to the two small programs, whose decisions sit inline in `Program.cs` on Windows,
 and to the card words, the island and the settings window, which sit in `Aiko.App` on Windows
@@ -26,6 +26,7 @@ a row cannot change in one core and stay as it was in the other. See `spec/cases
 | UpdateInfo.cs | UpdateInfo.swift | 12 | 12 | `System.Version` is ported as `VersionNumber` |
 | AllowedHosts.cs | AllowedHosts.swift | 19 | 19 | the source scan looks for `URLSession` outside `AikoHttp.swift` instead of `new HttpClient` |
 | UpdateManifest.cs | UpdateManifest.swift | 38 | 38 | CryptoKit in place of `ECDsa`; both read the openssl vector in `spec/cases/update-manifest/` |
+| UninstallPlan.cs | UninstallPlan.swift | 26 | 26 | the two folders Aiko may delete, and the guard that refuses every other path |
 | UpdateGate.cs, UpdateKey.cs | UpdateGate.swift, UpdateKey.swift | 15 | 15 | the key is one file, `update-public-key.pem`: Windows embeds it, `tools/update-key.py` writes the Swift copy, and a case in each suite fails if the two drift apart |
 | CubicBezier.cs | CubicBezier.swift | 9 | 9 | |
 | IslandReveal.cs | IslandReveal.swift | 8 | 8 | |
@@ -166,6 +167,7 @@ AikoKit decided, and it answers the mouse.
 | TaskbarOrder.cs | — | window levels do the same work: the island sits at `.statusBar` and the landing strip at `.floating`, under both the island and the menu bar |
 | SettingsStore.cs, ClaudeAccounts.cs | Store.swift | reads the settings, the environments and the plan of an account |
 | Log.cs | Log.swift | the same file, the same line format |
+| Uninstall.cs | Uninstall.swift | putting everything back on the way out. Windows is called by the installer's hook and then removes the program with `Update.exe uninstall`; macOS has no uninstaller, so the app does the work itself, moves its own bundle to the Bin and quits |
 | Settings/SettingsWindow.xaml(.cs), SettingsPanel.xaml | Settings/SettingsWindow.swift | the borderless window, the header, the menu and the page area; Esc closes it |
 | Settings/SavedMark.cs, Theme/Controls.xaml, Theme/DropDown.cs, Theme/RevealPanel.cs | Settings/SettingsControls.swift | the switch, the segments, the picked card, the fields, the buttons, the tick, the chip, the drop down and the "Saved" mark |
 | Settings/EnvironmentsEditor.cs | Settings/SettingsState.swift | what the window is looking at, and every change written through one place |

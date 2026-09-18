@@ -15,6 +15,7 @@ struct GeneralPageView: View {
     @State private var newerVersion: String?
     @State private var showDownload = false
     @State private var asking = false
+    @State private var deleteAsking = false
     @State private var diagnostics = Strings.diagnosticsWhat
     @State private var accessLine = ""
     @State private var offeringToAdd = false
@@ -82,6 +83,7 @@ struct GeneralPageView: View {
 
             Control.hairline().padding(.top, 22).padding(.bottom, 14)
             startOver
+            deleteAiko.padding(.top, 14)
 
             HStack {
                 Spacer()
@@ -323,6 +325,57 @@ struct GeneralPageView: View {
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(DiagnosticsText.build(facts), forType: .string)
         diagnostics = Strings.diagnosticsCopied
+    }
+
+    // ---- removing Aiko ----
+
+    /// The one thing on this page that cannot be undone, so it asks a second time, says what goes
+    /// and, when the app cannot put itself in the Bin, says that before the person agrees.
+    private var deleteAiko: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            if !deleteAsking {
+                HStack(spacing: 12) {
+                    Control.rowHint(Strings.deleteWhat)
+                    Spacer(minLength: 12)
+                    FlatButton(title: Strings.delete, look: .ghostDanger) { deleteAsking = true }
+                        .padding(.trailing, -10)
+                }
+            }
+
+            Reveal(isOpen: deleteAsking) {
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(Strings.format(
+                        Strings.deleteLineMac,
+                        state.environments.environments.map(\.command).joined(separator: ", ")))
+                        .font(Theme.sans(Theme.textSmall))
+                        .foregroundStyle(Theme.ink)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    Control.rowHint(Strings.deleteKeepMac).padding(.top, 8)
+
+                    if !Uninstall.canBinTheApp {
+                        Control.rowHint(Strings.deleteAppStays).padding(.top, 6)
+                    }
+
+                    if state.deleting {
+                        Control.rowHint(Strings.deleteWorking).padding(.top, 12)
+                    } else {
+                        HStack(spacing: 8) {
+                            Spacer()
+                            FlatButton(title: Strings.cancel, look: .ghost) { deleteAsking = false }
+                            FlatButton(title: Strings.delete, look: .danger) { state.deleteAiko() }
+                        }
+                        .padding(.top, 12)
+                    }
+                }
+                .padding(12)
+                .background(Theme.destructive.opacity(0.06))
+                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .strokeBorder(Theme.destructive.opacity(0.22), lineWidth: 1))
+            }
+        }
     }
 
     // ---- starting over ----

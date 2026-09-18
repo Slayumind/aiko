@@ -23,6 +23,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - **Every update is checked before it is installed.** A release carries a list of its files signed
   with an ECDSA P-256 key, and Aiko ships the public half. If the signature or the file does not
   match, nothing is replaced and the log says why. A build with no key installs nothing at all.
+- **Remove Aiko, from inside Aiko.** A new item on the General page of settings takes everything
+  back and then removes the program: on Windows through the uninstaller, on macOS by moving the app
+  to the Bin. Accounts and history stay where they are. Before, macOS had no way to remove Aiko
+  whole, only "Start over" and a drag to the Bin.
 - **Code signing policy.** [CODE-SIGNING.md](CODE-SIGNING.md) says which files will be signed through
   SignPath Foundation and who approves each release.
 

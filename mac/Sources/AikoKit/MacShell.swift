@@ -14,6 +14,13 @@ import Foundation
 public enum ZshProfile {
     public static let fileName = ".zshrc"
 
+    /// The copy Aiko makes before its first change to the profile. It stays after Aiko is gone: it
+    /// is the person's own file, and a copy of a shell profile is worth more than a tidy home
+    /// folder. Named here so that both the maker and the remover mean the same file.
+    public static let backupSuffix = ".aiko-backup"
+
+    public static func backupPath(_ profilePath: String) -> String { profilePath + backupSuffix }
+
     public static let startMark = "# Aiko: launch commands"
     public static let endMark = "# end Aiko"
 

@@ -123,7 +123,7 @@ enum CommandFolder {
 
         do {
             if FileManager.default.fileExists(atPath: path) {
-                let backup = path + ".aiko-backup"
+                let backup = ZshProfile.backupPath(path)
                 if !FileManager.default.fileExists(atPath: backup) {
                     try FileManager.default.copyItem(atPath: path, toPath: backup)
                 }

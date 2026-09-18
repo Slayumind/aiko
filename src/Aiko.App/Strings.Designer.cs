@@ -723,6 +723,33 @@ public static class Strings
     /// .claude stays either way.
     public static string RestartKeep => Get("RestartKeep");
 
+    /// Remove Aiko
+    public static string Delete => Get("Delete");
+
+    /// Removes Aiko itself, with everything it set up.
+    public static string DeleteWhat => Get("DeleteWhat");
+
+    /// Aiko puts back everything it changed: the lines and plugins in settings.json, the command...
+    public static string DeleteLine => Get("DeleteLine");
+
+    /// Aiko puts back everything it changed: the lines and plugins in settings.json, the command...
+    public static string DeleteLineMac => Get("DeleteLineMac");
+
+    /// Your accounts and history stay: Aiko never made them.
+    public static string DeleteKeep => Get("DeleteKeep");
+
+    /// Your accounts and history stay, and so does the copy of ~/.zshrc Aiko made.
+    public static string DeleteKeepMac => Get("DeleteKeepMac");
+
+    /// Removing Aiko. Claude Code may take a few seconds to answer.
+    public static string DeleteWorking => Get("DeleteWorking");
+
+    /// Aiko cannot move itself to the Bin from here. Drag the app there when it quits.
+    public static string DeleteAppStays => Get("DeleteAppStays");
+
+    /// This copy was unpacked from a zip, so it has no uninstaller. The folder with Aiko stays, ...
+    public static string DeletePortable => Get("DeletePortable");
+
     /// Open Claude Code
     public static string OpenClaudeCode => Get("OpenClaudeCode");
 
