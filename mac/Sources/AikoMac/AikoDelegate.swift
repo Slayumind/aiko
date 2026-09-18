@@ -6,6 +6,9 @@ final class AikoDelegate: NSObject, NSApplicationDelegate {
     private let shell = AikoShell()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // Cut, Copy and Paste in every field come from the main menu, even though Aiko shows none.
+        AppMenu.install()
+
         Strings.language = SessionReminder.isRussian(
             Store.settings().language, systemLanguageTag: Locale.preferredLanguages.first)
             ? .russian

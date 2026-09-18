@@ -11,17 +11,11 @@ enum Screens {
         NSScreen.screens.first?.frame.maxY ?? 0
     }
 
-    /// How tall the menu bar is. Only a menu can say, and an app with no windows has none, so one
-    /// is kept here for the question. It is never shown: Aiko has no menu bar of its own.
-    private static let ruler = NSMenu()
-
+    /// How tall the menu bar is. Only a menu can say, and the app's own main menu is the one that
+    /// answers — the same menu that carries Cut, Copy and Paste for the text fields (AppMenu).
     private static var menuBarHeight: CGFloat {
-        // A menu answers only once it is the app's own main menu. An app with no windows shows no
-        // menu bar anyway, so this changes nothing on screen.
-        if NSApp.mainMenu == nil {
-            NSApp.mainMenu = ruler
-        }
-        return ruler.menuBarHeight
+        AppMenu.install()
+        return NSApp.mainMenu?.menuBarHeight ?? 0
     }
 
     static func box(_ rect: NSRect) -> Box {
