@@ -733,6 +733,33 @@
   <data name="RestartKeep" xml:space="preserve">
     <value>.claude stays either way.</value>
   </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Remove Aiko</value>
+  </data>
+  <data name="DeleteWhat" xml:space="preserve">
+    <value>Removes Aiko itself, with everything it set up.</value>
+  </data>
+  <data name="DeleteLine" xml:space="preserve">
+    <value>Aiko puts back everything it changed: the lines and plugins in settings.json, the commands {0}, its folder in PATH and the functions in the PowerShell profile. Then its own folders go, and the uninstaller removes the program.</value>
+  </data>
+  <data name="DeleteLineMac" xml:space="preserve">
+    <value>Aiko puts back everything it changed: the lines and plugins in settings.json, the commands {0} and its line in ~/.zshrc. Then its own folders and the login item go, and the app moves to the Bin.</value>
+  </data>
+  <data name="DeleteKeep" xml:space="preserve">
+    <value>Your accounts and history stay: Aiko never made them.</value>
+  </data>
+  <data name="DeleteKeepMac" xml:space="preserve">
+    <value>Your accounts and history stay, and so does the copy of ~/.zshrc Aiko made.</value>
+  </data>
+  <data name="DeleteWorking" xml:space="preserve">
+    <value>Removing Aiko. Claude Code may take a few seconds to answer.</value>
+  </data>
+  <data name="DeleteAppStays" xml:space="preserve">
+    <value>Aiko cannot move itself to the Bin from here. Drag the app there when it quits.</value>
+  </data>
+  <data name="DeletePortable" xml:space="preserve">
+    <value>This copy was unpacked from a zip, so it has no uninstaller. The folder with Aiko stays, and Aiko opens it for you.</value>
+  </data>
   <data name="OpenClaudeCode" xml:space="preserve">
     <value>Open Claude Code</value>
   </data>

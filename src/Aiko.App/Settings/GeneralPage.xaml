@@ -156,6 +156,36 @@
       </Border>
     </local:RevealPanel>
 
+    <!-- The one thing on this page that cannot be undone: it asks a second time and says what goes. -->
+    <Grid x:Name="DeleteRow" Margin="0,14,0,0">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="Auto" />
+      </Grid.ColumnDefinitions>
+      <TextBlock Text="{x:Static local:Strings.DeleteWhat}" Style="{StaticResource RowHint}" VerticalAlignment="Center"
+                 Margin="0,0,12,0" />
+      <Button Grid.Column="1" Content="{x:Static local:Strings.Delete}" Style="{StaticResource GhostDangerButton}"
+              Margin="0,0,-10,0" Click="OnDeleteAsked" />
+    </Grid>
+    <local:RevealPanel x:Name="DeleteConfirm">
+      <Border CornerRadius="10" Background="#0FFF6467" BorderBrush="#38FF6467" BorderThickness="1" Padding="12"
+              Margin="0,14,0,0">
+        <StackPanel>
+          <TextBlock x:Name="DeleteLine" Style="{StaticResource RowHint}" Foreground="{StaticResource Ink}" />
+          <TextBlock Text="{x:Static local:Strings.DeleteKeep}" Style="{StaticResource RowHint}" Margin="0,8,0,0" />
+          <TextBlock x:Name="DeletePortable" Text="{x:Static local:Strings.DeletePortable}" Style="{StaticResource RowHint}"
+                     Margin="0,6,0,0" Visibility="Collapsed" />
+          <TextBlock x:Name="DeleteWorking" Text="{x:Static local:Strings.DeleteWorking}" Style="{StaticResource RowHint}"
+                     Margin="0,12,0,0" Visibility="Collapsed" />
+          <StackPanel x:Name="DeleteButtons" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+            <Button Content="{x:Static local:Strings.Cancel}" Style="{StaticResource GhostButton}" Click="OnDeleteCancelled" />
+            <Button Content="{x:Static local:Strings.Delete}" Style="{StaticResource DangerButton}" Margin="8,0,0,0"
+                    Click="OnDeleteConfirmed" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+    </local:RevealPanel>
+
     <Button Content="{x:Static local:Strings.QuitAiko}" Style="{StaticResource GhostButton}" HorizontalAlignment="Right"
             Margin="0,14,-10,0" Click="OnQuit" />
   </StackPanel>

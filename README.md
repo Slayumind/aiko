@@ -148,14 +148,16 @@ the taskbar: under the arrow, the card can't open.
 
 ## Remove
 
-**Windows:** uninstall Aiko from **Installed apps**. **macOS:** press **Start over** on the General
-page of settings, quit Aiko and drag the app to the Bin.
+Press **Remove Aiko** on the **General** page of settings. It asks a second time, then takes
+everything back: your status line and the session reminder, the plugins and their marketplace in
+Claude Code, the launch commands, Aiko's folder in PATH, the shell profile, the startup entry and
+Aiko's own folders. On Windows the uninstaller then removes the program; on macOS Aiko moves itself
+to the Bin.
 
-Either way Aiko puts your status line back and removes the session reminder, removes its plugins and
-their marketplace from Claude Code, takes its folder out of the PATH together with the launch
-commands and puts the shell profile back as it was. Your accounts and history stay in their Claude
-Code folders. On Windows the uninstaller also removes the startup entry and Aiko's own folders; on
-macOS those two go with the app and its folders in `~/Library`.
+Your accounts and history stay in their Claude Code folders: Aiko never made them. On macOS the copy
+of `~/.zshrc` that Aiko made before its first change stays too.
+
+On Windows you can also uninstall Aiko from **Installed apps**, which does the same.
 
 ## Build it yourself
 

@@ -733,6 +733,33 @@
   <data name="RestartKeep" xml:space="preserve">
     <value>.claude остаётся в любом случае.</value>
   </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Удалить Aiko</value>
+  </data>
+  <data name="DeleteWhat" xml:space="preserve">
+    <value>Убирает саму Aiko и всё, что она настроила.</value>
+  </data>
+  <data name="DeleteLine" xml:space="preserve">
+    <value>Aiko вернёт всё, что меняла: строки и плагины в settings.json, команды {0}, свою папку в PATH и функции в профиле PowerShell. Потом уйдут её папки, а программу снимет деинсталлятор.</value>
+  </data>
+  <data name="DeleteLineMac" xml:space="preserve">
+    <value>Aiko вернёт всё, что меняла: строки и плагины в settings.json, команды {0} и свою строку в ~/.zshrc. Потом уйдут её папки и автозапуск, а программа отправится в Корзину.</value>
+  </data>
+  <data name="DeleteKeep" xml:space="preserve">
+    <value>Аккаунты и история останутся: Aiko их не создавала.</value>
+  </data>
+  <data name="DeleteKeepMac" xml:space="preserve">
+    <value>Аккаунты и история останутся, и копия ~/.zshrc, которую сделала Aiko, тоже.</value>
+  </data>
+  <data name="DeleteWorking" xml:space="preserve">
+    <value>Убираю Aiko. Claude Code может отвечать несколько секунд.</value>
+  </data>
+  <data name="DeleteAppStays" xml:space="preserve">
+    <value>Отсюда Aiko не может отправить себя в Корзину. Перетащи программу туда, когда она закроется.</value>
+  </data>
+  <data name="DeletePortable" xml:space="preserve">
+    <value>Эта копия распакована из zip, деинсталлятора у неё нет. Папка с Aiko останется, и Aiko её откроет.</value>
+  </data>
   <data name="OpenClaudeCode" xml:space="preserve">
     <value>Открыть Claude Code</value>
   </data>

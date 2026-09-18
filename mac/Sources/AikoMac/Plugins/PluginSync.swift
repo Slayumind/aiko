@@ -205,6 +205,14 @@ enum PluginSync {
         enqueue { removeFrom(folders, why) }
     }
 
+    /// The same work while the caller waits, for the way out: after this Aiko deletes the folder
+    /// the marketplace lives in, so it cannot be left running behind us. A deadline keeps a slow
+    /// Claude Code from holding the removal open for ever; whatever is left undone only means
+    /// Claude Code keeps a record of plugins that no longer load. The twin of PluginSync.RemoveNow.
+    static func removeNow(_ folders: [String], _ why: String, deadline: Date) {
+        queue.sync { removeFrom(folders, why, deadline: deadline) }
+    }
+
     private static func enqueue(_ work: @escaping @Sendable () -> Void) {
         queue.async(execute: work)
     }
@@ -252,7 +260,7 @@ enum PluginSync {
         }
     }
 
-    private static func removeFrom(_ folders: [String], _ why: String) {
+    private static func removeFrom(_ folders: [String], _ why: String, deadline: Date? = nil) {
         let withPlugins = folders
             .filter { FileManager.default.fileExists(atPath: $0) }
             .map { (folder: $0, steps: PluginPlan.removal(state(of: $0))) }
@@ -267,7 +275,11 @@ enum PluginSync {
         let cli = ClaudeCliProcess(claude: claude)
         for plan in withPlugins {
             let results = PluginReconciler.apply(
-                cli: cli, configDirectory: plan.folder, steps: plan.steps)
+                cli: cli,
+                configDirectory: plan.folder,
+                steps: plan.steps,
+                now: deadline == nil ? nil : { Date() },
+                deadline: deadline)
 
             // The command writes an empty enabledPlugins back into the file Aiko just cleaned.
             _ = ClaudeSettingsFile.tidyAfterPluginRemoval(plan.folder)

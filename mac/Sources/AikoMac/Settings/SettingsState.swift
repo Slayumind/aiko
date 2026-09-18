@@ -169,6 +169,9 @@ final class SettingsState: ObservableObject {
     /// The words shown at the top of the environment page after the checklist or a removal.
     @Published var note = ""
 
+    /// True while Aiko is removing itself, so the page can wait instead of taking a second press.
+    @Published var deleting = false
+
     /// Set by the menu item that asks for an update check, so the general page asks as it opens.
     @Published var askForUpdate = false
 
@@ -361,6 +364,26 @@ final class SettingsState: ObservableObject {
         checklist = nil
         editor.startOver(trashSecond: trashSecond)
         openChecklist()
+    }
+
+    /// Aiko takes everything back and goes. Claude Code may take seconds to answer, so the work
+    /// happens off this thread and the page waits with a line; then Aiko quits, whether or not it
+    /// managed to put itself in the Bin.
+    func deleteAiko() {
+        guard !deleting else { return }
+        deleting = true
+        checklist?.close()
+        checklist = nil
+
+        Task.detached {
+            let outcome = Uninstall.everything()
+            await MainActor.run { [weak self] in
+                if outcome == .appStays {
+                    NSWorkspace.shared.activateFileViewerSelecting([Bundle.main.bundleURL])
+                }
+                self?.onQuit()
+            }
+        }
     }
 
     func showNoteOnFirstEnvironment(_ text: String) {
