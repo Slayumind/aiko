@@ -37,6 +37,54 @@ enum AikoHttp {
             return nil
         }
     }
+
+    /// A whole file: the parts of an update. Nil for anything but a plain 200, so a GitHub error
+    /// page is never mistaken for a zip.
+    static func bytes(_ address: String, timeout: TimeInterval) async -> Data? {
+        guard let url = URL(string: address), AllowedHosts.allows(url) else {
+            Log.write("blocked an address outside the allowed hosts")
+            return nil
+        }
+
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.timeoutIntervalForRequest = timeout
+        configuration.timeoutIntervalForResource = timeout
+        configuration.httpAdditionalHeaders = ["User-Agent": "Aiko/\(AppVersion.current())"]
+
+        let session = URLSession(
+            configuration: configuration, delegate: OnlyAllowedHops(), delegateQueue: nil)
+        defer { session.finishTasksAndInvalidate() }
+
+        do {
+            let (data, response) = try await session.data(from: url)
+            guard (response as? HTTPURLResponse)?.statusCode == 200 else { return nil }
+            return data
+        } catch {
+            return nil
+        }
+    }
+}
+
+/// Checks the address of every redirect before it is followed.
+///
+/// Without this the list of allowed hosts would only cover the first request: GitHub answers a
+/// download with a redirect to its file store, and URLSession follows a redirect anywhere.
+final class OnlyAllowedHops: NSObject, URLSessionTaskDelegate, @unchecked Sendable {
+    func urlSession(
+        _ session: URLSession,
+        task: URLSessionTask,
+        willPerformHTTPRedirection response: HTTPURLResponse,
+        newRequest request: URLRequest,
+        completionHandler: @escaping (URLRequest?) -> Void
+    ) {
+        guard AllowedHosts.allows(request.url) else {
+            Log.write("a redirect went outside the allowed hosts and was not followed")
+            completionHandler(nil)
+            return
+        }
+
+        completionHandler(request)
+    }
 }
 
 /// A random value made once on this computer, kept in a file beside the settings, and never sent

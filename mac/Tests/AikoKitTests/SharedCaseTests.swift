@@ -12,6 +12,14 @@ enum SpecCases {
         repository().appendingPathComponent("spec").appendingPathComponent("cases").appendingPathComponent(name)
     }
 
+    static func bytes(_ name: String, _ file: String) -> Data {
+        (try? Data(contentsOf: folder(name).appendingPathComponent(file))) ?? Data()
+    }
+
+    static func text(_ name: String, _ file: String) -> String {
+        (try? String(contentsOf: folder(name).appendingPathComponent(file), encoding: .utf8)) ?? ""
+    }
+
     static func json(_ name: String, _ file: String = "cases.json") -> JsonObject {
         let path = folder(name).appendingPathComponent(file).path
         let text = (try? String(contentsOfFile: path, encoding: .utf8)) ?? ""

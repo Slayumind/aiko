@@ -179,7 +179,7 @@
     <value>Start at login</value>
   </data>
   <data name="CheckUpdatesWhat" xml:space="preserve">
-    <value>Once a day Aiko asks slayumind.org for the latest version. Downloads come from GitHub.</value>
+    <value>Once a day Aiko asks slayumind.org for the latest version. The files come from GitHub, and Aiko checks their signature before it replaces anything.</value>
   </data>
   <data name="CheckNow" xml:space="preserve">
     <value>Check now</value>
@@ -198,6 +198,33 @@
   </data>
   <data name="UpdateFailed" xml:space="preserve">
     <value>Couldn't check. Try again in a few minutes.</value>
+  </data>
+  <data name="UpdateInstallNow" xml:space="preserve">
+    <value>Download and install</value>
+  </data>
+  <data name="UpdateDownloading" xml:space="preserve">
+    <value>Aiko is downloading {0}…</value>
+  </data>
+  <data name="UpdateReady" xml:space="preserve">
+    <value>Aiko {0} is ready. Restart to start using it.</value>
+  </data>
+  <data name="UpdateRestartNow" xml:space="preserve">
+    <value>Restart now</value>
+  </data>
+  <data name="UpdateNotInstalled" xml:space="preserve">
+    <value>This copy wasn't put here by the installer, so Aiko can't replace it. Use the download page.</value>
+  </data>
+  <data name="UpdateDownloadFailed" xml:space="preserve">
+    <value>The download didn't finish. Nothing was installed.</value>
+  </data>
+  <data name="UpdateNoKeyYet" xml:space="preserve">
+    <value>This build has no update key yet, so it can't install updates. Use the download page.</value>
+  </data>
+  <data name="UpdateBadSignature" xml:space="preserve">
+    <value>The release didn't pass the signature check. Nothing was installed.</value>
+  </data>
+  <data name="UpdateBadFile" xml:space="preserve">
+    <value>The downloaded file doesn't match the release list. Nothing was installed.</value>
   </data>
   <data name="LanguageSystem" xml:space="preserve">
     <value>System</value>

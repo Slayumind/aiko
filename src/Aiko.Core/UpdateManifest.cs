@@ -90,6 +90,33 @@ public sealed class UpdateManifest
         return true;
     }
 
+    /// The one file of the release whose name ends this way, or null when there is none or more
+    /// than one.
+    ///
+    /// It is how the macOS app finds its zip without knowing what the workflow called it: the
+    /// release carries one installer and one zip, so ".zip" names it. Two of them mean the release
+    /// changed shape, and then Aiko installs nothing rather than guessing which one is the app.
+    public string? OnlyFileEndingWith(string suffix)
+    {
+        string? found = null;
+        foreach (var name in _hashes.Keys)
+        {
+            if (!name.EndsWith(suffix, StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            if (found is not null)
+            {
+                return null;
+            }
+
+            found = name;
+        }
+
+        return found;
+    }
+
     public FileCheck CheckFile(string fileName, ReadOnlySpan<byte> fileBytes) =>
         CheckHash(fileName, SHA256.HashData(fileBytes));
 

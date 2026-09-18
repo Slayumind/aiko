@@ -5,14 +5,14 @@ import SwiftUI
 /// Everything that is not about one environment: where Aiko lives, startup, language, access.
 /// The twin of Settings/GeneralPage.xaml(.cs).
 ///
-/// There is no Velopack on macOS, so the update part shows the version and the check and nothing
-/// else: the answer is a number and a page to open, never an install button.
 struct GeneralPageView: View {
     @ObservedObject var state: SettingsState
 
     @State private var startsAtLogin = LoginItem.isEnabled()
     @State private var updateLine: String?
     @State private var downloadUrl = UpdateRun.releasesPage
+    /// The version the site named, kept for the line shown while it downloads.
+    @State private var newerVersion: String?
     @State private var showDownload = false
     @State private var asking = false
     @State private var diagnostics = Strings.diagnosticsWhat
@@ -20,6 +20,8 @@ struct GeneralPageView: View {
     @State private var offeringToAdd = false
     @State private var trashSecond = false
     @State private var checking = false
+    @State private var showInstall = false
+    @State private var showRestart = false
 
     private static let languages: [AikoLanguage] = [.system, .russian, .english]
 
@@ -90,6 +92,7 @@ struct GeneralPageView: View {
         }
         .onAppear {
             showAccess()
+            showReady()
             if state.askForUpdate {
                 state.askForUpdate = false
                 check()
@@ -136,6 +139,14 @@ struct GeneralPageView: View {
     private var updates: some View {
         HStack(spacing: 8) {
             FlatButton(title: Strings.checkNow, enabled: !checking, press: check)
+            // Downloading and replacing Aiko starts here and nowhere else: the daily check only
+            // ever says that a newer version is out.
+            if showInstall {
+                FlatButton(title: Strings.updateInstallNow, enabled: !checking, press: install)
+            }
+            if showRestart {
+                FlatButton(title: Strings.updateRestartNow) { UpdateInstall.relaunch() }
+            }
             if showDownload {
                 FlatButton(title: Strings.openDownloadPage) { open(downloadUrl) }
             }
@@ -152,6 +163,8 @@ struct GeneralPageView: View {
         checking = true
         updateLine = Strings.updateAsking
         showDownload = false
+        showInstall = false
+        showRestart = false
 
         Task {
             let info = await UpdateRun.ask()
@@ -161,6 +174,8 @@ struct GeneralPageView: View {
             case .available:
                 updateLine = Strings.format(Strings.updateAvailable, info.latest ?? "")
                 showDownload = true
+                showInstall = true
+                newerVersion = info.latest
             case .upToDate:
                 updateLine = Strings.format(Strings.updateLatest, version)
             // Never "you are up to date" when we do not know: that is the one answer that would
@@ -171,7 +186,56 @@ struct GeneralPageView: View {
 
             downloadUrl = info.downloadUrl ?? UpdateRun.releasesPage
             checking = false
+
+            // A version already downloaded and checked in this session stays offered, whatever the
+            // site says now.
+            showReady()
         }
+    }
+
+    /// Downloads the new version and puts it in place only if the release list is signed with our
+    /// key and the zip matches its line (D-246). Pressing this is the consent to download; the
+    /// restart asks once more.
+    private func install() {
+        guard let version = newerVersion, !checking else { return }
+        checking = true
+        updateLine = Strings.format(Strings.updateDownloading, version)
+
+        Task {
+            let outcome = await UpdateInstall.download(version: version)
+            updateLine = Self.words(outcome)
+            showInstall = outcome.step != .ready
+            checking = false
+            showReady()
+        }
+    }
+
+    /// The words for what came back. A refusal says what was refused and never offers to try the
+    /// same file again: the answer is the download page, where a person can look for themselves.
+    private static func words(_ outcome: InstallOutcome) -> String {
+        switch outcome.step {
+        case .ready:
+            return Strings.format(Strings.updateReady, outcome.version ?? "")
+        case .nothingNewer:
+            return Strings.format(Strings.updateLatest, AppVersion.current())
+        case .notInstalled:
+            return Strings.updateNotInstalled
+        case .failed:
+            return Strings.updateDownloadFailed
+        case .refused:
+            switch outcome.verdict {
+            case .noKeyYet: return Strings.updateNoKeyYet
+            case .notListed, .hashMismatch: return Strings.updateBadFile
+            default: return Strings.updateBadSignature
+            }
+        }
+    }
+
+    private func showReady() {
+        guard let ready = UpdateInstall.readyVersion else { return }
+        updateLine = Strings.format(Strings.updateReady, ready)
+        showRestart = true
+        showInstall = false
     }
 
     private func pickLanguage(_ index: Int) {

@@ -32,7 +32,8 @@ Nothing, unless you turn on one of these.
   limits of that account, at most once every three minutes. The request carries that account's
   access token and an honest user agent, `Aiko/<version>`. Aiko never sends the token anywhere else.
 - **Update checks** (off by default): Aiko asks `slayumind.org` for the latest version once a day
-  and whenever you press the button. Downloads come from GitHub.
+  and whenever you press the button. The files of an update come from GitHub, and only after you
+  press **Download and install**. See **Updates** below.
 - **Counting** (off by default, its own switch): the same request also says that one copy ran today.
   One request, two switches. With counting off, the identifier and the flags below are not in the
   address at all, and the site writes nothing. With update checks off and counting on, Aiko still
@@ -83,6 +84,30 @@ they see every request, and their access logs are outside this project's control
 **How to turn it off.** Use **Send anonymous statistics** on the **Privacy** page in settings. It's
 off until you turn it on, and turning it off stops the count. **Check for updates** sits next to it
 and is a separate switch, so you can keep one and drop the other.
+
+## Updates
+
+Aiko never downloads or replaces itself on its own. The daily check reads a version number and
+nothing else. Downloading starts when you press **Download and install** on the **General** page,
+and the new version starts when you press **Restart now**.
+
+Every release carries `SHA256SUMS.txt`, with the SHA-256 of each file, and `SHA256SUMS.txt.sig`, a
+signature made with an ECDSA P-256 key that only the release workflow holds. Aiko ships the public
+half of that key. Before anything is replaced, Aiko checks the signature of the list and then the
+hash of the file it downloaded. If either check fails, the file is deleted, nothing is replaced,
+and the reason goes into the log. A build that carries no key yet installs nothing at all.
+
+**On Windows** the package comes from GitHub through Velopack, over Aiko's own connection, so the
+list of allowed hosts applies to it as well. The checked package is put in place on restart, the
+way Velopack installs anything.
+
+**On macOS** Aiko downloads the zip of the release itself, unpacks it into a temporary folder with
+`ditto` and swaps the app bundle with two renames. A file the app downloads itself is not marked
+with quarantine, so the new version starts without a warning. The old bundle is deleted only after
+the new one is in place, and if the swap fails the old one is put back.
+
+For this Aiko may open `github.com`, `api.github.com` and GitHub's two file stores, and nothing
+else. Redirects are checked against the same list before they are followed.
 
 ## The token
 
