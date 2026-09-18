@@ -3,9 +3,10 @@
 The macOS app repeats the Windows core, so every ported file keeps its behaviour and every xUnit
 case has a Swift case with the same name and the same numbers. Test counts below are cases, not
 methods: one `[Theory]` with five `[InlineData]` rows counts as five, and so does the Swift
-`@Test(arguments:)` that mirrors it. 785 cases in `dotnet test`, 777 in `swift test`. The 49 the
-Swift side does not have are named at the bottom; the 41 it has and Windows does not belong to the
-two small programs, whose decisions sit inline in `Program.cs` on Windows and in AikoKit here.
+`@Test(arguments:)` that mirrors it. 785 cases in `dotnet test`, 835 in `swift test` (516 test
+methods). The 49 the Swift side does not have are named at the bottom; the ones it has and Windows
+does not belong to the two small programs, whose decisions sit inline in `Program.cs` on Windows,
+and to the card words, which sit in `Aiko.App` on Windows where no test can reach them.
 
 Rules that are a table of inputs and answers live in `spec/cases/` and are read by both suites, so
 a row cannot change in one core and stay as it was in the other. See `spec/cases/README.md`.
@@ -61,6 +62,18 @@ a row cannot change in one core and stay as it was in the other. See `spec/cases
 | CredentialFile.cs | CredentialFile.swift | 10 | 10 | `TryParse` with an out parameter is `parse`, which answers nil |
 | — | SharedCaseTests.swift | 4 | 4 | the case files under `spec/cases/`, read by both suites |
 
+The words and the numbers of the card sit in `src/Aiko.App` on Windows, where no xUnit case can
+reach them. In Swift they are part of AikoKit and have cases of their own:
+
+| C# file | Swift file | C# cases | Swift cases | Notes |
+|---|---|---|---|---|
+| Strings.resx, Strings.ru.resx | Strings.swift | — | 3 | both are made by `tools/strings.py` from `tools/strings.json`, so a text is written once |
+| Card/CardText.cs | CardText.swift | — | 20 | `clock` takes a time zone, where `$"{updatedAt:HH:mm}"` takes the machine's |
+| Card/CardModel.cs | CardModel.swift | — | 10 | brushes and `Visibility` become the tone and a plain "shown or not": AppKit and WPF spell those differently |
+| TrayText.cs | TrayText.swift | — | 6 | the 127 character limit is Windows', and one text for both is one text to translate |
+| RingIcon.cs, RingDrawing.cs | RingArt.swift | — | 13 | the 16 unit grid, the tones and the dashed ring as numbers; the drawing itself is `AikoMac/StatusIcon.swift` |
+| Theme/Motion.cs | Motion.swift, CardLifetime.swift | — | 6 | the durations and the curves, plus the hover delay and the two away turns that AikoShell.cs keeps inline |
+
 Helpers with no file of their own in the C# core:
 
 | Swift file | Why it exists |
@@ -108,9 +121,39 @@ Where they differ from the Windows pair:
   variable on either system: fed `{}` it writes nothing, prints nothing and exits 0, and CI runs
   exactly that.
 
-Not there yet: the app around them (tray, windows, the wizard), installing the shim into PATH and
-the commands folder, the marketplace and plugin install, the update check, and signing the two
-programs for release.
+## The app
+
+`Sources/AikoMac` is the Swift twin of `src/Aiko.App`. It holds no rules either: it draws what
+AikoKit decided, and it answers the mouse.
+
+| Windows file | macOS file | What it does |
+|---|---|---|
+| Program.cs, App.xaml.cs | main.swift, AikoDelegate.swift | starts without a Dock icon, picks the language, registers the fonts |
+| AikoShell.cs | AikoShell.swift | the status item, the hover, the menu and the life of the card |
+| RingIcon.cs | StatusIcon.swift | draws the ring and the dot into an `NSImage` |
+| Theme/Tokens.xaml | Theme.swift | the palette and the sizes, as SwiftUI values |
+| Card/CardPanel.xaml | CardView.swift | the card: header, blocks, rows, bars |
+| Card/CardWindow.xaml.cs | CardWindow.swift | the panel it lives in, where it is placed and how it arrives |
+| SnapshotWatcher.cs | SnapshotWatch.swift | watches the snapshots folder; a `DispatchSource` in place of `FileSystemWatcher` |
+| SettingsStore.cs, ClaudeAccounts.cs | Store.swift | reads the settings, the environments and the plan of an account |
+| Log.cs | Log.swift | the same file, the same line format |
+
+`Scripts/make-app.sh` builds `build/Aiko.app`: one universal binary, the bridge inside as
+`Aiko.Bridge`, the shim as `claude`, an ad-hoc signature.
+
+Where it differs from Windows:
+
+- **The card always hangs under the status item.** The Windows taskbar can sit on any edge, so the
+  card asks whether there is room above. The macOS menu bar is always at the top.
+- **The gear and the cross** are system symbols. The Windows build carries the gear of the user's
+  own icon set as a path in Tokens.xaml.
+- **Proof that it starts.** `AIKO_MAC_SELF_TEST=1` opens the card, writes what it says and what
+  size it came out, and quits after three seconds. The Windows app has `--snapshot` instead, which
+  saves a picture; over SSH a picture shows only the wallpaper.
+
+Not there yet: the island, the settings window and the wizard, the "Open Claude Code" button of the
+card, direct mode, the face (D-211), installing the shim into PATH and the commands folder, the
+marketplace and plugin install, the update check, and signing for release.
 
 ## Names that had to change
 
