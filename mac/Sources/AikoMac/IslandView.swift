@@ -66,11 +66,20 @@ final class IslandView: NSView {
 
     // ---- Drawing ----
 
+    /// How much of the island, in points from its top edge, is not drawn. While the island lands at
+    /// the top of the screen its overshoot would show above the menu bar, and macOS does not let a
+    /// window go under the bar (RESEARCH, 2026-09-18), so that part is cut away instead.
+    var cutFromTheTop: Double = 0
+
     override func draw(_ dirtyRect: NSRect) {
         let frame = islandFrame()
         let body = NSRect(origin: .zero, size: bounds.size)
 
-        NSBezierPath(rect: body).setClip()
+        // AppKit counts up from the bottom, so cutting from the top means lowering the height.
+        let shown = cutFromTheTop > 0
+            ? NSRect(x: 0, y: 0, width: body.width, height: max(0, body.height - cutFromTheTop))
+            : body
+        NSBezierPath(rect: shown).setClip()
         Theme.nsSurface.setFill()
         rounded(body, frame.corners).fill()
 

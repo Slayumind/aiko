@@ -33,7 +33,7 @@ final class IslandWindow {
         // island out of the bar's whole strip, which is a point taller than the bar itself, and the
         // island could never touch it. Above the bar it can, and it never covers it: it starts where
         // the bar ends.
-        panel.level = .statusBar
+        panel.level = WindowOrder.onTop
         panel.backgroundColor = .clear
         panel.isOpaque = false
         panel.hasShadow = false
@@ -336,17 +336,32 @@ final class IslandWindow {
         let target = IslandPlacement.place(position, size.width, size.height, work)
         view.frame = NSRect(origin: .zero, size: size)
 
+        // At the bottom edge the overshoot of the spring goes under the Dock, the way it goes under
+        // the taskbar on Windows. At the top there is nothing to go under: macOS pushes a window out
+        // of the menu bar's strip instead of drawing it below, so the island keeps its level and the
+        // view clips whatever would show above the bar.
+        panel.level = position.edge == .bottom ? WindowOrder.underTheDock : WindowOrder.onTop
+        let clipsUnderTheMenuBar = position.edge == .top
+
         landing.run(Motion.settle, Motion.spring) { [weak self] share in
             guard let self else { return }
-            self.panel.setFrame(
-                Screens.rect(Box(
-                    from.x + ((target.x - from.x) * share),
-                    from.y + ((target.y - from.y) * share),
-                    size.width,
-                    size.height)),
-                display: true)
+            let step = Box(
+                from.x + ((target.x - from.x) * share),
+                from.y + ((target.y - from.y) * share),
+                size.width,
+                size.height)
+
+            self.panel.setFrame(Screens.rect(step), display: true)
+
+            // The overshoot at the top would show above the menu bar, so the part of the island that
+            // reaches into the bar is simply not drawn: it reads as going under it.
+            self.view.cutFromTheTop = clipsUnderTheMenuBar ? max(0, work.y - step.y) : 0
+            self.view.needsDisplay = true
         } done: { [weak self] in
-            self?.fit(log: true)
+            guard let self else { return }
+            self.panel.level = WindowOrder.onTop
+            self.view.cutFromTheTop = 0
+            self.fit(log: true)
         }
     }
 

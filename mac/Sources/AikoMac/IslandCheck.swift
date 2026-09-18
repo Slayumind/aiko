@@ -43,11 +43,15 @@ enum IslandCheck {
         default: .top
         }
 
+        // The island is put away while the strip is held: the two sit in the same place, and the
+        // point of this door is to look at the glass.
+        island.hide(true)
         island.showStripForCheck(on: edge)
         Log.write("self test: strip held on the \(edge) edge for \(seconds) s")
 
         after(seconds) {
             island.hideStripForCheck()
+            island.hide(false)
             Log.write("self test: strip gone")
             quit(after: 0.3)
         }
