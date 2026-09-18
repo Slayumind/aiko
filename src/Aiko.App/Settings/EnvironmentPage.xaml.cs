@@ -63,7 +63,7 @@ public partial class EnvironmentPage : UserControl
 
         var settings = _editor.Current;
         var account = ClaudeAccounts.Read(_folder);
-        var signedIn = File.Exists(ClaudeInstall.CredentialsPathIn(_folder));
+        var signedIn = File.Exists(ClaudeInstall.CredentialsPathIn(ThisComputer.Platform, _folder));
         var two = settings.Environments.Count > 1;
         var isDefault = settings.Default(Home)?.Name == environment.Name;
 
@@ -148,7 +148,7 @@ public partial class EnvironmentPage : UserControl
         OpenedPanel.IsOpen = true;
 
         // The dot turns green by itself once the sign-in is done in the browser.
-        if (!File.Exists(ClaudeInstall.CredentialsPathIn(_folder)))
+        if (!File.Exists(ClaudeInstall.CredentialsPathIn(ThisComputer.Platform, _folder)))
         {
             _signIn?.Dispose();
             _signIn = Waiter.ForSignIn(_folder, Fill);

@@ -10,7 +10,7 @@ static class ThisComputer
 {
     public static readonly PlatformConventions Platform = PlatformConventions.Windows;
 
-    public static readonly AikoFolders Folders = new(
+    public static readonly AikoFolders Folders = AikoFolders.Windows(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
 

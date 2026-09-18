@@ -130,7 +130,7 @@ static class Program
             for (var run = 1; run <= 3; run++)
             {
                 var changed = SkillShelf.CopyTo(marketFolder);
-                var file = AikoMarketplace.FileIn(marketFolder);
+                var file = AikoMarketplace.FileIn(ThisComputer.Platform, marketFolder);
                 Directory.CreateDirectory(Path.GetDirectoryName(file)!);
                 File.WriteAllText(file, AikoMarketplace.Json(@"""C:\none\Aiko.Bridge.exe"" plugin aiko-persona", SkillShelf.Shipped));
 

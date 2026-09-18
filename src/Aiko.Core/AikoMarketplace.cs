@@ -15,8 +15,8 @@ public static class AikoMarketplace
     public static bool IsOurs(string pluginId) => pluginId.EndsWith("@" + Name, StringComparison.Ordinal);
 
     /// Where Claude Code looks for the marketplace file inside a marketplace folder.
-    public static string FileIn(string marketplaceFolder) =>
-        Path.Combine(marketplaceFolder, ".claude-plugin", "marketplace.json");
+    public static string FileIn(PlatformConventions platform, string marketplaceFolder) =>
+        platform.Join(marketplaceFolder, ".claude-plugin", "marketplace.json");
 
     /// The command Claude Code runs to get the persona plugin. For the installed app it names the
     /// local data folder through the platform's variable, %LOCALAPPDATA% on Windows, which the
@@ -24,18 +24,19 @@ public static class AikoMarketplace
     /// spaces. Null when no command fits Claude Code's rules.
     public static string? PersonaCommand(PlatformConventions platform, string bridgeExePath, AikoFolders folders)
     {
-        var installed = folders.InstalledAppFolder + Path.DirectorySeparatorChar;
+        // A system without such a variable never needs the installed folder: the command spells
+        // the real path, and on macOS the app is not under the local base at all.
         var path = platform.LocalDataVariable is { } variable
-            && bridgeExePath.StartsWith(installed, StringComparison.OrdinalIgnoreCase)
-            ? variable + Path.DirectorySeparatorChar + bridgeExePath[(TrimSeparators(folders.LocalBase).Length + 1)..]
+            && bridgeExePath.StartsWith(folders.InstalledAppFolder + platform.DirectorySeparator, StringComparison.OrdinalIgnoreCase)
+            ? variable + platform.DirectorySeparator + bridgeExePath[(TrimSeparators(platform, folders.LocalBase).Length + 1)..]
             : bridgeExePath;
 
         var command = $"\"{path}\" {PersonaPluginOutput.Verb} {PersonaPlugin.Name}";
         return IsValidCommand(command) ? command : null;
     }
 
-    private static string TrimSeparators(string folder) =>
-        folder.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+    private static string TrimSeparators(PlatformConventions platform, string folder) =>
+        folder.TrimEnd(platform.DirectorySeparator);
 
     /// Claude Code's rules for a command source: printable ASCII, at most 500 characters, and no
     /// run of four spaces, so the person can read the whole command they are asked to accept.

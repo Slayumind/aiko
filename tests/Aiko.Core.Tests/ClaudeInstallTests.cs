@@ -44,7 +44,7 @@ public class ClaudeInstallTests
     [InlineData("!!", @"C:\Users\someone\.claude-env")]
     public void A_new_folder_is_named_after_the_environment(string name, string folder)
     {
-        Assert.Equal(folder, ClaudeInstall.NewConfigFolder(name, Home, _ => false));
+        Assert.Equal(folder, ClaudeInstall.NewConfigFolder(Windows, name, Home, _ => false));
     }
 
     [Fact]
@@ -55,6 +55,6 @@ public class ClaudeInstallTests
             Home + @"\.claude-work", Home + @"\.claude-work-2",
         };
 
-        Assert.Equal(Home + @"\.claude-work-3", ClaudeInstall.NewConfigFolder("Work", Home, taken.Contains));
+        Assert.Equal(Home + @"\.claude-work-3", ClaudeInstall.NewConfigFolder(Windows, "Work", Home, taken.Contains));
     }
 }

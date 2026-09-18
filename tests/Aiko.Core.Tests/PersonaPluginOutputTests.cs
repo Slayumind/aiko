@@ -4,7 +4,7 @@ namespace Aiko.Core.Tests;
 
 public class PersonaPluginOutputTests
 {
-    private static readonly AikoFolders Folders = new(
+    private static readonly AikoFolders Folders = AikoFolders.Windows(
         @"C:\Users\someone\AppData\Roaming", @"C:\Users\someone\AppData\Local");
 
     [Fact]

@@ -513,7 +513,7 @@ sealed class AikoShell : IDisposable
             environment => environment.Name,
             environment => new CardAccount(
                 ClaudeAccounts.Read(environment.ConfigDirectories[0]).PlanLabel,
-                File.Exists(ClaudeInstall.CredentialsPathIn(environment.ConfigDirectories[0]))));
+                File.Exists(ClaudeInstall.CredentialsPathIn(ThisComputer.Platform, environment.ConfigDirectories[0]))));
 
     /// The card's button: Claude Code in a window of its own, for this environment.
     private static void OpenClaude(string environment)

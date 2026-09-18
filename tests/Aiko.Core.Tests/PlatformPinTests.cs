@@ -47,6 +47,6 @@ public class PlatformPinTests
             "\"C:\\Users\\someone\\AppData\\Local\\Other\\Aiko.Bridge.exe\" plugin aiko-persona",
             AikoMarketplace.PersonaCommand(Windows,
                 @"C:\Users\someone\AppData\Local\Other\Aiko.Bridge.exe",
-                new AikoFolders(@"C:\Users\someone\AppData\Roaming", @"C:\Users\someone\AppData\Local")));
+                AikoFolders.Windows(@"C:\Users\someone\AppData\Roaming", @"C:\Users\someone\AppData\Local")));
     }
 }
