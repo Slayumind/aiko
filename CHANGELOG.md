@@ -9,11 +9,17 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Added
 
+- **Aiko for macOS.** The same app on the other system: the ring in the menu bar, the island on any
+  edge of the screen, the card with the limits of both environments, the first run checklist and the
+  settings. It reads the numbers from Claude Code the same way, keeps environments apart the same way
+  and speaks the same two languages. macOS 14 or newer, Apple silicon and Intel.
 - **Code signing policy.** [CODE-SIGNING.md](CODE-SIGNING.md) says which files will be signed through
   SignPath Foundation and who approves each release.
 
 ### Changed
 
+- **The limits survive a fractional reset time.** A reset time with a fraction in it used to throw
+  and take the whole status line report with it; it is now read down to the second.
 - **PRIVACY.md** now also lists the `PATH` folder and the PowerShell profile change.
 
 ## [0.2.3] - 2026-09-17
