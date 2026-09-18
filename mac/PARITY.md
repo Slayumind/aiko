@@ -3,8 +3,8 @@
 The macOS app repeats the Windows core, so every ported file keeps its behaviour and every xUnit
 case has a Swift case with the same name and the same numbers. Test counts below are cases, not
 methods: one `[Theory]` with five `[InlineData]` rows counts as five, and so does the Swift
-`@Test(arguments:)` that mirrors it. `dotnet test` prints cases and says 811; `swift test` prints
-methods, not cases, and says 613. The 49 the Swift side does not have are named at the bottom; the ones it has and Windows
+`@Test(arguments:)` that mirrors it. `dotnet test` prints cases and says 774; `swift test` prints
+methods, not cases, and says 607. The 49 the Swift side does not have are named at the bottom; the ones it has and Windows
 does not belong to the two small programs, whose decisions sit inline in `Program.cs` on Windows,
 and to the card words, the island and the settings window, which sit in `Aiko.App` on Windows
 where no test can reach them.
@@ -32,8 +32,8 @@ a row cannot change in one core and stay as it was in the other. See `spec/cases
 | IslandReveal.cs | IslandReveal.swift | 8 | 8 | |
 | IslandPlacement.cs | IslandPlacement.swift | 18 | 18 | |
 | TrayFaceMotion.cs | TrayFaceMotion.swift | 7 | 7 | |
-| TrayMood.cs | TrayMood.swift | 25 | 25 | `hasFace` takes the environments, as on Windows |
-| SessionActivity.cs | SessionActivity.swift | 26 | 26 | |
+| TrayMood.cs | TrayMood.swift | 6 | 6 | which face an event brings is in `spec/cases/tray-mood/`; `hasFace` takes the environments, as on Windows |
+| SessionActivity.cs | SessionActivity.swift | 6 | 6 | what a hook means and what a broken record reads as are in `spec/cases/hook-events/` |
 | Heartbeat.cs | Heartbeat.swift | 17 | 17 | |
 | SessionReminder.cs | SessionReminder.swift | 18 | 20 | its other 6 C# cases are about the hook in settings.json and sit in SettingsJsonPatchTests; 8 Swift cases of its own read the system language from a tag (MacLanguageTests) |
 | PersonaSettings.cs | PersonaSettings.swift | 15 | 15 | |
@@ -64,7 +64,7 @@ a row cannot change in one core and stay as it was in the other. See `spec/cases
 | AppSettings.cs | AppSettings.swift | 15 | 15 | |
 | WizardChecklist.cs | WizardChecklist.swift | 13 | 13 | |
 | CredentialFile.cs | CredentialFile.swift | 10 | 10 | `TryParse` with an out parameter is `parse`, which answers nil |
-| — | SharedCaseTests.swift | 5 | 5 | the case files under `spec/cases/`, read by both suites |
+| — | SharedCaseTests.swift | 7 | 7 | the case files under `spec/cases/`, read by both suites |
 | — | UpdateInstaller.swift | — | 6 | the macOS half of an update: the zip, `ditto` and the bundle swap. Windows has Velopack instead, and UpdateInstall.cs holds the same steps around it where no xUnit case can reach them |
 
 The words and the numbers of the card sit in `src/Aiko.App` on Windows, where no xUnit case can

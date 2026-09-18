@@ -7,57 +7,8 @@ public class TrayMoodTests
     private static ActivityRecord At(SessionActivity activity, double secondsAgo = 0) =>
         new("claude", activity, Now.AddSeconds(-secondsAgo));
 
-    // ---- sessions ----
-
-    [Theory]
-    [InlineData(SessionActivity.Working, AikoFace.Working)]
-    [InlineData(SessionActivity.Waiting, AikoFace.Waiting)]
-    [InlineData(SessionActivity.Done, AikoFace.Done)]
-    [InlineData(SessionActivity.Error, AikoFace.Error)]
-    [InlineData(SessionActivity.OutOfLimit, AikoFace.Asleep)]
-    public void A_session_that_changes_what_it_does_brings_its_face(SessionActivity activity, AikoFace face)
-    {
-        Assert.Equal(face, TrayMood.ForActivity(null, At(activity), Now));
-    }
-
-    [Fact]
-    public void The_same_activity_again_brings_nothing()
-    {
-        Assert.Null(TrayMood.ForActivity(At(SessionActivity.Working, 20), At(SessionActivity.Working), Now));
-        Assert.Equal(AikoFace.Done, TrayMood.ForActivity(At(SessionActivity.Working, 20), At(SessionActivity.Done), Now));
-    }
-
-    [Fact]
-    public void An_old_event_found_in_a_file_is_history()
-    {
-        Assert.Null(TrayMood.ForActivity(null, At(SessionActivity.Waiting, 600), Now));
-    }
-
-    // ---- limits ----
-
-    [Theory]
-    [InlineData(70, 90, AikoFace.Tired)]
-    [InlineData(89, 95, AikoFace.Tired)]
-    [InlineData(95, 100, AikoFace.Asleep)]
-    [InlineData(80, 100, AikoFace.Asleep)]
-    [InlineData(100, 0, AikoFace.Fresh)]
-    [InlineData(92, 3, AikoFace.Fresh)]
-    public void A_limit_crossing_a_line_brings_a_face(int before, int after, AikoFace face)
-    {
-        Assert.Equal(face, TrayMood.ForLimit(before, after));
-    }
-
-    [Theory]
-    [InlineData(null, 95)]
-    [InlineData(40, 60)]
-    [InlineData(91, 97)]
-    [InlineData(100, 100)]
-    [InlineData(20, 10)]
-    [InlineData(95, null)]
-    public void Moving_inside_a_band_or_a_first_number_brings_nothing(int? before, int? after)
-    {
-        Assert.Null(TrayMood.ForLimit(before, after));
-    }
+    // Which face an event brings is a table, and it lives in spec/cases/tray-mood; both cores read
+    // it. What is left here needs a snapshot, a clock or a settings object.
 
     [Fact]
     public void The_fullest_window_counts_and_a_window_past_its_reset_is_empty()

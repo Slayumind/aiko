@@ -14,6 +14,8 @@ not: it stays a test in its own language.
 | `folder-layout/` | where Aiko keeps its files on Windows and on macOS (`AikoFolders`) |
 | `launch-command/` | the command name of an environment, and what makes a command bad (`LaunchCommand`) |
 | `shim-launch/` | which environment a start of Claude Code belongs to (`ShimLaunch`) |
+| `hook-events/` | what a hook of the persona plugin says a session is doing (`HookEvent`, `ActivityRecord`) |
+| `tray-mood/` | which face an event brings (`TrayMood`) |
 | `snapshot-name/` | the file name one environment reports into (`SnapshotName`) |
 | `update-manifest/` | a signed release manifest made with openssl (`UpdateManifest`) |
 

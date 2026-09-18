@@ -143,6 +143,70 @@ public class SharedCaseTests
         }
     }
 
+    // ---- what a hook says a session is doing ----
+
+    [Fact]
+    public void Every_hook_event_means_the_same_activity()
+    {
+        var cases = SpecCases.Json("hook-events");
+        var session = cases.GetProperty("session").GetString();
+
+        foreach (var row in cases.GetProperty("events").EnumerateArray())
+        {
+            var json = row.GetProperty("json").GetString()!;
+            var activity = row.GetProperty("activity").GetString();
+
+            var expected = activity is null
+                ? null
+                : new HookEvent(session!, Enum.Parse<SessionActivity>(activity));
+
+            Assert.Equal(expected, HookEvent.FromJson(json));
+        }
+
+        foreach (var row in cases.GetProperty("badRecords").EnumerateArray())
+        {
+            Assert.Null(ActivityRecord.FromJson(row.GetString()!));
+        }
+    }
+
+    // ---- which face an event brings ----
+
+    [Fact]
+    public void Every_mood_case_brings_the_same_face()
+    {
+        var cases = SpecCases.Json("tray-mood");
+        var now = new DateTimeOffset(2026, 9, 15, 12, 0, 0, TimeSpan.Zero);
+
+        ActivityRecord? RecordIn(JsonElement element) =>
+            element.ValueKind == JsonValueKind.Null
+                ? null
+                : new ActivityRecord(
+                    "claude",
+                    Enum.Parse<SessionActivity>(element.GetProperty("activity").GetString()!),
+                    now.AddSeconds(-element.GetProperty("secondsAgo").GetDouble()));
+
+        foreach (var row in cases.GetProperty("forActivity").EnumerateArray())
+        {
+            var face = row.GetProperty("face").GetString();
+
+            Assert.Equal(
+                face is null ? null : Enum.Parse<AikoFace>(face),
+                TrayMood.ForActivity(RecordIn(row.GetProperty("before")), RecordIn(row.GetProperty("now"))!, now));
+        }
+
+        foreach (var row in cases.GetProperty("forLimit").EnumerateArray())
+        {
+            int? Percent(string name) =>
+                row.GetProperty(name).ValueKind == JsonValueKind.Null ? null : row.GetProperty(name).GetInt32();
+
+            var face = row.GetProperty("face").GetString();
+
+            Assert.Equal(
+                face is null ? null : Enum.Parse<AikoFace>(face),
+                TrayMood.ForLimit(Percent("before"), Percent("after")));
+        }
+    }
+
     // ---- what a program is called on this system, and every path built from that ----
 
     [Fact]
