@@ -84,3 +84,14 @@ jobs:
       - name: Test
         working-directory: mac
         run: swift test
+
+      - name: Run the two programs
+        working-directory: mac
+        # Proof that the built files start and their runtime is complete. The bridge answers an
+        # empty status line payload with nothing at all and exit 0, as it does on Windows. The
+        # config folder is an empty one of ours, so the runner's own ~/.claude is never read.
+        run: |
+          bin=$(swift build --show-bin-path)
+          mkdir -p "$RUNNER_TEMP/claude"
+          echo '{}' | CLAUDE_CONFIG_DIR="$RUNNER_TEMP/claude" "$bin/aiko-bridge"
+          AIKO_SHIM_SELF_TEST=1 "$bin/aiko-shim"
