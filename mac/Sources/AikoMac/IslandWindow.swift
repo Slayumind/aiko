@@ -29,7 +29,9 @@ final class IslandWindow {
             defer: false)
 
         panel.isFloatingPanel = true
-        panel.level = .statusBar
+        // Above ordinary windows but under the menu bar, the way the island on Windows sits above
+        // every window and under the taskbar.
+        panel.level = NSWindow.Level(rawValue: NSWindow.Level.mainMenu.rawValue - 1)
         panel.backgroundColor = .clear
         panel.isOpaque = false
         panel.hasShadow = false
@@ -108,6 +110,24 @@ final class IslandWindow {
     /// Where the landing strip is, for the self test. Nil when the island is not in hand.
     var landingStrip: NSRect? { strip.map(\.frame) }
     var edge: ScreenEdge { drag?.isDragging == true ? handEdge : position.edge }
+
+    /// Shows the landing strip on an edge and leaves it there, so a person or a screenshot can
+    /// look at the glass. Only the self test calls these two.
+    func showStripForCheck(on edge: ScreenEdge) {
+        let size = view.wanted
+        let work = Screens.work(under: Screens.box(panel.frame))
+        let landing = IslandPlacement.place(
+            IslandPosition(edge, position.along), Double(size.width), Double(size.height), work)
+
+        let pane = IslandStrip()
+        pane.place(on: landing, edge: edge)
+        strip = pane
+    }
+
+    func hideStripForCheck() {
+        strip?.close()
+        strip = nil
+    }
 
     /// Whether the pointer, in screen points, is on the island. The card is at home over the island
     /// as well as over the menu bar icon (D-148).
