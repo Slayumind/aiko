@@ -1,21 +1,23 @@
-# Build the installer and publish a release when a version tag is pushed.
+# Build Aiko for Windows and macOS and publish one release when a version tag is pushed.
 #
 # Actions are pinned to a commit, not to a tag: a tag can be moved, and then a release would be
 # built by somebody else's code.
+#
+# Three jobs. `windows` and `mac` build their own files and hand them over as artifacts; `publish`
+# takes both, writes one SHA256SUMS.txt over everything and makes the release. If either build
+# fails, `publish` never runs and nothing is published.
 name: release
 
 on:
   push:
     tags: ['v*']
 
+# The build jobs only read the repository. The publish job asks for more, for itself.
 permissions:
-  contents: write
-  # Both are needed to attest where the installer was built.
-  id-token: write
-  attestations: write
+  contents: read
 
 jobs:
-  release:
+  windows:
     runs-on: windows-latest
 
     steps:
@@ -128,51 +130,292 @@ jobs:
           # into Downloads is not. Somebody who moved or deleted that folder would be left with a
           # Claude Code status line pointing at nothing, after every answer, forever.
           #
-          # It is deleted here, before the checksums. In 0.1.0 it was only left out of the upload,
-          # so SHA256SUMS.txt listed a file the release did not have and `sha256sum -c` failed.
+          # It is deleted here, before the files leave this job. In 0.1.0 it was only left out of
+          # the upload, so SHA256SUMS.txt listed a file the release did not have and
+          # `sha256sum -c` failed.
           Remove-Item releases/*Portable* -ErrorAction Stop
 
-      - name: Write the checksums
-        shell: pwsh
+      - name: Hand the files to the release job
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        with:
+          name: windows
+          path: releases/*
+          if-no-files-found: error
+
+  mac:
+    # The macOS app is signed with a Developer ID and notarized (D-251), so it opens on a stranger's
+    # Mac with Gatekeeper out of the way and needs no `xattr` command.
+    runs-on: macos-15
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Read the version from the tag
+        id: version
+        run: echo "number=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Check that the version file agrees with the tag
+        # make-app.sh takes the number from Directory.Build.props, the one home of the version
+        # (D-236), while the file names here come from the tag. If the two disagree, the DMG says
+        # one number and the app's settings window another, and nobody notices until a bug report.
+        env:
+          TAG_VERSION: ${{ steps.version.outputs.number }}
         run: |
-          # LF line endings on purpose. Set-Content on this Windows runner writes CRLF, and
-          # `sha256sum -c` then reads the carriage return as part of every file name and fails
-          # on all of them. That is what the 0.1.0 file did until it was replaced by hand.
-          $lines = Get-ChildItem releases -File | ForEach-Object {
-            $hash = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower()
-            "$hash  $($_.Name)"
-          }
-          [IO.File]::WriteAllText("$PWD/releases/SHA256SUMS.txt", (($lines -join "`n") + "`n"), [Text.Encoding]::ASCII)
+          set -euo pipefail
+          file_version="$(sed -n 's/.*<Version>\(.*\)<\/Version>.*/\1/p' Directory.Build.props | head -1)"
+          if [ "$file_version" != "$TAG_VERSION" ]; then
+            echo "Directory.Build.props says $file_version, the tag says $TAG_VERSION."
+            exit 1
+          fi
+
+      - name: Test
+        working-directory: mac
+        run: swift test
+
+      - name: Open a keychain for the certificate
+        # The certificate lives in a keychain made for this run and deleted at the end of the job,
+        # so it never touches the runner's own keychain. The .p12 is written to the temporary
+        # folder and removed as soon as it is imported, even when the import fails. Nothing here is
+        # printed: the identity is named by the certificate hash, which is not a secret.
+        id: keychain
+        env:
+          MAC_CERT_P12_BASE64: ${{ secrets.MAC_CERT_P12_BASE64 }}
+          MAC_CERT_PASSWORD: ${{ secrets.MAC_CERT_PASSWORD }}
+        run: |
+          set -euo pipefail
+          umask 077
+          keychain="$RUNNER_TEMP/aiko-signing.keychain-db"
+          cert="$RUNNER_TEMP/certificate.p12"
+          trap 'rm -f "$cert"' EXIT
+          # The keychain password is made here and dies with the job. It guards nothing else.
+          keychain_password="$(openssl rand -base64 24)"
+          printf '%s' "$MAC_CERT_P12_BASE64" | base64 --decode > "$cert"
+
+          security create-keychain -p "$keychain_password" "$keychain"
+          # Six hours before it locks itself. The build and two notarization waits take their time,
+          # and a keychain that locks in the middle fails the signing with an unclear error.
+          security set-keychain-settings -lut 21600 "$keychain"
+          security unlock-keychain -p "$keychain_password" "$keychain"
+          security import "$cert" -k "$keychain" -P "$MAC_CERT_PASSWORD" -T /usr/bin/codesign
+          # Lets codesign use the key without a dialog, which nobody could answer on a runner.
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$keychain_password" "$keychain" > /dev/null
+          security list-keychains -d user -s "$keychain" login.keychain-db
+
+          # An empty keychain makes find-identity end with an error, and the message below is
+          # kinder than that, so the failure is handled here.
+          identities="$(security find-identity -v -p codesigning "$keychain" || true)"
+          hash="$(printf '%s\n' "$identities" | awk '/Developer ID Application/ { print $2; exit }')"
+          if [ -z "$hash" ]; then
+            echo "The keychain has no Developer ID Application certificate. Check MAC_CERT_P12_BASE64."
+            exit 1
+          fi
+          echo "identity=$hash" >> "$GITHUB_OUTPUT"
+
+      - name: Build and sign the app
+        # make-app.sh builds one universal binary for both kinds of Mac and wraps it in the bundle.
+        # Given an identity it signs from the inside out, with a timestamp and the hardened
+        # runtime, and never with --deep. Without one it signs ad-hoc, the way it does on a laptop.
+        env:
+          AIKO_CODESIGN_IDENTITY: ${{ steps.keychain.outputs.identity }}
+        run: mac/Scripts/make-app.sh
+
+      - name: Check that the two small programs start from the bundle
+        # The same guard the Windows job has. The hardened runtime and a universal binary are two
+        # more ways a program can be built and still refuse to run, and neither shows up in a
+        # signature check. The bridge answers an empty status line payload with nothing and exit 0;
+        # the config folder is an empty one of ours, so the runner's own ~/.claude is never read.
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/claude"
+          echo '{}' | CLAUDE_CONFIG_DIR="$RUNNER_TEMP/claude" mac/build/Aiko.app/Contents/MacOS/Aiko.Bridge
+          out="$(AIKO_SHIM_SELF_TEST=1 mac/build/Aiko.app/Contents/MacOS/claude)"
+          if [ "$out" != 'aiko shim ok' ]; then
+            echo "The shim did not start: output '$out'."
+            exit 1
+          fi
+
+      - name: Notarize the app
+        # The App Store Connect key, not an app password: it belongs to no personal account and can
+        # be revoked on its own. It is written to the temporary folder for these commands only and
+        # removed when the step ends, even if notarization fails.
+        env:
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          set -euo pipefail
+          umask 077
+          key="$RUNNER_TEMP/asc-key.p8"
+          trap 'rm -f "$key"' EXIT
+          printf '%s\n' "$ASC_KEY_P8" > "$key"
+          # Apple takes an archive, not a folder. --wait holds the job until the answer comes back.
+          ditto -c -k --keepParent mac/build/Aiko.app "$RUNNER_TEMP/notarize-app.zip"
+          xcrun notarytool submit "$RUNNER_TEMP/notarize-app.zip" \
+            --key "$key" --key-id "$ASC_KEY_ID" --issuer "$ASC_ISSUER_ID" --wait
+          # The ticket is stapled into the bundle, so the app opens on a Mac that is offline. This
+          # is also the honest check of the line above: notarytool has been known to end with 0 on
+          # a rejected build, and there is no ticket to staple then.
+          xcrun stapler staple mac/build/Aiko.app
+
+      - name: Build and sign the DMG
+        env:
+          IDENTITY: ${{ steps.keychain.outputs.identity }}
+          VERSION: ${{ steps.version.outputs.number }}
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          staging="$RUNNER_TEMP/dmg"
+          rm -rf "$staging"
+          mkdir -p "$staging"
+          # ditto copies the bundle with the signature whole; cp does not always.
+          ditto mac/build/Aiko.app "$staging/Aiko.app"
+          # What people see when the disk image opens: the app, and Applications to drag it into.
+          ln -s /Applications "$staging/Applications"
+          hdiutil create -volname Aiko -srcfolder "$staging" -fs HFS+ -format UDZO -ov "dist/Aiko-$VERSION.dmg"
+          # The disk image gets a signature of its own, so Gatekeeper trusts the download itself
+          # and not only the app inside it. No hardened runtime here: a DMG does not run.
+          codesign --force --sign "$IDENTITY" --timestamp "dist/Aiko-$VERSION.dmg"
+
+      - name: Notarize the DMG
+        env:
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          VERSION: ${{ steps.version.outputs.number }}
+        run: |
+          set -euo pipefail
+          umask 077
+          key="$RUNNER_TEMP/asc-key.p8"
+          trap 'rm -f "$key"' EXIT
+          printf '%s\n' "$ASC_KEY_P8" > "$key"
+          xcrun notarytool submit "dist/Aiko-$VERSION.dmg" \
+            --key "$key" --key-id "$ASC_KEY_ID" --issuer "$ASC_ISSUER_ID" --wait
+          xcrun stapler staple "dist/Aiko-$VERSION.dmg"
+
+      - name: Pack the zip for the updater
+        # The macOS updater planned for 0.3 downloads a zip, not a disk image. The app inside is
+        # already stapled, so an update installs on a Mac with no network as well.
+        env:
+          VERSION: ${{ steps.version.outputs.number }}
+        run: ditto -c -k --keepParent mac/build/Aiko.app "dist/Aiko-$VERSION-mac.zip"
+
+      - name: Check the signature and Gatekeeper
+        # What a stranger's Mac will ask. --deep here is a check of every file inside, which is
+        # safe; it is only signing with --deep that hides mistakes.
+        env:
+          VERSION: ${{ steps.version.outputs.number }}
+        run: |
+          set -euo pipefail
+          codesign --verify --deep --strict --verbose=2 mac/build/Aiko.app
+          xcrun stapler validate mac/build/Aiko.app
+          xcrun stapler validate "dist/Aiko-$VERSION.dmg"
+          spctl -a -vv -t install "dist/Aiko-$VERSION.dmg"
+
+      - name: Close the keychain
+        # Always, so a failed build leaves no certificate behind on the runner.
+        if: always()
+        run: |
+          security list-keychains -d user -s login.keychain-db
+          security delete-keychain "$RUNNER_TEMP/aiko-signing.keychain-db" || true
+
+      - name: Hand the files to the release job
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        with:
+          name: macos
+          path: dist/*
+          if-no-files-found: error
+
+  publish:
+    # One release for both systems. It starts only when both builds are green, so a broken macOS
+    # build cannot leave a Windows-only release behind under a tag that promises both.
+    needs: [windows, mac]
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      # Both are needed to attest where the files were built.
+      id-token: write
+      attestations: write
+
+    steps:
+      - name: Check out
+        # For CHANGELOG.md and update-public-key.pem. No build happens here.
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Read the version from the tag
+        id: version
+        run: echo "number=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Take the Windows files
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        with:
+          name: windows
+          path: releases
+
+      - name: Take the macOS files
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        with:
+          name: macos
+          path: releases
+
+      - name: Attest where this was built
+        # Every file people download, not only the installer. The attestation shows which workflow
+        # in this repository built the file and from which commit.
+        #
+        # Before the checksums, on purpose: SHA256SUMS.txt is not a build output, it describes
+        # these files, and its own signature is what proves it.
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4
+        with:
+          subject-path: releases/*
+
+      - name: Write the checksums
+        run: |
+          set -euo pipefail
+          cd releases
+          # The list is taken before the file is written, or sha256sum would hash it as well and
+          # the line would never match. Sorted, so two releases read the same way.
+          find . -maxdepth 1 -type f -printf '%P\0' | sort -z | xargs -0 sha256sum > SHA256SUMS.txt
+          cat SHA256SUMS.txt
 
       - name: Decide whether the checksums get signed
         # Auto-update installs a file only when SHA256SUMS.txt carries a good signature. The real
         # public key replaces the placeholder in update-public-key.pem, and from then on a release
         # without the signing secret stops here. Until then the release goes out unsigned, as before.
         id: signing
-        shell: pwsh
         env:
           HAS_UPDATE_KEY: ${{ secrets.AIKO_UPDATE_SIGNING_KEY != '' }}
         run: |
-          $hasPublicKey = (Get-Content update-public-key.pem -Raw).Contains('-----BEGIN PUBLIC KEY-----')
-          $hasSecret = $env:HAS_UPDATE_KEY -eq 'true'
-          if ($hasPublicKey -and -not $hasSecret) {
-            throw "update-public-key.pem holds a real key, but the secret AIKO_UPDATE_SIGNING_KEY is not set."
-          }
-          if (-not $hasSecret) {
-            Write-Output "::warning::No update signing key yet. SHA256SUMS.txt is not signed."
-          }
-          elseif (-not $hasPublicKey) {
-            Write-Output "::warning::update-public-key.pem is still a placeholder. The signature is not checked."
-          }
-          "sign=$($hasSecret.ToString().ToLower())" >> $env:GITHUB_OUTPUT
-          "verify=$(($hasSecret -and $hasPublicKey).ToString().ToLower())" >> $env:GITHUB_OUTPUT
+          set -euo pipefail
+          has_public_key=false
+          if grep -qF -- '-----BEGIN PUBLIC KEY-----' update-public-key.pem; then
+            has_public_key=true
+          fi
+          has_secret=false
+          if [ "$HAS_UPDATE_KEY" = 'true' ]; then
+            has_secret=true
+          fi
+          if [ "$has_public_key" = true ] && [ "$has_secret" = false ]; then
+            echo "update-public-key.pem holds a real key, but the secret AIKO_UPDATE_SIGNING_KEY is not set."
+            exit 1
+          fi
+          if [ "$has_secret" = false ]; then
+            echo "::warning::No update signing key yet. SHA256SUMS.txt is not signed."
+          elif [ "$has_public_key" = false ]; then
+            echo "::warning::update-public-key.pem is still a placeholder. The signature is not checked."
+          fi
+          echo "sign=$has_secret" >> "$GITHUB_OUTPUT"
+          if [ "$has_secret" = true ] && [ "$has_public_key" = true ]; then
+            echo "verify=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "verify=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Sign the checksums
         # DER ECDSA P-256 over the raw bytes of the file, the format both apps check. The key is
         # written only for the one openssl call, readable by this user only, and removed on exit
         # even when signing fails. It is never printed.
         if: steps.signing.outputs.sign == 'true'
-        shell: bash
         env:
           AIKO_UPDATE_SIGNING_KEY: ${{ secrets.AIKO_UPDATE_SIGNING_KEY }}
         run: |
@@ -187,43 +430,37 @@ jobs:
         # Catches a secret and a public key that are not a pair before anybody downloads the
         # release. The app would refuse every update signed like that.
         if: steps.signing.outputs.verify == 'true'
-        shell: bash
         run: |
           openssl dgst -sha256 -verify update-public-key.pem \
             -signature releases/SHA256SUMS.txt.sig releases/SHA256SUMS.txt
 
-      - name: Attest where this was built
-        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4
-        with:
-          subject-path: releases/*Setup.exe
-
       - name: Take the notes from the changelog
-        id: notes
-        shell: pwsh
+        # Everything under the heading of this version, up to the next heading.
+        #
+        # A missing heading stops the release. It used to fall back to the first one, which is
+        # "Unreleased" until the day of a release, so a tag pushed with the changelog not yet
+        # written would publish notes titled Unreleased and nobody would find out until after.
+        env:
+          VERSION: ${{ steps.version.outputs.number }}
         run: |
-          # Everything under the heading of this version, up to the next heading.
-          #
-          # A missing heading stops the release. It used to fall back to the first one, which is
-          # "Unreleased" until the day of a release, so a tag pushed with the changelog not yet
-          # written would publish notes titled Unreleased and nobody would find out until after.
-          $lines = Get-Content CHANGELOG.md
-          $start = ($lines | Select-String -Pattern "^## \[${{ steps.version.outputs.number }}\]" | Select-Object -First 1).LineNumber
-          if (-not $start) {
-            throw "CHANGELOG.md has no section for ${{ steps.version.outputs.number }}. Write it before tagging."
-          }
-          $rest = $lines[$start..($lines.Count - 1)]
-          $end = ($rest | Select-String -Pattern '^## ' | Select-Object -First 1).LineNumber
-          $body = if ($end) { $rest[0..($end - 2)] } else { $rest }
-          $body | Set-Content release-notes.md -Encoding utf8
+          set -euo pipefail
+          if ! grep -qF "## [$VERSION]" CHANGELOG.md; then
+            echo "CHANGELOG.md has no section for $VERSION. Write it before tagging."
+            exit 1
+          fi
+          awk -v want="## [$VERSION]" '
+            index($0, want) == 1 { found = 1; next }
+            found && /^## / { exit }
+            found { print }
+          ' CHANGELOG.md > release-notes.md
+          cat release-notes.md
 
       - name: Publish the release
-        shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.number }}
         run: |
-          # The paths are gathered first: passing the command a PowerShell expression would hand
-          # it objects instead of file names. The same files the checksums were written for.
-          $files = Get-ChildItem releases -File | ForEach-Object { $_.FullName }
-          gh release create ${{ github.ref_name }} @files `
-            --title "Aiko ${{ steps.version.outputs.number }}" `
+          set -euo pipefail
+          gh release create "$GITHUB_REF_NAME" releases/* \
+            --title "Aiko $VERSION" \
             --notes-file release-notes.md
