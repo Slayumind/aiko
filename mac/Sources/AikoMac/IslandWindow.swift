@@ -29,9 +29,11 @@ final class IslandWindow {
             defer: false)
 
         panel.isFloatingPanel = true
-        // Above ordinary windows but under the menu bar, the way the island on Windows sits above
-        // every window and under the taskbar.
-        panel.level = NSWindow.Level(rawValue: NSWindow.Level.mainMenu.rawValue - 1)
+        // Above ordinary windows and above the menu bar. Under the bar the window server keeps the
+        // island out of the bar's whole strip, which is a point taller than the bar itself, and the
+        // island could never touch it. Above the bar it can, and it never covers it: it starts where
+        // the bar ends.
+        panel.level = .statusBar
         panel.backgroundColor = .clear
         panel.isOpaque = false
         panel.hasShadow = false
