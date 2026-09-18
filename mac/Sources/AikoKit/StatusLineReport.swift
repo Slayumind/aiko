@@ -89,12 +89,15 @@ public struct StatusLineReport: Sendable, Equatable {
         guard let percent = window["used_percentage"]?.doubleValue,
               let resetsAt = window["resets_at"] else { return true }
 
-        guard case .number = resetsAt, let seconds = resetsAt.int64Value else { return false }
+        // JSON has one number type, so the seconds can arrive with a fraction. They are cut down to
+        // the second instead of dropping the whole report.
+        guard case .number = resetsAt, let raw = resetsAt.doubleValue else { return false }
+        let seconds = raw.rounded(.down)
 
         windows.append(LimitWindow(
             kind: kind,
             percent: Percentage.fromDouble(percent),
-            resetsAt: Date(timeIntervalSince1970: Double(seconds))))
+            resetsAt: Date(timeIntervalSince1970: seconds)))
         return true
     }
 }

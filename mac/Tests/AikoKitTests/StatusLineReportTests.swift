@@ -29,6 +29,17 @@ struct StatusLineReportTests {
     }
 
     @Test
+    func aResetTimeWithAFractionIsReadDownToTheSecond() {
+        // JSON has one number type, so a sender may write the seconds with a fraction. Reading it
+        // as a whole number threw on Windows and the whole report was lost, status line and all.
+        let report = StatusLineReport.fromJson(
+            #"{ "rate_limits": { "five_hour": { "used_percentage": 42, "resets_at": 1789170600.5 } } }"#)
+
+        #expect(report.hasData)
+        #expect(report.find(.fiveHour)?.resetsAt == Date(timeIntervalSince1970: 1_789_170_600))
+    }
+
+    @Test
     func readsBothWindowsFromARealPayload() {
         let report = StatusLineReport.fromJson(Self.realPayload)
 
