@@ -11,17 +11,11 @@ struct EnvironmentPageView: View {
     @ObservedObject var state: SettingsState
     let folder: String
 
-    @State private var name = ""
-    @State private var command = ""
-    @State private var nameProblem = NameProblem.none
-    @State private var commandProblem = CommandProblem.none
-    @State private var suggestion: String?
     @State private var opened = false
     @State private var asking = false
     @State private var toTrash = false
     @State private var waiter: Waiter?
     @State private var signedIn = false
-    @State private var filled = false
 
     private var environment: AikoEnvironment? {
         state.environments.environments.first { $0.holds(folder) }
@@ -38,8 +32,8 @@ struct EnvironmentPageView: View {
         }
         .onAppear(perform: fill)
         .onDisappear {
-            commitName()
-            commitCommand()
+            // The typed name and command are applied by the state, which outlives this view: Esc
+            // has to keep them, and by then the view is already gone.
             waiter?.stop()
         }
     }
@@ -156,9 +150,9 @@ struct EnvironmentPageView: View {
 
         return VStack(alignment: .leading, spacing: 0) {
             Control.sectionLabel(Strings.nameInAiko).padding(.bottom, 6)
-            NameField(text: $name, size: Theme.textName, onCommit: commitName)
-            Reveal(isOpen: nameProblem != .none) {
-                Text(words(nameProblem))
+            NameField(text: $state.typedName, size: Theme.textName, onCommit: state.commitName)
+            Reveal(isOpen: state.nameProblem != .none) {
+                Text(words(state.nameProblem))
                     .font(Theme.sans(Theme.textSmall))
                     .foregroundStyle(Theme.caution)
                     .fixedSize(horizontal: false, vertical: true)
@@ -166,23 +160,24 @@ struct EnvironmentPageView: View {
             }
 
             Control.sectionLabel(Strings.sectionCommand).padding(.top, 16).padding(.bottom, 6)
-            NameField(text: $command, mono: true, size: Theme.textNumber, onCommit: commitCommand)
+            NameField(text: $state.typedCommand, mono: true, size: Theme.textNumber,
+                      onCommit: state.commitCommand)
 
-            if suggestion == nil {
-                Text(words(commandProblem))
+            if state.suggestion == nil {
+                Text(words(state.commandProblem))
                     .font(Theme.sans(Theme.textSmall))
-                    .foregroundStyle(commandProblem == .none ? Theme.muted : Theme.caution)
+                    .foregroundStyle(state.commandProblem == .none ? Theme.muted : Theme.caution)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.top, 5)
             }
 
-            Reveal(isOpen: suggestion != nil) {
+            Reveal(isOpen: state.suggestion != nil) {
                 VStack(alignment: .leading, spacing: 8) {
                     Control.rowHint(Strings.cmdKept)
-                    if let suggestion {
+                    if let suggestion = state.suggestion {
                         FlatButton(title: Strings.format(Strings.renameCommandTo, suggestion)) {
-                            command = suggestion
-                            commitCommand()
+                            state.typedCommand = suggestion
+                            state.commitCommand()
                         }
                     }
                 }
@@ -276,16 +271,12 @@ struct EnvironmentPageView: View {
     // ---- what the page does ----
 
     private func fill() {
-        guard let environment else { return }
-        filled = false
-        name = environment.name
-        command = environment.command
+        state.startEditing(folder)
         signedIn = Store.isSignedIn(folder)
-        filled = true
     }
 
     private func setDirect(_ on: Bool) {
-        guard filled, let environment else { return }
+        guard let environment else { return }
         state.editor.commit(
             EnvironmentEdits.setDirectMode(state.environments, environment.name, on),
             "direct mode \(on ? "on" : "off")")
@@ -302,43 +293,11 @@ struct EnvironmentPageView: View {
         }
     }
 
-    private func commitName() {
-        guard let environment else { return }
-        let wanted = name.trimmingCharacters(in: .whitespacesAndNewlines)
 
-        let problem = wanted == environment.name
-            ? NameProblem.none
-            : EnvironmentEdits.checkName(state.environments, environment.name, wanted)
-        nameProblem = problem
-
-        guard problem == .none, wanted != environment.name else { return }
-
-        let renamed = EnvironmentEdits.rename(
-            state.environments, environment.name, wanted, commandsInstalled: state.editor.commandsInstalled)
-        suggestion = renamed.suggestedCommand
-        state.editor.commit(renamed.settings, "renamed an environment")
-    }
-
-    private func commitCommand() {
-        guard let environment else { return }
-        let wanted = command.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard wanted != environment.command else {
-            commandProblem = .none
-            return
-        }
-
-        let problem = EnvironmentEdits.checkCommand(state.environments, environment.name, wanted)
-        commandProblem = problem
-        guard problem == .none else { return }
-
-        suggestion = nil
-        state.editor.commit(
-            EnvironmentEdits.setCommand(state.environments, environment.name, wanted),
-            "changed a command")
-    }
 
     private func remove(_ name: String) {
         waiter?.stop()
+        state.stopEditing()
         let trashed = state.editor.remove(name, toTrash: toTrash)
         state.showNoteOnFirstEnvironment(
             Strings.format(trashed ? Strings.environmentRemovedToTrash : Strings.environmentRemoved, name))

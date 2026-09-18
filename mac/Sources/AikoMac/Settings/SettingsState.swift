@@ -172,6 +172,21 @@ final class SettingsState: ObservableObject {
     /// Set by the menu item that asks for an update check, so the general page asks as it opens.
     @Published var askForUpdate = false
 
+    // ---- the two fields of the environment page ----
+    //
+    // They live here and not in the view because Esc has to apply what was typed on the way out,
+    // and a view that is already going away cannot be asked for anything (D-179).
+
+    @Published var typedName = ""
+    @Published var typedCommand = ""
+    @Published var nameProblem = NameProblem.none
+    @Published var commandProblem = CommandProblem.none
+
+    /// A command Aiko offers after a rename, when the old one no longer follows the name (D-180).
+    @Published var suggestion: String?
+
+    private var editingFolder: String?
+
     /// Read once per folder: .claude.json can be large and the plan does not change while a
     /// window is open.
     private var plans: [String: String] = [:]
@@ -218,7 +233,10 @@ final class SettingsState: ObservableObject {
         return label
     }
 
+    /// Leaving a page applies what was typed on it, the same as leaving a field. The twin of
+    /// SettingsPanel.LeaveCurrentPage.
     func show(_ page: SettingsPage) {
+        stopEditing()
         note = ""
         self.page = page
     }
@@ -234,11 +252,78 @@ final class SettingsState: ObservableObject {
         show(.checklist)
     }
 
-    /// Called when the window closes: the checklist stops waiting for anything outside Aiko.
+    /// Called when the window closes: what was typed is applied, and the checklist stops waiting
+    /// for anything outside Aiko.
     func leave() {
+        stopEditing()
         checklist?.close()
         savedUntil?.cancel()
     }
+
+    // ---- the name and the command, applied on Enter or when the field is left ----
+
+    func startEditing(_ folder: String) {
+        guard let environment = environments.environments.first(where: { $0.holds(folder) }) else {
+            return
+        }
+
+        editingFolder = folder
+        typedName = environment.name
+        typedCommand = environment.command
+        nameProblem = .none
+        commandProblem = .none
+        suggestion = nil
+    }
+
+    func stopEditing() {
+        commitName()
+        commitCommand()
+        editingFolder = nil
+    }
+
+    func commitName() {
+        guard let folder = editingFolder,
+              let environment = environments.environments.first(where: { $0.holds(folder) })
+        else {
+            return
+        }
+
+        let wanted = typedName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let problem = wanted == environment.name
+            ? NameProblem.none
+            : EnvironmentEdits.checkName(environments, environment.name, wanted)
+        nameProblem = problem
+
+        guard problem == .none, wanted != environment.name else { return }
+
+        let renamed = EnvironmentEdits.rename(
+            environments, environment.name, wanted, commandsInstalled: editor.commandsInstalled)
+        suggestion = renamed.suggestedCommand
+        editor.commit(renamed.settings, "renamed an environment")
+    }
+
+    func commitCommand() {
+        guard let folder = editingFolder,
+              let environment = environments.environments.first(where: { $0.holds(folder) })
+        else {
+            return
+        }
+
+        let wanted = typedCommand.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard wanted != environment.command else {
+            commandProblem = .none
+            return
+        }
+
+        let problem = EnvironmentEdits.checkCommand(environments, environment.name, wanted)
+        commandProblem = problem
+        guard problem == .none else { return }
+
+        suggestion = nil
+        editor.commit(
+            EnvironmentEdits.setCommand(environments, environment.name, wanted), "changed a command")
+    }
+
 
     func saveApp(_ next: AppSettings) {
         guard next != app else { return }
