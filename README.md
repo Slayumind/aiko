@@ -123,7 +123,9 @@ The build isn't signed yet, so **SmartScreen will warn you**. Choose *More info*
 anyway*. Signing is planned. Until then, every release comes with `SHA256SUMS.txt` and a build
 provenance attestation, and [SECURITY.md](SECURITY.md) shows how to check them.
 
-The [code signing policy](CODE-SIGNING.md) says what will be signed and who approves it.
+Free code signing provided by [SignPath.io](https://about.signpath.io), certificate by
+[SignPath Foundation](https://signpath.org). The [code signing policy](CODE-SIGNING.md) says what is
+signed and who approves each release.
 
 Windows 11 hides new app icons under the arrow next to the clock. Open the arrow and drag Aiko onto
 the taskbar: under the arrow, the card can't open.
