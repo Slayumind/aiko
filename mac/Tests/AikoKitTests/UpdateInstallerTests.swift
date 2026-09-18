@@ -25,7 +25,10 @@ struct UpdateInstallerTests {
     @Test
     func aManifestChangedAfterSigningLeavesTheOldVersion() async throws {
         let world = try World(version: "2.0.0")
-        world.files["\(World.base)/SHA256SUMS.txt"] = Data("0".utf8) + world.manifest.dropFirst()
+        // "x" is not a hex digit, so the first line always changes. A digit would sometimes be the
+        // one already there — the zip is made fresh every run and its hash starts where it likes —
+        // and then the "changed" manifest was the signed one and this test failed for no reason.
+        world.files["\(World.base)/SHA256SUMS.txt"] = Data("x".utf8) + world.manifest.dropFirst()
 
         let outcome = await world.installer().install(version: "2.0.0")
 

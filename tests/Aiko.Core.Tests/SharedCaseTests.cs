@@ -143,6 +143,136 @@ public class SharedCaseTests
         }
     }
 
+    // ---- what a program is called on this system, and every path built from that ----
+
+    [Fact]
+    public void Every_platform_answers_its_own_paths()
+    {
+        foreach (var block in SpecCases.Json("platform-paths").GetProperty("platforms").EnumerateArray())
+        {
+            var name = block.GetProperty("platform").GetString();
+            var platform = PlatformIn(block);
+
+            Assert.Equal(block.GetProperty("executableName").GetString(),
+                platform.ExecutableName(block.GetProperty("programName").GetString()!));
+            Assert.Equal(block.GetProperty("pathListSeparator").GetString(), platform.PathListSeparator.ToString());
+            Assert.Equal(block.GetProperty("directorySeparator").GetString(), platform.DirectorySeparator.ToString());
+            Assert.Equal(block.GetProperty("localDataVariable").GetString(), platform.LocalDataVariable);
+
+            var files = block.GetProperty("commandFiles");
+            Assert.Equal(files.GetProperty("shim").GetString(), CommandLinks.ShimFileName(platform));
+            Assert.Equal(
+                files.GetProperty("commandFile").GetString(),
+                CommandLinks.FileNameFor(platform, files.GetProperty("command").GetString()!));
+
+            var seen = block.GetProperty("seen");
+            Assert.Equal(
+                seen.GetProperty("formatted").GetString(),
+                RealClaude.FormatSeen(platform, [.. Strings(seen.GetProperty("folders"))]));
+            Assert.Equal(
+                Strings(seen.GetProperty("parsed")),
+                RealClaude.ParseSeen(platform, seen.GetProperty("written").GetString()));
+
+            var real = block.GetProperty("realClaude");
+            var onDisk = Strings(real.GetProperty("files")).ToHashSet();
+            Assert.Equal(
+                real.GetProperty("found").GetString(),
+                RealClaude.Find(platform, real.GetProperty("path").GetString(), [.. Strings(real.GetProperty("seen"))], onDisk.Contains));
+
+            foreach (var row in block.GetProperty("bridge").EnumerateArray())
+            {
+                Assert.True(
+                    row.GetProperty("ours").GetBoolean() == BridgeCommand.IsAiko(platform, row.GetProperty("command").GetString()),
+                    $"{name}: {row.GetProperty("command").GetString()}");
+            }
+
+            var shell = block.GetProperty("shell");
+            var (fileName, arguments) = ClaudeShellLookup.CallFor(platform, null, "line");
+            Assert.Equal(Enum.Parse<ClaudeShell>(shell.GetProperty("kind").GetString()!), ClaudeShellLookup.ShellFor(platform, null));
+            Assert.Equal(shell.GetProperty("fileName").GetString(), fileName);
+            Assert.Equal(Strings(shell.GetProperty("arguments")), arguments);
+
+            var install = block.GetProperty("install");
+            var installed = Strings(install.GetProperty("files")).ToHashSet();
+            Assert.Equal(
+                install.GetProperty("found").GetString(),
+                ClaudeInstall.Find(
+                    platform,
+                    install.GetProperty("freshPath").GetString()!,
+                    install.GetProperty("commandFolder").GetString()!,
+                    install.GetProperty("home").GetString()!,
+                    installed.Contains));
+
+            var made = block.GetProperty("newConfigFolder");
+            Assert.Equal(
+                made.GetProperty("folder").GetString(),
+                ClaudeInstall.NewConfigFolder(
+                    platform,
+                    made.GetProperty("environmentName").GetString()!,
+                    made.GetProperty("home").GetString()!,
+                    _ => false));
+
+            var credentials = block.GetProperty("credentials");
+            Assert.Equal(
+                credentials.GetProperty("path").GetString(),
+                ClaudeInstall.CredentialsPathIn(platform, credentials.GetProperty("configFolder").GetString()!));
+
+            var userPath = block.GetProperty("userPath");
+            var folder = userPath.GetProperty("folder").GetString()!;
+            var added = UserPathList.AddToFront(platform, userPath.GetProperty("before").GetString(), folder);
+            Assert.Equal(userPath.GetProperty("added").GetString(), added);
+            Assert.Equal(userPath.GetProperty("removed").GetString(), UserPathList.Remove(platform, added, folder));
+            Assert.True(UserPathList.Contains(platform, userPath.GetProperty("holds").GetString(), folder), $"{name}: holds");
+
+            var forShell = block.GetProperty("bridgeFor");
+            Assert.Equal(
+                forShell.GetProperty("command").GetString(),
+                BridgeCommand.For(
+                    forShell.GetProperty("bridge").GetString()!,
+                    Enum.Parse<ClaudeShell>(forShell.GetProperty("shell").GetString()!)));
+
+            var persona = block.GetProperty("personaCommand");
+            var folders = new AikoFolders(
+                platform,
+                persona.GetProperty("settingsBase").GetString()!,
+                persona.GetProperty("localBase").GetString()!);
+            Assert.Equal(
+                persona.GetProperty("command").GetString(),
+                AikoMarketplace.PersonaCommand(platform, persona.GetProperty("bridge").GetString()!, folders));
+        }
+    }
+
+    /// The two systems Aiko ships on are taken as they are; a block with conventions of its own
+    /// describes a system that is neither, and the core has to follow the description it is given.
+    private static PlatformConventions PlatformIn(JsonElement block)
+    {
+        if (!block.TryGetProperty("conventions", out var made))
+        {
+            return block.GetProperty("platform").GetString() switch
+            {
+                "windows" => PlatformConventions.Windows,
+                "macos" => PlatformConventions.MacOS,
+                var other => throw new InvalidOperationException($"unknown platform {other}"),
+            };
+        }
+
+        var shell = made.GetProperty("fallbackShell");
+        return new PlatformConventions
+        {
+            ExecutableSuffix = made.GetProperty("executableSuffix").GetString()!,
+            PathListSeparator = made.GetProperty("pathListSeparator").GetString()![0],
+            DirectorySeparator = made.GetProperty("directorySeparator").GetString()![0],
+            LocalDataVariable = made.GetProperty("localDataVariable").GetString(),
+            FallbackShell = new ShellProgram(
+                Enum.Parse<ClaudeShell>(shell.GetProperty("kind").GetString()!),
+                shell.GetProperty("fileName").GetString()!,
+                [.. Strings(shell.GetProperty("argumentsBeforeCommand"))]),
+        };
+    }
+
+    private static List<string> Strings(JsonElement array) =>
+        [.. array.EnumerateArray().Select(e => e.GetString()!)];
+
     private static AikoEnvironment EnvironmentIn(JsonElement element) =>
         new(
             element.GetProperty("name").GetString()!,

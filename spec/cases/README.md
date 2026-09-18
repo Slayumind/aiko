@@ -10,6 +10,7 @@ not: it stays a test in its own language.
 
 | Folder | Rule |
 |---|---|
+| `platform-paths/` | what a program is called and every path built from that, on Windows, macOS and a made-up system (`PlatformConventions`, `RealClaude`, `CommandLinks`, `ClaudeInstall`, `UserPathList`, `BridgeCommand`, `ClaudeShellLookup`, `AikoMarketplace`) |
 | `folder-layout/` | where Aiko keeps its files on Windows and on macOS (`AikoFolders`) |
 | `launch-command/` | the command name of an environment, and what makes a command bad (`LaunchCommand`) |
 | `shim-launch/` | which environment a start of Claude Code belongs to (`ShimLaunch`) |
