@@ -259,13 +259,6 @@
     ]
   ],
   [
-    "NoEnvironments",
-    [
-      "No environments yet. Aiko looks for them on the first run.",
-      "Сред пока нет. Aiko ищет их при первом запуске."
-    ]
-  ],
-  [
     "AccessOk",
     [
       "Claude Code sends its limits to Aiko.",
@@ -497,13 +490,6 @@
     ]
   ],
   [
-    "WizardStepEnvironments",
-    [
-      "Environments",
-      "Среды"
-    ]
-  ],
-  [
     "EnvironmentPlainName",
     [
       "Main",
@@ -525,20 +511,6 @@
     ]
   ],
   [
-    "WizardStepCount",
-    [
-      "step {0} of 3",
-      "шаг {0} из 3"
-    ]
-  ],
-  [
-    "Back",
-    [
-      "Back",
-      "Назад"
-    ]
-  ],
-  [
     "NotNow",
     [
       "Not now",
@@ -546,66 +518,10 @@
     ]
   ],
   [
-    "Next",
-    [
-      "Next",
-      "Дальше"
-    ]
-  ],
-  [
-    "Allow",
-    [
-      "Allow",
-      "Разрешить"
-    ]
-  ],
-  [
     "Finish",
     [
       "Finish",
       "Готово"
-    ]
-  ],
-  [
-    "WizardFoundOne",
-    [
-      "Aiko found one Claude Code folder. That's enough to start, and you can add a second one later in settings.",
-      "Aiko нашла одну папку Claude Code. Для начала этого хватит, вторую можно добавить позже в настройках."
-    ]
-  ],
-  [
-    "WizardFoundMany",
-    [
-      "Aiko found these Claude Code folders. Give them names you'll recognise and turn off the ones you don't need.",
-      "Aiko нашла эти папки Claude Code. Дай им понятные тебе имена и выключи лишние."
-    ]
-  ],
-  [
-    "WizardNothingFound",
-    [
-      "Aiko didn't find Claude Code on this computer. Install it and check again, or choose the folder yourself.",
-      "Aiko не нашла Claude Code на этом компьютере. Установи его и проверь снова или выбери папку сам."
-    ]
-  ],
-  [
-    "WizardChooseFolder",
-    [
-      "Choose a folder",
-      "Выбрать папку"
-    ]
-  ],
-  [
-    "WizardCheckAgain",
-    [
-      "Check again",
-      "Проверить снова"
-    ]
-  ],
-  [
-    "WizardFolderDialogTitle",
-    [
-      "Choose a Claude Code folder",
-      "Выбери папку Claude Code"
     ]
   ],
   [
@@ -854,13 +770,6 @@
     ]
   ],
   [
-    "StateNone",
-    [
-      "none",
-      "нет"
-    ]
-  ],
-  [
     "StateBound",
     [
       "{0} bound",
@@ -987,24 +896,10 @@
     ]
   ],
   [
-    "WaitLogin",
-    [
-      "Waiting for you to sign in…",
-      "Ждём, пока войдёшь в аккаунт…"
-    ]
-  ],
-  [
     "NameInAiko",
     [
       "NAME IN AIKO",
       "ИМЯ В AIKO"
-    ]
-  ],
-  [
-    "AccountLabel",
-    [
-      "Account",
-      "Аккаунт"
     ]
   ],
   [

@@ -142,9 +142,6 @@
   <data name="DirectModeAsk" xml:space="preserve">
     <value>Если аккаунт рабочий, сначала спроси того, кто им управляет.</value>
   </data>
-  <data name="NoEnvironments" xml:space="preserve">
-    <value>Сред пока нет. Aiko ищет их при первом запуске.</value>
-  </data>
   <data name="AccessOk" xml:space="preserve">
     <value>Claude Code передаёт лимиты в Aiko.</value>
   </data>
@@ -244,9 +241,6 @@
   <data name="SettingsWindowTitle" xml:space="preserve">
     <value>Настройки Aiko</value>
   </data>
-  <data name="WizardStepEnvironments" xml:space="preserve">
-    <value>Среды</value>
-  </data>
   <data name="EnvironmentPlainName" xml:space="preserve">
     <value>Основная</value>
   </data>
@@ -256,41 +250,11 @@
   <data name="WizardStepWhere" xml:space="preserve">
     <value>Где показывать Aiko</value>
   </data>
-  <data name="WizardStepCount" xml:space="preserve">
-    <value>шаг {0} из 3</value>
-  </data>
-  <data name="Back" xml:space="preserve">
-    <value>Назад</value>
-  </data>
   <data name="NotNow" xml:space="preserve">
     <value>Не сейчас</value>
   </data>
-  <data name="Next" xml:space="preserve">
-    <value>Дальше</value>
-  </data>
-  <data name="Allow" xml:space="preserve">
-    <value>Разрешить</value>
-  </data>
   <data name="Finish" xml:space="preserve">
     <value>Готово</value>
-  </data>
-  <data name="WizardFoundOne" xml:space="preserve">
-    <value>Aiko нашла одну папку Claude Code. Для начала этого хватит, вторую можно добавить позже в настройках.</value>
-  </data>
-  <data name="WizardFoundMany" xml:space="preserve">
-    <value>Aiko нашла эти папки Claude Code. Дай им понятные тебе имена и выключи лишние.</value>
-  </data>
-  <data name="WizardNothingFound" xml:space="preserve">
-    <value>Aiko не нашла Claude Code на этом компьютере. Установи его и проверь снова или выбери папку сам.</value>
-  </data>
-  <data name="WizardChooseFolder" xml:space="preserve">
-    <value>Выбрать папку</value>
-  </data>
-  <data name="WizardCheckAgain" xml:space="preserve">
-    <value>Проверить снова</value>
-  </data>
-  <data name="WizardFolderDialogTitle" xml:space="preserve">
-    <value>Выбери папку Claude Code</value>
   </data>
   <data name="WizardAccessExplain" xml:space="preserve">
     <value>Claude Code отдаёт лимиты строке состояния. Aiko добавит одну строку в файл настроек каждой среды. Если у тебя уже есть своя строка состояния, она продолжит работать: Aiko запустит её и покажет её вывод.</value>
@@ -397,9 +361,6 @@
   <data name="StateAdded" xml:space="preserve">
     <value>добавлена</value>
   </data>
-  <data name="StateNone" xml:space="preserve">
-    <value>нет</value>
-  </data>
   <data name="StateBound" xml:space="preserve">
     <value>привязано: {0}</value>
   </data>
@@ -454,14 +415,8 @@
   <data name="LoginNever" xml:space="preserve">
     <value>Aiko не видит ни пароля, ни токена. Только то, что аккаунт подключён.</value>
   </data>
-  <data name="WaitLogin" xml:space="preserve">
-    <value>Ждём, пока войдёшь в аккаунт…</value>
-  </data>
   <data name="NameInAiko" xml:space="preserve">
     <value>ИМЯ В AIKO</value>
-  </data>
-  <data name="AccountLabel" xml:space="preserve">
-    <value>Аккаунт</value>
   </data>
   <data name="PlanLabel" xml:space="preserve">
     <value>План</value>

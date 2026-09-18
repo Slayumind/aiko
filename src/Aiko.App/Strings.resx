@@ -142,9 +142,6 @@
   <data name="DirectModeAsk" xml:space="preserve">
     <value>If it's a work account, ask whoever manages it first.</value>
   </data>
-  <data name="NoEnvironments" xml:space="preserve">
-    <value>No environments yet. Aiko looks for them on the first run.</value>
-  </data>
   <data name="AccessOk" xml:space="preserve">
     <value>Claude Code sends its limits to Aiko.</value>
   </data>
@@ -244,9 +241,6 @@
   <data name="SettingsWindowTitle" xml:space="preserve">
     <value>Aiko settings</value>
   </data>
-  <data name="WizardStepEnvironments" xml:space="preserve">
-    <value>Environments</value>
-  </data>
   <data name="EnvironmentPlainName" xml:space="preserve">
     <value>Main</value>
   </data>
@@ -256,41 +250,11 @@
   <data name="WizardStepWhere" xml:space="preserve">
     <value>Where to show Aiko</value>
   </data>
-  <data name="WizardStepCount" xml:space="preserve">
-    <value>step {0} of 3</value>
-  </data>
-  <data name="Back" xml:space="preserve">
-    <value>Back</value>
-  </data>
   <data name="NotNow" xml:space="preserve">
     <value>Not now</value>
   </data>
-  <data name="Next" xml:space="preserve">
-    <value>Next</value>
-  </data>
-  <data name="Allow" xml:space="preserve">
-    <value>Allow</value>
-  </data>
   <data name="Finish" xml:space="preserve">
     <value>Finish</value>
-  </data>
-  <data name="WizardFoundOne" xml:space="preserve">
-    <value>Aiko found one Claude Code folder. That's enough to start, and you can add a second one later in settings.</value>
-  </data>
-  <data name="WizardFoundMany" xml:space="preserve">
-    <value>Aiko found these Claude Code folders. Give them names you'll recognise and turn off the ones you don't need.</value>
-  </data>
-  <data name="WizardNothingFound" xml:space="preserve">
-    <value>Aiko didn't find Claude Code on this computer. Install it and check again, or choose the folder yourself.</value>
-  </data>
-  <data name="WizardChooseFolder" xml:space="preserve">
-    <value>Choose a folder</value>
-  </data>
-  <data name="WizardCheckAgain" xml:space="preserve">
-    <value>Check again</value>
-  </data>
-  <data name="WizardFolderDialogTitle" xml:space="preserve">
-    <value>Choose a Claude Code folder</value>
   </data>
   <data name="WizardAccessExplain" xml:space="preserve">
     <value>Claude Code sends its limits to a status line. Aiko adds one line to the settings file of each environment. If you already have a status line, it keeps working: Aiko runs it and shows what it prints.</value>
@@ -397,9 +361,6 @@
   <data name="StateAdded" xml:space="preserve">
     <value>added</value>
   </data>
-  <data name="StateNone" xml:space="preserve">
-    <value>none</value>
-  </data>
   <data name="StateBound" xml:space="preserve">
     <value>{0} bound</value>
   </data>
@@ -454,14 +415,8 @@
   <data name="LoginNever" xml:space="preserve">
     <value>Aiko never sees a password or a token, only that the account is connected.</value>
   </data>
-  <data name="WaitLogin" xml:space="preserve">
-    <value>Waiting for you to sign in…</value>
-  </data>
   <data name="NameInAiko" xml:space="preserve">
     <value>NAME IN AIKO</value>
-  </data>
-  <data name="AccountLabel" xml:space="preserve">
-    <value>Account</value>
   </data>
   <data name="PlanLabel" xml:space="preserve">
     <value>Plan</value>

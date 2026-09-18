@@ -132,9 +132,6 @@ public static class Strings
     /// If it's a work account, ask whoever manages it first.
     public static string DirectModeAsk => Get("DirectModeAsk");
 
-    /// No environments yet. Aiko looks for them on the first run.
-    public static string NoEnvironments => Get("NoEnvironments");
-
     /// Claude Code sends its limits to Aiko.
     public static string AccessOk => Get("AccessOk");
 
@@ -234,9 +231,6 @@ public static class Strings
     /// Aiko settings
     public static string SettingsWindowTitle => Get("SettingsWindowTitle");
 
-    /// Environments
-    public static string WizardStepEnvironments => Get("WizardStepEnvironments");
-
     /// Main
     public static string EnvironmentPlainName => Get("EnvironmentPlainName");
 
@@ -246,41 +240,11 @@ public static class Strings
     /// Where to show Aiko
     public static string WizardStepWhere => Get("WizardStepWhere");
 
-    /// step {0} of 3
-    public static string WizardStepCount => Get("WizardStepCount");
-
-    /// Back
-    public static string Back => Get("Back");
-
     /// Not now
     public static string NotNow => Get("NotNow");
 
-    /// Next
-    public static string Next => Get("Next");
-
-    /// Allow
-    public static string Allow => Get("Allow");
-
     /// Finish
     public static string Finish => Get("Finish");
-
-    /// Aiko found one Claude Code folder. That's enough to start, and you can add a second one l...
-    public static string WizardFoundOne => Get("WizardFoundOne");
-
-    /// Aiko found these Claude Code folders. Give them names you'll recognise and turn off the o...
-    public static string WizardFoundMany => Get("WizardFoundMany");
-
-    /// Aiko didn't find Claude Code on this computer. Install it and check again, or choose the ...
-    public static string WizardNothingFound => Get("WizardNothingFound");
-
-    /// Choose a folder
-    public static string WizardChooseFolder => Get("WizardChooseFolder");
-
-    /// Check again
-    public static string WizardCheckAgain => Get("WizardCheckAgain");
-
-    /// Choose a Claude Code folder
-    public static string WizardFolderDialogTitle => Get("WizardFolderDialogTitle");
 
     /// Claude Code sends its limits to a status line. Aiko adds one line to the settings file of...
     public static string WizardAccessExplain => Get("WizardAccessExplain");
@@ -387,9 +351,6 @@ public static class Strings
     /// added
     public static string StateAdded => Get("StateAdded");
 
-    /// none
-    public static string StateNone => Get("StateNone");
-
     /// {0} bound
     public static string StateBound => Get("StateBound");
 
@@ -444,14 +405,8 @@ public static class Strings
     /// Aiko never sees a password or a token, only that the account is connected.
     public static string LoginNever => Get("LoginNever");
 
-    /// Waiting for you to sign in…
-    public static string WaitLogin => Get("WaitLogin");
-
     /// NAME IN AIKO
     public static string NameInAiko => Get("NameInAiko");
-
-    /// Account
-    public static string AccountLabel => Get("AccountLabel");
 
     /// Plan
     public static string PlanLabel => Get("PlanLabel");

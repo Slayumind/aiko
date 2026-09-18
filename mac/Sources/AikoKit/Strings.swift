@@ -77,7 +77,6 @@ public enum Strings {
         "DirectModeWhat": ("In direct mode, Aiko asks Anthropic for your limits itself. It uses the token Claude Code already keeps on this computer: Aiko reads it before each request and never saves it. Turn it on if you work in the IDE panel or in Claude Desktop, where there's no status line.", "В прямом режиме Aiko сама спрашивает лимиты у Anthropic. Для этого она берёт токен, который Claude Code уже хранит на этом компьютере: читает его перед каждым запросом и нигде не сохраняет. Включай, если работаешь в панели IDE или в Claude Desktop — там строки состояния нет."),
         "DirectModeMac": ("Direct mode is on Windows only. On macOS Claude Code keeps the token in the Keychain, and Aiko does not read it, so the IDE panel and Claude Desktop stay without numbers here.", "Прямой режим есть только на Windows. На macOS Claude Code держит токен в Связке ключей, а Aiko её не читает, поэтому панель IDE и Claude Desktop здесь остаются без цифр."),
         "DirectModeAsk": ("If it's a work account, ask whoever manages it first.", "Если аккаунт рабочий, сначала спроси того, кто им управляет."),
-        "NoEnvironments": ("No environments yet. Aiko looks for them on the first run.", "Сред пока нет. Aiko ищет их при первом запуске."),
         "AccessOk": ("Claude Code sends its limits to Aiko.", "Claude Code передаёт лимиты в Aiko."),
         "AccessMissingOne": ("One environment doesn't send its limits yet.", "Одна среда пока не передаёт лимиты."),
         "AccessMissingMany": ("{0} environments don't send their limits yet.", "Сред, которые пока не передают лимиты: {0}."),
@@ -111,22 +110,11 @@ public enum Strings {
         "LanguageRussian": ("Русский", "Русский"),
         "CopyDiagnostics": ("Copy diagnostics", "Скопировать диагностику"),
         "SettingsWindowTitle": ("Aiko settings", "Настройки Aiko"),
-        "WizardStepEnvironments": ("Environments", "Среды"),
         "EnvironmentPlainName": ("Main", "Основная"),
         "WizardStepAccess": ("Access to the limits", "Доступ к лимитам"),
         "WizardStepWhere": ("Where to show Aiko", "Где показывать Aiko"),
-        "WizardStepCount": ("step {0} of 3", "шаг {0} из 3"),
-        "Back": ("Back", "Назад"),
         "NotNow": ("Not now", "Не сейчас"),
-        "Next": ("Next", "Дальше"),
-        "Allow": ("Allow", "Разрешить"),
         "Finish": ("Finish", "Готово"),
-        "WizardFoundOne": ("Aiko found one Claude Code folder. That's enough to start, and you can add a second one later in settings.", "Aiko нашла одну папку Claude Code. Для начала этого хватит, вторую можно добавить позже в настройках."),
-        "WizardFoundMany": ("Aiko found these Claude Code folders. Give them names you'll recognise and turn off the ones you don't need.", "Aiko нашла эти папки Claude Code. Дай им понятные тебе имена и выключи лишние."),
-        "WizardNothingFound": ("Aiko didn't find Claude Code on this computer. Install it and check again, or choose the folder yourself.", "Aiko не нашла Claude Code на этом компьютере. Установи его и проверь снова или выбери папку сам."),
-        "WizardChooseFolder": ("Choose a folder", "Выбрать папку"),
-        "WizardCheckAgain": ("Check again", "Проверить снова"),
-        "WizardFolderDialogTitle": ("Choose a Claude Code folder", "Выбери папку Claude Code"),
         "WizardAccessExplain": ("Claude Code sends its limits to a status line. Aiko adds one line to the settings file of each environment. If you already have a status line, it keeps working: Aiko runs it and shows what it prints.", "Claude Code отдаёт лимиты строке состояния. Aiko добавит одну строку в файл настроек каждой среды. Если у тебя уже есть своя строка состояния, она продолжит работать: Aiko запустит её и покажет её вывод."),
         "WizardTheLine": ("THE LINE AIKO ADDS", "СТРОКА, КОТОРУЮ ДОБАВИТ AIKO"),
         "WizardTheFiles": ("FILES AIKO CHANGES", "ФАЙЛЫ, КОТОРЫЕ ИЗМЕНЯТСЯ"),
@@ -162,7 +150,6 @@ public enum Strings {
         "StateConnected": ("connected", "подключён"),
         "StateSignInNeeded": ("sign in needed", "нужно войти"),
         "StateAdded": ("added", "добавлена"),
-        "StateNone": ("none", "нет"),
         "StateBound": ("{0} bound", "привязано: {0}"),
         "StateTray": ("tray", "трей"),
         "StateIsland": ("island", "остров"),
@@ -181,9 +168,7 @@ public enum Strings {
         "SignIn": ("Sign in", "Войти"),
         "LoginHow": ("Aiko opened Claude Code in a new window. Sign in there through your browser. Aiko waits and moves on by itself.", "Aiko открыла Claude Code в новом окне. Войди там через браузер — Aiko дождётся и пойдёт дальше сама."),
         "LoginNever": ("Aiko never sees a password or a token, only that the account is connected.", "Aiko не видит ни пароля, ни токена. Только то, что аккаунт подключён."),
-        "WaitLogin": ("Waiting for you to sign in…", "Ждём, пока войдёшь в аккаунт…"),
         "NameInAiko": ("NAME IN AIKO", "ИМЯ В AIKO"),
-        "AccountLabel": ("Account", "Аккаунт"),
         "PlanLabel": ("Plan", "План"),
         "Env2LeadFound": ("Aiko found more Claude Code folders. Pick the one for your second environment, or create a new one.", "Aiko нашла ещё папки Claude Code. Выбери ту, что станет второй средой, или создай новую."),
         "Env2LeadNew": ("The second environment is a separate folder with its own account. Name it and Aiko creates the folder.", "Вторая среда — отдельная папка со своим аккаунтом. Назови её, и Aiko создаст папку."),
@@ -484,9 +469,6 @@ public enum Strings {
     /// If it's a work account, ask whoever manages it first.
     public static var directModeAsk: String { Strings.get("DirectModeAsk") }
 
-    /// No environments yet. Aiko looks for them on the first run.
-    public static var noEnvironments: String { Strings.get("NoEnvironments") }
-
     /// Claude Code sends its limits to Aiko.
     public static var accessOk: String { Strings.get("AccessOk") }
 
@@ -586,9 +568,6 @@ public enum Strings {
     /// Aiko settings
     public static var settingsWindowTitle: String { Strings.get("SettingsWindowTitle") }
 
-    /// Environments
-    public static var wizardStepEnvironments: String { Strings.get("WizardStepEnvironments") }
-
     /// Main
     public static var environmentPlainName: String { Strings.get("EnvironmentPlainName") }
 
@@ -598,41 +577,11 @@ public enum Strings {
     /// Where to show Aiko
     public static var wizardStepWhere: String { Strings.get("WizardStepWhere") }
 
-    /// step {0} of 3
-    public static var wizardStepCount: String { Strings.get("WizardStepCount") }
-
-    /// Back
-    public static var back: String { Strings.get("Back") }
-
     /// Not now
     public static var notNow: String { Strings.get("NotNow") }
 
-    /// Next
-    public static var next: String { Strings.get("Next") }
-
-    /// Allow
-    public static var allow: String { Strings.get("Allow") }
-
     /// Finish
     public static var finish: String { Strings.get("Finish") }
-
-    /// Aiko found one Claude Code folder. That's enough to start, and you can add a second one l...
-    public static var wizardFoundOne: String { Strings.get("WizardFoundOne") }
-
-    /// Aiko found these Claude Code folders. Give them names you'll recognise and turn off the o...
-    public static var wizardFoundMany: String { Strings.get("WizardFoundMany") }
-
-    /// Aiko didn't find Claude Code on this computer. Install it and check again, or choose the ...
-    public static var wizardNothingFound: String { Strings.get("WizardNothingFound") }
-
-    /// Choose a folder
-    public static var wizardChooseFolder: String { Strings.get("WizardChooseFolder") }
-
-    /// Check again
-    public static var wizardCheckAgain: String { Strings.get("WizardCheckAgain") }
-
-    /// Choose a Claude Code folder
-    public static var wizardFolderDialogTitle: String { Strings.get("WizardFolderDialogTitle") }
 
     /// Claude Code sends its limits to a status line. Aiko adds one line to the settings file of...
     public static var wizardAccessExplain: String { Strings.get("WizardAccessExplain") }
@@ -739,9 +688,6 @@ public enum Strings {
     /// added
     public static var stateAdded: String { Strings.get("StateAdded") }
 
-    /// none
-    public static var stateNone: String { Strings.get("StateNone") }
-
     /// {0} bound
     public static var stateBound: String { Strings.get("StateBound") }
 
@@ -796,14 +742,8 @@ public enum Strings {
     /// Aiko never sees a password or a token, only that the account is connected.
     public static var loginNever: String { Strings.get("LoginNever") }
 
-    /// Waiting for you to sign in…
-    public static var waitLogin: String { Strings.get("WaitLogin") }
-
     /// NAME IN AIKO
     public static var nameInAiko: String { Strings.get("NameInAiko") }
-
-    /// Account
-    public static var accountLabel: String { Strings.get("AccountLabel") }
 
     /// Plan
     public static var planLabel: String { Strings.get("PlanLabel") }
