@@ -109,19 +109,32 @@ lists the six things that go, line by line; so does [PRIVACY.md](PRIVACY.md).
 
 ## What you need
 
-- Windows 10 version 1809 or newer, 64-bit.
+- Windows 10 version 1809 or newer, 64-bit, or macOS 14 or newer.
 - Claude Code 2.1.80 or newer. Older versions don't report limits.
 - For the personality and the skills, a recent Claude Code: tested with 2.1.272.
 - A Claude.ai Pro, Max or Team plan. Enterprise accounts don't report limits.
 
 ## Install
 
-Download the installer from [Releases](https://github.com/Slayumind/aiko/releases/latest) and run
-it. Aiko installs for the current user and needs no administrator rights.
+Both downloads are on the same page: [Releases](https://github.com/Slayumind/aiko/releases/latest).
+
+### Windows
+
+Download the installer and run it. Aiko installs for the current user and needs no administrator
+rights.
 
 The build isn't signed yet, so **SmartScreen will warn you**. Choose *More info*, then *Run
 anyway*. Signing is planned. Until then, every release comes with `SHA256SUMS.txt` and a build
 provenance attestation, and [SECURITY.md](SECURITY.md) shows how to check them.
+
+### macOS
+
+Download `Aiko-<version>.dmg`, open it and drag Aiko into **Applications**. One file works on both
+Apple silicon and Intel Macs. You need macOS 14 or newer.
+
+The app is signed with an Apple Developer ID and notarized, so it opens the normal way. There is
+nothing to allow in System Settings and no command to run. [SECURITY.md](SECURITY.md) shows how to
+check the signature yourself.
 
 Free code signing provided by [SignPath.io](https://about.signpath.io), certificate by
 [SignPath Foundation](https://signpath.org). The [code signing policy](CODE-SIGNING.md) says what is
