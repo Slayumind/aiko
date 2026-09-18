@@ -1,0 +1,55 @@
+{
+  "comment": "The names under the two base folders are the same on both systems (D-250). Only the bases and the separator differ, so the Windows tray and the Mac tray read the same file of the same environment.",
+  "appFolderName": "Aiko",
+  "installFolderName": "Slayumind.Aiko",
+  "snapshotName": "claude-work",
+  "platforms": [
+    {
+      "platform": "windows",
+      "settingsBase": "C:\\Users\\someone\\AppData\\Roaming",
+      "localBase": "C:\\Users\\someone\\AppData\\Local",
+      "paths": {
+        "settingsFolder": "C:\\Users\\someone\\AppData\\Roaming\\Aiko",
+        "settingsFile": "C:\\Users\\someone\\AppData\\Roaming\\Aiko\\settings.json",
+        "environmentsFile": "C:\\Users\\someone\\AppData\\Roaming\\Aiko\\environments.json",
+        "personaFile": "C:\\Users\\someone\\AppData\\Roaming\\Aiko\\persona.json",
+        "installIdFile": "C:\\Users\\someone\\AppData\\Roaming\\Aiko\\install-id",
+        "reportedPeriodsFile": "C:\\Users\\someone\\AppData\\Roaming\\Aiko\\reported.json",
+        "localFolder": "C:\\Users\\someone\\AppData\\Local\\Aiko",
+        "snapshotsFolder": "C:\\Users\\someone\\AppData\\Local\\Aiko\\environments",
+        "snapshotFile": "C:\\Users\\someone\\AppData\\Local\\Aiko\\environments\\claude-work.json",
+        "activityFolder": "C:\\Users\\someone\\AppData\\Local\\Aiko\\activity",
+        "directCacheFolder": "C:\\Users\\someone\\AppData\\Local\\Aiko\\direct",
+        "commandsFolder": "C:\\Users\\someone\\AppData\\Local\\Aiko\\bin",
+        "marketplaceFolder": "C:\\Users\\someone\\AppData\\Local\\Aiko\\marketplace",
+        "marketplaceFile": "C:\\Users\\someone\\AppData\\Local\\Aiko\\marketplace\\.claude-plugin\\marketplace.json",
+        "personaPluginsFolder": "C:\\Users\\someone\\AppData\\Local\\Aiko\\plugins",
+        "logFile": "C:\\Users\\someone\\AppData\\Local\\Aiko\\log.txt",
+        "installedAppFolder": "C:\\Users\\someone\\AppData\\Local\\Slayumind.Aiko\\current"
+      }
+    },
+    {
+      "platform": "macos",
+      "settingsBase": "/Users/someone/Library/Application Support",
+      "localBase": "/Users/someone/Library/Caches",
+      "paths": {
+        "settingsFolder": "/Users/someone/Library/Application Support/Aiko",
+        "settingsFile": "/Users/someone/Library/Application Support/Aiko/settings.json",
+        "environmentsFile": "/Users/someone/Library/Application Support/Aiko/environments.json",
+        "personaFile": "/Users/someone/Library/Application Support/Aiko/persona.json",
+        "installIdFile": "/Users/someone/Library/Application Support/Aiko/install-id",
+        "reportedPeriodsFile": "/Users/someone/Library/Application Support/Aiko/reported.json",
+        "localFolder": "/Users/someone/Library/Caches/Aiko",
+        "snapshotsFolder": "/Users/someone/Library/Caches/Aiko/environments",
+        "snapshotFile": "/Users/someone/Library/Caches/Aiko/environments/claude-work.json",
+        "activityFolder": "/Users/someone/Library/Caches/Aiko/activity",
+        "directCacheFolder": "/Users/someone/Library/Caches/Aiko/direct",
+        "commandsFolder": "/Users/someone/Library/Caches/Aiko/bin",
+        "marketplaceFolder": "/Users/someone/Library/Caches/Aiko/marketplace",
+        "marketplaceFile": "/Users/someone/Library/Caches/Aiko/marketplace/.claude-plugin/marketplace.json",
+        "personaPluginsFolder": "/Users/someone/Library/Caches/Aiko/plugins",
+        "logFile": "/Users/someone/Library/Caches/Aiko/log.txt"
+      }
+    }
+  ]
+}

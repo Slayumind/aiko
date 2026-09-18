@@ -1,0 +1,194 @@
+{
+  "comment": "The shim is one program under several names. Started as claude it follows the folder bindings; started as a command it runs that environment whatever the folder says (D-159). The paths are Windows ones because that is what people have on disk today; both cores must read them the same way.",
+  "platform": "windows",
+  "userProfile": "C:\\Users\\someone",
+  "groups": [
+    {
+      "name": "two environments, one of them bound to a folder",
+      "environments": [
+        { "name": "Work", "configDirectories": ["C:\\Users\\someone\\.claude"] },
+        {
+          "name": "Personal",
+          "configDirectories": ["C:\\Users\\someone\\.claude-personal"],
+          "projectFolders": ["D:\\personal"]
+        }
+      ],
+      "cases": [
+        {
+          "invokedAs": "C:\\aiko\\bin\\claude.exe",
+          "workingDirectory": "D:\\personal\\app",
+          "environment": "Personal",
+          "variable": "Set",
+          "configDirectory": "C:\\Users\\someone\\.claude-personal",
+          "explicit": false
+        },
+        {
+          "invokedAs": "claude",
+          "workingDirectory": "C:\\temp",
+          "environment": "Work",
+          "variable": "Clear",
+          "configDirectory": null,
+          "explicit": false
+        },
+        {
+          "invokedAs": "claude",
+          "workingDirectory": "d:\\PERSONAL",
+          "environment": "Personal",
+          "variable": "Set",
+          "configDirectory": "C:\\Users\\someone\\.claude-personal",
+          "explicit": false
+        },
+        {
+          "invokedAs": "aiko-work.exe",
+          "workingDirectory": "D:\\personal\\app",
+          "environment": "Work",
+          "variable": "Clear",
+          "configDirectory": null,
+          "explicit": true
+        },
+        {
+          "invokedAs": "aiko-personal",
+          "workingDirectory": "C:\\temp",
+          "environment": "Personal",
+          "variable": "Set",
+          "configDirectory": "C:\\Users\\someone\\.claude-personal",
+          "explicit": true
+        },
+        {
+          "invokedAs": "aiko-gone",
+          "workingDirectory": "C:\\",
+          "environment": null,
+          "variable": "Keep",
+          "configDirectory": null,
+          "explicit": false
+        }
+      ]
+    },
+    {
+      "name": "a folder whose name only starts the same is not inside",
+      "environments": [
+        { "name": "Work", "configDirectories": ["C:\\Users\\someone\\.claude"] },
+        {
+          "name": "Personal",
+          "configDirectories": ["C:\\Users\\someone\\.claude-personal"],
+          "projectFolders": ["D:\\work"]
+        }
+      ],
+      "cases": [
+        {
+          "invokedAs": "claude",
+          "workingDirectory": "D:\\workshop",
+          "environment": "Work",
+          "variable": "Clear",
+          "configDirectory": null,
+          "explicit": false
+        },
+        {
+          "invokedAs": "claude",
+          "workingDirectory": "D:\\work\\client",
+          "environment": "Personal",
+          "variable": "Set",
+          "configDirectory": "C:\\Users\\someone\\.claude-personal",
+          "explicit": false
+        }
+      ]
+    },
+    {
+      "name": "the deeper binding wins",
+      "environments": [
+        {
+          "name": "Work",
+          "configDirectories": ["C:\\Users\\someone\\.claude"],
+          "projectFolders": ["D:\\work"]
+        },
+        {
+          "name": "Personal",
+          "configDirectories": ["C:\\Users\\someone\\.claude-personal"],
+          "projectFolders": ["D:\\work\\side-project\\"]
+        }
+      ],
+      "cases": [
+        {
+          "invokedAs": "claude",
+          "workingDirectory": "D:\\work\\side-project\\app",
+          "environment": "Personal",
+          "variable": "Set",
+          "configDirectory": "C:\\Users\\someone\\.claude-personal",
+          "explicit": false
+        },
+        {
+          "invokedAs": "claude",
+          "workingDirectory": "D:\\work\\client",
+          "environment": "Work",
+          "variable": "Clear",
+          "configDirectory": null,
+          "explicit": false
+        }
+      ]
+    },
+    {
+      "name": "a drive root binding covers the whole drive",
+      "environments": [
+        { "name": "Work", "configDirectories": ["C:\\Users\\someone\\.claude"] },
+        {
+          "name": "Personal",
+          "configDirectories": ["C:\\Users\\someone\\.claude-personal"],
+          "projectFolders": ["E:\\"]
+        }
+      ],
+      "cases": [
+        {
+          "invokedAs": "claude",
+          "workingDirectory": "E:\\anything",
+          "environment": "Personal",
+          "variable": "Set",
+          "configDirectory": "C:\\Users\\someone\\.claude-personal",
+          "explicit": false
+        }
+      ]
+    },
+    {
+      "name": "a command the person typed is found by its own name",
+      "environments": [
+        { "name": "Work", "configDirectories": ["C:\\Users\\someone\\.claude"] },
+        {
+          "name": "Personal",
+          "configDirectories": ["C:\\Users\\someone\\.claude-personal"],
+          "command": "cc-home"
+        }
+      ],
+      "cases": [
+        {
+          "invokedAs": "CC-HOME",
+          "workingDirectory": "C:\\",
+          "environment": "Personal",
+          "variable": "Set",
+          "configDirectory": "C:\\Users\\someone\\.claude-personal",
+          "explicit": true
+        },
+        {
+          "invokedAs": "aiko-personal",
+          "workingDirectory": "C:\\",
+          "environment": null,
+          "variable": "Keep",
+          "configDirectory": null,
+          "explicit": false
+        }
+      ]
+    },
+    {
+      "name": "nothing set up yet",
+      "environments": [],
+      "cases": [
+        {
+          "invokedAs": "claude",
+          "workingDirectory": "C:\\",
+          "environment": null,
+          "variable": "Keep",
+          "configDirectory": null,
+          "explicit": false
+        }
+      ]
+    }
+  ]
+}

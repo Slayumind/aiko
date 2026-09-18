@@ -1,0 +1,31 @@
+{
+  "default": "default",
+  "comment": "The bridge writes this file and the tray looks for it, so these names are on people's disks. A null config directory means Claude Code ran without CLAUDE_CONFIG_DIR.",
+  "for": [
+    { "configDirectory": "C:\\Users\\someone\\.claude", "name": "claude" },
+    { "configDirectory": "C:\\Users\\someone\\.claude-personal", "name": "claude-personal" },
+    { "configDirectory": "C:\\Users\\someone\\.claude-work", "name": "claude-work" },
+    { "configDirectory": "C:\\Users\\someone\\.claude-work\\", "name": "claude-work" },
+    { "configDirectory": "C:/Users/someone/.claude-work", "name": "claude-work" },
+    { "configDirectory": "C:/Users/someone/.claude-work/", "name": "claude-work" },
+    { "configDirectory": "C:\\Users\\someone/.claude-work\\\\", "name": "claude-work" },
+    { "configDirectory": "C:\\Users\\Александр Иванов\\.claude-osnovnaya", "name": "claude-osnovnaya" },
+    { "configDirectory": "D:\\Claude Accounts\\.claude-work-2", "name": "claude-work-2" },
+    { "configDirectory": "\\\\server\\share\\users\\someone\\.claude-team", "name": "claude-team" },
+    { "configDirectory": "/home/someone/.claude", "name": "claude" },
+    { "configDirectory": "/Users/someone/.claude-personal", "name": "claude-personal" },
+    { "configDirectory": "/Users/someone/.claude-work/", "name": "claude-work" },
+    { "configDirectory": "C:\\", "name": "default" },
+    { "configDirectory": "C:", "name": "default" },
+    { "configDirectory": "\\", "name": "default" },
+    { "configDirectory": null, "name": "default" },
+    { "configDirectory": "", "name": "default" },
+    { "configDirectory": "   ", "name": "default" }
+  ],
+  "clean": [
+    { "folderName": "claude:work?", "name": "claudework" },
+    { "folderName": ".клод", "name": "клод" },
+    { "folderName": "...", "name": "default" },
+    { "folderName": "???", "name": "default" }
+  ]
+}

@@ -9,12 +9,9 @@ public class UpdateManifestTests
     private const string PayloadHash = "5521dd4a9eeacccdef7dd1c7ea644fb1a1891157d5daed2eca8b6e47c3d8aa63";
 
     // The files openssl made. The Swift port reads the same folder, so both apps agree on the format.
-    private static readonly string VectorFolder =
-        Path.Combine(Repository(), "spec", "cases", "update-manifest");
+    private static byte[] VectorFile(string name) => SpecCases.Bytes("update-manifest", name);
 
-    private static byte[] VectorFile(string name) => File.ReadAllBytes(Path.Combine(VectorFolder, name));
-
-    private static string VectorKey => File.ReadAllText(Path.Combine(VectorFolder, "public.pem"));
+    private static string VectorKey => SpecCases.Text("update-manifest", "public.pem");
 
     [Fact]
     public void The_openssl_vector_verifies_and_its_payload_matches()
@@ -248,14 +245,4 @@ public class UpdateManifestTests
     private static string PublicPem(ECDsa key) => key.ExportSubjectPublicKeyInfoPem();
 
     private static string Hex(byte[] bytes) => Convert.ToHexStringLower(bytes);
-
-    private static string Repository()
-    {
-        var folder = new DirectoryInfo(AppContext.BaseDirectory);
-        while (folder is not null && !File.Exists(Path.Combine(folder.FullName, "Aiko.slnx")))
-        {
-            folder = folder.Parent;
-        }
-        return folder?.FullName ?? throw new InvalidOperationException("Aiko.slnx not found.");
-    }
 }
