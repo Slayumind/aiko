@@ -3,8 +3,8 @@
 The macOS app repeats the Windows core, so every ported file keeps its behaviour and every xUnit
 case has a Swift case with the same name and the same numbers. Test counts below are cases, not
 methods: one `[Theory]` with five `[InlineData]` rows counts as five, and so does the Swift
-`@Test(arguments:)` that mirrors it. `dotnet test` prints cases and says 774; `swift test` prints
-methods, not cases, and says 607. The 49 the Swift side does not have are named at the bottom; the ones it has and Windows
+`@Test(arguments:)` that mirrors it. `dotnet test` prints cases and says 736; `swift test` prints
+methods, not cases, and says 596. The 49 the Swift side does not have are named at the bottom; the ones it has and Windows
 does not belong to the two small programs, whose decisions sit inline in `Program.cs` on Windows,
 and to the card words, the island and the settings window, which sit in `Aiko.App` on Windows
 where no test can reach them.
@@ -49,10 +49,10 @@ a row cannot change in one core and stay as it was in the other. See `spec/cases
 | PlatformConventions.cs | PlatformConventions.swift | 2 | 2 | what each system names and where it puts things moved to `spec/cases/platform-paths/`, three systems side by side; what is left needs a settings object or this computer |
 | ClaudeShell.cs | PlatformConventions.swift | 4 | 4 | the shell of each system is in `spec/cases/platform-paths/`; the 8 cases left over are about WindowsGitBash |
 | AikoFolders.cs | AikoFolders.swift | 5 | 5 | both layouts, the trailing separator included, are pinned in `spec/cases/folder-layout/` |
-| SnapshotName.cs | SnapshotName.swift | 23 | 23 | SnapshotNameTests (10) and SnapshotNamePinTests (13) |
+| SnapshotName.cs | SnapshotName.swift | — | — | every case is in `spec/cases/snapshot-name/`, read by both suites |
 | SnapshotFile.cs | SnapshotFile.swift | 9 | 9 | |
 | EnvironmentSnapshots.cs | EnvironmentSnapshots.swift | 6 | 6 | |
-| EnvironmentSettings.cs, LaunchCommand.cs, ProjectBinding.cs | EnvironmentSettings.swift, LaunchCommand.swift, ProjectBinding.swift | 41 | 41 | EnvironmentSettingsTests (13) and EnvironmentModelTests (28) |
+| EnvironmentSettings.cs, LaunchCommand.cs, ProjectBinding.cs | EnvironmentSettings.swift, LaunchCommand.swift, ProjectBinding.swift | 26 | 26 | EnvironmentSettingsTests (13) and EnvironmentModelTests (13); the command of an environment is in `spec/cases/launch-command/` |
 | EnvironmentEdits.cs | EnvironmentEdits.swift | 24 | 24 | |
 | EnvironmentScan.cs | EnvironmentScan.swift | 12 | 12 | |
 | ClaudeConfigFolder.cs | ClaudeConfigFolder.swift | 7 | 7 | |
