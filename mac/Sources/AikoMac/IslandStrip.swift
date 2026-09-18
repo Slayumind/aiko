@@ -103,16 +103,19 @@ final class IslandStrip {
             defer: false)
 
         panel.isFloatingPanel = true
-        // Above ordinary windows but under the island and under the menu bar, the way the Windows
-        // strip sits under the taskbar: whatever reaches past the screen edge goes under them.
-        panel.level = .floating
+        // The same level as the island. Lower than that, macOS pushes the pane out of the menu bar's
+        // strip and it cannot touch the top edge (RESEARCH, 2026-09-18); the island is ordered above
+        // it anyway while it is in hand.
+        panel.level = WindowOrder.onTop
         panel.backgroundColor = .clear
         panel.isOpaque = false
         panel.hasShadow = false
         panel.ignoresMouseEvents = true
         panel.hidesOnDeactivate = false
         panel.isReleasedWhenClosed = false
-        panel.collectionBehavior = [.canJoinAllSpaces, .transient, .ignoresCycle, .fullScreenAuxiliary]
+        // .stationary keeps the island out of the shuffle when the desktop is shown or Mission
+        // Control opens: it belongs to the edge of the screen, not to a desk of windows.
+        panel.collectionBehavior = [.canJoinAllSpaces, .transient, .ignoresCycle, .fullScreenAuxiliary, .stationary]
         panel.animationBehavior = .none
         panel.alphaValue = IslandStrip.alpha
 

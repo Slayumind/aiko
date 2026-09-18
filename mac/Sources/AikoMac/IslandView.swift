@@ -75,9 +75,9 @@ final class IslandView: NSView {
         let frame = islandFrame()
         let body = NSRect(origin: .zero, size: bounds.size)
 
-        // AppKit counts up from the bottom, so cutting from the top means lowering the height.
+        // This view is flipped, so y grows downwards: cutting from the top starts the clip lower.
         let shown = cutFromTheTop > 0
-            ? NSRect(x: 0, y: 0, width: body.width, height: max(0, body.height - cutFromTheTop))
+            ? NSRect(x: 0, y: cutFromTheTop, width: body.width, height: max(0, body.height - cutFromTheTop))
             : body
         NSBezierPath(rect: shown).setClip()
         Theme.nsSurface.setFill()

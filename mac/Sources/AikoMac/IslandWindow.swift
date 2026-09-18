@@ -43,7 +43,9 @@ final class IslandWindow {
 
         // On every space, and out of Mission Control and Exposé: the island belongs to the edge of
         // the screen, not to a desk of windows.
-        panel.collectionBehavior = [.canJoinAllSpaces, .transient, .ignoresCycle, .fullScreenAuxiliary]
+        // .stationary keeps the island out of the shuffle when the desktop is shown or Mission
+        // Control opens: it belongs to the edge of the screen, not to a desk of windows.
+        panel.collectionBehavior = [.canJoinAllSpaces, .transient, .ignoresCycle, .fullScreenAuxiliary, .stationary]
         panel.animationBehavior = .none
 
         view.onEnter = { [weak self] in self?.pointerCame() }
@@ -326,6 +328,10 @@ final class IslandWindow {
         // In hand the island is a whole thing of its own: every corner rounded and a line all round.
         view.show(cards, edge: handEdge, docked: false)
         strip = IslandStrip()
+
+        // Both panes sit at the same level now, so the island is ordered over the glass once the
+        // strip appears: in hand it is the thing the person is holding.
+        panel.orderFrontRegardless()
     }
 
     /// The island flattens against its edge and settles into place with a small overshoot, the same
