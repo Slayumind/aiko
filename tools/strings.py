@@ -1,4 +1,4 @@
-"""Builds the two resource files and the class that reads them, from one list of strings.
+"""Builds the resource files and the classes that read them, from one list of strings.
 
 Run it from the repository root after editing tools/strings.json:
 
@@ -7,6 +7,10 @@ Run it from the repository root after editing tools/strings.json:
 The class goes into the source tree rather than being generated during the build, because WPF
 compiles XAML in a second pass through a temporary project that cannot see files the first pass
 made. That failure looks like "the name Strings does not exist" and takes a while to understand.
+
+The macOS app reads the same list from mac/Sources/AikoKit/Strings.swift, written here too. Both
+apps say the same words because both are made from this one file; a table typed a second time by
+hand would drift apart in a week.
 """
 
 import io
@@ -102,6 +106,86 @@ def write_class(path, pairs):
     io.open(path, "w", encoding="utf-8", newline="\n").write("".join(parts))
 
 
+SWIFT_HEAD = '''// Made by tools/strings.py from tools/strings.json. Do not edit by hand: run the script.
+
+import Foundation
+
+/// The two languages Aiko has words for. The setting also has "follow the system", which is
+/// turned into one of these before the app asks for a word.
+public enum StringLanguage: Sendable, Equatable {
+    case english
+    case russian
+}
+
+/// Every word Aiko says, in the language the user chose. One property per string, so a key that
+/// does not exist is a build error and not a blank label somebody finds months later.
+///
+/// The table is the twin of Strings.resx and Strings.ru.resx on Windows.
+public enum Strings {
+    /// Set at startup and again when the language changes. The lock is there because the bridge
+    /// and the app may ask from another thread, not because the value changes often.
+    nonisolated(unsafe) private static var chosen = StringLanguage.english
+    private static let lock = NSLock()
+
+    public static var language: StringLanguage {
+        get { lock.lock(); defer { lock.unlock() }; return chosen }
+        set { lock.lock(); defer { lock.unlock() }; chosen = newValue }
+    }
+
+    public static func get(_ key: String) -> String {
+        guard let pair = table[key] else { return key }
+        return language == .russian ? pair.russian : pair.english
+    }
+
+    /// Fills {0}, {1} and so on, the way string.Format does on Windows. The texts are shared, so
+    /// the placeholders have to be read the same way on both systems.
+    public static func format(_ text: String, _ arguments: CustomStringConvertible...) -> String {
+        var filled = text
+        for (index, argument) in arguments.enumerated() {
+            filled = filled.replacingOccurrences(of: "{\\(index)}", with: argument.description)
+        }
+        return filled
+    }
+
+    public static let table: [String: (english: String, russian: String)] = [
+'''
+
+
+def swift_name(key):
+    name = key[0].lower() + key[1:]
+    keywords = {
+        "as", "associatedtype", "break", "case", "catch", "class", "continue", "default", "defer",
+        "deinit", "do", "else", "enum", "extension", "fallthrough", "false", "fileprivate", "for",
+        "func", "guard", "if", "import", "in", "init", "inout", "internal", "is", "let", "nil",
+        "operator", "private", "protocol", "public", "repeat", "rethrows", "return", "self",
+        "static", "struct", "subscript", "super", "switch", "throw", "throws", "true", "try",
+        "typealias", "var", "where", "while",
+    }
+    return "`%s`" % name if name in keywords else name
+
+
+def swift_text(text):
+    return text.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
+
+
+def write_swift(path, data):
+    parts = [SWIFT_HEAD]
+    for key, value in data:
+        parts.append('        "%s": ("%s", "%s"),\n'
+                     % (key, swift_text(value[0]), swift_text(value[1])))
+    parts.append("    ]\n")
+
+    for key, value in data:
+        summary = value[0].replace("\n", " ")
+        if len(summary) > 92:
+            summary = summary[:89] + "..."
+        # Spelled with the type name because a bare get( reads as the start of a getter.
+        parts.append('\n    /// %s\n    public static var %s: String { Strings.get("%s") }\n'
+                     % (summary, swift_name(key), key))
+    parts.append("}\n")
+    io.open(path, "w", encoding="utf-8", newline="\n").write("".join(parts))
+
+
 def main():
     data = json.load(io.open(os.path.join(HERE, "strings.json"), encoding="utf-8"))
     keys = [k for k, _ in data]
@@ -112,6 +196,7 @@ def main():
     write_resx(os.path.join(app, "Strings.resx"), [(k, v[0]) for k, v in data])
     write_resx(os.path.join(app, "Strings.ru.resx"), [(k, v[1]) for k, v in data])
     write_class(os.path.join(app, "Strings.Designer.cs"), [(k, v[0]) for k, v in data])
+    write_swift(os.path.join(ROOT, "mac", "Sources", "AikoKit", "Strings.swift"), data)
     print("strings: %d" % len(data))
 
 
