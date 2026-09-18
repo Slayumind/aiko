@@ -43,9 +43,10 @@ final class IslandWindow {
 
         // On every space, and out of Mission Control and Exposé: the island belongs to the edge of
         // the screen, not to a desk of windows.
-        // .stationary keeps the island out of the shuffle when the desktop is shown or Mission
-        // Control opens: it belongs to the edge of the screen, not to a desk of windows.
-        panel.collectionBehavior = [.canJoinAllSpaces, .transient, .ignoresCycle, .fullScreenAuxiliary, .stationary]
+        // .auxiliary and .stationary keep the island where it is when the wallpaper is clicked and
+        // every window slides aside: it belongs to the edge of the screen, not to a desk of windows.
+        // A spike measured it (RESEARCH, 2026-09-18): with .transient the pane slid away with them.
+        panel.collectionBehavior = [.canJoinAllSpaces, .auxiliary, .stationary, .ignoresCycle, .fullScreenAuxiliary]
         panel.animationBehavior = .none
 
         view.onEnter = { [weak self] in self?.pointerCame() }
