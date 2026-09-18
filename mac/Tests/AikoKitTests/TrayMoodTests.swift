@@ -10,50 +10,13 @@ struct TrayMoodTests {
         ActivityRecord(environment: "claude", activity: activity, at: Self.now.adding(seconds: -secondsAgo))
     }
 
-    // ---- sessions ----
+    // Which face an event brings is a table, and it lives in spec/cases/tray-mood; both cores read
+    // it. What is left here needs a snapshot, a clock or a settings object.
 
-    @Test(arguments: [
-        (SessionActivity.working, AikoFace.working),
-        (SessionActivity.waiting, AikoFace.waiting),
-        (SessionActivity.done, AikoFace.done),
-        (SessionActivity.error, AikoFace.error),
-        (SessionActivity.outOfLimit, AikoFace.asleep),
-    ])
-    func aSessionThatChangesWhatItDoesBringsItsFace(activity: SessionActivity, face: AikoFace) {
-        #expect(TrayMood.forActivity(nil, at(activity), Self.now) == face)
-    }
 
-    @Test
-    func theSameActivityAgainBringsNothing() {
-        #expect(TrayMood.forActivity(at(.working, 20), at(.working), Self.now) == nil)
-        #expect(TrayMood.forActivity(at(.working, 20), at(.done), Self.now) == .done)
-    }
 
-    @Test
-    func anOldEventFoundInAFileIsHistory() {
-        #expect(TrayMood.forActivity(nil, at(.waiting, 600), Self.now) == nil)
-    }
 
-    // ---- limits ----
 
-    @Test(arguments: [
-        (70, 90, AikoFace.tired),
-        (89, 95, AikoFace.tired),
-        (95, 100, AikoFace.asleep),
-        (80, 100, AikoFace.asleep),
-        (100, 0, AikoFace.fresh),
-        (92, 3, AikoFace.fresh),
-    ])
-    func aLimitCrossingALineBringsAFace(before: Int, after: Int, face: AikoFace) {
-        #expect(TrayMood.forLimit(before, after) == face)
-    }
-
-    @Test(arguments: [
-        (nil, 95), (40, 60), (91, 97), (100, 100), (20, 10), (95, nil),
-    ] as [(Int?, Int?)])
-    func movingInsideABandOrAFirstNumberBringsNothing(before: Int?, after: Int?) {
-        #expect(TrayMood.forLimit(before, after) == nil)
-    }
 
     @Test
     func theFullestWindowCountsAndAWindowPastItsResetIsEmpty() {

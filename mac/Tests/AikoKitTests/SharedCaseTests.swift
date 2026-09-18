@@ -157,6 +157,82 @@ struct SharedCaseTests {
         }
     }
 
+    // ---- what a hook says a session is doing ----
+
+    @Test
+    func everyHookEventMeansTheSameActivity() {
+        let cases = SpecCases.json("hook-events")
+        let session = cases["session"]?.stringValue ?? ""
+
+        for row in cases["events"]?.arrayValue ?? [] {
+            let json = row["json"]?.stringValue ?? ""
+            let activity = row["activity"]?.stringValue
+            let expected = activity.map { HookEvent(sessionId: session, activity: Self.activity($0)) }
+
+            #expect(HookEvent.fromJson(json) == expected, "\(json)")
+        }
+
+        for row in cases["badRecords"]?.arrayValue ?? [] {
+            #expect(ActivityRecord.fromJson(row.stringValue ?? "") == nil)
+        }
+    }
+
+    // ---- which face an event brings ----
+
+    @Test
+    func everyMoodCaseBringsTheSameFace() {
+        let cases = SpecCases.json("tray-mood")
+        let now = Date(timeIntervalSince1970: 1_789_128_000)
+
+        func record(_ node: JsonNode?) -> ActivityRecord? {
+            guard let node, node.stringValue == nil, let activity = node["activity"]?.stringValue else {
+                return nil
+            }
+            let secondsAgo = node["secondsAgo"]?.doubleValue ?? 0
+            return ActivityRecord(
+                environment: "claude",
+                activity: Self.activity(activity),
+                at: now.addingTimeInterval(-secondsAgo))
+        }
+
+        for row in cases["forActivity"]?.arrayValue ?? [] {
+            let face = row["face"]?.stringValue
+            #expect(TrayMood.forActivity(record(row["before"]), record(row["now"])!, now)
+                == face.map(Self.face), "\(row["now"]?["activity"]?.stringValue ?? "")")
+        }
+
+        for row in cases["forLimit"]?.arrayValue ?? [] {
+            let face = row["face"]?.stringValue
+            let before = row["before"]?.int64Value.map(Int.init)
+            let after = row["after"]?.int64Value.map(Int.init)
+
+            #expect(TrayMood.forLimit(before, after) == face.map(Self.face), "\(String(describing: before)) → \(String(describing: after))")
+        }
+    }
+
+    private static func activity(_ name: String) -> SessionActivity {
+        switch name {
+        case "Working": return .working
+        case "Waiting": return .waiting
+        case "Done": return .done
+        case "Error": return .error
+        case "OutOfLimit": return .outOfLimit
+        default: return .ended
+        }
+    }
+
+    private static func face(_ name: String) -> AikoFace {
+        switch name {
+        case "Working": return .working
+        case "Waiting": return .waiting
+        case "Done": return .done
+        case "Error": return .error
+        case "Asleep": return .asleep
+        case "Tired": return .tired
+        default: return .fresh
+        }
+    }
+
     // ---- what a program is called on this system, and every path built from that ----
 
     @Test

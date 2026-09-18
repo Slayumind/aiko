@@ -1,0 +1,76 @@
+{
+  "comment": "What the persona plugin's hooks tell Aiko a session is doing. The path in the hook is never kept, so a case that carries one proves it too: nothing of the person's folder reaches the record.",
+  "session": "5f0c2a8e-1b7d-4c1e-9f3a-2d6b8e4a7c10",
+  "events": [
+    {
+      "json": "{ \"session_id\": \"5f0c2a8e-1b7d-4c1e-9f3a-2d6b8e4a7c10\", \"hook_event_name\": \"UserPromptSubmit\", \"cwd\": \"C:\\\\secret\\\\project\" }",
+      "activity": "Working"
+    },
+    {
+      "json": "{ \"session_id\": \"5f0c2a8e-1b7d-4c1e-9f3a-2d6b8e4a7c10\", \"hook_event_name\": \"PostToolUse\", \"cwd\": \"C:\\\\secret\\\\project\" }",
+      "activity": "Working"
+    },
+    {
+      "json": "{ \"session_id\": \"5f0c2a8e-1b7d-4c1e-9f3a-2d6b8e4a7c10\", \"hook_event_name\": \"PermissionRequest\", \"cwd\": \"C:\\\\secret\\\\project\" }",
+      "activity": "Waiting"
+    },
+    {
+      "json": "{ \"session_id\": \"5f0c2a8e-1b7d-4c1e-9f3a-2d6b8e4a7c10\", \"hook_event_name\": \"Notification\", \"cwd\": \"C:\\\\secret\\\\project\", \"notification_type\": \"permission_prompt\"  }",
+      "activity": "Waiting"
+    },
+    {
+      "json": "{ \"session_id\": \"5f0c2a8e-1b7d-4c1e-9f3a-2d6b8e4a7c10\", \"hook_event_name\": \"Notification\", \"cwd\": \"C:\\\\secret\\\\project\", \"notification_type\": \"elicitation_dialog\"  }",
+      "activity": "Waiting"
+    },
+    {
+      "json": "{ \"session_id\": \"5f0c2a8e-1b7d-4c1e-9f3a-2d6b8e4a7c10\", \"hook_event_name\": \"Notification\", \"cwd\": \"C:\\\\secret\\\\project\", \"notification_type\": \"agent_needs_input\"  }",
+      "activity": "Waiting"
+    },
+    {
+      "json": "{ \"session_id\": \"5f0c2a8e-1b7d-4c1e-9f3a-2d6b8e4a7c10\", \"hook_event_name\": \"Stop\", \"cwd\": \"C:\\\\secret\\\\project\" }",
+      "activity": "Done"
+    },
+    {
+      "json": "{ \"session_id\": \"5f0c2a8e-1b7d-4c1e-9f3a-2d6b8e4a7c10\", \"hook_event_name\": \"StopFailure\", \"cwd\": \"C:\\\\secret\\\\project\", \"error_type\": \"server_error\"  }",
+      "activity": "Error"
+    },
+    {
+      "json": "{ \"session_id\": \"5f0c2a8e-1b7d-4c1e-9f3a-2d6b8e4a7c10\", \"hook_event_name\": \"StopFailure\", \"cwd\": \"C:\\\\secret\\\\project\", \"error_type\": \"rate_limit\"  }",
+      "activity": "OutOfLimit"
+    },
+    {
+      "json": "{ \"session_id\": \"5f0c2a8e-1b7d-4c1e-9f3a-2d6b8e4a7c10\", \"hook_event_name\": \"SessionEnd\", \"cwd\": \"C:\\\\secret\\\\project\", \"reason\": \"clear\"  }",
+      "activity": "Ended"
+    },
+    {
+      "json": "{ \"session_id\": \"x\", \"hook_event_name\": \"Notification\", \"notification_type\": \"idle_prompt\" }",
+      "activity": null
+    },
+    {
+      "json": "{ \"session_id\": \"x\", \"hook_event_name\": \"PreToolUse\" }",
+      "activity": null
+    },
+    {
+      "json": "{ \"hook_event_name\": \"Stop\" }",
+      "activity": null
+    },
+    {
+      "json": "{ \"session_id\": 7, \"hook_event_name\": \"Stop\" }",
+      "activity": null
+    },
+    {
+      "json": "not json",
+      "activity": null
+    },
+    {
+      "json": "",
+      "activity": null
+    }
+  ],
+  "badRecords": [
+    "",
+    "{ \"environment\": \"default\", \"activity\": \"Dancing\", \"at\": \"2026-09-15T12:00:00Z\" }",
+    "{ \"environment\": \"default\", \"activity\": \"Done\" }",
+    "{ \"environment\": \"def"
+  ]
+}
