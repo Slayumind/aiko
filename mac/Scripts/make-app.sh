@@ -18,6 +18,10 @@ if [ -f ../Directory.Build.props ]; then
 fi
 version="${version:-0.0.0}"
 
+# Between releases the version does not change (D-236), so the commit is what tells two builds
+# apart in a bug report. The Windows build gets the same from the .NET SDK.
+commit="$(git rev-parse --short HEAD 2>/dev/null || true)"
+
 swift build -c release --arch arm64 --arch x86_64
 
 rm -rf build
@@ -40,6 +44,16 @@ else
   echo "note: $fonts is not here, the app will use the system font"
 fi
 
+# The skills plugin this copy ships (D-234). Claude Code installs from the copy Aiko makes in its
+# marketplace folder; without this the persona still works and the skills are simply not offered.
+skills="../plugins/aiko"
+if [ -d "$skills" ]; then
+  mkdir -p "$app/Contents/Resources/plugins"
+  cp -R "$skills" "$app/Contents/Resources/plugins/aiko"
+else
+  echo "note: $skills is not here, this build ships no skills"
+fi
+
 cat > "$app/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -51,6 +65,7 @@ cat > "$app/Contents/Info.plist" <<PLIST
 <key>CFBundlePackageType</key><string>APPL</string>
 <key>CFBundleShortVersionString</key><string>$version</string>
 <key>CFBundleVersion</key><string>$version</string>
+<key>AikoCommit</key><string>$commit</string>
 <key>LSMinimumSystemVersion</key><string>14.0</string>
 <key>LSUIElement</key><true/>
 <key>NSHumanReadableCopyright</key><string>Apache-2.0. Not affiliated with Anthropic.</string>

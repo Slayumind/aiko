@@ -3,11 +3,11 @@
 The macOS app repeats the Windows core, so every ported file keeps its behaviour and every xUnit
 case has a Swift case with the same name and the same numbers. Test counts below are cases, not
 methods: one `[Theory]` with five `[InlineData]` rows counts as five, and so does the Swift
-`@Test(arguments:)` that mirrors it. 785 cases in `dotnet test`, 888 in `swift test` (557 test
+`@Test(arguments:)` that mirrors it. 785 cases in `dotnet test`, 923 in `swift test` (592 test
 methods). The 49 the Swift side does not have are named at the bottom; the ones it has and Windows
 does not belong to the two small programs, whose decisions sit inline in `Program.cs` on Windows,
-and to the card words and the island, which sit in `Aiko.App` on Windows where no test can reach
-them.
+and to the card words, the island and the settings window, which sit in `Aiko.App` on Windows
+where no test can reach them.
 
 Rules that are a table of inputs and answers live in `spec/cases/` and are read by both suites, so
 a row cannot change in one core and stay as it was in the other. See `spec/cases/README.md`.
@@ -77,6 +77,9 @@ reach them. In Swift they are part of AikoKit and have cases of their own:
 | Island/IslandPanel.xaml.cs, Island/UnfoldPanel.cs, Island/FitPanel.cs | IslandLayout.swift | — | 28 | the size of the island, its line and corners per edge, the padding that keeps the rings still when the docked side loses its line, where every ring and percentage sits, and the 34 point square it closes into around the face |
 | Island/IslandWindow.xaml.cs | IslandDrag.swift | — | 7 | the 3 point threshold and the grip kept as a share of the size |
 | Island/RingGauge.cs | RingArt.swift | — | 2 | the island ring: the pen is 18 % of the ring, as RingGauge draws it |
+| Settings/SettingsPanel.xaml(.cs) | SettingsNav.swift | — | 10 | the page keys, the order of the menu, the small line under each title, and the body height a screen allows |
+| Settings/ChecklistPage.xaml(.cs) | ChecklistLayout.swift | — | 8 | the reading order of the nine items, the three group labels and the word beside each header |
+| GeneralPage.xaml.cs (OnCopyDiagnostics) | DiagnosticsText.swift | — | 2 | the lines of the bug report, English in every language as on Windows |
 
 Helpers with no file of their own in the C# core:
 
@@ -86,6 +89,8 @@ Helpers with no file of their own in the C# core:
 | JsonNode.swift | System.Text.Json keeps the order of keys and the text of numbers when it writes a file back; `JSONSerialization` keeps neither, and Aiko rewrites files that belong to Claude Code |
 | CivilTime.swift | `DateOnly`, ISO weeks and the round-trip ("O") time format |
 | SvgPath.swift | reads the SVG path data FaceArt writes. WPF parses it itself with `Geometry.Parse`; AppKit has nothing of the kind, so the core reads it and hands the drawing layer moves, lines and cubic curves. Arcs and quadratic curves become cubics here (15 cases in SvgPathTests, one of which reads every shape of all 56 faces) |
+| SignedIn.swift | whether a folder has an account. Windows reads `.credentials.json`; macOS keeps the same token in the Keychain, so that file is never written and the answer comes from the account block of `.claude.json` (3 cases in SignedInTests) |
+| MacShell.swift | two things Windows has a system service for. `ZshProfile` writes Aiko's marked block into `~/.zshrc`, because a folder under the home directory reaches a shell's PATH only through the shell profile; `MacTerminal` writes the script that opens Claude Code in a Terminal window (11 cases in ZshProfileTests and MacTerminalTests) |
 | `PathText` in PlatformConventions.swift | reading a path without asking the machine it runs on: `Path.GetFileName` and `Path.TrimEndingDirectorySeparator` answer differently on Windows and on macOS, and Aiko reads paths written for the other system all the time |
 
 ## The two programs
@@ -155,6 +160,24 @@ AikoKit decided, and it answers the mouse.
 | TaskbarOrder.cs | — | window levels do the same work: the island sits at `.statusBar` and the landing strip at `.floating`, under both the island and the menu bar |
 | SettingsStore.cs, ClaudeAccounts.cs | Store.swift | reads the settings, the environments and the plan of an account |
 | Log.cs | Log.swift | the same file, the same line format |
+| Settings/SettingsWindow.xaml(.cs), SettingsPanel.xaml | Settings/SettingsWindow.swift | the borderless window, the header, the menu and the page area; Esc closes it |
+| Settings/SavedMark.cs, Theme/Controls.xaml, Theme/DropDown.cs, Theme/RevealPanel.cs | Settings/SettingsControls.swift | the switch, the segments, the picked card, the fields, the buttons, the tick, the chip, the drop down and the "Saved" mark |
+| Settings/EnvironmentsEditor.cs | Settings/SettingsState.swift | what the window is looking at, and every change written through one place |
+| Settings/EnvironmentPage.xaml(.cs) | Settings/EnvironmentPageView.swift | one environment: the account, the name, the command, the bound folders and removal |
+| Settings/FoldersPage.xaml(.cs) | Settings/FoldersPageView.swift | every bound folder in one table |
+| Settings/PersonalityPage.xaml(.cs) | Settings/PersonalityPageView.swift | where Aiko talks, the face, the temperament, the sample answer and the skills |
+| Settings/PrivacyPage.xaml(.cs) | Settings/PrivacyPageView.swift | the two consents and the list of fields that would be sent |
+| Settings/GeneralPage.xaml(.cs) | Settings/GeneralPageView.swift | where Aiko shows, startup, the update check, the language, access, diagnostics, starting over |
+| Settings/ChecklistPage.xaml(.cs), ChecklistRow.cs | Settings/ChecklistPageView.swift, ChecklistModel.swift | the nine items, their bodies and Finish |
+| Settings/SettingsCheck.cs | Settings/SettingsCheck.swift | the self test doors `--try-settings` and `--try-wizard` |
+| Commands/ClaudeLauncher.cs, ClaudeFolders.cs | Commands/ClaudeLauncher.swift | finds Claude Code, opens it, waits for a sign-in, lists the config folders |
+| Commands/CommandFolder.cs | Commands/CommandFolder.swift | the shim, the command links and the block in `~/.zshrc` |
+| Commands/EnvironmentSetup.cs | Commands/EnvironmentSetup.swift | puts a saved list of environments into effect outside Aiko |
+| Plugins/PluginSync.cs, ClaudeCli.cs, SkillShelf.cs | Plugins/PluginSync.swift | the marketplace, the skills copy and the claude commands that install the plugins |
+| ClaudeSettingsFile.cs, BridgePath.cs | ClaudeSettingsFile.swift | Aiko's line in somebody else's settings.json, and where the bridge is |
+| AikoHttp.cs, UpdateClient.cs, UpdateRun.cs, InstallId.cs, ReportedPeriods.cs | AikoHttp.swift | the one place that makes a URLSession, the version check and the daily count |
+| AppVersion.cs, Startup.cs | AppVersion.swift | the version from Info.plist, and the login item in place of the Run key |
+| Faces/FaceDrawing.cs | FaceImage.swift | one face as a picture, for the settings window |
 
 `Scripts/make-app.sh` builds `build/Aiko.app`: one universal binary, the bridge inside as
 `Aiko.Bridge`, the shim as `claude`, an ad-hoc signature.
@@ -176,17 +199,83 @@ Where it differs from Windows:
   both a top and a bottom island. The Windows app has `--snapshot` as well, which saves a picture;
   over SSH a picture shows only the wallpaper, so nothing here draws one.
 
-Not there yet: the settings window and the wizard, the "Open Claude Code" button of the card,
-direct mode, installing the shim into PATH and the commands folder, the marketplace and plugin
-install, the update check, and signing for release. Until the settings window is there, the surface
-is chosen by hand in `settings.json`: `"place": "Island"` puts Aiko on the edge of the screen, and
-the default stays the menu bar icon (D-250).
+- **The settings window has two doors of its own.** `--try-settings <page>` opens it at one page
+  (`general`, `folders`, `personality`, `privacy`, `setup`, `env1`, `env2`) and `--try-wizard
+  <item>` at one checklist item. Both write down the size, the menu and the state of every item,
+  and quit after `AIKO_TRY_SECONDS`. `AIKO_TRY_GROW=1` makes the window as tall as the page, the
+  way `SettingsPanel.GrowToPage` does for `--snapshot-settings` on Windows, and `=end` keeps its
+  bottom on screen when the page is taller than the screen itself. Neither door saves anything.
+
+## What macOS does differently in the settings window
+
+These are the places where there was nothing to copy, with the reason for the choice.
+
+- **The launch commands reach PATH through `~/.zshrc`.** Windows writes the user PATH in the
+  registry and tells Explorer about it, and every new process sees it. macOS has no such place:
+  `path_helper` reads `/etc/paths` and `/etc/paths.d`, which are the system's, so a folder under the
+  home directory reaches a shell only if the shell's own profile puts it there (spike S4). Aiko
+  writes one block into `~/.zshrc`, marked at both ends so it can be found and taken out whole:
+
+      # Aiko: launch commands
+      export PATH='/Users/someone/Library/Caches/Aiko/bin':$PATH
+      # end Aiko
+
+  The checklist asks before it is written and shows exactly that line and exactly that file, the
+  same way the item above it shows the line it would add to `settings.json`. A copy of the profile
+  stays beside it, and removal puts the file back: `ZshProfile.remove(ZshProfile.add(text))` is the
+  text it started from, which has a case of its own and was also checked against a real 14 line
+  `~/.zshrc`. Terminals that are already open keep the PATH they started with, as on Windows.
+
+  The command folder itself is `~/Library/Caches/Aiko/bin`, where the shared layout puts it (D-250).
+  macOS may empty Caches; "Add to PATH" in the checklist builds the folder again, and the block in
+  the profile costs nothing while the folder is missing.
+
+- **The marketplace and the persona plugins are under `~/Library/Caches/Aiko` too**, for the same
+  reason: they are what Aiko makes for itself and can be made again. The skills plugin ships inside
+  the bundle at `Contents/Resources/plugins/aiko` and is copied into the marketplace folder only
+  when a file of it changed, as `SkillShelf` does on Windows.
+
+- **"Open Claude Code" writes a script and lets Terminal run it.** Windows starts `claude.exe` and
+  the system gives it a console. A GUI app on macOS gets no terminal at all, and telling Terminal
+  what to run by AppleScript needs the Automation permission and a prompt nobody asked for. So Aiko
+  writes `open-claude.command` into its own folder — `cd`, the config folder variable, `exec claude`
+  — and hands it to Terminal with `open`. That needs no extra permission, and the file is written
+  again every time and safe to delete. The button sits on the card, where Windows keeps it, and not
+  on the environment page: in Russian two buttons do not fit that column.
+
+- **"Signed in" is read from `.claude.json`, not from a file that is never written.** Claude Code on
+  macOS keeps its token in the Keychain, so `.credentials.json` is not there even for a folder in
+  daily use (checked 2026-09-18 on macOS 15.7, against two folders whose accounts were signed in).
+  Aiko will not read the Keychain — that would be storing somebody else's token by another name —
+  so the answer comes from the account block Aiko already reads for the plan. `SignedIn` holds the
+  rule for both systems. It is a weaker signal: a folder whose token has expired still names its
+  account. That is the right way round here, because a checklist that could never say "connected"
+  would stop somebody setting Aiko up at all, which is what the first live run on a Mac ran into.
+
+- **There is no updater.** Velopack is Windows only, so the general page shows the version and
+  "Check now" and nothing else; an available version opens the download page. The daily check, the
+  two consent switches and the count are the same as on Windows.
+
+- **Starting at login** is `SMAppService.mainApp` in place of the Run key. It needs a real bundle:
+  a binary run straight out of `.build` cannot register, and then the switch says off and saying
+  yes only writes a line in the log.
+
+- **A zsh function that shadows a command is left alone.** Windows offers to take a `function claude`
+  out of the PowerShell profile (D-167), because that function is usually something a tutorial told
+  the person to add. On macOS the shim is on PATH and a shell function that hides it is the person's
+  own choice; the checklist has no such item, and `PowerShellProfile.cs` stays unported.
+
+Not there yet: direct mode and signing for release.
 
 ## Names that had to change
 
 `for` and `default` are keywords in Swift. `SnapshotName.For` is `forConfigDirectory`,
 `BridgeCommand.For` is `forPath`, `IslandReveal.For` is `showFor`, and
 `EnvironmentSettings.Default(userProfile)` is `defaultEnvironmentIn(_:_:)`.
+
+`Binding` is `FolderBinding`. SwiftUI has a `Binding` of its own, and a module used beside it must
+not export that name: every `@Binding` in the app became ambiguous the day the settings window
+arrived.
 
 ## Where the two cores take different arguments
 

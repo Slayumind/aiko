@@ -5,8 +5,7 @@ import AppKit
 /// screen, and the card under whichever of them is there. One owner, because both show the same
 /// numbers and the user swaps between them at will.
 ///
-/// The twin of AikoShell.cs on Windows. The settings window and the wizard are not here yet; the
-/// menu items that would open them are marked below.
+/// The twin of AikoShell.cs on Windows.
 @MainActor
 final class AikoShell: NSResponder {
     private static let iconSize: CGFloat = 18
@@ -22,6 +21,10 @@ final class AikoShell: NSResponder {
     private var cardWatch: Timer?
     private var away = AwayWatch()
     private var card: CardWindow?
+
+    /// One settings window at a time (D-177). It is made when it is asked for and dropped when it
+    /// closes, the way every other window of Aiko is.
+    private var settings: SettingsWindow?
 
     /// The face for two seconds after a session event (D-211), and the way to it and back.
     private let faces = FacePlay()
@@ -57,6 +60,21 @@ final class AikoShell: NSResponder {
         Log.write("found \(environments.environments.count) environments, "
             + "\(watcher.byFile.count) snapshot files, showing the "
             + (Store.settings().place == .island ? "island" : "menu bar icon"))
+
+        openChecklistIfNothingIsSetUp(environments, Store.settings())
+    }
+
+    /// On a fresh machine the checklist opens by itself: there is nothing for the icon to show and
+    /// nothing tells the person where to start. Someone who set Aiko up before an item existed is
+    /// shown that one item once (D-200).
+    private func openChecklistIfNothingIsSetUp(_ environments: EnvironmentSettings, _ app: AppSettings) {
+        if !environments.hasEnvironments {
+            openSettings(at: .checklist)
+        } else if WizardChecklist.opensMeetAikoOnStart(app, environments) {
+            openSettings(at: .checklist, item: .meetAiko)
+        } else if WizardChecklist.opensPrivacyOnStart(app, environments) {
+            openSettings(at: .checklist, item: .privacy)
+        }
     }
 
     func stop() {
@@ -138,8 +156,13 @@ final class AikoShell: NSResponder {
 
     /// Proof that the app starts, reads the snapshots and lays the card out, for a machine nobody
     /// is looking at. The shim has the same door under AIKO_SHIM_SELF_TEST.
-    func selfTest(_ what: String) {
+    func selfTest(_ what: String, value: String? = nil) {
         selfTesting = true
+
+        if what == "settings" || what == "wizard" {
+            SettingsCheck.run(what, value: value, shell: self)
+            return
+        }
 
         if what != "1", what != "card" {
             IslandCheck.run(what, shell: self)
@@ -428,7 +451,8 @@ final class AikoShell: NSResponder {
         }
 
         let window = CardWindow(model: currentCard())
-        window.onSettings = { [weak self] in self?.openSettings() }
+        window.onSettings = { [weak self] in self?.openSettings(at: nil) }
+        window.onOpenClaude = { [weak self] name in self?.openClaudeCode(named: name) }
         window.onClosed = { [weak self] in
             guard let self, self.card === window else { return }
             self.card = nil
@@ -515,10 +539,9 @@ final class AikoShell: NSResponder {
             menu.addItem(.separator())
         }
 
-        // TODO: the settings window and the update check belong to the parts after this one.
-        add(menu, Strings.settings, #selector(openSettings), enabled: false)
+        add(menu, Strings.settings, #selector(onSettings))
         add(menu, Strings.menuRefresh, #selector(onRefresh))
-        add(menu, Strings.checkForUpdates, #selector(onCheckUpdates), enabled: false)
+        add(menu, Strings.checkForUpdates, #selector(onCheckUpdates))
         menu.addItem(.separator())
         add(menu, Strings.quitAiko, #selector(onQuit))
 
@@ -554,14 +577,48 @@ final class AikoShell: NSResponder {
         card?.update(currentCard())
     }
 
-    @objc private func openSettings() {
-        // TODO: the settings window is the next part of the macOS app.
-        Log.write("settings asked for, and there is no window yet")
+    /// Opens Claude Code in the folder of one environment, from the card. A card that stays open
+    /// behind a new terminal window is what the person asked for: they pressed a button on it.
+    private func openClaudeCode(named environment: String) {
+        guard let folder = Store.environments().environments
+            .first(where: { $0.name == environment })?.configDirectories.first
+        else {
+            return
+        }
+
+        card?.pin()
+        ClaudeLauncher.open(configFolder: folder, workingDirectory: Store.home)
+    }
+
+    @objc private func onSettings() {
+        openSettings(at: nil)
+    }
+
+    /// The one settings window. A second ask brings the one that is open to the front, so two
+    /// windows can never disagree about what is saved.
+    @discardableResult
+    func openSettings(at page: SettingsPage?, item: ChecklistItem? = nil) -> SettingsWindow {
+        if let open = settings {
+            if let page { open.state.show(page) }
+            if let item { open.openChecklist(at: item) }
+            open.show()
+            return open
+        }
+
+        let window = SettingsWindow(page: page)
+        window.onQuit = { NSApp.terminate(nil) }
+        window.onChanged = { [weak self] in self?.onRefresh() }
+        window.onClosed = { [weak self] in self?.settings = nil }
+        window.onReopen = { [weak self] page in self?.openSettings(at: page) }
+
+        settings = window
+        if let item { window.openChecklist(at: item) }
+        window.show()
+        return window
     }
 
     @objc private func onCheckUpdates() {
-        // TODO: the update check is not ported yet.
-        Log.write("update check asked for, and there is none yet")
+        openSettings(at: .general).startUpdateCheck()
     }
 
     @objc private func onQuit() {

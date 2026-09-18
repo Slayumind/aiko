@@ -166,11 +166,17 @@
   <data name="PlaceIsland" xml:space="preserve">
     <value>Island</value>
   </data>
+  <data name="PlaceMenuBar" xml:space="preserve">
+    <value>Menu bar</value>
+  </data>
   <data name="HideIslandInFullScreen" xml:space="preserve">
     <value>Hide the island in full screen</value>
   </data>
   <data name="StartWithWindows" xml:space="preserve">
     <value>Start with Windows</value>
+  </data>
+  <data name="StartAtLogin" xml:space="preserve">
+    <value>Start at login</value>
   </data>
   <data name="CheckUpdatesWhat" xml:space="preserve">
     <value>Once a day Aiko asks slayumind.org for the latest version. Downloads come from GitHub.</value>
@@ -277,11 +283,17 @@
   <data name="WizardDoneTray" xml:space="preserve">
     <value>Aiko is down by the clock. Rest the mouse on it to see the card, or click it to keep the card open.</value>
   </data>
+  <data name="WizardDoneMenuBar" xml:space="preserve">
+    <value>Aiko is up by the clock. Rest the mouse on it to see the card, or click it to keep the card open.</value>
+  </data>
   <data name="WizardDoneIsland" xml:space="preserve">
     <value>Aiko is at the top of your screen. Drag it anywhere and it sticks to the nearest edge.</value>
   </data>
   <data name="WizardDoneOverflow" xml:space="preserve">
     <value>Windows 11 hides new app icons under the arrow next to the clock. Open the arrow and drag Aiko onto the taskbar: under the arrow, the card can't open.</value>
+  </data>
+  <data name="WizardDoneMenuBarRoom" xml:space="preserve">
+    <value>A full menu bar hides the icons furthest from the clock. Close a menu bar app if Aiko doesn't fit.</value>
   </data>
   <data name="WizardDoneFirstNumbers" xml:space="preserve">
     <value>The first numbers arrive after your next answer from Claude Code. Until then, the ring is dashed.</value>
@@ -367,6 +379,9 @@
   <data name="StateIsland" xml:space="preserve">
     <value>island</value>
   </data>
+  <data name="StateMenuBar" xml:space="preserve">
+    <value>menu bar</value>
+  </data>
   <data name="Copy" xml:space="preserve">
     <value>Copy</value>
   </data>
@@ -384,6 +399,9 @@
   </data>
   <data name="InstallHow" xml:space="preserve">
     <value>Open PowerShell, paste the command and press Enter. Aiko notices when it's done.</value>
+  </data>
+  <data name="InstallHowMac" xml:space="preserve">
+    <value>Open Terminal, paste the command and press Enter. Aiko notices when it's done.</value>
   </data>
   <data name="WaitInstall" xml:space="preserve">
     <value>Waiting for Claude Code…</value>
@@ -448,6 +466,9 @@
   <data name="CmdLead" xml:space="preserve">
     <value>A command starts Claude Code in the right environment. It works in PowerShell, cmd and Git Bash.</value>
   </data>
+  <data name="CmdLeadMac" xml:space="preserve">
+    <value>A command starts Claude Code in the right environment. It works in Terminal and in any zsh shell.</value>
+  </data>
   <data name="CmdFor" xml:space="preserve">
     <value>COMMAND · {0}</value>
   </data>
@@ -486,6 +507,12 @@
   </data>
   <data name="PathNote" xml:space="preserve">
     <value>Aiko puts its folder at the start of PATH so every terminal finds the commands. Restart open terminals and your IDE.</value>
+  </data>
+  <data name="PathLineMac" xml:space="preserve">
+    <value>THE LINE AIKO ADDS TO ~/.ZSHRC</value>
+  </data>
+  <data name="PathNoteMac" xml:space="preserve">
+    <value>macOS puts a folder of your own on PATH only when your shell profile says so, so Aiko adds this line to ~/.zshrc. A copy of the file stays next to it, and removing Aiko takes the line out. Terminals that are already open keep the PATH they started with.</value>
   </data>
   <data name="PathAdd" xml:space="preserve">
     <value>Add to PATH</value>
@@ -550,6 +577,9 @@
   <data name="CmdShells" xml:space="preserve">
     <value>PowerShell · cmd · Git Bash</value>
   </data>
+  <data name="CmdShellsMac" xml:space="preserve">
+    <value>zsh · bash</value>
+  </data>
   <data name="CmdKept" xml:space="preserve">
     <value>The command stays the same, since your terminals and scripts know it.</value>
   </data>
@@ -586,8 +616,14 @@
   <data name="MoveToRecycleBin" xml:space="preserve">
     <value>And move the folder to the Recycle Bin</value>
   </data>
+  <data name="MoveToTrash" xml:space="preserve">
+    <value>And move the folder to the Trash</value>
+  </data>
   <data name="RecycleWhy" xml:space="preserve">
     <value>It holds the Claude Code account, history and memory. You can restore it from the Recycle Bin.</value>
+  </data>
+  <data name="TrashWhy" xml:space="preserve">
+    <value>It holds the Claude Code account, history and memory. You can put it back from the Trash.</value>
   </data>
   <data name="KeepClaude" xml:space="preserve">
     <value>VS Code and Claude Desktop use the .claude folder, so Aiko never removes it.</value>
@@ -603,6 +639,9 @@
   </data>
   <data name="EnvironmentRemovedToBin" xml:space="preserve">
     <value>{0} removed. The folder is in the Recycle Bin.</value>
+  </data>
+  <data name="EnvironmentRemovedToTrash" xml:space="preserve">
+    <value>{0} removed. The folder is in the Trash.</value>
   </data>
   <data name="FoldersTableLead" xml:space="preserve">
     <value>In a folder and in every folder inside, plain claude starts its environment. A command like {0} beats a binding, and Claude Code reminds you of it.</value>
@@ -652,8 +691,14 @@
   <data name="RestartLine" xml:space="preserve">
     <value>Aiko removes the environments, its lines and plugins in settings.json, the commands {0}, the folder bindings and its folder in PATH, and turns the PowerShell profile functions back on. Accounts and history stay in the folders.</value>
   </data>
+  <data name="RestartLineMac" xml:space="preserve">
+    <value>Aiko removes the environments, its lines and plugins in settings.json, the commands {0}, the folder bindings and its line in ~/.zshrc. Accounts and history stay in the folders.</value>
+  </data>
   <data name="RestartBin" xml:space="preserve">
     <value>And move {0} to the Recycle Bin</value>
+  </data>
+  <data name="RestartTrash" xml:space="preserve">
+    <value>And move {0} to the Trash</value>
   </data>
   <data name="RestartKeep" xml:space="preserve">
     <value>.claude stays either way.</value>
@@ -702,6 +747,9 @@
   </data>
   <data name="SentWindows" xml:space="preserve">
     <value>the version of Windows: what to test first</value>
+  </data>
+  <data name="SentMacOS" xml:space="preserve">
+    <value>the version of macOS: what to test first</value>
   </data>
   <data name="SentDayId" xml:space="preserve">
     <value>an ID that changes every day</value>
@@ -786,6 +834,9 @@
   </data>
   <data name="FaceWhere" xml:space="preserve">
     <value>This is how Aiko looks in the tray, on the island and in windows.</value>
+  </data>
+  <data name="FaceWhereMac" xml:space="preserve">
+    <value>That's how Aiko looks in the menu bar, on the island and in the windows.</value>
   </data>
   <data name="SectionTemperament" xml:space="preserve">
     <value>TEMPERAMENT</value>
