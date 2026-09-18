@@ -9,12 +9,19 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Added
 
+- **Aiko installs its own updates, when you ask it to.** Press **Download and install** on the
+  General page and Aiko downloads the new version from GitHub; press **Restart now** and it starts.
+  Windows and macOS both do this. Nothing is downloaded or replaced until you press the button.
+- **Every update is checked before it is installed.** A release carries a list of its files signed
+  with an ECDSA P-256 key, and Aiko ships the public half. If the signature or the file does not
+  match, nothing is replaced and the log says why. A build with no key installs nothing at all.
 - **Code signing policy.** [CODE-SIGNING.md](CODE-SIGNING.md) says which files will be signed through
   SignPath Foundation and who approves each release.
 
 ### Changed
 
-- **PRIVACY.md** now also lists the `PATH` folder and the PowerShell profile change.
+- **PRIVACY.md** now also lists the `PATH` folder and the PowerShell profile change, and describes
+  what the update path does on each system.
 
 ## [0.2.3] - 2026-09-17
 

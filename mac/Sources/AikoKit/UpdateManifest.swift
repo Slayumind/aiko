@@ -108,7 +108,7 @@ public struct UpdateManifest: Sendable {
             return .notListed
         }
 
-        return sameBytes(expected, sha256) ? .ok : .hashMismatch
+        return Self.sameBytes(expected, sha256) ? .ok : .hashMismatch
     }
 
     // ---- reading the text ----
