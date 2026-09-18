@@ -112,7 +112,9 @@ else. Redirects are checked against the same list before they are followed.
 ## The token
 
 Claude Code keeps an access token in its own folder. In direct mode Aiko needs that token to ask
-about your account. The rules:
+about your account. **Direct mode is on Windows only.** On macOS Claude Code keeps the token in the
+Keychain instead of a file, and Aiko does not read the Keychain, so there is no direct mode there
+and nothing on a Mac ever reads your token. The rules on Windows:
 
 - Aiko reads the token again before every request and keeps it in memory only for that request.
 - Aiko never writes the token to a file, a cache, a log or the screen.

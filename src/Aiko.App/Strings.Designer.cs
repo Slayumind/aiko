@@ -126,6 +126,9 @@ public static class Strings
     /// In direct mode, Aiko asks Anthropic for your limits itself. It uses the token Claude Code...
     public static string DirectModeWhat => Get("DirectModeWhat");
 
+    /// Direct mode is on Windows only. On macOS Claude Code keeps the token in the Keychain, and...
+    public static string DirectModeMac => Get("DirectModeMac");
+
     /// If it's a work account, ask whoever manages it first.
     public static string DirectModeAsk => Get("DirectModeAsk");
 

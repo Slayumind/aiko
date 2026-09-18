@@ -136,6 +136,9 @@
   <data name="DirectModeWhat" xml:space="preserve">
     <value>In direct mode, Aiko asks Anthropic for your limits itself. It uses the token Claude Code already keeps on this computer: Aiko reads it before each request and never saves it. Turn it on if you work in the IDE panel or in Claude Desktop, where there's no status line.</value>
   </data>
+  <data name="DirectModeMac" xml:space="preserve">
+    <value>Direct mode is on Windows only. On macOS Claude Code keeps the token in the Keychain, and Aiko does not read it, so the IDE panel and Claude Desktop stay without numbers here.</value>
+  </data>
   <data name="DirectModeAsk" xml:space="preserve">
     <value>If it's a work account, ask whoever manages it first.</value>
   </data>

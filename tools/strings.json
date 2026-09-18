@@ -245,6 +245,13 @@
     ]
   ],
   [
+    "DirectModeMac",
+    [
+      "Direct mode is on Windows only. On macOS Claude Code keeps the token in the Keychain, and Aiko does not read it, so the IDE panel and Claude Desktop stay without numbers here.",
+      "Прямой режим есть только на Windows. На macOS Claude Code держит токен в Связке ключей, а Aiko её не читает, поэтому панель IDE и Claude Desktop здесь остаются без цифр."
+    ]
+  ],
+  [
     "DirectModeAsk",
     [
       "If it's a work account, ask whoever manages it first.",

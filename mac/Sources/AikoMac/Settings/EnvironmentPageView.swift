@@ -123,22 +123,15 @@ struct EnvironmentPageView: View {
                 Control.rowHint(Strings.claudeOpened).padding(.top, 6)
             }
 
-            HStack {
-                Text(Strings.directMode)
-                    .font(Theme.sans(Theme.textName))
-                    .foregroundStyle(Theme.ink)
-                Spacer(minLength: 12)
-                AikoSwitch(isOn: environment.directMode, set: setDirect)
-            }
-            .padding(.top, 22)
+            // Direct mode reads the access token, and on macOS that token lives in the Keychain,
+            // which Aiko will not read (AikoKit.SignedIn). A switch that cannot keep its promise is
+            // worse than no switch, so here the page says what it means instead of offering it.
+            Text(Strings.directMode)
+                .font(Theme.sans(Theme.textName))
+                .foregroundStyle(Theme.ink)
+                .padding(.top, 22)
 
-            // The one control in Aiko that reads an access token. Somebody has to be able to decide
-            // before they flip it, not after, so the whole explanation sits right under it.
-            Control.rowHint(
-                account.plan == .team || account.plan == .enterprise
-                    ? Strings.directModeWhat + " " + Strings.directModeAsk
-                    : Strings.directModeWhat)
-                .padding(.top, 6)
+            Control.rowHint(Strings.directModeMac).padding(.top, 6)
         }
     }
 
@@ -273,13 +266,6 @@ struct EnvironmentPageView: View {
     private func fill() {
         state.startEditing(folder)
         signedIn = Store.isSignedIn(folder)
-    }
-
-    private func setDirect(_ on: Bool) {
-        guard let environment else { return }
-        state.editor.commit(
-            EnvironmentEdits.setDirectMode(state.environments, environment.name, on),
-            "direct mode \(on ? "on" : "off")")
     }
 
     private func signIn() {
