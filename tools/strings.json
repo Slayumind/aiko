@@ -598,7 +598,7 @@
     "WizardDoneMenuBarRoom",
     [
       "A full menu bar hides the icons furthest from the clock. Close a menu bar app if Aiko doesn't fit.",
-      "Если в строке меню нет места, macOS прячет значки, что дальше от часов. Закрой лишнее приложение, если Aiko не помещается."
+      "В переполненной строке меню macOS прячет значки, которые дальше от часов. Если Aiko не помещается, закрой лишнее приложение."
     ]
   ],
   [
@@ -1584,8 +1584,8 @@
   [
     "DeleteAppStays",
     [
-      "Aiko cannot move itself to the Bin from here. Drag the app there when it quits.",
-      "Отсюда Aiko не может отправить себя в Корзину. Перетащи программу туда, когда она закроется."
+      "Aiko cannot move itself to the Bin from where it is now. Drag the app there when it quits.",
+      "Aiko не может отправить себя в Корзину из этой папки. Перетащи программу туда, когда она закроется."
     ]
   ],
   [

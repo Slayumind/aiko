@@ -699,7 +699,7 @@ public static class Strings
     /// Removing Aiko. Claude Code may take a few seconds to answer.
     public static string DeleteWorking => Get("DeleteWorking");
 
-    /// Aiko cannot move itself to the Bin from here. Drag the app there when it quits.
+    /// Aiko cannot move itself to the Bin from where it is now. Drag the app there when it quits.
     public static string DeleteAppStays => Get("DeleteAppStays");
 
     /// This copy was unpacked from a zip, so it has no uninstaller. The folder with Aiko stays, ...

@@ -710,7 +710,7 @@
     <value>Removing Aiko. Claude Code may take a few seconds to answer.</value>
   </data>
   <data name="DeleteAppStays" xml:space="preserve">
-    <value>Aiko cannot move itself to the Bin from here. Drag the app there when it quits.</value>
+    <value>Aiko cannot move itself to the Bin from where it is now. Drag the app there when it quits.</value>
   </data>
   <data name="DeletePortable" xml:space="preserve">
     <value>This copy was unpacked from a zip, so it has no uninstaller. The folder with Aiko stays, and Aiko opens it for you.</value>

@@ -125,7 +125,7 @@ public enum Strings {
         "WizardDoneMenuBar": ("Aiko is up by the clock. Rest the mouse on it for the card, click to keep it open.", "Aiko наверху, рядом с часами. Наведи мышь — покажется карточка, кликни — останется открытой."),
         "WizardDoneIsland": ("Aiko is at the top of your screen. Drag it anywhere and it sticks to the nearest edge.", "Aiko вверху экрана. Перетащи куда угодно — она прилипнет к ближайшему краю."),
         "WizardDoneOverflow": ("Windows 11 hides new app icons under the arrow next to the clock. Open the arrow and drag Aiko onto the taskbar: under the arrow, the card can't open.", "Windows 11 прячет значки новых приложений под стрелку рядом с часами. Открой её и перетащи Aiko на панель задач: под стрелкой карточка не открывается."),
-        "WizardDoneMenuBarRoom": ("A full menu bar hides the icons furthest from the clock. Close a menu bar app if Aiko doesn't fit.", "Если в строке меню нет места, macOS прячет значки, что дальше от часов. Закрой лишнее приложение, если Aiko не помещается."),
+        "WizardDoneMenuBarRoom": ("A full menu bar hides the icons furthest from the clock. Close a menu bar app if Aiko doesn't fit.", "В переполненной строке меню macOS прячет значки, которые дальше от часов. Если Aiko не помещается, закрой лишнее приложение."),
         "WizardDoneFirstNumbers": ("The first numbers arrive after your next answer from Claude Code. Until then, the ring is dashed.", "Первые цифры придут после следующего ответа Claude Code. До этого кольцо пунктирное."),
         "WizardDoneNoAccess": ("Aiko can't see your limits yet. You can turn on access at any time on the General page.", "Aiko пока не видит лимиты. Доступ можно включить в любой момент на странице «Общие»."),
         "SettingsWriteFailed": ("Aiko couldn't write the Claude Code settings file. Try again.", "Aiko не смогла записать файл настроек Claude Code. Попробуй ещё раз."),
@@ -266,7 +266,7 @@ public enum Strings {
         "DeleteKeep": ("Your accounts and history stay: Aiko never made them.", "Аккаунты и история останутся: Aiko их не создавала."),
         "DeleteKeepMac": ("Your accounts and history stay, and so does the copy of ~/.zshrc Aiko made.", "Аккаунты и история останутся, и копия ~/.zshrc, которую сделала Aiko, тоже."),
         "DeleteWorking": ("Removing Aiko. Claude Code may take a few seconds to answer.", "Убираю Aiko. Claude Code может отвечать несколько секунд."),
-        "DeleteAppStays": ("Aiko cannot move itself to the Bin from here. Drag the app there when it quits.", "Отсюда Aiko не может отправить себя в Корзину. Перетащи программу туда, когда она закроется."),
+        "DeleteAppStays": ("Aiko cannot move itself to the Bin from where it is now. Drag the app there when it quits.", "Aiko не может отправить себя в Корзину из этой папки. Перетащи программу туда, когда она закроется."),
         "DeletePortable": ("This copy was unpacked from a zip, so it has no uninstaller. The folder with Aiko stays, and Aiko opens it for you.", "Эта копия распакована из zip, деинсталлятора у неё нет. Папка с Aiko останется, и Aiko её откроет."),
         "OpenClaudeCode": ("Open Claude Code", "Открыть Claude Code"),
         "CardSignInNote": ("Sign in so Aiko can see the limits of this environment.", "Войди, чтобы Aiko видела лимиты этой среды."),
@@ -1036,7 +1036,7 @@ public enum Strings {
     /// Removing Aiko. Claude Code may take a few seconds to answer.
     public static var deleteWorking: String { Strings.get("DeleteWorking") }
 
-    /// Aiko cannot move itself to the Bin from here. Drag the app there when it quits.
+    /// Aiko cannot move itself to the Bin from where it is now. Drag the app there when it quits.
     public static var deleteAppStays: String { Strings.get("DeleteAppStays") }
 
     /// This copy was unpacked from a zip, so it has no uninstaller. The folder with Aiko stays, ...

@@ -287,7 +287,7 @@
     <value>Windows 11 прячет значки новых приложений под стрелку рядом с часами. Открой её и перетащи Aiko на панель задач: под стрелкой карточка не открывается.</value>
   </data>
   <data name="WizardDoneMenuBarRoom" xml:space="preserve">
-    <value>Если в строке меню нет места, macOS прячет значки, что дальше от часов. Закрой лишнее приложение, если Aiko не помещается.</value>
+    <value>В переполненной строке меню macOS прячет значки, которые дальше от часов. Если Aiko не помещается, закрой лишнее приложение.</value>
   </data>
   <data name="WizardDoneFirstNumbers" xml:space="preserve">
     <value>Первые цифры придут после следующего ответа Claude Code. До этого кольцо пунктирное.</value>
@@ -710,7 +710,7 @@
     <value>Убираю Aiko. Claude Code может отвечать несколько секунд.</value>
   </data>
   <data name="DeleteAppStays" xml:space="preserve">
-    <value>Отсюда Aiko не может отправить себя в Корзину. Перетащи программу туда, когда она закроется.</value>
+    <value>Aiko не может отправить себя в Корзину из этой папки. Перетащи программу туда, когда она закроется.</value>
   </data>
   <data name="DeletePortable" xml:space="preserve">
     <value>Эта копия распакована из zip, деинсталлятора у неё нет. Папка с Aiko останется, и Aiko её откроет.</value>
