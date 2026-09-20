@@ -943,6 +943,9 @@
   <data name="SkillAikoPlaytest" xml:space="preserve">
     <value>Checks a game with numbers: the same test scene before and after a change.</value>
   </data>
+  <data name="SkillAikoPolishing" xml:space="preserve">
+    <value>Runs a polishing round on work the owner reviewed: their comments, a set number of questions, a set number of fixes.</value>
+  </data>
   <data name="SkillAikoBlenderToUnity" xml:space="preserve">
     <value>A model from Blender to Unity: axes, normals, export and import.</value>
   </data>

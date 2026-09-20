@@ -2128,6 +2128,13 @@
     ]
   ],
   [
+    "SkillAikoPolishing",
+    [
+      "Runs a polishing round on work the owner reviewed: their comments, a set number of questions, a set number of fixes.",
+      "Ведёт круг полишинга по уже увиденному: комментарии владельца, оговорённое число вопросов и правок."
+    ]
+  ],
+  [
     "SkillAikoBlenderToUnity",
     [
       "A model from Blender to Unity: axes, normals, export and import.",

@@ -943,6 +943,9 @@
   <data name="SkillAikoPlaytest" xml:space="preserve">
     <value>Проверяет игру цифрами: одна и та же тестовая сцена до и после правки.</value>
   </data>
+  <data name="SkillAikoPolishing" xml:space="preserve">
+    <value>Ведёт круг полишинга по уже увиденному: комментарии владельца, оговорённое число вопросов и правок.</value>
+  </data>
   <data name="SkillAikoBlenderToUnity" xml:space="preserve">
     <value>Модель из Blender в Unity: оси, нормали, экспорт и импорт.</value>
   </data>

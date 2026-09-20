@@ -344,6 +344,7 @@ public enum Strings {
         "SkillAikoReleaseGate": ("Before a release: what can't be undone, how to roll back, whether the docs match the code.", "Перед релизом: что необратимо, как откатить, совпадают ли документы с кодом."),
         "SkillAikoDocsHygiene": ("One fact in one place, a decision log, contradictions found.", "Факт живёт в одном месте, журнал решений, поиск противоречий."),
         "SkillAikoPlaytest": ("Checks a game with numbers: the same test scene before and after a change.", "Проверяет игру цифрами: одна и та же тестовая сцена до и после правки."),
+        "SkillAikoPolishing": ("Runs a polishing round on work the owner reviewed: their comments, a set number of questions, a set number of fixes.", "Ведёт круг полишинга по уже увиденному: комментарии владельца, оговорённое число вопросов и правок."),
         "SkillAikoBlenderToUnity": ("A model from Blender to Unity: axes, normals, export and import.", "Модель из Blender в Unity: оси, нормали, экспорт и импорт."),
         "SkillAikoTexturing": ("Ready files for textures: a size that fits the camera, and sheets to paint over.", "Готовые файлы для текстур: размер под камеру и шаблоны листов для отрисовки."),
         "SkillAikoGlbForWeb": ("A .glb for the web: size, axes, compression, and why the model shows as a blank view.", "Файл .glb для веба: размер, оси, сжатие и почему вместо модели пустое окно."),
@@ -1269,6 +1270,9 @@ public enum Strings {
 
     /// Checks a game with numbers: the same test scene before and after a change.
     public static var skillAikoPlaytest: String { Strings.get("SkillAikoPlaytest") }
+
+    /// Runs a polishing round on work the owner reviewed: their comments, a set number of questi...
+    public static var skillAikoPolishing: String { Strings.get("SkillAikoPolishing") }
 
     /// A model from Blender to Unity: axes, normals, export and import.
     public static var skillAikoBlenderToUnity: String { Strings.get("SkillAikoBlenderToUnity") }

@@ -933,6 +933,9 @@ public static class Strings
     /// Checks a game with numbers: the same test scene before and after a change.
     public static string SkillAikoPlaytest => Get("SkillAikoPlaytest");
 
+    /// Runs a polishing round on work the owner reviewed: their comments, a set number of questi...
+    public static string SkillAikoPolishing => Get("SkillAikoPolishing");
+
     /// A model from Blender to Unity: axes, normals, export and import.
     public static string SkillAikoBlenderToUnity => Get("SkillAikoBlenderToUnity");
 

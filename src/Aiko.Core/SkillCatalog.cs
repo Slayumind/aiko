@@ -1,4 +1,4 @@
-namespace Aiko.Core;
+﻿namespace Aiko.Core;
 
 /// What a group of skills is about. The settings page and the site show the skills under these.
 public enum SkillDomain
@@ -20,7 +20,7 @@ public static class SkillCatalog
     public static IReadOnlyList<SkillGroup> Groups { get; } =
     [
         new(SkillDomain.Projects, ["copy", "docs-hygiene", "release-gate", "calendar", "drive"]),
-        new(SkillDomain.Games, ["gamedesign-research", "playtest", "blender-to-unity", "texturing", "glb-for-web", "palette"]),
+        new(SkillDomain.Games, ["gamedesign-research", "playtest", "polishing", "blender-to-unity", "texturing", "glb-for-web", "palette"]),
     ];
 
     /// Every skill, domain by domain.
