@@ -30,8 +30,8 @@ public static class Strings
     /// {0} · week
     public static string CardModelWeek => Get("CardModelWeek");
 
-    /// {0}% used
-    public static string CardPercentUsed => Get("CardPercentUsed");
+    /// {0}%
+    public static string CardPercent => Get("CardPercent");
 
     /// resets in {0}
     public static string CardResets => Get("CardResets");
@@ -123,14 +123,14 @@ public static class Strings
     /// Direct mode
     public static string DirectMode => Get("DirectMode");
 
-    /// In direct mode, Aiko asks Anthropic for your limits itself. It uses the token Claude Code...
+    /// In direct mode, Aiko asks Anthropic for your limits itself. That needs the token Claude C...
     public static string DirectModeWhat => Get("DirectModeWhat");
+
+    /// Direct mode is on Windows only. On macOS Claude Code keeps the token in the Keychain, and...
+    public static string DirectModeMac => Get("DirectModeMac");
 
     /// If it's a work account, ask whoever manages it first.
     public static string DirectModeAsk => Get("DirectModeAsk");
-
-    /// No environments yet. Aiko looks for them on the first run.
-    public static string NoEnvironments => Get("NoEnvironments");
 
     /// Claude Code sends its limits to Aiko.
     public static string AccessOk => Get("AccessOk");
@@ -156,13 +156,19 @@ public static class Strings
     /// Island
     public static string PlaceIsland => Get("PlaceIsland");
 
+    /// Menu bar
+    public static string PlaceMenuBar => Get("PlaceMenuBar");
+
     /// Hide the island in full screen
     public static string HideIslandInFullScreen => Get("HideIslandInFullScreen");
 
     /// Start with Windows
     public static string StartWithWindows => Get("StartWithWindows");
 
-    /// Once a day Aiko asks slayumind.org for the latest version. Downloads come from GitHub.
+    /// Start at login
+    public static string StartAtLogin => Get("StartAtLogin");
+
+    /// Once a day Aiko asks slayumind.org for the latest version. The files come from GitHub, an...
     public static string CheckUpdatesWhat => Get("CheckUpdatesWhat");
 
     /// Check now
@@ -183,6 +189,33 @@ public static class Strings
     /// Couldn't check. Try again in a few minutes.
     public static string UpdateFailed => Get("UpdateFailed");
 
+    /// Download and install
+    public static string UpdateInstallNow => Get("UpdateInstallNow");
+
+    /// Aiko is downloading {0}…
+    public static string UpdateDownloading => Get("UpdateDownloading");
+
+    /// Aiko {0} is ready. Restart to start using it.
+    public static string UpdateReady => Get("UpdateReady");
+
+    /// Restart now
+    public static string UpdateRestartNow => Get("UpdateRestartNow");
+
+    /// This copy wasn't put here by the installer, so Aiko can't replace it. Use the download page.
+    public static string UpdateNotInstalled => Get("UpdateNotInstalled");
+
+    /// The download didn't finish. Nothing was installed.
+    public static string UpdateDownloadFailed => Get("UpdateDownloadFailed");
+
+    /// This build has no update key yet, so it can't install updates. Use the download page.
+    public static string UpdateNoKeyYet => Get("UpdateNoKeyYet");
+
+    /// The release didn't pass the signature check. Nothing was installed.
+    public static string UpdateBadSignature => Get("UpdateBadSignature");
+
+    /// The downloaded file doesn't match the release list. Nothing was installed.
+    public static string UpdateBadFile => Get("UpdateBadFile");
+
     /// System
     public static string LanguageSystem => Get("LanguageSystem");
 
@@ -198,9 +231,6 @@ public static class Strings
     /// Aiko settings
     public static string SettingsWindowTitle => Get("SettingsWindowTitle");
 
-    /// Environments
-    public static string WizardStepEnvironments => Get("WizardStepEnvironments");
-
     /// Main
     public static string EnvironmentPlainName => Get("EnvironmentPlainName");
 
@@ -210,41 +240,11 @@ public static class Strings
     /// Where to show Aiko
     public static string WizardStepWhere => Get("WizardStepWhere");
 
-    /// step {0} of 3
-    public static string WizardStepCount => Get("WizardStepCount");
-
-    /// Back
-    public static string Back => Get("Back");
-
     /// Not now
     public static string NotNow => Get("NotNow");
 
-    /// Next
-    public static string Next => Get("Next");
-
-    /// Allow
-    public static string Allow => Get("Allow");
-
     /// Finish
     public static string Finish => Get("Finish");
-
-    /// Aiko found one Claude Code folder. That's enough to start, and you can add a second one l...
-    public static string WizardFoundOne => Get("WizardFoundOne");
-
-    /// Aiko found these Claude Code folders. Give them names you'll recognise and turn off the o...
-    public static string WizardFoundMany => Get("WizardFoundMany");
-
-    /// Aiko didn't find Claude Code on this computer. Install it and check again, or choose the ...
-    public static string WizardNothingFound => Get("WizardNothingFound");
-
-    /// Choose a folder
-    public static string WizardChooseFolder => Get("WizardChooseFolder");
-
-    /// Check again
-    public static string WizardCheckAgain => Get("WizardCheckAgain");
-
-    /// Choose a Claude Code folder
-    public static string WizardFolderDialogTitle => Get("WizardFolderDialogTitle");
 
     /// Claude Code sends its limits to a status line. Aiko adds one line to the settings file of...
     public static string WizardAccessExplain => Get("WizardAccessExplain");
@@ -264,8 +264,11 @@ public static class Strings
     /// Once a day, Aiko asks slayumind.org for the latest version and says that one copy of Aiko...
     public static string WizardUpdatesWhat => Get("WizardUpdatesWhat");
 
-    /// Aiko is down by the clock. Rest the mouse on it to see the card, or click it to keep the ...
+    /// Aiko is down by the clock. Rest the mouse on it for the card, click to keep it open.
     public static string WizardDoneTray => Get("WizardDoneTray");
+
+    /// Aiko is up by the clock. Rest the mouse on it for the card, click to keep it open.
+    public static string WizardDoneMenuBar => Get("WizardDoneMenuBar");
 
     /// Aiko is at the top of your screen. Drag it anywhere and it sticks to the nearest edge.
     public static string WizardDoneIsland => Get("WizardDoneIsland");
@@ -273,10 +276,13 @@ public static class Strings
     /// Windows 11 hides new app icons under the arrow next to the clock. Open the arrow and drag...
     public static string WizardDoneOverflow => Get("WizardDoneOverflow");
 
+    /// A full menu bar hides the icons furthest from the clock. Close a menu bar app if Aiko doe...
+    public static string WizardDoneMenuBarRoom => Get("WizardDoneMenuBarRoom");
+
     /// The first numbers arrive after your next answer from Claude Code. Until then, the ring is...
     public static string WizardDoneFirstNumbers => Get("WizardDoneFirstNumbers");
 
-    /// Aiko can't see your limits yet. You can turn on access in settings at any time.
+    /// Aiko can't see your limits yet. You can turn on access at any time on the General page.
     public static string WizardDoneNoAccess => Get("WizardDoneNoAccess");
 
     /// Aiko couldn't write the Claude Code settings file. Try again.
@@ -345,9 +351,6 @@ public static class Strings
     /// added
     public static string StateAdded => Get("StateAdded");
 
-    /// none
-    public static string StateNone => Get("StateNone");
-
     /// {0} bound
     public static string StateBound => Get("StateBound");
 
@@ -356,6 +359,9 @@ public static class Strings
 
     /// island
     public static string StateIsland => Get("StateIsland");
+
+    /// menu bar
+    public static string StateMenuBar => Get("StateMenuBar");
 
     /// Copy
     public static string Copy => Get("Copy");
@@ -366,19 +372,22 @@ public static class Strings
     /// Later
     public static string Later => Get("Later");
 
-    /// Claude Code is already on this computer. Nothing to do here.
+    /// Claude Code is already on this computer.
     public static string InstallFound => Get("InstallFound");
 
-    /// Claude Code isn't on this computer yet. Aiko works alongside it, so install it first.
+    /// Claude Code isn't on this computer yet. Aiko shows its limits, so install it first.
     public static string InstallLead => Get("InstallLead");
 
     /// Open PowerShell, paste the command and press Enter. Aiko notices when it's done.
     public static string InstallHow => Get("InstallHow");
 
+    /// Open Terminal, paste the command and press Enter. Aiko notices when it's done.
+    public static string InstallHowMac => Get("InstallHowMac");
+
     /// Waiting for Claude Code…
     public static string WaitInstall => Get("WaitInstall");
 
-    /// The first environment lives in the .claude folder. The Claude Code panel in VS Code and C...
+    /// Environment 1 is the .claude folder. VS Code and Claude Desktop use it too.
     public static string Env1Lead => Get("Env1Lead");
 
     /// This folder has no account yet.
@@ -390,20 +399,14 @@ public static class Strings
     /// Sign in
     public static string SignIn => Get("SignIn");
 
-    /// Aiko opened Claude Code in a new window. Sign in there through your browser. Aiko waits a...
+    /// Aiko opened Claude Code in a new window. Sign in there, and Aiko moves on by itself.
     public static string LoginHow => Get("LoginHow");
 
     /// Aiko never sees a password or a token, only that the account is connected.
     public static string LoginNever => Get("LoginNever");
 
-    /// Waiting for you to sign in…
-    public static string WaitLogin => Get("WaitLogin");
-
     /// NAME IN AIKO
     public static string NameInAiko => Get("NameInAiko");
-
-    /// Account
-    public static string AccountLabel => Get("AccountLabel");
 
     /// Plan
     public static string PlanLabel => Get("PlanLabel");
@@ -414,7 +417,7 @@ public static class Strings
     /// The second environment is a separate folder with its own account. Name it and Aiko create...
     public static string Env2LeadNew => Get("Env2LeadNew");
 
-    /// One environment is enough to see limits. You can add the second one later in settings.
+    /// One environment is enough to see limits. You can add a second one later.
     public static string Env2Later => Get("Env2Later");
 
     /// Create a new one
@@ -437,6 +440,9 @@ public static class Strings
 
     /// A command starts Claude Code in the right environment. It works in PowerShell, cmd and Gi...
     public static string CmdLead => Get("CmdLead");
+
+    /// A command starts Claude Code in the right environment. It works in Terminal and in any zs...
+    public static string CmdLeadMac => Get("CmdLeadMac");
 
     /// COMMAND · {0}
     public static string CmdFor => Get("CmdFor");
@@ -468,7 +474,7 @@ public static class Strings
     /// Your PowerShell profile has functions that switch accounts. They run before Aiko's comman...
     public static string FnsLead => Get("FnsLead");
 
-    /// Remove {0}
+    /// Turn off {0}
     public static string FnRemove => Get("FnRemove");
 
     /// A copy of the profile stays next to it. Removing Aiko brings the functions back.
@@ -476,6 +482,12 @@ public static class Strings
 
     /// Aiko puts its folder at the start of PATH so every terminal finds the commands. Restart o...
     public static string PathNote => Get("PathNote");
+
+    /// THE LINE AIKO ADDS TO ~/.ZSHRC
+    public static string PathLineMac => Get("PathLineMac");
+
+    /// macOS puts a folder of your own on PATH only when your shell profile says so, so Aiko add...
+    public static string PathNoteMac => Get("PathNoteMac");
 
     /// Add to PATH
     public static string PathAdd => Get("PathAdd");
@@ -492,7 +504,7 @@ public static class Strings
     /// Choose a project folder
     public static string PickProject => Get("PickProject");
 
-    /// Nothing is bound yet. You can do it later in settings.
+    /// Nothing is bound yet. You can do it later.
     public static string NoBinds => Get("NoBinds");
 
     /// A command beats a binding: {0} in a bound folder starts {1}, and Claude Code reminds you ...
@@ -540,6 +552,9 @@ public static class Strings
     /// PowerShell · cmd · Git Bash
     public static string CmdShells => Get("CmdShells");
 
+    /// zsh · bash
+    public static string CmdShellsMac => Get("CmdShellsMac");
+
     /// The command stays the same, since your terminals and scripts know it.
     public static string CmdKept => Get("CmdKept");
 
@@ -576,8 +591,14 @@ public static class Strings
     /// And move the folder to the Recycle Bin
     public static string MoveToRecycleBin => Get("MoveToRecycleBin");
 
+    /// And move the folder to the Trash
+    public static string MoveToTrash => Get("MoveToTrash");
+
     /// It holds the Claude Code account, history and memory. You can restore it from the Recycle...
     public static string RecycleWhy => Get("RecycleWhy");
+
+    /// It holds the Claude Code account, history and memory. You can put it back from the Trash.
+    public static string TrashWhy => Get("TrashWhy");
 
     /// VS Code and Claude Desktop use the .claude folder, so Aiko never removes it.
     public static string KeepClaude => Get("KeepClaude");
@@ -593,6 +614,9 @@ public static class Strings
 
     /// {0} removed. The folder is in the Recycle Bin.
     public static string EnvironmentRemovedToBin => Get("EnvironmentRemovedToBin");
+
+    /// {0} removed. The folder is in the Trash.
+    public static string EnvironmentRemovedToTrash => Get("EnvironmentRemovedToTrash");
 
     /// In a folder and in every folder inside, plain claude starts its environment. A command li...
     public static string FoldersTableLead => Get("FoldersTableLead");
@@ -639,14 +663,47 @@ public static class Strings
     /// Removes the environments from Aiko and opens the checklist right here.
     public static string RestartWhat => Get("RestartWhat");
 
-    /// Aiko removes the environments, its lines and plugins in settings.json, the commands {0}, ...
+    /// Aiko forgets the environments and puts back everything it changed: the lines and plugins ...
     public static string RestartLine => Get("RestartLine");
+
+    /// Aiko forgets the environments and puts back everything it changed: the lines and plugins ...
+    public static string RestartLineMac => Get("RestartLineMac");
 
     /// And move {0} to the Recycle Bin
     public static string RestartBin => Get("RestartBin");
 
+    /// And move {0} to the Trash
+    public static string RestartTrash => Get("RestartTrash");
+
     /// .claude stays either way.
     public static string RestartKeep => Get("RestartKeep");
+
+    /// Remove Aiko
+    public static string Delete => Get("Delete");
+
+    /// Removes Aiko itself, with everything it set up.
+    public static string DeleteWhat => Get("DeleteWhat");
+
+    /// Aiko puts back everything it changed: the lines and plugins in settings.json, the command...
+    public static string DeleteLine => Get("DeleteLine");
+
+    /// Aiko puts back everything it changed: the lines and plugins in settings.json, the command...
+    public static string DeleteLineMac => Get("DeleteLineMac");
+
+    /// Your accounts and history stay: Aiko never made them.
+    public static string DeleteKeep => Get("DeleteKeep");
+
+    /// Your accounts and history stay, and so does the copy of ~/.zshrc Aiko made.
+    public static string DeleteKeepMac => Get("DeleteKeepMac");
+
+    /// Removing Aiko. Claude Code may take a few seconds to answer.
+    public static string DeleteWorking => Get("DeleteWorking");
+
+    /// Aiko cannot move itself to the Bin from where it is now. Drag the app there when it quits.
+    public static string DeleteAppStays => Get("DeleteAppStays");
+
+    /// This copy was unpacked from a zip, so it has no uninstaller. The folder with Aiko stays, ...
+    public static string DeletePortable => Get("DeletePortable");
 
     /// Open Claude Code
     public static string OpenClaudeCode => Get("OpenClaudeCode");
@@ -693,6 +750,9 @@ public static class Strings
     /// the version of Windows: what to test first
     public static string SentWindows => Get("SentWindows");
 
+    /// the version of macOS: what to test first
+    public static string SentMacOS => Get("SentMacOS");
+
     /// an ID that changes every day
     public static string SentDayId => Get("SentDayId");
 
@@ -714,13 +774,13 @@ public static class Strings
     /// Your name, email, project folders, limits, token and session texts. The site doesn't read...
     public static string NeverSentWhat => Get("NeverSentWhat");
 
-    /// The rows are deleted after 90 days.
+    /// The records are deleted after 90 days.
     public static string StatsKeptFor => Get("StatsKeptFor");
 
     /// Reset ID
     public static string ResetInstallId => Get("ResetInstallId");
 
-    /// Aiko makes a new value, and the days before it can't be linked to it.
+    /// Aiko makes a new value. The days before it cannot be linked to the new one.
     public static string ResetInstallIdWhat => Get("ResetInstallIdWhat");
 
     /// The ID is new.
@@ -738,7 +798,7 @@ public static class Strings
     /// The author of Aiko doesn't know how many people use it. Once a day Aiko can say that one ...
     public static string WizardStatsWhat => Get("WizardStatsWhat");
 
-    /// You can change this later in settings, under Privacy.
+    /// You can change this later on the Privacy page.
     public static string WizardStatsLater => Get("WizardStatsLater");
 
     /// Don't send
@@ -765,7 +825,7 @@ public static class Strings
     /// While the personality is on, your style {0} doesn't work. Turn it off and it comes back.
     public static string PersonaOwnStyle => Get("PersonaOwnStyle");
 
-    /// FACE
+    /// MOOD
     public static string SectionFace => Get("SectionFace");
 
     /// Chibi
@@ -774,8 +834,11 @@ public static class Strings
     /// Emoji
     public static string FaceEmoji => Get("FaceEmoji");
 
-    /// This is how Aiko looks in the tray, on the island and in windows.
+    /// Aiko shows her mood in the tray, on the island and in windows, as a drawing or an emoji.
     public static string FaceWhere => Get("FaceWhere");
+
+    /// Aiko shows her mood in the menu bar, on the island and in windows, as a drawing or an emoji.
+    public static string FaceWhereMac => Get("FaceWhereMac");
 
     /// TEMPERAMENT
     public static string SectionTemperament => Get("SectionTemperament");
@@ -858,37 +921,40 @@ public static class Strings
     /// GAME DEVELOPMENT
     public static string SkillDomainGames => Get("SkillDomainGames");
 
-    /// UI text, READMEs and release notes without stiff wording or AI tells. RU and EN.
+    /// Texts that sound like a person wrote them: UI, README, release notes. Russian and English.
     public static string SkillAikoCopy => Get("SkillAikoCopy");
 
-    /// Before a release: what can't be undone, how to roll back, whether the docs match the code.
+    /// Checks a release before it ships: what can't be undone, how to roll back, GO or NO-GO.
     public static string SkillAikoReleaseGate => Get("SkillAikoReleaseGate");
 
-    /// One fact in one place, a decision log, contradictions found.
+    /// Keeps project docs honest: each fact in one place, a log of decisions, contradictions found.
     public static string SkillAikoDocsHygiene => Get("SkillAikoDocsHygiene");
 
     /// Checks a game with numbers: the same test scene before and after a change.
     public static string SkillAikoPlaytest => Get("SkillAikoPlaytest");
 
-    /// A model from Blender to Unity: axes, normals, export and import.
+    /// Runs a polishing round on work you've already seen: your comments, a set number of questi...
+    public static string SkillAikoPolishing => Get("SkillAikoPolishing");
+
+    /// A model from Blender to Unity without mirrored or flipped parts: axes, normals, export an...
     public static string SkillAikoBlenderToUnity => Get("SkillAikoBlenderToUnity");
 
-    /// Ready files for textures: a size that fits the camera, and sheets to paint over.
+    /// Texture sizes picked from the camera, and guide sheets to paint over.
     public static string SkillAikoTexturing => Get("SkillAikoTexturing");
 
-    /// A .glb for the web: size, axes, compression, a blank view where the model should be.
+    /// A .glb that shows up on a web page: size, axes, compression. And what to check when the p...
     public static string SkillAikoGlbForWeb => Get("SkillAikoGlbForWeb");
 
-    /// Fit a color to the palette in OKLCH with the smallest change.
+    /// Checks colors against a palette and fixes a color with the smallest change, in OKLCH.
     public static string SkillAikoPalette => Get("SkillAikoPalette");
 
-    /// 30–40 games with the mechanic you need: an overview with screenshots, and interactive dem...
+    /// One mechanic across 30–40 games: a review with screenshots, and playable demos on request.
     public static string SkillAikoGamedesignResearch => Get("SkillAikoGamedesignResearch");
 
-    /// Plan the day in Google Calendar, find free time, add events after your yes.
+    /// Plans your day in Google Calendar and finds free time. Adds events only after your yes.
     public static string SkillAikoCalendar => Get("SkillAikoCalendar");
 
-    /// Documents from Google Drive into the work, and files from the project onto Drive.
+    /// Reads documents from Google Drive and puts project files onto Drive.
     public static string SkillAikoDrive => Get("SkillAikoDrive");
 
     /// Meet Aiko
@@ -897,7 +963,7 @@ public static class Strings
     /// Aiko can talk in your Claude Code sessions in her own voice, and she brings eleven skills...
     public static string MeetAikoLead => Get("MeetAikoLead");
 
-    /// The temperament, the face and the skills are in settings, under Personality. It works in ...
+    /// The temperament, the mood and the skills are on the Personality page. It works in new ses...
     public static string MeetAikoSettings => Get("MeetAikoSettings");
 
     /// Turn on in {0}

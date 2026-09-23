@@ -22,6 +22,9 @@ public partial class GeneralPage : UserControl
 
     private string _downloadUrl = ReleasesPage;
 
+    /// The version the site named, kept for the line shown while it downloads.
+    private string? _newerVersion;
+
     /// Cancelled when the page goes away, so a request still in the air does not come back to
     /// controls that are gone.
     private readonly CancellationTokenSource _closing = new();
@@ -30,6 +33,7 @@ public partial class GeneralPage : UserControl
     {
         InitializeComponent();
         Fill();
+        ShowReady();
         LanguageChoiceDrop.Picked += OnLanguagePicked;
         Unloaded += (_, _) => _closing.Cancel();
     }
@@ -42,6 +46,9 @@ public partial class GeneralPage : UserControl
     /// Raised after the second click on "Start over", with whether the second folder goes to the
     /// Recycle Bin.
     public event Action<bool>? RestartRequested;
+
+    /// Raised after the second click on "Remove Aiko". Nothing here can be undone afterwards.
+    public event Action? DeleteRequested;
 
     /// Raised when the window has to come back in another language.
     public event Action? ReopenRequested;
@@ -183,6 +190,8 @@ public partial class GeneralPage : UserControl
         UpdateLine.Text = Strings.UpdateAsking;
         UpdateLine.Visibility = Visibility.Visible;
         OpenDownload.Visibility = Visibility.Collapsed;
+        InstallUpdate.Visibility = Visibility.Collapsed;
+        RestartForUpdate.Visibility = Visibility.Collapsed;
 
         var info = await UpdateRun.AskAsync(_closing.Token).ConfigureAwait(true);
 
@@ -205,10 +214,73 @@ public partial class GeneralPage : UserControl
             _ => Strings.UpdateFailed,
         };
 
+        _newerVersion = state == UpdateState.Available ? info.Latest : null;
         _downloadUrl = info.DownloadUrl ?? ReleasesPage;
         OpenDownload.Visibility = state == UpdateState.Available ? Visibility.Visible : Visibility.Collapsed;
+        InstallUpdate.Visibility = OpenDownload.Visibility;
         CheckNow.IsEnabled = true;
+
+        // A version that was already downloaded and checked in this session stays offered, whatever
+        // the site says now.
+        ShowReady();
     }
+
+    /// Downloads the new version and puts it in place only if the release list is signed with our
+    /// key and the file matches its line (D-246). Pressing this is the consent to download; the
+    /// restart asks once more.
+    private async void OnInstallUpdate(object sender, RoutedEventArgs e)
+    {
+        InstallUpdate.IsEnabled = false;
+        CheckNow.IsEnabled = false;
+        UpdateLine.Text = string.Format(Strings.UpdateDownloading, _newerVersion ?? "");
+        UpdateLine.Visibility = Visibility.Visible;
+
+        var outcome = await UpdateInstall.DownloadAsync(_closing.Token).ConfigureAwait(true);
+
+        if (_closing.IsCancellationRequested)
+        {
+            return;
+        }
+
+        UpdateLine.Text = Words(outcome);
+        InstallUpdate.Visibility = outcome.Step == InstallStep.Ready
+            ? Visibility.Collapsed
+            : Visibility.Visible;
+        InstallUpdate.IsEnabled = true;
+        CheckNow.IsEnabled = true;
+        ShowReady();
+    }
+
+    /// The words for what came back. A refusal says what was refused and never offers to try the
+    /// same file again: the answer is the download page, where a person can look for themselves.
+    private static string Words(InstallOutcome outcome) => outcome.Step switch
+    {
+        InstallStep.Ready => string.Format(Strings.UpdateReady, outcome.Version),
+        InstallStep.NothingNewer => string.Format(Strings.UpdateLatest, AppVersion.Current()),
+        InstallStep.NotInstalled => Strings.UpdateNotInstalled,
+        InstallStep.Failed => Strings.UpdateDownloadFailed,
+        _ => outcome.Verdict switch
+        {
+            UpdateVerdict.NoKeyYet => Strings.UpdateNoKeyYet,
+            UpdateVerdict.NotListed or UpdateVerdict.HashMismatch => Strings.UpdateBadFile,
+            _ => Strings.UpdateBadSignature,
+        },
+    };
+
+    private void ShowReady()
+    {
+        if (UpdateInstall.ReadyVersion is not { } ready)
+        {
+            return;
+        }
+
+        UpdateLine.Text = string.Format(Strings.UpdateReady, ready);
+        UpdateLine.Visibility = Visibility.Visible;
+        RestartForUpdate.Visibility = Visibility.Visible;
+        InstallUpdate.Visibility = Visibility.Collapsed;
+    }
+
+    private void OnRestartForUpdate(object sender, RoutedEventArgs e) => UpdateInstall.ApplyAndRestart();
 
     private void OnOpenDownload(object sender, RoutedEventArgs e)
     {
@@ -314,4 +386,35 @@ public partial class GeneralPage : UserControl
     }
 
     private void OnRestartConfirmed(object sender, RoutedEventArgs e) => RestartRequested?.Invoke(RestartBin.IsChecked == true);
+
+    // ---- removing Aiko ----
+
+    private void OnDeleteAsked(object sender, RoutedEventArgs e)
+    {
+        var environments = SettingsStore.LoadEnvironments();
+        DeleteLine.Text = string.Format(
+            Strings.DeleteLine, string.Join(", ", environments.Environments.Select(env => env.Command)));
+
+        // A copy unpacked from the zip has no uninstaller to call, and Windows will not let a
+        // running program delete itself. The person is told before they agree, not after.
+        DeletePortable.Visibility = Uninstall.HasUninstaller ? Visibility.Collapsed : Visibility.Visible;
+
+        DeleteRow.Visibility = Visibility.Collapsed;
+        DeleteConfirm.IsOpen = true;
+    }
+
+    private void OnDeleteCancelled(object sender, RoutedEventArgs e)
+    {
+        DeleteConfirm.IsOpen = false;
+        DeleteRow.Visibility = Visibility.Visible;
+    }
+
+    /// Claude Code can take seconds to forget the plugins, so the page says what is happening and
+    /// takes no second press while it happens.
+    private void OnDeleteConfirmed(object sender, RoutedEventArgs e)
+    {
+        DeleteButtons.Visibility = Visibility.Collapsed;
+        DeleteWorking.Visibility = Visibility.Visible;
+        DeleteRequested?.Invoke();
+    }
 }

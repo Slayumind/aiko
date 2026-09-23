@@ -20,6 +20,15 @@ enum Theme {
     /// card and the raised surface without becoming a line of their own colour.
     static let hairline = Color.white.opacity(0.10)
 
+    /// The edge of a field and the track of a switch, one step lighter than a hairline.
+    static let inputLine = Color.white.opacity(0.149)
+
+    /// Hover lightens whatever is under it by this much.
+    static let hoverLayer = Color.white.opacity(0.071)
+
+    /// The plate under the chosen menu item, and under a plan chip.
+    static let chosenLayer = Color.white.opacity(0.078)
+
     static func tone(_ tone: LimitTone) -> Color {
         colour(RingArt.colour(for: tone))
     }
@@ -42,6 +51,12 @@ enum Theme {
     private static func rgb(_ red: Int, _ green: Int, _ blue: Int) -> Color {
         colour(Rgba(red, green, blue))
     }
+
+    /// The same palette for the parts Aiko draws by hand: the island is an NSView, not SwiftUI,
+    /// because it changes its own size every frame while it unfolds.
+    static var nsSurface: NSColor { nsColour(Rgba(0x17, 0x17, 0x17)) }
+    static var nsInk: NSColor { nsColour(Rgba(0xFA, 0xFA, 0xFA)) }
+    static var nsHairline: NSColor { NSColor.white.withAlphaComponent(0.10) }
 
     // ---- Sizes ----
 
@@ -76,6 +91,16 @@ enum Theme {
 
     static func mono(_ size: CGFloat) -> Font {
         hasGeist ? .custom("Geist Mono", size: size) : .system(size: size, design: .monospaced)
+    }
+
+    /// The same mono font as `mono`, for text drawn straight into a view.
+    static func monoFont(_ size: CGFloat) -> NSFont {
+        if hasGeist,
+           let font = NSFontManager.shared.font(withFamily: "Geist Mono", traits: [], weight: 5, size: size) {
+            return font
+        }
+
+        return .monospacedSystemFont(ofSize: size, weight: .regular)
     }
 
     /// Written once at startup and read by the views afterwards, all on the main thread.

@@ -12,6 +12,14 @@ enum SpecCases {
         repository().appendingPathComponent("spec").appendingPathComponent("cases").appendingPathComponent(name)
     }
 
+    static func bytes(_ name: String, _ file: String) -> Data {
+        (try? Data(contentsOf: folder(name).appendingPathComponent(file))) ?? Data()
+    }
+
+    static func text(_ name: String, _ file: String) -> String {
+        (try? String(contentsOf: folder(name).appendingPathComponent(file), encoding: .utf8)) ?? ""
+    }
+
     static func json(_ name: String, _ file: String = "cases.json") -> JsonObject {
         let path = folder(name).appendingPathComponent(file).path
         let text = (try? String(contentsOfFile: path, encoding: .utf8)) ?? ""
@@ -147,6 +155,197 @@ struct SharedCaseTests {
                 #expect(plan.isExplicit == (row["explicit"]?.boolValue ?? false), "\(where_)")
             }
         }
+    }
+
+    // ---- what a hook says a session is doing ----
+
+    @Test
+    func everyHookEventMeansTheSameActivity() {
+        let cases = SpecCases.json("hook-events")
+        let session = cases["session"]?.stringValue ?? ""
+
+        for row in cases["events"]?.arrayValue ?? [] {
+            let json = row["json"]?.stringValue ?? ""
+            let activity = row["activity"]?.stringValue
+            let expected = activity.map { HookEvent(sessionId: session, activity: Self.activity($0)) }
+
+            #expect(HookEvent.fromJson(json) == expected, "\(json)")
+        }
+
+        for row in cases["badRecords"]?.arrayValue ?? [] {
+            #expect(ActivityRecord.fromJson(row.stringValue ?? "") == nil)
+        }
+    }
+
+    // ---- which face an event brings ----
+
+    @Test
+    func everyMoodCaseBringsTheSameFace() {
+        let cases = SpecCases.json("tray-mood")
+        let now = Date(timeIntervalSince1970: 1_789_128_000)
+
+        func record(_ node: JsonNode?) -> ActivityRecord? {
+            guard let node, node.stringValue == nil, let activity = node["activity"]?.stringValue else {
+                return nil
+            }
+            let secondsAgo = node["secondsAgo"]?.doubleValue ?? 0
+            return ActivityRecord(
+                environment: "claude",
+                activity: Self.activity(activity),
+                at: now.addingTimeInterval(-secondsAgo))
+        }
+
+        for row in cases["forActivity"]?.arrayValue ?? [] {
+            let face = row["face"]?.stringValue
+            #expect(TrayMood.forActivity(record(row["before"]), record(row["now"])!, now)
+                == face.map(Self.face), "\(row["now"]?["activity"]?.stringValue ?? "")")
+        }
+
+        for row in cases["forLimit"]?.arrayValue ?? [] {
+            let face = row["face"]?.stringValue
+            let before = row["before"]?.int64Value.map(Int.init)
+            let after = row["after"]?.int64Value.map(Int.init)
+
+            #expect(TrayMood.forLimit(before, after) == face.map(Self.face), "\(String(describing: before)) → \(String(describing: after))")
+        }
+    }
+
+    private static func activity(_ name: String) -> SessionActivity {
+        switch name {
+        case "Working": return .working
+        case "Waiting": return .waiting
+        case "Done": return .done
+        case "Error": return .error
+        case "OutOfLimit": return .outOfLimit
+        default: return .ended
+        }
+    }
+
+    private static func face(_ name: String) -> AikoFace {
+        switch name {
+        case "Working": return .working
+        case "Waiting": return .waiting
+        case "Done": return .done
+        case "Error": return .error
+        case "Asleep": return .asleep
+        case "Tired": return .tired
+        default: return .fresh
+        }
+    }
+
+    // ---- what a program is called on this system, and every path built from that ----
+
+    @Test
+    func everyPlatformAnswersItsOwnPaths() {
+        for block in SpecCases.json("platform-paths")["platforms"]?.arrayValue ?? [] {
+            let name = block["platform"]?.stringValue ?? ""
+            let platform = Self.platformIn(block)
+
+            #expect(platform.executableName(block["programName"]?.stringValue ?? "")
+                == block["executableName"]?.stringValue, "\(name)")
+            #expect(String(platform.pathListSeparator) == block["pathListSeparator"]?.stringValue, "\(name)")
+            #expect(String(platform.directorySeparator) == block["directorySeparator"]?.stringValue, "\(name)")
+            #expect(platform.localDataVariable == block["localDataVariable"]?.stringValue, "\(name)")
+
+            let files = block["commandFiles"]
+            #expect(CommandLinks.shimFileName(platform) == files?["shim"]?.stringValue, "\(name)")
+            #expect(CommandLinks.fileNameFor(platform, files?["command"]?.stringValue ?? "")
+                == files?["commandFile"]?.stringValue, "\(name)")
+
+            let seen = block["seen"]
+            #expect(RealClaude.formatSeen(platform, Self.strings(seen?["folders"]))
+                == seen?["formatted"]?.stringValue, "\(name)")
+            #expect(RealClaude.parseSeen(platform, seen?["written"]?.stringValue)
+                == Self.strings(seen?["parsed"]), "\(name)")
+
+            let real = block["realClaude"]
+            let onDisk = Set(Self.strings(real?["files"]))
+            #expect(RealClaude.find(platform, real?["path"]?.stringValue, Self.strings(real?["seen"]),
+                                    { onDisk.contains($0) })
+                == real?["found"]?.stringValue, "\(name)")
+
+            for row in block["bridge"]?.arrayValue ?? [] {
+                #expect(BridgeCommand.isAiko(platform, row["command"]?.stringValue)
+                    == (row["ours"]?.boolValue ?? false), "\(name): \(row["command"]?.stringValue ?? "")")
+            }
+
+            let shell = block["shell"]
+            let call = ClaudeShellLookup.callFor(platform, nil, "line")
+            #expect(ClaudeShellLookup.shellFor(platform, nil) == Self.shell(shell?["kind"]?.stringValue), "\(name)")
+            #expect(call.fileName == shell?["fileName"]?.stringValue, "\(name)")
+            #expect(call.arguments == Self.strings(shell?["arguments"]), "\(name)")
+
+            let install = block["install"]
+            let installed = Set(Self.strings(install?["files"]))
+            #expect(ClaudeInstall.find(
+                platform,
+                freshPath: install?["freshPath"]?.stringValue ?? "",
+                commandFolder: install?["commandFolder"]?.stringValue ?? "",
+                userProfile: install?["home"]?.stringValue ?? "",
+                exists: { installed.contains($0) }) == install?["found"]?.stringValue, "\(name)")
+
+            let made = block["newConfigFolder"]
+            #expect(ClaudeInstall.newConfigFolder(
+                platform,
+                environmentName: made?["environmentName"]?.stringValue ?? "",
+                userProfile: made?["home"]?.stringValue ?? "",
+                folderExists: { _ in false }) == made?["folder"]?.stringValue, "\(name)")
+
+            let credentials = block["credentials"]
+            #expect(ClaudeInstall.credentialsPathIn(platform, credentials?["configFolder"]?.stringValue ?? "")
+                == credentials?["path"]?.stringValue, "\(name)")
+
+            let userPath = block["userPath"]
+            let folder = userPath?["folder"]?.stringValue ?? ""
+            let added = UserPathList.addToFront(platform, userPath?["before"]?.stringValue, folder)
+            #expect(added == userPath?["added"]?.stringValue, "\(name)")
+            #expect(UserPathList.remove(platform, added, folder) == userPath?["removed"]?.stringValue, "\(name)")
+            #expect(UserPathList.contains(platform, userPath?["holds"]?.stringValue, folder), "\(name): holds")
+
+            let forShell = block["bridgeFor"]
+            #expect(BridgeCommand.forPath(forShell?["bridge"]?.stringValue,
+                                          Self.shell(forShell?["shell"]?.stringValue))
+                == forShell?["command"]?.stringValue, "\(name)")
+
+            let persona = block["personaCommand"]
+            let folders = AikoFolders(
+                platform,
+                persona?["settingsBase"]?.stringValue ?? "",
+                persona?["localBase"]?.stringValue ?? "")
+            #expect(AikoMarketplace.personaCommand(platform, persona?["bridge"]?.stringValue ?? "", folders)
+                == persona?["command"]?.stringValue, "\(name)")
+        }
+    }
+
+    /// The two systems Aiko ships on are taken as they are; a block with conventions of its own
+    /// describes a system that is neither, and the core has to follow the description it is given.
+    private static func platformIn(_ block: JsonNode) -> PlatformConventions {
+        guard let made = block["conventions"] else {
+            return block["platform"]?.stringValue == "windows" ? .windows : .macOS
+        }
+
+        let fallback = made["fallbackShell"]
+        return PlatformConventions(
+            executableSuffix: made["executableSuffix"]?.stringValue ?? "",
+            pathListSeparator: Character(made["pathListSeparator"]?.stringValue ?? ":"),
+            directorySeparator: Character(made["directorySeparator"]?.stringValue ?? "/"),
+            localDataVariable: made["localDataVariable"]?.stringValue,
+            fallbackShell: ShellProgram(
+                shell(fallback?["kind"]?.stringValue),
+                fallback?["fileName"]?.stringValue ?? "",
+                strings(fallback?["argumentsBeforeCommand"])))
+    }
+
+    private static func shell(_ name: String?) -> ClaudeShell {
+        switch name {
+        case "PowerShell": return .powerShell
+        case "Zsh": return .zsh
+        default: return .gitBash
+        }
+    }
+
+    private static func strings(_ node: JsonNode?) -> [String] {
+        (node?.arrayValue ?? []).compactMap(\.stringValue)
     }
 
     private static func environmentIn(_ node: JsonNode) -> AikoEnvironment {

@@ -17,6 +17,7 @@ public partial class PersonalityPage : UserControl
         ["release-gate"] = Strings.SkillAikoReleaseGate,
         ["docs-hygiene"] = Strings.SkillAikoDocsHygiene,
         ["playtest"] = Strings.SkillAikoPlaytest,
+        ["polishing"] = Strings.SkillAikoPolishing,
         ["blender-to-unity"] = Strings.SkillAikoBlenderToUnity,
         ["texturing"] = Strings.SkillAikoTexturing,
         ["glb-for-web"] = Strings.SkillAikoGlbForWeb,

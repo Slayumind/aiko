@@ -238,6 +238,13 @@ static class Program
             return;
         }
 
+        // Picks a language on the General page with the real mouse, then puts the settings back.
+        if (args is ["--try-language", ..])
+        {
+            Environment.Exit(LanguageCheck.Run());
+            return;
+        }
+
         // Uses the settings window with the real mouse and keyboard, then puts the environments back.
         if (args is ["--try-settings", ..])
         {

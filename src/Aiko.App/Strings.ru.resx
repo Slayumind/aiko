@@ -40,14 +40,14 @@
   <data name="CardModelWeek" xml:space="preserve">
     <value>{0} · неделя</value>
   </data>
-  <data name="CardPercentUsed" xml:space="preserve">
-    <value>потрачено {0}%</value>
+  <data name="CardPercent" xml:space="preserve">
+    <value>{0}%</value>
   </data>
   <data name="CardResets" xml:space="preserve">
     <value>сброс через {0}</value>
   </data>
   <data name="CardJustReset" xml:space="preserve">
-    <value>только что сброшен</value>
+    <value>сброс только что</value>
   </data>
   <data name="CardLastsUntilReset" xml:space="preserve">
     <value>хватит до сброса</value>
@@ -134,13 +134,13 @@
     <value>Прямой режим</value>
   </data>
   <data name="DirectModeWhat" xml:space="preserve">
-    <value>В прямом режиме Aiko сама спрашивает лимиты у Anthropic. Для этого она берёт токен, который Claude Code уже хранит на этом компьютере: читает его перед каждым запросом и нигде не сохраняет. Включай, если работаешь в панели IDE или в Claude Desktop — там строки состояния нет.</value>
+    <value>В прямом режиме Aiko спрашивает лимиты у Anthropic сама. Для этого нужен токен, который Claude Code хранит на этом компьютере: Aiko читает его перед каждым запросом и нигде не сохраняет. Включи, если работаешь в панели IDE или в Claude Desktop — там строки состояния нет.</value>
+  </data>
+  <data name="DirectModeMac" xml:space="preserve">
+    <value>Прямой режим есть только на Windows. На macOS Claude Code держит токен в Связке ключей, а Aiko её не читает, поэтому панель IDE и Claude Desktop здесь остаются без цифр.</value>
   </data>
   <data name="DirectModeAsk" xml:space="preserve">
     <value>Если аккаунт рабочий, сначала спроси того, кто им управляет.</value>
-  </data>
-  <data name="NoEnvironments" xml:space="preserve">
-    <value>Сред пока нет. Aiko ищет их при первом запуске.</value>
   </data>
   <data name="AccessOk" xml:space="preserve">
     <value>Claude Code передаёт лимиты в Aiko.</value>
@@ -166,14 +166,20 @@
   <data name="PlaceIsland" xml:space="preserve">
     <value>Остров</value>
   </data>
+  <data name="PlaceMenuBar" xml:space="preserve">
+    <value>Строка меню</value>
+  </data>
   <data name="HideIslandInFullScreen" xml:space="preserve">
     <value>Прятать остров в полноэкранных окнах</value>
   </data>
   <data name="StartWithWindows" xml:space="preserve">
     <value>Запускать вместе с Windows</value>
   </data>
+  <data name="StartAtLogin" xml:space="preserve">
+    <value>Запускать при входе</value>
+  </data>
   <data name="CheckUpdatesWhat" xml:space="preserve">
-    <value>Раз в сутки Aiko спрашивает у slayumind.org свежую версию. Сами файлы скачиваются с GitHub.</value>
+    <value>Раз в сутки Aiko спрашивает у slayumind.org последнюю версию. Файлы приходят с GitHub, и Aiko проверяет их подпись, прежде чем что-то заменить.</value>
   </data>
   <data name="CheckNow" xml:space="preserve">
     <value>Проверить сейчас</value>
@@ -193,6 +199,33 @@
   <data name="UpdateFailed" xml:space="preserve">
     <value>Проверить не получилось. Попробуй через несколько минут.</value>
   </data>
+  <data name="UpdateInstallNow" xml:space="preserve">
+    <value>Скачать и установить</value>
+  </data>
+  <data name="UpdateDownloading" xml:space="preserve">
+    <value>Aiko скачивает {0}…</value>
+  </data>
+  <data name="UpdateReady" xml:space="preserve">
+    <value>Aiko {0} готова. Перезапусти, чтобы перейти на неё.</value>
+  </data>
+  <data name="UpdateRestartNow" xml:space="preserve">
+    <value>Перезапустить</value>
+  </data>
+  <data name="UpdateNotInstalled" xml:space="preserve">
+    <value>Эту копию поставил не установщик, поэтому Aiko не может её заменить. Открой страницу загрузки.</value>
+  </data>
+  <data name="UpdateDownloadFailed" xml:space="preserve">
+    <value>Скачать не удалось. Ничего не установлено.</value>
+  </data>
+  <data name="UpdateNoKeyYet" xml:space="preserve">
+    <value>В этой сборке ещё нет ключа проверки, поэтому обновления она не ставит. Открой страницу загрузки.</value>
+  </data>
+  <data name="UpdateBadSignature" xml:space="preserve">
+    <value>Релиз не прошёл проверку подписи. Ничего не установлено.</value>
+  </data>
+  <data name="UpdateBadFile" xml:space="preserve">
+    <value>Скачанный файл не совпадает со списком релиза. Ничего не установлено.</value>
+  </data>
   <data name="LanguageSystem" xml:space="preserve">
     <value>Системный</value>
   </data>
@@ -208,9 +241,6 @@
   <data name="SettingsWindowTitle" xml:space="preserve">
     <value>Настройки Aiko</value>
   </data>
-  <data name="WizardStepEnvironments" xml:space="preserve">
-    <value>Среды</value>
-  </data>
   <data name="EnvironmentPlainName" xml:space="preserve">
     <value>Основная</value>
   </data>
@@ -220,44 +250,14 @@
   <data name="WizardStepWhere" xml:space="preserve">
     <value>Где показывать Aiko</value>
   </data>
-  <data name="WizardStepCount" xml:space="preserve">
-    <value>шаг {0} из 3</value>
-  </data>
-  <data name="Back" xml:space="preserve">
-    <value>Назад</value>
-  </data>
   <data name="NotNow" xml:space="preserve">
     <value>Не сейчас</value>
-  </data>
-  <data name="Next" xml:space="preserve">
-    <value>Дальше</value>
-  </data>
-  <data name="Allow" xml:space="preserve">
-    <value>Разрешить</value>
   </data>
   <data name="Finish" xml:space="preserve">
     <value>Готово</value>
   </data>
-  <data name="WizardFoundOne" xml:space="preserve">
-    <value>Aiko нашла одну папку Claude Code. Для начала этого хватит, вторую можно добавить позже в настройках.</value>
-  </data>
-  <data name="WizardFoundMany" xml:space="preserve">
-    <value>Aiko нашла эти папки Claude Code. Дай им понятные тебе имена и выключи лишние.</value>
-  </data>
-  <data name="WizardNothingFound" xml:space="preserve">
-    <value>Aiko не нашла Claude Code на этом компьютере. Установи его и проверь снова или выбери папку сам.</value>
-  </data>
-  <data name="WizardChooseFolder" xml:space="preserve">
-    <value>Выбрать папку</value>
-  </data>
-  <data name="WizardCheckAgain" xml:space="preserve">
-    <value>Проверить снова</value>
-  </data>
-  <data name="WizardFolderDialogTitle" xml:space="preserve">
-    <value>Выбери папку Claude Code</value>
-  </data>
   <data name="WizardAccessExplain" xml:space="preserve">
-    <value>Claude Code отдаёт лимиты строке состояния. Aiko добавит одну строку в файл настроек каждой среды. Если у тебя уже есть своя строка состояния, она продолжит работать: Aiko запустит её и покажет её вывод.</value>
+    <value>Claude Code отдаёт лимиты строке состояния. Aiko добавит одну строку в файл настроек каждой среды. Если у тебя уже есть своя строка состояния, Aiko запустит её и покажет её вывод.</value>
   </data>
   <data name="WizardTheLine" xml:space="preserve">
     <value>СТРОКА, КОТОРУЮ ДОБАВИТ AIKO</value>
@@ -272,10 +272,13 @@
     <value>Aiko не нашла свою программу-посредник.</value>
   </data>
   <data name="WizardUpdatesWhat" xml:space="preserve">
-    <value>Раз в сутки Aiko спрашивает у slayumind.org свежую версию и сообщает, что одна копия сегодня работала. Идентификатор, который уходит, меняется каждый день.</value>
+    <value>Раз в сутки Aiko спрашивает у slayumind.org свежую версию и сообщает, что одна копия сегодня работала. ID меняется каждый день.</value>
   </data>
   <data name="WizardDoneTray" xml:space="preserve">
-    <value>Aiko внизу, рядом с часами. Наведи мышь, чтобы увидеть карточку, или кликни, чтобы карточка осталась открытой.</value>
+    <value>Aiko внизу, рядом с часами. Наведи мышь — покажется карточка, кликни — останется открытой.</value>
+  </data>
+  <data name="WizardDoneMenuBar" xml:space="preserve">
+    <value>Aiko наверху, рядом с часами. Наведи мышь — покажется карточка, кликни — останется открытой.</value>
   </data>
   <data name="WizardDoneIsland" xml:space="preserve">
     <value>Aiko вверху экрана. Перетащи куда угодно — она прилипнет к ближайшему краю.</value>
@@ -283,11 +286,14 @@
   <data name="WizardDoneOverflow" xml:space="preserve">
     <value>Windows 11 прячет значки новых приложений под стрелку рядом с часами. Открой её и перетащи Aiko на панель задач: под стрелкой карточка не открывается.</value>
   </data>
+  <data name="WizardDoneMenuBarRoom" xml:space="preserve">
+    <value>В переполненной строке меню macOS прячет значки, которые дальше от часов. Если Aiko не помещается, закрой лишнее приложение.</value>
+  </data>
   <data name="WizardDoneFirstNumbers" xml:space="preserve">
     <value>Первые цифры придут после следующего ответа Claude Code. До этого кольцо пунктирное.</value>
   </data>
   <data name="WizardDoneNoAccess" xml:space="preserve">
-    <value>Aiko пока не видит лимиты. Доступ можно включить в настройках в любой момент.</value>
+    <value>Aiko пока не видит лимиты. Доступ можно включить в любой момент на странице «Общие».</value>
   </data>
   <data name="SettingsWriteFailed" xml:space="preserve">
     <value>Aiko не смогла записать файл настроек Claude Code. Попробуй ещё раз.</value>
@@ -355,9 +361,6 @@
   <data name="StateAdded" xml:space="preserve">
     <value>добавлена</value>
   </data>
-  <data name="StateNone" xml:space="preserve">
-    <value>нет</value>
-  </data>
   <data name="StateBound" xml:space="preserve">
     <value>привязано: {0}</value>
   </data>
@@ -366,6 +369,9 @@
   </data>
   <data name="StateIsland" xml:space="preserve">
     <value>остров</value>
+  </data>
+  <data name="StateMenuBar" xml:space="preserve">
+    <value>строка меню</value>
   </data>
   <data name="Copy" xml:space="preserve">
     <value>Скопировать</value>
@@ -377,19 +383,22 @@
     <value>Позже</value>
   </data>
   <data name="InstallFound" xml:space="preserve">
-    <value>Claude Code уже есть на этом компьютере. Здесь ничего делать не нужно.</value>
+    <value>Claude Code уже есть на этом компьютере.</value>
   </data>
   <data name="InstallLead" xml:space="preserve">
-    <value>Claude Code на этом компьютере пока нет. Aiko работает вместе с ним, так что сначала установи его.</value>
+    <value>Claude Code на этом компьютере пока нет. Aiko показывает его лимиты, поэтому сначала установи его.</value>
   </data>
   <data name="InstallHow" xml:space="preserve">
     <value>Открой PowerShell, вставь команду и нажми Enter. Aiko заметит, когда установка закончится.</value>
+  </data>
+  <data name="InstallHowMac" xml:space="preserve">
+    <value>Открой Терминал, вставь команду и нажми Enter. Aiko заметит, когда установка закончится.</value>
   </data>
   <data name="WaitInstall" xml:space="preserve">
     <value>Ждём Claude Code…</value>
   </data>
   <data name="Env1Lead" xml:space="preserve">
-    <value>Первая среда живёт в папке .claude. С ней же работают панель Claude Code в VS Code и Claude Desktop.</value>
+    <value>Среда 1 — это папка .claude. Ею же пользуются VS Code и Claude Desktop.</value>
   </data>
   <data name="Env1Empty" xml:space="preserve">
     <value>В этой папке ещё нет аккаунта.</value>
@@ -401,19 +410,13 @@
     <value>Войти</value>
   </data>
   <data name="LoginHow" xml:space="preserve">
-    <value>Aiko открыла Claude Code в новом окне. Войди там через браузер — Aiko дождётся и пойдёт дальше сама.</value>
+    <value>Aiko открыла Claude Code в новом окне. Войди там — дальше Aiko всё сделает сама.</value>
   </data>
   <data name="LoginNever" xml:space="preserve">
-    <value>Aiko не видит ни пароля, ни токена. Только то, что аккаунт подключён.</value>
-  </data>
-  <data name="WaitLogin" xml:space="preserve">
-    <value>Ждём, пока войдёшь в аккаунт…</value>
+    <value>Aiko не видит ни пароля, ни токена — только то, что аккаунт подключён.</value>
   </data>
   <data name="NameInAiko" xml:space="preserve">
     <value>ИМЯ В AIKO</value>
-  </data>
-  <data name="AccountLabel" xml:space="preserve">
-    <value>Аккаунт</value>
   </data>
   <data name="PlanLabel" xml:space="preserve">
     <value>План</value>
@@ -425,7 +428,7 @@
     <value>Вторая среда — отдельная папка со своим аккаунтом. Назови её, и Aiko создаст папку.</value>
   </data>
   <data name="Env2Later" xml:space="preserve">
-    <value>Чтобы видеть лимиты, хватит и одной среды. Вторую можно добавить позже в настройках.</value>
+    <value>Чтобы видеть лимиты, хватит одной среды. Вторую можно добавить позже.</value>
   </data>
   <data name="CreateNew" xml:space="preserve">
     <value>Создать новую</value>
@@ -447,6 +450,9 @@
   </data>
   <data name="CmdLead" xml:space="preserve">
     <value>Команда запускает Claude Code сразу под нужной средой. Работает в PowerShell, cmd и Git Bash.</value>
+  </data>
+  <data name="CmdLeadMac" xml:space="preserve">
+    <value>Команда запускает Claude Code сразу в нужной среде. Работает в Терминале и в любой оболочке zsh.</value>
   </data>
   <data name="CmdFor" xml:space="preserve">
     <value>КОМАНДА · {0}</value>
@@ -476,16 +482,22 @@
     <value>Эта команда уже у другой среды.</value>
   </data>
   <data name="FnsLead" xml:space="preserve">
-    <value>В профиле PowerShell нашлись функции, которые переключают аккаунт. Они срабатывают раньше команд Aiko и перекрывают их, поэтому отмечены к удалению.</value>
+    <value>В профиле PowerShell есть функции, которые переключают аккаунт. Они срабатывают раньше команд Aiko и перекрывают их, поэтому Aiko предлагает их выключить.</value>
   </data>
   <data name="FnRemove" xml:space="preserve">
-    <value>Убрать {0}</value>
+    <value>Выключить {0}</value>
   </data>
   <data name="FnBackup" xml:space="preserve">
-    <value>Копия профиля останется рядом, а удаление Aiko вернёт функции.</value>
+    <value>Копия профиля останется рядом. Удалишь Aiko — функции вернутся.</value>
   </data>
   <data name="PathNote" xml:space="preserve">
     <value>Aiko поставит свою папку в начало PATH, чтобы команды нашлись в любом терминале. Открытые терминалы и IDE нужно перезапустить.</value>
+  </data>
+  <data name="PathLineMac" xml:space="preserve">
+    <value>СТРОКА, КОТОРУЮ AIKO ДОБАВИТ В ~/.ZSHRC</value>
+  </data>
+  <data name="PathNoteMac" xml:space="preserve">
+    <value>macOS добавляет твою папку в PATH, только если об этом сказано в профиле оболочки, поэтому Aiko допишет эту строку в ~/.zshrc. Рядом останется копия файла, а при удалении Aiko строка уйдёт. Уже открытые терминалы сохранят прежний PATH.</value>
   </data>
   <data name="PathAdd" xml:space="preserve">
     <value>Добавить в PATH</value>
@@ -503,7 +515,7 @@
     <value>Выбери папку проекта</value>
   </data>
   <data name="NoBinds" xml:space="preserve">
-    <value>Пока ничего не привязано. Можно и потом, в настройках.</value>
+    <value>Пока ничего не привязано. Можно и потом.</value>
   </data>
   <data name="ExplicitWins" xml:space="preserve">
     <value>Команда сильнее привязки: {0} в привязанной папке запустит {1}, а Claude Code напомнит о привязке.</value>
@@ -550,6 +562,9 @@
   <data name="CmdShells" xml:space="preserve">
     <value>PowerShell · cmd · Git Bash</value>
   </data>
+  <data name="CmdShellsMac" xml:space="preserve">
+    <value>zsh · bash</value>
+  </data>
   <data name="CmdKept" xml:space="preserve">
     <value>Команда осталась прежней: терминалы и скрипты её знают.</value>
   </data>
@@ -581,13 +596,19 @@
     <value>Удалить среду</value>
   </data>
   <data name="RemoveEnvironmentLine" xml:space="preserve">
-    <value>Строка и плагины Aiko уйдут из settings.json этой папки. Вместе с ними уйдут команда {0} и привязки к {1}.</value>
+    <value>Из settings.json этой папки уйдут строка и плагины Aiko, а с ними команда {0} и привязки к {1}.</value>
   </data>
   <data name="MoveToRecycleBin" xml:space="preserve">
-    <value>И переместить папку в корзину</value>
+    <value>И переместить папку в Корзину</value>
+  </data>
+  <data name="MoveToTrash" xml:space="preserve">
+    <value>И переместить папку в Корзину</value>
   </data>
   <data name="RecycleWhy" xml:space="preserve">
-    <value>В ней аккаунт, история и память Claude Code. Вернуть можно из корзины Windows.</value>
+    <value>В ней аккаунт, история и память Claude Code. Вернуть её можно из Корзины.</value>
+  </data>
+  <data name="TrashWhy" xml:space="preserve">
+    <value>В ней аккаунт, история и память Claude Code. Вернуть её можно из Корзины.</value>
   </data>
   <data name="KeepClaude" xml:space="preserve">
     <value>Папку .claude используют VS Code и Claude Desktop, поэтому Aiko её не удаляет.</value>
@@ -602,10 +623,13 @@
     <value>{0} удалена.</value>
   </data>
   <data name="EnvironmentRemovedToBin" xml:space="preserve">
-    <value>{0} удалена, папка в корзине.</value>
+    <value>{0} удалена, папка в Корзине.</value>
+  </data>
+  <data name="EnvironmentRemovedToTrash" xml:space="preserve">
+    <value>{0} удалена, папка в Корзине.</value>
   </data>
   <data name="FoldersTableLead" xml:space="preserve">
-    <value>В папке и во всех вложенных обычный claude запускает её среду. Команда вроде {0} сильнее привязки, но Claude Code напомнит о ней.</value>
+    <value>В папке и во всех вложенных обычный claude запускает её среду. Команда вроде {0} сильнее привязки, но Claude Code напомнит о привязке.</value>
   </data>
   <data name="FolderColumn" xml:space="preserve">
     <value>ПАПКА</value>
@@ -650,13 +674,46 @@
     <value>Убирает среды из Aiko и открывает чек-лист здесь же.</value>
   </data>
   <data name="RestartLine" xml:space="preserve">
-    <value>Из Aiko уйдут среды, строки и плагины Aiko в settings.json, команды {0}, привязки папок и папка Aiko в PATH, а функции в профиле PowerShell вернутся. Аккаунты и история в папках останутся.</value>
+    <value>Aiko забудет среды и вернёт всё, что меняла: строки и плагины в settings.json, команды {0}, привязки папок, свою папку в PATH и функции в профиле PowerShell. Аккаунты и история в папках останутся.</value>
+  </data>
+  <data name="RestartLineMac" xml:space="preserve">
+    <value>Aiko забудет среды и вернёт всё, что меняла: строки и плагины в settings.json, команды {0}, привязки папок и свою строку в ~/.zshrc. Аккаунты и история в папках останутся.</value>
   </data>
   <data name="RestartBin" xml:space="preserve">
-    <value>И переместить {0} в корзину</value>
+    <value>И переместить {0} в Корзину</value>
+  </data>
+  <data name="RestartTrash" xml:space="preserve">
+    <value>И переместить {0} в Корзину</value>
   </data>
   <data name="RestartKeep" xml:space="preserve">
     <value>.claude остаётся в любом случае.</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Удалить Aiko</value>
+  </data>
+  <data name="DeleteWhat" xml:space="preserve">
+    <value>Убирает саму Aiko и всё, что она настроила.</value>
+  </data>
+  <data name="DeleteLine" xml:space="preserve">
+    <value>Aiko вернёт всё, что меняла: строки и плагины в settings.json, команды {0}, свою папку в PATH и функции в профиле PowerShell. Потом уйдут её папки, а программу снимет деинсталлятор.</value>
+  </data>
+  <data name="DeleteLineMac" xml:space="preserve">
+    <value>Aiko вернёт всё, что меняла: строки и плагины в settings.json, команды {0} и свою строку в ~/.zshrc. Потом уйдут её папки и автозапуск, а программа отправится в Корзину.</value>
+  </data>
+  <data name="DeleteKeep" xml:space="preserve">
+    <value>Аккаунты и история останутся: Aiko их не создавала.</value>
+  </data>
+  <data name="DeleteKeepMac" xml:space="preserve">
+    <value>Аккаунты и история останутся, и копия ~/.zshrc, которую сделала Aiko, тоже.</value>
+  </data>
+  <data name="DeleteWorking" xml:space="preserve">
+    <value>Убираю Aiko. Claude Code может отвечать несколько секунд.</value>
+  </data>
+  <data name="DeleteAppStays" xml:space="preserve">
+    <value>Aiko не может отправить себя в Корзину из этой папки. Перетащи программу туда, когда она закроется.</value>
+  </data>
+  <data name="DeletePortable" xml:space="preserve">
+    <value>Эта копия распакована из zip, деинсталлятора у неё нет. Папка с Aiko останется, и Aiko её откроет.</value>
   </data>
   <data name="OpenClaudeCode" xml:space="preserve">
     <value>Открыть Claude Code</value>
@@ -703,6 +760,9 @@
   <data name="SentWindows" xml:space="preserve">
     <value>версия Windows: что проверять первым</value>
   </data>
+  <data name="SentMacOS" xml:space="preserve">
+    <value>версия macOS: что проверять первым</value>
+  </data>
   <data name="SentDayId" xml:space="preserve">
     <value>ID, который меняется каждый день</value>
   </data>
@@ -716,7 +776,7 @@
     <value>личность включена хотя бы в одной среде</value>
   </data>
   <data name="NothingSentYet" xml:space="preserve">
-    <value>Сейчас не отправляется ничего из этого.</value>
+    <value>Сейчас ничего из этого не отправляется.</value>
   </data>
   <data name="SectionNeverSent" xml:space="preserve">
     <value>ЧТО НЕ ОТПРАВЛЯЕТСЯ НИКОГДА</value>
@@ -725,13 +785,13 @@
     <value>Имя, почта, папки проектов, лимиты, токен и тексты сессий. IP-адрес сайт не читает и не хранит.</value>
   </data>
   <data name="StatsKeptFor" xml:space="preserve">
-    <value>Строки удаляются через 90 дней.</value>
+    <value>Записи удаляются через 90 дней.</value>
   </data>
   <data name="ResetInstallId" xml:space="preserve">
     <value>Сбросить ID</value>
   </data>
   <data name="ResetInstallIdWhat" xml:space="preserve">
-    <value>Aiko придумает новое значение, и прежние сутки с ним не свяжутся.</value>
+    <value>Aiko придумает новое значение. Прежние дни с новым ID уже не связать.</value>
   </data>
   <data name="ResetInstallIdDone" xml:space="preserve">
     <value>ID теперь новый.</value>
@@ -746,10 +806,10 @@
     <value>Анонимная статистика</value>
   </data>
   <data name="WizardStatsWhat" xml:space="preserve">
-    <value>Автор Aiko не знает, сколько людей ею пользуется. Раз в сутки Aiko может сообщить, что одна копия работала, и отправить шесть значений — вот они целиком.</value>
+    <value>Автор Aiko не знает, сколько людей ею пользуется. Раз в сутки Aiko может сообщить, что одна копия работала, и отправить шесть значений. Вот все шесть.</value>
   </data>
   <data name="WizardStatsLater" xml:space="preserve">
-    <value>Решение меняется в настройках, в разделе «Приватность».</value>
+    <value>Это можно поменять потом на странице «Приватность».</value>
   </data>
   <data name="StatsDecline" xml:space="preserve">
     <value>Не отправлять</value>
@@ -776,7 +836,7 @@
     <value>Пока личность включена, твой стиль {0} не работает. Выключишь — вернётся.</value>
   </data>
   <data name="SectionFace" xml:space="preserve">
-    <value>ЛИЦО</value>
+    <value>НАСТРОЕНИЕ</value>
   </data>
   <data name="FaceChibi" xml:space="preserve">
     <value>Чиби</value>
@@ -785,7 +845,10 @@
     <value>Смайлик</value>
   </data>
   <data name="FaceWhere" xml:space="preserve">
-    <value>Так Aiko выглядит в трее, на острове и в окнах.</value>
+    <value>Aiko показывает настроение в трее, на острове и в окнах — рисунком или смайликом.</value>
+  </data>
+  <data name="FaceWhereMac" xml:space="preserve">
+    <value>Aiko показывает настроение в строке меню, на острове и в окнах — рисунком или смайликом.</value>
   </data>
   <data name="SectionTemperament" xml:space="preserve">
     <value>ТЕМПЕРАМЕНТ</value>
@@ -869,37 +932,40 @@
     <value>РАЗРАБОТКА ИГР</value>
   </data>
   <data name="SkillAikoCopy" xml:space="preserve">
-    <value>Интерфейс, README и релизы без канцелярита и штампов ИИ. RU и EN.</value>
+    <value>Тексты, которые звучат как написанные человеком: интерфейс, README, заметки к релизу. На русском и английском.</value>
   </data>
   <data name="SkillAikoReleaseGate" xml:space="preserve">
-    <value>Перед релизом: что необратимо, как откатить, совпадают ли документы с кодом.</value>
+    <value>Проверяет релиз до выката: что необратимо, как откатить, GO или NO-GO.</value>
   </data>
   <data name="SkillAikoDocsHygiene" xml:space="preserve">
-    <value>Факт живёт в одном месте, журнал решений, поиск противоречий.</value>
+    <value>Держит документы проекта в порядке: факт в одном месте, журнал решений, найденные противоречия.</value>
   </data>
   <data name="SkillAikoPlaytest" xml:space="preserve">
     <value>Проверяет игру цифрами: одна и та же тестовая сцена до и после правки.</value>
   </data>
+  <data name="SkillAikoPolishing" xml:space="preserve">
+    <value>Ведёт круг полишинга по уже увиденной работе: твои комментарии, заранее оговорённое число вопросов и правок.</value>
+  </data>
   <data name="SkillAikoBlenderToUnity" xml:space="preserve">
-    <value>Модель из Blender в Unity: оси, нормали, экспорт и импорт.</value>
+    <value>Модель из Blender в Unity без зеркальных и перевёрнутых деталей: оси, нормали, экспорт и импорт.</value>
   </data>
   <data name="SkillAikoTexturing" xml:space="preserve">
-    <value>Готовые файлы для текстур: размер под камеру и шаблоны листов для отрисовки.</value>
+    <value>Размер текстур по камере и листы-подложки для отрисовки.</value>
   </data>
   <data name="SkillAikoGlbForWeb" xml:space="preserve">
-    <value>Файл .glb для веба: размер, оси, сжатие, пустое окно вместо модели.</value>
+    <value>Файл .glb, который видно на сайте: размер, оси, сжатие. И что проверить, если вместо модели пустое окно.</value>
   </data>
   <data name="SkillAikoPalette" xml:space="preserve">
-    <value>Подогнать цвет под палитру в OKLCH с самой маленькой правкой.</value>
+    <value>Проверяет цвета по палитре и подгоняет цвет самой маленькой правкой, в OKLCH.</value>
   </data>
   <data name="SkillAikoGamedesignResearch" xml:space="preserve">
-    <value>30–40 игр с нужной механикой: обзор со скриншотами и интерактивные стенды по запросу.</value>
+    <value>Одна механика в 30–40 играх: обзор со скриншотами и стенды, в которые можно поиграть, по запросу.</value>
   </data>
   <data name="SkillAikoCalendar" xml:space="preserve">
-    <value>План дня по Google Calendar, свободное время, события — после твоего «да».</value>
+    <value>Планирует день по Google Calendar и ищет свободное время. События добавляет только после твоего «да».</value>
   </data>
   <data name="SkillAikoDrive" xml:space="preserve">
-    <value>Документы с Google Drive в работу и файлы проекта — на Drive.</value>
+    <value>Берёт документы с Google Drive в работу и кладёт файлы проекта на Drive.</value>
   </data>
   <data name="ItemMeetAiko" xml:space="preserve">
     <value>Познакомься с Aiko</value>
@@ -908,7 +974,7 @@
     <value>Aiko может говорить в твоих сессиях Claude Code своим голосом и приносит одиннадцать навыков. В коде и коммитах она молчит.</value>
   </data>
   <data name="MeetAikoSettings" xml:space="preserve">
-    <value>Темперамент, лицо и навыки — в настройках, в разделе «Личность». Действует в новых сессиях.</value>
+    <value>Темперамент, настроение и навыки — на странице «Личность». Действует в новых сессиях.</value>
   </data>
   <data name="MeetAikoTurnOn" xml:space="preserve">
     <value>Включить в среде {0}</value>

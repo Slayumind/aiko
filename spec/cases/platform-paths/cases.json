@@ -1,0 +1,291 @@
+{
+  "comment": "What a program is called, how folders are listed, and every path the core builds from those two answers. One row of the rule, three answers side by side: Windows, macOS and a made-up system that is neither, so a rule that only works for the two we ship fails here.",
+  "platforms": [
+    {
+      "platform": "windows",
+      "programName": "claude",
+      "executableName": "claude.exe",
+      "pathListSeparator": ";",
+      "directorySeparator": "\\",
+      "localDataVariable": "%LOCALAPPDATA%",
+      "commandFiles": {
+        "shim": "claude.exe",
+        "command": "aiko-work",
+        "commandFile": "aiko-work.exe"
+      },
+      "seen": {
+        "folders": [
+          "C:\\new",
+          "C:\\old"
+        ],
+        "formatted": "C:\\new;C:\\old",
+        "written": " C:\\new ;;C:\\old;",
+        "parsed": [
+          "C:\\new",
+          "C:\\old"
+        ]
+      },
+      "realClaude": {
+        "path": "C:\\tools",
+        "seen": [],
+        "files": [
+          "C:\\tools\\claude.exe"
+        ],
+        "found": "C:\\tools\\claude.exe"
+      },
+      "bridge": [
+        {
+          "command": "\"C:\\Aiko\\Aiko.Bridge.exe\"",
+          "ours": true
+        },
+        {
+          "command": "\"C:\\Aiko\\Aiko.Bridge\"",
+          "ours": false
+        },
+        {
+          "command": "\"C:\\Aiko\\Aiko.Bridge.cmd\"",
+          "ours": false
+        }
+      ],
+      "shell": {
+        "kind": "PowerShell",
+        "fileName": "powershell.exe",
+        "arguments": [
+          "-NoProfile",
+          "-NonInteractive",
+          "-Command",
+          "line"
+        ]
+      },
+      "install": {
+        "freshPath": "C:\\Windows",
+        "commandFolder": "C:\\Users\\someone\\AppData\\Local\\Aiko\\bin",
+        "home": "C:\\Users\\someone",
+        "files": [
+          "C:\\Users\\someone\\.local\\bin\\claude.exe"
+        ],
+        "found": "C:\\Users\\someone\\.local\\bin\\claude.exe"
+      },
+      "newConfigFolder": {
+        "environmentName": "Work",
+        "home": "C:\\Users\\someone",
+        "folder": "C:\\Users\\someone\\.claude-work"
+      },
+      "credentials": {
+        "configFolder": "C:\\Users\\someone\\.claude",
+        "path": "C:\\Users\\someone\\.claude\\.credentials.json"
+      },
+      "personaCommand": {
+        "settingsBase": "C:\\Users\\someone\\AppData\\Roaming",
+        "localBase": "C:\\Users\\someone\\AppData\\Local",
+        "bridge": "C:\\Users\\someone\\AppData\\Local\\Other\\Aiko.Bridge.exe",
+        "command": "\"C:\\Users\\someone\\AppData\\Local\\Other\\Aiko.Bridge.exe\" plugin aiko-persona"
+      },
+      "userPath": {
+        "before": " C:\\x ;;C:\\y",
+        "folder": "C:\\aiko\\bin",
+        "added": "C:\\aiko\\bin; C:\\x ;C:\\y",
+        "holds": "C:\\x;C:\\aiko\\bin\\",
+        "removed": " C:\\x ;C:\\y"
+      },
+      "bridgeFor": {
+        "bridge": "C:\\Users\\someone\\AppData\\Local\\Aiko\\Aiko.Bridge.exe",
+        "shell": "PowerShell",
+        "command": "& \"C:\\Users\\someone\\AppData\\Local\\Aiko\\Aiko.Bridge.exe\""
+      }
+    },
+    {
+      "platform": "macos",
+      "programName": "claude",
+      "executableName": "claude",
+      "pathListSeparator": ":",
+      "directorySeparator": "/",
+      "localDataVariable": null,
+      "commandFiles": {
+        "shim": "claude",
+        "command": "aiko-work",
+        "commandFile": "aiko-work"
+      },
+      "seen": {
+        "folders": [
+          "/a/bin",
+          "/b/bin"
+        ],
+        "formatted": "/a/bin:/b/bin",
+        "written": " /a/bin ::/b/bin:",
+        "parsed": [
+          "/a/bin",
+          "/b/bin"
+        ]
+      },
+      "realClaude": {
+        "path": "/Users/someone/Library/Caches/Aiko/bin:/opt/homebrew/bin",
+        "seen": [
+          "/Users/someone/Library/Caches/Aiko/bin"
+        ],
+        "files": [
+          "/Users/someone/Library/Caches/Aiko/bin/claude",
+          "/opt/homebrew/bin/claude"
+        ],
+        "found": "/opt/homebrew/bin/claude"
+      },
+      "bridge": [
+        {
+          "command": "\"/Applications/Aiko.app/Contents/MacOS/Aiko.Bridge\"",
+          "ours": true
+        },
+        {
+          "command": "\"/Applications/Aiko.app/Aiko.Bridge.exe\"",
+          "ours": false
+        }
+      ],
+      "shell": {
+        "kind": "Zsh",
+        "fileName": "/bin/zsh",
+        "arguments": [
+          "-lc",
+          "line"
+        ]
+      },
+      "install": {
+        "freshPath": "/usr/bin",
+        "commandFolder": "/tmp/bin",
+        "home": "/Users/someone",
+        "files": [
+          "/Users/someone/.local/bin/claude"
+        ],
+        "found": "/Users/someone/.local/bin/claude"
+      },
+      "newConfigFolder": {
+        "environmentName": "Work",
+        "home": "/Users/someone",
+        "folder": "/Users/someone/.claude-work"
+      },
+      "credentials": {
+        "configFolder": "/Users/someone/.claude",
+        "path": "/Users/someone/.claude/.credentials.json"
+      },
+      "personaCommand": {
+        "settingsBase": "/Users/someone/Library/Application Support",
+        "localBase": "/Users/someone/Library/Caches",
+        "bridge": "/Applications/Aiko.app/Contents/MacOS/Aiko.Bridge",
+        "command": "\"/Applications/Aiko.app/Contents/MacOS/Aiko.Bridge\" plugin aiko-persona"
+      },
+      "userPath": {
+        "before": " /usr/bin ::/bin",
+        "folder": "/Users/someone/Library/Caches/Aiko/bin",
+        "added": "/Users/someone/Library/Caches/Aiko/bin: /usr/bin :/bin",
+        "holds": "/usr/bin:/Users/someone/Library/Caches/Aiko/bin/",
+        "removed": " /usr/bin :/bin"
+      },
+      "bridgeFor": {
+        "bridge": "/Applications/Aiko.app/Contents/MacOS/Aiko.Bridge",
+        "shell": "Zsh",
+        "command": "\"/Applications/Aiko.app/Contents/MacOS/Aiko.Bridge\""
+      }
+    },
+    {
+      "platform": "made up",
+      "conventions": {
+        "executableSuffix": "",
+        "pathListSeparator": ":",
+        "directorySeparator": "/",
+        "localDataVariable": null,
+        "fallbackShell": {
+          "kind": "GitBash",
+          "fileName": "/bin/sh",
+          "argumentsBeforeCommand": [
+            "-c"
+          ]
+        }
+      },
+      "programName": "claude",
+      "executableName": "claude",
+      "pathListSeparator": ":",
+      "directorySeparator": "/",
+      "localDataVariable": null,
+      "commandFiles": {
+        "shim": "claude",
+        "command": "aiko-work",
+        "commandFile": "aiko-work"
+      },
+      "seen": {
+        "folders": [
+          "/a",
+          "/b"
+        ],
+        "formatted": "/a:/b",
+        "written": "/a:/b",
+        "parsed": [
+          "/a",
+          "/b"
+        ]
+      },
+      "realClaude": {
+        "path": "/opt/aiko/bin:/usr/local/bin",
+        "seen": [
+          "/opt/aiko/bin"
+        ],
+        "files": [
+          "/opt/aiko/bin/claude",
+          "/usr/local/bin/claude"
+        ],
+        "found": "/usr/local/bin/claude"
+      },
+      "bridge": [
+        {
+          "command": "\"/Applications/Aiko.app/Aiko.Bridge\"",
+          "ours": true
+        },
+        {
+          "command": "\"C:\\Aiko\\Aiko.Bridge.exe\"",
+          "ours": false
+        }
+      ],
+      "shell": {
+        "kind": "GitBash",
+        "fileName": "/bin/sh",
+        "arguments": [
+          "-c",
+          "line"
+        ]
+      },
+      "install": {
+        "freshPath": "/usr/bin",
+        "commandFolder": "/opt/aiko/bin",
+        "home": "/home/someone",
+        "files": [
+          "/home/someone/.local/bin/claude"
+        ],
+        "found": "/home/someone/.local/bin/claude"
+      },
+      "newConfigFolder": {
+        "environmentName": "Work",
+        "home": "/home/someone",
+        "folder": "/home/someone/.claude-work"
+      },
+      "credentials": {
+        "configFolder": "/home/someone/.claude",
+        "path": "/home/someone/.claude/.credentials.json"
+      },
+      "personaCommand": {
+        "settingsBase": "/home/someone/settings",
+        "localBase": "/home/someone/local",
+        "bridge": "/home/someone/local/Slayumind.Aiko/current/Aiko.Bridge",
+        "command": "\"/home/someone/local/Slayumind.Aiko/current/Aiko.Bridge\" plugin aiko-persona"
+      },
+      "userPath": {
+        "before": "/usr/bin",
+        "folder": "/opt/aiko/bin",
+        "added": "/opt/aiko/bin:/usr/bin",
+        "holds": "/usr/bin:/opt/aiko/bin",
+        "removed": "/usr/bin"
+      },
+      "bridgeFor": {
+        "bridge": "/opt/aiko/Aiko.Bridge",
+        "shell": "GitBash",
+        "command": "\"/opt/aiko/Aiko.Bridge\""
+      }
+    }
+  ]
+}

@@ -118,8 +118,8 @@ struct EnvironmentEditsTests {
     func bindingsAreOneListSortedByFolder() {
         #expect(
             EnvironmentEdits.bindings(twoEnvironments()) == [
-                Binding(#"C:\Users\someone\Desktop\kodland"#, "Work"),
-                Binding(#"C:\Users\someone\Desktop\personal projects"#, "Aiko"),
+                FolderBinding(#"C:\Users\someone\Desktop\kodland"#, "Work"),
+                FolderBinding(#"C:\Users\someone\Desktop\personal projects"#, "Aiko"),
             ])
     }
 

@@ -5,9 +5,9 @@
 **See how much of your Claude Code limits is left, for two accounts at once, without opening a
 terminal.**
 
-Aiko sits in the Windows tray. Rest the mouse on it and a card shows every environment you set up:
-the five-hour window, the week, and the weekly limit of the heavy model. For each one you see when
-it resets and how long it lasts at your current pace.
+Aiko sits in the Windows tray and in the macOS menu bar. Rest the mouse on it and a card shows every
+environment you set up: the five-hour window, the week, and the weekly limit of the heavy model. For
+each one you see when it resets and how long it lasts at your current pace.
 
 ![The Aiko card](assets/card.png)
 
@@ -47,7 +47,7 @@ sample answer for each level. She stays quiet where it matters: code, commits, f
 error explanations, security warnings, dangerous actions and bad news are written in a plain neutral
 voice. The switch works in new sessions; open sessions finish the way they started.
 
-With the personality come eleven skills, with one switch for all of them. They live in one plugin
+With the personality come twelve skills, with one switch for all of them. They live in one plugin
 called `aiko`, so you call a skill by its full name:
 
 **Project management**
@@ -66,6 +66,7 @@ called `aiko`, so you call a skill by its full name:
 |---|---|
 | `/aiko:gamedesign-research` | one game mechanic across 30-40 games, with an illustrated review and playable stands |
 | `/aiko:playtest` | a game checked with numbers: the same test scene before and after a change |
+| `/aiko:polishing` | a polishing round on work you have already seen: your comments, a set number of questions and fixes |
 | `/aiko:blender-to-unity` | meshes from Blender into Unity without mirrored or rotated surprises |
 | `/aiko:texturing` | ready files for textures: a size that fits the camera, and sheets to paint over |
 | `/aiko:glb-for-web` | a Blender model as a `.glb` that web players show correctly |
@@ -78,8 +79,9 @@ Aiko installs all of this as Claude Code plugins from a marketplace on your own 
 downloaded. Your own plugins, output style and settings stay as they are. If you set your own output
 style, the settings page tells you that the personality's style wins while it is on.
 
-Where the personality is on, Aiko's face shows up in the tray or on the island for two seconds when a
-session starts working, waits for you, finishes, fails or runs out of limit. Chibi or emoji, your pick.
+Where the personality is on, Aiko shows her mood in the tray or on the island for two seconds when a
+session starts working, waits for you, finishes, fails or runs out of limit. A chibi drawing or an
+emoji, your pick.
 
 The skills also work without Aiko:
 
@@ -102,6 +104,9 @@ Desktop, turn on **direct mode** for that environment, and Aiko asks the usage A
 mode needs the account's access token, so it's off until you turn it on.
 [PRIVACY.md](PRIVACY.md) describes exactly what happens with the token.
 
+Direct mode is on Windows only. On macOS Claude Code keeps the token in the Keychain, and Aiko does
+not read it, so there the numbers come from the status line and the CLI.
+
 If you allow it, Aiko also counts how many copies run each day. It has its own switch on the
 **Privacy** page, off by default and separate from the update check. The ID it sends changes every
 day, so two days can't be linked to one person, and the rows are deleted after 90 days. That page
@@ -109,19 +114,32 @@ lists the six things that go, line by line; so does [PRIVACY.md](PRIVACY.md).
 
 ## What you need
 
-- Windows 10 version 1809 or newer, 64-bit.
+- Windows 10 version 1809 or newer, 64-bit, or macOS 14 or newer.
 - Claude Code 2.1.80 or newer. Older versions don't report limits.
 - For the personality and the skills, a recent Claude Code: tested with 2.1.272.
 - A Claude.ai Pro, Max or Team plan. Enterprise accounts don't report limits.
 
 ## Install
 
-Download the installer from [Releases](https://github.com/Slayumind/aiko/releases/latest) and run
-it. Aiko installs for the current user and needs no administrator rights.
+Both downloads are on the same page: [Releases](https://github.com/Slayumind/aiko/releases/latest).
+
+### Windows
+
+Download the installer and run it. Aiko installs for the current user and needs no administrator
+rights.
 
 The build isn't signed yet, so **SmartScreen will warn you**. Choose *More info*, then *Run
 anyway*. Signing is planned. Until then, every release comes with `SHA256SUMS.txt` and a build
 provenance attestation, and [SECURITY.md](SECURITY.md) shows how to check them.
+
+### macOS
+
+Download `Aiko-<version>.dmg`, open it and drag Aiko into **Applications**. One file works on both
+Apple silicon and Intel Macs. You need macOS 14 or newer.
+
+The app is signed with an Apple Developer ID and notarized, so it opens the normal way. There is
+nothing to allow in System Settings and no command to run. [SECURITY.md](SECURITY.md) shows how to
+check the signature yourself.
 
 Free code signing provided by [SignPath.io](https://about.signpath.io), certificate by
 [SignPath Foundation](https://signpath.org). The [code signing policy](CODE-SIGNING.md) says what is
@@ -132,11 +150,16 @@ the taskbar: under the arrow, the card can't open.
 
 ## Remove
 
-Uninstall Aiko from **Installed apps**. It puts your status line back and removes the session
-reminder, removes its plugins and their marketplace from Claude Code, takes its folder out of PATH
-together with the launch commands, turns your PowerShell profile functions back on, removes its
-startup entry and deletes its own folders. Your accounts and
-history stay in their Claude Code folders. There's nothing left to clean up by hand.
+Press **Remove Aiko** on the **General** page of settings. It asks a second time, then takes
+everything back: your status line and the session reminder, the plugins and their marketplace in
+Claude Code, the launch commands, Aiko's folder in PATH, the shell profile, the startup entry and
+Aiko's own folders. On Windows the uninstaller then removes the program; on macOS Aiko moves itself
+to the Bin.
+
+Your accounts and history stay in their Claude Code folders: Aiko never made them. On macOS the copy
+of `~/.zshrc` that Aiko made before its first change stays too.
+
+On Windows you can also uninstall Aiko from **Installed apps**, which does the same.
 
 ## Build it yourself
 

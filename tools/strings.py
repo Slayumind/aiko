@@ -15,6 +15,7 @@ hand would drift apart in a week.
 
 import io
 import json
+import re
 import os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -186,11 +187,28 @@ def write_swift(path, data):
     io.open(path, "w", encoding="utf-8", newline="\n").write("".join(parts))
 
 
-def main():
-    data = json.load(io.open(os.path.join(HERE, "strings.json"), encoding="utf-8"))
+def check(data):
+    """What a rewrite breaks quietly. A missing key is a build error on both systems, but these
+    three are not, and the last one cost a Russian window its numbers once."""
     keys = [k for k, _ in data]
     if len(keys) != len(set(keys)):
         raise SystemExit("two entries share a key")
+
+    for key, (english, russian) in data:
+        if not english.strip() or not russian.strip():
+            raise SystemExit("%s: one of the two languages is empty" % key)
+
+        # {0} and {1} are filled in by the app. A language that lost one shows a number that
+        # never arrives, or drops the one the sentence was built around.
+        holes = lambda text: sorted(re.findall(r"\{\d+\}", text))
+        if holes(english) != holes(russian):
+            raise SystemExit("%s: %s in English, %s in Russian"
+                             % (key, holes(english) or "no {0}", holes(russian) or "no {0}"))
+
+
+def main():
+    data = json.load(io.open(os.path.join(HERE, "strings.json"), encoding="utf-8"))
+    check(data)
 
     app = os.path.join(ROOT, "src", "Aiko.App")
     write_resx(os.path.join(app, "Strings.resx"), [(k, v[0]) for k, v in data])

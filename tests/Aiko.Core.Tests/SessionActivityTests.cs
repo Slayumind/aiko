@@ -1,27 +1,13 @@
 namespace Aiko.Core.Tests;
 
+/// What a hook means and what a broken record reads as are tables, and they live in
+/// spec/cases/hook-events; both cores read them. What is left here needs a clock or a file name.
 public class SessionActivityTests
 {
     private const string Session = "5f0c2a8e-1b7d-4c1e-9f3a-2d6b8e4a7c10";
 
     private static string Hook(string name, string extra = "") =>
         $$"""{ "session_id": "{{Session}}", "hook_event_name": "{{name}}", "cwd": "C:\\secret\\project"{{extra}} }""";
-
-    [Theory]
-    [InlineData("UserPromptSubmit", "", SessionActivity.Working)]
-    [InlineData("PostToolUse", "", SessionActivity.Working)]
-    [InlineData("PermissionRequest", "", SessionActivity.Waiting)]
-    [InlineData("Notification", """, "notification_type": "permission_prompt" """, SessionActivity.Waiting)]
-    [InlineData("Notification", """, "notification_type": "elicitation_dialog" """, SessionActivity.Waiting)]
-    [InlineData("Notification", """, "notification_type": "agent_needs_input" """, SessionActivity.Waiting)]
-    [InlineData("Stop", "", SessionActivity.Done)]
-    [InlineData("StopFailure", """, "error_type": "server_error" """, SessionActivity.Error)]
-    [InlineData("StopFailure", """, "error_type": "rate_limit" """, SessionActivity.OutOfLimit)]
-    [InlineData("SessionEnd", """, "reason": "clear" """, SessionActivity.Ended)]
-    public void Each_event_the_plugin_listens_to_means_one_activity(string name, string extra, SessionActivity expected)
-    {
-        Assert.Equal(new HookEvent(Session, expected), HookEvent.FromJson(Hook(name, extra)));
-    }
 
     [Fact]
     public void Every_event_in_the_plugin_is_understood()
@@ -31,18 +17,6 @@ public class SessionActivityTests
             var extra = name == "Notification" ? """, "notification_type": "permission_prompt" """ : "";
             Assert.NotNull(HookEvent.FromJson(Hook(name, extra)));
         }
-    }
-
-    [Theory]
-    [InlineData("""{ "session_id": "x", "hook_event_name": "Notification", "notification_type": "idle_prompt" }""")]
-    [InlineData("""{ "session_id": "x", "hook_event_name": "PreToolUse" }""")]
-    [InlineData("""{ "hook_event_name": "Stop" }""")]
-    [InlineData("""{ "session_id": 7, "hook_event_name": "Stop" }""")]
-    [InlineData("not json")]
-    [InlineData("")]
-    public void Anything_else_changes_nothing(string json)
-    {
-        Assert.Null(HookEvent.FromJson(json));
     }
 
     [Fact]
@@ -67,16 +41,6 @@ public class SessionActivityTests
         Assert.Equal(record, ActivityRecord.FromJson(json));
         Assert.DoesNotContain("secret", json);
         Assert.Contains("+03:00", json);
-    }
-
-    [Theory]
-    [InlineData("")]
-    [InlineData("{ \"environment\": \"default\", \"activity\": \"Dancing\", \"at\": \"2026-09-15T12:00:00Z\" }")]
-    [InlineData("{ \"environment\": \"default\", \"activity\": \"Done\" }")]
-    [InlineData("{ \"environment\": \"def")]
-    public void A_half_written_or_strange_file_reads_as_nothing(string json)
-    {
-        Assert.Null(ActivityRecord.FromJson(json));
     }
 
     [Fact]

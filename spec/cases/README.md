@@ -6,13 +6,18 @@ core and stay as it was in the other.
 
 Only rules that earn it live here. A rule with a shape (a name, a path, a command, a decision) and
 many rows earns a file. A rule that needs a fake clock, a fake disk or a hand written object does
-not: it stays a test in its own language.
+not: it stays a test in its own language. Reading a settings file is the clearest example of the
+second kind — what is checked there is the defaults, the trip through the file and the schema
+stamp, not a table (D-255).
 
 | Folder | Rule |
 |---|---|
+| `platform-paths/` | what a program is called and every path built from that, on Windows, macOS and a made-up system (`PlatformConventions`, `RealClaude`, `CommandLinks`, `ClaudeInstall`, `UserPathList`, `BridgeCommand`, `ClaudeShellLookup`, `AikoMarketplace`) |
 | `folder-layout/` | where Aiko keeps its files on Windows and on macOS (`AikoFolders`) |
 | `launch-command/` | the command name of an environment, and what makes a command bad (`LaunchCommand`) |
 | `shim-launch/` | which environment a start of Claude Code belongs to (`ShimLaunch`) |
+| `hook-events/` | what a hook of the persona plugin says a session is doing (`HookEvent`, `ActivityRecord`) |
+| `tray-mood/` | which face an event brings (`TrayMood`) |
 | `snapshot-name/` | the file name one environment reports into (`SnapshotName`) |
 | `update-manifest/` | a signed release manifest made with openssl (`UpdateManifest`) |
 

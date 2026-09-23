@@ -83,6 +83,8 @@ public struct LimitSnapshot: Sendable, Equatable {
 
     /// Two sources for one environment: the fresher answer wins. Direct mode is asked rarely,
     /// the status line speaks on every reply, so neither is always ahead.
+    /// Only direct mode knows the model limit. If the status line wins, it keeps the model limit
+    /// of the other answer: the limit has its own reset time, so it does not get old with the windows.
     public static func newer(_ first: LimitSnapshot, _ second: LimitSnapshot) -> LimitSnapshot {
         if !first.hasData {
             return second
@@ -90,7 +92,11 @@ public struct LimitSnapshot: Sendable, Equatable {
         if !second.hasData {
             return first
         }
-        return second.receivedAt > first.receivedAt ? second : first
+        var (winner, other) = second.receivedAt > first.receivedAt ? (second, first) : (first, second)
+        if winner.model == nil {
+            winner.model = other.model
+        }
+        return winner
     }
 
     public func freshnessAt(_ now: Date, staleAfter: TimeInterval? = nil) -> DataFreshness {

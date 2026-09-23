@@ -84,6 +84,30 @@ public class PersonaPromptTests
         }
     }
 
+    /// Transcripts after 0.2.1 showed where the masculine still slips in: the first word of a reply
+    /// that takes in a correction, «Понял:». The rule names that place.
+    [Theory]
+    [MemberData(nameof(AllTemperaments))]
+    public void The_first_word_of_a_reply_is_feminine_too(Temperament temperament)
+    {
+        var prompt = PersonaPrompt.Compose(temperament);
+
+        Assert.Contains("first word of a reply", prompt);
+        Assert.Contains("«Поняла»", prompt);
+    }
+
+    /// Her feminine forms used to carry over to the user. The prompt does not know the user's gender,
+    /// so she talks about the user without gendered forms.
+    [Theory]
+    [MemberData(nameof(AllTemperaments))]
+    public void She_talks_about_the_user_without_gendered_forms(Temperament temperament)
+    {
+        var prompt = PersonaPrompt.Compose(temperament);
+
+        Assert.Contains("You do not know the user's gender", prompt);
+        Assert.Contains("without gendered forms", prompt);
+    }
+
     /// A game named at the end of every report about patches and checklists reads as a tic. A game is
     /// named only when the thing at hand really works like it, at every temperament.
     [Theory]

@@ -1,0 +1,137 @@
+{
+  "comment": "Which face an event brings. A session that changes what it does brings its face once; a limit brings one only when it crosses a line, and never on the first number.",
+  "forActivity": [
+    {
+      "before": null,
+      "now": {
+        "activity": "Working",
+        "secondsAgo": 0
+      },
+      "face": "Working"
+    },
+    {
+      "before": null,
+      "now": {
+        "activity": "Waiting",
+        "secondsAgo": 0
+      },
+      "face": "Waiting"
+    },
+    {
+      "before": null,
+      "now": {
+        "activity": "Done",
+        "secondsAgo": 0
+      },
+      "face": "Done"
+    },
+    {
+      "before": null,
+      "now": {
+        "activity": "Error",
+        "secondsAgo": 0
+      },
+      "face": "Error"
+    },
+    {
+      "before": null,
+      "now": {
+        "activity": "OutOfLimit",
+        "secondsAgo": 0
+      },
+      "face": "Asleep"
+    },
+    {
+      "before": {
+        "activity": "Working",
+        "secondsAgo": 20
+      },
+      "now": {
+        "activity": "Working",
+        "secondsAgo": 0
+      },
+      "face": null
+    },
+    {
+      "before": {
+        "activity": "Working",
+        "secondsAgo": 20
+      },
+      "now": {
+        "activity": "Done",
+        "secondsAgo": 0
+      },
+      "face": "Done"
+    },
+    {
+      "before": null,
+      "now": {
+        "activity": "Waiting",
+        "secondsAgo": 600
+      },
+      "face": null
+    }
+  ],
+  "forLimit": [
+    {
+      "before": 70,
+      "after": 90,
+      "face": "Tired"
+    },
+    {
+      "before": 89,
+      "after": 95,
+      "face": "Tired"
+    },
+    {
+      "before": 95,
+      "after": 100,
+      "face": "Asleep"
+    },
+    {
+      "before": 80,
+      "after": 100,
+      "face": "Asleep"
+    },
+    {
+      "before": 100,
+      "after": 0,
+      "face": "Fresh"
+    },
+    {
+      "before": 92,
+      "after": 3,
+      "face": "Fresh"
+    },
+    {
+      "before": null,
+      "after": 95,
+      "face": null
+    },
+    {
+      "before": 40,
+      "after": 60,
+      "face": null
+    },
+    {
+      "before": 91,
+      "after": 97,
+      "face": null
+    },
+    {
+      "before": 100,
+      "after": 100,
+      "face": null
+    },
+    {
+      "before": 20,
+      "after": 10,
+      "face": null
+    },
+    {
+      "before": 95,
+      "after": null,
+      "face": null
+    }
+  ]
+}

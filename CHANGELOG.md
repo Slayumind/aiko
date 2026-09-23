@@ -7,14 +7,64 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-09-23
+
+Aiko comes to macOS. One version tag now builds both systems, and the Mac app is signed and
+notarized by Apple. Aiko can also install its own updates when you ask, after it checks a signed
+list of files. Also new: the polishing skill, and fixes for the card, the settings lists and the
+personality. The Windows build is not signed yet.
+
 ### Added
 
+- **Aiko for macOS.** The same app on the other system: the ring in the menu bar, the island on any
+  edge of the screen, the card with the limits of both environments, the first run checklist and the
+  settings. It reads the numbers from Claude Code the same way, keeps environments apart the same way
+  and speaks the same two languages. macOS 14 or newer, Apple silicon and Intel. Direct mode is the
+  one thing it does not have: the token lives in the Keychain there, and Aiko does not read it.
+- **A macOS download.** One version tag now builds both systems and publishes one release. The macOS
+  app comes as a disk image, signed with an Apple Developer ID and notarized by Apple, so it opens
+  the normal way. [SECURITY.md](SECURITY.md) shows how to check it.
+- **Aiko installs its own updates, when you ask it to.** Press **Download and install** on the
+  General page and Aiko downloads the new version from GitHub; press **Restart now** and it starts.
+  Windows and macOS both do this. Nothing is downloaded or replaced until you press the button.
+- **Every update is checked before it is installed.** A release carries a list of its files signed
+  with an ECDSA P-256 key, and Aiko ships the public half. If the signature or the file does not
+  match, nothing is replaced and the log says why. A build with no key installs nothing at all.
+- **Remove Aiko, from inside Aiko.** A new item on the General page of settings takes everything
+  back and then removes the program: on Windows through the uninstaller, on macOS by moving the app
+  to the Bin. Accounts and history stay where they are. Before, macOS had no way to remove Aiko
+  whole, only "Start over" and a drag to the Bin.
+- **A twelfth skill, `/aiko:polishing`.** It runs a polishing round on work you have already seen.
+  First it asks how many questions and how many rounds of fixes you want. Then it sorts your
+  comments, asks only about real choices and checks each round of fixes with measurements.
 - **Code signing policy.** [CODE-SIGNING.md](CODE-SIGNING.md) says which files will be signed through
   SignPath Foundation and who approves each release.
 
 ### Changed
 
-- **PRIVACY.md** now also lists the `PATH` folder and the PowerShell profile change.
+- **The card shows a percentage without a word next to it.** "42% used" is now "42%". The
+  bar and the row name already say what the number is.
+- **Every interface text was read through**, in both languages. The checklist now says that Aiko
+  turns the line in your PowerShell profile off, not that it removes it; that is what it does.
+- **Clearer skill descriptions** in settings and in the skill files. Each one now says what the
+  skill does, in plain words.
+- **The limits survive a fractional reset time.** A reset time with a fraction in it used to throw
+  and take the whole status line report with it; it is now read down to the second.
+- **Every file in a release is attested**, not only the Windows installer.
+- **PRIVACY.md** now also lists the `PATH` folder and the shell profile change, and describes what
+  the update path does on each system.
+
+### Fixed
+
+- **A mouse click picks an item in the settings lists again.** On Windows, a click on a language or
+  on the environment of a folder closed the list and changed nothing. The keyboard worked.
+- **The weekly limit of the model no longer comes and goes in direct mode.** Each reply of Claude
+  Code hid the row, and the next answer of the usage API brought it back. The row now stays until
+  its own reset.
+- **Aiko keeps her own gender in Russian and does not guess yours.** She still sometimes answered
+  a correction with a masculine «Понял»; the prompt now names that place. And she no longer puts
+  gendered forms on you, like «ты прав» or «ты готова»: she does not know your gender, so she
+  words it without one.
 
 ## [0.2.3] - 2026-09-17
 

@@ -12,9 +12,24 @@ public class AllowedHostsTests
     [InlineData("https://api.anthropic.com/api/oauth/usage")]
     [InlineData("https://slayumind.org/api/v1/aiko/version")]
     [InlineData("https://SLAYUMIND.ORG/api/v1/aiko/version")]
-    public void The_two_hosts_are_allowed(string address)
+    [InlineData("https://api.github.com/repos/Slayumind/aiko/releases")]
+    [InlineData("https://github.com/Slayumind/aiko/releases/download/v0.3.0/SHA256SUMS.txt")]
+    [InlineData("https://release-assets.githubusercontent.com/github-production-release-asset/1")]
+    [InlineData("https://objects.githubusercontent.com/github-production-release-asset/1")]
+    public void The_hosts_of_an_update_and_of_the_limits_are_allowed(string address)
     {
         Assert.True(AllowedHosts.Allows(new Uri(address)));
+    }
+
+    /// GitHub is here since 0.3, when Aiko began downloading the files of an update itself. The
+    /// list is what makes "and nothing else" true, so a host GitHub does not use is still refused.
+    [Theory]
+    [InlineData("https://githubusercontent.com/file")]
+    [InlineData("https://raw.githubusercontent.com/Slayumind/aiko/main/README.md")]
+    [InlineData("https://codeload.github.com/Slayumind/aiko/zip/main")]
+    public void A_github_host_that_is_not_on_the_list_is_refused(string address)
+    {
+        Assert.False(AllowedHosts.Allows(new Uri(address)));
     }
 
     /// The suffix trick is how such a list is usually defeated: a host that merely ends with an

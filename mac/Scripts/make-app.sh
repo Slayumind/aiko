@@ -18,6 +18,12 @@ if [ -f ../Directory.Build.props ]; then
 fi
 version="${version:-0.0.0}"
 
+# Between releases the version does not change (D-236), so the commit is what tells two builds
+# apart in a bug report. The Windows build gets the same from the .NET SDK.
+# A tree copied to the Mac without its .git says nothing to `git`, so the caller can pass the
+# commit in. tools/local-install-mac.ps1 does that.
+commit="${AIKO_COMMIT:-$(git rev-parse --short HEAD 2>/dev/null || true)}"
+
 swift build -c release --arch arm64 --arch x86_64
 
 rm -rf build
@@ -40,6 +46,16 @@ else
   echo "note: $fonts is not here, the app will use the system font"
 fi
 
+# The skills plugin this copy ships (D-234). Claude Code installs from the copy Aiko makes in its
+# marketplace folder; without this the persona still works and the skills are simply not offered.
+skills="../plugins/aiko"
+if [ -d "$skills" ]; then
+  mkdir -p "$app/Contents/Resources/plugins"
+  cp -R "$skills" "$app/Contents/Resources/plugins/aiko"
+else
+  echo "note: $skills is not here, this build ships no skills"
+fi
+
 cat > "$app/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -51,16 +67,27 @@ cat > "$app/Contents/Info.plist" <<PLIST
 <key>CFBundlePackageType</key><string>APPL</string>
 <key>CFBundleShortVersionString</key><string>$version</string>
 <key>CFBundleVersion</key><string>$version</string>
+<key>AikoCommit</key><string>$commit</string>
 <key>LSMinimumSystemVersion</key><string>14.0</string>
 <key>LSUIElement</key><true/>
 <key>NSHumanReadableCopyright</key><string>Apache-2.0. Not affiliated with Anthropic.</string>
 </dict></plist>
 PLIST
 
-# The two small programs are signed first: signing the bundle does not reach inside MacOS.
-codesign --force --sign - "$app/Contents/MacOS/Aiko.Bridge"
-codesign --force --sign - "$app/Contents/MacOS/claude"
-codesign --force --sign - "$app"
+# Who signs this build. The default "-" is ad-hoc, which is enough to run the app on this machine.
+# The release workflow passes the hash of the Developer ID certificate it imported.
+identity="${AIKO_CODESIGN_IDENTITY:--}"
+flags=(--force --sign "$identity")
+if [ "$identity" != "-" ]; then
+  # Notarization takes nothing else: a trusted timestamp and the hardened runtime.
+  flags+=(--timestamp --options runtime)
+fi
+
+# The two small programs are signed first: signing the bundle does not reach inside MacOS. This is
+# why --deep is never used here; it would sign them in one pass and hide a file that was missed.
+codesign "${flags[@]}" "$app/Contents/MacOS/Aiko.Bridge"
+codesign "${flags[@]}" "$app/Contents/MacOS/claude"
+codesign "${flags[@]}" "$app"
 
 lipo -info "$app/Contents/MacOS/Aiko"
 codesign -dv "$app" 2>&1 | grep -E "Signature|Identifier"

@@ -3,6 +3,8 @@ import Testing
 
 @testable import AikoKit
 
+/// What a hook means and what a broken record reads as are tables, and they live in
+/// spec/cases/hook-events; both cores read them. What is left here needs a clock or a file name.
 struct SessionActivityTests {
     static let session = "5f0c2a8e-1b7d-4c1e-9f3a-2d6b8e4a7c10"
 
@@ -10,21 +12,6 @@ struct SessionActivityTests {
         #"{ "session_id": "\#(Self.session)", "hook_event_name": "\#(name)", "cwd": "C:\\secret\\project"\#(extra) }"#
     }
 
-    @Test(arguments: [
-        ("UserPromptSubmit", "", SessionActivity.working),
-        ("PostToolUse", "", SessionActivity.working),
-        ("PermissionRequest", "", SessionActivity.waiting),
-        ("Notification", #", "notification_type": "permission_prompt" "#, SessionActivity.waiting),
-        ("Notification", #", "notification_type": "elicitation_dialog" "#, SessionActivity.waiting),
-        ("Notification", #", "notification_type": "agent_needs_input" "#, SessionActivity.waiting),
-        ("Stop", "", SessionActivity.done),
-        ("StopFailure", #", "error_type": "server_error" "#, SessionActivity.error),
-        ("StopFailure", #", "error_type": "rate_limit" "#, SessionActivity.outOfLimit),
-        ("SessionEnd", #", "reason": "clear" "#, SessionActivity.ended),
-    ])
-    func eachEventThePluginListensToMeansOneActivity(name: String, extra: String, expected: SessionActivity) {
-        #expect(HookEvent.fromJson(hook(name, extra)) == HookEvent(sessionId: Self.session, activity: expected))
-    }
 
     @Test
     func everyEventInThePluginIsUnderstood() {
@@ -34,17 +21,6 @@ struct SessionActivityTests {
         }
     }
 
-    @Test(arguments: [
-        #"{ "session_id": "x", "hook_event_name": "Notification", "notification_type": "idle_prompt" }"#,
-        #"{ "session_id": "x", "hook_event_name": "PreToolUse" }"#,
-        #"{ "hook_event_name": "Stop" }"#,
-        #"{ "session_id": 7, "hook_event_name": "Stop" }"#,
-        "not json",
-        "",
-    ])
-    func anythingElseChangesNothing(json: String) {
-        #expect(HookEvent.fromJson(json) == nil)
-    }
 
     @Test
     func theFileNameKeepsTheEnvironmentButNotTheSessionId() {
@@ -72,15 +48,6 @@ struct SessionActivityTests {
         #expect(json.contains("+03:00"))
     }
 
-    @Test(arguments: [
-        "",
-        #"{ "environment": "default", "activity": "Dancing", "at": "2026-09-15T12:00:00Z" }"#,
-        #"{ "environment": "default", "activity": "Done" }"#,
-        #"{ "environment": "def"#,
-    ])
-    func aHalfWrittenOrStrangeFileReadsAsNothing(json: String) {
-        #expect(ActivityRecord.fromJson(json) == nil)
-    }
 
     @Test
     func theSameActivityIsNotWrittenAgainForAFewSeconds() {

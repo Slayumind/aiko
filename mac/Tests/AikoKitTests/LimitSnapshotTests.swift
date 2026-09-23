@@ -86,4 +86,48 @@ struct LimitSnapshotTests {
         #expect(snapshot.source == .statusLine)
         #expect(snapshot.receivedAt == Self.now)
     }
+
+    private func fromApi(_ receivedAt: Date) -> LimitSnapshot {
+        LimitSnapshot(
+            environment: "Personal",
+            source: .directMode,
+            receivedAt: receivedAt,
+            windows: [LimitWindow(kind: .sevenDay, percent: 40, resetsAt: Self.now.adding(days: 3))],
+            model: ModelLimit(modelName: "Fable", percent: 62, resetsAt: Self.now.adding(days: 3)))
+    }
+
+    private func fromStatusLine(_ receivedAt: Date) -> LimitSnapshot {
+        LimitSnapshot(
+            environment: "Personal",
+            source: .statusLine,
+            receivedAt: receivedAt,
+            windows: [LimitWindow(kind: .sevenDay, percent: 41, resetsAt: Self.now.adding(days: 3))])
+    }
+
+    @Test
+    func aFresherStatusLineKeepsTheModelLimitFromDirectMode() {
+        // The status line writes on every reply and never carries the model limit. Before this,
+        // each reply hid the model row until the next direct answer.
+        let merged = LimitSnapshot.newer(fromStatusLine(Self.now.adding(minutes: 1)), fromApi(Self.now))
+
+        #expect(merged.source == .statusLine)
+        #expect(merged.statusAt(Self.now, .sevenDay)?.percent == 41)
+        #expect(merged.model == ModelLimit(modelName: "Fable", percent: 62, resetsAt: Self.now.adding(days: 3)))
+    }
+
+    @Test
+    func aFresherDirectAnswerWinsWithItsOwnModelLimit() {
+        let merged = LimitSnapshot.newer(fromStatusLine(Self.now), fromApi(Self.now.adding(minutes: 1)))
+
+        #expect(merged.source == .directMode)
+        #expect(merged.model?.percent == 62)
+    }
+
+    @Test
+    func theOrderOfTheTwoSourcesDoesNotMatter() {
+        let statusLine = fromStatusLine(Self.now.adding(minutes: 1))
+        let direct = fromApi(Self.now)
+
+        #expect(LimitSnapshot.newer(statusLine, direct) == LimitSnapshot.newer(direct, statusLine))
+    }
 }

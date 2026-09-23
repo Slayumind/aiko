@@ -65,6 +65,16 @@ public enum RingArt {
         return (dash, segment - dash)
     }
 
+    /// The island has room the menu bar has not, so every environment gets a ring of its own and
+    /// the pen is a share of the ring instead of a number on the 16 unit grid.
+    public static let islandPenShare = 0.18
+
+    /// The radius and the pen of an island ring of this size: the twin of RingGauge.cs.
+    public static func islandRing(_ size: Double) -> (radius: Double, thickness: Double) {
+        let thickness = size * islandPenShare
+        return ((size - thickness) / 2, thickness)
+    }
+
     /// The share of the ring the arc covers, from 0 to 1. Nothing to draw at zero, a whole circle
     /// at a hundred.
     public static func arcShare(_ percent: Int) -> Double {

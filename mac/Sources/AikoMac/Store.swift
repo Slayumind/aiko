@@ -14,6 +14,22 @@ enum Store {
         AppSettings.fromJson(read(folders.settingsFile))
     }
 
+    /// The settings file is written back whole, so a field this version does not know about would
+    /// be lost. Only the island's place is saved from here, and only after the person moved it.
+    static func saveSettings(_ settings: AppSettings) {
+        write(folders.settingsFile, settings.toJson())
+    }
+
+    /// Which face Aiko wears (D-215). Read when a face is about to be drawn: the file is tiny and
+    /// the settings window can change it while Aiko runs.
+    static func persona() -> PersonaSettings {
+        PersonaSettings.fromJson(read(folders.personaFile) ?? "")
+    }
+
+    static func savePersona(_ persona: PersonaSettings) {
+        write(folders.personaFile, persona.toJson())
+    }
+
     static func environments() -> EnvironmentSettings {
         EnvironmentSettings.fromJson(read(folders.environmentsFile))
     }
@@ -32,8 +48,7 @@ enum Store {
 
             found[environment.name] = CardAccount(
                 plan: account(in: directory).planLabel,
-                signedIn: FileManager.default.fileExists(
-                    atPath: ClaudeInstall.credentialsPathIn(.macOS, directory)))
+                signedIn: isSignedIn(directory))
         }
 
         return found
@@ -41,7 +56,7 @@ enum Store {
 
     /// Which account a Claude Code folder belongs to. Only .claude.json is opened, never the
     /// credentials file, and nothing read here goes into the log.
-    private static func account(in directory: String) -> ClaudeAccount {
+    static func account(in directory: String) -> ClaudeAccount {
         for path in ClaudeConfigFolder.accountFileCandidates(.macOS, directory, home) {
             let account = ClaudeAccount.fromClaudeJson(read(path))
             if account.isKnown {
@@ -50,6 +65,16 @@ enum Store {
         }
 
         return .none
+    }
+
+    /// Whether this folder has an account. macOS keeps the token in the Keychain, so the rule is
+    /// not the same as on Windows: see AikoKit.SignedIn.
+    static func isSignedIn(_ directory: String) -> Bool {
+        SignedIn.decide(
+            .macOS,
+            credentialsFileExists: FileManager.default.fileExists(
+                atPath: ClaudeInstall.credentialsPathIn(.macOS, directory)),
+            account: account(in: directory))
     }
 
     private static func read(_ path: String) -> String? {
