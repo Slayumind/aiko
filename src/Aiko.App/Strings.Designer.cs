@@ -951,6 +951,9 @@ public static class Strings
     /// One mechanic across 30–40 games: a review with screenshots, and playable demos on request.
     public static string SkillAikoGamedesignResearch => Get("SkillAikoGamedesignResearch");
 
+    /// Balances a game's numbers from one anchor, usually health: progression curves, classes an...
+    public static string SkillAikoBalance => Get("SkillAikoBalance");
+
     /// Plans your day in Google Calendar and finds free time. Adds events only after your yes.
     public static string SkillAikoCalendar => Get("SkillAikoCalendar");
 

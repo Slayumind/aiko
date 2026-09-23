@@ -28,6 +28,7 @@ struct PersonalityPageView: View {
         "glb-for-web": Strings.skillAikoGlbForWeb,
         "palette": Strings.skillAikoPalette,
         "gamedesign-research": Strings.skillAikoGamedesignResearch,
+        "balance": Strings.skillAikoBalance,
         "calendar": Strings.skillAikoCalendar,
          "drive": Strings.skillAikoDrive]
     }

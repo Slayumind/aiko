@@ -7,6 +7,13 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Added
+
+- **The balance skill.** `/aiko:balance` prices every number of a game in one anchor resource,
+  usually health. It builds progression curves with hand-made spikes, compares classes, and checks a
+  table of items for ones that are too strong, too weak or never worth taking. A small Python script
+  does the sums.
+
 ## [0.3.0] - 2026-09-23
 
 Aiko comes to macOS. One version tag now builds both systems, and the Mac app is signed and
