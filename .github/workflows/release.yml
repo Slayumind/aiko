@@ -373,9 +373,14 @@ jobs:
         run: |
           set -euo pipefail
           cd releases
-          # The list is taken before the file is written, or sha256sum would hash it as well and
-          # the line would never match. Sorted, so two releases read the same way.
-          find . -maxdepth 1 -type f -printf '%P\0' | sort -z | xargs -0 sha256sum > SHA256SUMS.txt
+          # The list is written outside the folder and moved in at the end. The parts of a pipeline
+          # start together, so "> SHA256SUMS.txt" made the file before find listed the folder:
+          # v0.3.0 carried a line for SHA256SUMS.txt itself, hashed half written, which never
+          # matches. The two names are also left out on purpose. Sorted, so two releases read the
+          # same way.
+          find . -maxdepth 1 -type f ! -name SHA256SUMS.txt ! -name SHA256SUMS.txt.sig -printf '%P\0' \
+            | sort -z | xargs -0 sha256sum > "$RUNNER_TEMP/SHA256SUMS.txt"
+          mv "$RUNNER_TEMP/SHA256SUMS.txt" SHA256SUMS.txt
           cat SHA256SUMS.txt
 
       - name: Decide whether the checksums get signed
