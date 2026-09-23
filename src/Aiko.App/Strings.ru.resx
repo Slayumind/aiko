@@ -932,40 +932,40 @@
     <value>РАЗРАБОТКА ИГР</value>
   </data>
   <data name="SkillAikoCopy" xml:space="preserve">
-    <value>Интерфейс, README и релизы без канцелярита и штампов ИИ. RU и EN.</value>
+    <value>Тексты, которые звучат как написанные человеком: интерфейс, README, заметки к релизу. На русском и английском.</value>
   </data>
   <data name="SkillAikoReleaseGate" xml:space="preserve">
-    <value>Перед релизом: что необратимо, как откатить, совпадают ли документы с кодом.</value>
+    <value>Проверяет релиз до выката: что необратимо, как откатить, GO или NO-GO.</value>
   </data>
   <data name="SkillAikoDocsHygiene" xml:space="preserve">
-    <value>Факт живёт в одном месте, журнал решений, поиск противоречий.</value>
+    <value>Держит документы проекта в порядке: факт в одном месте, журнал решений, найденные противоречия.</value>
   </data>
   <data name="SkillAikoPlaytest" xml:space="preserve">
     <value>Проверяет игру цифрами: одна и та же тестовая сцена до и после правки.</value>
   </data>
   <data name="SkillAikoPolishing" xml:space="preserve">
-    <value>Ведёт круг полишинга по уже увиденному: комментарии владельца, оговорённое число вопросов и правок.</value>
+    <value>Ведёт круг полишинга по уже увиденной работе: твои комментарии, заранее оговорённое число вопросов и правок.</value>
   </data>
   <data name="SkillAikoBlenderToUnity" xml:space="preserve">
-    <value>Модель из Blender в Unity: оси, нормали, экспорт и импорт.</value>
+    <value>Модель из Blender в Unity без зеркальных и перевёрнутых деталей: оси, нормали, экспорт и импорт.</value>
   </data>
   <data name="SkillAikoTexturing" xml:space="preserve">
-    <value>Готовые файлы для текстур: размер под камеру и шаблоны листов для отрисовки.</value>
+    <value>Размер текстур по камере и листы-подложки для отрисовки.</value>
   </data>
   <data name="SkillAikoGlbForWeb" xml:space="preserve">
-    <value>Файл .glb для веба: размер, оси, сжатие и почему вместо модели пустое окно.</value>
+    <value>Файл .glb, который видно на сайте: размер, оси, сжатие. И что проверить, если вместо модели пустое окно.</value>
   </data>
   <data name="SkillAikoPalette" xml:space="preserve">
-    <value>Подогнать цвет под палитру в OKLCH с самой маленькой правкой.</value>
+    <value>Проверяет цвета по палитре и подгоняет цвет самой маленькой правкой, в OKLCH.</value>
   </data>
   <data name="SkillAikoGamedesignResearch" xml:space="preserve">
-    <value>30–40 игр с нужной механикой: обзор со скриншотами и интерактивные стенды по запросу.</value>
+    <value>Одна механика в 30–40 играх: обзор со скриншотами и стенды, в которые можно поиграть, по запросу.</value>
   </data>
   <data name="SkillAikoCalendar" xml:space="preserve">
-    <value>План дня по Google Calendar, свободное время, события — после твоего «да».</value>
+    <value>Планирует день по Google Calendar и ищет свободное время. События добавляет только после твоего «да».</value>
   </data>
   <data name="SkillAikoDrive" xml:space="preserve">
-    <value>Документы с Google Drive в работу и файлы проекта — на Drive.</value>
+    <value>Берёт документы с Google Drive в работу и кладёт файлы проекта на Drive.</value>
   </data>
   <data name="ItemMeetAiko" xml:space="preserve">
     <value>Познакомься с Aiko</value>

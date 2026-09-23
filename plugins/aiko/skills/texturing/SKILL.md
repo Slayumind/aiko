@@ -1,6 +1,6 @@
 ---
 name: texturing
-description: Plan textures for a game from its camera instead of habit - pixels per metre from the screen, when a surface earns a sheet of its own and when it tiles, UVs laid out from world position, guide sheets for hand painting, and measuring texel density face by face. Includes a camera budget calculator and a Blender density checker. Use before unwrapping, when picking a texture size, when a texture looks soft, blurry or visibly repeats, or when preparing sheets for a painter.
+description: Plan textures for a game from its camera instead of habit - pixels per metre from the screen, when a surface needs its own sheet and when it tiles, UVs laid out from world position, guide sheets for hand painting, and measuring texel density face by face. Includes a camera budget calculator and a Blender density checker. Use before unwrapping, when picking a texture size, when a texture looks soft, blurry or visibly repeats, or when preparing sheets for a painter.
 ---
 
 # aiko texturing
