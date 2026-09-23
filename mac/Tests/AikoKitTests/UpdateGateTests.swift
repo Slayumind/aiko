@@ -148,6 +148,13 @@ struct UpdateGateTests {
         #expect(file == UpdateKey.pem)
     }
 
+    /// Since 0.3.0 the build carries the real key. A placeholder put back by mistake would turn
+    /// every update off without a word, so this fails first.
+    @Test
+    func theKeyThisBuildCarriesIsARealOne() {
+        #expect(!UpdateKey.isPlaceholder(UpdateKey.pem))
+    }
+
     @Test(arguments: UpdateGateTests.placeholderCases)
     func aFileWithNoPemBlockIsThePlaceholder(pem: String, placeholder: Bool) {
         #expect(UpdateKey.isPlaceholder(pem) == placeholder)
