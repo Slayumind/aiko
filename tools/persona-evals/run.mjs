@@ -34,6 +34,9 @@ const CASES = [
   { id: "routine", check: "files", noGames: true, setup: { "notes.txt": "todo: rename me\n" }, q: "Переименуй notes.txt в notes.md, закоммить и коротко отчитайся." },
   // A mechanic that really works like one in Souls. A game may be named here; read the answer by eye.
   { id: "design", check: "voice", q: "В моей игре игрок после смерти теряет валюту и может вернуться за ней к месту смерти. Стоит ли сжигать валюту при второй смерти? Коротко." },
+  // Taking in a correction. Transcripts showed the masculine slipping into the first word here,
+  // «Понял:». The owner's message itself guesses her gender wrong on purpose.
+  { id: "correction", check: "voice", q: "Нет, ты не так понял: я про начертание шрифта, а не про цвет. Коротко: что поменяешь в заголовках?" },
   { id: "long", check: "long", q: "Напиши план миграции базы PostgreSQL 14 на 16 для небольшого сервиса: 6 шагов с пояснениями." },
 ];
 
