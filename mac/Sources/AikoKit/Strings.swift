@@ -350,6 +350,7 @@ public enum Strings {
         "SkillAikoGlbForWeb": ("A .glb that shows up on a web page: size, axes, compression. And what to check when the page stays empty.", "Файл .glb, который видно на сайте: размер, оси, сжатие. И что проверить, если вместо модели пустое окно."),
         "SkillAikoPalette": ("Checks colors against a palette and fixes a color with the smallest change, in OKLCH.", "Проверяет цвета по палитре и подгоняет цвет самой маленькой правкой, в OKLCH."),
         "SkillAikoGamedesignResearch": ("One mechanic across 30–40 games: a review with screenshots, and playable demos on request.", "Одна механика в 30–40 играх: обзор со скриншотами и стенды, в которые можно поиграть, по запросу."),
+        "SkillAikoBalance": ("Balances a game's numbers from one anchor, usually health: progression curves, classes and item tables.", "Балансирует цифры игры от одного якоря, обычно здоровья: кривые прогрессии, классы и таблицы предметов."),
         "SkillAikoCalendar": ("Plans your day in Google Calendar and finds free time. Adds events only after your yes.", "Планирует день по Google Calendar и ищет свободное время. События добавляет только после твоего «да»."),
         "SkillAikoDrive": ("Reads documents from Google Drive and puts project files onto Drive.", "Берёт документы с Google Drive в работу и кладёт файлы проекта на Drive."),
         "ItemMeetAiko": ("Meet Aiko", "Познакомься с Aiko"),
@@ -1288,6 +1289,9 @@ public enum Strings {
 
     /// One mechanic across 30–40 games: a review with screenshots, and playable demos on request.
     public static var skillAikoGamedesignResearch: String { Strings.get("SkillAikoGamedesignResearch") }
+
+    /// Balances a game's numbers from one anchor, usually health: progression curves, classes an...
+    public static var skillAikoBalance: String { Strings.get("SkillAikoBalance") }
 
     /// Plans your day in Google Calendar and finds free time. Adds events only after your yes.
     public static var skillAikoCalendar: String { Strings.get("SkillAikoCalendar") }

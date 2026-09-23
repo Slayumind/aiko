@@ -23,6 +23,7 @@ public partial class PersonalityPage : UserControl
         ["glb-for-web"] = Strings.SkillAikoGlbForWeb,
         ["palette"] = Strings.SkillAikoPalette,
         ["gamedesign-research"] = Strings.SkillAikoGamedesignResearch,
+        ["balance"] = Strings.SkillAikoBalance,
         ["calendar"] = Strings.SkillAikoCalendar,
         ["drive"] = Strings.SkillAikoDrive,
     };

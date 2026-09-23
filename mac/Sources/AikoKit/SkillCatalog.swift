@@ -27,7 +27,7 @@ public enum SkillCatalog {
         SkillGroup(domain: .projects, skills: ["copy", "docs-hygiene", "release-gate", "calendar", "drive"]),
         SkillGroup(
             domain: .games,
-            skills: ["gamedesign-research", "playtest", "polishing", "blender-to-unity", "texturing", "glb-for-web", "palette"]),
+            skills: ["gamedesign-research", "balance", "playtest", "polishing", "blender-to-unity", "texturing", "glb-for-web", "palette"]),
     ]
 
     /// Every skill, domain by domain.
