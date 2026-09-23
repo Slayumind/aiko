@@ -7,6 +7,13 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-09-23
+
+Aiko comes to macOS. One version tag now builds both systems, and the Mac app is signed and
+notarized by Apple. Aiko can also install its own updates when you ask, after it checks a signed
+list of files. Also new: the polishing skill, and fixes for the card, the settings lists and the
+personality. The Windows build is not signed yet.
+
 ### Added
 
 - **Aiko for macOS.** The same app on the other system: the ring in the menu bar, the island on any
