@@ -1,6 +1,6 @@
 ---
 name: glb-for-web
-description: Turn a Blender model into a .glb that a web page shows correctly with model-viewer or three.js - exporter flags, size and origin, sRGB versus linear colour, when Draco compression pays off, and the silent failure of an unsupported required extension. Includes an offline checker for .glb files. Use when exporting a model for a website, a blog post or a web demo, or when a model uploads fine and the page shows an empty box, a mirrored model or pale colours.
+description: Turn a Blender model into a .glb that a web page shows correctly with model-viewer or three.js - exporter flags, size and origin, sRGB versus linear colour, when Draco compression pays off, and a required extension the viewer does not support, which fails with no error. Includes an offline checker for .glb files. Use when exporting a model for a website, a blog post or a web demo, or when a model uploads fine and the page shows an empty box, a mirrored model or pale colours.
 ---
 
 # aiko glb for web

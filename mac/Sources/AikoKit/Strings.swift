@@ -340,18 +340,18 @@ public enum Strings {
         "SkillsNeedPersona": ("Turn the personality on in at least one environment, and the skills start working.", "Включи личность хотя бы в одной среде — тогда навыки заработают."),
         "SkillDomainProjects": ("PROJECT MANAGEMENT", "УПРАВЛЕНИЕ ПРОЕКТАМИ"),
         "SkillDomainGames": ("GAME DEVELOPMENT", "РАЗРАБОТКА ИГР"),
-        "SkillAikoCopy": ("UI text, READMEs and release notes without stiff wording or AI tells. RU and EN.", "Интерфейс, README и релизы без канцелярита и штампов ИИ. RU и EN."),
-        "SkillAikoReleaseGate": ("Before a release: what can't be undone, how to roll back, whether the docs match the code.", "Перед релизом: что необратимо, как откатить, совпадают ли документы с кодом."),
-        "SkillAikoDocsHygiene": ("One fact in one place, a decision log, contradictions found.", "Факт живёт в одном месте, журнал решений, поиск противоречий."),
+        "SkillAikoCopy": ("Texts that sound like a person wrote them: UI, README, release notes. Russian and English.", "Тексты, которые звучат как написанные человеком: интерфейс, README, заметки к релизу. На русском и английском."),
+        "SkillAikoReleaseGate": ("Checks a release before it ships: what can't be undone, how to roll back, GO or NO-GO.", "Проверяет релиз до выката: что необратимо, как откатить, GO или NO-GO."),
+        "SkillAikoDocsHygiene": ("Keeps project docs honest: each fact in one place, a log of decisions, contradictions found.", "Держит документы проекта в порядке: факт в одном месте, журнал решений, найденные противоречия."),
         "SkillAikoPlaytest": ("Checks a game with numbers: the same test scene before and after a change.", "Проверяет игру цифрами: одна и та же тестовая сцена до и после правки."),
-        "SkillAikoPolishing": ("Runs a polishing round on work the owner reviewed: their comments, a set number of questions, a set number of fixes.", "Ведёт круг полишинга по уже увиденному: комментарии владельца, оговорённое число вопросов и правок."),
-        "SkillAikoBlenderToUnity": ("A model from Blender to Unity: axes, normals, export and import.", "Модель из Blender в Unity: оси, нормали, экспорт и импорт."),
-        "SkillAikoTexturing": ("Ready files for textures: a size that fits the camera, and sheets to paint over.", "Готовые файлы для текстур: размер под камеру и шаблоны листов для отрисовки."),
-        "SkillAikoGlbForWeb": ("A .glb for the web: size, axes, compression, and why the model shows as a blank view.", "Файл .glb для веба: размер, оси, сжатие и почему вместо модели пустое окно."),
-        "SkillAikoPalette": ("Fit a color to the palette in OKLCH with the smallest change.", "Подогнать цвет под палитру в OKLCH с самой маленькой правкой."),
-        "SkillAikoGamedesignResearch": ("30–40 games with the mechanic you need: an overview with screenshots, and interactive demos on request.", "30–40 игр с нужной механикой: обзор со скриншотами и интерактивные стенды по запросу."),
-        "SkillAikoCalendar": ("Plan the day in Google Calendar, find free time, add events after your yes.", "План дня по Google Calendar, свободное время, события — после твоего «да»."),
-        "SkillAikoDrive": ("Documents from Google Drive into the work, and files from the project onto Drive.", "Документы с Google Drive в работу и файлы проекта — на Drive."),
+        "SkillAikoPolishing": ("Runs a polishing round on work you've already seen: your comments, a set number of questions and fix rounds.", "Ведёт круг полишинга по уже увиденной работе: твои комментарии, заранее оговорённое число вопросов и правок."),
+        "SkillAikoBlenderToUnity": ("A model from Blender to Unity without mirrored or flipped parts: axes, normals, export and import.", "Модель из Blender в Unity без зеркальных и перевёрнутых деталей: оси, нормали, экспорт и импорт."),
+        "SkillAikoTexturing": ("Texture sizes picked from the camera, and guide sheets to paint over.", "Размер текстур по камере и листы-подложки для отрисовки."),
+        "SkillAikoGlbForWeb": ("A .glb that shows up on a web page: size, axes, compression. And what to check when the page stays empty.", "Файл .glb, который видно на сайте: размер, оси, сжатие. И что проверить, если вместо модели пустое окно."),
+        "SkillAikoPalette": ("Checks colors against a palette and fixes a color with the smallest change, in OKLCH.", "Проверяет цвета по палитре и подгоняет цвет самой маленькой правкой, в OKLCH."),
+        "SkillAikoGamedesignResearch": ("One mechanic across 30–40 games: a review with screenshots, and playable demos on request.", "Одна механика в 30–40 играх: обзор со скриншотами и стенды, в которые можно поиграть, по запросу."),
+        "SkillAikoCalendar": ("Plans your day in Google Calendar and finds free time. Adds events only after your yes.", "Планирует день по Google Calendar и ищет свободное время. События добавляет только после твоего «да»."),
+        "SkillAikoDrive": ("Reads documents from Google Drive and puts project files onto Drive.", "Берёт документы с Google Drive в работу и кладёт файлы проекта на Drive."),
         "ItemMeetAiko": ("Meet Aiko", "Познакомься с Aiko"),
         "MeetAikoLead": ("Aiko can talk in your Claude Code sessions in her own voice, and she brings eleven skills. In code and commits she stays quiet.", "Aiko может говорить в твоих сессиях Claude Code своим голосом и приносит одиннадцать навыков. В коде и коммитах она молчит."),
         "MeetAikoSettings": ("The temperament, the mood and the skills are on the Personality page. It works in new sessions.", "Темперамент, настроение и навыки — на странице «Личность». Действует в новых сессиях."),
@@ -1259,40 +1259,40 @@ public enum Strings {
     /// GAME DEVELOPMENT
     public static var skillDomainGames: String { Strings.get("SkillDomainGames") }
 
-    /// UI text, READMEs and release notes without stiff wording or AI tells. RU and EN.
+    /// Texts that sound like a person wrote them: UI, README, release notes. Russian and English.
     public static var skillAikoCopy: String { Strings.get("SkillAikoCopy") }
 
-    /// Before a release: what can't be undone, how to roll back, whether the docs match the code.
+    /// Checks a release before it ships: what can't be undone, how to roll back, GO or NO-GO.
     public static var skillAikoReleaseGate: String { Strings.get("SkillAikoReleaseGate") }
 
-    /// One fact in one place, a decision log, contradictions found.
+    /// Keeps project docs honest: each fact in one place, a log of decisions, contradictions found.
     public static var skillAikoDocsHygiene: String { Strings.get("SkillAikoDocsHygiene") }
 
     /// Checks a game with numbers: the same test scene before and after a change.
     public static var skillAikoPlaytest: String { Strings.get("SkillAikoPlaytest") }
 
-    /// Runs a polishing round on work the owner reviewed: their comments, a set number of questi...
+    /// Runs a polishing round on work you've already seen: your comments, a set number of questi...
     public static var skillAikoPolishing: String { Strings.get("SkillAikoPolishing") }
 
-    /// A model from Blender to Unity: axes, normals, export and import.
+    /// A model from Blender to Unity without mirrored or flipped parts: axes, normals, export an...
     public static var skillAikoBlenderToUnity: String { Strings.get("SkillAikoBlenderToUnity") }
 
-    /// Ready files for textures: a size that fits the camera, and sheets to paint over.
+    /// Texture sizes picked from the camera, and guide sheets to paint over.
     public static var skillAikoTexturing: String { Strings.get("SkillAikoTexturing") }
 
-    /// A .glb for the web: size, axes, compression, and why the model shows as a blank view.
+    /// A .glb that shows up on a web page: size, axes, compression. And what to check when the p...
     public static var skillAikoGlbForWeb: String { Strings.get("SkillAikoGlbForWeb") }
 
-    /// Fit a color to the palette in OKLCH with the smallest change.
+    /// Checks colors against a palette and fixes a color with the smallest change, in OKLCH.
     public static var skillAikoPalette: String { Strings.get("SkillAikoPalette") }
 
-    /// 30–40 games with the mechanic you need: an overview with screenshots, and interactive dem...
+    /// One mechanic across 30–40 games: a review with screenshots, and playable demos on request.
     public static var skillAikoGamedesignResearch: String { Strings.get("SkillAikoGamedesignResearch") }
 
-    /// Plan the day in Google Calendar, find free time, add events after your yes.
+    /// Plans your day in Google Calendar and finds free time. Adds events only after your yes.
     public static var skillAikoCalendar: String { Strings.get("SkillAikoCalendar") }
 
-    /// Documents from Google Drive into the work, and files from the project onto Drive.
+    /// Reads documents from Google Drive and puts project files onto Drive.
     public static var skillAikoDrive: String { Strings.get("SkillAikoDrive") }
 
     /// Meet Aiko

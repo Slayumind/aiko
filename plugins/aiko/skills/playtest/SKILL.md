@@ -1,6 +1,6 @@
 ---
 name: playtest
-description: Let an agent play a game and prove a change with numbers instead of a feeling. Turns player feedback into something measurable, adds a read-only state surface the tools can query, named test scenes as repeatable starting points, before and after tables, and journey tests that drive the real controls. Works with any engine; recipes for the web, Unity and Godot. Use when a game "feels" slow, floaty, stuttery or wrong, before and after a performance or game feel change, when a bug needs a long trip through the game to reproduce, or when setting up testing for a game project.
+description: Let an agent play a game and prove a change with numbers instead of a feeling. Turns player feedback into something measurable, adds a read-only view of the game state that tools can ask, named test scenes as repeatable starting points, before and after tables, and journey tests that drive the real controls. Works with any engine; recipes for the web, Unity and Godot. Use when a game "feels" slow, floaty, stuttery or wrong, before and after a performance or game feel change, when a bug needs a long trip through the game to reproduce, or when setting up testing for a game project.
 ---
 
 # aiko playtest

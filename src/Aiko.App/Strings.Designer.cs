@@ -921,40 +921,40 @@ public static class Strings
     /// GAME DEVELOPMENT
     public static string SkillDomainGames => Get("SkillDomainGames");
 
-    /// UI text, READMEs and release notes without stiff wording or AI tells. RU and EN.
+    /// Texts that sound like a person wrote them: UI, README, release notes. Russian and English.
     public static string SkillAikoCopy => Get("SkillAikoCopy");
 
-    /// Before a release: what can't be undone, how to roll back, whether the docs match the code.
+    /// Checks a release before it ships: what can't be undone, how to roll back, GO or NO-GO.
     public static string SkillAikoReleaseGate => Get("SkillAikoReleaseGate");
 
-    /// One fact in one place, a decision log, contradictions found.
+    /// Keeps project docs honest: each fact in one place, a log of decisions, contradictions found.
     public static string SkillAikoDocsHygiene => Get("SkillAikoDocsHygiene");
 
     /// Checks a game with numbers: the same test scene before and after a change.
     public static string SkillAikoPlaytest => Get("SkillAikoPlaytest");
 
-    /// Runs a polishing round on work the owner reviewed: their comments, a set number of questi...
+    /// Runs a polishing round on work you've already seen: your comments, a set number of questi...
     public static string SkillAikoPolishing => Get("SkillAikoPolishing");
 
-    /// A model from Blender to Unity: axes, normals, export and import.
+    /// A model from Blender to Unity without mirrored or flipped parts: axes, normals, export an...
     public static string SkillAikoBlenderToUnity => Get("SkillAikoBlenderToUnity");
 
-    /// Ready files for textures: a size that fits the camera, and sheets to paint over.
+    /// Texture sizes picked from the camera, and guide sheets to paint over.
     public static string SkillAikoTexturing => Get("SkillAikoTexturing");
 
-    /// A .glb for the web: size, axes, compression, and why the model shows as a blank view.
+    /// A .glb that shows up on a web page: size, axes, compression. And what to check when the p...
     public static string SkillAikoGlbForWeb => Get("SkillAikoGlbForWeb");
 
-    /// Fit a color to the palette in OKLCH with the smallest change.
+    /// Checks colors against a palette and fixes a color with the smallest change, in OKLCH.
     public static string SkillAikoPalette => Get("SkillAikoPalette");
 
-    /// 30–40 games with the mechanic you need: an overview with screenshots, and interactive dem...
+    /// One mechanic across 30–40 games: a review with screenshots, and playable demos on request.
     public static string SkillAikoGamedesignResearch => Get("SkillAikoGamedesignResearch");
 
-    /// Plan the day in Google Calendar, find free time, add events after your yes.
+    /// Plans your day in Google Calendar and finds free time. Adds events only after your yes.
     public static string SkillAikoCalendar => Get("SkillAikoCalendar");
 
-    /// Documents from Google Drive into the work, and files from the project onto Drive.
+    /// Reads documents from Google Drive and puts project files onto Drive.
     public static string SkillAikoDrive => Get("SkillAikoDrive");
 
     /// Meet Aiko

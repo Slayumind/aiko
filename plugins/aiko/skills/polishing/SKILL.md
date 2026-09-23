@@ -1,6 +1,6 @@
 ---
 name: polishing
-description: Run a polishing round on a design the owner has already seen: collect their comments from an artifact or the chat, structure them, ask a set number of clarifying questions, hand the work to a subagent with exact numbers, and give it a set number of critique rounds before assembling and publishing. Use when the owner says «давай заполишим», "let's polish this", leaves comments on a published artifact or mockup, or asks for another pass over a screen, a layout, a palette or a document they reviewed.
+description: Run a polishing round on a design the user has already seen: collect their comments from an artifact or the chat, structure them, ask a set number of clarifying questions, hand the work to a subagent with exact numbers, and give it a set number of critique rounds before assembling and publishing. Use when the user says «давай заполишим», "let's polish this", leaves comments on a published artifact or mockup, or asks for another pass over a screen, a layout, a palette or a document they reviewed.
 ---
 
 # aiko polishing
