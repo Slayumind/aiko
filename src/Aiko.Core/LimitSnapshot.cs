@@ -47,6 +47,8 @@ public sealed record LimitSnapshot(
 
     /// Two sources for one environment: the fresher answer wins. Direct mode is asked rarely,
     /// the status line speaks on every reply, so neither is always ahead.
+    /// Only direct mode knows the model limit. If the status line wins, it keeps the model limit
+    /// of the other answer: the limit has its own reset time, so it does not get old with the windows.
     public static LimitSnapshot Newer(LimitSnapshot first, LimitSnapshot second)
     {
         if (!first.HasData)
@@ -57,7 +59,10 @@ public sealed record LimitSnapshot(
         {
             return first;
         }
-        return second.ReceivedAt > first.ReceivedAt ? second : first;
+        var (winner, other) = second.ReceivedAt > first.ReceivedAt ? (second, first) : (first, second);
+        return winner.Model is null && other.Model is not null
+            ? winner with { Model = other.Model }
+            : winner;
     }
 
     public DataFreshness FreshnessAt(DateTimeOffset now, TimeSpan? staleAfter = null)

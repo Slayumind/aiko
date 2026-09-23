@@ -90,4 +90,43 @@ public class LimitSnapshotTests
         Assert.Equal(LimitSource.StatusLine, snapshot.Source);
         Assert.Equal(Now, snapshot.ReceivedAt);
     }
+
+    private static LimitSnapshot FromApi(DateTimeOffset receivedAt) =>
+        new("Personal", LimitSource.DirectMode, receivedAt, [new LimitWindow(LimitKind.SevenDay, 40, Now.AddDays(3))])
+        {
+            Model = new ModelLimit("Fable", 62, Now.AddDays(3)),
+        };
+
+    private static LimitSnapshot FromStatusLine(DateTimeOffset receivedAt) =>
+        new("Personal", LimitSource.StatusLine, receivedAt, [new LimitWindow(LimitKind.SevenDay, 41, Now.AddDays(3))]);
+
+    [Fact]
+    public void A_fresher_status_line_keeps_the_model_limit_from_direct_mode()
+    {
+        // The status line writes on every reply and never carries the model limit. Before this,
+        // each reply hid the model row until the next direct answer.
+        var merged = LimitSnapshot.Newer(FromStatusLine(Now.AddMinutes(1)), FromApi(Now));
+
+        Assert.Equal(LimitSource.StatusLine, merged.Source);
+        Assert.Equal(41, merged.StatusAt(Now, LimitKind.SevenDay)!.Value.Percent);
+        Assert.Equal(new ModelLimit("Fable", 62, Now.AddDays(3)), merged.Model);
+    }
+
+    [Fact]
+    public void A_fresher_direct_answer_wins_with_its_own_model_limit()
+    {
+        var merged = LimitSnapshot.Newer(FromStatusLine(Now), FromApi(Now.AddMinutes(1)));
+
+        Assert.Equal(LimitSource.DirectMode, merged.Source);
+        Assert.Equal(62, merged.Model!.Value.Percent);
+    }
+
+    [Fact]
+    public void The_order_of_the_two_sources_does_not_matter()
+    {
+        var statusLine = FromStatusLine(Now.AddMinutes(1));
+        var direct = FromApi(Now);
+
+        Assert.Equal(LimitSnapshot.Newer(statusLine, direct), LimitSnapshot.Newer(direct, statusLine));
+    }
 }
