@@ -27,6 +27,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   back and then removes the program: on Windows through the uninstaller, on macOS by moving the app
   to the Bin. Accounts and history stay where they are. Before, macOS had no way to remove Aiko
   whole, only "Start over" and a drag to the Bin.
+- **A twelfth skill, `/aiko:polishing`.** It runs a polishing round on work you have already seen.
+  First it asks how many questions and how many rounds of fixes you want. Then it sorts your
+  comments, asks only about real choices and checks each round of fixes with measurements.
 - **Code signing policy.** [CODE-SIGNING.md](CODE-SIGNING.md) says which files will be signed through
   SignPath Foundation and who approves each release.
 

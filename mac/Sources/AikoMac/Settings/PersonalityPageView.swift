@@ -22,6 +22,7 @@ struct PersonalityPageView: View {
         "release-gate": Strings.skillAikoReleaseGate,
         "docs-hygiene": Strings.skillAikoDocsHygiene,
         "playtest": Strings.skillAikoPlaytest,
+        "polishing": Strings.skillAikoPolishing,
         "blender-to-unity": Strings.skillAikoBlenderToUnity,
         "texturing": Strings.skillAikoTexturing,
         "glb-for-web": Strings.skillAikoGlbForWeb,

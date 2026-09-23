@@ -47,7 +47,7 @@ sample answer for each level. She stays quiet where it matters: code, commits, f
 error explanations, security warnings, dangerous actions and bad news are written in a plain neutral
 voice. The switch works in new sessions; open sessions finish the way they started.
 
-With the personality come eleven skills, with one switch for all of them. They live in one plugin
+With the personality come twelve skills, with one switch for all of them. They live in one plugin
 called `aiko`, so you call a skill by its full name:
 
 **Project management**
@@ -66,6 +66,7 @@ called `aiko`, so you call a skill by its full name:
 |---|---|
 | `/aiko:gamedesign-research` | one game mechanic across 30-40 games, with an illustrated review and playable stands |
 | `/aiko:playtest` | a game checked with numbers: the same test scene before and after a change |
+| `/aiko:polishing` | a polishing round on work you have already seen: your comments, a set number of questions and fixes |
 | `/aiko:blender-to-unity` | meshes from Blender into Unity without mirrored or rotated surprises |
 | `/aiko:texturing` | ready files for textures: a size that fits the camera, and sheets to paint over |
 | `/aiko:glb-for-web` | a Blender model as a `.glb` that web players show correctly |

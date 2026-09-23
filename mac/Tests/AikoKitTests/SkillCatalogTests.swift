@@ -8,7 +8,7 @@ struct SkillCatalogTests {
     func everySkillHasAShortNameAndIsListedOnce() throws {
         let shortName = try NSRegularExpression(pattern: "^[a-z0-9]+(-[a-z0-9]+)*$")
 
-        #expect(SkillCatalog.all.count == 11)
+        #expect(SkillCatalog.all.count == 12)
         for name in SkillCatalog.all {
             #expect(shortName.firstMatch(in: name, range: NSRange(location: 0, length: name.utf16.count)) != nil)
             #expect(!name.hasPrefix("aiko-"))
