@@ -37,6 +37,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 - **The card shows a percentage without a word next to it.** "42% used" is now "42%". The
   bar and the row name already say what the number is.
+- **Every interface text was read through**, in both languages. The checklist now says that Aiko
+  turns the line in your PowerShell profile off, not that it removes it; that is what it does.
 - **Clearer skill descriptions** in settings and in the skill files. Each one now says what the
   skill does, in plain words.
 - **The limits survive a fractional reset time.** A reset time with a fraction in it used to throw
