@@ -142,4 +142,12 @@ public class UpdateGateTests
     {
         Assert.Equal(placeholder, UpdateKey.IsPlaceholder(pem));
     }
+
+    /// Since 0.3.0 the build carries the real key. A placeholder put back by mistake would turn
+    /// every update off without a word, so this fails first.
+    [Fact]
+    public void The_key_this_build_carries_is_a_real_one()
+    {
+        Assert.False(UpdateKey.IsPlaceholder(UpdateKey.Pem));
+    }
 }
