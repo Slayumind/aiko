@@ -35,11 +35,19 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Changed
 
+- **The card shows a percentage without a word next to it.** "42% used" is now "42%". The
+  bar and the row name already say what the number is.
 - **The limits survive a fractional reset time.** A reset time with a fraction in it used to throw
   and take the whole status line report with it; it is now read down to the second.
 - **Every file in a release is attested**, not only the Windows installer.
 - **PRIVACY.md** now also lists the `PATH` folder and the shell profile change, and describes what
   the update path does on each system.
+
+### Fixed
+
+- **The weekly limit of the model no longer comes and goes in direct mode.** Each reply of Claude
+  Code hid the row, and the next answer of the usage API brought it back. The row now stays until
+  its own reset.
 
 ## [0.2.3] - 2026-09-17
 

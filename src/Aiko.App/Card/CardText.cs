@@ -17,7 +17,7 @@ static class CardText
 
     /// The share of the limit already gone, said so. A bare "42%" reads as forty two percent left
     /// just as easily as forty two percent spent, and the two are opposite news.
-    public static string Percent(int percent) => string.Format(Strings.CardPercentUsed, percent);
+    public static string Percent(int percent) => string.Format(Strings.CardPercent, percent);
 
     /// A word beside the colour.
     ///

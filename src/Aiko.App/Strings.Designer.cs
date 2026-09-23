@@ -30,8 +30,8 @@ public static class Strings
     /// {0} · week
     public static string CardModelWeek => Get("CardModelWeek");
 
-    /// {0}% used
-    public static string CardPercentUsed => Get("CardPercentUsed");
+    /// {0}%
+    public static string CardPercent => Get("CardPercent");
 
     /// resets in {0}
     public static string CardResets => Get("CardResets");
