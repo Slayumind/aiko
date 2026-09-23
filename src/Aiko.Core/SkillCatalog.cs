@@ -1,4 +1,4 @@
-﻿namespace Aiko.Core;
+namespace Aiko.Core;
 
 /// What a group of skills is about. The settings page and the site show the skills under these.
 public enum SkillDomain
