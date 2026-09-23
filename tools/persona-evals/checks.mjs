@@ -16,6 +16,9 @@ const KAOMOJI = /\((?![^()]*[A-Za-z0-9])[^()\n]{0,4}[\^;_＾▽◕ω∀ﾉ・´�
 const EMOJI = /\p{Extended_Pictographic}/u;
 // Aiko is a woman. A first-person past tense or short adjective in the masculine gives the draft away.
 const MASCULINE_SELF = /(?<![\p{L}])я\s+(?:\p{L}+\s+)?(\p{L}+(?<![аеиоуыэюя])[аеиоуыяё]л)(?![\p{L}])|(?<![\p{L}])я\s+(?:(?:не|уже|так|очень|точно|вполне)\s+)?(готов|уверен|рад|согласен|должен|занят)(?![\p{L}])|(?:^|[.!?\n]\s*)(проверил|сделал|создал|добавил|нашёл|нашел|исправил|поправил|посмотрел|прочитал|собрал|разобрал|запустил|поставил|удалил|написал|закоммитил|понял|обновил|переписал|сломал|ошибся)(?![\p{L}])|(?:^|[.!?\n]\s*)(?:не\s+)?(готов|уверен|рад|согласен)(?=\s*[,.!:]|\s+(?:помочь|начать|продолжить|взяться))/iu;
+// Aiko does not know the user's gender, so a past tense or short adjective after «ты» gives a guess
+// away, in either gender.
+const GENDERED_USER = /(?<![\p{L}])ты\s+(?:(?:не|уже|так|всё|все|точно|тоже|сам|сама)\s+)?(\p{L}+(?<![аеиоуыэюя])[аеиоуыяё]ла?|прав|права|готов|готова|уверен|уверена|рад|рада|согласен|согласна|должен|должна)(?![\p{L}])/iu;
 // Aiko's favourite games, in Latin and Cyrillic. A reply about routine work names none of them.
 const GAME = /(?<![\p{L}])(undertale|dark souls|souls|elden ring|slay the spire|skyrim|андертейл|скайрим|элден ринг|дарк соулс)(?![\p{L}])/iu;
 
@@ -37,7 +40,7 @@ export function foreignJapanese(text) {
  *   mode "silent": no character at all (files, commits, errors, dangerous actions, bad news);
  *   mode "voice": character allowed, but only the allowed Japanese, in Japanese script;
  *   mode "plain": the Quiet temperament, no Japanese and no kaomoji, but a warm sentence is fine.
- * Every mode checks emoji and the masculine first person.
+ * Every mode checks emoji, the masculine first person and a guessed gender of the user.
  */
 export function problems(text, mode) {
   const found = [];
@@ -56,6 +59,7 @@ export function problems(text, mode) {
   add("transliteration", firstMatch(text, TRANSLIT));
   add("emoji", firstMatch(text, EMOJI));
   add("masculine", firstMatch(text, MASCULINE_SELF));
+  add("gendered user", firstMatch(text, GENDERED_USER));
   return found;
 }
 

@@ -64,14 +64,22 @@ test("a masculine first person is caught, a feminine one and third persons are n
   assert.deepEqual(problems("Он проверил файл, и тест прошёл.", "voice"), []);
 });
 
-test("masculine short adjectives and more verbs are caught, the user's and feminine ones are not", () => {
+test("masculine short adjectives and more verbs are caught, feminine ones are not", () => {
   assert.deepEqual(kinds("Я уже готов начать.", "voice"), ["masculine"]);
   assert.deepEqual(kinds("Слияние прошло. Я не уверен, что тест полный.", "voice"), ["masculine"]);
   assert.deepEqual(kinds("Готов, могу мерджить.", "voice"), ["masculine"]);
   assert.deepEqual(kinds("Собрал установщик, всё встало.", "voice"), ["masculine"]);
   assert.deepEqual(problems("Я готова начать. Уверена, что тест полный. Собрала установщик.", "voice"), []);
-  assert.deepEqual(problems("Ты прав, это лишнее. Ты сделал всё верно.", "voice"), []);
   assert.deepEqual(problems("Готов отчёт по сборке. Готово.", "voice"), []);
+});
+
+test("a gendered form about the user is caught in both genders, a neutral one is not", () => {
+  assert.deepEqual(kinds("Ты прав, это лишнее.", "voice"), ["gendered user"]);
+  assert.deepEqual(kinds("Ты сделал всё верно.", "voice"), ["gendered user"]);
+  assert.deepEqual(kinds("Если ты готова это балансить, делай сетку.", "voice"), ["gendered user"]);
+  assert.deepEqual(kinds("Ты не сделала коммит.", "voice"), ["gendered user"]);
+  assert.deepEqual(problems("Верно, это лишнее. У тебя всё получилось. Можно начинать?", "voice"), []);
+  assert.deepEqual(problems("Ты делаешь сетку? Ты знаешь, где лежит файл.", "voice"), []);
 });
 
 test("a favourite game is found in Latin and Cyrillic, other words are not", () => {

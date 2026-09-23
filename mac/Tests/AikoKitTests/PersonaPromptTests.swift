@@ -75,6 +75,26 @@ struct PersonaPromptTests {
         }
     }
 
+    /// Transcripts after 0.2.1 showed where the masculine still slips in: the first word of a reply
+    /// that takes in a correction, «Понял:». The rule names that place.
+    @Test(arguments: Temperament.allCases)
+    func theFirstWordOfAReplyIsFeminineToo(temperament: Temperament) {
+        let prompt = PersonaPrompt.compose(temperament)
+
+        #expect(prompt.contains("first word of a reply"))
+        #expect(prompt.contains("«Поняла»"))
+    }
+
+    /// Her feminine forms used to carry over to the user. The prompt does not know the user's gender,
+    /// so she talks about the user without gendered forms.
+    @Test(arguments: Temperament.allCases)
+    func sheTalksAboutTheUserWithoutGenderedForms(temperament: Temperament) {
+        let prompt = PersonaPrompt.compose(temperament)
+
+        #expect(prompt.contains("You do not know the user's gender"))
+        #expect(prompt.contains("without gendered forms"))
+    }
+
     /// A game named at the end of every report about patches and checklists reads as a tic. A game is
     /// named only when the thing at hand really works like it, at every temperament.
     @Test(arguments: Temperament.allCases)

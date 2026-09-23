@@ -48,6 +48,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - **The weekly limit of the model no longer comes and goes in direct mode.** Each reply of Claude
   Code hid the row, and the next answer of the usage API brought it back. The row now stays until
   its own reset.
+- **Aiko keeps her own gender in Russian and does not guess yours.** She still sometimes answered
+  a correction with a masculine «Понял»; the prompt now names that place. And she no longer puts
+  gendered forms on you, like «ты прав» or «ты готова»: she does not know your gender, so she
+  words it without one.
 
 ## [0.2.3] - 2026-09-17
 
