@@ -20,7 +20,7 @@ public enum CardText {
     /// The share of the limit already gone, said so. A bare "42%" reads as forty two percent left
     /// just as easily as forty two percent spent, and the two are opposite news.
     public static func percent(_ percent: Int) -> String {
-        Strings.format(Strings.cardPercentUsed, percent)
+        Strings.format(Strings.cardPercent, percent)
     }
 
     /// A word beside the colour.

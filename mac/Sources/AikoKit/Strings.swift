@@ -43,7 +43,7 @@ public enum Strings {
         "CardSession": ("Session · 5 hours", "Сессия · 5 часов"),
         "CardWeek": ("Week", "Неделя"),
         "CardModelWeek": ("{0} · week", "{0} · неделя"),
-        "CardPercentUsed": ("{0}% used", "потрачено {0}%"),
+        "CardPercent": ("{0}%", "{0}%"),
         "CardResets": ("resets in {0}", "сброс через {0}"),
         "CardJustReset": ("just reset", "сброс только что"),
         "CardLastsUntilReset": ("lasts until reset", "хватит до сброса"),
@@ -368,8 +368,8 @@ public enum Strings {
     /// {0} · week
     public static var cardModelWeek: String { Strings.get("CardModelWeek") }
 
-    /// {0}% used
-    public static var cardPercentUsed: String { Strings.get("CardPercentUsed") }
+    /// {0}%
+    public static var cardPercent: String { Strings.get("CardPercent") }
 
     /// resets in {0}
     public static var cardResets: String { Strings.get("CardResets") }

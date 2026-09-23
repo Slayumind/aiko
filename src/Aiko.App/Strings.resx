@@ -40,8 +40,8 @@
   <data name="CardModelWeek" xml:space="preserve">
     <value>{0} · week</value>
   </data>
-  <data name="CardPercentUsed" xml:space="preserve">
-    <value>{0}% used</value>
+  <data name="CardPercent" xml:space="preserve">
+    <value>{0}%</value>
   </data>
   <data name="CardResets" xml:space="preserve">
     <value>resets in {0}</value>

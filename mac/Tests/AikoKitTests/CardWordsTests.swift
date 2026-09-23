@@ -42,7 +42,7 @@ struct CardWordsTests {
 
     @Test
     func thePercentageSaysItIsTheShareAlreadySpent() {
-        #expect(CardText.percent(42) == "42% used")
+        #expect(CardText.percent(42) == "42%")
     }
 
     @Test(arguments: [
@@ -241,7 +241,7 @@ struct CardWordsTests {
             pace: PaceEstimate(verdict: .lastsPastReset, timeLeft: 7200)))
 
         #expect(row.name == "Session · 5 hours")
-        #expect(row.percent == "42% used")
+        #expect(row.percent == "42%")
         #expect(row.resets == "resets in 2h 0m")
         #expect(row.pace == "lasts until reset")
         #expect(row.fill == 0.42)
@@ -279,7 +279,7 @@ struct CardWordsTests {
         #expect(model.updated == "обновлено в 12:00")
         #expect(model.blocks[0].state == "сейчас работает")
         #expect(model.blocks[0].rows[0].name == "Сессия · 5 часов")
-        #expect(model.blocks[0].rows[0].percent == "потрачено 42%")
+        #expect(model.blocks[0].rows[0].percent == "42%")
     }
 
     @Test
