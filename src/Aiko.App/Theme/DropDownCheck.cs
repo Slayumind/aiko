@@ -26,7 +26,9 @@ static class DropDownCheck
             WindowStyle = WindowStyle.None,
             AllowsTransparency = true,
             Background = Tokens.Brush("Surface"),
-            Content = new StackPanel { Margin = new Thickness(20), Children = { dropDown } },
+            // Inside a scroll viewer, as on every settings page: it takes focus on a mouse press,
+            // and a press on the list used to reach it and close the list before the click landed.
+            Content = new ScrollViewer { Content = new StackPanel { Margin = new Thickness(20), Children = { dropDown } } },
         };
 
         var picked = -1;

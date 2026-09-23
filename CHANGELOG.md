@@ -49,6 +49,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Fixed
 
+- **A mouse click picks an item in the settings lists again.** On Windows, a click on a language or
+  on the environment of a folder closed the list and changed nothing. The keyboard worked.
 - **The weekly limit of the model no longer comes and goes in direct mode.** Each reply of Claude
   Code hid the row, and the next answer of the usage API brought it back. The row now stays until
   its own reset.

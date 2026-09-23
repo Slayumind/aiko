@@ -119,6 +119,11 @@ sealed class DropDown : UserControl
         _listFrame.RenderTransform = _listScale;
         _listFrame.Child = _list;
 
+        // A press on the list bubbles to the page through the drop-down. A scroll viewer there,
+        // as on every settings page, takes the keyboard focus on a press, the drop-down loses it
+        // and closes, and the release that picks the item never comes. The press stops here.
+        _listFrame.MouseLeftButtonDown += (_, e) => e.Handled = true;
+
         _popup.PlacementTarget = _button;
         _popup.Placement = PlacementMode.Bottom;
         _popup.AllowsTransparency = true;
