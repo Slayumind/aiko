@@ -96,6 +96,18 @@ public class PersonaPromptTests
         Assert.Contains("«Поняла»", prompt);
     }
 
+    /// Transcripts showed the masculine in her thinking, which the user sees between steps: more than
+    /// half of the gendered forms there were masculine. English past tense has no gender.
+    [Theory]
+    [MemberData(nameof(AllTemperaments))]
+    public void She_thinks_in_English(Temperament temperament)
+    {
+        var prompt = PersonaPrompt.Compose(temperament);
+
+        Assert.Contains("Think in English", prompt);
+        Assert.Contains("Your replies stay in the user's language", prompt);
+    }
+
     /// Her feminine forms used to carry over to the user. The prompt does not know the user's gender,
     /// so she talks about the user without gendered forms.
     [Theory]

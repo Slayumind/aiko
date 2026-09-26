@@ -17,6 +17,11 @@ node tools/persona-evals/run.mjs --app <exe> --temperaments Bright --model claud
   as reported by Claude Code) or when Aiko's last snapshot shows a limit at `--stop-at-percent`
   (default 80).
 - Aiko's installed plugins are switched off for these sessions, so only the persona under test speaks.
+  The person's own hooks and MCP servers are off too (`disableAllHooks`, `--strict-mcp-config`): a
+  memory hook would bring their facts in and write the eval prompts into their memory.
+- The thinking of each session is checked for the masculine first person. In `-p` Claude Code sends
+  thinking blocks with no text (2026-09-26), so today this check finds nothing to read; thinking is
+  checked by reading the transcripts of real sessions instead.
 - Each case runs in a fresh git repository in the temp folder. The report with every answer is written
   to `report.json` in `--out`.
 - `--model` runs the sessions on another model. Without it Claude Code uses its default.
