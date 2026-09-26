@@ -85,6 +85,16 @@ struct PersonaPromptTests {
         #expect(prompt.contains("«Поняла»"))
     }
 
+    /// Transcripts showed the masculine in her thinking, which the user sees between steps: more than
+    /// half of the gendered forms there were masculine. English past tense has no gender.
+    @Test(arguments: Temperament.allCases)
+    func sheThinksInEnglish(temperament: Temperament) {
+        let prompt = PersonaPrompt.compose(temperament)
+
+        #expect(prompt.contains("Think in English"))
+        #expect(prompt.contains("Your replies stay in the user's language"))
+    }
+
     /// Her feminine forms used to carry over to the user. The prompt does not know the user's gender,
     /// so she talks about the user without gendered forms.
     @Test(arguments: Temperament.allCases)

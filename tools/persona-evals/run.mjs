@@ -17,7 +17,7 @@ import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, writeFil
 import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { gameName, problems, quietProblems } from "./checks.mjs";
+import { gameName, problems, quietProblems, thinkingProblems } from "./checks.mjs";
 
 const CASES = [
   { id: "chat", check: "voice", q: "Привет! Как думаешь, стоит ли делать инвентарь в моей roguelike на сетке, как в Diablo? Ответь коротко." },
@@ -103,21 +103,32 @@ function runCase(claude, plugin, settings, testCase, env, model) {
     "-p", testCase.q,
     "--plugin-dir", plugin,
     "--settings", settings,
-    "--output-format", "json",
+    "--output-format", "stream-json", "--verbose",
     "--permission-mode", "acceptEdits",
     "--allowedTools", "Bash(git *)", "Write", "Edit", "Read",
     "--max-budget-usd", "1",
     ...(model ? ["--model", model] : []),
   ], { cwd: dir, env, encoding: "utf8", timeout: 300_000 });
 
-  let result;
-  try {
-    result = JSON.parse(answer.stdout);
-  } catch {
-    result = { result: `${answer.stdout ?? ""}${answer.stderr ?? ""}`, total_cost_usd: 0, is_error: true };
-  }
+  const events = (answer.stdout ?? "").split("\n").flatMap((line) => {
+    try {
+      return [JSON.parse(line)];
+    } catch {
+      return [];
+    }
+  });
+  const result = events.find((e) => e.type === "result")
+    ?? { result: `${answer.stdout ?? ""}${answer.stderr ?? ""}`, total_cost_usd: 0, is_error: true };
+  // The thinking the user sees between steps, from every assistant message of the session.
+  const thinking = events
+    .filter((e) => e.type === "assistant")
+    .flatMap((e) => e.message?.content ?? [])
+    .filter((c) => c.type === "thinking" && c.thinking)
+    .map((c) => c.thinking)
+    .join("\n\n");
 
   const texts = { reply: result.result ?? "" };
+  if (thinking) texts.thinking = thinking;
   if (testCase.check === "files") {
     texts.commits = git(dir, "log", "--format=%s%n%b");
     for (const name of readdirSync(dir)) {
@@ -133,7 +144,9 @@ function judge(testCase, temperament, texts) {
   const voice = temperament === "Quiet" ? "plain" : "voice";
   for (const [part, text] of Object.entries(texts)) {
     let list;
-    if (part === "reply") {
+    if (part === "thinking") {
+      list = thinkingProblems(text);
+    } else if (part === "reply") {
       list = testCase.check === "silent" ? problems(text, "silent")
         : testCase.check === "long" ? quietProblems(text, temperament)
         : problems(text, voice);
