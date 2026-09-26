@@ -68,7 +68,9 @@ function settingsWithoutAiko() {
   } catch {
     // No settings file: nothing of Aiko's to switch off.
   }
-  return JSON.stringify({ enabledPlugins: enabled });
+  // The person's own hooks and MCP servers stay out too: a memory hook would carry their facts into
+  // the session and write the eval prompts into their memory.
+  return JSON.stringify({ enabledPlugins: enabled, disableAllHooks: true });
 }
 
 /** The fullest limit window of ~/.claude as Aiko last saw it, or null when unknown. */
@@ -103,6 +105,7 @@ function runCase(claude, plugin, settings, testCase, env, model) {
     "-p", testCase.q,
     "--plugin-dir", plugin,
     "--settings", settings,
+    "--strict-mcp-config",
     "--output-format", "stream-json", "--verbose",
     "--permission-mode", "acceptEdits",
     "--allowedTools", "Bash(git *)", "Write", "Edit", "Read",
