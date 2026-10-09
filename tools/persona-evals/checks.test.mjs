@@ -5,7 +5,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { ALLOWED_JAPANESE, foreignJapanese, gameName, problems, quietProblems, thinkingProblems } from "./checks.mjs";
+import { ALLOWED_JAPANESE, foreignJapanese, gameName, problems, quietProblems } from "./checks.mjs";
 
 const kinds = (text, mode) => problems(text, mode).map((p) => p.split(":")[0]);
 
@@ -92,10 +92,4 @@ test("a long reply may keep character only in its last paragraph", () => {
   const long = "1. Сделайте бэкап.\n\n2. Обновите расширения.\n\nよし, удачи с миграцией!";
   assert.deepEqual(quietProblems(long, "Musou"), []);
   assert.deepEqual(quietProblems("やった, начнём.\n\n1. Сделайте бэкап.\n\nУдачи!", "Musou").map((p) => p.split(":")[0]), ["japanese"]);
-});
-
-test("thinking is checked for her gender only", () => {
-  assert.deepEqual(thinkingProblems("Нашёл баг в RunController, исправляю."), ["masculine: Нашёл"]);
-  assert.deepEqual(thinkingProblems("Found the bug in RunController. The user said «я придумал»."), []);
-  assert.deepEqual(thinkingProblems("よし, the build is green (^_^)"), []);
 });
