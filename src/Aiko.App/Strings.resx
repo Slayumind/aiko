@@ -961,6 +961,9 @@
   <data name="SkillAikoGamedesignResearch" xml:space="preserve">
     <value>One mechanic across 30–40 games: a review with screenshots, and playable demos on request.</value>
   </data>
+  <data name="SkillAikoBalance" xml:space="preserve">
+    <value>Balances a game's numbers from one anchor, usually health: progression curves, classes and item tables.</value>
+  </data>
   <data name="SkillAikoCalendar" xml:space="preserve">
     <value>Plans your day in Google Calendar and finds free time. Adds events only after your yes.</value>
   </data>

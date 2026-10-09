@@ -961,6 +961,9 @@
   <data name="SkillAikoGamedesignResearch" xml:space="preserve">
     <value>Одна механика в 30–40 играх: обзор со скриншотами и стенды, в которые можно поиграть, по запросу.</value>
   </data>
+  <data name="SkillAikoBalance" xml:space="preserve">
+    <value>Балансирует цифры игры от одного якоря, обычно здоровья: кривые прогрессии, классы и таблицы предметов.</value>
+  </data>
   <data name="SkillAikoCalendar" xml:space="preserve">
     <value>Планирует день по Google Calendar и ищет свободное время. События добавляет только после твоего «да».</value>
   </data>

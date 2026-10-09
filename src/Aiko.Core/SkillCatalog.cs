@@ -20,7 +20,7 @@ public static class SkillCatalog
     public static IReadOnlyList<SkillGroup> Groups { get; } =
     [
         new(SkillDomain.Projects, ["copy", "docs-hygiene", "release-gate", "calendar", "drive"]),
-        new(SkillDomain.Games, ["gamedesign-research", "playtest", "polishing", "blender-to-unity", "texturing", "glb-for-web", "palette"]),
+        new(SkillDomain.Games, ["gamedesign-research", "balance", "playtest", "polishing", "blender-to-unity", "texturing", "glb-for-web", "palette"]),
     ];
 
     /// Every skill, domain by domain.
