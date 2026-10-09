@@ -5,7 +5,10 @@ All notable changes to Aiko are listed here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and Aiko uses
 [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.3.1] - 2026-10-09
+
+A small update: a new skill for game balance and a fix for the checksum list. The Windows build is
+still not signed.
 
 ### Added
 
@@ -13,6 +16,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   usually health. It builds progression curves with hand-made spikes, compares classes, and checks a
   table of items for ones that are too strong, too weak or never worth taking. A small Python script
   does the sums.
+
+### Fixed
+
+- **The checksum list.** The release build wrote a line for `SHA256SUMS.txt` into the list itself,
+  and `sha256sum -c` failed on that line. For 0.3.0 the file was fixed by hand. Now the build writes
+  only the release files into the list.
 
 ## [0.3.0] - 2026-09-23
 
