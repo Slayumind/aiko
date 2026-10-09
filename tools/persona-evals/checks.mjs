@@ -63,17 +63,6 @@ export function problems(text, mode) {
   return found;
 }
 
-/**
- * Problems in Aiko's thinking, which the user sees between steps. Only her gender is checked: the
- * thinking is not a reply, so character and Japanese are not judged there. English thinking quotes
- * the user's Russian words, so quoted text is left out.
- */
-export function thinkingProblems(text) {
-  const unquoted = text.replace(/«[^»]*»|"[^"\n]*"|“[^”]*”|`[^`\n]*`/gu, " ");
-  const match = firstMatch(unquoted, MASCULINE_SELF);
-  return match ? [`masculine: ${match}`] : [];
-}
-
 /** A favourite game named in the text, or null. */
 export function gameName(text) {
   return firstMatch(text, GAME);

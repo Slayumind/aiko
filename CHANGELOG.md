@@ -14,11 +14,6 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   table of items for ones that are too strong, too weak or never worth taking. A small Python script
   does the sums.
 
-### Changed
-
-- **Aiko thinks in English.** Her thinking between steps is shown to you, and in Russian it often
-  slipped into the masculine. English past tense has no gender. Her replies stay in your language.
-
 ## [0.3.0] - 2026-09-23
 
 Aiko comes to macOS. One version tag now builds both systems, and the Mac app is signed and

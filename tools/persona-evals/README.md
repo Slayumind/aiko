@@ -19,9 +19,8 @@ node tools/persona-evals/run.mjs --app <exe> --temperaments Bright --model claud
 - Aiko's installed plugins are switched off for these sessions, so only the persona under test speaks.
   The person's own hooks and MCP servers are off too (`disableAllHooks`, `--strict-mcp-config`): a
   memory hook would bring their facts in and write the eval prompts into their memory.
-- The thinking of each session is checked for the masculine first person. In `-p` Claude Code sends
-  thinking blocks with no text (2026-09-26), so today this check finds nothing to read; thinking is
-  checked by reading the transcripts of real sessions instead.
+- Only the reply and the written files are checked, not the thinking. The short text a person sees
+  between steps is a summary written by another model, which does not see the persona prompt.
 - Each case runs in a fresh git repository in the temp folder. The report with every answer is written
   to `report.json` in `--out`.
 - `--model` runs the sessions on another model. Without it Claude Code uses its default.
