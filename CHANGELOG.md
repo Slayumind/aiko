@@ -5,6 +5,13 @@ All notable changes to Aiko are listed here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and Aiko uses
 [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- The `aiko:docs-hygiene` skill knows that a project may keep its tasks in a tracker. It no longer
+  offers to create `PLAN.md` and `ROADMAP.md` for such a project.
+
 ## [0.3.1] - 2026-10-09
 
 A small update: a new skill for game balance and a fix for the checksum list. The Windows build is
