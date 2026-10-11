@@ -119,4 +119,26 @@ public class PersonaPluginMemoryTests
         Assert.False(PersonaPluginOutput.HasMemory(settings, null));
         Assert.False(PersonaPluginOutput.HasMemory(EnvironmentSettings.Empty, @"C:\Users\someone\.claude"));
     }
+
+    [Theory]
+    [InlineData(null, true)]
+    [InlineData("", true)]
+    [InlineData("0123456789ab", false)]
+    [InlineData("0123456789ab\n", false)]
+    [InlineData("ba9876543210", true)]
+    public void The_plugin_is_updated_when_its_content_is_not_the_one_noted(string? synced, bool needsUpdate)
+    {
+        Assert.Equal(needsUpdate, PersonaPluginOutput.NeedsUpdate(synced, "0123456789ab"));
+    }
+
+    [Fact]
+    public void The_note_sits_beside_the_versions_and_is_not_taken_for_one()
+    {
+        var folders = AikoFolders.Windows(@"C:\Users\someone\AppData\Roaming", @"C:\Users\someone\AppData\Local");
+        var note = PersonaPluginOutput.SyncedFile(folders, @"C:\Users\someone\.claude");
+
+        Assert.Equal(PersonaPluginOutput.EnvironmentFolder(folders, @"C:\Users\someone\.claude"), Path.GetDirectoryName(note));
+        Assert.Empty(PersonaPluginOutput.StaleFolders(
+            [(Path.GetFileName(note), DateTimeOffset.MinValue)], "0123456789ab", DateTimeOffset.UtcNow));
+    }
 }

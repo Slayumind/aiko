@@ -67,7 +67,14 @@ public sealed class ClaudeSettingsEditor(IFileAccess files, PlatformConventions 
             SettingsJsonPatch.TryAddSessionHook(platform, json, hookCommand, out var patched) ? patched : null);
     }
 
-    /// Everything of Aiko's in the file: the status line, the hook, the plugins and the marketplace.
+    /// The permission for the memory tools, written when the memory is turned on in the
+    /// environment of this folder and taken out when it is turned off (D-279).
+    public PatchOutcome SetMemoryPermission(string configDirectory, bool allowed) =>
+        Change(configDirectory, json =>
+            SettingsJsonPatch.TrySetMemoryPermission(json, allowed, out var patched) ? patched : null);
+
+    /// Everything of Aiko's in the file: the status line, the hook, the plugins, the marketplace
+    /// and the permission for the memory tools.
     public PatchOutcome Remove(string configDirectory)
     {
         // A copy is only ever made of a file that was already there. No copy means Aiko made this
@@ -78,7 +85,8 @@ public sealed class ClaudeSettingsEditor(IFileAccess files, PlatformConventions 
         {
             var bridge = SettingsJsonPatch.TryRemoveBridge(platform, json, out var withoutBridge);
             var plugins = SettingsJsonPatch.TryRemovePlugins(withoutBridge, out var withoutPlugins);
-            return bridge || plugins ? withoutPlugins : null;
+            var permission = SettingsJsonPatch.TrySetMemoryPermission(withoutPlugins, allowed: false, out var clean);
+            return bridge || plugins || permission ? clean : null;
         });
 
         if (outcome.Changed)
