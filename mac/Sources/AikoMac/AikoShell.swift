@@ -42,7 +42,11 @@ final class AikoShell: NSResponder {
     /// arrive. Worked out when the settings change rather than every time the card is drawn.
     private var noAccess: Set<String> = []
 
-    func show() {
+    /// A self test draws one thing to be looked at and must leave the machine as it found it.
+    /// So with changingNothing the start skips what writes: the carry-over of the old skills
+    /// switch, the plugin sync (which writes settings.json and runs claude) and the refresh of
+    /// the commands in PATH. Before this a door like --try-settings did all three.
+    func show(changingNothing: Bool = false) {
         let watcher = SnapshotWatch(folder: Store.folders.snapshotsFolder)
         watcher.updated = { [weak self] in self?.onSnapshotsChanged() }
         watch = watcher
@@ -62,6 +66,10 @@ final class AikoShell: NSResponder {
             + (Store.settings().place == .island ? "island" : "menu bar icon"))
 
         openChecklistIfNothingIsSetUp(environments, Store.settings())
+
+        if changingNothing {
+            return
+        }
 
         // One switch used to turn the skills off everywhere. An "off" from that time goes into
         // every environment once, before the plugins are looked at.
