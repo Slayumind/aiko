@@ -69,6 +69,24 @@ public static class MemoryServer
         }
     }
 
+    /// A tool result that says the call failed, for the request in this line. Null when the line
+    /// is not a request, so there is nobody to answer.
+    public static string? ToolFailure(string line, string text)
+    {
+        try
+        {
+            using var document = JsonDocument.Parse(line);
+            return document.RootElement.ValueKind == JsonValueKind.Object
+                && document.RootElement.TryGetProperty("id", out var id)
+                    ? Result(id.GetRawText(), w => WriteToolText(w, text, isError: true))
+                    : null;
+        }
+        catch (JsonException)
+        {
+            return null;
+        }
+    }
+
     private static MemoryServerReply Call(string id, JsonElement parameters, MemoryFile memory, DateOnly today)
     {
         var arguments = parameters.ValueKind == JsonValueKind.Object
