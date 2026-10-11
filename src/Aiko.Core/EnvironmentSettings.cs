@@ -9,9 +9,18 @@ public sealed record AikoEnvironment(string Name, IReadOnlyList<string> ConfigDi
 {
     public bool DirectMode { get; init; }
 
-    /// Whether Aiko talks in this environment and brings her skills (D-196, D-197). Off until the
-    /// person turns it on.
+    /// Whether Aiko talks in this environment (D-196). Off until the person turns it on.
     public bool Persona { get; init; }
+
+    /// Whether Aiko's skills are in this environment. They do not need the persona (D-265).
+    public bool Skills { get; init; }
+
+    /// What the person chose for the memory here. It works only together with the persona
+    /// (D-264), so read HasMemory to know whether it is on.
+    public bool Memory { get; init; }
+
+    /// The choice is kept while the persona is off, so turning her on again brings the memory back.
+    public bool HasMemory => Persona && Memory;
 
     /// A command name the person typed. Null means the command follows the environment name.
     public string? CustomCommand { get; init; }
@@ -34,7 +43,9 @@ public sealed record EnvironmentSettings(IReadOnlyList<AikoEnvironment> Environm
     /// 2 added custom commands, project folders and the default environment. A file of schema 1
     /// reads as before, with none of them set.
     /// 3 added the persona flag. Older files read with the persona off.
-    public const int CurrentSchema = 3;
+    /// 4 added the skills and memory flags. In an older file the skills came with the persona, so
+    /// they read as on where she is on; the memory reads as off.
+    public const int CurrentSchema = 4;
 
     /// The tray has a ring and a dot, so Aiko keeps two environments (D-152).
     public const int MaxEnvironments = 2;
@@ -117,6 +128,8 @@ public sealed record EnvironmentSettings(IReadOnlyList<AikoEnvironment> Environm
                 {
                     DirectMode = e.DirectMode,
                     Persona = e.Persona,
+                    Skills = e.Skills ?? e.Persona,
+                    Memory = e.Memory,
                     CustomCommand = string.IsNullOrWhiteSpace(e.Command) ? null : e.Command,
                     ProjectFolders = e.ProjectFolders?.Where(p => !string.IsNullOrWhiteSpace(p)).ToList() ?? [],
                 })
@@ -150,6 +163,8 @@ public sealed record EnvironmentSettings(IReadOnlyList<AikoEnvironment> Environm
                         ConfigDirectories = e.ConfigDirectories,
                         DirectMode = e.DirectMode,
                         Persona = e.Persona,
+                        Skills = e.Skills,
+                        Memory = e.Memory,
                         Command = e.CustomCommand,
                         ProjectFolders = e.ProjectFolders.Count > 0 ? e.ProjectFolders : null,
                     })
@@ -171,6 +186,10 @@ public sealed record EnvironmentSettings(IReadOnlyList<AikoEnvironment> Environm
         public IReadOnlyList<string>? ConfigDirectories { get; set; }
         public bool DirectMode { get; set; }
         public bool Persona { get; set; }
+
+        /// Null in a file from before schema 4.
+        public bool? Skills { get; set; }
+        public bool Memory { get; set; }
         public string? Command { get; set; }
         public IReadOnlyList<string>? ProjectFolders { get; set; }
     }

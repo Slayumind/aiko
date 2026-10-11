@@ -137,6 +137,30 @@ public enum EnvironmentEdits {
         }
     }
 
+    public static func setSkills(
+        _ settings: EnvironmentSettings, _ environment: String, _ on: Bool
+    ) -> EnvironmentSettings {
+        change(settings, environment) { environment in
+            var copy = environment
+            copy.skills = on
+            return copy
+        }
+    }
+
+    /// The memory needs the persona, so without her the choice does not change: the switch is
+    /// locked in the window, and a call that got past it must not store a wish that is not shown.
+    public static func setMemory(
+        _ settings: EnvironmentSettings, _ environment: String, _ on: Bool
+    ) -> EnvironmentSettings {
+        change(settings, environment) { environment in
+            var copy = environment
+            if copy.persona {
+                copy.memory = on
+            }
+            return copy
+        }
+    }
+
     public static func setDefault(_ settings: EnvironmentSettings, _ environment: String) -> EnvironmentSettings {
         guard find(settings, environment) != nil else { return settings }
         var copy = settings

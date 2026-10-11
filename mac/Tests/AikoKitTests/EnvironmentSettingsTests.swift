@@ -118,4 +118,49 @@ struct EnvironmentSettingsTests {
         #expect(!back.environments[1].persona)
         #expect(json.contains("\"schemaVersion\": \(EnvironmentSettings.currentSchema)"))
     }
+
+    @Test
+    func inAFileFromBeforeTheSkillsFlagTheSkillsFollowThePersona() {
+        let settings = EnvironmentSettings.fromJson(
+            """
+            {
+              "schemaVersion": 3,
+              "environments": [
+                { "name": "Aiko", "configDirectories": ["C:\\\\x"], "persona": true },
+                { "name": "Work", "configDirectories": ["C:\\\\y"], "persona": false }
+              ]
+            }
+            """)
+
+        #expect(settings.environments[0].skills)
+        #expect(!settings.environments[1].skills)
+        #expect(settings.environments.allSatisfy { !$0.memory })
+    }
+
+    @Test
+    func theSkillsAndMemoryFlagsSurviveATripThroughTheFile() {
+        var settings = EnvironmentSettings.fromJson(Self.twoEnvironments)
+        settings.environments[0].persona = true
+        settings.environments[0].skills = false
+        settings.environments[0].memory = true
+        settings.environments[1].skills = true
+
+        let back = EnvironmentSettings.fromJson(settings.toJson())
+
+        #expect(!back.environments[0].skills)
+        #expect(back.environments[0].memory)
+        #expect(back.environments[1].skills)
+        #expect(!back.environments[1].persona)
+    }
+
+    @Test
+    func theMemoryIsOnOnlyTogetherWithThePersona() {
+        var environment = AikoEnvironment("Aiko", [#"C:\x"#], memory: true)
+
+        #expect(!environment.hasMemory)
+        environment.persona = true
+        #expect(environment.hasMemory)
+        environment.memory = false
+        #expect(!environment.hasMemory)
+    }
 }

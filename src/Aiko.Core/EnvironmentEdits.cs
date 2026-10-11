@@ -88,6 +88,14 @@ public static class EnvironmentEdits
     public static EnvironmentSettings SetPersona(EnvironmentSettings settings, string environment, bool on) =>
         Change(settings, environment, e => e with { Persona = on });
 
+    public static EnvironmentSettings SetSkills(EnvironmentSettings settings, string environment, bool on) =>
+        Change(settings, environment, e => e with { Skills = on });
+
+    /// The memory needs the persona, so without her the choice does not change: the switch is
+    /// locked in the window, and a call that got past it must not store a wish that is not shown.
+    public static EnvironmentSettings SetMemory(EnvironmentSettings settings, string environment, bool on) =>
+        Change(settings, environment, e => e.Persona ? e with { Memory = on } : e);
+
     public static EnvironmentSettings SetDefault(EnvironmentSettings settings, string environment) =>
         Find(settings, environment) is null ? settings : settings with { DefaultEnvironment = environment };
 

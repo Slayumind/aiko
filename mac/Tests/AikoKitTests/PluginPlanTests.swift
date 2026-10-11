@@ -9,8 +9,8 @@ struct PluginPlanTests {
     static let folders = AikoFolders.windows(#"C:\Users\Тест Юзер\AppData\Roaming"#, localAppData)
     static let persona = "aiko-persona@aiko"
 
-    private func env(persona: Bool) -> AikoEnvironment {
-        AikoEnvironment("Aiko", [#"C:\Users\someone\.claude"#], persona: persona)
+    private func env(persona: Bool, skills: Bool? = nil) -> AikoEnvironment {
+        AikoEnvironment("Aiko", [#"C:\Users\someone\.claude"#], persona: persona, skills: skills ?? persona)
     }
 
     // ---- the command and the marketplace file ----
@@ -102,8 +102,22 @@ struct PluginPlanTests {
     // ---- what a folder should have ----
 
     @Test
-    func withoutThePersonaAFolderWantsNothingNotEvenSkills() {
+    func withThePersonaAndTheSkillsOffAFolderWantsNothing() {
         #expect(PluginPlan.desired(env(persona: false), persona: .default, skills: ["copy"]).isEmpty)
+    }
+
+    @Test
+    func theSkillsDoNotNeedThePersona() {
+        let desired = PluginPlan.desired(env(persona: false, skills: true), persona: .default, skills: ["copy"])
+
+        #expect(desired == ["aiko@aiko"])
+    }
+
+    @Test
+    func thePersonaDoesNotBringTheSkillsWhereTheyAreOff() {
+        let desired = PluginPlan.desired(env(persona: true, skills: false), persona: .default, skills: ["copy"])
+
+        #expect(desired == [Self.persona])
     }
 
     @Test

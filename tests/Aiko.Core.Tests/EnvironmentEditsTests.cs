@@ -195,6 +195,39 @@ public class EnvironmentEditsTests
     }
 
     [Fact]
+    public void The_skills_are_switched_without_the_persona()
+    {
+        var settings = EnvironmentEdits.SetSkills(TwoEnvironments(), "Work", true);
+
+        Assert.True(settings.Environments[1].Skills);
+        Assert.False(settings.Environments[1].Persona);
+        Assert.False(settings.Environments[0].Skills);
+    }
+
+    [Fact]
+    public void The_memory_is_switched_only_where_the_persona_is_on()
+    {
+        var withPersona = EnvironmentEdits.SetPersona(TwoEnvironments(), "Work", true);
+
+        var on = EnvironmentEdits.SetMemory(withPersona, "Work", true);
+        var refused = EnvironmentEdits.SetMemory(withPersona, "Aiko", true);
+
+        Assert.True(on.Environments[1].HasMemory);
+        Assert.False(refused.Environments[0].Memory);
+    }
+
+    [Fact]
+    public void Turning_the_persona_off_keeps_the_choice_of_memory_but_the_memory_is_off()
+    {
+        var on = EnvironmentEdits.SetMemory(EnvironmentEdits.SetPersona(TwoEnvironments(), "Work", true), "Work", true);
+
+        var off = EnvironmentEdits.SetPersona(on, "Work", false);
+
+        Assert.True(off.Environments[1].Memory);
+        Assert.False(off.Environments[1].HasMemory);
+    }
+
+    [Fact]
     public void Switching_the_persona_of_an_unknown_environment_changes_nothing()
     {
         var settings = TwoEnvironments();

@@ -189,6 +189,36 @@ struct EnvironmentEditsTests {
     }
 
     @Test
+    func theSkillsAreSwitchedWithoutThePersona() {
+        let settings = EnvironmentEdits.setSkills(twoEnvironments(), "Work", true)
+
+        #expect(settings.environments[1].skills)
+        #expect(!settings.environments[1].persona)
+        #expect(!settings.environments[0].skills)
+    }
+
+    @Test
+    func theMemoryIsSwitchedOnlyWhereThePersonaIsOn() {
+        let withPersona = EnvironmentEdits.setPersona(twoEnvironments(), "Work", true)
+
+        let on = EnvironmentEdits.setMemory(withPersona, "Work", true)
+        let refused = EnvironmentEdits.setMemory(withPersona, "Aiko", true)
+
+        #expect(on.environments[1].hasMemory)
+        #expect(!refused.environments[0].memory)
+    }
+
+    @Test
+    func turningThePersonaOffKeepsTheChoiceOfMemoryButTheMemoryIsOff() {
+        let on = EnvironmentEdits.setMemory(EnvironmentEdits.setPersona(twoEnvironments(), "Work", true), "Work", true)
+
+        let off = EnvironmentEdits.setPersona(on, "Work", false)
+
+        #expect(off.environments[1].memory)
+        #expect(!off.environments[1].hasMemory)
+    }
+
+    @Test
     func switchingThePersonaOfAnUnknownEnvironmentChangesNothing() {
         let settings = twoEnvironments()
 

@@ -8,6 +8,13 @@ public struct AikoEnvironment: Sendable, Equatable {
     public var directMode: Bool
     public var persona: Bool
 
+    /// Whether Aiko's skills are in this environment. They do not need the persona (D-265).
+    public var skills: Bool
+
+    /// What the person chose for the memory here. It works only together with the persona
+    /// (D-264), so read hasMemory to know whether it is on.
+    public var memory: Bool
+
     /// A command name the person typed. Nil means the command follows the environment name.
     public var customCommand: String?
 
@@ -19,6 +26,8 @@ public struct AikoEnvironment: Sendable, Equatable {
         _ configDirectories: [String],
         directMode: Bool = false,
         persona: Bool = false,
+        skills: Bool = false,
+        memory: Bool = false,
         customCommand: String? = nil,
         projectFolders: [String] = []
     ) {
@@ -26,9 +35,14 @@ public struct AikoEnvironment: Sendable, Equatable {
         self.configDirectories = configDirectories
         self.directMode = directMode
         self.persona = persona
+        self.skills = skills
+        self.memory = memory
         self.customCommand = customCommand
         self.projectFolders = projectFolders
     }
+
+    /// The choice is kept while the persona is off, so turning her on again brings the memory back.
+    public var hasMemory: Bool { persona && memory }
 
     public var command: String { customCommand ?? LaunchCommand.fromEnvironmentName(name) }
 
@@ -60,7 +74,9 @@ public struct EnvironmentSettings: Sendable, Equatable {
     /// 2 added custom commands, project folders and the default environment. A file of schema 1
     /// reads as before, with none of them set.
     /// 3 added the persona flag. Older files read with the persona off.
-    public static let currentSchema = 3
+    /// 4 added the skills and memory flags. In an older file the skills came with the persona, so
+    /// they read as on where she is on; the memory reads as off.
+    public static let currentSchema = 4
 
     /// The tray has a ring and a dot, so Aiko keeps two environments (D-152).
     public static let maxEnvironments = 2
@@ -150,11 +166,14 @@ public struct EnvironmentSettings: Sendable, Equatable {
             }
 
             let command = object["command"]?.stringValue
+            let persona = object["persona"]?.boolValue ?? false
             return AikoEnvironment(
                 name,
                 directories.compactMap(\.stringValue),
                 directMode: object["directMode"]?.boolValue ?? false,
-                persona: object["persona"]?.boolValue ?? false,
+                persona: persona,
+                skills: object["skills"]?.boolValue ?? persona,
+                memory: object["memory"]?.boolValue ?? false,
                 customCommand: (command?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true) ? nil : command,
                 projectFolders: (object["projectFolders"]?.arrayValue ?? [])
                     .compactMap(\.stringValue)
@@ -187,6 +206,8 @@ public struct EnvironmentSettings: Sendable, Equatable {
             file["configDirectories"] = .array(environment.configDirectories.map(JsonNode.string))
             file["directMode"] = .bool(environment.directMode)
             file["persona"] = .bool(environment.persona)
+            file["skills"] = .bool(environment.skills)
+            file["memory"] = .bool(environment.memory)
             if let custom = environment.customCommand {
                 file["command"] = .string(custom)
             }
