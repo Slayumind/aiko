@@ -3,13 +3,13 @@ import Testing
 
 @testable import AikoKit
 
-/// What the persona plugin gains when the memory is on in its environment: two hooks at the start
-/// of a session, one beside every message, and the server with the memory tools.
+/// The memory inside the persona plugin: two hooks at the start of a session, one beside every
+/// message, and the server with the memory tools. Aiko is not switched on without it (D-285).
 struct PersonaPluginMemoryTests {
     static let bridge = #"C:\Users\Саша Иванов\AppData\Local\Slayumind.Aiko\current\Aiko.Bridge.exe"#
 
     private var withMemory: [(path: String, content: String)] {
-        PersonaPlugin.files(.normal, Self.bridge, memory: true)
+        PersonaPlugin.files(.normal, Self.bridge)
     }
 
     private func hooks(_ files: [(path: String, content: String)]) throws -> JsonObject {
@@ -26,17 +26,7 @@ struct PersonaPluginMemoryTests {
     }
 
     @Test
-    func withoutTheMemoryThePluginIsWhatItWas() throws {
-        let files = PersonaPlugin.files(.normal, Self.bridge, memory: false)
-
-        #expect(files.map(\.path) == PersonaPlugin.files(.normal, Self.bridge).map(\.path))
-        #expect(files.map(\.content) == PersonaPlugin.files(.normal, Self.bridge).map(\.content))
-        #expect(!files.contains { $0.path == ".mcp.json" })
-        #expect(try hooks(files)["SessionStart"] == nil)
-    }
-
-    @Test
-    func withTheMemoryThePluginBringsAServerFile() {
+    func thePluginBringsAServerFile() {
         #expect(withMemory.map(\.path) == [
             ".claude-plugin/plugin.json", ".mcp.json", "hooks/hooks.json", "output-styles/aiko.md",
         ])
@@ -93,29 +83,8 @@ struct PersonaPluginMemoryTests {
     }
 
     @Test
-    func turningTheMemoryOnChangesTheHashSoThePluginIsUpdated() {
-        let off = PersonaPlugin.contentHash(PersonaPlugin.files(.normal, Self.bridge))
-
-        #expect(off != PersonaPlugin.contentHash(withMemory))
-    }
-
-    @Test
     func thePermissionNamesTheServerTheWayClaudeCodeNamesPluginTools() {
         #expect(PersonaPlugin.memoryPermission == "mcp__plugin_aiko-persona_memory")
-    }
-
-    @Test
-    func thePluginHasTheMemoryOnlyForAFolderOfAnEnvironmentWithIt() {
-        let withMemory = AikoEnvironment("Aiko", [#"C:\Users\someone\.claude"#], persona: true, memory: true)
-        let personaOff = AikoEnvironment("Work", [#"C:\Users\someone\.claude-work"#], memory: true)
-        let settings = EnvironmentSettings([withMemory, personaOff])
-
-        #expect(PersonaPluginOutput.hasMemory(settings, #"C:\Users\someone\.claude"#))
-        #expect(PersonaPluginOutput.hasMemory(settings, #"c:\users\someone\.claude\"#))
-        #expect(!PersonaPluginOutput.hasMemory(settings, #"C:\Users\someone\.claude-work"#))
-        #expect(!PersonaPluginOutput.hasMemory(settings, #"C:\Users\someone\.claude-other"#))
-        #expect(!PersonaPluginOutput.hasMemory(settings, nil))
-        #expect(!PersonaPluginOutput.hasMemory(.empty, #"C:\Users\someone\.claude"#))
     }
 
     @Test(arguments: [

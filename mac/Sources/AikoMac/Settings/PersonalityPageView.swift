@@ -1,10 +1,10 @@
 import AikoKit
 import SwiftUI
 
-/// Aiko's personality (D-207). What is on is a table: a row per environment and a switch each for
-/// the personality, the skills and the memory (D-278). The memory itself stands under the table.
-/// The face and the temperament are one choice for all environments. A sample answer shows what
-/// the temperament means, so nobody has to guess from a word.
+/// Aiko's personality (D-207). One switch per environment turns on all of Aiko there: her
+/// character, her skills and her memory (D-285). The memory itself stands under the switches. The
+/// face and the temperament are one choice for all environments. A sample answer shows what the
+/// temperament means, so nobody has to guess from a word.
 ///
 /// The twin of Settings/PersonalityPage.xaml(.cs).
 struct PersonalityPageView: View {
@@ -34,11 +34,7 @@ struct PersonalityPageView: View {
          "drive": Strings.skillAikoDrive]
     }
 
-    /// The width of one column of switches. The Russian word for the personality in the head of
-    /// its column is the widest thing in it.
-    private static let switchColumn: CGFloat = 84
-
-    private var skillsAnywhere: Bool { state.environments.environments.contains(where: \.hasSkills) }
+    private var aikoIsOnSomewhere: Bool { state.environments.environments.contains(where: \.persona) }
 
     /// A calm temperament smiles, a loud one beams, as in the mockup.
     private var face: AikoFace {
@@ -52,10 +48,10 @@ struct PersonalityPageView: View {
                 Control.pageTitle(Strings.navPersonality)
             }
 
-            Control.sectionLabel(Strings.sectionWhatIsOn).padding(.top, 18).padding(.bottom, 8)
+            Control.sectionLabel(Strings.sectionWhereAikoIsOn).padding(.top, 18).padding(.bottom, 8)
             environments
-            Control.rowHint(Strings.switchesNote).padding(.top, 8)
-            Control.rowHint(Strings.memoryPermissionNote).padding(.top, 4)
+            Control.rowHint(Strings.aikoOnNote).padding(.top, 8)
+            Control.rowHint(Strings.aikoOnWhat).padding(.top, 4)
 
             // The memory itself: quotas, facts and what a person may do to them.
             MemoryBlockView().padding(.top, 22)
@@ -94,67 +90,42 @@ struct PersonalityPageView: View {
         }
     }
 
-    // ---- what is on, by environment ----
+    // ---- where Aiko is on ----
 
-    /// A table: one row per environment, one column per thing that can be on there.
+    /// One switch per environment. It turns on all of Aiko there: her character, her skills and
+    /// her memory are parts of one thing and are not switched apart (D-285).
     private var environments: some View {
         RowsBox {
-            columnHeads
             ForEach(Array(SettingsNav.ordered(state.environments, .macOS, Store.home).enumerated()),
-                    id: \.offset) { _, environment in
-                environmentRow(environment)
+                    id: \.offset) { at, environment in
+                environmentRow(environment, first: at == 0)
             }
         }
     }
 
-    /// The name takes what is left; the three switches stand in columns of one width, so they
-    /// line up under their heads in every row.
-    private var columnHeads: some View {
-        HStack(spacing: 0) {
-            Spacer(minLength: 0)
-            ForEach([Strings.columnPersonality, Strings.columnSkills, Strings.columnMemory], id: \.self) { name in
-                Control.sectionLabel(name).lineLimit(1).frame(width: Self.switchColumn)
-            }
-        }
-        .padding(.leading, 12)
-        .padding(.trailing, 2)
-        .padding(.vertical, 8)
-    }
-
-    private func environmentRow(_ environment: AikoEnvironment) -> some View {
+    private func environmentRow(_ environment: AikoEnvironment, first: Bool) -> some View {
         let name = environment.name
         let folder = environment.configDirectories.first ?? ""
         let plan = state.plan(of: folder)
         let ownStyle = environment.persona ? ClaudeSettingsFile.userOutputStyle(folder) : nil
 
         return VStack(alignment: .leading, spacing: 0) {
-            HStack(spacing: 0) {
-                HStack(spacing: 8) {
-                    Text(name)
-                        .font(Theme.sans(Theme.textName))
-                        .foregroundStyle(Theme.ink)
-                        .lineLimit(1)
-                    if !plan.isEmpty { Chip(text: plan).fixedSize() }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
+            HStack(spacing: 8) {
+                Text(name)
+                    .font(Theme.sans(Theme.textName))
+                    .foregroundStyle(Theme.ink)
+                    .lineLimit(1)
+                if !plan.isEmpty { Chip(text: plan).fixedSize() }
+                Spacer(minLength: 12)
 
-                tableSwitch(name, Strings.columnPersonality, on: environment.persona) { on in
-                    commit(EnvironmentEdits.setPersona(state.environments, name, on),
-                           on ? "turned the persona on" : "turned the persona off")
-                }
-                tableSwitch(name, Strings.columnSkills, on: environment.hasSkills, enabled: environment.persona) { on in
-                    commit(EnvironmentEdits.setSkills(state.environments, name, on),
-                           on ? "turned the skills on" : "turned the skills off")
-                }
-
-                // The memory works only together with the persona, so without her the switch is
-                // locked.
-                tableSwitch(
-                    name, Strings.columnMemory, on: environment.hasMemory, enabled: environment.persona
-                ) { on in
-                    commit(EnvironmentEdits.setMemory(state.environments, name, on),
-                           on ? "turned the memory on" : "turned the memory off")
-                }
+                // A screen reader hears the environment, because the switch itself has no word
+                // on it.
+                AikoSwitch(isOn: environment.persona) { setPersona(name, $0) }
+                    .accessibilityElement()
+                    .accessibilityLabel(name)
+                    .accessibilityValue(environment.persona ? "1" : "0")
+                    .accessibilityAddTraits(.isToggle)
+                    .accessibilityAction { setPersona(name, !environment.persona) }
             }
 
             Reveal(isOpen: ownStyle != nil) {
@@ -163,32 +134,25 @@ struct PersonalityPageView: View {
                     .foregroundStyle(Theme.caution)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.top, 4)
-                    .padding(.trailing, 10)
             }
         }
-        .padding(.leading, 12)
-        .padding(.trailing, 2)
+        .padding(.horizontal, 12)
         .padding(.vertical, 10)
-        // Every row has a line above it: the first one stands under the heads of the columns.
-        .overlay(alignment: .top) { Control.hairline() }
+        .overlay(alignment: .top) { if !first { Control.hairline() } }
     }
 
-    /// One switch of the table. A screen reader hears the environment and the column, because the
-    /// switch itself has no word on it.
-    private func tableSwitch(
-        _ environment: String, _ column: String, on: Bool, enabled: Bool = true, _ set: @escaping (Bool) -> Void
-    ) -> some View {
-        AikoSwitch(isOn: on, enabled: enabled, set: set)
-            .frame(width: Self.switchColumn)
-            .accessibilityElement()
-            .accessibilityLabel("\(environment) · \(column)")
-            .accessibilityValue(on ? "1" : "0")
-            .accessibilityAddTraits(.isToggle)
-            .accessibilityAction { if enabled { set(!on) } }
-    }
+    private func setPersona(_ environment: String, _ on: Bool) {
+        state.editor.commit(
+            EnvironmentEdits.setPersona(state.environments, environment, on),
+            on ? "turned Aiko on" : "turned Aiko off")
 
-    private func commit(_ next: EnvironmentSettings, _ what: String) {
-        state.editor.commit(next, what)
+        // The lines under the switches say what the memory does, so whoever turned her on here
+        // has been told and is not shown this page again on the next start.
+        if on && !state.app.memoryShown {
+            var shown = state.app
+            shown.memoryShown = true
+            state.saveApp(shown)
+        }
     }
 
     // ---- temperament ----
@@ -281,7 +245,7 @@ struct PersonalityPageView: View {
     // ---- skills ----
 
     /// The skills themselves. They are one plugin in Claude Code and come and go together
-    /// (D-237); where they are on is a switch of each environment in the table above (D-281).
+    /// (D-237), in every environment where Aiko is on (D-285).
     private var skills: some View {
         VStack(alignment: .leading, spacing: 0) {
             // One box per domain, so the groups read apart.
@@ -299,7 +263,7 @@ struct PersonalityPageView: View {
                 }
             }
         }
-        .opacity(skillsAnywhere ? 1 : 0.45)
+        .opacity(aikoIsOnSomewhere ? 1 : 0.45)
     }
 
     private func skillRow(_ skill: String, topLine: Bool) -> some View {

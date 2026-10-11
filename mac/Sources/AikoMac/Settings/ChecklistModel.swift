@@ -422,10 +422,6 @@ final class ChecklistModel: ObservableObject {
                 directMode: before?.directMode ?? false,
                 // "Meet Aiko" turns it on in environment 1. "Later" never turns off what is on.
                 persona: (before?.persona ?? false) || (index == 0 && personaWanted == true),
-                // She brings her skills with her, as she always did. The memory is never turned
-                // on from here: it has its own switch on the Personality page.
-                skills: (before?.skills ?? false) || (index == 0 && personaWanted == true),
-                memory: before?.memory ?? false,
                 customCommand: customCommand[index],
                 projectFolders: projects)
         }
@@ -464,8 +460,9 @@ final class ChecklistModel: ObservableObject {
         app.privacyAsked = statsWanted != nil
         app.meetAikoShown = true
 
-        // The question shows the whole list, so an answer to it covers the list as it is now.
-        Store.saveSettings(statsWanted == nil ? app : StatsList.seen(app))
+        // "Meet Aiko" says what the memory does, so whoever finishes the checklist has read it.
+        app.memoryShown = true
+        Store.saveSettings(app)
     }
 
     private func signedIn(_ folder: String) -> Bool {

@@ -24,8 +24,6 @@ struct PrivacyPageView: View {
         ("w", Strings.sentWeekFlag),
         ("m", Strings.sentMonthFlag),
         ("p", Strings.sentPersona),
-        ("s", Strings.sentSkills),
-        ("mem", Strings.sentMemory),
         ]
     }
 
@@ -90,8 +88,7 @@ struct PrivacyPageView: View {
         var next = state.app
         next.sendStats = on
         next.privacyAsked = true
-        // The switch sits right above the list, so an answer here is an answer to the whole list.
-        state.saveApp(StatsList.seen(next))
+        state.saveApp(next)
     }
 
     private func open(_ address: String) {

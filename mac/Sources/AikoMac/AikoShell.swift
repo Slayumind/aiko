@@ -43,9 +43,9 @@ final class AikoShell: NSResponder {
     private var noAccess: Set<String> = []
 
     /// A self test draws one thing to be looked at and must leave the machine as it found it.
-    /// So with changingNothing the start skips what writes: the carry-over of the old skills
-    /// switch, the plugin sync (which writes settings.json and runs claude) and the refresh of
-    /// the commands in PATH. Before this a door like --try-settings did all three.
+    /// So with changingNothing the start skips what writes: the note that the memory was shown
+    /// (and the page opened for it), the plugin sync (which writes settings.json and runs claude)
+    /// and the refresh of the commands in PATH.
     func show(changingNothing: Bool = false) {
         let watcher = SnapshotWatch(folder: Store.folders.snapshotsFolder)
         watcher.updated = { [weak self] in self?.onSnapshotsChanged() }
@@ -65,18 +65,10 @@ final class AikoShell: NSResponder {
             + "\(watcher.byFile.count) snapshot files, showing the "
             + (Store.settings().place == .island ? "island" : "menu bar icon"))
 
-        openChecklistIfNothingIsSetUp(environments, Store.settings())
+        openChecklistIfNothingIsSetUp(environments, Store.settings(), changingNothing: changingNothing)
 
         if changingNothing {
             return
-        }
-
-        // One switch used to turn the skills off everywhere. An "off" from that time goes into
-        // every environment once, before the plugins are looked at.
-        let carried = EnvironmentEdits.carryOldSkillsSwitch(Store.environments(), Store.persona())
-        if carried.changed {
-            Store.saveEnvironments(carried.settings)
-            Store.savePersona(carried.persona)
         }
 
         // An update can bring a new persona text, and on macOS the app itself moves: the marketplace
@@ -95,18 +87,23 @@ final class AikoShell: NSResponder {
     /// On a fresh machine the checklist opens by itself: there is nothing for the icon to show and
     /// nothing tells the person where to start. Someone who set Aiko up before an item existed is
     /// shown that one item once (D-200).
-    private func openChecklistIfNothingIsSetUp(_ environments: EnvironmentSettings, _ app: AppSettings) {
+    private func openChecklistIfNothingIsSetUp(
+        _ environments: EnvironmentSettings, _ app: AppSettings, changingNothing: Bool
+    ) {
         if !environments.hasEnvironments {
             openSettings(at: .checklist)
         } else if WizardChecklist.opensMeetAikoOnStart(app, environments) {
             openSettings(at: .checklist, item: .meetAiko)
         } else if WizardChecklist.opensPrivacyOnStart(app, environments) {
             openSettings(at: .checklist, item: .privacy)
-        } else if StatsList.asksToLookAgain(app, environments) {
-            // Once, for someone who agreed to the count when it had fewer values. The two new
-            // ones are not sent until this page has been put in front of them.
-            openSettings(at: .privacy)
-            Store.saveSettings(StatsList.seen(app))
+        } else if !changingNothing, WizardChecklist.opensMemoryOnStart(app, environments) {
+            // Once, for someone who turned Aiko on before she had a memory. The page says what the
+            // memory reads and writes, and it is where she can be turned off. A self test skips
+            // it: the page it was asked for is the one to show, and the note is a write.
+            openSettings(at: .personality)
+            var shown = app
+            shown.memoryShown = true
+            Store.saveSettings(shown)
         }
     }
 

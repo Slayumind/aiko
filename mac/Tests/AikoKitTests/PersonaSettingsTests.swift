@@ -4,12 +4,11 @@ import Testing
 
 struct PersonaSettingsTests {
     @Test
-    func byDefaultAikoIsNormalChibiWithTheSkillsOn() {
+    func byDefaultAikoIsNormalAndChibi() {
         let persona = PersonaSettings.default
 
         #expect(persona.temperament == .normal)
         #expect(persona.face == .chibi)
-        #expect(persona.skillsOn)
     }
 
     @Test
@@ -17,13 +16,10 @@ struct PersonaSettingsTests {
         var persona = PersonaSettings.default
         persona.temperament = .musou
         persona.face = .emoji
-        persona.skillsOn = false
 
         let back = PersonaSettings.fromJson(persona.toJson())
 
         #expect(back == persona)
-        #expect(persona.toJson().contains("\"skillsOn\": false"))
-        #expect(!persona.toJson().contains("disabledSkills"))
     }
 
     @Test
@@ -45,43 +41,17 @@ struct PersonaSettingsTests {
         #expect(PersonaSettings.fromJson(json) == PersonaSettings.default)
     }
 
-    // ---- files written when each skill had its own switch ----
-
+    /// The skills had switches of their own until 0.2.1 and one switch for all until 0.3.1. They
+    /// come with Aiko now (D-285), and a file from those days must still read.
     @Test(arguments: [
-        #"{ "temperament": "Quiet" }"#,
-        #"{ "temperament": "Quiet", "disabledSkills": null }"#,
-        #"{ "temperament": "Quiet", "disabledSkills": [] }"#,
         #"{ "temperament": "Quiet", "disabledSkills": ["aiko-copy", "aiko-palette"] }"#,
-        #"{ "temperament": "Quiet", "disabledSkills": ["copy", "", null] }"#,
+        #"{ "temperament": "Quiet", "skillsOn": false }"#,
     ])
-    func anOldFileWithAnySkillLeftOnHasTheSkillsOn(json: String) {
+    func aFileWithASkillsSwitchOfAnOlderAikoStillReads(json: String) {
         let persona = PersonaSettings.fromJson(json)
 
         #expect(persona.temperament == .quiet)
-        #expect(persona.skillsOn)
-    }
-
-    @Test
-    func anOldFileWithEverySkillOffHasTheSkillsOff() {
-        let oldNames = PersonaSettings.fromJson("""
-            { "disabledSkills": ["aiko-copy", "aiko-release-gate", "aiko-docs-hygiene", "aiko-blender-to-unity",
-                                 "aiko-texturing", "aiko-glb-for-web", "aiko-palette", "aiko-gamedesign-research"] }
-            """)
-        let newNames = PersonaSettings.fromJson("""
-            { "disabledSkills": ["copy", "release-gate", "docs-hygiene", "blender-to-unity",
-                                 "texturing", "glb-for-web", "palette", "gamedesign-research"] }
-            """)
-
-        #expect(!oldNames.skillsOn)
-        #expect(!newNames.skillsOn)
-    }
-
-    @Test
-    func theNewSwitchWinsOverAnOldListInTheSameFile() {
-        let persona = PersonaSettings.fromJson(
-            #"{ "skillsOn": true, "disabledSkills": ["copy", "release-gate", "docs-hygiene", "blender-to-unity", "texturing", "glb-for-web", "palette", "gamedesign-research"] }"#
-        )
-
-        #expect(persona.skillsOn)
+        #expect(!persona.toJson().contains("skillsOn"))
+        #expect(!persona.toJson().contains("disabledSkills"))
     }
 }

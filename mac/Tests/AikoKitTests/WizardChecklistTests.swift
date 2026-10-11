@@ -172,6 +172,19 @@ struct WizardChecklistTests {
     }
 
     @Test
+    func thePersonalityPageOpensOnceForSomeoneWhoHadAikoOnBeforeSheRemembered() {
+        var shown = AppSettings.default
+        shown.memoryShown = true
+
+        #expect(WizardChecklist.opensMemoryOnStart(.default, Self.oneEnvironment(persona: true)))
+        #expect(!WizardChecklist.opensMemoryOnStart(shown, Self.oneEnvironment(persona: true)))
+
+        // Where she is off there is no memory to tell about, and no reason to open anything.
+        #expect(!WizardChecklist.opensMemoryOnStart(.default, Self.oneEnvironment(persona: false)))
+        #expect(!WizardChecklist.opensMemoryOnStart(.default, .empty))
+    }
+
+    @Test
     func meetAikoOpensOnceForSomeoneWhoSetAikoUpBefore() {
         var shown = AppSettings.default
         shown.meetAikoShown = true

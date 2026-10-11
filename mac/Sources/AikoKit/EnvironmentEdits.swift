@@ -7,13 +7,6 @@ public enum NameProblem: Sendable, Equatable {
     case taken
 }
 
-/// Both files after the old skills switch was carried over. changed says whether to save them.
-public struct SkillsCarried: Sendable, Equatable {
-    public let settings: EnvironmentSettings
-    public let persona: PersonaSettings
-    public let changed: Bool
-}
-
 public struct Renamed: Sendable, Equatable {
     public let settings: EnvironmentSettings
     public let suggestedCommand: String?
@@ -140,54 +133,6 @@ public enum EnvironmentEdits {
         change(settings, environment) { environment in
             var copy = environment
             copy.persona = on
-            return copy
-        }
-    }
-
-    public static func setSkills(
-        _ settings: EnvironmentSettings, _ environment: String, _ on: Bool
-    ) -> EnvironmentSettings {
-        change(settings, environment) { environment in
-            // The skills need the persona, like the memory: without her the choice does not change.
-            var copy = environment
-            if copy.persona {
-                copy.skills = on
-            }
-            return copy
-        }
-    }
-
-    /// Before the skills became a choice of each environment, one switch in persona.json turned
-    /// them off everywhere. A person who had it off must not get the skills back by an update, so
-    /// "off" is carried into every environment once and the old switch is set back to on, which
-    /// makes a second call change nothing.
-    public static func carryOldSkillsSwitch(
-        _ settings: EnvironmentSettings, _ persona: PersonaSettings
-    ) -> SkillsCarried {
-        guard !persona.skillsOn else {
-            return SkillsCarried(settings: settings, persona: persona, changed: false)
-        }
-
-        var off = settings
-        for index in off.environments.indices {
-            off.environments[index].skills = false
-        }
-
-        var consumed = persona
-        consumed.skillsOn = true
-        return SkillsCarried(settings: off, persona: consumed, changed: true)
-    }
-
-    /// The memory needs the persona, so without her the choice does not change: the switch is
-    /// locked in the window, and a call that got past it must not store a wish that is not shown.
-    public static func setMemory(
-        _ settings: EnvironmentSettings, _ environment: String, _ on: Bool
-    ) -> EnvironmentSettings {
-        change(settings, environment) { environment in
-            var copy = environment
-            if copy.persona {
-                copy.memory = on
-            }
             return copy
         }
     }

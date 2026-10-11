@@ -174,18 +174,11 @@ enum UpdateRun {
         let reported = ReportedPeriods.read()
         let week = Heartbeat.firstThisWeek(reported.week, today) ? Heartbeat.weekKey(today) : nil
         let month = Heartbeat.firstThisMonth(reported.month, today) ? Heartbeat.monthKey(today) : nil
-        // Only whether each thing is on in at least one environment: not in which, not how many,
-        // and nothing about what the skills or the memory hold.
-        let environments = Store.environments().environments
-        let persona = environments.contains(where: \.persona) ? 1 : 0
-        let skills = environments.contains(where: \.hasSkills) ? 1 : 0
-        let memory = environments.contains(where: \.hasMemory) ? 1 : 0
+        let persona = Store.environments().environments.contains(where: \.persona) ? 1 : 0
 
         let address = plain
             + "&os=\(escape(AppVersion.system()))"
             + "&day=\(id)&p=\(persona)"
-            // Left out until the person has seen the list that names them (StatsList).
-            + (StatsList.sendsSkillsAndMemory(settings) ? "&s=\(skills)&mem=\(memory)" : "")
             + (week == nil ? "" : "&w=1")
             + (month == nil ? "" : "&m=1")
 

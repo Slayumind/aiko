@@ -288,8 +288,6 @@ public enum Strings {
         "SentWeekFlag": ("the first run this week", "первый запуск на этой неделе"),
         "SentMonthFlag": ("the first run this month", "первый запуск в этом месяце"),
         "SentPersona": ("the personality is on in at least one environment", "личность включена хотя бы в одной среде"),
-        "SentSkills": ("the skills are on in at least one environment", "навыки включены хотя бы в одной среде"),
-        "SentMemory": ("the memory is on in at least one environment", "память включена хотя бы в одной среде"),
         "NothingSentYet": ("None of this is sent right now.", "Сейчас ничего из этого не отправляется."),
         "SectionNeverSent": ("WHAT NEVER LEAVES", "ЧТО НЕ ОТПРАВЛЯЕТСЯ НИКОГДА"),
         "NeverSentWhat": ("Your name, email, project folders, limits, token, session texts and what the memory holds. The site doesn't read or store the IP address.", "Имя, почта, папки проектов, лимиты, токен, тексты сессий и содержимое памяти. IP-адрес сайт не читает и не хранит."),
@@ -300,22 +298,17 @@ public enum Strings {
         "OpenPrivacyDoc": ("Open PRIVACY.md", "Открыть PRIVACY.md"),
         "PrivacyLinkFromGeneral": ("What Aiko sends and to whom — Privacy.", "Что Aiko отправляет и кому — раздел «Приватность»."),
         "WizardStats": ("Anonymous statistics", "Анонимная статистика"),
-        "WizardStatsWhat": ("The author of Aiko doesn't know how many people use it. Once a day Aiko can say that one copy ran and send eight values. All eight are below.", "Автор Aiko не знает, сколько людей ею пользуется. Раз в сутки Aiko может сообщить, что одна копия работала, и отправить восемь значений. Вот все восемь."),
+        "WizardStatsWhat": ("The author of Aiko doesn't know how many people use it. Once a day Aiko can say that one copy ran and send six values. All six are below.", "Автор Aiko не знает, сколько людей ею пользуется. Раз в сутки Aiko может сообщить, что одна копия работала, и отправить шесть значений. Вот все шесть."),
         "WizardStatsLater": ("You can change this later on the Privacy page.", "Это можно поменять потом на странице «Приватность»."),
         "StatsDecline": ("Don't send", "Не отправлять"),
         "StatsAccept": ("Send", "Отправлять"),
         "StatsStateOn": ("on", "включена"),
         "StatsStateOff": ("off", "выключена"),
         "StatsStateUnset": ("not chosen", "не выбрано"),
-        "SectionWhereAikoTalks": ("WHERE AIKO TALKS", "ГДЕ AIKO ГОВОРИТ"),
-        "SectionWhatIsOn": ("WHAT IS ON, BY ENVIRONMENT", "ЧТО ВКЛЮЧЕНО В СРЕДАХ"),
-        "ColumnPersonality": ("PERSONALITY", "ЛИЧНОСТЬ"),
-        "ColumnSkills": ("SKILLS", "НАВЫКИ"),
-        "ColumnMemory": ("MEMORY", "ПАМЯТЬ"),
-        "SwitchesNote": ("Skills and memory work only together with the personality. Works in new sessions.", "Навыки и память работают только вместе с личностью. Действует в новых сессиях."),
-        "MemoryPermissionNote": ("With memory on, Aiko adds one line to that environment's settings.json: a permission for its two memory tools.", "Когда память включена, Aiko добавляет в settings.json этой среды одну строку: разрешение на два своих инструмента памяти."),
-        "SkillsWhere": ("Skills work in the environments where they are on.", "Навыки работают в тех средах, где они включены."),
-        "PersonaNewSessions": ("Works in new sessions. Open sessions finish the way they started.", "Действует в новых сессиях. Открытые сессии доработают как были."),
+        "SectionWhereAikoIsOn": ("WHERE AIKO IS ON", "ГДЕ AIKO ВКЛЮЧЕНА"),
+        "AikoOnNote": ("Her character, her skills and her memory come together. Works in new sessions; open sessions finish the way they started.", "Характер, навыки и память включаются вместе. Действует в новых сессиях; открытые доработают как были."),
+        "AikoOnWhat": ("Where Aiko is on, she reads each message you send to keep her memory fresh, and adds one line to that environment's settings.json: a permission for her two memory tools. Turning her off does not erase the memory.", "Там, где Aiko включена, она читает каждое твоё сообщение, чтобы память не устаревала, и добавляет в settings.json этой среды одну строку: разрешение на два своих инструмента памяти. Выключение память не стирает."),
+        "SkillsWhere": ("Skills work in the environments where Aiko is on.", "Навыки работают в тех средах, где Aiko включена."),
         "PersonaOwnStyle": ("While the personality is on, your style {0} doesn't work. Turn it off and it comes back.", "Пока личность включена, твой стиль {0} не работает. Выключишь — вернётся."),
         "SectionFace": ("MOOD", "НАСТРОЕНИЕ"),
         "FaceChibi": ("Chibi", "Чиби"),
@@ -373,9 +366,6 @@ public enum Strings {
         "MemoryFull": ("This section is full. Remove a fact to add a new one.", "Раздел заполнен. Удали факт, чтобы добавить новый."),
         "MemoryWriteFailed": ("Aiko could not write the memory file. Nothing changed.", "Aiko не смогла записать файл памяти. Ничего не изменилось."),
         "SectionSkills": ("SKILLS · {0}", "НАВЫКИ · {0}"),
-        "SkillsWork": ("Skills work in environments where the personality is on.", "Навыки работают в средах, где включена личность."),
-        "SkillsSwitch": ("Aiko's skills", "Навыки Aiko"),
-        "SkillsNeedPersona": ("Turn the personality on in at least one environment, and the skills start working.", "Включи личность хотя бы в одной среде — тогда навыки заработают."),
         "SkillDomainProjects": ("PROJECT MANAGEMENT", "УПРАВЛЕНИЕ ПРОЕКТАМИ"),
         "SkillDomainGames": ("GAME DEVELOPMENT", "РАЗРАБОТКА ИГР"),
         "SkillAikoCopy": ("Texts that sound like a person wrote them: UI, README, release notes. Russian and English.", "Тексты, которые звучат как написанные человеком: интерфейс, README, заметки к релизу. На русском и английском."),
@@ -392,8 +382,8 @@ public enum Strings {
         "SkillAikoCalendar": ("Plans your day in Google Calendar and finds free time. Adds events only after your yes.", "Планирует день по Google Calendar и ищет свободное время. События добавляет только после твоего «да»."),
         "SkillAikoDrive": ("Reads documents from Google Drive and puts project files onto Drive.", "Берёт документы с Google Drive в работу и кладёт файлы проекта на Drive."),
         "ItemMeetAiko": ("Meet Aiko", "Познакомься с Aiko"),
-        "MeetAikoLead": ("Aiko can talk in your Claude Code sessions in her own voice, and she brings eleven skills. In code and commits she stays quiet.", "Aiko может говорить в твоих сессиях Claude Code своим голосом и приносит одиннадцать навыков. В коде и коммитах она молчит."),
-        "MeetAikoSettings": ("The temperament, the mood and the skills are on the Personality page. It works in new sessions.", "Темперамент, настроение и навыки — на странице «Личность». Действует в новых сессиях."),
+        "MeetAikoLead": ("Aiko can talk in your Claude Code sessions in her own voice. She brings her skills and a small memory about you. In code and commits she stays quiet.", "Aiko может отвечать в твоих сессиях Claude Code своим голосом. С ней приходят её навыки и небольшая память о тебе. В коде и коммитах она молчит."),
+        "MeetAikoSettings": ("The temperament, the mood, the skills and the memory are on the Personality page. It works in new sessions.", "Темперамент, настроение, навыки и память — на странице «Личность». Действует в новых сессиях."),
         "MeetAikoTurnOn": ("Turn on in {0}", "Включить в среде {0}"),
         "StateOn": ("on", "включена"),
     ]
@@ -1142,12 +1132,6 @@ public enum Strings {
     /// the personality is on in at least one environment
     public static var sentPersona: String { Strings.get("SentPersona") }
 
-    /// the skills are on in at least one environment
-    public static var sentSkills: String { Strings.get("SentSkills") }
-
-    /// the memory is on in at least one environment
-    public static var sentMemory: String { Strings.get("SentMemory") }
-
     /// None of this is sent right now.
     public static var nothingSentYet: String { Strings.get("NothingSentYet") }
 
@@ -1199,32 +1183,17 @@ public enum Strings {
     /// not chosen
     public static var statsStateUnset: String { Strings.get("StatsStateUnset") }
 
-    /// WHERE AIKO TALKS
-    public static var sectionWhereAikoTalks: String { Strings.get("SectionWhereAikoTalks") }
+    /// WHERE AIKO IS ON
+    public static var sectionWhereAikoIsOn: String { Strings.get("SectionWhereAikoIsOn") }
 
-    /// WHAT IS ON, BY ENVIRONMENT
-    public static var sectionWhatIsOn: String { Strings.get("SectionWhatIsOn") }
+    /// Her character, her skills and her memory come together. Works in new sessions; open sessi...
+    public static var aikoOnNote: String { Strings.get("AikoOnNote") }
 
-    /// PERSONALITY
-    public static var columnPersonality: String { Strings.get("ColumnPersonality") }
+    /// Where Aiko is on, she reads each message you send to keep her memory fresh, and adds one ...
+    public static var aikoOnWhat: String { Strings.get("AikoOnWhat") }
 
-    /// SKILLS
-    public static var columnSkills: String { Strings.get("ColumnSkills") }
-
-    /// MEMORY
-    public static var columnMemory: String { Strings.get("ColumnMemory") }
-
-    /// Skills and memory work only together with the personality. Works in new sessions.
-    public static var switchesNote: String { Strings.get("SwitchesNote") }
-
-    /// With memory on, Aiko adds one line to that environment's settings.json: a permission for ...
-    public static var memoryPermissionNote: String { Strings.get("MemoryPermissionNote") }
-
-    /// Skills work in the environments where they are on.
+    /// Skills work in the environments where Aiko is on.
     public static var skillsWhere: String { Strings.get("SkillsWhere") }
-
-    /// Works in new sessions. Open sessions finish the way they started.
-    public static var personaNewSessions: String { Strings.get("PersonaNewSessions") }
 
     /// While the personality is on, your style {0} doesn't work. Turn it off and it comes back.
     public static var personaOwnStyle: String { Strings.get("PersonaOwnStyle") }
@@ -1397,15 +1366,6 @@ public enum Strings {
     /// SKILLS · {0}
     public static var sectionSkills: String { Strings.get("SectionSkills") }
 
-    /// Skills work in environments where the personality is on.
-    public static var skillsWork: String { Strings.get("SkillsWork") }
-
-    /// Aiko's skills
-    public static var skillsSwitch: String { Strings.get("SkillsSwitch") }
-
-    /// Turn the personality on in at least one environment, and the skills start working.
-    public static var skillsNeedPersona: String { Strings.get("SkillsNeedPersona") }
-
     /// PROJECT MANAGEMENT
     public static var skillDomainProjects: String { Strings.get("SkillDomainProjects") }
 
@@ -1454,10 +1414,10 @@ public enum Strings {
     /// Meet Aiko
     public static var itemMeetAiko: String { Strings.get("ItemMeetAiko") }
 
-    /// Aiko can talk in your Claude Code sessions in her own voice, and she brings eleven skills...
+    /// Aiko can talk in your Claude Code sessions in her own voice. She brings her skills and a ...
     public static var meetAikoLead: String { Strings.get("MeetAikoLead") }
 
-    /// The temperament, the mood and the skills are on the Personality page. It works in new ses...
+    /// The temperament, the mood, the skills and the memory are on the Personality page. It work...
     public static var meetAikoSettings: String { Strings.get("MeetAikoSettings") }
 
     /// Turn on in {0}

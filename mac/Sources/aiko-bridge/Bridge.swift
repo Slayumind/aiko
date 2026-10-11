@@ -213,7 +213,6 @@ enum Bridge {
                 folders: folders,
                 configDirectory: configDirectory(folders),
                 personaJson: Disk.readIfThere(folders.personaFile) ?? "",
-                environmentsJson: Disk.readIfThere(folders.environmentsFile) ?? "",
                 bridgePath: bridge)
 
             if !FileManager.default.fileExists(atPath: build.folder) {

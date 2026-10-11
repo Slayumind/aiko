@@ -33,8 +33,8 @@ final class EnvironmentsEditor {
             addReminderHooks(next)
         }
 
-        if pluginSwitches(before) != pluginSwitches(next) {
-            PluginSync.request("switches changed")
+        if personaFolders(before) != personaFolders(next) {
+            PluginSync.request("persona switched")
         }
 
         Log.write("settings: \(what)")
@@ -106,14 +106,8 @@ final class EnvironmentsEditor {
         Set(settings.environments.map { $0.command.lowercased() })
     }
 
-    /// What Claude Code must hear about: the three switches of every folder. The persona and the
-    /// skills are plugins, and the memory changes the files of the persona plugin.
-    private func pluginSwitches(_ settings: EnvironmentSettings) -> Set<String> {
-        Set(settings.environments.flatMap { environment in
-            environment.configDirectories.map { folder in
-                "\(folder)|\(environment.persona)|\(environment.hasSkills)|\(environment.hasMemory)".lowercased()
-            }
-        })
+    private func personaFolders(_ settings: EnvironmentSettings) -> Set<String> {
+        Set(settings.environments.filter(\.persona).flatMap(\.configDirectories).map { $0.lowercased() })
     }
 
     private func hasBindings(_ settings: EnvironmentSettings) -> Bool {

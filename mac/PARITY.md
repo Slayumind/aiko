@@ -3,8 +3,8 @@
 The macOS app repeats the Windows core, so every ported file keeps its behaviour and every xUnit
 case has a Swift case with the same name and the same numbers. Test counts below are cases, not
 methods: one `[Theory]` with five `[InlineData]` rows counts as five, and so does the Swift
-`@Test(arguments:)` that mirrors it. `dotnet test` prints cases and says 1001; `swift test` prints
-methods, not cases, and says 776. The 49 the Swift side does not have are named at the bottom; the ones it has and Windows
+`@Test(arguments:)` that mirrors it. `dotnet test` prints cases and says 984; `swift test` prints
+methods, not cases, and says 762. The 49 the Swift side does not have are named at the bottom; the ones it has and Windows
 does not belong to the two small programs, whose decisions sit inline in `Program.cs` on Windows,
 and to the card words, the island and the settings window, which sit in `Aiko.App` on Windows
 where no test can reach them.
@@ -36,10 +36,10 @@ a row cannot change in one core and stay as it was in the other. See `spec/cases
 | SessionActivity.cs | SessionActivity.swift | 6 | 6 | what a hook means and what a broken record reads as are in `spec/cases/hook-events/` |
 | Heartbeat.cs | Heartbeat.swift | 17 | 17 | |
 | SessionReminder.cs | SessionReminder.swift | 18 | 20 | its other 6 C# cases are about the hook in settings.json and sit in SettingsJsonPatchTests; 8 Swift cases of its own read the system language from a tag (MacLanguageTests) |
-| PersonaSettings.cs | PersonaSettings.swift | 15 | 15 | |
+| PersonaSettings.cs | PersonaSettings.swift | 10 | 10 | |
 | PersonaPrompt.cs | PersonaPrompt.swift, PersonaPlugin.swift | 33 | 33 | the prompt text and the plugin files hash the same in both languages |
 | PersonaPluginOutput.cs | PersonaPluginOutput.swift | 7 | 7 | |
-| PersonaPlugin.cs and PersonaPluginOutput.cs with the memory | PersonaPlugin.swift, PersonaPluginOutput.swift | 16 | 16 | PersonaPluginMemoryTests: the hooks and the server the memory adds, and the `synced` note with the hash of the plugin Claude Code last took |
+| PersonaPlugin.cs and PersonaPluginOutput.cs with the memory | PersonaPlugin.swift, PersonaPluginOutput.swift | 13 | 13 | PersonaPluginMemoryTests: the memory hooks and the server the plugin always carries, and the `synced` note with the hash of the plugin Claude Code last took |
 | SkillCatalog.cs | SkillCatalog.swift | 3 | 3 | |
 | SkillPlugin.cs | SkillPlugin.swift | 17 | 17 | |
 | ClaudeAccount.cs | ClaudeAccount.swift | 16 | 16 | 2 of them are about ClaudeConfigFolder, as in the xUnit file |
@@ -64,7 +64,7 @@ a row cannot change in one core and stay as it was in the other. See `spec/cases
 | CommandLinks.cs | CommandLinks.swift | 3 | 3 | |
 | AikoMarketplace.cs | AikoMarketplace.swift | — | — | its cases sit in PluginPlanTests and SkillPluginTests |
 | AppSettings.cs | AppSettings.swift | 15 | 15 | |
-| WizardChecklist.cs | WizardChecklist.swift | 13 | 13 | |
+| WizardChecklist.cs | WizardChecklist.swift | 14 | 14 | |
 | CredentialFile.cs | CredentialFile.swift | 10 | 10 | `TryParse` with an out parameter is `parse`, which answers nil |
 | MemoryFact.cs, MemoryFile.cs | MemoryFact.swift, MemoryFile.swift | 65 | 65 | an entry Aiko cannot use goes back into the file as it was written, which Swift reads with `JsonRawText`; the file is the same in both cores apart from the line ends |
 | MemoryRules.cs, MemoryEdits.cs | MemoryRules.swift, MemoryEdits.swift | 44 | 44 | what may be a key, when a key is found and how long a fact may be are in `spec/cases/memory-keys/` and `memory-limits/`; lengths are UTF-16 units in both |
@@ -197,7 +197,7 @@ AikoKit decided, and it answers the mouse.
 | Settings/EnvironmentsEditor.cs | Settings/SettingsState.swift | what the window is looking at, and every change written through one place |
 | Settings/EnvironmentPage.xaml(.cs) | Settings/EnvironmentPageView.swift | one environment: the account, the name, the command, the bound folders and removal |
 | Settings/FoldersPage.xaml(.cs) | Settings/FoldersPageView.swift | every bound folder in one table |
-| Settings/PersonalityPage.xaml(.cs) | Settings/PersonalityPageView.swift | the table of switches (a row per environment; the personality, the skills, the memory), the face, the temperament, the sample answer and the list of skills |
+| Settings/PersonalityPage.xaml(.cs) | Settings/PersonalityPageView.swift | one switch per environment for all of Aiko (her character, her skills and her memory), the memory block, the face, the temperament, the sample answer and the list of skills |
 | Settings/MemoryBlock.cs | Settings/MemoryBlockView.swift, MemoryBlockModel.swift | the memory under the table: quotas, facts, the two forms, the warnings, the foot and the erase question. The model keeps what is open and has the snapshot door `AIKO_TRY_MEMORY` |
 | Settings/MemoryStore.cs | Settings/MemoryStore.swift | the memory file for the window: the bridge's lock file, read again, change, write in one step |
 | Settings/PrivacyPage.xaml(.cs) | Settings/PrivacyPageView.swift | the two consents and the list of fields that would be sent |

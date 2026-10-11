@@ -43,17 +43,6 @@ public enum PersonaPluginOutput {
         args == [verb, PersonaPlugin.name]
     }
 
-    /// Whether the plugin for this Claude Code folder brings the memory. The bridge knows only the
-    /// folder it runs in, so the environment is found by it. A folder of no environment has none.
-    public static func hasMemory(_ environments: EnvironmentSettings, _ configDirectory: String?) -> Bool {
-        guard let folder = configDirectory,
-              !folder.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            return false
-        }
-
-        return environments.environments.contains { $0.hasMemory && $0.holds(folder) }
-    }
-
     /// Old folders to delete: every other version older than keepOldFor. Folders that are not a
     /// version at all, such as a temporary folder of a build still running, are left alone.
     public static func staleFolders(

@@ -231,10 +231,10 @@ enum PluginSync {
                 }
             }
 
-        // The permission for the memory tools follows the memory switch. Where the rule is already
-        // right this only reads the file.
+        // The permission for the memory tools goes with Aiko: on where she is on, off where she is
+        // off. Where the rule is already right this only reads the file.
         for folder in folders {
-            _ = ClaudeSettingsFile.setMemoryPermission(folder.folder, allowed: folder.environment.hasMemory)
+            _ = ClaudeSettingsFile.setMemoryPermission(folder.folder, allowed: folder.environment.persona)
         }
 
         // With the persona off everywhere and nothing of ours installed, Aiko writes nothing at all.
@@ -276,8 +276,7 @@ enum PluginSync {
     private static func personaHash(_ environment: AikoEnvironment) -> String? {
         guard environment.persona, let bridge = BridgePath.current() else { return nil }
 
-        return PersonaPlugin.contentHash(
-            PersonaPlugin.files(Store.persona().temperament, bridge, memory: environment.hasMemory))
+        return PersonaPlugin.contentHash(PersonaPlugin.files(Store.persona().temperament, bridge))
     }
 
     private static func isStale(_ folder: String, _ hash: String?) -> Bool {

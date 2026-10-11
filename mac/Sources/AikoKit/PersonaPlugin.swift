@@ -24,20 +24,18 @@ public enum PersonaPlugin {
     /// without the tool part covers the whole server.
     public static let memoryPermission = "mcp__plugin_\(name)_\(memoryServer)"
 
-    /// Relative path with forward slashes to file content, in the order the paths sort. With the
-    /// memory on, the plugin also brings the memory hooks and the server with the remember and
-    /// forget tools.
+    /// Relative path with forward slashes to file content, in the order the paths sort. The plugin
+    /// is all of Aiko in a session except her skills: the style she talks in, the hooks behind her
+    /// face, the memory hooks and the server with the remember and forget tools (D-285).
     public static func files(
-        _ temperament: Temperament, _ bridgePath: String, memory: Bool = false
+        _ temperament: Temperament, _ bridgePath: String
     ) -> [(path: String, content: String)] {
-        var files = [(path: ".claude-plugin/plugin.json", content: manifest())]
-        if memory {
-            files.append((".mcp.json", servers(bridgePath)))
-        }
-
-        files.append(("hooks/hooks.json", hooks(bridgePath, memory: memory)))
-        files.append(("output-styles/aiko.md", PersonaPrompt.styleFile(temperament)))
-        return files
+        [
+            (".claude-plugin/plugin.json", manifest()),
+            (".mcp.json", servers(bridgePath)),
+            ("hooks/hooks.json", hooks(bridgePath)),
+            ("output-styles/aiko.md", PersonaPrompt.styleFile(temperament)),
+        ]
     }
 
     /// Twelve hex characters of SHA-256 over the paths and contents. The bridge names the folder
@@ -55,7 +53,7 @@ public enum PersonaPlugin {
     private static func manifest() -> String {
         let object = JsonObject([
             ("name", .string(name)),
-            ("description", .string("Aiko's persona and the hooks behind her face in the tray.")),
+            ("description", .string("Aiko's persona, her memory and the hooks behind her face in the tray.")),
         ])
         return JsonNode.object(object).toJsonString(indented: true, escaping: .relaxed) + "\n"
     }
@@ -66,24 +64,22 @@ public enum PersonaPlugin {
     /// The memory hooks are not async: their output is what the model must read, the rules and the
     /// facts at the start of a session and the reminder beside a message. The rules and the facts
     /// are two hooks because Claude Code cuts each hook output on its own.
-    private static func hooks(_ bridgePath: String, memory: Bool) -> String {
+    private static func hooks(_ bridgePath: String) -> String {
         var events = JsonObject()
         for name in hookEvents {
             var hooks = [faceHook(bridgePath)]
-            if memory && name == "UserPromptSubmit" {
+            if name == "UserPromptSubmit" {
                 hooks.append(memoryHook(bridgePath, .prompt))
             }
 
             events[name] = .array([.object(JsonObject([("hooks", .array(hooks))]))])
         }
 
-        if memory {
-            events["SessionStart"] = .array([
-                .object(JsonObject([
-                    ("hooks", .array([memoryHook(bridgePath, .rules), memoryHook(bridgePath, .facts)]))
-                ]))
-            ])
-        }
+        events["SessionStart"] = .array([
+            .object(JsonObject([
+                ("hooks", .array([memoryHook(bridgePath, .rules), memoryHook(bridgePath, .facts)]))
+            ]))
+        ])
 
         let root = JsonObject([("hooks", .object(events))])
         return JsonNode.object(root).toJsonString(indented: true, escaping: .relaxed) + "\n"

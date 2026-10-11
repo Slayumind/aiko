@@ -14,8 +14,8 @@ public enum FaceStyle: String, Sendable, Equatable, CaseIterable {
     case emoji = "Emoji"
 }
 
-/// Aiko herself: one temperament, one face and one skills switch for all environments (D-196).
-/// Whether she talks in an environment is a flag of that environment, not stored here.
+/// Aiko herself: one temperament and one face for all environments (D-196). Whether she is on in
+/// an environment is a flag of that environment, not stored here.
 public struct PersonaSettings: Sendable, Equatable {
     /// See AppSettings.CurrentSchema for why this is written from the start.
     public static let currentSchema = 1
@@ -24,19 +24,14 @@ public struct PersonaSettings: Sendable, Equatable {
     public var temperament: Temperament
     public var face: FaceStyle
 
-    /// All of Aiko's skills at once: they are one plugin, and it is on or off as a whole (D-237).
-    public var skillsOn: Bool
-
     public init(
         schemaVersion: Int = PersonaSettings.currentSchema,
         temperament: Temperament = .normal,
-        face: FaceStyle = .chibi,
-        skillsOn: Bool = true
+        face: FaceStyle = .chibi
     ) {
         self.schemaVersion = schemaVersion
         self.temperament = temperament
         self.face = face
-        self.skillsOn = skillsOn
     }
 
     public static let `default` = PersonaSettings()
@@ -66,12 +61,6 @@ public struct PersonaSettings: Sendable, Equatable {
             guard let face = named(value, FaceStyle.allCases) else { return `default` }
             settings.face = face
         }
-        if let value = file["skillsOn"] {
-            guard let on = value.boolValue else { return `default` }
-            settings.skillsOn = on
-        } else {
-            settings.skillsOn = !everyOldSkillIsOff(file["disabledSkills"])
-        }
 
         return settings
     }
@@ -81,7 +70,6 @@ public struct PersonaSettings: Sendable, Equatable {
             ("schemaVersion", .number(String(schemaVersion))),
             ("temperament", .string(temperament.rawValue)),
             ("face", .string(face.rawValue)),
-            ("skillsOn", .bool(skillsOn)),
         ])
         return JsonNode.object(object).toJsonString(indented: true) + "\n"
     }
@@ -98,27 +86,4 @@ public struct PersonaSettings: Sendable, Equatable {
         }
         return nil
     }
-
-    /// Up to 0.2.1 each skill had its own switch, kept as a list of the skills switched off, first
-    /// as aiko-copy and later as copy (D-197, D-234). A file from then keeps the skills off only if
-    /// every one of them was off; any skill left on means the person wanted skills.
-    private static func everyOldSkillIsOff(_ disabled: JsonNode?) -> Bool {
-        guard let list = disabled?.arrayValue else {
-            return false
-        }
-
-        let off = Set(list.compactMap { $0.stringValue }.map { name in
-            name.hasPrefix(oldPrefix) ? String(name.dropFirst(oldPrefix.count)) : name
-        })
-
-        return oldSkills.allSatisfy(off.contains)
-    }
-
-    private static let oldPrefix = "aiko-"
-
-    /// The skills that had a switch of their own, before the one switch.
-    private static let oldSkills = [
-        "copy", "release-gate", "docs-hygiene", "blender-to-unity", "texturing", "glb-for-web",
-        "palette", "gamedesign-research",
-    ]
 }

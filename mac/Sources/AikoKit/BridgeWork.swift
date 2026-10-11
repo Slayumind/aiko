@@ -184,12 +184,10 @@ public enum BridgeWork {
         folders: AikoFolders,
         configDirectory: String,
         personaJson: String,
-        environmentsJson: String = "",
         bridgePath: String
     ) -> PersonaPluginBuild {
         let persona = PersonaSettings.fromJson(personaJson)
-        let memory = PersonaPluginOutput.hasMemory(EnvironmentSettings.fromJson(environmentsJson), configDirectory)
-        let files = PersonaPlugin.files(persona.temperament, bridgePath, memory: memory)
+        let files = PersonaPlugin.files(persona.temperament, bridgePath)
         let folder = PersonaPluginOutput.versionFolder(
             folders, configDirectory, PersonaPlugin.contentHash(files))
         return PersonaPluginBuild(folder: folder, files: files)
