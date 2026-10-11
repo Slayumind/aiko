@@ -19,6 +19,9 @@ struct GeneralPageView: View {
     @State private var percent = 0
     @State private var asking = false
     @State private var deleteAsking = false
+    /// Whether the memory holds something, read when the question opens, and the person's answer.
+    @State private var memoryToKeep = false
+    @State private var keepMemory = true
     @State private var diagnostics = Strings.diagnosticsWhat
     @State private var accessLine = ""
     @State private var offeringToAdd = false
@@ -411,7 +414,13 @@ struct GeneralPageView: View {
                 HStack(spacing: 12) {
                     Control.rowHint(Strings.deleteWhat)
                     Spacer(minLength: 12)
-                    FlatButton(title: Strings.delete, look: .ghostDanger) { deleteAsking = true }
+                    FlatButton(title: Strings.delete, look: .ghostDanger) {
+                        // The memory is the one thing here the person cannot make again, so it
+                        // stays unless they say no. With nothing in it there is nothing to ask.
+                        memoryToKeep = Uninstall.memoryIsWorthKeeping
+                        keepMemory = true
+                        deleteAsking = true
+                    }
                         .padding(.trailing, -10)
                 }
             }
@@ -425,6 +434,20 @@ struct GeneralPageView: View {
                         .foregroundStyle(Theme.ink)
                         .fixedSize(horizontal: false, vertical: true)
 
+                    if memoryToKeep {
+                        Tick(isOn: $keepMemory, title: Strings.deleteKeepMemory)
+                            .allowsHitTesting(!state.deleting)
+                            .padding(.top, 12)
+
+                        // The line under the tick says what the tick does now.
+                        Control.rowHint(keepMemory
+                            ? Strings.format(
+                                Strings.deleteMemoryStays,
+                                (MemoryStore.path as NSString).abbreviatingWithTildeInPath)
+                            : Strings.deleteMemoryGoes)
+                            .padding(.top, 6)
+                    }
+
                     Control.rowHint(Strings.deleteKeepMac).padding(.top, 8)
 
                     if !Uninstall.canBinTheApp {
@@ -437,7 +460,9 @@ struct GeneralPageView: View {
                         HStack(spacing: 8) {
                             Spacer()
                             FlatButton(title: Strings.cancel, look: .ghost) { deleteAsking = false }
-                            FlatButton(title: Strings.delete, look: .danger) { state.deleteAiko() }
+                            FlatButton(title: Strings.delete, look: .danger) {
+                                state.deleteAiko(keepMemory: keepMemory)
+                            }
                         }
                         .padding(.top, 12)
                     }
