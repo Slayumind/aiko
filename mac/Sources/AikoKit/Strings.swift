@@ -306,6 +306,13 @@ public enum Strings {
         "StatsStateOff": ("off", "выключена"),
         "StatsStateUnset": ("not chosen", "не выбрано"),
         "SectionWhereAikoTalks": ("WHERE AIKO TALKS", "ГДЕ AIKO ГОВОРИТ"),
+        "SectionWhatIsOn": ("WHAT IS ON, BY ENVIRONMENT", "ЧТО ВКЛЮЧЕНО В СРЕДАХ"),
+        "ColumnPersonality": ("PERSONALITY", "ЛИЧНОСТЬ"),
+        "ColumnSkills": ("SKILLS", "НАВЫКИ"),
+        "ColumnMemory": ("MEMORY", "ПАМЯТЬ"),
+        "SwitchesNote": ("Memory works only together with the personality. Works in new sessions.", "Память работает только вместе с личностью. Действует в новых сессиях."),
+        "MemoryPermissionNote": ("With memory on, Aiko adds one line to that environment's settings.json: a permission for its two memory tools.", "Когда память включена, Aiko добавляет в settings.json этой среды одну строку: разрешение на два своих инструмента памяти."),
+        "SkillsWhere": ("Skills work in the environments where they are on.", "Навыки работают в тех средах, где они включены."),
         "PersonaNewSessions": ("Works in new sessions. Open sessions finish the way they started.", "Действует в новых сессиях. Открытые сессии доработают как были."),
         "PersonaOwnStyle": ("While the personality is on, your style {0} doesn't work. Turn it off and it comes back.", "Пока личность включена, твой стиль {0} не работает. Выключишь — вернётся."),
         "SectionFace": ("MOOD", "НАСТРОЕНИЕ"),
@@ -1157,6 +1164,27 @@ public enum Strings {
 
     /// WHERE AIKO TALKS
     public static var sectionWhereAikoTalks: String { Strings.get("SectionWhereAikoTalks") }
+
+    /// WHAT IS ON, BY ENVIRONMENT
+    public static var sectionWhatIsOn: String { Strings.get("SectionWhatIsOn") }
+
+    /// PERSONALITY
+    public static var columnPersonality: String { Strings.get("ColumnPersonality") }
+
+    /// SKILLS
+    public static var columnSkills: String { Strings.get("ColumnSkills") }
+
+    /// MEMORY
+    public static var columnMemory: String { Strings.get("ColumnMemory") }
+
+    /// Memory works only together with the personality. Works in new sessions.
+    public static var switchesNote: String { Strings.get("SwitchesNote") }
+
+    /// With memory on, Aiko adds one line to that environment's settings.json: a permission for ...
+    public static var memoryPermissionNote: String { Strings.get("MemoryPermissionNote") }
+
+    /// Skills work in the environments where they are on.
+    public static var skillsWhere: String { Strings.get("SkillsWhere") }
 
     /// Works in new sessions. Open sessions finish the way they started.
     public static var personaNewSessions: String { Strings.get("PersonaNewSessions") }
