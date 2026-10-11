@@ -182,7 +182,7 @@
     <value>Once a day Aiko asks slayumind.org for the latest version. The files come from GitHub, and Aiko checks their signature before it replaces anything.</value>
   </data>
   <data name="CheckNow" xml:space="preserve">
-    <value>Check now</value>
+    <value>Check for updates</value>
   </data>
   <data name="OpenDownloadPage" xml:space="preserve">
     <value>Open download page</value>
@@ -191,25 +191,37 @@
     <value>Aiko is asking slayumind.org…</value>
   </data>
   <data name="UpdateAvailable" xml:space="preserve">
-    <value>Version {0} is available.</value>
+    <value>Aiko {0} is out</value>
   </data>
   <data name="UpdateLatest" xml:space="preserve">
-    <value>Aiko {0} is the latest version.</value>
+    <value>The latest version is installed</value>
+  </data>
+  <data name="UpdateThisVersion" xml:space="preserve">
+    <value>Aiko {0}</value>
+  </data>
+  <data name="UpdateCheckedAt" xml:space="preserve">
+    <value>Aiko {0} · checked at {1}</value>
+  </data>
+  <data name="UpdateNow" xml:space="preserve">
+    <value>now {0}</value>
+  </data>
+  <data name="UpdateReadyDetail" xml:space="preserve">
+    <value>it starts after a restart</value>
   </data>
   <data name="UpdateFailed" xml:space="preserve">
     <value>Couldn't check. Try again in a few minutes.</value>
   </data>
   <data name="UpdateInstallNow" xml:space="preserve">
-    <value>Download and install</value>
+    <value>Install {0}</value>
   </data>
   <data name="UpdateDownloading" xml:space="preserve">
-    <value>Aiko is downloading {0}…</value>
+    <value>Downloading {0}</value>
   </data>
   <data name="UpdateReady" xml:space="preserve">
-    <value>Aiko {0} is ready. Restart to start using it.</value>
+    <value>Aiko {0} is ready</value>
   </data>
   <data name="UpdateRestartNow" xml:space="preserve">
-    <value>Restart now</value>
+    <value>Restart Aiko</value>
   </data>
   <data name="UpdateNotInstalled" xml:space="preserve">
     <value>This copy wasn't put here by the installer, so Aiko can't replace it. Use the download page.</value>
@@ -798,9 +810,6 @@
   </data>
   <data name="OpenPrivacyDoc" xml:space="preserve">
     <value>Open PRIVACY.md</value>
-  </data>
-  <data name="PrivacyLinkFromGeneral" xml:space="preserve">
-    <value>What Aiko sends and to whom — Privacy.</value>
   </data>
   <data name="WizardStats" xml:space="preserve">
     <value>Anonymous statistics</value>

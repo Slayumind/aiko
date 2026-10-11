@@ -352,8 +352,8 @@
   [
     "CheckNow",
     [
-      "Check now",
-      "Проверить сейчас"
+      "Check for updates",
+      "Проверить обновления"
     ]
   ],
   [
@@ -373,15 +373,43 @@
   [
     "UpdateAvailable",
     [
-      "Version {0} is available.",
-      "Вышла версия {0}."
+      "Aiko {0} is out",
+      "Вышла Aiko {0}"
     ]
   ],
   [
     "UpdateLatest",
     [
-      "Aiko {0} is the latest version.",
-      "Aiko {0} — самая свежая версия."
+      "The latest version is installed",
+      "Установлена последняя версия"
+    ]
+  ],
+  [
+    "UpdateThisVersion",
+    [
+      "Aiko {0}",
+      "Aiko {0}"
+    ]
+  ],
+  [
+    "UpdateCheckedAt",
+    [
+      "Aiko {0} · checked at {1}",
+      "Aiko {0} · проверено в {1}"
+    ]
+  ],
+  [
+    "UpdateNow",
+    [
+      "now {0}",
+      "сейчас {0}"
+    ]
+  ],
+  [
+    "UpdateReadyDetail",
+    [
+      "it starts after a restart",
+      "встанет после перезапуска"
     ]
   ],
   [
@@ -394,29 +422,29 @@
   [
     "UpdateInstallNow",
     [
-      "Download and install",
-      "Скачать и установить"
+      "Install {0}",
+      "Установить {0}"
     ]
   ],
   [
     "UpdateDownloading",
     [
-      "Aiko is downloading {0}…",
-      "Aiko скачивает {0}…"
+      "Downloading {0}",
+      "Скачивается {0}"
     ]
   ],
   [
     "UpdateReady",
     [
-      "Aiko {0} is ready. Restart to start using it.",
-      "Aiko {0} готова. Перезапусти, чтобы перейти на неё."
+      "Aiko {0} is ready",
+      "Aiko {0} готова"
     ]
   ],
   [
     "UpdateRestartNow",
     [
-      "Restart now",
-      "Перезапустить"
+      "Restart Aiko",
+      "Перезапустить Aiko"
     ]
   ],
   [
@@ -1789,13 +1817,6 @@
     [
       "Open PRIVACY.md",
       "Открыть PRIVACY.md"
-    ]
-  ],
-  [
-    "PrivacyLinkFromGeneral",
-    [
-      "What Aiko sends and to whom — Privacy.",
-      "Что Aiko отправляет и кому — раздел «Приватность»."
     ]
   ],
   [

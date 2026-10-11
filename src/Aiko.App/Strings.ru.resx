@@ -182,7 +182,7 @@
     <value>Раз в сутки Aiko спрашивает у slayumind.org последнюю версию. Файлы приходят с GitHub, и Aiko проверяет их подпись, прежде чем что-то заменить.</value>
   </data>
   <data name="CheckNow" xml:space="preserve">
-    <value>Проверить сейчас</value>
+    <value>Проверить обновления</value>
   </data>
   <data name="OpenDownloadPage" xml:space="preserve">
     <value>Открыть страницу загрузки</value>
@@ -191,25 +191,37 @@
     <value>Aiko спрашивает slayumind.org…</value>
   </data>
   <data name="UpdateAvailable" xml:space="preserve">
-    <value>Вышла версия {0}.</value>
+    <value>Вышла Aiko {0}</value>
   </data>
   <data name="UpdateLatest" xml:space="preserve">
-    <value>Aiko {0} — самая свежая версия.</value>
+    <value>Установлена последняя версия</value>
+  </data>
+  <data name="UpdateThisVersion" xml:space="preserve">
+    <value>Aiko {0}</value>
+  </data>
+  <data name="UpdateCheckedAt" xml:space="preserve">
+    <value>Aiko {0} · проверено в {1}</value>
+  </data>
+  <data name="UpdateNow" xml:space="preserve">
+    <value>сейчас {0}</value>
+  </data>
+  <data name="UpdateReadyDetail" xml:space="preserve">
+    <value>встанет после перезапуска</value>
   </data>
   <data name="UpdateFailed" xml:space="preserve">
     <value>Проверить не получилось. Попробуй через несколько минут.</value>
   </data>
   <data name="UpdateInstallNow" xml:space="preserve">
-    <value>Скачать и установить</value>
+    <value>Установить {0}</value>
   </data>
   <data name="UpdateDownloading" xml:space="preserve">
-    <value>Aiko скачивает {0}…</value>
+    <value>Скачивается {0}</value>
   </data>
   <data name="UpdateReady" xml:space="preserve">
-    <value>Aiko {0} готова. Перезапусти, чтобы перейти на неё.</value>
+    <value>Aiko {0} готова</value>
   </data>
   <data name="UpdateRestartNow" xml:space="preserve">
-    <value>Перезапустить</value>
+    <value>Перезапустить Aiko</value>
   </data>
   <data name="UpdateNotInstalled" xml:space="preserve">
     <value>Эту копию поставил не установщик, поэтому Aiko не может её заменить. Открой страницу загрузки.</value>
@@ -798,9 +810,6 @@
   </data>
   <data name="OpenPrivacyDoc" xml:space="preserve">
     <value>Открыть PRIVACY.md</value>
-  </data>
-  <data name="PrivacyLinkFromGeneral" xml:space="preserve">
-    <value>Что Aiko отправляет и кому — раздел «Приватность».</value>
   </data>
   <data name="WizardStats" xml:space="preserve">
     <value>Анонимная статистика</value>

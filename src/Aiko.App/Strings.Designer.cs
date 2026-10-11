@@ -171,7 +171,7 @@ public static class Strings
     /// Once a day Aiko asks slayumind.org for the latest version. The files come from GitHub, an...
     public static string CheckUpdatesWhat => Get("CheckUpdatesWhat");
 
-    /// Check now
+    /// Check for updates
     public static string CheckNow => Get("CheckNow");
 
     /// Open download page
@@ -180,25 +180,37 @@ public static class Strings
     /// Aiko is asking slayumind.org…
     public static string UpdateAsking => Get("UpdateAsking");
 
-    /// Version {0} is available.
+    /// Aiko {0} is out
     public static string UpdateAvailable => Get("UpdateAvailable");
 
-    /// Aiko {0} is the latest version.
+    /// The latest version is installed
     public static string UpdateLatest => Get("UpdateLatest");
+
+    /// Aiko {0}
+    public static string UpdateThisVersion => Get("UpdateThisVersion");
+
+    /// Aiko {0} · checked at {1}
+    public static string UpdateCheckedAt => Get("UpdateCheckedAt");
+
+    /// now {0}
+    public static string UpdateNow => Get("UpdateNow");
+
+    /// it starts after a restart
+    public static string UpdateReadyDetail => Get("UpdateReadyDetail");
 
     /// Couldn't check. Try again in a few minutes.
     public static string UpdateFailed => Get("UpdateFailed");
 
-    /// Download and install
+    /// Install {0}
     public static string UpdateInstallNow => Get("UpdateInstallNow");
 
-    /// Aiko is downloading {0}…
+    /// Downloading {0}
     public static string UpdateDownloading => Get("UpdateDownloading");
 
-    /// Aiko {0} is ready. Restart to start using it.
+    /// Aiko {0} is ready
     public static string UpdateReady => Get("UpdateReady");
 
-    /// Restart now
+    /// Restart Aiko
     public static string UpdateRestartNow => Get("UpdateRestartNow");
 
     /// This copy wasn't put here by the installer, so Aiko can't replace it. Use the download page.
@@ -788,9 +800,6 @@ public static class Strings
 
     /// Open PRIVACY.md
     public static string OpenPrivacyDoc => Get("OpenPrivacyDoc");
-
-    /// What Aiko sends and to whom — Privacy.
-    public static string PrivacyLinkFromGeneral => Get("PrivacyLinkFromGeneral");
 
     /// Anonymous statistics
     public static string WizardStats => Get("WizardStats");

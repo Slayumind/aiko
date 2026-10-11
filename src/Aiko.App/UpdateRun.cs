@@ -14,10 +14,19 @@ static class UpdateRun
         return new StatsChoice(allowed, persona);
     }
 
+    /// When the site last answered in this run of the app, by the daily check or by the button.
+    /// The General page shows it, so "up to date" comes with "as of when".
+    public static DateTime? LastAnswered { get; private set; }
+
     public static async Task<UpdateInfo> AskAsync(CancellationToken cancel)
     {
         using var client = new UpdateClient();
         var answer = await client.AskAsync(Choice(), cancel).ConfigureAwait(true);
+
+        if (answer.Answered)
+        {
+            LastAnswered = DateTime.Now;
+        }
 
         if (answer.Answered && (answer.Week is not null || answer.Month is not null))
         {

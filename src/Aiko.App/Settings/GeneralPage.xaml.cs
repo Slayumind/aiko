@@ -25,6 +25,10 @@ public partial class GeneralPage : UserControl
     /// The version the site named, kept for the line shown while it downloads.
     private string? _newerVersion;
 
+    /// Where the update line stands, and what went wrong with the last download, in words.
+    private UpdateStage _stage = UpdateStage.NotAsked;
+    private string? _problem;
+
     /// Cancelled when the page goes away, so a request still in the air does not come back to
     /// controls that are gone.
     private readonly CancellationTokenSource _closing = new();
@@ -33,7 +37,8 @@ public partial class GeneralPage : UserControl
     {
         InitializeComponent();
         Fill();
-        ShowReady();
+        ShowUpdate(UpdateInstall.ReadyVersion is null ? UpdateStage.NotAsked : UpdateStage.Ready);
+        TryUpdateStage();
         LanguageChoiceDrop.Picked += OnLanguagePicked;
         Unloaded += (_, _) => _closing.Cancel();
     }
@@ -170,29 +175,59 @@ public partial class GeneralPage : UserControl
         _ => "the one Windows uses",
     };
 
-    /// Asked for by hand, so it runs whatever the switch says: the switch decides whether Aiko
-    /// checks on its own, not whether the person may ask.
-    private async void OnCheckNow(object sender, RoutedEventArgs e) => await CheckAsync();
+    /// A door for snapshots: AIKO_TRY_UPDATE=UpToDate, Available, Downloading, Ready, CheckFailed,
+    /// DownloadFailed or CannotInstall draws the update line at that stage, with a made-up version.
+    private void TryUpdateStage()
+    {
+        if (!Enum.TryParse<UpdateStage>(Environment.GetEnvironmentVariable("AIKO_TRY_UPDATE"), out var stage))
+        {
+            return;
+        }
+
+        _newerVersion = "9.9.9";
+        _problem = stage == UpdateStage.CannotInstall ? Strings.UpdateBadSignature : Strings.UpdateDownloadFailed;
+        ShowUpdate(stage);
+        if (stage == UpdateStage.Downloading)
+        {
+            ShowPercent(64);
+        }
+    }
 
     /// The tray menu has a "Check for updates" item. It opens this page and asks straight away, so
     /// the answer appears where the button already is.
     public async void StartUpdateCheck() => await CheckAsync();
 
+    /// The one button of the line does whatever is the next step from where the line stands.
+    private async void OnUpdateButton(object sender, RoutedEventArgs e)
+    {
+        switch (UpdateBlock.ActionFor(_stage))
+        {
+            // Asked for by hand, so it runs whatever the switch says: the switch decides whether
+            // Aiko checks on its own, not whether the person may ask.
+            case UpdateAction.Check:
+                await CheckAsync();
+                break;
+            case UpdateAction.Install:
+                await InstallAsync();
+                break;
+            case UpdateAction.Restart:
+                UpdateInstall.ApplyAndRestart();
+                break;
+            case UpdateAction.OpenDownloadPage:
+                OnOpenDownload(sender, e);
+                break;
+        }
+    }
+
     private async Task CheckAsync()
     {
-        if (!CheckNow.IsEnabled)
+        if (UpdateBlock.ActionFor(_stage) == UpdateAction.None)
         {
-            // Already asking. Two answers racing into one line is worse than one answer.
+            // Already asking or downloading. Two answers racing into one line is worse than one.
             return;
         }
 
-        CheckNow.IsEnabled = false;
-        UpdateLine.Text = Strings.UpdateAsking;
-        UpdateLine.Visibility = Visibility.Visible;
-        OpenDownload.Visibility = Visibility.Collapsed;
-        InstallUpdate.Visibility = Visibility.Collapsed;
-        RestartForUpdate.Visibility = Visibility.Collapsed;
-
+        ShowUpdate(UpdateStage.Asking);
         var info = await UpdateRun.AskAsync(_closing.Token).ConfigureAwait(true);
 
         // The window can be closed while the request is in the air, and touching its controls
@@ -202,61 +237,49 @@ public partial class GeneralPage : UserControl
             return;
         }
 
-        var version = AppVersion.Current();
-        var state = info.CompareWith(version);
-
-        UpdateLine.Text = state switch
-        {
-            UpdateState.Available => string.Format(Strings.UpdateAvailable, info.Latest),
-            UpdateState.UpToDate => string.Format(Strings.UpdateLatest, version),
-            // Never "you are up to date" when we do not know: that is the one answer that would
-            // keep every copy quiet after a bad deploy.
-            _ => Strings.UpdateFailed,
-        };
-
+        var state = info.CompareWith(AppVersion.Current());
         _newerVersion = state == UpdateState.Available ? info.Latest : null;
         _downloadUrl = info.DownloadUrl ?? ReleasesPage;
-        OpenDownload.Visibility = state == UpdateState.Available ? Visibility.Visible : Visibility.Collapsed;
-        InstallUpdate.Visibility = OpenDownload.Visibility;
-        CheckNow.IsEnabled = true;
 
         // A version that was already downloaded and checked in this session stays offered, whatever
         // the site says now.
-        ShowReady();
+        ShowUpdate(UpdateInstall.ReadyVersion is null ? UpdateBlock.After(state) : UpdateStage.Ready);
     }
 
     /// Downloads the new version and puts it in place only if the release list is signed with our
     /// key and the file matches its line (D-246). Pressing this is the consent to download; the
     /// restart asks once more.
-    private async void OnInstallUpdate(object sender, RoutedEventArgs e)
+    private async Task InstallAsync()
     {
-        InstallUpdate.IsEnabled = false;
-        CheckNow.IsEnabled = false;
-        UpdateLine.Text = string.Format(Strings.UpdateDownloading, _newerVersion ?? "");
-        UpdateLine.Visibility = Visibility.Visible;
+        ShowUpdate(UpdateStage.Downloading);
 
-        var outcome = await UpdateInstall.DownloadAsync(_closing.Token).ConfigureAwait(true);
+        // Velopack reports from its own thread; the number is shown on ours.
+        var outcome = await UpdateInstall
+            .DownloadAsync(percent => Dispatcher.BeginInvoke(() => ShowPercent(percent)), _closing.Token)
+            .ConfigureAwait(true);
 
         if (_closing.IsCancellationRequested)
         {
             return;
         }
 
-        UpdateLine.Text = Words(outcome);
-        InstallUpdate.Visibility = outcome.Step == InstallStep.Ready
-            ? Visibility.Collapsed
-            : Visibility.Visible;
-        InstallUpdate.IsEnabled = true;
-        CheckNow.IsEnabled = true;
-        ShowReady();
+        _problem = Words(outcome);
+        ShowUpdate(outcome.Step switch
+        {
+            InstallStep.Ready => UpdateStage.Ready,
+            InstallStep.NothingNewer => UpdateStage.UpToDate,
+            InstallStep.Failed => UpdateStage.DownloadFailed,
+
+            // A refusal never offers to try the same file again: the answer is the download page,
+            // where a person can look for themselves.
+            _ => UpdateStage.CannotInstall,
+        });
     }
 
-    /// The words for what came back. A refusal says what was refused and never offers to try the
-    /// same file again: the answer is the download page, where a person can look for themselves.
-    private static string Words(InstallOutcome outcome) => outcome.Step switch
+    /// The words for a download that did not end with a version ready to install.
+    private static string? Words(InstallOutcome outcome) => outcome.Step switch
     {
-        InstallStep.Ready => string.Format(Strings.UpdateReady, outcome.Version),
-        InstallStep.NothingNewer => string.Format(Strings.UpdateLatest, AppVersion.Current()),
+        InstallStep.Ready or InstallStep.NothingNewer => null,
         InstallStep.NotInstalled => Strings.UpdateNotInstalled,
         InstallStep.Failed => Strings.UpdateDownloadFailed,
         _ => outcome.Verdict switch
@@ -267,20 +290,53 @@ public partial class GeneralPage : UserControl
         },
     };
 
-    private void ShowReady()
+    /// Draws the line for a stage: what it says, the small print under it, and the one action.
+    private void ShowUpdate(UpdateStage stage)
     {
-        if (UpdateInstall.ReadyVersion is not { } ready)
-        {
-            return;
-        }
+        _stage = stage;
+        var version = AppVersion.Current();
+        var newer = UpdateInstall.ReadyVersion ?? _newerVersion ?? string.Empty;
+        var current = string.Format(Strings.UpdateThisVersion, version);
+        var comparing = string.Format(Strings.UpdateNow, version);
 
-        UpdateLine.Text = string.Format(Strings.UpdateReady, ready);
-        UpdateLine.Visibility = Visibility.Visible;
-        RestartForUpdate.Visibility = Visibility.Visible;
-        InstallUpdate.Visibility = Visibility.Collapsed;
+        (UpdateTitle.Text, UpdateDetail.Text) = stage switch
+        {
+            UpdateStage.Asking => (Strings.UpdateAsking, current),
+            UpdateStage.UpToDate => (Strings.UpdateLatest, UpdateRun.LastAnswered is { } at
+                ? string.Format(Strings.UpdateCheckedAt, version, at.ToString("HH:mm", System.Globalization.CultureInfo.InvariantCulture))
+                : current),
+            UpdateStage.Available => (string.Format(Strings.UpdateAvailable, newer), comparing),
+            UpdateStage.CheckFailed => (Strings.UpdateFailed, current),
+            UpdateStage.Downloading => (string.Format(Strings.UpdateDownloading, newer), comparing),
+            UpdateStage.Ready => (string.Format(Strings.UpdateReady, newer), Strings.UpdateReadyDetail),
+            UpdateStage.DownloadFailed or UpdateStage.CannotInstall => (_problem ?? Strings.UpdateDownloadFailed, comparing),
+            _ => (current, string.Empty),
+        };
+        UpdateDetail.Visibility = UpdateDetail.Text.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
+
+        var action = UpdateBlock.ActionFor(stage);
+        UpdateButton.Content = action switch
+        {
+            UpdateAction.Install => string.Format(Strings.UpdateInstallNow, newer),
+            UpdateAction.Restart => Strings.UpdateRestartNow,
+            UpdateAction.OpenDownloadPage => Strings.OpenDownloadPage,
+            _ => Strings.CheckNow,
+        };
+
+        // The step forward is the one bright button on the page; asking again is an ordinary one.
+        var forward = action is UpdateAction.Install or UpdateAction.Restart;
+        UpdateButton.Background = Tokens.Brush(forward ? "Ink" : "Raised");
+        UpdateButton.Foreground = Tokens.Brush(forward ? "Background" : "Ink");
+        UpdateButton.IsEnabled = action != UpdateAction.None;
+        UpdateButton.Visibility = stage == UpdateStage.Downloading ? Visibility.Collapsed : Visibility.Visible;
+        UpdatePercent.Visibility = stage == UpdateStage.Downloading ? Visibility.Visible : Visibility.Collapsed;
+        if (stage == UpdateStage.Downloading)
+        {
+            ShowPercent(0);
+        }
     }
 
-    private void OnRestartForUpdate(object sender, RoutedEventArgs e) => UpdateInstall.ApplyAndRestart();
+    private void ShowPercent(int percent) => UpdatePercent.Text = $"{UpdateBlock.Percent(percent)}%";
 
     private void OnOpenDownload(object sender, RoutedEventArgs e)
     {
