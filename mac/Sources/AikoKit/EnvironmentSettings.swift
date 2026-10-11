@@ -8,7 +8,8 @@ public struct AikoEnvironment: Sendable, Equatable {
     public var directMode: Bool
     public var persona: Bool
 
-    /// Whether Aiko's skills are in this environment. They do not need the persona (D-265).
+    /// What the person chose for Aiko's skills here. Like the memory, they work only together
+    /// with the persona (D-282), so read hasSkills to know whether they are on.
     public var skills: Bool
 
     /// What the person chose for the memory here. It works only together with the persona
@@ -41,7 +42,10 @@ public struct AikoEnvironment: Sendable, Equatable {
         self.projectFolders = projectFolders
     }
 
-    /// The choice is kept while the persona is off, so turning her on again brings the memory back.
+    /// Both choices are kept while the persona is off, so turning her on again brings back what
+    /// was on with her.
+    public var hasSkills: Bool { persona && skills }
+
     public var hasMemory: Bool { persona && memory }
 
     public var command: String { customCommand ?? LaunchCommand.fromEnvironmentName(name) }

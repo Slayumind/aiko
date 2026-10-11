@@ -19,7 +19,7 @@ static class UpdateRun
         return new StatsChoice(
             true,
             Persona: environments.Any(environment => environment.Persona),
-            Skills: environments.Any(environment => environment.Skills),
+            Skills: environments.Any(environment => environment.HasSkills),
             Memory: environments.Any(environment => environment.HasMemory));
     }
 

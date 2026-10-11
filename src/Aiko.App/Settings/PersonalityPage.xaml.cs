@@ -149,7 +149,7 @@ public partial class PersonalityPage : UserControl
         var name = environment.Name;
         var persona = SwitchFor(name, Strings.ColumnPersonality, environment.Persona, 1, on =>
             Commit(EnvironmentEdits.SetPersona(_editor.Current, name, on), on ? "turned the persona on" : "turned the persona off"));
-        var skills = SwitchFor(name, Strings.ColumnSkills, environment.Skills, 2, on =>
+        var skills = SwitchFor(name, Strings.ColumnSkills, environment.HasSkills, 2, on =>
             Commit(EnvironmentEdits.SetSkills(_editor.Current, name, on), on ? "turned the skills on" : "turned the skills off"));
         var memory = SwitchFor(name, Strings.ColumnMemory, environment.HasMemory, 3, on =>
             Commit(EnvironmentEdits.SetMemory(_editor.Current, name, on), on ? "turned the memory on" : "turned the memory off"));
@@ -227,7 +227,7 @@ public partial class PersonalityPage : UserControl
         foreach (var (row, environment) in _environmentRows.Zip(environments))
         {
             row.Persona.IsChecked = environment.Persona;
-            row.Skills.IsChecked = environment.Skills;
+            row.Skills.IsChecked = environment.HasSkills;
             row.Memory.IsChecked = environment.HasMemory;
         }
         _filling = false;
@@ -244,12 +244,16 @@ public partial class PersonalityPage : UserControl
             var persona = row.Persona.IsChecked == true;
             row.Warning.IsOpen = persona && row.OwnStyle is not null;
 
-            // The memory works only together with the persona, so without her the switch is locked.
-            row.Memory.IsEnabled = persona;
-            row.Memory.Opacity = persona ? 1 : 0.45;
+            // The skills and the memory work only together with the persona, so without her both
+            // switches are locked.
+            foreach (var locked in (ToggleButton[])[row.Skills, row.Memory])
+            {
+                locked.IsEnabled = persona;
+                locked.Opacity = persona ? 1 : 0.45;
+            }
         }
 
-        SkillGroups.Opacity = _editor.Current.Environments.Any(e => e.Skills) ? 1 : 0.45;
+        SkillGroups.Opacity = _editor.Current.Environments.Any(e => e.HasSkills) ? 1 : 0.45;
     }
 
     /// Read once when the page opens: the person changes it in their own settings.json, not here.

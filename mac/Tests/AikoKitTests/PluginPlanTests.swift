@@ -107,10 +107,8 @@ struct PluginPlanTests {
     }
 
     @Test
-    func theSkillsDoNotNeedThePersona() {
-        let desired = PluginPlan.desired(env(persona: false, skills: true), skills: ["copy"])
-
-        #expect(desired == ["aiko@aiko"])
+    func theSkillsDoNotComeWithoutThePersona() {
+        #expect(PluginPlan.desired(env(persona: false, skills: true), skills: ["copy"]).isEmpty)
     }
 
     @Test

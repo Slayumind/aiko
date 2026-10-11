@@ -104,8 +104,8 @@ public struct PluginState: Sendable, Equatable {
 
 /// Which of Aiko's plugins a folder should have, and the steps from what it has (D-197, D-234).
 public enum PluginPlan {
-    /// The persona where she is on, and the skills plugin where the skills are on and this Aiko
-    /// ships any. The two do not depend on each other (D-265).
+    /// The persona where she is on, and with her the skills plugin where the skills are on and
+    /// this Aiko ships any. She may be on without the skills, but not they without her (D-282).
     public static func desired(
         _ environment: AikoEnvironment, skills: [String]
     ) -> Set<String> {
@@ -114,7 +114,7 @@ public enum PluginPlan {
             desired.insert(AikoMarketplace.pluginId(PersonaPlugin.name))
         }
 
-        if environment.skills && !skills.isEmpty {
+        if environment.hasSkills && !skills.isEmpty {
             desired.insert(AikoMarketplace.pluginId(SkillCatalog.pluginName))
         }
 

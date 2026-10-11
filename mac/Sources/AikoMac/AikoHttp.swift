@@ -178,7 +178,7 @@ enum UpdateRun {
         // and nothing about what the skills or the memory hold.
         let environments = Store.environments().environments
         let persona = environments.contains(where: \.persona) ? 1 : 0
-        let skills = environments.contains(where: \.skills) ? 1 : 0
+        let skills = environments.contains(where: \.hasSkills) ? 1 : 0
         let memory = environments.contains(where: \.hasMemory) ? 1 : 0
 
         let address = plain

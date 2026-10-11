@@ -848,7 +848,7 @@
     <value>ПАМЯТЬ</value>
   </data>
   <data name="SwitchesNote" xml:space="preserve">
-    <value>Память работает только вместе с личностью. Действует в новых сессиях.</value>
+    <value>Навыки и память работают только вместе с личностью. Действует в новых сессиях.</value>
   </data>
   <data name="MemoryPermissionNote" xml:space="preserve">
     <value>Когда память включена, Aiko добавляет в settings.json этой среды одну строку: разрешение на два своих инструмента памяти.</value>

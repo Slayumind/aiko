@@ -312,7 +312,7 @@ public enum Strings {
         "ColumnPersonality": ("PERSONALITY", "ЛИЧНОСТЬ"),
         "ColumnSkills": ("SKILLS", "НАВЫКИ"),
         "ColumnMemory": ("MEMORY", "ПАМЯТЬ"),
-        "SwitchesNote": ("Memory works only together with the personality. Works in new sessions.", "Память работает только вместе с личностью. Действует в новых сессиях."),
+        "SwitchesNote": ("Skills and memory work only together with the personality. Works in new sessions.", "Навыки и память работают только вместе с личностью. Действует в новых сессиях."),
         "MemoryPermissionNote": ("With memory on, Aiko adds one line to that environment's settings.json: a permission for its two memory tools.", "Когда память включена, Aiko добавляет в settings.json этой среды одну строку: разрешение на два своих инструмента памяти."),
         "SkillsWhere": ("Skills work in the environments where they are on.", "Навыки работают в тех средах, где они включены."),
         "PersonaNewSessions": ("Works in new sessions. Open sessions finish the way they started.", "Действует в новых сессиях. Открытые сессии доработают как были."),
@@ -1214,7 +1214,7 @@ public enum Strings {
     /// MEMORY
     public static var columnMemory: String { Strings.get("ColumnMemory") }
 
-    /// Memory works only together with the personality. Works in new sessions.
+    /// Skills and memory work only together with the personality. Works in new sessions.
     public static var switchesNote: String { Strings.get("SwitchesNote") }
 
     /// With memory on, Aiko adds one line to that environment's settings.json: a permission for ...

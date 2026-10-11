@@ -145,11 +145,11 @@ Without direct mode, Aiko never touches the token.
 - `%APPDATA%\Aiko`: your settings, the list of environments, the random value described above,
   which week and month have already been reported, and the memory file once the memory is used.
 - `%LOCALAPPDATA%\Aiko`: the limit numbers from Claude Code, the last direct mode answer, a short
-  log, the local marketplace with the skills where they are on, and, where the personality is on,
-  the session state files and the personality plugin.
+  log, and, where the personality is on, the session state files, the personality plugin and the
+  local marketplace with the skills.
 - `%USERPROFILE%\.claude*\settings.json`: one line added by Aiko, with a copy of the original next
-  to it, Aiko's plugins and marketplace where the personality or the skills are on, and the
-  permission line for the memory tools where the memory is on. Claude Code keeps its own copies of
+  to it, Aiko's plugins and marketplace where the personality is on, and the permission line for
+  the memory tools where the memory is on. Claude Code keeps its own copies of
   those plugins in its `plugins` folder.
 - Your user `PATH`: Aiko's command folder at the start, if you agreed in the setup checklist.
 - Your PowerShell profile: the account-switching functions you ticked are turned off, with a copy of

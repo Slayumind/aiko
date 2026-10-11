@@ -848,7 +848,7 @@
     <value>MEMORY</value>
   </data>
   <data name="SwitchesNote" xml:space="preserve">
-    <value>Memory works only together with the personality. Works in new sessions.</value>
+    <value>Skills and memory work only together with the personality. Works in new sessions.</value>
   </data>
   <data name="MemoryPermissionNote" xml:space="preserve">
     <value>With memory on, Aiko adds one line to that environment's settings.json: a permission for its two memory tools.</value>

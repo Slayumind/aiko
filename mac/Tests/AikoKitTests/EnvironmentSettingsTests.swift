@@ -154,6 +154,17 @@ struct EnvironmentSettingsTests {
     }
 
     @Test
+    func theSkillsAreOnOnlyTogetherWithThePersona() {
+        var environment = AikoEnvironment("Aiko", [#"C:\x"#], skills: true)
+
+        #expect(!environment.hasSkills)
+        environment.persona = true
+        #expect(environment.hasSkills)
+        environment.skills = false
+        #expect(!environment.hasSkills)
+    }
+
+    @Test
     func theMemoryIsOnOnlyTogetherWithThePersona() {
         var environment = AikoEnvironment("Aiko", [#"C:\x"#], memory: true)
 

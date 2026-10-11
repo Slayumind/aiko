@@ -110,11 +110,9 @@ public class PluginPlanTests
     }
 
     [Fact]
-    public void The_skills_do_not_need_the_persona()
+    public void The_skills_do_not_come_without_the_persona()
     {
-        var desired = PluginPlan.Desired(Env(persona: false, skills: true), ["copy"]);
-
-        Assert.Equal(["aiko@aiko"], desired);
+        Assert.Empty(PluginPlan.Desired(Env(persona: false, skills: true), ["copy"]));
     }
 
     [Fact]

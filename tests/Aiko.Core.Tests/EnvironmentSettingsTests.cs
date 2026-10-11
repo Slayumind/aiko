@@ -175,6 +175,16 @@ public class EnvironmentSettingsTests
     }
 
     [Fact]
+    public void The_skills_are_on_only_together_with_the_persona()
+    {
+        var environment = new AikoEnvironment("Aiko", [@"C:\x"]) { Skills = true };
+
+        Assert.False(environment.HasSkills);
+        Assert.True((environment with { Persona = true }).HasSkills);
+        Assert.False((environment with { Persona = true, Skills = false }).HasSkills);
+    }
+
+    [Fact]
     public void The_memory_is_on_only_together_with_the_persona()
     {
         var environment = new AikoEnvironment("Aiko", [@"C:\x"]) { Memory = true };

@@ -190,14 +190,14 @@ struct EnvironmentEditsTests {
 
     @Test
     func anOldSkillsSwitchThatWasOffTurnsTheSkillsOffEverywhereOnce() {
-        let settings = EnvironmentEdits.setSkills(EnvironmentEdits.setSkills(twoEnvironments(), "Aiko", true), "Work", true)
+        let settings = withSkills(withSkills(twoEnvironments(), "Aiko"), "Work")
         var oldOff = PersonaSettings.default
         oldOff.skillsOn = false
         oldOff.temperament = .musou
 
         let carried = EnvironmentEdits.carryOldSkillsSwitch(settings, oldOff)
         let again = EnvironmentEdits.carryOldSkillsSwitch(
-            EnvironmentEdits.setSkills(carried.settings, "Work", true), carried.persona)
+            withSkills(carried.settings, "Work"), carried.persona)
 
         #expect(carried.changed)
         #expect(carried.settings.environments.allSatisfy { !$0.skills })
@@ -209,7 +209,7 @@ struct EnvironmentEditsTests {
 
     @Test
     func anOldSkillsSwitchThatWasOnChangesNothing() {
-        let settings = EnvironmentEdits.setSkills(twoEnvironments(), "Work", true)
+        let settings = withSkills(twoEnvironments(), "Work")
 
         let carried = EnvironmentEdits.carryOldSkillsSwitch(settings, .default)
 
@@ -217,13 +217,36 @@ struct EnvironmentEditsTests {
         #expect(carried.settings == settings)
     }
 
-    @Test
-    func theSkillsAreSwitchedWithoutThePersona() {
-        let settings = EnvironmentEdits.setSkills(twoEnvironments(), "Work", true)
+    /// The persona on and then the skills, the only order in which the skills can be turned on.
+    private func withSkills(_ settings: EnvironmentSettings, _ environment: String) -> EnvironmentSettings {
+        EnvironmentEdits.setSkills(EnvironmentEdits.setPersona(settings, environment, true), environment, true)
+    }
 
-        #expect(settings.environments[1].skills)
-        #expect(!settings.environments[1].persona)
-        #expect(!settings.environments[0].skills)
+    @Test
+    func theSkillsAreSwitchedOnlyWhereThePersonaIsOn() {
+        let withPersona = EnvironmentEdits.setPersona(twoEnvironments(), "Work", true)
+
+        let on = EnvironmentEdits.setSkills(withPersona, "Work", true)
+        let refused = EnvironmentEdits.setSkills(withPersona, "Aiko", true)
+
+        #expect(on.environments[1].hasSkills)
+        #expect(!refused.environments[0].skills)
+    }
+
+    @Test
+    func thePersonaMayBeOnWithoutTheSkills() {
+        let settings = EnvironmentEdits.setSkills(withSkills(twoEnvironments(), "Work"), "Work", false)
+
+        #expect(settings.environments[1].persona)
+        #expect(!settings.environments[1].hasSkills)
+    }
+
+    @Test
+    func turningThePersonaOffKeepsTheChoiceOfSkillsButTheSkillsAreOff() {
+        let off = EnvironmentEdits.setPersona(withSkills(twoEnvironments(), "Work"), "Work", false)
+
+        #expect(off.environments[1].skills)
+        #expect(!off.environments[1].hasSkills)
     }
 
     @Test

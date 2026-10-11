@@ -14,7 +14,7 @@ public sealed class EnvironmentsEditor
     /// skills are plugins, and the memory changes the files of the persona plugin.
     private static HashSet<string> PluginSwitches(EnvironmentSettings settings) =>
         settings.Environments
-            .SelectMany(e => e.ConfigDirectories.Select(folder => $"{folder}|{e.Persona}|{e.Skills}|{e.HasMemory}"))
+            .SelectMany(e => e.ConfigDirectories.Select(folder => $"{folder}|{e.Persona}|{e.HasSkills}|{e.HasMemory}"))
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
     private static readonly string Home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);

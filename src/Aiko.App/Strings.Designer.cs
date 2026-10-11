@@ -837,7 +837,7 @@ public static class Strings
     /// MEMORY
     public static string ColumnMemory => Get("ColumnMemory");
 
-    /// Memory works only together with the personality. Works in new sessions.
+    /// Skills and memory work only together with the personality. Works in new sessions.
     public static string SwitchesNote => Get("SwitchesNote");
 
     /// With memory on, Aiko adds one line to that environment's settings.json: a permission for ...

@@ -111,7 +111,7 @@ final class EnvironmentsEditor {
     private func pluginSwitches(_ settings: EnvironmentSettings) -> Set<String> {
         Set(settings.environments.flatMap { environment in
             environment.configDirectories.map { folder in
-                "\(folder)|\(environment.persona)|\(environment.skills)|\(environment.hasMemory)".lowercased()
+                "\(folder)|\(environment.persona)|\(environment.hasSkills)|\(environment.hasMemory)".lowercased()
             }
         })
     }

@@ -38,7 +38,7 @@ struct PersonalityPageView: View {
     /// its column is the widest thing in it.
     private static let switchColumn: CGFloat = 84
 
-    private var skillsAnywhere: Bool { state.environments.environments.contains(where: \.skills) }
+    private var skillsAnywhere: Bool { state.environments.environments.contains(where: \.hasSkills) }
 
     /// A calm temperament smiles, a loud one beams, as in the mockup.
     private var face: AikoFace {
@@ -142,7 +142,7 @@ struct PersonalityPageView: View {
                     commit(EnvironmentEdits.setPersona(state.environments, name, on),
                            on ? "turned the persona on" : "turned the persona off")
                 }
-                tableSwitch(name, Strings.columnSkills, on: environment.skills) { on in
+                tableSwitch(name, Strings.columnSkills, on: environment.hasSkills, enabled: environment.persona) { on in
                     commit(EnvironmentEdits.setSkills(state.environments, name, on),
                            on ? "turned the skills on" : "turned the skills off")
                 }

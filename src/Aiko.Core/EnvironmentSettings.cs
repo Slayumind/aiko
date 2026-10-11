@@ -12,14 +12,18 @@ public sealed record AikoEnvironment(string Name, IReadOnlyList<string> ConfigDi
     /// Whether Aiko talks in this environment (D-196). Off until the person turns it on.
     public bool Persona { get; init; }
 
-    /// Whether Aiko's skills are in this environment. They do not need the persona (D-265).
+    /// What the person chose for Aiko's skills here. Like the memory, they work only together
+    /// with the persona (D-282), so read HasSkills to know whether they are on.
     public bool Skills { get; init; }
 
     /// What the person chose for the memory here. It works only together with the persona
     /// (D-264), so read HasMemory to know whether it is on.
     public bool Memory { get; init; }
 
-    /// The choice is kept while the persona is off, so turning her on again brings the memory back.
+    /// Both choices are kept while the persona is off, so turning her on again brings back what
+    /// was on with her.
+    public bool HasSkills => Persona && Skills;
+
     public bool HasMemory => Persona && Memory;
 
     /// A command name the person typed. Null means the command follows the environment name.

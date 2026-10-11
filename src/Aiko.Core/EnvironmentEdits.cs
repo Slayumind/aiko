@@ -88,8 +88,9 @@ public static class EnvironmentEdits
     public static EnvironmentSettings SetPersona(EnvironmentSettings settings, string environment, bool on) =>
         Change(settings, environment, e => e with { Persona = on });
 
+    /// The skills need the persona, like the memory: without her the choice does not change.
     public static EnvironmentSettings SetSkills(EnvironmentSettings settings, string environment, bool on) =>
-        Change(settings, environment, e => e with { Skills = on });
+        Change(settings, environment, e => e.Persona ? e with { Skills = on } : e);
 
     /// Before the skills became a choice of each environment, one switch in persona.json turned
     /// them off everywhere. A person who had it off must not get the skills back by an update, so

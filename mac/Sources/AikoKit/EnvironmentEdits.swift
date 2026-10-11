@@ -148,8 +148,11 @@ public enum EnvironmentEdits {
         _ settings: EnvironmentSettings, _ environment: String, _ on: Bool
     ) -> EnvironmentSettings {
         change(settings, environment) { environment in
+            // The skills need the persona, like the memory: without her the choice does not change.
             var copy = environment
-            copy.skills = on
+            if copy.persona {
+                copy.skills = on
+            }
             return copy
         }
     }
