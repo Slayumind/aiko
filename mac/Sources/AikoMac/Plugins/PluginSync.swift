@@ -219,14 +219,13 @@ enum PluginSync {
 
     private static func reconcile(_ why: String, updatePersona: Bool) {
         let environments = EnvironmentSettings.fromJson(read(Store.folders.environmentsFile))
-        let persona = PersonaSettings.fromJson(read(Store.folders.personaFile) ?? "")
         let skills = SkillShelf.skills
 
         let folders = environments.environments
             .flatMap { environment in
                 environment.configDirectories.map { folder in
                     (folder: folder,
-                     desired: PluginPlan.desired(environment, persona: persona, skills: skills),
+                     desired: PluginPlan.desired(environment, skills: skills),
                      state: state(of: folder))
                 }
             }

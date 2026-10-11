@@ -189,6 +189,35 @@ struct EnvironmentEditsTests {
     }
 
     @Test
+    func anOldSkillsSwitchThatWasOffTurnsTheSkillsOffEverywhereOnce() {
+        let settings = EnvironmentEdits.setSkills(EnvironmentEdits.setSkills(twoEnvironments(), "Aiko", true), "Work", true)
+        var oldOff = PersonaSettings.default
+        oldOff.skillsOn = false
+        oldOff.temperament = .musou
+
+        let carried = EnvironmentEdits.carryOldSkillsSwitch(settings, oldOff)
+        let again = EnvironmentEdits.carryOldSkillsSwitch(
+            EnvironmentEdits.setSkills(carried.settings, "Work", true), carried.persona)
+
+        #expect(carried.changed)
+        #expect(carried.settings.environments.allSatisfy { !$0.skills })
+        #expect(carried.persona.skillsOn)
+        #expect(carried.persona.temperament == .musou)
+        #expect(!again.changed)
+        #expect(again.settings.environments[1].skills)
+    }
+
+    @Test
+    func anOldSkillsSwitchThatWasOnChangesNothing() {
+        let settings = EnvironmentEdits.setSkills(twoEnvironments(), "Work", true)
+
+        let carried = EnvironmentEdits.carryOldSkillsSwitch(settings, .default)
+
+        #expect(!carried.changed)
+        #expect(carried.settings == settings)
+    }
+
+    @Test
     func theSkillsAreSwitchedWithoutThePersona() {
         let settings = EnvironmentEdits.setSkills(twoEnvironments(), "Work", true)
 

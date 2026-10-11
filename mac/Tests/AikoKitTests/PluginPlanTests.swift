@@ -103,37 +103,33 @@ struct PluginPlanTests {
 
     @Test
     func withThePersonaAndTheSkillsOffAFolderWantsNothing() {
-        #expect(PluginPlan.desired(env(persona: false), persona: .default, skills: ["copy"]).isEmpty)
+        #expect(PluginPlan.desired(env(persona: false), skills: ["copy"]).isEmpty)
     }
 
     @Test
     func theSkillsDoNotNeedThePersona() {
-        let desired = PluginPlan.desired(env(persona: false, skills: true), persona: .default, skills: ["copy"])
+        let desired = PluginPlan.desired(env(persona: false, skills: true), skills: ["copy"])
 
         #expect(desired == ["aiko@aiko"])
     }
 
     @Test
     func thePersonaDoesNotBringTheSkillsWhereTheyAreOff() {
-        let desired = PluginPlan.desired(env(persona: true, skills: false), persona: .default, skills: ["copy"])
+        let desired = PluginPlan.desired(env(persona: true, skills: false), skills: ["copy"])
 
         #expect(desired == [Self.persona])
     }
 
     @Test
     func withThePersonaAFolderWantsItAndTheSkillsPlugin() {
-        let desired = PluginPlan.desired(env(persona: true), persona: .default, skills: ["copy", "palette"])
+        let desired = PluginPlan.desired(env(persona: true), skills: ["copy", "palette"])
 
         #expect(desired.sorted() == [Self.persona, "aiko@aiko"].sorted())
     }
 
     @Test
-    func withTheSkillsOffOrNoneShippedAFolderWantsOnlyThePersona() {
-        var skillsOff = PersonaSettings.default
-        skillsOff.skillsOn = false
-
-        #expect(PluginPlan.desired(env(persona: true), persona: skillsOff, skills: ["copy", "palette"]) == [Self.persona])
-        #expect(PluginPlan.desired(env(persona: true), persona: .default, skills: []) == [Self.persona])
+    func withNoSkillsShippedAFolderWantsOnlyThePersona() {
+        #expect(PluginPlan.desired(env(persona: true), skills: []) == [Self.persona])
     }
 
     @Test(arguments: [

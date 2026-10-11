@@ -54,10 +54,9 @@ static class PluginSync
     private static void Reconcile(string why, bool updatePersona)
     {
         var environments = SettingsStore.LoadEnvironments();
-        var persona = SettingsStore.LoadPersona();
 
         var folders = environments.Environments
-            .SelectMany(e => e.ConfigDirectories.Select(folder => (Folder: folder, Desired: PluginPlan.Desired(e, persona, SkillShelf.Skills))))
+            .SelectMany(e => e.ConfigDirectories.Select(folder => (Folder: folder, Desired: PluginPlan.Desired(e, SkillShelf.Skills))))
             .Select(p => (p.Folder, p.Desired, State: ReadState(p.Folder)))
             .ToList();
 

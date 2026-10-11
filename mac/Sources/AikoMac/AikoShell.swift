@@ -63,6 +63,14 @@ final class AikoShell: NSResponder {
 
         openChecklistIfNothingIsSetUp(environments, Store.settings())
 
+        // One switch used to turn the skills off everywhere. An "off" from that time goes into
+        // every environment once, before the plugins are looked at.
+        let carried = EnvironmentEdits.carryOldSkillsSwitch(Store.environments(), Store.persona())
+        if carried.changed {
+            Store.saveEnvironments(carried.settings)
+            Store.savePersona(carried.persona)
+        }
+
         // An update can bring a new persona text, and on macOS the app itself moves: the marketplace
         // names the bridge by its full path, so a copy dragged from the disk image into Applications
         // leaves Claude Code with a command that points at nothing. When the persona is off

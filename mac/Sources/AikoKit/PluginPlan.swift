@@ -107,14 +107,14 @@ public enum PluginPlan {
     /// The persona where she is on, and the skills plugin where the skills are on and this Aiko
     /// ships any. The two do not depend on each other (D-265).
     public static func desired(
-        _ environment: AikoEnvironment, persona: PersonaSettings, skills: [String]
+        _ environment: AikoEnvironment, skills: [String]
     ) -> Set<String> {
         var desired: Set<String> = []
         if environment.persona {
             desired.insert(AikoMarketplace.pluginId(PersonaPlugin.name))
         }
 
-        if environment.skills && persona.skillsOn && !skills.isEmpty {
+        if environment.skills && !skills.isEmpty {
             desired.insert(AikoMarketplace.pluginId(SkillCatalog.pluginName))
         }
 

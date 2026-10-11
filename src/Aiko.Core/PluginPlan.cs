@@ -113,7 +113,7 @@ public static class PluginPlan
 {
     /// The persona where she is on, and the skills plugin where the skills are on and this Aiko
     /// ships any. The two do not depend on each other (D-265).
-    public static IReadOnlySet<string> Desired(AikoEnvironment environment, PersonaSettings persona, IEnumerable<string> skills)
+    public static IReadOnlySet<string> Desired(AikoEnvironment environment, IEnumerable<string> skills)
     {
         var desired = new HashSet<string>(StringComparer.Ordinal);
         if (environment.Persona)
@@ -121,7 +121,7 @@ public static class PluginPlan
             desired.Add(AikoMarketplace.PluginId(PersonaPlugin.Name));
         }
 
-        if (environment.Skills && persona.SkillsOn && skills.Any())
+        if (environment.Skills && skills.Any())
         {
             desired.Add(AikoMarketplace.PluginId(SkillCatalog.PluginName));
         }

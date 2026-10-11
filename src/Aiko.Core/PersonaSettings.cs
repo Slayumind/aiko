@@ -35,7 +35,9 @@ public sealed record PersonaSettings
 
     public FaceStyle Face { get; init; } = FaceStyle.Chibi;
 
-    /// All of Aiko's skills at once: they are one plugin, and it is on or off as a whole (D-237).
+    /// The old switch for the skills in every environment at once (D-237). The skills are now a
+    /// choice of each environment, and this is read only to carry an old "off" over to them
+    /// (EnvironmentEdits.CarryOldSkillsSwitch). Nothing else looks at it.
     public bool SkillsOn { get; init; } = true;
 
     /// Same rule as AppSettings: a file we cannot read, or a value from a newer Aiko, means the

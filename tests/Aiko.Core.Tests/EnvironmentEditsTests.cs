@@ -195,6 +195,35 @@ public class EnvironmentEditsTests
     }
 
     [Fact]
+    public void An_old_skills_switch_that_was_off_turns_the_skills_off_everywhere_once()
+    {
+        var settings = EnvironmentEdits.SetSkills(EnvironmentEdits.SetSkills(TwoEnvironments(), "Aiko", true), "Work", true);
+        var oldOff = PersonaSettings.Default with { SkillsOn = false, Temperament = Temperament.Musou };
+
+        var carried = EnvironmentEdits.CarryOldSkillsSwitch(settings, oldOff);
+        var again = EnvironmentEdits.CarryOldSkillsSwitch(
+            EnvironmentEdits.SetSkills(carried.Settings, "Work", true), carried.Persona);
+
+        Assert.True(carried.Changed);
+        Assert.All(carried.Settings.Environments, e => Assert.False(e.Skills));
+        Assert.True(carried.Persona.SkillsOn);
+        Assert.Equal(Temperament.Musou, carried.Persona.Temperament);
+        Assert.False(again.Changed);
+        Assert.True(again.Settings.Environments[1].Skills);
+    }
+
+    [Fact]
+    public void An_old_skills_switch_that_was_on_changes_nothing()
+    {
+        var settings = EnvironmentEdits.SetSkills(TwoEnvironments(), "Work", true);
+
+        var carried = EnvironmentEdits.CarryOldSkillsSwitch(settings, PersonaSettings.Default);
+
+        Assert.False(carried.Changed);
+        Assert.Same(settings, carried.Settings);
+    }
+
+    [Fact]
     public void The_skills_are_switched_without_the_persona()
     {
         var settings = EnvironmentEdits.SetSkills(TwoEnvironments(), "Work", true);

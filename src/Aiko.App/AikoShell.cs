@@ -137,6 +137,8 @@ sealed class AikoShell : IDisposable
                 _settings?.OpenChecklist(ChecklistItem.Privacy);
             }
 
+            CarryOldSkillsSwitch();
+
             // An update can bring a new persona text or move the marketplace. When the persona is
             // off everywhere this reads a few files and does nothing else.
             PluginSync.Request("startup");
@@ -225,6 +227,18 @@ sealed class AikoShell : IDisposable
 
     /// Direct mode is switched per environment, and the settings window and the wizard both
     /// change it, so this is called again whenever either of them closes.
+    /// One switch used to turn the skills off everywhere. An "off" from that time goes into every
+    /// environment once, before the plugins are looked at.
+    private static void CarryOldSkillsSwitch()
+    {
+        var carried = EnvironmentEdits.CarryOldSkillsSwitch(SettingsStore.LoadEnvironments(), SettingsStore.LoadPersona());
+        if (carried.Changed)
+        {
+            SettingsStore.SaveEnvironments(carried.Settings);
+            SettingsStore.SavePersona(carried.Persona);
+        }
+    }
+
     private void FollowDirectMode() => _direct?.Follow(SettingsStore.LoadEnvironments());
 
     /// Tray or island, whichever the settings say. Called again after the settings window or the

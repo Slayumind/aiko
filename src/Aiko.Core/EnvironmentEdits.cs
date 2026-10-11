@@ -91,6 +91,18 @@ public static class EnvironmentEdits
     public static EnvironmentSettings SetSkills(EnvironmentSettings settings, string environment, bool on) =>
         Change(settings, environment, e => e with { Skills = on });
 
+    /// Before the skills became a choice of each environment, one switch in persona.json turned
+    /// them off everywhere. A person who had it off must not get the skills back by an update, so
+    /// "off" is carried into every environment once and the old switch is set back to on, which
+    /// makes a second call change nothing.
+    public static SkillsCarried CarryOldSkillsSwitch(EnvironmentSettings settings, PersonaSettings persona) =>
+        persona.SkillsOn
+            ? new SkillsCarried(settings, persona, Changed: false)
+            : new SkillsCarried(
+                settings with { Environments = settings.Environments.Select(e => e with { Skills = false }).ToList() },
+                persona with { SkillsOn = true },
+                Changed: true);
+
     /// The memory needs the persona, so without her the choice does not change: the switch is
     /// locked in the window, and a call that got past it must not store a wish that is not shown.
     public static EnvironmentSettings SetMemory(EnvironmentSettings settings, string environment, bool on) =>
@@ -176,6 +188,9 @@ public static class EnvironmentEdits
 }
 
 public sealed record Renamed(EnvironmentSettings Settings, string? SuggestedCommand);
+
+/// Both files after the old skills switch was carried over. Changed says whether to save them.
+public sealed record SkillsCarried(EnvironmentSettings Settings, PersonaSettings Persona, bool Changed);
 
 public sealed record Binding(string Folder, string Environment);
 
