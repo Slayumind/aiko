@@ -70,6 +70,9 @@ final class UpdateWatch {
         asking = true
         defer { asking = false }
 
+        // Said every time: an answer that changes nothing is silent, and without this line a
+        // quiet day looks the same in the log as a check that never ran.
+        Log.write("update check: asking the site")
         let info = await UpdateRun.ask()
 
         guard !stopped, settings.checkUpdates else { return }
