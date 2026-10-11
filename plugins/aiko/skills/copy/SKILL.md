@@ -1,6 +1,6 @@
 ---
 name: copy
-description: Write and edit text that reads as written by a person, in Russian and English. Covers UI strings and i18n messages (buttons, errors, empty states, dialogs, toasts), artifacts and reports, README and docs, release notes, announcements, bad news, commit and PR text. Use when writing or reviewing user-facing copy, when a text sounds generic, corporate or AI-written, or when the user asks «сделай живее», «человечнее», «звучит как ИИ», "make it sound human".
+description: Write and edit text that reads as written by a person, in Russian and English. Covers UI strings and i18n messages (buttons, errors, empty states, dialogs, toasts), artifacts and reports, README and docs, release notes, announcements, bad news, commit and PR text, task cards and briefs in a tracker, and translations between the two languages. Use when writing or reviewing user-facing copy, when a text sounds generic, corporate, translated or AI-written, when cards or tickets need to be short and clear, or when the user asks «сделай живее», «человечнее», «звучит как ИИ», "make it sound human".
 ---
 
 # aiko copy
@@ -24,6 +24,11 @@ the project's Voice section (see "Decide once" in `references/ui-copy.md`).
 English in a repository (commits, code comments, README) stays plain: short sentences and common
 words, readable for someone whose first language is not English.
 
+**Language.** Write in the reader's language: the user's own language in a chat and in their
+tracker, the locale's language in UI strings. Do not pick a language because it is the default.
+Names of products, features and tools keep their original spelling inside any language:
+"Blender", "Pull Request", not «Блендер», «Запрос на слияние».
+
 ## 2. Read only what the task needs
 
 | Task | Read |
@@ -31,6 +36,8 @@ words, readable for someone whose first language is not English.
 | UI strings, `messages/*.json`, dialogs, forms | `references/ui-copy.md` + tells for that language |
 | Release notes, changelog, announcement, bad news, apology | `references/voice.md` |
 | Long text: artifact, report, README, docs, post | `references/tells-en.md` or `references/tells-ru.md` |
+| Task cards, tickets, release goals, a brief for an agent | `references/tasks.md` |
+| A translation, or a text first written in the other language | tells for the target language, the part on calques |
 | Commit message, PR, short chat reply | nothing more; sections 3–5 are enough |
 
 ## 3. Process
@@ -55,6 +62,9 @@ words, readable for someone whose first language is not English.
 10. Say how finished it is, including what is rough or not checked.
 11. Form follows size. A short reply is a paragraph. Lists only for parallel items; headings only when someone will scan.
 12. Never tell the reader how they feel: "Don't worry!", «Не переживайте».
+13. A translation carries the meaning, not the sentence. Read the result without the original and
+    ask how a native speaker would say it. A text that keeps the source's headings, word order and
+    figures of speech reads as a machine wrote it, even when every word is correct.
 
 ## 5. Checklist: remove before you send
 
@@ -68,6 +78,14 @@ words, readable for someone whose first language is not English.
 - Formatting a short text does not need: headings, bold terms with colons, Title Case, emoji.
 - Vague authority ("experts say") and knowledge hedges ("based on available information").
 - Uniform rhythm: every sentence the same length.
+- Calques: a thing that "lives", "waits", "travels" or "learns" because the source language said so;
+  the structure of the original kept line for line.
+
+## Find a whole class, not one phrase
+
+When a reader points at one bad phrase, the text has more of the same kind. Name the class
+("inanimate things with living verbs"), search the whole text for it, and fix every hit. Then say
+how you searched and what the search cannot see: a pattern outside your list stays in the text.
 
 ## Don't overcorrect
 

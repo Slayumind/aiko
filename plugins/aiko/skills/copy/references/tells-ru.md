@@ -46,6 +46,28 @@ Editors now complain that professional typography is taken for a model. Keep it.
   in one text, a comma after «Благодаря этому,» or «Однако,» at the start (rarely needed).
 - **Quotes around any metaphor:** «начать с "нуля"» → no quotes.
 
+## Калька с английского
+
+The text was written or thought in English first. Every word is Russian and the sentence is not.
+The script catches a few of these (`ru/calque`); the rest you find by reading without the original.
+
+| Tell | Example | Rewrite |
+|---|---|---|
+| Неодушевлённое «живёт» | «Задачи живут в трекере», «настройки живут в файле» | «ведутся», «хранится» |
+| «Дом» для места хранения | «Трекер становится домом задач» | «Задачи переносим в трекер» |
+| Вещь «учится» | «Научить счётчик хранить меньше» | «Сократить данные счётчика» |
+| Вещь «едет», «уезжает», «доезжает» | «Файлы уезжают на новый сервер» | «переносится» |
+| «Побеждает» о правиле | «Побеждает последняя запись» | «Сохраняется последняя запись» |
+| Вещь «говорит», «знает» | «Документация говорит, что…» | «В документации сказано, что…» |
+| «Не дотягивается», «уживается» | «Скрипт до базы не дотягивается» | «У скрипта нет доступа к базе» |
+| Структура оригинала | «**Цель.** … **Готово, когда**» в карточке на десять строк | Две фразы и список |
+
+Not a calque, keep: «код лежит в ветке», «сайт лежит», «вопрос висит», «хвосты». A living verb
+that Russian speakers do use about things is fine. The test is the ear, not the dictionary.
+
+Names stay in the original: Blender, Photoshop, Pull Request. A translated name
+(«Блендер», «Запрос на слияние») is a calque too, and the reader cannot search for it.
+
 ## Chat
 «Конечно!», «Безусловно», «Отличный вопрос!», repeating the question, headings in a three-sentence
 reply, «Надеюсь, это помогло», «Если остались вопросы — обращайтесь».

@@ -31,6 +31,15 @@ Studies of millions of texts show these jumped after 2023 ("delves" about 28×).
 | False breadth | "Whether you're a beginner or a pro…" | Name the real reader. |
 | Generic ending | "Despite challenges, X continues to thrive." | End on the last fact. |
 
+## Calques from another language
+
+A text first written in Russian (or any other language) and put into English word by word.
+- Missing or extra articles, and "the" before every noun.
+- Russian word order: "In the settings there is a button" → "The settings have a button".
+- "Realize a feature", "actual" for "current", "decide a problem", "make a decision about".
+- A translated product name. Keep the name the product uses.
+Read the result without the original. If a native speaker would say it another way, say it that way.
+
 ## Structure and formatting
 - Headings, bold and bullets on a three-sentence answer.
 - "**Speed:** Pages load faster." bullets where a paragraph would do.
