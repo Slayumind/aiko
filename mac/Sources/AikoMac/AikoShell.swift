@@ -17,6 +17,7 @@ final class AikoShell: NSResponder {
     private var island: IslandWindow?
     private var fullScreen: FullScreenWatch?
     private var watch: SnapshotWatch?
+    private var updates: UpdateWatch?
     private var hover: Timer?
     private var cardWatch: Timer?
     private var away = AwayWatch()
@@ -82,6 +83,11 @@ final class AikoShell: NSResponder {
         if CommandFolder.isSetUp {
             CommandFolder.sync(environments)
         }
+
+        // Not in a self test: the check sends a request and writes down the reported week.
+        let checks = UpdateWatch()
+        checks.found = { [weak self] in self?.onNewerVersion() }
+        updates = checks
     }
 
     /// On a fresh machine the checklist opens by itself: there is nothing for the icon to show and
@@ -112,6 +118,7 @@ final class AikoShell: NSResponder {
         cardWatch?.invalidate()
         card?.fadeAndClose()
         watch?.stop()
+        updates?.stop()
         mood?.stop()
         closeIsland()
         removeIcon()
@@ -141,6 +148,7 @@ final class AikoShell: NSResponder {
             island = window
         }
 
+        island?.newerVersion = updates?.newerVersion
         island?.show(cards(), at: position)
 
         // Only watched while the island is on screen: the menu bar icon has nothing to hide from.
@@ -310,8 +318,14 @@ final class AikoShell: NSResponder {
 
         // The numbers go in the tooltip as well as in the ring: a screen reader has nothing else
         // to read, and the ring says nothing to one.
-        // TODO: the newer version comes from the update check, which is not built yet.
-        button.toolTip = TrayText.tooltip(cards(), newerVersion: nil)
+        button.toolTip = TrayText.tooltip(cards(), newerVersion: updates?.newerVersion)
+    }
+
+    /// The daily check found a newer version, or stopped seeing one. Only the words change.
+    private func onNewerVersion() {
+        updateIcon()
+        island?.newerVersion = updates?.newerVersion
+        island?.update(cards())
     }
 
     /// One frame of a face transition: only the picture changes, not the tooltip.

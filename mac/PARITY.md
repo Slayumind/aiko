@@ -186,6 +186,7 @@ AikoKit decided, and it answers the mouse.
 | RingDrawing.cs | RingPaint.swift | one arc, drawn the same by the menu bar icon and by the island |
 | Tray/TrayMoodPlayer.cs | MoodPlay.swift | which face an event brings, and the one short timer |
 | Tray/ActivityWatcher.cs | ActivityWatch.swift | watches the session files the bridge writes |
+| UpdateWatch.cs | UpdateWatch.swift | the daily version check and count: first two minutes after the start, then once a day. Windows uses a `DispatcherTimer`; the Mac uses `NSBackgroundActivityScheduler`, because a plain timer does not count the hours a MacBook sleeps. The answer goes into the tooltip of the icon and the island |
 | FullScreenWatch.cs | FullScreenWatch.swift | says when a window owns the screen; macOS has no foreground event, so it looks at what is in front when the space or the front app changes |
 | — | Screens.swift | AppKit counts screen points from the bottom left, the core from the top left: the turn happens here and nowhere else |
 | — | Tween.swift | one short animation on a timer that exists only while something moves. WPF has `CompositionTarget.Rendering`; AppKit cannot animate a window that changes its whole shape every frame |
@@ -290,9 +291,8 @@ These are the places where there was nothing to copy, with the reason for the ch
 
 - **The updater is Aiko's own.** Velopack is Windows only, so `UpdateInstaller` downloads the
   zip, checks it against the signed list and swaps the bundle. The general page shows the same
-  one line and one action as on Windows. The Mac asks for a new version only when the person
-  presses the button; Windows also asks once a day. The two consent switches and the count are
-  the same.
+  one line and one action as on Windows. The daily check, the two consent switches and the count
+  are the same.
 
 - **Starting at login** is `SMAppService.mainApp` in place of the Run key. It needs a real bundle:
   a binary run straight out of `.build` cannot register, and then the switch says off and saying
