@@ -743,6 +743,11 @@ public partial class ChecklistPage : UserControl
                 // "Meet Aiko" turns it on in environment 1. "Later" never turns off what is on.
                 Persona = (_existing.Environments.FirstOrDefault(e => e.Holds(folder))?.Persona ?? false)
                     || (index == 0 && _personaWanted == true),
+                // She brings her skills with her, as she always did. The memory is never turned on
+                // from here: it has its own switch on the Personality page.
+                Skills = (_existing.Environments.FirstOrDefault(e => e.Holds(folder))?.Skills ?? false)
+                    || (index == 0 && _personaWanted == true),
+                Memory = _existing.Environments.FirstOrDefault(e => e.Holds(folder))?.Memory ?? false,
                 CustomCommand = _commandFields.TryGetValue(index, out var field) ? field.Custom : null,
                 ProjectFolders = projects,
             };
