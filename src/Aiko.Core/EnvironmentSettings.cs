@@ -9,8 +9,8 @@ public sealed record AikoEnvironment(string Name, IReadOnlyList<string> ConfigDi
 {
     public bool DirectMode { get; init; }
 
-    /// Whether Aiko talks in this environment and brings her skills (D-196, D-197). Off until the
-    /// person turns it on.
+    /// Whether Aiko is on in this environment: her character, her skills and her memory. They
+    /// are parts of one thing and come and go together (D-285). Off until the person turns it on.
     public bool Persona { get; init; }
 
     /// A command name the person typed. Null means the command follows the environment name.

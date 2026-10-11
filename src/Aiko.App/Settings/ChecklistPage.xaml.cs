@@ -792,6 +792,9 @@ public partial class ChecklistPage : UserControl
             // possible: the wizard does not finish until the item has a state.
             PrivacyAsked = _statsWanted is not null,
             MeetAikoShown = true,
+
+            // "Meet Aiko" says what the memory does, so whoever finishes the checklist has read it.
+            MemoryShown = true,
         });
     }
 

@@ -145,6 +145,17 @@ public class WizardChecklistTests
         new([new AikoEnvironment("Aiko", ["C:/Users/someone/.claude"]) { Persona = persona }]);
 
     [Fact]
+    public void The_personality_page_opens_once_for_someone_who_had_aiko_on_before_she_remembered()
+    {
+        Assert.True(WizardChecklist.OpensMemoryOnStart(AppSettings.Default, OneEnvironment(persona: true)));
+        Assert.False(WizardChecklist.OpensMemoryOnStart(AppSettings.Default with { MemoryShown = true }, OneEnvironment(persona: true)));
+
+        // Where she is off there is no memory to tell about, and no reason to open anything.
+        Assert.False(WizardChecklist.OpensMemoryOnStart(AppSettings.Default, OneEnvironment(persona: false)));
+        Assert.False(WizardChecklist.OpensMemoryOnStart(AppSettings.Default, EnvironmentSettings.Empty));
+    }
+
+    [Fact]
     public void Meet_Aiko_opens_once_for_someone_who_set_Aiko_up_before()
     {
         Assert.True(WizardChecklist.OpensMeetAikoOnStart(AppSettings.Default, OneEnvironment(persona: false)));

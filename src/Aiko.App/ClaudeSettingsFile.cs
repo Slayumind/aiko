@@ -65,6 +65,10 @@ static class ClaudeSettingsFile
     public static PatchOutcome RemoveAiko(string configDirectory) =>
         Report(configDirectory, Editor.Remove(configDirectory));
 
+    /// The rule that lets the model use the memory tools without a question (D-279).
+    public static PatchOutcome SetMemoryPermission(string configDirectory, bool allowed) =>
+        Report(configDirectory, Editor.SetMemoryPermission(configDirectory, allowed));
+
     public static PatchOutcome TidyAfterPluginRemoval(string configDirectory) =>
         Report(configDirectory, Editor.TidyAfterPluginRemoval(configDirectory));
 

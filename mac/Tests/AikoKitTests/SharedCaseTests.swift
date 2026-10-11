@@ -80,6 +80,7 @@ struct SharedCaseTests {
                 "settingsFile": folders.settingsFile,
                 "environmentsFile": folders.environmentsFile,
                 "personaFile": folders.personaFile,
+                "memoryFile": folders.memoryFile,
                 "installIdFile": folders.installIdFile,
                 "reportedPeriodsFile": folders.reportedPeriodsFile,
                 "localFolder": folders.localFolder,
@@ -231,6 +232,87 @@ struct SharedCaseTests {
         case "Tired": return .tired
         default: return .fresh
         }
+    }
+
+    // ---- what Aiko remembers about the person ----
+
+    @Test
+    func everyMemoryKeyCaseAnswersTheSame() {
+        let cases = SpecCases.json("memory-keys")
+
+        #expect(cases["maxKeys"]?.int64Value == Int64(MemoryRules.maxKeys))
+        #expect(cases["maxTail"]?.int64Value == Int64(MemoryRules.maxKeyTail))
+        #expect(cases["minStemLength"]?.int64Value == Int64(MemoryRules.minStemLength))
+        #expect(cases["maxStemTail"]?.int64Value == Int64(MemoryRules.maxStemTail))
+
+        let nameLike = cases["nameLike"]?.arrayValue ?? []
+        #expect(!nameLike.isEmpty)
+        for row in nameLike {
+            let key = row["key"]?.stringValue ?? ""
+
+            #expect(MemoryRules.isNameLike(key) == row["nameLike"]?.boolValue, "\(key)")
+        }
+
+        let clean = cases["clean"]?.arrayValue ?? []
+        #expect(!clean.isEmpty)
+        for row in clean {
+            let cleaned = MemoryRules.cleanKeys(Self.strings(row["keys"]))
+
+            #expect(cleaned.kept == Self.strings(row["kept"]))
+            #expect(cleaned.rejected == Self.strings(row["rejected"]))
+        }
+
+        let matches = cases["matches"]?.arrayValue ?? []
+        #expect(!matches.isEmpty)
+        for row in matches {
+            let key = row["key"]?.stringValue ?? ""
+            let prompt = row["prompt"]?.stringValue ?? ""
+
+            #expect(MemoryRules.keyMatches(key, prompt) == row["matches"]?.boolValue, "\(key) in: \(prompt)")
+        }
+    }
+
+    @Test
+    func everyMemoryNudgeCaseAnswersTheSame() {
+        let rows = SpecCases.json("memory-nudge")["cases"]?.arrayValue ?? []
+        #expect(!rows.isEmpty)
+
+        for row in rows {
+            let prompt = row["prompt"]?.stringValue
+
+            #expect(MemoryNudge.applies(prompt) == row["nudge"]?.boolValue, "\(prompt ?? "")")
+        }
+    }
+
+    @Test
+    func everyMemoryLimitCaseIsSavedOrRefusedTheSame() {
+        let cases = SpecCases.json("memory-limits")
+        let today = DateOnly(2026, 10, 11)
+
+        #expect(cases["maxLength"]?.int64Value == Int64(MemoryRules.maxLength))
+
+        let rows = cases["cases"]?.arrayValue ?? []
+        #expect(!rows.isEmpty)
+        for row in rows {
+            let text = Self.repeated(row, "text")
+            let meaning = Self.repeated(row, "meaning")
+            let keys = Self.strings(row["keys"])
+            let length = Int(row["length"]?.int64Value ?? -1)
+            let saved = row["saved"]?.boolValue
+
+            #expect(MemoryRules.lengthOf(text, meaning, keys) == length)
+            #expect(MemoryRules.fits(length) == saved, "\(length)")
+
+            let edit = MemoryEdits.remember(
+                .empty, MemoryRequest(category: "you", text: text, meaning: meaning, keys: keys), today)
+
+            #expect(edit.changed == saved, "\(length): \(edit.reply)")
+            #expect(edit.memory.facts.count == (saved == true ? 1 : 0))
+        }
+    }
+
+    private static func repeated(_ row: JsonNode, _ name: String) -> String {
+        String(repeating: row[name]?.stringValue ?? "", count: Int(row[name + "Times"]?.int64Value ?? 0))
     }
 
     // ---- what a program is called on this system, and every path built from that ----

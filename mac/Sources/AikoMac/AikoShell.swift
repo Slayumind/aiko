@@ -42,7 +42,11 @@ final class AikoShell: NSResponder {
     /// arrive. Worked out when the settings change rather than every time the card is drawn.
     private var noAccess: Set<String> = []
 
-    func show() {
+    /// A self test draws one thing to be looked at and must leave the machine as it found it.
+    /// So with changingNothing the start skips what writes: the note that the memory was shown
+    /// (and the page opened for it), the plugin sync (which writes settings.json and runs claude)
+    /// and the refresh of the commands in PATH.
+    func show(changingNothing: Bool = false) {
         let watcher = SnapshotWatch(folder: Store.folders.snapshotsFolder)
         watcher.updated = { [weak self] in self?.onSnapshotsChanged() }
         watch = watcher
@@ -61,7 +65,11 @@ final class AikoShell: NSResponder {
             + "\(watcher.byFile.count) snapshot files, showing the "
             + (Store.settings().place == .island ? "island" : "menu bar icon"))
 
-        openChecklistIfNothingIsSetUp(environments, Store.settings())
+        openChecklistIfNothingIsSetUp(environments, Store.settings(), changingNothing: changingNothing)
+
+        if changingNothing {
+            return
+        }
 
         // An update can bring a new persona text, and on macOS the app itself moves: the marketplace
         // names the bridge by its full path, so a copy dragged from the disk image into Applications
@@ -79,13 +87,23 @@ final class AikoShell: NSResponder {
     /// On a fresh machine the checklist opens by itself: there is nothing for the icon to show and
     /// nothing tells the person where to start. Someone who set Aiko up before an item existed is
     /// shown that one item once (D-200).
-    private func openChecklistIfNothingIsSetUp(_ environments: EnvironmentSettings, _ app: AppSettings) {
+    private func openChecklistIfNothingIsSetUp(
+        _ environments: EnvironmentSettings, _ app: AppSettings, changingNothing: Bool
+    ) {
         if !environments.hasEnvironments {
             openSettings(at: .checklist)
         } else if WizardChecklist.opensMeetAikoOnStart(app, environments) {
             openSettings(at: .checklist, item: .meetAiko)
         } else if WizardChecklist.opensPrivacyOnStart(app, environments) {
             openSettings(at: .checklist, item: .privacy)
+        } else if !changingNothing, WizardChecklist.opensMemoryOnStart(app, environments) {
+            // Once, for someone who turned Aiko on before she had a memory. The page says what the
+            // memory reads and writes, and it is where she can be turned off. A self test skips
+            // it: the page it was asked for is the one to show, and the note is a write.
+            openSettings(at: .personality)
+            var shown = app
+            shown.memoryShown = true
+            Store.saveSettings(shown)
         }
     }
 

@@ -459,6 +459,9 @@ final class ChecklistModel: ObservableObject {
         // possible: the checklist does not finish until the item has a state.
         app.privacyAsked = statsWanted != nil
         app.meetAikoShown = true
+
+        // "Meet Aiko" says what the memory does, so whoever finishes the checklist has read it.
+        app.memoryShown = true
         Store.saveSettings(app)
     }
 

@@ -103,26 +103,23 @@ public class PluginPlanTests
     // ---- what a folder should have ----
 
     [Fact]
-    public void Without_the_persona_a_folder_wants_nothing_not_even_skills()
+    public void Where_aiko_is_off_a_folder_wants_nothing_not_even_skills()
     {
-        Assert.Empty(PluginPlan.Desired(Env(persona: false), PersonaSettings.Default, ["copy"]));
+        Assert.Empty(PluginPlan.Desired(Env(persona: false), ["copy"]));
     }
 
     [Fact]
-    public void With_the_persona_a_folder_wants_it_and_the_skills_plugin()
+    public void Where_aiko_is_on_a_folder_wants_the_persona_and_the_skills_plugin()
     {
-        var desired = PluginPlan.Desired(Env(persona: true), PersonaSettings.Default, ["copy", "palette"]);
+        var desired = PluginPlan.Desired(Env(persona: true), ["copy", "palette"]);
 
         Assert.Equal([Persona, "aiko@aiko"], desired.Order(StringComparer.Ordinal));
     }
 
     [Fact]
-    public void With_the_skills_off_or_none_shipped_a_folder_wants_only_the_persona()
+    public void With_no_skills_shipped_a_folder_wants_only_the_persona()
     {
-        var skillsOff = PersonaSettings.Default with { SkillsOn = false };
-
-        Assert.Equal([Persona], PluginPlan.Desired(Env(persona: true), skillsOff, ["copy", "palette"]));
-        Assert.Equal([Persona], PluginPlan.Desired(Env(persona: true), PersonaSettings.Default, []));
+        Assert.Equal([Persona], PluginPlan.Desired(Env(persona: true), []));
     }
 
     [Theory]

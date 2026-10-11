@@ -182,7 +182,7 @@
     <value>Раз в сутки Aiko спрашивает у slayumind.org последнюю версию. Файлы приходят с GitHub, и Aiko проверяет их подпись, прежде чем что-то заменить.</value>
   </data>
   <data name="CheckNow" xml:space="preserve">
-    <value>Проверить сейчас</value>
+    <value>Проверить обновления</value>
   </data>
   <data name="OpenDownloadPage" xml:space="preserve">
     <value>Открыть страницу загрузки</value>
@@ -191,25 +191,37 @@
     <value>Aiko спрашивает slayumind.org…</value>
   </data>
   <data name="UpdateAvailable" xml:space="preserve">
-    <value>Вышла версия {0}.</value>
+    <value>Вышла Aiko {0}</value>
   </data>
   <data name="UpdateLatest" xml:space="preserve">
-    <value>Aiko {0} — самая свежая версия.</value>
+    <value>Установлена последняя версия</value>
+  </data>
+  <data name="UpdateThisVersion" xml:space="preserve">
+    <value>Aiko {0}</value>
+  </data>
+  <data name="UpdateCheckedAt" xml:space="preserve">
+    <value>Aiko {0} · проверено в {1}</value>
+  </data>
+  <data name="UpdateNow" xml:space="preserve">
+    <value>сейчас {0}</value>
+  </data>
+  <data name="UpdateReadyDetail" xml:space="preserve">
+    <value>встанет после перезапуска</value>
   </data>
   <data name="UpdateFailed" xml:space="preserve">
     <value>Проверить не получилось. Попробуй через несколько минут.</value>
   </data>
   <data name="UpdateInstallNow" xml:space="preserve">
-    <value>Скачать и установить</value>
+    <value>Установить {0}</value>
   </data>
   <data name="UpdateDownloading" xml:space="preserve">
-    <value>Aiko скачивает {0}…</value>
+    <value>Скачивается {0}</value>
   </data>
   <data name="UpdateReady" xml:space="preserve">
-    <value>Aiko {0} готова. Перезапусти, чтобы перейти на неё.</value>
+    <value>Aiko {0} готова</value>
   </data>
   <data name="UpdateRestartNow" xml:space="preserve">
-    <value>Перезапустить</value>
+    <value>Перезапустить Aiko</value>
   </data>
   <data name="UpdateNotInstalled" xml:space="preserve">
     <value>Эту копию поставил не установщик, поэтому Aiko не может её заменить. Открой страницу загрузки.</value>
@@ -715,6 +727,15 @@
   <data name="DeletePortable" xml:space="preserve">
     <value>Эта копия распакована из zip, деинсталлятора у неё нет. Папка с Aiko останется, и Aiko её откроет.</value>
   </data>
+  <data name="DeleteKeepMemory" xml:space="preserve">
+    <value>Сохранить то, что Aiko помнит обо мне</value>
+  </data>
+  <data name="DeleteMemoryStays" xml:space="preserve">
+    <value>Останется один файл: {0}. Когда поставишь Aiko снова, она найдёт память там.</value>
+  </data>
+  <data name="DeleteMemoryGoes" xml:space="preserve">
+    <value>Память уйдёт вместе с папками Aiko. Вернуть её нельзя.</value>
+  </data>
   <data name="OpenClaudeCode" xml:space="preserve">
     <value>Открыть Claude Code</value>
   </data>
@@ -782,7 +803,7 @@
     <value>ЧТО НЕ ОТПРАВЛЯЕТСЯ НИКОГДА</value>
   </data>
   <data name="NeverSentWhat" xml:space="preserve">
-    <value>Имя, почта, папки проектов, лимиты, токен и тексты сессий. IP-адрес сайт не читает и не хранит.</value>
+    <value>Имя, почта, папки проектов, лимиты, токен, тексты сессий и содержимое памяти. IP-адрес сайт не читает и не хранит.</value>
   </data>
   <data name="StatsKeptFor" xml:space="preserve">
     <value>Записи удаляются через 90 дней.</value>
@@ -798,9 +819,6 @@
   </data>
   <data name="OpenPrivacyDoc" xml:space="preserve">
     <value>Открыть PRIVACY.md</value>
-  </data>
-  <data name="PrivacyLinkFromGeneral" xml:space="preserve">
-    <value>Что Aiko отправляет и кому — раздел «Приватность».</value>
   </data>
   <data name="WizardStats" xml:space="preserve">
     <value>Анонимная статистика</value>
@@ -826,11 +844,17 @@
   <data name="StatsStateUnset" xml:space="preserve">
     <value>не выбрано</value>
   </data>
-  <data name="SectionWhereAikoTalks" xml:space="preserve">
-    <value>ГДЕ AIKO ГОВОРИТ</value>
+  <data name="SectionWhereAikoIsOn" xml:space="preserve">
+    <value>ГДЕ AIKO ВКЛЮЧЕНА</value>
   </data>
-  <data name="PersonaNewSessions" xml:space="preserve">
-    <value>Действует в новых сессиях. Открытые сессии доработают как были.</value>
+  <data name="AikoOnNote" xml:space="preserve">
+    <value>Характер, навыки и память включаются вместе. Действует в новых сессиях; открытые доработают как были.</value>
+  </data>
+  <data name="AikoOnWhat" xml:space="preserve">
+    <value>Там, где Aiko включена, она читает каждое твоё сообщение, чтобы память не устаревала, и добавляет в settings.json этой среды одну строку: разрешение на два своих инструмента памяти. Выключение память не стирает.</value>
+  </data>
+  <data name="SkillsWhere" xml:space="preserve">
+    <value>Навыки работают в тех средах, где Aiko включена.</value>
   </data>
   <data name="PersonaOwnStyle" xml:space="preserve">
     <value>Пока личность включена, твой стиль {0} не работает. Выключишь — вернётся.</value>
@@ -913,17 +937,95 @@
   <data name="SampleCommit" xml:space="preserve">
     <value>Коммит к этой правке — без характера:</value>
   </data>
+  <data name="SectionMemory" xml:space="preserve">
+    <value>ПАМЯТЬ · {0} ИЗ {1}</value>
+  </data>
+  <data name="MemoryAdd" xml:space="preserve">
+    <value>Добавить факт</value>
+  </data>
+  <data name="MemoryCategoryYou" xml:space="preserve">
+    <value>Ты</value>
+  </data>
+  <data name="MemoryCategoryWork" xml:space="preserve">
+    <value>Как со мной работать</value>
+  </data>
+  <data name="MemoryCategoryProjects" xml:space="preserve">
+    <value>Проекты</value>
+  </data>
+  <data name="MemoryCategoryInterests" xml:space="preserve">
+    <value>Интересы и вкус</value>
+  </data>
+  <data name="MemoryTabYou" xml:space="preserve">
+    <value>Ты</value>
+  </data>
+  <data name="MemoryTabWork" xml:space="preserve">
+    <value>Работа</value>
+  </data>
+  <data name="MemoryTabProjects" xml:space="preserve">
+    <value>Проекты</value>
+  </data>
+  <data name="MemoryTabInterests" xml:space="preserve">
+    <value>Вкус</value>
+  </data>
+  <data name="MemoryPin" xml:space="preserve">
+    <value>Закрепить</value>
+  </data>
+  <data name="MemoryUnpin" xml:space="preserve">
+    <value>Открепить</value>
+  </data>
+  <data name="MemoryEdit" xml:space="preserve">
+    <value>Править</value>
+  </data>
+  <data name="MemorySave" xml:space="preserve">
+    <value>Сохранить</value>
+  </data>
+  <data name="MemoryCount" xml:space="preserve">
+    <value>{0} из {1}</value>
+  </data>
+  <data name="MemoryFactPlaceholder" xml:space="preserve">
+    <value>Факт, одна мысль</value>
+  </data>
+  <data name="MemoryMeaningPlaceholder" xml:space="preserve">
+    <value>Что это меняет в ответах (необязательно)</value>
+  </data>
+  <data name="MemoryEnglishNote" xml:space="preserve">
+    <value>Факты записаны по-английски — так их читает модель.</value>
+  </data>
+  <data name="MemoryAnyLanguageNote" xml:space="preserve">
+    <value>Факт можно писать на любом языке. Aiko записывает свои по-английски.</value>
+  </data>
+  <data name="MemoryYouNote" xml:space="preserve">
+    <value>Имя, обращение и род — закреплённые факты в этом разделе. Если их нет, Aiko спросит один раз в разговоре. Их можно добавить и здесь.</value>
+  </data>
+  <data name="MemoryOpenFile" xml:space="preserve">
+    <value>Открыть файл</value>
+  </data>
+  <data name="MemoryErase" xml:space="preserve">
+    <value>Стереть память</value>
+  </data>
+  <data name="MemoryEraseAsk" xml:space="preserve">
+    <value>Aiko забудет все факты во всех средах, их {0}. Вернуть их нельзя.</value>
+  </data>
+  <data name="MemoryTooLong" xml:space="preserve">
+    <value>слишком длинный · {0} из {1}</value>
+  </data>
+  <data name="MemoryTooLongNote" xml:space="preserve">
+    <value>Факт длиннее {0} знаков модель не видит. Сократи его, и он вернётся в память.</value>
+  </data>
+  <data name="MemoryAsideNote" xml:space="preserve">
+    <value>Записей в файле, которые не читаются после ручной правки: {0}. Они сохранены в файле, в списке setAside.</value>
+  </data>
+  <data name="MemoryEmpty" xml:space="preserve">
+    <value>Память пуста. Aiko запишет первый факт, когда в разговоре прозвучит что-то о тебе: кто ты, как с тобой работать, над чем ты работаешь. Факт можно добавить и здесь.</value>
+  </data>
+  <data name="MemoryFull" xml:space="preserve">
+    <value>Раздел заполнен. Удали факт, чтобы добавить новый.</value>
+  </data>
+  <data name="MemoryWriteFailed" xml:space="preserve">
+    <value>Aiko не смогла записать файл памяти. Ничего не изменилось.</value>
+  </data>
   <data name="SectionSkills" xml:space="preserve">
     <value>НАВЫКИ · {0}</value>
-  </data>
-  <data name="SkillsWork" xml:space="preserve">
-    <value>Навыки работают в средах, где включена личность.</value>
-  </data>
-  <data name="SkillsSwitch" xml:space="preserve">
-    <value>Навыки Aiko</value>
-  </data>
-  <data name="SkillsNeedPersona" xml:space="preserve">
-    <value>Включи личность хотя бы в одной среде — тогда навыки заработают.</value>
   </data>
   <data name="SkillDomainProjects" xml:space="preserve">
     <value>УПРАВЛЕНИЕ ПРОЕКТАМИ</value>
@@ -974,10 +1076,10 @@
     <value>Познакомься с Aiko</value>
   </data>
   <data name="MeetAikoLead" xml:space="preserve">
-    <value>Aiko может говорить в твоих сессиях Claude Code своим голосом и приносит одиннадцать навыков. В коде и коммитах она молчит.</value>
+    <value>Aiko может отвечать в твоих сессиях Claude Code своим голосом. С ней приходят её навыки и небольшая память о тебе. В коде и коммитах она молчит.</value>
   </data>
   <data name="MeetAikoSettings" xml:space="preserve">
-    <value>Темперамент, настроение и навыки — на странице «Личность». Действует в новых сессиях.</value>
+    <value>Темперамент, настроение, навыки и память — на странице «Личность». Действует в новых сессиях.</value>
   </data>
   <data name="MeetAikoTurnOn" xml:space="preserve">
     <value>Включить в среде {0}</value>

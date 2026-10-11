@@ -219,17 +219,23 @@ enum PluginSync {
 
     private static func reconcile(_ why: String, updatePersona: Bool) {
         let environments = EnvironmentSettings.fromJson(read(Store.folders.environmentsFile))
-        let persona = PersonaSettings.fromJson(read(Store.folders.personaFile) ?? "")
         let skills = SkillShelf.skills
 
         let folders = environments.environments
             .flatMap { environment in
                 environment.configDirectories.map { folder in
                     (folder: folder,
-                     desired: PluginPlan.desired(environment, persona: persona, skills: skills),
+                     environment: environment,
+                     desired: PluginPlan.desired(environment, skills: skills),
                      state: state(of: folder))
                 }
             }
+
+        // The permission for the memory tools goes with Aiko: on where she is on, off where she is
+        // off. Where the rule is already right this only reads the file.
+        for folder in folders {
+            _ = ClaudeSettingsFile.setMemoryPermission(folder.folder, allowed: folder.environment.persona)
+        }
 
         // With the persona off everywhere and nothing of ours installed, Aiko writes nothing at all.
         if folders.allSatisfy({
@@ -240,11 +246,15 @@ enum PluginSync {
 
         guard let written = writeMarketplace() else { return }
 
+        let update = updatePersona || written.marketplaceChanged
         let plans = folders
-            .map { (folder: $0.folder,
-                    steps: stepsFor($0.desired, $0.state,
-                                    updatePersona: updatePersona || written.marketplaceChanged,
-                                    skillsChanged: written.skillsChanged)) }
+            .map { folder -> (folder: String, hash: String?, steps: [PluginStep]) in
+                let hash = personaHash(folder.environment)
+                return (folder.folder, hash,
+                        stepsFor(folder.desired, folder.state,
+                                 updatePersona: update || isStale(folder.folder, hash),
+                                 skillsChanged: written.skillsChanged))
+            }
             .filter { !$0.steps.isEmpty }
 
         guard !plans.isEmpty else { return }
@@ -255,9 +265,42 @@ enum PluginSync {
 
         let cli = ClaudeCliProcess(claude: claude)
         for plan in plans {
-            tell(why, plan.folder,
-                 PluginReconciler.apply(cli: cli, configDirectory: plan.folder, steps: plan.steps))
+            let results = PluginReconciler.apply(cli: cli, configDirectory: plan.folder, steps: plan.steps)
+            noteSynced(plan.folder, plan.hash, results)
+            tell(why, plan.folder, results)
         }
+    }
+
+    /// The hash of the persona plugin this folder should have now, or nil when the bridge is not
+    /// found: then nothing is compared and nothing is noted.
+    private static func personaHash(_ environment: AikoEnvironment) -> String? {
+        guard environment.persona, let bridge = BridgePath.current() else { return nil }
+
+        return PersonaPlugin.contentHash(PersonaPlugin.files(Store.persona().temperament, bridge))
+    }
+
+    private static func isStale(_ folder: String, _ hash: String?) -> Bool {
+        guard let hash else { return false }
+
+        return PersonaPluginOutput.needsUpdate(read(PersonaPluginOutput.syncedFile(Store.folders, folder)), hash)
+    }
+
+    /// Noted only after Claude Code took the plugin: a failed install or update is tried again.
+    private static func noteSynced(
+        _ folder: String, _ hash: String?, _ results: [(step: PluginStep, result: CliResult)]
+    ) {
+        let persona = AikoMarketplace.pluginId(PersonaPlugin.name)
+        let taken = results.contains {
+            $0.result.succeeded && $0.step.target == persona && ($0.step.kind == .install || $0.step.kind == .update)
+        }
+        guard let hash, taken else { return }
+
+        // Not noted when this fails: the next sync updates the plugin once more, which costs a
+        // few seconds.
+        let path = PersonaPluginOutput.syncedFile(Store.folders, folder)
+        try? FileManager.default.createDirectory(
+            atPath: (path as NSString).deletingLastPathComponent, withIntermediateDirectories: true)
+        try? hash.write(toFile: path, atomically: true, encoding: .utf8)
     }
 
     private static func removeFrom(_ folders: [String], _ why: String, deadline: Date? = nil) {

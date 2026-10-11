@@ -19,6 +19,8 @@ public static class SettingsJsonPatch
     public const string WrappedKey = "aikoWrappedStatusLine";
     public const string EnabledPluginsKey = "enabledPlugins";
     public const string ExtraMarketplacesKey = "extraKnownMarketplaces";
+    public const string PermissionsKey = "permissions";
+    public const string AllowKey = "allow";
 
     private static readonly JsonSerializerOptions Formatting = new()
     {
@@ -216,6 +218,82 @@ public static class SettingsJsonPatch
         return true;
     }
 
+    /// The rule that lets the model call the memory tools without a question (D-279). Claude Code
+    /// asks about every tool of a plugin server, and a memory that asks is not written silently.
+    /// Added when the memory is turned on in an environment and taken out when it is turned off.
+    ///
+    /// Only our own rule is touched. A "permissions" or an "allow" of a shape we do not know is
+    /// left as it is, and then nothing is added.
+    public static bool TrySetMemoryPermission(string settingsJson, bool allowed, out string patched)
+    {
+        patched = settingsJson;
+        if (!TryParseObject(settingsJson, out var root)
+            || !(allowed ? AddMemoryPermission(root!) : RemoveMemoryPermission(root!)))
+        {
+            return false;
+        }
+
+        patched = Write(root!);
+        return true;
+    }
+
+    public static bool HasMemoryPermission(string settingsJson) =>
+        TryParseObject(settingsJson, out var root) && OurPermissions(root!).Any();
+
+    private static bool AddMemoryPermission(JsonObject root)
+    {
+        if (root[PermissionsKey] is not (null or JsonObject)
+            || root[PermissionsKey]?[AllowKey] is not (null or JsonArray)
+            || OurPermissions(root).Any())
+        {
+            return false;
+        }
+
+        if (root[PermissionsKey] is not JsonObject permissions)
+        {
+            root[PermissionsKey] = permissions = [];
+        }
+
+        if (permissions[AllowKey] is not JsonArray allow)
+        {
+            permissions[AllowKey] = allow = [];
+        }
+
+        allow.Add(PersonaPlugin.MemoryPermission);
+        return true;
+    }
+
+    private static bool RemoveMemoryPermission(JsonObject root)
+    {
+        var ours = OurPermissions(root).ToList();
+        if (ours.Count == 0)
+        {
+            return false;
+        }
+
+        var permissions = (JsonObject)root[PermissionsKey]!;
+        var allow = (JsonArray)permissions[AllowKey]!;
+        foreach (var rule in ours)
+        {
+            allow.Remove(rule);
+        }
+
+        // Keys Aiko may have made itself. Left empty they would be litter in the person's file.
+        if (allow.Count == 0)
+        {
+            permissions.Remove(AllowKey);
+        }
+
+        DropIfEmpty(root, PermissionsKey);
+        return true;
+    }
+
+    private static IEnumerable<JsonNode> OurPermissions(JsonObject root) =>
+        root[PermissionsKey] is JsonObject permissions && permissions[AllowKey] is JsonArray allow
+            ? allow.OfType<JsonValue>()
+                .Where(rule => rule.TryGetValue<string>(out var text) && text == PersonaPlugin.MemoryPermission)
+            : [];
+
     /// "claude plugin uninstall" writes an empty enabledPlugins back after Aiko took its own keys
     /// out. Called only for a folder where it just ran.
     public static bool TryDropEmptyPluginKeys(string settingsJson, out string restored)
@@ -249,7 +327,8 @@ public static class SettingsJsonPatch
             || root.ContainsKey(WrappedKey)
             || (SessionStartGroups(root) is { } groups && OurHookCommands(platform, groups).Any())
             || (root[EnabledPluginsKey] is JsonObject enabled && enabled.Any(p => AikoMarketplace.IsOurs(p.Key)))
-            || (root[ExtraMarketplacesKey] is JsonObject marketplaces && marketplaces.ContainsKey(AikoMarketplace.Name));
+            || (root[ExtraMarketplacesKey] is JsonObject marketplaces && marketplaces.ContainsKey(AikoMarketplace.Name))
+            || OurPermissions(root).Any();
     }
 
     private static bool DropIfEmpty(JsonObject root, string key) =>

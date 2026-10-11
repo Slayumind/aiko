@@ -17,6 +17,7 @@ public class AikoFoldersTests
         Assert.Equal(@"C:\Users\someone\AppData\Roaming\Aiko\settings.json", Folders.SettingsFile);
         Assert.Equal(@"C:\Users\someone\AppData\Roaming\Aiko\environments.json", Folders.EnvironmentsFile);
         Assert.Equal(@"C:\Users\someone\AppData\Roaming\Aiko\persona.json", Folders.PersonaFile);
+        Assert.Equal(@"C:\Users\someone\AppData\Roaming\Aiko\memory.json", Folders.MemoryFile);
         Assert.Equal(@"C:\Users\someone\AppData\Roaming\Aiko\install-id", Folders.InstallIdFile);
         Assert.Equal(@"C:\Users\someone\AppData\Roaming\Aiko\reported.json", Folders.ReportedPeriodsFile);
     }

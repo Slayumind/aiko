@@ -2,9 +2,10 @@ import Foundation
 
 /// What one run of the bridge was asked to do.
 ///
-/// Claude Code starts the bridge for four different jobs and tells them apart by the arguments.
+/// Claude Code starts the bridge for several jobs and tells them apart by the arguments.
 /// The plugin job is decided before anything is read from stdin: Claude Code sends nothing there,
-/// and waiting for input that never comes would hang the install (D-201).
+/// and waiting for input that never comes would hang the install (D-201). The memory server is
+/// decided that early too, for the opposite reason: its input does not end until the session does.
 ///
 /// On Windows the same choice sits inline in Aiko.Bridge/Program.cs.
 public enum BridgeMode: Sendable, Equatable {
@@ -17,12 +18,19 @@ public enum BridgeMode: Sendable, Equatable {
     /// "hook": one session event for the face in the tray.
     case hook
 
+    /// "memory rules|facts|prompt|serve": the three memory hooks and the memory server.
+    case memory(MemoryBridgeMode)
+
     /// No argument we know: the status line.
     case statusLine
 
     public static func forArguments(_ arguments: [String]) -> BridgeMode {
         if PersonaPluginOutput.isRequest(arguments) {
             return .personaPlugin
+        }
+
+        if let job = MemoryBridge.modeFor(arguments) {
+            return .memory(job)
         }
 
         switch arguments.first {

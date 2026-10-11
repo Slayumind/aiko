@@ -160,7 +160,12 @@ to the Bin.
 Your accounts and history stay in their Claude Code folders: Aiko never made them. On macOS the copy
 of `~/.zshrc` that Aiko made before its first change stays too.
 
-On Windows you can also uninstall Aiko from **Installed apps**, which does the same.
+If Aiko remembers something about you, it asks whether to keep the memory. Keeping is the default:
+the file `memory.json` stays in Aiko's settings folder, and Aiko finds it there if you install it
+again. Untick the choice and the memory goes with the rest.
+
+On Windows you can also uninstall Aiko from **Installed apps**. That does the same, but it cannot
+ask you anything, so it keeps the memory.
 
 ## Build it yourself
 

@@ -18,9 +18,10 @@ static class Program
         // for installing, updating and removing, and this handles them and exits.
         //
         // The hook before uninstalling is the reason this is here at all: it is where the status
-        // line goes back into the Claude Code settings, as promised on the first run.
+        // line goes back into the Claude Code settings, as promised on the first run. The hook has
+        // no window to ask in, so the memory is kept (null: nobody was asked).
         VelopackApp.Build()
-            .OnBeforeUninstallFastCallback(_ => Uninstall.Cleanup())
+            .OnBeforeUninstallFastCallback(_ => Uninstall.Cleanup(keepMemory: null))
             .Run();
 
         // Software rendering: the spike measured 33 MB against 92 MB with the DirectX stack, and

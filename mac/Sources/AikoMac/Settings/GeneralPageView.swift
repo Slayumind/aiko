@@ -9,20 +9,23 @@ struct GeneralPageView: View {
     @ObservedObject var state: SettingsState
 
     @State private var startsAtLogin = LoginItem.isEnabled()
-    @State private var updateLine: String?
     @State private var downloadUrl = UpdateRun.releasesPage
     /// The version the site named, kept for the line shown while it downloads.
     @State private var newerVersion: String?
-    @State private var showDownload = false
+
+    /// Where the update line stands, and what went wrong with the last download, in words.
+    @State private var stage = UpdateStage.notAsked
+    @State private var problem: String?
+    @State private var percent = 0
     @State private var asking = false
     @State private var deleteAsking = false
+    /// Whether the memory holds something, read when the question opens, and the person's answer.
+    @State private var memoryToKeep = false
+    @State private var keepMemory = true
     @State private var diagnostics = Strings.diagnosticsWhat
     @State private var accessLine = ""
     @State private var offeringToAdd = false
     @State private var trashSecond = false
-    @State private var checking = false
-    @State private var showInstall = false
-    @State private var showRestart = false
 
     private static let languages: [AikoLanguage] = [.system, .russian, .english]
 
@@ -57,7 +60,6 @@ struct GeneralPageView: View {
             // preference. The button stays here, because pressing it is the person's own action
             // (D-113).
             updates.padding(.top, 20)
-            Control.rowHint(Strings.privacyLinkFromGeneral).padding(.top, 8).padding(.trailing, 56)
 
             Control.sectionLabel(Strings.sectionLanguage).padding(.top, 22).padding(.bottom, 8)
             DropDown(
@@ -94,7 +96,10 @@ struct GeneralPageView: View {
         }
         .onAppear {
             showAccess()
-            showReady()
+            if UpdateInstall.readyVersion != nil {
+                stage = .ready
+            }
+            tryUpdateStage()
             if state.askForUpdate {
                 state.askForUpdate = false
                 check()
@@ -138,60 +143,131 @@ struct GeneralPageView: View {
         state.saveApp(next)
     }
 
+    /// One state on the left, one action on the right (D-278). Downloading and replacing Aiko
+    /// starts here and nowhere else: the daily check only ever says that a newer version is out.
     private var updates: some View {
-        HStack(spacing: 8) {
-            FlatButton(title: Strings.checkNow, enabled: !checking, press: check)
-            // Downloading and replacing Aiko starts here and nowhere else: the daily check only
-            // ever says that a newer version is out.
-            if showInstall {
-                FlatButton(title: Strings.updateInstallNow, enabled: !checking, press: install)
+        let words = updateWords
+        let action = UpdateBlock.actionFor(stage)
+
+        // The step forward is the one bright button on the page; asking again is an ordinary one.
+        let forward = action == .install || action == .restart
+
+        return HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 2) {
+                Control.rowName(words.title).fixedSize(horizontal: false, vertical: true)
+                if !words.detail.isEmpty {
+                    Control.rowNote(words.detail)
+                }
             }
-            if showRestart {
-                FlatButton(title: Strings.updateRestartNow) { UpdateInstall.relaunch() }
-            }
-            if showDownload {
-                FlatButton(title: Strings.openDownloadPage) { open(downloadUrl) }
-            }
-            if let updateLine {
-                Control.rowHint(updateLine).padding(.leading, 2)
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            if stage == .downloading {
+                // In place of the button while a download runs: there is nothing to press then.
+                Text("\(UpdateBlock.percent(percent))%")
+                    .font(Theme.mono(Theme.textSmall))
+                    .foregroundStyle(Theme.ink)
+                    .padding(.horizontal, 10)
+            } else {
+                FlatButton(
+                    title: buttonTitle(action), look: forward ? .primary : .plain,
+                    enabled: action != .none, press: pressUpdate)
             }
         }
     }
 
-    /// Asked for by hand, so it runs whatever the switch says: the switch decides whether Aiko
-    /// checks on its own, not whether the person may ask.
+    /// What the line says at its stage, and the small print under it.
+    private var updateWords: (title: String, detail: String) {
+        let version = AppVersion.current()
+        let newer = newerShown
+        let current = Strings.format(Strings.updateThisVersion, version)
+        let comparing = Strings.format(Strings.updateNow, version)
+
+        switch stage {
+        case .notAsked:
+            return (current, "")
+        case .asking:
+            return (Strings.updateAsking, current)
+        case .upToDate:
+            guard let at = UpdateRun.lastAnswered else { return (Strings.updateLatest, current) }
+            return (Strings.updateLatest, Strings.format(Strings.updateCheckedAt, version, Self.clock(at)))
+        case .available:
+            return (Strings.format(Strings.updateAvailable, newer), comparing)
+        case .checkFailed:
+            return (Strings.updateFailed, current)
+        case .downloading:
+            return (Strings.format(Strings.updateDownloading, newer), comparing)
+        case .ready:
+            return (Strings.format(Strings.updateReady, newer), Strings.updateReadyDetail)
+        case .downloadFailed, .cannotInstall:
+            return (problem ?? Strings.updateDownloadFailed, comparing)
+        }
+    }
+
+    private var newerShown: String {
+        UpdateInstall.readyVersion ?? newerVersion ?? ""
+    }
+
+    private func buttonTitle(_ action: UpdateAction) -> String {
+        switch action {
+        case .install: return Strings.format(Strings.updateInstallNow, newerShown)
+        case .restart: return Strings.updateRestartNow
+        case .openDownloadPage: return Strings.openDownloadPage
+        case .check, .none: return Strings.checkNow
+        }
+    }
+
+    /// 12:40 in every language, as on Windows.
+    private static func clock(_ moment: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "HH:mm"
+        return formatter.string(from: moment)
+    }
+
+    /// A door for snapshots: AIKO_TRY_UPDATE=UpToDate, Available, Downloading, Ready, CheckFailed,
+    /// DownloadFailed or CannotInstall draws the update line at that stage, with a made-up version.
+    /// It asks nobody and writes nothing.
+    private func tryUpdateStage() {
+        guard let asked = ProcessInfo.processInfo.environment["AIKO_TRY_UPDATE"],
+              let wanted = UpdateStage.allCases.first(where: { "\($0)".lowercased() == asked.lowercased() })
+        else {
+            return
+        }
+
+        newerVersion = "9.9.9"
+        problem = wanted == .cannotInstall ? Strings.updateBadSignature : Strings.updateDownloadFailed
+        stage = wanted
+        percent = wanted == .downloading ? 64 : 0
+    }
+
+    /// The one button of the line does whatever is the next step from where the line stands.
+    private func pressUpdate() {
+        switch UpdateBlock.actionFor(stage) {
+        // Asked for by hand, so it runs whatever the switch says: the switch decides whether Aiko
+        // checks on its own, not whether the person may ask.
+        case .check: check()
+        case .install: install()
+        case .restart: UpdateInstall.relaunch()
+        case .openDownloadPage: open(downloadUrl)
+        case .none: break
+        }
+    }
+
     private func check() {
-        guard !checking else { return }
-        checking = true
-        updateLine = Strings.updateAsking
-        showDownload = false
-        showInstall = false
-        showRestart = false
+        // Already asking or downloading. Two answers racing into one line is worse than one.
+        guard UpdateBlock.actionFor(stage) != .none else { return }
+        stage = .asking
 
         Task {
             let info = await UpdateRun.ask()
-            let version = AppVersion.current()
+            let state = info.compareWith(AppVersion.current())
 
-            switch info.compareWith(version) {
-            case .available:
-                updateLine = Strings.format(Strings.updateAvailable, info.latest ?? "")
-                showDownload = true
-                showInstall = true
-                newerVersion = info.latest
-            case .upToDate:
-                updateLine = Strings.format(Strings.updateLatest, version)
-            // Never "you are up to date" when we do not know: that is the one answer that would
-            // keep every copy quiet after a bad deploy.
-            case .unknown:
-                updateLine = Strings.updateFailed
-            }
-
+            newerVersion = state == .available ? info.latest : nil
             downloadUrl = info.downloadUrl ?? UpdateRun.releasesPage
-            checking = false
 
             // A version already downloaded and checked in this session stays offered, whatever the
             // site says now.
-            showReady()
+            stage = UpdateInstall.readyVersion == nil ? UpdateBlock.after(state) : .ready
         }
     }
 
@@ -199,27 +275,35 @@ struct GeneralPageView: View {
     /// key and the zip matches its line (D-246). Pressing this is the consent to download; the
     /// restart asks once more.
     private func install() {
-        guard let version = newerVersion, !checking else { return }
-        checking = true
-        updateLine = Strings.format(Strings.updateDownloading, version)
+        guard let version = newerVersion, UpdateBlock.actionFor(stage) == .install else { return }
+        percent = 0
+        stage = .downloading
 
         Task {
-            let outcome = await UpdateInstall.download(version: version)
-            updateLine = Self.words(outcome)
-            showInstall = outcome.step != .ready
-            checking = false
-            showReady()
+            // URLSession reports from its own thread; the number is shown on ours. It only grows:
+            // two reports can arrive out of order.
+            let outcome = await UpdateInstall.download(version: version) { reported in
+                Task { @MainActor in percent = max(percent, reported) }
+            }
+
+            problem = Self.words(outcome)
+            switch outcome.step {
+            case .ready: stage = .ready
+            case .nothingNewer: stage = .upToDate
+            case .failed: stage = .downloadFailed
+
+            // A refusal never offers to try the same file again: the answer is the download page,
+            // where a person can look for themselves.
+            case .notInstalled, .refused: stage = .cannotInstall
+            }
         }
     }
 
-    /// The words for what came back. A refusal says what was refused and never offers to try the
-    /// same file again: the answer is the download page, where a person can look for themselves.
-    private static func words(_ outcome: InstallOutcome) -> String {
+    /// The words for a download that did not end with a version ready to install.
+    private static func words(_ outcome: InstallOutcome) -> String? {
         switch outcome.step {
-        case .ready:
-            return Strings.format(Strings.updateReady, outcome.version ?? "")
-        case .nothingNewer:
-            return Strings.format(Strings.updateLatest, AppVersion.current())
+        case .ready, .nothingNewer:
+            return nil
         case .notInstalled:
             return Strings.updateNotInstalled
         case .failed:
@@ -231,13 +315,6 @@ struct GeneralPageView: View {
             default: return Strings.updateBadSignature
             }
         }
-    }
-
-    private func showReady() {
-        guard let ready = UpdateInstall.readyVersion else { return }
-        updateLine = Strings.format(Strings.updateReady, ready)
-        showRestart = true
-        showInstall = false
     }
 
     private func pickLanguage(_ index: Int) {
@@ -337,7 +414,13 @@ struct GeneralPageView: View {
                 HStack(spacing: 12) {
                     Control.rowHint(Strings.deleteWhat)
                     Spacer(minLength: 12)
-                    FlatButton(title: Strings.delete, look: .ghostDanger) { deleteAsking = true }
+                    FlatButton(title: Strings.delete, look: .ghostDanger) {
+                        // The memory is the one thing here the person cannot make again, so it
+                        // stays unless they say no. With nothing in it there is nothing to ask.
+                        memoryToKeep = Uninstall.memoryIsWorthKeeping
+                        keepMemory = true
+                        deleteAsking = true
+                    }
                         .padding(.trailing, -10)
                 }
             }
@@ -351,6 +434,20 @@ struct GeneralPageView: View {
                         .foregroundStyle(Theme.ink)
                         .fixedSize(horizontal: false, vertical: true)
 
+                    if memoryToKeep {
+                        Tick(isOn: $keepMemory, title: Strings.deleteKeepMemory)
+                            .allowsHitTesting(!state.deleting)
+                            .padding(.top, 12)
+
+                        // The line under the tick says what the tick does now.
+                        Control.rowHint(keepMemory
+                            ? Strings.format(
+                                Strings.deleteMemoryStays,
+                                (MemoryStore.path as NSString).abbreviatingWithTildeInPath)
+                            : Strings.deleteMemoryGoes)
+                            .padding(.top, 6)
+                    }
+
                     Control.rowHint(Strings.deleteKeepMac).padding(.top, 8)
 
                     if !Uninstall.canBinTheApp {
@@ -363,7 +460,9 @@ struct GeneralPageView: View {
                         HStack(spacing: 8) {
                             Spacer()
                             FlatButton(title: Strings.cancel, look: .ghost) { deleteAsking = false }
-                            FlatButton(title: Strings.delete, look: .danger) { state.deleteAiko() }
+                            FlatButton(title: Strings.delete, look: .danger) {
+                                state.deleteAiko(keepMemory: keepMemory)
+                            }
                         }
                         .padding(.top, 12)
                     }

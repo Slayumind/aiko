@@ -31,7 +31,6 @@ public partial class PersonalityPage : UserControl
     private readonly EnvironmentsEditor _editor;
 
     private readonly List<EnvironmentRow> _environmentRows = [];
-    private readonly ToggleButton _skillsSwitch = new();
 
     private PersonaSettings _persona = SettingsStore.LoadPersona();
 
@@ -65,10 +64,12 @@ public partial class PersonalityPage : UserControl
 
     public void Leave() => _editor.Changed -= OnEnvironmentsChanged;
 
-    // ---- where Aiko talks ----
+    // ---- where Aiko is on ----
 
     private sealed record EnvironmentRow(string Name, ToggleButton Switch, RevealPanel Warning, string? OwnStyle);
 
+    /// One switch per environment. It turns on all of Aiko there: her character, her skills and
+    /// her memory are parts of one thing and are not switched apart (D-285).
     private void FillEnvironments()
     {
         EnvironmentRows.Children.Clear();
@@ -81,7 +82,7 @@ public partial class PersonalityPage : UserControl
         }
         _filling = false;
 
-        ShowPersonaState();
+        ShowSwitchState();
     }
 
     private Border EnvironmentRowFor(AikoEnvironment environment, bool first)
@@ -106,7 +107,9 @@ public partial class PersonalityPage : UserControl
             });
         }
 
+        // A screen reader hears the environment, because the switch itself has no word on it.
         var toggle = new ToggleButton { Style = (Style)FindResource("Switch"), IsChecked = environment.Persona };
+        System.Windows.Automation.AutomationProperties.SetName(toggle, environment.Name);
         toggle.Checked += (_, _) => SetPersona(environment.Name, true);
         toggle.Unchecked += (_, _) => SetPersona(environment.Name, false);
         Grid.SetColumn(toggle, 1);
@@ -150,7 +153,18 @@ public partial class PersonalityPage : UserControl
             return;
         }
 
-        _editor.Commit(EnvironmentEdits.SetPersona(_editor.Current, environment, on), on ? "turned the persona on" : "turned the persona off");
+        _editor.Commit(EnvironmentEdits.SetPersona(_editor.Current, environment, on), on ? "turned Aiko on" : "turned Aiko off");
+
+        // The lines under the switches say what the memory does, so whoever turned her on here
+        // has been told and is not shown this page again on the next start.
+        if (on)
+        {
+            var app = SettingsStore.Load();
+            if (!app.MemoryShown)
+            {
+                SettingsStore.Save(app with { MemoryShown = true });
+            }
+        }
     }
 
     private void OnEnvironmentsChanged()
@@ -170,22 +184,19 @@ public partial class PersonalityPage : UserControl
         }
         _filling = false;
 
-        ShowPersonaState();
+        ShowSwitchState();
     }
 
-    /// The warning under a switch, and whether the skills can work anywhere at all.
-    private void ShowPersonaState()
+    /// The warning under a switch, and whether the list of skills is about something that is on
+    /// anywhere.
+    private void ShowSwitchState()
     {
         foreach (var row in _environmentRows)
         {
             row.Warning.IsOpen = row.Switch.IsChecked == true && row.OwnStyle is not null;
         }
 
-        var anyOn = _editor.Current.Environments.Any(e => e.Persona);
-        SkillsArea.Opacity = anyOn ? 1 : 0.45;
-        _skillsSwitch.IsEnabled = anyOn;
-
-        SkillsNote.Text = anyOn ? Strings.SkillsWork : Strings.SkillsNeedPersona;
+        SkillGroups.Opacity = _editor.Current.Environments.Any(e => e.Persona) ? 1 : 0.45;
     }
 
     /// Read once when the page opens: the person changes it in their own settings.json, not here.
@@ -261,35 +272,11 @@ public partial class PersonalityPage : UserControl
 
     // ---- skills ----
 
-    /// One switch for all skills, then the skills themselves: they are one plugin in Claude Code and
-    /// come and go together (D-237).
+    /// The skills themselves. They are one plugin in Claude Code and come and go together
+    /// (D-237), in every environment where Aiko is on (D-285).
     private void FillSkills()
     {
-        SkillRows.Children.Clear();
         SkillGroups.Children.Clear();
-
-        _filling = true;
-        _skillsSwitch.Style = (Style)FindResource("Switch");
-        _skillsSwitch.IsChecked = _persona.SkillsOn;
-        _filling = false;
-        _skillsSwitch.Checked += (_, _) => SetSkills(true);
-        _skillsSwitch.Unchecked += (_, _) => SetSkills(false);
-        Grid.SetColumn(_skillsSwitch, 1);
-
-        var title = new TextBlock
-        {
-            Text = Strings.SkillsSwitch,
-            Style = (Style)FindResource("RowName"),
-            FontSize = Tokens.Get<double>("TextName"),
-            VerticalAlignment = VerticalAlignment.Center,
-        };
-
-        var header = new Grid { Margin = new Thickness(12, 10, 12, 10) };
-        header.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-        header.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-        header.Children.Add(title);
-        header.Children.Add(_skillsSwitch);
-        SkillRows.Children.Add(header);
 
         foreach (var group in SkillCatalog.Groups)
         {
@@ -298,7 +285,6 @@ public partial class PersonalityPage : UserControl
         }
 
         SkillsTitle.Text = string.Format(Strings.SectionSkills, SkillCatalog.All.Count);
-        ShowSkillsOn();
     }
 
     /// The domain name and how many skills it has, above its own box.
@@ -343,20 +329,6 @@ public partial class PersonalityPage : UserControl
             Child = rows,
         };
     }
-
-    private void SetSkills(bool on)
-    {
-        if (_filling)
-        {
-            return;
-        }
-
-        SavePersona(_persona with { SkillsOn = on });
-        ShowSkillsOn();
-        PluginSync.Request(on ? "skills switched on" : "skills switched off");
-    }
-
-    private void ShowSkillsOn() => SkillGroups.Opacity = _persona.SkillsOn ? 1 : 0.45;
 
     private void SavePersona(PersonaSettings next)
     {

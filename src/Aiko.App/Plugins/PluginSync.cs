@@ -54,12 +54,18 @@ static class PluginSync
     private static void Reconcile(string why, bool updatePersona)
     {
         var environments = SettingsStore.LoadEnvironments();
-        var persona = SettingsStore.LoadPersona();
 
         var folders = environments.Environments
-            .SelectMany(e => e.ConfigDirectories.Select(folder => (Folder: folder, Desired: PluginPlan.Desired(e, persona, SkillShelf.Skills))))
-            .Select(p => (p.Folder, p.Desired, State: ReadState(p.Folder)))
+            .SelectMany(e => e.ConfigDirectories.Select(folder => (Folder: folder, Environment: e, Desired: PluginPlan.Desired(e, SkillShelf.Skills))))
+            .Select(p => (p.Folder, p.Environment, p.Desired, State: ReadState(p.Folder)))
             .ToList();
+
+        // The permission for the memory tools goes with Aiko: on where she is on, off where she is
+        // off. Where the rule is already right this only reads the file.
+        foreach (var folder in folders)
+        {
+            ClaudeSettingsFile.SetMemoryPermission(folder.Folder, folder.Environment.Persona);
+        }
 
         // With the persona off everywhere and nothing of ours installed, Aiko writes nothing at all.
         if (folders.All(f => f.Desired.Count == 0 && f.State.Installed.Count == 0 && f.State.Enabled.Count == 0))
@@ -77,7 +83,8 @@ static class PluginSync
         updatePersona |= marketplaceChanged;
 
         var plans = folders
-            .Select(p => (p.Folder, p.Desired, Steps: StepsFor(p.Desired, p.State, updatePersona, skillsChanged)))
+            .Select(p => (p.Folder, p.Desired, p.State, Hash: PersonaHash(p.Folder, p.Environment)))
+            .Select(p => (p.Folder, p.Hash, Steps: StepsFor(p.Desired, p.State, updatePersona || IsStale(p.Folder, p.Hash), skillsChanged)))
             .Where(p => p.Steps.Count > 0)
             .ToList();
 
@@ -93,9 +100,11 @@ static class PluginSync
         }
 
         var cli = new ClaudeCli(claude);
-        foreach (var (folder, _, steps) in plans)
+        foreach (var (folder, hash, steps) in plans)
         {
-            LogResults(why, folder, PluginReconciler.Apply(cli, folder, steps));
+            var results = PluginReconciler.Apply(cli, folder, steps);
+            NoteSynced(folder, hash, results);
+            LogResults(why, folder, results);
         }
     }
 
@@ -126,6 +135,39 @@ static class PluginSync
             // The command writes an empty enabledPlugins back into the file Aiko just cleaned.
             ClaudeSettingsFile.TidyAfterPluginRemoval(folder);
             LogResults(why, folder, results);
+        }
+    }
+
+    /// The hash of the persona plugin this folder should have now, or null when the bridge is not
+    /// found: then nothing is compared and nothing is noted.
+    private static string? PersonaHash(string folder, AikoEnvironment environment) =>
+        environment.Persona && BridgePath.Current() is { } bridge
+            ? PersonaPlugin.ContentHash(PersonaPlugin.Files(SettingsStore.LoadPersona().Temperament, bridge))
+            : null;
+
+    private static bool IsStale(string folder, string? hash) =>
+        hash is not null && PersonaPluginOutput.NeedsUpdate(ReadIfThere(PersonaPluginOutput.SyncedFile(Folders, folder)), hash);
+
+    /// Noted only after Claude Code took the plugin: a failed install or update is tried again.
+    private static void NoteSynced(string folder, string? hash, IReadOnlyList<(PluginStep Step, CliResult Result)> results)
+    {
+        var persona = AikoMarketplace.PluginId(PersonaPlugin.Name);
+        var taken = results.Any(r => r.Result.Succeeded && r.Step.Target == persona
+            && r.Step.Kind is PluginStepKind.Install or PluginStepKind.Update);
+        if (hash is null || !taken)
+        {
+            return;
+        }
+
+        try
+        {
+            var path = PersonaPluginOutput.SyncedFile(Folders, folder);
+            Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+            File.WriteAllText(path, hash);
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            // Not noted: the next sync updates the plugin once more, which costs a few seconds.
         }
     }
 

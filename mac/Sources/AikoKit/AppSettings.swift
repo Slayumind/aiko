@@ -36,12 +36,18 @@ public struct AppSettings: Sendable, Equatable {
 
     /// Off by default, and its own switch since 0.2.1. It used to ride on checkUpdates, so turning
     /// off the count meant turning off update checks with it, and there was no way to keep one
-    /// without the other.
+    /// without the other. The request is still one request: with this off, the identifier and the
+    /// three flags are simply left out of it and the server writes nothing.
     public var sendStats = false
 
     /// Whether the privacy question has been answered at all. Without it, "off" cannot be told
     /// apart from "never asked", and somebody updating from 0.2.0 would never see the question.
     public var privacyAsked = false
+
+    /// Whether the person has been shown that Aiko now remembers. With the memory, an environment
+    /// where she was already on starts to read messages for her memory and gets a permission
+    /// line in its settings.json. Somebody who turned her on before that must be told once.
+    public var memoryShown = false
 
     public var language: AikoLanguage = .system
 
@@ -86,6 +92,7 @@ public struct AppSettings: Sendable, Equatable {
         if let value = root["checkUpdates"]?.boolValue { settings.checkUpdates = value }
         if let value = root["sendStats"]?.boolValue { settings.sendStats = value }
         if let value = root["privacyAsked"]?.boolValue { settings.privacyAsked = value }
+        if let value = root["memoryShown"]?.boolValue { settings.memoryShown = value }
         if let value = root["hideIslandInFullScreen"]?.boolValue { settings.hideIslandInFullScreen = value }
         if let value = root["meetAikoShown"]?.boolValue { settings.meetAikoShown = value }
 
@@ -109,6 +116,7 @@ public struct AppSettings: Sendable, Equatable {
             ("checkUpdates", .bool(checkUpdates)),
             ("sendStats", .bool(sendStats)),
             ("privacyAsked", .bool(privacyAsked)),
+            ("memoryShown", .bool(memoryShown)),
             ("language", .string(language.rawValue)),
             ("hideIslandInFullScreen", .bool(hideIslandInFullScreen)),
             ("island", .object(JsonObject([

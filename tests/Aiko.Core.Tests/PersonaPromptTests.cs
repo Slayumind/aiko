@@ -105,6 +105,9 @@ public class PersonaPromptTests
         var prompt = PersonaPrompt.Compose(temperament);
 
         Assert.Contains("You do not know the user's gender", prompt);
+
+        // The memory may know how to address the user; without it the rule above holds.
+        Assert.Contains("The only exception is a fact in the Aiko memory of this session that says how to address the user", prompt);
         Assert.Contains("without gendered forms", prompt);
     }
 
@@ -145,11 +148,13 @@ public class PersonaPromptTests
     }
 
     [Fact]
-    public void The_plugin_has_a_manifest_a_style_and_hooks()
+    public void The_plugin_has_a_manifest_a_style_hooks_and_the_memory_server()
     {
         var files = PersonaPlugin.Files(Temperament.Normal, Bridge);
 
-        Assert.Equal([".claude-plugin/plugin.json", "hooks/hooks.json", "output-styles/aiko.md"], files.Keys.Order(StringComparer.Ordinal));
+        Assert.Equal(
+            [".claude-plugin/plugin.json", ".mcp.json", "hooks/hooks.json", "output-styles/aiko.md"],
+            files.Keys.Order(StringComparer.Ordinal));
         using var manifest = JsonDocument.Parse(files[".claude-plugin/plugin.json"]);
         Assert.Equal("aiko-persona", manifest.RootElement.GetProperty("name").GetString());
     }
@@ -160,8 +165,9 @@ public class PersonaPromptTests
         using var hooks = JsonDocument.Parse(PersonaPlugin.Files(Temperament.Normal, Bridge)["hooks/hooks.json"]);
         var events = hooks.RootElement.GetProperty("hooks");
 
-        Assert.Equal(PersonaPlugin.HookEvents, events.EnumerateObject().Select(e => e.Name));
-        foreach (var e in events.EnumerateObject())
+        // The face follows these events. The memory adds SessionStart, checked with the memory.
+        Assert.Equal([.. PersonaPlugin.HookEvents, "SessionStart"], events.EnumerateObject().Select(e => e.Name));
+        foreach (var e in events.EnumerateObject().Where(e => PersonaPlugin.HookEvents.Contains(e.Name)))
         {
             var hook = e.Value[0].GetProperty("hooks")[0];
             Assert.Equal("command", hook.GetProperty("type").GetString());
