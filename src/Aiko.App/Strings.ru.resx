@@ -727,6 +727,15 @@
   <data name="DeletePortable" xml:space="preserve">
     <value>Эта копия распакована из zip, деинсталлятора у неё нет. Папка с Aiko останется, и Aiko её откроет.</value>
   </data>
+  <data name="DeleteKeepMemory" xml:space="preserve">
+    <value>Сохранить то, что Aiko помнит обо мне</value>
+  </data>
+  <data name="DeleteMemoryStays" xml:space="preserve">
+    <value>Останется один файл: {0}. Когда поставишь Aiko снова, она найдёт память там.</value>
+  </data>
+  <data name="DeleteMemoryGoes" xml:space="preserve">
+    <value>Память уйдёт вместе с папками Aiko. Вернуть её нельзя.</value>
+  </data>
   <data name="OpenClaudeCode" xml:space="preserve">
     <value>Открыть Claude Code</value>
   </data>

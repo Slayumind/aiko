@@ -52,8 +52,9 @@ public partial class GeneralPage : UserControl
     /// Recycle Bin.
     public event Action<bool>? RestartRequested;
 
-    /// Raised after the second click on "Remove Aiko". Nothing here can be undone afterwards.
-    public event Action? DeleteRequested;
+    /// Raised after the second click on "Remove Aiko", with whether the memory stays. Nothing here
+    /// can be undone afterwards.
+    public event Action<bool>? DeleteRequested;
 
     /// Raised when the window has to come back in another language.
     public event Action? ReopenRequested;
@@ -455,9 +456,23 @@ public partial class GeneralPage : UserControl
         // running program delete itself. The person is told before they agree, not after.
         DeletePortable.Visibility = Uninstall.HasUninstaller ? Visibility.Collapsed : Visibility.Visible;
 
+        // The memory is the one thing here the person cannot make again, so it stays unless they
+        // say no. With nothing in it there is nothing to ask about.
+        DeleteKeepMemory.IsChecked = true;
+        DeleteMemory.Visibility = Uninstall.MemoryIsWorthKeeping() ? Visibility.Visible : Visibility.Collapsed;
+        ShowWhatHappensToMemory();
+
         DeleteRow.Visibility = Visibility.Collapsed;
         DeleteConfirm.IsOpen = true;
     }
+
+    private void OnDeleteKeepMemoryChanged(object sender, RoutedEventArgs e) => ShowWhatHappensToMemory();
+
+    /// The line under the tick says what the tick does now: where the file stays, or that it goes.
+    private void ShowWhatHappensToMemory() =>
+        DeleteMemoryLine.Text = DeleteKeepMemory.IsChecked == true
+            ? string.Format(Strings.DeleteMemoryStays, MemoryStore.Path)
+            : Strings.DeleteMemoryGoes;
 
     private void OnDeleteCancelled(object sender, RoutedEventArgs e)
     {
@@ -471,6 +486,7 @@ public partial class GeneralPage : UserControl
     {
         DeleteButtons.Visibility = Visibility.Collapsed;
         DeleteWorking.Visibility = Visibility.Visible;
-        DeleteRequested?.Invoke();
+        DeleteKeepMemory.IsEnabled = false;
+        DeleteRequested?.Invoke(DeleteKeepMemory.IsChecked == true);
     }
 }

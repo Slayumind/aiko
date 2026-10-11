@@ -33,6 +33,7 @@ the update check.
   on your computer, `memory.json` next to Aiko's settings. It is given to the model at the start of
   a session in the environments where the personality is on. You can read, change and erase it on
   the Personality page, or open the file itself. Turning the personality off does not erase it.
+  Removing Aiko asks whether to keep it (see "Where Aiko keeps things").
   Aiko never sends it anywhere; the model you talk to sees it, as it sees everything else in the
   session.
 - **One permission line, where the personality is on.** Aiko adds one rule to that environment's
@@ -161,8 +162,17 @@ Without direct mode, Aiko never touches the token.
 
 Removing Aiko puts the status line back, removes its plugins from Claude Code, takes its folder out
 of `PATH`, turns the profile functions back on, removes that value and deletes both of Aiko's
-folders. You
-can also delete the folders by hand at any time, and Aiko starts again with its defaults.
+folders.
+
+One file may stay: the memory. When you press **Remove Aiko** in settings and the memory holds
+something, Aiko asks whether to keep it, and the answer is "keep" unless you untick it. Then
+`memory.json` stays alone in the settings folder (`%APPDATA%\Aiko` on Windows,
+`~/Library/Application Support/Aiko` on macOS), and Aiko finds it there if you install it again.
+Everything else in the folder goes, the lock file and a `memory.json.bad` copy too. When you
+uninstall Aiko from **Installed apps** on Windows, nobody can ask you, so the memory is kept. An
+empty memory is not kept. To remove a kept memory, delete that file.
+
+You can also delete the folders by hand at any time, and Aiko starts again with its defaults.
 
 ## The log
 

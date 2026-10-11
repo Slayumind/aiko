@@ -727,6 +727,15 @@
   <data name="DeletePortable" xml:space="preserve">
     <value>This copy was unpacked from a zip, so it has no uninstaller. The folder with Aiko stays, and Aiko opens it for you.</value>
   </data>
+  <data name="DeleteKeepMemory" xml:space="preserve">
+    <value>Keep what Aiko remembers about me</value>
+  </data>
+  <data name="DeleteMemoryStays" xml:space="preserve">
+    <value>One file stays: {0}. When you install Aiko again, it finds the memory there.</value>
+  </data>
+  <data name="DeleteMemoryGoes" xml:space="preserve">
+    <value>The memory goes with Aiko's folders. It cannot be brought back.</value>
+  </data>
   <data name="OpenClaudeCode" xml:space="preserve">
     <value>Open Claude Code</value>
   </data>

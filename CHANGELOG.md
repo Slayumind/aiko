@@ -16,6 +16,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - **The memory on the Personality page.** You see every fact, sorted into four groups with their
   limits. You can pin a fact, edit it, remove it, add one yourself, open the file or erase the
   memory. A fact that is too long for the model is marked, and the page says what to do.
+- **Removing Aiko asks whether to keep the memory.** The choice is on by default. The file
+  `memory.json` then stays in Aiko's settings folder, and Aiko finds it there if you install it
+  again. Uninstalling from Installed apps on Windows cannot ask, so it keeps the memory.
 
 ### Changed
 

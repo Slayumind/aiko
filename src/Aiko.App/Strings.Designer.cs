@@ -717,6 +717,15 @@ public static class Strings
     /// This copy was unpacked from a zip, so it has no uninstaller. The folder with Aiko stays, ...
     public static string DeletePortable => Get("DeletePortable");
 
+    /// Keep what Aiko remembers about me
+    public static string DeleteKeepMemory => Get("DeleteKeepMemory");
+
+    /// One file stays: {0}. When you install Aiko again, it finds the memory there.
+    public static string DeleteMemoryStays => Get("DeleteMemoryStays");
+
+    /// The memory goes with Aiko's folders. It cannot be brought back.
+    public static string DeleteMemoryGoes => Get("DeleteMemoryGoes");
+
     /// Open Claude Code
     public static string OpenClaudeCode => Get("OpenClaudeCode");
 

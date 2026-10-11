@@ -174,6 +174,15 @@
               Margin="0,14,0,0">
         <StackPanel>
           <TextBlock x:Name="DeleteLine" Style="{StaticResource RowHint}" Foreground="{StaticResource Ink}" />
+          <!-- Shown only when the memory holds something. Ticked each time the question opens: the
+               memory stays unless the person says no. -->
+          <StackPanel x:Name="DeleteMemory" Margin="0,12,0,0" Visibility="Collapsed">
+            <CheckBox x:Name="DeleteKeepMemory" Style="{StaticResource Tick}"
+                      Checked="OnDeleteKeepMemoryChanged" Unchecked="OnDeleteKeepMemoryChanged">
+              <TextBlock Text="{x:Static local:Strings.DeleteKeepMemory}" TextWrapping="Wrap" />
+            </CheckBox>
+            <TextBlock x:Name="DeleteMemoryLine" Style="{StaticResource RowHint}" Margin="0,6,0,0" />
+          </StackPanel>
           <TextBlock Text="{x:Static local:Strings.DeleteKeep}" Style="{StaticResource RowHint}" Margin="0,8,0,0" />
           <TextBlock x:Name="DeletePortable" Text="{x:Static local:Strings.DeletePortable}" Style="{StaticResource RowHint}"
                      Margin="0,6,0,0" Visibility="Collapsed" />

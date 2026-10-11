@@ -272,6 +272,9 @@ public enum Strings {
         "DeleteWorking": ("Removing Aiko. Claude Code may take a few seconds to answer.", "Убираю Aiko. Claude Code может отвечать несколько секунд."),
         "DeleteAppStays": ("Aiko cannot move itself to the Bin from where it is now. Drag the app there when it quits.", "Aiko не может отправить себя в Корзину из этой папки. Перетащи программу туда, когда она закроется."),
         "DeletePortable": ("This copy was unpacked from a zip, so it has no uninstaller. The folder with Aiko stays, and Aiko opens it for you.", "Эта копия распакована из zip, деинсталлятора у неё нет. Папка с Aiko останется, и Aiko её откроет."),
+        "DeleteKeepMemory": ("Keep what Aiko remembers about me", "Сохранить то, что Aiko помнит обо мне"),
+        "DeleteMemoryStays": ("One file stays: {0}. When you install Aiko again, it finds the memory there.", "Останется один файл: {0}. Когда поставишь Aiko снова, она найдёт память там."),
+        "DeleteMemoryGoes": ("The memory goes with Aiko's folders. It cannot be brought back.", "Память уйдёт вместе с папками Aiko. Вернуть её нельзя."),
         "OpenClaudeCode": ("Open Claude Code", "Открыть Claude Code"),
         "CardSignInNote": ("Sign in so Aiko can see the limits of this environment.", "Войди, чтобы Aiko видела лимиты этой среды."),
         "StateWorkingNow": ("working now", "сейчас работает"),
@@ -1086,6 +1089,15 @@ public enum Strings {
 
     /// This copy was unpacked from a zip, so it has no uninstaller. The folder with Aiko stays, ...
     public static var deletePortable: String { Strings.get("DeletePortable") }
+
+    /// Keep what Aiko remembers about me
+    public static var deleteKeepMemory: String { Strings.get("DeleteKeepMemory") }
+
+    /// One file stays: {0}. When you install Aiko again, it finds the memory there.
+    public static var deleteMemoryStays: String { Strings.get("DeleteMemoryStays") }
+
+    /// The memory goes with Aiko's folders. It cannot be brought back.
+    public static var deleteMemoryGoes: String { Strings.get("DeleteMemoryGoes") }
 
     /// Open Claude Code
     public static var openClaudeCode: String { Strings.get("OpenClaudeCode") }
