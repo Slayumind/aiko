@@ -193,11 +193,13 @@ AikoKit decided, and it answers the mouse.
 | Log.cs | Log.swift | the same file, the same line format |
 | Uninstall.cs | Uninstall.swift | putting everything back on the way out. Windows is called by the installer's hook and then removes the program with `Update.exe uninstall`; macOS has no uninstaller, so the app does the work itself, moves its own bundle to the Bin and quits |
 | Settings/SettingsWindow.xaml(.cs), SettingsPanel.xaml | Settings/SettingsWindow.swift | the borderless window, the header, the menu and the page area; Esc closes it |
-| Settings/SavedMark.cs, Theme/Controls.xaml, Theme/DropDown.cs, Theme/RevealPanel.cs | Settings/SettingsControls.swift | the switch, the segments, the picked card, the fields, the buttons, the tick, the chip, the drop down and the "Saved" mark |
+| Settings/SavedMark.cs, Theme/Controls.xaml, Theme/DropDown.cs, Theme/RevealPanel.cs | Settings/SettingsControls.swift | the switch, the segments, the picked card, the fields, the buttons (with the light one for Save and a plus before the words), the tick, the chip, the drop down and the "Saved" mark |
 | Settings/EnvironmentsEditor.cs | Settings/SettingsState.swift | what the window is looking at, and every change written through one place |
 | Settings/EnvironmentPage.xaml(.cs) | Settings/EnvironmentPageView.swift | one environment: the account, the name, the command, the bound folders and removal |
 | Settings/FoldersPage.xaml(.cs) | Settings/FoldersPageView.swift | every bound folder in one table |
-| Settings/PersonalityPage.xaml(.cs) | Settings/PersonalityPageView.swift | where Aiko talks, the face, the temperament, the sample answer and the skills |
+| Settings/PersonalityPage.xaml(.cs) | Settings/PersonalityPageView.swift | the table of switches (a row per environment; the personality, the skills, the memory), the face, the temperament, the sample answer and the list of skills |
+| Settings/MemoryBlock.cs | Settings/MemoryBlockView.swift, MemoryBlockModel.swift | the memory under the table: quotas, facts, the two forms, the warnings, the foot and the erase question. The model keeps what is open and has the snapshot door `AIKO_TRY_MEMORY` |
+| Settings/MemoryStore.cs | Settings/MemoryStore.swift | the memory file for the window: the bridge's lock file, read again, change, write in one step |
 | Settings/PrivacyPage.xaml(.cs) | Settings/PrivacyPageView.swift | the two consents and the list of fields that would be sent |
 | Settings/GeneralPage.xaml(.cs) | Settings/GeneralPageView.swift | where Aiko shows, startup, the update check and the install, the language, access, diagnostics, starting over |
 | Settings/ChecklistPage.xaml(.cs), ChecklistRow.cs | Settings/ChecklistPageView.swift, ChecklistModel.swift | the nine items, their bodies and Finish |
@@ -297,6 +299,20 @@ These are the places where there was nothing to copy, with the reason for the ch
   out of the PowerShell profile (D-167), because that function is usually something a tutorial told
   the person to add. On macOS the shim is on PATH and a shell function that hides it is the person's
   own choice; the checklist has no such item, and `PowerShellProfile.cs` stays unported.
+
+- **The memory block draws its icons with SF Symbols.** Windows draws the lock, the pencil and
+  the trash can from the paths of the slayumind set. The Mac window already uses SF Symbols for
+  its small marks, so the block uses `lock`, `lock.open`, `pencil` and `trash`. The meaning is the
+  same: a closed lock is a pinned fact.
+
+- **The add form keeps what was typed when the category changes.** Windows builds the form again
+  on every click and the two fields come back empty. SwiftUI keeps the same form, so the text
+  stays.
+
+- **`MemoryStore.swift` repeats the lock and the write of `aiko-bridge/Disk.swift`.** The bridge is
+  a program of its own and the app cannot see its files, and AikoKit does not touch the disk. The
+  two must stay the same: `flock` on `memory.json.lock`, 80 tries 25 ms apart, a temporary file and
+  `rename`, and `.bad` for a file that was not a memory.
 
 Not there yet: direct mode and signing for release.
 
