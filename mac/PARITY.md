@@ -4,7 +4,7 @@ The macOS app repeats the Windows core, so every ported file keeps its behaviour
 case has a Swift case with the same name and the same numbers. Test counts below are cases, not
 methods: one `[Theory]` with five `[InlineData]` rows counts as five, and so does the Swift
 `@Test(arguments:)` that mirrors it. `dotnet test` prints cases and says 1064; `swift test` prints
-methods, not cases, and says 774. The 49 the Swift side does not have are named at the bottom; the ones it has and Windows
+methods, not cases, and says 774. The 14 the Swift side does not have are named at the bottom; the ones it has and Windows
 does not belong to the two small programs, whose decisions sit inline in `Program.cs` on Windows,
 and to the card words, the island and the settings window, which sit in `Aiko.App` on Windows
 where no test can reach them.
@@ -288,9 +288,11 @@ These are the places where there was nothing to copy, with the reason for the ch
   account. That is the right way round here, because a checklist that could never say "connected"
   would stop somebody setting Aiko up at all, which is what the first live run on a Mac ran into.
 
-- **There is no updater.** Velopack is Windows only, so the general page shows the version and
-  "Check now" and nothing else; an available version opens the download page. The daily check, the
-  two consent switches and the count are the same as on Windows.
+- **The updater is Aiko's own.** Velopack is Windows only, so `UpdateInstaller` downloads the
+  zip, checks it against the signed list and swaps the bundle. The general page shows the same
+  one line and one action as on Windows. The Mac asks for a new version only when the person
+  presses the button; Windows also asks once a day. The two consent switches and the count are
+  the same.
 
 - **Starting at login** is `SMAppService.mainApp` in place of the Run key. It needs a real bundle:
   a binary run straight out of `.build` cannot register, and then the switch says off and saying
@@ -394,7 +396,7 @@ exactly, which is what the Swift tests do; the Mac app passes `.macOS`.
 
 ## Not ported, on purpose
 
-Together these are the 49 cases the Swift suite does not have, less the one case it has and the
+Together these are the 14 cases the Swift suite does not have, less the one case it has and the
 Windows suite does not (the folders `FileManager` hands this Mac).
 
 - **PowerShellProfile.cs** — 6 cases in ShimTests. It reads and rewrites a PowerShell profile so
@@ -404,6 +406,3 @@ Windows suite does not (the folders `FileManager` hands this Mac).
 - **WindowsGitBash.cs** — 8 cases in ClaudeShellLookupTests. Git Bash only exists on Windows. On
   macOS `ClaudeShellLookup` is always asked with no path, so it always answers with the fallback
   shell of the platform, `/bin/zsh -lc`.
-- **UpdateManifest.cs** — 36 cases. Checking the signature of a release needs a key API of its own,
-  `Security` on macOS against `System.Security.Cryptography` on Windows, and the Mac app has no
-  updater yet. The openssl vector in `spec/cases/update-manifest/` is ready for whoever writes it.
