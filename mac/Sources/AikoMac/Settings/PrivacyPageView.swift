@@ -23,7 +23,10 @@ struct PrivacyPageView: View {
         ("day", Strings.sentDayId),
         ("w", Strings.sentWeekFlag),
         ("m", Strings.sentMonthFlag),
-         ("p", Strings.sentPersona)]
+        ("p", Strings.sentPersona),
+        ("s", Strings.sentSkills),
+        ("mem", Strings.sentMemory),
+        ]
     }
 
     var body: some View {

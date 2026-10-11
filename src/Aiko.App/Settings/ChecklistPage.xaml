@@ -222,6 +222,8 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
               </Grid.RowDefinitions>
 
               <TextBlock Grid.Row="0" Grid.Column="0" Text="v" Style="{StaticResource LedgerKey}" />
@@ -241,6 +243,12 @@
 
               <TextBlock Grid.Row="5" Grid.Column="0" Text="p" Style="{StaticResource LedgerKey}" />
               <TextBlock Grid.Row="5" Grid.Column="1" Text="{x:Static local:Strings.SentPersona}" Style="{StaticResource RowNote}" TextWrapping="Wrap" TextTrimming="None" />
+
+              <TextBlock Grid.Row="6" Grid.Column="0" Text="s" Style="{StaticResource LedgerKey}" />
+              <TextBlock Grid.Row="6" Grid.Column="1" Text="{x:Static local:Strings.SentSkills}" Style="{StaticResource RowNote}" TextWrapping="Wrap" TextTrimming="None" />
+
+              <TextBlock Grid.Row="7" Grid.Column="0" Text="mem" Style="{StaticResource LedgerKey}" />
+              <TextBlock Grid.Row="7" Grid.Column="1" Text="{x:Static local:Strings.SentMemory}" Style="{StaticResource RowNote}" TextWrapping="Wrap" TextTrimming="None" />
             </Grid>
           </Border>
 

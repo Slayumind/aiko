@@ -300,7 +300,7 @@ public enum Strings {
         "OpenPrivacyDoc": ("Open PRIVACY.md", "Открыть PRIVACY.md"),
         "PrivacyLinkFromGeneral": ("What Aiko sends and to whom — Privacy.", "Что Aiko отправляет и кому — раздел «Приватность»."),
         "WizardStats": ("Anonymous statistics", "Анонимная статистика"),
-        "WizardStatsWhat": ("The author of Aiko doesn't know how many people use it. Once a day Aiko can say that one copy ran and send six values. All six are below.", "Автор Aiko не знает, сколько людей ею пользуется. Раз в сутки Aiko может сообщить, что одна копия работала, и отправить шесть значений. Вот все шесть."),
+        "WizardStatsWhat": ("The author of Aiko doesn't know how many people use it. Once a day Aiko can say that one copy ran and send eight values. All eight are below.", "Автор Aiko не знает, сколько людей ею пользуется. Раз в сутки Aiko может сообщить, что одна копия работала, и отправить восемь значений. Вот все восемь."),
         "WizardStatsLater": ("You can change this later on the Privacy page.", "Это можно поменять потом на странице «Приватность»."),
         "StatsDecline": ("Don't send", "Не отправлять"),
         "StatsAccept": ("Send", "Отправлять"),
