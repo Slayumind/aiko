@@ -26,6 +26,8 @@ public struct SettingsJsonPatch: Sendable {
     public static let extraMarketplacesKey = "extraKnownMarketplaces"
     public static let hooksKey = "hooks"
     public static let sessionStartKey = "SessionStart"
+    public static let permissionsKey = "permissions"
+    public static let allowKey = "allow"
 
     public func addBridge(_ settingsJson: String, _ bridgeCommand: String) -> String? {
         guard !bridgeCommand.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
@@ -170,6 +172,28 @@ public struct SettingsJsonPatch: Sendable {
         return write(root)
     }
 
+    /// The rule that lets the model call the memory tools without a question (D-279). Claude Code
+    /// asks about every tool of a plugin server, and a memory that asks is not written silently.
+    /// Added when the memory is turned on in an environment and taken out when it is turned off.
+    ///
+    /// Only our own rule is touched. A "permissions" or an "allow" of a shape we do not know is
+    /// left as it is, and then nothing is added.
+    public func setMemoryPermission(_ settingsJson: String, allowed: Bool) -> String? {
+        guard var root = parseObject(settingsJson),
+              allowed ? addMemoryPermission(&root) : removeMemoryPermission(&root) else {
+            return nil
+        }
+
+        return write(root)
+    }
+
+    public func hasMemoryPermission(_ settingsJson: String) -> Bool {
+        guard let root = parseObject(settingsJson) else {
+            return false
+        }
+        return hasOurPermission(root)
+    }
+
     /// "claude plugin uninstall" writes an empty enabledPlugins back after Aiko took its own keys
     /// out. Called only for a folder where it just ran.
     public func dropEmptyPluginKeys(_ settingsJson: String) -> String? {
@@ -203,7 +227,7 @@ public struct SettingsJsonPatch: Sendable {
            marketplaces.contains(AikoMarketplace.name) {
             return true
         }
-        return false
+        return hasOurPermission(root)
     }
 
     /// Whether the status line in this file is ours, whatever path or shell it names.
@@ -243,6 +267,62 @@ public struct SettingsJsonPatch: Sendable {
             return false
         }
         return root.remove(key)
+    }
+
+    private func addMemoryPermission(_ root: inout JsonObject) -> Bool {
+        // A key that says null is read as a key that is not there, the way the Windows core reads it.
+        let permissionsNode = present(root[SettingsJsonPatch.permissionsKey])
+        if permissionsNode != nil && permissionsNode?.objectValue == nil {
+            return false
+        }
+
+        var permissions = permissionsNode?.objectValue ?? JsonObject()
+        let allowNode = present(permissions[SettingsJsonPatch.allowKey])
+        if allowNode != nil && allowNode?.arrayValue == nil {
+            return false
+        }
+
+        var allow = allowNode?.arrayValue ?? []
+        if allow.contains(SettingsJsonPatch.ourRule) {
+            return false
+        }
+
+        allow.append(SettingsJsonPatch.ourRule)
+        permissions[SettingsJsonPatch.allowKey] = .array(allow)
+        root[SettingsJsonPatch.permissionsKey] = .object(permissions)
+        return true
+    }
+
+    private func removeMemoryPermission(_ root: inout JsonObject) -> Bool {
+        guard hasOurPermission(root),
+              var permissions = root[SettingsJsonPatch.permissionsKey]?.objectValue,
+              var allow = permissions[SettingsJsonPatch.allowKey]?.arrayValue else {
+            return false
+        }
+
+        allow.removeAll { $0 == SettingsJsonPatch.ourRule }
+
+        // Keys Aiko may have made itself. Left empty they would be litter in the person's file.
+        if allow.isEmpty {
+            permissions.remove(SettingsJsonPatch.allowKey)
+        } else {
+            permissions[SettingsJsonPatch.allowKey] = .array(allow)
+        }
+
+        root[SettingsJsonPatch.permissionsKey] = .object(permissions)
+        dropIfEmpty(&root, SettingsJsonPatch.permissionsKey)
+        return true
+    }
+
+    private func hasOurPermission(_ root: JsonObject) -> Bool {
+        root[SettingsJsonPatch.permissionsKey]?.objectValue?[SettingsJsonPatch.allowKey]?.arrayValue?
+            .contains(SettingsJsonPatch.ourRule) ?? false
+    }
+
+    private static let ourRule = JsonNode.string(PersonaPlugin.memoryPermission)
+
+    private func present(_ node: JsonNode?) -> JsonNode? {
+        node == .null ? nil : node
     }
 
     private func sessionStartGroups(_ root: JsonObject) -> [JsonNode]? {

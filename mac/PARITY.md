@@ -3,8 +3,8 @@
 The macOS app repeats the Windows core, so every ported file keeps its behaviour and every xUnit
 case has a Swift case with the same name and the same numbers. Test counts below are cases, not
 methods: one `[Theory]` with five `[InlineData]` rows counts as five, and so does the Swift
-`@Test(arguments:)` that mirrors it. `dotnet test` prints cases and says 933; `swift test` prints
-methods, not cases, and says 720. The 49 the Swift side does not have are named at the bottom; the ones it has and Windows
+`@Test(arguments:)` that mirrors it. `dotnet test` prints cases and says 973; `swift test` prints
+methods, not cases, and says 753. The 49 the Swift side does not have are named at the bottom; the ones it has and Windows
 does not belong to the two small programs, whose decisions sit inline in `Program.cs` on Windows,
 and to the card words, the island and the settings window, which sit in `Aiko.App` on Windows
 where no test can reach them.
@@ -39,11 +39,13 @@ a row cannot change in one core and stay as it was in the other. See `spec/cases
 | PersonaSettings.cs | PersonaSettings.swift | 15 | 15 | |
 | PersonaPrompt.cs | PersonaPrompt.swift, PersonaPlugin.swift | 33 | 33 | the prompt text and the plugin files hash the same in both languages |
 | PersonaPluginOutput.cs | PersonaPluginOutput.swift | 7 | 7 | |
+| PersonaPlugin.cs and PersonaPluginOutput.cs with the memory | PersonaPlugin.swift, PersonaPluginOutput.swift | 16 | 16 | PersonaPluginMemoryTests: the hooks and the server the memory adds, and the `synced` note with the hash of the plugin Claude Code last took |
 | SkillCatalog.cs | SkillCatalog.swift | 3 | 3 | |
 | SkillPlugin.cs | SkillPlugin.swift | 17 | 17 | |
 | ClaudeAccount.cs | ClaudeAccount.swift | 16 | 16 | 2 of them are about ClaudeConfigFolder, as in the xUnit file |
 | FaceArt.cs | FaceArt.swift | 63 | 63 | every one of the 56 pictures hashes the same in both languages |
 | SettingsJsonPatch.cs | SettingsJsonPatch.swift | 20 | 26 | the 6 extra come from SessionReminderTests; a method answers "nothing to change" with nil instead of a bool and an out parameter |
+| SettingsJsonPatch.cs, ClaudeSettingsEditor.cs: the rule for the memory tools | the same two Swift files | 14 | 14 | MemoryPermissionTests; `TrySetMemoryPermission` is `setMemoryPermission`, which answers nil when nothing changes |
 | ClaudeSettingsEditor.cs, IFileAccess.cs | ClaudeSettingsEditor.swift | 38 | 38 | ClaudeSettingsEditorTests (19) and PluginRemovalTests (19); `FileAccess` is IFileAccess with Swift errors in place of exceptions |
 | PluginPlan.cs, PluginReconciler.cs | PluginPlan.swift, PluginReconciler.swift | 33 | 33 | the reconciler's clock comes in as a function instead of TimeProvider |
 | PlatformConventions.cs | PlatformConventions.swift | 2 | 2 | what each system names and where it puts things moved to `spec/cases/platform-paths/`, three systems side by side; what is left needs a settings object or this computer |
@@ -201,7 +203,7 @@ AikoKit decided, and it answers the mouse.
 | Commands/ClaudeLauncher.cs, ClaudeFolders.cs | Commands/ClaudeLauncher.swift | finds Claude Code, opens it, waits for a sign-in, lists the config folders |
 | Commands/CommandFolder.cs | Commands/CommandFolder.swift | the shim, the command links and the block in `~/.zshrc` |
 | Commands/EnvironmentSetup.cs | Commands/EnvironmentSetup.swift | puts a saved list of environments into effect outside Aiko |
-| Plugins/PluginSync.cs, ClaudeCli.cs, SkillShelf.cs | Plugins/PluginSync.swift | the marketplace, the skills copy and the claude commands that install the plugins |
+| Plugins/PluginSync.cs, ClaudeCli.cs, SkillShelf.cs | Plugins/PluginSync.swift | the marketplace, the skills copy and the claude commands that install the plugins; the rule for the memory tools in every folder, and the update of the persona plugin when its hash is not the one noted |
 | ClaudeSettingsFile.cs, BridgePath.cs | ClaudeSettingsFile.swift | Aiko's line in somebody else's settings.json, and where the bridge is |
 | AikoHttp.cs, UpdateClient.cs, UpdateRun.cs, InstallId.cs, ReportedPeriods.cs | AikoHttp.swift | the one place that makes a URLSession, the version check and the daily count; both check the host of every redirect before following it |
 | UpdateInstall.cs | UpdateInstall.swift | downloads an update and installs it once it passes. Windows wraps Velopack's `UpdateManager`; macOS hands the release folder, the key and this bundle to `UpdateInstaller` in the core |

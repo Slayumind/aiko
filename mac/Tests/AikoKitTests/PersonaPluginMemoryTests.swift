@@ -117,4 +117,27 @@ struct PersonaPluginMemoryTests {
         #expect(!PersonaPluginOutput.hasMemory(settings, nil))
         #expect(!PersonaPluginOutput.hasMemory(.empty, #"C:\Users\someone\.claude"#))
     }
+
+    @Test(arguments: [
+        (nil, true),
+        ("", true),
+        ("0123456789ab", false),
+        ("0123456789ab\n", false),
+        ("ba9876543210", true),
+    ] as [(String?, Bool)])
+    func thePluginIsUpdatedWhenItsContentIsNotTheOneNoted(_ synced: String?, _ needsUpdate: Bool) {
+        #expect(PersonaPluginOutput.needsUpdate(synced, "0123456789ab") == needsUpdate)
+    }
+
+    @Test
+    func theNoteSitsBesideTheVersionsAndIsNotTakenForOne() {
+        let folders = AikoFolders.windows(#"C:\Users\someone\AppData\Roaming"#, #"C:\Users\someone\AppData\Local"#)
+        let home = PersonaPluginOutput.environmentFolder(folders, #"C:\Users\someone\.claude"#)
+        let note = PersonaPluginOutput.syncedFile(folders, #"C:\Users\someone\.claude"#)
+        let name = PersonaPluginOutput.syncedName
+
+        #expect(note == folders.platform.join(home, name))
+        #expect(PersonaPluginOutput.staleFolders(
+            [(name: name, written: Date.distantPast)], currentHash: "0123456789ab", now: Date()).isEmpty)
+    }
 }

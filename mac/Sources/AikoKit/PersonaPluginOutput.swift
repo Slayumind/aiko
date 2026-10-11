@@ -23,6 +23,21 @@ public enum PersonaPluginOutput {
         folders.platform.join(environmentFolder(folders, configDirectory), contentHash)
     }
 
+    public static let syncedName = "synced"
+
+    /// Where the app notes the hash of the plugin it last gave Claude Code for this folder. The
+    /// name is not twelve hex characters, so the clean-up of old versions leaves it alone.
+    public static func syncedFile(_ folders: AikoFolders, _ configDirectory: String) -> String {
+        folders.platform.join(environmentFolder(folders, configDirectory), syncedName)
+    }
+
+    /// Claude Code copies the plugin once and never looks at our folder again. It takes a new
+    /// copy only when told to update, so the app tells it whenever the content is not the one it
+    /// noted: after a new Aiko, another temperament or the memory switch (D-207).
+    public static func needsUpdate(_ syncedHash: String?, _ currentHash: String) -> Bool {
+        syncedHash?.trimmingCharacters(in: .whitespacesAndNewlines) != currentHash
+    }
+
     /// Whether the command asks for a plugin this bridge can build.
     public static func isRequest(_ args: [String]) -> Bool {
         args == [verb, PersonaPlugin.name]
