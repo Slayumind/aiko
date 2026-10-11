@@ -829,6 +829,27 @@
   <data name="SectionWhereAikoTalks" xml:space="preserve">
     <value>WHERE AIKO TALKS</value>
   </data>
+  <data name="SectionWhatIsOn" xml:space="preserve">
+    <value>WHAT IS ON, BY ENVIRONMENT</value>
+  </data>
+  <data name="ColumnPersonality" xml:space="preserve">
+    <value>PERSONALITY</value>
+  </data>
+  <data name="ColumnSkills" xml:space="preserve">
+    <value>SKILLS</value>
+  </data>
+  <data name="ColumnMemory" xml:space="preserve">
+    <value>MEMORY</value>
+  </data>
+  <data name="SwitchesNote" xml:space="preserve">
+    <value>Memory works only together with the personality. Works in new sessions.</value>
+  </data>
+  <data name="MemoryPermissionNote" xml:space="preserve">
+    <value>With memory on, Aiko adds one line to that environment's settings.json: a permission for its two memory tools.</value>
+  </data>
+  <data name="SkillsWhere" xml:space="preserve">
+    <value>Skills work in the environments where they are on.</value>
+  </data>
   <data name="PersonaNewSessions" xml:space="preserve">
     <value>Works in new sessions. Open sessions finish the way they started.</value>
   </data>

@@ -819,6 +819,27 @@ public static class Strings
     /// WHERE AIKO TALKS
     public static string SectionWhereAikoTalks => Get("SectionWhereAikoTalks");
 
+    /// WHAT IS ON, BY ENVIRONMENT
+    public static string SectionWhatIsOn => Get("SectionWhatIsOn");
+
+    /// PERSONALITY
+    public static string ColumnPersonality => Get("ColumnPersonality");
+
+    /// SKILLS
+    public static string ColumnSkills => Get("ColumnSkills");
+
+    /// MEMORY
+    public static string ColumnMemory => Get("ColumnMemory");
+
+    /// Memory works only together with the personality. Works in new sessions.
+    public static string SwitchesNote => Get("SwitchesNote");
+
+    /// With memory on, Aiko adds one line to that environment's settings.json: a permission for ...
+    public static string MemoryPermissionNote => Get("MemoryPermissionNote");
+
+    /// Skills work in the environments where they are on.
+    public static string SkillsWhere => Get("SkillsWhere");
+
     /// Works in new sessions. Open sessions finish the way they started.
     public static string PersonaNewSessions => Get("PersonaNewSessions");
 

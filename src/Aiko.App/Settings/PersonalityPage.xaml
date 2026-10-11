@@ -40,11 +40,12 @@
                  FontWeight="Medium" Foreground="{StaticResource Ink}" VerticalAlignment="Center" />
     </StackPanel>
 
-    <TextBlock Text="{x:Static local:Strings.SectionWhereAikoTalks}" Style="{StaticResource SectionLabel}" Margin="0,18,0,8" />
+    <TextBlock Text="{x:Static local:Strings.SectionWhatIsOn}" Style="{StaticResource SectionLabel}" Margin="0,18,0,8" />
     <Border Style="{StaticResource Rows}">
       <StackPanel x:Name="EnvironmentRows" />
     </Border>
-    <TextBlock Text="{x:Static local:Strings.PersonaNewSessions}" Style="{StaticResource RowHint}" Margin="0,8,0,0" />
+    <TextBlock Text="{x:Static local:Strings.SwitchesNote}" Style="{StaticResource RowHint}" Margin="0,8,0,0" />
+    <TextBlock Text="{x:Static local:Strings.MemoryPermissionNote}" Style="{StaticResource RowHint}" Margin="0,4,0,0" />
 
     <TextBlock Text="{x:Static local:Strings.SectionFace}" Style="{StaticResource SectionLabel}" Margin="0,22,0,8" />
     <Border Style="{StaticResource SegmentBar}">
@@ -105,13 +106,8 @@
     </TextBlock>
 
     <TextBlock x:Name="SkillsTitle" Style="{StaticResource SectionLabel}" Margin="0,22,0,8" />
-    <StackPanel x:Name="SkillsArea">
-      <Border Style="{StaticResource Rows}">
-        <StackPanel x:Name="SkillRows" />
-      </Border>
-      <!-- One box per domain, so the groups read apart. -->
-      <StackPanel x:Name="SkillGroups" />
-    </StackPanel>
-    <TextBlock x:Name="SkillsNote" Style="{StaticResource RowHint}" Margin="0,8,0,0" />
+    <!-- One box per domain, so the groups read apart. The first label brings its own gap. -->
+    <StackPanel x:Name="SkillGroups" Margin="0,-18,0,0" />
+    <TextBlock Text="{x:Static local:Strings.SkillsWhere}" Style="{StaticResource RowHint}" Margin="0,8,0,0" />
   </StackPanel>
 </UserControl>
