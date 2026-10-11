@@ -77,6 +77,10 @@ measures, and this is how.
 the memory holds, which projects you work on, or how long Aiko has been running. The settings page
 lists these eight lines and says what each one is for.
 
+**When the list grows.** Your yes is to the list you were shown. `s` and `mem` are newer than the
+other six. If you agreed to the count before they existed, Aiko opens the Privacy page once after
+the update and sends the two new values only after that. You can turn the count off there.
+
 **How the ID works.** Aiko makes a random value once and keeps it in `%APPDATA%\Aiko\install-id`.
 That value never leaves your computer. Aiko sends a hash of the value and today's date, cut to
 sixteen characters. Tomorrow's hash has no link to today's, so two days of requests can't be joined

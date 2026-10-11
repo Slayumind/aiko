@@ -102,6 +102,11 @@ final class AikoShell: NSResponder {
             openSettings(at: .checklist, item: .meetAiko)
         } else if WizardChecklist.opensPrivacyOnStart(app, environments) {
             openSettings(at: .checklist, item: .privacy)
+        } else if StatsList.asksToLookAgain(app, environments) {
+            // Once, for someone who agreed to the count when it had fewer values. The two new
+            // ones are not sent until this page has been put in front of them.
+            openSettings(at: .privacy)
+            Store.saveSettings(StatsList.seen(app))
         }
     }
 

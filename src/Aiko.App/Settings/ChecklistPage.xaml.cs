@@ -787,7 +787,7 @@ public partial class ChecklistPage : UserControl
         var runAtStartup = RunAtStartup.IsChecked == true;
         Startup.Set(runAtStartup);
 
-        SettingsStore.Save(SettingsStore.Load() with
+        var answered = SettingsStore.Load() with
         {
             Place = PlaceIsland.IsChecked == true ? AikoPlace.Island : AikoPlace.Tray,
             RunAtStartup = runAtStartup,
@@ -797,7 +797,10 @@ public partial class ChecklistPage : UserControl
             // possible: the wizard does not finish until the item has a state.
             PrivacyAsked = _statsWanted is not null,
             MeetAikoShown = true,
-        });
+        };
+
+        // The question shows the whole list, so an answer to it covers the list as it is now.
+        SettingsStore.Save(_statsWanted is null ? answered : StatsList.Seen(answered));
     }
 
     private StackPanel TwoLines(string first, string second)

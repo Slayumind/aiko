@@ -463,7 +463,9 @@ final class ChecklistModel: ObservableObject {
         // possible: the checklist does not finish until the item has a state.
         app.privacyAsked = statsWanted != nil
         app.meetAikoShown = true
-        Store.saveSettings(app)
+
+        // The question shows the whole list, so an answer to it covers the list as it is now.
+        Store.saveSettings(statsWanted == nil ? app : StatsList.seen(app))
     }
 
     private func signedIn(_ folder: String) -> Bool {

@@ -53,6 +53,10 @@ public sealed record AppSettings
     /// apart from "never asked", and somebody updating from 0.2.0 would never see the question.
     public bool PrivacyAsked { get; init; }
 
+    /// Which list of counted values the person has been shown (see StatsList). A file from before
+    /// the list grew has no number here, which reads as 0: the person saw the short list or none.
+    public int StatsListSeen { get; init; }
+
     public AikoLanguage Language { get; init; } = AikoLanguage.System;
 
     /// Games, video and presentations take the whole screen, and the island would sit on top.

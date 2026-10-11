@@ -90,7 +90,8 @@ struct PrivacyPageView: View {
         var next = state.app
         next.sendStats = on
         next.privacyAsked = true
-        state.saveApp(next)
+        // The switch sits right above the list, so an answer here is an answer to the whole list.
+        state.saveApp(StatsList.seen(next))
     }
 
     private func open(_ address: String) {

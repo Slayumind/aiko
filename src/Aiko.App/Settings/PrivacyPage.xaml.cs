@@ -67,7 +67,8 @@ public partial class PrivacyPage : UserControl
     {
         ShowLedger();
         ResetLine.Visibility = Visibility.Collapsed;
-        Save(_settings with { SendStats = SendStats.IsChecked == true, PrivacyAsked = true });
+        // The switch sits right above the list, so an answer here is an answer to the whole list.
+        Save(StatsList.Seen(_settings with { SendStats = SendStats.IsChecked == true, PrivacyAsked = true }));
     }
 
     private void OnResetId(object sender, RoutedEventArgs e)

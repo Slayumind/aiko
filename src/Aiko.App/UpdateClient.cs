@@ -80,7 +80,9 @@ sealed class UpdateClient : IDisposable
         var month = Heartbeat.FirstThisMonth(reported.Month, today) ? Heartbeat.MonthKey(today) : null;
 
         var windows = Uri.EscapeDataString(Environment.OSVersion.Version.ToString());
-        var address = $"{Endpoint}?v={version}&os={windows}&day={id}&p={Bit(stats.Persona)}&s={Bit(stats.Skills)}&mem={Bit(stats.Memory)}"
+        var address = $"{Endpoint}?v={version}&os={windows}&day={id}&p={Bit(stats.Persona)}"
+            + (stats.Skills is { } skills ? $"&s={Bit(skills)}" : string.Empty)
+            + (stats.Memory is { } memory ? $"&mem={Bit(memory)}" : string.Empty)
             + (week is null ? string.Empty : "&w=1")
             + (month is null ? string.Empty : "&m=1");
 
@@ -103,8 +105,10 @@ sealed class UpdateClient : IDisposable
 /// that the client itself reads nothing from the settings.
 ///
 /// The three flags say only whether a thing is on in at least one environment: not in which, not
-/// how many, and nothing about what the skills or the memory hold.
-readonly record struct StatsChoice(bool Allowed, bool Persona, bool Skills, bool Memory);
+/// how many, and nothing about what the skills or the memory hold. Skills and Memory are null,
+/// and then left out of the request, until the person has seen the list that names them
+/// (StatsList).
+readonly record struct StatsChoice(bool Allowed, bool Persona, bool? Skills, bool? Memory);
 
 /// Whether the site answered, and which periods the request claimed. The periods are written down
 /// only on an answer: a claim that never arrived must be made again.

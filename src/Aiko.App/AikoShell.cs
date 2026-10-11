@@ -137,6 +137,14 @@ sealed class AikoShell : IDisposable
                 _settings?.OpenChecklist(ChecklistItem.Privacy);
             }
 
+            // Once, for someone who agreed to the count when it had fewer values. The two new
+            // ones are not sent until this page has been put in front of them.
+            else if (StatsList.AsksToLookAgain(app, SettingsStore.LoadEnvironments()))
+            {
+                OpenSettings(page: SettingsPanel.PrivacyPageKey);
+                SettingsStore.Save(StatsList.Seen(app));
+            }
+
             CarryOldSkillsSwitch();
 
             // An update can bring a new persona text or move the marketplace. When the persona is

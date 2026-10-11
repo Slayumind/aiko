@@ -43,6 +43,10 @@ public struct AppSettings: Sendable, Equatable {
     /// apart from "never asked", and somebody updating from 0.2.0 would never see the question.
     public var privacyAsked = false
 
+    /// Which list of counted values the person has been shown (see StatsList). A file from before
+    /// the list grew has no number here, which reads as 0: the person saw the short list or none.
+    public var statsListSeen = 0
+
     public var language: AikoLanguage = .system
 
     /// Games, video and presentations take the whole screen, and the island would sit on top.
@@ -86,6 +90,7 @@ public struct AppSettings: Sendable, Equatable {
         if let value = root["checkUpdates"]?.boolValue { settings.checkUpdates = value }
         if let value = root["sendStats"]?.boolValue { settings.sendStats = value }
         if let value = root["privacyAsked"]?.boolValue { settings.privacyAsked = value }
+        if let value = root["statsListSeen"]?.int64Value { settings.statsListSeen = Int(value) }
         if let value = root["hideIslandInFullScreen"]?.boolValue { settings.hideIslandInFullScreen = value }
         if let value = root["meetAikoShown"]?.boolValue { settings.meetAikoShown = value }
 
@@ -109,6 +114,7 @@ public struct AppSettings: Sendable, Equatable {
             ("checkUpdates", .bool(checkUpdates)),
             ("sendStats", .bool(sendStats)),
             ("privacyAsked", .bool(privacyAsked)),
+            ("statsListSeen", .number(String(statsListSeen))),
             ("language", .string(language.rawValue)),
             ("hideIslandInFullScreen", .bool(hideIslandInFullScreen)),
             ("island", .object(JsonObject([

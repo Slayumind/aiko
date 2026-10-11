@@ -183,7 +183,9 @@ enum UpdateRun {
 
         let address = plain
             + "&os=\(escape(AppVersion.system()))"
-            + "&day=\(id)&p=\(persona)&s=\(skills)&mem=\(memory)"
+            + "&day=\(id)&p=\(persona)"
+            // Left out until the person has seen the list that names them (StatsList).
+            + (StatsList.sendsSkillsAndMemory(settings) ? "&s=\(skills)&mem=\(memory)" : "")
             + (week == nil ? "" : "&w=1")
             + (month == nil ? "" : "&m=1")
 
