@@ -65,10 +65,15 @@ public static class MemoryBridge
         HookOutput("SessionStart", FactsThatFit(MemoryFile.FromJson(memoryJson).Memory));
 
     /// Facts saved through the tools always fit. A file edited by hand may not, and a block over
-    /// the cut reaches the model with no facts at all. So the longest facts that are not pinned
-    /// stay out of the block until it fits; they stay in the file.
+    /// the cut reaches the model with no facts at all.
+    ///
+    /// So a fact over the limit stays out of the block, pinned or not: the settings window marks
+    /// it "too long" and says the model does not see it, and that must be true. If the block is
+    /// still over the cut, for example with more facts than the quotas allow, the longest facts
+    /// that are not pinned stay out until it fits. All of them stay in the file.
     public static string FactsThatFit(MemoryFile memory)
     {
+        memory = memory with { Facts = memory.Facts.Where(f => MemoryRules.Fits(MemoryRules.LengthOf(f))).ToList() };
         var text = MemoryPrompt.Facts(memory);
         while (text.Length > HookLimit && LongestToLeaveOut(memory) is { } fact)
         {

@@ -72,21 +72,36 @@ public class MemoryBridgeTests
     }
 
     [Fact]
-    public void A_file_grown_by_hand_still_fits_and_loses_its_longest_facts_first()
+    public void A_fact_over_the_limit_stays_out_of_the_block_even_when_pinned()
     {
-        var huge = Fact(1, new string('x', 6_000));
-        var big = Fact(2, new string('y', 5_000));
-        var small = Fact(3, "Makes Aiko");
-        var pinned = Fact(4, new string('z', 3_000)) with { Pinned = true };
-        var memory = new MemoryFile(5, [huge, big, small, pinned], []);
+        var atTheLimit = Fact(1, new string('x', MemoryRules.MaxLength));
+        var tooLong = Fact(2, new string('y', MemoryRules.MaxLength + 1));
+        var pinnedTooLong = Fact(3, new string('z', MemoryRules.MaxLength + 1)) with { Pinned = true };
+        var memory = new MemoryFile(4, [atTheLimit, tooLong, pinnedTooLong], []);
+
+        var text = MemoryBridge.FactsThatFit(memory);
+
+        Assert.Contains("[F1]", text);
+        Assert.DoesNotContain("[F2]", text);
+        Assert.DoesNotContain("[F3]", text);
+        Assert.Contains("(1/12)", text);
+    }
+
+    [Fact]
+    public void A_file_with_more_facts_than_the_quotas_still_fits_and_keeps_the_pinned_ones()
+    {
+        var facts = Enumerable.Range(1, 80)
+            .Select(n => Fact(n, new string('x', MemoryRules.MaxLength - 2) + (n % 10)) with { Pinned = n <= 3 })
+            .ToList();
+        var memory = new MemoryFile(81, facts, []);
 
         var text = MemoryBridge.FactsThatFit(memory);
 
         Assert.True(text.Length <= MemoryBridge.HookLimit);
-        Assert.DoesNotContain("[F1]", text);
+        Assert.Contains("[F1]", text);
         Assert.Contains("[F2]", text);
         Assert.Contains("[F3]", text);
-        Assert.Contains("[F4]", text);
+        Assert.True(MemoryPrompt.Facts(memory).Length > MemoryBridge.HookLimit);
     }
 
     [Fact]

@@ -178,6 +178,6 @@ public static class MemoryEdits
         + " forget the other), then call again.";
 
     /// A fact is one line of the memory block, so a line break inside it would break the list.
-    private static string OneLine(string? text) =>
+    internal static string OneLine(string? text) =>
         string.Join(' ', (text ?? "").Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
 }
