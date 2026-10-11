@@ -11,6 +11,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 - The `aiko:docs-hygiene` skill knows that a project may keep its tasks in a tracker. It no longer
   offers to create `PLAN.md` and `ROADMAP.md` for such a project.
+- The `aiko:copy` skill writes task cards and briefs: a title that starts with a verb, one or two
+  sentences and a checklist, a long brief in a comment. It writes in the reader's language and keeps
+  product names as they are spelled.
+- `aiko:copy` finds phrases a translation leaves behind in Russian, such as «задачи живут в трекере».
+  It no longer reports code in straight quotes or «зеленеет» next to «зелёные».
 
 ## [0.3.1] - 2026-10-09
 
