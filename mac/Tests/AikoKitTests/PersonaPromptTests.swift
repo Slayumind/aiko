@@ -91,10 +91,10 @@ struct PersonaPromptTests {
     func sheTalksAboutTheUserWithoutGenderedForms(temperament: Temperament) {
         let prompt = PersonaPrompt.compose(temperament)
 
-        #expect(prompt.contains("you do not know the user's gender"))
+        #expect(prompt.contains("You do not know the user's gender"))
 
         // The memory may know how to address the user; without it the rule above holds.
-        #expect(prompt.contains("If a fact of the Aiko memory in this session says how to address the user"))
+        #expect(prompt.contains("The only exception is a fact in the Aiko memory of this session that says how to address the user"))
         #expect(prompt.contains("without gendered forms"))
     }
 

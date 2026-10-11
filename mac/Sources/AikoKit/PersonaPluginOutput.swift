@@ -33,7 +33,7 @@ public enum PersonaPluginOutput {
 
     /// Claude Code copies the plugin once and never looks at our folder again. It takes a new
     /// copy only when told to update, so the app tells it whenever the content is not the one it
-    /// noted: after a new Aiko, another temperament or the memory switch (D-207).
+    /// noted: after a new Aiko or another temperament (D-207).
     public static func needsUpdate(_ syncedHash: String?, _ currentHash: String) -> Bool {
         syncedHash?.trimmingCharacters(in: .whitespacesAndNewlines) != currentHash
     }

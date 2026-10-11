@@ -104,10 +104,10 @@ public class PersonaPromptTests
     {
         var prompt = PersonaPrompt.Compose(temperament);
 
-        Assert.Contains("you do not know the user's gender", prompt);
+        Assert.Contains("You do not know the user's gender", prompt);
 
         // The memory may know how to address the user; without it the rule above holds.
-        Assert.Contains("If a fact of the Aiko memory in this session says how to address the user", prompt);
+        Assert.Contains("The only exception is a fact in the Aiko memory of this session that says how to address the user", prompt);
         Assert.Contains("without gendered forms", prompt);
     }
 
