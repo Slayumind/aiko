@@ -43,6 +43,13 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - `aiko:copy` finds phrases a translation leaves behind in Russian, such as «задачи живут в трекере».
   It no longer reports code in straight quotes or «зеленеет» next to «зелёные».
 
+### Fixed
+
+- **The daily check on macOS.** The Mac app asked for a new version only when you pressed the
+  button in settings, so the daily count from a Mac was sent only then too. Now it asks two
+  minutes after it starts and then once a day, as the switches say and as Windows does. A newer
+  version is named in the tooltip of the icon or the island.
+
 ## [0.3.1] - 2026-10-09
 
 A small update: a new skill for game balance and a fix for the checksum list. The Windows build is

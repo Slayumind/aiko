@@ -12,6 +12,9 @@ final class IslandView: NSView {
     private var edge = ScreenEdge.top
     private var docked = true
 
+    /// Named in the tooltip when the daily update check found one.
+    var newerVersion: String?
+
     /// 0 folded, 1 with the percentages fully out.
     var unfold = 0.0
 
@@ -42,7 +45,7 @@ final class IslandView: NSView {
 
         // The numbers go in words too: a ring and a colour say nothing to a screen reader, and
         // nothing at all to somebody who cannot tell the green from the red.
-        toolTip = TrayText.tooltip(cards, newerVersion: nil)
+        toolTip = TrayText.tooltip(cards, newerVersion: newerVersion)
         setAccessibilityLabel(toolTip)
         needsDisplay = true
     }
