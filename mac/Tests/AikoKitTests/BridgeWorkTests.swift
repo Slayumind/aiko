@@ -48,6 +48,22 @@ struct BridgeWorkTests {
         #expect(BridgeMode.forArguments(["hook", "ignored"]) == .hook)
     }
 
+    @Test(arguments: [
+        ("rules", MemoryBridgeMode.rules),
+        ("facts", MemoryBridgeMode.facts),
+        ("prompt", MemoryBridgeMode.prompt),
+        ("serve", MemoryBridgeMode.serve),
+    ])
+    func theMemoryJobsAreToldApartByTheirSecondArgument(argument: String, job: MemoryBridgeMode) {
+        #expect(BridgeMode.forArguments(["memory", argument]) == .memory(job))
+        #expect(BridgeMode.forArguments(["memory", argument, "ignored"]) == .memory(job))
+    }
+
+    @Test(arguments: [["memory"], ["memory", "erase"]])
+    func aMemoryJobNobodyKnowsIsTheStatusLineAsOnWindows(arguments: [String]) {
+        #expect(BridgeMode.forArguments(arguments) == .statusLine)
+    }
+
     // ---- the status line ----
 
     @Test

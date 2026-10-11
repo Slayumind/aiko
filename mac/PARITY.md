@@ -3,8 +3,8 @@
 The macOS app repeats the Windows core, so every ported file keeps its behaviour and every xUnit
 case has a Swift case with the same name and the same numbers. Test counts below are cases, not
 methods: one `[Theory]` with five `[InlineData]` rows counts as five, and so does the Swift
-`@Test(arguments:)` that mirrors it. `dotnet test` prints cases and says 736; `swift test` prints
-methods, not cases, and says 596. The 49 the Swift side does not have are named at the bottom; the ones it has and Windows
+`@Test(arguments:)` that mirrors it. `dotnet test` prints cases and says 933; `swift test` prints
+methods, not cases, and says 720. The 49 the Swift side does not have are named at the bottom; the ones it has and Windows
 does not belong to the two small programs, whose decisions sit inline in `Program.cs` on Windows,
 and to the card words, the island and the settings window, which sit in `Aiko.App` on Windows
 where no test can reach them.
@@ -64,7 +64,12 @@ a row cannot change in one core and stay as it was in the other. See `spec/cases
 | AppSettings.cs | AppSettings.swift | 15 | 15 | |
 | WizardChecklist.cs | WizardChecklist.swift | 13 | 13 | |
 | CredentialFile.cs | CredentialFile.swift | 10 | 10 | `TryParse` with an out parameter is `parse`, which answers nil |
-| — | SharedCaseTests.swift | 7 | 7 | the case files under `spec/cases/`, read by both suites |
+| MemoryFact.cs, MemoryFile.cs | MemoryFact.swift, MemoryFile.swift | 65 | 65 | an entry Aiko cannot use goes back into the file as it was written, which Swift reads with `JsonRawText`; the file is the same in both cores apart from the line ends |
+| MemoryRules.cs, MemoryEdits.cs | MemoryRules.swift, MemoryEdits.swift | 44 | 44 | what may be a key, when a key is found and how long a fact may be are in `spec/cases/memory-keys/` and `memory-limits/`; lengths are UTF-16 units in both |
+| MemoryPrompt.cs, MemoryNudge.cs | MemoryPrompt.swift, MemoryNudge.swift | 27 | 27 | the rules text is the same word for word; which messages get the note is in `spec/cases/memory-nudge/` |
+| MemoryServer.cs | MemoryServer.swift | 17 | 17 | every reply is the same line in both cores |
+| MemoryBridge.cs | MemoryBridge.swift | 27 | 27 | |
+| — | SharedCaseTests.swift | 10 | 10 | the case files under `spec/cases/`, read by both suites |
 | — | UpdateInstaller.swift | — | 6 | the macOS half of an update: the zip, `ditto` and the bundle swap. Windows has Velopack instead, and UpdateInstall.cs holds the same steps around it where no xUnit case can reach them |
 
 The words and the numbers of the card sit in `src/Aiko.App` on Windows, where no xUnit case can
@@ -89,9 +94,11 @@ Helpers with no file of their own in the C# core:
 
 | Swift file | Why it exists |
 |---|---|
-| BridgeWork.swift | what one run of the bridge does: which job it was started for, the snapshot to write, the activity file of a session, the reminder at session start, the persona plugin folder. On Windows the same choices sit inline in `Aiko.Bridge/Program.cs`, where no test can reach them (29 cases in BridgeWorkTests) |
+| BridgeWork.swift | what one run of the bridge does: which job it was started for, the snapshot to write, the activity file of a session, the reminder at session start, the persona plugin folder. On Windows the same choices sit inline in `Aiko.Bridge/Program.cs`, where no test can reach them (35 cases in BridgeWorkTests) |
 | JsonNode.swift | System.Text.Json keeps the order of keys and the text of numbers when it writes a file back; `JSONSerialization` keeps neither, and Aiko rewrites files that belong to Claude Code |
 | CivilTime.swift | `DateOnly`, ISO weeks and the round-trip ("O") time format |
+| MemoryText.swift | the memory's questions about a text, answered the way .NET answers them: what `Trim` and `Split` call white space, what `\w` is for one UTF-16 unit, and which two units `RegexOptions.IgnoreCase` takes for the same letter. Foundation has other lists for all three, and the limits and word edges of the memory must agree to the unit (74 cases in MemoryTextTests, shared with JsonRawText) |
+| JsonRawText.swift | `JsonElement.GetRawText`: a value of a JSON text as it was written. `JsonNode` keeps the order of keys and the text of numbers, but not the spaces of a whole entry |
 | SvgPath.swift | reads the SVG path data FaceArt writes. WPF parses it itself with `Geometry.Parse`; AppKit has nothing of the kind, so the core reads it and hands the drawing layer moves, lines and cubic curves. Arcs and quadratic curves become cubics here (15 cases in SvgPathTests, one of which reads every shape of all 56 faces) |
 | SignedIn.swift | whether a folder has an account. Windows reads `.credentials.json`; macOS keeps the same token in the Keychain, so that file is never written and the answer comes from the account block of `.claude.json` (3 cases in SignedInTests) |
 | MacShell.swift | two things Windows has a system service for. `ZshProfile` writes Aiko's marked block into `~/.zshrc`, because a folder under the home directory reaches a shell's PATH only through the shell profile; `MacTerminal` writes the script that opens Claude Code in a Terminal window (11 cases in ZshProfileTests and MacTerminalTests) |
@@ -110,6 +117,10 @@ stdin, touching the disk and starting a process.
 | session events behind the face | `hook` | the same | `BridgeWork.activity`, `HookEvent`, `ActivityRecord` |
 | the reminder at session start | `--session-start` | the same | `BridgeWork.sessionStart`, `SessionReminder` |
 | the persona plugin | `plugin aiko-persona` | the same | `BridgeWork.personaPlugin`, `PersonaPlugin`, `PersonaPluginOutput` |
+| the rules of the memory at session start | `memory rules` | the same | `MemoryBridge.rulesOutput`, `MemoryPrompt` |
+| the facts at session start | `memory facts` | the same | `MemoryBridge.factsOutput`, `MemoryBridge.factsThatFit` |
+| a message of the person: keys and the note | `memory prompt` | the same | `MemoryBridge.onPrompt`, `MemoryEdits.touchByPrompt`, `MemoryNudge` |
+| the memory tools as an MCP server | `memory serve` | the same | `MemoryBridge.onServerLine`, `MemoryServer`, `MemoryBridge.writeFailedReply` |
 | which environment a start belongs to | `claude.exe` | `aiko-shim` | `ShimLaunch.decide`, `ShimPlan.variableChanges` |
 | never start another shim | `AIKO_SHIM_SEEN` | the same | `RealClaude` |
 
@@ -134,6 +145,15 @@ Where they differ from the Windows pair:
   `Console.CancelKeyPress` twin and no "128 plus the signal" here.
 - **The language of the reminder.** macOS says its language as a tag (`ru-RU`), Windows as a
   number, so `SessionReminder.isRussian` has an overload for each.
+- **One writer of the memory at a time.** Windows opens `memory.json.lock` with no sharing; macOS
+  takes `flock` on the same file. Both try for two seconds, and both let go when the process ends.
+  A file that is not a memory is kept as `memory.json.bad` on both, and the new one is written
+  beside the old one and moved over it.
+- **The memory file that cannot be read.** Bytes that are not UTF-8 are read as broken text, so
+  the file counts as "not a memory" and is kept aside before a save. `Disk.readIfThere` would
+  answer "no file" for them, and then a save would write an empty memory over the file.
+- **The version the memory server names** comes from the Info.plist of the app the bridge ships
+  in, where Windows reads the assembly. A bridge run straight out of `.build` says `0.0.0`.
 - **Proof that they start.** The shim keeps `AIKO_SHIM_SELF_TEST=1`. The bridge has no such
   variable on either system: fed `{}` it writes nothing, prints nothing and exits 0, and CI runs
   exactly that.
@@ -282,6 +302,8 @@ Not there yet: direct mode and signing for release.
 `BridgeCommand.For` is `forPath`, `IslandReveal.For` is `showFor`, and
 `EnvironmentSettings.Default(userProfile)` is `defaultEnvironmentIn(_:_:)`.
 
+`in` is a keyword too: `MemoryFile.In(category)` is `inCategory(_:)`.
+
 `Binding` is `FolderBinding`. SwiftUI has a `Binding` of its own, and a module used beside it must
 not export that name: every `@Binding` in the app became ambiguous the day the settings window
 arrived.
@@ -335,6 +357,19 @@ exactly, which is what the Swift tests do; the Mac app passes `.macOS`.
   `caseInsensitiveCompare` folds case the Unicode way. The lists these rules sort — folders,
   commands, environment names — agree on everything the tests hold. Only a pair that differs by a
   letter outside ASCII could come out in another order.
+
+- **A key in a message, and the first person.** Windows asks a regular expression with `\w` and
+  `RegexOptions.IgnoreCase`. `NSRegularExpression` has another `\w` and reads a letter above the
+  basic plane as one character, where .NET sees two halves that are not letters. So
+  `MemoryRules.keyMatches` and `MemoryNudge.applies` walk the message one UTF-16 unit at a time,
+  with the .NET meaning of a word character and of the same letter in another case. Both were
+  compared with .NET 10 for every unit of the basic plane on 2026-10-11. On the same day the two
+  cores were given the same inputs and their 668 answers were compared: the rules text, the tool
+  list, the replies, the hook outputs and the files, which were the same apart from the line ends.
+- **A category or an id in another case.** `OrdinalIgnoreCase` folds every letter; Swift folds A to
+  Z only. The words compared this way are `you`, `work`, `projects`, `interests` and `F12`, and no
+  letter outside ASCII turns into one of theirs in .NET: the long «ſ» and the Kelvin sign were
+  tried in both cores and are refused by both.
 
 ## Not ported, on purpose
 
