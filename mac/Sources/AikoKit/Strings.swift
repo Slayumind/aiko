@@ -341,6 +341,35 @@ public enum Strings {
         "SampleCloseBright": ("お疲れ様!", "お疲れ様!"),
         "SampleCloseMusou": ("よし、行くぞ! On to the next one (^_^)", "よし、行くぞ! Дальше (^_^)"),
         "SampleCommit": ("The commit for this fix has no character:", "Коммит к этой правке — без характера:"),
+        "SectionMemory": ("MEMORY · {0} OF {1}", "ПАМЯТЬ · {0} ИЗ {1}"),
+        "MemoryAdd": ("Add a fact", "Добавить факт"),
+        "MemoryCategoryYou": ("You", "Ты"),
+        "MemoryCategoryWork": ("How to work with me", "Как со мной работать"),
+        "MemoryCategoryProjects": ("Projects", "Проекты"),
+        "MemoryCategoryInterests": ("Interests and taste", "Интересы и вкус"),
+        "MemoryTabYou": ("You", "Ты"),
+        "MemoryTabWork": ("Work", "Работа"),
+        "MemoryTabProjects": ("Projects", "Проекты"),
+        "MemoryTabInterests": ("Taste", "Вкус"),
+        "MemoryPin": ("Pin", "Закрепить"),
+        "MemoryUnpin": ("Unpin", "Открепить"),
+        "MemoryEdit": ("Edit", "Править"),
+        "MemorySave": ("Save", "Сохранить"),
+        "MemoryCount": ("{0} of {1}", "{0} из {1}"),
+        "MemoryFactPlaceholder": ("The fact, one thought", "Факт, одна мысль"),
+        "MemoryMeaningPlaceholder": ("What it changes in the answers (optional)", "Что это меняет в ответах (необязательно)"),
+        "MemoryEnglishNote": ("Facts are in English, the way the model reads them.", "Факты записаны по-английски — так их читает модель."),
+        "MemoryAnyLanguageNote": ("You can write a fact in any language. Aiko writes hers in English.", "Факт можно писать на любом языке. Aiko записывает свои по-английски."),
+        "MemoryYouNote": ("Your name, how to address you and your grammatical gender are pinned facts here. If they are missing, Aiko asks once in a casual talk. You can also add them yourself.", "Имя, обращение и род — закреплённые факты в этом разделе. Если их нет, Aiko спросит один раз в разговоре. Их можно добавить и здесь."),
+        "MemoryOpenFile": ("Open file", "Открыть файл"),
+        "MemoryErase": ("Erase memory", "Стереть память"),
+        "MemoryEraseAsk": ("Aiko will forget every fact in every environment, {0} in all. This is not reversible.", "Aiko забудет все факты во всех средах, их {0}. Вернуть их нельзя."),
+        "MemoryTooLong": ("too long · {0} of {1}", "слишком длинный · {0} из {1}"),
+        "MemoryTooLongNote": ("The model does not see a fact longer than {0} characters. Shorten it and it comes back.", "Факт длиннее {0} знаков модель не видит. Сократи его, и он вернётся в память."),
+        "MemoryAsideNote": ("Records in the file that cannot be read after a hand edit: {0}. They are kept in the file, in the setAside list.", "Записей в файле, которые не читаются после ручной правки: {0}. Они сохранены в файле, в списке setAside."),
+        "MemoryEmpty": ("Memory is empty. Aiko saves the first fact when you tell her something about yourself: who you are, how to work with you, what you work on. You can also add a fact here.", "Память пуста. Aiko запишет первый факт, когда в разговоре прозвучит что-то о тебе: кто ты, как с тобой работать, над чем ты работаешь. Факт можно добавить и здесь."),
+        "MemoryFull": ("This section is full. Remove a fact to add a new one.", "Раздел заполнен. Удали факт, чтобы добавить новый."),
+        "MemoryWriteFailed": ("Aiko could not write the memory file. Nothing changed.", "Aiko не смогла записать файл памяти. Ничего не изменилось."),
         "SectionSkills": ("SKILLS · {0}", "НАВЫКИ · {0}"),
         "SkillsWork": ("Skills work in environments where the personality is on.", "Навыки работают в средах, где включена личность."),
         "SkillsSwitch": ("Aiko's skills", "Навыки Aiko"),
@@ -1269,6 +1298,93 @@ public enum Strings {
 
     /// The commit for this fix has no character:
     public static var sampleCommit: String { Strings.get("SampleCommit") }
+
+    /// MEMORY · {0} OF {1}
+    public static var sectionMemory: String { Strings.get("SectionMemory") }
+
+    /// Add a fact
+    public static var memoryAdd: String { Strings.get("MemoryAdd") }
+
+    /// You
+    public static var memoryCategoryYou: String { Strings.get("MemoryCategoryYou") }
+
+    /// How to work with me
+    public static var memoryCategoryWork: String { Strings.get("MemoryCategoryWork") }
+
+    /// Projects
+    public static var memoryCategoryProjects: String { Strings.get("MemoryCategoryProjects") }
+
+    /// Interests and taste
+    public static var memoryCategoryInterests: String { Strings.get("MemoryCategoryInterests") }
+
+    /// You
+    public static var memoryTabYou: String { Strings.get("MemoryTabYou") }
+
+    /// Work
+    public static var memoryTabWork: String { Strings.get("MemoryTabWork") }
+
+    /// Projects
+    public static var memoryTabProjects: String { Strings.get("MemoryTabProjects") }
+
+    /// Taste
+    public static var memoryTabInterests: String { Strings.get("MemoryTabInterests") }
+
+    /// Pin
+    public static var memoryPin: String { Strings.get("MemoryPin") }
+
+    /// Unpin
+    public static var memoryUnpin: String { Strings.get("MemoryUnpin") }
+
+    /// Edit
+    public static var memoryEdit: String { Strings.get("MemoryEdit") }
+
+    /// Save
+    public static var memorySave: String { Strings.get("MemorySave") }
+
+    /// {0} of {1}
+    public static var memoryCount: String { Strings.get("MemoryCount") }
+
+    /// The fact, one thought
+    public static var memoryFactPlaceholder: String { Strings.get("MemoryFactPlaceholder") }
+
+    /// What it changes in the answers (optional)
+    public static var memoryMeaningPlaceholder: String { Strings.get("MemoryMeaningPlaceholder") }
+
+    /// Facts are in English, the way the model reads them.
+    public static var memoryEnglishNote: String { Strings.get("MemoryEnglishNote") }
+
+    /// You can write a fact in any language. Aiko writes hers in English.
+    public static var memoryAnyLanguageNote: String { Strings.get("MemoryAnyLanguageNote") }
+
+    /// Your name, how to address you and your grammatical gender are pinned facts here. If they ...
+    public static var memoryYouNote: String { Strings.get("MemoryYouNote") }
+
+    /// Open file
+    public static var memoryOpenFile: String { Strings.get("MemoryOpenFile") }
+
+    /// Erase memory
+    public static var memoryErase: String { Strings.get("MemoryErase") }
+
+    /// Aiko will forget every fact in every environment, {0} in all. This is not reversible.
+    public static var memoryEraseAsk: String { Strings.get("MemoryEraseAsk") }
+
+    /// too long · {0} of {1}
+    public static var memoryTooLong: String { Strings.get("MemoryTooLong") }
+
+    /// The model does not see a fact longer than {0} characters. Shorten it and it comes back.
+    public static var memoryTooLongNote: String { Strings.get("MemoryTooLongNote") }
+
+    /// Records in the file that cannot be read after a hand edit: {0}. They are kept in the file...
+    public static var memoryAsideNote: String { Strings.get("MemoryAsideNote") }
+
+    /// Memory is empty. Aiko saves the first fact when you tell her something about yourself: wh...
+    public static var memoryEmpty: String { Strings.get("MemoryEmpty") }
+
+    /// This section is full. Remove a fact to add a new one.
+    public static var memoryFull: String { Strings.get("MemoryFull") }
+
+    /// Aiko could not write the memory file. Nothing changed.
+    public static var memoryWriteFailed: String { Strings.get("MemoryWriteFailed") }
 
     /// SKILLS · {0}
     public static var sectionSkills: String { Strings.get("SectionSkills") }
