@@ -5,7 +5,10 @@ All notable changes to Aiko are listed here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and Aiko uses
 [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.4.0] - 2026-10-11
+
+Aiko gets a memory. Her personality, her skills and her memory now turn on together, with one
+switch per environment. The Windows build is still not signed.
 
 ### Added
 
