@@ -1,7 +1,9 @@
 {
-  "comment": "A key is a name or a term the person would say when a fact comes up again. nameLike: what may be a key at all (a capital letter first, or a Latin letter, a digit, #, + or a dot anywhere). clean: what is left of the keys a tool call gives. matches: when a key is found in a message (it starts a word, the word goes on for at most maxTail more word characters, case does not matter).",
+  "comment": "A key is a name or a term the person would say when a fact comes up again. nameLike: what may be a key at all (a capital letter first, or a Latin letter, a digit, #, + or a dot anywhere). clean: what is left of the keys a tool call gives. matches: when a key is found in a message (it starts a word, the word goes on for at most maxTail more word characters, case does not matter). A key of minStemLength characters or more that ends with a Cyrillic letter is compared without its last letter, and then the word may go on for maxStemTail characters: Russian endings change that letter.",
   "maxKeys": 3,
   "maxTail": 2,
+  "minStemLength": 5,
+  "maxStemTail": 3,
   "nameLike": [
     { "key": "Swift", "nameLike": true },
     { "key": "swift", "nameLike": true },
@@ -66,6 +68,20 @@
     { "key": "Ember", "prompt": "Emberfall is another game", "matches": false },
     { "key": "Slay the Spire", "prompt": "вчера играл в slay the spire", "matches": true },
     { "key": "Slay the Spire", "prompt": "slay the dragon", "matches": false },
-    { "key": "Swift", "prompt": "", "matches": false }
+    { "key": "Swift", "prompt": "", "matches": false },
+    { "key": "Реликварий", "prompt": "что там с реликварием", "comment": "The ending replaces the last letter of the key.", "matches": true },
+    { "key": "Реликварий", "prompt": "реликварии готовы", "matches": true },
+    { "key": "Реликварий", "prompt": "реликвариями", "comment": "Three characters after the stem.", "matches": true },
+    { "key": "Реликварий", "prompt": "реликварийный зал", "comment": "Four characters after the stem: another word.", "matches": false },
+    { "key": "Реликварий", "prompt": "открой РЕЛИКВАРИЙ", "matches": true },
+    { "key": "Москва", "prompt": "дом в Москве", "matches": true },
+    { "key": "Москва", "prompt": "подмосковье", "comment": "The key must start the word.", "matches": false },
+    { "key": "Юнити", "prompt": "каждый юнит", "comment": "A known cost of the rule: the stem alone is found too. It only refreshes a date.", "matches": true },
+    { "key": "Офис", "prompt": "из офиса", "comment": "Four characters: compared whole, with the usual tail.", "matches": true },
+    { "key": "Офис", "prompt": "офицер", "matches": false },
+    { "key": "Unity", "prompt": "United", "comment": "A Latin key keeps its last letter.", "matches": false },
+    { "key": "Slay the Spire", "prompt": "Slay the Spires", "matches": true },
+    { "key": "Проектный офис", "prompt": "в Проектном офисе", "comment": "Only the last letter of the whole key is dropped, not of every word.", "matches": false },
+    { "key": "Проектный офис", "prompt": "карточка в Проектный офисе", "matches": true }
   ]
 }

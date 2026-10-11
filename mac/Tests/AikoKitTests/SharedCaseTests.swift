@@ -242,6 +242,8 @@ struct SharedCaseTests {
 
         #expect(cases["maxKeys"]?.int64Value == Int64(MemoryRules.maxKeys))
         #expect(cases["maxTail"]?.int64Value == Int64(MemoryRules.maxKeyTail))
+        #expect(cases["minStemLength"]?.int64Value == Int64(MemoryRules.minStemLength))
+        #expect(cases["maxStemTail"]?.int64Value == Int64(MemoryRules.maxStemTail))
 
         let nameLike = cases["nameLike"]?.arrayValue ?? []
         #expect(!nameLike.isEmpty)

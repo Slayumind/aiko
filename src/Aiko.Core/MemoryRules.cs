@@ -17,6 +17,12 @@ public static class MemoryRules
     /// How many more letters a word may have after a key: «маком» is still «мак», «макрос» is not.
     public const int MaxKeyTail = 2;
 
+    /// A key this long that ends with a Cyrillic letter is compared without that letter (D-280).
+    public const int MinStemLength = 5;
+
+    /// How far a word may go on after a key that lost its last letter.
+    public const int MaxStemTail = 3;
+
     public static readonly IReadOnlyList<MemoryCategory> Categories =
         [MemoryCategory.You, MemoryCategory.Work, MemoryCategory.Projects, MemoryCategory.Interests];
 
@@ -92,17 +98,34 @@ public static class MemoryRules
     /// A key is found when it starts a word of the message and the word goes on for at most two
     /// more letters, so a case ending or a short suffix still counts. Letters are any letters,
     /// not only Latin ones, and case does not matter.
-    public static bool KeyMatches(string key, string prompt) =>
-        key.Length > 0
-        && Regex.IsMatch(
+    ///
+    /// A Russian ending often replaces the last letter of the word instead of following it: the
+    /// key "Реликварий" never stands whole in "с реликварием". So a longer key that ends with a
+    /// Cyrillic letter is compared without it, and the word may go on one letter further.
+    public static bool KeyMatches(string key, string prompt)
+    {
+        if (key.Length == 0)
+        {
+            return false;
+        }
+
+        var (searched, tail) = LosesLastLetter(key) ? (key[..^1], MaxStemTail) : (key, MaxKeyTail);
+        return Regex.IsMatch(
             prompt,
-            @"(?<!\w)" + Regex.Escape(key) + @"\w{0," + MaxKeyTail + @"}(?!\w)",
+            @"(?<!\w)" + Regex.Escape(searched) + @"\w{0," + tail + @"}(?!\w)",
             RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+    }
+
+    /// Latin names do not decline, and without its last letter "Unity" would find "United".
+    public static bool LosesLastLetter(string key) => key.Length >= MinStemLength && IsCyrillicLetter(key[^1]);
 
     /// The fact that goes first when a category is full: the one not seen for the longest time,
     /// and of two seen on the same day the one with the smaller id. Null when every fact is pinned.
     public static MemoryFact? OldestUnpinned(IEnumerable<MemoryFact> facts) =>
         facts.Where(f => !f.Pinned).OrderBy(f => f.Seen).ThenBy(f => f.Number).FirstOrDefault();
+
+    /// The letters of the Cyrillic block. U+0482 to U+0489 in the middle of it are signs, not letters.
+    private static bool IsCyrillicLetter(char c) => c is (>= '\u0400' and <= '\u0481') or (>= '\u048A' and <= '\u04FF');
 
     private static bool IsTermCharacter(char c) => char.IsAsciiLetterOrDigit(c) || c is '#' or '+' or '.';
 }

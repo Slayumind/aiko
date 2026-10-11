@@ -344,6 +344,8 @@ public class SharedCaseTests
 
         Assert.Equal(MemoryRules.MaxKeys, cases.GetProperty("maxKeys").GetInt32());
         Assert.Equal(MemoryRules.MaxKeyTail, cases.GetProperty("maxTail").GetInt32());
+        Assert.Equal(MemoryRules.MinStemLength, cases.GetProperty("minStemLength").GetInt32());
+        Assert.Equal(MemoryRules.MaxStemTail, cases.GetProperty("maxStemTail").GetInt32());
 
         foreach (var row in cases.GetProperty("nameLike").EnumerateArray())
         {

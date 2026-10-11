@@ -15,6 +15,12 @@ public enum MemoryRules {
     /// How many more letters a word may have after a key: «маком» is still «мак», «макрос» is not.
     public static let maxKeyTail = 2
 
+    /// A key this long that ends with a Cyrillic letter is compared without that letter (D-280).
+    public static let minStemLength = 5
+
+    /// How far a word may go on after a key that lost its last letter.
+    public static let maxStemTail = 3
+
     public static let categories: [MemoryCategory] = [.you, .work, .projects, .interests]
 
     public static func quota(_ category: MemoryCategory) -> Int {
@@ -106,7 +112,11 @@ public enum MemoryRules {
     /// instead, one UTF-16 unit at a time as that expression does: the expressions of Foundation
     /// have another idea of \w and of letters above the basic plane.
     static func keyMatches(_ key: String, _ prompt: SearchedText) -> Bool {
-        let word = MemoryText.folded(key)
+        // A Russian ending often replaces the last letter of the word, so a longer key that ends
+        // with a Cyrillic letter is compared without it and the word may go on one letter further.
+        let stemmed = losesLastLetter(key)
+        let word = stemmed ? Array(MemoryText.folded(key).dropLast()) : MemoryText.folded(key)
+        let maxTail = stemmed ? maxStemTail : maxKeyTail
         guard !word.isEmpty, word.count <= prompt.units.count else {
             return false
         }
@@ -120,17 +130,28 @@ public enum MemoryRules {
             // letter behind it, so the word is another word.
             var tail = 0
             var at = start + word.count
-            while at < prompt.units.count, tail <= maxKeyTail, MemoryText.isWordUnit(prompt.units[at]) {
+            while at < prompt.units.count, tail <= maxTail, MemoryText.isWordUnit(prompt.units[at]) {
                 tail += 1
                 at += 1
             }
 
-            if tail <= maxKeyTail {
+            if tail <= maxTail {
                 return true
             }
         }
 
         return false
+    }
+
+    /// Latin names do not decline, and without its last letter "Unity" would find "United".
+    /// The length is counted in UTF-16 units, as on Windows.
+    public static func losesLastLetter(_ key: String) -> Bool {
+        guard key.utf16.count >= minStemLength, let last = key.utf16.last else {
+            return false
+        }
+
+        // The letters of the Cyrillic block. U+0482 to U+0489 in the middle of it are signs.
+        return (0x0400...0x0481).contains(last) || (0x048A...0x04FF).contains(last)
     }
 
     /// The fact that goes first when a category is full: the one not seen for the longest time,
