@@ -59,6 +59,7 @@ public class SharedCaseTests
                 ["settingsFile"] = folders.SettingsFile,
                 ["environmentsFile"] = folders.EnvironmentsFile,
                 ["personaFile"] = folders.PersonaFile,
+                ["memoryFile"] = folders.MemoryFile,
                 ["installIdFile"] = folders.InstallIdFile,
                 ["reportedPeriodsFile"] = folders.ReportedPeriodsFile,
                 ["localFolder"] = folders.LocalFolder,
@@ -333,6 +334,85 @@ public class SharedCaseTests
                 [.. Strings(shell.GetProperty("argumentsBeforeCommand"))]),
         };
     }
+
+    // ---- what Aiko remembers about the person ----
+
+    [Fact]
+    public void Every_memory_key_case_answers_the_same()
+    {
+        var cases = SpecCases.Json("memory-keys");
+
+        Assert.Equal(MemoryRules.MaxKeys, cases.GetProperty("maxKeys").GetInt32());
+        Assert.Equal(MemoryRules.MaxKeyTail, cases.GetProperty("maxTail").GetInt32());
+
+        foreach (var row in cases.GetProperty("nameLike").EnumerateArray())
+        {
+            string key = row.GetProperty("key").GetString()!;
+
+            Assert.True(row.GetProperty("nameLike").GetBoolean() == MemoryRules.IsNameLike(key), key);
+        }
+
+        foreach (var row in cases.GetProperty("clean").EnumerateArray())
+        {
+            var cleaned = MemoryRules.CleanKeys(Strings(row.GetProperty("keys")));
+
+            Assert.Equal(Strings(row.GetProperty("kept")), cleaned.Kept);
+            Assert.Equal(Strings(row.GetProperty("rejected")), cleaned.Rejected);
+        }
+
+        foreach (var row in cases.GetProperty("matches").EnumerateArray())
+        {
+            string key = row.GetProperty("key").GetString()!;
+            string prompt = row.GetProperty("prompt").GetString()!;
+
+            Assert.True(
+                row.GetProperty("matches").GetBoolean() == MemoryRules.KeyMatches(key, prompt),
+                $"{key} in: {prompt}");
+        }
+    }
+
+    [Fact]
+    public void Every_memory_nudge_case_answers_the_same()
+    {
+        foreach (var row in SpecCases.Json("memory-nudge").GetProperty("cases").EnumerateArray())
+        {
+            string prompt = row.GetProperty("prompt").GetString()!;
+
+            Assert.True(row.GetProperty("nudge").GetBoolean() == MemoryNudge.Applies(prompt), prompt);
+        }
+    }
+
+    [Fact]
+    public void Every_memory_limit_case_is_saved_or_refused_the_same()
+    {
+        var cases = SpecCases.Json("memory-limits");
+        var today = new DateOnly(2026, 10, 11);
+
+        Assert.Equal(MemoryRules.MaxLength, cases.GetProperty("maxLength").GetInt32());
+
+        foreach (var row in cases.GetProperty("cases").EnumerateArray())
+        {
+            string text = Repeated(row, "text");
+            string meaning = Repeated(row, "meaning");
+            var keys = Strings(row.GetProperty("keys"));
+            int length = row.GetProperty("length").GetInt32();
+            bool saved = row.GetProperty("saved").GetBoolean();
+
+            Assert.Equal(length, MemoryRules.LengthOf(text, meaning, keys));
+            Assert.True(saved == MemoryRules.Fits(length), $"{length}");
+
+            var edit = MemoryEdits.Remember(
+                MemoryFile.Empty,
+                new MemoryRequest { Category = "you", Text = text, Meaning = meaning, Keys = keys },
+                today);
+
+            Assert.True(saved == edit.Changed, $"{length}: {edit.Reply}");
+            Assert.Equal(saved ? 1 : 0, edit.Memory.Facts.Count);
+        }
+    }
+
+    private static string Repeated(JsonElement row, string name) =>
+        string.Concat(Enumerable.Repeat(row.GetProperty(name).GetString()!, row.GetProperty(name + "Times").GetInt32()));
 
     private static List<string> Strings(JsonElement array) =>
         [.. array.EnumerateArray().Select(e => e.GetString()!)];

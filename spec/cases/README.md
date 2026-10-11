@@ -20,6 +20,9 @@ stamp, not a table (D-255).
 | `tray-mood/` | which face an event brings (`TrayMood`) |
 | `snapshot-name/` | the file name one environment reports into (`SnapshotName`) |
 | `update-manifest/` | a signed release manifest made with openssl (`UpdateManifest`) |
+| `memory-keys/` | what may be a key of a fact, and when a key is found in a message (`MemoryRules`) |
+| `memory-nudge/` | which messages speak in the first person and get the memory note (`MemoryNudge`) |
+| `memory-limits/` | how long a fact may be with its meaning and keys (`MemoryRules`) |
 
 A path in these files is written for the platform the case names. Windows cases keep the
 backslashes people have on their disks today.
