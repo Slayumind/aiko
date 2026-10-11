@@ -14,12 +14,19 @@ enum UpdateInstall {
     /// The version that is in place and waiting for a restart, or nil while there is none.
     private(set) static nonisolated(unsafe) var readyVersion: String?
 
-    static func download(version: String) async -> InstallOutcome {
+    /// `progress` hears the zip in whole percent, on whatever thread URLSession reports from. The
+    /// two small files of the release list are not counted.
+    static func download(
+        version: String, progress: @escaping @Sendable (Int) -> Void
+    ) async -> InstallOutcome {
         let installer = UpdateInstaller(
             base: "\(repository)/releases/download/v\(version)",
             publicKeyPem: UpdateKey.pem,
             bundle: Bundle.main.bundleURL,
-            fetch: { address, timeout in await AikoHttp.bytes(address, timeout: timeout) },
+            fetch: { address, timeout in
+                await AikoHttp.bytes(
+                    address, timeout: timeout, progress: address.hasSuffix(".zip") ? progress : nil)
+            },
             run: run,
             log: { Log.write($0) })
 

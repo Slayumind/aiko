@@ -90,16 +90,20 @@ public enum Strings {
         "StartWithWindows": ("Start with Windows", "Запускать вместе с Windows"),
         "StartAtLogin": ("Start at login", "Запускать при входе"),
         "CheckUpdatesWhat": ("Once a day Aiko asks slayumind.org for the latest version. The files come from GitHub, and Aiko checks their signature before it replaces anything.", "Раз в сутки Aiko спрашивает у slayumind.org последнюю версию. Файлы приходят с GitHub, и Aiko проверяет их подпись, прежде чем что-то заменить."),
-        "CheckNow": ("Check now", "Проверить сейчас"),
+        "CheckNow": ("Check for updates", "Проверить обновления"),
         "OpenDownloadPage": ("Open download page", "Открыть страницу загрузки"),
         "UpdateAsking": ("Aiko is asking slayumind.org…", "Aiko спрашивает slayumind.org…"),
-        "UpdateAvailable": ("Version {0} is available.", "Вышла версия {0}."),
-        "UpdateLatest": ("Aiko {0} is the latest version.", "Aiko {0} — самая свежая версия."),
+        "UpdateAvailable": ("Aiko {0} is out", "Вышла Aiko {0}"),
+        "UpdateLatest": ("The latest version is installed", "Установлена последняя версия"),
+        "UpdateThisVersion": ("Aiko {0}", "Aiko {0}"),
+        "UpdateCheckedAt": ("Aiko {0} · checked at {1}", "Aiko {0} · проверено в {1}"),
+        "UpdateNow": ("now {0}", "сейчас {0}"),
+        "UpdateReadyDetail": ("it starts after a restart", "встанет после перезапуска"),
         "UpdateFailed": ("Couldn't check. Try again in a few minutes.", "Проверить не получилось. Попробуй через несколько минут."),
-        "UpdateInstallNow": ("Download and install", "Скачать и установить"),
-        "UpdateDownloading": ("Aiko is downloading {0}…", "Aiko скачивает {0}…"),
-        "UpdateReady": ("Aiko {0} is ready. Restart to start using it.", "Aiko {0} готова. Перезапусти, чтобы перейти на неё."),
-        "UpdateRestartNow": ("Restart now", "Перезапустить"),
+        "UpdateInstallNow": ("Install {0}", "Установить {0}"),
+        "UpdateDownloading": ("Downloading {0}", "Скачивается {0}"),
+        "UpdateReady": ("Aiko {0} is ready", "Aiko {0} готова"),
+        "UpdateRestartNow": ("Restart Aiko", "Перезапустить Aiko"),
         "UpdateNotInstalled": ("This copy wasn't put here by the installer, so Aiko can't replace it. Use the download page.", "Эту копию поставил не установщик, поэтому Aiko не может её заменить. Открой страницу загрузки."),
         "UpdateDownloadFailed": ("The download didn't finish. Nothing was installed.", "Скачать не удалось. Ничего не установлено."),
         "UpdateNoKeyYet": ("This build has no update key yet, so it can't install updates. Use the download page.", "В этой сборке ещё нет ключа проверки, поэтому обновления она не ставит. Открой страницу загрузки."),
@@ -296,7 +300,6 @@ public enum Strings {
         "ResetInstallIdWhat": ("Aiko makes a new value. The days before it cannot be linked to the new one.", "Aiko придумает новое значение. Прежние дни с новым ID уже не связать."),
         "ResetInstallIdDone": ("The ID is new.", "ID теперь новый."),
         "OpenPrivacyDoc": ("Open PRIVACY.md", "Открыть PRIVACY.md"),
-        "PrivacyLinkFromGeneral": ("What Aiko sends and to whom — Privacy.", "Что Aiko отправляет и кому — раздел «Приватность»."),
         "WizardStats": ("Anonymous statistics", "Анонимная статистика"),
         "WizardStatsWhat": ("The author of Aiko doesn't know how many people use it. Once a day Aiko can say that one copy ran and send six values. All six are below.", "Автор Aiko не знает, сколько людей ею пользуется. Раз в сутки Aiko может сообщить, что одна копия работала, и отправить шесть значений. Вот все шесть."),
         "WizardStatsLater": ("You can change this later on the Privacy page.", "Это можно поменять потом на странице «Приватность»."),
@@ -538,7 +541,7 @@ public enum Strings {
     /// Once a day Aiko asks slayumind.org for the latest version. The files come from GitHub, an...
     public static var checkUpdatesWhat: String { Strings.get("CheckUpdatesWhat") }
 
-    /// Check now
+    /// Check for updates
     public static var checkNow: String { Strings.get("CheckNow") }
 
     /// Open download page
@@ -547,25 +550,37 @@ public enum Strings {
     /// Aiko is asking slayumind.org…
     public static var updateAsking: String { Strings.get("UpdateAsking") }
 
-    /// Version {0} is available.
+    /// Aiko {0} is out
     public static var updateAvailable: String { Strings.get("UpdateAvailable") }
 
-    /// Aiko {0} is the latest version.
+    /// The latest version is installed
     public static var updateLatest: String { Strings.get("UpdateLatest") }
+
+    /// Aiko {0}
+    public static var updateThisVersion: String { Strings.get("UpdateThisVersion") }
+
+    /// Aiko {0} · checked at {1}
+    public static var updateCheckedAt: String { Strings.get("UpdateCheckedAt") }
+
+    /// now {0}
+    public static var updateNow: String { Strings.get("UpdateNow") }
+
+    /// it starts after a restart
+    public static var updateReadyDetail: String { Strings.get("UpdateReadyDetail") }
 
     /// Couldn't check. Try again in a few minutes.
     public static var updateFailed: String { Strings.get("UpdateFailed") }
 
-    /// Download and install
+    /// Install {0}
     public static var updateInstallNow: String { Strings.get("UpdateInstallNow") }
 
-    /// Aiko is downloading {0}…
+    /// Downloading {0}
     public static var updateDownloading: String { Strings.get("UpdateDownloading") }
 
-    /// Aiko {0} is ready. Restart to start using it.
+    /// Aiko {0} is ready
     public static var updateReady: String { Strings.get("UpdateReady") }
 
-    /// Restart now
+    /// Restart Aiko
     public static var updateRestartNow: String { Strings.get("UpdateRestartNow") }
 
     /// This copy wasn't put here by the installer, so Aiko can't replace it. Use the download page.
@@ -1155,9 +1170,6 @@ public enum Strings {
 
     /// Open PRIVACY.md
     public static var openPrivacyDoc: String { Strings.get("OpenPrivacyDoc") }
-
-    /// What Aiko sends and to whom — Privacy.
-    public static var privacyLinkFromGeneral: String { Strings.get("PrivacyLinkFromGeneral") }
 
     /// Anonymous statistics
     public static var wizardStats: String { Strings.get("WizardStats") }

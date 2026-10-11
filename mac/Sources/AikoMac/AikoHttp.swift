@@ -40,7 +40,11 @@ enum AikoHttp {
 
     /// A whole file: the parts of an update. Nil for anything but a plain 200, so a GitHub error
     /// page is never mistaken for a zip.
-    static func bytes(_ address: String, timeout: TimeInterval) async -> Data? {
+    ///
+    /// `progress` hears the download in whole percent, on whatever thread URLSession reports from.
+    static func bytes(
+        _ address: String, timeout: TimeInterval, progress: (@Sendable (Int) -> Void)? = nil
+    ) async -> Data? {
         guard let url = URL(string: address), AllowedHosts.allows(url) else {
             Log.write("blocked an address outside the allowed hosts")
             return nil
@@ -52,7 +56,8 @@ enum AikoHttp {
         configuration.httpAdditionalHeaders = ["User-Agent": "Aiko/\(AppVersion.current())"]
 
         let session = URLSession(
-            configuration: configuration, delegate: OnlyAllowedHops(), delegateQueue: nil)
+            configuration: configuration, delegate: OnlyAllowedHops(progress: progress),
+            delegateQueue: nil)
         defer { session.finishTasksAndInvalidate() }
 
         do {
@@ -69,7 +74,29 @@ enum AikoHttp {
 ///
 /// Without this the list of allowed hosts would only cover the first request: GitHub answers a
 /// download with a redirect to its file store, and URLSession follows a redirect anywhere.
+///
+/// It also watches how much of the file has arrived, when somebody asked to hear it. The session
+/// counts the bytes anyway, so this adds no second way of downloading.
 final class OnlyAllowedHops: NSObject, URLSessionTaskDelegate, @unchecked Sendable {
+    private let progress: (@Sendable (Int) -> Void)?
+    private var watching: NSKeyValueObservation?
+
+    init(progress: (@Sendable (Int) -> Void)? = nil) {
+        self.progress = progress
+    }
+
+    func urlSession(_ session: URLSession, didCreateTask task: URLSessionTask) {
+        guard let progress else { return }
+
+        watching = task.observe(\.countOfBytesReceived) { task, _ in
+            // The size is unknown until the file store answers, and stays unknown when it does
+            // not say. No number is better than a made-up one.
+            let whole = task.countOfBytesExpectedToReceive
+            guard whole > 0 else { return }
+            progress(Int(task.countOfBytesReceived * 100 / whole))
+        }
+    }
+
     func urlSession(
         _ session: URLSession,
         task: URLSessionTask,
@@ -134,6 +161,10 @@ enum UpdateRun {
 
     static let releasesPage = "https://github.com/Slayumind/aiko/releases/latest"
 
+    /// When the site last answered in this run of the app. The General page shows it, so "up to
+    /// date" comes with "as of when".
+    private(set) static nonisolated(unsafe) var lastAnswered: Date?
+
     static func ask() async -> UpdateInfo {
         let request = build()
         // Short: nobody should wait for a version check, and a silent failure is fine here.
@@ -146,6 +177,8 @@ enum UpdateRun {
             Log.write("update check: the site answered \(answer.status)")
             return .unknown
         }
+
+        lastAnswered = Date()
 
         if request.week != nil || request.month != nil {
             var reported = ReportedPeriods.read()
