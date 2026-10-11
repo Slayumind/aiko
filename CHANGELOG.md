@@ -7,7 +7,28 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Added
+
+- **Memory.** Aiko keeps a small memory about you: who you are, how you like to work, your projects
+  and your taste. It is one file on your computer, at most 42 short facts, shared by every
+  environment where Aiko is on. The model saves a fact quietly when you tell it something about
+  yourself, and you can ask it to remember or forget. Nothing is sent anywhere by Aiko.
+- **The memory on the Personality page.** You see every fact, sorted into four groups with their
+  limits. You can pin a fact, edit it, remove it, add one yourself, open the file or erase the
+  memory. A fact that is too long for the model is marked, and the page says what to do.
+
 ### Changed
+
+- **One switch turns on all of Aiko.** Her personality, her skills and her memory are parts of one
+  thing. The switch of an environment on the Personality page turns all three on there, and off
+  again. Turning her off does not erase the memory. The separate switch for the skills is gone.
+- If Aiko was already on in an environment, the memory starts with this update. Aiko opens the
+  Personality page once after it. The page says what the memory reads and writes: each message you
+  send is read for the keys of the facts and is not stored, and one permission line for the two
+  memory tools is added to that environment's `settings.json`. [PRIVACY.md](PRIVACY.md) has the
+  details.
+- After an update of Aiko, Claude Code now gets the new version of her plugin by itself. Before,
+  it kept the old copy until the temperament was changed.
 
 - The `aiko:docs-hygiene` skill knows that a project may keep its tasks in a tracker. It no longer
   offers to create `PLAN.md` and `ROADMAP.md` for such a project.
