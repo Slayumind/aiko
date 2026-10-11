@@ -41,6 +41,10 @@ public sealed record AikoFolders(PlatformConventions Platform, string SettingsBa
     /// Its own file: the bridge reads the persona to build the plugin, and the shim does not need it.
     public string PersonaFile => Platform.Join(SettingsFolder, "persona.json");
 
+    /// What Aiko remembers about the person. It sits with the choices and not in the cache: it is
+    /// theirs, it is backed up with them, and macOS must not empty it.
+    public string MemoryFile => Platform.Join(SettingsFolder, "memory.json");
+
     public string InstallIdFile => Platform.Join(SettingsFolder, "install-id");
 
     public string ReportedPeriodsFile => Platform.Join(SettingsFolder, "reported.json");

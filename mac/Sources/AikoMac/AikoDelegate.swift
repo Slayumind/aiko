@@ -14,13 +14,15 @@ final class AikoDelegate: NSObject, NSApplicationDelegate {
             ? .russian
             : .english
 
-        Theme.registerFonts()
-        shell.show()
-        Log.write("started")
-
         // The self test is asked for by a variable, or by an argument: `open Aiko.app --args
         // --try-island` is the only way to pass anything to an app that is opened, not run.
-        if let asked = selfTestAskedFor() {
+        let asked = selfTestAskedFor()
+
+        Theme.registerFonts()
+        shell.show(changingNothing: asked != nil)
+        Log.write("started")
+
+        if let asked {
             shell.selfTest(asked.what, value: asked.value)
         }
     }

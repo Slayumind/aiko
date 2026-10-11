@@ -21,11 +21,22 @@ public static class PersonaPlugin
         "UserPromptSubmit", "PostToolUse", "PermissionRequest", "Notification", "Stop", "StopFailure", "SessionEnd",
     ];
 
-    /// Relative path with forward slashes → file content.
+    /// The key of the memory server in the plugin. Claude Code builds the tool names from it.
+    public const string MemoryServer = "memory";
+
+    /// The permission rule that lets the model call both memory tools without a question (D-279).
+    /// Claude Code names a tool of a plugin server mcp__plugin_<plugin>_<server>__<tool>, and a rule
+    /// without the tool part covers the whole server.
+    public const string MemoryPermission = "mcp__plugin_" + Name + "_" + MemoryServer;
+
+    /// Relative path with forward slashes → file content. The plugin is all of Aiko in a session
+    /// except her skills: the style she talks in, the hooks behind her face, the memory hooks and
+    /// the server with the remember and forget tools (D-285).
     public static IReadOnlyDictionary<string, string> Files(Temperament temperament, string bridgeExePath) =>
         new SortedDictionary<string, string>(StringComparer.Ordinal)
         {
             [".claude-plugin/plugin.json"] = Manifest(),
+            [".mcp.json"] = Servers(bridgeExePath),
             ["output-styles/aiko.md"] = PersonaPrompt.StyleFile(temperament),
             ["hooks/hooks.json"] = Hooks(bridgeExePath),
         };
@@ -49,32 +60,67 @@ public static class PersonaPlugin
         new JsonObject
         {
             ["name"] = Name,
-            ["description"] = "Aiko's persona and the hooks behind her face in the tray.",
+            ["description"] = "Aiko's persona, her memory and the hooks behind her face in the tray.",
         }.ToJsonString(Indented) + "\n";
 
     /// The command and its argument go separately, so no shell reads the path: the install path
     /// has spaces and may have letters that are not ASCII. async keeps the session from waiting.
+    ///
+    /// The memory hooks are not async: their output is what the model must read, the rules and the
+    /// facts at the start of a session and the reminder beside a message. The rules and the facts
+    /// are two hooks because Claude Code cuts each hook output on its own.
     private static string Hooks(string bridgeExePath)
     {
         var events = new JsonObject();
         foreach (var name in HookEvents)
         {
-            events[name] = new JsonArray(
-                new JsonObject
-                {
-                    ["hooks"] = new JsonArray(
-                        new JsonObject
-                        {
-                            ["type"] = "command",
-                            ["command"] = bridgeExePath,
-                            ["args"] = new JsonArray(HookArgument),
-                            ["async"] = true,
-                        }),
-                });
+            var hooks = new JsonArray(FaceHook(bridgeExePath));
+            if (name == "UserPromptSubmit")
+            {
+                hooks.Add(MemoryHook(bridgeExePath, MemoryBridgeMode.Prompt));
+            }
+
+            events[name] = new JsonArray(new JsonObject { ["hooks"] = hooks });
         }
+
+        events["SessionStart"] = new JsonArray(
+            new JsonObject
+            {
+                ["hooks"] = new JsonArray(
+                    MemoryHook(bridgeExePath, MemoryBridgeMode.Rules),
+                    MemoryHook(bridgeExePath, MemoryBridgeMode.Facts)),
+            });
 
         return new JsonObject { ["hooks"] = events }.ToJsonString(Indented) + "\n";
     }
+
+    private static JsonObject FaceHook(string bridgeExePath) => new()
+    {
+        ["type"] = "command",
+        ["command"] = bridgeExePath,
+        ["args"] = new JsonArray(HookArgument),
+        ["async"] = true,
+    };
+
+    private static JsonObject MemoryHook(string bridgeExePath, MemoryBridgeMode mode) => new()
+    {
+        ["type"] = "command",
+        ["command"] = bridgeExePath,
+        ["args"] = new JsonArray(MemoryBridge.Argument, MemoryBridge.ArgumentFor(mode)),
+    };
+
+    private static string Servers(string bridgeExePath) =>
+        new JsonObject
+        {
+            ["mcpServers"] = new JsonObject
+            {
+                [MemoryServer] = new JsonObject
+                {
+                    ["command"] = bridgeExePath,
+                    ["args"] = new JsonArray(MemoryBridge.Argument, MemoryBridge.ArgumentFor(MemoryBridgeMode.Serve)),
+                },
+            },
+        }.ToJsonString(Indented) + "\n";
 
     private static readonly System.Text.Json.JsonSerializerOptions Indented = new()
     {

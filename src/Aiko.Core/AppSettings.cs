@@ -53,6 +53,11 @@ public sealed record AppSettings
     /// apart from "never asked", and somebody updating from 0.2.0 would never see the question.
     public bool PrivacyAsked { get; init; }
 
+    /// Whether the person has been shown that Aiko now remembers. With the memory, an environment
+    /// where she was already on starts to read messages for her memory and gets a permission
+    /// line in its settings.json. Somebody who turned her on before that must be told once.
+    public bool MemoryShown { get; init; }
+
     public AikoLanguage Language { get; init; } = AikoLanguage.System;
 
     /// Games, video and presentations take the whole screen, and the island would sit on top.

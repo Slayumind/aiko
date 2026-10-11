@@ -137,6 +137,14 @@ sealed class AikoShell : IDisposable
                 _settings?.OpenChecklist(ChecklistItem.Privacy);
             }
 
+            // Once, for someone who turned Aiko on before she had a memory. The page says what the
+            // memory reads and writes, and it is where she can be turned off.
+            else if (WizardChecklist.OpensMemoryOnStart(app, SettingsStore.LoadEnvironments()))
+            {
+                OpenSettings(page: SettingsPanel.PersonalityPageKey);
+                SettingsStore.Save(app with { MemoryShown = true });
+            }
+
             // An update can bring a new persona text or move the marketplace. When the persona is
             // off everywhere this reads a few files and does nothing else.
             PluginSync.Request("startup");

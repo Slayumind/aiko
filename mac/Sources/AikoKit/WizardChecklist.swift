@@ -130,6 +130,12 @@ public enum WizardChecklist {
         environments.hasEnvironments && !app.privacyAsked
     }
 
+    /// Somebody who turned Aiko on before she had a memory never read what the memory does. The
+    /// Personality page, which says it, opens once for them.
+    public static func opensMemoryOnStart(_ app: AppSettings, _ environments: EnvironmentSettings) -> Bool {
+        !app.memoryShown && environments.environments.contains(where: \.persona)
+    }
+
     private static func answered(_ unlocked: Bool, _ answer: Bool?) -> ItemState {
         guard unlocked else { return .locked }
         switch answer {

@@ -90,16 +90,20 @@ public enum Strings {
         "StartWithWindows": ("Start with Windows", "Запускать вместе с Windows"),
         "StartAtLogin": ("Start at login", "Запускать при входе"),
         "CheckUpdatesWhat": ("Once a day Aiko asks slayumind.org for the latest version. The files come from GitHub, and Aiko checks their signature before it replaces anything.", "Раз в сутки Aiko спрашивает у slayumind.org последнюю версию. Файлы приходят с GitHub, и Aiko проверяет их подпись, прежде чем что-то заменить."),
-        "CheckNow": ("Check now", "Проверить сейчас"),
+        "CheckNow": ("Check for updates", "Проверить обновления"),
         "OpenDownloadPage": ("Open download page", "Открыть страницу загрузки"),
         "UpdateAsking": ("Aiko is asking slayumind.org…", "Aiko спрашивает slayumind.org…"),
-        "UpdateAvailable": ("Version {0} is available.", "Вышла версия {0}."),
-        "UpdateLatest": ("Aiko {0} is the latest version.", "Aiko {0} — самая свежая версия."),
+        "UpdateAvailable": ("Aiko {0} is out", "Вышла Aiko {0}"),
+        "UpdateLatest": ("The latest version is installed", "Установлена последняя версия"),
+        "UpdateThisVersion": ("Aiko {0}", "Aiko {0}"),
+        "UpdateCheckedAt": ("Aiko {0} · checked at {1}", "Aiko {0} · проверено в {1}"),
+        "UpdateNow": ("now {0}", "сейчас {0}"),
+        "UpdateReadyDetail": ("it starts after a restart", "встанет после перезапуска"),
         "UpdateFailed": ("Couldn't check. Try again in a few minutes.", "Проверить не получилось. Попробуй через несколько минут."),
-        "UpdateInstallNow": ("Download and install", "Скачать и установить"),
-        "UpdateDownloading": ("Aiko is downloading {0}…", "Aiko скачивает {0}…"),
-        "UpdateReady": ("Aiko {0} is ready. Restart to start using it.", "Aiko {0} готова. Перезапусти, чтобы перейти на неё."),
-        "UpdateRestartNow": ("Restart now", "Перезапустить"),
+        "UpdateInstallNow": ("Install {0}", "Установить {0}"),
+        "UpdateDownloading": ("Downloading {0}", "Скачивается {0}"),
+        "UpdateReady": ("Aiko {0} is ready", "Aiko {0} готова"),
+        "UpdateRestartNow": ("Restart Aiko", "Перезапустить Aiko"),
         "UpdateNotInstalled": ("This copy wasn't put here by the installer, so Aiko can't replace it. Use the download page.", "Эту копию поставил не установщик, поэтому Aiko не может её заменить. Открой страницу загрузки."),
         "UpdateDownloadFailed": ("The download didn't finish. Nothing was installed.", "Скачать не удалось. Ничего не установлено."),
         "UpdateNoKeyYet": ("This build has no update key yet, so it can't install updates. Use the download page.", "В этой сборке ещё нет ключа проверки, поэтому обновления она не ставит. Открой страницу загрузки."),
@@ -268,6 +272,9 @@ public enum Strings {
         "DeleteWorking": ("Removing Aiko. Claude Code may take a few seconds to answer.", "Убираю Aiko. Claude Code может отвечать несколько секунд."),
         "DeleteAppStays": ("Aiko cannot move itself to the Bin from where it is now. Drag the app there when it quits.", "Aiko не может отправить себя в Корзину из этой папки. Перетащи программу туда, когда она закроется."),
         "DeletePortable": ("This copy was unpacked from a zip, so it has no uninstaller. The folder with Aiko stays, and Aiko opens it for you.", "Эта копия распакована из zip, деинсталлятора у неё нет. Папка с Aiko останется, и Aiko её откроет."),
+        "DeleteKeepMemory": ("Keep what Aiko remembers about me", "Сохранить то, что Aiko помнит обо мне"),
+        "DeleteMemoryStays": ("One file stays: {0}. When you install Aiko again, it finds the memory there.", "Останется один файл: {0}. Когда поставишь Aiko снова, она найдёт память там."),
+        "DeleteMemoryGoes": ("The memory goes with Aiko's folders. It cannot be brought back.", "Память уйдёт вместе с папками Aiko. Вернуть её нельзя."),
         "OpenClaudeCode": ("Open Claude Code", "Открыть Claude Code"),
         "CardSignInNote": ("Sign in so Aiko can see the limits of this environment.", "Войди, чтобы Aiko видела лимиты этой среды."),
         "StateWorkingNow": ("working now", "сейчас работает"),
@@ -290,13 +297,12 @@ public enum Strings {
         "SentPersona": ("the personality is on in at least one environment", "личность включена хотя бы в одной среде"),
         "NothingSentYet": ("None of this is sent right now.", "Сейчас ничего из этого не отправляется."),
         "SectionNeverSent": ("WHAT NEVER LEAVES", "ЧТО НЕ ОТПРАВЛЯЕТСЯ НИКОГДА"),
-        "NeverSentWhat": ("Your name, email, project folders, limits, token and session texts. The site doesn't read or store the IP address.", "Имя, почта, папки проектов, лимиты, токен и тексты сессий. IP-адрес сайт не читает и не хранит."),
+        "NeverSentWhat": ("Your name, email, project folders, limits, token, session texts and what the memory holds. The site doesn't read or store the IP address.", "Имя, почта, папки проектов, лимиты, токен, тексты сессий и содержимое памяти. IP-адрес сайт не читает и не хранит."),
         "StatsKeptFor": ("The records are deleted after 90 days.", "Записи удаляются через 90 дней."),
         "ResetInstallId": ("Reset ID", "Сбросить ID"),
         "ResetInstallIdWhat": ("Aiko makes a new value. The days before it cannot be linked to the new one.", "Aiko придумает новое значение. Прежние дни с новым ID уже не связать."),
         "ResetInstallIdDone": ("The ID is new.", "ID теперь новый."),
         "OpenPrivacyDoc": ("Open PRIVACY.md", "Открыть PRIVACY.md"),
-        "PrivacyLinkFromGeneral": ("What Aiko sends and to whom — Privacy.", "Что Aiko отправляет и кому — раздел «Приватность»."),
         "WizardStats": ("Anonymous statistics", "Анонимная статистика"),
         "WizardStatsWhat": ("The author of Aiko doesn't know how many people use it. Once a day Aiko can say that one copy ran and send six values. All six are below.", "Автор Aiko не знает, сколько людей ею пользуется. Раз в сутки Aiko может сообщить, что одна копия работала, и отправить шесть значений. Вот все шесть."),
         "WizardStatsLater": ("You can change this later on the Privacy page.", "Это можно поменять потом на странице «Приватность»."),
@@ -305,8 +311,10 @@ public enum Strings {
         "StatsStateOn": ("on", "включена"),
         "StatsStateOff": ("off", "выключена"),
         "StatsStateUnset": ("not chosen", "не выбрано"),
-        "SectionWhereAikoTalks": ("WHERE AIKO TALKS", "ГДЕ AIKO ГОВОРИТ"),
-        "PersonaNewSessions": ("Works in new sessions. Open sessions finish the way they started.", "Действует в новых сессиях. Открытые сессии доработают как были."),
+        "SectionWhereAikoIsOn": ("WHERE AIKO IS ON", "ГДЕ AIKO ВКЛЮЧЕНА"),
+        "AikoOnNote": ("Her character, her skills and her memory come together. Works in new sessions; open sessions finish the way they started.", "Характер, навыки и память включаются вместе. Действует в новых сессиях; открытые доработают как были."),
+        "AikoOnWhat": ("Where Aiko is on, she reads each message you send to keep her memory fresh, and adds one line to that environment's settings.json: a permission for her two memory tools. Turning her off does not erase the memory.", "Там, где Aiko включена, она читает каждое твоё сообщение, чтобы память не устаревала, и добавляет в settings.json этой среды одну строку: разрешение на два своих инструмента памяти. Выключение память не стирает."),
+        "SkillsWhere": ("Skills work in the environments where Aiko is on.", "Навыки работают в тех средах, где Aiko включена."),
         "PersonaOwnStyle": ("While the personality is on, your style {0} doesn't work. Turn it off and it comes back.", "Пока личность включена, твой стиль {0} не работает. Выключишь — вернётся."),
         "SectionFace": ("MOOD", "НАСТРОЕНИЕ"),
         "FaceChibi": ("Chibi", "Чиби"),
@@ -334,10 +342,36 @@ public enum Strings {
         "SampleCloseBright": ("お疲れ様!", "お疲れ様!"),
         "SampleCloseMusou": ("よし、行くぞ! On to the next one (^_^)", "よし、行くぞ! Дальше (^_^)"),
         "SampleCommit": ("The commit for this fix has no character:", "Коммит к этой правке — без характера:"),
+        "SectionMemory": ("MEMORY · {0} OF {1}", "ПАМЯТЬ · {0} ИЗ {1}"),
+        "MemoryAdd": ("Add a fact", "Добавить факт"),
+        "MemoryCategoryYou": ("You", "Ты"),
+        "MemoryCategoryWork": ("How to work with me", "Как со мной работать"),
+        "MemoryCategoryProjects": ("Projects", "Проекты"),
+        "MemoryCategoryInterests": ("Interests and taste", "Интересы и вкус"),
+        "MemoryTabYou": ("You", "Ты"),
+        "MemoryTabWork": ("Work", "Работа"),
+        "MemoryTabProjects": ("Projects", "Проекты"),
+        "MemoryTabInterests": ("Taste", "Вкус"),
+        "MemoryPin": ("Pin", "Закрепить"),
+        "MemoryUnpin": ("Unpin", "Открепить"),
+        "MemoryEdit": ("Edit", "Править"),
+        "MemorySave": ("Save", "Сохранить"),
+        "MemoryCount": ("{0} of {1}", "{0} из {1}"),
+        "MemoryFactPlaceholder": ("The fact, one thought", "Факт, одна мысль"),
+        "MemoryMeaningPlaceholder": ("What it changes in the answers (optional)", "Что это меняет в ответах (необязательно)"),
+        "MemoryEnglishNote": ("Facts are in English, the way the model reads them.", "Факты записаны по-английски — так их читает модель."),
+        "MemoryAnyLanguageNote": ("You can write a fact in any language. Aiko writes hers in English.", "Факт можно писать на любом языке. Aiko записывает свои по-английски."),
+        "MemoryYouNote": ("Your name, how to address you and your grammatical gender are pinned facts here. If they are missing, Aiko asks once in a casual talk. You can also add them yourself.", "Имя, обращение и род — закреплённые факты в этом разделе. Если их нет, Aiko спросит один раз в разговоре. Их можно добавить и здесь."),
+        "MemoryOpenFile": ("Open file", "Открыть файл"),
+        "MemoryErase": ("Erase memory", "Стереть память"),
+        "MemoryEraseAsk": ("Aiko will forget every fact in every environment, {0} in all. This is not reversible.", "Aiko забудет все факты во всех средах, их {0}. Вернуть их нельзя."),
+        "MemoryTooLong": ("too long · {0} of {1}", "слишком длинный · {0} из {1}"),
+        "MemoryTooLongNote": ("The model does not see a fact longer than {0} characters. Shorten it and it comes back.", "Факт длиннее {0} знаков модель не видит. Сократи его, и он вернётся в память."),
+        "MemoryAsideNote": ("Records in the file that cannot be read after a hand edit: {0}. They are kept in the file, in the setAside list.", "Записей в файле, которые не читаются после ручной правки: {0}. Они сохранены в файле, в списке setAside."),
+        "MemoryEmpty": ("Memory is empty. Aiko saves the first fact when you tell her something about yourself: who you are, how to work with you, what you work on. You can also add a fact here.", "Память пуста. Aiko запишет первый факт, когда в разговоре прозвучит что-то о тебе: кто ты, как с тобой работать, над чем ты работаешь. Факт можно добавить и здесь."),
+        "MemoryFull": ("This section is full. Remove a fact to add a new one.", "Раздел заполнен. Удали факт, чтобы добавить новый."),
+        "MemoryWriteFailed": ("Aiko could not write the memory file. Nothing changed.", "Aiko не смогла записать файл памяти. Ничего не изменилось."),
         "SectionSkills": ("SKILLS · {0}", "НАВЫКИ · {0}"),
-        "SkillsWork": ("Skills work in environments where the personality is on.", "Навыки работают в средах, где включена личность."),
-        "SkillsSwitch": ("Aiko's skills", "Навыки Aiko"),
-        "SkillsNeedPersona": ("Turn the personality on in at least one environment, and the skills start working.", "Включи личность хотя бы в одной среде — тогда навыки заработают."),
         "SkillDomainProjects": ("PROJECT MANAGEMENT", "УПРАВЛЕНИЕ ПРОЕКТАМИ"),
         "SkillDomainGames": ("GAME DEVELOPMENT", "РАЗРАБОТКА ИГР"),
         "SkillAikoCopy": ("Texts that sound like a person wrote them: UI, README, release notes. Russian and English.", "Тексты, которые звучат как написанные человеком: интерфейс, README, заметки к релизу. На русском и английском."),
@@ -354,8 +388,8 @@ public enum Strings {
         "SkillAikoCalendar": ("Plans your day in Google Calendar and finds free time. Adds events only after your yes.", "Планирует день по Google Calendar и ищет свободное время. События добавляет только после твоего «да»."),
         "SkillAikoDrive": ("Reads documents from Google Drive and puts project files onto Drive.", "Берёт документы с Google Drive в работу и кладёт файлы проекта на Drive."),
         "ItemMeetAiko": ("Meet Aiko", "Познакомься с Aiko"),
-        "MeetAikoLead": ("Aiko can talk in your Claude Code sessions in her own voice, and she brings eleven skills. In code and commits she stays quiet.", "Aiko может говорить в твоих сессиях Claude Code своим голосом и приносит одиннадцать навыков. В коде и коммитах она молчит."),
-        "MeetAikoSettings": ("The temperament, the mood and the skills are on the Personality page. It works in new sessions.", "Темперамент, настроение и навыки — на странице «Личность». Действует в новых сессиях."),
+        "MeetAikoLead": ("Aiko can talk in your Claude Code sessions in her own voice. She brings her skills and a small memory about you. In code and commits she stays quiet.", "Aiko может отвечать в твоих сессиях Claude Code своим голосом. С ней приходят её навыки и небольшая память о тебе. В коде и коммитах она молчит."),
+        "MeetAikoSettings": ("The temperament, the mood, the skills and the memory are on the Personality page. It works in new sessions.", "Темперамент, настроение, навыки и память — на странице «Личность». Действует в новых сессиях."),
         "MeetAikoTurnOn": ("Turn on in {0}", "Включить в среде {0}"),
         "StateOn": ("on", "включена"),
     ]
@@ -510,7 +544,7 @@ public enum Strings {
     /// Once a day Aiko asks slayumind.org for the latest version. The files come from GitHub, an...
     public static var checkUpdatesWhat: String { Strings.get("CheckUpdatesWhat") }
 
-    /// Check now
+    /// Check for updates
     public static var checkNow: String { Strings.get("CheckNow") }
 
     /// Open download page
@@ -519,25 +553,37 @@ public enum Strings {
     /// Aiko is asking slayumind.org…
     public static var updateAsking: String { Strings.get("UpdateAsking") }
 
-    /// Version {0} is available.
+    /// Aiko {0} is out
     public static var updateAvailable: String { Strings.get("UpdateAvailable") }
 
-    /// Aiko {0} is the latest version.
+    /// The latest version is installed
     public static var updateLatest: String { Strings.get("UpdateLatest") }
+
+    /// Aiko {0}
+    public static var updateThisVersion: String { Strings.get("UpdateThisVersion") }
+
+    /// Aiko {0} · checked at {1}
+    public static var updateCheckedAt: String { Strings.get("UpdateCheckedAt") }
+
+    /// now {0}
+    public static var updateNow: String { Strings.get("UpdateNow") }
+
+    /// it starts after a restart
+    public static var updateReadyDetail: String { Strings.get("UpdateReadyDetail") }
 
     /// Couldn't check. Try again in a few minutes.
     public static var updateFailed: String { Strings.get("UpdateFailed") }
 
-    /// Download and install
+    /// Install {0}
     public static var updateInstallNow: String { Strings.get("UpdateInstallNow") }
 
-    /// Aiko is downloading {0}…
+    /// Downloading {0}
     public static var updateDownloading: String { Strings.get("UpdateDownloading") }
 
-    /// Aiko {0} is ready. Restart to start using it.
+    /// Aiko {0} is ready
     public static var updateReady: String { Strings.get("UpdateReady") }
 
-    /// Restart now
+    /// Restart Aiko
     public static var updateRestartNow: String { Strings.get("UpdateRestartNow") }
 
     /// This copy wasn't put here by the installer, so Aiko can't replace it. Use the download page.
@@ -1044,6 +1090,15 @@ public enum Strings {
     /// This copy was unpacked from a zip, so it has no uninstaller. The folder with Aiko stays, ...
     public static var deletePortable: String { Strings.get("DeletePortable") }
 
+    /// Keep what Aiko remembers about me
+    public static var deleteKeepMemory: String { Strings.get("DeleteKeepMemory") }
+
+    /// One file stays: {0}. When you install Aiko again, it finds the memory there.
+    public static var deleteMemoryStays: String { Strings.get("DeleteMemoryStays") }
+
+    /// The memory goes with Aiko's folders. It cannot be brought back.
+    public static var deleteMemoryGoes: String { Strings.get("DeleteMemoryGoes") }
+
     /// Open Claude Code
     public static var openClaudeCode: String { Strings.get("OpenClaudeCode") }
 
@@ -1110,7 +1165,7 @@ public enum Strings {
     /// WHAT NEVER LEAVES
     public static var sectionNeverSent: String { Strings.get("SectionNeverSent") }
 
-    /// Your name, email, project folders, limits, token and session texts. The site doesn't read...
+    /// Your name, email, project folders, limits, token, session texts and what the memory holds...
     public static var neverSentWhat: String { Strings.get("NeverSentWhat") }
 
     /// The records are deleted after 90 days.
@@ -1127,9 +1182,6 @@ public enum Strings {
 
     /// Open PRIVACY.md
     public static var openPrivacyDoc: String { Strings.get("OpenPrivacyDoc") }
-
-    /// What Aiko sends and to whom — Privacy.
-    public static var privacyLinkFromGeneral: String { Strings.get("PrivacyLinkFromGeneral") }
 
     /// Anonymous statistics
     public static var wizardStats: String { Strings.get("WizardStats") }
@@ -1155,11 +1207,17 @@ public enum Strings {
     /// not chosen
     public static var statsStateUnset: String { Strings.get("StatsStateUnset") }
 
-    /// WHERE AIKO TALKS
-    public static var sectionWhereAikoTalks: String { Strings.get("SectionWhereAikoTalks") }
+    /// WHERE AIKO IS ON
+    public static var sectionWhereAikoIsOn: String { Strings.get("SectionWhereAikoIsOn") }
 
-    /// Works in new sessions. Open sessions finish the way they started.
-    public static var personaNewSessions: String { Strings.get("PersonaNewSessions") }
+    /// Her character, her skills and her memory come together. Works in new sessions; open sessi...
+    public static var aikoOnNote: String { Strings.get("AikoOnNote") }
+
+    /// Where Aiko is on, she reads each message you send to keep her memory fresh, and adds one ...
+    public static var aikoOnWhat: String { Strings.get("AikoOnWhat") }
+
+    /// Skills work in the environments where Aiko is on.
+    public static var skillsWhere: String { Strings.get("SkillsWhere") }
 
     /// While the personality is on, your style {0} doesn't work. Turn it off and it comes back.
     public static var personaOwnStyle: String { Strings.get("PersonaOwnStyle") }
@@ -1242,17 +1300,95 @@ public enum Strings {
     /// The commit for this fix has no character:
     public static var sampleCommit: String { Strings.get("SampleCommit") }
 
+    /// MEMORY · {0} OF {1}
+    public static var sectionMemory: String { Strings.get("SectionMemory") }
+
+    /// Add a fact
+    public static var memoryAdd: String { Strings.get("MemoryAdd") }
+
+    /// You
+    public static var memoryCategoryYou: String { Strings.get("MemoryCategoryYou") }
+
+    /// How to work with me
+    public static var memoryCategoryWork: String { Strings.get("MemoryCategoryWork") }
+
+    /// Projects
+    public static var memoryCategoryProjects: String { Strings.get("MemoryCategoryProjects") }
+
+    /// Interests and taste
+    public static var memoryCategoryInterests: String { Strings.get("MemoryCategoryInterests") }
+
+    /// You
+    public static var memoryTabYou: String { Strings.get("MemoryTabYou") }
+
+    /// Work
+    public static var memoryTabWork: String { Strings.get("MemoryTabWork") }
+
+    /// Projects
+    public static var memoryTabProjects: String { Strings.get("MemoryTabProjects") }
+
+    /// Taste
+    public static var memoryTabInterests: String { Strings.get("MemoryTabInterests") }
+
+    /// Pin
+    public static var memoryPin: String { Strings.get("MemoryPin") }
+
+    /// Unpin
+    public static var memoryUnpin: String { Strings.get("MemoryUnpin") }
+
+    /// Edit
+    public static var memoryEdit: String { Strings.get("MemoryEdit") }
+
+    /// Save
+    public static var memorySave: String { Strings.get("MemorySave") }
+
+    /// {0} of {1}
+    public static var memoryCount: String { Strings.get("MemoryCount") }
+
+    /// The fact, one thought
+    public static var memoryFactPlaceholder: String { Strings.get("MemoryFactPlaceholder") }
+
+    /// What it changes in the answers (optional)
+    public static var memoryMeaningPlaceholder: String { Strings.get("MemoryMeaningPlaceholder") }
+
+    /// Facts are in English, the way the model reads them.
+    public static var memoryEnglishNote: String { Strings.get("MemoryEnglishNote") }
+
+    /// You can write a fact in any language. Aiko writes hers in English.
+    public static var memoryAnyLanguageNote: String { Strings.get("MemoryAnyLanguageNote") }
+
+    /// Your name, how to address you and your grammatical gender are pinned facts here. If they ...
+    public static var memoryYouNote: String { Strings.get("MemoryYouNote") }
+
+    /// Open file
+    public static var memoryOpenFile: String { Strings.get("MemoryOpenFile") }
+
+    /// Erase memory
+    public static var memoryErase: String { Strings.get("MemoryErase") }
+
+    /// Aiko will forget every fact in every environment, {0} in all. This is not reversible.
+    public static var memoryEraseAsk: String { Strings.get("MemoryEraseAsk") }
+
+    /// too long · {0} of {1}
+    public static var memoryTooLong: String { Strings.get("MemoryTooLong") }
+
+    /// The model does not see a fact longer than {0} characters. Shorten it and it comes back.
+    public static var memoryTooLongNote: String { Strings.get("MemoryTooLongNote") }
+
+    /// Records in the file that cannot be read after a hand edit: {0}. They are kept in the file...
+    public static var memoryAsideNote: String { Strings.get("MemoryAsideNote") }
+
+    /// Memory is empty. Aiko saves the first fact when you tell her something about yourself: wh...
+    public static var memoryEmpty: String { Strings.get("MemoryEmpty") }
+
+    /// This section is full. Remove a fact to add a new one.
+    public static var memoryFull: String { Strings.get("MemoryFull") }
+
+    /// Aiko could not write the memory file. Nothing changed.
+    public static var memoryWriteFailed: String { Strings.get("MemoryWriteFailed") }
+
     /// SKILLS · {0}
     public static var sectionSkills: String { Strings.get("SectionSkills") }
-
-    /// Skills work in environments where the personality is on.
-    public static var skillsWork: String { Strings.get("SkillsWork") }
-
-    /// Aiko's skills
-    public static var skillsSwitch: String { Strings.get("SkillsSwitch") }
-
-    /// Turn the personality on in at least one environment, and the skills start working.
-    public static var skillsNeedPersona: String { Strings.get("SkillsNeedPersona") }
 
     /// PROJECT MANAGEMENT
     public static var skillDomainProjects: String { Strings.get("SkillDomainProjects") }
@@ -1302,10 +1438,10 @@ public enum Strings {
     /// Meet Aiko
     public static var itemMeetAiko: String { Strings.get("ItemMeetAiko") }
 
-    /// Aiko can talk in your Claude Code sessions in her own voice, and she brings eleven skills...
+    /// Aiko can talk in your Claude Code sessions in her own voice. She brings her skills and a ...
     public static var meetAikoLead: String { Strings.get("MeetAikoLead") }
 
-    /// The temperament, the mood and the skills are on the Personality page. It works in new ses...
+    /// The temperament, the mood, the skills and the memory are on the Personality page. It work...
     public static var meetAikoSettings: String { Strings.get("MeetAikoSettings") }
 
     /// Turn on in {0}

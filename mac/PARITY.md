@@ -3,8 +3,8 @@
 The macOS app repeats the Windows core, so every ported file keeps its behaviour and every xUnit
 case has a Swift case with the same name and the same numbers. Test counts below are cases, not
 methods: one `[Theory]` with five `[InlineData]` rows counts as five, and so does the Swift
-`@Test(arguments:)` that mirrors it. `dotnet test` prints cases and says 736; `swift test` prints
-methods, not cases, and says 596. The 49 the Swift side does not have are named at the bottom; the ones it has and Windows
+`@Test(arguments:)` that mirrors it. `dotnet test` prints cases and says 1064; `swift test` prints
+methods, not cases, and says 774. The 14 the Swift side does not have are named at the bottom; the ones it has and Windows
 does not belong to the two small programs, whose decisions sit inline in `Program.cs` on Windows,
 and to the card words, the island and the settings window, which sit in `Aiko.App` on Windows
 where no test can reach them.
@@ -24,9 +24,10 @@ a row cannot change in one core and stay as it was in the other. See `spec/cases
 | PollBackoff.cs | PollBackoff.swift | 9 | 9 | |
 | CardState.cs | CardState.swift | 25 | 25 | CardStateTests (17) and PaceEstimateTests (8) |
 | UpdateInfo.cs | UpdateInfo.swift | 12 | 12 | `System.Version` is ported as `VersionNumber` |
+| UpdateBlock.cs | UpdateBlock.swift | 17 | 17 | the one action of each stage of the update line, what an answer of the site means for it, and the percent kept inside 0 to 100 |
 | AllowedHosts.cs | AllowedHosts.swift | 19 | 19 | the source scan looks for `URLSession` outside `AikoHttp.swift` instead of `new HttpClient` |
 | UpdateManifest.cs | UpdateManifest.swift | 38 | 38 | CryptoKit in place of `ECDsa`; both read the openssl vector in `spec/cases/update-manifest/` |
-| UninstallPlan.cs | UninstallPlan.swift | 26 | 26 | the two folders Aiko may delete, and the guard that refuses every other path |
+| UninstallPlan.cs | UninstallPlan.swift | 89 | 89 | the two folders Aiko may delete, the guard that refuses every other path, and the memory file that may stay: when it is worth keeping, that it stays when nobody could be asked, and the guard for emptying the folder around it |
 | UpdateGate.cs, UpdateKey.cs | UpdateGate.swift, UpdateKey.swift | 15 | 15 | the key is one file, `update-public-key.pem`: Windows embeds it, `tools/update-key.py` writes the Swift copy, and a case in each suite fails if the two drift apart |
 | CubicBezier.cs | CubicBezier.swift | 9 | 9 | |
 | IslandReveal.cs | IslandReveal.swift | 8 | 8 | |
@@ -36,14 +37,16 @@ a row cannot change in one core and stay as it was in the other. See `spec/cases
 | SessionActivity.cs | SessionActivity.swift | 6 | 6 | what a hook means and what a broken record reads as are in `spec/cases/hook-events/` |
 | Heartbeat.cs | Heartbeat.swift | 17 | 17 | |
 | SessionReminder.cs | SessionReminder.swift | 18 | 20 | its other 6 C# cases are about the hook in settings.json and sit in SettingsJsonPatchTests; 8 Swift cases of its own read the system language from a tag (MacLanguageTests) |
-| PersonaSettings.cs | PersonaSettings.swift | 15 | 15 | |
+| PersonaSettings.cs | PersonaSettings.swift | 10 | 10 | |
 | PersonaPrompt.cs | PersonaPrompt.swift, PersonaPlugin.swift | 33 | 33 | the prompt text and the plugin files hash the same in both languages |
 | PersonaPluginOutput.cs | PersonaPluginOutput.swift | 7 | 7 | |
+| PersonaPlugin.cs and PersonaPluginOutput.cs with the memory | PersonaPlugin.swift, PersonaPluginOutput.swift | 13 | 13 | PersonaPluginMemoryTests: the memory hooks and the server the plugin always carries, and the `synced` note with the hash of the plugin Claude Code last took |
 | SkillCatalog.cs | SkillCatalog.swift | 3 | 3 | |
 | SkillPlugin.cs | SkillPlugin.swift | 17 | 17 | |
 | ClaudeAccount.cs | ClaudeAccount.swift | 16 | 16 | 2 of them are about ClaudeConfigFolder, as in the xUnit file |
 | FaceArt.cs | FaceArt.swift | 63 | 63 | every one of the 56 pictures hashes the same in both languages |
 | SettingsJsonPatch.cs | SettingsJsonPatch.swift | 20 | 26 | the 6 extra come from SessionReminderTests; a method answers "nothing to change" with nil instead of a bool and an out parameter |
+| SettingsJsonPatch.cs, ClaudeSettingsEditor.cs: the rule for the memory tools | the same two Swift files | 14 | 14 | MemoryPermissionTests; `TrySetMemoryPermission` is `setMemoryPermission`, which answers nil when nothing changes |
 | ClaudeSettingsEditor.cs, IFileAccess.cs | ClaudeSettingsEditor.swift | 38 | 38 | ClaudeSettingsEditorTests (19) and PluginRemovalTests (19); `FileAccess` is IFileAccess with Swift errors in place of exceptions |
 | PluginPlan.cs, PluginReconciler.cs | PluginPlan.swift, PluginReconciler.swift | 33 | 33 | the reconciler's clock comes in as a function instead of TimeProvider |
 | PlatformConventions.cs | PlatformConventions.swift | 2 | 2 | what each system names and where it puts things moved to `spec/cases/platform-paths/`, three systems side by side; what is left needs a settings object or this computer |
@@ -62,9 +65,16 @@ a row cannot change in one core and stay as it was in the other. See `spec/cases
 | CommandLinks.cs | CommandLinks.swift | 3 | 3 | |
 | AikoMarketplace.cs | AikoMarketplace.swift | — | — | its cases sit in PluginPlanTests and SkillPluginTests |
 | AppSettings.cs | AppSettings.swift | 15 | 15 | |
-| WizardChecklist.cs | WizardChecklist.swift | 13 | 13 | |
+| WizardChecklist.cs | WizardChecklist.swift | 14 | 14 | |
 | CredentialFile.cs | CredentialFile.swift | 10 | 10 | `TryParse` with an out parameter is `parse`, which answers nil |
-| — | SharedCaseTests.swift | 7 | 7 | the case files under `spec/cases/`, read by both suites |
+| MemoryFact.cs, MemoryFile.cs | MemoryFact.swift, MemoryFile.swift | 65 | 65 | an entry Aiko cannot use goes back into the file as it was written, which Swift reads with `JsonRawText`; the file is the same in both cores apart from the line ends |
+| MemoryRules.cs, MemoryEdits.cs | MemoryRules.swift, MemoryEdits.swift | 44 | 44 | what may be a key, when a key is found and how long a fact may be are in `spec/cases/memory-keys/` and `memory-limits/`; lengths are UTF-16 units in both |
+| MemoryPrompt.cs, MemoryNudge.cs | MemoryPrompt.swift, MemoryNudge.swift | 27 | 27 | the rules text is the same word for word; which messages get the note is in `spec/cases/memory-nudge/` |
+| MemoryServer.cs | MemoryServer.swift | 17 | 17 | every reply is the same line in both cores |
+| MemoryBridge.cs | MemoryBridge.swift | 28 | 28 | a fact over the limit stays out of the block for the model in both, pinned or not |
+| MemoryHand.cs | MemoryHand.swift | 22 | 22 | the changes a person makes in the settings window; `MemoryHandTests` holds these and the cases of the page. `OneLine` is `MemoryText.oneLine` here |
+| MemoryPage.cs | MemoryPage.swift | 5 | 5 | the other 5 cases of `MemoryHandTests`; `Length` is in UTF-16 units in both |
+| — | SharedCaseTests.swift | 10 | 10 | the case files under `spec/cases/`, read by both suites |
 | — | UpdateInstaller.swift | — | 6 | the macOS half of an update: the zip, `ditto` and the bundle swap. Windows has Velopack instead, and UpdateInstall.cs holds the same steps around it where no xUnit case can reach them |
 
 The words and the numbers of the card sit in `src/Aiko.App` on Windows, where no xUnit case can
@@ -89,9 +99,11 @@ Helpers with no file of their own in the C# core:
 
 | Swift file | Why it exists |
 |---|---|
-| BridgeWork.swift | what one run of the bridge does: which job it was started for, the snapshot to write, the activity file of a session, the reminder at session start, the persona plugin folder. On Windows the same choices sit inline in `Aiko.Bridge/Program.cs`, where no test can reach them (29 cases in BridgeWorkTests) |
+| BridgeWork.swift | what one run of the bridge does: which job it was started for, the snapshot to write, the activity file of a session, the reminder at session start, the persona plugin folder. On Windows the same choices sit inline in `Aiko.Bridge/Program.cs`, where no test can reach them (35 cases in BridgeWorkTests) |
 | JsonNode.swift | System.Text.Json keeps the order of keys and the text of numbers when it writes a file back; `JSONSerialization` keeps neither, and Aiko rewrites files that belong to Claude Code |
 | CivilTime.swift | `DateOnly`, ISO weeks and the round-trip ("O") time format |
+| MemoryText.swift | the memory's questions about a text, answered the way .NET answers them: what `Trim` and `Split` call white space, what `\w` is for one UTF-16 unit, and which two units `RegexOptions.IgnoreCase` takes for the same letter. Foundation has other lists for all three, and the limits and word edges of the memory must agree to the unit (74 cases in MemoryTextTests, shared with JsonRawText) |
+| JsonRawText.swift | `JsonElement.GetRawText`: a value of a JSON text as it was written. `JsonNode` keeps the order of keys and the text of numbers, but not the spaces of a whole entry |
 | SvgPath.swift | reads the SVG path data FaceArt writes. WPF parses it itself with `Geometry.Parse`; AppKit has nothing of the kind, so the core reads it and hands the drawing layer moves, lines and cubic curves. Arcs and quadratic curves become cubics here (15 cases in SvgPathTests, one of which reads every shape of all 56 faces) |
 | SignedIn.swift | whether a folder has an account. Windows reads `.credentials.json`; macOS keeps the same token in the Keychain, so that file is never written and the answer comes from the account block of `.claude.json` (3 cases in SignedInTests) |
 | MacShell.swift | two things Windows has a system service for. `ZshProfile` writes Aiko's marked block into `~/.zshrc`, because a folder under the home directory reaches a shell's PATH only through the shell profile; `MacTerminal` writes the script that opens Claude Code in a Terminal window (11 cases in ZshProfileTests and MacTerminalTests) |
@@ -110,6 +122,10 @@ stdin, touching the disk and starting a process.
 | session events behind the face | `hook` | the same | `BridgeWork.activity`, `HookEvent`, `ActivityRecord` |
 | the reminder at session start | `--session-start` | the same | `BridgeWork.sessionStart`, `SessionReminder` |
 | the persona plugin | `plugin aiko-persona` | the same | `BridgeWork.personaPlugin`, `PersonaPlugin`, `PersonaPluginOutput` |
+| the rules of the memory at session start | `memory rules` | the same | `MemoryBridge.rulesOutput`, `MemoryPrompt` |
+| the facts at session start | `memory facts` | the same | `MemoryBridge.factsOutput`, `MemoryBridge.factsThatFit` |
+| a message of the person: keys and the note | `memory prompt` | the same | `MemoryBridge.onPrompt`, `MemoryEdits.touchByPrompt`, `MemoryNudge` |
+| the memory tools as an MCP server | `memory serve` | the same | `MemoryBridge.onServerLine`, `MemoryServer`, `MemoryBridge.writeFailedReply` |
 | which environment a start belongs to | `claude.exe` | `aiko-shim` | `ShimLaunch.decide`, `ShimPlan.variableChanges` |
 | never start another shim | `AIKO_SHIM_SEEN` | the same | `RealClaude` |
 
@@ -134,6 +150,15 @@ Where they differ from the Windows pair:
   `Console.CancelKeyPress` twin and no "128 plus the signal" here.
 - **The language of the reminder.** macOS says its language as a tag (`ru-RU`), Windows as a
   number, so `SessionReminder.isRussian` has an overload for each.
+- **One writer of the memory at a time.** Windows opens `memory.json.lock` with no sharing; macOS
+  takes `flock` on the same file. Both try for two seconds, and both let go when the process ends.
+  A file that is not a memory is kept as `memory.json.bad` on both, and the new one is written
+  beside the old one and moved over it.
+- **The memory file that cannot be read.** Bytes that are not UTF-8 are read as broken text, so
+  the file counts as "not a memory" and is kept aside before a save. `Disk.readIfThere` would
+  answer "no file" for them, and then a save would write an empty memory over the file.
+- **The version the memory server names** comes from the Info.plist of the app the bridge ships
+  in, where Windows reads the assembly. A bridge run straight out of `.build` says `0.0.0`.
 - **Proof that they start.** The shim keeps `AIKO_SHIM_SELF_TEST=1`. The bridge has no such
   variable on either system: fed `{}` it writes nothing, prints nothing and exits 0, and CI runs
   exactly that.
@@ -161,30 +186,33 @@ AikoKit decided, and it answers the mouse.
 | RingDrawing.cs | RingPaint.swift | one arc, drawn the same by the menu bar icon and by the island |
 | Tray/TrayMoodPlayer.cs | MoodPlay.swift | which face an event brings, and the one short timer |
 | Tray/ActivityWatcher.cs | ActivityWatch.swift | watches the session files the bridge writes |
+| UpdateWatch.cs | UpdateWatch.swift | the daily version check and count: first two minutes after the start, then once a day. Windows uses a `DispatcherTimer`; the Mac uses `NSBackgroundActivityScheduler`, because a plain timer does not count the hours a MacBook sleeps. The answer goes into the tooltip of the icon and the island |
 | FullScreenWatch.cs | FullScreenWatch.swift | says when a window owns the screen; macOS has no foreground event, so it looks at what is in front when the space or the front app changes |
 | — | Screens.swift | AppKit counts screen points from the bottom left, the core from the top left: the turn happens here and nowhere else |
 | — | Tween.swift | one short animation on a timer that exists only while something moves. WPF has `CompositionTarget.Rendering`; AppKit cannot animate a window that changes its whole shape every frame |
 | TaskbarOrder.cs | — | window levels do the same work: the island sits at `.statusBar` and the landing strip at `.floating`, under both the island and the menu bar |
 | SettingsStore.cs, ClaudeAccounts.cs | Store.swift | reads the settings, the environments and the plan of an account |
 | Log.cs | Log.swift | the same file, the same line format |
-| Uninstall.cs | Uninstall.swift | putting everything back on the way out. Windows is called by the installer's hook and then removes the program with `Update.exe uninstall`; macOS has no uninstaller, so the app does the work itself, moves its own bundle to the Bin and quits |
+| Uninstall.cs | Uninstall.swift | putting everything back on the way out. Windows is called by the installer's hook and then removes the program with `Update.exe uninstall`; macOS has no uninstaller, so the app does the work itself, moves its own bundle to the Bin and quits. Both carry the answer about the memory from the settings page to `UninstallPlan`; the Windows hook has no window and passes "nobody was asked", and macOS has no such path |
 | Settings/SettingsWindow.xaml(.cs), SettingsPanel.xaml | Settings/SettingsWindow.swift | the borderless window, the header, the menu and the page area; Esc closes it |
-| Settings/SavedMark.cs, Theme/Controls.xaml, Theme/DropDown.cs, Theme/RevealPanel.cs | Settings/SettingsControls.swift | the switch, the segments, the picked card, the fields, the buttons, the tick, the chip, the drop down and the "Saved" mark |
+| Settings/SavedMark.cs, Theme/Controls.xaml, Theme/DropDown.cs, Theme/RevealPanel.cs | Settings/SettingsControls.swift | the switch, the segments, the picked card, the fields, the buttons (with the light one for Save and a plus before the words), the tick, the chip, the drop down and the "Saved" mark |
 | Settings/EnvironmentsEditor.cs | Settings/SettingsState.swift | what the window is looking at, and every change written through one place |
 | Settings/EnvironmentPage.xaml(.cs) | Settings/EnvironmentPageView.swift | one environment: the account, the name, the command, the bound folders and removal |
 | Settings/FoldersPage.xaml(.cs) | Settings/FoldersPageView.swift | every bound folder in one table |
-| Settings/PersonalityPage.xaml(.cs) | Settings/PersonalityPageView.swift | where Aiko talks, the face, the temperament, the sample answer and the skills |
+| Settings/PersonalityPage.xaml(.cs) | Settings/PersonalityPageView.swift | one switch per environment for all of Aiko (her character, her skills and her memory), the memory block, the face, the temperament, the sample answer and the list of skills |
+| Settings/MemoryBlock.cs | Settings/MemoryBlockView.swift, MemoryBlockModel.swift | the memory under the table: quotas, facts, the two forms, the warnings, the foot and the erase question. The model keeps what is open and has the snapshot door `AIKO_TRY_MEMORY` |
+| Settings/MemoryStore.cs | Settings/MemoryStore.swift | the memory file for the window: the bridge's lock file, read again, change, write in one step |
 | Settings/PrivacyPage.xaml(.cs) | Settings/PrivacyPageView.swift | the two consents and the list of fields that would be sent |
-| Settings/GeneralPage.xaml(.cs) | Settings/GeneralPageView.swift | where Aiko shows, startup, the update check and the install, the language, access, diagnostics, starting over |
+| Settings/GeneralPage.xaml(.cs) | Settings/GeneralPageView.swift | where Aiko shows, startup, the update line, the language, access, diagnostics, starting over. The update line is one state and one action from `UpdateBlock`, with the percent in place of the button while a download runs; `AIKO_TRY_UPDATE` draws it at a stage for a snapshot. The time of the last answer is `UpdateRun.lastAnswered` in AikoHttp.swift |
 | Settings/ChecklistPage.xaml(.cs), ChecklistRow.cs | Settings/ChecklistPageView.swift, ChecklistModel.swift | the nine items, their bodies and Finish |
 | Settings/SettingsCheck.cs | Settings/SettingsCheck.swift | the self test doors `--try-settings` and `--try-wizard` |
 | Commands/ClaudeLauncher.cs, ClaudeFolders.cs | Commands/ClaudeLauncher.swift | finds Claude Code, opens it, waits for a sign-in, lists the config folders |
 | Commands/CommandFolder.cs | Commands/CommandFolder.swift | the shim, the command links and the block in `~/.zshrc` |
 | Commands/EnvironmentSetup.cs | Commands/EnvironmentSetup.swift | puts a saved list of environments into effect outside Aiko |
-| Plugins/PluginSync.cs, ClaudeCli.cs, SkillShelf.cs | Plugins/PluginSync.swift | the marketplace, the skills copy and the claude commands that install the plugins |
+| Plugins/PluginSync.cs, ClaudeCli.cs, SkillShelf.cs | Plugins/PluginSync.swift | the marketplace, the skills copy and the claude commands that install the plugins; the rule for the memory tools in every folder, and the update of the persona plugin when its hash is not the one noted |
 | ClaudeSettingsFile.cs, BridgePath.cs | ClaudeSettingsFile.swift | Aiko's line in somebody else's settings.json, and where the bridge is |
 | AikoHttp.cs, UpdateClient.cs, UpdateRun.cs, InstallId.cs, ReportedPeriods.cs | AikoHttp.swift | the one place that makes a URLSession, the version check and the daily count; both check the host of every redirect before following it |
-| UpdateInstall.cs | UpdateInstall.swift | downloads an update and installs it once it passes. Windows wraps Velopack's `UpdateManager`; macOS hands the release folder, the key and this bundle to `UpdateInstaller` in the core |
+| UpdateInstall.cs | UpdateInstall.swift | downloads an update and installs it once it passes. Windows wraps Velopack's `UpdateManager`; macOS hands the release folder, the key and this bundle to `UpdateInstaller` in the core. Velopack reports the percent on Windows; on macOS the redirect delegate in AikoHttp.swift watches the bytes of the zip |
 | AppVersion.cs, Startup.cs | AppVersion.swift | the version from Info.plist, and the login item in place of the Run key |
 | Faces/FaceDrawing.cs | FaceImage.swift | one face as a picture, for the settings window |
 
@@ -261,9 +289,10 @@ These are the places where there was nothing to copy, with the reason for the ch
   account. That is the right way round here, because a checklist that could never say "connected"
   would stop somebody setting Aiko up at all, which is what the first live run on a Mac ran into.
 
-- **There is no updater.** Velopack is Windows only, so the general page shows the version and
-  "Check now" and nothing else; an available version opens the download page. The daily check, the
-  two consent switches and the count are the same as on Windows.
+- **The updater is Aiko's own.** Velopack is Windows only, so `UpdateInstaller` downloads the
+  zip, checks it against the signed list and swaps the bundle. The general page shows the same
+  one line and one action as on Windows. The daily check, the two consent switches and the count
+  are the same.
 
 - **Starting at login** is `SMAppService.mainApp` in place of the Run key. It needs a real bundle:
   a binary run straight out of `.build` cannot register, and then the switch says off and saying
@@ -274,6 +303,20 @@ These are the places where there was nothing to copy, with the reason for the ch
   the person to add. On macOS the shim is on PATH and a shell function that hides it is the person's
   own choice; the checklist has no such item, and `PowerShellProfile.cs` stays unported.
 
+- **The memory block draws its icons with SF Symbols.** Windows draws the lock, the pencil and
+  the trash can from the paths of the slayumind set. The Mac window already uses SF Symbols for
+  its small marks, so the block uses `lock`, `lock.open`, `pencil` and `trash`. The meaning is the
+  same: a closed lock is a pinned fact.
+
+- **The add form keeps what was typed when the category changes.** Windows builds the form again
+  on every click and the two fields come back empty. SwiftUI keeps the same form, so the text
+  stays.
+
+- **`MemoryStore.swift` repeats the lock and the write of `aiko-bridge/Disk.swift`.** The bridge is
+  a program of its own and the app cannot see its files, and AikoKit does not touch the disk. The
+  two must stay the same: `flock` on `memory.json.lock`, 80 tries 25 ms apart, a temporary file and
+  `rename`, and `.bad` for a file that was not a memory.
+
 Not there yet: direct mode and signing for release.
 
 ## Names that had to change
@@ -281,6 +324,8 @@ Not there yet: direct mode and signing for release.
 `for` and `default` are keywords in Swift. `SnapshotName.For` is `forConfigDirectory`,
 `BridgeCommand.For` is `forPath`, `IslandReveal.For` is `showFor`, and
 `EnvironmentSettings.Default(userProfile)` is `defaultEnvironmentIn(_:_:)`.
+
+`in` is a keyword too: `MemoryFile.In(category)` is `inCategory(_:)`.
 
 `Binding` is `FolderBinding`. SwiftUI has a `Binding` of its own, and a module used beside it must
 not export that name: every `@Binding` in the app became ambiguous the day the settings window
@@ -336,9 +381,22 @@ exactly, which is what the Swift tests do; the Mac app passes `.macOS`.
   commands, environment names — agree on everything the tests hold. Only a pair that differs by a
   letter outside ASCII could come out in another order.
 
+- **A key in a message, and the first person.** Windows asks a regular expression with `\w` and
+  `RegexOptions.IgnoreCase`. `NSRegularExpression` has another `\w` and reads a letter above the
+  basic plane as one character, where .NET sees two halves that are not letters. So
+  `MemoryRules.keyMatches` and `MemoryNudge.applies` walk the message one UTF-16 unit at a time,
+  with the .NET meaning of a word character and of the same letter in another case. Both were
+  compared with .NET 10 for every unit of the basic plane on 2026-10-11. On the same day the two
+  cores were given the same inputs and their 668 answers were compared: the rules text, the tool
+  list, the replies, the hook outputs and the files, which were the same apart from the line ends.
+- **A category or an id in another case.** `OrdinalIgnoreCase` folds every letter; Swift folds A to
+  Z only. The words compared this way are `you`, `work`, `projects`, `interests` and `F12`, and no
+  letter outside ASCII turns into one of theirs in .NET: the long «ſ» and the Kelvin sign were
+  tried in both cores and are refused by both.
+
 ## Not ported, on purpose
 
-Together these are the 49 cases the Swift suite does not have, less the one case it has and the
+Together these are the 14 cases the Swift suite does not have, less the one case it has and the
 Windows suite does not (the folders `FileManager` hands this Mac).
 
 - **PowerShellProfile.cs** — 6 cases in ShimTests. It reads and rewrites a PowerShell profile so
@@ -348,6 +406,3 @@ Windows suite does not (the folders `FileManager` hands this Mac).
 - **WindowsGitBash.cs** — 8 cases in ClaudeShellLookupTests. Git Bash only exists on Windows. On
   macOS `ClaudeShellLookup` is always asked with no path, so it always answers with the fallback
   shell of the platform, `/bin/zsh -lc`.
-- **UpdateManifest.cs** — 36 cases. Checking the signature of a release needs a key API of its own,
-  `Security` on macOS against `System.Security.Cryptography` on Windows, and the Mac app has no
-  updater yet. The openssl vector in `spec/cases/update-manifest/` is ready for whoever writes it.

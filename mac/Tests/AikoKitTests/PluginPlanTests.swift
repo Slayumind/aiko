@@ -102,24 +102,20 @@ struct PluginPlanTests {
     // ---- what a folder should have ----
 
     @Test
-    func withoutThePersonaAFolderWantsNothingNotEvenSkills() {
-        #expect(PluginPlan.desired(env(persona: false), persona: .default, skills: ["copy"]).isEmpty)
+    func whereAikoIsOffAFolderWantsNothingNotEvenSkills() {
+        #expect(PluginPlan.desired(env(persona: false), skills: ["copy"]).isEmpty)
     }
 
     @Test
-    func withThePersonaAFolderWantsItAndTheSkillsPlugin() {
-        let desired = PluginPlan.desired(env(persona: true), persona: .default, skills: ["copy", "palette"])
+    func whereAikoIsOnAFolderWantsThePersonaAndTheSkillsPlugin() {
+        let desired = PluginPlan.desired(env(persona: true), skills: ["copy", "palette"])
 
         #expect(desired.sorted() == [Self.persona, "aiko@aiko"].sorted())
     }
 
     @Test
-    func withTheSkillsOffOrNoneShippedAFolderWantsOnlyThePersona() {
-        var skillsOff = PersonaSettings.default
-        skillsOff.skillsOn = false
-
-        #expect(PluginPlan.desired(env(persona: true), persona: skillsOff, skills: ["copy", "palette"]) == [Self.persona])
-        #expect(PluginPlan.desired(env(persona: true), persona: .default, skills: []) == [Self.persona])
+    func withNoSkillsShippedAFolderWantsOnlyThePersona() {
+        #expect(PluginPlan.desired(env(persona: true), skills: []) == [Self.persona])
     }
 
     @Test(arguments: [

@@ -67,7 +67,10 @@ const RULES = [
   { id: "please-wait", lang: "ru", re: rx(String.raw`\bпожалуйста, подождите\b`), hint: "Скажите, чего ждём: «Загружаем фото»." },
   { id: "click-here", lang: "ru", re: rx(String.raw`\bнажмите (?:здесь|сюда|на кнопку)\b`), hint: "Глагол на самой кнопке или ссылке." },
   // ---- Russian: typography ----
-  { id: "straight-quotes", lang: "ru", re: rx(String.raw`"[^"\n]{1,80}"|“[^”\n]{1,80}”`), hint: "«Ёлочки» снаружи, „лапки“ внутри." },
+  // Only around Russian words: "node:fs" or "standalone" in a Russian sentence is code, not a quote.
+  { id: "straight-quotes", lang: "ru", re: rx(String.raw`"(?=[^"\n]{1,80}")(?=[^"\n]*[а-яё])[^"\n]+"|“[^”\n]{1,80}”`), hint: "«Ёлочки» снаружи, „лапки“ внутри." },
+  // A short list on purpose: each line is a phrase a translation leaves behind, and none is said of a person.
+  { id: "calque", lang: "ru", re: rx(String.raw`\b(?:задач|карточк|файл|данны|документ|настройк|запис|черновик|правил|запрос|ключ|памят)\p{L}*(?: [\p{L}-]+){0,2} (?:жив[её]т|живут)\b|\bдом(?:ом|а|е|у)? (?:для )?(?:задач|данных|файлов|карточек|документов|кода|настроек|записей)\b|\bнаучить (?:счётчик|кнопк|страниц|форм|скрипт|сервер|редактор|фильтр|поиск)\p{L}*|\bпобежда(?:ет|ют) (?:последн|перв)\p{L}+ (?:запис|значени|правил)\p{L}*`), hint: "Калька: о вещах — «хранятся», «ведутся», «добавить», «сохраняется»." },
   { id: "hyphen-as-dash", lang: "ru", re: rx(String.raw`(?<=[\p{L}»)\d]) - (?=[\p{L}«(\d])`), hint: "Тире с пробелами: « — »." },
   { id: "capital-after-colon", lang: "ru", re: rx(String.raw`(?<=[а-яё]{2}): (?=[А-ЯЁ][а-яё]+ [а-яё])`, "gu"), hint: "После двоеточия строчная (если это не имя)." },
   { id: "capital-vy", lang: "ru", re: rx(String.raw`(?<=[а-яё,]\s)(?:Вы|Вас|Вам|Вами|Ваш\p{L}*)(?!\p{L})`, "gu"), hint: "«вы» со строчной в тексте для всех." },
@@ -242,7 +245,8 @@ export function scan(source, { type = "text" } = {}) {
       stats.ty += (seg.text.match(TY) || []).length;
       stats.vy += (seg.text.match(VY) || []).length;
       for (const base of YO_PAIRS) {
-        const plain = base.replaceAll("ё", "е");
+        // «зеленеет» and «зелень» have no ё at all: they are not a second spelling of «зелён».
+        const plain = base.replaceAll("ё", "е") + (base === "зелён" ? "(?!е[ею]|ь)" : "");
         const r = rx(String.raw`\b(?:${base}|${plain})`, "giu");
         for (const m of seg.text.matchAll(r)) {
           if (!yo.has(base)) yo.set(base, new Set());

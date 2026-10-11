@@ -17,6 +17,12 @@ Use it when the project does not describe its own. Offer it to the user before c
 
 PRODUCT, RESEARCH and DESIGN are created when there is something to put in them.
 
+**Tasks in a tracker.** A project may keep its tasks and its roadmap in a tracker: an issue list, a
+board, cards. Then it has no `PLAN.md` and no `ROADMAP.md`, and that is not a gap to fill. The table in
+its `CLAUDE.md` or `AGENTS.md` names the tracker in their place, and STATE holds no task lists. A
+document names a task by its id in the tracker and never copies its text. Do not offer to create PLAN
+or ROADMAP for such a project, and do not move tasks from the tracker into files.
+
 Why these limits: the files read in every session (agent rules, state, plan) stay small, so reading
 them costs little. The decision log, the changelog and the reference folder are read only when a
 question needs them.
@@ -28,7 +34,7 @@ limit is solved by moving, not by finding a better home for the content.
 ## Where a fact goes
 
 - It is true now and will change soon: STATE.
-- Someone has to do it in this release: PLAN.
+- Someone has to do it in this release: PLAN, or the tracker when the project keeps tasks there.
 - It was chosen, and a different choice was possible: DECISIONS.
 - It is how the product itself works: PRODUCT.
 - It is how a tool, a service or a library behaves: RESEARCH, with the date it was checked.

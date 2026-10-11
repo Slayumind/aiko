@@ -359,12 +359,12 @@ public partial class SettingsPanel : UserControl
 
     /// Aiko takes everything back and goes. Claude Code can take seconds to forget the plugins, so
     /// the work happens off the window's thread and the page waits with a line of its own.
-    private void RemoveAiko()
+    private void RemoveAiko(bool keepMemory)
     {
         _checklist?.Close();
         _checklist = null;
 
-        Task.Run(Uninstall.RemoveFromApp).ContinueWith(
+        Task.Run(() => Uninstall.RemoveFromApp(keepMemory)).ContinueWith(
             _ => QuitRequested?.Invoke(), TaskScheduler.FromCurrentSynchronizationContext());
     }
 

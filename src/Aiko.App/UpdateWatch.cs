@@ -62,6 +62,9 @@ sealed class UpdateWatch : IDisposable
         _asking = true;
         try
         {
+            // Said every time: an answer that changes nothing is silent, and without this line a
+            // quiet day looks the same in the log as a check that never ran.
+            Log.Write("update check: asking the site");
             var info = await UpdateRun.AskAsync(_stopping.Token).ConfigureAwait(true);
 
             if (_stopping.IsCancellationRequested || !settings.CheckUpdates)

@@ -1,0 +1,20 @@
+{
+  "comment": "How long one fact may be. The text, the meaning and the keys are counted together, in UTF-16 units: a Cyrillic letter is 1 and an emoji is 2. The memory block has to fit one hook output of 10,000 units, and that is how Claude Code counts it. Each row builds the text and the meaning by repeating a piece, to keep the file readable. A fact that fits is saved into an empty memory; one that does not is refused and nothing is saved.",
+  "maxLength": 200,
+  "cases": [
+    { "text": "a", "textTimes": 1, "meaning": "", "meaningTimes": 0, "keys": [], "length": 1, "saved": true },
+    { "text": "a", "textTimes": 200, "meaning": "", "meaningTimes": 0, "keys": [], "length": 200, "saved": true },
+    { "text": "a", "textTimes": 201, "meaning": "", "meaningTimes": 0, "keys": [], "length": 201, "saved": false },
+    { "text": "a", "textTimes": 120, "meaning": "b", "meaningTimes": 80, "keys": [], "length": 200, "saved": true },
+    { "text": "a", "textTimes": 120, "meaning": "b", "meaningTimes": 81, "keys": [], "length": 201, "saved": false },
+    { "text": "a", "textTimes": 100, "meaning": "b", "meaningTimes": 90, "keys": ["Swift", "Ember"], "length": 200, "saved": true },
+    { "text": "a", "textTimes": 100, "meaning": "b", "meaningTimes": 90, "keys": ["Swift", "Ember", "X"], "length": 201, "saved": false },
+    { "text": "a", "textTimes": 1, "meaning": "b", "meaningTimes": 200, "keys": [], "length": 201, "saved": false },
+    { "text": "я", "textTimes": 200, "meaning": "", "meaningTimes": 0, "keys": [], "length": 200, "saved": true },
+    { "text": "я", "textTimes": 100, "meaning": "ё", "meaningTimes": 101, "keys": [], "length": 201, "saved": false },
+    { "text": "🙂", "textTimes": 100, "meaning": "", "meaningTimes": 0, "keys": [], "length": 200, "saved": true },
+    { "text": "🙂", "textTimes": 100, "meaning": "a", "meaningTimes": 1, "keys": [], "length": 201, "saved": false },
+    { "text": "a", "textTimes": 198, "meaning": "", "meaningTimes": 0, "keys": ["C#"], "length": 200, "saved": true },
+    { "text": "a", "textTimes": 199, "meaning": "", "meaningTimes": 0, "keys": ["C#"], "length": 201, "saved": false }
+  ]
+}

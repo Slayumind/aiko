@@ -86,6 +86,11 @@ enum ClaudeSettingsFile {
         report(configDirectory, editor.remove(configDirectory))
     }
 
+    /// The rule that lets the model use the memory tools without a question (D-279).
+    static func setMemoryPermission(_ configDirectory: String, allowed: Bool) -> PatchOutcome {
+        report(configDirectory, editor.setMemoryPermission(configDirectory, allowed: allowed))
+    }
+
     static func tidyAfterPluginRemoval(_ configDirectory: String) -> PatchOutcome {
         report(configDirectory, editor.tidyAfterPluginRemoval(configDirectory))
     }

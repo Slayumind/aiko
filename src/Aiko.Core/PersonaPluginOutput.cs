@@ -20,6 +20,17 @@ public static class PersonaPluginOutput
     public static string VersionFolder(AikoFolders folders, string configDirectory, string contentHash) =>
         Path.Combine(EnvironmentFolder(folders, configDirectory), contentHash);
 
+    /// Where the app notes the hash of the plugin it last gave Claude Code for this folder. The
+    /// name is not twelve hex characters, so the clean-up of old versions leaves it alone.
+    public static string SyncedFile(AikoFolders folders, string configDirectory) =>
+        Path.Combine(EnvironmentFolder(folders, configDirectory), "synced");
+
+    /// Claude Code copies the plugin once and never looks at our folder again. It takes a new
+    /// copy only when told to update, so the app tells it whenever the content is not the one it
+    /// noted: after a new Aiko or another temperament (D-207).
+    public static bool NeedsUpdate(string? syncedHash, string currentHash) =>
+        !string.Equals(syncedHash?.Trim(), currentHash, StringComparison.Ordinal);
+
     /// Whether the command asks for a plugin this bridge can build.
     public static bool IsRequest(IReadOnlyList<string> args) =>
         args is [Verb, PersonaPlugin.Name];

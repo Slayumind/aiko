@@ -8,6 +8,9 @@ import Foundation
 /// the folders, the login item and the line in the shell profile behind, so Aiko does that work
 /// itself while it is still running. Nothing here asks anything: the person already answered.
 ///
+/// One answer is carried in: whether the memory stays. Only the settings page removes Aiko here,
+/// so there is always somebody to ask; Windows also has a hook with no window, and keeps it there.
+///
 /// The twin of Uninstall.cs, which the Windows installer calls instead.
 enum Uninstall {
     /// How long Claude Code is given to forget the plugins. The person is watching a window, and
@@ -43,7 +46,7 @@ enum Uninstall {
     /// Claude Code, then what Aiko put outside itself, then Aiko's own files, and the app last.
     ///
     /// Runs off the window's thread: Claude Code may take seconds to answer.
-    static func everything() -> Outcome {
+    static func everything(keepMemory: Bool) -> Outcome {
         let deadline = Date().addingTimeInterval(pluginBudget)
         let folders = claudeFoldersAikoMayHaveTouched()
 
@@ -70,9 +73,21 @@ enum Uninstall {
         // again.
         Log.write("uninstall: \(folders.count) Claude Code folders put back, "
             + "app \(outcome == .done ? "in the Bin" : "left in place")")
-        removeOwnFolders()
+        removeOwnFolders(
+            keepMemory: UninstallPlan.keepsMemory(keepMemory, worthKeeping: memoryIsWorthKeeping))
 
         return outcome
+    }
+
+    /// Whether there is a memory to keep, for the window to offer the choice and for the removal.
+    ///
+    /// A file that is there and cannot be opened counts as worth keeping: not knowing what is in
+    /// it is no reason to delete it.
+    static var memoryIsWorthKeeping: Bool {
+        let path = Store.folders.memoryFile
+        guard FileManager.default.fileExists(atPath: path) else { return false }
+        guard let data = try? Data(contentsOf: URL(fileURLWithPath: path)) else { return true }
+        return UninstallPlan.memoryWorthKeeping(String(decoding: data, as: UTF8.self))
     }
 
     /// Every folder Aiko knows about, and then every Claude Code folder in the home directory.
@@ -99,11 +114,24 @@ enum Uninstall {
         return folders
     }
 
-    /// Only Aiko's own two folders, and only through the guard that says which they are.
-    private static func removeOwnFolders() {
-        for folder in UninstallPlan.foldersToDelete(Store.folders)
-        where UninstallPlan.mayDelete(Store.folders, folder) {
-            try? FileManager.default.removeItem(atPath: folder)
+    /// Only Aiko's own two folders, and only through the guards that say which they are. A folder
+    /// that keeps a file is emptied around it, one thing at a time, and the plan is asked about
+    /// each: the file that stays is refused there. The other folder goes whole.
+    private static func removeOwnFolders(keepMemory: Bool) {
+        let manager = FileManager.default
+        let own = Store.folders
+
+        for folder in UninstallPlan.foldersToDelete(own) {
+            if UninstallPlan.keepsSomethingIn(own, folder, keepMemory: keepMemory) {
+                for name in (try? manager.contentsOfDirectory(atPath: folder)) ?? [] {
+                    let path = (folder as NSString).appendingPathComponent(name)
+                    if UninstallPlan.mayDeleteInside(own, path, keepMemory: keepMemory) {
+                        try? manager.removeItem(atPath: path)
+                    }
+                }
+            } else if UninstallPlan.mayDelete(own, folder, keepMemory: keepMemory) {
+                try? manager.removeItem(atPath: folder)
+            }
         }
     }
 

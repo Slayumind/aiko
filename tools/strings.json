@@ -352,8 +352,8 @@
   [
     "CheckNow",
     [
-      "Check now",
-      "Проверить сейчас"
+      "Check for updates",
+      "Проверить обновления"
     ]
   ],
   [
@@ -373,15 +373,43 @@
   [
     "UpdateAvailable",
     [
-      "Version {0} is available.",
-      "Вышла версия {0}."
+      "Aiko {0} is out",
+      "Вышла Aiko {0}"
     ]
   ],
   [
     "UpdateLatest",
     [
-      "Aiko {0} is the latest version.",
-      "Aiko {0} — самая свежая версия."
+      "The latest version is installed",
+      "Установлена последняя версия"
+    ]
+  ],
+  [
+    "UpdateThisVersion",
+    [
+      "Aiko {0}",
+      "Aiko {0}"
+    ]
+  ],
+  [
+    "UpdateCheckedAt",
+    [
+      "Aiko {0} · checked at {1}",
+      "Aiko {0} · проверено в {1}"
+    ]
+  ],
+  [
+    "UpdateNow",
+    [
+      "now {0}",
+      "сейчас {0}"
+    ]
+  ],
+  [
+    "UpdateReadyDetail",
+    [
+      "it starts after a restart",
+      "встанет после перезапуска"
     ]
   ],
   [
@@ -394,29 +422,29 @@
   [
     "UpdateInstallNow",
     [
-      "Download and install",
-      "Скачать и установить"
+      "Install {0}",
+      "Установить {0}"
     ]
   ],
   [
     "UpdateDownloading",
     [
-      "Aiko is downloading {0}…",
-      "Aiko скачивает {0}…"
+      "Downloading {0}",
+      "Скачивается {0}"
     ]
   ],
   [
     "UpdateReady",
     [
-      "Aiko {0} is ready. Restart to start using it.",
-      "Aiko {0} готова. Перезапусти, чтобы перейти на неё."
+      "Aiko {0} is ready",
+      "Aiko {0} готова"
     ]
   ],
   [
     "UpdateRestartNow",
     [
-      "Restart now",
-      "Перезапустить"
+      "Restart Aiko",
+      "Перезапустить Aiko"
     ]
   ],
   [
@@ -1596,6 +1624,27 @@
     ]
   ],
   [
+    "DeleteKeepMemory",
+    [
+      "Keep what Aiko remembers about me",
+      "Сохранить то, что Aiko помнит обо мне"
+    ]
+  ],
+  [
+    "DeleteMemoryStays",
+    [
+      "One file stays: {0}. When you install Aiko again, it finds the memory there.",
+      "Останется один файл: {0}. Когда поставишь Aiko снова, она найдёт память там."
+    ]
+  ],
+  [
+    "DeleteMemoryGoes",
+    [
+      "The memory goes with Aiko's folders. It cannot be brought back.",
+      "Память уйдёт вместе с папками Aiko. Вернуть её нельзя."
+    ]
+  ],
+  [
     "OpenClaudeCode",
     [
       "Open Claude Code",
@@ -1752,8 +1801,8 @@
   [
     "NeverSentWhat",
     [
-      "Your name, email, project folders, limits, token and session texts. The site doesn't read or store the IP address.",
-      "Имя, почта, папки проектов, лимиты, токен и тексты сессий. IP-адрес сайт не читает и не хранит."
+      "Your name, email, project folders, limits, token, session texts and what the memory holds. The site doesn't read or store the IP address.",
+      "Имя, почта, папки проектов, лимиты, токен, тексты сессий и содержимое памяти. IP-адрес сайт не читает и не хранит."
     ]
   ],
   [
@@ -1789,13 +1838,6 @@
     [
       "Open PRIVACY.md",
       "Открыть PRIVACY.md"
-    ]
-  ],
-  [
-    "PrivacyLinkFromGeneral",
-    [
-      "What Aiko sends and to whom — Privacy.",
-      "Что Aiko отправляет и кому — раздел «Приватность»."
     ]
   ],
   [
@@ -1855,17 +1897,31 @@
     ]
   ],
   [
-    "SectionWhereAikoTalks",
+    "SectionWhereAikoIsOn",
     [
-      "WHERE AIKO TALKS",
-      "ГДЕ AIKO ГОВОРИТ"
+      "WHERE AIKO IS ON",
+      "ГДЕ AIKO ВКЛЮЧЕНА"
     ]
   ],
   [
-    "PersonaNewSessions",
+    "AikoOnNote",
     [
-      "Works in new sessions. Open sessions finish the way they started.",
-      "Действует в новых сессиях. Открытые сессии доработают как были."
+      "Her character, her skills and her memory come together. Works in new sessions; open sessions finish the way they started.",
+      "Характер, навыки и память включаются вместе. Действует в новых сессиях; открытые доработают как были."
+    ]
+  ],
+  [
+    "AikoOnWhat",
+    [
+      "Where Aiko is on, she reads each message you send to keep her memory fresh, and adds one line to that environment's settings.json: a permission for her two memory tools. Turning her off does not erase the memory.",
+      "Там, где Aiko включена, она читает каждое твоё сообщение, чтобы память не устаревала, и добавляет в settings.json этой среды одну строку: разрешение на два своих инструмента памяти. Выключение память не стирает."
+    ]
+  ],
+  [
+    "SkillsWhere",
+    [
+      "Skills work in the environments where Aiko is on.",
+      "Навыки работают в тех средах, где Aiko включена."
     ]
   ],
   [
@@ -2058,31 +2114,213 @@
     ]
   ],
   [
+    "SectionMemory",
+    [
+      "MEMORY · {0} OF {1}",
+      "ПАМЯТЬ · {0} ИЗ {1}"
+    ]
+  ],
+  [
+    "MemoryAdd",
+    [
+      "Add a fact",
+      "Добавить факт"
+    ]
+  ],
+  [
+    "MemoryCategoryYou",
+    [
+      "You",
+      "Ты"
+    ]
+  ],
+  [
+    "MemoryCategoryWork",
+    [
+      "How to work with me",
+      "Как со мной работать"
+    ]
+  ],
+  [
+    "MemoryCategoryProjects",
+    [
+      "Projects",
+      "Проекты"
+    ]
+  ],
+  [
+    "MemoryCategoryInterests",
+    [
+      "Interests and taste",
+      "Интересы и вкус"
+    ]
+  ],
+  [
+    "MemoryTabYou",
+    [
+      "You",
+      "Ты"
+    ]
+  ],
+  [
+    "MemoryTabWork",
+    [
+      "Work",
+      "Работа"
+    ]
+  ],
+  [
+    "MemoryTabProjects",
+    [
+      "Projects",
+      "Проекты"
+    ]
+  ],
+  [
+    "MemoryTabInterests",
+    [
+      "Taste",
+      "Вкус"
+    ]
+  ],
+  [
+    "MemoryPin",
+    [
+      "Pin",
+      "Закрепить"
+    ]
+  ],
+  [
+    "MemoryUnpin",
+    [
+      "Unpin",
+      "Открепить"
+    ]
+  ],
+  [
+    "MemoryEdit",
+    [
+      "Edit",
+      "Править"
+    ]
+  ],
+  [
+    "MemorySave",
+    [
+      "Save",
+      "Сохранить"
+    ]
+  ],
+  [
+    "MemoryCount",
+    [
+      "{0} of {1}",
+      "{0} из {1}"
+    ]
+  ],
+  [
+    "MemoryFactPlaceholder",
+    [
+      "The fact, one thought",
+      "Факт, одна мысль"
+    ]
+  ],
+  [
+    "MemoryMeaningPlaceholder",
+    [
+      "What it changes in the answers (optional)",
+      "Что это меняет в ответах (необязательно)"
+    ]
+  ],
+  [
+    "MemoryEnglishNote",
+    [
+      "Facts are in English, the way the model reads them.",
+      "Факты записаны по-английски — так их читает модель."
+    ]
+  ],
+  [
+    "MemoryAnyLanguageNote",
+    [
+      "You can write a fact in any language. Aiko writes hers in English.",
+      "Факт можно писать на любом языке. Aiko записывает свои по-английски."
+    ]
+  ],
+  [
+    "MemoryYouNote",
+    [
+      "Your name, how to address you and your grammatical gender are pinned facts here. If they are missing, Aiko asks once in a casual talk. You can also add them yourself.",
+      "Имя, обращение и род — закреплённые факты в этом разделе. Если их нет, Aiko спросит один раз в разговоре. Их можно добавить и здесь."
+    ]
+  ],
+  [
+    "MemoryOpenFile",
+    [
+      "Open file",
+      "Открыть файл"
+    ]
+  ],
+  [
+    "MemoryErase",
+    [
+      "Erase memory",
+      "Стереть память"
+    ]
+  ],
+  [
+    "MemoryEraseAsk",
+    [
+      "Aiko will forget every fact in every environment, {0} in all. This is not reversible.",
+      "Aiko забудет все факты во всех средах, их {0}. Вернуть их нельзя."
+    ]
+  ],
+  [
+    "MemoryTooLong",
+    [
+      "too long · {0} of {1}",
+      "слишком длинный · {0} из {1}"
+    ]
+  ],
+  [
+    "MemoryTooLongNote",
+    [
+      "The model does not see a fact longer than {0} characters. Shorten it and it comes back.",
+      "Факт длиннее {0} знаков модель не видит. Сократи его, и он вернётся в память."
+    ]
+  ],
+  [
+    "MemoryAsideNote",
+    [
+      "Records in the file that cannot be read after a hand edit: {0}. They are kept in the file, in the setAside list.",
+      "Записей в файле, которые не читаются после ручной правки: {0}. Они сохранены в файле, в списке setAside."
+    ]
+  ],
+  [
+    "MemoryEmpty",
+    [
+      "Memory is empty. Aiko saves the first fact when you tell her something about yourself: who you are, how to work with you, what you work on. You can also add a fact here.",
+      "Память пуста. Aiko запишет первый факт, когда в разговоре прозвучит что-то о тебе: кто ты, как с тобой работать, над чем ты работаешь. Факт можно добавить и здесь."
+    ]
+  ],
+  [
+    "MemoryFull",
+    [
+      "This section is full. Remove a fact to add a new one.",
+      "Раздел заполнен. Удали факт, чтобы добавить новый."
+    ]
+  ],
+  [
+    "MemoryWriteFailed",
+    [
+      "Aiko could not write the memory file. Nothing changed.",
+      "Aiko не смогла записать файл памяти. Ничего не изменилось."
+    ]
+  ],
+  [
     "SectionSkills",
     [
       "SKILLS · {0}",
       "НАВЫКИ · {0}"
-    ]
-  ],
-  [
-    "SkillsWork",
-    [
-      "Skills work in environments where the personality is on.",
-      "Навыки работают в средах, где включена личность."
-    ]
-  ],
-  [
-    "SkillsSwitch",
-    [
-      "Aiko's skills",
-      "Навыки Aiko"
-    ]
-  ],
-  [
-    "SkillsNeedPersona",
-    [
-      "Turn the personality on in at least one environment, and the skills start working.",
-      "Включи личность хотя бы в одной среде — тогда навыки заработают."
     ]
   ],
   [
@@ -2200,15 +2438,15 @@
   [
     "MeetAikoLead",
     [
-      "Aiko can talk in your Claude Code sessions in her own voice, and she brings eleven skills. In code and commits she stays quiet.",
-      "Aiko может говорить в твоих сессиях Claude Code своим голосом и приносит одиннадцать навыков. В коде и коммитах она молчит."
+      "Aiko can talk in your Claude Code sessions in her own voice. She brings her skills and a small memory about you. In code and commits she stays quiet.",
+      "Aiko может отвечать в твоих сессиях Claude Code своим голосом. С ней приходят её навыки и небольшая память о тебе. В коде и коммитах она молчит."
     ]
   ],
   [
     "MeetAikoSettings",
     [
-      "The temperament, the mood and the skills are on the Personality page. It works in new sessions.",
-      "Темперамент, настроение и навыки — на странице «Личность». Действует в новых сессиях."
+      "The temperament, the mood, the skills and the memory are on the Personality page. It works in new sessions.",
+      "Темперамент, настроение, навыки и память — на странице «Личность». Действует в новых сессиях."
     ]
   ],
   [

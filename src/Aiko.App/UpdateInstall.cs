@@ -50,11 +50,12 @@ static class UpdateInstall
     /// The version waiting to be put in place, or null while there is none.
     public static string? ReadyVersion { get; private set; }
 
-    public static async Task<InstallOutcome> DownloadAsync(CancellationToken cancel)
+    /// progress hears the download in whole percent, on whatever thread Velopack reports from.
+    public static async Task<InstallOutcome> DownloadAsync(Action<int> progress, CancellationToken cancel)
     {
         try
         {
-            return await RunAsync(cancel).ConfigureAwait(true);
+            return await RunAsync(progress, cancel).ConfigureAwait(true);
         }
         catch (Exception failed) when (failed is HttpRequestException or IOException
                                            or TaskCanceledException or InvalidOperationException)
@@ -76,7 +77,7 @@ static class UpdateInstall
         Manager.ApplyUpdatesAndRestart(CheckedPackage);
     }
 
-    private static async Task<InstallOutcome> RunAsync(CancellationToken cancel)
+    private static async Task<InstallOutcome> RunAsync(Action<int> progress, CancellationToken cancel)
     {
         using var downloader = new GuardedDownloader();
 
@@ -101,7 +102,7 @@ static class UpdateInstall
         var asset = update.TargetFullRelease;
         var version = asset.Version.ToString();
         Log.Write($"update: downloading {version}");
-        await manager.DownloadUpdatesAsync(update, null, cancel).ConfigureAwait(true);
+        await manager.DownloadUpdatesAsync(update, progress, cancel).ConfigureAwait(true);
 
         // Where Velopack keeps what it downloaded, the same path its own helper builds.
         var package = Path.Combine(packages, asset.FileName);

@@ -101,7 +101,14 @@ public struct ClaudeSettingsEditor {
         return change(configDirectory) { patch.addSessionHook($0, hookCommand) }
     }
 
-    /// Everything of Aiko's in the file: the status line, the hook, the plugins and the marketplace.
+    /// The permission for the memory tools, written when the memory is turned on in the
+    /// environment of this folder and taken out when it is turned off (D-279).
+    public func setMemoryPermission(_ configDirectory: String, allowed: Bool) -> PatchOutcome {
+        change(configDirectory) { patch.setMemoryPermission($0, allowed: allowed) }
+    }
+
+    /// Everything of Aiko's in the file: the status line, the hook, the plugins, the marketplace
+    /// and the permission for the memory tools.
     public func remove(_ configDirectory: String) -> PatchOutcome {
         // A copy is only ever made of a file that was already there. No copy means Aiko made this
         // file itself, from nothing, the day it added its line.
@@ -109,8 +116,9 @@ public struct ClaudeSettingsEditor {
 
         let outcome = change(configDirectory) { json in
             let withoutBridge = patch.removeBridge(json)
-            let withoutPlugins = patch.removePlugins(withoutBridge ?? json)
-            return withoutPlugins ?? withoutBridge
+            let withoutPlugins = patch.removePlugins(withoutBridge ?? json) ?? withoutBridge
+            let clean = patch.setMemoryPermission(withoutPlugins ?? json, allowed: false)
+            return clean ?? withoutPlugins
         }
 
         if outcome.changed {

@@ -6,6 +6,9 @@ public struct AikoEnvironment: Sendable, Equatable {
     public var name: String
     public var configDirectories: [String]
     public var directMode: Bool
+
+    /// Whether Aiko is on in this environment: her character, her skills and her memory. They
+    /// are parts of one thing and come and go together (D-285). Off until the person turns it on.
     public var persona: Bool
 
     /// A command name the person typed. Nil means the command follows the environment name.

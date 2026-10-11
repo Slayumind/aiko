@@ -1,8 +1,9 @@
 import AikoKit
 import SwiftUI
 
-/// Aiko's personality (D-207). Where she talks is a switch per environment; the face, the
-/// temperament and the skills are one choice for all of them. A sample answer shows what the
+/// Aiko's personality (D-207). One switch per environment turns on all of Aiko there: her
+/// character, her skills and her memory (D-285). The memory itself stands under the switches. The
+/// face and the temperament are one choice for all environments. A sample answer shows what the
 /// temperament means, so nobody has to guess from a word.
 ///
 /// The twin of Settings/PersonalityPage.xaml(.cs).
@@ -33,7 +34,7 @@ struct PersonalityPageView: View {
          "drive": Strings.skillAikoDrive]
     }
 
-    private var anyoneTalks: Bool { state.environments.environments.contains(where: \.persona) }
+    private var aikoIsOnSomewhere: Bool { state.environments.environments.contains(where: \.persona) }
 
     /// A calm temperament smiles, a loud one beams, as in the mockup.
     private var face: AikoFace {
@@ -47,9 +48,13 @@ struct PersonalityPageView: View {
                 Control.pageTitle(Strings.navPersonality)
             }
 
-            Control.sectionLabel(Strings.sectionWhereAikoTalks).padding(.top, 18).padding(.bottom, 8)
+            Control.sectionLabel(Strings.sectionWhereAikoIsOn).padding(.top, 18).padding(.bottom, 8)
             environments
-            Control.rowHint(Strings.personaNewSessions).padding(.top, 8)
+            Control.rowHint(Strings.aikoOnNote).padding(.top, 8)
+            Control.rowHint(Strings.aikoOnWhat).padding(.top, 4)
+
+            // The memory itself: quotas, facts and what a person may do to them.
+            MemoryBlockView().padding(.top, 22)
 
             Control.sectionLabel(Strings.sectionFace).padding(.top, 22).padding(.bottom, 8)
             SegmentBar(
@@ -81,13 +86,14 @@ struct PersonalityPageView: View {
             Control.sectionLabel(Strings.format(Strings.sectionSkills, SkillCatalog.all.count))
                 .padding(.top, 22).padding(.bottom, 8)
             skills
-            Control.rowHint(anyoneTalks ? Strings.skillsWork : Strings.skillsNeedPersona)
-                .padding(.top, 8)
+            Control.rowHint(Strings.skillsWhere).padding(.top, 8)
         }
     }
 
-    // ---- where Aiko talks ----
+    // ---- where Aiko is on ----
 
+    /// One switch per environment. It turns on all of Aiko there: her character, her skills and
+    /// her memory are parts of one thing and are not switched apart (D-285).
     private var environments: some View {
         RowsBox {
             ForEach(Array(SettingsNav.ordered(state.environments, .macOS, Store.home).enumerated()),
@@ -98,18 +104,28 @@ struct PersonalityPageView: View {
     }
 
     private func environmentRow(_ environment: AikoEnvironment, first: Bool) -> some View {
+        let name = environment.name
         let folder = environment.configDirectories.first ?? ""
         let plan = state.plan(of: folder)
         let ownStyle = environment.persona ? ClaudeSettingsFile.userOutputStyle(folder) : nil
 
         return VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 8) {
-                Text(environment.name)
+                Text(name)
                     .font(Theme.sans(Theme.textName))
                     .foregroundStyle(Theme.ink)
-                if !plan.isEmpty { Chip(text: plan) }
+                    .lineLimit(1)
+                if !plan.isEmpty { Chip(text: plan).fixedSize() }
                 Spacer(minLength: 12)
-                AikoSwitch(isOn: environment.persona) { setPersona(environment.name, $0) }
+
+                // A screen reader hears the environment, because the switch itself has no word
+                // on it.
+                AikoSwitch(isOn: environment.persona) { setPersona(name, $0) }
+                    .accessibilityElement()
+                    .accessibilityLabel(name)
+                    .accessibilityValue(environment.persona ? "1" : "0")
+                    .accessibilityAddTraits(.isToggle)
+                    .accessibilityAction { setPersona(name, !environment.persona) }
             }
 
             Reveal(isOpen: ownStyle != nil) {
@@ -128,7 +144,15 @@ struct PersonalityPageView: View {
     private func setPersona(_ environment: String, _ on: Bool) {
         state.editor.commit(
             EnvironmentEdits.setPersona(state.environments, environment, on),
-            on ? "turned the persona on" : "turned the persona off")
+            on ? "turned Aiko on" : "turned Aiko off")
+
+        // The lines under the switches say what the memory does, so whoever turned her on here
+        // has been told and is not shown this page again on the next start.
+        if on && !state.app.memoryShown {
+            var shown = state.app
+            shown.memoryShown = true
+            state.saveApp(shown)
+        }
     }
 
     // ---- temperament ----
@@ -220,26 +244,16 @@ struct PersonalityPageView: View {
 
     // ---- skills ----
 
-    /// One switch for all skills, then the skills themselves: they are one plugin in Claude Code
-    /// and come and go together (D-237).
+    /// The skills themselves. They are one plugin in Claude Code and come and go together
+    /// (D-237), in every environment where Aiko is on (D-285).
     private var skills: some View {
         VStack(alignment: .leading, spacing: 0) {
-            RowsBox {
-                HStack(spacing: 12) {
-                    Control.rowName(Strings.skillsSwitch)
-                    Spacer(minLength: 12)
-                    AikoSwitch(isOn: state.persona.skillsOn, enabled: anyoneTalks, set: setSkills)
-                }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 10)
-            }
-
             // One box per domain, so the groups read apart.
-            ForEach(Array(SkillCatalog.groups.enumerated()), id: \.offset) { _, group in
+            ForEach(Array(SkillCatalog.groups.enumerated()), id: \.offset) { at, group in
                 Control.sectionLabel(
                     "\(group.domain == .projects ? Strings.skillDomainProjects : Strings.skillDomainGames)"
                         + " · \(group.skills.count)")
-                    .padding(.top, 18)
+                    .padding(.top, at == 0 ? 0 : 18)
                     .padding(.bottom, 8)
 
                 RowsBox {
@@ -248,9 +262,8 @@ struct PersonalityPageView: View {
                     }
                 }
             }
-            .opacity(state.persona.skillsOn ? 1 : 0.45)
         }
-        .opacity(anyoneTalks ? 1 : 0.45)
+        .opacity(aikoIsOnSomewhere ? 1 : 0.45)
     }
 
     private func skillRow(_ skill: String, topLine: Bool) -> some View {
@@ -265,12 +278,5 @@ struct PersonalityPageView: View {
         .padding(.vertical, 9)
         .frame(maxWidth: .infinity, alignment: .leading)
         .overlay(alignment: .top) { if topLine { Control.hairline() } }
-    }
-
-    private func setSkills(_ on: Bool) {
-        var next = state.persona
-        next.skillsOn = on
-        state.savePersona(next)
-        PluginSync.request(on ? "skills switched on" : "skills switched off")
     }
 }

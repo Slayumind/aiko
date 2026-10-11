@@ -182,7 +182,7 @@
     <value>Once a day Aiko asks slayumind.org for the latest version. The files come from GitHub, and Aiko checks their signature before it replaces anything.</value>
   </data>
   <data name="CheckNow" xml:space="preserve">
-    <value>Check now</value>
+    <value>Check for updates</value>
   </data>
   <data name="OpenDownloadPage" xml:space="preserve">
     <value>Open download page</value>
@@ -191,25 +191,37 @@
     <value>Aiko is asking slayumind.org…</value>
   </data>
   <data name="UpdateAvailable" xml:space="preserve">
-    <value>Version {0} is available.</value>
+    <value>Aiko {0} is out</value>
   </data>
   <data name="UpdateLatest" xml:space="preserve">
-    <value>Aiko {0} is the latest version.</value>
+    <value>The latest version is installed</value>
+  </data>
+  <data name="UpdateThisVersion" xml:space="preserve">
+    <value>Aiko {0}</value>
+  </data>
+  <data name="UpdateCheckedAt" xml:space="preserve">
+    <value>Aiko {0} · checked at {1}</value>
+  </data>
+  <data name="UpdateNow" xml:space="preserve">
+    <value>now {0}</value>
+  </data>
+  <data name="UpdateReadyDetail" xml:space="preserve">
+    <value>it starts after a restart</value>
   </data>
   <data name="UpdateFailed" xml:space="preserve">
     <value>Couldn't check. Try again in a few minutes.</value>
   </data>
   <data name="UpdateInstallNow" xml:space="preserve">
-    <value>Download and install</value>
+    <value>Install {0}</value>
   </data>
   <data name="UpdateDownloading" xml:space="preserve">
-    <value>Aiko is downloading {0}…</value>
+    <value>Downloading {0}</value>
   </data>
   <data name="UpdateReady" xml:space="preserve">
-    <value>Aiko {0} is ready. Restart to start using it.</value>
+    <value>Aiko {0} is ready</value>
   </data>
   <data name="UpdateRestartNow" xml:space="preserve">
-    <value>Restart now</value>
+    <value>Restart Aiko</value>
   </data>
   <data name="UpdateNotInstalled" xml:space="preserve">
     <value>This copy wasn't put here by the installer, so Aiko can't replace it. Use the download page.</value>
@@ -715,6 +727,15 @@
   <data name="DeletePortable" xml:space="preserve">
     <value>This copy was unpacked from a zip, so it has no uninstaller. The folder with Aiko stays, and Aiko opens it for you.</value>
   </data>
+  <data name="DeleteKeepMemory" xml:space="preserve">
+    <value>Keep what Aiko remembers about me</value>
+  </data>
+  <data name="DeleteMemoryStays" xml:space="preserve">
+    <value>One file stays: {0}. When you install Aiko again, it finds the memory there.</value>
+  </data>
+  <data name="DeleteMemoryGoes" xml:space="preserve">
+    <value>The memory goes with Aiko's folders. It cannot be brought back.</value>
+  </data>
   <data name="OpenClaudeCode" xml:space="preserve">
     <value>Open Claude Code</value>
   </data>
@@ -782,7 +803,7 @@
     <value>WHAT NEVER LEAVES</value>
   </data>
   <data name="NeverSentWhat" xml:space="preserve">
-    <value>Your name, email, project folders, limits, token and session texts. The site doesn't read or store the IP address.</value>
+    <value>Your name, email, project folders, limits, token, session texts and what the memory holds. The site doesn't read or store the IP address.</value>
   </data>
   <data name="StatsKeptFor" xml:space="preserve">
     <value>The records are deleted after 90 days.</value>
@@ -798,9 +819,6 @@
   </data>
   <data name="OpenPrivacyDoc" xml:space="preserve">
     <value>Open PRIVACY.md</value>
-  </data>
-  <data name="PrivacyLinkFromGeneral" xml:space="preserve">
-    <value>What Aiko sends and to whom — Privacy.</value>
   </data>
   <data name="WizardStats" xml:space="preserve">
     <value>Anonymous statistics</value>
@@ -826,11 +844,17 @@
   <data name="StatsStateUnset" xml:space="preserve">
     <value>not chosen</value>
   </data>
-  <data name="SectionWhereAikoTalks" xml:space="preserve">
-    <value>WHERE AIKO TALKS</value>
+  <data name="SectionWhereAikoIsOn" xml:space="preserve">
+    <value>WHERE AIKO IS ON</value>
   </data>
-  <data name="PersonaNewSessions" xml:space="preserve">
-    <value>Works in new sessions. Open sessions finish the way they started.</value>
+  <data name="AikoOnNote" xml:space="preserve">
+    <value>Her character, her skills and her memory come together. Works in new sessions; open sessions finish the way they started.</value>
+  </data>
+  <data name="AikoOnWhat" xml:space="preserve">
+    <value>Where Aiko is on, she reads each message you send to keep her memory fresh, and adds one line to that environment's settings.json: a permission for her two memory tools. Turning her off does not erase the memory.</value>
+  </data>
+  <data name="SkillsWhere" xml:space="preserve">
+    <value>Skills work in the environments where Aiko is on.</value>
   </data>
   <data name="PersonaOwnStyle" xml:space="preserve">
     <value>While the personality is on, your style {0} doesn't work. Turn it off and it comes back.</value>
@@ -913,17 +937,95 @@
   <data name="SampleCommit" xml:space="preserve">
     <value>The commit for this fix has no character:</value>
   </data>
+  <data name="SectionMemory" xml:space="preserve">
+    <value>MEMORY · {0} OF {1}</value>
+  </data>
+  <data name="MemoryAdd" xml:space="preserve">
+    <value>Add a fact</value>
+  </data>
+  <data name="MemoryCategoryYou" xml:space="preserve">
+    <value>You</value>
+  </data>
+  <data name="MemoryCategoryWork" xml:space="preserve">
+    <value>How to work with me</value>
+  </data>
+  <data name="MemoryCategoryProjects" xml:space="preserve">
+    <value>Projects</value>
+  </data>
+  <data name="MemoryCategoryInterests" xml:space="preserve">
+    <value>Interests and taste</value>
+  </data>
+  <data name="MemoryTabYou" xml:space="preserve">
+    <value>You</value>
+  </data>
+  <data name="MemoryTabWork" xml:space="preserve">
+    <value>Work</value>
+  </data>
+  <data name="MemoryTabProjects" xml:space="preserve">
+    <value>Projects</value>
+  </data>
+  <data name="MemoryTabInterests" xml:space="preserve">
+    <value>Taste</value>
+  </data>
+  <data name="MemoryPin" xml:space="preserve">
+    <value>Pin</value>
+  </data>
+  <data name="MemoryUnpin" xml:space="preserve">
+    <value>Unpin</value>
+  </data>
+  <data name="MemoryEdit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="MemorySave" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="MemoryCount" xml:space="preserve">
+    <value>{0} of {1}</value>
+  </data>
+  <data name="MemoryFactPlaceholder" xml:space="preserve">
+    <value>The fact, one thought</value>
+  </data>
+  <data name="MemoryMeaningPlaceholder" xml:space="preserve">
+    <value>What it changes in the answers (optional)</value>
+  </data>
+  <data name="MemoryEnglishNote" xml:space="preserve">
+    <value>Facts are in English, the way the model reads them.</value>
+  </data>
+  <data name="MemoryAnyLanguageNote" xml:space="preserve">
+    <value>You can write a fact in any language. Aiko writes hers in English.</value>
+  </data>
+  <data name="MemoryYouNote" xml:space="preserve">
+    <value>Your name, how to address you and your grammatical gender are pinned facts here. If they are missing, Aiko asks once in a casual talk. You can also add them yourself.</value>
+  </data>
+  <data name="MemoryOpenFile" xml:space="preserve">
+    <value>Open file</value>
+  </data>
+  <data name="MemoryErase" xml:space="preserve">
+    <value>Erase memory</value>
+  </data>
+  <data name="MemoryEraseAsk" xml:space="preserve">
+    <value>Aiko will forget every fact in every environment, {0} in all. This is not reversible.</value>
+  </data>
+  <data name="MemoryTooLong" xml:space="preserve">
+    <value>too long · {0} of {1}</value>
+  </data>
+  <data name="MemoryTooLongNote" xml:space="preserve">
+    <value>The model does not see a fact longer than {0} characters. Shorten it and it comes back.</value>
+  </data>
+  <data name="MemoryAsideNote" xml:space="preserve">
+    <value>Records in the file that cannot be read after a hand edit: {0}. They are kept in the file, in the setAside list.</value>
+  </data>
+  <data name="MemoryEmpty" xml:space="preserve">
+    <value>Memory is empty. Aiko saves the first fact when you tell her something about yourself: who you are, how to work with you, what you work on. You can also add a fact here.</value>
+  </data>
+  <data name="MemoryFull" xml:space="preserve">
+    <value>This section is full. Remove a fact to add a new one.</value>
+  </data>
+  <data name="MemoryWriteFailed" xml:space="preserve">
+    <value>Aiko could not write the memory file. Nothing changed.</value>
+  </data>
   <data name="SectionSkills" xml:space="preserve">
     <value>SKILLS · {0}</value>
-  </data>
-  <data name="SkillsWork" xml:space="preserve">
-    <value>Skills work in environments where the personality is on.</value>
-  </data>
-  <data name="SkillsSwitch" xml:space="preserve">
-    <value>Aiko's skills</value>
-  </data>
-  <data name="SkillsNeedPersona" xml:space="preserve">
-    <value>Turn the personality on in at least one environment, and the skills start working.</value>
   </data>
   <data name="SkillDomainProjects" xml:space="preserve">
     <value>PROJECT MANAGEMENT</value>
@@ -974,10 +1076,10 @@
     <value>Meet Aiko</value>
   </data>
   <data name="MeetAikoLead" xml:space="preserve">
-    <value>Aiko can talk in your Claude Code sessions in her own voice, and she brings eleven skills. In code and commits she stays quiet.</value>
+    <value>Aiko can talk in your Claude Code sessions in her own voice. She brings her skills and a small memory about you. In code and commits she stays quiet.</value>
   </data>
   <data name="MeetAikoSettings" xml:space="preserve">
-    <value>The temperament, the mood and the skills are on the Personality page. It works in new sessions.</value>
+    <value>The temperament, the mood, the skills and the memory are on the Personality page. It works in new sessions.</value>
   </data>
   <data name="MeetAikoTurnOn" xml:space="preserve">
     <value>Turn on in {0}</value>

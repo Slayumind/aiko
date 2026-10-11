@@ -17,6 +17,7 @@ final class AikoShell: NSResponder {
     private var island: IslandWindow?
     private var fullScreen: FullScreenWatch?
     private var watch: SnapshotWatch?
+    private var updates: UpdateWatch?
     private var hover: Timer?
     private var cardWatch: Timer?
     private var away = AwayWatch()
@@ -42,7 +43,11 @@ final class AikoShell: NSResponder {
     /// arrive. Worked out when the settings change rather than every time the card is drawn.
     private var noAccess: Set<String> = []
 
-    func show() {
+    /// A self test draws one thing to be looked at and must leave the machine as it found it.
+    /// So with changingNothing the start skips what writes: the note that the memory was shown
+    /// (and the page opened for it), the plugin sync (which writes settings.json and runs claude)
+    /// and the refresh of the commands in PATH.
+    func show(changingNothing: Bool = false) {
         let watcher = SnapshotWatch(folder: Store.folders.snapshotsFolder)
         watcher.updated = { [weak self] in self?.onSnapshotsChanged() }
         watch = watcher
@@ -61,7 +66,11 @@ final class AikoShell: NSResponder {
             + "\(watcher.byFile.count) snapshot files, showing the "
             + (Store.settings().place == .island ? "island" : "menu bar icon"))
 
-        openChecklistIfNothingIsSetUp(environments, Store.settings())
+        openChecklistIfNothingIsSetUp(environments, Store.settings(), changingNothing: changingNothing)
+
+        if changingNothing {
+            return
+        }
 
         // An update can bring a new persona text, and on macOS the app itself moves: the marketplace
         // names the bridge by its full path, so a copy dragged from the disk image into Applications
@@ -74,18 +83,33 @@ final class AikoShell: NSResponder {
         if CommandFolder.isSetUp {
             CommandFolder.sync(environments)
         }
+
+        // Not in a self test: the check sends a request and writes down the reported week.
+        let checks = UpdateWatch()
+        checks.found = { [weak self] in self?.onNewerVersion() }
+        updates = checks
     }
 
     /// On a fresh machine the checklist opens by itself: there is nothing for the icon to show and
     /// nothing tells the person where to start. Someone who set Aiko up before an item existed is
     /// shown that one item once (D-200).
-    private func openChecklistIfNothingIsSetUp(_ environments: EnvironmentSettings, _ app: AppSettings) {
+    private func openChecklistIfNothingIsSetUp(
+        _ environments: EnvironmentSettings, _ app: AppSettings, changingNothing: Bool
+    ) {
         if !environments.hasEnvironments {
             openSettings(at: .checklist)
         } else if WizardChecklist.opensMeetAikoOnStart(app, environments) {
             openSettings(at: .checklist, item: .meetAiko)
         } else if WizardChecklist.opensPrivacyOnStart(app, environments) {
             openSettings(at: .checklist, item: .privacy)
+        } else if !changingNothing, WizardChecklist.opensMemoryOnStart(app, environments) {
+            // Once, for someone who turned Aiko on before she had a memory. The page says what the
+            // memory reads and writes, and it is where she can be turned off. A self test skips
+            // it: the page it was asked for is the one to show, and the note is a write.
+            openSettings(at: .personality)
+            var shown = app
+            shown.memoryShown = true
+            Store.saveSettings(shown)
         }
     }
 
@@ -94,6 +118,7 @@ final class AikoShell: NSResponder {
         cardWatch?.invalidate()
         card?.fadeAndClose()
         watch?.stop()
+        updates?.stop()
         mood?.stop()
         closeIsland()
         removeIcon()
@@ -123,6 +148,7 @@ final class AikoShell: NSResponder {
             island = window
         }
 
+        island?.newerVersion = updates?.newerVersion
         island?.show(cards(), at: position)
 
         // Only watched while the island is on screen: the menu bar icon has nothing to hide from.
@@ -292,8 +318,14 @@ final class AikoShell: NSResponder {
 
         // The numbers go in the tooltip as well as in the ring: a screen reader has nothing else
         // to read, and the ring says nothing to one.
-        // TODO: the newer version comes from the update check, which is not built yet.
-        button.toolTip = TrayText.tooltip(cards(), newerVersion: nil)
+        button.toolTip = TrayText.tooltip(cards(), newerVersion: updates?.newerVersion)
+    }
+
+    /// The daily check found a newer version, or stopped seeing one. Only the words change.
+    private func onNewerVersion() {
+        updateIcon()
+        island?.newerVersion = updates?.newerVersion
+        island?.update(cards())
     }
 
     /// One frame of a face transition: only the picture changes, not the tooltip.

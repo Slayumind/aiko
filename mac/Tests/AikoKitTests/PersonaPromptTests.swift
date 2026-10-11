@@ -92,6 +92,9 @@ struct PersonaPromptTests {
         let prompt = PersonaPrompt.compose(temperament)
 
         #expect(prompt.contains("You do not know the user's gender"))
+
+        // The memory may know how to address the user; without it the rule above holds.
+        #expect(prompt.contains("The only exception is a fact in the Aiko memory of this session that says how to address the user"))
         #expect(prompt.contains("without gendered forms"))
     }
 
@@ -126,10 +129,12 @@ struct PersonaPromptTests {
     }
 
     @Test
-    func thePluginHasAManifestAStyleAndHooks() {
+    func thePluginHasAManifestAStyleHooksAndTheMemoryServer() {
         let files = PersonaPlugin.files(.normal, Self.bridge)
 
-        #expect(files.map(\.path).sorted() == [".claude-plugin/plugin.json", "hooks/hooks.json", "output-styles/aiko.md"])
+        #expect(files.map(\.path).sorted() == [
+            ".claude-plugin/plugin.json", ".mcp.json", "hooks/hooks.json", "output-styles/aiko.md",
+        ])
         let manifest = JsonNode.parse(files.first { $0.path == ".claude-plugin/plugin.json" }?.content)
         #expect(manifest?["name"]?.stringValue == "aiko-persona")
     }
@@ -139,8 +144,9 @@ struct PersonaPromptTests {
         let hooksFile = try #require(PersonaPlugin.files(.normal, Self.bridge).first { $0.path == "hooks/hooks.json" })
         let events = try #require(JsonNode.parse(hooksFile.content)?["hooks"]?.objectValue)
 
-        #expect(events.keys == PersonaPlugin.hookEvents)
-        for member in events.members {
+        // The face follows these events. The memory adds SessionStart, checked with the memory.
+        #expect(events.keys == PersonaPlugin.hookEvents + ["SessionStart"])
+        for member in events.members where PersonaPlugin.hookEvents.contains(member.key) {
             let hook = try #require(member.value.arrayValue?.first?["hooks"]?.arrayValue?.first)
             #expect(hook["type"]?.stringValue == "command")
             #expect(hook["command"]?.stringValue == Self.bridge)

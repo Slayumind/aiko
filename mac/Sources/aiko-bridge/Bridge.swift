@@ -1,8 +1,8 @@
 import AikoKit
 import Foundation
 
-/// The four jobs Claude Code starts the bridge for. What to write and when is decided in
-/// `BridgeWork`; this only reads the input, the environment and the files it needs.
+/// The jobs Claude Code starts the bridge for. What to write and when is decided in `BridgeWork`
+/// and `MemoryBridge`; this only reads the input, the environment and the files it needs.
 enum Bridge {
     static func run(_ arguments: [String]) -> Int32 {
         let mode = BridgeMode.forArguments(arguments)
@@ -14,8 +14,16 @@ enum Bridge {
             return buildPersonaPlugin()
         }
 
+        // The memory server talks over stdin for as long as the session lives. Reading the input
+        // to its end, as every other job does, would wait for the session to close before the
+        // first answer.
+        if mode == .memory(.serve) {
+            return serveMemory()
+        }
+
         let input = readAllInput()
         switch mode {
+        case .memory(let job): answerMemoryHook(job, input)
         case .sessionStart: remindAboutBinding(input)
         case .hook: recordActivity(input)
         default: runStatusLine(input)
@@ -99,6 +107,94 @@ enum Bridge {
         case .write(let file):
             try? Disk.writeInOneStep(file)
         }
+    }
+
+    // ---- the memory ----
+
+    /// The memory hooks of the persona plugin. The rules and the facts go to the model at the
+    /// start of a session; a message of the person refreshes facts by their keys and may bring a
+    /// reminder. A hook that cannot read, lock or write prints nothing, like every other hook.
+    private static func answerMemoryHook(_ job: MemoryBridgeMode, _ input: String) {
+        let path = AikoFolders.forThisMac().memoryFile
+
+        switch job {
+        case .rules:
+            write(MemoryBridge.rulesOutput(today()))
+        case .facts:
+            // No file is an empty memory and is still printed. A file that is there and cannot
+            // be opened prints nothing: an empty list would tell the model the memory is gone.
+            do {
+                write(MemoryBridge.factsOutput(try Disk.readMemory(path)))
+            } catch {
+            }
+        case .prompt, .serve:
+            let step = try? Disk.withLock(lockFile(path)) {
+                let step = MemoryBridge.onPrompt(input, try Disk.readMemory(path), today())
+                if let json = step.memoryJson {
+                    try Disk.writeMemory(path, json, keepBadFile: step.badFile)
+                }
+                return step
+            }
+
+            if let output = step?.output {
+                write(output)
+            }
+        }
+    }
+
+    /// The MCP server with the memory tools: one JSON-RPC message per line, until Claude Code
+    /// closes the input. The file is read again for every message, because hooks of other
+    /// sessions and the app write it too.
+    private static func serveMemory() -> Int32 {
+        let version = serverVersion()
+
+        while let line = readLine(strippingNewline: true) {
+            let blank = line.allSatisfy { $0.isWhitespace }
+            if !blank, let reply = answerServerLine(line, version) {
+                write(reply + "\n")
+            }
+        }
+
+        return 0
+    }
+
+    /// A change that could not be written is answered as a failed tool call: the model must not
+    /// read "Saved" for a fact that is not in the file.
+    private static func answerServerLine(_ line: String, _ version: String) -> String? {
+        let path = AikoFolders.forThisMac().memoryFile
+
+        do {
+            return try Disk.withLock(lockFile(path)) {
+                let step = MemoryBridge.onServerLine(line, try Disk.readMemory(path), today(), version)
+                if let json = step.memoryJson {
+                    try Disk.writeMemory(path, json, keepBadFile: step.badFile)
+                }
+                return step.output
+            }
+        } catch {
+            return MemoryBridge.writeFailedReply(line)
+        }
+    }
+
+    private static func lockFile(_ memoryFile: String) -> String {
+        memoryFile + ".lock"
+    }
+
+    /// The day on the clock of this Mac, in the calendar the file is written in whatever calendar
+    /// the Mac itself is set to.
+    private static func today() -> DateOnly {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = .current
+        let day = calendar.dateComponents([.year, .month, .day], from: Date())
+        return DateOnly(day.year ?? 1, day.month ?? 1, day.day ?? 1)
+    }
+
+    /// Three numbers from the Info.plist of the app the bridge ships in. A bridge run straight
+    /// out of .build has no bundle and says 0.0.0, as the Windows one does without a version.
+    private static func serverVersion() -> String {
+        let text = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? ""
+        let parts = text.split(separator: ".").prefix(3)
+        return parts.count == 3 ? parts.joined(separator: ".") : "0.0.0"
     }
 
     // ---- the persona plugin ----

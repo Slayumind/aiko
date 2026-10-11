@@ -171,7 +171,7 @@ public static class Strings
     /// Once a day Aiko asks slayumind.org for the latest version. The files come from GitHub, an...
     public static string CheckUpdatesWhat => Get("CheckUpdatesWhat");
 
-    /// Check now
+    /// Check for updates
     public static string CheckNow => Get("CheckNow");
 
     /// Open download page
@@ -180,25 +180,37 @@ public static class Strings
     /// Aiko is asking slayumind.org…
     public static string UpdateAsking => Get("UpdateAsking");
 
-    /// Version {0} is available.
+    /// Aiko {0} is out
     public static string UpdateAvailable => Get("UpdateAvailable");
 
-    /// Aiko {0} is the latest version.
+    /// The latest version is installed
     public static string UpdateLatest => Get("UpdateLatest");
+
+    /// Aiko {0}
+    public static string UpdateThisVersion => Get("UpdateThisVersion");
+
+    /// Aiko {0} · checked at {1}
+    public static string UpdateCheckedAt => Get("UpdateCheckedAt");
+
+    /// now {0}
+    public static string UpdateNow => Get("UpdateNow");
+
+    /// it starts after a restart
+    public static string UpdateReadyDetail => Get("UpdateReadyDetail");
 
     /// Couldn't check. Try again in a few minutes.
     public static string UpdateFailed => Get("UpdateFailed");
 
-    /// Download and install
+    /// Install {0}
     public static string UpdateInstallNow => Get("UpdateInstallNow");
 
-    /// Aiko is downloading {0}…
+    /// Downloading {0}
     public static string UpdateDownloading => Get("UpdateDownloading");
 
-    /// Aiko {0} is ready. Restart to start using it.
+    /// Aiko {0} is ready
     public static string UpdateReady => Get("UpdateReady");
 
-    /// Restart now
+    /// Restart Aiko
     public static string UpdateRestartNow => Get("UpdateRestartNow");
 
     /// This copy wasn't put here by the installer, so Aiko can't replace it. Use the download page.
@@ -705,6 +717,15 @@ public static class Strings
     /// This copy was unpacked from a zip, so it has no uninstaller. The folder with Aiko stays, ...
     public static string DeletePortable => Get("DeletePortable");
 
+    /// Keep what Aiko remembers about me
+    public static string DeleteKeepMemory => Get("DeleteKeepMemory");
+
+    /// One file stays: {0}. When you install Aiko again, it finds the memory there.
+    public static string DeleteMemoryStays => Get("DeleteMemoryStays");
+
+    /// The memory goes with Aiko's folders. It cannot be brought back.
+    public static string DeleteMemoryGoes => Get("DeleteMemoryGoes");
+
     /// Open Claude Code
     public static string OpenClaudeCode => Get("OpenClaudeCode");
 
@@ -771,7 +792,7 @@ public static class Strings
     /// WHAT NEVER LEAVES
     public static string SectionNeverSent => Get("SectionNeverSent");
 
-    /// Your name, email, project folders, limits, token and session texts. The site doesn't read...
+    /// Your name, email, project folders, limits, token, session texts and what the memory holds...
     public static string NeverSentWhat => Get("NeverSentWhat");
 
     /// The records are deleted after 90 days.
@@ -788,9 +809,6 @@ public static class Strings
 
     /// Open PRIVACY.md
     public static string OpenPrivacyDoc => Get("OpenPrivacyDoc");
-
-    /// What Aiko sends and to whom — Privacy.
-    public static string PrivacyLinkFromGeneral => Get("PrivacyLinkFromGeneral");
 
     /// Anonymous statistics
     public static string WizardStats => Get("WizardStats");
@@ -816,11 +834,17 @@ public static class Strings
     /// not chosen
     public static string StatsStateUnset => Get("StatsStateUnset");
 
-    /// WHERE AIKO TALKS
-    public static string SectionWhereAikoTalks => Get("SectionWhereAikoTalks");
+    /// WHERE AIKO IS ON
+    public static string SectionWhereAikoIsOn => Get("SectionWhereAikoIsOn");
 
-    /// Works in new sessions. Open sessions finish the way they started.
-    public static string PersonaNewSessions => Get("PersonaNewSessions");
+    /// Her character, her skills and her memory come together. Works in new sessions; open sessi...
+    public static string AikoOnNote => Get("AikoOnNote");
+
+    /// Where Aiko is on, she reads each message you send to keep her memory fresh, and adds one ...
+    public static string AikoOnWhat => Get("AikoOnWhat");
+
+    /// Skills work in the environments where Aiko is on.
+    public static string SkillsWhere => Get("SkillsWhere");
 
     /// While the personality is on, your style {0} doesn't work. Turn it off and it comes back.
     public static string PersonaOwnStyle => Get("PersonaOwnStyle");
@@ -903,17 +927,95 @@ public static class Strings
     /// The commit for this fix has no character:
     public static string SampleCommit => Get("SampleCommit");
 
+    /// MEMORY · {0} OF {1}
+    public static string SectionMemory => Get("SectionMemory");
+
+    /// Add a fact
+    public static string MemoryAdd => Get("MemoryAdd");
+
+    /// You
+    public static string MemoryCategoryYou => Get("MemoryCategoryYou");
+
+    /// How to work with me
+    public static string MemoryCategoryWork => Get("MemoryCategoryWork");
+
+    /// Projects
+    public static string MemoryCategoryProjects => Get("MemoryCategoryProjects");
+
+    /// Interests and taste
+    public static string MemoryCategoryInterests => Get("MemoryCategoryInterests");
+
+    /// You
+    public static string MemoryTabYou => Get("MemoryTabYou");
+
+    /// Work
+    public static string MemoryTabWork => Get("MemoryTabWork");
+
+    /// Projects
+    public static string MemoryTabProjects => Get("MemoryTabProjects");
+
+    /// Taste
+    public static string MemoryTabInterests => Get("MemoryTabInterests");
+
+    /// Pin
+    public static string MemoryPin => Get("MemoryPin");
+
+    /// Unpin
+    public static string MemoryUnpin => Get("MemoryUnpin");
+
+    /// Edit
+    public static string MemoryEdit => Get("MemoryEdit");
+
+    /// Save
+    public static string MemorySave => Get("MemorySave");
+
+    /// {0} of {1}
+    public static string MemoryCount => Get("MemoryCount");
+
+    /// The fact, one thought
+    public static string MemoryFactPlaceholder => Get("MemoryFactPlaceholder");
+
+    /// What it changes in the answers (optional)
+    public static string MemoryMeaningPlaceholder => Get("MemoryMeaningPlaceholder");
+
+    /// Facts are in English, the way the model reads them.
+    public static string MemoryEnglishNote => Get("MemoryEnglishNote");
+
+    /// You can write a fact in any language. Aiko writes hers in English.
+    public static string MemoryAnyLanguageNote => Get("MemoryAnyLanguageNote");
+
+    /// Your name, how to address you and your grammatical gender are pinned facts here. If they ...
+    public static string MemoryYouNote => Get("MemoryYouNote");
+
+    /// Open file
+    public static string MemoryOpenFile => Get("MemoryOpenFile");
+
+    /// Erase memory
+    public static string MemoryErase => Get("MemoryErase");
+
+    /// Aiko will forget every fact in every environment, {0} in all. This is not reversible.
+    public static string MemoryEraseAsk => Get("MemoryEraseAsk");
+
+    /// too long · {0} of {1}
+    public static string MemoryTooLong => Get("MemoryTooLong");
+
+    /// The model does not see a fact longer than {0} characters. Shorten it and it comes back.
+    public static string MemoryTooLongNote => Get("MemoryTooLongNote");
+
+    /// Records in the file that cannot be read after a hand edit: {0}. They are kept in the file...
+    public static string MemoryAsideNote => Get("MemoryAsideNote");
+
+    /// Memory is empty. Aiko saves the first fact when you tell her something about yourself: wh...
+    public static string MemoryEmpty => Get("MemoryEmpty");
+
+    /// This section is full. Remove a fact to add a new one.
+    public static string MemoryFull => Get("MemoryFull");
+
+    /// Aiko could not write the memory file. Nothing changed.
+    public static string MemoryWriteFailed => Get("MemoryWriteFailed");
+
     /// SKILLS · {0}
     public static string SectionSkills => Get("SectionSkills");
-
-    /// Skills work in environments where the personality is on.
-    public static string SkillsWork => Get("SkillsWork");
-
-    /// Aiko's skills
-    public static string SkillsSwitch => Get("SkillsSwitch");
-
-    /// Turn the personality on in at least one environment, and the skills start working.
-    public static string SkillsNeedPersona => Get("SkillsNeedPersona");
 
     /// PROJECT MANAGEMENT
     public static string SkillDomainProjects => Get("SkillDomainProjects");
@@ -963,10 +1065,10 @@ public static class Strings
     /// Meet Aiko
     public static string ItemMeetAiko => Get("ItemMeetAiko");
 
-    /// Aiko can talk in your Claude Code sessions in her own voice, and she brings eleven skills...
+    /// Aiko can talk in your Claude Code sessions in her own voice. She brings her skills and a ...
     public static string MeetAikoLead => Get("MeetAikoLead");
 
-    /// The temperament, the mood and the skills are on the Personality page. It works in new ses...
+    /// The temperament, the mood, the skills and the memory are on the Personality page. It work...
     public static string MeetAikoSettings => Get("MeetAikoSettings");
 
     /// Turn on in {0}

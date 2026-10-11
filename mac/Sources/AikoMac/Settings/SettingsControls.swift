@@ -151,6 +151,9 @@ struct PickCard<Content: View>: View {
 struct FlatButton: View {
     enum Look {
         case plain
+
+        /// The one button that finishes what the person typed: light, with dark words.
+        case primary
         case ghost
         case danger
         case ghostDanger
@@ -159,6 +162,9 @@ struct FlatButton: View {
 
     let title: String
     var look = Look.plain
+
+    /// An SF Symbol before the words, for a button that makes something new.
+    var symbol: String?
     var enabled = true
     let press: () -> Void
 
@@ -166,8 +172,12 @@ struct FlatButton: View {
 
     var body: some View {
         Button(action: { if enabled { press() } }) {
-            Text(title)
-                .font(Theme.sans(Theme.textSmall))
+            HStack(spacing: 6) {
+                if let symbol {
+                    Image(systemName: symbol).font(.system(size: 10, weight: .medium))
+                }
+                Text(title).font(Theme.sans(Theme.textSmall))
+            }
                 .foregroundStyle(words)
                 .padding(.horizontal, look == .quiet ? 12 : 10)
                 .frame(height: look == .quiet ? 32 : 28)
@@ -185,6 +195,7 @@ struct FlatButton: View {
         switch look {
         case .danger, .ghostDanger: return Theme.destructive
         case .ghost: return hovering ? Theme.ink : Theme.muted
+        case .primary: return Theme.background
         default: return Theme.ink
         }
     }
@@ -193,6 +204,7 @@ struct FlatButton: View {
         switch look {
         case .ghost, .ghostDanger: return .clear
         case .danger: return Theme.destructive.opacity(0.16)
+        case .primary: return Theme.ink
         default: return Theme.raised
         }
     }

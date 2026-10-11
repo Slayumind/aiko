@@ -34,7 +34,7 @@ final class EnvironmentsEditor {
         }
 
         if personaFolders(before) != personaFolders(next) {
-            PluginSync.personaChanged()
+            PluginSync.request("persona switched")
         }
 
         Log.write("settings: \(what)")
@@ -368,15 +368,15 @@ final class SettingsState: ObservableObject {
 
     /// Aiko takes everything back and goes. Claude Code may take seconds to answer, so the work
     /// happens off this thread and the page waits with a line; then Aiko quits, whether or not it
-    /// managed to put itself in the Bin.
-    func deleteAiko() {
+    /// managed to put itself in the Bin. keepMemory is the person's answer on the page.
+    func deleteAiko(keepMemory: Bool) {
         guard !deleting else { return }
         deleting = true
         checklist?.close()
         checklist = nil
 
         Task.detached {
-            let outcome = Uninstall.everything()
+            let outcome = Uninstall.everything(keepMemory: keepMemory)
             await MainActor.run { [weak self] in
                 if outcome == .appStays {
                     NSWorkspace.shared.activateFileViewerSelecting([Bundle.main.bundleURL])

@@ -56,6 +56,10 @@ public struct AikoFolders: Sendable, Equatable {
     /// Its own file: the bridge reads the persona to build the plugin, and the shim does not need it.
     public var personaFile: String { platform.join(settingsFolder, "persona.json") }
 
+    /// What Aiko remembers about the person. It sits with the choices and not in the cache: it is
+    /// theirs, it is backed up with them, and macOS must not empty it.
+    public var memoryFile: String { platform.join(settingsFolder, "memory.json") }
+
     public var installIdFile: String { platform.join(settingsFolder, "install-id") }
 
     public var reportedPeriodsFile: String { platform.join(settingsFolder, "reported.json") }

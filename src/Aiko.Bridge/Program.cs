@@ -13,9 +13,23 @@ if (PersonaPluginOutput.IsRequest(args))
     return BuildPersonaPlugin();
 }
 
+// The memory server talks over stdin for as long as the session lives. Reading the input to its
+// end, as every other job does, would wait for the session to close before the first answer.
+var memoryMode = MemoryBridge.ModeFor(args);
+if (memoryMode == MemoryBridgeMode.Serve)
+{
+    return ServeMemory();
+}
+
 try
 {
     var input = ReadAllInput();
+
+    if (memoryMode is { } memoryHook)
+    {
+        AnswerMemoryHook(memoryHook, input);
+        return 0;
+    }
 
     if (args is [SessionReminder.Argument, ..])
     {
@@ -130,6 +144,119 @@ static void RecordActivity(string input)
     Directory.CreateDirectory(folder);
     var temporary = path + "." + Environment.ProcessId + ".tmp";
     File.WriteAllText(temporary, new ActivityRecord(environment, hook.Activity, now).ToJson(), new UTF8Encoding(false));
+    File.Move(temporary, path, overwrite: true);
+}
+
+/// The memory hooks of the persona plugin. The rules and the facts go to the model at the start of
+/// a session; a message of the person refreshes facts by their keys and may bring a reminder.
+static void AnswerMemoryHook(MemoryBridgeMode mode, string input)
+{
+    var today = DateOnly.FromDateTime(DateTime.Now);
+    var path = ThisComputer.Folders.MemoryFile;
+    if (mode == MemoryBridgeMode.Rules)
+    {
+        WriteOutput(MemoryBridge.RulesOutput(today));
+        return;
+    }
+
+    if (mode == MemoryBridgeMode.Facts)
+    {
+        WriteOutput(MemoryBridge.FactsOutput(ReadIfThere(path)));
+        return;
+    }
+
+    MemoryBridgeStep step;
+    using (TakeMemoryLock())
+    {
+        step = MemoryBridge.OnPrompt(input, ReadIfThere(path), today);
+        if (step.MemoryJson is { } json)
+        {
+            WriteMemory(json, step.BadFile);
+        }
+    }
+
+    if (step.Output is { } output)
+    {
+        WriteOutput(output);
+    }
+}
+
+/// The MCP server with the memory tools: one JSON-RPC message per line, until Claude Code closes
+/// the input. The file is read again for every message, because hooks of other sessions and the
+/// app write it too.
+static int ServeMemory()
+{
+    using var stdin = new StreamReader(Console.OpenStandardInput(), new UTF8Encoding(false));
+    using var stdout = Console.OpenStandardOutput();
+    var version = typeof(MemoryServer).Assembly.GetName().Version?.ToString(3) ?? "0.0.0";
+
+    while (stdin.ReadLine() is { } line)
+    {
+        if (string.IsNullOrWhiteSpace(line) || AnswerServerLine(line, version) is not { } reply)
+        {
+            continue;
+        }
+
+        stdout.Write(Encoding.UTF8.GetBytes(reply + "\n"));
+        stdout.Flush();
+    }
+
+    return 0;
+}
+
+/// A change that could not be written is answered as a failed tool call: the model must not read
+/// "Saved" for a fact that is not in the file.
+static string? AnswerServerLine(string line, string version)
+{
+    try
+    {
+        using var gate = TakeMemoryLock();
+        var path = ThisComputer.Folders.MemoryFile;
+        var step = MemoryBridge.OnServerLine(line, ReadIfThere(path), DateOnly.FromDateTime(DateTime.Now), version);
+        if (step.MemoryJson is { } json)
+        {
+            WriteMemory(json, step.BadFile);
+        }
+
+        return step.Output;
+    }
+    catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+    {
+        return MemoryBridge.WriteFailedReply(line);
+    }
+}
+
+/// One writer at a time. Hooks of several sessions, the memory server and the app all read the
+/// file, change it and write it back; without a gate the slower one would undo the other's change.
+static FileStream TakeMemoryLock()
+{
+    var path = ThisComputer.Folders.MemoryFile + ".lock";
+    Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+    for (var attempt = 0; ; attempt++)
+    {
+        try
+        {
+            return new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+        }
+        catch (IOException) when (attempt < 80)
+        {
+            Thread.Sleep(25);
+        }
+    }
+}
+
+/// A file that was not a memory is kept as ".bad" before the new one takes its place, so a slip
+/// in a hand edit never costs the person their facts.
+static void WriteMemory(string json, bool keepBadFile)
+{
+    var path = ThisComputer.Folders.MemoryFile;
+    if (keepBadFile && File.Exists(path))
+    {
+        File.Move(path, path + ".bad", overwrite: true);
+    }
+
+    var temporary = path + "." + Environment.ProcessId + ".tmp";
+    File.WriteAllText(temporary, json, new UTF8Encoding(false));
     File.Move(temporary, path, overwrite: true);
 }
 

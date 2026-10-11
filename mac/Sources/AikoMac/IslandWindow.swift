@@ -18,6 +18,12 @@ final class IslandWindow {
     /// the card then stays until it is closed, the same as after a click on the menu bar icon.
     var onCard: ((Bool) -> Void)?
 
+    /// What the daily update check found. It goes into the words of the island, not its picture.
+    var newerVersion: String? {
+        get { view.newerVersion }
+        set { view.newerVersion = newValue }
+    }
+
     /// Raised after a drag, with the place the island ended up in.
     var onMoved: ((IslandPosition) -> Void)?
 
