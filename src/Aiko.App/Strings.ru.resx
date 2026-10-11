@@ -775,6 +775,12 @@
   <data name="SentPersona" xml:space="preserve">
     <value>личность включена хотя бы в одной среде</value>
   </data>
+  <data name="SentSkills" xml:space="preserve">
+    <value>навыки включены хотя бы в одной среде</value>
+  </data>
+  <data name="SentMemory" xml:space="preserve">
+    <value>память включена хотя бы в одной среде</value>
+  </data>
   <data name="NothingSentYet" xml:space="preserve">
     <value>Сейчас ничего из этого не отправляется.</value>
   </data>
@@ -782,7 +788,7 @@
     <value>ЧТО НЕ ОТПРАВЛЯЕТСЯ НИКОГДА</value>
   </data>
   <data name="NeverSentWhat" xml:space="preserve">
-    <value>Имя, почта, папки проектов, лимиты, токен и тексты сессий. IP-адрес сайт не читает и не хранит.</value>
+    <value>Имя, почта, папки проектов, лимиты, токен, тексты сессий и содержимое памяти. IP-адрес сайт не читает и не хранит.</value>
   </data>
   <data name="StatsKeptFor" xml:space="preserve">
     <value>Записи удаляются через 90 дней.</value>

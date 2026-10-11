@@ -21,8 +21,21 @@ the update check.
 - **Session events, where the personality is on.** Claude Code runs Aiko's hook when a session
   starts working, waits for you, finishes, fails or ends. Aiko reads only the kind of event and the
   session ID, keeps a small file per session with the state and the time, and hashes the session ID
-  into the file name. The prompt, tool input, paths and answers are never read or stored. The file
-  goes away when the session ends, and files older than a day are removed when Aiko starts.
+  into the file name. For this the prompt, tool input, paths and answers are never read or stored.
+  The file goes away when the session ends, and files older than a day are removed when Aiko starts.
+- **Your message, where the memory is on.** Memory is off until you turn it on for an environment.
+  With it on, Claude Code hands each message you send to a second hook of Aiko. It looks for two
+  things: the keys of the facts in the memory, to note that a fact came up again today, and words
+  like "I" or "my", to remind the model that the message may hold something worth remembering. The
+  message is read in memory and is **not** stored, logged or sent anywhere by Aiko.
+- **The memory file.** What the model saves about you, at most 42 short facts, is kept in one file
+  on your computer, `memory.json` next to Aiko's settings. It is given to the model at the start of
+  a session in the environments where memory is on. You can read, change and erase it on the
+  Personality page, or open the file itself. Aiko never sends it anywhere; the model you talk to
+  sees it, as it sees everything else in the session.
+- **One permission line, where the memory is on.** Aiko adds one rule to that environment's
+  `settings.json`, so the model may use Aiko's two memory tools without asking you each time. The
+  rule goes away when you turn memory off or remove Aiko.
 
 ## What Aiko sends
 
@@ -56,11 +69,13 @@ measures, and this is how.
 - `day`: an ID that **changes every day**;
 - `w`: a single 1, when this is the first run of this week;
 - `m`: a single 1, when this is the first run of this month;
-- `p`: 1 or 0: whether the personality is on in at least one environment.
+- `p`: 1 or 0: whether the personality is on in at least one environment;
+- `s`: 1 or 0: whether the skills are on in at least one environment;
+- `mem`: 1 or 0: whether the memory is on in at least one environment.
 
-**Nothing else.** No name, account, folders or limits. Nothing about which skills you use, which
-projects you work on, or how long Aiko has been running. The settings page lists these six lines
-and says what each one is for.
+**Nothing else.** No name, account, folders or limits. Nothing about which skills you use, what
+the memory holds, which projects you work on, or how long Aiko has been running. The settings page
+lists these eight lines and says what each one is for.
 
 **How the ID works.** Aiko makes a random value once and keeps it in `%APPDATA%\Aiko\install-id`.
 That value never leaves your computer. Aiko sends a hash of the value and today's date, cut to
@@ -127,14 +142,15 @@ Without direct mode, Aiko never touches the token.
 
 ## Where Aiko keeps things
 
-- `%APPDATA%\Aiko`: your settings, the list of environments, the random value described above, and
-  which week and month have already been reported.
+- `%APPDATA%\Aiko`: your settings, the list of environments, the random value described above,
+  which week and month have already been reported, and the memory file once the memory is used.
 - `%LOCALAPPDATA%\Aiko`: the limit numbers from Claude Code, the last direct mode answer, a short
-  log, and, where the personality is on, the session state files, the personality plugin and the
-  local marketplace with the skills.
+  log, the local marketplace with the skills where they are on, and, where the personality is on,
+  the session state files and the personality plugin.
 - `%USERPROFILE%\.claude*\settings.json`: one line added by Aiko, with a copy of the original next
-  to it, and Aiko's plugins and marketplace where the personality is on. Claude Code keeps its own
-  copies of those plugins in its `plugins` folder.
+  to it, Aiko's plugins and marketplace where the personality or the skills are on, and the
+  permission line for the memory tools where the memory is on. Claude Code keeps its own copies of
+  those plugins in its `plugins` folder.
 - Your user `PATH`: Aiko's command folder at the start, if you agreed in the setup checklist.
 - Your PowerShell profile: the account-switching functions you ticked are turned off, with a copy of
   the profile next to it.

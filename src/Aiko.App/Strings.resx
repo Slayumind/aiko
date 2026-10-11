@@ -775,6 +775,12 @@
   <data name="SentPersona" xml:space="preserve">
     <value>the personality is on in at least one environment</value>
   </data>
+  <data name="SentSkills" xml:space="preserve">
+    <value>the skills are on in at least one environment</value>
+  </data>
+  <data name="SentMemory" xml:space="preserve">
+    <value>the memory is on in at least one environment</value>
+  </data>
   <data name="NothingSentYet" xml:space="preserve">
     <value>None of this is sent right now.</value>
   </data>
@@ -782,7 +788,7 @@
     <value>WHAT NEVER LEAVES</value>
   </data>
   <data name="NeverSentWhat" xml:space="preserve">
-    <value>Your name, email, project folders, limits, token and session texts. The site doesn't read or store the IP address.</value>
+    <value>Your name, email, project folders, limits, token, session texts and what the memory holds. The site doesn't read or store the IP address.</value>
   </data>
   <data name="StatsKeptFor" xml:space="preserve">
     <value>The records are deleted after 90 days.</value>

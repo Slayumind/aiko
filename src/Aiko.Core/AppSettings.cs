@@ -46,7 +46,7 @@ public sealed record AppSettings
     /// Off by default, and its own switch since 0.2.1. It used to ride on CheckUpdates, so turning
     /// off the count meant turning off update checks with it, and there was no way to keep one
     /// without the other. The request is still one request: with this off, the identifier and the
-    /// three flags are simply left out of it and the server writes nothing.
+    /// flags are simply left out of it and the server writes nothing.
     public bool SendStats { get; init; }
 
     /// Whether the privacy question has been answered at all. Without it, "off" cannot be told

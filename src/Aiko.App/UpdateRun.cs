@@ -10,8 +10,17 @@ static class UpdateRun
     public static StatsChoice Choice()
     {
         var allowed = SettingsStore.Load().SendStats;
-        var persona = allowed && SettingsStore.LoadEnvironments().Environments.Any(environment => environment.Persona);
-        return new StatsChoice(allowed, persona);
+        if (!allowed)
+        {
+            return new StatsChoice(false, false, false, false);
+        }
+
+        var environments = SettingsStore.LoadEnvironments().Environments;
+        return new StatsChoice(
+            true,
+            Persona: environments.Any(environment => environment.Persona),
+            Skills: environments.Any(environment => environment.Skills),
+            Memory: environments.Any(environment => environment.HasMemory));
     }
 
     public static async Task<UpdateInfo> AskAsync(CancellationToken cancel)

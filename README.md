@@ -111,7 +111,7 @@ not read it, so there the numbers come from the status line and the CLI.
 If you allow it, Aiko also counts how many copies run each day. It has its own switch on the
 **Privacy** page, off by default and separate from the update check. The ID it sends changes every
 day, so two days can't be linked to one person, and the rows are deleted after 90 days. That page
-lists the six things that go, line by line; so does [PRIVACY.md](PRIVACY.md).
+lists the eight things that go, line by line; so does [PRIVACY.md](PRIVACY.md).
 
 ## What you need
 

@@ -96,7 +96,7 @@ These are settled. A pull request that changes them will be turned down.
   credentials file. [PRIVACY.md](PRIVACY.md) says why.
 - **Aiko doesn't pretend to be Claude Code.** Its user agent says Aiko and its version.
 - **No analytics service, no crash reporting service, no third-party network calls.** The count in
-  [PRIVACY.md](PRIVACY.md) is the only measurement: six values a day, behind their own switch. It
+  [PRIVACY.md](PRIVACY.md) is the only measurement: eight values a day, behind their own switch. It
   uses the update check request, and its ID still changes every day. The week and the month are
   counted with a flag the copy sets for itself, not with a longer-lived ID, and that is the line to
   hold. Ask before you add anything else to measure.

@@ -288,9 +288,11 @@ public enum Strings {
         "SentWeekFlag": ("the first run this week", "первый запуск на этой неделе"),
         "SentMonthFlag": ("the first run this month", "первый запуск в этом месяце"),
         "SentPersona": ("the personality is on in at least one environment", "личность включена хотя бы в одной среде"),
+        "SentSkills": ("the skills are on in at least one environment", "навыки включены хотя бы в одной среде"),
+        "SentMemory": ("the memory is on in at least one environment", "память включена хотя бы в одной среде"),
         "NothingSentYet": ("None of this is sent right now.", "Сейчас ничего из этого не отправляется."),
         "SectionNeverSent": ("WHAT NEVER LEAVES", "ЧТО НЕ ОТПРАВЛЯЕТСЯ НИКОГДА"),
-        "NeverSentWhat": ("Your name, email, project folders, limits, token and session texts. The site doesn't read or store the IP address.", "Имя, почта, папки проектов, лимиты, токен и тексты сессий. IP-адрес сайт не читает и не хранит."),
+        "NeverSentWhat": ("Your name, email, project folders, limits, token, session texts and what the memory holds. The site doesn't read or store the IP address.", "Имя, почта, папки проектов, лимиты, токен, тексты сессий и содержимое памяти. IP-адрес сайт не читает и не хранит."),
         "StatsKeptFor": ("The records are deleted after 90 days.", "Записи удаляются через 90 дней."),
         "ResetInstallId": ("Reset ID", "Сбросить ID"),
         "ResetInstallIdWhat": ("Aiko makes a new value. The days before it cannot be linked to the new one.", "Aiko придумает новое значение. Прежние дни с новым ID уже не связать."),
@@ -1140,13 +1142,19 @@ public enum Strings {
     /// the personality is on in at least one environment
     public static var sentPersona: String { Strings.get("SentPersona") }
 
+    /// the skills are on in at least one environment
+    public static var sentSkills: String { Strings.get("SentSkills") }
+
+    /// the memory is on in at least one environment
+    public static var sentMemory: String { Strings.get("SentMemory") }
+
     /// None of this is sent right now.
     public static var nothingSentYet: String { Strings.get("NothingSentYet") }
 
     /// WHAT NEVER LEAVES
     public static var sectionNeverSent: String { Strings.get("SectionNeverSent") }
 
-    /// Your name, email, project folders, limits, token and session texts. The site doesn't read...
+    /// Your name, email, project folders, limits, token, session texts and what the memory holds...
     public static var neverSentWhat: String { Strings.get("NeverSentWhat") }
 
     /// The records are deleted after 90 days.

@@ -1736,6 +1736,20 @@
     ]
   ],
   [
+    "SentSkills",
+    [
+      "the skills are on in at least one environment",
+      "навыки включены хотя бы в одной среде"
+    ]
+  ],
+  [
+    "SentMemory",
+    [
+      "the memory is on in at least one environment",
+      "память включена хотя бы в одной среде"
+    ]
+  ],
+  [
     "NothingSentYet",
     [
       "None of this is sent right now.",
@@ -1752,8 +1766,8 @@
   [
     "NeverSentWhat",
     [
-      "Your name, email, project folders, limits, token and session texts. The site doesn't read or store the IP address.",
-      "Имя, почта, папки проектов, лимиты, токен и тексты сессий. IP-адрес сайт не читает и не хранит."
+      "Your name, email, project folders, limits, token, session texts and what the memory holds. The site doesn't read or store the IP address.",
+      "Имя, почта, папки проектов, лимиты, токен, тексты сессий и содержимое памяти. IP-адрес сайт не читает и не хранит."
     ]
   ],
   [

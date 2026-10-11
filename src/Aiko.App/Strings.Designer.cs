@@ -765,13 +765,19 @@ public static class Strings
     /// the personality is on in at least one environment
     public static string SentPersona => Get("SentPersona");
 
+    /// the skills are on in at least one environment
+    public static string SentSkills => Get("SentSkills");
+
+    /// the memory is on in at least one environment
+    public static string SentMemory => Get("SentMemory");
+
     /// None of this is sent right now.
     public static string NothingSentYet => Get("NothingSentYet");
 
     /// WHAT NEVER LEAVES
     public static string SectionNeverSent => Get("SectionNeverSent");
 
-    /// Your name, email, project folders, limits, token and session texts. The site doesn't read...
+    /// Your name, email, project folders, limits, token, session texts and what the memory holds...
     public static string NeverSentWhat => Get("NeverSentWhat");
 
     /// The records are deleted after 90 days.
