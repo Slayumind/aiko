@@ -47,6 +47,9 @@
     <TextBlock Text="{x:Static local:Strings.SwitchesNote}" Style="{StaticResource RowHint}" Margin="0,8,0,0" />
     <TextBlock Text="{x:Static local:Strings.MemoryPermissionNote}" Style="{StaticResource RowHint}" Margin="0,4,0,0" />
 
+    <!-- The memory itself: quotas, facts and what a person may do to them (MemoryBlock.cs). -->
+    <local:MemoryBlock Margin="0,22,0,0" />
+
     <TextBlock Text="{x:Static local:Strings.SectionFace}" Style="{StaticResource SectionLabel}" Margin="0,22,0,8" />
     <Border Style="{StaticResource SegmentBar}">
       <StackPanel Orientation="Horizontal">

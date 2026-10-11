@@ -2107,6 +2107,209 @@
     ]
   ],
   [
+    "SectionMemory",
+    [
+      "MEMORY · {0} OF {1}",
+      "ПАМЯТЬ · {0} ИЗ {1}"
+    ]
+  ],
+  [
+    "MemoryAdd",
+    [
+      "Add a fact",
+      "Добавить факт"
+    ]
+  ],
+  [
+    "MemoryCategoryYou",
+    [
+      "You",
+      "Ты"
+    ]
+  ],
+  [
+    "MemoryCategoryWork",
+    [
+      "How to work with me",
+      "Как со мной работать"
+    ]
+  ],
+  [
+    "MemoryCategoryProjects",
+    [
+      "Projects",
+      "Проекты"
+    ]
+  ],
+  [
+    "MemoryCategoryInterests",
+    [
+      "Interests and taste",
+      "Интересы и вкус"
+    ]
+  ],
+  [
+    "MemoryTabYou",
+    [
+      "You",
+      "Ты"
+    ]
+  ],
+  [
+    "MemoryTabWork",
+    [
+      "Work",
+      "Работа"
+    ]
+  ],
+  [
+    "MemoryTabProjects",
+    [
+      "Projects",
+      "Проекты"
+    ]
+  ],
+  [
+    "MemoryTabInterests",
+    [
+      "Taste",
+      "Вкус"
+    ]
+  ],
+  [
+    "MemoryPin",
+    [
+      "Pin",
+      "Закрепить"
+    ]
+  ],
+  [
+    "MemoryUnpin",
+    [
+      "Unpin",
+      "Открепить"
+    ]
+  ],
+  [
+    "MemoryEdit",
+    [
+      "Edit",
+      "Править"
+    ]
+  ],
+  [
+    "MemorySave",
+    [
+      "Save",
+      "Сохранить"
+    ]
+  ],
+  [
+    "MemoryCount",
+    [
+      "{0} of {1}",
+      "{0} из {1}"
+    ]
+  ],
+  [
+    "MemoryFactPlaceholder",
+    [
+      "The fact, one thought",
+      "Факт, одна мысль"
+    ]
+  ],
+  [
+    "MemoryMeaningPlaceholder",
+    [
+      "What it changes in the answers (optional)",
+      "Что это меняет в ответах (необязательно)"
+    ]
+  ],
+  [
+    "MemoryEnglishNote",
+    [
+      "Facts are in English, the way the model reads them.",
+      "Факты записаны по-английски — так их читает модель."
+    ]
+  ],
+  [
+    "MemoryAnyLanguageNote",
+    [
+      "You can write a fact in any language. Aiko writes hers in English.",
+      "Факт можно писать на любом языке. Aiko записывает свои по-английски."
+    ]
+  ],
+  [
+    "MemoryYouNote",
+    [
+      "Your name, how to address you and your grammatical gender are pinned facts here. If they are missing, Aiko asks once in a casual talk. You can also add them yourself.",
+      "Имя, обращение и род — закреплённые факты в этом разделе. Если их нет, Aiko спросит один раз в разговоре. Их можно добавить и здесь."
+    ]
+  ],
+  [
+    "MemoryOpenFile",
+    [
+      "Open file",
+      "Открыть файл"
+    ]
+  ],
+  [
+    "MemoryErase",
+    [
+      "Erase memory",
+      "Стереть память"
+    ]
+  ],
+  [
+    "MemoryEraseAsk",
+    [
+      "Aiko will forget every fact in every environment, {0} in all. This is not reversible.",
+      "Aiko забудет все факты во всех средах, их {0}. Вернуть их нельзя."
+    ]
+  ],
+  [
+    "MemoryTooLong",
+    [
+      "too long · {0} of {1}",
+      "слишком длинный · {0} из {1}"
+    ]
+  ],
+  [
+    "MemoryTooLongNote",
+    [
+      "The model does not see a fact longer than {0} characters. Shorten it and it comes back.",
+      "Факт длиннее {0} знаков модель не видит. Сократи его, и он вернётся в память."
+    ]
+  ],
+  [
+    "MemoryAsideNote",
+    [
+      "Records in the file that cannot be read after a hand edit: {0}. They are kept in the file, in the setAside list.",
+      "Записей в файле, которые не читаются после ручной правки: {0}. Они сохранены в файле, в списке setAside."
+    ]
+  ],
+  [
+    "MemoryEmpty",
+    [
+      "Memory is empty. Aiko saves the first fact when you tell her something about yourself: who you are, how to work with you, what you work on. You can also add a fact here.",
+      "Память пуста. Aiko запишет первый факт, когда в разговоре прозвучит что-то о тебе: кто ты, как с тобой работать, над чем ты работаешь. Факт можно добавить и здесь."
+    ]
+  ],
+  [
+    "MemoryFull",
+    [
+      "This section is full. Remove a fact to add a new one.",
+      "Раздел заполнен. Удали факт, чтобы добавить новый."
+    ]
+  ],
+  [
+    "MemoryWriteFailed",
+    [
+      "Aiko could not write the memory file. Nothing changed.",
+      "Aiko не смогла записать файл памяти. Ничего не изменилось."
+    ]
+  ],
+  [
     "SectionSkills",
     [
       "SKILLS · {0}",

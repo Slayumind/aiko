@@ -934,6 +934,93 @@
   <data name="SampleCommit" xml:space="preserve">
     <value>The commit for this fix has no character:</value>
   </data>
+  <data name="SectionMemory" xml:space="preserve">
+    <value>MEMORY · {0} OF {1}</value>
+  </data>
+  <data name="MemoryAdd" xml:space="preserve">
+    <value>Add a fact</value>
+  </data>
+  <data name="MemoryCategoryYou" xml:space="preserve">
+    <value>You</value>
+  </data>
+  <data name="MemoryCategoryWork" xml:space="preserve">
+    <value>How to work with me</value>
+  </data>
+  <data name="MemoryCategoryProjects" xml:space="preserve">
+    <value>Projects</value>
+  </data>
+  <data name="MemoryCategoryInterests" xml:space="preserve">
+    <value>Interests and taste</value>
+  </data>
+  <data name="MemoryTabYou" xml:space="preserve">
+    <value>You</value>
+  </data>
+  <data name="MemoryTabWork" xml:space="preserve">
+    <value>Work</value>
+  </data>
+  <data name="MemoryTabProjects" xml:space="preserve">
+    <value>Projects</value>
+  </data>
+  <data name="MemoryTabInterests" xml:space="preserve">
+    <value>Taste</value>
+  </data>
+  <data name="MemoryPin" xml:space="preserve">
+    <value>Pin</value>
+  </data>
+  <data name="MemoryUnpin" xml:space="preserve">
+    <value>Unpin</value>
+  </data>
+  <data name="MemoryEdit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="MemorySave" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="MemoryCount" xml:space="preserve">
+    <value>{0} of {1}</value>
+  </data>
+  <data name="MemoryFactPlaceholder" xml:space="preserve">
+    <value>The fact, one thought</value>
+  </data>
+  <data name="MemoryMeaningPlaceholder" xml:space="preserve">
+    <value>What it changes in the answers (optional)</value>
+  </data>
+  <data name="MemoryEnglishNote" xml:space="preserve">
+    <value>Facts are in English, the way the model reads them.</value>
+  </data>
+  <data name="MemoryAnyLanguageNote" xml:space="preserve">
+    <value>You can write a fact in any language. Aiko writes hers in English.</value>
+  </data>
+  <data name="MemoryYouNote" xml:space="preserve">
+    <value>Your name, how to address you and your grammatical gender are pinned facts here. If they are missing, Aiko asks once in a casual talk. You can also add them yourself.</value>
+  </data>
+  <data name="MemoryOpenFile" xml:space="preserve">
+    <value>Open file</value>
+  </data>
+  <data name="MemoryErase" xml:space="preserve">
+    <value>Erase memory</value>
+  </data>
+  <data name="MemoryEraseAsk" xml:space="preserve">
+    <value>Aiko will forget every fact in every environment, {0} in all. This is not reversible.</value>
+  </data>
+  <data name="MemoryTooLong" xml:space="preserve">
+    <value>too long · {0} of {1}</value>
+  </data>
+  <data name="MemoryTooLongNote" xml:space="preserve">
+    <value>The model does not see a fact longer than {0} characters. Shorten it and it comes back.</value>
+  </data>
+  <data name="MemoryAsideNote" xml:space="preserve">
+    <value>Records in the file that cannot be read after a hand edit: {0}. They are kept in the file, in the setAside list.</value>
+  </data>
+  <data name="MemoryEmpty" xml:space="preserve">
+    <value>Memory is empty. Aiko saves the first fact when you tell her something about yourself: who you are, how to work with you, what you work on. You can also add a fact here.</value>
+  </data>
+  <data name="MemoryFull" xml:space="preserve">
+    <value>This section is full. Remove a fact to add a new one.</value>
+  </data>
+  <data name="MemoryWriteFailed" xml:space="preserve">
+    <value>Aiko could not write the memory file. Nothing changed.</value>
+  </data>
   <data name="SectionSkills" xml:space="preserve">
     <value>SKILLS · {0}</value>
   </data>

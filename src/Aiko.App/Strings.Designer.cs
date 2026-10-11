@@ -924,6 +924,93 @@ public static class Strings
     /// The commit for this fix has no character:
     public static string SampleCommit => Get("SampleCommit");
 
+    /// MEMORY · {0} OF {1}
+    public static string SectionMemory => Get("SectionMemory");
+
+    /// Add a fact
+    public static string MemoryAdd => Get("MemoryAdd");
+
+    /// You
+    public static string MemoryCategoryYou => Get("MemoryCategoryYou");
+
+    /// How to work with me
+    public static string MemoryCategoryWork => Get("MemoryCategoryWork");
+
+    /// Projects
+    public static string MemoryCategoryProjects => Get("MemoryCategoryProjects");
+
+    /// Interests and taste
+    public static string MemoryCategoryInterests => Get("MemoryCategoryInterests");
+
+    /// You
+    public static string MemoryTabYou => Get("MemoryTabYou");
+
+    /// Work
+    public static string MemoryTabWork => Get("MemoryTabWork");
+
+    /// Projects
+    public static string MemoryTabProjects => Get("MemoryTabProjects");
+
+    /// Taste
+    public static string MemoryTabInterests => Get("MemoryTabInterests");
+
+    /// Pin
+    public static string MemoryPin => Get("MemoryPin");
+
+    /// Unpin
+    public static string MemoryUnpin => Get("MemoryUnpin");
+
+    /// Edit
+    public static string MemoryEdit => Get("MemoryEdit");
+
+    /// Save
+    public static string MemorySave => Get("MemorySave");
+
+    /// {0} of {1}
+    public static string MemoryCount => Get("MemoryCount");
+
+    /// The fact, one thought
+    public static string MemoryFactPlaceholder => Get("MemoryFactPlaceholder");
+
+    /// What it changes in the answers (optional)
+    public static string MemoryMeaningPlaceholder => Get("MemoryMeaningPlaceholder");
+
+    /// Facts are in English, the way the model reads them.
+    public static string MemoryEnglishNote => Get("MemoryEnglishNote");
+
+    /// You can write a fact in any language. Aiko writes hers in English.
+    public static string MemoryAnyLanguageNote => Get("MemoryAnyLanguageNote");
+
+    /// Your name, how to address you and your grammatical gender are pinned facts here. If they ...
+    public static string MemoryYouNote => Get("MemoryYouNote");
+
+    /// Open file
+    public static string MemoryOpenFile => Get("MemoryOpenFile");
+
+    /// Erase memory
+    public static string MemoryErase => Get("MemoryErase");
+
+    /// Aiko will forget every fact in every environment, {0} in all. This is not reversible.
+    public static string MemoryEraseAsk => Get("MemoryEraseAsk");
+
+    /// too long · {0} of {1}
+    public static string MemoryTooLong => Get("MemoryTooLong");
+
+    /// The model does not see a fact longer than {0} characters. Shorten it and it comes back.
+    public static string MemoryTooLongNote => Get("MemoryTooLongNote");
+
+    /// Records in the file that cannot be read after a hand edit: {0}. They are kept in the file...
+    public static string MemoryAsideNote => Get("MemoryAsideNote");
+
+    /// Memory is empty. Aiko saves the first fact when you tell her something about yourself: wh...
+    public static string MemoryEmpty => Get("MemoryEmpty");
+
+    /// This section is full. Remove a fact to add a new one.
+    public static string MemoryFull => Get("MemoryFull");
+
+    /// Aiko could not write the memory file. Nothing changed.
+    public static string MemoryWriteFailed => Get("MemoryWriteFailed");
+
     /// SKILLS · {0}
     public static string SectionSkills => Get("SectionSkills");
 
