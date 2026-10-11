@@ -29,23 +29,17 @@ public static class PersonaPlugin
     /// without the tool part covers the whole server.
     public const string MemoryPermission = "mcp__plugin_" + Name + "_" + MemoryServer;
 
-    /// Relative path with forward slashes → file content. With the memory on, the plugin also
-    /// brings the memory hooks and the server with the remember and forget tools.
-    public static IReadOnlyDictionary<string, string> Files(Temperament temperament, string bridgeExePath, bool memory = false)
-    {
-        var files = new SortedDictionary<string, string>(StringComparer.Ordinal)
+    /// Relative path with forward slashes → file content. The plugin is all of Aiko in a session
+    /// except her skills: the style she talks in, the hooks behind her face, the memory hooks and
+    /// the server with the remember and forget tools (D-285).
+    public static IReadOnlyDictionary<string, string> Files(Temperament temperament, string bridgeExePath) =>
+        new SortedDictionary<string, string>(StringComparer.Ordinal)
         {
             [".claude-plugin/plugin.json"] = Manifest(),
+            [".mcp.json"] = Servers(bridgeExePath),
             ["output-styles/aiko.md"] = PersonaPrompt.StyleFile(temperament),
-            ["hooks/hooks.json"] = Hooks(bridgeExePath, memory),
+            ["hooks/hooks.json"] = Hooks(bridgeExePath),
         };
-        if (memory)
-        {
-            files[".mcp.json"] = Servers(bridgeExePath);
-        }
-
-        return files;
-    }
 
     /// Twelve hex characters of SHA-256 over the paths and contents. The bridge names the folder
     /// after it, so a changed persona lands in a new folder and never half-overwrites the old one.
@@ -66,7 +60,7 @@ public static class PersonaPlugin
         new JsonObject
         {
             ["name"] = Name,
-            ["description"] = "Aiko's persona and the hooks behind her face in the tray.",
+            ["description"] = "Aiko's persona, her memory and the hooks behind her face in the tray.",
         }.ToJsonString(Indented) + "\n";
 
     /// The command and its argument go separately, so no shell reads the path: the install path
@@ -75,13 +69,13 @@ public static class PersonaPlugin
     /// The memory hooks are not async: their output is what the model must read, the rules and the
     /// facts at the start of a session and the reminder beside a message. The rules and the facts
     /// are two hooks because Claude Code cuts each hook output on its own.
-    private static string Hooks(string bridgeExePath, bool memory)
+    private static string Hooks(string bridgeExePath)
     {
         var events = new JsonObject();
         foreach (var name in HookEvents)
         {
             var hooks = new JsonArray(FaceHook(bridgeExePath));
-            if (memory && name == "UserPromptSubmit")
+            if (name == "UserPromptSubmit")
             {
                 hooks.Add(MemoryHook(bridgeExePath, MemoryBridgeMode.Prompt));
             }
@@ -89,16 +83,13 @@ public static class PersonaPlugin
             events[name] = new JsonArray(new JsonObject { ["hooks"] = hooks });
         }
 
-        if (memory)
-        {
-            events["SessionStart"] = new JsonArray(
-                new JsonObject
-                {
-                    ["hooks"] = new JsonArray(
-                        MemoryHook(bridgeExePath, MemoryBridgeMode.Rules),
-                        MemoryHook(bridgeExePath, MemoryBridgeMode.Facts)),
-                });
-        }
+        events["SessionStart"] = new JsonArray(
+            new JsonObject
+            {
+                ["hooks"] = new JsonArray(
+                    MemoryHook(bridgeExePath, MemoryBridgeMode.Rules),
+                    MemoryHook(bridgeExePath, MemoryBridgeMode.Facts)),
+            });
 
         return new JsonObject { ["hooks"] = events }.ToJsonString(Indented) + "\n";
     }

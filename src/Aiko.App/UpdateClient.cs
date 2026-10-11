@@ -14,7 +14,7 @@ namespace Aiko.App;
 ///
 /// What goes along with the question, when the count is on: the version, the Windows version, an
 /// identifier that changes every day, whether this is the first run of the week and of the month,
-/// and whether the personality, the skills and the memory are on anywhere. Nothing else.
+/// and whether the personality is on anywhere. Nothing else.
 sealed class UpdateClient : IDisposable
 {
     private const string Endpoint = "https://slayumind.org/api/v1/aiko/version";
@@ -80,16 +80,12 @@ sealed class UpdateClient : IDisposable
         var month = Heartbeat.FirstThisMonth(reported.Month, today) ? Heartbeat.MonthKey(today) : null;
 
         var windows = Uri.EscapeDataString(Environment.OSVersion.Version.ToString());
-        var address = $"{Endpoint}?v={version}&os={windows}&day={id}&p={Bit(stats.Persona)}"
-            + (stats.Skills is { } skills ? $"&s={Bit(skills)}" : string.Empty)
-            + (stats.Memory is { } memory ? $"&mem={Bit(memory)}" : string.Empty)
+        var address = $"{Endpoint}?v={version}&os={windows}&day={id}&p={(stats.Persona ? 1 : 0)}"
             + (week is null ? string.Empty : "&w=1")
             + (month is null ? string.Empty : "&m=1");
 
         return new Request(new Uri(address), week, month);
     }
-
-    private static int Bit(bool on) => on ? 1 : 0;
 
     public static string CurrentVersion() =>
         Assembly.GetEntryAssembly()?.GetName().Version is { } version
@@ -103,12 +99,7 @@ sealed class UpdateClient : IDisposable
 
 /// What the user allows and what there is to say about this copy, gathered before the request so
 /// that the client itself reads nothing from the settings.
-///
-/// The three flags say only whether a thing is on in at least one environment: not in which, not
-/// how many, and nothing about what the skills or the memory hold. Skills and Memory are null,
-/// and then left out of the request, until the person has seen the list that names them
-/// (StatsList).
-readonly record struct StatsChoice(bool Allowed, bool Persona, bool? Skills, bool? Memory);
+readonly record struct StatsChoice(bool Allowed, bool Persona);
 
 /// Whether the site answered, and which periods the request claimed. The periods are written down
 /// only on an answer: a claim that never arrived must be made again.

@@ -10,12 +10,8 @@ namespace Aiko.App;
 /// in Aiko.Core.EnvironmentEdits; this class only does the writing.
 public sealed class EnvironmentsEditor
 {
-    /// What Claude Code must hear about: the three switches of every folder. The persona and the
-    /// skills are plugins, and the memory changes the files of the persona plugin.
-    private static HashSet<string> PluginSwitches(EnvironmentSettings settings) =>
-        settings.Environments
-            .SelectMany(e => e.ConfigDirectories.Select(folder => $"{folder}|{e.Persona}|{e.HasSkills}|{e.HasMemory}"))
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+    private static HashSet<string> PersonaSwitches(EnvironmentSettings settings) =>
+        settings.Environments.Where(e => e.Persona).SelectMany(e => e.ConfigDirectories).ToHashSet(StringComparer.OrdinalIgnoreCase);
 
     private static readonly string Home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
@@ -49,9 +45,9 @@ public sealed class EnvironmentsEditor
             AddReminderHooks(next);
         }
 
-        if (!PluginSwitches(before).SetEquals(PluginSwitches(next)))
+        if (!PersonaSwitches(before).SetEquals(PersonaSwitches(next)))
         {
-            PluginSync.Request("switches changed");
+            PluginSync.Request("persona switched");
         }
 
         Log.Write($"settings: {what}");

@@ -10,8 +10,7 @@ public class PluginPlanTests
     private static readonly AikoFolders Folders = AikoFolders.Windows(@"C:\Users\Тест Юзер\AppData\Roaming", LocalAppData);
     private const string Persona = "aiko-persona@aiko";
 
-    private static AikoEnvironment Env(bool persona, bool? skills = null) =>
-        new("Aiko", [@"C:\Users\someone\.claude"]) { Persona = persona, Skills = skills ?? persona };
+    private static AikoEnvironment Env(bool persona) => new("Aiko", [@"C:\Users\someone\.claude"]) { Persona = persona };
 
     private static PluginState State(string? marketplace = null, string[]? installed = null, string[]? enabled = null) =>
         new(marketplace, (installed ?? []).ToHashSet(), (enabled ?? []).ToHashSet());
@@ -104,27 +103,13 @@ public class PluginPlanTests
     // ---- what a folder should have ----
 
     [Fact]
-    public void With_the_persona_and_the_skills_off_a_folder_wants_nothing()
+    public void Where_aiko_is_off_a_folder_wants_nothing_not_even_skills()
     {
         Assert.Empty(PluginPlan.Desired(Env(persona: false), ["copy"]));
     }
 
     [Fact]
-    public void The_skills_do_not_come_without_the_persona()
-    {
-        Assert.Empty(PluginPlan.Desired(Env(persona: false, skills: true), ["copy"]));
-    }
-
-    [Fact]
-    public void The_persona_does_not_bring_the_skills_where_they_are_off()
-    {
-        var desired = PluginPlan.Desired(Env(persona: true, skills: false), ["copy"]);
-
-        Assert.Equal([Persona], desired);
-    }
-
-    [Fact]
-    public void With_the_persona_a_folder_wants_it_and_the_skills_plugin()
+    public void Where_aiko_is_on_a_folder_wants_the_persona_and_the_skills_plugin()
     {
         var desired = PluginPlan.Desired(Env(persona: true), ["copy", "palette"]);
 

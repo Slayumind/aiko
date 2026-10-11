@@ -775,12 +775,6 @@
   <data name="SentPersona" xml:space="preserve">
     <value>the personality is on in at least one environment</value>
   </data>
-  <data name="SentSkills" xml:space="preserve">
-    <value>the skills are on in at least one environment</value>
-  </data>
-  <data name="SentMemory" xml:space="preserve">
-    <value>the memory is on in at least one environment</value>
-  </data>
   <data name="NothingSentYet" xml:space="preserve">
     <value>None of this is sent right now.</value>
   </data>
@@ -812,7 +806,7 @@
     <value>Anonymous statistics</value>
   </data>
   <data name="WizardStatsWhat" xml:space="preserve">
-    <value>The author of Aiko doesn't know how many people use it. Once a day Aiko can say that one copy ran and send eight values. All eight are below.</value>
+    <value>The author of Aiko doesn't know how many people use it. Once a day Aiko can say that one copy ran and send six values. All six are below.</value>
   </data>
   <data name="WizardStatsLater" xml:space="preserve">
     <value>You can change this later on the Privacy page.</value>
@@ -832,32 +826,17 @@
   <data name="StatsStateUnset" xml:space="preserve">
     <value>not chosen</value>
   </data>
-  <data name="SectionWhereAikoTalks" xml:space="preserve">
-    <value>WHERE AIKO TALKS</value>
+  <data name="SectionWhereAikoIsOn" xml:space="preserve">
+    <value>WHERE AIKO IS ON</value>
   </data>
-  <data name="SectionWhatIsOn" xml:space="preserve">
-    <value>WHAT IS ON, BY ENVIRONMENT</value>
+  <data name="AikoOnNote" xml:space="preserve">
+    <value>Her character, her skills and her memory come together. Works in new sessions; open sessions finish the way they started.</value>
   </data>
-  <data name="ColumnPersonality" xml:space="preserve">
-    <value>PERSONALITY</value>
-  </data>
-  <data name="ColumnSkills" xml:space="preserve">
-    <value>SKILLS</value>
-  </data>
-  <data name="ColumnMemory" xml:space="preserve">
-    <value>MEMORY</value>
-  </data>
-  <data name="SwitchesNote" xml:space="preserve">
-    <value>Skills and memory work only together with the personality. Works in new sessions.</value>
-  </data>
-  <data name="MemoryPermissionNote" xml:space="preserve">
-    <value>With memory on, Aiko adds one line to that environment's settings.json: a permission for its two memory tools.</value>
+  <data name="AikoOnWhat" xml:space="preserve">
+    <value>Where Aiko is on, she reads each message you send to keep her memory fresh, and adds one line to that environment's settings.json: a permission for her two memory tools. Turning her off does not erase the memory.</value>
   </data>
   <data name="SkillsWhere" xml:space="preserve">
-    <value>Skills work in the environments where they are on.</value>
-  </data>
-  <data name="PersonaNewSessions" xml:space="preserve">
-    <value>Works in new sessions. Open sessions finish the way they started.</value>
+    <value>Skills work in the environments where Aiko is on.</value>
   </data>
   <data name="PersonaOwnStyle" xml:space="preserve">
     <value>While the personality is on, your style {0} doesn't work. Turn it off and it comes back.</value>
@@ -1030,15 +1009,6 @@
   <data name="SectionSkills" xml:space="preserve">
     <value>SKILLS · {0}</value>
   </data>
-  <data name="SkillsWork" xml:space="preserve">
-    <value>Skills work in environments where the personality is on.</value>
-  </data>
-  <data name="SkillsSwitch" xml:space="preserve">
-    <value>Aiko's skills</value>
-  </data>
-  <data name="SkillsNeedPersona" xml:space="preserve">
-    <value>Turn the personality on in at least one environment, and the skills start working.</value>
-  </data>
   <data name="SkillDomainProjects" xml:space="preserve">
     <value>PROJECT MANAGEMENT</value>
   </data>
@@ -1088,10 +1058,10 @@
     <value>Meet Aiko</value>
   </data>
   <data name="MeetAikoLead" xml:space="preserve">
-    <value>Aiko can talk in your Claude Code sessions in her own voice, and she brings eleven skills. In code and commits she stays quiet.</value>
+    <value>Aiko can talk in your Claude Code sessions in her own voice. She brings her skills and a small memory about you. In code and commits she stays quiet.</value>
   </data>
   <data name="MeetAikoSettings" xml:space="preserve">
-    <value>The temperament, the mood and the skills are on the Personality page. It works in new sessions.</value>
+    <value>The temperament, the mood, the skills and the memory are on the Personality page. It works in new sessions.</value>
   </data>
   <data name="MeetAikoTurnOn" xml:space="preserve">
     <value>Turn on in {0}</value>

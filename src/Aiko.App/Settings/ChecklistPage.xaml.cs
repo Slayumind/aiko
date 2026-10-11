@@ -743,11 +743,6 @@ public partial class ChecklistPage : UserControl
                 // "Meet Aiko" turns it on in environment 1. "Later" never turns off what is on.
                 Persona = (_existing.Environments.FirstOrDefault(e => e.Holds(folder))?.Persona ?? false)
                     || (index == 0 && _personaWanted == true),
-                // She brings her skills with her, as she always did. The memory is never turned on
-                // from here: it has its own switch on the Personality page.
-                Skills = (_existing.Environments.FirstOrDefault(e => e.Holds(folder))?.Skills ?? false)
-                    || (index == 0 && _personaWanted == true),
-                Memory = _existing.Environments.FirstOrDefault(e => e.Holds(folder))?.Memory ?? false,
                 CustomCommand = _commandFields.TryGetValue(index, out var field) ? field.Custom : null,
                 ProjectFolders = projects,
             };
@@ -787,7 +782,7 @@ public partial class ChecklistPage : UserControl
         var runAtStartup = RunAtStartup.IsChecked == true;
         Startup.Set(runAtStartup);
 
-        var answered = SettingsStore.Load() with
+        SettingsStore.Save(SettingsStore.Load() with
         {
             Place = PlaceIsland.IsChecked == true ? AikoPlace.Island : AikoPlace.Tray,
             RunAtStartup = runAtStartup,
@@ -797,10 +792,10 @@ public partial class ChecklistPage : UserControl
             // possible: the wizard does not finish until the item has a state.
             PrivacyAsked = _statsWanted is not null,
             MeetAikoShown = true,
-        };
 
-        // The question shows the whole list, so an answer to it covers the list as it is now.
-        SettingsStore.Save(_statsWanted is null ? answered : StatsList.Seen(answered));
+            // "Meet Aiko" says what the memory does, so whoever finishes the checklist has read it.
+            MemoryShown = true,
+        });
     }
 
     private StackPanel TwoLines(string first, string second)

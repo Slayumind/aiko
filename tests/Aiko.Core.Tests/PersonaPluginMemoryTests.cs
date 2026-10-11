@@ -3,13 +3,13 @@ using Aiko.Core;
 
 namespace Aiko.Core.Tests;
 
-/// What the persona plugin gains when the memory is on in its environment: two hooks at the start
-/// of a session, one beside every message, and the server with the memory tools.
+/// The memory inside the persona plugin: two hooks at the start of a session, one beside every
+/// message, and the server with the memory tools. Aiko is not switched on without it (D-285).
 public class PersonaPluginMemoryTests
 {
     private const string Bridge = @"C:\Users\Саша Иванов\AppData\Local\Slayumind.Aiko\current\Aiko.Bridge.exe";
 
-    private static IReadOnlyDictionary<string, string> WithMemory => PersonaPlugin.Files(Temperament.Normal, Bridge, memory: true);
+    private static IReadOnlyDictionary<string, string> WithMemory => PersonaPlugin.Files(Temperament.Normal, Bridge);
 
     private static JsonElement Hooks(IReadOnlyDictionary<string, string> files) =>
         JsonDocument.Parse(files["hooks/hooks.json"]).RootElement.GetProperty("hooks");
@@ -18,17 +18,7 @@ public class PersonaPluginMemoryTests
         hook.GetProperty("args").EnumerateArray().Select(a => a.GetString()!).ToArray();
 
     [Fact]
-    public void Without_the_memory_the_plugin_is_what_it_was()
-    {
-        var files = PersonaPlugin.Files(Temperament.Normal, Bridge, memory: false);
-
-        Assert.Equal(PersonaPlugin.Files(Temperament.Normal, Bridge), files);
-        Assert.False(files.ContainsKey(".mcp.json"));
-        Assert.False(Hooks(files).TryGetProperty("SessionStart", out _));
-    }
-
-    [Fact]
-    public void With_the_memory_the_plugin_brings_a_server_file()
+    public void The_plugin_brings_a_server_file()
     {
         Assert.Equal(
             [".claude-plugin/plugin.json", ".mcp.json", "hooks/hooks.json", "output-styles/aiko.md"],
@@ -92,32 +82,9 @@ public class PersonaPluginMemoryTests
     }
 
     [Fact]
-    public void Turning_the_memory_on_changes_the_hash_so_the_plugin_is_updated()
-    {
-        var off = PersonaPlugin.ContentHash(PersonaPlugin.Files(Temperament.Normal, Bridge));
-
-        Assert.NotEqual(off, PersonaPlugin.ContentHash(WithMemory));
-    }
-
-    [Fact]
     public void The_permission_names_the_server_the_way_claude_code_names_plugin_tools()
     {
         Assert.Equal("mcp__plugin_aiko-persona_memory", PersonaPlugin.MemoryPermission);
-    }
-
-    [Fact]
-    public void The_plugin_has_the_memory_only_for_a_folder_of_an_environment_with_it()
-    {
-        var withMemory = new AikoEnvironment("Aiko", [@"C:\Users\someone\.claude"]) { Persona = true, Memory = true };
-        var personaOff = new AikoEnvironment("Work", [@"C:\Users\someone\.claude-work"]) { Memory = true };
-        var settings = new EnvironmentSettings([withMemory, personaOff]);
-
-        Assert.True(PersonaPluginOutput.HasMemory(settings, @"C:\Users\someone\.claude"));
-        Assert.True(PersonaPluginOutput.HasMemory(settings, @"c:\users\someone\.claude\"));
-        Assert.False(PersonaPluginOutput.HasMemory(settings, @"C:\Users\someone\.claude-work"));
-        Assert.False(PersonaPluginOutput.HasMemory(settings, @"C:\Users\someone\.claude-other"));
-        Assert.False(PersonaPluginOutput.HasMemory(settings, null));
-        Assert.False(PersonaPluginOutput.HasMemory(EnvironmentSettings.Empty, @"C:\Users\someone\.claude"));
     }
 
     [Theory]

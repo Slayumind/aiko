@@ -5,25 +5,22 @@ namespace Aiko.Core.Tests;
 public class PersonaSettingsTests
 {
     [Fact]
-    public void By_default_Aiko_is_normal_chibi_with_the_skills_on()
+    public void By_default_Aiko_is_normal_and_chibi()
     {
         var persona = PersonaSettings.Default;
 
         Assert.Equal(Temperament.Normal, persona.Temperament);
         Assert.Equal(FaceStyle.Chibi, persona.Face);
-        Assert.True(persona.SkillsOn);
     }
 
     [Fact]
     public void The_persona_survives_a_trip_through_the_file()
     {
-        var persona = PersonaSettings.Default with { Temperament = Temperament.Musou, Face = FaceStyle.Emoji, SkillsOn = false };
+        var persona = PersonaSettings.Default with { Temperament = Temperament.Musou, Face = FaceStyle.Emoji };
 
         var back = PersonaSettings.FromJson(persona.ToJson());
 
         Assert.Equal(persona, back);
-        Assert.Contains("\"skillsOn\": false", persona.ToJson());
-        Assert.DoesNotContain("disabledSkills", persona.ToJson());
     }
 
     [Fact]
@@ -46,43 +43,17 @@ public class PersonaSettingsTests
         Assert.Equal(PersonaSettings.Default, PersonaSettings.FromJson(json));
     }
 
-    // ---- files written when each skill had its own switch ----
-
+    /// The skills had switches of their own until 0.2.1 and one switch for all until 0.3.1. They
+    /// come with Aiko now (D-285), and a file from those days must still read.
     [Theory]
-    [InlineData("""{ "temperament": "Quiet" }""")]
-    [InlineData("""{ "temperament": "Quiet", "disabledSkills": null }""")]
-    [InlineData("""{ "temperament": "Quiet", "disabledSkills": [] }""")]
     [InlineData("""{ "temperament": "Quiet", "disabledSkills": ["aiko-copy", "aiko-palette"] }""")]
-    [InlineData("""{ "temperament": "Quiet", "disabledSkills": ["copy", "", null] }""")]
-    public void An_old_file_with_any_skill_left_on_has_the_skills_on(string json)
+    [InlineData("""{ "temperament": "Quiet", "skillsOn": false }""")]
+    public void A_file_with_a_skills_switch_of_an_older_aiko_still_reads(string json)
     {
         var persona = PersonaSettings.FromJson(json);
 
         Assert.Equal(Temperament.Quiet, persona.Temperament);
-        Assert.True(persona.SkillsOn);
-    }
-
-    [Fact]
-    public void An_old_file_with_every_skill_off_has_the_skills_off()
-    {
-        var oldNames = PersonaSettings.FromJson("""
-            { "disabledSkills": ["aiko-copy", "aiko-release-gate", "aiko-docs-hygiene", "aiko-blender-to-unity",
-                                 "aiko-texturing", "aiko-glb-for-web", "aiko-palette", "aiko-gamedesign-research"] }
-            """);
-        var newNames = PersonaSettings.FromJson("""
-            { "disabledSkills": ["copy", "release-gate", "docs-hygiene", "blender-to-unity",
-                                 "texturing", "glb-for-web", "palette", "gamedesign-research"] }
-            """);
-
-        Assert.False(oldNames.SkillsOn);
-        Assert.False(newNames.SkillsOn);
-    }
-
-    [Fact]
-    public void The_new_switch_wins_over_an_old_list_in_the_same_file()
-    {
-        var persona = PersonaSettings.FromJson("""{ "skillsOn": true, "disabledSkills": ["copy", "release-gate", "docs-hygiene", "blender-to-unity", "texturing", "glb-for-web", "palette", "gamedesign-research"] }""");
-
-        Assert.True(persona.SkillsOn);
+        Assert.DoesNotContain("skillsOn", persona.ToJson());
+        Assert.DoesNotContain("disabledSkills", persona.ToJson());
     }
 }

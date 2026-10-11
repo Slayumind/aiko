@@ -60,11 +60,11 @@ static class PluginSync
             .Select(p => (p.Folder, p.Environment, p.Desired, State: ReadState(p.Folder)))
             .ToList();
 
-        // The permission for the memory tools follows the memory switch. Where the rule is already
-        // right this only reads the file.
+        // The permission for the memory tools goes with Aiko: on where she is on, off where she is
+        // off. Where the rule is already right this only reads the file.
         foreach (var folder in folders)
         {
-            ClaudeSettingsFile.SetMemoryPermission(folder.Folder, folder.Environment.HasMemory);
+            ClaudeSettingsFile.SetMemoryPermission(folder.Folder, folder.Environment.Persona);
         }
 
         // With the persona off everywhere and nothing of ours installed, Aiko writes nothing at all.
@@ -142,7 +142,7 @@ static class PluginSync
     /// found: then nothing is compared and nothing is noted.
     private static string? PersonaHash(string folder, AikoEnvironment environment) =>
         environment.Persona && BridgePath.Current() is { } bridge
-            ? PersonaPlugin.ContentHash(PersonaPlugin.Files(SettingsStore.LoadPersona().Temperament, bridge, environment.HasMemory))
+            ? PersonaPlugin.ContentHash(PersonaPlugin.Files(SettingsStore.LoadPersona().Temperament, bridge))
             : null;
 
     private static bool IsStale(string folder, string? hash) =>

@@ -118,6 +118,11 @@ public static class WizardChecklist
     public static bool OpensPrivacyOnStart(AppSettings app, EnvironmentSettings environments) =>
         environments.HasEnvironments && !app.PrivacyAsked;
 
+    /// Somebody who turned Aiko on before she had a memory never read what the memory does. The
+    /// Personality page, which says it, opens once for them.
+    public static bool OpensMemoryOnStart(AppSettings app, EnvironmentSettings environments) =>
+        !app.MemoryShown && environments.Environments.Any(e => e.Persona);
+
     private static ItemState Answered(bool unlocked, bool? answer) =>
         !unlocked ? ItemState.Locked
         : answer switch

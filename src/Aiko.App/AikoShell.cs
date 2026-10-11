@@ -137,15 +137,13 @@ sealed class AikoShell : IDisposable
                 _settings?.OpenChecklist(ChecklistItem.Privacy);
             }
 
-            // Once, for someone who agreed to the count when it had fewer values. The two new
-            // ones are not sent until this page has been put in front of them.
-            else if (StatsList.AsksToLookAgain(app, SettingsStore.LoadEnvironments()))
+            // Once, for someone who turned Aiko on before she had a memory. The page says what the
+            // memory reads and writes, and it is where she can be turned off.
+            else if (WizardChecklist.OpensMemoryOnStart(app, SettingsStore.LoadEnvironments()))
             {
-                OpenSettings(page: SettingsPanel.PrivacyPageKey);
-                SettingsStore.Save(StatsList.Seen(app));
+                OpenSettings(page: SettingsPanel.PersonalityPageKey);
+                SettingsStore.Save(app with { MemoryShown = true });
             }
-
-            CarryOldSkillsSwitch();
 
             // An update can bring a new persona text or move the marketplace. When the persona is
             // off everywhere this reads a few files and does nothing else.
@@ -235,18 +233,6 @@ sealed class AikoShell : IDisposable
 
     /// Direct mode is switched per environment, and the settings window and the wizard both
     /// change it, so this is called again whenever either of them closes.
-    /// One switch used to turn the skills off everywhere. An "off" from that time goes into every
-    /// environment once, before the plugins are looked at.
-    private static void CarryOldSkillsSwitch()
-    {
-        var carried = EnvironmentEdits.CarryOldSkillsSwitch(SettingsStore.LoadEnvironments(), SettingsStore.LoadPersona());
-        if (carried.Changed)
-        {
-            SettingsStore.SaveEnvironments(carried.Settings);
-            SettingsStore.SavePersona(carried.Persona);
-        }
-    }
-
     private void FollowDirectMode() => _direct?.Follow(SettingsStore.LoadEnvironments());
 
     /// Tray or island, whichever the settings say. Called again after the settings window or the

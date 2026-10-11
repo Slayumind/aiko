@@ -111,17 +111,19 @@ public sealed record PluginState(
 /// Which of Aiko's plugins a folder should have, and the steps from what it has (D-197, D-234).
 public static class PluginPlan
 {
-    /// The persona where she is on, and with her the skills plugin where the skills are on and
-    /// this Aiko ships any. She may be on without the skills, but not they without her (D-282).
+    /// Where Aiko is on: the persona plugin, which also carries the memory, and the skills plugin
+    /// if this Aiko ships any skills. Where she is off: nothing. The three are not switched apart
+    /// (D-285).
     public static IReadOnlySet<string> Desired(AikoEnvironment environment, IEnumerable<string> skills)
     {
         var desired = new HashSet<string>(StringComparer.Ordinal);
-        if (environment.Persona)
+        if (!environment.Persona)
         {
-            desired.Add(AikoMarketplace.PluginId(PersonaPlugin.Name));
+            return desired;
         }
 
-        if (environment.HasSkills && skills.Any())
+        desired.Add(AikoMarketplace.PluginId(PersonaPlugin.Name));
+        if (skills.Any())
         {
             desired.Add(AikoMarketplace.PluginId(SkillCatalog.PluginName));
         }

@@ -20,8 +20,8 @@ public enum FaceStyle
     Emoji,
 }
 
-/// Aiko herself: one temperament, one face and one skills switch for all environments (D-196).
-/// Whether she talks in an environment is a flag of that environment, not stored here.
+/// Aiko herself: one temperament and one face for all environments (D-196). Whether she is on in
+/// an environment is a flag of that environment, not stored here.
 public sealed record PersonaSettings
 {
     /// See AppSettings.CurrentSchema for why this is written from the start.
@@ -35,11 +35,6 @@ public sealed record PersonaSettings
 
     public FaceStyle Face { get; init; } = FaceStyle.Chibi;
 
-    /// The old switch for the skills in every environment at once (D-237). The skills are now a
-    /// choice of each environment, and this is read only to carry an old "off" over to them
-    /// (EnvironmentEdits.CarryOldSkillsSwitch). Nothing else looks at it.
-    public bool SkillsOn { get; init; } = true;
-
     /// Same rule as AppSettings: a file we cannot read, or a value from a newer Aiko, means the
     /// defaults for the whole file rather than half of it applied.
     public static PersonaSettings FromJson(string json)
@@ -51,13 +46,7 @@ public sealed record PersonaSettings
 
         try
         {
-            var settings = JsonSerializer.Deserialize<PersonaSettings>(json, Options) ?? Default;
-            if (JsonNode.Parse(json) is JsonObject file && !file.ContainsKey("skillsOn"))
-            {
-                settings = settings with { SkillsOn = !EveryOldSkillIsOff(file["disabledSkills"]) };
-            }
-
-            return settings;
+            return JsonSerializer.Deserialize<PersonaSettings>(json, Options) ?? Default;
         }
         catch (JsonException)
         {
@@ -66,31 +55,6 @@ public sealed record PersonaSettings
     }
 
     public string ToJson() => JsonSerializer.Serialize(this, Options) + Environment.NewLine;
-
-    /// Up to 0.2.1 each skill had its own switch, kept as a list of the skills switched off, first
-    /// as aiko-copy and later as copy (D-197, D-234). A file from then keeps the skills off only if
-    /// every one of them was off; any skill left on means the person wanted skills.
-    private static bool EveryOldSkillIsOff(JsonNode? disabled)
-    {
-        if (disabled is not JsonArray list)
-        {
-            return false;
-        }
-
-        var off = list
-            .Select(item => item is JsonValue value && value.TryGetValue<string>(out var name) ? name : null)
-            .OfType<string>()
-            .Select(name => name.StartsWith(OldPrefix, StringComparison.Ordinal) ? name[OldPrefix.Length..] : name)
-            .ToHashSet(StringComparer.Ordinal);
-
-        return OldSkills.All(off.Contains);
-    }
-
-    private const string OldPrefix = "aiko-";
-
-    /// The skills that had a switch of their own, before the one switch.
-    private static readonly string[] OldSkills =
-        ["copy", "release-gate", "docs-hygiene", "blender-to-unity", "texturing", "glb-for-web", "palette", "gamedesign-research"];
 
     private static readonly JsonSerializerOptions Options = new()
     {

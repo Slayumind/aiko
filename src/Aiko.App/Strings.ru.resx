@@ -775,12 +775,6 @@
   <data name="SentPersona" xml:space="preserve">
     <value>личность включена хотя бы в одной среде</value>
   </data>
-  <data name="SentSkills" xml:space="preserve">
-    <value>навыки включены хотя бы в одной среде</value>
-  </data>
-  <data name="SentMemory" xml:space="preserve">
-    <value>память включена хотя бы в одной среде</value>
-  </data>
   <data name="NothingSentYet" xml:space="preserve">
     <value>Сейчас ничего из этого не отправляется.</value>
   </data>
@@ -812,7 +806,7 @@
     <value>Анонимная статистика</value>
   </data>
   <data name="WizardStatsWhat" xml:space="preserve">
-    <value>Автор Aiko не знает, сколько людей ею пользуется. Раз в сутки Aiko может сообщить, что одна копия работала, и отправить восемь значений. Вот все восемь.</value>
+    <value>Автор Aiko не знает, сколько людей ею пользуется. Раз в сутки Aiko может сообщить, что одна копия работала, и отправить шесть значений. Вот все шесть.</value>
   </data>
   <data name="WizardStatsLater" xml:space="preserve">
     <value>Это можно поменять потом на странице «Приватность».</value>
@@ -832,32 +826,17 @@
   <data name="StatsStateUnset" xml:space="preserve">
     <value>не выбрано</value>
   </data>
-  <data name="SectionWhereAikoTalks" xml:space="preserve">
-    <value>ГДЕ AIKO ГОВОРИТ</value>
+  <data name="SectionWhereAikoIsOn" xml:space="preserve">
+    <value>ГДЕ AIKO ВКЛЮЧЕНА</value>
   </data>
-  <data name="SectionWhatIsOn" xml:space="preserve">
-    <value>ЧТО ВКЛЮЧЕНО В СРЕДАХ</value>
+  <data name="AikoOnNote" xml:space="preserve">
+    <value>Характер, навыки и память включаются вместе. Действует в новых сессиях; открытые доработают как были.</value>
   </data>
-  <data name="ColumnPersonality" xml:space="preserve">
-    <value>ЛИЧНОСТЬ</value>
-  </data>
-  <data name="ColumnSkills" xml:space="preserve">
-    <value>НАВЫКИ</value>
-  </data>
-  <data name="ColumnMemory" xml:space="preserve">
-    <value>ПАМЯТЬ</value>
-  </data>
-  <data name="SwitchesNote" xml:space="preserve">
-    <value>Навыки и память работают только вместе с личностью. Действует в новых сессиях.</value>
-  </data>
-  <data name="MemoryPermissionNote" xml:space="preserve">
-    <value>Когда память включена, Aiko добавляет в settings.json этой среды одну строку: разрешение на два своих инструмента памяти.</value>
+  <data name="AikoOnWhat" xml:space="preserve">
+    <value>Там, где Aiko включена, она читает каждое твоё сообщение, чтобы память не устаревала, и добавляет в settings.json этой среды одну строку: разрешение на два своих инструмента памяти. Выключение память не стирает.</value>
   </data>
   <data name="SkillsWhere" xml:space="preserve">
-    <value>Навыки работают в тех средах, где они включены.</value>
-  </data>
-  <data name="PersonaNewSessions" xml:space="preserve">
-    <value>Действует в новых сессиях. Открытые сессии доработают как были.</value>
+    <value>Навыки работают в тех средах, где Aiko включена.</value>
   </data>
   <data name="PersonaOwnStyle" xml:space="preserve">
     <value>Пока личность включена, твой стиль {0} не работает. Выключишь — вернётся.</value>
@@ -1030,15 +1009,6 @@
   <data name="SectionSkills" xml:space="preserve">
     <value>НАВЫКИ · {0}</value>
   </data>
-  <data name="SkillsWork" xml:space="preserve">
-    <value>Навыки работают в средах, где включена личность.</value>
-  </data>
-  <data name="SkillsSwitch" xml:space="preserve">
-    <value>Навыки Aiko</value>
-  </data>
-  <data name="SkillsNeedPersona" xml:space="preserve">
-    <value>Включи личность хотя бы в одной среде — тогда навыки заработают.</value>
-  </data>
   <data name="SkillDomainProjects" xml:space="preserve">
     <value>УПРАВЛЕНИЕ ПРОЕКТАМИ</value>
   </data>
@@ -1088,10 +1058,10 @@
     <value>Познакомься с Aiko</value>
   </data>
   <data name="MeetAikoLead" xml:space="preserve">
-    <value>Aiko может говорить в твоих сессиях Claude Code своим голосом и приносит одиннадцать навыков. В коде и коммитах она молчит.</value>
+    <value>Aiko может отвечать в твоих сессиях Claude Code своим голосом. С ней приходят её навыки и небольшая память о тебе. В коде и коммитах она молчит.</value>
   </data>
   <data name="MeetAikoSettings" xml:space="preserve">
-    <value>Темперамент, настроение и навыки — на странице «Личность». Действует в новых сессиях.</value>
+    <value>Темперамент, настроение, навыки и память — на странице «Личность». Действует в новых сессиях.</value>
   </data>
   <data name="MeetAikoTurnOn" xml:space="preserve">
     <value>Включить в среде {0}</value>

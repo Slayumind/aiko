@@ -32,10 +32,6 @@ public partial class PersonalityPage : UserControl
 
     private readonly List<EnvironmentRow> _environmentRows = [];
 
-    /// The width of one column of switches. The Russian word for the persona in the head of its
-    /// column is the widest thing in it.
-    private const double SwitchColumn = 84;
-
     private PersonaSettings _persona = SettingsStore.LoadPersona();
 
     /// Setting the controls raises their own events, and those events save.
@@ -68,63 +64,28 @@ public partial class PersonalityPage : UserControl
 
     public void Leave() => _editor.Changed -= OnEnvironmentsChanged;
 
-    // ---- what is on, by environment ----
+    // ---- where Aiko is on ----
 
-    private sealed record EnvironmentRow(
-        string Name, ToggleButton Persona, ToggleButton Skills, ToggleButton Memory, RevealPanel Warning, string? OwnStyle);
+    private sealed record EnvironmentRow(string Name, ToggleButton Switch, RevealPanel Warning, string? OwnStyle);
 
-    /// A table: one row per environment, one column per thing that can be on there (D-278).
+    /// One switch per environment. It turns on all of Aiko there: her character, her skills and
+    /// her memory are parts of one thing and are not switched apart (D-285).
     private void FillEnvironments()
     {
         EnvironmentRows.Children.Clear();
         _environmentRows.Clear();
-        EnvironmentRows.Children.Add(ColumnHeads());
 
         _filling = true;
         foreach (var environment in SettingsPanel.Ordered(_editor.Current))
         {
-            EnvironmentRows.Children.Add(EnvironmentRowFor(environment));
+            EnvironmentRows.Children.Add(EnvironmentRowFor(environment, first: _environmentRows.Count == 0));
         }
         _filling = false;
 
         ShowSwitchState();
     }
 
-    private Grid ColumnHeads()
-    {
-        var heads = SwitchGrid(new Thickness(12, 8, 2, 8));
-        string[] names = [Strings.ColumnPersonality, Strings.ColumnSkills, Strings.ColumnMemory];
-        for (var i = 0; i < names.Length; i++)
-        {
-            var head = new TextBlock
-            {
-                Text = names[i],
-                Style = (Style)FindResource("SectionLabel"),
-                Margin = new Thickness(0),
-                HorizontalAlignment = HorizontalAlignment.Center,
-            };
-            Grid.SetColumn(head, i + 1);
-            heads.Children.Add(head);
-        }
-
-        return heads;
-    }
-
-    /// The name takes what is left; the three switches stand in columns of one width, so they
-    /// line up under their heads in every row.
-    private static Grid SwitchGrid(Thickness margin)
-    {
-        var grid = new Grid { Margin = margin };
-        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-        for (var i = 0; i < 3; i++)
-        {
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(SwitchColumn) });
-        }
-
-        return grid;
-    }
-
-    private Border EnvironmentRowFor(AikoEnvironment environment)
+    private Border EnvironmentRowFor(AikoEnvironment environment, bool first)
     {
         var folder = environment.ConfigDirectories[0];
 
@@ -146,13 +107,12 @@ public partial class PersonalityPage : UserControl
             });
         }
 
-        var name = environment.Name;
-        var persona = SwitchFor(name, Strings.ColumnPersonality, environment.Persona, 1, on =>
-            Commit(EnvironmentEdits.SetPersona(_editor.Current, name, on), on ? "turned the persona on" : "turned the persona off"));
-        var skills = SwitchFor(name, Strings.ColumnSkills, environment.HasSkills, 2, on =>
-            Commit(EnvironmentEdits.SetSkills(_editor.Current, name, on), on ? "turned the skills on" : "turned the skills off"));
-        var memory = SwitchFor(name, Strings.ColumnMemory, environment.HasMemory, 3, on =>
-            Commit(EnvironmentEdits.SetMemory(_editor.Current, name, on), on ? "turned the memory on" : "turned the memory off"));
+        // A screen reader hears the environment, because the switch itself has no word on it.
+        var toggle = new ToggleButton { Style = (Style)FindResource("Switch"), IsChecked = environment.Persona };
+        System.Windows.Automation.AutomationProperties.SetName(toggle, environment.Name);
+        toggle.Checked += (_, _) => SetPersona(environment.Name, true);
+        toggle.Unchecked += (_, _) => SetPersona(environment.Name, false);
+        Grid.SetColumn(toggle, 1);
 
         var ownStyle = OwnOutputStyle(folder);
         var warning = new RevealPanel
@@ -166,50 +126,44 @@ public partial class PersonalityPage : UserControl
             },
         };
         Grid.SetRow(warning, 1);
-        Grid.SetColumnSpan(warning, 4);
 
-        var grid = SwitchGrid(new Thickness(12, 10, 2, 10));
+        var grid = new Grid { Margin = new Thickness(12, 10, 12, 10) };
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
         grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         grid.Children.Add(title);
-        grid.Children.Add(persona);
-        grid.Children.Add(skills);
-        grid.Children.Add(memory);
+        grid.Children.Add(toggle);
         grid.Children.Add(warning);
 
-        _environmentRows.Add(new EnvironmentRow(name, persona, skills, memory, warning, ownStyle));
+        _environmentRows.Add(new EnvironmentRow(environment.Name, toggle, warning, ownStyle));
 
-        // Every row has a line above it: the first one stands under the heads of the columns.
         return new Border
         {
             BorderBrush = Tokens.Brush("Hairline"),
-            BorderThickness = new Thickness(0, 1, 0, 0),
+            BorderThickness = new Thickness(0, first ? 0 : 1, 0, 0),
             Child = grid,
         };
     }
 
-    /// One switch of the table. A screen reader hears the environment and the column, because the
-    /// switch itself has no word on it.
-    private ToggleButton SwitchFor(string environment, string column, bool on, int at, Action<bool> changed)
+    private void SetPersona(string environment, bool on)
     {
-        var toggle = new ToggleButton
+        if (_filling)
         {
-            Style = (Style)FindResource("Switch"),
-            IsChecked = on,
-            HorizontalAlignment = HorizontalAlignment.Center,
-        };
-        System.Windows.Automation.AutomationProperties.SetName(toggle, environment + " · " + column);
-        toggle.Checked += (_, _) => changed(true);
-        toggle.Unchecked += (_, _) => changed(false);
-        Grid.SetColumn(toggle, at);
-        return toggle;
-    }
+            return;
+        }
 
-    private void Commit(EnvironmentSettings next, string what)
-    {
-        if (!_filling)
+        _editor.Commit(EnvironmentEdits.SetPersona(_editor.Current, environment, on), on ? "turned Aiko on" : "turned Aiko off");
+
+        // The lines under the switches say what the memory does, so whoever turned her on here
+        // has been told and is not shown this page again on the next start.
+        if (on)
         {
-            _editor.Commit(next, what);
+            var app = SettingsStore.Load();
+            if (!app.MemoryShown)
+            {
+                SettingsStore.Save(app with { MemoryShown = true });
+            }
         }
     }
 
@@ -226,34 +180,23 @@ public partial class PersonalityPage : UserControl
         _filling = true;
         foreach (var (row, environment) in _environmentRows.Zip(environments))
         {
-            row.Persona.IsChecked = environment.Persona;
-            row.Skills.IsChecked = environment.HasSkills;
-            row.Memory.IsChecked = environment.HasMemory;
+            row.Switch.IsChecked = environment.Persona;
         }
         _filling = false;
 
         ShowSwitchState();
     }
 
-    /// The warning under a row, the lock on the memory switch, and whether the list of skills
-    /// is about something that is on anywhere.
+    /// The warning under a switch, and whether the list of skills is about something that is on
+    /// anywhere.
     private void ShowSwitchState()
     {
         foreach (var row in _environmentRows)
         {
-            var persona = row.Persona.IsChecked == true;
-            row.Warning.IsOpen = persona && row.OwnStyle is not null;
-
-            // The skills and the memory work only together with the persona, so without her both
-            // switches are locked.
-            foreach (var locked in (ToggleButton[])[row.Skills, row.Memory])
-            {
-                locked.IsEnabled = persona;
-                locked.Opacity = persona ? 1 : 0.45;
-            }
+            row.Warning.IsOpen = row.Switch.IsChecked == true && row.OwnStyle is not null;
         }
 
-        SkillGroups.Opacity = _editor.Current.Environments.Any(e => e.HasSkills) ? 1 : 0.45;
+        SkillGroups.Opacity = _editor.Current.Environments.Any(e => e.Persona) ? 1 : 0.45;
     }
 
     /// Read once when the page opens: the person changes it in their own settings.json, not here.
@@ -330,7 +273,7 @@ public partial class PersonalityPage : UserControl
     // ---- skills ----
 
     /// The skills themselves. They are one plugin in Claude Code and come and go together
-    /// (D-237); where they are on is a switch of each environment in the table above (D-281).
+    /// (D-237), in every environment where Aiko is on (D-285).
     private void FillSkills()
     {
         SkillGroups.Children.Clear();

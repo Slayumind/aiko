@@ -765,12 +765,6 @@ public static class Strings
     /// the personality is on in at least one environment
     public static string SentPersona => Get("SentPersona");
 
-    /// the skills are on in at least one environment
-    public static string SentSkills => Get("SentSkills");
-
-    /// the memory is on in at least one environment
-    public static string SentMemory => Get("SentMemory");
-
     /// None of this is sent right now.
     public static string NothingSentYet => Get("NothingSentYet");
 
@@ -822,32 +816,17 @@ public static class Strings
     /// not chosen
     public static string StatsStateUnset => Get("StatsStateUnset");
 
-    /// WHERE AIKO TALKS
-    public static string SectionWhereAikoTalks => Get("SectionWhereAikoTalks");
+    /// WHERE AIKO IS ON
+    public static string SectionWhereAikoIsOn => Get("SectionWhereAikoIsOn");
 
-    /// WHAT IS ON, BY ENVIRONMENT
-    public static string SectionWhatIsOn => Get("SectionWhatIsOn");
+    /// Her character, her skills and her memory come together. Works in new sessions; open sessi...
+    public static string AikoOnNote => Get("AikoOnNote");
 
-    /// PERSONALITY
-    public static string ColumnPersonality => Get("ColumnPersonality");
+    /// Where Aiko is on, she reads each message you send to keep her memory fresh, and adds one ...
+    public static string AikoOnWhat => Get("AikoOnWhat");
 
-    /// SKILLS
-    public static string ColumnSkills => Get("ColumnSkills");
-
-    /// MEMORY
-    public static string ColumnMemory => Get("ColumnMemory");
-
-    /// Skills and memory work only together with the personality. Works in new sessions.
-    public static string SwitchesNote => Get("SwitchesNote");
-
-    /// With memory on, Aiko adds one line to that environment's settings.json: a permission for ...
-    public static string MemoryPermissionNote => Get("MemoryPermissionNote");
-
-    /// Skills work in the environments where they are on.
+    /// Skills work in the environments where Aiko is on.
     public static string SkillsWhere => Get("SkillsWhere");
-
-    /// Works in new sessions. Open sessions finish the way they started.
-    public static string PersonaNewSessions => Get("PersonaNewSessions");
 
     /// While the personality is on, your style {0} doesn't work. Turn it off and it comes back.
     public static string PersonaOwnStyle => Get("PersonaOwnStyle");
@@ -1020,15 +999,6 @@ public static class Strings
     /// SKILLS · {0}
     public static string SectionSkills => Get("SectionSkills");
 
-    /// Skills work in environments where the personality is on.
-    public static string SkillsWork => Get("SkillsWork");
-
-    /// Aiko's skills
-    public static string SkillsSwitch => Get("SkillsSwitch");
-
-    /// Turn the personality on in at least one environment, and the skills start working.
-    public static string SkillsNeedPersona => Get("SkillsNeedPersona");
-
     /// PROJECT MANAGEMENT
     public static string SkillDomainProjects => Get("SkillDomainProjects");
 
@@ -1077,10 +1047,10 @@ public static class Strings
     /// Meet Aiko
     public static string ItemMeetAiko => Get("ItemMeetAiko");
 
-    /// Aiko can talk in your Claude Code sessions in her own voice, and she brings eleven skills...
+    /// Aiko can talk in your Claude Code sessions in her own voice. She brings her skills and a ...
     public static string MeetAikoLead => Get("MeetAikoLead");
 
-    /// The temperament, the mood and the skills are on the Personality page. It works in new ses...
+    /// The temperament, the mood, the skills and the memory are on the Personality page. It work...
     public static string MeetAikoSettings => Get("MeetAikoSettings");
 
     /// Turn on in {0}

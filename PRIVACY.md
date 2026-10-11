@@ -23,19 +23,23 @@ the update check.
   session ID, keeps a small file per session with the state and the time, and hashes the session ID
   into the file name. For this the prompt, tool input, paths and answers are never read or stored.
   The file goes away when the session ends, and files older than a day are removed when Aiko starts.
-- **Your message, where the memory is on.** Memory is off until you turn it on for an environment.
-  With it on, Claude Code hands each message you send to a second hook of Aiko. It looks for two
-  things: the keys of the facts in the memory, to note that a fact came up again today, and words
-  like "I" or "my", to remind the model that the message may hold something worth remembering. The
-  message is read in memory and is **not** stored, logged or sent anywhere by Aiko.
+- **Your message, where the personality is on.** Aiko's memory comes with her personality: they
+  are turned on together for an environment. There Claude Code hands each message you send to a
+  second hook of Aiko. It looks for two things: the keys of the facts in the memory, to note that a
+  fact came up again today, and words like "I" or "my", to remind the model that the message may
+  hold something worth remembering. The message is read in memory and is **not** stored, logged
+  or sent anywhere by Aiko.
 - **The memory file.** What the model saves about you, at most 42 short facts, is kept in one file
   on your computer, `memory.json` next to Aiko's settings. It is given to the model at the start of
-  a session in the environments where memory is on. You can read, change and erase it on the
-  Personality page, or open the file itself. Aiko never sends it anywhere; the model you talk to
-  sees it, as it sees everything else in the session.
-- **One permission line, where the memory is on.** Aiko adds one rule to that environment's
+  a session in the environments where the personality is on. You can read, change and erase it on
+  the Personality page, or open the file itself. Turning the personality off does not erase it.
+  Aiko never sends it anywhere; the model you talk to sees it, as it sees everything else in the
+  session.
+- **One permission line, where the personality is on.** Aiko adds one rule to that environment's
   `settings.json`, so the model may use Aiko's two memory tools without asking you each time. The
-  rule goes away when you turn memory off or remove Aiko.
+  rule goes away when you turn the personality off there or remove Aiko.
+- **If the personality was on before Aiko had a memory**, the memory starts with the update. Aiko
+  opens the Personality page once after it, where this is said and where you can turn her off.
 
 ## What Aiko sends
 
@@ -69,17 +73,11 @@ measures, and this is how.
 - `day`: an ID that **changes every day**;
 - `w`: a single 1, when this is the first run of this week;
 - `m`: a single 1, when this is the first run of this month;
-- `p`: 1 or 0: whether the personality is on in at least one environment;
-- `s`: 1 or 0: whether the skills are on in at least one environment;
-- `mem`: 1 or 0: whether the memory is on in at least one environment.
+- `p`: 1 or 0: whether the personality is on in at least one environment.
 
 **Nothing else.** No name, account, folders or limits. Nothing about which skills you use, what
 the memory holds, which projects you work on, or how long Aiko has been running. The settings page
-lists these eight lines and says what each one is for.
-
-**When the list grows.** Your yes is to the list you were shown. `s` and `mem` are newer than the
-other six. If you agreed to the count before they existed, Aiko opens the Privacy page once after
-the update and sends the two new values only after that. You can turn the count off there.
+lists these six lines and says what each one is for.
 
 **How the ID works.** Aiko makes a random value once and keeps it in `%APPDATA%\Aiko\install-id`.
 That value never leaves your computer. Aiko sends a hash of the value and today's date, cut to
@@ -152,8 +150,8 @@ Without direct mode, Aiko never touches the token.
   log, and, where the personality is on, the session state files, the personality plugin and the
   local marketplace with the skills.
 - `%USERPROFILE%\.claude*\settings.json`: one line added by Aiko, with a copy of the original next
-  to it, Aiko's plugins and marketplace where the personality is on, and the permission line for
-  the memory tools where the memory is on. Claude Code keeps its own copies of
+  to it, and, where the personality is on, Aiko's plugins and marketplace and the permission line
+  for the memory tools. Claude Code keeps its own copies of
   those plugins in its `plugins` folder.
 - Your user `PATH`: Aiko's command folder at the start, if you agreed in the setup checklist.
 - Your PowerShell profile: the account-switching functions you ticked are turned off, with a copy of
