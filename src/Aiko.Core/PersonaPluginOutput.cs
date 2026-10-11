@@ -24,6 +24,12 @@ public static class PersonaPluginOutput
     public static bool IsRequest(IReadOnlyList<string> args) =>
         args is [Verb, PersonaPlugin.Name];
 
+    /// Whether the plugin for this Claude Code folder brings the memory. The bridge knows only the
+    /// folder it runs in, so the environment is found by it. A folder of no environment has none.
+    public static bool HasMemory(EnvironmentSettings environments, string? configDirectory) =>
+        !string.IsNullOrWhiteSpace(configDirectory)
+        && environments.Environments.Any(e => e.HasMemory && e.Holds(configDirectory));
+
     /// Old folders to delete: every other version older than KeepOldFor. Folders that are not a
     /// version at all, such as a temporary folder of a build still running, are left alone.
     public static IReadOnlyList<string> StaleFolders(

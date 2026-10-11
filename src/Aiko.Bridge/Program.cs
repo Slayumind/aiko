@@ -273,7 +273,8 @@ static int BuildPersonaPlugin()
         var bridge = Environment.ProcessPath ?? throw new InvalidOperationException("the bridge does not know its own path");
 
         var persona = PersonaSettings.FromJson(ReadIfThere(ThisComputer.Folders.PersonaFile));
-        var files = PersonaPlugin.Files(persona.Temperament, bridge);
+        var environments = EnvironmentSettings.FromJson(ReadIfThere(ThisComputer.Folders.EnvironmentsFile));
+        var files = PersonaPlugin.Files(persona.Temperament, bridge, PersonaPluginOutput.HasMemory(environments, configDirectory));
         var hash = PersonaPlugin.ContentHash(files);
         var folder = PersonaPluginOutput.VersionFolder(ThisComputer.Folders, configDirectory, hash);
 
