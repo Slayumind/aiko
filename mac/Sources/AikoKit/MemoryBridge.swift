@@ -70,10 +70,15 @@ public enum MemoryBridge {
     }
 
     /// Facts saved through the tools always fit. A file edited by hand may not, and a block over
-    /// the cut reaches the model with no facts at all. So the longest facts that are not pinned
-    /// stay out of the block until it fits; they stay in the file.
+    /// the cut reaches the model with no facts at all.
+    ///
+    /// So a fact over the limit stays out of the block, pinned or not: the settings window marks
+    /// it "too long" and says the model does not see it, and that must be true. If the block is
+    /// still over the cut, for example with more facts than the quotas allow, the longest facts
+    /// that are not pinned stay out until it fits. All of them stay in the file.
     public static func factsThatFit(_ memory: MemoryFile) -> String {
         var shown = memory
+        shown.facts = memory.facts.filter { MemoryRules.fits(MemoryRules.lengthOf($0)) }
         var text = MemoryPrompt.facts(shown)
         while text.utf16.count > hookLimit, let fact = longestToLeaveOut(shown) {
             shown.facts.removeAll { $0.id == fact.id }

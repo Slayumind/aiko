@@ -3,8 +3,8 @@
 The macOS app repeats the Windows core, so every ported file keeps its behaviour and every xUnit
 case has a Swift case with the same name and the same numbers. Test counts below are cases, not
 methods: one `[Theory]` with five `[InlineData]` rows counts as five, and so does the Swift
-`@Test(arguments:)` that mirrors it. `dotnet test` prints cases and says 973; `swift test` prints
-methods, not cases, and says 753. The 49 the Swift side does not have are named at the bottom; the ones it has and Windows
+`@Test(arguments:)` that mirrors it. `dotnet test` prints cases and says 1001; `swift test` prints
+methods, not cases, and says 776. The 49 the Swift side does not have are named at the bottom; the ones it has and Windows
 does not belong to the two small programs, whose decisions sit inline in `Program.cs` on Windows,
 and to the card words, the island and the settings window, which sit in `Aiko.App` on Windows
 where no test can reach them.
@@ -70,7 +70,9 @@ a row cannot change in one core and stay as it was in the other. See `spec/cases
 | MemoryRules.cs, MemoryEdits.cs | MemoryRules.swift, MemoryEdits.swift | 44 | 44 | what may be a key, when a key is found and how long a fact may be are in `spec/cases/memory-keys/` and `memory-limits/`; lengths are UTF-16 units in both |
 | MemoryPrompt.cs, MemoryNudge.cs | MemoryPrompt.swift, MemoryNudge.swift | 27 | 27 | the rules text is the same word for word; which messages get the note is in `spec/cases/memory-nudge/` |
 | MemoryServer.cs | MemoryServer.swift | 17 | 17 | every reply is the same line in both cores |
-| MemoryBridge.cs | MemoryBridge.swift | 27 | 27 | |
+| MemoryBridge.cs | MemoryBridge.swift | 28 | 28 | a fact over the limit stays out of the block for the model in both, pinned or not |
+| MemoryHand.cs | MemoryHand.swift | 22 | 22 | the changes a person makes in the settings window; `MemoryHandTests` holds these and the cases of the page. `OneLine` is `MemoryText.oneLine` here |
+| MemoryPage.cs | MemoryPage.swift | 5 | 5 | the other 5 cases of `MemoryHandTests`; `Length` is in UTF-16 units in both |
 | — | SharedCaseTests.swift | 10 | 10 | the case files under `spec/cases/`, read by both suites |
 | — | UpdateInstaller.swift | — | 6 | the macOS half of an update: the zip, `ditto` and the bundle swap. Windows has Velopack instead, and UpdateInstall.cs holds the same steps around it where no xUnit case can reach them |
 

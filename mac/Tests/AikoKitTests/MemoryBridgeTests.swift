@@ -74,21 +74,37 @@ struct MemoryBridgeTests {
     }
 
     @Test
-    func aFileGrownByHandStillFitsAndLosesItsLongestFactsFirst() {
-        let huge = Self.fact(1, String(repeating: "x", count: 6_000))
-        let big = Self.fact(2, String(repeating: "y", count: 5_000))
-        let small = Self.fact(3, "Makes Aiko")
-        var pinned = Self.fact(4, String(repeating: "z", count: 3_000))
-        pinned.pinned = true
-        let memory = MemoryFile(5, [huge, big, small, pinned], [])
+    func aFactOverTheLimitStaysOutOfTheBlockEvenWhenPinned() {
+        let atTheLimit = Self.fact(1, String(repeating: "x", count: MemoryRules.maxLength))
+        let tooLong = Self.fact(2, String(repeating: "y", count: MemoryRules.maxLength + 1))
+        var pinnedTooLong = Self.fact(3, String(repeating: "z", count: MemoryRules.maxLength + 1))
+        pinnedTooLong.pinned = true
+        let memory = MemoryFile(4, [atTheLimit, tooLong, pinnedTooLong], [])
+
+        let text = MemoryBridge.factsThatFit(memory)
+
+        #expect(text.contains("[F1]"))
+        #expect(!text.contains("[F2]"))
+        #expect(!text.contains("[F3]"))
+        #expect(text.contains("(1/12)"))
+    }
+
+    @Test
+    func aFileWithMoreFactsThanTheQuotasStillFitsAndKeepsThePinnedOnes() {
+        let facts = (1...80).map { number in
+            var fact = Self.fact(number, String(repeating: "x", count: MemoryRules.maxLength - 2) + String(number % 10))
+            fact.pinned = number <= 3
+            return fact
+        }
+        let memory = MemoryFile(81, facts, [])
 
         let text = MemoryBridge.factsThatFit(memory)
 
         #expect(text.utf16.count <= MemoryBridge.hookLimit)
-        #expect(!text.contains("[F1]"))
+        #expect(text.contains("[F1]"))
         #expect(text.contains("[F2]"))
         #expect(text.contains("[F3]"))
-        #expect(text.contains("[F4]"))
+        #expect(MemoryPrompt.facts(memory).utf16.count > MemoryBridge.hookLimit)
     }
 
     @Test
