@@ -32,7 +32,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   details.
 - After an update of Aiko, Claude Code now gets the new version of her plugin by itself. Before,
   it kept the old copy until the temperament was changed.
-
+- **Updates are one line on the General page.** It says where the update stands and offers one
+  action: check, install, restart or open the download page. A download shows its percent in
+  place of the button.
 - The `aiko:docs-hygiene` skill knows that a project may keep its tasks in a tracker. It no longer
   offers to create `PLAN.md` and `ROADMAP.md` for such a project.
 - The `aiko:copy` skill writes task cards and briefs: a title that starts with a verb, one or two
