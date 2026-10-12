@@ -88,4 +88,13 @@ struct UsageReportTests {
     func brokenInputReadsAsNoDataAndNeverThrows(json: String) {
         #expect(!UsageReport.fromJson(json).hasData)
     }
+
+    @Test
+    func anAnswerWithTheModelLimitAndNoWindowsSaysSo() {
+        let model = ModelLimit(modelName: "Fable", percent: 3, resetsAt: utc(2026, 9, 15, 3))
+
+        #expect(UsageReport(windows: [], model: model).hasOnlyTheModelLimit)
+        #expect(!UsageReport.fromJson(Self.realAnswer).hasOnlyTheModelLimit)
+        #expect(!UsageReport.empty.hasOnlyTheModelLimit)
+    }
 }

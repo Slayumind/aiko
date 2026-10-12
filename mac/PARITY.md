@@ -3,8 +3,8 @@
 The macOS app repeats the Windows core, so every ported file keeps its behaviour and every xUnit
 case has a Swift case with the same name and the same numbers. Test counts below are cases, not
 methods: one `[Theory]` with five `[InlineData]` rows counts as five, and so does the Swift
-`@Test(arguments:)` that mirrors it. `dotnet test` prints cases and says 1071; `swift test` prints
-methods, not cases, and says 780. The 14 the Swift side does not have are named at the bottom; the ones it has and Windows
+`@Test(arguments:)` that mirrors it. `dotnet test` prints cases and says 1072; `swift test` prints
+methods, not cases, and says 781. The 14 the Swift side does not have are named at the bottom; the ones it has and Windows
 does not belong to the two small programs, whose decisions sit inline in `Program.cs` on Windows,
 and to the card words, the island and the settings window, which sit in `Aiko.App` on Windows
 where no test can reach them.
@@ -19,7 +19,7 @@ a row cannot change in one core and stay as it was in the other. See `spec/cases
 | JsonText.cs | JsonText.swift | 15 | 15 | |
 | LimitSnapshot.cs | LimitSnapshot.swift | 8 | 8 | |
 | StatusLineReport.cs | StatusLineReport.swift | 14 | 14 | |
-| UsageReport.cs | UsageReport.swift | 10 | 10 | |
+| UsageReport.cs | UsageReport.swift | 11 | 11 | |
 | ResetCountdown.cs | ResetCountdown.swift | 7 | 7 | |
 | PollBackoff.cs | PollBackoff.swift | 9 | 9 | |
 | CardState.cs | CardState.swift | 25 | 25 | CardStateTests (17) and PaceEstimateTests (8) |
