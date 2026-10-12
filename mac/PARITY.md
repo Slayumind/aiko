@@ -3,8 +3,8 @@
 The macOS app repeats the Windows core, so every ported file keeps its behaviour and every xUnit
 case has a Swift case with the same name and the same numbers. Test counts below are cases, not
 methods: one `[Theory]` with five `[InlineData]` rows counts as five, and so does the Swift
-`@Test(arguments:)` that mirrors it. `dotnet test` prints cases and says 1064; `swift test` prints
-methods, not cases, and says 774. The 14 the Swift side does not have are named at the bottom; the ones it has and Windows
+`@Test(arguments:)` that mirrors it. `dotnet test` prints cases and says 1071; `swift test` prints
+methods, not cases, and says 780. The 14 the Swift side does not have are named at the bottom; the ones it has and Windows
 does not belong to the two small programs, whose decisions sit inline in `Program.cs` on Windows,
 and to the card words, the island and the settings window, which sit in `Aiko.App` on Windows
 where no test can reach them.
@@ -30,6 +30,7 @@ a row cannot change in one core and stay as it was in the other. See `spec/cases
 | UninstallPlan.cs | UninstallPlan.swift | 89 | 89 | the two folders Aiko may delete, the guard that refuses every other path, and the memory file that may stay: when it is worth keeping, that it stays when nobody could be asked, and the guard for emptying the folder around it |
 | UpdateGate.cs, UpdateKey.cs | UpdateGate.swift, UpdateKey.swift | 15 | 15 | the key is one file, `update-public-key.pem`: Windows embeds it, `tools/update-key.py` writes the Swift copy, and a case in each suite fails if the two drift apart |
 | CubicBezier.cs | CubicBezier.swift | 9 | 9 | |
+| IconRows.cs | IconRows.swift | 7 | 7 | which environment the ring shows and which the dot; both shells kept this rule inline before |
 | IslandReveal.cs | IslandReveal.swift | 8 | 8 | |
 | IslandPlacement.cs | IslandPlacement.swift | 18 | 18 | |
 | TrayFaceMotion.cs | TrayFaceMotion.swift | 7 | 7 | |

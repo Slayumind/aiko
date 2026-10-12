@@ -343,13 +343,7 @@ final class AikoShell: NSResponder {
     /// The ring shows one environment and the dot the other. With nothing reported yet both are
     /// empty and the icon draws the dashed ring.
     private func currentRows() -> (ring: CardRow?, dot: CardRow?) {
-        let withData = cards().filter(\.hasData)
-        guard !withData.isEmpty else { return (nil, nil) }
-
-        let chosen = Store.environments().ringEnvironment
-        let ring = withData.first { $0.environment == chosen } ?? withData[0]
-        let dot = withData.first { $0.environment != ring.environment }
-        return (ring.iconRow, dot?.iconRow)
+        IconRows.choose(cards(), ringEnvironment: Store.environments().ringEnvironment)
     }
 
     // ---- The face (D-211) ----
