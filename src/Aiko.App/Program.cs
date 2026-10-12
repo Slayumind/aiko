@@ -224,6 +224,14 @@ static class Program
             return;
         }
 
+        // Starts the real shell without writing anything and walks it through the icon, the card,
+        // a face, the island and the settings window.
+        if (args is ["--try-shell", ..])
+        {
+            Environment.Exit(ShellCheck.Run());
+            return;
+        }
+
         // Drags the island with the real mouse to the left edge and checks where it lands.
         if (args is ["--try-island", ..])
         {

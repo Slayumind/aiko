@@ -49,7 +49,7 @@ final class CardWindow {
         state.onClose = { [weak self] in self?.fadeAndClose() }
         state.onOpenClaude = { [weak self] name in self?.onOpenClaude?(name) }
 
-        let hosting = NSHostingView(rootView: CardHost(state: state))
+        let hosting = NSHostingView(rootView: CardRoot(state: state))
         panel.setContentSize(hosting.fittingSize)
         panel.contentView = hosting
     }
@@ -58,7 +58,7 @@ final class CardWindow {
 
     func update(_ model: CardModel) {
         state.model = model
-        guard let hosting = panel.contentView as? NSHostingView<CardHost> else { return }
+        guard let hosting = panel.contentView as? NSHostingView<CardRoot> else { return }
 
         let size = hosting.fittingSize
         guard size != panel.frame.size else { return }
@@ -79,7 +79,7 @@ final class CardWindow {
     /// a little differently once it belongs to a window, and a card placed on the old size would
     /// sit a few points off.
     func show(from anchor: NSRect?, above: Bool = false) {
-        if let hosting = panel.contentView as? NSHostingView<CardHost> {
+        if let hosting = panel.contentView as? NSHostingView<CardRoot> {
             hosting.layoutSubtreeIfNeeded()
             panel.setContentSize(hosting.fittingSize)
         }
@@ -163,7 +163,7 @@ final class CardViewState: ObservableObject {
 
 /// The card plus the way it arrives: it grows out of the status item, from a little smaller and a
 /// few points below, with the spring everything else in Aiko uses (D-161).
-struct CardHost: View {
+struct CardRoot: View {
     @ObservedObject var state: CardViewState
 
     var body: some View {
