@@ -32,14 +32,13 @@ sealed class AikoShell : IDisposable
     private readonly SnapshotWatcher _watcher = new();
     private readonly ShellNumbers _numbers;
     private readonly TrayIcon _tray;
+    private readonly IslandHost _island;
 
     /// The face for two seconds after an event (D-211). Drawn by the icon and the island later.
     private TrayMoodPlayer? _mood;
     private DispatcherTimer? _hover;
     private CardWindow? _card;
     private SettingsWindow? _settings;
-    private IslandWindow? _island;
-    private FullScreenWatch? _fullScreen;
     private DirectPoller? _direct;
     private UpdateWatch? _updates;
     private DispatcherTimer? _cardWatch;
@@ -59,6 +58,8 @@ sealed class AikoShell : IDisposable
         _tray.Clicked += OnIconClicked;
         _tray.MouseMoved += StartHover;
         _tray.MenuRequested += OnMenuRequested;
+        _island = new IslandHost(application.Dispatcher);
+        _island.CardRequested += pinned => OpenCard(pinned);
     }
 
     /// With changingNothing the start skips everything that writes or asks the network: the repair
@@ -67,6 +68,7 @@ sealed class AikoShell : IDisposable
     public void Show(bool changingNothing = false)
     {
         _changingNothing = changingNothing;
+        _island.ChangingNothing = changingNothing;
 
         _tray.Open();
 
@@ -161,7 +163,7 @@ sealed class AikoShell : IDisposable
 
     public CardWindow? CardForCheck => _card;
 
-    public IslandWindow? IslandForCheck => _island;
+    public IslandWindow? IslandForCheck => _island.Window;
 
     public SettingsWindow? SettingsForCheck => _settings;
 
@@ -171,7 +173,7 @@ sealed class AikoShell : IDisposable
 
     /// Whether the pointer is over the icon, the island or the card: the places an open card stays for.
     public bool MouseAtHomeForCheck =>
-        _tray.CursorOver || CursorOverIsland() || (_card is { } card && CursorOver(card));
+        _tray.CursorOver || _island.CursorOver || (_card is { } card && Pointer.IsOver(card));
 
     public int BlocksOnCardForCheck => CurrentCard().Blocks.Count;
 
@@ -194,7 +196,7 @@ sealed class AikoShell : IDisposable
         CancelHover();
         _card?.Close();
         _settings?.Close();
-        CloseIsland();
+        _island.Close();
 
         _tray.Dispose();
     }
@@ -219,79 +221,13 @@ sealed class AikoShell : IDisposable
         if ((forced ?? settings.Place) == AikoPlace.Island)
         {
             _tray.Remove();
-            ShowIsland(settings.Island);
+            _island.Show(_numbers.Cards(), settings.Island);
         }
         else
         {
-            CloseIsland();
+            _island.Close();
             _tray.Add();
         }
-    }
-
-    private void ShowIsland(IslandPosition position)
-    {
-        if (_island is null)
-        {
-            var window = new IslandWindow();
-            window.CardRequested += pinned => OpenCard(pinned);
-            window.Moved += SaveIslandPosition;
-            _island = window;
-        }
-
-        _island.Show(_numbers.Cards(), position);
-
-        // Only watched while the island is on screen: the tray icon has nothing to hide from.
-        if (_fullScreen is null)
-        {
-            var watch = new FullScreenWatch();
-            watch.Changed += OnFullScreenChanged;
-            _fullScreen = watch;
-        }
-
-        OnFullScreenChanged(FullScreenWatch.IsFullScreenInFront());
-    }
-
-    private void OnFullScreenChanged(bool fullScreen) =>
-        _application.Dispatcher.BeginInvoke(() =>
-        {
-            if (_island is not { } island)
-            {
-                return;
-            }
-
-            var hide = fullScreen && SettingsStore.Load().HideIslandInFullScreen;
-            var wanted = hide ? Visibility.Hidden : Visibility.Visible;
-
-            // Windows says which window came to the front on every switch, which is many times a
-            // minute. Only a real change is worth a line.
-            if (island.Visibility == wanted)
-            {
-                return;
-            }
-
-            island.Visibility = wanted;
-            Log.Write($"island {(hide ? "hidden behind a full screen window" : "shown again")}");
-        });
-
-    private void CloseIsland()
-    {
-        _fullScreen?.Dispose();
-        _fullScreen = null;
-
-        _island?.Close();
-        _island = null;
-    }
-
-    private void SaveIslandPosition(IslandPosition position)
-    {
-        if (_changingNothing)
-        {
-            Log.Write($"island would be saved at {position.Edge} {position.Along:0.00}");
-            return;
-        }
-
-        SettingsStore.Save(SettingsStore.Load() with { Island = position });
-        Log.Write($"island moved to {position.Edge} at {position.Along:0.00}");
     }
 
     private void OnSnapshotsChanged() =>
@@ -300,7 +236,7 @@ sealed class AikoShell : IDisposable
             _mood?.OnLimits(EnvironmentSnapshots.Combine(SettingsStore.LoadEnvironments(), _watcher.ByFile));
             var cards = _numbers.Cards();
             _tray.Update();
-            _island?.Update(cards);
+            _island.Update(cards);
             _card?.Update(CurrentCard());
         });
 
@@ -309,23 +245,9 @@ sealed class AikoShell : IDisposable
     {
         var style = SettingsStore.LoadPersona().Face;
 
-        if (_island is { } island)
-        {
-            // The island is always dark, whatever the taskbar.
-            if (face is { } onIsland)
-            {
-                island.ShowFace(FaceDrawing.For(style, onIsland, FaceGround.Dark, IslandFaceSize));
-            }
-            else
-            {
-                island.HideFace();
-            }
-        }
-
+        _island.ShowFace(face, style);
         _tray.ShowFace(face, style);
     }
-
-    private const double IslandFaceSize = 18;
 
     private CardModel CurrentCard()
     {
@@ -439,7 +361,7 @@ sealed class AikoShell : IDisposable
 
             // The island is home for the card the same way the icon is. Without it a card opened
             // from the island closed half a second later, before the mouse could reach it.
-            if (_tray.CursorOver || CursorOver(card) || CursorOverIsland())
+            if (_tray.CursorOver || Pointer.IsOver(card) || _island.CursorOver)
             {
                 _awayTurns = 0;
                 return;
@@ -455,27 +377,6 @@ sealed class AikoShell : IDisposable
         };
 
         return timer;
-    }
-
-    private bool CursorOverIsland() => _island is { IsVisible: true } island && CursorOver(island);
-
-    private static bool CursorOver(Window window)
-    {
-        if (!PInvoke.GetCursorPos(out var point))
-        {
-            // Without an answer, assume the mouse is still there: closing a card somebody is
-            // reading is worse than leaving one up a moment longer.
-            return true;
-        }
-
-        var dpi = VisualTreeHelper.GetDpi(window);
-        var bounds = new Rect(
-            window.Left * dpi.DpiScaleX,
-            window.Top * dpi.DpiScaleY,
-            window.ActualWidth * dpi.DpiScaleX,
-            window.ActualHeight * dpi.DpiScaleY);
-
-        return bounds.Contains(point.X, point.Y);
     }
 
     private void OnHoverFinished(object? sender, EventArgs e)
@@ -541,10 +442,10 @@ sealed class AikoShell : IDisposable
         {
             card.ShowAt(rect);
         }
-        else if (_island is { } island)
+        else if (_island.Bounds is { } island)
         {
             // From the island the card opens right under it.
-            card.ShowAt(new Rect(island.Left, island.Top, island.ActualWidth, island.ActualHeight));
+            card.ShowAt(island);
         }
         else
         {
@@ -559,13 +460,13 @@ sealed class AikoShell : IDisposable
     private void FollowSettings()
     {
         var island = SettingsStore.Load().Place == AikoPlace.Island;
-        if (island != (_island is not null))
+        if (island != _island.IsShown)
         {
             ApplyPlace();
         }
         else if (island)
         {
-            OnFullScreenChanged(FullScreenWatch.IsFullScreenInFront());
+            _island.FollowFullScreen();
         }
 
         FollowDirectMode();
@@ -632,7 +533,7 @@ sealed class AikoShell : IDisposable
                 break;
             case TrayCommand.Refresh:
                 _tray.Update();
-                _island?.Update(_numbers.Cards());
+                _island.Update(_numbers.Cards());
                 _card?.Update(CurrentCard());
                 break;
             case TrayCommand.Updates:
