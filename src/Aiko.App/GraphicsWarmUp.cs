@@ -24,9 +24,11 @@ static class GraphicsWarmUp
                 Marshal.ReleaseComObject(direct3D);
             }
         }
-        catch (Exception e) when (e is DllNotFoundException or EntryPointNotFoundException)
+        catch (Exception)
         {
-            // No Direct3D 9 on this machine. WPF finds that out for itself and draws without it.
+            // Everything is caught on purpose. An exception that leaves a thread ends the whole
+            // process, and this thread only saves time: WPF makes the same call a moment later
+            // and deals with whatever is wrong, a machine with no Direct3D 9 included.
         }
     }
 }
