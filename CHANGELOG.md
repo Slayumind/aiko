@@ -5,7 +5,9 @@ All notable changes to Aiko are listed here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and Aiko uses
 [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.4.1] - 2026-10-12
+
+A faster start on Windows. Nothing else changes for you.
 
 ### Changed
 
