@@ -33,21 +33,24 @@ final class AikoShell {
 
     private var selfTesting = false
 
+    /// Set for a self test at the start. It must leave the machine as it found it.
+    private var changingNothing = false
+
     init() {
         cards = CardHost(numbers: numbers, icon: icon, island: island)
         cards.onSettings = { [weak self] in self?.openSettings(at: nil) }
 
         icon.faces = faces
-        icon.rows = { [numbers] in numbers.iconRows() }
+        icon.rows = { [weak self] in self?.numbers.iconRows() ?? (nil, nil) }
         icon.tooltip = { [weak self] in
             TrayText.tooltip(self?.numbers.cards() ?? [], newerVersion: self?.updates?.newerVersion)
         }
-        icon.onMouseEntered = { [cards] in cards.startHover() }
-        icon.onMouseExited = { [cards] in cards.cancelHover() }
+        icon.onMouseEntered = { [weak self] in self?.cards.startHover() }
+        icon.onMouseExited = { [weak self] in self?.cards.cancelHover() }
         icon.onClick = { [weak self] in self?.onIconClicked() }
         icon.onMenu = { [weak self] in self?.onMenuRequested() }
 
-        island.onCard = { [cards] pinned in cards.open(pinned: pinned) }
+        island.onCard = { [weak self] pinned in self?.cards.open(pinned: pinned) }
     }
 
     /// A self test draws one thing to be looked at and must leave the machine as it found it.
@@ -63,8 +66,9 @@ final class AikoShell {
         faces.changed = { [weak self] in self?.onFaceStep() }
         let player = MoodPlay()
         player.faceChanged = { [weak self] face in self?.onFace(face) }
-        player.follow(Store.environments())
         mood = player
+        self.changingNothing = changingNothing
+        followMoods()
 
         numbers.noteWhereWeHaveNoAccess()
         applyPlace()
@@ -321,7 +325,8 @@ final class AikoShell {
     private func run(_ command: TrayCommand) {
         switch command {
         case .swapRing:
-            if ShellNumbers.swapRing() {
+            // The swap is saved, and a self test saves nothing.
+            if !changingNothing, ShellNumbers.swapRing() {
                 icon.update()
             }
         case .settings:
@@ -330,7 +335,7 @@ final class AikoShell {
             onRefresh()
         case .updates:
             openSettings(at: .general).startUpdateCheck()
-        case .quit:
+        case .exit:
             NSApp.terminate(nil)
         }
     }
@@ -339,11 +344,19 @@ final class AikoShell {
     /// on the settings is worked out again.
     private func onRefresh() {
         numbers.noteWhereWeHaveNoAccess()
-        mood?.follow(Store.environments())
+        followMoods()
         applyPlace()
         icon.update()
         island.update(numbers.cards())
         cards.refresh()
+    }
+
+    private func followMoods() {
+        // A self test shows the faces it asks for. A session at work on this machine would bring
+        // its own in the middle of a step.
+        if !changingNothing {
+            mood?.follow(Store.environments())
+        }
     }
 
     // ---- The settings window ----

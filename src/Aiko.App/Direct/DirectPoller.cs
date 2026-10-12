@@ -22,6 +22,9 @@ sealed class DirectPoller : IDisposable
     private readonly Dictionary<string, Account> _accounts = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, LimitSnapshot> _latest = new(StringComparer.OrdinalIgnoreCase);
 
+    /// The accounts whose answer with only the model limit is already in the log (D-298).
+    private readonly HashSet<string> _modelOnlyNoted = new(StringComparer.OrdinalIgnoreCase);
+
     private bool _asking;
 
     public DirectPoller(Dispatcher dispatcher)
@@ -168,12 +171,17 @@ sealed class DirectPoller : IDisposable
                 account.Wait(account.Backoff.AfterSuccess(), now);
 
                 // Percentages only. The token never appears here, and neither does the body.
-                Log.Write(
-                    $"direct mode for {account.Name}: " +
-                    string.Join(", ", answer.Report.Windows.Select(w => $"{w.Kind} {w.Percent}%")) +
-                    (answer.Report.Model is { } model ? $", {model.ModelName} {model.Percent}%" : string.Empty));
+                var parts = answer.Report.Windows.Select(w => $"{w.Kind} {w.Percent}%").ToList();
+                if (answer.Report.Model is { } model)
+                {
+                    parts.Add($"{model.ModelName} {model.Percent}%");
+                }
 
-                if (answer.Report.HasOnlyTheModelLimit)
+                Log.Write($"direct mode for {account.Name}: {string.Join(", ", parts)}");
+
+                // Once per account while Aiko runs: the answer comes every three minutes, and the
+                // log is short.
+                if (answer.Report.HasOnlyTheModelLimit && _modelOnlyNoted.Add(account.Name))
                 {
                     Log.Write($"direct mode for {account.Name}: only the model limit came, with no windows, and nothing shows it (D-259)");
                 }

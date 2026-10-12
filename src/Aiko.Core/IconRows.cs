@@ -1,7 +1,8 @@
 namespace Aiko.Core;
 
-/// What the small picture shows: the tray icon on Windows, the menu bar icon on macOS and the
-/// island. The ring is one environment and the dot is another.
+/// What the small picture shows: the tray icon on Windows and the menu bar icon on macOS. The
+/// ring is one environment and the dot is another. The island needs no such rule: it draws a ring
+/// for every environment.
 public static class IconRows
 {
     /// The ring goes to the environment the person chose, when it has numbers, and to the first

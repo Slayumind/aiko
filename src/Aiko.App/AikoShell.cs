@@ -143,7 +143,7 @@ sealed class AikoShell : IDisposable
 
     // ---- doors for --try-shell: the check drives the shell through these and nothing else ----
 
-    /// The tray icon or the island, whatever the settings say. Nothing is saved.
+    /// The tray icon or the island, as the check asks and whatever the settings say. Nothing is saved.
     public void ShowPlaceForCheck(AikoPlace place)
     {
         _placeForCheck = place;

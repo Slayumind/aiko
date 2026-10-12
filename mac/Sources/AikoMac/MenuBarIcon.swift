@@ -102,7 +102,6 @@ final class MenuBarIcon: NSResponder {
     }
 
     /// What a self test reads back.
-    var rowsForCheck: (ring: CardRow?, dot: CardRow?) { lastRows }
     var tooltipForCheck: String { statusItem?.button?.toolTip ?? "" }
     var pictureForCheck: Data? { statusItem?.button?.image?.tiffRepresentation }
 

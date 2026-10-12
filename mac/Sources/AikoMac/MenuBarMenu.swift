@@ -1,13 +1,15 @@
 import AikoKit
 import AppKit
 
-/// What a person can pick in the menu of the icon. The same names as TrayCommand on Windows.
+/// What a person can pick in the menu of the icon. The names are those of TrayCommand on Windows.
+/// Windows has one more, None, for a menu closed with nothing picked: there the menu answers with
+/// a value, and here a closed menu simply calls nobody.
 enum TrayCommand {
     case swapRing
     case settings
     case refresh
     case updates
-    case quit
+    case exit
 }
 
 /// The menu under a right click on the menu bar icon. It builds the menu and says what was picked;
@@ -50,5 +52,5 @@ final class MenuBarMenu: NSObject {
     @objc private func onSettings() { picked?(.settings) }
     @objc private func onRefresh() { picked?(.refresh) }
     @objc private func onCheckUpdates() { picked?(.updates) }
-    @objc private func onQuit() { picked?(.quit) }
+    @objc private func onQuit() { picked?(.exit) }
 }
