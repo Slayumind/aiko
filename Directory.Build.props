@@ -1,6 +1,6 @@
 <Project>
 
-  <!-- One version for the whole solution. Bumped on every merge into in-progress. -->
+  <!-- One version for the whole solution. It changes only in the release commit. -->
   <PropertyGroup>
     <Version>0.4.0</Version>
     <Company>Aleksandr Fomichenko</Company>
