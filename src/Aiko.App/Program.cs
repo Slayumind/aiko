@@ -14,6 +14,13 @@ static class Program
     [STAThread]
     static void Main(string[] args)
     {
+        // A plain start only. The installer's hooks and the snapshot and --try commands come with
+        // arguments, and most of them never open a window.
+        if (args.Length == 0)
+        {
+            GraphicsWarmUp.Start();
+        }
+
         // First thing, before anything is drawn: the installer starts Aiko with its own arguments
         // for installing, updating and removing, and this handles them and exits.
         //
