@@ -37,7 +37,13 @@ static class Program
 
         // Before any window is made: the words are picked when a control is created, so a late
         // change would leave half a window in the other language.
-        LanguageChoice.Apply(SettingsStore.Load().Language);
+        //
+        // A door for snapshots: AIKO_TRY_LANGUAGE=English or Russian draws in that language and
+        // leaves the settings file alone.
+        LanguageChoice.Apply(
+            Enum.TryParse<AikoLanguage>(Environment.GetEnvironmentVariable("AIKO_TRY_LANGUAGE"), ignoreCase: true, out var tryLanguage)
+                ? tryLanguage
+                : SettingsStore.Load().Language);
 
         // A snapshot draws a window at once and reads its pixels. Anything still fading in would be
         // caught half there.
