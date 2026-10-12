@@ -66,6 +66,8 @@ sealed class AikoShell : IDisposable
     private int _iconSize;
     private bool _iconShown;
 
+    /// Set by --try-shell. A check draws the real shell and must leave the machine as it found it.
+    private bool _changingNothing;
 
     public AikoShell(Application application)
     {
@@ -75,8 +77,13 @@ sealed class AikoShell : IDisposable
 
     private HWND Hwnd => (HWND)_source!.Handle;
 
-    public void Show()
+    /// With changingNothing the start skips everything that writes or asks the network: the repair
+    /// of the status lines, the pages that open once and note that they did, the plugin sync, the
+    /// commands in PATH, direct mode, the update check and the clean-up of old activity files.
+    public void Show(bool changingNothing = false)
     {
+        _changingNothing = changingNothing;
+
         // A hidden top level window, not a message only one: broadcasts such as TaskbarCreated
         // never reach message only windows (spike 2026-09-11).
         _source = new HwndSource(new HwndSourceParameters("AikoTray") { Width = 0, Height = 0, WindowStyle = 0 });
@@ -97,9 +104,12 @@ sealed class AikoShell : IDisposable
         poller.Reported += OnSnapshotsChanged;
         _direct = poller;
 
-        var updates = new UpdateWatch(_application.Dispatcher);
-        updates.Found += UpdateIcon;
-        _updates = updates;
+        if (!changingNothing)
+        {
+            var updates = new UpdateWatch(_application.Dispatcher);
+            updates.Found += UpdateIcon;
+            _updates = updates;
+        }
 
         ApplyPlace();
         FollowDirectMode();
@@ -109,6 +119,12 @@ sealed class AikoShell : IDisposable
         var folders = ClaudeFolders.Find();
         Log.Write($"started, status line shell: {ShellDetect.Current()}");
         Log.Write($"found {folders.Count} claude folders, {EnvironmentScan.Pick(folders).Count} usable");
+
+        if (changingNothing)
+        {
+            NoteWhereWeHaveNoAccess();
+            return;
+        }
 
         // Nothing set up yet: this is a first run, so settings open themselves on the checklist.
         if (!SettingsStore.LoadEnvironments().HasEnvironments)
@@ -210,6 +226,37 @@ sealed class AikoShell : IDisposable
         }
     }
 
+    // ---- doors for --try-shell: the check drives the shell through these and nothing else ----
+
+    /// The tray icon or the island, whatever the settings say, and nothing is saved.
+    public void ShowPlaceForCheck(AikoPlace place) => ApplyPlace(place);
+
+    public void OpenCardForCheck(bool pinned) => OpenCard(pinned);
+
+    public CardWindow? CardForCheck => _card;
+
+    public IslandWindow? IslandForCheck => _island;
+
+    public SettingsWindow? SettingsForCheck => _settings;
+
+    public Rect? IconRectForCheck => IconRect();
+
+    public bool FaceOnIconForCheck => _faceAnimator?.Face is not null;
+
+    /// Whether the pointer is over the icon, the island or the card: the places an open card stays for.
+    public bool MouseAtHomeForCheck =>
+        CursorOverIcon() || CursorOverIsland() || (_card is { } card && CursorOver(card));
+
+    public int BlocksOnCardForCheck => CurrentCard().Blocks.Count;
+
+    /// One face, without waiting for a session to do anything.
+    public void ShowFaceForCheck(AikoFace? face) => OnFaceChanged(face);
+
+    public void OpenSettingsForCheck() => OpenSettings();
+
+    /// The wait before the card, as a mouse over the icon starts it.
+    public void StartHoverForCheck() => StartHover();
+
     public void Dispose()
     {
         _watcher.Updated -= OnSnapshotsChanged;
@@ -233,15 +280,22 @@ sealed class AikoShell : IDisposable
 
     /// Direct mode is switched per environment, and the settings window and the wizard both
     /// change it, so this is called again whenever either of them closes.
-    private void FollowDirectMode() => _direct?.Follow(SettingsStore.LoadEnvironments());
+    private void FollowDirectMode()
+    {
+        // Direct mode reads the token and asks the server. A check has no business doing either.
+        if (!_changingNothing)
+        {
+            _direct?.Follow(SettingsStore.LoadEnvironments());
+        }
+    }
 
     /// Tray or island, whichever the settings say. Called again after the settings window or the
     /// wizard closes, so a change takes effect at once.
-    private void ApplyPlace()
+    private void ApplyPlace(AikoPlace? forced = null)
     {
         var settings = SettingsStore.Load();
 
-        if (settings.Place == AikoPlace.Island)
+        if ((forced ?? settings.Place) == AikoPlace.Island)
         {
             RemoveIcon();
             ShowIsland(settings.Island);
@@ -309,6 +363,12 @@ sealed class AikoShell : IDisposable
 
     private void SaveIslandPosition(IslandPosition position)
     {
+        if (_changingNothing)
+        {
+            Log.Write($"island would be saved at {position.Edge} {position.Along:0.00}");
+            return;
+        }
+
         SettingsStore.Save(SettingsStore.Load() with { Island = position });
         Log.Write($"island moved to {position.Edge} at {position.Along:0.00}");
     }
