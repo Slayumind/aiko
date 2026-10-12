@@ -172,7 +172,14 @@ AikoKit decided, and it answers the mouse.
 | Windows file | macOS file | What it does |
 |---|---|---|
 | Program.cs, App.xaml.cs | main.swift, AikoDelegate.swift | starts without a Dock icon, picks the language, registers the fonts |
-| AikoShell.cs, Tray/TrayIcon.cs, Tray/TrayMenu.cs, Card/CardHost.cs, Island/IslandHost.cs, ShellNumbers.cs, StartupChores.cs | AikoShell.swift | the status item, the hover, the menu and the life of the card. On Windows the shell is split into parts and AikoShell.cs only connects them; the Swift shell is still one file with the same sections |
+| AikoShell.cs | AikoShell.swift | the one owner that connects the parts below and decides who is told what |
+| Tray/TrayIcon.cs | MenuBarIcon.swift | the icon itself: the picture, the tooltip, the clicks and the mouse over it |
+| Tray/TrayMenu.cs | MenuBarMenu.swift | the menu of the icon; both answer with a `TrayCommand` |
+| Card/CardHost.cs | CardHost.swift | the wait under a resting mouse, the pinned card and the watch that closes an unpinned one |
+| Island/IslandHost.cs | IslandHost.swift | the island window, hiding behind a full screen window, saving where it was dragged |
+| ShellNumbers.cs | ShellNumbers.swift | the cards, the card model and the rows of the icon; Windows also brings in direct mode |
+| StartupChores.cs | StartupChores.swift | what is put right at every start; Windows also repairs status lines and clears old activity files |
+| ShellCheck.cs (`--try-shell`) | the self tests in AikoShell.swift, IslandCheck.swift, SettingsCheck.swift | checks that drive the real shell without writing anything; `tools/check-shell.sh` and `tools/check-shell-mac.sh` in the workspace run them |
 | RingIcon.cs | StatusIcon.swift | draws the ring and the dot into an `NSImage` |
 | Theme/Tokens.xaml | Theme.swift | the palette and the sizes, as SwiftUI values |
 | Card/CardPanel.xaml | CardView.swift | the card: header, blocks, rows, bars |
