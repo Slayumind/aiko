@@ -15,7 +15,7 @@ public sealed record UsageReport(IReadOnlyList<LimitWindow> Windows, ModelLimit?
 
     /// The limit of the heavy model came and neither window did. Nothing shows such an answer:
     /// the card, the icon and the cache all ask for the windows first (D-259). Nobody has seen
-    /// one yet, so direct mode writes a line to the log when it happens (D-297).
+    /// one yet, so direct mode writes a line to the log when it happens (D-298).
     public bool HasOnlyTheModelLimit => Windows.Count == 0 && Model is not null;
 
     public static UsageReport FromJson(string json)
