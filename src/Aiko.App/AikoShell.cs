@@ -28,14 +28,6 @@ sealed class AikoShell : IDisposable
     private const uint IconId = 1;
     private const uint CallbackMessage = PInvoke.WM_APP + 1;
     private const uint NinSelect = PInvoke.WM_USER;
-    private const uint MenuSettings = 1;
-    private const uint MenuRefresh = 2;
-    private const uint MenuUpdates = 3;
-    private const uint MenuExit = 4;
-    private const uint MenuSwap = 5;
-    private const uint TpmRightButton = 0x0002;
-    private const uint TpmNoNotify = 0x0080;
-    private const uint TpmReturnCommand = 0x0100;
 
     /// Long enough that running the mouse along the taskbar does not open the card.
     private static readonly TimeSpan HoverDelay = TimeSpan.FromSeconds(1.5);
@@ -838,65 +830,31 @@ sealed class AikoShell : IDisposable
         }
     }
 
-    private unsafe void ShowMenu(IntPtr anchor)
+    private void ShowMenu(IntPtr anchor)
     {
-        var x = (short)(anchor.ToInt64() & 0xFFFF);
-        var y = (short)((anchor.ToInt64() >> 16) & 0xFFFF);
-
-        var menu = PInvoke.CreatePopupMenu();
-
-        // The click on the icon opens the card now, so swapping the ring needs a home. Here it
-        // says which environment it would show, which the click never did.
-        if (ShellNumbers.OtherEnvironment() is { } other)
+        switch (TrayMenu.Show(Hwnd, anchor, ShellNumbers.OtherEnvironment()))
         {
-            fixed (char* swap = string.Format(Strings.MenuShowInRing, other))
-            {
-                PInvoke.AppendMenu(menu, MENU_ITEM_FLAGS.MF_STRING, MenuSwap, swap);
-            }
-            PInvoke.AppendMenu(menu, MENU_ITEM_FLAGS.MF_SEPARATOR, 0, null);
-        }
-
-        fixed (char* settings = Strings.Settings,
-                     refresh = Strings.MenuRefresh,
-                     updates = Strings.CheckForUpdates,
-                     exit = Strings.QuitAiko)
-        {
-            PInvoke.AppendMenu(menu, MENU_ITEM_FLAGS.MF_STRING, MenuSettings, settings);
-            PInvoke.AppendMenu(menu, MENU_ITEM_FLAGS.MF_STRING, MenuRefresh, refresh);
-            PInvoke.AppendMenu(menu, MENU_ITEM_FLAGS.MF_STRING, MenuUpdates, updates);
-            PInvoke.AppendMenu(menu, MENU_ITEM_FLAGS.MF_SEPARATOR, 0, null);
-            PInvoke.AppendMenu(menu, MENU_ITEM_FLAGS.MF_STRING, MenuExit, exit);
-        }
-
-        // Without this the menu stays open after a click somewhere else.
-        PInvoke.SetForegroundWindow(Hwnd);
-        var command = (uint)PInvoke.TrackPopupMenuEx(
-            menu, TpmReturnCommand | TpmNoNotify | TpmRightButton, x, y, Hwnd, null).Value;
-        PInvoke.DestroyMenu(menu);
-
-        switch (command)
-        {
-            case MenuSwap:
+            case TrayCommand.SwapRing:
                 if (ShellNumbers.SwapRing())
                 {
                     UpdateIcon();
                 }
 
                 break;
-            case MenuSettings:
+            case TrayCommand.Settings:
                 OpenSettings();
                 break;
-            case MenuRefresh:
+            case TrayCommand.Refresh:
                 UpdateIcon();
                 _island?.Update(_numbers.Cards());
                 _card?.Update(CurrentCard());
                 break;
-            case MenuUpdates:
+            case TrayCommand.Updates:
                 // The menu had this item from the start and nothing was listening for it: the item
                 // was drawn, clicked and ignored.
                 OpenSettings(checkUpdates: true);
                 break;
-            case MenuExit:
+            case TrayCommand.Exit:
                 _application.Shutdown();
                 break;
         }
