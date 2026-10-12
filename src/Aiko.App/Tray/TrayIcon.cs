@@ -179,6 +179,10 @@ sealed class TrayIcon : IDisposable
         }
     }
 
+    /// A message for the hidden window, from a check. A key sent this way reaches the open menu
+    /// of the icon and never another program.
+    public void PostForCheck(uint message, nuint wParam) => PInvoke.PostMessage(Window, message, wParam, 0);
+
     public void Dispose()
     {
         Remove();

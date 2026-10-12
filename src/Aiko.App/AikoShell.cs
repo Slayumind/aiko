@@ -31,6 +31,10 @@ sealed class AikoShell : IDisposable
     /// Set by --try-shell. A check draws the real shell and must leave the machine as it found it.
     private bool _changingNothing;
 
+    /// The place a check asked for. It holds until the check asks for another one, so a settings
+    /// window that closes in the middle does not put Aiko back where the settings say.
+    private AikoPlace? _placeForCheck;
+
     public AikoShell(Application application)
     {
         _application = application;
@@ -62,7 +66,7 @@ sealed class AikoShell : IDisposable
 
         _mood = new TrayMoodPlayer(_application.Dispatcher);
         _mood.FaceChanged += OnFaceChanged;
-        _mood.Follow(SettingsStore.LoadEnvironments());
+        FollowMoods();
 
         var poller = new DirectPoller(_application.Dispatcher);
         poller.Reported += OnSnapshotsChanged;
@@ -139,8 +143,12 @@ sealed class AikoShell : IDisposable
 
     // ---- doors for --try-shell: the check drives the shell through these and nothing else ----
 
-    /// The tray icon or the island, whatever the settings say, and nothing is saved.
-    public void ShowPlaceForCheck(AikoPlace place) => ApplyPlace(place);
+    /// The tray icon or the island, whatever the settings say. Nothing is saved.
+    public void ShowPlaceForCheck(AikoPlace place)
+    {
+        _placeForCheck = place;
+        ApplyPlace();
+    }
 
     public void OpenCardForCheck(bool pinned) => _cards.Open(pinned);
 
@@ -166,6 +174,13 @@ sealed class AikoShell : IDisposable
 
     /// The wait before the card, as a mouse over the icon starts it.
     public void StartHoverForCheck() => _cards.StartHover();
+
+    /// The menu as a right click opens it. The call returns when the menu closes.
+    public void OpenMenuForCheck() => OnMenuRequested(IntPtr.Zero);
+
+    public void PressInMenuForCheck(uint key) => _tray.PostForCheck(Windows.Win32.PInvoke.WM_KEYDOWN, key);
+
+    public void CancelMenuForCheck() => _tray.PostForCheck(Windows.Win32.PInvoke.WM_CANCELMODE, 0);
 
     public void Dispose()
     {
@@ -195,11 +210,11 @@ sealed class AikoShell : IDisposable
 
     /// Tray or island, whichever the settings say. Called again after the settings window or the
     /// wizard closes, so a change takes effect at once.
-    private void ApplyPlace(AikoPlace? forced = null)
+    private void ApplyPlace()
     {
         var settings = SettingsStore.Load();
 
-        if ((forced ?? settings.Place) == AikoPlace.Island)
+        if ((_placeForCheck ?? settings.Place) == AikoPlace.Island)
         {
             _tray.Remove();
             _island.Show(_numbers.Cards(), settings.Island);
@@ -246,7 +261,8 @@ sealed class AikoShell : IDisposable
         switch (TrayMenu.Show(_tray.Window, anchor, ShellNumbers.OtherEnvironment()))
         {
             case TrayCommand.SwapRing:
-                if (ShellNumbers.SwapRing())
+                // The swap is saved, and a check saves nothing.
+                if (!_changingNothing && ShellNumbers.SwapRing())
                 {
                     _tray.Update();
                 }
@@ -275,7 +291,7 @@ sealed class AikoShell : IDisposable
     /// the island takes the icon down or puts it up.
     private void FollowSettings()
     {
-        var island = SettingsStore.Load().Place == AikoPlace.Island;
+        var island = (_placeForCheck ?? SettingsStore.Load().Place) == AikoPlace.Island;
         if (island != _island.IsShown)
         {
             ApplyPlace();
@@ -287,9 +303,19 @@ sealed class AikoShell : IDisposable
 
         FollowDirectMode();
         _numbers.NoteWhereWeHaveNoAccess();
-        _mood?.Follow(SettingsStore.LoadEnvironments());
+        FollowMoods();
         _tray.Update();
         _cards.Refresh();
+    }
+
+    private void FollowMoods()
+    {
+        // A check shows the faces it asks for. A session at work on this machine would bring its
+        // own in the middle of a step.
+        if (!_changingNothing)
+        {
+            _mood?.Follow(SettingsStore.LoadEnvironments());
+        }
     }
 
     /// One settings window at a time: asking twice brings the open one forward instead of
