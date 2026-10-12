@@ -1,48 +1,32 @@
-using System.IO;
-using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Windows;
-using System.Windows.Interop;
-using System.Windows.Media;
-using System.Windows.Threading;
 using Aiko.Core;
-using Windows.Win32;
-using Windows.Win32.Foundation;
-using Windows.Win32.Graphics.Gdi;
-using Windows.Win32.UI.HiDpi;
-using Windows.Win32.UI.Shell;
-using Windows.Win32.UI.WindowsAndMessaging;
 
 namespace Aiko.App;
 
-/// Everything Aiko shows: the icon in the tray or the island at the edge of the screen, the card,
-/// the settings window and the first run wizard. One owner, because all of them show the same
-/// numbers and the user swaps between the two places at will.
+/// The one owner of everything Aiko shows: the icon in the tray or the island at the edge of the
+/// screen, the card, the settings window and the first run wizard. All of them show the same
+/// numbers and the user swaps between the two places at will, so one class decides who is told
+/// what and when.
 ///
-/// Windows 10 1809 is the minimum, the same as in app.manifest: asking the taskbar monitor for
-/// its scaling needs it. Saying so here instead of in the project file keeps the WinRT
-/// projections, and their tens of megabytes, out of the build.
+/// The parts do the work: TrayIcon and TrayMenu, IslandHost, CardHost, ShellNumbers for what the
+/// numbers are, StartupChores for what is put right at every start. This class only connects them.
+/// The Windows version below is what TrayIcon needs; the reason is written there.
 [SupportedOSPlatform("windows10.0.17763")]
 sealed class AikoShell : IDisposable
 {
-    /// Long enough that running the mouse along the taskbar does not open the card.
-    private static readonly TimeSpan HoverDelay = TimeSpan.FromSeconds(1.5);
-
     private readonly Application _application;
     private readonly SnapshotWatcher _watcher = new();
     private readonly ShellNumbers _numbers;
     private readonly TrayIcon _tray;
     private readonly IslandHost _island;
+    private readonly CardHost _cards;
 
     /// The face for two seconds after an event (D-211). Drawn by the icon and the island later.
     private TrayMoodPlayer? _mood;
-    private DispatcherTimer? _hover;
-    private CardWindow? _card;
     private SettingsWindow? _settings;
     private DirectPoller? _direct;
     private UpdateWatch? _updates;
-    private DispatcherTimer? _cardWatch;
-    private int _awayTurns;
 
     /// Set by --try-shell. A check draws the real shell and must leave the machine as it found it.
     private bool _changingNothing;
@@ -56,10 +40,12 @@ sealed class AikoShell : IDisposable
             _numbers.IconRows,
             () => TrayText.Tooltip(_numbers.Cards(), _updates?.NewerVersion));
         _tray.Clicked += OnIconClicked;
-        _tray.MouseMoved += StartHover;
         _tray.MenuRequested += OnMenuRequested;
         _island = new IslandHost(application.Dispatcher);
-        _island.CardRequested += pinned => OpenCard(pinned);
+        _cards = new CardHost(application.Dispatcher, _numbers, _tray, _island);
+        _cards.SettingsRequested += () => OpenSettings();
+        _tray.MouseMoved += _cards.StartHover;
+        _island.CardRequested += _cards.Open;
     }
 
     /// With changingNothing the start skips everything that writes or asks the network: the repair
@@ -71,9 +57,6 @@ sealed class AikoShell : IDisposable
         _island.ChangingNothing = changingNothing;
 
         _tray.Open();
-
-        _hover = new DispatcherTimer(DispatcherPriority.Normal, _application.Dispatcher) { Interval = HoverDelay };
-        _hover.Tick += OnHoverFinished;
 
         _watcher.Updated += OnSnapshotsChanged;
 
@@ -159,9 +142,9 @@ sealed class AikoShell : IDisposable
     /// The tray icon or the island, whatever the settings say, and nothing is saved.
     public void ShowPlaceForCheck(AikoPlace place) => ApplyPlace(place);
 
-    public void OpenCardForCheck(bool pinned) => OpenCard(pinned);
+    public void OpenCardForCheck(bool pinned) => _cards.Open(pinned);
 
-    public CardWindow? CardForCheck => _card;
+    public CardWindow? CardForCheck => _cards.Window;
 
     public IslandWindow? IslandForCheck => _island.Window;
 
@@ -172,10 +155,9 @@ sealed class AikoShell : IDisposable
     public bool FaceOnIconForCheck => _tray.HasFace;
 
     /// Whether the pointer is over the icon, the island or the card: the places an open card stays for.
-    public bool MouseAtHomeForCheck =>
-        _tray.CursorOver || _island.CursorOver || (_card is { } card && Pointer.IsOver(card));
+    public bool MouseAtHomeForCheck => _cards.PointerAtHome;
 
-    public int BlocksOnCardForCheck => CurrentCard().Blocks.Count;
+    public int BlocksOnCardForCheck => _cards.Model().Blocks.Count;
 
     /// One face, without waiting for a session to do anything.
     public void ShowFaceForCheck(AikoFace? face) => OnFaceChanged(face);
@@ -183,7 +165,7 @@ sealed class AikoShell : IDisposable
     public void OpenSettingsForCheck() => OpenSettings();
 
     /// The wait before the card, as a mouse over the icon starts it.
-    public void StartHoverForCheck() => StartHover();
+    public void StartHoverForCheck() => _cards.StartHover();
 
     public void Dispose()
     {
@@ -193,8 +175,7 @@ sealed class AikoShell : IDisposable
         _direct?.Dispose();
         _updates?.Dispose();
 
-        CancelHover();
-        _card?.Close();
+        _cards.Dispose();
         _settings?.Close();
         _island.Close();
 
@@ -237,7 +218,7 @@ sealed class AikoShell : IDisposable
             var cards = _numbers.Cards();
             _tray.Update();
             _island.Update(cards);
-            _card?.Update(CurrentCard());
+            _cards.Refresh();
         });
 
     /// A face comes or goes (D-211), on the tray icon or on the island, wherever Aiko lives.
@@ -249,210 +230,45 @@ sealed class AikoShell : IDisposable
         _tray.ShowFace(face, style);
     }
 
-    private CardModel CurrentCard()
-    {
-        var now = DateTimeOffset.Now;
-        var cards = _numbers.Cards();
-        WakeWhenWorkingEnds(cards, now);
-        return _numbers.CardFor(cards, now);
-    }
-
-    /// "working now" has to go away by itself when a session goes quiet, and nothing else changes
-    /// then. One timer for the moment the first such mark runs out, only while the card is open.
-    private DispatcherTimer? _workingEnds;
-
-    private void WakeWhenWorkingEnds(IReadOnlyList<CardState> cards, DateTimeOffset now)
-    {
-        _workingEnds?.Stop();
-        var next = cards.Where(card => card.IsWorkingAt(now)).Min(card => card.WorkingUntil);
-        if (_card is null || next is not { } until)
-        {
-            return;
-        }
-
-        _workingEnds ??= NewWorkingEndsTimer();
-        _workingEnds.Interval = until - now + TimeSpan.FromSeconds(1);
-        _workingEnds.Start();
-    }
-
-    private DispatcherTimer NewWorkingEndsTimer()
-    {
-        var timer = new DispatcherTimer(DispatcherPriority.Background, _application.Dispatcher);
-        timer.Tick += (_, _) =>
-        {
-            timer.Stop();
-            _card?.Update(CurrentCard());
-        };
-        return timer;
-    }
-
-    /// The card's button: Claude Code in a window of its own, for this environment.
-    private static void OpenClaude(string environment)
-    {
-        if (SettingsStore.LoadEnvironments().Environments.FirstOrDefault(e => e.Name == environment) is { } found)
-        {
-            ClaudeLauncher.Open(found.ConfigDirectories[0], Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
-        }
-    }
-
     /// A left click on a tray icon opens the thing. Swapping the ring instead left the click with
     /// no visible answer beyond two colours trading places, which reads as a glitch, and hid the
     /// card behind a gesture nobody is told about.
     private void OnIconClicked()
     {
-        CancelHover();
-        OpenCard(pinned: true);
+        _cards.CancelHover();
+        _cards.Open(pinned: true);
     }
 
     private void OnMenuRequested(IntPtr anchor)
     {
-        CancelHover();
-        ShowMenu(anchor);
-    }
+        _cards.CancelHover();
 
-    /// Windows sends nothing that plainly means "the mouse left the icon". The two popup messages
-    /// are about its own tooltip and arrive in pairs on every move, so cancelling on them killed
-    /// the count every time. The wait simply runs out, and then we ask where the pointer is.
-    private void StartHover()
-    {
-        // Already counting, or the card is up: nothing to start.
-        if (_card is not null || _hover is null || _hover.IsEnabled)
+        switch (TrayMenu.Show(_tray.Window, anchor, ShellNumbers.OtherEnvironment()))
         {
-            return;
+            case TrayCommand.SwapRing:
+                if (ShellNumbers.SwapRing())
+                {
+                    _tray.Update();
+                }
+
+                break;
+            case TrayCommand.Settings:
+                OpenSettings();
+                break;
+            case TrayCommand.Refresh:
+                _tray.Update();
+                _island.Update(_numbers.Cards());
+                _cards.Refresh();
+                break;
+            case TrayCommand.Updates:
+                // The menu had this item from the start and nothing was listening for it: the item
+                // was drawn, clicked and ignored.
+                OpenSettings(checkUpdates: true);
+                break;
+            case TrayCommand.Exit:
+                _application.Shutdown();
+                break;
         }
-        Log.Write("hover started");
-        _hover.Start();
-    }
-
-    private void CancelHover() => _hover?.Stop();
-
-    /// An unpinned card follows the mouse out.
-    ///
-    /// Windows says nothing useful about the mouse leaving a tray icon, and there is a gap between
-    /// the icon and the card that the pointer crosses on its way in. So the pointer is looked at
-    /// instead, and it has to be away from both for two turns in a row before the card goes. The
-    /// watch runs only while an unpinned card is on screen, which is a few seconds at a time.
-    private void WatchForTheMouseLeaving()
-    {
-        if (_card is null || _card.IsPinned)
-        {
-            return;
-        }
-
-        _awayTurns = 0;
-        _cardWatch ??= NewCardWatch();
-        _cardWatch.Start();
-    }
-
-    private DispatcherTimer NewCardWatch()
-    {
-        var timer = new DispatcherTimer(DispatcherPriority.Background, _application.Dispatcher)
-        {
-            Interval = TimeSpan.FromMilliseconds(250),
-        };
-
-        timer.Tick += (_, _) =>
-        {
-            if (_card is not { } card || card.IsPinned)
-            {
-                timer.Stop();
-                return;
-            }
-
-            // The island is home for the card the same way the icon is. Without it a card opened
-            // from the island closed half a second later, before the mouse could reach it.
-            if (_tray.CursorOver || Pointer.IsOver(card) || _island.CursorOver)
-            {
-                _awayTurns = 0;
-                return;
-            }
-
-            if (++_awayTurns < 2)
-            {
-                return;
-            }
-
-            timer.Stop();
-            card.FadeAndClose();
-        };
-
-        return timer;
-    }
-
-    private void OnHoverFinished(object? sender, EventArgs e)
-    {
-        CancelHover();
-
-        // Windows does not promise to say when the mouse left the icon, so the pointer is checked
-        // here. Without this the card would appear long after the user walked away.
-        var over = _tray.CursorOver;
-        Log.Write($"hover finished, cursor over icon: {over}, icon at {_tray.Rect}");
-        if (over)
-        {
-            OpenCard();
-        }
-    }
-
-    private void OpenCard() => OpenCard(pinned: false);
-
-    private void OpenCard(bool pinned)
-    {
-        _numbers.ReadAccounts();
-        if (_card is { IsClosing: false })
-        {
-            // A second click on a card that is already pinned closes it, the way it opened.
-            if (pinned && _card.IsPinned)
-            {
-                _card.FadeAndClose();
-                return;
-            }
-
-            if (pinned)
-            {
-                _card.Pin();
-            }
-            _card.Update(CurrentCard());
-            return;
-        }
-
-        var card = new CardWindow();
-        card.SettingsRequested += () => OpenSettings();
-        card.OpenClaudeRequested += OpenClaude;
-        card.Closed += (_, _) =>
-        {
-            // A card still fading out may close after a new one has opened.
-            if (_card != card)
-            {
-                return;
-            }
-
-            _card = null;
-            _cardWatch?.Stop();
-            _workingEnds?.Stop();
-        };
-        _card = card;
-        card.Update(CurrentCard());
-        if (pinned)
-        {
-            card.Pin();
-        }
-        WatchForTheMouseLeaving();
-
-        if (_tray.Rect is { } rect)
-        {
-            card.ShowAt(rect);
-        }
-        else if (_island.Bounds is { } island)
-        {
-            // From the island the card opens right under it.
-            card.ShowAt(island);
-        }
-        else
-        {
-            card.Show();
-        }
-
-        Log.Write($"card opened at {card.Left},{card.Top} size {card.ActualWidth}x{card.ActualHeight}");
     }
 
     /// Called after every change in the settings window, so only a real move between the tray and
@@ -473,7 +289,7 @@ sealed class AikoShell : IDisposable
         _numbers.NoteWhereWeHaveNoAccess();
         _mood?.Follow(SettingsStore.LoadEnvironments());
         _tray.Update();
-        _card?.Update(CurrentCard());
+        _cards.Refresh();
     }
 
     /// One settings window at a time: asking twice brings the open one forward instead of
@@ -515,35 +331,5 @@ sealed class AikoShell : IDisposable
         }
 
         Log.Write("settings opened");
-    }
-
-    private void ShowMenu(IntPtr anchor)
-    {
-        switch (TrayMenu.Show(_tray.Window, anchor, ShellNumbers.OtherEnvironment()))
-        {
-            case TrayCommand.SwapRing:
-                if (ShellNumbers.SwapRing())
-                {
-                    _tray.Update();
-                }
-
-                break;
-            case TrayCommand.Settings:
-                OpenSettings();
-                break;
-            case TrayCommand.Refresh:
-                _tray.Update();
-                _island.Update(_numbers.Cards());
-                _card?.Update(CurrentCard());
-                break;
-            case TrayCommand.Updates:
-                // The menu had this item from the start and nothing was listening for it: the item
-                // was drawn, clicked and ignored.
-                OpenSettings(checkUpdates: true);
-                break;
-            case TrayCommand.Exit:
-                _application.Shutdown();
-                break;
-        }
     }
 }
