@@ -133,96 +133,42 @@ sealed class AikoShell : IDisposable
         }
         else
         {
-            RepairOurStatusLines();
-
-            // Once, for someone who set Aiko up before the persona existed (D-200).
-            var app = SettingsStore.Load();
-            if (WizardChecklist.OpensMeetAikoOnStart(app, SettingsStore.LoadEnvironments()))
-            {
-                OpenSettings(page: SettingsPanel.ChecklistPageKey);
-                _settings?.OpenChecklist(ChecklistItem.MeetAiko);
-                app = app with { MeetAikoShown = true };
-                SettingsStore.Save(app);
-            }
-
-            // Once, for someone who set Aiko up before the count had its own switch. Not asking
-            // would leave them sending nothing and never learning the question existed.
-            else if (WizardChecklist.OpensPrivacyOnStart(app, SettingsStore.LoadEnvironments()))
-            {
-                OpenSettings(page: SettingsPanel.ChecklistPageKey);
-                _settings?.OpenChecklist(ChecklistItem.Privacy);
-            }
-
-            // Once, for someone who turned Aiko on before she had a memory. The page says what the
-            // memory reads and writes, and it is where she can be turned off.
-            else if (WizardChecklist.OpensMemoryOnStart(app, SettingsStore.LoadEnvironments()))
-            {
-                OpenSettings(page: SettingsPanel.PersonalityPageKey);
-                SettingsStore.Save(app with { MemoryShown = true });
-            }
-
-            // An update can bring a new persona text or move the marketplace. When the persona is
-            // off everywhere this reads a few files and does nothing else.
-            PluginSync.Request("startup");
-
-            // An update brings a new shim. The copy in PATH is refreshed, and only when the person
-            // set commands up: the folder never appears on its own.
-            if (CommandFolder.IsSetUp)
-            {
-                CommandFolder.Sync(SettingsStore.LoadEnvironments());
-            }
+            StartupChores.RepairOurStatusLines();
+            OpenThePageShownOnce();
+            StartupChores.RefreshPluginsAndCommands();
         }
 
         NoteWhereWeHaveNoAccess();
-        ClearStaleActivity();
+        StartupChores.ClearStaleActivity();
     }
 
-    /// A session that never sent SessionEnd leaves its file behind (D-206). A day later it goes.
-    private static void ClearStaleActivity()
+    /// A page that opens by itself one time, for someone who set Aiko up before the page existed.
+    private void OpenThePageShownOnce()
     {
-        var folder = ThisComputer.Folders.ActivityFolder;
-        if (!Directory.Exists(folder))
+        // Once, for someone who set Aiko up before the persona existed (D-200).
+        var app = SettingsStore.Load();
+        if (WizardChecklist.OpensMeetAikoOnStart(app, SettingsStore.LoadEnvironments()))
         {
-            return;
+            OpenSettings(page: SettingsPanel.ChecklistPageKey);
+            _settings?.OpenChecklist(ChecklistItem.MeetAiko);
+            app = app with { MeetAikoShown = true };
+            SettingsStore.Save(app);
         }
 
-        foreach (var file in new DirectoryInfo(folder).EnumerateFiles())
+        // Once, for someone who set Aiko up before the count had its own switch. Not asking
+        // would leave them sending nothing and never learning the question existed.
+        else if (WizardChecklist.OpensPrivacyOnStart(app, SettingsStore.LoadEnvironments()))
         {
-            if (ActivityRecord.IsStale(file.LastWriteTimeUtc, DateTimeOffset.UtcNow))
-            {
-                try
-                {
-                    file.Delete();
-                }
-                catch (Exception e) when (e is IOException or UnauthorizedAccessException)
-                {
-                }
-            }
-        }
-    }
-
-    /// Our own line goes stale on its own: reinstalling moves the bridge, and installing Git
-    /// changes the shell the line has to be written for. A stale line runs nothing and says
-    /// nothing about it, so it is put right at startup.
-    ///
-    /// Only lines that are already ours are touched. Somebody who answered "not now" in the wizard
-    /// keeps that answer, and a settings file with no line of ours in it is not ours to write to.
-    private static void RepairOurStatusLines()
-    {
-        if (BridgePath.Current() is not { } bridge)
-        {
-            return;
+            OpenSettings(page: SettingsPanel.ChecklistPageKey);
+            _settings?.OpenChecklist(ChecklistItem.Privacy);
         }
 
-        foreach (var environment in SettingsStore.LoadEnvironments().Environments)
+        // Once, for someone who turned Aiko on before she had a memory. The page says what the
+        // memory reads and writes, and it is where she can be turned off.
+        else if (WizardChecklist.OpensMemoryOnStart(app, SettingsStore.LoadEnvironments()))
         {
-            foreach (var folder in environment.ConfigDirectories)
-            {
-                if (ClaudeSettingsFile.RepairBridge(folder, bridge).Changed)
-                {
-                    Log.Write($"our status line was stale in {Path.GetFileName(folder)} and was put right");
-                }
-            }
+            OpenSettings(page: SettingsPanel.PersonalityPageKey);
+            SettingsStore.Save(app with { MemoryShown = true });
         }
     }
 
