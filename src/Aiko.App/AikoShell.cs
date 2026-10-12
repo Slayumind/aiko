@@ -42,6 +42,7 @@ sealed class AikoShell : IDisposable
 
     private readonly Application _application;
     private readonly SnapshotWatcher _watcher = new();
+    private readonly ShellNumbers _numbers;
 
     /// The face for two seconds after an event (D-211). Drawn by the icon and the island later.
     private TrayMoodPlayer? _mood;
@@ -72,6 +73,7 @@ sealed class AikoShell : IDisposable
     public AikoShell(Application application)
     {
         _application = application;
+        _numbers = new ShellNumbers(_watcher);
         _taskbarCreatedMessage = PInvoke.RegisterWindowMessage("TaskbarCreated");
     }
 
@@ -103,6 +105,7 @@ sealed class AikoShell : IDisposable
         var poller = new DirectPoller(_application.Dispatcher);
         poller.Reported += OnSnapshotsChanged;
         _direct = poller;
+        _numbers.Direct = poller;
 
         if (!changingNothing)
         {
@@ -122,7 +125,7 @@ sealed class AikoShell : IDisposable
 
         if (changingNothing)
         {
-            NoteWhereWeHaveNoAccess();
+            _numbers.NoteWhereWeHaveNoAccess();
             return;
         }
 
@@ -138,7 +141,7 @@ sealed class AikoShell : IDisposable
             StartupChores.RefreshPluginsAndCommands();
         }
 
-        NoteWhereWeHaveNoAccess();
+        _numbers.NoteWhereWeHaveNoAccess();
         StartupChores.ClearStaleActivity();
     }
 
@@ -263,7 +266,7 @@ sealed class AikoShell : IDisposable
             _island = window;
         }
 
-        _island.Show(Cards(), position);
+        _island.Show(_numbers.Cards(), position);
 
         // Only watched while the island is on screen: the tray icon has nothing to hide from.
         if (_fullScreen is null)
@@ -323,7 +326,7 @@ sealed class AikoShell : IDisposable
         _application.Dispatcher.BeginInvoke(() =>
         {
             _mood?.OnLimits(EnvironmentSnapshots.Combine(SettingsStore.LoadEnvironments(), _watcher.ByFile));
-            var cards = Cards();
+            var cards = _numbers.Cards();
             UpdateIcon();
             _island?.Update(cards);
             _card?.Update(CurrentCard());
@@ -383,7 +386,7 @@ sealed class AikoShell : IDisposable
     /// reader has nothing else to read.
     private void WriteTooltip(ref NOTIFYICONDATAW data)
     {
-        var text = TrayText.Tooltip(Cards(), _updates?.NewerVersion);
+        var text = TrayText.Tooltip(_numbers.Cards(), _updates?.NewerVersion);
         var room = data.szTip.AsSpan();
         room.Clear();
         text.AsSpan(0, Math.Min(text.Length, room.Length - 1)).CopyTo(room);
@@ -397,7 +400,7 @@ sealed class AikoShell : IDisposable
 
         if (!sameRows)
         {
-            _iconRows = CurrentRows();
+            _iconRows = _numbers.IconRows();
         }
 
         _icon = RingIcon.Render(_iconSize, _iconRows.Ring, _iconRows.Dot, _faceAnimator?.Frame, _faceAnimator?.Face);
@@ -459,34 +462,12 @@ sealed class AikoShell : IDisposable
         }
     }
 
-    /// Every environment we know about, in the order the settings hold them. The card shows all of
-    /// them, including the ones with nothing reported yet: an empty block says so in words.
-    private IReadOnlyList<CardState> Cards()
-    {
-        var now = DateTimeOffset.Now;
-
-        // Read every time: the settings window can rename an environment while Aiko runs, and the
-        // file is small.
-        var environments = SettingsStore.LoadEnvironments();
-
-        var direct = _direct?.Latest;
-
-        return EnvironmentSnapshots.Combine(environments, _watcher.ByFile)
-            // Two sources for one environment: the fresher answer wins. Direct mode is asked
-            // rarely, the status line speaks on every reply, so neither is always ahead. Whether a
-            // session is working comes from the status line alone, whichever answer wins.
-            .Select(snapshot => direct is not null && direct.TryGetValue(snapshot.Environment, out var fromApi)
-                ? CardState.From(LimitSnapshot.Newer(snapshot, fromApi), now) with { WorkingUntil = CardState.WorkingUntilFor(snapshot) }
-                : CardState.From(snapshot, now))
-            .ToList();
-    }
-
     private CardModel CurrentCard()
     {
         var now = DateTimeOffset.Now;
-        var cards = Cards();
+        var cards = _numbers.Cards();
         WakeWhenWorkingEnds(cards, now);
-        return CardModel.From(cards, now, _noAccess, _accounts);
+        return _numbers.CardFor(cards, now);
     }
 
     /// "working now" has to go away by itself when a session goes quiet, and nothing else changes
@@ -518,17 +499,6 @@ sealed class AikoShell : IDisposable
         return timer;
     }
 
-    /// Plan and sign-in per environment. Read when the card opens, not on every new number:
-    /// .claude.json can be large, and neither the plan nor the sign-in changes between two answers.
-    private IReadOnlyDictionary<string, CardAccount> _accounts = new Dictionary<string, CardAccount>();
-
-    private static IReadOnlyDictionary<string, CardAccount> ReadAccounts() =>
-        SettingsStore.LoadEnvironments().Environments.ToDictionary(
-            environment => environment.Name,
-            environment => new CardAccount(
-                ClaudeAccounts.Read(environment.ConfigDirectories[0]).PlanLabel,
-                File.Exists(ClaudeInstall.CredentialsPathIn(ThisComputer.Platform, environment.ConfigDirectories[0]))));
-
     /// The card's button: Claude Code in a window of its own, for this environment.
     private static void OpenClaude(string environment)
     {
@@ -536,69 +506,6 @@ sealed class AikoShell : IDisposable
         {
             ClaudeLauncher.Open(found.ConfigDirectories[0], Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
         }
-    }
-
-    /// Environments where Aiko's line is not in the Claude Code settings, so no numbers can ever
-    /// arrive. Worked out when the settings change rather than every time the card is drawn.
-    private IReadOnlySet<string> _noAccess = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-    private void NoteWhereWeHaveNoAccess()
-    {
-        var missing = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-        foreach (var environment in SettingsStore.LoadEnvironments().Environments)
-        {
-            // Direct mode fetches the numbers itself, so the status line is not needed there.
-            if (environment.DirectMode)
-            {
-                continue;
-            }
-
-            if (environment.ConfigDirectories.Any(folder => !ClaudeSettingsFile.HasOurLine(folder)))
-            {
-                missing.Add(environment.Name);
-            }
-        }
-
-        _noAccess = missing;
-    }
-
-    /// The ring shows one environment and the dot the other. With nothing reported yet both are
-    /// empty and the icon draws the dashed ring.
-    private (CardRow? Ring, CardRow? Dot) CurrentRows()
-    {
-        var cards = Cards().Where(card => card.HasData).ToList();
-        if (cards.Count == 0)
-        {
-            return (null, null);
-        }
-
-        var chosen = SettingsStore.LoadEnvironments().RingEnvironment;
-        var ringCard = cards.FirstOrDefault(c => c.Environment == chosen) ?? cards[0];
-
-        var dotCard = cards.FirstOrDefault(c => c.Environment != ringCard.Environment);
-        return (ringCard.IconRow, dotCard?.IconRow);
-    }
-
-    /// The environment the ring does not show, when there is one. Null with a single environment,
-    /// and then the menu leaves the item out rather than showing one that does nothing.
-    private static string? OtherEnvironment() => SettingsStore.LoadEnvironments().Dot?.Name;
-
-    /// The chosen environment is kept in the environments file, not in a field here. It is a
-    /// choice the user made, and a choice that quietly goes back to the other environment on the
-    /// next start is worse than no choice at all.
-    private void SwapRing()
-    {
-        var environments = SettingsStore.LoadEnvironments();
-        var swapped = environments.SwapRing();
-        if (ReferenceEquals(swapped, environments))
-        {
-            // One environment: there is nothing to swap with.
-            return;
-        }
-
-        SettingsStore.SaveEnvironments(swapped);
-        UpdateIcon();
     }
 
     private void StartHover()
@@ -706,7 +613,7 @@ sealed class AikoShell : IDisposable
 
     private void OpenCard(bool pinned)
     {
-        _accounts = ReadAccounts();
+        _numbers.ReadAccounts();
         if (_card is { IsClosing: false })
         {
             // A second click on a card that is already pinned closes it, the way it opened.
@@ -779,7 +686,7 @@ sealed class AikoShell : IDisposable
         }
 
         FollowDirectMode();
-        NoteWhereWeHaveNoAccess();
+        _numbers.NoteWhereWeHaveNoAccess();
         _mood?.Follow(SettingsStore.LoadEnvironments());
         UpdateIcon();
         _card?.Update(CurrentCard());
@@ -940,7 +847,7 @@ sealed class AikoShell : IDisposable
 
         // The click on the icon opens the card now, so swapping the ring needs a home. Here it
         // says which environment it would show, which the click never did.
-        if (OtherEnvironment() is { } other)
+        if (ShellNumbers.OtherEnvironment() is { } other)
         {
             fixed (char* swap = string.Format(Strings.MenuShowInRing, other))
             {
@@ -970,14 +877,18 @@ sealed class AikoShell : IDisposable
         switch (command)
         {
             case MenuSwap:
-                SwapRing();
+                if (ShellNumbers.SwapRing())
+                {
+                    UpdateIcon();
+                }
+
                 break;
             case MenuSettings:
                 OpenSettings();
                 break;
             case MenuRefresh:
                 UpdateIcon();
-                _island?.Update(Cards());
+                _island?.Update(_numbers.Cards());
                 _card?.Update(CurrentCard());
                 break;
             case MenuUpdates:
