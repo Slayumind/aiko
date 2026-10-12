@@ -25,26 +25,16 @@ namespace Aiko.App;
 [SupportedOSPlatform("windows10.0.17763")]
 sealed class AikoShell : IDisposable
 {
-    private const uint IconId = 1;
-    private const uint CallbackMessage = PInvoke.WM_APP + 1;
-    private const uint NinSelect = PInvoke.WM_USER;
-
     /// Long enough that running the mouse along the taskbar does not open the card.
     private static readonly TimeSpan HoverDelay = TimeSpan.FromSeconds(1.5);
 
     private readonly Application _application;
     private readonly SnapshotWatcher _watcher = new();
     private readonly ShellNumbers _numbers;
+    private readonly TrayIcon _tray;
 
     /// The face for two seconds after an event (D-211). Drawn by the icon and the island later.
     private TrayMoodPlayer? _mood;
-    private TrayFaceAnimator? _faceAnimator;
-
-    /// The rows the icon last drew. Frames of a face transition reuse them instead of reading the
-    /// settings and the snapshots sixteen times in half a second.
-    private (CardRow? Ring, CardRow? Dot) _iconRows;
-    private readonly uint _taskbarCreatedMessage;
-    private HwndSource? _source;
     private DispatcherTimer? _hover;
     private CardWindow? _card;
     private SettingsWindow? _settings;
@@ -54,10 +44,6 @@ sealed class AikoShell : IDisposable
     private UpdateWatch? _updates;
     private DispatcherTimer? _cardWatch;
     private int _awayTurns;
-    private HICON _icon;
-    private uint _iconDpi;
-    private int _iconSize;
-    private bool _iconShown;
 
     /// Set by --try-shell. A check draws the real shell and must leave the machine as it found it.
     private bool _changingNothing;
@@ -66,10 +52,14 @@ sealed class AikoShell : IDisposable
     {
         _application = application;
         _numbers = new ShellNumbers(_watcher);
-        _taskbarCreatedMessage = PInvoke.RegisterWindowMessage("TaskbarCreated");
+        _tray = new TrayIcon(
+            application.Dispatcher,
+            _numbers.IconRows,
+            () => TrayText.Tooltip(_numbers.Cards(), _updates?.NewerVersion));
+        _tray.Clicked += OnIconClicked;
+        _tray.MouseMoved += StartHover;
+        _tray.MenuRequested += OnMenuRequested;
     }
-
-    private HWND Hwnd => (HWND)_source!.Handle;
 
     /// With changingNothing the start skips everything that writes or asks the network: the repair
     /// of the status lines, the pages that open once and note that they did, the plugin sync, the
@@ -78,18 +68,13 @@ sealed class AikoShell : IDisposable
     {
         _changingNothing = changingNothing;
 
-        // A hidden top level window, not a message only one: broadcasts such as TaskbarCreated
-        // never reach message only windows (spike 2026-09-11).
-        _source = new HwndSource(new HwndSourceParameters("AikoTray") { Width = 0, Height = 0, WindowStyle = 0 });
-        _source.AddHook(WndProc);
+        _tray.Open();
 
         _hover = new DispatcherTimer(DispatcherPriority.Normal, _application.Dispatcher) { Interval = HoverDelay };
         _hover.Tick += OnHoverFinished;
 
         _watcher.Updated += OnSnapshotsChanged;
 
-        _faceAnimator = new TrayFaceAnimator(_application.Dispatcher);
-        _faceAnimator.Changed += RedrawIcon;
         _mood = new TrayMoodPlayer(_application.Dispatcher);
         _mood.FaceChanged += OnFaceChanged;
         _mood.Follow(SettingsStore.LoadEnvironments());
@@ -102,7 +87,7 @@ sealed class AikoShell : IDisposable
         if (!changingNothing)
         {
             var updates = new UpdateWatch(_application.Dispatcher);
-            updates.Found += UpdateIcon;
+            updates.Found += _tray.Update;
             _updates = updates;
         }
 
@@ -180,13 +165,13 @@ sealed class AikoShell : IDisposable
 
     public SettingsWindow? SettingsForCheck => _settings;
 
-    public Rect? IconRectForCheck => IconRect();
+    public Rect? IconRectForCheck => _tray.Rect;
 
-    public bool FaceOnIconForCheck => _faceAnimator?.Face is not null;
+    public bool FaceOnIconForCheck => _tray.HasFace;
 
     /// Whether the pointer is over the icon, the island or the card: the places an open card stays for.
     public bool MouseAtHomeForCheck =>
-        CursorOverIcon() || CursorOverIsland() || (_card is { } card && CursorOver(card));
+        _tray.CursorOver || CursorOverIsland() || (_card is { } card && CursorOver(card));
 
     public int BlocksOnCardForCheck => CurrentCard().Blocks.Count;
 
@@ -211,12 +196,7 @@ sealed class AikoShell : IDisposable
         _settings?.Close();
         CloseIsland();
 
-        RemoveIcon();
-        if (!_icon.IsNull)
-        {
-            PInvoke.DestroyIcon(_icon);
-        }
-        _source?.Dispose();
+        _tray.Dispose();
     }
 
     /// Direct mode is switched per environment, and the settings window and the wizard both
@@ -238,13 +218,13 @@ sealed class AikoShell : IDisposable
 
         if ((forced ?? settings.Place) == AikoPlace.Island)
         {
-            RemoveIcon();
+            _tray.Remove();
             ShowIsland(settings.Island);
         }
         else
         {
             CloseIsland();
-            AddIcon();
+            _tray.Add();
         }
     }
 
@@ -319,85 +299,10 @@ sealed class AikoShell : IDisposable
         {
             _mood?.OnLimits(EnvironmentSnapshots.Combine(SettingsStore.LoadEnvironments(), _watcher.ByFile));
             var cards = _numbers.Cards();
-            UpdateIcon();
+            _tray.Update();
             _island?.Update(cards);
             _card?.Update(CurrentCard());
         });
-
-    private void AddIcon()
-    {
-        ReplaceIcon(TaskbarDpi());
-
-        var data = NewData();
-        data.uFlags = NOTIFY_ICON_DATA_FLAGS.NIF_MESSAGE | NOTIFY_ICON_DATA_FLAGS.NIF_ICON | NOTIFY_ICON_DATA_FLAGS.NIF_TIP;
-        data.uCallbackMessage = CallbackMessage;
-        data.hIcon = _icon;
-        WriteTooltip(ref data);
-        PInvoke.Shell_NotifyIcon(NOTIFY_ICON_MESSAGE.NIM_ADD, in data);
-
-        data.Anonymous.uVersion = PInvoke.NOTIFYICON_VERSION_4;
-        PInvoke.Shell_NotifyIcon(NOTIFY_ICON_MESSAGE.NIM_SETVERSION, in data);
-
-        _iconShown = true;
-    }
-
-    private void RemoveIcon()
-    {
-        if (!_iconShown)
-        {
-            return;
-        }
-
-        var data = NewData();
-        PInvoke.Shell_NotifyIcon(NOTIFY_ICON_MESSAGE.NIM_DELETE, in data);
-        _iconShown = false;
-    }
-
-    private void UpdateIcon()
-    {
-        if (!_iconShown)
-        {
-            return;
-        }
-
-        var old = ReplaceIcon(TaskbarDpi());
-        var data = NewData();
-        data.uFlags = NOTIFY_ICON_DATA_FLAGS.NIF_ICON | NOTIFY_ICON_DATA_FLAGS.NIF_TIP;
-        data.hIcon = _icon;
-        WriteTooltip(ref data);
-        PInvoke.Shell_NotifyIcon(NOTIFY_ICON_MESSAGE.NIM_MODIFY, in data);
-
-        if (!old.IsNull)
-        {
-            PInvoke.DestroyIcon(old);
-        }
-    }
-
-    /// The numbers go in the tooltip as well as in the ring. Under the Windows 11 overflow arrow
-    /// the hover card never opens, so for some people this is the whole product, and a screen
-    /// reader has nothing else to read.
-    private void WriteTooltip(ref NOTIFYICONDATAW data)
-    {
-        var text = TrayText.Tooltip(_numbers.Cards(), _updates?.NewerVersion);
-        var room = data.szTip.AsSpan();
-        room.Clear();
-        text.AsSpan(0, Math.Min(text.Length, room.Length - 1)).CopyTo(room);
-    }
-
-    private HICON ReplaceIcon(uint dpi, bool sameRows = false)
-    {
-        var old = _icon;
-        _iconSize = PInvoke.GetSystemMetricsForDpi(SYSTEM_METRICS_INDEX.SM_CXSMICON, dpi);
-        _iconDpi = dpi;
-
-        if (!sameRows)
-        {
-            _iconRows = _numbers.IconRows();
-        }
-
-        _icon = RingIcon.Render(_iconSize, _iconRows.Ring, _iconRows.Dot, _faceAnimator?.Frame, _faceAnimator?.Face);
-        return old;
-    }
 
     /// A face comes or goes (D-211), on the tray icon or on the island, wherever Aiko lives.
     private void OnFaceChanged(AikoFace? face)
@@ -417,42 +322,10 @@ sealed class AikoShell : IDisposable
             }
         }
 
-        if (_faceAnimator is null || !_iconShown)
-        {
-            return;
-        }
-
-        if (face is { } shown)
-        {
-            _faceAnimator.Show(FaceDrawing.For(style, shown, TaskbarTheme.Ground(), _iconSize));
-        }
-        else
-        {
-            _faceAnimator.Hide();
-        }
+        _tray.ShowFace(face, style);
     }
 
     private const double IslandFaceSize = 18;
-
-    /// One frame of a face transition: only the picture changes, not the tooltip.
-    private void RedrawIcon()
-    {
-        if (!_iconShown)
-        {
-            return;
-        }
-
-        var old = ReplaceIcon(TaskbarDpi(), sameRows: true);
-        var data = NewData();
-        data.uFlags = NOTIFY_ICON_DATA_FLAGS.NIF_ICON;
-        data.hIcon = _icon;
-        PInvoke.Shell_NotifyIcon(NOTIFY_ICON_MESSAGE.NIM_MODIFY, in data);
-
-        if (!old.IsNull)
-        {
-            PInvoke.DestroyIcon(old);
-        }
-    }
 
     private CardModel CurrentCard()
     {
@@ -500,6 +373,24 @@ sealed class AikoShell : IDisposable
         }
     }
 
+    /// A left click on a tray icon opens the thing. Swapping the ring instead left the click with
+    /// no visible answer beyond two colours trading places, which reads as a glitch, and hid the
+    /// card behind a gesture nobody is told about.
+    private void OnIconClicked()
+    {
+        CancelHover();
+        OpenCard(pinned: true);
+    }
+
+    private void OnMenuRequested(IntPtr anchor)
+    {
+        CancelHover();
+        ShowMenu(anchor);
+    }
+
+    /// Windows sends nothing that plainly means "the mouse left the icon". The two popup messages
+    /// are about its own tooltip and arrive in pairs on every move, so cancelling on them killed
+    /// the count every time. The wait simply runs out, and then we ask where the pointer is.
     private void StartHover()
     {
         // Already counting, or the card is up: nothing to start.
@@ -548,7 +439,7 @@ sealed class AikoShell : IDisposable
 
             // The island is home for the card the same way the icon is. Without it a card opened
             // from the island closed half a second later, before the mouse could reach it.
-            if (CursorOverIcon() || CursorOver(card) || CursorOverIsland())
+            if (_tray.CursorOver || CursorOver(card) || CursorOverIsland())
             {
                 _awayTurns = 0;
                 return;
@@ -593,8 +484,8 @@ sealed class AikoShell : IDisposable
 
         // Windows does not promise to say when the mouse left the icon, so the pointer is checked
         // here. Without this the card would appear long after the user walked away.
-        var over = CursorOverIcon();
-        Log.Write($"hover finished, cursor over icon: {over}, icon at {IconRect()}");
+        var over = _tray.CursorOver;
+        Log.Write($"hover finished, cursor over icon: {over}, icon at {_tray.Rect}");
         if (over)
         {
             OpenCard();
@@ -646,7 +537,7 @@ sealed class AikoShell : IDisposable
         }
         WatchForTheMouseLeaving();
 
-        if (IconRect() is { } rect)
+        if (_tray.Rect is { } rect)
         {
             card.ShowAt(rect);
         }
@@ -680,7 +571,7 @@ sealed class AikoShell : IDisposable
         FollowDirectMode();
         _numbers.NoteWhereWeHaveNoAccess();
         _mood?.Follow(SettingsStore.LoadEnvironments());
-        UpdateIcon();
+        _tray.Update();
         _card?.Update(CurrentCard());
     }
 
@@ -725,119 +616,14 @@ sealed class AikoShell : IDisposable
         Log.Write("settings opened");
     }
 
-    /// Where Windows put our icon, in real pixels. It answers even when the icon sits in the
-    /// overflow area, which is where Windows 11 puts a new app by default.
-    private Rect? IconRect()
-    {
-        if (!_iconShown)
-        {
-            return null;
-        }
-
-        var id = new NOTIFYICONIDENTIFIER
-        {
-            cbSize = (uint)Marshal.SizeOf<NOTIFYICONIDENTIFIER>(),
-            hWnd = Hwnd,
-            uID = IconId,
-        };
-
-        return PInvoke.Shell_NotifyIconGetRect(in id, out var rect).Succeeded
-            ? new Rect(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top)
-            : null;
-    }
-
-    private bool CursorOverIcon()
-    {
-        if (IconRect() is not { } rect || !PInvoke.GetCursorPos(out var point))
-        {
-            return false;
-        }
-        return rect.Contains(point.X, point.Y);
-    }
-
-    private static uint TaskbarDpi()
-    {
-        var taskbar = PInvoke.FindWindow("Shell_TrayWnd", null);
-        var monitor = PInvoke.MonitorFromWindow(taskbar, MONITOR_FROM_FLAGS.MONITOR_DEFAULTTOPRIMARY);
-        PInvoke.GetDpiForMonitor(monitor, MONITOR_DPI_TYPE.MDT_EFFECTIVE_DPI, out var dpiX, out _);
-        return dpiX;
-    }
-
-    private NOTIFYICONDATAW NewData() => new()
-    {
-        cbSize = (uint)Marshal.SizeOf<NOTIFYICONDATAW>(),
-        hWnd = Hwnd,
-        uID = IconId,
-    };
-
-    private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
-    {
-        var message = (uint)msg;
-        if (message == CallbackMessage)
-        {
-            OnIconMessage((uint)(lParam.ToInt64() & 0xFFFF), wParam);
-            handled = true;
-        }
-        else if (message == _taskbarCreatedMessage)
-        {
-            // Explorer restarted and forgot every icon; ours has to introduce itself again.
-            if (_iconShown)
-            {
-                _iconShown = false;
-                AddIcon();
-            }
-        }
-        else if (message is PInvoke.WM_DPICHANGED or PInvoke.WM_DISPLAYCHANGE or PInvoke.WM_SETTINGCHANGE)
-        {
-            // WM_DPICHANGED never arrives at a hidden window, so the other two carry the news.
-            if (TaskbarDpi() != _iconDpi)
-            {
-                UpdateIcon();
-            }
-        }
-        return IntPtr.Zero;
-    }
-
-    private void OnIconMessage(uint iconEvent, IntPtr anchor)
-    {
-        // Mouse moves arrive many times a second; the rest are rare and worth a line each.
-        if (iconEvent != PInvoke.WM_MOUSEMOVE)
-        {
-            Log.Write($"icon event {iconEvent}");
-        }
-
-        switch (iconEvent)
-        {
-            // A left click on a tray icon opens the thing. Swapping the ring instead left the
-            // click with no visible answer beyond two colours trading places, which reads as a
-            // glitch, and hid the card behind a gesture nobody is told about.
-            case NinSelect:
-                CancelHover();
-                OpenCard(pinned: true);
-                break;
-
-            // Windows sends nothing that plainly means "the mouse left the icon". The two popup
-            // messages are about its own tooltip and arrive in pairs on every move, so cancelling
-            // on them killed the count every time. The wait simply runs out, and then we ask where
-            // the pointer is.
-            case PInvoke.WM_MOUSEMOVE:
-                StartHover();
-                break;
-            case PInvoke.WM_CONTEXTMENU:
-                CancelHover();
-                ShowMenu(anchor);
-                break;
-        }
-    }
-
     private void ShowMenu(IntPtr anchor)
     {
-        switch (TrayMenu.Show(Hwnd, anchor, ShellNumbers.OtherEnvironment()))
+        switch (TrayMenu.Show(_tray.Window, anchor, ShellNumbers.OtherEnvironment()))
         {
             case TrayCommand.SwapRing:
                 if (ShellNumbers.SwapRing())
                 {
-                    UpdateIcon();
+                    _tray.Update();
                 }
 
                 break;
@@ -845,7 +631,7 @@ sealed class AikoShell : IDisposable
                 OpenSettings();
                 break;
             case TrayCommand.Refresh:
-                UpdateIcon();
+                _tray.Update();
                 _island?.Update(_numbers.Cards());
                 _card?.Update(CurrentCard());
                 break;
