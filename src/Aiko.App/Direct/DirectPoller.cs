@@ -172,6 +172,12 @@ sealed class DirectPoller : IDisposable
                     $"direct mode for {account.Name}: " +
                     string.Join(", ", answer.Report.Windows.Select(w => $"{w.Kind} {w.Percent}%")) +
                     (answer.Report.Model is { } model ? $", {model.ModelName} {model.Percent}%" : string.Empty));
+
+                if (answer.Report.HasOnlyTheModelLimit)
+                {
+                    Log.Write($"direct mode for {account.Name}: only the model limit came, with no windows, and nothing shows it (D-259)");
+                }
+
                 return true;
 
             case AskOutcome.Fine:

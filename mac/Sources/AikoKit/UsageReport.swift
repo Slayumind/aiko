@@ -27,6 +27,11 @@ public struct UsageReport: Sendable, Equatable {
 
     public var hasData: Bool { !windows.isEmpty || model != nil }
 
+    /// The limit of the heavy model came and neither window did. Nothing shows such an answer:
+    /// the card, the icon and the cache all ask for the windows first (D-259). Nobody has seen
+    /// one yet, so direct mode on Windows writes a line to the log when it happens (D-297).
+    public var hasOnlyTheModelLimit: Bool { windows.isEmpty && model != nil }
+
     public static func fromJson(_ json: String) -> UsageReport {
         if json.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             return empty
