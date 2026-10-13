@@ -31,6 +31,13 @@ static class Program
             .OnBeforeUninstallFastCallback(_ => Uninstall.Cleanup(keepMemory: null))
             .Run();
 
+        // Aiko as a child of itself, in the place of Claude Code: the other end of --try-pipe.
+        if (args is [PipeChild.Argument, ..])
+        {
+            PipeChild.Run(args);
+            return;
+        }
+
         // Software rendering: the spike measured 33 MB against 92 MB with the DirectX stack, and
         // Aiko draws a small card a few times an hour. Nobody needs the GPU for that.
         RenderOptions.ProcessRenderMode = RenderMode.SoftwareOnly;
@@ -271,6 +278,27 @@ static class Program
         if (args is ["--try-settings", ..])
         {
             Environment.Exit(SettingsCheck.Run());
+            return;
+        }
+
+        // The pipes a conversation runs on, checked with Aiko as its own child. No Claude Code.
+        if (args is ["--try-pipe", ..])
+        {
+            Environment.Exit(TerminalCheck.Pipe());
+            return;
+        }
+
+        // One short turn with the real Claude Code. Spends a little of the limits.
+        if (args is ["--try-conversation", "real", var talkFolder, ..])
+        {
+            Environment.Exit(TerminalCheck.Real(talkFolder, args.Length > 3 ? args[3] : null));
+            return;
+        }
+
+        // A conversation played from a script, against a scripted Claude Code.
+        if (args is ["--try-conversation", var talkScript, ..])
+        {
+            Environment.Exit(TerminalCheck.Conversation(talkScript));
             return;
         }
 

@@ -40,3 +40,9 @@ D3D_SDK_VERSION
 PostMessage
 WM_KEYDOWN
 WM_CANCELMODE
+CreateJobObject
+SetInformationJobObject
+AssignProcessToJobObject
+TerminateJobObject
+JOBOBJECT_EXTENDED_LIMIT_INFORMATION
+JOB_OBJECT_LIMIT
