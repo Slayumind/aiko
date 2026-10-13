@@ -22,6 +22,16 @@ public enum RowState: Sendable, Equatable {
     case signedOut
 }
 
+/// How long ago a session was used, as the second line of a sleeping row says it.
+public enum UsedDay: Sendable, Equatable {
+    /// Only the time is shown.
+    case today
+    case yesterday
+
+    /// The date is shown.
+    case earlier
+}
+
 /// A conversation that is in memory: what it looks like and whether Claude Code runs for it.
 public struct LiveTalk: Sendable, Equatable {
     public let glance: TalkGlance
@@ -61,6 +71,23 @@ public enum SessionRows {
     /// How many sessions of the environment wait for the person: the number on its tab.
     public static func waiting(_ sessions: TerminalSessions, _ environment: String, live: (String) -> LiveTalk?) -> Int {
         sessions.open(environment).filter { live($0.id)?.glance.activity == .waiting }.count
+    }
+
+    /// The day a session was used on, counted by the clock of the person: offsetMinutes is how far
+    /// that clock is from UTC. A time that is still to come reads as today.
+    public static func dayOf(_ usedSeconds: Int64, _ nowSeconds: Int64, offsetMinutes: Int) -> UsedDay {
+        let day: Int64 = 86400
+        let shift = Int64(offsetMinutes) * 60
+        let days = max(0, floorDay(nowSeconds + shift, day) - floorDay(usedSeconds + shift, day))
+        switch days {
+        case 0: return .today
+        case 1: return .yesterday
+        default: return .earlier
+        }
+    }
+
+    private static func floorDay(_ seconds: Int64, _ day: Int64) -> Int64 {
+        (seconds - (((seconds % day) + day) % day)) / day
     }
 
     private static func row(_ session: TerminalSession, _ talk: LiveTalk?) -> SessionRow {

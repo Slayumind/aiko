@@ -392,6 +392,63 @@ public enum Strings {
         "MeetAikoSettings": ("The temperament, the mood, the skills and the memory are on the Personality page. It works in new sessions.", "Темперамент, настроение, навыки и память — на странице «Личность». Действует в новых сессиях."),
         "MeetAikoTurnOn": ("Turn on in {0}", "Включить в среде {0}"),
         "StateOn": ("on", "включена"),
+        "TerminalTitle": ("Terminal", "Терминал"),
+        "TerminalCreateSession": ("Create session", "Создать сессию"),
+        "TerminalCloseSession": ("Close session", "Закрыть сессию"),
+        "TerminalFormTitle": ("New session in {0}", "Новая сессия в среде {0}"),
+        "TerminalFolder": ("Folder", "Папка"),
+        "TerminalModel": ("Model", "Модель"),
+        "TerminalName": ("Name", "Имя"),
+        "TerminalNameHint": ("Optional. An empty name becomes the folder name with a number.", "Можно оставить пустым: сессия получит имя папки с номером."),
+        "TerminalDescribeTask": ("Describe the task", "Опиши задачу"),
+        "TerminalRecent": ("Recent", "Недавние"),
+        "TerminalBound": ("Bound folders", "Привязанные"),
+        "TerminalChooseFolder": ("Choose another folder", "Выбрать другую папку"),
+        "TerminalElsewhere": ("This folder is bound to {0}. The session starts in {1}.", "Эта папка привязана к среде {0}. Сессия запустится в среде {1}."),
+        "TerminalNoSessionsTitle": ("Start your first session in {0}", "Начни первую сессию в среде {0}"),
+        "TerminalNoSessionsBody": ("A session is one conversation with Claude Code in one folder.", "Сессия — это один разговор с Claude Code в одной папке."),
+        "TerminalEmptyTalk": ("Describe the task. Claude Code starts with your first message.", "Опиши задачу. Claude Code запустится с первым сообщением."),
+        "TerminalWorking": ("working", "работает"),
+        "TerminalWaiting": ("waiting", "ждёт"),
+        "TerminalDone": ("done", "готово"),
+        "TerminalAsleep": ("asleep", "спит"),
+        "TerminalStopped": ("stopped", "остановилась"),
+        "TerminalTabWaitingOne": ("{0} waiting", "{0} ждёт"),
+        "TerminalTabWaitingMany": ("{0} waiting", "{0} ждут"),
+        "TerminalStepRead": ("read", "чтение"),
+        "TerminalStepSearch": ("search", "поиск"),
+        "TerminalStepEdit": ("edit", "правка"),
+        "TerminalStepRun": ("run", "запуск"),
+        "TerminalStepAgent": ("agent", "агент"),
+        "TerminalStepWeb": ("web", "веб"),
+        "TerminalLineRequest": ("Needs permission: {0} {1}", "Ждёт разрешения: {0} {1}"),
+        "TerminalLineQuestion": ("Asks: {0}", "Спрашивает: {0}"),
+        "TerminalLinePlan": ("The plan is ready for you", "План готов, посмотри"),
+        "TerminalLineReading": ("Reading {0}", "Читает {0}"),
+        "TerminalLineSearching": ("Searching {0}", "Ищет {0}"),
+        "TerminalLineEditing": ("Editing {0}", "Правит {0}"),
+        "TerminalLineRunning": ("Running {0}", "Запускает {0}"),
+        "TerminalLineAgent": ("Agent: {0}", "Агент: {0}"),
+        "TerminalLineOpening": ("Opening {0}", "Открывает {0}"),
+        "TerminalLineCalling": ("Calling {0}", "Вызывает {0}"),
+        "TerminalLineStoppedAt": ("Stopped at the “{0}” step", "Остановилась на шаге «{0}»"),
+        "TerminalLineSignIn": ("Sign in needed", "Нужно войти"),
+        "TerminalYesterday": ("Yesterday, {0}", "Вчера, {0}"),
+        "TerminalLoginTitle": ("{0} isn’t signed in", "В среде {0} нет входа"),
+        "TerminalLoginBody": ("You can sign in only in Claude Code itself. Aiko opens it in the system terminal and starts the conversation here once you’re in.", "Войти можно только в самом Claude Code. Aiko откроет его в терминале системы, а после входа начнёт разговор здесь."),
+        "TerminalCloseTitle": ("Session “{0}” is still working", "Сессия «{0}» ещё работает"),
+        "TerminalCloseBody": ("If you close it now, Claude Code stops in the middle of the work.", "Если закрыть её сейчас, Claude Code остановится посреди работы."),
+        "TerminalCloseWindowTitle": ("Some sessions are still working", "Часть сессий ещё работает"),
+        "TerminalCloseWindowBody": ("If you close the window now, Claude Code stops in the middle of the work.", "Если закрыть окно сейчас, Claude Code остановится посреди работы."),
+        "TerminalStopAndClose": ("Stop and close", "Остановить и закрыть"),
+        "TerminalKeepOpen": ("Keep open", "Не закрывать"),
+        "TerminalLimitFiveHour": ("5-hour limit", "Лимит на 5 часов"),
+        "TerminalLimitWeek": ("Weekly limit", "Лимит на неделю"),
+        "TerminalMinimize": ("Minimize", "Свернуть"),
+        "TerminalMaximize": ("Maximize", "Развернуть"),
+        "TerminalRestore": ("Restore", "Восстановить"),
+        "TerminalCloseWindow": ("Close", "Закрыть"),
+        "TerminalSessions": ("Sessions", "Сессии"),
     ]
 
     /// Session · 5 hours
@@ -1449,4 +1506,175 @@ public enum Strings {
 
     /// on
     public static var stateOn: String { Strings.get("StateOn") }
+
+    /// Terminal
+    public static var terminalTitle: String { Strings.get("TerminalTitle") }
+
+    /// Create session
+    public static var terminalCreateSession: String { Strings.get("TerminalCreateSession") }
+
+    /// Close session
+    public static var terminalCloseSession: String { Strings.get("TerminalCloseSession") }
+
+    /// New session in {0}
+    public static var terminalFormTitle: String { Strings.get("TerminalFormTitle") }
+
+    /// Folder
+    public static var terminalFolder: String { Strings.get("TerminalFolder") }
+
+    /// Model
+    public static var terminalModel: String { Strings.get("TerminalModel") }
+
+    /// Name
+    public static var terminalName: String { Strings.get("TerminalName") }
+
+    /// Optional. An empty name becomes the folder name with a number.
+    public static var terminalNameHint: String { Strings.get("TerminalNameHint") }
+
+    /// Describe the task
+    public static var terminalDescribeTask: String { Strings.get("TerminalDescribeTask") }
+
+    /// Recent
+    public static var terminalRecent: String { Strings.get("TerminalRecent") }
+
+    /// Bound folders
+    public static var terminalBound: String { Strings.get("TerminalBound") }
+
+    /// Choose another folder
+    public static var terminalChooseFolder: String { Strings.get("TerminalChooseFolder") }
+
+    /// This folder is bound to {0}. The session starts in {1}.
+    public static var terminalElsewhere: String { Strings.get("TerminalElsewhere") }
+
+    /// Start your first session in {0}
+    public static var terminalNoSessionsTitle: String { Strings.get("TerminalNoSessionsTitle") }
+
+    /// A session is one conversation with Claude Code in one folder.
+    public static var terminalNoSessionsBody: String { Strings.get("TerminalNoSessionsBody") }
+
+    /// Describe the task. Claude Code starts with your first message.
+    public static var terminalEmptyTalk: String { Strings.get("TerminalEmptyTalk") }
+
+    /// working
+    public static var terminalWorking: String { Strings.get("TerminalWorking") }
+
+    /// waiting
+    public static var terminalWaiting: String { Strings.get("TerminalWaiting") }
+
+    /// done
+    public static var terminalDone: String { Strings.get("TerminalDone") }
+
+    /// asleep
+    public static var terminalAsleep: String { Strings.get("TerminalAsleep") }
+
+    /// stopped
+    public static var terminalStopped: String { Strings.get("TerminalStopped") }
+
+    /// {0} waiting
+    public static var terminalTabWaitingOne: String { Strings.get("TerminalTabWaitingOne") }
+
+    /// {0} waiting
+    public static var terminalTabWaitingMany: String { Strings.get("TerminalTabWaitingMany") }
+
+    /// read
+    public static var terminalStepRead: String { Strings.get("TerminalStepRead") }
+
+    /// search
+    public static var terminalStepSearch: String { Strings.get("TerminalStepSearch") }
+
+    /// edit
+    public static var terminalStepEdit: String { Strings.get("TerminalStepEdit") }
+
+    /// run
+    public static var terminalStepRun: String { Strings.get("TerminalStepRun") }
+
+    /// agent
+    public static var terminalStepAgent: String { Strings.get("TerminalStepAgent") }
+
+    /// web
+    public static var terminalStepWeb: String { Strings.get("TerminalStepWeb") }
+
+    /// Needs permission: {0} {1}
+    public static var terminalLineRequest: String { Strings.get("TerminalLineRequest") }
+
+    /// Asks: {0}
+    public static var terminalLineQuestion: String { Strings.get("TerminalLineQuestion") }
+
+    /// The plan is ready for you
+    public static var terminalLinePlan: String { Strings.get("TerminalLinePlan") }
+
+    /// Reading {0}
+    public static var terminalLineReading: String { Strings.get("TerminalLineReading") }
+
+    /// Searching {0}
+    public static var terminalLineSearching: String { Strings.get("TerminalLineSearching") }
+
+    /// Editing {0}
+    public static var terminalLineEditing: String { Strings.get("TerminalLineEditing") }
+
+    /// Running {0}
+    public static var terminalLineRunning: String { Strings.get("TerminalLineRunning") }
+
+    /// Agent: {0}
+    public static var terminalLineAgent: String { Strings.get("TerminalLineAgent") }
+
+    /// Opening {0}
+    public static var terminalLineOpening: String { Strings.get("TerminalLineOpening") }
+
+    /// Calling {0}
+    public static var terminalLineCalling: String { Strings.get("TerminalLineCalling") }
+
+    /// Stopped at the “{0}” step
+    public static var terminalLineStoppedAt: String { Strings.get("TerminalLineStoppedAt") }
+
+    /// Sign in needed
+    public static var terminalLineSignIn: String { Strings.get("TerminalLineSignIn") }
+
+    /// Yesterday, {0}
+    public static var terminalYesterday: String { Strings.get("TerminalYesterday") }
+
+    /// {0} isn’t signed in
+    public static var terminalLoginTitle: String { Strings.get("TerminalLoginTitle") }
+
+    /// You can sign in only in Claude Code itself. Aiko opens it in the system terminal and star...
+    public static var terminalLoginBody: String { Strings.get("TerminalLoginBody") }
+
+    /// Session “{0}” is still working
+    public static var terminalCloseTitle: String { Strings.get("TerminalCloseTitle") }
+
+    /// If you close it now, Claude Code stops in the middle of the work.
+    public static var terminalCloseBody: String { Strings.get("TerminalCloseBody") }
+
+    /// Some sessions are still working
+    public static var terminalCloseWindowTitle: String { Strings.get("TerminalCloseWindowTitle") }
+
+    /// If you close the window now, Claude Code stops in the middle of the work.
+    public static var terminalCloseWindowBody: String { Strings.get("TerminalCloseWindowBody") }
+
+    /// Stop and close
+    public static var terminalStopAndClose: String { Strings.get("TerminalStopAndClose") }
+
+    /// Keep open
+    public static var terminalKeepOpen: String { Strings.get("TerminalKeepOpen") }
+
+    /// 5-hour limit
+    public static var terminalLimitFiveHour: String { Strings.get("TerminalLimitFiveHour") }
+
+    /// Weekly limit
+    public static var terminalLimitWeek: String { Strings.get("TerminalLimitWeek") }
+
+    /// Minimize
+    public static var terminalMinimize: String { Strings.get("TerminalMinimize") }
+
+    /// Maximize
+    public static var terminalMaximize: String { Strings.get("TerminalMaximize") }
+
+    /// Restore
+    public static var terminalRestore: String { Strings.get("TerminalRestore") }
+
+    /// Close
+    public static var terminalCloseWindow: String { Strings.get("TerminalCloseWindow") }
+
+    /// Sessions
+    public static var terminalSessions: String { Strings.get("TerminalSessions") }
 }

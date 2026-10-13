@@ -1,5 +1,5 @@
 {
-  "comment": "The window of the terminal (D-292, D-293, D-299, D-304). rows: the list of one environment as rows. A session with no conversation in memory is asleep; one whose conversation is idle is read while Claude Code runs for it and asleep when it does not; a sleeping row has no line about the conversation. waiting is the number on the tab. caps: no more than four processes; the one to stop before the next start is idle and was used longest ago, and when all are busy none is stopped. places: where the window opens; a saved place is kept when 80 units of its title bar are on a screen, its size is brought into the limits of that screen, and otherwise the window stands in the middle of the first screen at 1100 by 760. windows: what is chosen after each action.",
+  "comment": "The window of the terminal (D-292, D-293, D-299, D-304). rows: the list of one environment as rows. A session with no conversation in memory is asleep; one whose conversation is idle is read while Claude Code runs for it and asleep when it does not; a sleeping row has no line about the conversation. waiting is the number on the tab. caps: no more than four processes; the one to stop before the next start is idle and was used longest ago, and when all are busy none is stopped. places: where the window opens; a saved place is kept when 80 units of its title bar are on a screen, its size is brought into the limits of that screen, and otherwise the window stands in the middle of the first screen at 1100 by 760. windows: what is chosen after each action. days: how long ago a session was used, by the clock of the person; each row is the time of use and the time now in seconds, the offset of the clock in minutes, and the answer.",
   "sessions": {
     "sessions": [
       {
@@ -1265,5 +1265,61 @@
         }
       ]
     }
+  ],
+  "days": [
+    [
+      1791889200,
+      1791892800,
+      0,
+      "today"
+    ],
+    [
+      1791846000,
+      1791892800,
+      0,
+      "yesterday"
+    ],
+    [
+      1791846000,
+      1791892800,
+      120,
+      "today"
+    ],
+    [
+      1791853200,
+      1791892800,
+      -720,
+      "yesterday"
+    ],
+    [
+      1791759600,
+      1791892800,
+      0,
+      "earlier"
+    ],
+    [
+      1791896400,
+      1791892800,
+      0,
+      "today"
+    ],
+    [
+      1792065600,
+      1791892800,
+      0,
+      "today"
+    ],
+    [
+      -3600,
+      3600,
+      0,
+      "yesterday"
+    ],
+    [
+      0,
+      0,
+      -60,
+      "today"
+    ]
   ]
 }

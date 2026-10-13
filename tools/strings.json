@@ -2462,5 +2462,404 @@
       "on",
       "включена"
     ]
+  ],
+  [
+    "TerminalTitle",
+    [
+      "Terminal",
+      "Терминал"
+    ]
+  ],
+  [
+    "TerminalCreateSession",
+    [
+      "Create session",
+      "Создать сессию"
+    ]
+  ],
+  [
+    "TerminalCloseSession",
+    [
+      "Close session",
+      "Закрыть сессию"
+    ]
+  ],
+  [
+    "TerminalFormTitle",
+    [
+      "New session in {0}",
+      "Новая сессия в среде {0}"
+    ]
+  ],
+  [
+    "TerminalFolder",
+    [
+      "Folder",
+      "Папка"
+    ]
+  ],
+  [
+    "TerminalModel",
+    [
+      "Model",
+      "Модель"
+    ]
+  ],
+  [
+    "TerminalName",
+    [
+      "Name",
+      "Имя"
+    ]
+  ],
+  [
+    "TerminalNameHint",
+    [
+      "Optional. An empty name becomes the folder name with a number.",
+      "Можно оставить пустым: сессия получит имя папки с номером."
+    ]
+  ],
+  [
+    "TerminalDescribeTask",
+    [
+      "Describe the task",
+      "Опиши задачу"
+    ]
+  ],
+  [
+    "TerminalRecent",
+    [
+      "Recent",
+      "Недавние"
+    ]
+  ],
+  [
+    "TerminalBound",
+    [
+      "Bound folders",
+      "Привязанные"
+    ]
+  ],
+  [
+    "TerminalChooseFolder",
+    [
+      "Choose another folder",
+      "Выбрать другую папку"
+    ]
+  ],
+  [
+    "TerminalElsewhere",
+    [
+      "This folder is bound to {0}. The session starts in {1}.",
+      "Эта папка привязана к среде {0}. Сессия запустится в среде {1}."
+    ]
+  ],
+  [
+    "TerminalNoSessionsTitle",
+    [
+      "Start your first session in {0}",
+      "Начни первую сессию в среде {0}"
+    ]
+  ],
+  [
+    "TerminalNoSessionsBody",
+    [
+      "A session is one conversation with Claude Code in one folder.",
+      "Сессия — это один разговор с Claude Code в одной папке."
+    ]
+  ],
+  [
+    "TerminalEmptyTalk",
+    [
+      "Describe the task. Claude Code starts with your first message.",
+      "Опиши задачу. Claude Code запустится с первым сообщением."
+    ]
+  ],
+  [
+    "TerminalWorking",
+    [
+      "working",
+      "работает"
+    ]
+  ],
+  [
+    "TerminalWaiting",
+    [
+      "waiting",
+      "ждёт"
+    ]
+  ],
+  [
+    "TerminalDone",
+    [
+      "done",
+      "готово"
+    ]
+  ],
+  [
+    "TerminalAsleep",
+    [
+      "asleep",
+      "спит"
+    ]
+  ],
+  [
+    "TerminalStopped",
+    [
+      "stopped",
+      "остановилась"
+    ]
+  ],
+  [
+    "TerminalTabWaitingOne",
+    [
+      "{0} waiting",
+      "{0} ждёт"
+    ]
+  ],
+  [
+    "TerminalTabWaitingMany",
+    [
+      "{0} waiting",
+      "{0} ждут"
+    ]
+  ],
+  [
+    "TerminalStepRead",
+    [
+      "read",
+      "чтение"
+    ]
+  ],
+  [
+    "TerminalStepSearch",
+    [
+      "search",
+      "поиск"
+    ]
+  ],
+  [
+    "TerminalStepEdit",
+    [
+      "edit",
+      "правка"
+    ]
+  ],
+  [
+    "TerminalStepRun",
+    [
+      "run",
+      "запуск"
+    ]
+  ],
+  [
+    "TerminalStepAgent",
+    [
+      "agent",
+      "агент"
+    ]
+  ],
+  [
+    "TerminalStepWeb",
+    [
+      "web",
+      "веб"
+    ]
+  ],
+  [
+    "TerminalLineRequest",
+    [
+      "Needs permission: {0} {1}",
+      "Ждёт разрешения: {0} {1}"
+    ]
+  ],
+  [
+    "TerminalLineQuestion",
+    [
+      "Asks: {0}",
+      "Спрашивает: {0}"
+    ]
+  ],
+  [
+    "TerminalLinePlan",
+    [
+      "The plan is ready for you",
+      "План готов, посмотри"
+    ]
+  ],
+  [
+    "TerminalLineReading",
+    [
+      "Reading {0}",
+      "Читает {0}"
+    ]
+  ],
+  [
+    "TerminalLineSearching",
+    [
+      "Searching {0}",
+      "Ищет {0}"
+    ]
+  ],
+  [
+    "TerminalLineEditing",
+    [
+      "Editing {0}",
+      "Правит {0}"
+    ]
+  ],
+  [
+    "TerminalLineRunning",
+    [
+      "Running {0}",
+      "Запускает {0}"
+    ]
+  ],
+  [
+    "TerminalLineAgent",
+    [
+      "Agent: {0}",
+      "Агент: {0}"
+    ]
+  ],
+  [
+    "TerminalLineOpening",
+    [
+      "Opening {0}",
+      "Открывает {0}"
+    ]
+  ],
+  [
+    "TerminalLineCalling",
+    [
+      "Calling {0}",
+      "Вызывает {0}"
+    ]
+  ],
+  [
+    "TerminalLineStoppedAt",
+    [
+      "Stopped at the “{0}” step",
+      "Остановилась на шаге «{0}»"
+    ]
+  ],
+  [
+    "TerminalLineSignIn",
+    [
+      "Sign in needed",
+      "Нужно войти"
+    ]
+  ],
+  [
+    "TerminalYesterday",
+    [
+      "Yesterday, {0}",
+      "Вчера, {0}"
+    ]
+  ],
+  [
+    "TerminalLoginTitle",
+    [
+      "{0} isn’t signed in",
+      "В среде {0} нет входа"
+    ]
+  ],
+  [
+    "TerminalLoginBody",
+    [
+      "You can sign in only in Claude Code itself. Aiko opens it in the system terminal and starts the conversation here once you’re in.",
+      "Войти можно только в самом Claude Code. Aiko откроет его в терминале системы, а после входа начнёт разговор здесь."
+    ]
+  ],
+  [
+    "TerminalCloseTitle",
+    [
+      "Session “{0}” is still working",
+      "Сессия «{0}» ещё работает"
+    ]
+  ],
+  [
+    "TerminalCloseBody",
+    [
+      "If you close it now, Claude Code stops in the middle of the work.",
+      "Если закрыть её сейчас, Claude Code остановится посреди работы."
+    ]
+  ],
+  [
+    "TerminalCloseWindowTitle",
+    [
+      "Some sessions are still working",
+      "Часть сессий ещё работает"
+    ]
+  ],
+  [
+    "TerminalCloseWindowBody",
+    [
+      "If you close the window now, Claude Code stops in the middle of the work.",
+      "Если закрыть окно сейчас, Claude Code остановится посреди работы."
+    ]
+  ],
+  [
+    "TerminalStopAndClose",
+    [
+      "Stop and close",
+      "Остановить и закрыть"
+    ]
+  ],
+  [
+    "TerminalKeepOpen",
+    [
+      "Keep open",
+      "Не закрывать"
+    ]
+  ],
+  [
+    "TerminalLimitFiveHour",
+    [
+      "5-hour limit",
+      "Лимит на 5 часов"
+    ]
+  ],
+  [
+    "TerminalLimitWeek",
+    [
+      "Weekly limit",
+      "Лимит на неделю"
+    ]
+  ],
+  [
+    "TerminalMinimize",
+    [
+      "Minimize",
+      "Свернуть"
+    ]
+  ],
+  [
+    "TerminalMaximize",
+    [
+      "Maximize",
+      "Развернуть"
+    ]
+  ],
+  [
+    "TerminalRestore",
+    [
+      "Restore",
+      "Восстановить"
+    ]
+  ],
+  [
+    "TerminalCloseWindow",
+    [
+      "Close",
+      "Закрыть"
+    ]
+  ],
+  [
+    "TerminalSessions",
+    [
+      "Sessions",
+      "Сессии"
+    ]
   ]
 ]

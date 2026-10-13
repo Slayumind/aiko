@@ -23,6 +23,17 @@ public enum RowState
     SignedOut,
 }
 
+/// How long ago a session was used, as the second line of a sleeping row says it.
+public enum UsedDay
+{
+    /// Only the time is shown.
+    Today,
+    Yesterday,
+
+    /// The date is shown.
+    Earlier,
+}
+
 /// A conversation that is in memory: what it looks like and whether Claude Code runs for it.
 public sealed record LiveTalk(TalkGlance Glance, bool Running);
 
@@ -43,6 +54,23 @@ public static class SessionRows
     /// How many sessions of the environment wait for the person: the number on its tab.
     public static int Waiting(TerminalSessions sessions, string environment, Func<string, LiveTalk?> live) =>
         sessions.Open(environment).Count(session => live(session.Id)?.Glance.Activity == TalkActivity.Waiting);
+
+    /// The day a session was used on, counted by the clock of the person: offsetMinutes is how far
+    /// that clock is from UTC. A time that is still to come reads as today.
+    public static UsedDay DayOf(long usedSeconds, long nowSeconds, int offsetMinutes)
+    {
+        const long Day = 86400;
+        var shift = offsetMinutes * 60L;
+        var days = Math.Max(0, FloorDay(nowSeconds + shift, Day) - FloorDay(usedSeconds + shift, Day));
+        return days switch
+        {
+            0 => UsedDay.Today,
+            1 => UsedDay.Yesterday,
+            _ => UsedDay.Earlier,
+        };
+    }
+
+    private static long FloorDay(long seconds, long day) => (seconds - (((seconds % day) + day) % day)) / day;
 
     private static SessionRow Row(TerminalSession session, LiveTalk? talk)
     {

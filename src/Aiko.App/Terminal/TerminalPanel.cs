@@ -1,0 +1,831 @@
+using System.Globalization;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Shapes;
+using Aiko.Core;
+using Aiko.Core.Terminal;
+
+namespace Aiko.App;
+
+/// The inside of the terminal window (D-292, D-299): the title bar with the tabs of the
+/// environments, the list of sessions and the place of the conversation.
+///
+/// It draws a TerminalView and reports what the person did. It decides nothing: the host answers
+/// every event with a new view. It is a control and not a window, so a snapshot can draw it.
+sealed class TerminalPanel : UserControl
+{
+    public const double BarHeight = 44;
+    private const double ListWidth = 252;
+
+    private readonly Grid _bar = new() { Height = BarHeight, Background = Brushes.Transparent };
+    private readonly StackPanel _tabs = new() { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
+    private readonly StackPanel _right = new() { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
+    private readonly ColumnDefinition _listColumn = new() { Width = new GridLength(ListWidth) };
+    private readonly DockPanel _list = new();
+    private readonly StackPanel _rows = new();
+    private readonly Grid _main = new();
+    private readonly Popup _listPopup = new() { StaysOpen = false, AllowsTransparency = true, Placement = PlacementMode.Bottom };
+    private readonly Button _listButton;
+    private readonly Path _maximizeIcon = Line("");
+    private readonly Button _maximize;
+
+    private TerminalView? _view;
+    private bool _narrow;
+
+    // What is typed into the form stays here while the view is drawn again.
+    private readonly TextBox _name = new();
+    private readonly TextBox _message = new();
+
+    public TerminalPanel()
+    {
+        Background = Tokens.Brush("Background");
+        FontFamily = Tokens.Get<FontFamily>("Sans");
+        Focusable = false;
+
+        _listButton = Flat("", () => _listPopup.IsOpen = !_listPopup.IsOpen, ghost: false);
+        _listButton.Margin = new Thickness(10, 0, 0, 0);
+        _listButton.Visibility = Visibility.Collapsed;
+        _listPopup.PlacementTarget = _listButton;
+
+        _maximize = BarButton(_maximizeIcon, Strings.TerminalMaximize, () => MaximizeAsked?.Invoke());
+        var minimize = BarButton(Line("M0,5 L10,5"), Strings.TerminalMinimize, () => MinimizeAsked?.Invoke());
+        var close = BarButton(Line("M0,0 L10,10 M10,0 L0,10"), Strings.TerminalCloseWindow, () => CloseAsked?.Invoke());
+        Buttons = [minimize, _maximize, close];
+        ShowMaximized(false);
+
+        var left = new StackPanel { Orientation = Orientation.Horizontal };
+        left.Children.Add(_listButton);
+        left.Children.Add(_tabs);
+        _tabs.Margin = new Thickness(10, 0, 0, 0);
+        _bar.Children.Add(left);
+        _bar.Children.Add(_right);
+        _bar.Children.Add(new Border { Height = 1, VerticalAlignment = VerticalAlignment.Bottom, Background = Tokens.Brush("Hairline") });
+
+        var body = new Grid();
+        body.ColumnDefinitions.Add(_listColumn);
+        body.ColumnDefinitions.Add(new ColumnDefinition());
+        var listSide = new Grid();
+        listSide.Children.Add(_list);
+        listSide.Children.Add(new Border { Width = 1, HorizontalAlignment = HorizontalAlignment.Right, Background = Tokens.Brush("Hairline") });
+        body.Children.Add(listSide);
+        Grid.SetColumn(_main, 1);
+        body.Children.Add(_main);
+
+        var all = new DockPanel();
+        DockPanel.SetDock(_bar, Dock.Top);
+        all.Children.Add(_bar);
+        all.Children.Add(body);
+        Content = all;
+
+        Field(_name);
+        Field(_message);
+        _message.AcceptsReturn = true;
+        _message.TextWrapping = TextWrapping.Wrap;
+        _message.MinHeight = 64;
+        _message.VerticalContentAlignment = VerticalAlignment.Top;
+        _message.PreviewKeyDown += (_, e) =>
+        {
+            // Enter starts the session, Shift+Enter is a new line (D-294).
+            if (e.Key == Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
+            {
+                e.Handled = true;
+                Submit();
+            }
+        };
+        _name.KeyDown += (_, e) =>
+        {
+            if (e.Key == Key.Enter)
+            {
+                e.Handled = true;
+                Submit();
+            }
+        };
+
+        SizeChanged += (_, e) =>
+        {
+            var narrow = WindowPlace.IsNarrow(e.NewSize.Width);
+            if (narrow != _narrow && _view is not null)
+            {
+                _narrow = narrow;
+                Show(_view);
+            }
+        };
+    }
+
+    /// The part of the title bar the window is dragged by.
+    public FrameworkElement Bar => _bar;
+
+    /// The buttons of the window, for the hit test of the window.
+    public IReadOnlyList<Button> Buttons { get; }
+
+    public event Action<string>? TabPicked;
+    public event Action<string>? RowPicked;
+    public event Action<string>? RowClosed;
+    public event Action? CreateAsked;
+    public event Action<int>? FolderPicked;
+    public event Action? OtherFolderAsked;
+    public event Action<int>? ModelPicked;
+
+    /// The name and the first message of the form.
+    public event Action<string, string>? Submitted;
+    public event Action? FormCancelled;
+    public event Action<bool>? AskAnswered;
+    public event Action? SignInAsked;
+    public event Action? MinimizeAsked;
+    public event Action? MaximizeAsked;
+    public event Action? CloseAsked;
+
+    public void ShowMaximized(bool maximized)
+    {
+        _maximizeIcon.Data = Geometry.Parse(maximized ? "M0,2.5 L7.5,2.5 L7.5,10 L0,10 Z M2.5,2.5 L2.5,0 L10,0 L10,7.5 L7.5,7.5" : "M0,0 L10,0 L10,10 L0,10 Z");
+        _maximize.ToolTip = maximized ? Strings.TerminalRestore : Strings.TerminalMaximize;
+    }
+
+    public void Show(TerminalView view)
+    {
+        var formWasOpen = _view?.Form is not null;
+        _view = view;
+        _narrow = ActualWidth > 0 ? WindowPlace.IsNarrow(ActualWidth) : WindowPlace.IsNarrow(Width);
+
+        if (view.Form is null || !formWasOpen)
+        {
+            _name.Text = "";
+            _message.Text = "";
+        }
+
+        ShowBar(view);
+        ShowList(view);
+        ShowMain(view);
+    }
+
+    // ---- the title bar ----
+
+    private void ShowBar(TerminalView view)
+    {
+        _tabs.Children.Clear();
+        foreach (var tab in view.Tabs)
+        {
+            _tabs.Children.Add(Tab(tab));
+        }
+
+        _right.Children.Clear();
+        if (view.Badge is { } badge)
+        {
+            _right.Children.Add(Badge(badge));
+        }
+
+        foreach (var button in Buttons)
+        {
+            _right.Children.Add(button);
+        }
+
+        _listButton.Visibility = _narrow ? Visibility.Visible : Visibility.Collapsed;
+        _listButton.Content = WithChevron(view.SessionName ?? Strings.TerminalSessions);
+    }
+
+    private UIElement Tab(TabView tab)
+    {
+        var row = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
+        row.Children.Add(Text(tab.Name, "TextNumber", tab.Selected ? "Ink" : "Muted", tab.Selected ? FontWeights.Medium : FontWeights.Normal));
+        if (tab.Waiting > 0)
+        {
+            var pause = Pause();
+            pause.Margin = new Thickness(8, 0, 5, 0);
+            row.Children.Add(pause);
+            row.Children.Add(Mono(_narrow ? tab.Waiting.ToString(CultureInfo.CurrentCulture) : WaitingWords(tab.Waiting), "Caution"));
+        }
+
+        var back = new Border
+        {
+            Height = 28,
+            Padding = new Thickness(12, 0, 12, 0),
+            Margin = new Thickness(0, 0, 4, 0),
+            CornerRadius = new CornerRadius(14),
+            Background = tab.Selected ? Tokens.Brush("Raised") : Brushes.Transparent,
+            Cursor = Cursors.Hand,
+            Child = row,
+        };
+        back.MouseLeftButtonUp += (_, _) => TabPicked?.Invoke(tab.Name);
+        WindowChromeHit(back);
+        return back;
+    }
+
+    private static string WaitingWords(int count) =>
+        string.Format(
+            CultureInfo.CurrentCulture,
+            count % 10 == 1 && count % 100 != 11 ? Strings.TerminalTabWaitingOne : Strings.TerminalTabWaitingMany,
+            count);
+
+    private static UIElement Badge(BadgeView badge)
+    {
+        var tone = Tokens.ToneBrush(badge.Tone);
+        var ring = new Grid { Width = 14, Height = 14, Margin = new Thickness(0, 0, 6, 0), VerticalAlignment = VerticalAlignment.Center };
+        ring.Children.Add(new Ellipse { Stroke = Tokens.Brush("Raised"), StrokeThickness = 2 });
+        ring.Children.Add(new Path { Stroke = tone, StrokeThickness = 2, Data = Arc(7, 6, badge.Percent / 100.0) });
+
+        var row = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(0, 0, 14, 0),
+            ToolTip = badge.Kind == LimitKind.FiveHour ? Strings.TerminalLimitFiveHour : Strings.TerminalLimitWeek,
+        };
+        row.Children.Add(ring);
+        row.Children.Add(Mono(badge.Percent.ToString(CultureInfo.CurrentCulture) + "%", "Muted"));
+        return row;
+    }
+
+    /// A part of a circle from the top, clockwise.
+    private static Geometry Arc(double centre, double radius, double part)
+    {
+        part = Math.Clamp(part, 0, 0.999);
+        var angle = part * 2 * Math.PI;
+        var end = new Point(centre + radius * Math.Sin(angle), centre - radius * Math.Cos(angle));
+        var figure = new PathFigure { StartPoint = new Point(centre, centre - radius) };
+        figure.Segments.Add(new ArcSegment(end, new Size(radius, radius), 0, part > 0.5, SweepDirection.Clockwise, true));
+        return new PathGeometry([figure]);
+    }
+
+    // ---- the list of sessions ----
+
+    private void ShowList(TerminalView view)
+    {
+        _rows.Children.Clear();
+        foreach (var group in view.Groups)
+        {
+            _rows.Children.Add(new Border { Padding = new Thickness(10, 10, 10, 4), Child = Mono(group.Name, "Muted") });
+            foreach (var row in group.Rows)
+            {
+                _rows.Children.Add(Row(row, row.Id == view.SessionId && view.Main == MainView.Talk, view.Now));
+            }
+        }
+
+        var create = Flat(Strings.TerminalCreateSession, () => CreateAsked?.Invoke(), ghost: true, plus: true);
+        create.HorizontalAlignment = HorizontalAlignment.Stretch;
+        create.HorizontalContentAlignment = HorizontalAlignment.Left;
+        create.Margin = new Thickness(8);
+
+        // The list lives in the window or, in a narrow one, under the button with the session name.
+        _list.Children.Clear();
+        _listPopup.Child = null;
+        var holder = new DockPanel { Background = Tokens.Brush("Background") };
+        DockPanel.SetDock(create, Dock.Bottom);
+        holder.Children.Add(create);
+        holder.Children.Add(new ScrollViewer
+        {
+            VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+            HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
+            Focusable = false,
+            Padding = new Thickness(8, 4, 8, 0),
+            Content = _rows,
+        });
+
+        if (_narrow)
+        {
+            _listColumn.Width = new GridLength(0);
+            _listPopup.Child = new Border
+            {
+                Width = ListWidth + 20,
+                MaxHeight = 480,
+                Margin = new Thickness(0, 4, 12, 12),
+                CornerRadius = new CornerRadius(12),
+                BorderBrush = Tokens.Brush("InputLine"),
+                BorderThickness = new Thickness(1),
+                Background = Tokens.Brush("Background"),
+                Effect = Tokens.Get<System.Windows.Media.Effects.Effect>("CardShadow"),
+                Child = holder,
+            };
+        }
+        else
+        {
+            _listColumn.Width = new GridLength(ListWidth);
+            _list.Children.Add(holder);
+        }
+    }
+
+    private UIElement Row(SessionRow row, bool selected, DateTimeOffset now)
+    {
+        var top = new DockPanel();
+        var mark = Mark(row.State);
+        DockPanel.SetDock(mark, Dock.Right);
+        top.Children.Add(mark);
+        var name = Text(row.Name, "TextName", "Ink", FontWeights.Normal);
+        name.TextTrimming = TextTrimming.CharacterEllipsis;
+        top.Children.Add(name);
+
+        var lines = new StackPanel();
+        lines.Children.Add(top);
+        var second = SecondLine(row, now);
+        if (second.Length > 0)
+        {
+            var line = Text(second, "TextSmall", "Muted", FontWeights.Normal);
+            line.TextTrimming = TextTrimming.CharacterEllipsis;
+            line.Margin = new Thickness(0, 3, 0, 0);
+            lines.Children.Add(line);
+        }
+
+        var hover = new Border { CornerRadius = new CornerRadius(10), Background = Tokens.Brush("HoverLayer"), Opacity = 0 };
+        var face = new Grid();
+        face.Children.Add(hover);
+        face.Children.Add(new Border { Padding = new Thickness(10, 8, 10, 8), Child = lines });
+
+        var back = new Border
+        {
+            CornerRadius = new CornerRadius(10),
+            Margin = new Thickness(0, 1, 0, 1),
+            Background = selected ? Tokens.Brush("Surface") : Brushes.Transparent,
+            BorderBrush = selected ? Tokens.Brush("InputLine") : Brushes.Transparent,
+            BorderThickness = new Thickness(1),
+            Cursor = Cursors.Hand,
+            Child = face,
+            ContextMenu = RowMenu(row.Id),
+        };
+        back.MouseEnter += (_, _) => hover.BeginAnimation(OpacityProperty, Motion.To(1, Motion.Or0(Motion.Hover), Motion.Standard));
+        back.MouseLeave += (_, _) => hover.BeginAnimation(OpacityProperty, Motion.To(0, Motion.Or0(Motion.Hover), Motion.Standard));
+        back.MouseLeftButtonUp += (_, _) =>
+        {
+            _listPopup.IsOpen = false;
+            RowPicked?.Invoke(row.Id);
+        };
+        return back;
+    }
+
+    private ContextMenu RowMenu(string id)
+    {
+        var close = new MenuItem { Header = Strings.TerminalCloseSession };
+        close.Click += (_, _) => RowClosed?.Invoke(id);
+        return new ContextMenu { Items = { close } };
+    }
+
+    private static UIElement Mark(RowState state)
+    {
+        var (icon, word, tone) = state switch
+        {
+            RowState.Working => ((UIElement)Dot(filled: true), Strings.TerminalWorking, "Muted"),
+            RowState.Waiting => (Pause(), Strings.TerminalWaiting, "Caution"),
+            RowState.Done => (Line("M0,4.5 L3.5,8 L10,1", "Positive"), Strings.TerminalDone, "Positive"),
+            RowState.Asleep => (Dot(filled: false), Strings.TerminalAsleep, "Muted"),
+            RowState.Stopped => (Line("M0,0 L8,8 M8,0 L0,8", "Destructive"), Strings.TerminalStopped, "Destructive"),
+            _ => (new Border(), "", "Muted"),
+        };
+
+        var row = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(8, 0, 0, 0) };
+        if (word.Length > 0)
+        {
+            row.Children.Add(icon);
+            var text = Mono(word, tone);
+            text.Margin = new Thickness(6, 0, 0, 0);
+            row.Children.Add(text);
+        }
+
+        return row;
+    }
+
+    private static string SecondLine(SessionRow row, DateTimeOffset now)
+    {
+        if (row.Glance is not { } glance)
+        {
+            return UsedWords(row.LastUsed, now);
+        }
+
+        string With(string format, params object[] parts) => string.Format(CultureInfo.CurrentCulture, format, parts);
+
+        return glance.Line switch
+        {
+            GlanceLine.Request => With(Strings.TerminalLineRequest, StepWord(glance), glance.Text).TrimEnd(),
+            GlanceLine.Question => With(Strings.TerminalLineQuestion, glance.Text),
+            GlanceLine.Plan => Strings.TerminalLinePlan,
+            GlanceLine.Step => With(glance.Kind switch
+            {
+                StepKind.Read => Strings.TerminalLineReading,
+                StepKind.Search => Strings.TerminalLineSearching,
+                StepKind.Edit => Strings.TerminalLineEditing,
+                StepKind.Run => Strings.TerminalLineRunning,
+                StepKind.Agent => Strings.TerminalLineAgent,
+                StepKind.Web => Strings.TerminalLineOpening,
+                _ => Strings.TerminalLineCalling,
+            }, glance.Kind == StepKind.Other ? glance.Label : glance.Text),
+            GlanceLine.Answer => glance.Text,
+            GlanceLine.StoppedAt => With(Strings.TerminalLineStoppedAt, StepWord(glance)),
+            GlanceLine.SignIn => Strings.TerminalLineSignIn,
+            _ => "",
+        };
+    }
+
+    /// The word of a step, the one the feed uses for it.
+    private static string StepWord(TalkGlance glance) => glance.Kind switch
+    {
+        StepKind.Read => Strings.TerminalStepRead,
+        StepKind.Search => Strings.TerminalStepSearch,
+        StepKind.Edit => Strings.TerminalStepEdit,
+        StepKind.Run => Strings.TerminalStepRun,
+        StepKind.Agent => Strings.TerminalStepAgent,
+        StepKind.Web => Strings.TerminalStepWeb,
+        _ => glance.Label,
+    };
+
+    private static string UsedWords(long lastUsed, DateTimeOffset now)
+    {
+        if (lastUsed <= 0)
+        {
+            return "";
+        }
+
+        var used = DateTimeOffset.FromUnixTimeSeconds(lastUsed).ToOffset(now.Offset);
+        var time = used.ToString("t", CultureInfo.CurrentCulture);
+        return SessionRows.DayOf(lastUsed, now.ToUnixTimeSeconds(), (int)now.Offset.TotalMinutes) switch
+        {
+            UsedDay.Today => time,
+            UsedDay.Yesterday => string.Format(CultureInfo.CurrentCulture, Strings.TerminalYesterday, time),
+            _ => used.ToString("d MMMM", CultureInfo.CurrentCulture),
+        };
+    }
+
+    // ---- the place of the conversation ----
+
+    private void ShowMain(TerminalView view)
+    {
+        _main.Children.Clear();
+        UIElement content = view.Main switch
+        {
+            MainView.Form when view.Form is { } form => Form(form),
+            MainView.Talk when view.SignedOut => Message(
+                string.Format(CultureInfo.CurrentCulture, Strings.TerminalLoginTitle, view.Environment),
+                Strings.TerminalLoginBody,
+                Flat(Strings.SignIn, () => SignInAsked?.Invoke(), ghost: false, main: true)),
+            MainView.Talk => Message(null, Strings.TerminalEmptyTalk, null),
+            _ => Message(
+                string.Format(CultureInfo.CurrentCulture, Strings.TerminalNoSessionsTitle, view.Environment),
+                Strings.TerminalNoSessionsBody,
+                Flat(Strings.TerminalCreateSession, () => CreateAsked?.Invoke(), ghost: false, main: true, plus: true)),
+        };
+        _main.Children.Add(content);
+
+        if (view.Ask is { } ask)
+        {
+            _main.Children.Add(Ask(ask));
+        }
+    }
+
+    private static UIElement Message(string? title, string body, UIElement? button)
+    {
+        var column = new StackPanel { MaxWidth = 520, VerticalAlignment = VerticalAlignment.Center, HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(40, 0, 40, 0) };
+        if (title is not null)
+        {
+            var head = Text(title, "TextName", "Ink", FontWeights.Medium);
+            head.FontSize = 16;
+            head.TextWrapping = TextWrapping.Wrap;
+            head.Margin = new Thickness(0, 0, 0, 8);
+            column.Children.Add(head);
+        }
+
+        var text = Text(body, "TextName", "Muted", FontWeights.Normal);
+        text.TextWrapping = TextWrapping.Wrap;
+        text.LineHeight = 21;
+        column.Children.Add(text);
+
+        if (button is FrameworkElement element)
+        {
+            element.Margin = new Thickness(0, 14, 0, 0);
+            element.HorizontalAlignment = HorizontalAlignment.Left;
+            column.Children.Add(element);
+        }
+
+        return column;
+    }
+
+    private UIElement Form(FormView form)
+    {
+        var folders = new DropDown
+        {
+            Items = [.. form.Folders.Select(folder => folder.Name + "   " + folder.Path), Strings.TerminalChooseFolder],
+            SelectedIndex = form.Folder,
+        };
+        folders.Picked += index =>
+        {
+            if (index < form.Folders.Count)
+            {
+                FolderPicked?.Invoke(index);
+            }
+            else
+            {
+                OtherFolderAsked?.Invoke();
+            }
+        };
+
+        var models = new DropDown { Items = [.. NewSessionChoices.Models.Select(ModelWord)], SelectedIndex = form.Model, Width = 180, HorizontalAlignment = HorizontalAlignment.Left };
+        models.Picked += index => ModelPicked?.Invoke(index);
+
+        var grid = new Grid { MaxWidth = 620, HorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment = VerticalAlignment.Top, Margin = new Thickness(40, 36, 40, 0) };
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(96) });
+        grid.ColumnDefinitions.Add(new ColumnDefinition());
+
+        var title = Text(string.Format(CultureInfo.CurrentCulture, Strings.TerminalFormTitle, form.Environment), "TextName", "Ink", FontWeights.Medium);
+        title.FontSize = 16;
+        title.Margin = new Thickness(0, 0, 0, 18);
+        Grid.SetColumnSpan(title, 2);
+        AddRow(grid, title);
+
+        AddField(grid, Strings.TerminalFolder, folders);
+        if (form.BoundElsewhere is { } other)
+        {
+            var hint = Text(string.Format(CultureInfo.CurrentCulture, Strings.TerminalElsewhere, other, form.Environment), "TextSmall", "Muted", FontWeights.Normal);
+            hint.TextWrapping = TextWrapping.Wrap;
+            hint.Margin = new Thickness(0, -6, 0, 12);
+            Grid.SetColumn(hint, 1);
+            AddRow(grid, hint);
+        }
+
+        AddField(grid, Strings.TerminalModel, models);
+
+        AddField(grid, Strings.TerminalName, WithPlaceholder(_name, form.DefaultName));
+        var nameHint = Text(Strings.TerminalNameHint, "TextSmall", "Muted", FontWeights.Normal);
+        nameHint.TextWrapping = TextWrapping.Wrap;
+        nameHint.Margin = new Thickness(0, -6, 0, 12);
+        Grid.SetColumn(nameHint, 1);
+        AddRow(grid, nameHint);
+
+        var message = WithPlaceholder(_message, Strings.TerminalDescribeTask);
+        Grid.SetColumnSpan(message, 2);
+        AddRow(grid, message);
+
+        var create = Flat(Strings.TerminalCreateSession, Submit, ghost: false, main: true);
+        create.Margin = new Thickness(0, 12, 0, 0);
+        create.HorizontalAlignment = HorizontalAlignment.Left;
+        Grid.SetColumnSpan(create, 2);
+        AddRow(grid, create);
+
+        grid.KeyDown += (_, e) =>
+        {
+            if (e.Key == Key.Escape && !folders.IsOpen && !models.IsOpen)
+            {
+                e.Handled = true;
+                FormCancelled?.Invoke();
+            }
+        };
+        return grid;
+    }
+
+    private void Submit() => Submitted?.Invoke(_name.Text, _message.Text);
+
+    private static string ModelWord(string model) => char.ToUpperInvariant(model[0]) + model[1..];
+
+    private UIElement Ask(AskView ask)
+    {
+        var buttons = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 14, 0, 0) };
+        var stop = Flat(Strings.TerminalStopAndClose, () => AskAnswered?.Invoke(true), ghost: false, danger: true);
+        var keep = Flat(Strings.TerminalKeepOpen, () => AskAnswered?.Invoke(false), ghost: false);
+        keep.Margin = new Thickness(8, 0, 0, 0);
+        buttons.Children.Add(stop);
+        buttons.Children.Add(keep);
+
+        var cross = BarButton(Line("M0,0 L8,8 M8,0 L0,8"), Strings.TerminalKeepOpen, () => AskAnswered?.Invoke(false));
+        cross.HorizontalAlignment = HorizontalAlignment.Right;
+        cross.VerticalAlignment = VerticalAlignment.Top;
+        cross.Margin = new Thickness(0, -6, -8, 0);
+
+        var title = Text(ask.Title, "TextName", "Ink", FontWeights.Medium);
+        title.TextWrapping = TextWrapping.Wrap;
+        title.Margin = new Thickness(0, 0, 28, 6);
+        var body = Text(ask.Body, "TextNumber", "Muted", FontWeights.Normal);
+        body.TextWrapping = TextWrapping.Wrap;
+        body.LineHeight = 20;
+
+        var column = new StackPanel();
+        column.Children.Add(title);
+        column.Children.Add(body);
+        column.Children.Add(buttons);
+        var inside = new Grid();
+        inside.Children.Add(column);
+        inside.Children.Add(cross);
+
+        var card = new Border
+        {
+            Width = 420,
+            VerticalAlignment = VerticalAlignment.Top,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            Margin = new Thickness(20, 28, 20, 0),
+            Padding = new Thickness(18, 16, 18, 16),
+            CornerRadius = new CornerRadius(14),
+            Background = Tokens.Brush("Surface"),
+            BorderBrush = Tokens.Brush("InputLine"),
+            BorderThickness = new Thickness(1),
+            Effect = Tokens.Get<System.Windows.Media.Effects.Effect>("CardShadow"),
+            Child = inside,
+        };
+
+        // What is under the panel is still there, only quieter.
+        var cover = new Grid { Background = new SolidColorBrush(Color.FromArgb(0x99, 0x0A, 0x0A, 0x0A)) };
+        cover.Children.Add(card);
+        return cover;
+    }
+
+    // ---- small parts ----
+
+    private static void AddRow(Grid grid, UIElement element)
+    {
+        grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        Grid.SetRow(element, grid.RowDefinitions.Count - 1);
+        grid.Children.Add(element);
+    }
+
+    private static void AddField(Grid grid, string label, FrameworkElement field)
+    {
+        var name = Text(label, "TextNumber", "Muted", FontWeights.Normal);
+        name.VerticalAlignment = VerticalAlignment.Top;
+        name.Margin = new Thickness(0, 7, 0, 0);
+        AddRow(grid, name);
+
+        field.Margin = new Thickness(0, 0, 0, 12);
+        Grid.SetColumn(field, 1);
+        Grid.SetRow(field, grid.RowDefinitions.Count - 1);
+        grid.Children.Add(field);
+    }
+
+    /// A field is kept between two drawings of the form, so it has to leave its old place first.
+    private static FrameworkElement Unparented(FrameworkElement element)
+    {
+        (element.Parent as Panel)?.Children.Remove(element);
+        return element;
+    }
+
+    private static void Field(TextBox box)
+    {
+        box.FontFamily = Tokens.Get<FontFamily>("Sans");
+        box.FontSize = Tokens.Get<double>("TextName");
+        box.Foreground = Tokens.Brush("Ink");
+        box.CaretBrush = Tokens.Brush("Ink");
+        box.Background = Tokens.Brush("Surface");
+        box.BorderBrush = Tokens.Brush("InputLine");
+        box.BorderThickness = new Thickness(1);
+        box.Padding = new Thickness(9, 6, 9, 6);
+        box.Resources[typeof(Border)] = new Style(typeof(Border)) { Setters = { new Setter(Border.CornerRadiusProperty, new CornerRadius(8)) } };
+    }
+
+    /// The field with words that show while it is empty. They lie over the field and let every
+    /// click through, so the field never holds them as text.
+    private static FrameworkElement WithPlaceholder(TextBox box, string text)
+    {
+        var words = new TextBlock
+        {
+            Text = text,
+            FontFamily = box.FontFamily,
+            FontSize = box.FontSize,
+            Foreground = Tokens.Brush("Muted"),
+            Margin = new Thickness(12, 7, 12, 0),
+            VerticalAlignment = VerticalAlignment.Top,
+            TextTrimming = TextTrimming.CharacterEllipsis,
+            IsHitTestVisible = false,
+            Visibility = box.Text.Length == 0 ? Visibility.Visible : Visibility.Collapsed,
+        };
+        box.TextChanged += (_, _) => words.Visibility = box.Text.Length == 0 ? Visibility.Visible : Visibility.Collapsed;
+
+        var both = new Grid();
+        both.Children.Add(Unparented(box));
+        both.Children.Add(words);
+        return both;
+    }
+
+    private static TextBlock Text(string text, string size, string tone, FontWeight weight) => new()
+    {
+        Text = text,
+        FontFamily = Tokens.Get<FontFamily>("Sans"),
+        FontSize = Tokens.Get<double>(size),
+        FontWeight = weight,
+        Foreground = Tokens.Brush(tone),
+        VerticalAlignment = VerticalAlignment.Center,
+    };
+
+    private static TextBlock Mono(string text, string tone) => new()
+    {
+        Text = text,
+        FontFamily = Tokens.Get<FontFamily>("Mono"),
+        FontSize = Tokens.Get<double>("TextTiny"),
+        Foreground = Tokens.Brush(tone),
+        VerticalAlignment = VerticalAlignment.Center,
+    };
+
+    private static Path Line(string data, string tone = "Muted") => new()
+    {
+        Data = Geometry.Parse(data),
+        Stroke = Tokens.Brush(tone),
+        StrokeThickness = 1.3,
+        StrokeStartLineCap = PenLineCap.Round,
+        StrokeEndLineCap = PenLineCap.Round,
+        StrokeLineJoin = PenLineJoin.Round,
+        VerticalAlignment = VerticalAlignment.Center,
+    };
+
+    /// The sign of "waits for you": a pause (D-299).
+    private static FrameworkElement Pause() => Line("M1,0 L1,11 M6,0 L6,11", "Caution");
+
+    private static FrameworkElement Dot(bool filled) => new Ellipse
+    {
+        Width = 6,
+        Height = 6,
+        Fill = filled ? Tokens.Brush("Muted") : Brushes.Transparent,
+        Stroke = Tokens.Brush("Muted"),
+        StrokeThickness = 1,
+        VerticalAlignment = VerticalAlignment.Center,
+    };
+
+    private static UIElement WithChevron(string text)
+    {
+        var row = new StackPanel { Orientation = Orientation.Horizontal };
+        var name = Text(text, "TextNumber", "Ink", FontWeights.Normal);
+        name.MaxWidth = 160;
+        name.TextTrimming = TextTrimming.CharacterEllipsis;
+        row.Children.Add(name);
+        var chevron = Line("M0,0 L4,4 L8,0");
+        chevron.Margin = new Thickness(8, 1, 0, 0);
+        row.Children.Add(chevron);
+        return row;
+    }
+
+    private Button BarButton(UIElement icon, string tip, Action click)
+    {
+        var hover = new Border { CornerRadius = new CornerRadius(6), Background = Tokens.Brush("Raised"), Opacity = 0 };
+        var face = new Grid { Width = 40, Height = 28 };
+        face.Children.Add(hover);
+        face.Children.Add(new Border { Child = icon, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center });
+
+        var button = new Button
+        {
+            Content = face,
+            ToolTip = tip,
+            Focusable = false,
+            Cursor = Cursors.Hand,
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(0, 0, 4, 0),
+            Template = Bare(),
+        };
+        button.MouseEnter += (_, _) => hover.BeginAnimation(OpacityProperty, Motion.To(1, Motion.Or0(Motion.Hover), Motion.Standard));
+        button.MouseLeave += (_, _) => hover.BeginAnimation(OpacityProperty, Motion.To(0, Motion.Or0(Motion.Hover), Motion.Standard));
+        button.Click += (_, _) => click();
+        WindowChromeHit(button);
+        return button;
+    }
+
+    /// One button for the whole window: the filled one is the main action, the outlined one the
+    /// second, the ghost one the quiet third (DESIGN, one fill per control).
+    private static Button Flat(string text, Action click, bool ghost, bool main = false, bool danger = false, bool plus = false)
+    {
+        var row = new StackPanel { Orientation = Orientation.Horizontal };
+        var ink = main ? "Background" : danger ? "Destructive" : ghost ? "Muted" : "Ink";
+        if (plus)
+        {
+            var sign = Line("M5,0 L5,10 M0,5 L10,5", ink);
+            sign.Margin = new Thickness(0, 0, 8, 0);
+            row.Children.Add(sign);
+        }
+
+        row.Children.Add(Text(text, "TextNumber", ink, main ? FontWeights.Medium : FontWeights.Normal));
+
+        var hover = new Border { CornerRadius = new CornerRadius(8), Background = Tokens.Brush("HoverLayer"), Opacity = 0 };
+        var face = new Grid();
+        face.Children.Add(new Border
+        {
+            CornerRadius = new CornerRadius(8),
+            Background = main ? Tokens.Brush("Ink") : danger ? new SolidColorBrush(Color.FromArgb(0x29, 0xFF, 0x64, 0x67)) : Brushes.Transparent,
+            BorderBrush = main || danger || ghost ? Brushes.Transparent : Tokens.Brush("InputLine"),
+            BorderThickness = new Thickness(1),
+        });
+        face.Children.Add(hover);
+        face.Children.Add(new Border { Padding = new Thickness(12, 0, 12, 0), Child = row, VerticalAlignment = VerticalAlignment.Center });
+
+        var button = new Button { Content = face, Height = 32, Cursor = Cursors.Hand, Template = Bare(), FocusVisualStyle = FocusRing() };
+        button.MouseEnter += (_, _) => hover.BeginAnimation(OpacityProperty, Motion.To(1, Motion.Or0(Motion.Hover), Motion.Standard));
+        button.MouseLeave += (_, _) => hover.BeginAnimation(OpacityProperty, Motion.To(0, Motion.Or0(Motion.Hover), Motion.Standard));
+        button.Click += (_, _) => click();
+        Motion.SetPress(button, true);
+        WindowChromeHit(button);
+        return button;
+    }
+
+    private static ControlTemplate Bare()
+    {
+        var template = new ControlTemplate(typeof(Button));
+        var presenter = new FrameworkElementFactory(typeof(ContentPresenter));
+        presenter.SetValue(HorizontalAlignmentProperty, new TemplateBindingExtension(HorizontalContentAlignmentProperty));
+        template.VisualTree = presenter;
+        return template;
+    }
+
+    /// The focus of the keyboard: an outline of 2 px, as in the settings (D-308).
+    private static Style FocusRing()
+    {
+        var ring = new FrameworkElementFactory(typeof(Border));
+        ring.SetValue(Border.BorderBrushProperty, Tokens.Brush("Ink"));
+        ring.SetValue(Border.BorderThicknessProperty, new Thickness(2));
+        ring.SetValue(Border.CornerRadiusProperty, new CornerRadius(10));
+        ring.SetValue(MarginProperty, new Thickness(-3));
+        return new Style { Setters = { new Setter(TemplateProperty, new ControlTemplate { VisualTree = ring }) } };
+    }
+
+    /// The title bar belongs to the window for dragging; what can be pressed in it says so.
+    private static void WindowChromeHit(IInputElement element) =>
+        System.Windows.Shell.WindowChrome.SetIsHitTestVisibleInChrome(element, true);
+}
