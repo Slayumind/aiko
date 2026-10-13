@@ -29,6 +29,9 @@ sealed class TerminalLog : ITerminalLog
     public static void ConversationChecked(bool read, bool markSeen, bool logClean, int items, int starts, int written) =>
         Log.Write($"--try-conversation: script read={read}, mark in the conversation={markSeen}, log clean={logClean}, items {items}, starts {starts}, lines written {written}");
 
+    public static void HistoryChecked(bool found, int items, int messages, int answers, int steps, int notices) =>
+        Log.Write($"--try-history: file found={found}, items {items}: messages {messages}, answers {answers}, steps {steps}, notices {notices}");
+
     public static void RealChecked(bool claudeFound, bool answered, bool signedOut, bool failed, int items) =>
         Log.Write($"--try-conversation real: claude found={claudeFound}, answered={answered}, signed out={signedOut}, failed={failed}, items {items}");
 }

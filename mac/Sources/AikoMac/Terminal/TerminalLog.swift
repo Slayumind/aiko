@@ -46,6 +46,12 @@ struct AppTerminalLog: TerminalLog {
                 + "log clean=\(logClean), items \(items), starts \(starts), lines written \(written)")
     }
 
+    static func historyChecked(found: Bool, items: Int, messages: Int, answers: Int, steps: Int, notices: Int) {
+        Log.write(
+            "--try-history: file found=\(found), items \(items): messages \(messages), answers \(answers), "
+                + "steps \(steps), notices \(notices)")
+    }
+
     static func realChecked(claudeFound: Bool, answered: Bool, signedOut: Bool, failed: Bool, items: Int) {
         Log.write(
             "--try-conversation real: claude found=\(claudeFound), answered=\(answered), "

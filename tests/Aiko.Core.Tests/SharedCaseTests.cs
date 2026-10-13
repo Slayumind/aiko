@@ -64,6 +64,7 @@ public class SharedCaseTests
                 ["memoryFile"] = folders.MemoryFile,
                 ["installIdFile"] = folders.InstallIdFile,
                 ["reportedPeriodsFile"] = folders.ReportedPeriodsFile,
+                ["terminalFile"] = folders.TerminalFile,
                 ["localFolder"] = folders.LocalFolder,
                 ["snapshotsFolder"] = folders.SnapshotsFolder,
                 ["snapshotFile"] = folders.SnapshotFile(snapshotName),
@@ -832,6 +833,183 @@ public class SharedCaseTests
 
         public void Stopped(string environment, int linesRead, int linesWritten) =>
             Lines.Add($"stopped {environment} read {linesRead} written {linesWritten}");
+    }
+
+    [Fact]
+    public void Every_session_gets_the_same_name()
+    {
+        var cases = SpecCases.Json("session-name");
+
+        foreach (var row in cases.GetProperty("defaults").EnumerateArray())
+        {
+            Assert.Equal(
+                row.GetProperty("name").GetString(),
+                SessionName.Default(row.GetProperty("folder").GetString()!, Strings(row.GetProperty("taken"))));
+        }
+
+        foreach (var row in cases.GetProperty("names").EnumerateArray())
+        {
+            Assert.Equal(row.GetProperty("name").GetString(), SessionName.Clean(row.GetProperty("input").GetString()));
+        }
+
+        foreach (var row in cases.GetProperty("folders").EnumerateArray())
+        {
+            var input = row.GetProperty("input").GetString()!;
+            Assert.Equal(row.GetProperty("path").GetString(), SessionName.FolderPath(input));
+            Assert.Equal(row.GetProperty("name").GetString(), SessionName.FolderName(input));
+        }
+    }
+
+    [Fact]
+    public void Every_conversation_file_is_found_in_the_same_place()
+    {
+        foreach (var row in SpecCases.Json("transcript-path").GetProperty("paths").EnumerateArray())
+        {
+            var folder = row.GetProperty("folder").GetString()!;
+
+            Assert.Equal(row.GetProperty("folderName").GetString(), TranscriptPath.FolderName(folder));
+            Assert.Equal(row.GetProperty("cut").GetBoolean(), TranscriptPath.IsCut(folder));
+            Assert.Equal(
+                row.GetProperty("path").GetString(),
+                TranscriptPath.For(PlatformIn(row), row.GetProperty("config").GetString()!, folder, row.GetProperty("id").GetString()!));
+        }
+    }
+
+    [Fact]
+    public void Every_list_of_sessions_changes_the_same()
+    {
+        foreach (var row in SpecCases.Json("terminal-sessions").GetProperty("scenarios").EnumerateArray())
+        {
+            var described = SessionsDescribed(row);
+
+            foreach (var part in new[] { "saved", "groups", "toOpen" })
+            {
+                Assert.True(
+                    JsonNode.DeepEquals(JsonNode.Parse(row.GetProperty(part).GetRawText()), described[part]),
+                    $"{row.GetProperty("name").GetString()}, {part}: {described[part]?.ToJsonString()}");
+            }
+        }
+    }
+
+    [Fact]
+    public void Every_conversation_file_is_read_into_the_same_feed()
+    {
+        foreach (var row in SpecCases.Json("transcript").GetProperty("transcripts").EnumerateArray())
+        {
+            var described = TranscriptDescribed(row);
+
+            Assert.True(
+                JsonNode.DeepEquals(JsonNode.Parse(row.GetProperty("state").GetRawText()), described),
+                $"{row.GetProperty("name").GetString()}: {described.ToJsonString()}");
+        }
+    }
+
+    [Fact]
+    public void Every_form_of_a_new_session_offers_the_same()
+    {
+        var cases = SpecCases.Json("new-session");
+        var settings = new EnvironmentSettings([.. cases.GetProperty("environments").EnumerateArray().Select(EnvironmentIn)]);
+
+        foreach (var row in cases.GetProperty("forms").EnumerateArray())
+        {
+            var described = FormDescribed(row, settings);
+
+            foreach (var part in new[] { "folders", "names", "elsewhere" })
+            {
+                Assert.True(
+                    JsonNode.DeepEquals(JsonNode.Parse(row.GetProperty(part).GetRawText()), described[part]),
+                    $"{row.GetProperty("name").GetString()}, {part}: {described[part]?.ToJsonString()}");
+            }
+        }
+    }
+
+    /// The file of a case: an object or a list as it is, a text as a broken file, null as no file.
+    private static string? FileIn(JsonElement file) => file.ValueKind switch
+    {
+        JsonValueKind.Null => null,
+        JsonValueKind.String => file.GetString(),
+        _ => file.GetRawText(),
+    };
+
+    private static JsonObject SessionsDescribed(JsonElement row)
+    {
+        var sessions = TerminalSessions.FromJson(FileIn(row.GetProperty("file")));
+
+        foreach (var step in row.GetProperty("steps").EnumerateArray())
+        {
+            string Word(string key) => step.GetProperty(key).GetString()!;
+
+            sessions = step.GetProperty("do").GetString() switch
+            {
+                "add" => sessions.Add(
+                    Word("id"), Word("environment"), Word("folder"), Word("name"),
+                    step.GetProperty("model").GetString(), Mode(step.GetProperty("mode"))!.Value, step.GetProperty("now").GetInt64()),
+                "rename" => sessions.Rename(Word("id"), Word("name")),
+                "setMode" => sessions.SetMode(Word("id"), Mode(step.GetProperty("mode"))!.Value),
+                "setModel" => sessions.SetModel(Word("id"), step.GetProperty("model").GetString()),
+                "started" => sessions.MarkStarted(Word("id")),
+                "used" => sessions.Used(Word("id"), step.GetProperty("now").GetInt64()),
+                "opened" => sessions.Opened(Word("id")),
+                "close" => sessions.Close(Word("id")),
+                "move" => sessions.Move(Word("id"), step.GetProperty("before").GetString()),
+                var other => throw new InvalidOperationException($"unknown step {other}"),
+            };
+        }
+
+        var environment = row.GetProperty("environment").GetString()!;
+        return new JsonObject
+        {
+            ["saved"] = JsonNode.Parse(sessions.ToJson()),
+            ["groups"] = new JsonArray([.. sessions.Groups(environment).Select(group => (JsonNode)new JsonObject
+            {
+                ["folder"] = group.Folder,
+                ["name"] = group.Name,
+                ["sessions"] = new JsonArray([.. group.Sessions.Select(session => (JsonNode)session.Name)]),
+            })]),
+            ["toOpen"] = sessions.ToOpen(environment)?.Id,
+        };
+    }
+
+    private static JsonObject TranscriptDescribed(JsonElement row)
+    {
+        var lines = row.GetProperty("lines").EnumerateArray()
+            .Select(line => line.ValueKind == JsonValueKind.String ? line.GetString()! : line.GetRawText());
+        var state = Transcript.Read(lines, PermissionMode.Plan);
+
+        return new JsonObject
+        {
+            ["activity"] = Camel(state.Activity),
+            ["mode"] = PermissionModes.Name(state.Mode),
+            ["busy"] = state.IsBusy,
+            ["nextId"] = state.NextId,
+            ["items"] = new JsonArray([.. state.Items.Select(Described)]),
+        };
+    }
+
+    private static JsonObject FormDescribed(JsonElement row, EnvironmentSettings settings)
+    {
+        var sessions = TerminalSessions.FromJson(FileIn(row.GetProperty("sessions")));
+        var environment = settings.Environments.First(one => one.Name == row.GetProperty("environment").GetString());
+        var inside = row.GetProperty("inside");
+
+        var folders = NewSessionChoices.Folders(
+            sessions,
+            environment,
+            bound => inside.TryGetProperty(bound, out var list) ? Strings(list) : []);
+
+        return new JsonObject
+        {
+            ["folders"] = new JsonArray([.. folders.Select(choice => (JsonNode)new JsonObject
+            {
+                ["path"] = choice.Path,
+                ["name"] = choice.Name,
+                ["source"] = Camel(choice.Source),
+            })]),
+            ["names"] = new JsonArray([.. Strings(row.GetProperty("nameFor"))
+                .Select(folder => (JsonNode)NewSessionChoices.DefaultName(sessions, environment.Name, folder))]),
+            ["elsewhere"] = new JsonArray([.. Strings(row.GetProperty("elsewhereFor"))
+                .Select(folder => (JsonNode?)NewSessionChoices.BoundElsewhere(folder, environment, settings))]),
+        };
     }
 
     [Fact]

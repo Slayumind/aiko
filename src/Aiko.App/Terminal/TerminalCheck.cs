@@ -131,6 +131,24 @@ static class TerminalCheck
         return answered ? 0 : 1;
     }
 
+    /// --try-history &lt;folder&gt; &lt;session id&gt; [environment]: reads the file Claude Code keeps of a
+    /// conversation the way the window will, and counts what came out. The text stays in memory.
+    public static int History(string folder, string sessionId, string? environmentName)
+    {
+        var setup = Setup("claude", folder, environmentName);
+        var found = TerminalStore.TranscriptFile(setup.ConfigDirectory, folder, sessionId) is not null;
+        var items = TerminalStore.History(setup.ConfigDirectory, folder, sessionId, PermissionMode.Manual).Items;
+
+        TerminalLog.HistoryChecked(
+            found,
+            items.Count,
+            items.Count(item => item is FeedItem.OwnerMessage),
+            items.Count(item => item is FeedItem.Answer),
+            items.Count(item => item is FeedItem.Step),
+            items.Count(item => item is FeedItem.Notice));
+        return found && items.Count > 0 ? 0 : 1;
+    }
+
     private static RunnerSetup Setup(string claude, string folder, string? environmentName)
     {
         var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);

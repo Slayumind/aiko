@@ -9,6 +9,11 @@ if arguments.contains(PipeChild.argument) {
 if arguments.contains("--try-pipe") {
     exit(TerminalCheck.pipe())
 }
+if let door = arguments.firstIndex(of: "--try-history"), arguments.count > door + 2 {
+    exit(TerminalCheck.history(
+        arguments[door + 1], sessionId: arguments[door + 2],
+        environmentName: arguments.count > door + 3 ? arguments[door + 3] : nil))
+}
 if let door = arguments.firstIndex(of: "--try-conversation"), arguments.count > door + 1 {
     // "real" takes one short turn with the real Claude Code and spends a little of the limits.
     if arguments[door + 1] == "real", arguments.count > door + 2 {

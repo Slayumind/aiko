@@ -1,0 +1,77 @@
+{
+  "comment": "Where Claude Code keeps the file of a conversation (D-303), checked on 2.1.296: <config folder>/projects/<name>/<id>.jsonl. The name is the working folder with every UTF-16 unit that is not an English letter or a digit turned into a dash. A name longer than 200 is cut there; Claude Code then adds a dash and characters of its own, so for a cut name the path given here is only the start of the real folder.",
+  "paths": [
+    {
+      "platform": "windows",
+      "config": "C:\\Users\\someone\\.claude",
+      "folder": "C:\\Users\\someone\\a b",
+      "id": "id-1",
+      "folderName": "C--Users-someone-a-b",
+      "cut": false,
+      "path": "C:\\Users\\someone\\.claude\\projects\\C--Users-someone-a-b\\id-1.jsonl"
+    },
+    {
+      "platform": "windows",
+      "config": "C:\\Users\\someone\\.claude-work\\",
+      "folder": "D:\\Work\\app_v1.2 (copy)",
+      "id": "5f0c2a8e-1b7d-4c1e-9f3a-2d6b8e4a7c10",
+      "folderName": "D--Work-app-v1-2--copy-",
+      "cut": false,
+      "path": "C:\\Users\\someone\\.claude-work\\projects\\D--Work-app-v1-2--copy-\\5f0c2a8e-1b7d-4c1e-9f3a-2d6b8e4a7c10.jsonl"
+    },
+    {
+      "platform": "macos",
+      "config": "/Users/someone/.claude",
+      "folder": "/Users/someone/projects/aiko",
+      "id": "id-2",
+      "folderName": "-Users-someone-projects-aiko",
+      "cut": false,
+      "path": "/Users/someone/.claude/projects/-Users-someone-projects-aiko/id-2.jsonl"
+    },
+    {
+      "platform": "macos",
+      "config": "/Users/someone/.claude",
+      "folder": "/Users/someone/мои проекты",
+      "id": "id-3",
+      "folderName": "-Users-someone------------",
+      "cut": false,
+      "path": "/Users/someone/.claude/projects/-Users-someone------------/id-3.jsonl"
+    },
+    {
+      "platform": "macos",
+      "config": "/Users/someone/.claude",
+      "folder": "/work/smile 🙂 here",
+      "id": "id-4",
+      "folderName": "-work-smile----here",
+      "cut": false,
+      "path": "/Users/someone/.claude/projects/-work-smile----here/id-4.jsonl"
+    },
+    {
+      "platform": "windows",
+      "config": "C:\\Users\\someone\\.claude",
+      "folder": "C:\\long-folder-name-00\\long-folder-name-01\\long-folder-name-02\\long-folder-name-03\\long-folder-name-04\\long-folder-name-05\\long-folder-name-06\\long-folder-name-07\\long-folder-name-08\\long-folder-name-09\\long-folder-name-10",
+      "id": "id-5",
+      "folderName": "C--long-folder-name-00-long-folder-name-01-long-folder-name-02-long-folder-name-03-long-folder-name-04-long-folder-name-05-long-folder-name-06-long-folder-name-07-long-folder-name-08-long-folder-name-",
+      "cut": true,
+      "path": "C:\\Users\\someone\\.claude\\projects\\C--long-folder-name-00-long-folder-name-01-long-folder-name-02-long-folder-name-03-long-folder-name-04-long-folder-name-05-long-folder-name-06-long-folder-name-07-long-folder-name-08-long-folder-name-\\id-5.jsonl"
+    },
+    {
+      "platform": "macos",
+      "config": "/Users/someone/.claude",
+      "folder": "/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "id": "id-6",
+      "folderName": "-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "cut": false,
+      "path": "/Users/someone/.claude/projects/-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/id-6.jsonl"
+    },
+    {
+      "platform": "macos",
+      "config": "/Users/someone/.claude",
+      "folder": "/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "id": "id-7",
+      "folderName": "-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "cut": true,
+      "path": "/Users/someone/.claude/projects/-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/id-7.jsonl"
+    }
+  ]
+}

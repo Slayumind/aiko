@@ -13,6 +13,7 @@ static class SettingsStore
     private static readonly string SettingsFile = ThisComputer.Folders.SettingsFile;
     private static readonly string EnvironmentsFile = ThisComputer.Folders.EnvironmentsFile;
     private static readonly string PersonaFile = ThisComputer.Folders.PersonaFile;
+    private static readonly string TerminalFile = ThisComputer.Folders.TerminalFile;
 
     public static AppSettings Load() => AppSettings.FromJson(Read(SettingsFile));
 
@@ -23,6 +24,12 @@ static class SettingsStore
 
     public static void SaveEnvironments(EnvironmentSettings environments) =>
         Write(EnvironmentsFile, environments.ToJson());
+
+    /// The sessions of the terminal: names, folders and conversation ids, never a conversation.
+    public static Aiko.Core.Terminal.TerminalSessions LoadTerminal() =>
+        Aiko.Core.Terminal.TerminalSessions.FromJson(Read(TerminalFile));
+
+    public static void SaveTerminal(Aiko.Core.Terminal.TerminalSessions sessions) => Write(TerminalFile, sessions.ToJson());
 
     public static PersonaSettings LoadPersona() => PersonaSettings.FromJson(Read(PersonaFile));
 
