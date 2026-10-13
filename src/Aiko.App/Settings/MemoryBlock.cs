@@ -17,9 +17,14 @@ namespace Aiko.App;
 /// rebuilt list cannot disagree with the file.
 sealed class MemoryBlock : StackPanel
 {
+    /// A door for snapshots: AIKO_TRY_MEMORY_FILE=<path> draws the block from that file in place of
+    /// the person's own memory, so a picture for the site never shows real facts. With it the block
+    /// only draws: nothing is written and the real file is not opened.
+    private static readonly string? SampleFile = Environment.GetEnvironmentVariable("AIKO_TRY_MEMORY_FILE");
+
     private readonly HashSet<MemoryCategory> _open = [];
 
-    private MemoryFile _memory = MemoryStore.Load();
+    private MemoryFile _memory = Load();
 
     /// The fact shown as two fields instead of two lines.
     private string? _editing;
@@ -63,9 +68,14 @@ sealed class MemoryBlock : StackPanel
 
     private void Reload()
     {
-        _memory = MemoryStore.Load();
+        _memory = Load();
         Build();
     }
+
+    private static MemoryFile Load() =>
+        string.IsNullOrEmpty(SampleFile)
+            ? MemoryStore.Load()
+            : MemoryFile.FromJson(System.IO.File.ReadAllText(SampleFile)).Memory;
 
     private void Build()
     {
@@ -477,6 +487,11 @@ sealed class MemoryBlock : StackPanel
 
     private void OpenFile()
     {
+        if (!string.IsNullOrEmpty(SampleFile))
+        {
+            return;
+        }
+
         if (!MemoryStore.EnsureFile())
         {
             Show(() => _problem = Strings.MemoryWriteFailed);
@@ -507,6 +522,11 @@ sealed class MemoryBlock : StackPanel
     /// saved a moment ago is not lost, and then the block is drawn from what was written.
     private void Apply(Func<MemoryFile, MemoryHandEdit> change, Action? then = null)
     {
+        if (!string.IsNullOrEmpty(SampleFile))
+        {
+            return;
+        }
+
         var edit = MemoryStore.Change(change);
         _problem = edit?.Outcome switch
         {

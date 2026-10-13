@@ -5,6 +5,16 @@ All notable changes to Aiko are listed here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and Aiko uses
 [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1] - 2026-10-12
+
+A faster start on Windows. Nothing else changes for you.
+
+### Changed
+
+- **Aiko starts faster on Windows.** Windows loads the video driver for Aiko's first window, and
+  that took more than half of the start. Aiko now loads it in the background while the rest of the
+  start goes on. On the laptop where this was measured, the start went from 800 ms to 650 ms.
+
 ## [0.4.0] - 2026-10-11
 
 Aiko gets a memory. Her personality, her skills and her memory now turn on together, with one

@@ -35,3 +35,8 @@ SendMessageTimeout
 CreateHardLink
 HWND_BROADCAST
 HWND_TOPMOST
+Direct3DCreate9
+D3D_SDK_VERSION
+PostMessage
+WM_KEYDOWN
+WM_CANCELMODE

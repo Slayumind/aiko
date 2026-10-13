@@ -3,8 +3,8 @@
 The macOS app repeats the Windows core, so every ported file keeps its behaviour and every xUnit
 case has a Swift case with the same name and the same numbers. Test counts below are cases, not
 methods: one `[Theory]` with five `[InlineData]` rows counts as five, and so does the Swift
-`@Test(arguments:)` that mirrors it. `dotnet test` prints cases and says 1064; `swift test` prints
-methods, not cases, and says 774. The 14 the Swift side does not have are named at the bottom; the ones it has and Windows
+`@Test(arguments:)` that mirrors it. `dotnet test` prints cases and says 1072; `swift test` prints
+methods, not cases, and says 781. The 14 the Swift side does not have are named at the bottom; the ones it has and Windows
 does not belong to the two small programs, whose decisions sit inline in `Program.cs` on Windows,
 and to the card words, the island and the settings window, which sit in `Aiko.App` on Windows
 where no test can reach them.
@@ -19,7 +19,7 @@ a row cannot change in one core and stay as it was in the other. See `spec/cases
 | JsonText.cs | JsonText.swift | 15 | 15 | |
 | LimitSnapshot.cs | LimitSnapshot.swift | 8 | 8 | |
 | StatusLineReport.cs | StatusLineReport.swift | 14 | 14 | |
-| UsageReport.cs | UsageReport.swift | 10 | 10 | |
+| UsageReport.cs | UsageReport.swift | 11 | 11 | |
 | ResetCountdown.cs | ResetCountdown.swift | 7 | 7 | |
 | PollBackoff.cs | PollBackoff.swift | 9 | 9 | |
 | CardState.cs | CardState.swift | 25 | 25 | CardStateTests (17) and PaceEstimateTests (8) |
@@ -30,6 +30,7 @@ a row cannot change in one core and stay as it was in the other. See `spec/cases
 | UninstallPlan.cs | UninstallPlan.swift | 89 | 89 | the two folders Aiko may delete, the guard that refuses every other path, and the memory file that may stay: when it is worth keeping, that it stays when nobody could be asked, and the guard for emptying the folder around it |
 | UpdateGate.cs, UpdateKey.cs | UpdateGate.swift, UpdateKey.swift | 15 | 15 | the key is one file, `update-public-key.pem`: Windows embeds it, `tools/update-key.py` writes the Swift copy, and a case in each suite fails if the two drift apart |
 | CubicBezier.cs | CubicBezier.swift | 9 | 9 | |
+| IconRows.cs | IconRows.swift | 7 | 7 | which environment the ring shows and which the dot; both shells kept this rule inline before |
 | IslandReveal.cs | IslandReveal.swift | 8 | 8 | |
 | IslandPlacement.cs | IslandPlacement.swift | 18 | 18 | |
 | TrayFaceMotion.cs | TrayFaceMotion.swift | 7 | 7 | |
@@ -87,7 +88,7 @@ reach them. In Swift they are part of AikoKit and have cases of their own:
 | Card/CardModel.cs | CardModel.swift | — | 10 | brushes and `Visibility` become the tone and a plain "shown or not": AppKit and WPF spell those differently |
 | TrayText.cs | TrayText.swift | — | 6 | the 127 character limit is Windows', and one text for both is one text to translate |
 | RingIcon.cs, RingDrawing.cs | RingArt.swift | — | 13 | the 16 unit grid, the tones and the dashed ring as numbers; the drawing itself is `AikoMac/StatusIcon.swift` |
-| Theme/Motion.cs | Motion.swift, CardLifetime.swift | — | 6 | the durations and the curves, plus the hover delay and the two away turns that AikoShell.cs keeps inline |
+| Theme/Motion.cs | Motion.swift, CardLifetime.swift | — | 6 | the durations and the curves, plus the hover delay and the two away turns that CardHost.cs keeps inline |
 | Island/IslandPanel.xaml.cs, Island/UnfoldPanel.cs, Island/FitPanel.cs | IslandLayout.swift | — | 28 | the size of the island, its line and corners per edge, the padding that keeps the rings still when the docked side loses its line, where every ring and percentage sits, and the 34 point square it closes into around the face |
 | Island/IslandWindow.xaml.cs | IslandDrag.swift | — | 7 | the 3 point threshold and the grip kept as a share of the size |
 | Island/RingGauge.cs | RingArt.swift | — | 2 | the island ring: the pen is 18 % of the ring, as RingGauge draws it |
@@ -171,7 +172,14 @@ AikoKit decided, and it answers the mouse.
 | Windows file | macOS file | What it does |
 |---|---|---|
 | Program.cs, App.xaml.cs | main.swift, AikoDelegate.swift | starts without a Dock icon, picks the language, registers the fonts |
-| AikoShell.cs | AikoShell.swift | the status item, the hover, the menu and the life of the card |
+| AikoShell.cs | AikoShell.swift | the one owner that connects the parts below and decides who is told what |
+| Tray/TrayIcon.cs | MenuBarIcon.swift | the icon itself: the picture, the tooltip, the clicks and the mouse over it |
+| Tray/TrayMenu.cs | MenuBarMenu.swift | the menu of the icon; both answer with a `TrayCommand` |
+| Card/CardHost.cs | CardHost.swift | the wait under a resting mouse, the pinned card and the watch that closes an unpinned one |
+| Island/IslandHost.cs | IslandHost.swift | the island window, hiding behind a full screen window, saving where it was dragged |
+| ShellNumbers.cs | ShellNumbers.swift | the cards, the card model and the rows of the icon; Windows also brings in direct mode |
+| StartupChores.cs | StartupChores.swift | what is put right at every start; Windows also repairs status lines and clears old activity files |
+| ShellCheck.cs (`--try-shell`) | the self tests in AikoShell.swift, IslandCheck.swift, SettingsCheck.swift | checks that drive the real shell without writing anything. One difference is left: on a machine that is not set up, the Mac self test still opens the checklist by itself, and the Windows check opens no page |
 | RingIcon.cs | StatusIcon.swift | draws the ring and the dot into an `NSImage` |
 | Theme/Tokens.xaml | Theme.swift | the palette and the sizes, as SwiftUI values |
 | Card/CardPanel.xaml | CardView.swift | the card: header, blocks, rows, bars |

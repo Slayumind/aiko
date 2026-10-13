@@ -14,6 +14,13 @@ static class Program
     [STAThread]
     static void Main(string[] args)
     {
+        // A plain start only. The installer's hooks and the snapshot and --try commands come with
+        // arguments, and most of them never open a window.
+        if (args.Length == 0)
+        {
+            GraphicsWarmUp.Start();
+        }
+
         // First thing, before anything is drawn: the installer starts Aiko with its own arguments
         // for installing, updating and removing, and this handles them and exits.
         //
@@ -30,7 +37,13 @@ static class Program
 
         // Before any window is made: the words are picked when a control is created, so a late
         // change would leave half a window in the other language.
-        LanguageChoice.Apply(SettingsStore.Load().Language);
+        //
+        // A door for snapshots: AIKO_TRY_LANGUAGE=English or Russian draws in that language and
+        // leaves the settings file alone.
+        LanguageChoice.Apply(
+            Enum.TryParse<AikoLanguage>(Environment.GetEnvironmentVariable("AIKO_TRY_LANGUAGE"), ignoreCase: true, out var tryLanguage)
+                ? tryLanguage
+                : SettingsStore.Load().Language);
 
         // A snapshot draws a window at once and reads its pixels. Anything still fading in would be
         // caught half there.
@@ -208,6 +221,14 @@ static class Program
         if (args is ["--try-dropdown", ..])
         {
             Environment.Exit(DropDownCheck.Run());
+            return;
+        }
+
+        // Starts the real shell without writing anything and walks it through the icon, the card,
+        // a face, the island and the settings window.
+        if (args is ["--try-shell", ..])
+        {
+            Environment.Exit(ShellCheck.Run());
             return;
         }
 

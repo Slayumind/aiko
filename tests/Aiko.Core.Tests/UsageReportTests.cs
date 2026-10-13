@@ -101,4 +101,14 @@ public class UsageReportTests
     {
         Assert.False(UsageReport.FromJson(json).HasData);
     }
+
+    [Fact]
+    public void An_answer_with_the_model_limit_and_no_windows_says_so()
+    {
+        var model = new ModelLimit("Fable", 3, new DateTimeOffset(2026, 9, 15, 3, 0, 0, TimeSpan.Zero));
+
+        Assert.True(new UsageReport([], model).HasOnlyTheModelLimit);
+        Assert.False(UsageReport.FromJson(RealAnswer).HasOnlyTheModelLimit);
+        Assert.False(UsageReport.Empty.HasOnlyTheModelLimit);
+    }
 }
