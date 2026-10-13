@@ -22,7 +22,7 @@ public enum SecondChoice
     /// Allow, and stop asking about edits in this session.
     EditsInSession,
 
-    /// Allow, and never ask about this command in this project again (D-306).
+    /// Allow, and never ask about this command or this MCP tool in this project again (D-306, D-307).
     AlwaysAllow,
 }
 

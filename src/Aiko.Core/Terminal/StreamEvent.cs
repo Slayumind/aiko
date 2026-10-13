@@ -264,11 +264,10 @@ public abstract record StreamEvent
         var suggestsAcceptEdits = Items(request, "permission_suggestions")
             .Any(suggestion => Str(suggestion, "type") == "setMode" && Str(suggestion, "mode") == "acceptEdits");
 
-        // Only a rule that allows, and only one with words to show: a button needs a name.
         JsonElement? rule = Items(request, "permission_suggestions").FirstOrDefault(suggestion =>
             Str(suggestion, "type") == "addRules"
             && Str(suggestion, "behavior") == "allow"
-            && Str(Items(suggestion, "rules").FirstOrDefault(), "ruleContent") is { Length: > 0 });
+            && RuleWords(Items(suggestion, "rules").FirstOrDefault(), tool).Length > 0);
         if (rule is { ValueKind: JsonValueKind.Undefined })
         {
             rule = null;
@@ -285,8 +284,20 @@ public abstract record StreamEvent
         {
             AgentId = Str(request, "agent_id"),
             Rule = rule?.Clone(),
-            RuleText = Str(Items(rule, "rules").FirstOrDefault(), "ruleContent") ?? "",
+            RuleText = RuleWords(Items(rule, "rules").FirstOrDefault(), tool),
         };
+    }
+
+    /// The words of a rule that may be offered, or nothing. A rule with words of its own covers
+    /// what they say. A rule without them covers every call of its tool, so it is taken only for
+    /// the MCP tool that asks: its words are then the name of that tool (D-307).
+    private static string RuleWords(JsonElement? rule, string tool)
+    {
+        if (Str(rule, "ruleContent") is { Length: > 0 } words)
+        {
+            return words;
+        }
+        return tool.StartsWith("mcp__", StringComparison.Ordinal) && Str(rule, "toolName") == tool ? tool : "";
     }
 
     private static StreamEvent ReadReply(JsonElement root)
