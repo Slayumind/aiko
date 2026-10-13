@@ -62,10 +62,8 @@ public struct ClaudeLaunchPlan: Sendable, Equatable {
         arguments.append(request.started ? "--resume" : "--session-id")
         arguments.append(request.sessionId)
 
-        if let mode = PermissionModes.flagValue(request.mode) {
-            arguments.append("--permission-mode")
-            arguments.append(mode)
-        }
+        arguments.append("--permission-mode")
+        arguments.append(PermissionModes.flagValue(request.mode))
 
         let model = (request.model ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         if !model.isEmpty {

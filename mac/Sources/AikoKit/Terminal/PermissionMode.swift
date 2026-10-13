@@ -38,10 +38,10 @@ public enum PermissionModes {
         }
     }
 
-    /// The value of --permission-mode, or nil when the flag is left out. The manual mode is what
-    /// Claude Code starts in, and its name differs between versions, so it is never passed.
-    public static func flagValue(_ mode: PermissionMode) -> String? {
-        mode == .manual ? nil : name(mode)
+    /// The value of --permission-mode. The flag is always passed: without it a new config folder
+    /// starts in auto mode. The manual mode goes as "default", the word every version takes.
+    public static func flagValue(_ mode: PermissionMode) -> String {
+        requestValue(mode)
     }
 
     /// The value a set_permission_mode request carries. The stream reports the manual mode as

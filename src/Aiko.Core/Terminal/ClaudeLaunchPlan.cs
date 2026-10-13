@@ -42,11 +42,8 @@ public sealed record ClaudeLaunchPlan(IReadOnlyList<string> Arguments, IReadOnly
         arguments.Add(request.Started ? "--resume" : "--session-id");
         arguments.Add(request.SessionId);
 
-        if (PermissionModes.FlagValue(request.Mode) is { } mode)
-        {
-            arguments.Add("--permission-mode");
-            arguments.Add(mode);
-        }
+        arguments.Add("--permission-mode");
+        arguments.Add(PermissionModes.FlagValue(request.Mode));
 
         if (!string.IsNullOrWhiteSpace(request.Model))
         {

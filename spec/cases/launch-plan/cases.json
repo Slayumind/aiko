@@ -12,7 +12,7 @@
       "mode": "manual",
       "model": null,
       "inherited": ["PATH", "USERPROFILE"],
-      "arguments": ["-p", "--input-format", "stream-json", "--output-format", "stream-json", "--verbose", "--include-partial-messages", "--permission-prompt-tool", "stdio", "--session-id", "5f0c2a8e-1b7d-4c1e-9f3a-2d6b8e4a7c10"],
+      "arguments": ["-p", "--input-format", "stream-json", "--output-format", "stream-json", "--verbose", "--include-partial-messages", "--permission-prompt-tool", "stdio", "--session-id", "5f0c2a8e-1b7d-4c1e-9f3a-2d6b8e4a7c10", "--permission-mode", "default"],
       "variables": [
         { "name": "AIKO_ENVIRONMENT", "value": "Aiko" },
         { "name": "AIKO_LAUNCH", "value": "terminal" }
