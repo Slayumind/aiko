@@ -1,7 +1,7 @@
 {
-  "comment": "The four permission modes of the terminal (D-302). The names are the words of Claude Code and are the same in every language of the interface. The stream calls the manual mode default, the flag calls it manual; the flag is left out for it and a request sends default.",
+  "comment": "The four permission modes of the terminal (D-302). The names are the words of Claude Code and are the same in every language of the interface. The stream calls the manual mode default, so the flag and a request both send default. The flag is always passed: without it a new config folder starts in auto mode.",
   "modes": [
-    { "mode": "manual", "name": "manual", "flag": null, "request": "default", "next": "acceptEdits" },
+    { "mode": "manual", "name": "manual", "flag": "default", "request": "default", "next": "acceptEdits" },
     { "mode": "acceptEdits", "name": "acceptEdits", "flag": "acceptEdits", "request": "acceptEdits", "next": "plan" },
     { "mode": "plan", "name": "plan", "flag": "plan", "request": "plan", "next": "auto" },
     { "mode": "auto", "name": "auto", "flag": "auto", "request": "auto", "next": "manual" }

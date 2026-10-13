@@ -41,10 +41,9 @@ public static class PermissionModes
         _ => null,
     };
 
-    /// The value of --permission-mode, or null when the flag is left out. The manual mode is what
-    /// Claude Code starts in, and its name differs between versions, so it is never passed.
-    public static string? FlagValue(PermissionMode mode) =>
-        mode == PermissionMode.Manual ? null : Name(mode);
+    /// The value of --permission-mode. The flag is always passed: without it a new config folder
+    /// starts in auto mode. The manual mode goes as "default", the word every version takes.
+    public static string FlagValue(PermissionMode mode) => RequestValue(mode);
 
     /// The value a set_permission_mode request carries. The stream reports the manual mode as
     /// "default", so that is the word sent back.
