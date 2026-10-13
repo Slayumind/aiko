@@ -1,0 +1,1269 @@
+{
+  "comment": "The window of the terminal (D-292, D-293, D-299, D-304). rows: the list of one environment as rows. A session with no conversation in memory is asleep; one whose conversation is idle is read while Claude Code runs for it and asleep when it does not; a sleeping row has no line about the conversation. waiting is the number on the tab. caps: no more than four processes; the one to stop before the next start is idle and was used longest ago, and when all are busy none is stopped. places: where the window opens; a saved place is kept when 80 units of its title bar are on a screen, its size is brought into the limits of that screen, and otherwise the window stands in the middle of the first screen at 1100 by 760. windows: what is chosen after each action.",
+  "sessions": {
+    "sessions": [
+      {
+        "id": "a1",
+        "environment": "Aiko",
+        "folder": "C:\\work\\aiko",
+        "name": "office: reports",
+        "mode": "manual",
+        "started": true,
+        "closed": false,
+        "lastUsed": 100
+      },
+      {
+        "id": "a2",
+        "environment": "Aiko",
+        "folder": "C:\\work\\aiko",
+        "name": "terminal",
+        "mode": "manual",
+        "started": true,
+        "closed": false,
+        "lastUsed": 200
+      },
+      {
+        "id": "a3",
+        "environment": "Aiko",
+        "folder": "C:\\work\\aiko",
+        "name": "memory polish",
+        "mode": "manual",
+        "started": true,
+        "closed": false,
+        "lastUsed": 300
+      },
+      {
+        "id": "a4",
+        "environment": "Aiko",
+        "folder": "C:\\work\\aiko",
+        "name": "icon polish",
+        "mode": "manual",
+        "started": true,
+        "closed": false,
+        "lastUsed": 400
+      },
+      {
+        "id": "a5",
+        "environment": "Aiko",
+        "folder": "C:\\work\\aiko",
+        "name": "closed one",
+        "mode": "manual",
+        "started": true,
+        "closed": true,
+        "lastUsed": 450
+      },
+      {
+        "id": "c1",
+        "environment": "Aiko",
+        "folder": "C:\\work\\code-crawler",
+        "name": "weapon balance",
+        "mode": "manual",
+        "started": true,
+        "closed": false,
+        "lastUsed": 500
+      },
+      {
+        "id": "c2",
+        "environment": "Aiko",
+        "folder": "C:\\work\\code-crawler",
+        "name": "installer build",
+        "mode": "manual",
+        "started": true,
+        "closed": false,
+        "lastUsed": 600
+      },
+      {
+        "id": "c3",
+        "environment": "Aiko",
+        "folder": "C:\\work\\code-crawler",
+        "name": "idle, no process",
+        "mode": "manual",
+        "started": true,
+        "closed": false,
+        "lastUsed": 700
+      },
+      {
+        "id": "c4",
+        "environment": "Aiko",
+        "folder": "C:\\work\\code-crawler",
+        "name": "no sign-in",
+        "mode": "manual",
+        "started": false,
+        "closed": false,
+        "lastUsed": 800
+      },
+      {
+        "id": "w1",
+        "environment": "Work",
+        "folder": "C:\\work\\app",
+        "name": "app 1",
+        "mode": "manual",
+        "started": true,
+        "closed": false,
+        "lastUsed": 900
+      },
+      {
+        "id": "w2",
+        "environment": "Work",
+        "folder": "C:\\work\\app",
+        "name": "app 2",
+        "mode": "manual",
+        "started": true,
+        "closed": false,
+        "lastUsed": 950
+      }
+    ],
+    "last": "a2"
+  },
+  "rows": [
+    {
+      "name": "every state of a row",
+      "environment": "Aiko",
+      "live": {
+        "a1": {
+          "activity": "working",
+          "line": "step",
+          "kind": "read",
+          "label": "",
+          "text": "office.mjs",
+          "running": true
+        },
+        "a2": {
+          "activity": "waiting",
+          "line": "request",
+          "kind": "edit",
+          "label": "",
+          "text": "NewSessionForm.cs",
+          "running": true
+        },
+        "a3": {
+          "activity": "done",
+          "line": "answer",
+          "kind": "other",
+          "label": "",
+          "text": "Done. Snapshots match in both locales",
+          "running": true
+        },
+        "a4": {
+          "activity": "idle",
+          "line": "answer",
+          "kind": "other",
+          "label": "",
+          "text": "Both locales checked, no differences",
+          "running": true
+        },
+        "a5": {
+          "activity": "waiting",
+          "line": "plan",
+          "kind": "other",
+          "label": "",
+          "text": "",
+          "running": true
+        },
+        "c2": {
+          "activity": "failed",
+          "line": "stoppedAt",
+          "kind": "run",
+          "label": "",
+          "text": "dotnet publish",
+          "running": false
+        },
+        "c3": {
+          "activity": "idle",
+          "line": "answer",
+          "kind": "other",
+          "label": "",
+          "text": "Said before the process was stopped",
+          "running": false
+        },
+        "c4": {
+          "activity": "signedOut",
+          "line": "signIn",
+          "kind": "other",
+          "label": "",
+          "text": "",
+          "running": false
+        }
+      },
+      "groups": [
+        {
+          "name": "aiko",
+          "rows": [
+            {
+              "id": "a1",
+              "state": "working",
+              "line": "step",
+              "text": "office.mjs",
+              "lastUsed": 100
+            },
+            {
+              "id": "a2",
+              "state": "waiting",
+              "line": "request",
+              "text": "NewSessionForm.cs",
+              "lastUsed": 200
+            },
+            {
+              "id": "a3",
+              "state": "done",
+              "line": "answer",
+              "text": "Done. Snapshots match in both locales",
+              "lastUsed": 300
+            },
+            {
+              "id": "a4",
+              "state": "read",
+              "line": "answer",
+              "text": "Both locales checked, no differences",
+              "lastUsed": 400
+            }
+          ]
+        },
+        {
+          "name": "code-crawler",
+          "rows": [
+            {
+              "id": "c1",
+              "state": "asleep",
+              "line": null,
+              "text": null,
+              "lastUsed": 500
+            },
+            {
+              "id": "c2",
+              "state": "stopped",
+              "line": "stoppedAt",
+              "text": "dotnet publish",
+              "lastUsed": 600
+            },
+            {
+              "id": "c3",
+              "state": "asleep",
+              "line": null,
+              "text": null,
+              "lastUsed": 700
+            },
+            {
+              "id": "c4",
+              "state": "signedOut",
+              "line": "signIn",
+              "text": "",
+              "lastUsed": 800
+            }
+          ]
+        }
+      ],
+      "waiting": 1
+    },
+    {
+      "name": "the other environment: one waits, one has finished without a process",
+      "environment": "Work",
+      "live": {
+        "w1": {
+          "activity": "waiting",
+          "line": "question",
+          "kind": "other",
+          "label": "",
+          "text": "Session name",
+          "running": true
+        },
+        "w2": {
+          "activity": "done",
+          "line": "none",
+          "kind": "other",
+          "label": "",
+          "text": "",
+          "running": false
+        }
+      },
+      "groups": [
+        {
+          "name": "app",
+          "rows": [
+            {
+              "id": "w1",
+              "state": "waiting",
+              "line": "question",
+              "text": "Session name",
+              "lastUsed": 900
+            },
+            {
+              "id": "w2",
+              "state": "done",
+              "line": "none",
+              "text": "",
+              "lastUsed": 950
+            }
+          ]
+        }
+      ],
+      "waiting": 1
+    },
+    {
+      "name": "nothing in memory: everything sleeps",
+      "environment": "Aiko",
+      "live": {},
+      "groups": [
+        {
+          "name": "aiko",
+          "rows": [
+            {
+              "id": "a1",
+              "state": "asleep",
+              "line": null,
+              "text": null,
+              "lastUsed": 100
+            },
+            {
+              "id": "a2",
+              "state": "asleep",
+              "line": null,
+              "text": null,
+              "lastUsed": 200
+            },
+            {
+              "id": "a3",
+              "state": "asleep",
+              "line": null,
+              "text": null,
+              "lastUsed": 300
+            },
+            {
+              "id": "a4",
+              "state": "asleep",
+              "line": null,
+              "text": null,
+              "lastUsed": 400
+            }
+          ]
+        },
+        {
+          "name": "code-crawler",
+          "rows": [
+            {
+              "id": "c1",
+              "state": "asleep",
+              "line": null,
+              "text": null,
+              "lastUsed": 500
+            },
+            {
+              "id": "c2",
+              "state": "asleep",
+              "line": null,
+              "text": null,
+              "lastUsed": 600
+            },
+            {
+              "id": "c3",
+              "state": "asleep",
+              "line": null,
+              "text": null,
+              "lastUsed": 700
+            },
+            {
+              "id": "c4",
+              "state": "asleep",
+              "line": null,
+              "text": null,
+              "lastUsed": 800
+            }
+          ]
+        }
+      ],
+      "waiting": 0
+    },
+    {
+      "name": "an environment without sessions",
+      "environment": "Nobody",
+      "live": {},
+      "groups": [],
+      "waiting": 0
+    }
+  ],
+  "caps": [
+    {
+      "name": "three run: room for one more",
+      "starting": "new",
+      "running": [
+        [
+          "a",
+          false,
+          10
+        ],
+        [
+          "b",
+          false,
+          20
+        ],
+        [
+          "c",
+          true,
+          30
+        ]
+      ],
+      "stop": null
+    },
+    {
+      "name": "four run: the idle one used longest ago goes",
+      "starting": "new",
+      "running": [
+        [
+          "a",
+          false,
+          40
+        ],
+        [
+          "b",
+          false,
+          20
+        ],
+        [
+          "c",
+          true,
+          10
+        ],
+        [
+          "d",
+          false,
+          30
+        ]
+      ],
+      "stop": "b"
+    },
+    {
+      "name": "the session that starts is not counted and not stopped",
+      "starting": "a",
+      "running": [
+        [
+          "a",
+          false,
+          1
+        ],
+        [
+          "b",
+          false,
+          20
+        ],
+        [
+          "c",
+          false,
+          30
+        ],
+        [
+          "d",
+          false,
+          40
+        ]
+      ],
+      "stop": null
+    },
+    {
+      "name": "it is counted out, and the other four are full",
+      "starting": "a",
+      "running": [
+        [
+          "a",
+          false,
+          1
+        ],
+        [
+          "b",
+          false,
+          20
+        ],
+        [
+          "c",
+          false,
+          15
+        ],
+        [
+          "d",
+          false,
+          40
+        ],
+        [
+          "e",
+          true,
+          5
+        ]
+      ],
+      "stop": "c"
+    },
+    {
+      "name": "all four are busy: none is stopped",
+      "starting": "new",
+      "running": [
+        [
+          "a",
+          true,
+          10
+        ],
+        [
+          "b",
+          true,
+          20
+        ],
+        [
+          "c",
+          true,
+          30
+        ],
+        [
+          "d",
+          true,
+          40
+        ]
+      ],
+      "stop": null
+    },
+    {
+      "name": "used at the same time: the first in the list goes",
+      "starting": "new",
+      "running": [
+        [
+          "a",
+          false,
+          10
+        ],
+        [
+          "b",
+          false,
+          10
+        ],
+        [
+          "c",
+          true,
+          1
+        ],
+        [
+          "d",
+          false,
+          10
+        ]
+      ],
+      "stop": "a"
+    },
+    {
+      "name": "nothing runs",
+      "starting": "new",
+      "running": [],
+      "stop": null
+    }
+  ],
+  "places": [
+    {
+      "name": "the first time: the middle of the first screen",
+      "saved": null,
+      "screens": [
+        [
+          0,
+          0,
+          1707,
+          1019
+        ]
+      ],
+      "place": [
+        303,
+        129,
+        1100,
+        760,
+        false
+      ]
+    },
+    {
+      "name": "a small screen: the default size shrinks to it",
+      "saved": null,
+      "screens": [
+        [
+          0,
+          0,
+          1000,
+          600
+        ]
+      ],
+      "place": [
+        0,
+        0,
+        1000,
+        600,
+        false
+      ]
+    },
+    {
+      "name": "a saved place on the screen is kept",
+      "saved": [
+        200,
+        100,
+        900,
+        700,
+        false
+      ],
+      "screens": [
+        [
+          0,
+          0,
+          1707,
+          1019
+        ]
+      ],
+      "place": [
+        200,
+        100,
+        900,
+        700,
+        false
+      ]
+    },
+    {
+      "name": "maximized is kept with its place for later",
+      "saved": [
+        200,
+        100,
+        900,
+        700,
+        true
+      ],
+      "screens": [
+        [
+          0,
+          0,
+          1707,
+          1019
+        ]
+      ],
+      "place": [
+        200,
+        100,
+        900,
+        700,
+        true
+      ]
+    },
+    {
+      "name": "on the second screen, to the left of the first",
+      "saved": [
+        -1500,
+        50,
+        1000,
+        700,
+        false
+      ],
+      "screens": [
+        [
+          0,
+          0,
+          1707,
+          1019
+        ],
+        [
+          -1920,
+          0,
+          1920,
+          1040
+        ]
+      ],
+      "place": [
+        -1500,
+        50,
+        1000,
+        700,
+        false
+      ]
+    },
+    {
+      "name": "the second screen is gone: back to the first",
+      "saved": [
+        -1500,
+        50,
+        1000,
+        700,
+        false
+      ],
+      "screens": [
+        [
+          0,
+          0,
+          1707,
+          1019
+        ]
+      ],
+      "place": [
+        303,
+        129,
+        1100,
+        760,
+        false
+      ]
+    },
+    {
+      "name": "only 80 units of the title bar are left on the screen: still reachable",
+      "saved": [
+        1627,
+        100,
+        900,
+        700,
+        false
+      ],
+      "screens": [
+        [
+          0,
+          0,
+          1707,
+          1019
+        ]
+      ],
+      "place": [
+        1627,
+        100,
+        900,
+        700,
+        false
+      ]
+    },
+    {
+      "name": "79 units are not enough",
+      "saved": [
+        1628,
+        100,
+        900,
+        700,
+        false
+      ],
+      "screens": [
+        [
+          0,
+          0,
+          1707,
+          1019
+        ]
+      ],
+      "place": [
+        303,
+        129,
+        1100,
+        760,
+        false
+      ]
+    },
+    {
+      "name": "the title bar is above the screen: brought down",
+      "saved": [
+        200,
+        -15,
+        900,
+        700,
+        false
+      ],
+      "screens": [
+        [
+          0,
+          0,
+          1707,
+          1019
+        ]
+      ],
+      "place": [
+        200,
+        0,
+        900,
+        700,
+        false
+      ]
+    },
+    {
+      "name": "the title bar is far above the screen: not reachable",
+      "saved": [
+        200,
+        -300,
+        900,
+        700,
+        false
+      ],
+      "screens": [
+        [
+          0,
+          0,
+          1707,
+          1019
+        ]
+      ],
+      "place": [
+        303,
+        129,
+        1100,
+        760,
+        false
+      ]
+    },
+    {
+      "name": "larger than the screen it is on: cut to the screen",
+      "saved": [
+        100,
+        100,
+        3000,
+        2000,
+        false
+      ],
+      "screens": [
+        [
+          0,
+          0,
+          1707,
+          1019
+        ]
+      ],
+      "place": [
+        100,
+        100,
+        1707,
+        1019,
+        false
+      ]
+    },
+    {
+      "name": "smaller than the smallest window: grown",
+      "saved": [
+        100,
+        100,
+        200,
+        100,
+        false
+      ],
+      "screens": [
+        [
+          0,
+          0,
+          1707,
+          1019
+        ]
+      ],
+      "place": [
+        100,
+        100,
+        480,
+        360,
+        false
+      ]
+    },
+    {
+      "name": "a size of nothing is no place",
+      "saved": [
+        100,
+        100,
+        0,
+        700,
+        false
+      ],
+      "screens": [
+        [
+          0,
+          0,
+          1707,
+          1019
+        ]
+      ],
+      "place": [
+        303,
+        129,
+        1100,
+        760,
+        false
+      ]
+    }
+  ],
+  "narrow": [
+    [
+      719,
+      true
+    ],
+    [
+      720,
+      false
+    ],
+    [
+      1100,
+      false
+    ]
+  ],
+  "windows": [
+    {
+      "name": "opens on the session that was open last",
+      "environments": [
+        "Aiko",
+        "Work"
+      ],
+      "actions": [],
+      "steps": [
+        {
+          "environment": "Aiko",
+          "session": "a2",
+          "view": "talk"
+        }
+      ]
+    },
+    {
+      "name": "the last session belongs to an environment that is gone: the first environment",
+      "environments": [
+        "Work"
+      ],
+      "actions": [],
+      "steps": [
+        {
+          "environment": "Work",
+          "session": "w1",
+          "view": "talk"
+        }
+      ]
+    },
+    {
+      "name": "another tab opens on its first session, and back on the last one",
+      "environments": [
+        "Aiko",
+        "Work"
+      ],
+      "actions": [
+        [
+          "environment",
+          "Work"
+        ],
+        [
+          "environment",
+          "Aiko"
+        ]
+      ],
+      "steps": [
+        {
+          "environment": "Aiko",
+          "session": "a2",
+          "view": "talk"
+        },
+        {
+          "environment": "Work",
+          "session": "w1",
+          "view": "talk"
+        },
+        {
+          "environment": "Aiko",
+          "session": "a2",
+          "view": "talk"
+        }
+      ]
+    },
+    {
+      "name": "the same tab changes nothing, even with the form open",
+      "environments": [
+        "Aiko",
+        "Work"
+      ],
+      "actions": [
+        [
+          "form",
+          "open"
+        ],
+        [
+          "environment",
+          "Aiko"
+        ]
+      ],
+      "steps": [
+        {
+          "environment": "Aiko",
+          "session": "a2",
+          "view": "talk"
+        },
+        {
+          "environment": "Aiko",
+          "session": "a2",
+          "view": "form"
+        },
+        {
+          "environment": "Aiko",
+          "session": "a2",
+          "view": "form"
+        }
+      ]
+    },
+    {
+      "name": "another tab closes the form",
+      "environments": [
+        "Aiko",
+        "Work"
+      ],
+      "actions": [
+        [
+          "form",
+          "open"
+        ],
+        [
+          "environment",
+          "Work"
+        ]
+      ],
+      "steps": [
+        {
+          "environment": "Aiko",
+          "session": "a2",
+          "view": "talk"
+        },
+        {
+          "environment": "Aiko",
+          "session": "a2",
+          "view": "form"
+        },
+        {
+          "environment": "Work",
+          "session": "w1",
+          "view": "talk"
+        }
+      ]
+    },
+    {
+      "name": "a click on a row closes the form",
+      "environments": [
+        "Aiko",
+        "Work"
+      ],
+      "actions": [
+        [
+          "form",
+          "open"
+        ],
+        [
+          "session",
+          "c1"
+        ]
+      ],
+      "steps": [
+        {
+          "environment": "Aiko",
+          "session": "a2",
+          "view": "talk"
+        },
+        {
+          "environment": "Aiko",
+          "session": "a2",
+          "view": "form"
+        },
+        {
+          "environment": "Aiko",
+          "session": "c1",
+          "view": "talk"
+        }
+      ]
+    },
+    {
+      "name": "the form is closed without a session: the conversation is back",
+      "environments": [
+        "Aiko",
+        "Work"
+      ],
+      "actions": [
+        [
+          "form",
+          "open"
+        ],
+        [
+          "form",
+          "close"
+        ]
+      ],
+      "steps": [
+        {
+          "environment": "Aiko",
+          "session": "a2",
+          "view": "talk"
+        },
+        {
+          "environment": "Aiko",
+          "session": "a2",
+          "view": "form"
+        },
+        {
+          "environment": "Aiko",
+          "session": "a2",
+          "view": "talk"
+        }
+      ]
+    },
+    {
+      "name": "a row of another environment, a closed one and an unknown one change nothing",
+      "environments": [
+        "Aiko",
+        "Work"
+      ],
+      "actions": [
+        [
+          "session",
+          "w1"
+        ],
+        [
+          "session",
+          "a5"
+        ],
+        [
+          "session",
+          "nobody"
+        ]
+      ],
+      "steps": [
+        {
+          "environment": "Aiko",
+          "session": "a2",
+          "view": "talk"
+        },
+        {
+          "environment": "Aiko",
+          "session": "a2",
+          "view": "talk"
+        },
+        {
+          "environment": "Aiko",
+          "session": "a2",
+          "view": "talk"
+        },
+        {
+          "environment": "Aiko",
+          "session": "a2",
+          "view": "talk"
+        }
+      ]
+    },
+    {
+      "name": "the chosen session is closed: the list picks the next one",
+      "environments": [
+        "Aiko",
+        "Work"
+      ],
+      "actions": [
+        [
+          "close",
+          "a2"
+        ]
+      ],
+      "steps": [
+        {
+          "environment": "Aiko",
+          "session": "a2",
+          "view": "talk"
+        },
+        {
+          "environment": "Aiko",
+          "session": "a3",
+          "view": "talk"
+        }
+      ]
+    },
+    {
+      "name": "another session is closed: the window stays",
+      "environments": [
+        "Aiko",
+        "Work"
+      ],
+      "actions": [
+        [
+          "session",
+          "c1"
+        ],
+        [
+          "close",
+          "a1"
+        ]
+      ],
+      "steps": [
+        {
+          "environment": "Aiko",
+          "session": "a2",
+          "view": "talk"
+        },
+        {
+          "environment": "Aiko",
+          "session": "c1",
+          "view": "talk"
+        },
+        {
+          "environment": "Aiko",
+          "session": "c1",
+          "view": "talk"
+        }
+      ]
+    },
+    {
+      "name": "the last session of an environment is closed: nothing to show",
+      "environments": [
+        "Aiko",
+        "Work"
+      ],
+      "actions": [
+        [
+          "environment",
+          "Work"
+        ],
+        [
+          "close",
+          "w1"
+        ],
+        [
+          "close",
+          "w2"
+        ]
+      ],
+      "steps": [
+        {
+          "environment": "Aiko",
+          "session": "a2",
+          "view": "talk"
+        },
+        {
+          "environment": "Work",
+          "session": "w1",
+          "view": "talk"
+        },
+        {
+          "environment": "Work",
+          "session": "w2",
+          "view": "talk"
+        },
+        {
+          "environment": "Work",
+          "session": null,
+          "view": "noSessions"
+        }
+      ]
+    },
+    {
+      "name": "an environment without sessions, then the form",
+      "environments": [
+        "Aiko",
+        "Nobody"
+      ],
+      "actions": [
+        [
+          "environment",
+          "Nobody"
+        ],
+        [
+          "form",
+          "open"
+        ]
+      ],
+      "steps": [
+        {
+          "environment": "Aiko",
+          "session": "a2",
+          "view": "talk"
+        },
+        {
+          "environment": "Nobody",
+          "session": null,
+          "view": "noSessions"
+        },
+        {
+          "environment": "Nobody",
+          "session": null,
+          "view": "form"
+        }
+      ]
+    }
+  ]
+}

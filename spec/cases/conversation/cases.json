@@ -1,5 +1,5 @@
 {
-  "comment": "A conversation as a row of steps and what it has become after them (D-294, D-304, D-305). A step is a line of Claude Code, or something the person does. The answer is the state, the feed and every line written to Claude Code on the way. The queue is kept by Aiko: a message sent during a turn, or while a card waits, goes out when the turn is over. A turn that ended does not free the session while a subagent still runs. What a subagent says inside its own work stays out of the feed; its requests do not.",
+  "comment": "A conversation as a row of steps and what it has become after them (D-294, D-304, D-305). A step is a line of Claude Code, or something the person does. The answer is the state, the feed and every line written to Claude Code on the way. The queue is kept by Aiko: a message sent during a turn, or while a card waits, goes out when the turn is over. A turn that ended does not free the session while a subagent still runs. What a subagent says inside its own work stays out of the feed; its requests do not. glance is the conversation as the list of sessions sees it: what it does and the parts of the one line about it.",
   "scenarios": [
     {
       "name": "nothing happened yet",
@@ -15,7 +15,14 @@
         "limits": 0,
         "items": []
       },
-      "written": []
+      "written": [],
+      "glance": {
+        "activity": "idle",
+        "line": "none",
+        "kind": "other",
+        "label": "",
+        "text": ""
+      }
     },
     {
       "name": "a plain turn, written piece by piece",
@@ -120,7 +127,14 @@
       },
       "written": [
         "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"Привет!\"}]}}"
-      ]
+      ],
+      "glance": {
+        "activity": "done",
+        "line": "answer",
+        "kind": "other",
+        "label": "",
+        "text": "Hello."
+      }
     },
     {
       "name": "an answer that is still being written",
@@ -177,7 +191,14 @@
       },
       "written": [
         "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"tell me\"}]}}"
-      ]
+      ],
+      "glance": {
+        "activity": "working",
+        "line": "none",
+        "kind": "other",
+        "label": "",
+        "text": ""
+      }
     },
     {
       "name": "the person looked at the finished answer",
@@ -233,7 +254,14 @@
       },
       "written": [
         "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"hi\"}]}}"
-      ]
+      ],
+      "glance": {
+        "activity": "idle",
+        "line": "answer",
+        "kind": "other",
+        "label": "",
+        "text": "Hello."
+      }
     },
     {
       "name": "a step that reads a file, then the answer",
@@ -345,7 +373,14 @@
       },
       "written": [
         "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"what is in the form?\"}]}}"
-      ]
+      ],
+      "glance": {
+        "activity": "done",
+        "line": "answer",
+        "kind": "other",
+        "label": "",
+        "text": "A class."
+      }
     },
     {
       "name": "a tool that failed and a picture that came back",
@@ -465,7 +500,14 @@
       },
       "written": [
         "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"look\"}]}}"
-      ]
+      ],
+      "glance": {
+        "activity": "working",
+        "line": "none",
+        "kind": "other",
+        "label": "",
+        "text": ""
+      }
     },
     {
       "name": "a card waits for the person",
@@ -557,7 +599,14 @@
       },
       "written": [
         "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"add the check\"}]}}"
-      ]
+      ],
+      "glance": {
+        "activity": "waiting",
+        "line": "request",
+        "kind": "edit",
+        "label": "",
+        "text": "Form.cs"
+      }
     },
     {
       "name": "the edit is allowed and the work goes on",
@@ -693,7 +742,14 @@
       "written": [
         "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"add the check\"}]}}",
         "{\"type\":\"control_response\",\"response\":{\"subtype\":\"success\",\"request_id\":\"req-1\",\"response\":{\"behavior\":\"allow\",\"updatedInput\":{\"file_path\":\"src/Form.cs\",\"old_string\":\"a\",\"new_string\":\"a\\nb\"}}}}"
-      ]
+      ],
+      "glance": {
+        "activity": "done",
+        "line": "answer",
+        "kind": "other",
+        "label": "",
+        "text": "Done."
+      }
     },
     {
       "name": "edits are allowed for the session: the mode follows",
@@ -797,7 +853,14 @@
       "written": [
         "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"add the check\"}]}}",
         "{\"type\":\"control_response\",\"response\":{\"subtype\":\"success\",\"request_id\":\"req-1\",\"response\":{\"behavior\":\"allow\",\"updatedInput\":{\"file_path\":\"a.txt\",\"content\":\"ok\"},\"updatedPermissions\":[{\"type\":\"setMode\",\"mode\":\"acceptEdits\",\"destination\":\"session\"}]}}}"
-      ]
+      ],
+      "glance": {
+        "activity": "working",
+        "line": "step",
+        "kind": "edit",
+        "label": "",
+        "text": "a.txt"
+      }
     },
     {
       "name": "the edit is refused, twice the same card is not answered",
@@ -912,7 +975,117 @@
       "written": [
         "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"add the check\"}]}}",
         "{\"type\":\"control_response\",\"response\":{\"subtype\":\"success\",\"request_id\":\"req-1\",\"response\":{\"behavior\":\"deny\",\"message\":\"Не надо.\"}}}"
-      ]
+      ],
+      "glance": {
+        "activity": "working",
+        "line": "none",
+        "kind": "other",
+        "label": "",
+        "text": ""
+      }
+    },
+    {
+      "name": "a question waits for an answer",
+      "steps": [
+        {
+          "do": "send",
+          "text": "decide"
+        },
+        {
+          "line": {
+            "type": "assistant",
+            "message": {
+              "content": [
+                {
+                  "type": "tool_use",
+                  "id": "toolu_1",
+                  "name": "AskUserQuestion",
+                  "input": {
+                    "questions": [
+                      {
+                        "question": "Red or blue?",
+                        "header": "Colour",
+                        "multiSelect": false,
+                        "options": [
+                          {
+                            "label": "Red"
+                          },
+                          {
+                            "label": "Blue"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "line": {
+            "type": "control_request",
+            "request_id": "req-1",
+            "request": {
+              "subtype": "can_use_tool",
+              "tool_name": "AskUserQuestion",
+              "requires_user_interaction": true,
+              "input": {
+                "questions": [
+                  {
+                    "question": "Red or blue?",
+                    "header": "Colour",
+                    "multiSelect": false,
+                    "options": [
+                      {
+                        "label": "Red"
+                      },
+                      {
+                        "label": "Blue"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "tool_use_id": "toolu_1"
+            }
+          }
+        }
+      ],
+      "state": {
+        "activity": "waiting",
+        "mode": "manual",
+        "model": "",
+        "session": "",
+        "tasks": 0,
+        "unread": false,
+        "compacting": false,
+        "limits": 0,
+        "items": [
+          {
+            "owner": "decide",
+            "images": 0,
+            "queued": false
+          },
+          {
+            "card": "question",
+            "state": "open",
+            "requestId": "req-1",
+            "second": "none",
+            "subagent": false
+          }
+        ]
+      },
+      "written": [
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"decide\"}]}}"
+      ],
+      "glance": {
+        "activity": "waiting",
+        "line": "question",
+        "kind": "other",
+        "label": "",
+        "text": "Colour"
+      }
     },
     {
       "name": "a question is a card without a step",
@@ -1019,7 +1192,106 @@
       "written": [
         "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"decide\"}]}}",
         "{\"type\":\"control_response\",\"response\":{\"subtype\":\"success\",\"request_id\":\"req-1\",\"response\":{\"behavior\":\"allow\",\"updatedInput\":{\"questions\":[{\"question\":\"Red or blue?\",\"header\":\"Colour\",\"multiSelect\":false,\"options\":[{\"label\":\"Red\"},{\"label\":\"Blue\"}]}],\"answers\":{\"Red or blue?\":\"Blue\"}}}}}"
-      ]
+      ],
+      "glance": {
+        "activity": "working",
+        "line": "none",
+        "kind": "other",
+        "label": "",
+        "text": ""
+      }
+    },
+    {
+      "name": "a plan waits to be approved",
+      "steps": [
+        {
+          "do": "setMode",
+          "mode": "plan"
+        },
+        {
+          "line": {
+            "type": "control_response",
+            "response": {
+              "subtype": "success",
+              "request_id": "mode-1",
+              "response": {
+                "mode": "plan"
+              }
+            }
+          }
+        },
+        {
+          "do": "send",
+          "text": "plan the change"
+        },
+        {
+          "line": {
+            "type": "assistant",
+            "message": {
+              "content": [
+                {
+                  "type": "tool_use",
+                  "id": "toolu_1",
+                  "name": "ExitPlanMode",
+                  "input": {
+                    "plan": "1. Do it"
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "line": {
+            "type": "control_request",
+            "request_id": "req-1",
+            "request": {
+              "subtype": "can_use_tool",
+              "tool_name": "ExitPlanMode",
+              "requires_user_interaction": true,
+              "input": {
+                "plan": "1. Do it"
+              },
+              "tool_use_id": "toolu_1"
+            }
+          }
+        }
+      ],
+      "state": {
+        "activity": "waiting",
+        "mode": "plan",
+        "model": "",
+        "session": "",
+        "tasks": 0,
+        "unread": false,
+        "compacting": false,
+        "limits": 0,
+        "items": [
+          {
+            "owner": "plan the change",
+            "images": 0,
+            "queued": false
+          },
+          {
+            "card": "plan",
+            "state": "open",
+            "requestId": "req-1",
+            "second": "none",
+            "subagent": false
+          }
+        ]
+      },
+      "written": [
+        "{\"type\":\"control_request\",\"request_id\":\"mode-1\",\"request\":{\"subtype\":\"set_permission_mode\",\"mode\":\"plan\"}}",
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"plan the change\"}]}}"
+      ],
+      "glance": {
+        "activity": "waiting",
+        "line": "plan",
+        "kind": "other",
+        "label": "",
+        "text": ""
+      }
     },
     {
       "name": "a plan is approved and the mode goes back",
@@ -1118,7 +1390,14 @@
         "{\"type\":\"control_request\",\"request_id\":\"mode-1\",\"request\":{\"subtype\":\"set_permission_mode\",\"mode\":\"plan\"}}",
         "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"plan the change\"}]}}",
         "{\"type\":\"control_response\",\"response\":{\"subtype\":\"success\",\"request_id\":\"req-1\",\"response\":{\"behavior\":\"allow\",\"updatedInput\":{\"plan\":\"1. Do it\"}}}}"
-      ]
+      ],
+      "glance": {
+        "activity": "working",
+        "line": "none",
+        "kind": "other",
+        "label": "",
+        "text": ""
+      }
     },
     {
       "name": "two messages sent during the work go out one by one",
@@ -1221,7 +1500,14 @@
         "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"first\"}]}}",
         "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"image\",\"source\":{\"type\":\"base64\",\"media_type\":\"image/png\",\"data\":\"AAAA\"}},{\"type\":\"text\",\"text\":\"second\"}]}}",
         "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"third\"}]}}"
-      ]
+      ],
+      "glance": {
+        "activity": "working",
+        "line": "none",
+        "kind": "other",
+        "label": "",
+        "text": ""
+      }
     },
     {
       "name": "a message sent while a card waits is queued too",
@@ -1313,7 +1599,14 @@
       },
       "written": [
         "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"write it\"}]}}"
-      ]
+      ],
+      "glance": {
+        "activity": "waiting",
+        "line": "request",
+        "kind": "edit",
+        "label": "",
+        "text": "a.txt"
+      }
     },
     {
       "name": "the person stops the turn: the pieces are kept, the card closes, the queue moves",
@@ -1448,7 +1741,14 @@
         "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"a long story\"}]}}",
         "{\"type\":\"control_request\",\"request_id\":\"int-6\",\"request\":{\"subtype\":\"interrupt\"}}",
         "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"never mind\"}]}}"
-      ]
+      ],
+      "glance": {
+        "activity": "working",
+        "line": "none",
+        "kind": "other",
+        "label": "",
+        "text": ""
+      }
     },
     {
       "name": "stopping when nothing runs does nothing",
@@ -1468,7 +1768,14 @@
         "limits": 0,
         "items": []
       },
-      "written": []
+      "written": [],
+      "glance": {
+        "activity": "idle",
+        "line": "none",
+        "kind": "other",
+        "label": "",
+        "text": ""
+      }
     },
     {
       "name": "an empty message is not sent",
@@ -1489,7 +1796,14 @@
         "limits": 0,
         "items": []
       },
-      "written": []
+      "written": [],
+      "glance": {
+        "activity": "idle",
+        "line": "none",
+        "kind": "other",
+        "label": "",
+        "text": ""
+      }
     },
     {
       "name": "a picture alone is a message",
@@ -1524,7 +1838,14 @@
       },
       "written": [
         "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"image\",\"source\":{\"type\":\"base64\",\"media_type\":\"image/png\",\"data\":\"AAAA\"}}]}}"
-      ]
+      ],
+      "glance": {
+        "activity": "working",
+        "line": "none",
+        "kind": "other",
+        "label": "",
+        "text": ""
+      }
     },
     {
       "name": "the mode is changed from the line under the input",
@@ -1564,7 +1885,14 @@
       "written": [
         "{\"type\":\"control_request\",\"request_id\":\"mode-1\",\"request\":{\"subtype\":\"set_permission_mode\",\"mode\":\"auto\"}}",
         "{\"type\":\"control_request\",\"request_id\":\"mode-2\",\"request\":{\"subtype\":\"set_permission_mode\",\"mode\":\"default\"}}"
-      ]
+      ],
+      "glance": {
+        "activity": "idle",
+        "line": "none",
+        "kind": "other",
+        "label": "",
+        "text": ""
+      }
     },
     {
       "name": "the environment is not signed in",
@@ -1622,7 +1950,14 @@
       },
       "written": [
         "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"hi\"}]}}"
-      ]
+      ],
+      "glance": {
+        "activity": "signedOut",
+        "line": "signIn",
+        "kind": "other",
+        "label": "",
+        "text": ""
+      }
     },
     {
       "name": "sending again after the sign-in clears the failure",
@@ -1686,7 +2021,14 @@
       "written": [
         "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"hi\"}]}}",
         "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"hi again\"}]}}"
-      ]
+      ],
+      "glance": {
+        "activity": "working",
+        "line": "none",
+        "kind": "other",
+        "label": "",
+        "text": ""
+      }
     },
     {
       "name": "another error of Claude Code in the place of an answer",
@@ -1742,7 +2084,14 @@
       },
       "written": [
         "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"hi\"}]}}"
-      ]
+      ],
+      "glance": {
+        "activity": "done",
+        "line": "none",
+        "kind": "other",
+        "label": "",
+        "text": ""
+      }
     },
     {
       "name": "a command that ran without the model",
@@ -1792,7 +2141,14 @@
       },
       "written": [
         "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"/model sonnet\"}]}}"
-      ]
+      ],
+      "glance": {
+        "activity": "done",
+        "line": "none",
+        "kind": "other",
+        "label": "",
+        "text": ""
+      }
     },
     {
       "name": "the conversation is made shorter",
@@ -1838,7 +2194,14 @@
       },
       "written": [
         "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"/compact\"}]}}"
-      ]
+      ],
+      "glance": {
+        "activity": "working",
+        "line": "none",
+        "kind": "other",
+        "label": "",
+        "text": ""
+      }
     },
     {
       "name": "a subagent works after the turn ended, and asks",
@@ -2001,7 +2364,14 @@
       },
       "written": [
         "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"start an agent\"}]}}"
-      ]
+      ],
+      "glance": {
+        "activity": "waiting",
+        "line": "request",
+        "kind": "edit",
+        "label": "",
+        "text": "sub.txt"
+      }
     },
     {
       "name": "the subagent finished and Claude reported",
@@ -2168,7 +2538,14 @@
       "written": [
         "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"start an agent\"}]}}",
         "{\"type\":\"control_response\",\"response\":{\"subtype\":\"success\",\"request_id\":\"req-1\",\"response\":{\"behavior\":\"allow\",\"updatedInput\":{\"file_path\":\"sub.txt\",\"content\":\"ok\"}}}}"
-      ]
+      ],
+      "glance": {
+        "activity": "done",
+        "line": "answer",
+        "kind": "other",
+        "label": "",
+        "text": "The agent created sub.txt."
+      }
     },
     {
       "name": "stopping while only a subagent runs",
@@ -2219,7 +2596,14 @@
       "written": [
         "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"start an agent\"}]}}",
         "{\"type\":\"control_request\",\"request_id\":\"int-2\",\"request\":{\"subtype\":\"interrupt\"}}"
-      ]
+      ],
+      "glance": {
+        "activity": "working",
+        "line": "none",
+        "kind": "other",
+        "label": "",
+        "text": ""
+      }
     },
     {
       "name": "Claude Code is gone in the middle of a step",
@@ -2302,7 +2686,14 @@
       },
       "written": [
         "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"run it\"}]}}"
-      ]
+      ],
+      "glance": {
+        "activity": "failed",
+        "line": "stoppedAt",
+        "kind": "run",
+        "label": "",
+        "text": "dotnet test"
+      }
     },
     {
       "name": "Claude Code is gone after the work was done: nothing to report",
@@ -2358,7 +2749,14 @@
       },
       "written": [
         "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"hi\"}]}}"
-      ]
+      ],
+      "glance": {
+        "activity": "done",
+        "line": "answer",
+        "kind": "other",
+        "label": "",
+        "text": "Hello."
+      }
     },
     {
       "name": "a turn that failed says why",
@@ -2400,7 +2798,14 @@
       },
       "written": [
         "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"go\"}]}}"
-      ]
+      ],
+      "glance": {
+        "activity": "done",
+        "line": "none",
+        "kind": "other",
+        "label": "",
+        "text": ""
+      }
     },
     {
       "name": "lines of no use change nothing",
@@ -2468,7 +2873,14 @@
       },
       "written": [
         "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"hi\"}]}}"
-      ]
+      ],
+      "glance": {
+        "activity": "working",
+        "line": "none",
+        "kind": "other",
+        "label": "",
+        "text": ""
+      }
     }
   ]
 }
