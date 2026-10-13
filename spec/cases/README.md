@@ -23,6 +23,12 @@ stamp, not a table (D-255).
 | `memory-keys/` | what may be a key of a fact, and when a key is found in a message (`MemoryRules`) |
 | `memory-nudge/` | which messages speak in the first person and get the memory note (`MemoryNudge`) |
 | `memory-limits/` | how long a fact may be with its meaning and keys (`MemoryRules`) |
+| `stream-events/` | what the terminal reads from one line of Claude Code, and what it drops (`StreamEvent`) |
+| `host-lines/` | the exact lines the terminal writes to Claude Code (`HostLine`) |
+| `launch-plan/` | the arguments and the environment of the Claude Code a conversation starts (`ClaudeLaunchPlan`) |
+| `permission-mode/` | the names of the four permission modes and their order (`PermissionModes`) |
+| `limit-badge/` | which limit the title bar of the terminal names (`LimitBadge`) |
+| `model-name/` | the name of a model in the line under the input (`ModelName`) |
 
 A path in these files is written for the platform the case names. Windows cases keep the
 backslashes people have on their disks today.

@@ -38,6 +38,7 @@ struct SessionReminderTests {
         ("command", "Personal", #"C:\projects\aiko"#),  // the command matches the binding
         ("command", "Work", #"C:\temp"#),  // no binding here, so nothing to remind about
         (nil, nil, #"C:\projects\aiko"#),  // not started through the shim at all
+        ("terminal", "Work", #"C:\projects\aiko"#),  // the terminal of Aiko: its form already said so
     ] as [(String?, String?, String)])
     func quietWhenThereIsNothingToSay(launch: String?, running: String?, folder: String) {
         #expect(
