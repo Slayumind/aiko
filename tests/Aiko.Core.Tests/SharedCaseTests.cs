@@ -1230,6 +1230,181 @@ public class SharedCaseTests
     private static string Repeated(JsonElement row, string name) =>
         string.Concat(Enumerable.Repeat(row.GetProperty(name).GetString()!, row.GetProperty(name + "Times").GetInt32()));
 
+    [Fact]
+    public void Every_conversation_looks_the_same_in_the_list()
+    {
+        foreach (var row in SpecCases.Json("conversation").GetProperty("scenarios").EnumerateArray())
+        {
+            var described = GlanceDescribed(TalkGlance.Of(Played(row).State));
+
+            Assert.True(
+                JsonNode.DeepEquals(JsonNode.Parse(row.GetProperty("glance").GetRawText()), described),
+                $"{row.GetProperty("name").GetString()}: {described.ToJsonString()}");
+        }
+    }
+
+    [Fact]
+    public void Every_list_of_the_terminal_window_has_the_same_rows()
+    {
+        var cases = SpecCases.Json("terminal-window");
+        var sessions = TerminalSessions.FromJson(cases.GetProperty("sessions").GetRawText());
+
+        foreach (var row in cases.GetProperty("rows").EnumerateArray())
+        {
+            var described = RowsDescribed(row, sessions);
+
+            foreach (var part in new[] { "groups", "waiting" })
+            {
+                Assert.True(
+                    JsonNode.DeepEquals(JsonNode.Parse(row.GetProperty(part).GetRawText()), described[part]),
+                    $"{row.GetProperty("name").GetString()}, {part}: {described[part]?.ToJsonString()}");
+            }
+        }
+    }
+
+    [Fact]
+    public void Every_fifth_process_stops_the_same_session()
+    {
+        foreach (var row in SpecCases.Json("terminal-window").GetProperty("caps").EnumerateArray())
+        {
+            Assert.Equal(row.GetProperty("stop").GetString(), ProcessCap.ToStop(RunningIn(row), row.GetProperty("starting").GetString()!));
+        }
+    }
+
+    [Fact]
+    public void Every_terminal_window_opens_at_the_same_place()
+    {
+        var cases = SpecCases.Json("terminal-window");
+
+        foreach (var row in cases.GetProperty("places").EnumerateArray())
+        {
+            var described = PlaceDescribed(row);
+
+            Assert.True(
+                JsonNode.DeepEquals(JsonNode.Parse(row.GetProperty("place").GetRawText()), described),
+                $"{row.GetProperty("name").GetString()}: {described.ToJsonString()}");
+        }
+
+        foreach (var row in cases.GetProperty("narrow").EnumerateArray())
+        {
+            Assert.Equal(row[1].GetBoolean(), WindowPlace.IsNarrow(row[0].GetDouble()));
+        }
+    }
+
+    [Fact]
+    public void Every_terminal_window_chooses_the_same()
+    {
+        var cases = SpecCases.Json("terminal-window");
+
+        foreach (var row in cases.GetProperty("windows").EnumerateArray())
+        {
+            var described = WindowDescribed(row, TerminalSessions.FromJson(cases.GetProperty("sessions").GetRawText()));
+
+            Assert.True(
+                JsonNode.DeepEquals(JsonNode.Parse(row.GetProperty("steps").GetRawText()), described),
+                $"{row.GetProperty("name").GetString()}: {described.ToJsonString()}");
+        }
+    }
+
+    private static JsonObject GlanceDescribed(TalkGlance glance) => new()
+    {
+        ["activity"] = Camel(glance.Activity),
+        ["line"] = Camel(glance.Line),
+        ["kind"] = Camel(glance.Kind),
+        ["label"] = glance.Label,
+        ["text"] = glance.Text,
+    };
+
+    private static List<RunningTalk> RunningIn(JsonElement row) =>
+        [.. row.GetProperty("running").EnumerateArray()
+            .Select(talk => new RunningTalk(talk[0].GetString()!, talk[1].GetBoolean(), talk[2].GetInt64()))];
+
+    private static JsonArray PlaceDescribed(JsonElement row)
+    {
+        var saved = row.GetProperty("saved");
+        var place = WindowPlace.Fit(
+            saved.ValueKind == JsonValueKind.Null
+                ? null
+                : new WindowPlace(saved[0].GetDouble(), saved[1].GetDouble(), saved[2].GetDouble(), saved[3].GetDouble(), saved[4].GetBoolean()),
+            [.. row.GetProperty("screens").EnumerateArray().Select(screen =>
+                new ScreenArea(screen[0].GetDouble(), screen[1].GetDouble(), screen[2].GetDouble(), screen[3].GetDouble()))]);
+
+        return new JsonArray(place.Left, place.Top, place.Width, place.Height, place.Maximized);
+    }
+
+    private static JsonObject RowsDescribed(JsonElement row, TerminalSessions sessions)
+    {
+        var environment = row.GetProperty("environment").GetString()!;
+        var live = row.GetProperty("live");
+
+        LiveTalk? Live(string id) => live.TryGetProperty(id, out var talk)
+            ? new LiveTalk(
+                new TalkGlance(
+                    Enum.Parse<TalkActivity>(talk.GetProperty("activity").GetString()!, ignoreCase: true),
+                    Enum.Parse<GlanceLine>(talk.GetProperty("line").GetString()!, ignoreCase: true),
+                    Enum.Parse<StepKind>(talk.GetProperty("kind").GetString()!, ignoreCase: true),
+                    talk.GetProperty("label").GetString()!,
+                    talk.GetProperty("text").GetString()!),
+                talk.GetProperty("running").GetBoolean())
+            : null;
+
+        return new JsonObject
+        {
+            ["groups"] = new JsonArray([.. SessionRows.For(sessions, environment, Live).Select(group => (JsonNode)new JsonObject
+            {
+                ["name"] = group.Name,
+                ["rows"] = new JsonArray([.. group.Rows.Select(one => (JsonNode)new JsonObject
+                {
+                    ["id"] = one.Id,
+                    ["state"] = Camel(one.State),
+                    ["line"] = one.Glance is { } glance ? Camel(glance.Line) : null,
+                    ["text"] = one.Glance?.Text,
+                    ["lastUsed"] = one.LastUsed,
+                })]),
+            })]),
+            ["waiting"] = SessionRows.Waiting(sessions, environment, Live),
+        };
+    }
+
+    private static JsonArray WindowDescribed(JsonElement row, TerminalSessions sessions)
+    {
+        var window = TerminalWindowModel.Opened(sessions, Strings(row.GetProperty("environments")));
+        var steps = new JsonArray();
+
+        void Note() => steps.Add(new JsonObject
+        {
+            ["environment"] = window.Environment,
+            ["session"] = window.Session(sessions)?.Id,
+            ["view"] = Camel(window.View(sessions)),
+        });
+
+        Note();
+        foreach (var action in row.GetProperty("actions").EnumerateArray())
+        {
+            var what = action[1].GetString()!;
+            switch (action[0].GetString())
+            {
+                case "environment":
+                    window = window.ToEnvironment(what, sessions);
+                    break;
+                case "session":
+                    window = window.ToSession(what, sessions);
+                    break;
+                case "form":
+                    window = window.WithForm(what == "open");
+                    break;
+                default:
+                    sessions = sessions.Close(what);
+                    window = window.After(sessions);
+                    break;
+            }
+
+            Note();
+        }
+
+        return steps;
+    }
+
     private static List<string> Strings(JsonElement array) =>
         [.. array.EnumerateArray().Select(e => e.GetString()!)];
 

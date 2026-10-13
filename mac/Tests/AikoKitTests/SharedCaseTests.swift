@@ -1102,6 +1102,188 @@ struct SharedCaseTests {
         }
     }
 
+    // ---- the terminal: its window ----
+
+    @Test
+    func everyConversationLooksTheSameInTheList() {
+        for row in SpecCases.json("conversation")["scenarios"]?.arrayValue ?? [] {
+            let described = Self.describedGlance(TalkGlance.of(Self.played(row).0))
+
+            #expect(
+                described == row["glance"],
+                "\(row["name"]?.stringValue ?? ""): \(described.toJsonString(escaping: .relaxed))")
+        }
+    }
+
+    @Test
+    func everyListOfTheTerminalWindowHasTheSameRows() {
+        let cases = SpecCases.json("terminal-window")
+        let sessions = TerminalSessions.fromJson(cases["sessions"]?.toJsonString(escaping: .relaxed))
+
+        for row in cases["rows"]?.arrayValue ?? [] {
+            let described = Self.describedRows(row, sessions)
+
+            for part in ["groups", "waiting"] {
+                #expect(
+                    described[part] == row[part],
+                    "\(row["name"]?.stringValue ?? ""), \(part): \(described[part]?.toJsonString(escaping: .relaxed) ?? "")")
+            }
+        }
+    }
+
+    @Test
+    func everyFifthProcessStopsTheSameSession() {
+        for row in SpecCases.json("terminal-window")["caps"]?.arrayValue ?? [] {
+            let running = (row["running"]?.arrayValue ?? []).map { node in
+                let talk = node.arrayValue ?? []
+                return RunningTalk(
+                    id: talk[0].stringValue ?? "", busy: talk[1].boolValue ?? false, lastUsed: talk[2].int64Value ?? 0)
+            }
+
+            #expect(
+                ProcessCap.toStop(running, starting: row["starting"]?.stringValue ?? "") == row["stop"]?.stringValue,
+                "\(row["name"]?.stringValue ?? "")")
+        }
+    }
+
+    @Test
+    func everyTerminalWindowOpensAtTheSamePlace() {
+        let cases = SpecCases.json("terminal-window")
+
+        for row in cases["places"]?.arrayValue ?? [] {
+            let saved = row["saved"]?.arrayValue.map { numbers in
+                WindowPlace(
+                    left: numbers[0].doubleValue ?? 0, top: numbers[1].doubleValue ?? 0, width: numbers[2].doubleValue ?? 0,
+                    height: numbers[3].doubleValue ?? 0, maximized: numbers[4].boolValue ?? false)
+            }
+            let screens = (row["screens"]?.arrayValue ?? []).map { node in
+                let screen = (node.arrayValue ?? []).map { $0.doubleValue ?? 0 }
+                return ScreenArea(left: screen[0], top: screen[1], width: screen[2], height: screen[3])
+            }
+            let place = WindowPlace.fit(saved, screens)
+            let sizes: [JsonNode] = [place.left, place.top, place.width, place.height].map(Self.whole)
+            let described = JsonNode.array(sizes + [JsonNode.bool(place.maximized)])
+
+            #expect(
+                described == row["place"],
+                "\(row["name"]?.stringValue ?? ""): \(described.toJsonString(escaping: .relaxed))")
+        }
+
+        for row in cases["narrow"]?.arrayValue ?? [] {
+            let pair = row.arrayValue ?? []
+            #expect(WindowPlace.isNarrow(pair[0].doubleValue ?? 0) == pair[1].boolValue)
+        }
+    }
+
+    @Test
+    func everyTerminalWindowChoosesTheSame() {
+        let cases = SpecCases.json("terminal-window")
+
+        for row in cases["windows"]?.arrayValue ?? [] {
+            let sessions = TerminalSessions.fromJson(cases["sessions"]?.toJsonString(escaping: .relaxed))
+            let described = Self.describedWindow(row, sessions)
+
+            #expect(
+                described == row["steps"],
+                "\(row["name"]?.stringValue ?? ""): \(described.toJsonString(escaping: .relaxed))")
+        }
+    }
+
+    /// The cases hold whole numbers, and a number is compared by its text.
+    private static func whole(_ value: Double) -> JsonNode {
+        .number(String(Int64(value)))
+    }
+
+    private static func describedGlance(_ glance: TalkGlance) -> JsonNode {
+        node([
+            ("activity", .string(String(describing: glance.activity))),
+            ("line", .string(String(describing: glance.line))),
+            ("kind", .string(String(describing: glance.kind))),
+            ("label", .string(glance.label)),
+            ("text", .string(glance.text)),
+        ])
+    }
+
+    private static let activities: [String: TalkActivity] = [
+        "idle": .idle, "working": .working, "waiting": .waiting, "done": .done, "failed": .failed, "signedOut": .signedOut,
+    ]
+
+    private static let glanceLines: [String: GlanceLine] = [
+        "none": .none, "request": .request, "question": .question, "plan": .plan, "step": .step, "answer": .answer,
+        "stoppedAt": .stoppedAt, "signIn": .signIn,
+    ]
+
+    private static let stepKinds: [String: StepKind] = [
+        "read": .read, "search": .search, "edit": .edit, "run": .run, "agent": .agent, "web": .web, "other": .other,
+    ]
+
+    private static func describedRows(_ row: JsonNode, _ sessions: TerminalSessions) -> JsonNode {
+        let environment = row["environment"]?.stringValue ?? ""
+
+        func live(_ id: String) -> LiveTalk? {
+            guard let talk = row["live"]?[id] else {
+                return nil
+            }
+            return LiveTalk(
+                glance: TalkGlance(
+                    activity: activities[talk["activity"]?.stringValue ?? ""] ?? .idle,
+                    line: glanceLines[talk["line"]?.stringValue ?? ""] ?? GlanceLine.none,
+                    kind: stepKinds[talk["kind"]?.stringValue ?? ""] ?? .other,
+                    label: talk["label"]?.stringValue ?? "",
+                    text: talk["text"]?.stringValue ?? ""),
+                running: talk["running"]?.boolValue ?? false)
+        }
+
+        return node([
+            ("groups", .array(SessionRows.of(sessions, environment, live: live).map { group in
+                node([
+                    ("name", .string(group.name)),
+                    ("rows", .array(group.rows.map { one in
+                        node([
+                            ("id", .string(one.id)),
+                            ("state", .string(String(describing: one.state))),
+                            ("line", text(one.glance.map { String(describing: $0.line) })),
+                            ("text", text(one.glance?.text)),
+                            ("lastUsed", .number(String(one.lastUsed))),
+                        ])
+                    })),
+                ])
+            })),
+            ("waiting", number(SessionRows.waiting(sessions, environment, live: live))),
+        ])
+    }
+
+    private static func describedWindow(_ row: JsonNode, _ start: TerminalSessions) -> JsonNode {
+        var sessions = start
+        var window = TerminalWindowModel.opened(sessions, strings(row["environments"]))
+        var steps: [JsonNode] = []
+
+        func note() {
+            steps.append(node([
+                ("environment", .string(window.environment)),
+                ("session", text(window.session(sessions)?.id)),
+                ("view", .string(String(describing: window.view(sessions)))),
+            ]))
+        }
+
+        note()
+        for action in row["actions"]?.arrayValue ?? [] {
+            let pair = strings(action)
+            let what = pair[1]
+            switch pair[0] {
+            case "environment": window = window.toEnvironment(what, sessions)
+            case "session": window = window.toSession(what, sessions)
+            case "form": window = window.withForm(what == "open")
+            default:
+                sessions = sessions.close(what)
+                window = window.after(sessions)
+            }
+            note()
+        }
+
+        return .array(steps)
+    }
+
     private static func text(_ value: String?) -> JsonNode {
         value.map(JsonNode.string) ?? .null
     }
