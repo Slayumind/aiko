@@ -1,5 +1,5 @@
 {
-  "comment": "What the form of a new session offers (D-293, D-300). The folders, each once: the five where sessions of the environment were used last (closed ones too), then every bound folder followed by the folders right inside it. The form names the other environment a folder is bound to. An empty name field shows the name the session will get.",
+  "comment": "What the form of a new session offers (D-293, D-300). The folders, each once: the five where sessions of the environment were used last (closed ones too), then every bound folder followed by the folders right inside it. The form names the other environment a folder is bound to. An empty name field shows the name the session will get. The model the form starts with is the one of the session of the environment that was used last and has a model from the list; with none it is the first of the list.",
   "platform": "windows",
   "environments": [
     {
@@ -37,7 +37,8 @@
             "mode": "manual",
             "started": false,
             "closed": false,
-            "lastUsed": 300
+            "lastUsed": 300,
+            "model": "haiku"
           },
           {
             "id": "a2",
@@ -47,7 +48,8 @@
             "mode": "manual",
             "started": false,
             "closed": true,
-            "lastUsed": 500
+            "lastUsed": 500,
+            "model": "sonnet"
           },
           {
             "id": "a3",
@@ -57,7 +59,8 @@
             "mode": "manual",
             "started": false,
             "closed": false,
-            "lastUsed": 900
+            "lastUsed": 900,
+            "model": "claude-opus-4"
           },
           {
             "id": "w1",
@@ -151,7 +154,8 @@
         "Work",
         null,
         null
-      ]
+      ],
+      "model": "sonnet"
     },
     {
       "name": "the other environment sees its own",
@@ -166,7 +170,8 @@
             "mode": "manual",
             "started": false,
             "closed": false,
-            "lastUsed": 300
+            "lastUsed": 300,
+            "model": "haiku"
           },
           {
             "id": "a2",
@@ -176,7 +181,8 @@
             "mode": "manual",
             "started": false,
             "closed": true,
-            "lastUsed": 500
+            "lastUsed": 500,
+            "model": "sonnet"
           },
           {
             "id": "a3",
@@ -186,7 +192,8 @@
             "mode": "manual",
             "started": false,
             "closed": false,
-            "lastUsed": 900
+            "lastUsed": 900,
+            "model": "claude-opus-4"
           },
           {
             "id": "w1",
@@ -241,7 +248,8 @@
       "elsewhere": [
         "Aiko",
         null
-      ]
+      ],
+      "model": "opus"
     },
     {
       "name": "nothing yet: only the bound folders",
@@ -267,7 +275,8 @@
       "names": [
         "personal 1"
       ],
-      "elsewhere": []
+      "elsewhere": [],
+      "model": "opus"
     },
     {
       "name": "no more than five recent folders, the latest first",
@@ -387,7 +396,8 @@
         }
       ],
       "names": [],
-      "elsewhere": []
+      "elsewhere": [],
+      "model": "opus"
     }
   ]
 }

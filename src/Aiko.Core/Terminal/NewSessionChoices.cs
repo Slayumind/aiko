@@ -22,9 +22,9 @@ public static class NewSessionChoices
     public const int MostRecent = 5;
 
     /// The models of the form, as the words Claude Code takes for --model. They are the short
-    /// names, which stay the same from one version of a model to the next. Null is the first
-    /// choice: Claude Code picks the model itself.
-    public static readonly IReadOnlyList<string?> Models = [null, "opus", "sonnet", "haiku"];
+    /// names, which stay the same from one version of a model to the next. The form offers models
+    /// only (D-308): a session always starts with one of them.
+    public static readonly IReadOnlyList<string> Models = ["opus", "sonnet", "haiku"];
 
     /// The folders, each once: where sessions of the environment ran last, then every bound
     /// folder followed by the folders inside it. foldersInside gives the full paths of the folders
@@ -69,6 +69,15 @@ public static class NewSessionChoices
 
         return choices;
     }
+
+    /// The model the form starts with: the one of the session of the environment that was used
+    /// last and has a model of the list. With no such session it is the first of the list.
+    public static string DefaultModel(TerminalSessions sessions, string environment) =>
+        sessions.Sessions
+            .Where(session => session.Environment == environment && session.Model is { } model && Models.Contains(model))
+            .OrderByDescending(session => session.LastUsed)
+            .Select(session => session.Model)
+            .FirstOrDefault() ?? Models[0];
 
     /// The name of the other environment a folder is bound to, or null. The form says so before
     /// the session is made: Claude Code started there from a console would use that environment.
