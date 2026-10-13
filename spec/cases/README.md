@@ -29,6 +29,9 @@ stamp, not a table (D-255).
 | `permission-mode/` | the names of the four permission modes and their order (`PermissionModes`) |
 | `limit-badge/` | which limit the title bar of the terminal names (`LimitBadge`) |
 | `model-name/` | the name of a model in the line under the input (`ModelName`) |
+| `markdown/` | the markdown of an answer read into blocks and inlines (`Markdown`) |
+| `answer-segments/` | the pieces an answer is drawn and selected in (`AnswerSegments`) |
+| `file-link/` | which words look like a file with a line, and where a link leads (`FileLink`, `LinkTarget`) |
 
 A path in these files is written for the platform the case names. Windows cases keep the
 backslashes people have on their disks today.

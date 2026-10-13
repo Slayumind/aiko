@@ -3,8 +3,8 @@
 The macOS app repeats the Windows core, so every ported file keeps its behaviour and every xUnit
 case has a Swift case with the same name and the same numbers. Test counts below are cases, not
 methods: one `[Theory]` with five `[InlineData]` rows counts as five, and so does the Swift
-`@Test(arguments:)` that mirrors it. `dotnet test` prints cases and says 1079; `swift test` prints
-methods, not cases, and says 787. The 14 the Swift side does not have are named at the bottom; the ones it has and Windows
+`@Test(arguments:)` that mirrors it. `dotnet test` prints cases and says 1082; `swift test` prints
+methods, not cases, and says 790. The 14 the Swift side does not have are named at the bottom; the ones it has and Windows
 does not belong to the two small programs, whose decisions sit inline in `Program.cs` on Windows,
 and to the card words, the island and the settings window, which sit in `Aiko.App` on Windows
 where no test can reach them.
@@ -76,7 +76,8 @@ a row cannot change in one core and stay as it was in the other. See `spec/cases
 | MemoryHand.cs | MemoryHand.swift | 22 | 22 | the changes a person makes in the settings window; `MemoryHandTests` holds these and the cases of the page. `OneLine` is `MemoryText.oneLine` here |
 | MemoryPage.cs | MemoryPage.swift | 5 | 5 | the other 5 cases of `MemoryHandTests`; `Length` is in UTF-16 units in both |
 | Terminal/StreamEvent.cs, HostLine.cs, PermissionMode.cs, ClaudeLaunchPlan.cs, LimitBadge.cs, ModelName.cs | the same names under Terminal/ | — | — | the channel to Claude Code for the terminal window; every rule is a table in `spec/cases/` (`stream-events`, `host-lines`, `launch-plan`, `permission-mode`, `limit-badge`, `model-name`). The C# events are records and keep a tool input as `JsonElement`; the Swift ones are cases of an enum and keep it as `JsonObject`, and the request is the struct `ToolRequest` |
-| — | SharedCaseTests.swift | 16 | 16 | the case files under `spec/cases/`, read by both suites |
+| Terminal/Markdown.cs, AnswerSegments.cs, FileLink.cs | the same names under Terminal/ | — | — | the markdown of an answer read into blocks, the pieces an answer is drawn in, and the words that look like a file; tables in `spec/cases/` (`markdown`, `answer-segments`, `file-link`). The Swift side reads the text in UTF-16 units, as a C# string is read, so both cut it in the same places |
+| — | SharedCaseTests.swift | 19 | 19 | the case files under `spec/cases/`, read by both suites |
 | — | UpdateInstaller.swift | — | 6 | the macOS half of an update: the zip, `ditto` and the bundle swap. Windows has Velopack instead, and UpdateInstall.cs holds the same steps around it where no xUnit case can reach them |
 
 The words and the numbers of the card sit in `src/Aiko.App` on Windows, where no xUnit case can
