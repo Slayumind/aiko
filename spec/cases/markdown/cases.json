@@ -1,0 +1,420 @@
+{
+  "comment": "The markdown of an answer read into blocks (D-303). This is the part of markdown Claude writes; everything else stays text. A line break inside a paragraph is kept. Code is only fenced, and a fence that was not closed runs to the end, so a text that is still being written reads the same way. Inside a paragraph a numbered list begins only at one. An inline is text, code, strong, emphasis, strike or a link; a picture is a link, because Aiko loads nothing from the internet.",
+  "texts": [
+    {
+      "name": "nothing at all",
+      "markdown": "",
+      "blocks": []
+    },
+    {
+      "name": "only empty lines",
+      "markdown": "\n\n  \n",
+      "blocks": []
+    },
+    {
+      "name": "one paragraph",
+      "markdown": "Проверки имени в форме нет совсем.",
+      "blocks": [{"type":"paragraph","inlines":[{"text":"Проверки имени в форме нет совсем."}]}]
+    },
+    {
+      "name": "two paragraphs",
+      "markdown": "First.\n\nSecond.",
+      "blocks": [{"type":"paragraph","inlines":[{"text":"First."}]},{"type":"paragraph","inlines":[{"text":"Second."}]}]
+    },
+    {
+      "name": "a line break inside a paragraph is kept",
+      "markdown": "one\ntwo  \n   three",
+      "blocks": [{"type":"paragraph","inlines":[{"text":"one\ntwo\nthree"}]}]
+    },
+    {
+      "name": "windows line ends",
+      "markdown": "one\r\ntwo\r\n\r\nthree",
+      "blocks": [{"type":"paragraph","inlines":[{"text":"one\ntwo"}]},{"type":"paragraph","inlines":[{"text":"three"}]}]
+    },
+    {
+      "name": "headings of every level",
+      "markdown": "# One\n## Two\n### Three\n#### Four\n##### Five\n###### Six",
+      "blocks": [{"type":"heading","level":1,"inlines":[{"text":"One"}]},{"type":"heading","level":2,"inlines":[{"text":"Two"}]},{"type":"heading","level":3,"inlines":[{"text":"Three"}]},{"type":"heading","level":4,"inlines":[{"text":"Four"}]},{"type":"heading","level":5,"inlines":[{"text":"Five"}]},{"type":"heading","level":6,"inlines":[{"text":"Six"}]}]
+    },
+    {
+      "name": "seven hashes are text",
+      "markdown": "####### Seven",
+      "blocks": [{"type":"paragraph","inlines":[{"text":"####### Seven"}]}]
+    },
+    {
+      "name": "a hash without a space is a word",
+      "markdown": "#tag and #1",
+      "blocks": [{"type":"paragraph","inlines":[{"text":"#tag and #1"}]}]
+    },
+    {
+      "name": "a heading with closing hashes and inline marks",
+      "markdown": "## Что **нашла** ##",
+      "blocks": [{"type":"heading","level":2,"inlines":[{"text":"Что "},{"strong":[{"text":"нашла"}]}]}]
+    },
+    {
+      "name": "a heading that is only hashes",
+      "markdown": "#",
+      "blocks": [{"type":"heading","level":1,"inlines":[]}]
+    },
+    {
+      "name": "a heading ends a paragraph",
+      "markdown": "text\n# Title\nmore",
+      "blocks": [{"type":"paragraph","inlines":[{"text":"text"}]},{"type":"heading","level":1,"inlines":[{"text":"Title"}]},{"type":"paragraph","inlines":[{"text":"more"}]}]
+    },
+    {
+      "name": "fenced code with a language",
+      "markdown": "```cs\nvar a = 1;\n\n    return a;\n```",
+      "blocks": [{"type":"code","language":"cs","text":"var a = 1;\n\n    return a;"}]
+    },
+    {
+      "name": "fenced code keeps markdown as text",
+      "markdown": "```\n# not a heading\n- not a list\n**not bold**\n```",
+      "blocks": [{"type":"code","language":"","text":"# not a heading\n- not a list\n**not bold**"}]
+    },
+    {
+      "name": "a fence with tildes and a longer closing",
+      "markdown": "~~~text more words\ncode ``` here\n~~~~",
+      "blocks": [{"type":"code","language":"text","text":"code ``` here"}]
+    },
+    {
+      "name": "a fence of four closes only with four",
+      "markdown": "````md\n```\ninner\n```\n````",
+      "blocks": [{"type":"code","language":"md","text":"```\ninner\n```"}]
+    },
+    {
+      "name": "a fence that was not closed runs to the end",
+      "markdown": "before\n```py\nprint(1)\nprint(2)",
+      "blocks": [{"type":"paragraph","inlines":[{"text":"before"}]},{"type":"code","language":"py","text":"print(1)\nprint(2)"}]
+    },
+    {
+      "name": "an indented fence loses its indent",
+      "markdown": "  ```\n  a\n    b\n c\n  ```",
+      "blocks": [{"type":"code","language":"","text":"a\n  b\nc"}]
+    },
+    {
+      "name": "backticks with a backtick in the info are not a fence",
+      "markdown": "```a`b\ntext",
+      "blocks": [{"type":"paragraph","inlines":[{"text":"```a`b\ntext"}]}]
+    },
+    {
+      "name": "rules",
+      "markdown": "---\n***\n_ _ _\n- - -",
+      "blocks": [{"type":"rule"},{"type":"rule"},{"type":"rule"},{"type":"rule"}]
+    },
+    {
+      "name": "two dashes are text",
+      "markdown": "--",
+      "blocks": [{"type":"paragraph","inlines":[{"text":"--"}]}]
+    },
+    {
+      "name": "a quote",
+      "markdown": "> first\n> second\n>\n> third",
+      "blocks": [{"type":"quote","blocks":[{"type":"paragraph","inlines":[{"text":"first\nsecond"}]},{"type":"paragraph","inlines":[{"text":"third"}]}]}]
+    },
+    {
+      "name": "a quote with a list and code",
+      "markdown": "> - one\n> - two\n>\n> ```\n> code\n> ```",
+      "blocks": [{"type":"quote","blocks":[{"type":"list","ordered":false,"start":1,"items":[[{"type":"paragraph","inlines":[{"text":"one"}]}],[{"type":"paragraph","inlines":[{"text":"two"}]}]]},{"type":"code","language":"","text":"code"}]}]
+    },
+    {
+      "name": "a quote inside a quote",
+      "markdown": "> outer\n> > inner",
+      "blocks": [{"type":"quote","blocks":[{"type":"paragraph","inlines":[{"text":"outer"}]},{"type":"quote","blocks":[{"type":"paragraph","inlines":[{"text":"inner"}]}]}]}]
+    },
+    {
+      "name": "a quote ends at a line without the mark",
+      "markdown": "> quoted\nplain",
+      "blocks": [{"type":"quote","blocks":[{"type":"paragraph","inlines":[{"text":"quoted"}]}]},{"type":"paragraph","inlines":[{"text":"plain"}]}]
+    },
+    {
+      "name": "a bullet list",
+      "markdown": "- one\n- two\n- three",
+      "blocks": [{"type":"list","ordered":false,"start":1,"items":[[{"type":"paragraph","inlines":[{"text":"one"}]}],[{"type":"paragraph","inlines":[{"text":"two"}]}],[{"type":"paragraph","inlines":[{"text":"three"}]}]]}]
+    },
+    {
+      "name": "bullets of other kinds are one list",
+      "markdown": "* one\n+ two\n- three",
+      "blocks": [{"type":"list","ordered":false,"start":1,"items":[[{"type":"paragraph","inlines":[{"text":"one"}]}],[{"type":"paragraph","inlines":[{"text":"two"}]}],[{"type":"paragraph","inlines":[{"text":"three"}]}]]}]
+    },
+    {
+      "name": "an ordered list keeps its start",
+      "markdown": "3. three\n4. four\n7) seven",
+      "blocks": [{"type":"list","ordered":true,"start":3,"items":[[{"type":"paragraph","inlines":[{"text":"three"}]}],[{"type":"paragraph","inlines":[{"text":"four"}]}],[{"type":"paragraph","inlines":[{"text":"seven"}]}]]}]
+    },
+    {
+      "name": "an ordered list after a bullet list is another list",
+      "markdown": "- a\n1. b",
+      "blocks": [{"type":"list","ordered":false,"start":1,"items":[[{"type":"paragraph","inlines":[{"text":"a"}]}]]},{"type":"list","ordered":true,"start":1,"items":[[{"type":"paragraph","inlines":[{"text":"b"}]}]]}]
+    },
+    {
+      "name": "a list after a paragraph",
+      "markdown": "Что нашла:\n- первое\n- второе",
+      "blocks": [{"type":"paragraph","inlines":[{"text":"Что нашла:"}]},{"type":"list","ordered":false,"start":1,"items":[[{"type":"paragraph","inlines":[{"text":"первое"}]}],[{"type":"paragraph","inlines":[{"text":"второе"}]}]]}]
+    },
+    {
+      "name": "a nested list",
+      "markdown": "- one\n  - inner a\n  - inner b\n- two",
+      "blocks": [{"type":"list","ordered":false,"start":1,"items":[[{"type":"paragraph","inlines":[{"text":"one"}]},{"type":"list","ordered":false,"start":1,"items":[[{"type":"paragraph","inlines":[{"text":"inner a"}]}],[{"type":"paragraph","inlines":[{"text":"inner b"}]}]]}],[{"type":"paragraph","inlines":[{"text":"two"}]}]]}]
+    },
+    {
+      "name": "a nested ordered list under a bullet",
+      "markdown": "- one\n  1. first\n  2. second\n- two",
+      "blocks": [{"type":"list","ordered":false,"start":1,"items":[[{"type":"paragraph","inlines":[{"text":"one"}]},{"type":"list","ordered":true,"start":1,"items":[[{"type":"paragraph","inlines":[{"text":"first"}]}],[{"type":"paragraph","inlines":[{"text":"second"}]}]]}],[{"type":"paragraph","inlines":[{"text":"two"}]}]]}]
+    },
+    {
+      "name": "three levels",
+      "markdown": "1. a\n   - b\n     - c\n2. d",
+      "blocks": [{"type":"list","ordered":true,"start":1,"items":[[{"type":"paragraph","inlines":[{"text":"a"}]},{"type":"list","ordered":false,"start":1,"items":[[{"type":"paragraph","inlines":[{"text":"b"}]},{"type":"list","ordered":false,"start":1,"items":[[{"type":"paragraph","inlines":[{"text":"c"}]}]]}]]}],[{"type":"paragraph","inlines":[{"text":"d"}]}]]}]
+    },
+    {
+      "name": "an item with two paragraphs and code",
+      "markdown": "- first line\n  same paragraph\n\n  second paragraph\n\n  ```\n  code\n  ```\n- next",
+      "blocks": [{"type":"list","ordered":false,"start":1,"items":[[{"type":"paragraph","inlines":[{"text":"first line\nsame paragraph"}]},{"type":"paragraph","inlines":[{"text":"second paragraph"}]},{"type":"code","language":"","text":"code"}],[{"type":"paragraph","inlines":[{"text":"next"}]}]]}]
+    },
+    {
+      "name": "an empty line between items keeps one list",
+      "markdown": "- one\n\n- two",
+      "blocks": [{"type":"list","ordered":false,"start":1,"items":[[{"type":"paragraph","inlines":[{"text":"one"}]}],[{"type":"paragraph","inlines":[{"text":"two"}]}]]}]
+    },
+    {
+      "name": "a paragraph after a list",
+      "markdown": "- one\n\nafter",
+      "blocks": [{"type":"list","ordered":false,"start":1,"items":[[{"type":"paragraph","inlines":[{"text":"one"}]}]]},{"type":"paragraph","inlines":[{"text":"after"}]}]
+    },
+    {
+      "name": "text right under a list is not part of it",
+      "markdown": "- one\nafter",
+      "blocks": [{"type":"list","ordered":false,"start":1,"items":[[{"type":"paragraph","inlines":[{"text":"one"}]}]]},{"type":"paragraph","inlines":[{"text":"after"}]}]
+    },
+    {
+      "name": "a dash without a space is text",
+      "markdown": "-one\n-",
+      "blocks": [{"type":"paragraph","inlines":[{"text":"-one\n-"}]}]
+    },
+    {
+      "name": "a number without a space is text",
+      "markdown": "1.one\n2024. a year is too long 1234567890. x",
+      "blocks": [{"type":"paragraph","inlines":[{"text":"1.one\n2024. a year is too long 1234567890. x"}]}]
+    },
+    {
+      "name": "inside a paragraph only a list that starts at one begins",
+      "markdown": "Text\n2024. was a year\n1. first\n2. second",
+      "blocks": [{"type":"paragraph","inlines":[{"text":"Text\n2024. was a year"}]},{"type":"list","ordered":true,"start":1,"items":[[{"type":"paragraph","inlines":[{"text":"first"}]}],[{"type":"paragraph","inlines":[{"text":"second"}]}]]}]
+    },
+    {
+      "name": "a number list after an empty line starts anywhere",
+      "markdown": "Text\n\n5. five",
+      "blocks": [{"type":"paragraph","inlines":[{"text":"Text"}]},{"type":"list","ordered":true,"start":5,"items":[[{"type":"paragraph","inlines":[{"text":"five"}]}]]}]
+    },
+    {
+      "name": "a line that starts with italic or bold is not a list",
+      "markdown": "*italic* first\n**bold** second\n+1 to that",
+      "blocks": [{"type":"paragraph","inlines":[{"emphasis":[{"text":"italic"}]},{"text":" first\n"},{"strong":[{"text":"bold"}]},{"text":" second\n+1 to that"}]}]
+    },
+    {
+      "name": "an item with nothing in it",
+      "markdown": "- \n- x",
+      "blocks": [{"type":"list","ordered":false,"start":1,"items":[[],[{"type":"paragraph","inlines":[{"text":"x"}]}]]}]
+    },
+    {
+      "name": "emphasis over a line break",
+      "markdown": "*one\ntwo* and **three\nfour**",
+      "blocks": [{"type":"paragraph","inlines":[{"emphasis":[{"text":"one\ntwo"}]},{"text":" and "},{"strong":[{"text":"three\nfour"}]}]}]
+    },
+    {
+      "name": "an item with extra spaces after the mark",
+      "markdown": "-   wide\n    still the item",
+      "blocks": [{"type":"list","ordered":false,"start":1,"items":[[{"type":"paragraph","inlines":[{"text":"wide\nstill the item"}]}]]}]
+    },
+    {
+      "name": "a task list stays text",
+      "markdown": "- [ ] open\n- [x] done",
+      "blocks": [{"type":"list","ordered":false,"start":1,"items":[[{"type":"paragraph","inlines":[{"text":"[ ] open"}]}],[{"type":"paragraph","inlines":[{"text":"[x] done"}]}]]}]
+    },
+    {
+      "name": "a table",
+      "markdown": "| Name | Count |\n|---|---|\n| a | 1 |\n| b | 2 |",
+      "blocks": [{"type":"table","columns":["none","none"],"header":[[{"text":"Name"}],[{"text":"Count"}]],"rows":[[[{"text":"a"}],[{"text":"1"}]],[[{"text":"b"}],[{"text":"2"}]]]}]
+    },
+    {
+      "name": "a table with alignment and no outer bars",
+      "markdown": "Left | Center | Right | None\n:--- | :---: | ---: | ---\n1 | 2 | 3 | 4",
+      "blocks": [{"type":"table","columns":["left","center","right","none"],"header":[[{"text":"Left"}],[{"text":"Center"}],[{"text":"Right"}],[{"text":"None"}]],"rows":[[[{"text":"1"}],[{"text":"2"}],[{"text":"3"}],[{"text":"4"}]]]}]
+    },
+    {
+      "name": "a table row with fewer and more cells",
+      "markdown": "| a | b |\n|---|---|\n| only |\n| x | y | z |",
+      "blocks": [{"type":"table","columns":["none","none"],"header":[[{"text":"a"}],[{"text":"b"}]],"rows":[[[{"text":"only"}],[]],[[{"text":"x"}],[{"text":"y"}]]]}]
+    },
+    {
+      "name": "a table cell with marks and an escaped bar",
+      "markdown": "| What | Why |\n|---|---|\n| `a\\|b` | **bold** and \\| bar |",
+      "blocks": [{"type":"table","columns":["none","none"],"header":[[{"text":"What"}],[{"text":"Why"}]],"rows":[[[{"code":"a|b"}],[{"strong":[{"text":"bold"}]},{"text":" and | bar"}]]]}]
+    },
+    {
+      "name": "a table ends at a line without a bar",
+      "markdown": "| a |\n|---|\n| 1 |\nafter",
+      "blocks": [{"type":"table","columns":["none"],"header":[[{"text":"a"}]],"rows":[[[{"text":"1"}]]]},{"type":"paragraph","inlines":[{"text":"after"}]}]
+    },
+    {
+      "name": "a table after a paragraph",
+      "markdown": "text\n| a | b |\n|---|---|\n| 1 | 2 |",
+      "blocks": [{"type":"paragraph","inlines":[{"text":"text"}]},{"type":"table","columns":["none","none"],"header":[[{"text":"a"}],[{"text":"b"}]],"rows":[[[{"text":"1"}],[{"text":"2"}]]]}]
+    },
+    {
+      "name": "a bar without the dashes row is text",
+      "markdown": "a | b\nc | d",
+      "blocks": [{"type":"paragraph","inlines":[{"text":"a | b\nc | d"}]}]
+    },
+    {
+      "name": "a dashes row with another count is text",
+      "markdown": "| a | b |\n|---|\n| 1 | 2 |",
+      "blocks": [{"type":"paragraph","inlines":[{"text":"| a | b |\n|---|\n| 1 | 2 |"}]}]
+    },
+    {
+      "name": "bold, italic and both",
+      "markdown": "**bold** *italic* ***both*** __bold__ _italic_ ___both___",
+      "blocks": [{"type":"paragraph","inlines":[{"strong":[{"text":"bold"}]},{"text":" "},{"emphasis":[{"text":"italic"}]},{"text":" "},{"emphasis":[{"strong":[{"text":"both"}]}]},{"text":" "},{"strong":[{"text":"bold"}]},{"text":" "},{"emphasis":[{"text":"italic"}]},{"text":" "},{"emphasis":[{"strong":[{"text":"both"}]}]}]}]
+    },
+    {
+      "name": "bold with italic inside, closed together",
+      "markdown": "**bold *both***",
+      "blocks": [{"type":"paragraph","inlines":[{"strong":[{"text":"bold "},{"emphasis":[{"text":"both"}]}]}]}]
+    },
+    {
+      "name": "italic with bold inside, closed together",
+      "markdown": "*italic **both***",
+      "blocks": [{"type":"paragraph","inlines":[{"emphasis":[{"text":"italic "},{"strong":[{"text":"both"}]}]}]}]
+    },
+    {
+      "name": "italic with bold in the middle",
+      "markdown": "*a **b** c*",
+      "blocks": [{"type":"paragraph","inlines":[{"emphasis":[{"text":"a "},{"strong":[{"text":"b"}]},{"text":" c"}]}]}]
+    },
+    {
+      "name": "bold with italic in the middle",
+      "markdown": "**a *b* c**",
+      "blocks": [{"type":"paragraph","inlines":[{"strong":[{"text":"a "},{"emphasis":[{"text":"b"}]},{"text":" c"}]}]}]
+    },
+    {
+      "name": "a star with spaces is a star",
+      "markdown": "2 * 3 * 4 and a* b",
+      "blocks": [{"type":"paragraph","inlines":[{"text":"2 * 3 * 4 and a* b"}]}]
+    },
+    {
+      "name": "an underscore inside a word is a letter",
+      "markdown": "snake_case_name and _private and file_name_",
+      "blocks": [{"type":"paragraph","inlines":[{"text":"snake_case_name and "},{"emphasis":[{"text":"private and file_name"}]}]}]
+    },
+    {
+      "name": "marks that were not closed stay",
+      "markdown": "**not closed and *also not",
+      "blocks": [{"type":"paragraph","inlines":[{"text":"**not closed and *also not"}]}]
+    },
+    {
+      "name": "an empty pair stays",
+      "markdown": "** ** and ****",
+      "blocks": [{"type":"paragraph","inlines":[{"text":"** ** and ****"}]}]
+    },
+    {
+      "name": "four stars are text",
+      "markdown": "****four****",
+      "blocks": [{"type":"paragraph","inlines":[{"text":"****four****"}]}]
+    },
+    {
+      "name": "strike",
+      "markdown": "~~old~~ new ~not~ ~~~no~~~",
+      "blocks": [{"type":"paragraph","inlines":[{"strike":[{"text":"old"}]},{"text":" new ~not~ ~~~no~~~"}]}]
+    },
+    {
+      "name": "escaped marks",
+      "markdown": "\\*not italic\\* \\# \\[x\\] \\\\ \\a",
+      "blocks": [{"type":"paragraph","inlines":[{"text":"*not italic* # [x] \\ \\a"}]}]
+    },
+    {
+      "name": "inline code",
+      "markdown": "`code` and ``a ` b`` and ` padded ` and `  `",
+      "blocks": [{"type":"paragraph","inlines":[{"code":"code"},{"text":" and "},{"code":"a ` b"},{"text":" and "},{"code":"padded"},{"text":" and "},{"code":"  "}]}]
+    },
+    {
+      "name": "code keeps marks",
+      "markdown": "`**not bold**` and `[not](link)`",
+      "blocks": [{"type":"paragraph","inlines":[{"code":"**not bold**"},{"text":" and "},{"code":"[not](link)"}]}]
+    },
+    {
+      "name": "a backtick that was not closed",
+      "markdown": "a `b c",
+      "blocks": [{"type":"paragraph","inlines":[{"text":"a `b c"}]}]
+    },
+    {
+      "name": "code inside bold",
+      "markdown": "**see `a*b` here**",
+      "blocks": [{"type":"paragraph","inlines":[{"strong":[{"text":"see "},{"code":"a*b"},{"text":" here"}]}]}]
+    },
+    {
+      "name": "a link",
+      "markdown": "[words](https://example.com/a) and [**bold** words](path/to/file.cs:42)",
+      "blocks": [{"type":"paragraph","inlines":[{"link":"https://example.com/a","inlines":[{"text":"words"}]},{"text":" and "},{"link":"path/to/file.cs:42","inlines":[{"strong":[{"text":"bold"}]},{"text":" words"}]}]}]
+    },
+    {
+      "name": "a link with a title, brackets and angle target",
+      "markdown": "[a](https://e.com/x_(y) \"title\") [b](<a b.md>) [c](x 'y')",
+      "blocks": [{"type":"paragraph","inlines":[{"link":"https://e.com/x_(y)","inlines":[{"text":"a"}]},{"text":" "},{"link":"a b.md","inlines":[{"text":"b"}]},{"text":" "},{"link":"x","inlines":[{"text":"c"}]}]}]
+    },
+    {
+      "name": "a link with nothing in the words",
+      "markdown": "[](https://example.com)",
+      "blocks": [{"type":"paragraph","inlines":[{"link":"https://example.com","inlines":[{"text":"https://example.com"}]}]}]
+    },
+    {
+      "name": "brackets that are not a link",
+      "markdown": "[x] and [a](  ) and [b] (c) and a[1]",
+      "blocks": [{"type":"paragraph","inlines":[{"text":"[x] and [a](  ) and [b] (c) and a[1]"}]}]
+    },
+    {
+      "name": "a picture is a link",
+      "markdown": "![a red square](https://example.com/red.png) ![](pic.png)",
+      "blocks": [{"type":"paragraph","inlines":[{"link":"https://example.com/red.png","inlines":[{"text":"a red square"}]},{"text":" "},{"link":"pic.png","inlines":[{"text":"pic.png"}]}]}]
+    },
+    {
+      "name": "an address in angle brackets",
+      "markdown": "<https://example.com/a?b=1> and <not a link> and <b>",
+      "blocks": [{"type":"paragraph","inlines":[{"link":"https://example.com/a?b=1","inlines":[{"text":"https://example.com/a?b=1"}]},{"text":" and <not a link> and <b>"}]}]
+    },
+    {
+      "name": "a bare address",
+      "markdown": "see https://example.com/a_(b), then http://x.io. And (https://y.dev/p)!",
+      "blocks": [{"type":"paragraph","inlines":[{"text":"see "},{"link":"https://example.com/a_(b)","inlines":[{"text":"https://example.com/a_(b)"}]},{"text":", then "},{"link":"http://x.io","inlines":[{"text":"http://x.io"}]},{"text":". And ("},{"link":"https://y.dev/p","inlines":[{"text":"https://y.dev/p"}]},{"text":")!"}]}]
+    },
+    {
+      "name": "a bare address inside a word or too short",
+      "markdown": "xhttps://a.b and https:// and http://",
+      "blocks": [{"type":"paragraph","inlines":[{"text":"xhttps://a.b and https:// and http://"}]}]
+    },
+    {
+      "name": "an address in bold and in a list",
+      "markdown": "- **https://example.com**",
+      "blocks": [{"type":"list","ordered":false,"start":1,"items":[[{"type":"paragraph","inlines":[{"strong":[{"link":"https://example.com","inlines":[{"text":"https://example.com"}]}]}]}]]}]
+    },
+    {
+      "name": "unicode around marks",
+      "markdown": "это **важно**, а это _курсив_ и слово_с_подчёркиванием",
+      "blocks": [{"type":"paragraph","inlines":[{"text":"это "},{"strong":[{"text":"важно"}]},{"text":", а это "},{"emphasis":[{"text":"курсив"}]},{"text":" и слово_с_подчёркиванием"}]}]
+    },
+    {
+      "name": "html stays text",
+      "markdown": "<div>a</div> &amp; <br>",
+      "blocks": [{"type":"paragraph","inlines":[{"text":"<div>a</div> &amp; <br>"}]}]
+    },
+    {
+      "name": "an answer as Claude writes it",
+      "markdown": "Проверки имени в форме нет совсем.\n\n### Что нашла\n\n- `NewSessionForm.Validate` смотрит только папку и модель.\n- Пустое имя доходит до списка.\n\nМесто правки: [NewSessionForm.cs:42](Aiko.Core/Terminal/NewSessionForm.cs:42)\n\n```cs\nif (string.IsNullOrWhiteSpace(name))\n{\n    name = DefaultName(folder);\n}\n```\n\n| Поле | Проверка |\n|---|---|\n| Папка | есть |\n| Имя | **нет** |\n\n> Тест добавлю следом.",
+      "blocks": [{"type":"paragraph","inlines":[{"text":"Проверки имени в форме нет совсем."}]},{"type":"heading","level":3,"inlines":[{"text":"Что нашла"}]},{"type":"list","ordered":false,"start":1,"items":[[{"type":"paragraph","inlines":[{"code":"NewSessionForm.Validate"},{"text":" смотрит только папку и модель."}]}],[{"type":"paragraph","inlines":[{"text":"Пустое имя доходит до списка."}]}]]},{"type":"paragraph","inlines":[{"text":"Место правки: "},{"link":"Aiko.Core/Terminal/NewSessionForm.cs:42","inlines":[{"text":"NewSessionForm.cs:42"}]}]},{"type":"code","language":"cs","text":"if (string.IsNullOrWhiteSpace(name))\n{\n    name = DefaultName(folder);\n}"},{"type":"table","columns":["none","none"],"header":[[{"text":"Поле"}],[{"text":"Проверка"}]],"rows":[[[{"text":"Папка"}],[{"text":"есть"}]],[[{"text":"Имя"}],[{"strong":[{"text":"нет"}]}]]]},{"type":"quote","blocks":[{"type":"paragraph","inlines":[{"text":"Тест добавлю следом."}]}]}]
+    },
+    {
+      "name": "an answer cut while it is written",
+      "markdown": "Смотрю файл.\n\n1. Первое\n2. Вто",
+      "blocks": [{"type":"paragraph","inlines":[{"text":"Смотрю файл."}]},{"type":"list","ordered":true,"start":1,"items":[[{"type":"paragraph","inlines":[{"text":"Первое"}]}],[{"type":"paragraph","inlines":[{"text":"Вто"}]}]]}]
+    }
+  ]
+}

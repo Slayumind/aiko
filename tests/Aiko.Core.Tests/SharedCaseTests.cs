@@ -556,6 +556,117 @@ public class SharedCaseTests
         }
     }
 
+    [Fact]
+    public void Every_markdown_text_is_read_into_the_same_blocks()
+    {
+        foreach (var row in SpecCases.Json("markdown").GetProperty("texts").EnumerateArray())
+        {
+            var expected = JsonNode.Parse(row.GetProperty("blocks").GetRawText());
+
+            var described = Described(Markdown.Parse(row.GetProperty("markdown").GetString()));
+
+            Assert.True(
+                JsonNode.DeepEquals(expected, described),
+                $"{row.GetProperty("name").GetString()}: {described.ToJsonString()}");
+        }
+    }
+
+    [Fact]
+    public void Every_answer_is_cut_into_the_same_pieces()
+    {
+        foreach (var row in SpecCases.Json("answer-segments").GetProperty("answers").EnumerateArray())
+        {
+            var segments = AnswerSegments.Of(Markdown.Parse(row.GetProperty("markdown").GetString()));
+
+            var described = new JsonArray([.. segments.Select(segment => (JsonNode)(segment switch
+            {
+                AnswerSegment.Prose prose => new JsonObject { ["kind"] = "prose", ["blocks"] = prose.Blocks.Count },
+                AnswerSegment.Code code => new JsonObject { ["kind"] = "code", ["language"] = code.Language },
+                AnswerSegment.Table table => new JsonObject { ["kind"] = "table", ["rows"] = table.Value.Rows.Count },
+                _ => throw new InvalidOperationException("unknown segment"),
+            }))]);
+
+            Assert.True(
+                JsonNode.DeepEquals(JsonNode.Parse(row.GetProperty("segments").GetRawText()), described),
+                $"{row.GetProperty("name").GetString()}: {described.ToJsonString()}");
+        }
+    }
+
+    [Fact]
+    public void Every_file_link_is_found_the_same()
+    {
+        var cases = SpecCases.Json("file-link");
+
+        foreach (var row in cases.GetProperty("files").EnumerateArray())
+        {
+            var path = row.GetProperty("path").GetString();
+            var line = row.GetProperty("line");
+            var expected = path is null
+                ? null
+                : new FileLink(path, line.ValueKind == JsonValueKind.Null ? null : line.GetInt32());
+
+            Assert.Equal(expected, FileLink.Parse(row.GetProperty("text").GetString()));
+        }
+
+        foreach (var row in cases.GetProperty("targets").EnumerateArray())
+        {
+            LinkTarget expected = row.GetProperty("kind").GetString() switch
+            {
+                "web" => new LinkTarget.Web(row.GetProperty("url").GetString()!),
+                "file" => new LinkTarget.File(new FileLink(
+                    row.GetProperty("path").GetString()!,
+                    row.GetProperty("line").ValueKind == JsonValueKind.Null ? null : row.GetProperty("line").GetInt32())),
+                _ => new LinkTarget.None(),
+            };
+
+            Assert.Equal(expected, LinkTarget.Of(row.GetProperty("href").GetString()));
+        }
+    }
+
+    /// Markdown blocks as the case files write them down.
+    private static JsonArray Described(IReadOnlyList<MarkdownBlock> blocks) => new([.. blocks.Select(Described)]);
+
+    private static JsonNode Described(MarkdownBlock block) => block switch
+    {
+        MarkdownBlock.Paragraph paragraph => new JsonObject { ["type"] = "paragraph", ["inlines"] = Described(paragraph.Inlines) },
+        MarkdownBlock.Heading heading => new JsonObject
+        {
+            ["type"] = "heading",
+            ["level"] = heading.Level,
+            ["inlines"] = Described(heading.Inlines),
+        },
+        MarkdownBlock.Code code => new JsonObject { ["type"] = "code", ["language"] = code.Language, ["text"] = code.Text },
+        MarkdownBlock.List list => new JsonObject
+        {
+            ["type"] = "list",
+            ["ordered"] = list.Ordered,
+            ["start"] = list.Start,
+            ["items"] = new JsonArray([.. list.Items.Select(Described)]),
+        },
+        MarkdownBlock.Quote quote => new JsonObject { ["type"] = "quote", ["blocks"] = Described(quote.Blocks) },
+        MarkdownBlock.Table table => new JsonObject
+        {
+            ["type"] = "table",
+            ["columns"] = new JsonArray([.. table.Columns.Select(column => (JsonNode)column.ToString().ToLowerInvariant())]),
+            ["header"] = new JsonArray([.. table.Header.Select(Described)]),
+            ["rows"] = new JsonArray([.. table.Rows.Select(row => new JsonArray([.. row.Select(Described)]))]),
+        },
+        _ => new JsonObject { ["type"] = "rule" },
+    };
+
+    private static JsonArray Described(IReadOnlyList<MarkdownInline> inlines) => new([.. inlines.Select(Described)]);
+
+    private static JsonNode Described(MarkdownInline inline) => inline switch
+    {
+        MarkdownInline.Text text => new JsonObject { ["text"] = text.Value },
+        MarkdownInline.Code code => new JsonObject { ["code"] = code.Value },
+        MarkdownInline.Strong strong => new JsonObject { ["strong"] = Described(strong.Inlines) },
+        MarkdownInline.Emphasis emphasis => new JsonObject { ["emphasis"] = Described(emphasis.Inlines) },
+        MarkdownInline.Strike strike => new JsonObject { ["strike"] = Described(strike.Inlines) },
+        MarkdownInline.Link link => new JsonObject { ["link"] = link.Target, ["inlines"] = Described(link.Inlines) },
+        _ => throw new InvalidOperationException("unknown inline"),
+    };
+
     private static PermissionMode? Mode(JsonElement name) =>
         name.ValueKind == JsonValueKind.Null ? null : Enum.Parse<PermissionMode>(name.GetString()!, ignoreCase: true);
 

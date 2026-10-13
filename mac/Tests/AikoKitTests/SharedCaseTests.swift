@@ -570,6 +570,119 @@ struct SharedCaseTests {
         }
     }
 
+    @Test
+    func everyMarkdownTextIsReadIntoTheSameBlocks() {
+        for row in SpecCases.json("markdown")["texts"]?.arrayValue ?? [] {
+            let described = JsonNode.array(Markdown.parse(row["markdown"]?.stringValue).map(Self.describedBlock))
+
+            #expect(
+                described == row["blocks"],
+                "\(row["name"]?.stringValue ?? ""): \(described.toJsonString(escaping: .relaxed))")
+        }
+    }
+
+    @Test
+    func everyAnswerIsCutIntoTheSamePieces() {
+        for row in SpecCases.json("answer-segments")["answers"]?.arrayValue ?? [] {
+            let segments = AnswerSegments.of(Markdown.parse(row["markdown"]?.stringValue))
+
+            let described = JsonNode.array(segments.map { segment in
+                switch segment {
+                case .prose(let blocks):
+                    return Self.node([("kind", .string("prose")), ("blocks", .number(String(blocks.count)))])
+                case .code(let language, _):
+                    return Self.node([("kind", .string("code")), ("language", .string(language))])
+                case .table(_, _, let rows):
+                    return Self.node([("kind", .string("table")), ("rows", .number(String(rows.count)))])
+                }
+            })
+
+            #expect(
+                described == row["segments"],
+                "\(row["name"]?.stringValue ?? ""): \(described.toJsonString(escaping: .relaxed))")
+        }
+    }
+
+    @Test
+    func everyFileLinkIsFoundTheSame() {
+        let cases = SpecCases.json("file-link")
+
+        func line(_ row: JsonNode) -> Int? {
+            row["line"]?.doubleValue.map { Int($0) }
+        }
+
+        for row in cases["files"]?.arrayValue ?? [] {
+            let expected = row["path"]?.stringValue.map { FileLink(path: $0, line: line(row)) }
+
+            #expect(FileLink.parse(row["text"]?.stringValue) == expected, "\(row["text"]?.stringValue ?? "nil")")
+        }
+
+        for row in cases["targets"]?.arrayValue ?? [] {
+            let expected: LinkTarget
+            switch row["kind"]?.stringValue {
+            case "web": expected = .web(row["url"]?.stringValue ?? "")
+            case "file": expected = .file(FileLink(path: row["path"]?.stringValue ?? "", line: line(row)))
+            default: expected = .none
+            }
+
+            #expect(LinkTarget.of(row["href"]?.stringValue) == expected, "\(row["href"]?.stringValue ?? "nil")")
+        }
+    }
+
+    /// Markdown blocks as the case files write them down, with the keys in the order of the files.
+    private static func describedBlock(_ block: MarkdownBlock) -> JsonNode {
+        switch block {
+        case .paragraph(let inlines):
+            return node([("type", .string("paragraph")), ("inlines", describedInlines(inlines))])
+        case .heading(let level, let inlines):
+            return node([
+                ("type", .string("heading")), ("level", .number(String(level))),
+                ("inlines", describedInlines(inlines)),
+            ])
+        case .code(let language, let words):
+            return node([("type", .string("code")), ("language", .string(language)), ("text", .string(words))])
+        case .list(let ordered, let start, let items):
+            return node([
+                ("type", .string("list")), ("ordered", .bool(ordered)), ("start", .number(String(start))),
+                ("items", .array(items.map { .array($0.map(describedBlock)) })),
+            ])
+        case .quote(let blocks):
+            return node([("type", .string("quote")), ("blocks", .array(blocks.map(describedBlock)))])
+        case .table(let columns, let header, let rows):
+            return node([
+                ("type", .string("table")),
+                ("columns", .array(columns.map { .string(columnName($0)) })),
+                ("header", .array(header.map(describedInlines))),
+                ("rows", .array(rows.map { .array($0.map(describedInlines)) })),
+            ])
+        case .rule:
+            return node([("type", .string("rule"))])
+        }
+    }
+
+    private static func describedInlines(_ inlines: [MarkdownInline]) -> JsonNode {
+        .array(inlines.map { inline in
+            switch inline {
+            case .text(let value): return node([("text", .string(value))])
+            case .code(let value): return node([("code", .string(value))])
+            case .strong(let inner): return node([("strong", describedInlines(inner))])
+            case .emphasis(let inner): return node([("emphasis", describedInlines(inner))])
+            case .strike(let inner): return node([("strike", describedInlines(inner))])
+            case .link(let target, let inner):
+                return node([("link", .string(target)), ("inlines", describedInlines(inner))])
+            }
+        })
+    }
+
+    private static func columnName(_ column: ColumnAlign) -> String {
+        switch column {
+        case .none: return "none"
+        case .left: return "left"
+        case .center: return "center"
+        case .right: return "right"
+        }
+    }
+
     private static func mode(_ node: JsonNode?) -> PermissionMode? {
         PermissionModes.all.first { PermissionModes.name($0) == node?.stringValue }
     }
