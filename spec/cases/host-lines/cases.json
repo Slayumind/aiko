@@ -26,6 +26,17 @@
       "line": "{\"type\":\"control_response\",\"response\":{\"subtype\":\"success\",\"request_id\":\"req-2\",\"response\":{\"behavior\":\"allow\",\"updatedInput\":{}}}}"
     },
     {
+      "action": { "kind": "allowEdits", "requestId": "req-1", "input": { "file_path": "hello.txt", "content": "ok" } },
+      "line": "{\"type\":\"control_response\",\"response\":{\"subtype\":\"success\",\"request_id\":\"req-1\",\"response\":{\"behavior\":\"allow\",\"updatedInput\":{\"file_path\":\"hello.txt\",\"content\":\"ok\"},\"updatedPermissions\":[{\"type\":\"setMode\",\"mode\":\"acceptEdits\",\"destination\":\"session\"}]}}}"
+    },
+    {
+      "action": {
+        "kind": "allowAlways", "requestId": "req-5", "input": { "command": "mkdir build" },
+        "rule": { "type": "addRules", "rules": [{ "toolName": "Bash", "ruleContent": "mkdir build *" }], "behavior": "allow", "destination": "localSettings" }
+      },
+      "line": "{\"type\":\"control_response\",\"response\":{\"subtype\":\"success\",\"request_id\":\"req-5\",\"response\":{\"behavior\":\"allow\",\"updatedInput\":{\"command\":\"mkdir build\"},\"updatedPermissions\":[{\"type\":\"addRules\",\"rules\":[{\"toolName\":\"Bash\",\"ruleContent\":\"mkdir build *\"}],\"behavior\":\"allow\",\"destination\":\"localSettings\"}]}}}"
+    },
+    {
       "action": { "kind": "deny", "requestId": "req-1", "message": "Сначала покажи план." },
       "line": "{\"type\":\"control_response\",\"response\":{\"subtype\":\"success\",\"request_id\":\"req-1\",\"response\":{\"behavior\":\"deny\",\"message\":\"Сначала покажи план.\"}}}"
     },

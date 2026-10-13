@@ -450,6 +450,8 @@ public class SharedCaseTests
                         image.GetProperty("mediaType").GetString()!,
                         image.GetProperty("base64").GetString()!))]),
                 "allow" => HostLine.Allow(id, Input()),
+                "allowEdits" => HostLine.AllowEdits(id, Input()),
+                "allowAlways" => HostLine.AllowAlways(id, Input(), action.GetProperty("rule").Clone()),
                 "deny" => HostLine.Deny(id, action.GetProperty("message").GetString()!),
                 "answer" => HostLine.Answer(
                     id,
@@ -570,6 +572,203 @@ public class SharedCaseTests
                 $"{row.GetProperty("name").GetString()}: {described.ToJsonString()}");
         }
     }
+
+    [Fact]
+    public void Every_step_gets_the_same_line()
+    {
+        foreach (var row in SpecCases.Json("step-line").GetProperty("steps").EnumerateArray())
+        {
+            var described = Described(StepLine.For(row.GetProperty("tool").GetString()!, row.GetProperty("input")));
+
+            Assert.True(
+                JsonNode.DeepEquals(JsonNode.Parse(row.GetProperty("line").GetRawText()), described),
+                $"{row.GetProperty("tool").GetString()}: {described.ToJsonString()}");
+        }
+    }
+
+    [Fact]
+    public void Every_request_becomes_the_same_card()
+    {
+        foreach (var row in SpecCases.Json("request-card").GetProperty("cards").EnumerateArray())
+        {
+            var card = CardIn(row);
+            var name = row.GetProperty("name").GetString();
+
+            Assert.True(
+                JsonNode.DeepEquals(JsonNode.Parse(row.GetProperty("card").GetRawText()), Described(card)),
+                $"{name}: {Described(card).ToJsonString()}");
+
+            foreach (var choice in row.GetProperty("choices").EnumerateArray())
+            {
+                Assert.Equal(choice.GetProperty("line").GetString(), card.LineFor(ChoiceIn(choice)));
+            }
+        }
+    }
+
+    [Fact]
+    public void Every_conversation_ends_in_the_same_state()
+    {
+        foreach (var row in SpecCases.Json("conversation").GetProperty("scenarios").EnumerateArray())
+        {
+            var (state, written) = Played(row);
+            var name = row.GetProperty("name").GetString();
+
+            Assert.True(
+                JsonNode.DeepEquals(JsonNode.Parse(row.GetProperty("state").GetRawText()), Described(state)),
+                $"{name}: {Described(state).ToJsonString()}");
+            Assert.Equal(Strings(row.GetProperty("written")), written);
+        }
+    }
+
+    private static RequestCard CardIn(JsonElement row) =>
+        RequestCard.From((StreamEvent.Request)StreamEvent.FromLine(row.GetProperty("request").GetRawText()));
+
+    private static CardChoice ChoiceIn(JsonElement choice) => choice.GetProperty("choice").GetString() switch
+    {
+        "second" => new CardChoice.Second(),
+        "deny" => new CardChoice.Deny(choice.GetProperty("message").GetString()!),
+        "answers" => new CardChoice.Answers([.. choice.GetProperty("picked").EnumerateArray().Select(Strings)]),
+        _ => new CardChoice.Allow(),
+    };
+
+    /// A scenario of the conversation cases, step by step.
+    private static (Conversation State, List<string> Written) Played(JsonElement scenario)
+    {
+        var state = Conversation.Empty();
+        var written = new List<string>();
+
+        void Take(Outcome outcome)
+        {
+            state = outcome.State;
+            written.AddRange(outcome.Written);
+        }
+
+        foreach (var step in scenario.GetProperty("steps").EnumerateArray())
+        {
+            if (step.TryGetProperty("raw", out var raw))
+            {
+                Take(state.On(StreamEvent.FromLine(raw.GetString())));
+            }
+            else if (step.TryGetProperty("line", out var line))
+            {
+                Take(state.On(StreamEvent.FromLine(line.GetRawText())));
+            }
+            else
+            {
+                switch (step.GetProperty("do").GetString())
+                {
+                    case "send":
+                        Take(state.Send(
+                            step.GetProperty("text").GetString()!,
+                            step.TryGetProperty("images", out var images)
+                                ? [.. images.EnumerateArray().Select(image => new AttachedImage(
+                                    image.GetProperty("mediaType").GetString()!,
+                                    image.GetProperty("base64").GetString()!))]
+                                : []));
+                        break;
+                    case "choose":
+                        Take(state.Choose(step.GetProperty("requestId").GetString()!, ChoiceIn(step)));
+                        break;
+                    case "interrupt":
+                        Take(state.Interrupt());
+                        break;
+                    case "setMode":
+                        Take(state.SetMode(Mode(step.GetProperty("mode"))!.Value));
+                        break;
+                    case "markRead":
+                        state = state.MarkRead();
+                        break;
+                    case "exit":
+                        state = state.ProcessExited();
+                        break;
+                    default:
+                        throw new InvalidOperationException("unknown step");
+                }
+            }
+        }
+
+        return (state, written);
+    }
+
+    private static string Camel<T>(T value)
+        where T : struct, Enum
+    {
+        var name = value.ToString();
+        return char.ToLowerInvariant(name[0]) + name[1..];
+    }
+
+    private static JsonObject Described(StepLine line) => new()
+    {
+        ["kind"] = Camel(line.Kind),
+        ["label"] = line.Label,
+        ["subject"] = line.Subject,
+        ["added"] = line.Added,
+        ["removed"] = line.Removed,
+        ["hidden"] = line.Hidden,
+    };
+
+    private static JsonObject Described(RequestCard card) => new()
+    {
+        ["kind"] = Camel(card.Kind),
+        ["second"] = Camel(card.Second),
+        ["rule"] = card.RuleText,
+        ["subagent"] = card.FromSubagent,
+        ["step"] = Described(card.Step),
+        ["questions"] = new JsonArray([.. card.Questions.Select(question => new JsonObject
+        {
+            ["text"] = question.Text,
+            ["header"] = question.Header,
+            ["multi"] = question.MultiSelect,
+            ["options"] = new JsonArray([.. question.Options.Select(option => new JsonObject
+            {
+                ["label"] = option.Label,
+                ["description"] = option.Description,
+            })]),
+        })]),
+        ["plan"] = card.Plan,
+    };
+
+    private static JsonObject Described(Conversation state) => new()
+    {
+        ["activity"] = Camel(state.Activity),
+        ["mode"] = PermissionModes.Name(state.Mode),
+        ["model"] = state.Model,
+        ["session"] = state.SessionId,
+        ["tasks"] = state.Tasks,
+        ["unread"] = state.Unread,
+        ["compacting"] = state.Compacting,
+        ["limits"] = state.Limits.Count,
+        ["items"] = new JsonArray([.. state.Items.Select(Described)]),
+    };
+
+    private static JsonNode Described(FeedItem item) => item switch
+    {
+        FeedItem.OwnerMessage message => new JsonObject
+        {
+            ["owner"] = message.Text,
+            ["images"] = message.Images,
+            ["queued"] = message.Queued,
+        },
+        FeedItem.Answer answer => new JsonObject { ["answer"] = answer.Text, ["streaming"] = answer.Streaming },
+        FeedItem.Step step => new JsonObject
+        {
+            ["step"] = Described(step.Line),
+            ["state"] = Camel(step.State),
+            ["result"] = step.Result,
+            ["images"] = step.Images.Count,
+            ["progress"] = step.Progress,
+        },
+        FeedItem.Card card => new JsonObject
+        {
+            ["card"] = Camel(card.Request.Kind),
+            ["state"] = Camel(card.State),
+            ["requestId"] = card.Request.RequestId,
+            ["second"] = Camel(card.Request.Second),
+            ["subagent"] = card.Request.FromSubagent,
+        },
+        FeedItem.Notice notice => new JsonObject { ["notice"] = Camel(notice.Kind), ["text"] = notice.Text },
+        _ => throw new InvalidOperationException("unknown item"),
+    };
 
     [Fact]
     public void Every_answer_is_cut_into_the_same_pieces()
@@ -723,6 +922,8 @@ public class SharedCaseTests
             ["description"] = request.Description,
             ["suggestsAcceptEdits"] = request.SuggestsAcceptEdits,
             ["needsAnswer"] = request.NeedsAnswer,
+            ["agent"] = request.AgentId,
+            ["rule"] = request.RuleText,
         },
         StreamEvent.Reply reply => new JsonObject
         {
@@ -738,6 +939,13 @@ public class SharedCaseTests
             ["mode"] = ModeName(status.Mode),
         },
         StreamEvent.Compacted => new JsonObject { ["kind"] = "compacted" },
+        StreamEvent.Tasks tasks => new JsonObject { ["kind"] = "tasks", ["count"] = tasks.Count },
+        StreamEvent.TaskProgress progress => new JsonObject
+        {
+            ["kind"] = "taskProgress",
+            ["toolUseId"] = progress.ToolUseId,
+            ["description"] = progress.Description,
+        },
         StreamEvent.RateLimit limit => new JsonObject
         {
             ["kind"] = "rateLimit",

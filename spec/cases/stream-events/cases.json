@@ -134,7 +134,7 @@
         "permission_suggestions": [{ "type": "setMode", "mode": "acceptEdits", "destination": "session" }],
         "tool_use_id": "toolu_1"
       } },
-      "event": { "kind": "request", "requestId": "req-1", "tool": "Write", "toolUseId": "toolu_1", "input": { "file_path": "C:\\work\\hello.txt", "content": "ok" }, "description": "hello.txt", "suggestsAcceptEdits": true, "needsAnswer": false }
+      "event": { "kind": "request", "requestId": "req-1", "tool": "Write", "toolUseId": "toolu_1", "input": { "file_path": "C:\\work\\hello.txt", "content": "ok" }, "description": "hello.txt", "suggestsAcceptEdits": true, "needsAnswer": false, "agent": null, "rule": "" }
     },
     {
       "name": "a request to run a command, with a rule offered instead of a mode",
@@ -144,7 +144,7 @@
         "permission_suggestions": [{ "type": "addRules", "rules": [{ "toolName": "Bash", "ruleContent": "dotnet test:*" }], "behavior": "allow", "destination": "localSettings" }],
         "tool_use_id": "toolu_2"
       } },
-      "event": { "kind": "request", "requestId": "req-2", "tool": "Bash", "toolUseId": "toolu_2", "input": { "command": "dotnet test", "description": "Run the tests" }, "description": "Run the tests", "suggestsAcceptEdits": false, "needsAnswer": false }
+      "event": { "kind": "request", "requestId": "req-2", "tool": "Bash", "toolUseId": "toolu_2", "input": { "command": "dotnet test", "description": "Run the tests" }, "description": "Run the tests", "suggestsAcceptEdits": false, "needsAnswer": false, "agent": null, "rule": "dotnet test:*" }
     },
     {
       "name": "a question with options",
@@ -153,7 +153,57 @@
         "input": { "questions": [{ "question": "Что делать с пустым именем?", "header": "Имя", "multiSelect": false, "options": [{ "label": "Подставить", "description": "Имя папки с номером" }, { "label": "Не пускать", "description": "Форма ждёт имя" }] }] },
         "tool_use_id": "toolu_3"
       } },
-      "event": { "kind": "request", "requestId": "req-3", "tool": "AskUserQuestion", "toolUseId": "toolu_3", "input": { "questions": [{ "question": "Что делать с пустым именем?", "header": "Имя", "multiSelect": false, "options": [{ "label": "Подставить", "description": "Имя папки с номером" }, { "label": "Не пускать", "description": "Форма ждёт имя" }] }] }, "description": "", "suggestsAcceptEdits": false, "needsAnswer": true }
+      "event": { "kind": "request", "requestId": "req-3", "tool": "AskUserQuestion", "toolUseId": "toolu_3", "input": { "questions": [{ "question": "Что делать с пустым именем?", "header": "Имя", "multiSelect": false, "options": [{ "label": "Подставить", "description": "Имя папки с номером" }, { "label": "Не пускать", "description": "Форма ждёт имя" }] }] }, "description": "", "suggestsAcceptEdits": false, "needsAnswer": true, "agent": null, "rule": "" }
+    },
+    {
+      "name": "a request of a subagent, with three offers: only the rule and the edit mode are read",
+      "line": { "type": "control_request", "request_id": "req-5", "request": {
+        "subtype": "can_use_tool", "tool_name": "Bash", "input": { "command": "mkdir build" }, "description": "Create the folder",
+        "permission_suggestions": [
+          { "type": "addRules", "rules": [{ "toolName": "Bash", "ruleContent": "mkdir build *" }], "behavior": "allow", "destination": "localSettings" },
+          { "type": "addDirectories", "directories": ["/work/project"], "destination": "session" },
+          { "type": "setMode", "mode": "acceptEdits", "destination": "session" }
+        ],
+        "tool_use_id": "toolu_9", "agent_id": "agent-1"
+      } },
+      "event": { "kind": "request", "requestId": "req-5", "tool": "Bash", "toolUseId": "toolu_9", "input": { "command": "mkdir build" }, "description": "Create the folder", "suggestsAcceptEdits": true, "needsAnswer": false, "agent": "agent-1", "rule": "mkdir build *" }
+    },
+    {
+      "name": "a rule that denies, or has no words, is not offered",
+      "line": { "type": "control_request", "request_id": "req-6", "request": {
+        "subtype": "can_use_tool", "tool_name": "Bash", "input": { "command": "rm x" },
+        "permission_suggestions": [
+          { "type": "addRules", "rules": [{ "toolName": "Bash", "ruleContent": "rm x" }], "behavior": "deny", "destination": "localSettings" },
+          { "type": "addRules", "rules": [{ "toolName": "Bash" }], "behavior": "allow", "destination": "localSettings" }
+        ],
+        "tool_use_id": "toolu_10"
+      } },
+      "event": { "kind": "request", "requestId": "req-6", "tool": "Bash", "toolUseId": "toolu_10", "input": { "command": "rm x" }, "description": "", "suggestsAcceptEdits": false, "needsAnswer": false, "agent": null, "rule": "" }
+    },
+    {
+      "name": "one subagent runs in the background",
+      "line": { "type": "system", "subtype": "background_tasks_changed", "tasks": [{ "task_id": "t-1", "task_type": "local_agent", "description": "Create a file" }], "session_id": "s-1" },
+      "event": { "kind": "tasks", "count": 1 }
+    },
+    {
+      "name": "no subagent runs any more",
+      "line": { "type": "system", "subtype": "background_tasks_changed", "tasks": [] },
+      "event": { "kind": "tasks", "count": 0 }
+    },
+    {
+      "name": "what a subagent is doing",
+      "line": { "type": "system", "subtype": "task_progress", "task_id": "t-1", "tool_use_id": "toolu_7", "description": "Writing sub.txt", "usage": { "total_tokens": 34560 } },
+      "event": { "kind": "taskProgress", "toolUseId": "toolu_7", "description": "Writing sub.txt" }
+    },
+    {
+      "name": "a subagent started: the list of tasks says the same",
+      "line": { "type": "system", "subtype": "task_started", "task_id": "t-1", "tool_use_id": "toolu_7", "description": "Create a file" },
+      "event": { "kind": "ignored" }
+    },
+    {
+      "name": "Claude Code refused by itself, which happens only without the permission channel",
+      "line": { "type": "system", "subtype": "permission_denied", "tool_name": "Write", "tool_use_id": "toolu_8", "message": "Claude requested permissions" },
+      "event": { "kind": "ignored" }
     },
     {
       "name": "a request of a kind the terminal does not know",

@@ -56,6 +56,36 @@ public static class HostLine
             input.WriteTo(writer);
         });
 
+    /// Yes, and no more questions about edits in this session: the mode change travels with the
+    /// answer (D-305).
+    public static string AllowEdits(string requestId, JsonElement input) =>
+        Respond(requestId, writer =>
+        {
+            writer.WriteString("behavior", "allow");
+            writer.WritePropertyName("updatedInput");
+            input.WriteTo(writer);
+            writer.WriteStartArray("updatedPermissions");
+            writer.WriteStartObject();
+            writer.WriteString("type", "setMode");
+            writer.WriteString("mode", PermissionModes.Name(PermissionMode.AcceptEdits));
+            writer.WriteString("destination", "session");
+            writer.WriteEndObject();
+            writer.WriteEndArray();
+        });
+
+    /// Yes, and the rule Claude Code offered goes back as it came. Claude Code writes it into the
+    /// settings of the project itself (D-306).
+    public static string AllowAlways(string requestId, JsonElement input, JsonElement rule) =>
+        Respond(requestId, writer =>
+        {
+            writer.WriteString("behavior", "allow");
+            writer.WritePropertyName("updatedInput");
+            input.WriteTo(writer);
+            writer.WriteStartArray("updatedPermissions");
+            rule.WriteTo(writer);
+            writer.WriteEndArray();
+        });
+
     /// The message reaches Claude as the error of the tool.
     public static string Deny(string requestId, string message) =>
         Respond(requestId, writer =>
