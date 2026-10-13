@@ -20,6 +20,34 @@ final class ClaudeProcess: ConversationProcess, @unchecked Sendable {
         signal(SIGPIPE, SIG_IGN)
     }()
 
+    /// How long the login shell gets to print its PATH.
+    private static let shellPatience: TimeInterval = 5
+
+    /// The PATH of a console of this person, asked once: Aiko started from Finder has the short
+    /// one of the system. Nil when the shell did not answer; Claude Code then gets the PATH of Aiko.
+    private static let searchPath: String? = {
+        let shell = Process()
+        shell.executableURL = URL(fileURLWithPath: ProcessInfo.processInfo.environment["SHELL"] ?? "/bin/zsh")
+        shell.arguments = LoginShellPath.arguments
+        shell.standardInput = FileHandle.nullDevice
+        shell.standardError = FileHandle.nullDevice
+        let output = Pipe()
+        shell.standardOutput = output
+
+        let ended = DispatchSemaphore(value: 0)
+        shell.terminationHandler = { _ in ended.signal() }
+        guard (try? shell.run()) != nil else {
+            return nil
+        }
+        guard ended.wait(timeout: .now() + shellPatience) == .success else {
+            shell.terminate()
+            return nil
+        }
+
+        let printed = String(data: output.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
+        return LoginShellPath.parse(printed)
+    }()
+
     private let gate = NSLock()
     private var process: Process?
     private var input: FileHandle?
@@ -38,6 +66,9 @@ final class ClaudeProcess: ConversationProcess, @unchecked Sendable {
         process.currentDirectoryURL = URL(fileURLWithPath: start.workingDirectory)
 
         var environment = ProcessInfo.processInfo.environment
+        if let path = Self.searchPath {
+            environment["PATH"] = path
+        }
         for variable in start.variables {
             environment[variable.name] = variable.value
         }

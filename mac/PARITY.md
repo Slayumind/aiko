@@ -116,6 +116,7 @@ Helpers with no file of their own in the C# core:
 | SignedIn.swift | whether a folder has an account. Windows reads `.credentials.json`; macOS keeps the same token in the Keychain, so that file is never written and the answer comes from the account block of `.claude.json` (3 cases in SignedInTests) |
 | MacShell.swift | two things Windows has a system service for. `ZshProfile` writes Aiko's marked block into `~/.zshrc`, because a folder under the home directory reaches a shell's PATH only through the shell profile; `MacTerminal` writes the script that opens Claude Code in a Terminal window (11 cases in ZshProfileTests and MacTerminalTests) |
 | Terminal/LineBuffer.swift | cuts what a pipe delivers into lines without cutting a letter in two. On Windows the reader of the process stream does this itself (6 cases in LineBufferTests) |
+| Terminal/LoginShellPath.swift | reads the PATH of a console from what a login shell printed. Claude Code is started with it: an app started from Finder has only the short PATH of the system. On Windows a program gets the PATH of the user from the system (5 cases in LoginShellPathTests) |
 | `PathText` in PlatformConventions.swift | reading a path without asking the machine it runs on: `Path.GetFileName` and `Path.TrimEndingDirectorySeparator` answer differently on Windows and on macOS, and Aiko reads paths written for the other system all the time |
 
 ## The two programs
