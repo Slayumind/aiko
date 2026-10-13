@@ -750,6 +750,76 @@ struct SharedCaseTests {
     }
 
     @Test
+    func everyConversationIsRunTheSame() {
+        for row in SpecCases.json("conversation-runner")["scenarios"]?.arrayValue ?? [] {
+            let described = Self.runDescribed(row)
+
+            for part in ["starts", "written", "log", "activity", "items", "running"] {
+                #expect(
+                    described[part] == row[part],
+                    "\(row["name"]?.stringValue ?? ""), \(part): \(described[part]?.toJsonString(escaping: .relaxed) ?? "")")
+            }
+        }
+    }
+
+    /// A scenario of the runner cases, played against a scripted Claude Code.
+    private static func runDescribed(_ row: JsonNode) -> JsonNode {
+        guard let talk = TalkScript.parse(row.toJsonString(escaping: .relaxed)) else {
+            return .null
+        }
+
+        let claude = ScriptedClaude(talk.replies)
+        let log = SpokenLog()
+        let runner = ConversationRunner(
+            .macOS,
+            RunnerSetup(
+                executable: "claude", workingDirectory: "/work", configDirectory: "/accounts/.claude-work",
+                userProfile: "/home/someone", environmentName: "Work", sessionId: "id-1",
+                started: row["started"]?.boolValue ?? false, mode: mode(row["mode"]) ?? .manual, model: nil,
+                inheritedVariables: []),
+            newProcess: claude.newProcess,
+            post: { work in work() },
+            log: log)
+
+        talk.play(runner)
+
+        return node([
+            ("starts", .array(claude.starts.map { start in
+                node([
+                    ("resumed", .bool(start.arguments.contains("--resume"))),
+                    ("mode", .string(start.arguments[(start.arguments.firstIndex(of: "--permission-mode") ?? 0) + 1])),
+                ])
+            })),
+            ("written", .array(claude.written.map { .string($0) })),
+            ("log", .array(log.lines.map { .string($0) })),
+            ("activity", .string(String(describing: runner.state.activity))),
+            ("items", number(runner.state.items.count)),
+            ("running", .bool(runner.isRunning)),
+        ])
+    }
+
+    /// The log of the terminal as words, so a case file can list what was said.
+    private final class SpokenLog: TerminalLog {
+        var lines: [String] = []
+
+        func started(_ environment: String, resumed: Bool) {
+            lines.append("started \(environment) \(resumed ? "resumed" : "new")")
+        }
+
+        func startFailed(_ environment: String) {
+            lines.append("start failed \(environment)")
+        }
+
+        func exited(_ environment: String, exitCode: Int, linesRead: Int, linesWritten: Int) {
+            lines.append("exited \(environment) code \(exitCode) read \(linesRead) written \(linesWritten)")
+        }
+
+        func stopped(_ environment: String, linesRead: Int, linesWritten: Int) {
+            lines.append("stopped \(environment) read \(linesRead) written \(linesWritten)")
+        }
+    }
+
+    @Test
     func everyAnswerIsCutIntoTheSamePieces() {
         for row in SpecCases.json("answer-segments")["answers"]?.arrayValue ?? [] {
             let segments = AnswerSegments.of(Markdown.parse(row["markdown"]?.stringValue))

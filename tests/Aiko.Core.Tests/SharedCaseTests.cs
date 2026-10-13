@@ -771,6 +771,70 @@ public class SharedCaseTests
     };
 
     [Fact]
+    public void Every_conversation_is_run_the_same()
+    {
+        foreach (var row in SpecCases.Json("conversation-runner").GetProperty("scenarios").EnumerateArray())
+        {
+            var described = RunDescribed(row);
+
+            foreach (var part in new[] { "starts", "written", "log", "activity", "items", "running" })
+            {
+                Assert.True(
+                    JsonNode.DeepEquals(JsonNode.Parse(row.GetProperty(part).GetRawText()), described[part]),
+                    $"{row.GetProperty("name").GetString()}, {part}: {described[part]!.ToJsonString()}");
+            }
+        }
+    }
+
+    /// A scenario of the runner cases, played against a scripted Claude Code.
+    private static JsonObject RunDescribed(JsonElement row)
+    {
+        var talk = TalkScript.Parse(row.GetRawText())!;
+        var claude = new ScriptedClaude(talk.Replies);
+        var log = new SpokenLog();
+        var runner = new ConversationRunner(
+            new RunnerSetup(
+                "claude", "/work", "/accounts/.claude-work", "/home/someone", "Work", "id-1",
+                row.GetProperty("started").GetBoolean(), Mode(row.GetProperty("mode"))!.Value, null, []),
+            claude.NewProcess,
+            action => action(),
+            log);
+
+        talk.Play(runner);
+
+        return new JsonObject
+        {
+            ["starts"] = new JsonArray([.. claude.Starts.Select(start => (JsonNode)new JsonObject
+            {
+                ["resumed"] = start.Arguments.Contains("--resume"),
+                ["mode"] = start.Arguments[start.Arguments.ToList().IndexOf("--permission-mode") + 1],
+            })]),
+            ["written"] = new JsonArray([.. claude.Written.Select(line => (JsonNode)line)]),
+            ["log"] = new JsonArray([.. log.Lines.Select(line => (JsonNode)line)]),
+            ["activity"] = Camel(runner.State.Activity),
+            ["items"] = runner.State.Items.Count,
+            ["running"] = runner.IsRunning,
+        };
+    }
+
+    /// The log of the terminal as words, so a case file can list what was said.
+    private sealed class SpokenLog : ITerminalLog
+    {
+        public List<string> Lines { get; } = [];
+
+        public void Started(string environment, bool resumed) =>
+            Lines.Add($"started {environment} {(resumed ? "resumed" : "new")}");
+
+        public void StartFailed(string environment) => Lines.Add($"start failed {environment}");
+
+        public void Exited(string environment, int exitCode, int linesRead, int linesWritten) =>
+            Lines.Add($"exited {environment} code {exitCode} read {linesRead} written {linesWritten}");
+
+        public void Stopped(string environment, int linesRead, int linesWritten) =>
+            Lines.Add($"stopped {environment} read {linesRead} written {linesWritten}");
+    }
+
+    [Fact]
     public void Every_answer_is_cut_into_the_same_pieces()
     {
         foreach (var row in SpecCases.Json("answer-segments").GetProperty("answers").EnumerateArray())

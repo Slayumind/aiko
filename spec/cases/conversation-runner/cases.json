@@ -1,0 +1,1256 @@
+{
+  "comment": "How one conversation is run (D-304): when Claude Code is started, with which arguments, what is written to it and what goes into the log. Claude Code is played from the script: each entry waits for one thing (start, user, response, interrupt, mode), writes its lines and may end the process. The setup is the same for every scenario: the environment Work, the conversation id-1, the folder /work. A start is described by whether it resumes and by the mode it carries. The log lines are what ITerminalLog was told, never a text of the conversation.",
+  "scenarios": [
+    {
+      "name": "nothing was sent: Claude Code is not started",
+      "started": false,
+      "mode": "manual",
+      "script": [],
+      "steps": [
+        {
+          "do": "setMode",
+          "mode": "plan"
+        },
+        {
+          "do": "interrupt"
+        },
+        {
+          "do": "close"
+        }
+      ],
+      "starts": [],
+      "written": [],
+      "log": [],
+      "activity": "idle",
+      "items": 0,
+      "running": false
+    },
+    {
+      "name": "the first message starts Claude Code with a new id",
+      "started": false,
+      "mode": "manual",
+      "script": [
+        {
+          "after": "user",
+          "lines": [
+            {
+              "type": "system",
+              "subtype": "init",
+              "session_id": "s-1",
+              "model": "claude-opus-5-5",
+              "permissionMode": "default",
+              "claude_code_version": "2.1.296"
+            },
+            {
+              "type": "assistant",
+              "message": {
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Hello."
+                  }
+                ]
+              },
+              "parent_tool_use_id": null
+            },
+            {
+              "type": "result",
+              "subtype": "success",
+              "is_error": false,
+              "terminal_reason": "completed",
+              "result": "Hello."
+            }
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "do": "send",
+          "text": "Привет!"
+        }
+      ],
+      "starts": [
+        {
+          "resumed": false,
+          "mode": "default"
+        }
+      ],
+      "written": [
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"Привет!\"}]}}"
+      ],
+      "log": [
+        "started Work new"
+      ],
+      "activity": "done",
+      "items": 2,
+      "running": true
+    },
+    {
+      "name": "the second message goes to the same process",
+      "started": false,
+      "mode": "manual",
+      "script": [
+        {
+          "after": "user",
+          "lines": [
+            {
+              "type": "system",
+              "subtype": "init",
+              "session_id": "s-1",
+              "model": "claude-opus-5-5",
+              "permissionMode": "default",
+              "claude_code_version": "2.1.296"
+            },
+            {
+              "type": "assistant",
+              "message": {
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "One."
+                  }
+                ]
+              },
+              "parent_tool_use_id": null
+            },
+            {
+              "type": "result",
+              "subtype": "success",
+              "is_error": false,
+              "terminal_reason": "completed",
+              "result": "One."
+            }
+          ]
+        },
+        {
+          "after": "user",
+          "lines": [
+            {
+              "type": "system",
+              "subtype": "init",
+              "session_id": "s-1",
+              "model": "claude-opus-5-5",
+              "permissionMode": "default",
+              "claude_code_version": "2.1.296"
+            },
+            {
+              "type": "assistant",
+              "message": {
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Two."
+                  }
+                ]
+              },
+              "parent_tool_use_id": null
+            },
+            {
+              "type": "result",
+              "subtype": "success",
+              "is_error": false,
+              "terminal_reason": "completed",
+              "result": "Two."
+            }
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "do": "send",
+          "text": "one"
+        },
+        {
+          "do": "send",
+          "text": "two"
+        },
+        {
+          "do": "markRead"
+        }
+      ],
+      "starts": [
+        {
+          "resumed": false,
+          "mode": "default"
+        }
+      ],
+      "written": [
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"one\"}]}}",
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"two\"}]}}"
+      ],
+      "log": [
+        "started Work new"
+      ],
+      "activity": "idle",
+      "items": 4,
+      "running": true
+    },
+    {
+      "name": "Claude Code left after its turn: the next message brings the conversation back",
+      "started": false,
+      "mode": "manual",
+      "script": [
+        {
+          "after": "user",
+          "lines": [
+            {
+              "type": "system",
+              "subtype": "init",
+              "session_id": "s-1",
+              "model": "claude-opus-5-5",
+              "permissionMode": "default",
+              "claude_code_version": "2.1.296"
+            },
+            {
+              "type": "assistant",
+              "message": {
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "One."
+                  }
+                ]
+              },
+              "parent_tool_use_id": null
+            },
+            {
+              "type": "result",
+              "subtype": "success",
+              "is_error": false,
+              "terminal_reason": "completed",
+              "result": "One."
+            }
+          ],
+          "exit": 0
+        },
+        {
+          "after": "user",
+          "lines": [
+            {
+              "type": "system",
+              "subtype": "init",
+              "session_id": "s-1",
+              "model": "claude-opus-5-5",
+              "permissionMode": "default",
+              "claude_code_version": "2.1.296"
+            },
+            {
+              "type": "assistant",
+              "message": {
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Two."
+                  }
+                ]
+              },
+              "parent_tool_use_id": null
+            },
+            {
+              "type": "result",
+              "subtype": "success",
+              "is_error": false,
+              "terminal_reason": "completed",
+              "result": "Two."
+            }
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "do": "send",
+          "text": "one"
+        },
+        {
+          "do": "send",
+          "text": "two"
+        }
+      ],
+      "starts": [
+        {
+          "resumed": false,
+          "mode": "default"
+        },
+        {
+          "resumed": true,
+          "mode": "default"
+        }
+      ],
+      "written": [
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"one\"}]}}",
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"two\"}]}}"
+      ],
+      "log": [
+        "started Work new",
+        "exited Work code 0 read 3 written 1",
+        "started Work resumed"
+      ],
+      "activity": "done",
+      "items": 4,
+      "running": true
+    },
+    {
+      "name": "a conversation from an earlier run of Aiko is resumed at once",
+      "started": true,
+      "mode": "plan",
+      "script": [
+        {
+          "after": "user",
+          "lines": [
+            {
+              "type": "system",
+              "subtype": "init",
+              "session_id": "s-1",
+              "model": "claude-opus-5-5",
+              "permissionMode": "plan",
+              "claude_code_version": "2.1.296"
+            },
+            {
+              "type": "assistant",
+              "message": {
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Again."
+                  }
+                ]
+              },
+              "parent_tool_use_id": null
+            },
+            {
+              "type": "result",
+              "subtype": "success",
+              "is_error": false,
+              "terminal_reason": "completed",
+              "result": "Again."
+            }
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "do": "send",
+          "text": "go on"
+        }
+      ],
+      "starts": [
+        {
+          "resumed": true,
+          "mode": "plan"
+        }
+      ],
+      "written": [
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"go on\"}]}}"
+      ],
+      "log": [
+        "started Work resumed"
+      ],
+      "activity": "done",
+      "items": 2,
+      "running": true
+    },
+    {
+      "name": "Claude Code does not start: the message stays, the failure is shown and logged",
+      "started": false,
+      "mode": "manual",
+      "script": [
+        {
+          "after": "start",
+          "fails": true
+        }
+      ],
+      "steps": [
+        {
+          "do": "send",
+          "text": "hello"
+        }
+      ],
+      "starts": [
+        {
+          "resumed": false,
+          "mode": "default"
+        }
+      ],
+      "written": [],
+      "log": [
+        "start failed Work"
+      ],
+      "activity": "failed",
+      "items": 2,
+      "running": false
+    },
+    {
+      "name": "after a failed start the next message tries again, still with a new id",
+      "started": false,
+      "mode": "manual",
+      "script": [
+        {
+          "after": "start",
+          "fails": true
+        },
+        {
+          "after": "user",
+          "lines": [
+            {
+              "type": "system",
+              "subtype": "init",
+              "session_id": "s-1",
+              "model": "claude-opus-5-5",
+              "permissionMode": "default",
+              "claude_code_version": "2.1.296"
+            },
+            {
+              "type": "assistant",
+              "message": {
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Here."
+                  }
+                ]
+              },
+              "parent_tool_use_id": null
+            },
+            {
+              "type": "result",
+              "subtype": "success",
+              "is_error": false,
+              "terminal_reason": "completed",
+              "result": "Here."
+            }
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "do": "send",
+          "text": "hello"
+        },
+        {
+          "do": "send",
+          "text": "anyone?"
+        }
+      ],
+      "starts": [
+        {
+          "resumed": false,
+          "mode": "default"
+        },
+        {
+          "resumed": false,
+          "mode": "default"
+        }
+      ],
+      "written": [
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"anyone?\"}]}}"
+      ],
+      "log": [
+        "start failed Work",
+        "started Work new"
+      ],
+      "activity": "done",
+      "items": 4,
+      "running": true
+    },
+    {
+      "name": "Claude Code is gone in the middle of a turn, the next message resumes",
+      "started": false,
+      "mode": "manual",
+      "script": [
+        {
+          "after": "user",
+          "lines": [
+            {
+              "type": "system",
+              "subtype": "init",
+              "session_id": "s-1",
+              "model": "claude-opus-5-5",
+              "permissionMode": "default",
+              "claude_code_version": "2.1.296"
+            },
+            {
+              "type": "assistant",
+              "message": {
+                "content": [
+                  {
+                    "type": "tool_use",
+                    "id": "toolu_1",
+                    "name": "Write",
+                    "input": {
+                      "file_path": "/work/a.txt",
+                      "content": "ok"
+                    }
+                  }
+                ]
+              },
+              "parent_tool_use_id": null
+            }
+          ],
+          "exit": 1
+        },
+        {
+          "after": "user",
+          "lines": [
+            {
+              "type": "system",
+              "subtype": "init",
+              "session_id": "s-1",
+              "model": "claude-opus-5-5",
+              "permissionMode": "default",
+              "claude_code_version": "2.1.296"
+            },
+            {
+              "type": "assistant",
+              "message": {
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Back."
+                  }
+                ]
+              },
+              "parent_tool_use_id": null
+            },
+            {
+              "type": "result",
+              "subtype": "success",
+              "is_error": false,
+              "terminal_reason": "completed",
+              "result": "Back."
+            }
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "do": "send",
+          "text": "write it"
+        },
+        {
+          "do": "send",
+          "text": "again"
+        }
+      ],
+      "starts": [
+        {
+          "resumed": false,
+          "mode": "default"
+        },
+        {
+          "resumed": true,
+          "mode": "default"
+        }
+      ],
+      "written": [
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"write it\"}]}}",
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"again\"}]}}"
+      ],
+      "log": [
+        "started Work new",
+        "exited Work code 1 read 2 written 1",
+        "started Work resumed"
+      ],
+      "activity": "done",
+      "items": 5,
+      "running": true
+    },
+    {
+      "name": "Claude Code is gone before it was ready: the next start tries the other way",
+      "started": false,
+      "mode": "manual",
+      "script": [
+        {
+          "after": "user",
+          "lines": [],
+          "exit": 1
+        },
+        {
+          "after": "user",
+          "lines": [
+            {
+              "type": "system",
+              "subtype": "init",
+              "session_id": "s-1",
+              "model": "claude-opus-5-5",
+              "permissionMode": "default",
+              "claude_code_version": "2.1.296"
+            },
+            {
+              "type": "assistant",
+              "message": {
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Here."
+                  }
+                ]
+              },
+              "parent_tool_use_id": null
+            },
+            {
+              "type": "result",
+              "subtype": "success",
+              "is_error": false,
+              "terminal_reason": "completed",
+              "result": "Here."
+            }
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "do": "send",
+          "text": "hello"
+        },
+        {
+          "do": "send",
+          "text": "again"
+        }
+      ],
+      "starts": [
+        {
+          "resumed": false,
+          "mode": "default"
+        },
+        {
+          "resumed": true,
+          "mode": "default"
+        }
+      ],
+      "written": [
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"hello\"}]}}",
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"again\"}]}}"
+      ],
+      "log": [
+        "started Work new",
+        "exited Work code 1 read 0 written 1",
+        "started Work resumed"
+      ],
+      "activity": "done",
+      "items": 4,
+      "running": true
+    },
+    {
+      "name": "a resumed conversation that Claude Code no longer has starts again with a new id",
+      "started": true,
+      "mode": "manual",
+      "script": [
+        {
+          "after": "start",
+          "lines": [
+            {
+              "type": "result",
+              "subtype": "error_during_execution",
+              "is_error": true,
+              "num_turns": 0
+            }
+          ],
+          "exit": 1
+        },
+        {
+          "after": "user",
+          "lines": [
+            {
+              "type": "system",
+              "subtype": "init",
+              "session_id": "s-1",
+              "model": "claude-opus-5-5",
+              "permissionMode": "default",
+              "claude_code_version": "2.1.296"
+            },
+            {
+              "type": "assistant",
+              "message": {
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Here."
+                  }
+                ]
+              },
+              "parent_tool_use_id": null
+            },
+            {
+              "type": "result",
+              "subtype": "success",
+              "is_error": false,
+              "terminal_reason": "completed",
+              "result": "Here."
+            }
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "do": "send",
+          "text": "go on"
+        },
+        {
+          "do": "send",
+          "text": "again"
+        }
+      ],
+      "starts": [
+        {
+          "resumed": true,
+          "mode": "default"
+        },
+        {
+          "resumed": false,
+          "mode": "default"
+        }
+      ],
+      "written": [
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"again\"}]}}"
+      ],
+      "log": [
+        "started Work resumed",
+        "exited Work code 1 read 1 written 0",
+        "started Work new"
+      ],
+      "activity": "done",
+      "items": 4,
+      "running": true
+    },
+    {
+      "name": "a message sent during the work goes out when the turn is over",
+      "started": false,
+      "mode": "manual",
+      "script": [
+        {
+          "after": "user",
+          "lines": [
+            {
+              "type": "system",
+              "subtype": "init",
+              "session_id": "s-1",
+              "model": "claude-opus-5-5",
+              "permissionMode": "default",
+              "claude_code_version": "2.1.296"
+            },
+            {
+              "type": "assistant",
+              "message": {
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "One."
+                  }
+                ]
+              },
+              "parent_tool_use_id": null
+            }
+          ]
+        },
+        {
+          "after": "interrupt",
+          "lines": [
+            {
+              "type": "result",
+              "subtype": "success",
+              "is_error": false,
+              "terminal_reason": "completed",
+              "result": "One."
+            }
+          ]
+        },
+        {
+          "after": "user",
+          "lines": [
+            {
+              "type": "system",
+              "subtype": "init",
+              "session_id": "s-1",
+              "model": "claude-opus-5-5",
+              "permissionMode": "default",
+              "claude_code_version": "2.1.296"
+            },
+            {
+              "type": "assistant",
+              "message": {
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Two."
+                  }
+                ]
+              },
+              "parent_tool_use_id": null
+            },
+            {
+              "type": "result",
+              "subtype": "success",
+              "is_error": false,
+              "terminal_reason": "completed",
+              "result": "Two."
+            }
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "do": "send",
+          "text": "one"
+        },
+        {
+          "do": "send",
+          "text": "two"
+        },
+        {
+          "do": "interrupt"
+        }
+      ],
+      "starts": [
+        {
+          "resumed": false,
+          "mode": "default"
+        }
+      ],
+      "written": [
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"one\"}]}}",
+        "{\"type\":\"control_request\",\"request_id\":\"int-4\",\"request\":{\"subtype\":\"interrupt\"}}",
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"two\"}]}}"
+      ],
+      "log": [
+        "started Work new"
+      ],
+      "activity": "done",
+      "items": 4,
+      "running": true
+    },
+    {
+      "name": "a card is answered and the work goes on",
+      "started": false,
+      "mode": "manual",
+      "script": [
+        {
+          "after": "user",
+          "lines": [
+            {
+              "type": "system",
+              "subtype": "init",
+              "session_id": "s-1",
+              "model": "claude-opus-5-5",
+              "permissionMode": "default",
+              "claude_code_version": "2.1.296"
+            },
+            {
+              "type": "assistant",
+              "message": {
+                "content": [
+                  {
+                    "type": "tool_use",
+                    "id": "toolu_1",
+                    "name": "Write",
+                    "input": {
+                      "file_path": "/work/a.txt",
+                      "content": "ok"
+                    }
+                  }
+                ]
+              },
+              "parent_tool_use_id": null
+            },
+            {
+              "type": "control_request",
+              "request_id": "req-1",
+              "request": {
+                "subtype": "can_use_tool",
+                "tool_name": "Write",
+                "input": {
+                  "file_path": "/work/a.txt",
+                  "content": "ok"
+                },
+                "description": "a.txt",
+                "permission_suggestions": [
+                  {
+                    "type": "setMode",
+                    "mode": "acceptEdits",
+                    "destination": "session"
+                  }
+                ],
+                "tool_use_id": "toolu_1"
+              }
+            }
+          ]
+        },
+        {
+          "after": "response",
+          "lines": [
+            {
+              "type": "user",
+              "message": {
+                "content": [
+                  {
+                    "type": "tool_result",
+                    "tool_use_id": "toolu_1",
+                    "content": "File created"
+                  }
+                ]
+              },
+              "parent_tool_use_id": null
+            },
+            {
+              "type": "assistant",
+              "message": {
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Done."
+                  }
+                ]
+              },
+              "parent_tool_use_id": null
+            },
+            {
+              "type": "result",
+              "subtype": "success",
+              "is_error": false,
+              "terminal_reason": "completed",
+              "result": "Done."
+            }
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "do": "send",
+          "text": "write it"
+        },
+        {
+          "do": "choose",
+          "requestId": "req-1",
+          "choice": "allow"
+        }
+      ],
+      "starts": [
+        {
+          "resumed": false,
+          "mode": "default"
+        }
+      ],
+      "written": [
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"write it\"}]}}",
+        "{\"type\":\"control_response\",\"response\":{\"subtype\":\"success\",\"request_id\":\"req-1\",\"response\":{\"behavior\":\"allow\",\"updatedInput\":{\"file_path\":\"/work/a.txt\",\"content\":\"ok\"}}}}"
+      ],
+      "log": [
+        "started Work new"
+      ],
+      "activity": "done",
+      "items": 4,
+      "running": true
+    },
+    {
+      "name": "the mode changed before the first message goes into the start",
+      "started": false,
+      "mode": "manual",
+      "script": [
+        {
+          "after": "user",
+          "lines": [
+            {
+              "type": "system",
+              "subtype": "init",
+              "session_id": "s-1",
+              "model": "claude-opus-5-5",
+              "permissionMode": "acceptEdits",
+              "claude_code_version": "2.1.296"
+            },
+            {
+              "type": "assistant",
+              "message": {
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Ok."
+                  }
+                ]
+              },
+              "parent_tool_use_id": null
+            },
+            {
+              "type": "result",
+              "subtype": "success",
+              "is_error": false,
+              "terminal_reason": "completed",
+              "result": "Ok."
+            }
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "do": "setMode",
+          "mode": "acceptEdits"
+        },
+        {
+          "do": "send",
+          "text": "go"
+        }
+      ],
+      "starts": [
+        {
+          "resumed": false,
+          "mode": "acceptEdits"
+        }
+      ],
+      "written": [
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"go\"}]}}"
+      ],
+      "log": [
+        "started Work new"
+      ],
+      "activity": "done",
+      "items": 2,
+      "running": true
+    },
+    {
+      "name": "the mode changed while Claude Code runs is written to it",
+      "started": false,
+      "mode": "manual",
+      "script": [
+        {
+          "after": "user",
+          "lines": [
+            {
+              "type": "system",
+              "subtype": "init",
+              "session_id": "s-1",
+              "model": "claude-opus-5-5",
+              "permissionMode": "default",
+              "claude_code_version": "2.1.296"
+            },
+            {
+              "type": "assistant",
+              "message": {
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Ok."
+                  }
+                ]
+              },
+              "parent_tool_use_id": null
+            },
+            {
+              "type": "result",
+              "subtype": "success",
+              "is_error": false,
+              "terminal_reason": "completed",
+              "result": "Ok."
+            }
+          ]
+        },
+        {
+          "after": "mode",
+          "lines": [
+            {
+              "type": "control_response",
+              "response": {
+                "subtype": "success",
+                "request_id": "mode-3",
+                "response": {
+                  "mode": "plan"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "do": "send",
+          "text": "go"
+        },
+        {
+          "do": "setMode",
+          "mode": "plan"
+        }
+      ],
+      "starts": [
+        {
+          "resumed": false,
+          "mode": "default"
+        }
+      ],
+      "written": [
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"go\"}]}}",
+        "{\"type\":\"control_request\",\"request_id\":\"mode-3\",\"request\":{\"subtype\":\"set_permission_mode\",\"mode\":\"plan\"}}"
+      ],
+      "log": [
+        "started Work new"
+      ],
+      "activity": "done",
+      "items": 2,
+      "running": true
+    },
+    {
+      "name": "the window closed during the work: Claude Code is stopped and the turn is marked as failed",
+      "started": false,
+      "mode": "manual",
+      "script": [
+        {
+          "after": "user",
+          "lines": [
+            {
+              "type": "system",
+              "subtype": "init",
+              "session_id": "s-1",
+              "model": "claude-opus-5-5",
+              "permissionMode": "default",
+              "claude_code_version": "2.1.296"
+            },
+            {
+              "type": "assistant",
+              "message": {
+                "content": [
+                  {
+                    "type": "tool_use",
+                    "id": "toolu_1",
+                    "name": "Write",
+                    "input": {
+                      "file_path": "/work/a.txt",
+                      "content": "ok"
+                    }
+                  }
+                ]
+              },
+              "parent_tool_use_id": null
+            }
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "do": "send",
+          "text": "write it"
+        },
+        {
+          "do": "close"
+        }
+      ],
+      "starts": [
+        {
+          "resumed": false,
+          "mode": "default"
+        }
+      ],
+      "written": [
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"write it\"}]}}"
+      ],
+      "log": [
+        "started Work new",
+        "stopped Work read 2 written 1"
+      ],
+      "activity": "failed",
+      "items": 3,
+      "running": false
+    },
+    {
+      "name": "the window closed after the work: nothing to report, the next message resumes",
+      "started": false,
+      "mode": "manual",
+      "script": [
+        {
+          "after": "user",
+          "lines": [
+            {
+              "type": "system",
+              "subtype": "init",
+              "session_id": "s-1",
+              "model": "claude-opus-5-5",
+              "permissionMode": "default",
+              "claude_code_version": "2.1.296"
+            },
+            {
+              "type": "assistant",
+              "message": {
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "One."
+                  }
+                ]
+              },
+              "parent_tool_use_id": null
+            },
+            {
+              "type": "result",
+              "subtype": "success",
+              "is_error": false,
+              "terminal_reason": "completed",
+              "result": "One."
+            }
+          ]
+        },
+        {
+          "after": "user",
+          "lines": [
+            {
+              "type": "system",
+              "subtype": "init",
+              "session_id": "s-1",
+              "model": "claude-opus-5-5",
+              "permissionMode": "default",
+              "claude_code_version": "2.1.296"
+            },
+            {
+              "type": "assistant",
+              "message": {
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Two."
+                  }
+                ]
+              },
+              "parent_tool_use_id": null
+            },
+            {
+              "type": "result",
+              "subtype": "success",
+              "is_error": false,
+              "terminal_reason": "completed",
+              "result": "Two."
+            }
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "do": "send",
+          "text": "one"
+        },
+        {
+          "do": "close"
+        },
+        {
+          "do": "send",
+          "text": "two"
+        }
+      ],
+      "starts": [
+        {
+          "resumed": false,
+          "mode": "default"
+        },
+        {
+          "resumed": true,
+          "mode": "default"
+        }
+      ],
+      "written": [
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"one\"}]}}",
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"two\"}]}}"
+      ],
+      "log": [
+        "started Work new",
+        "stopped Work read 3 written 1",
+        "started Work resumed"
+      ],
+      "activity": "done",
+      "items": 4,
+      "running": true
+    }
+  ]
+}
