@@ -1,5 +1,5 @@
 {
-  "comment": "A request of Claude Code as a card of the feed, and the line each choice writes back (D-294, D-305, D-306). An edit offers 'edits in this session' as its second button. Anything else offers the rule Claude Code suggested, when there is one; a command is never answered with the edit mode. A question and a plan have no second button. A refusal without words becomes a plain one. Several picks for one question are joined with a comma, and a question nobody answered is left out.",
+  "comment": "A request of Claude Code as a card of the feed, and the line each choice writes back (D-294, D-305, D-306). An edit offers 'edits in this session' as its second button. Anything else offers the rule Claude Code suggested, when there is one: for a command the rule has words, for an MCP tool it covers the whole tool (D-307); a command is never answered with the edit mode. A question and a plan have no second button. A refusal without words becomes a plain one. Several picks for one question are joined with a comma, and a question nobody answered is left out.",
   "cards": [
     {
       "name": "an edit",
@@ -258,6 +258,59 @@
           "kind": "other",
           "label": "blender",
           "subject": "execute_blender_code",
+          "added": 0,
+          "removed": 0,
+          "hidden": false
+        },
+        "questions": [],
+        "plan": ""
+      }
+    },
+    {
+      "name": "an MCP tool with a rule for the whole tool on offer",
+      "request": {
+        "type": "control_request",
+        "request_id": "req-8",
+        "request": {
+          "subtype": "can_use_tool",
+          "tool_name": "mcp__office__add_card",
+          "input": {
+            "title": "Buy a cable"
+          },
+          "permission_suggestions": [
+            {
+              "type": "addRules",
+              "rules": [
+                {
+                  "toolName": "mcp__office__add_card"
+                }
+              ],
+              "behavior": "allow",
+              "destination": "localSettings"
+            }
+          ],
+          "tool_use_id": "toolu_8"
+        }
+      },
+      "choices": [
+        {
+          "choice": "allow",
+          "line": "{\"type\":\"control_response\",\"response\":{\"subtype\":\"success\",\"request_id\":\"req-8\",\"response\":{\"behavior\":\"allow\",\"updatedInput\":{\"title\":\"Buy a cable\"}}}}"
+        },
+        {
+          "choice": "second",
+          "line": "{\"type\":\"control_response\",\"response\":{\"subtype\":\"success\",\"request_id\":\"req-8\",\"response\":{\"behavior\":\"allow\",\"updatedInput\":{\"title\":\"Buy a cable\"},\"updatedPermissions\":[{\"type\":\"addRules\",\"rules\":[{\"toolName\":\"mcp__office__add_card\"}],\"behavior\":\"allow\",\"destination\":\"localSettings\"}]}}}"
+        }
+      ],
+      "card": {
+        "kind": "permission",
+        "second": "alwaysAllow",
+        "rule": "mcp__office__add_card",
+        "subagent": false,
+        "step": {
+          "kind": "other",
+          "label": "office",
+          "subject": "add_card",
           "added": 0,
           "removed": 0,
           "hidden": false

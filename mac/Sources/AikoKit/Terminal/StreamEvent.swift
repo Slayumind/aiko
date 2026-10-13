@@ -313,11 +313,10 @@ public enum StreamEvent: Sendable, Equatable {
             $0["type"]?.stringValue == "setMode" && $0["mode"]?.stringValue == "acceptEdits"
         }
 
-        // Only a rule that allows, and only one with words to show: a button needs a name.
         let rule = items(request["permission_suggestions"]).first {
             $0["type"]?.stringValue == "addRules"
                 && $0["behavior"]?.stringValue == "allow"
-                && !(items($0["rules"]).first?["ruleContent"]?.stringValue ?? "").isEmpty
+                && !ruleWords(items($0["rules"]).first, tool: tool).isEmpty
         }
 
         return .request(ToolRequest(
@@ -330,7 +329,17 @@ public enum StreamEvent: Sendable, Equatable {
             needsAnswer: request["requires_user_interaction"]?.boolValue ?? false,
             agentId: request["agent_id"]?.stringValue,
             rule: rule,
-            ruleText: rule.flatMap { items($0["rules"]).first?["ruleContent"]?.stringValue } ?? ""))
+            ruleText: rule.map { ruleWords(items($0["rules"]).first, tool: tool) } ?? ""))
+    }
+
+    /// The words of a rule that may be offered, or nothing. A rule with words of its own covers
+    /// what they say. A rule without them covers every call of its tool, so it is taken only for
+    /// the MCP tool that asks: its words are then the name of that tool (D-307).
+    private static func ruleWords(_ rule: JsonObject?, tool: String) -> String {
+        if let words = rule?["ruleContent"]?.stringValue, !words.isEmpty {
+            return words
+        }
+        return tool.hasPrefix("mcp__") && rule?["toolName"]?.stringValue == tool ? tool : ""
     }
 
     private static func readReply(_ root: JsonObject) -> StreamEvent {
