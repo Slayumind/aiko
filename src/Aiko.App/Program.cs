@@ -281,6 +281,36 @@ static class Program
             return;
         }
 
+        // The window of the terminal drawn into a file, on made up sessions. States: talk, empty,
+        // form, elsewhere, login, close. The width is 1100 unless a third word gives another.
+        if (args is ["--snapshot-terminal", var terminalPath, var terminalState, .. var terminalRest])
+        {
+            var width = terminalRest is [var word, ..] && double.TryParse(word, System.Globalization.CultureInfo.InvariantCulture, out var given)
+                ? given
+                : Aiko.Core.Terminal.WindowPlace.DefaultWidth;
+            Environment.Exit(TerminalSnapshot.Write(terminalPath, terminalState, width) ? 0 : 1);
+            return;
+        }
+
+        // Opens the window of the terminal on the real sessions, without the rest of Aiko. A message
+        // sent there goes to the real Claude Code. The way in until the terminal is in the menu.
+        if (args is ["--try-terminal", ..])
+        {
+            var environments = SettingsStore.LoadEnvironments();
+            if (environments.Environments.Count == 0)
+            {
+                Environment.Exit(1);
+                return;
+            }
+
+            var terminalApp = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
+            var terminal = new TerminalHost(environments, SettingsStore.LoadTerminal(), () => new ClaudeProcess());
+            terminal.Closed += terminalApp.Shutdown;
+            terminal.Show();
+            terminalApp.Run();
+            return;
+        }
+
         // The pipes a conversation runs on, checked with Aiko as its own child. No Claude Code.
         if (args is ["--try-pipe", ..])
         {

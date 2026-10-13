@@ -1076,4 +1076,175 @@ public static class Strings
 
     /// on
     public static string StateOn => Get("StateOn");
+
+    /// Terminal
+    public static string TerminalTitle => Get("TerminalTitle");
+
+    /// Create session
+    public static string TerminalCreateSession => Get("TerminalCreateSession");
+
+    /// Close session
+    public static string TerminalCloseSession => Get("TerminalCloseSession");
+
+    /// New session in {0}
+    public static string TerminalFormTitle => Get("TerminalFormTitle");
+
+    /// Folder
+    public static string TerminalFolder => Get("TerminalFolder");
+
+    /// Model
+    public static string TerminalModel => Get("TerminalModel");
+
+    /// Name
+    public static string TerminalName => Get("TerminalName");
+
+    /// Optional. An empty name becomes the folder name with a number.
+    public static string TerminalNameHint => Get("TerminalNameHint");
+
+    /// Describe the task
+    public static string TerminalDescribeTask => Get("TerminalDescribeTask");
+
+    /// Recent
+    public static string TerminalRecent => Get("TerminalRecent");
+
+    /// Bound folders
+    public static string TerminalBound => Get("TerminalBound");
+
+    /// Choose another folder
+    public static string TerminalChooseFolder => Get("TerminalChooseFolder");
+
+    /// This folder is bound to {0}. The session starts in {1}.
+    public static string TerminalElsewhere => Get("TerminalElsewhere");
+
+    /// Start your first session in {0}
+    public static string TerminalNoSessionsTitle => Get("TerminalNoSessionsTitle");
+
+    /// A session is one conversation with Claude Code in one folder.
+    public static string TerminalNoSessionsBody => Get("TerminalNoSessionsBody");
+
+    /// Describe the task. Claude Code starts with your first message.
+    public static string TerminalEmptyTalk => Get("TerminalEmptyTalk");
+
+    /// working
+    public static string TerminalWorking => Get("TerminalWorking");
+
+    /// waiting
+    public static string TerminalWaiting => Get("TerminalWaiting");
+
+    /// done
+    public static string TerminalDone => Get("TerminalDone");
+
+    /// asleep
+    public static string TerminalAsleep => Get("TerminalAsleep");
+
+    /// stopped
+    public static string TerminalStopped => Get("TerminalStopped");
+
+    /// {0} waiting
+    public static string TerminalTabWaitingOne => Get("TerminalTabWaitingOne");
+
+    /// {0} waiting
+    public static string TerminalTabWaitingMany => Get("TerminalTabWaitingMany");
+
+    /// read
+    public static string TerminalStepRead => Get("TerminalStepRead");
+
+    /// search
+    public static string TerminalStepSearch => Get("TerminalStepSearch");
+
+    /// edit
+    public static string TerminalStepEdit => Get("TerminalStepEdit");
+
+    /// run
+    public static string TerminalStepRun => Get("TerminalStepRun");
+
+    /// agent
+    public static string TerminalStepAgent => Get("TerminalStepAgent");
+
+    /// web
+    public static string TerminalStepWeb => Get("TerminalStepWeb");
+
+    /// Needs permission: {0} {1}
+    public static string TerminalLineRequest => Get("TerminalLineRequest");
+
+    /// Asks: {0}
+    public static string TerminalLineQuestion => Get("TerminalLineQuestion");
+
+    /// The plan is ready for you
+    public static string TerminalLinePlan => Get("TerminalLinePlan");
+
+    /// Reading {0}
+    public static string TerminalLineReading => Get("TerminalLineReading");
+
+    /// Searching {0}
+    public static string TerminalLineSearching => Get("TerminalLineSearching");
+
+    /// Editing {0}
+    public static string TerminalLineEditing => Get("TerminalLineEditing");
+
+    /// Running {0}
+    public static string TerminalLineRunning => Get("TerminalLineRunning");
+
+    /// Agent: {0}
+    public static string TerminalLineAgent => Get("TerminalLineAgent");
+
+    /// Opening {0}
+    public static string TerminalLineOpening => Get("TerminalLineOpening");
+
+    /// Calling {0}
+    public static string TerminalLineCalling => Get("TerminalLineCalling");
+
+    /// Stopped at the “{0}” step
+    public static string TerminalLineStoppedAt => Get("TerminalLineStoppedAt");
+
+    /// Sign in needed
+    public static string TerminalLineSignIn => Get("TerminalLineSignIn");
+
+    /// Yesterday, {0}
+    public static string TerminalYesterday => Get("TerminalYesterday");
+
+    /// {0} isn’t signed in
+    public static string TerminalLoginTitle => Get("TerminalLoginTitle");
+
+    /// You can sign in only in Claude Code itself. Aiko opens it in the system terminal and star...
+    public static string TerminalLoginBody => Get("TerminalLoginBody");
+
+    /// Session “{0}” is still working
+    public static string TerminalCloseTitle => Get("TerminalCloseTitle");
+
+    /// If you close it now, Claude Code stops in the middle of the work.
+    public static string TerminalCloseBody => Get("TerminalCloseBody");
+
+    /// Some sessions are still working
+    public static string TerminalCloseWindowTitle => Get("TerminalCloseWindowTitle");
+
+    /// If you close the window now, Claude Code stops in the middle of the work.
+    public static string TerminalCloseWindowBody => Get("TerminalCloseWindowBody");
+
+    /// Stop and close
+    public static string TerminalStopAndClose => Get("TerminalStopAndClose");
+
+    /// Keep open
+    public static string TerminalKeepOpen => Get("TerminalKeepOpen");
+
+    /// 5-hour limit
+    public static string TerminalLimitFiveHour => Get("TerminalLimitFiveHour");
+
+    /// Weekly limit
+    public static string TerminalLimitWeek => Get("TerminalLimitWeek");
+
+    /// Minimize
+    public static string TerminalMinimize => Get("TerminalMinimize");
+
+    /// Maximize
+    public static string TerminalMaximize => Get("TerminalMaximize");
+
+    /// Restore
+    public static string TerminalRestore => Get("TerminalRestore");
+
+    /// Close
+    public static string TerminalCloseWindow => Get("TerminalCloseWindow");
+
+    /// Sessions
+    public static string TerminalSessions => Get("TerminalSessions");
 }

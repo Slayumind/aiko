@@ -1289,6 +1289,11 @@ public class SharedCaseTests
         {
             Assert.Equal(row[1].GetBoolean(), WindowPlace.IsNarrow(row[0].GetDouble()));
         }
+
+        foreach (var row in cases.GetProperty("days").EnumerateArray())
+        {
+            Assert.Equal(row[3].GetString(), Camel(SessionRows.DayOf(row[0].GetInt64(), row[1].GetInt64(), row[2].GetInt32())));
+        }
     }
 
     [Fact]

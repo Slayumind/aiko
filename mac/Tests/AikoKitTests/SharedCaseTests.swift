@@ -1173,6 +1173,13 @@ struct SharedCaseTests {
             let pair = row.arrayValue ?? []
             #expect(WindowPlace.isNarrow(pair[0].doubleValue ?? 0) == pair[1].boolValue)
         }
+
+        for row in cases["days"]?.arrayValue ?? [] {
+            let parts = row.arrayValue ?? []
+            let day = SessionRows.dayOf(
+                parts[0].int64Value ?? 0, parts[1].int64Value ?? 0, offsetMinutes: Int(parts[2].int64Value ?? 0))
+            #expect(String(describing: day) == parts[3].stringValue, "\(row.toJsonString(escaping: .relaxed))")
+        }
     }
 
     @Test
