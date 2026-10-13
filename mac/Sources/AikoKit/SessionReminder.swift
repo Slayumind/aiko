@@ -14,6 +14,9 @@ public enum SessionReminder {
     public static let environmentVariable = "AIKO_ENVIRONMENT"
     public static let launchedByCommand = "command"
 
+    /// The terminal of Aiko started the session. The reminder stays quiet (D-304).
+    public static let launchedByTerminal = "terminal"
+
     public static func messageFor(
         _ platform: PlatformConventions,
         launch: String?,

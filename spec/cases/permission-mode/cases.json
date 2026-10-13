@@ -1,0 +1,24 @@
+{
+  "comment": "The four permission modes of the terminal (D-302). The names are the words of Claude Code and are the same in every language of the interface. The stream calls the manual mode default, the flag calls it manual; the flag is left out for it and a request sends default.",
+  "modes": [
+    { "mode": "manual", "name": "manual", "flag": null, "request": "default", "next": "acceptEdits" },
+    { "mode": "acceptEdits", "name": "acceptEdits", "flag": "acceptEdits", "request": "acceptEdits", "next": "plan" },
+    { "mode": "plan", "name": "plan", "flag": "plan", "request": "plan", "next": "auto" },
+    { "mode": "auto", "name": "auto", "flag": "auto", "request": "auto", "next": "manual" }
+  ],
+  "order": ["manual", "acceptEdits", "plan", "auto"],
+  "fromStream": [
+    { "value": "default", "mode": "manual" },
+    { "value": "manual", "mode": "manual" },
+    { "value": "acceptEdits", "mode": "acceptEdits" },
+    { "value": "plan", "mode": "plan" },
+    { "value": "auto", "mode": "auto" },
+    { "value": "bypassPermissions", "mode": null },
+    { "value": "dontAsk", "mode": null },
+    { "value": "Plan", "mode": null },
+    { "value": "accept_edits", "mode": null },
+    { "value": " plan", "mode": null },
+    { "value": "", "mode": null },
+    { "value": null, "mode": null }
+  ]
+}

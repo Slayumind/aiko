@@ -1,5 +1,7 @@
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using Aiko.Core;
+using Aiko.Core.Terminal;
 
 namespace Aiko.Core.Tests;
 
@@ -412,6 +414,256 @@ public class SharedCaseTests
             Assert.Equal(saved ? 1 : 0, edit.Memory.Facts.Count);
         }
     }
+
+    // ---- the terminal: what Claude Code says and what Aiko answers ----
+
+    [Fact]
+    public void Every_stream_line_becomes_the_same_event()
+    {
+        foreach (var row in SpecCases.Json("stream-events").GetProperty("events").EnumerateArray())
+        {
+            var line = row.TryGetProperty("raw", out var raw) ? raw.GetString()! : row.GetProperty("line").GetRawText();
+            var expected = JsonNode.Parse(row.GetProperty("event").GetRawText());
+
+            var described = Described(StreamEvent.FromLine(line));
+
+            Assert.True(
+                JsonNode.DeepEquals(expected, described),
+                $"{row.GetProperty("name").GetString()}: {described.ToJsonString()}");
+        }
+    }
+
+    [Fact]
+    public void Every_host_line_is_written_the_same()
+    {
+        foreach (var row in SpecCases.Json("host-lines").GetProperty("lines").EnumerateArray())
+        {
+            var action = row.GetProperty("action");
+            var id = action.TryGetProperty("requestId", out var request) ? request.GetString()! : "";
+            JsonElement Input() => action.GetProperty("input").Clone();
+
+            var line = action.GetProperty("kind").GetString() switch
+            {
+                "userMessage" => HostLine.UserMessage(
+                    action.GetProperty("text").GetString()!,
+                    [.. action.GetProperty("images").EnumerateArray().Select(image => new AttachedImage(
+                        image.GetProperty("mediaType").GetString()!,
+                        image.GetProperty("base64").GetString()!))]),
+                "allow" => HostLine.Allow(id, Input()),
+                "deny" => HostLine.Deny(id, action.GetProperty("message").GetString()!),
+                "answer" => HostLine.Answer(
+                    id,
+                    Input(),
+                    [.. action.GetProperty("answers").EnumerateArray().Select(answer => KeyValuePair.Create(
+                        answer.GetProperty("question").GetString()!,
+                        answer.GetProperty("answer").GetString()!))]),
+                "interrupt" => HostLine.Interrupt(id),
+                "setMode" => HostLine.SetMode(id, Mode(action.GetProperty("mode"))!.Value),
+                var other => throw new InvalidOperationException($"unknown action {other}"),
+            };
+
+            Assert.Equal(row.GetProperty("line").GetString(), line);
+        }
+    }
+
+    [Fact]
+    public void Every_launch_of_a_conversation_is_planned_the_same()
+    {
+        var cases = SpecCases.Json("launch-plan");
+        var home = cases.GetProperty("userProfile").GetString()!;
+
+        foreach (var row in cases.GetProperty("cases").EnumerateArray())
+        {
+            var request = new LaunchRequest(
+                row.GetProperty("configDirectory").GetString()!,
+                home,
+                row.GetProperty("environment").GetString()!,
+                row.GetProperty("sessionId").GetString()!,
+                row.GetProperty("started").GetBoolean(),
+                Mode(row.GetProperty("mode"))!.Value,
+                row.GetProperty("model").GetString());
+
+            var plan = ClaudeLaunchPlan.For(request, Strings(row.GetProperty("inherited")));
+
+            Assert.Equal(Strings(row.GetProperty("arguments")), plan.Arguments);
+            Assert.Equal(
+                [.. row.GetProperty("variables").EnumerateArray().Select(variable => new VariableChange(
+                    variable.GetProperty("name").GetString()!,
+                    variable.GetProperty("value").GetString()))],
+                plan.Variables);
+        }
+    }
+
+    [Fact]
+    public void Every_permission_mode_has_the_same_names()
+    {
+        var cases = SpecCases.Json("permission-mode");
+
+        Assert.Equal(
+            Strings(cases.GetProperty("order")),
+            PermissionModes.All.Select(PermissionModes.Name));
+
+        foreach (var row in cases.GetProperty("modes").EnumerateArray())
+        {
+            var mode = Mode(row.GetProperty("mode"))!.Value;
+
+            Assert.Equal(row.GetProperty("name").GetString(), PermissionModes.Name(mode));
+            Assert.Equal(row.GetProperty("flag").GetString(), PermissionModes.FlagValue(mode));
+            Assert.Equal(row.GetProperty("request").GetString(), PermissionModes.RequestValue(mode));
+            Assert.Equal(Mode(row.GetProperty("next")), PermissionModes.Next(mode));
+        }
+
+        foreach (var row in cases.GetProperty("fromStream").EnumerateArray())
+        {
+            Assert.Equal(Mode(row.GetProperty("mode")), PermissionModes.FromStream(row.GetProperty("value").GetString()));
+        }
+    }
+
+    [Fact]
+    public void Every_limit_badge_names_the_same_limit()
+    {
+        var now = new DateTimeOffset(2026, 10, 13, 12, 0, 0, TimeSpan.Zero);
+
+        foreach (var row in SpecCases.Json("limit-badge").GetProperty("badges").EnumerateArray())
+        {
+            var snapshot = new LimitSnapshot(
+                "claude",
+                LimitSource.StatusLine,
+                now.AddSeconds(-row.GetProperty("ageSeconds").GetInt32()),
+                [.. row.GetProperty("windows").EnumerateArray().Select(window => new LimitWindow(
+                    Enum.Parse<LimitKind>(window.GetProperty("kind").GetString()!, ignoreCase: true),
+                    window.GetProperty("percent").GetInt32(),
+                    now.AddSeconds(window.GetProperty("resetsInSeconds").GetInt32())))]);
+
+            var badge = row.GetProperty("badge");
+            LimitBadge? expected = badge.ValueKind == JsonValueKind.Null
+                ? null
+                : new LimitBadge(
+                    Enum.Parse<LimitKind>(badge.GetProperty("kind").GetString()!, ignoreCase: true),
+                    badge.GetProperty("percent").GetInt32(),
+                    Enum.Parse<LimitTone>(badge.GetProperty("tone").GetString()!, ignoreCase: true));
+
+            Assert.True(expected == LimitBadge.For(snapshot, now), row.GetProperty("name").GetString());
+        }
+    }
+
+    [Fact]
+    public void Every_model_id_gets_the_same_name()
+    {
+        foreach (var row in SpecCases.Json("model-name").GetProperty("names").EnumerateArray())
+        {
+            Assert.Equal(row.GetProperty("name").GetString(), ModelName.Display(row.GetProperty("id").GetString()));
+        }
+    }
+
+    private static PermissionMode? Mode(JsonElement name) =>
+        name.ValueKind == JsonValueKind.Null ? null : Enum.Parse<PermissionMode>(name.GetString()!, ignoreCase: true);
+
+    /// A stream event as the case files write it down.
+    private static JsonObject Described(StreamEvent streamEvent) => streamEvent switch
+    {
+        StreamEvent.Ready ready => new JsonObject
+        {
+            ["kind"] = "ready",
+            ["sessionId"] = ready.SessionId,
+            ["model"] = ready.Model,
+            ["mode"] = ModeName(ready.Mode),
+            ["version"] = ready.Version,
+        },
+        StreamEvent.Assistant assistant => new JsonObject
+        {
+            ["kind"] = "assistant",
+            ["parent"] = assistant.ParentToolUseId,
+            ["error"] = assistant.Error,
+            ["blocks"] = new JsonArray([.. assistant.Blocks.Select(Described)]),
+        },
+        StreamEvent.User user => new JsonObject
+        {
+            ["kind"] = "user",
+            ["parent"] = user.ParentToolUseId,
+            ["text"] = user.Text,
+            ["replay"] = user.IsReplay,
+            ["synthetic"] = user.IsSynthetic,
+            ["results"] = new JsonArray([.. user.Results.Select(result => new JsonObject
+            {
+                ["id"] = result.ToolUseId,
+                ["error"] = result.IsError,
+                ["text"] = result.Text,
+                ["images"] = new JsonArray([.. result.Images.Select(image => new JsonObject
+                {
+                    ["mediaType"] = image.MediaType,
+                    ["data"] = image.Data,
+                })]),
+            })]),
+        },
+        StreamEvent.TextDelta delta => new JsonObject
+        {
+            ["kind"] = "textDelta",
+            ["parent"] = delta.ParentToolUseId,
+            ["text"] = delta.Text,
+        },
+        StreamEvent.Request request => new JsonObject
+        {
+            ["kind"] = "request",
+            ["requestId"] = request.RequestId,
+            ["tool"] = request.ToolName,
+            ["toolUseId"] = request.ToolUseId,
+            ["input"] = JsonNode.Parse(request.Input.GetRawText()),
+            ["description"] = request.Description,
+            ["suggestsAcceptEdits"] = request.SuggestsAcceptEdits,
+            ["needsAnswer"] = request.NeedsAnswer,
+        },
+        StreamEvent.Reply reply => new JsonObject
+        {
+            ["kind"] = "reply",
+            ["requestId"] = reply.RequestId,
+            ["ok"] = reply.Ok,
+            ["mode"] = ModeName(reply.Mode),
+        },
+        StreamEvent.Status status => new JsonObject
+        {
+            ["kind"] = "status",
+            ["activity"] = status.Activity,
+            ["mode"] = ModeName(status.Mode),
+        },
+        StreamEvent.Compacted => new JsonObject { ["kind"] = "compacted" },
+        StreamEvent.RateLimit limit => new JsonObject
+        {
+            ["kind"] = "rateLimit",
+            ["windows"] = new JsonArray([.. limit.Windows.Select(window => new JsonObject
+            {
+                ["kind"] = window.Kind == LimitKind.FiveHour ? "fiveHour" : "sevenDay",
+                ["percent"] = window.Percent,
+                ["resetsAt"] = window.ResetsAt.ToUnixTimeSeconds(),
+            })]),
+        },
+        StreamEvent.Result result => new JsonObject
+        {
+            ["kind"] = "result",
+            ["isError"] = result.IsError,
+            ["subtype"] = result.Subtype,
+            ["terminalReason"] = result.TerminalReason,
+            ["text"] = result.Text,
+        },
+        StreamEvent.Unreadable => new JsonObject { ["kind"] = "unreadable" },
+        _ => new JsonObject { ["kind"] = "ignored" },
+    };
+
+    private static JsonNode Described(AssistantBlock block) => block switch
+    {
+        AssistantBlock.Text text => new JsonObject { ["type"] = "text", ["text"] = text.Value },
+        AssistantBlock.ToolUse tool => new JsonObject
+        {
+            ["type"] = "toolUse",
+            ["id"] = tool.Id,
+            ["name"] = tool.Name,
+            ["input"] = JsonNode.Parse(tool.Input.GetRawText()),
+        },
+        _ => new JsonObject { ["type"] = "thinking" },
+    };
+
+    private static string? ModeName(PermissionMode? mode) =>
+        mode is { } known ? PermissionModes.Name(known) : null;
 
     private static string Repeated(JsonElement row, string name) =>
         string.Concat(Enumerable.Repeat(row.GetProperty(name).GetString()!, row.GetProperty(name + "Times").GetInt32()));

@@ -430,6 +430,254 @@ struct SharedCaseTests {
         (node?.arrayValue ?? []).compactMap(\.stringValue)
     }
 
+    // ---- the terminal: what Claude Code says and what Aiko answers ----
+
+    @Test
+    func everyStreamLineBecomesTheSameEvent() {
+        for row in SpecCases.json("stream-events")["events"]?.arrayValue ?? [] {
+            let line = row["raw"]?.stringValue ?? row["line"]?.toJsonString(escaping: .relaxed) ?? ""
+            let described = Self.described(StreamEvent.fromLine(line))
+
+            #expect(
+                described == row["event"],
+                "\(row["name"]?.stringValue ?? ""): \(described.toJsonString(escaping: .relaxed))")
+        }
+    }
+
+    @Test
+    func everyHostLineIsWrittenTheSame() {
+        for row in SpecCases.json("host-lines")["lines"]?.arrayValue ?? [] {
+            let action = row["action"] ?? .null
+            let id = action["requestId"]?.stringValue ?? ""
+            let input = action["input"]?.objectValue ?? JsonObject()
+
+            let line: String
+            switch action["kind"]?.stringValue {
+            case "userMessage":
+                line = HostLine.userMessage(
+                    action["text"]?.stringValue ?? "",
+                    images: (action["images"]?.arrayValue ?? []).map {
+                        AttachedImage(
+                            mediaType: $0["mediaType"]?.stringValue ?? "",
+                            base64: $0["base64"]?.stringValue ?? "")
+                    })
+            case "allow":
+                line = HostLine.allow(id, input: input)
+            case "deny":
+                line = HostLine.deny(id, message: action["message"]?.stringValue ?? "")
+            case "answer":
+                line = HostLine.answer(
+                    id,
+                    input: input,
+                    answers: (action["answers"]?.arrayValue ?? []).map {
+                        (question: $0["question"]?.stringValue ?? "", answer: $0["answer"]?.stringValue ?? "")
+                    })
+            case "interrupt":
+                line = HostLine.interrupt(id)
+            case "setMode":
+                line = HostLine.setMode(id, Self.mode(action["mode"]) ?? .manual)
+            default:
+                line = "unknown action"
+            }
+
+            #expect(line == row["line"]?.stringValue)
+        }
+    }
+
+    @Test
+    func everyLaunchOfAConversationIsPlannedTheSame() {
+        let cases = SpecCases.json("launch-plan")
+        let home = cases["userProfile"]?.stringValue ?? ""
+        let platform: PlatformConventions = cases["platform"]?.stringValue == "macos" ? .macOS : .windows
+
+        for row in cases["cases"]?.arrayValue ?? [] {
+            let request = LaunchRequest(
+                configDirectory: row["configDirectory"]?.stringValue ?? "",
+                userProfile: home,
+                environmentName: row["environment"]?.stringValue ?? "",
+                sessionId: row["sessionId"]?.stringValue ?? "",
+                started: row["started"]?.boolValue ?? false,
+                mode: Self.mode(row["mode"]) ?? .manual,
+                model: row["model"]?.stringValue)
+
+            let plan = ClaudeLaunchPlan.forRequest(platform, request, inheritedVariables: Self.strings(row["inherited"]))
+            let name = row["name"]?.stringValue ?? ""
+
+            #expect(plan.arguments == Self.strings(row["arguments"]), "\(name)")
+            #expect(
+                plan.variables == (row["variables"]?.arrayValue ?? []).map {
+                    VariableChange($0["name"]?.stringValue ?? "", $0["value"]?.stringValue)
+                },
+                "\(name)")
+        }
+    }
+
+    @Test
+    func everyPermissionModeHasTheSameNames() {
+        let cases = SpecCases.json("permission-mode")
+
+        #expect(PermissionModes.all.map(PermissionModes.name) == Self.strings(cases["order"]))
+
+        for row in cases["modes"]?.arrayValue ?? [] {
+            guard let mode = Self.mode(row["mode"]) else {
+                Issue.record("unknown mode in the cases")
+                continue
+            }
+
+            #expect(PermissionModes.name(mode) == row["name"]?.stringValue)
+            #expect(PermissionModes.flagValue(mode) == row["flag"]?.stringValue)
+            #expect(PermissionModes.requestValue(mode) == row["request"]?.stringValue)
+            #expect(PermissionModes.next(mode) == Self.mode(row["next"]))
+        }
+
+        for row in cases["fromStream"]?.arrayValue ?? [] {
+            #expect(PermissionModes.fromStream(row["value"]?.stringValue) == Self.mode(row["mode"]))
+        }
+    }
+
+    @Test
+    func everyLimitBadgeNamesTheSameLimit() {
+        let now = Date(timeIntervalSince1970: 1_791_892_800)
+
+        for row in SpecCases.json("limit-badge")["badges"]?.arrayValue ?? [] {
+            let snapshot = LimitSnapshot(
+                environment: "claude",
+                source: .statusLine,
+                receivedAt: now.addingTimeInterval(-(row["ageSeconds"]?.doubleValue ?? 0)),
+                windows: (row["windows"]?.arrayValue ?? []).map {
+                    LimitWindow(
+                        kind: $0["kind"]?.stringValue == "sevenDay" ? .sevenDay : .fiveHour,
+                        percent: Int($0["percent"]?.doubleValue ?? 0),
+                        resetsAt: now.addingTimeInterval($0["resetsInSeconds"]?.doubleValue ?? 0))
+                })
+
+            var expected: LimitBadge?
+            if let badge = row["badge"]?.objectValue {
+                expected = LimitBadge(
+                    kind: badge["kind"]?.stringValue == "sevenDay" ? .sevenDay : .fiveHour,
+                    percent: Int(badge["percent"]?.doubleValue ?? 0),
+                    tone: Self.tone(badge["tone"]?.stringValue))
+            }
+
+            #expect(LimitBadge.forSnapshot(snapshot, now) == expected, "\(row["name"]?.stringValue ?? "")")
+        }
+    }
+
+    @Test
+    func everyModelIdGetsTheSameName() {
+        for row in SpecCases.json("model-name")["names"]?.arrayValue ?? [] {
+            #expect(ModelName.display(row["id"]?.stringValue) == row["name"]?.stringValue)
+        }
+    }
+
+    private static func mode(_ node: JsonNode?) -> PermissionMode? {
+        PermissionModes.all.first { PermissionModes.name($0) == node?.stringValue }
+    }
+
+    private static func tone(_ name: String?) -> LimitTone {
+        switch name {
+        case "normal": return .normal
+        case "caution": return .caution
+        case "critical": return .critical
+        default: return .unknown
+        }
+    }
+
+    private static func text(_ value: String?) -> JsonNode {
+        value.map(JsonNode.string) ?? .null
+    }
+
+    private static func node(_ pairs: [(String, JsonNode)]) -> JsonNode {
+        .object(JsonObject(pairs))
+    }
+
+    private static func modeName(_ mode: PermissionMode?) -> JsonNode {
+        text(mode.map(PermissionModes.name))
+    }
+
+    /// A stream event as the case files write it down, with the keys in the order of the files.
+    private static func described(_ event: StreamEvent) -> JsonNode {
+        switch event {
+        case .ready(let sessionId, let model, let mode, let version):
+            return node([
+                ("kind", .string("ready")), ("sessionId", .string(sessionId)), ("model", .string(model)),
+                ("mode", modeName(mode)), ("version", .string(version)),
+            ])
+        case .assistant(let parent, let blocks, let error):
+            return node([
+                ("kind", .string("assistant")), ("parent", text(parent)), ("error", text(error)),
+                ("blocks", .array(blocks.map(described))),
+            ])
+        case .user(let parent, let words, let results, let isReplay, let isSynthetic):
+            return node([
+                ("kind", .string("user")), ("parent", text(parent)), ("text", .string(words)),
+                ("replay", .bool(isReplay)), ("synthetic", .bool(isSynthetic)),
+                ("results", .array(results.map { result in
+                    node([
+                        ("id", .string(result.toolUseId)), ("error", .bool(result.isError)),
+                        ("text", .string(result.text)),
+                        ("images", .array(result.images.map {
+                            node([("mediaType", .string($0.mediaType)), ("data", .string($0.data))])
+                        })),
+                    ])
+                })),
+            ])
+        case .textDelta(let parent, let words):
+            return node([("kind", .string("textDelta")), ("parent", text(parent)), ("text", .string(words))])
+        case .request(let request):
+            return node([
+                ("kind", .string("request")), ("requestId", .string(request.requestId)),
+                ("tool", .string(request.toolName)), ("toolUseId", .string(request.toolUseId)),
+                ("input", .object(request.input)), ("description", .string(request.description)),
+                ("suggestsAcceptEdits", .bool(request.suggestsAcceptEdits)),
+                ("needsAnswer", .bool(request.needsAnswer)),
+            ])
+        case .reply(let requestId, let ok, let mode):
+            return node([
+                ("kind", .string("reply")), ("requestId", .string(requestId)), ("ok", .bool(ok)),
+                ("mode", modeName(mode)),
+            ])
+        case .status(let activity, let mode):
+            return node([("kind", .string("status")), ("activity", text(activity)), ("mode", modeName(mode))])
+        case .compacted:
+            return node([("kind", .string("compacted"))])
+        case .rateLimit(let windows):
+            return node([
+                ("kind", .string("rateLimit")),
+                ("windows", .array(windows.map {
+                    node([
+                        ("kind", .string($0.kind == .fiveHour ? "fiveHour" : "sevenDay")),
+                        ("percent", .number(String($0.percent))),
+                        ("resetsAt", .number(String(Int64($0.resetsAt.timeIntervalSince1970)))),
+                    ])
+                })),
+            ])
+        case .result(let isError, let subtype, let terminalReason, let words):
+            return node([
+                ("kind", .string("result")), ("isError", .bool(isError)), ("subtype", .string(subtype)),
+                ("terminalReason", .string(terminalReason)), ("text", .string(words)),
+            ])
+        case .unreadable:
+            return node([("kind", .string("unreadable"))])
+        case .ignored:
+            return node([("kind", .string("ignored"))])
+        }
+    }
+
+    private static func described(_ block: AssistantBlock) -> JsonNode {
+        switch block {
+        case .text(let value):
+            return node([("type", .string("text")), ("text", .string(value))])
+        case .toolUse(let id, let name, let input):
+            return node([
+                ("type", .string("toolUse")), ("id", .string(id)), ("name", .string(name)),
+                ("input", .object(input)),
+            ])
+        case .thinking:
+            return node([("type", .string("thinking"))])
+        }
+    }
+
     private static func environmentIn(_ node: JsonNode) -> AikoEnvironment {
         AikoEnvironment(
             node["name"]?.stringValue ?? "",

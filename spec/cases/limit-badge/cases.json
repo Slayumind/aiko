@@ -1,0 +1,59 @@
+{
+  "comment": "The one percentage in the title bar of the terminal: the limit that is closer to its end (D-296). A window whose reset time has passed counts as zero. Equal windows name the five hour one. The tone follows the card: caution from 75, critical from 90, no colour for numbers older than 15 minutes. Times are seconds from the moment of the question.",
+  "badges": [
+    {
+      "name": "nothing is known",
+      "ageSeconds": 0,
+      "windows": [],
+      "badge": null
+    },
+    {
+      "name": "the five hour window is fuller",
+      "ageSeconds": 10,
+      "windows": [{ "kind": "fiveHour", "percent": 42, "resetsInSeconds": 3600 }, { "kind": "sevenDay", "percent": 10, "resetsInSeconds": 86400 }],
+      "badge": { "kind": "fiveHour", "percent": 42, "tone": "normal" }
+    },
+    {
+      "name": "the seven day window is fuller",
+      "ageSeconds": 10,
+      "windows": [{ "kind": "fiveHour", "percent": 19, "resetsInSeconds": 3600 }, { "kind": "sevenDay", "percent": 76, "resetsInSeconds": 86400 }],
+      "badge": { "kind": "sevenDay", "percent": 76, "tone": "caution" }
+    },
+    {
+      "name": "equal windows name the five hour one",
+      "ageSeconds": 10,
+      "windows": [{ "kind": "sevenDay", "percent": 50, "resetsInSeconds": 86400 }, { "kind": "fiveHour", "percent": 50, "resetsInSeconds": 3600 }],
+      "badge": { "kind": "fiveHour", "percent": 50, "tone": "normal" }
+    },
+    {
+      "name": "a window that has turned over counts as zero",
+      "ageSeconds": 600,
+      "windows": [{ "kind": "fiveHour", "percent": 95, "resetsInSeconds": -60 }, { "kind": "sevenDay", "percent": 30, "resetsInSeconds": 86400 }],
+      "badge": { "kind": "sevenDay", "percent": 30, "tone": "normal" }
+    },
+    {
+      "name": "both windows have turned over",
+      "ageSeconds": 600,
+      "windows": [{ "kind": "fiveHour", "percent": 95, "resetsInSeconds": -60 }, { "kind": "sevenDay", "percent": 99, "resetsInSeconds": -1 }],
+      "badge": { "kind": "fiveHour", "percent": 0, "tone": "normal" }
+    },
+    {
+      "name": "only the seven day window is known",
+      "ageSeconds": 10,
+      "windows": [{ "kind": "sevenDay", "percent": 90, "resetsInSeconds": 86400 }],
+      "badge": { "kind": "sevenDay", "percent": 90, "tone": "critical" }
+    },
+    {
+      "name": "just under caution",
+      "ageSeconds": 10,
+      "windows": [{ "kind": "fiveHour", "percent": 74, "resetsInSeconds": 3600 }],
+      "badge": { "kind": "fiveHour", "percent": 74, "tone": "normal" }
+    },
+    {
+      "name": "old numbers lose their colour",
+      "ageSeconds": 3600,
+      "windows": [{ "kind": "fiveHour", "percent": 95, "resetsInSeconds": 3600 }, { "kind": "sevenDay", "percent": 10, "resetsInSeconds": 86400 }],
+      "badge": { "kind": "fiveHour", "percent": 95, "tone": "unknown" }
+    }
+  ]
+}

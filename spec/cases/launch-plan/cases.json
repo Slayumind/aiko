@@ -1,0 +1,76 @@
+{
+  "comment": "How the terminal starts Claude Code for one conversation (D-297, D-304): the arguments in order, and what changes in the environment. A variable with a null value is removed. The first environment runs with CLAUDE_CONFIG_DIR removed, never pointed at .claude (D-156). The paths are Windows ones, as in shim-launch.",
+  "platform": "windows",
+  "userProfile": "C:\\Users\\someone",
+  "cases": [
+    {
+      "name": "a new conversation in the first environment",
+      "configDirectory": "C:\\Users\\someone\\.claude",
+      "environment": "Aiko",
+      "sessionId": "5f0c2a8e-1b7d-4c1e-9f3a-2d6b8e4a7c10",
+      "started": false,
+      "mode": "manual",
+      "model": null,
+      "inherited": ["PATH", "USERPROFILE"],
+      "arguments": ["-p", "--input-format", "stream-json", "--output-format", "stream-json", "--verbose", "--include-partial-messages", "--permission-prompt-tool", "stdio", "--session-id", "5f0c2a8e-1b7d-4c1e-9f3a-2d6b8e4a7c10"],
+      "variables": [
+        { "name": "AIKO_ENVIRONMENT", "value": "Aiko" },
+        { "name": "AIKO_LAUNCH", "value": "terminal" }
+      ]
+    },
+    {
+      "name": "a conversation that already ran, in the second environment, in plan mode with a model",
+      "configDirectory": "C:\\Users\\someone\\.claude-work",
+      "environment": "Work · Kodland",
+      "sessionId": "s-2",
+      "started": true,
+      "mode": "plan",
+      "model": "opus",
+      "inherited": [],
+      "arguments": ["-p", "--input-format", "stream-json", "--output-format", "stream-json", "--verbose", "--include-partial-messages", "--permission-prompt-tool", "stdio", "--resume", "s-2", "--permission-mode", "plan", "--model", "opus"],
+      "variables": [
+        { "name": "CLAUDE_CONFIG_DIR", "value": "C:\\Users\\someone\\.claude-work" },
+        { "name": "AIKO_ENVIRONMENT", "value": "Work · Kodland" },
+        { "name": "AIKO_LAUNCH", "value": "terminal" }
+      ]
+    },
+    {
+      "name": "Aiko was itself started from a session: what that session left is removed",
+      "configDirectory": "C:\\Users\\someone\\.claude\\",
+      "environment": "Aiko",
+      "sessionId": "s-3",
+      "started": false,
+      "mode": "acceptEdits",
+      "model": "  claude-sonnet-5-5  ",
+      "inherited": ["Path", "CLAUDECODE", "claude_config_dir", "CLAUDE_CODE_ENTRYPOINT", "Claude_Code_SSE_PORT", "AIKO_ENVIRONMENT", "aiko_launch", "ANTHROPIC_API_KEY", "CLAUDE", "CLAUDECODEX", "AIKO"],
+      "arguments": ["-p", "--input-format", "stream-json", "--output-format", "stream-json", "--verbose", "--include-partial-messages", "--permission-prompt-tool", "stdio", "--session-id", "s-3", "--permission-mode", "acceptEdits", "--model", "claude-sonnet-5-5"],
+      "variables": [
+        { "name": "CLAUDECODE", "value": null },
+        { "name": "claude_config_dir", "value": null },
+        { "name": "CLAUDE_CODE_ENTRYPOINT", "value": null },
+        { "name": "Claude_Code_SSE_PORT", "value": null },
+        { "name": "AIKO_ENVIRONMENT", "value": null },
+        { "name": "aiko_launch", "value": null },
+        { "name": "AIKO_ENVIRONMENT", "value": "Aiko" },
+        { "name": "AIKO_LAUNCH", "value": "terminal" }
+      ]
+    },
+    {
+      "name": "auto mode, and a model that is only spaces",
+      "configDirectory": "D:\\Claude Accounts\\.claude-team",
+      "environment": "Team",
+      "sessionId": "s-4",
+      "started": true,
+      "mode": "auto",
+      "model": "   ",
+      "inherited": ["CLAUDE_CONFIG_DIR"],
+      "arguments": ["-p", "--input-format", "stream-json", "--output-format", "stream-json", "--verbose", "--include-partial-messages", "--permission-prompt-tool", "stdio", "--resume", "s-4", "--permission-mode", "auto"],
+      "variables": [
+        { "name": "CLAUDE_CONFIG_DIR", "value": null },
+        { "name": "CLAUDE_CONFIG_DIR", "value": "D:\\Claude Accounts\\.claude-team" },
+        { "name": "AIKO_ENVIRONMENT", "value": "Team" },
+        { "name": "AIKO_LAUNCH", "value": "terminal" }
+      ]
+    }
+  ]
+}
