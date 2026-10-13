@@ -463,6 +463,10 @@ struct SharedCaseTests {
                     })
             case "allow":
                 line = HostLine.allow(id, input: input)
+            case "allowEdits":
+                line = HostLine.allowEdits(id, input: input)
+            case "allowAlways":
+                line = HostLine.allowAlways(id, input: input, rule: action["rule"]?.objectValue ?? JsonObject())
             case "deny":
                 line = HostLine.deny(id, message: action["message"]?.stringValue ?? "")
             case "answer":
@@ -578,6 +582,170 @@ struct SharedCaseTests {
             #expect(
                 described == row["blocks"],
                 "\(row["name"]?.stringValue ?? ""): \(described.toJsonString(escaping: .relaxed))")
+        }
+    }
+
+    @Test
+    func everyStepGetsTheSameLine() {
+        for row in SpecCases.json("step-line")["steps"]?.arrayValue ?? [] {
+            let tool = row["tool"]?.stringValue ?? ""
+            let described = Self.describedStep(StepLine.forTool(tool, row["input"]?.objectValue ?? JsonObject()))
+
+            #expect(described == row["line"], "\(tool): \(described.toJsonString(escaping: .relaxed))")
+        }
+    }
+
+    @Test
+    func everyRequestBecomesTheSameCard() {
+        for row in SpecCases.json("request-card")["cards"]?.arrayValue ?? [] {
+            guard let card = Self.cardIn(row) else {
+                Issue.record("not a request: \(row["name"]?.stringValue ?? "")")
+                continue
+            }
+            let described = Self.describedCard(card)
+
+            #expect(
+                described == row["card"],
+                "\(row["name"]?.stringValue ?? ""): \(described.toJsonString(escaping: .relaxed))")
+
+            for choice in row["choices"]?.arrayValue ?? [] {
+                #expect(card.lineFor(Self.choiceIn(choice)) == choice["line"]?.stringValue)
+            }
+        }
+    }
+
+    @Test
+    func everyConversationEndsInTheSameState() {
+        for row in SpecCases.json("conversation")["scenarios"]?.arrayValue ?? [] {
+            let (state, written) = Self.played(row)
+            let described = Self.describedState(state)
+            let name = row["name"]?.stringValue ?? ""
+
+            #expect(described == row["state"], "\(name): \(described.toJsonString(escaping: .relaxed))")
+            #expect(written == Self.strings(row["written"]), "\(name)")
+        }
+    }
+
+    private static func cardIn(_ row: JsonNode) -> RequestCard? {
+        guard case .request(let request) = StreamEvent.fromLine(row["request"]?.toJsonString(escaping: .relaxed)) else {
+            return nil
+        }
+        return RequestCard.from(request)
+    }
+
+    private static func choiceIn(_ choice: JsonNode) -> CardChoice {
+        switch choice["choice"]?.stringValue {
+        case "second": return .second
+        case "deny": return .deny(choice["message"]?.stringValue ?? "")
+        case "answers": return .answers((choice["picked"]?.arrayValue ?? []).map { strings($0) })
+        default: return .allow
+        }
+    }
+
+    /// A scenario of the conversation cases, step by step.
+    private static func played(_ scenario: JsonNode) -> (Conversation, [String]) {
+        var state = Conversation.empty()
+        var written: [String] = []
+
+        func take(_ outcome: Outcome) {
+            state = outcome.state
+            written += outcome.written
+        }
+
+        for step in scenario["steps"]?.arrayValue ?? [] {
+            if let raw = step["raw"]?.stringValue {
+                take(state.on(StreamEvent.fromLine(raw)))
+            } else if let line = step["line"] {
+                take(state.on(StreamEvent.fromLine(line.toJsonString(escaping: .relaxed))))
+            } else {
+                switch step["do"]?.stringValue {
+                case "send":
+                    take(state.send(
+                        step["text"]?.stringValue ?? "",
+                        images: (step["images"]?.arrayValue ?? []).map {
+                            AttachedImage(
+                                mediaType: $0["mediaType"]?.stringValue ?? "",
+                                base64: $0["base64"]?.stringValue ?? "")
+                        }))
+                case "choose":
+                    take(state.choose(step["requestId"]?.stringValue ?? "", choiceIn(step)))
+                case "interrupt":
+                    take(state.interrupt())
+                case "setMode":
+                    take(state.setMode(mode(step["mode"]) ?? .manual))
+                case "markRead":
+                    state = state.markRead()
+                case "exit":
+                    state = state.processExited()
+                default:
+                    Issue.record("unknown step")
+                }
+            }
+        }
+
+        return (state, written)
+    }
+
+    private static func number(_ value: Int) -> JsonNode {
+        .number(String(value))
+    }
+
+    private static func describedStep(_ line: StepLine) -> JsonNode {
+        node([
+            ("kind", .string(String(describing: line.kind))), ("label", .string(line.label)),
+            ("subject", .string(line.subject)), ("added", number(line.added)), ("removed", number(line.removed)),
+            ("hidden", .bool(line.hidden)),
+        ])
+    }
+
+    private static func describedCard(_ card: RequestCard) -> JsonNode {
+        node([
+            ("kind", .string(String(describing: card.kind))), ("second", .string(String(describing: card.second))),
+            ("rule", .string(card.ruleText)), ("subagent", .bool(card.fromSubagent)),
+            ("step", describedStep(card.step)),
+            ("questions", .array(card.questions.map { question in
+                node([
+                    ("text", .string(question.text)), ("header", .string(question.header)),
+                    ("multi", .bool(question.multiSelect)),
+                    ("options", .array(question.options.map {
+                        node([("label", .string($0.label)), ("description", .string($0.description))])
+                    })),
+                ])
+            })),
+            ("plan", .string(card.plan)),
+        ])
+    }
+
+    private static func describedState(_ state: Conversation) -> JsonNode {
+        node([
+            ("activity", .string(String(describing: state.activity))),
+            ("mode", .string(PermissionModes.name(state.mode))), ("model", .string(state.model)),
+            ("session", .string(state.sessionId)), ("tasks", number(state.tasks)), ("unread", .bool(state.unread)),
+            ("compacting", .bool(state.compacting)), ("limits", number(state.limits.count)),
+            ("items", .array(state.items.map(describedItem))),
+        ])
+    }
+
+    private static func describedItem(_ item: FeedItem) -> JsonNode {
+        switch item.content {
+        case .ownerMessage(let words, let images, let queued, _):
+            return node([("owner", .string(words)), ("images", number(images)), ("queued", .bool(queued))])
+        case .answer(let words, let streaming):
+            return node([("answer", .string(words)), ("streaming", .bool(streaming))])
+        case .step(let step):
+            return node([
+                ("step", describedStep(step.line)), ("state", .string(String(describing: step.state))),
+                ("result", .string(step.result)), ("images", number(step.images.count)),
+                ("progress", .string(step.progress)),
+            ])
+        case .card(let request, let state):
+            return node([
+                ("card", .string(String(describing: request.kind))), ("state", .string(String(describing: state))),
+                ("requestId", .string(request.requestId)), ("second", .string(String(describing: request.second))),
+                ("subagent", .bool(request.fromSubagent)),
+            ])
+        case .notice(let kind, let words):
+            return node([("notice", .string(String(describing: kind))), ("text", .string(words))])
         }
     }
 
@@ -744,6 +912,14 @@ struct SharedCaseTests {
                 ("input", .object(request.input)), ("description", .string(request.description)),
                 ("suggestsAcceptEdits", .bool(request.suggestsAcceptEdits)),
                 ("needsAnswer", .bool(request.needsAnswer)),
+                ("agent", text(request.agentId)), ("rule", .string(request.ruleText)),
+            ])
+        case .tasks(let count):
+            return node([("kind", .string("tasks")), ("count", .number(String(count)))])
+        case .taskProgress(let toolUseId, let description):
+            return node([
+                ("kind", .string("taskProgress")), ("toolUseId", .string(toolUseId)),
+                ("description", .string(description)),
             ])
         case .reply(let requestId, let ok, let mode):
             return node([

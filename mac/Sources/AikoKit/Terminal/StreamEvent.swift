@@ -47,6 +47,16 @@ public struct ToolRequest: Sendable, Equatable {
     public let suggestsAcceptEdits: Bool
     public let needsAnswer: Bool
 
+    /// Set when a subagent asks. Its tool call is not in the feed of the conversation.
+    public let agentId: String?
+
+    /// The rule Claude Code offers to add so that it never asks about this again. It goes back
+    /// as it came (D-306).
+    public let rule: JsonObject?
+
+    /// The words of that rule, to show on the button: "mkdir build *".
+    public let ruleText: String
+
     public init(
         requestId: String,
         toolName: String,
@@ -54,7 +64,10 @@ public struct ToolRequest: Sendable, Equatable {
         input: JsonObject,
         description: String,
         suggestsAcceptEdits: Bool,
-        needsAnswer: Bool
+        needsAnswer: Bool,
+        agentId: String? = nil,
+        rule: JsonObject? = nil,
+        ruleText: String = ""
     ) {
         self.requestId = requestId
         self.toolName = toolName
@@ -63,6 +76,9 @@ public struct ToolRequest: Sendable, Equatable {
         self.description = description
         self.suggestsAcceptEdits = suggestsAcceptEdits
         self.needsAnswer = needsAnswer
+        self.agentId = agentId
+        self.rule = rule
+        self.ruleText = ruleText
     }
 }
 
@@ -98,6 +114,13 @@ public enum StreamEvent: Sendable, Equatable {
     case compacted
 
     case rateLimit([LimitWindow])
+
+    /// How many subagents still run in the background. A turn can end while they work, and the
+    /// session is not free until this is zero (D-305).
+    case tasks(Int)
+
+    /// What a subagent is doing now, in a few words of its own.
+    case taskProgress(toolUseId: String, description: String)
 
     /// The turn is over. The text is the output of a command that ran without the model.
     case result(isError: Bool, subtype: String, terminalReason: String, text: String)
@@ -160,6 +183,13 @@ public enum StreamEvent: Sendable, Equatable {
                 mode: PermissionModes.fromStream(root["permissionMode"]?.stringValue))
         case "compact_boundary":
             return .compacted
+        case "background_tasks_changed":
+            return .tasks(items(root["tasks"]).count)
+        case "task_progress":
+            guard let task = root["tool_use_id"]?.stringValue, !task.isEmpty else {
+                return .ignored
+            }
+            return .taskProgress(toolUseId: task, description: root["description"]?.stringValue ?? "")
         default:
             return .ignored
         }
@@ -283,6 +313,13 @@ public enum StreamEvent: Sendable, Equatable {
             $0["type"]?.stringValue == "setMode" && $0["mode"]?.stringValue == "acceptEdits"
         }
 
+        // Only a rule that allows, and only one with words to show: a button needs a name.
+        let rule = items(request["permission_suggestions"]).first {
+            $0["type"]?.stringValue == "addRules"
+                && $0["behavior"]?.stringValue == "allow"
+                && !(items($0["rules"]).first?["ruleContent"]?.stringValue ?? "").isEmpty
+        }
+
         return .request(ToolRequest(
             requestId: id,
             toolName: tool,
@@ -290,7 +327,10 @@ public enum StreamEvent: Sendable, Equatable {
             input: request["input"]?.objectValue ?? JsonObject(),
             description: request["description"]?.stringValue ?? "",
             suggestsAcceptEdits: suggestsAcceptEdits,
-            needsAnswer: request["requires_user_interaction"]?.boolValue ?? false))
+            needsAnswer: request["requires_user_interaction"]?.boolValue ?? false,
+            agentId: request["agent_id"]?.stringValue,
+            rule: rule,
+            ruleText: rule.flatMap { items($0["rules"]).first?["ruleContent"]?.stringValue } ?? ""))
     }
 
     private static func readReply(_ root: JsonObject) -> StreamEvent {

@@ -54,7 +54,25 @@ public abstract record StreamEvent
         JsonElement Input,
         string Description,
         bool SuggestsAcceptEdits,
-        bool NeedsAnswer) : StreamEvent;
+        bool NeedsAnswer) : StreamEvent
+    {
+        /// Set when a subagent asks. Its tool call is not in the feed of the conversation.
+        public string? AgentId { get; init; }
+
+        /// The rule Claude Code offers to add so that it never asks about this again. It goes
+        /// back as it came (D-306).
+        public JsonElement? Rule { get; init; }
+
+        /// The words of that rule, to show on the button: "mkdir build *".
+        public string RuleText { get; init; } = "";
+    }
+
+    /// How many subagents still run in the background. A turn can end while they work, and the
+    /// session is not free until this is zero (D-305).
+    public sealed record Tasks(int Count) : StreamEvent;
+
+    /// What a subagent is doing now, in a few words of its own.
+    public sealed record TaskProgress(string ToolUseId, string Description) : StreamEvent;
 
     /// The answer to a request the terminal sent: an interrupt or a change of mode.
     public sealed record Reply(string RequestId, bool Ok, PermissionMode? Mode) : StreamEvent;
@@ -127,6 +145,10 @@ public abstract record StreamEvent
                 return new Status(Str(root, "status"), PermissionModes.FromStream(Str(root, "permissionMode")));
             case "compact_boundary":
                 return new Compacted();
+            case "background_tasks_changed":
+                return new Tasks(Items(root, "tasks").Count());
+            case "task_progress" when Str(root, "tool_use_id") is { Length: > 0 } task:
+                return new TaskProgress(task, Str(root, "description") ?? "");
             default:
                 return new Ignored();
         }
@@ -242,6 +264,16 @@ public abstract record StreamEvent
         var suggestsAcceptEdits = Items(request, "permission_suggestions")
             .Any(suggestion => Str(suggestion, "type") == "setMode" && Str(suggestion, "mode") == "acceptEdits");
 
+        // Only a rule that allows, and only one with words to show: a button needs a name.
+        JsonElement? rule = Items(request, "permission_suggestions").FirstOrDefault(suggestion =>
+            Str(suggestion, "type") == "addRules"
+            && Str(suggestion, "behavior") == "allow"
+            && Str(Items(suggestion, "rules").FirstOrDefault(), "ruleContent") is { Length: > 0 });
+        if (rule is { ValueKind: JsonValueKind.Undefined })
+        {
+            rule = null;
+        }
+
         return new Request(
             id,
             tool,
@@ -249,7 +281,12 @@ public abstract record StreamEvent
             Object(request, "input")?.Clone() ?? EmptyObject,
             Str(request, "description") ?? "",
             suggestsAcceptEdits,
-            Flag(request, "requires_user_interaction"));
+            Flag(request, "requires_user_interaction"))
+        {
+            AgentId = Str(request, "agent_id"),
+            Rule = rule?.Clone(),
+            RuleText = Str(Items(rule, "rules").FirstOrDefault(), "ruleContent") ?? "",
+        };
     }
 
     private static StreamEvent ReadReply(JsonElement root)

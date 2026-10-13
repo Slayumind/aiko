@@ -44,6 +44,28 @@ public enum HostLine {
         respond(requestId, [("behavior", .string("allow")), ("updatedInput", .object(input))])
     }
 
+    /// Yes, and no more questions about edits in this session: the mode change travels with the
+    /// answer (D-305).
+    public static func allowEdits(_ requestId: String, input: JsonObject) -> String {
+        let mode = object([
+            ("type", .string("setMode")),
+            ("mode", .string(PermissionModes.name(.acceptEdits))),
+            ("destination", .string("session")),
+        ])
+        return respond(requestId, [
+            ("behavior", .string("allow")), ("updatedInput", .object(input)), ("updatedPermissions", .array([mode])),
+        ])
+    }
+
+    /// Yes, and the rule Claude Code offered goes back as it came. Claude Code writes it into the
+    /// settings of the project itself (D-306).
+    public static func allowAlways(_ requestId: String, input: JsonObject, rule: JsonObject) -> String {
+        respond(requestId, [
+            ("behavior", .string("allow")), ("updatedInput", .object(input)),
+            ("updatedPermissions", .array([.object(rule)])),
+        ])
+    }
+
     /// The message reaches Claude as the error of the tool.
     public static func deny(_ requestId: String, message: String) -> String {
         respond(requestId, [("behavior", .string("deny")), ("message", .string(message))])
