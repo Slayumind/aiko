@@ -914,7 +914,7 @@ public class SharedCaseTests
         {
             var described = FormDescribed(row, settings);
 
-            foreach (var part in new[] { "folders", "names", "elsewhere" })
+            foreach (var part in new[] { "folders", "names", "elsewhere", "model" })
             {
                 Assert.True(
                     JsonNode.DeepEquals(JsonNode.Parse(row.GetProperty(part).GetRawText()), described[part]),
@@ -1009,6 +1009,7 @@ public class SharedCaseTests
                 .Select(folder => (JsonNode)NewSessionChoices.DefaultName(sessions, environment.Name, folder))]),
             ["elsewhere"] = new JsonArray([.. Strings(row.GetProperty("elsewhereFor"))
                 .Select(folder => (JsonNode?)NewSessionChoices.BoundElsewhere(folder, environment, settings))]),
+            ["model"] = NewSessionChoices.DefaultModel(sessions, environment.Name),
         };
     }
 

@@ -26,9 +26,9 @@ public enum NewSessionChoices {
     public static let mostRecent = 5
 
     /// The models of the form, as the words Claude Code takes for --model. They are the short
-    /// names, which stay the same from one version of a model to the next. Nil is the first
-    /// choice: Claude Code picks the model itself.
-    public static let models: [String?] = [nil, "opus", "sonnet", "haiku"]
+    /// names, which stay the same from one version of a model to the next. The form offers models
+    /// only (D-308): a session always starts with one of them.
+    public static let models = ["opus", "sonnet", "haiku"]
 
     /// The folders, each once: where sessions of the environment ran last, then every bound
     /// folder followed by the folders inside it. foldersInside gives the full paths of the folders
@@ -72,6 +72,18 @@ public enum NewSessionChoices {
         }
 
         return choices
+    }
+
+    /// The model the form starts with: the one of the session of the environment that was used
+    /// last and has a model of the list. With no such session it is the first of the list.
+    public static func defaultModel(_ sessions: TerminalSessions, _ environment: String) -> String {
+        var latest: (model: String, used: Int64)?
+        for session in sessions.sessions where session.environment == environment {
+            if let model = session.model, models.contains(model), session.lastUsed > (latest?.used ?? Int64.min) {
+                latest = (model, session.lastUsed)
+            }
+        }
+        return latest?.model ?? models[0]
     }
 
     /// The name of the other environment a folder is bound to, or nil. The form says so before

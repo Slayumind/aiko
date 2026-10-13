@@ -35,7 +35,7 @@ stamp, not a table (D-255).
 | `request-card/` | a request as a card, and the line each choice writes back (`RequestCard`) |
 | `terminal-sessions/` | the list of sessions as the file `terminal.json`: adding, closing, moving, and what a broken file reads as (`TerminalSessions`) |
 | `session-name/` | the name of a session with an empty name field, and how a name and a folder are kept (`SessionName`) |
-| `new-session/` | the folders the form of a new session offers, and the other environment a folder is bound to (`NewSessionChoices`) |
+| `new-session/` | the folders the form of a new session offers, the model it starts with, and the other environment a folder is bound to (`NewSessionChoices`) |
 | `transcript/` | the file Claude Code keeps of a conversation, read into the feed (`Transcript`) |
 | `transcript-path/` | where that file is (`TranscriptPath`) |
 | `markdown/` | the markdown of an answer read into blocks and inlines (`Markdown`) |
