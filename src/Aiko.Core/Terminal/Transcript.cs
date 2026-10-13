@@ -1,0 +1,169 @@
+using System.Text.Json;
+
+namespace Aiko.Core.Terminal;
+
+/// The file Claude Code keeps of a conversation, read into the feed of the terminal (D-303).
+///
+/// Aiko keeps no copy of a conversation. When the person goes back into a session, its feed is
+/// read from this file into memory. The lines "user" and "assistant" carry a message in the same
+/// shape as the stream, so they go through the same Conversation and give the same items.
+///
+/// The format is not documented, so every line is taken on its own terms: what is not understood
+/// is skipped. Only the message of a line is read. The other lines hold the folder, the text of
+/// the persona and the last prompt, and none of that is looked at.
+public static class Transcript
+{
+    /// What Claude Code writes in the place of a message when the person stops a turn.
+    private const string Interrupted = "[Request interrupted by user";
+
+    /// The feed of a conversation that is over: nothing in it runs or waits.
+    public static Conversation Read(IEnumerable<string> lines, PermissionMode mode)
+    {
+        var state = Conversation.Empty(mode);
+        foreach (var line in lines)
+        {
+            state = Taken(state, line);
+        }
+
+        // A step without a result was cut off. A failure that was said back then is not the
+        // state of the session now.
+        return state with
+        {
+            Items = [.. state.Items.Select(item => item is FeedItem.Step { State: StepState.Running } step
+                ? step with { State = StepState.Failed }
+                : item)],
+            InTurn = false,
+            Tasks = 0,
+            Unread = false,
+            Failure = TalkFailure.None,
+            AnsweredInTurn = false,
+            FailedInTurn = false,
+            Compacting = false,
+        };
+    }
+
+    private static Conversation Taken(Conversation state, string line)
+    {
+        JsonDocument document;
+        try
+        {
+            document = JsonDocument.Parse(line);
+        }
+        catch (JsonException)
+        {
+            return state;
+        }
+
+        using (document)
+        {
+            var root = document.RootElement;
+            if (root.ValueKind != JsonValueKind.Object || Flag(root, "isSidechain"))
+            {
+                return state;
+            }
+
+            switch (Word(root, "type"))
+            {
+                case "assistant" when !IsEmptyReply(root):
+                    return state.On(StreamEvent.FromLine(line)).State;
+                case "user" when !Flag(root, "isMeta") && !Flag(root, "isCompactSummary"):
+                    return FromPerson(state, root, line);
+                case "system" when Word(root, "subtype") == "compact_boundary":
+                    return state.On(StreamEvent.FromLine(line)).State;
+                default:
+                    return state;
+            }
+        }
+    }
+
+    /// A "user" line is either what tools gave back, or what the person wrote.
+    private static Conversation FromPerson(Conversation state, JsonElement root, string line)
+    {
+        if (StreamEvent.FromLine(line) is not StreamEvent.User user)
+        {
+            return state;
+        }
+
+        if (user.Results.Count > 0)
+        {
+            return state.On(user).State;
+        }
+
+        var images = Blocks(root).Count(block => Word(block, "type") == "image");
+        if (user.Text.StartsWith(Interrupted, StringComparison.Ordinal))
+        {
+            return state with
+            {
+                Items = [.. state.Items, new FeedItem.Notice(state.NextId, NoticeKind.Interrupted, "")],
+                NextId = state.NextId + 1,
+            };
+        }
+
+        // What a command printed without the model. The stream shows it as a notice, so does this.
+        if (Tagged(user.Text, "local-command-stdout") is { Length: > 0 } output && user.Text.StartsWith('<'))
+        {
+            return state with
+            {
+                Items = [.. state.Items, new FeedItem.Notice(state.NextId, NoticeKind.Output, output)],
+                NextId = state.NextId + 1,
+            };
+        }
+
+        var text = Written(user.Text);
+        if (text.Length == 0 && images == 0)
+        {
+            return state;
+        }
+
+        return state with
+        {
+            Items = [.. state.Items, new FeedItem.OwnerMessage(state.NextId, text, images, false, [])],
+            NextId = state.NextId + 1,
+        };
+    }
+
+    /// The words of the person. Claude Code wraps a command in tags and writes notes of its own
+    /// as messages; a command is shown the way it was typed, a note is not shown.
+    private static string Written(string text)
+    {
+        if (!text.StartsWith('<'))
+        {
+            return text;
+        }
+
+        var command = Tagged(text, "command-name");
+        if (command.Length == 0)
+        {
+            return "";
+        }
+
+        var arguments = Tagged(text, "command-args");
+        return arguments.Length > 0 ? $"{command} {arguments}" : command;
+    }
+
+    private static string Tagged(string text, string tag)
+    {
+        var start = text.IndexOf($"<{tag}>", StringComparison.Ordinal);
+        var end = text.IndexOf($"</{tag}>", StringComparison.Ordinal);
+        return start >= 0 && end > start
+            ? text[(start + tag.Length + 2)..end].Trim(' ', '\t', '\r', '\n')
+            : "";
+    }
+
+    /// Claude Code fills a turn without an answer with a message of its own, from no model.
+    private static bool IsEmptyReply(JsonElement root) =>
+        Word(Member(root, "message"), "model") == "<synthetic>" && Word(root, "error").Length == 0;
+
+    private static IEnumerable<JsonElement> Blocks(JsonElement root) =>
+        Member(Member(root, "message"), "content") is { ValueKind: JsonValueKind.Array } content
+            ? content.EnumerateArray().Where(block => block.ValueKind == JsonValueKind.Object)
+            : [];
+
+    private static JsonElement Member(JsonElement node, string key) =>
+        node.ValueKind == JsonValueKind.Object && node.TryGetProperty(key, out var value) ? value : default;
+
+    private static string Word(JsonElement node, string key) =>
+        Member(node, key) is { ValueKind: JsonValueKind.String } value ? value.GetString() ?? "" : "";
+
+    private static bool Flag(JsonElement node, string key) => Member(node, key).ValueKind == JsonValueKind.True;
+}

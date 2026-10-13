@@ -169,6 +169,28 @@ enum TerminalCheck {
         return answered ? 0 : 1
     }
 
+    /// --try-history <folder> <session id> [environment]: reads the file Claude Code keeps of a
+    /// conversation the way the window will, and counts what came out. The text stays in memory.
+    static func history(_ folder: String, sessionId: String, environmentName: String?) -> Int32 {
+        let config = setup(claude: "claude", folder: folder, environmentName: environmentName).configDirectory
+        let found = TerminalStore.transcriptFile(configDirectory: config, folder: folder, sessionId: sessionId) != nil
+        let items = TerminalStore.history(
+            configDirectory: config, folder: folder, sessionId: sessionId, mode: .manual).items
+
+        func count(_ matches: (FeedItem.Content) -> Bool) -> Int {
+            items.filter { matches($0.content) }.count
+        }
+
+        AppTerminalLog.historyChecked(
+            found: found,
+            items: items.count,
+            messages: count { if case .ownerMessage = $0 { true } else { false } },
+            answers: count { if case .answer = $0 { true } else { false } },
+            steps: count { if case .step = $0 { true } else { false } },
+            notices: count { if case .notice = $0 { true } else { false } })
+        return found && !items.isEmpty ? 0 : 1
+    }
+
     private static func setup(claude: String, folder: String, environmentName: String?) -> RunnerSetup {
         let environments = Store.environments().environments
         let environment = environments.first { $0.name == environmentName } ?? environments.first

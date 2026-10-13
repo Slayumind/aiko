@@ -45,6 +45,10 @@ public sealed record AikoFolders(PlatformConventions Platform, string SettingsBa
     /// theirs, it is backed up with them, and macOS must not empty it.
     public string MemoryFile => Platform.Join(SettingsFolder, "memory.json");
 
+    /// The sessions of the terminal: their names, folders and conversation ids. No text of a
+    /// conversation is ever written there.
+    public string TerminalFile => Platform.Join(SettingsFolder, "terminal.json");
+
     public string InstallIdFile => Platform.Join(SettingsFolder, "install-id");
 
     public string ReportedPeriodsFile => Platform.Join(SettingsFolder, "reported.json");

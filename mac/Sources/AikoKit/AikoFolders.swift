@@ -64,6 +64,10 @@ public struct AikoFolders: Sendable, Equatable {
 
     public var reportedPeriodsFile: String { platform.join(settingsFolder, "reported.json") }
 
+    /// The sessions of the terminal: their names, folders and conversation ids. No text of a
+    /// conversation is ever written there.
+    public var terminalFile: String { platform.join(settingsFolder, "terminal.json") }
+
     /// The limit snapshots the bridge writes, one file per config folder.
     public var snapshotsFolder: String { platform.join(localFolder, "environments") }
 

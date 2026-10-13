@@ -83,6 +83,7 @@ struct SharedCaseTests {
                 "memoryFile": folders.memoryFile,
                 "installIdFile": folders.installIdFile,
                 "reportedPeriodsFile": folders.reportedPeriodsFile,
+                "terminalFile": folders.terminalFile,
                 "localFolder": folders.localFolder,
                 "snapshotsFolder": folders.snapshotsFolder,
                 "snapshotFile": folders.snapshotFile(snapshotName),
@@ -817,6 +818,172 @@ struct SharedCaseTests {
         func stopped(_ environment: String, linesRead: Int, linesWritten: Int) {
             lines.append("stopped \(environment) read \(linesRead) written \(linesWritten)")
         }
+    }
+
+    @Test
+    func everySessionGetsTheSameName() {
+        let cases = SpecCases.json("session-name")
+
+        for row in cases["defaults"]?.arrayValue ?? [] {
+            #expect(
+                SessionName.defaultName(row["folder"]?.stringValue ?? "", taken: Self.strings(row["taken"]))
+                    == row["name"]?.stringValue)
+        }
+
+        for row in cases["names"]?.arrayValue ?? [] {
+            #expect(SessionName.clean(row["input"]?.stringValue) == row["name"]?.stringValue)
+        }
+
+        for row in cases["folders"]?.arrayValue ?? [] {
+            let input = row["input"]?.stringValue ?? ""
+            #expect(SessionName.folderPath(input) == row["path"]?.stringValue)
+            #expect(SessionName.folderName(input) == row["name"]?.stringValue)
+        }
+    }
+
+    @Test
+    func everyConversationFileIsFoundInTheSamePlace() {
+        for row in SpecCases.json("transcript-path")["paths"]?.arrayValue ?? [] {
+            let folder = row["folder"]?.stringValue ?? ""
+
+            #expect(TranscriptPath.folderName(folder) == row["folderName"]?.stringValue)
+            #expect(TranscriptPath.isCut(folder) == row["cut"]?.boolValue)
+            #expect(
+                TranscriptPath.forSession(
+                    Self.platformIn(row), configDirectory: row["config"]?.stringValue ?? "",
+                    workingDirectory: folder, sessionId: row["id"]?.stringValue ?? "")
+                    == row["path"]?.stringValue)
+        }
+    }
+
+    @Test
+    func everyListOfSessionsChangesTheSame() {
+        for row in SpecCases.json("terminal-sessions")["scenarios"]?.arrayValue ?? [] {
+            let described = Self.sessionsDescribed(row)
+
+            for part in ["saved", "groups", "toOpen"] {
+                #expect(
+                    described[part] == row[part],
+                    "\(row["name"]?.stringValue ?? ""), \(part): \(described[part]?.toJsonString(escaping: .relaxed) ?? "")")
+            }
+        }
+    }
+
+    @Test
+    func everyConversationFileIsReadIntoTheSameFeed() {
+        for row in SpecCases.json("transcript")["transcripts"]?.arrayValue ?? [] {
+            let described = Self.transcriptDescribed(row)
+
+            #expect(
+                described == row["state"],
+                "\(row["name"]?.stringValue ?? ""): \(described.toJsonString(escaping: .relaxed))")
+        }
+    }
+
+    @Test
+    func everyFormOfANewSessionOffersTheSame() {
+        let cases = SpecCases.json("new-session")
+        let settings = EnvironmentSettings((cases["environments"]?.arrayValue ?? []).map(Self.environmentIn))
+
+        for row in cases["forms"]?.arrayValue ?? [] {
+            let described = Self.formDescribed(row, settings, Self.platformIn(.object(cases)))
+
+            for part in ["folders", "names", "elsewhere"] {
+                #expect(
+                    described[part] == row[part],
+                    "\(row["name"]?.stringValue ?? ""), \(part): \(described[part]?.toJsonString(escaping: .relaxed) ?? "")")
+            }
+        }
+    }
+
+    /// The file of a case: an object or a list as it is, a text as a broken file, null as no file.
+    private static func fileIn(_ file: JsonNode?) -> String? {
+        switch file {
+        case .none, .some(.null): return nil
+        case .some(.string(let text)): return text
+        case .some(let other): return other.toJsonString(escaping: .relaxed)
+        }
+    }
+
+    private static func sessionsDescribed(_ row: JsonNode) -> JsonNode {
+        var sessions = TerminalSessions.fromJson(fileIn(row["file"]))
+
+        for step in row["steps"]?.arrayValue ?? [] {
+            func word(_ key: String) -> String { step[key]?.stringValue ?? "" }
+
+            switch step["do"]?.stringValue {
+            case "add":
+                sessions = sessions.add(
+                    id: word("id"), environment: word("environment"), folder: word("folder"), name: word("name"),
+                    model: step["model"]?.stringValue, mode: mode(step["mode"]) ?? .manual,
+                    now: step["now"]?.int64Value ?? 0)
+            case "rename": sessions = sessions.rename(word("id"), word("name"))
+            case "setMode": sessions = sessions.setMode(word("id"), mode(step["mode"]) ?? .manual)
+            case "setModel": sessions = sessions.setModel(word("id"), step["model"]?.stringValue)
+            case "started": sessions = sessions.markStarted(word("id"))
+            case "used": sessions = sessions.used(word("id"), now: step["now"]?.int64Value ?? 0)
+            case "opened": sessions = sessions.opened(word("id"))
+            case "close": sessions = sessions.close(word("id"))
+            case "move": sessions = sessions.move(word("id"), before: step["before"]?.stringValue)
+            default: Issue.record("unknown step")
+            }
+        }
+
+        let environment = row["environment"]?.stringValue ?? ""
+        return node([
+            ("saved", JsonNode.parse(sessions.toJson()) ?? .null),
+            ("groups", .array(sessions.groups(environment).map { group in
+                node([
+                    ("folder", .string(group.folder)), ("name", .string(group.name)),
+                    ("sessions", .array(group.sessions.map { .string($0.name) })),
+                ])
+            })),
+            ("toOpen", text(sessions.toOpen(environment)?.id)),
+        ])
+    }
+
+    private static func transcriptDescribed(_ row: JsonNode) -> JsonNode {
+        let lines = (row["lines"]?.arrayValue ?? []).map { line in
+            line.stringValue ?? line.toJsonString(escaping: .relaxed)
+        }
+        let state = Transcript.read(lines, mode: .plan)
+
+        return node([
+            ("activity", .string(String(describing: state.activity))),
+            ("mode", .string(PermissionModes.name(state.mode))),
+            ("busy", .bool(state.isBusy)),
+            ("nextId", number(state.nextId)),
+            ("items", .array(state.items.map(describedItem))),
+        ])
+    }
+
+    private static func formDescribed(
+        _ row: JsonNode, _ settings: EnvironmentSettings, _ platform: PlatformConventions
+    ) -> JsonNode {
+        let sessions = TerminalSessions.fromJson(fileIn(row["sessions"]))
+        guard let environment = settings.environments.first(where: { $0.name == row["environment"]?.stringValue })
+        else {
+            return .null
+        }
+
+        let folders = NewSessionChoices.folders(sessions, environment) { bound in
+            strings(row["inside"]?[bound])
+        }
+
+        return node([
+            ("folders", .array(folders.map { choice in
+                node([
+                    ("path", .string(choice.path)), ("name", .string(choice.name)),
+                    ("source", .string(String(describing: choice.source))),
+                ])
+            })),
+            ("names", .array(strings(row["nameFor"]).map {
+                .string(NewSessionChoices.defaultName(sessions, environment.name, $0))
+            })),
+            ("elsewhere", .array(strings(row["elsewhereFor"]).map {
+                text(NewSessionChoices.boundElsewhere(platform, $0, environment, settings))
+            })),
+        ])
     }
 
     @Test

@@ -1,0 +1,2354 @@
+{
+  "comment": "The list of sessions of the terminal, the file terminal.json (D-293). A scenario reads a file, does the steps and gives what is saved, the groups of one environment and the session the window opens on. The list keeps the order of the person; a group is a folder, in the order the folders first appear. A closed session leaves the list and stays in the file. Not a word of a conversation is in the file.",
+  "scenarios": [
+    {
+      "name": "no file yet",
+      "file": null,
+      "steps": [],
+      "environment": "Aiko",
+      "saved": {
+        "sessions": []
+      },
+      "groups": [],
+      "toOpen": null
+    },
+    {
+      "name": "a broken file is an empty list",
+      "file": "{ not json",
+      "steps": [],
+      "environment": "Aiko",
+      "saved": {
+        "sessions": []
+      },
+      "groups": [],
+      "toOpen": null
+    },
+    {
+      "name": "a file of another shape is an empty list",
+      "file": [
+        1,
+        2
+      ],
+      "steps": [],
+      "environment": "Aiko",
+      "saved": {
+        "sessions": []
+      },
+      "groups": [],
+      "toOpen": null
+    },
+    {
+      "name": "the first session gets the folder with a number and becomes the last one",
+      "file": null,
+      "steps": [
+        {
+          "do": "add",
+          "id": "a1",
+          "environment": "Aiko",
+          "folder": "/work/aiko/",
+          "name": "",
+          "model": null,
+          "mode": "manual",
+          "now": 100
+        }
+      ],
+      "environment": "Aiko",
+      "saved": {
+        "sessions": [
+          {
+            "id": "a1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 100
+          }
+        ],
+        "last": "a1"
+      },
+      "groups": [
+        {
+          "folder": "/work/aiko",
+          "name": "aiko",
+          "sessions": [
+            "aiko 1"
+          ]
+        }
+      ],
+      "toOpen": "a1"
+    },
+    {
+      "name": "the second session of a folder gets the next number, a name of the person is kept",
+      "file": null,
+      "steps": [
+        {
+          "do": "add",
+          "id": "a1",
+          "environment": "Aiko",
+          "folder": "/work/aiko",
+          "name": "",
+          "model": null,
+          "mode": "manual",
+          "now": 100
+        },
+        {
+          "do": "add",
+          "id": "a2",
+          "environment": "Aiko",
+          "folder": "/work/aiko",
+          "name": "",
+          "model": null,
+          "mode": "manual",
+          "now": 100
+        },
+        {
+          "do": "add",
+          "id": "a3",
+          "environment": "Aiko",
+          "folder": "/work/aiko",
+          "name": "  the terminal\n",
+          "model": null,
+          "mode": "manual",
+          "now": 100
+        },
+        {
+          "do": "add",
+          "id": "a4",
+          "environment": "Aiko",
+          "folder": "/work/aiko",
+          "name": "",
+          "model": null,
+          "mode": "manual",
+          "now": 100
+        }
+      ],
+      "environment": "Aiko",
+      "saved": {
+        "sessions": [
+          {
+            "id": "a1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 100
+          },
+          {
+            "id": "a2",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 2",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 100
+          },
+          {
+            "id": "a3",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "the terminal",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 100
+          },
+          {
+            "id": "a4",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 3",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 100
+          }
+        ],
+        "last": "a4"
+      },
+      "groups": [
+        {
+          "folder": "/work/aiko",
+          "name": "aiko",
+          "sessions": [
+            "aiko 1",
+            "aiko 2",
+            "the terminal",
+            "aiko 3"
+          ]
+        }
+      ],
+      "toOpen": "a4"
+    },
+    {
+      "name": "the numbers are counted in one environment and one folder",
+      "file": {
+        "sessions": [
+          {
+            "id": "a1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "s1",
+            "environment": "Aiko",
+            "folder": "/work/site",
+            "name": "site 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "a2",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 2",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "w1",
+            "environment": "Work",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          }
+        ],
+        "last": "s1"
+      },
+      "steps": [
+        {
+          "do": "add",
+          "id": "n1",
+          "environment": "Aiko",
+          "folder": "/work/aiko",
+          "name": "",
+          "model": null,
+          "mode": "manual",
+          "now": 100
+        },
+        {
+          "do": "add",
+          "id": "n2",
+          "environment": "Aiko",
+          "folder": "/work/site",
+          "name": "",
+          "model": null,
+          "mode": "manual",
+          "now": 100
+        },
+        {
+          "do": "add",
+          "id": "n3",
+          "environment": "Work",
+          "folder": "/work/aiko",
+          "name": "",
+          "model": null,
+          "mode": "manual",
+          "now": 100
+        }
+      ],
+      "environment": "Aiko",
+      "saved": {
+        "sessions": [
+          {
+            "id": "a1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "s1",
+            "environment": "Aiko",
+            "folder": "/work/site",
+            "name": "site 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "a2",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 2",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "w1",
+            "environment": "Work",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "n1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 3",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 100
+          },
+          {
+            "id": "n2",
+            "environment": "Aiko",
+            "folder": "/work/site",
+            "name": "site 2",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 100
+          },
+          {
+            "id": "n3",
+            "environment": "Work",
+            "folder": "/work/aiko",
+            "name": "aiko 2",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 100
+          }
+        ],
+        "last": "n3"
+      },
+      "groups": [
+        {
+          "folder": "/work/aiko",
+          "name": "aiko",
+          "sessions": [
+            "aiko 1",
+            "aiko 2",
+            "aiko 3"
+          ]
+        },
+        {
+          "folder": "/work/site",
+          "name": "site",
+          "sessions": [
+            "site 1",
+            "site 2"
+          ]
+        }
+      ],
+      "toOpen": "a1"
+    },
+    {
+      "name": "groups follow the folders as they first appear, sessions keep the order of the list",
+      "file": {
+        "sessions": [
+          {
+            "id": "a1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "s1",
+            "environment": "Aiko",
+            "folder": "/work/site",
+            "name": "site 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "a2",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 2",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "w1",
+            "environment": "Work",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          }
+        ],
+        "last": "s1"
+      },
+      "steps": [],
+      "environment": "Aiko",
+      "saved": {
+        "sessions": [
+          {
+            "id": "a1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "s1",
+            "environment": "Aiko",
+            "folder": "/work/site",
+            "name": "site 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "a2",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 2",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "w1",
+            "environment": "Work",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          }
+        ],
+        "last": "s1"
+      },
+      "groups": [
+        {
+          "folder": "/work/aiko",
+          "name": "aiko",
+          "sessions": [
+            "aiko 1",
+            "aiko 2"
+          ]
+        },
+        {
+          "folder": "/work/site",
+          "name": "site",
+          "sessions": [
+            "site 1"
+          ]
+        }
+      ],
+      "toOpen": "s1"
+    },
+    {
+      "name": "the other environment has its own list",
+      "file": {
+        "sessions": [
+          {
+            "id": "a1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "s1",
+            "environment": "Aiko",
+            "folder": "/work/site",
+            "name": "site 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "a2",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 2",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "w1",
+            "environment": "Work",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          }
+        ],
+        "last": "s1"
+      },
+      "steps": [],
+      "environment": "Work",
+      "saved": {
+        "sessions": [
+          {
+            "id": "a1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "s1",
+            "environment": "Aiko",
+            "folder": "/work/site",
+            "name": "site 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "a2",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 2",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "w1",
+            "environment": "Work",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          }
+        ],
+        "last": "s1"
+      },
+      "groups": [
+        {
+          "folder": "/work/aiko",
+          "name": "aiko",
+          "sessions": [
+            "aiko 1"
+          ]
+        }
+      ],
+      "toOpen": "w1"
+    },
+    {
+      "name": "an id that is taken, or a session without a folder, is not added",
+      "file": {
+        "sessions": [
+          {
+            "id": "a1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "s1",
+            "environment": "Aiko",
+            "folder": "/work/site",
+            "name": "site 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "a2",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 2",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "w1",
+            "environment": "Work",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          }
+        ],
+        "last": "s1"
+      },
+      "steps": [
+        {
+          "do": "add",
+          "id": "a1",
+          "environment": "Aiko",
+          "folder": "/work/site",
+          "name": "",
+          "model": null,
+          "mode": "manual",
+          "now": 100
+        },
+        {
+          "do": "add",
+          "id": "x1",
+          "environment": "Aiko",
+          "folder": "  ",
+          "name": "",
+          "model": null,
+          "mode": "manual",
+          "now": 100
+        },
+        {
+          "do": "add",
+          "id": "",
+          "environment": "Aiko",
+          "folder": "/work/aiko",
+          "name": "",
+          "model": null,
+          "mode": "manual",
+          "now": 100
+        },
+        {
+          "do": "add",
+          "id": "x2",
+          "environment": "",
+          "folder": "/work/aiko",
+          "name": "",
+          "model": null,
+          "mode": "manual",
+          "now": 100
+        }
+      ],
+      "environment": "Aiko",
+      "saved": {
+        "sessions": [
+          {
+            "id": "a1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "s1",
+            "environment": "Aiko",
+            "folder": "/work/site",
+            "name": "site 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "a2",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 2",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "w1",
+            "environment": "Work",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          }
+        ],
+        "last": "s1"
+      },
+      "groups": [
+        {
+          "folder": "/work/aiko",
+          "name": "aiko",
+          "sessions": [
+            "aiko 1",
+            "aiko 2"
+          ]
+        },
+        {
+          "folder": "/work/site",
+          "name": "site",
+          "sessions": [
+            "site 1"
+          ]
+        }
+      ],
+      "toOpen": "s1"
+    },
+    {
+      "name": "a model is kept as typed, an empty one is no model",
+      "file": null,
+      "steps": [
+        {
+          "do": "add",
+          "id": "a1",
+          "environment": "Aiko",
+          "folder": "/work/aiko",
+          "name": "",
+          "model": "  opus ",
+          "mode": "manual",
+          "now": 100
+        },
+        {
+          "do": "add",
+          "id": "a2",
+          "environment": "Aiko",
+          "folder": "/work/aiko",
+          "name": "",
+          "model": "  ",
+          "mode": "plan",
+          "now": 100
+        }
+      ],
+      "environment": "Aiko",
+      "saved": {
+        "sessions": [
+          {
+            "id": "a1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "model": "opus",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 100
+          },
+          {
+            "id": "a2",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 2",
+            "mode": "plan",
+            "started": false,
+            "closed": false,
+            "lastUsed": 100
+          }
+        ],
+        "last": "a2"
+      },
+      "groups": [
+        {
+          "folder": "/work/aiko",
+          "name": "aiko",
+          "sessions": [
+            "aiko 1",
+            "aiko 2"
+          ]
+        }
+      ],
+      "toOpen": "a2"
+    },
+    {
+      "name": "renaming, and an empty name that changes nothing",
+      "file": {
+        "sessions": [
+          {
+            "id": "a1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "s1",
+            "environment": "Aiko",
+            "folder": "/work/site",
+            "name": "site 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "a2",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 2",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "w1",
+            "environment": "Work",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          }
+        ],
+        "last": "s1"
+      },
+      "steps": [
+        {
+          "do": "rename",
+          "id": "a1",
+          "name": " the feed "
+        },
+        {
+          "do": "rename",
+          "id": "a2",
+          "name": "  "
+        }
+      ],
+      "environment": "Aiko",
+      "saved": {
+        "sessions": [
+          {
+            "id": "a1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "the feed",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "s1",
+            "environment": "Aiko",
+            "folder": "/work/site",
+            "name": "site 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "a2",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 2",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "w1",
+            "environment": "Work",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          }
+        ],
+        "last": "s1"
+      },
+      "groups": [
+        {
+          "folder": "/work/aiko",
+          "name": "aiko",
+          "sessions": [
+            "the feed",
+            "aiko 2"
+          ]
+        },
+        {
+          "folder": "/work/site",
+          "name": "site",
+          "sessions": [
+            "site 1"
+          ]
+        }
+      ],
+      "toOpen": "s1"
+    },
+    {
+      "name": "the mode, the model, the start and the time are remembered",
+      "file": {
+        "sessions": [
+          {
+            "id": "a1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "s1",
+            "environment": "Aiko",
+            "folder": "/work/site",
+            "name": "site 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "a2",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 2",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "w1",
+            "environment": "Work",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          }
+        ],
+        "last": "s1"
+      },
+      "steps": [
+        {
+          "do": "setMode",
+          "id": "a1",
+          "mode": "acceptEdits"
+        },
+        {
+          "do": "setModel",
+          "id": "a1",
+          "model": "sonnet"
+        },
+        {
+          "do": "started",
+          "id": "a1"
+        },
+        {
+          "do": "used",
+          "id": "a1",
+          "now": 500
+        }
+      ],
+      "environment": "Aiko",
+      "saved": {
+        "sessions": [
+          {
+            "id": "a1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "model": "sonnet",
+            "mode": "acceptEdits",
+            "started": true,
+            "closed": false,
+            "lastUsed": 500
+          },
+          {
+            "id": "s1",
+            "environment": "Aiko",
+            "folder": "/work/site",
+            "name": "site 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "a2",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 2",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "w1",
+            "environment": "Work",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          }
+        ],
+        "last": "s1"
+      },
+      "groups": [
+        {
+          "folder": "/work/aiko",
+          "name": "aiko",
+          "sessions": [
+            "aiko 1",
+            "aiko 2"
+          ]
+        },
+        {
+          "folder": "/work/site",
+          "name": "site",
+          "sessions": [
+            "site 1"
+          ]
+        }
+      ],
+      "toOpen": "s1"
+    },
+    {
+      "name": "going into a session makes it the last one",
+      "file": {
+        "sessions": [
+          {
+            "id": "a1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "s1",
+            "environment": "Aiko",
+            "folder": "/work/site",
+            "name": "site 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "a2",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 2",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "w1",
+            "environment": "Work",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          }
+        ],
+        "last": "s1"
+      },
+      "steps": [
+        {
+          "do": "opened",
+          "id": "a2"
+        }
+      ],
+      "environment": "Aiko",
+      "saved": {
+        "sessions": [
+          {
+            "id": "a1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "s1",
+            "environment": "Aiko",
+            "folder": "/work/site",
+            "name": "site 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "a2",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 2",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "w1",
+            "environment": "Work",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          }
+        ],
+        "last": "a2"
+      },
+      "groups": [
+        {
+          "folder": "/work/aiko",
+          "name": "aiko",
+          "sessions": [
+            "aiko 1",
+            "aiko 2"
+          ]
+        },
+        {
+          "folder": "/work/site",
+          "name": "site",
+          "sessions": [
+            "site 1"
+          ]
+        }
+      ],
+      "toOpen": "a2"
+    },
+    {
+      "name": "going into a session that is not there changes nothing",
+      "file": {
+        "sessions": [
+          {
+            "id": "a1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "s1",
+            "environment": "Aiko",
+            "folder": "/work/site",
+            "name": "site 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "a2",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 2",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "w1",
+            "environment": "Work",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          }
+        ],
+        "last": "s1"
+      },
+      "steps": [
+        {
+          "do": "opened",
+          "id": "nope"
+        }
+      ],
+      "environment": "Aiko",
+      "saved": {
+        "sessions": [
+          {
+            "id": "a1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "s1",
+            "environment": "Aiko",
+            "folder": "/work/site",
+            "name": "site 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "a2",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 2",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "w1",
+            "environment": "Work",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          }
+        ],
+        "last": "s1"
+      },
+      "groups": [
+        {
+          "folder": "/work/aiko",
+          "name": "aiko",
+          "sessions": [
+            "aiko 1",
+            "aiko 2"
+          ]
+        },
+        {
+          "folder": "/work/site",
+          "name": "site",
+          "sessions": [
+            "site 1"
+          ]
+        }
+      ],
+      "toOpen": "s1"
+    },
+    {
+      "name": "closing the session the window is on moves the window to the next one",
+      "file": {
+        "sessions": [
+          {
+            "id": "a1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "s1",
+            "environment": "Aiko",
+            "folder": "/work/site",
+            "name": "site 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "a2",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 2",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "w1",
+            "environment": "Work",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          }
+        ],
+        "last": "s1"
+      },
+      "steps": [
+        {
+          "do": "close",
+          "id": "s1"
+        }
+      ],
+      "environment": "Aiko",
+      "saved": {
+        "sessions": [
+          {
+            "id": "a1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "s1",
+            "environment": "Aiko",
+            "folder": "/work/site",
+            "name": "site 1",
+            "mode": "manual",
+            "started": false,
+            "closed": true,
+            "lastUsed": 0
+          },
+          {
+            "id": "a2",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 2",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "w1",
+            "environment": "Work",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          }
+        ],
+        "last": "a2"
+      },
+      "groups": [
+        {
+          "folder": "/work/aiko",
+          "name": "aiko",
+          "sessions": [
+            "aiko 1",
+            "aiko 2"
+          ]
+        }
+      ],
+      "toOpen": "a2"
+    },
+    {
+      "name": "closing the last session of the list moves the window to the one before",
+      "file": {
+        "sessions": [
+          {
+            "id": "a1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "s1",
+            "environment": "Aiko",
+            "folder": "/work/site",
+            "name": "site 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "a2",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 2",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "w1",
+            "environment": "Work",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          }
+        ],
+        "last": "s1"
+      },
+      "steps": [
+        {
+          "do": "opened",
+          "id": "a2"
+        },
+        {
+          "do": "close",
+          "id": "a2"
+        }
+      ],
+      "environment": "Aiko",
+      "saved": {
+        "sessions": [
+          {
+            "id": "a1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "s1",
+            "environment": "Aiko",
+            "folder": "/work/site",
+            "name": "site 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "a2",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 2",
+            "mode": "manual",
+            "started": false,
+            "closed": true,
+            "lastUsed": 0
+          },
+          {
+            "id": "w1",
+            "environment": "Work",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          }
+        ],
+        "last": "s1"
+      },
+      "groups": [
+        {
+          "folder": "/work/aiko",
+          "name": "aiko",
+          "sessions": [
+            "aiko 1"
+          ]
+        },
+        {
+          "folder": "/work/site",
+          "name": "site",
+          "sessions": [
+            "site 1"
+          ]
+        }
+      ],
+      "toOpen": "s1"
+    },
+    {
+      "name": "closing another session leaves the window where it is",
+      "file": {
+        "sessions": [
+          {
+            "id": "a1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "s1",
+            "environment": "Aiko",
+            "folder": "/work/site",
+            "name": "site 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "a2",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 2",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "w1",
+            "environment": "Work",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          }
+        ],
+        "last": "s1"
+      },
+      "steps": [
+        {
+          "do": "close",
+          "id": "a1"
+        }
+      ],
+      "environment": "Aiko",
+      "saved": {
+        "sessions": [
+          {
+            "id": "a1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": true,
+            "lastUsed": 0
+          },
+          {
+            "id": "s1",
+            "environment": "Aiko",
+            "folder": "/work/site",
+            "name": "site 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "a2",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 2",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "w1",
+            "environment": "Work",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          }
+        ],
+        "last": "s1"
+      },
+      "groups": [
+        {
+          "folder": "/work/aiko",
+          "name": "aiko",
+          "sessions": [
+            "aiko 2"
+          ]
+        },
+        {
+          "folder": "/work/site",
+          "name": "site",
+          "sessions": [
+            "site 1"
+          ]
+        }
+      ],
+      "toOpen": "s1"
+    },
+    {
+      "name": "closing the only session leaves no session to open",
+      "file": {
+        "sessions": [
+          {
+            "id": "a1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "s1",
+            "environment": "Aiko",
+            "folder": "/work/site",
+            "name": "site 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "a2",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 2",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "w1",
+            "environment": "Work",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          }
+        ],
+        "last": "s1"
+      },
+      "steps": [
+        {
+          "do": "opened",
+          "id": "w1"
+        },
+        {
+          "do": "close",
+          "id": "w1"
+        }
+      ],
+      "environment": "Work",
+      "saved": {
+        "sessions": [
+          {
+            "id": "a1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "s1",
+            "environment": "Aiko",
+            "folder": "/work/site",
+            "name": "site 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "a2",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 2",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "w1",
+            "environment": "Work",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": true,
+            "lastUsed": 0
+          }
+        ]
+      },
+      "groups": [],
+      "toOpen": null
+    },
+    {
+      "name": "the number of a closed session is free again",
+      "file": {
+        "sessions": [
+          {
+            "id": "a1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "s1",
+            "environment": "Aiko",
+            "folder": "/work/site",
+            "name": "site 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "a2",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 2",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "w1",
+            "environment": "Work",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          }
+        ],
+        "last": "s1"
+      },
+      "steps": [
+        {
+          "do": "close",
+          "id": "a1"
+        },
+        {
+          "do": "add",
+          "id": "a3",
+          "environment": "Aiko",
+          "folder": "/work/aiko",
+          "name": "",
+          "model": null,
+          "mode": "manual",
+          "now": 100
+        }
+      ],
+      "environment": "Aiko",
+      "saved": {
+        "sessions": [
+          {
+            "id": "a1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": true,
+            "lastUsed": 0
+          },
+          {
+            "id": "s1",
+            "environment": "Aiko",
+            "folder": "/work/site",
+            "name": "site 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "a2",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 2",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "w1",
+            "environment": "Work",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "a3",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 100
+          }
+        ],
+        "last": "a3"
+      },
+      "groups": [
+        {
+          "folder": "/work/aiko",
+          "name": "aiko",
+          "sessions": [
+            "aiko 2",
+            "aiko 1"
+          ]
+        },
+        {
+          "folder": "/work/site",
+          "name": "site",
+          "sessions": [
+            "site 1"
+          ]
+        }
+      ],
+      "toOpen": "a3"
+    },
+    {
+      "name": "a session is moved before another of its folder",
+      "file": {
+        "sessions": [
+          {
+            "id": "a1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "s1",
+            "environment": "Aiko",
+            "folder": "/work/site",
+            "name": "site 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "a2",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 2",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "w1",
+            "environment": "Work",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          }
+        ],
+        "last": "s1"
+      },
+      "steps": [
+        {
+          "do": "move",
+          "id": "a2",
+          "before": "a1"
+        }
+      ],
+      "environment": "Aiko",
+      "saved": {
+        "sessions": [
+          {
+            "id": "a2",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 2",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "s1",
+            "environment": "Aiko",
+            "folder": "/work/site",
+            "name": "site 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "a1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "w1",
+            "environment": "Work",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          }
+        ],
+        "last": "s1"
+      },
+      "groups": [
+        {
+          "folder": "/work/aiko",
+          "name": "aiko",
+          "sessions": [
+            "aiko 2",
+            "aiko 1"
+          ]
+        },
+        {
+          "folder": "/work/site",
+          "name": "site",
+          "sessions": [
+            "site 1"
+          ]
+        }
+      ],
+      "toOpen": "s1"
+    },
+    {
+      "name": "a session is moved to the end of its group",
+      "file": {
+        "sessions": [
+          {
+            "id": "a1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "s1",
+            "environment": "Aiko",
+            "folder": "/work/site",
+            "name": "site 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "a2",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 2",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "w1",
+            "environment": "Work",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          }
+        ],
+        "last": "s1"
+      },
+      "steps": [
+        {
+          "do": "move",
+          "id": "a1",
+          "before": null
+        }
+      ],
+      "environment": "Aiko",
+      "saved": {
+        "sessions": [
+          {
+            "id": "a2",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 2",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "s1",
+            "environment": "Aiko",
+            "folder": "/work/site",
+            "name": "site 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "a1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "w1",
+            "environment": "Work",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          }
+        ],
+        "last": "s1"
+      },
+      "groups": [
+        {
+          "folder": "/work/aiko",
+          "name": "aiko",
+          "sessions": [
+            "aiko 2",
+            "aiko 1"
+          ]
+        },
+        {
+          "folder": "/work/site",
+          "name": "site",
+          "sessions": [
+            "site 1"
+          ]
+        }
+      ],
+      "toOpen": "s1"
+    },
+    {
+      "name": "a place in another group, or before itself, changes nothing",
+      "file": {
+        "sessions": [
+          {
+            "id": "a1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "s1",
+            "environment": "Aiko",
+            "folder": "/work/site",
+            "name": "site 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "a2",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 2",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "w1",
+            "environment": "Work",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          }
+        ],
+        "last": "s1"
+      },
+      "steps": [
+        {
+          "do": "move",
+          "id": "a1",
+          "before": "s1"
+        },
+        {
+          "do": "move",
+          "id": "a1",
+          "before": "a1"
+        },
+        {
+          "do": "move",
+          "id": "a1",
+          "before": "w1"
+        }
+      ],
+      "environment": "Aiko",
+      "saved": {
+        "sessions": [
+          {
+            "id": "a1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "s1",
+            "environment": "Aiko",
+            "folder": "/work/site",
+            "name": "site 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "a2",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 2",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "w1",
+            "environment": "Work",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          }
+        ],
+        "last": "s1"
+      },
+      "groups": [
+        {
+          "folder": "/work/aiko",
+          "name": "aiko",
+          "sessions": [
+            "aiko 1",
+            "aiko 2"
+          ]
+        },
+        {
+          "folder": "/work/site",
+          "name": "site",
+          "sessions": [
+            "site 1"
+          ]
+        }
+      ],
+      "toOpen": "s1"
+    },
+    {
+      "name": "what the file does not say gets a plain value, what it says twice is read once",
+      "file": {
+        "sessions": [
+          {
+            "id": "a1",
+            "environment": "Aiko",
+            "folder": "/work/aiko/"
+          },
+          {
+            "id": "a1",
+            "environment": "Aiko",
+            "folder": "/work/site",
+            "name": "the copy"
+          },
+          {
+            "id": "a2",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": " \n",
+            "mode": "bypassPermissions",
+            "started": "yes",
+            "lastUsed": "soon",
+            "model": 5
+          },
+          {
+            "id": "a3",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "old one",
+            "mode": "default",
+            "closed": true,
+            "lastUsed": 1791913800,
+            "model": "claude-opus-5-5",
+            "text": "never kept"
+          },
+          {
+            "id": "",
+            "environment": "Aiko",
+            "folder": "/work/aiko"
+          },
+          {
+            "environment": "Aiko",
+            "folder": "/work/aiko"
+          },
+          "a session?"
+        ],
+        "last": "a3",
+        "window": {
+          "left": 10
+        }
+      },
+      "steps": [],
+      "environment": "Aiko",
+      "saved": {
+        "sessions": [
+          {
+            "id": "a1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "a2",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          },
+          {
+            "id": "a3",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "old one",
+            "model": "claude-opus-5-5",
+            "mode": "manual",
+            "started": false,
+            "closed": true,
+            "lastUsed": 1791913800
+          }
+        ]
+      },
+      "groups": [
+        {
+          "folder": "/work/aiko",
+          "name": "aiko",
+          "sessions": [
+            "aiko",
+            "aiko"
+          ]
+        }
+      ],
+      "toOpen": "a1"
+    }
+  ]
+}

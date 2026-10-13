@@ -30,6 +30,15 @@ enum Store {
         write(folders.personaFile, persona.toJson())
     }
 
+    /// The sessions of the terminal: names, folders and conversation ids, never a conversation.
+    static func terminal() -> TerminalSessions {
+        TerminalSessions.fromJson(read(folders.terminalFile))
+    }
+
+    static func saveTerminal(_ sessions: TerminalSessions) {
+        write(folders.terminalFile, sessions.toJson())
+    }
+
     static func environments() -> EnvironmentSettings {
         EnvironmentSettings.fromJson(read(folders.environmentsFile))
     }

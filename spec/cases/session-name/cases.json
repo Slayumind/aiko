@@ -1,0 +1,122 @@
+{
+  "comment": "The name of a session (D-299). An empty field gives the folder with the lowest number no open session of that folder has. A name is kept as one line without spaces around it. A folder is kept without a slash at its end, and its name is its last part; a slash of either kind is read on both systems.",
+  "defaults": [
+    {
+      "folder": "C:\\Users\\someone\\projects\\aiko",
+      "taken": [],
+      "name": "aiko 1"
+    },
+    {
+      "folder": "C:\\Users\\someone\\projects\\aiko",
+      "taken": [
+        "aiko 1",
+        "aiko 2"
+      ],
+      "name": "aiko 3"
+    },
+    {
+      "folder": "C:\\Users\\someone\\projects\\aiko",
+      "taken": [
+        "aiko 2",
+        "the terminal"
+      ],
+      "name": "aiko 1"
+    },
+    {
+      "folder": "C:\\Users\\someone\\projects\\aiko",
+      "taken": [
+        "aiko 1",
+        "aiko 3"
+      ],
+      "name": "aiko 2"
+    },
+    {
+      "folder": "C:\\Users\\someone\\projects\\aiko",
+      "taken": [
+        "Aiko 1"
+      ],
+      "name": "aiko 1"
+    },
+    {
+      "folder": "/Users/someone/мои проекты/",
+      "taken": [
+        "мои проекты 1"
+      ],
+      "name": "мои проекты 2"
+    },
+    {
+      "folder": "D:\\",
+      "taken": [],
+      "name": "D: 1"
+    },
+    {
+      "folder": "/",
+      "taken": [],
+      "name": "/ 1"
+    }
+  ],
+  "names": [
+    {
+      "input": "  the terminal  ",
+      "name": "the terminal"
+    },
+    {
+      "input": "two\r\nlines\there",
+      "name": "two lines here"
+    },
+    {
+      "input": "   ",
+      "name": ""
+    },
+    {
+      "input": "",
+      "name": ""
+    },
+    {
+      "input": "полишинг памяти",
+      "name": "полишинг памяти"
+    }
+  ],
+  "folders": [
+    {
+      "input": "C:\\Users\\someone\\projects\\aiko",
+      "path": "C:\\Users\\someone\\projects\\aiko",
+      "name": "aiko"
+    },
+    {
+      "input": "C:\\Users\\someone\\projects\\aiko\\",
+      "path": "C:\\Users\\someone\\projects\\aiko",
+      "name": "aiko"
+    },
+    {
+      "input": "/Users/someone/projects/aiko///",
+      "path": "/Users/someone/projects/aiko",
+      "name": "aiko"
+    },
+    {
+      "input": "C:/mixed\\slashes/",
+      "path": "C:/mixed\\slashes",
+      "name": "slashes"
+    },
+    {
+      "input": "D:\\",
+      "path": "D:\\",
+      "name": "D:"
+    },
+    {
+      "input": "/",
+      "path": "/",
+      "name": "/"
+    },
+    {
+      "input": "  /work/app  ",
+      "path": "/work/app",
+      "name": "app"
+    },
+    {
+      "input": "",
+      "path": "",
+      "name": ""
+    }
+  ]
+}

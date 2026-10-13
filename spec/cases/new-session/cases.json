@@ -1,0 +1,393 @@
+{
+  "comment": "What the form of a new session offers (D-293, D-300). The folders, each once: the five where sessions of the environment were used last (closed ones too), then every bound folder followed by the folders right inside it. The form names the other environment a folder is bound to. An empty name field shows the name the session will get.",
+  "platform": "windows",
+  "environments": [
+    {
+      "name": "Aiko",
+      "configDirectories": [
+        "C:\\Users\\someone\\.claude"
+      ],
+      "projectFolders": [
+        "C:\\Users\\someone\\personal",
+        "D:\\games\\"
+      ]
+    },
+    {
+      "name": "Work",
+      "configDirectories": [
+        "C:\\Users\\someone\\.claude-work"
+      ],
+      "projectFolders": [
+        "C:\\Users\\someone\\work",
+        "C:\\Users\\someone\\personal\\for-work"
+      ]
+    }
+  ],
+  "forms": [
+    {
+      "name": "an environment with sessions and bound folders",
+      "environment": "Aiko",
+      "sessions": {
+        "sessions": [
+          {
+            "id": "a1",
+            "environment": "Aiko",
+            "folder": "C:\\Users\\someone\\personal\\aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 300
+          },
+          {
+            "id": "a2",
+            "environment": "Aiko",
+            "folder": "E:\\elsewhere",
+            "name": "elsewhere 1",
+            "mode": "manual",
+            "started": false,
+            "closed": true,
+            "lastUsed": 500
+          },
+          {
+            "id": "a3",
+            "environment": "Aiko",
+            "folder": "C:\\Users\\someone\\personal\\aiko",
+            "name": "the terminal",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 900
+          },
+          {
+            "id": "w1",
+            "environment": "Work",
+            "folder": "C:\\Users\\someone\\work\\app",
+            "name": "app 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 999
+          },
+          {
+            "id": "a4",
+            "environment": "Aiko",
+            "folder": "C:\\Users\\someone\\personal\\site",
+            "name": "site 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 300
+          }
+        ]
+      },
+      "inside": {
+        "C:\\Users\\someone\\personal": [
+          "C:\\Users\\someone\\personal\\aiko",
+          "C:\\Users\\someone\\personal\\for-work",
+          "C:\\Users\\someone\\personal\\site"
+        ],
+        "D:\\games\\": [
+          "D:\\games\\crawler"
+        ]
+      },
+      "nameFor": [
+        "C:\\Users\\someone\\personal\\aiko",
+        "C:\\Users\\someone\\personal\\site",
+        "D:\\games\\crawler"
+      ],
+      "elsewhereFor": [
+        "C:\\Users\\someone\\personal\\aiko",
+        "C:\\Users\\someone\\personal\\for-work\\api",
+        "C:\\Users\\someone\\work\\app",
+        "E:\\elsewhere",
+        "D:\\games"
+      ],
+      "folders": [
+        {
+          "path": "C:\\Users\\someone\\personal\\aiko",
+          "name": "aiko",
+          "source": "recent"
+        },
+        {
+          "path": "E:\\elsewhere",
+          "name": "elsewhere",
+          "source": "recent"
+        },
+        {
+          "path": "C:\\Users\\someone\\personal\\site",
+          "name": "site",
+          "source": "recent"
+        },
+        {
+          "path": "C:\\Users\\someone\\personal",
+          "name": "personal",
+          "source": "bound"
+        },
+        {
+          "path": "C:\\Users\\someone\\personal\\for-work",
+          "name": "for-work",
+          "source": "inside"
+        },
+        {
+          "path": "D:\\games",
+          "name": "games",
+          "source": "bound"
+        },
+        {
+          "path": "D:\\games\\crawler",
+          "name": "crawler",
+          "source": "inside"
+        }
+      ],
+      "names": [
+        "aiko 2",
+        "site 2",
+        "crawler 1"
+      ],
+      "elsewhere": [
+        null,
+        "Work",
+        "Work",
+        null,
+        null
+      ]
+    },
+    {
+      "name": "the other environment sees its own",
+      "environment": "Work",
+      "sessions": {
+        "sessions": [
+          {
+            "id": "a1",
+            "environment": "Aiko",
+            "folder": "C:\\Users\\someone\\personal\\aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 300
+          },
+          {
+            "id": "a2",
+            "environment": "Aiko",
+            "folder": "E:\\elsewhere",
+            "name": "elsewhere 1",
+            "mode": "manual",
+            "started": false,
+            "closed": true,
+            "lastUsed": 500
+          },
+          {
+            "id": "a3",
+            "environment": "Aiko",
+            "folder": "C:\\Users\\someone\\personal\\aiko",
+            "name": "the terminal",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 900
+          },
+          {
+            "id": "w1",
+            "environment": "Work",
+            "folder": "C:\\Users\\someone\\work\\app",
+            "name": "app 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 999
+          },
+          {
+            "id": "a4",
+            "environment": "Aiko",
+            "folder": "C:\\Users\\someone\\personal\\site",
+            "name": "site 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 300
+          }
+        ]
+      },
+      "inside": {},
+      "nameFor": [
+        "C:\\Users\\someone\\work\\app"
+      ],
+      "elsewhereFor": [
+        "C:\\Users\\someone\\personal\\aiko",
+        "C:\\Users\\someone\\work"
+      ],
+      "folders": [
+        {
+          "path": "C:\\Users\\someone\\work\\app",
+          "name": "app",
+          "source": "recent"
+        },
+        {
+          "path": "C:\\Users\\someone\\work",
+          "name": "work",
+          "source": "bound"
+        },
+        {
+          "path": "C:\\Users\\someone\\personal\\for-work",
+          "name": "for-work",
+          "source": "bound"
+        }
+      ],
+      "names": [
+        "app 2"
+      ],
+      "elsewhere": [
+        "Aiko",
+        null
+      ]
+    },
+    {
+      "name": "nothing yet: only the bound folders",
+      "environment": "Aiko",
+      "sessions": null,
+      "inside": {},
+      "nameFor": [
+        "C:\\Users\\someone\\personal"
+      ],
+      "elsewhereFor": [],
+      "folders": [
+        {
+          "path": "C:\\Users\\someone\\personal",
+          "name": "personal",
+          "source": "bound"
+        },
+        {
+          "path": "D:\\games",
+          "name": "games",
+          "source": "bound"
+        }
+      ],
+      "names": [
+        "personal 1"
+      ],
+      "elsewhere": []
+    },
+    {
+      "name": "no more than five recent folders, the latest first",
+      "environment": "Aiko",
+      "sessions": {
+        "sessions": [
+          {
+            "id": "m1",
+            "environment": "Aiko",
+            "folder": "E:\\f1",
+            "name": "f1 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 1
+          },
+          {
+            "id": "m2",
+            "environment": "Aiko",
+            "folder": "E:\\f2",
+            "name": "f2 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 2
+          },
+          {
+            "id": "m3",
+            "environment": "Aiko",
+            "folder": "E:\\f3",
+            "name": "f3 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 3
+          },
+          {
+            "id": "m4",
+            "environment": "Aiko",
+            "folder": "E:\\f4",
+            "name": "f4 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 4
+          },
+          {
+            "id": "m5",
+            "environment": "Aiko",
+            "folder": "E:\\f5",
+            "name": "f5 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 5
+          },
+          {
+            "id": "m6",
+            "environment": "Aiko",
+            "folder": "E:\\f6",
+            "name": "f6 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 6
+          },
+          {
+            "id": "m7",
+            "environment": "Aiko",
+            "folder": "E:\\f7",
+            "name": "f7 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 7
+          }
+        ]
+      },
+      "inside": {},
+      "nameFor": [],
+      "elsewhereFor": [],
+      "folders": [
+        {
+          "path": "E:\\f7",
+          "name": "f7",
+          "source": "recent"
+        },
+        {
+          "path": "E:\\f6",
+          "name": "f6",
+          "source": "recent"
+        },
+        {
+          "path": "E:\\f5",
+          "name": "f5",
+          "source": "recent"
+        },
+        {
+          "path": "E:\\f4",
+          "name": "f4",
+          "source": "recent"
+        },
+        {
+          "path": "E:\\f3",
+          "name": "f3",
+          "source": "recent"
+        },
+        {
+          "path": "C:\\Users\\someone\\personal",
+          "name": "personal",
+          "source": "bound"
+        },
+        {
+          "path": "D:\\games",
+          "name": "games",
+          "source": "bound"
+        }
+      ],
+      "names": [],
+      "elsewhere": []
+    }
+  ]
+}

@@ -56,7 +56,7 @@ struct TerminalPrivacyTests {
             }
         }
 
-        // Four in the seam, the same four and the three of the doors in the app.
-        #expect(methods == 11)
+        // Four in the seam, the same four and the four of the doors in the app.
+        #expect(methods == 12)
     }
 }

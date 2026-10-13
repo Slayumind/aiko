@@ -288,6 +288,13 @@ static class Program
             return;
         }
 
+        // Reads the history of one conversation from the file of Claude Code and counts the items.
+        if (args is ["--try-history", var historyFolder, var historySession, ..])
+        {
+            Environment.Exit(TerminalCheck.History(historyFolder, historySession, args.Length > 3 ? args[3] : null));
+            return;
+        }
+
         // One short turn with the real Claude Code. Spends a little of the limits.
         if (args is ["--try-conversation", "real", var talkFolder, ..])
         {
