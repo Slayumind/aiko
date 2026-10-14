@@ -9,9 +9,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Added
 
-- **Terminal window, first part.** On Windows, the tray menu has "Open terminal". The window keeps
-  your Claude Code sessions, grouped by environment and folder, and opens where you closed it. You
-  can't talk in it yet: the conversation and the input field come next, and so does the Mac version.
+- **Terminal window, first part.** The menu of the Aiko icon has "Open terminal", on Windows and
+  macOS. The window keeps your Claude Code sessions, grouped by environment and folder, and opens
+  where you closed it. You can't talk in it yet: the conversation and the input field come next.
 
 ## [0.4.1] - 2026-10-12
 
