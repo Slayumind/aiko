@@ -11,7 +11,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 - **Terminal window, first part.** Open it from the menu of the Aiko icon or with the terminal
   button on the card, on Windows and macOS. The window keeps your Claude Code sessions, grouped by environment and folder, and opens
-  where you closed it. You can't talk in it yet: the conversation and the input field come next.
+  where you closed it.
+- **Talk to Claude Code in the terminal.** Answers show as formatted text with code blocks you can
+  copy and tables. Each step of the work is one line that opens to its result. A permission card
+  shows the lines an edit changes. Under the field you see the mode, the model and the environment;
+  Shift+Tab changes the mode. Arrows bring back what you sent, Ctrl+V or Cmd+V adds a screenshot,
+  and a dropped file adds its path. A new session starts in the mode your project settings name.
 
 ## [0.4.1] - 2026-10-12
 

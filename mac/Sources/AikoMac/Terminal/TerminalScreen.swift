@@ -48,5 +48,6 @@ struct TerminalScreen: Equatable {
     let signedOut: Bool
     let form: SessionForm?
     let ask: CloseAsk?
+    let talk: TalkScreen?
     let now: Date
 }

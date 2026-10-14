@@ -18,6 +18,10 @@ final class TerminalHost {
     private let window: TerminalWindow
     private var talks: [String: ConversationRunner] = [:]
 
+    /// What a conversation said before its process started this time, read from the file of
+    /// Claude Code (D-303). The process adds what comes after.
+    private var histories: [String: Conversation] = [:]
+
     private var sessions: TerminalSessions
     private var model: TerminalWindowModel
     private var form: SessionForm?
@@ -76,6 +80,14 @@ final class TerminalHost {
         }
         panel.askAnswered = { [weak self] in self?.answer(stop: $0) }
         panel.signInAsked = { [weak self] in self?.signIn() }
+        panel.chosen = { [weak self] requestId, choice in self?.current()?.choose(requestId, choice) }
+        panel.input.sent = { [weak self] text, images in
+            guard let self, let session = self.model.session(self.sessions) else { return }
+            self.send(session.id, text, images: images)
+            self.draw()
+        }
+        panel.input.stopAsked = { [weak self] in self?.current()?.interrupt() }
+        panel.input.modeAsked = { [weak self] in self?.nextMode() }
     }
 
     func show() {
@@ -220,6 +232,7 @@ final class TerminalHost {
 
     private func closeSession(_ id: String) {
         talks.removeValue(forKey: id)?.close()
+        histories.removeValue(forKey: id)
         sessions = sessions.close(id)
         save()
         change(model.after(sessions))
@@ -244,19 +257,21 @@ final class TerminalHost {
 
     // MARK: - The conversations
 
-    private func send(_ id: String, _ message: String) {
+    private func send(_ id: String, _ message: String, images: [AttachedImage] = []) {
         guard let talk = talkFor(id) else { return }
 
         let running = talks
             .filter { $0.value.isRunning }
             .map { RunningTalk(id: $0.key, busy: $0.value.state.isBusy, lastUsed: sessions.find($0.key)?.lastUsed ?? 0) }
-        if let idle = ProcessCap.toStop(running, starting: id) {
-            talks[idle]?.close()
+        if let idle = ProcessCap.toStop(running, starting: id), let stopped = talks.removeValue(forKey: idle) {
+            // Its next process starts from the file again, which then holds this run too.
+            stopped.close()
+            histories.removeValue(forKey: idle)
         }
 
         sessions = sessions.used(id, now: Self.now()).markStarted(id)
         save()
-        talk.send(message, images: [])
+        talk.send(message, images: images)
     }
 
     private func talkFor(_ id: String) -> ConversationRunner? {
@@ -271,6 +286,7 @@ final class TerminalHost {
             return nil
         }
 
+        readHistory(id)
         let folder = FileManager.default.fileExists(atPath: session.folder) ? session.folder : Store.home
         let talk = ConversationRunner(
             .macOS,
@@ -293,6 +309,63 @@ final class TerminalHost {
         talk.changed = { [weak self] in MainActor.assumeIsolated { self?.draw() } }
         talks[id] = talk
         return talk
+    }
+
+    /// The next mode of the session. It is kept for the next start, and a running Claude Code
+    /// takes it at once.
+    private func nextMode() {
+        guard let session = model.session(sessions) else { return }
+        let talk = current()
+        let next = PermissionModes.next(talk?.state.mode ?? session.mode)
+        sessions = sessions.setMode(session.id, next)
+        save()
+        talk?.setMode(next)
+        draw()
+    }
+
+    private func current() -> ConversationRunner? {
+        model.session(sessions).flatMap { talks[$0.id] }
+    }
+
+    private func readHistory(_ id: String) {
+        guard let session = sessions.find(id), session.started,
+              let environment = settings.environments.first(where: { $0.name == session.environment })
+        else {
+            histories[id] = Conversation.empty(mode: sessions.find(id)?.mode ?? .manual)
+            return
+        }
+
+        histories[id] = TerminalStore.history(
+            configDirectory: environment.configDirectories.first ?? ClaudeConfigFolder.resolve(.macOS, nil, Store.home),
+            folder: session.folder,
+            sessionId: session.id,
+            mode: session.mode)
+    }
+
+    private func talk(_ session: TerminalSession?) -> TalkScreen? {
+        guard let session else { return nil }
+
+        // The window opens on a session nobody picked yet: its past is read here, once.
+        if histories[session.id] == nil {
+            readHistory(session.id)
+        }
+        let past = histories[session.id]?.items ?? []
+
+        guard let talk = talks[session.id] else {
+            return TalkScreen(
+                session: session.id, items: past, busy: false, hasOpenCard: false, mode: session.mode,
+                model: ModelName.display(session.model), environment: session.environment)
+        }
+
+        let state = talk.state
+        return TalkScreen(
+            session: session.id,
+            items: past + state.items,
+            busy: state.isBusy,
+            hasOpenCard: state.hasOpenCard,
+            mode: state.mode,
+            model: ModelName.display(state.model.isEmpty ? session.model : state.model),
+            environment: session.environment)
     }
 
     // MARK: - The screen
@@ -338,6 +411,7 @@ final class TerminalHost {
             signedOut: signedOut,
             form: form,
             ask: ask,
+            talk: signedOut ? nil : talk(session),
             now: now)
     }
 

@@ -12,6 +12,13 @@ final class TerminalPanelState: ObservableObject {
     @Published var name = ""
     @Published var message = ""
 
+    /// The steps that are open to their result. Kept here, as a lazy row is built again each
+    /// time it comes into view.
+    @Published var openSteps: Set<String> = []
+
+    /// The field of the conversation keeps what is typed while the screen is drawn again.
+    let input = TalkInputState()
+
     var tabPicked: ((String) -> Void)?
     var rowPicked: ((String) -> Void)?
     var rowClosed: ((String) -> Void)?
@@ -25,6 +32,7 @@ final class TerminalPanelState: ObservableObject {
     var formCancelled: (() -> Void)?
     var askAnswered: ((Bool) -> Void)?
     var signInAsked: (() -> Void)?
+    var chosen: ((String, CardChoice) -> Void)?
 
     func show(_ next: TerminalScreen) {
         let formWasOpen = screen?.form != nil
@@ -177,6 +185,10 @@ struct TerminalPanelView: View {
             case .form:
                 if let form = screen.form {
                     SessionFormView(form: form, state: state)
+                }
+            case .talk where !screen.signedOut && screen.talk != nil:
+                if let talk = screen.talk {
+                    TalkPanelView(talk: talk, state: state)
                 }
             case .talk where screen.signedOut:
                 MessageView(
