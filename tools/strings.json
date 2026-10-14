@@ -2534,20 +2534,6 @@
     ]
   ],
   [
-    "TerminalRecent",
-    [
-      "Recent",
-      "Недавние"
-    ]
-  ],
-  [
-    "TerminalBound",
-    [
-      "Bound folders",
-      "Привязанные"
-    ]
-  ],
-  [
     "TerminalChooseFolder",
     [
       "Choose another folder",
@@ -2881,6 +2867,97 @@
     [
       "Sessions",
       "Сессии"
+    ]
+  ],
+  [
+    "TerminalAllow",
+    [
+      "Allow",
+      "Разрешить"
+    ]
+  ],
+  [
+    "TerminalAllowEdits",
+    [
+      "Allow edits in this session",
+      "Разрешать правки в этой сессии"
+    ]
+  ],
+  [
+    "TerminalAllowInProject",
+    [
+      "Allow in this project",
+      "Разрешать в этом проекте"
+    ]
+  ],
+  [
+    "TerminalDeny",
+    [
+      "Deny",
+      "Отказать"
+    ]
+  ],
+  [
+    "TerminalStop",
+    [
+      "Stop",
+      "Остановить"
+    ]
+  ],
+  [
+    "TerminalTurnStopped",
+    [
+      "Turn stopped.",
+      "Ход остановлен."
+    ]
+  ],
+  [
+    "TerminalQueued",
+    [
+      "queued",
+      "в очереди"
+    ]
+  ],
+  [
+    "TerminalCompacted",
+    [
+      "The conversation was made shorter to fit.",
+      "Разговор сжат, чтобы поместиться в память."
+    ]
+  ],
+  [
+    "TerminalFailed",
+    [
+      "Claude Code stopped with an error.",
+      "Claude Code остановился с ошибкой."
+    ]
+  ],
+  [
+    "TerminalDiffMore",
+    [
+      "{0} more lines",
+      "Ещё строк: {0}"
+    ]
+  ],
+  [
+    "TerminalWaitsForYou",
+    [
+      "Waiting for you: {0}",
+      "Ждёт тебя: {0}"
+    ]
+  ],
+  [
+    "TerminalShow",
+    [
+      "Show",
+      "Показать"
+    ]
+  ],
+  [
+    "TerminalPictures",
+    [
+      "Pictures: {0}",
+      "Картинок: {0}"
     ]
   ]
 ]

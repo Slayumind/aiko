@@ -1117,12 +1117,6 @@
   <data name="TerminalDescribeTask" xml:space="preserve">
     <value>Опиши задачу</value>
   </data>
-  <data name="TerminalRecent" xml:space="preserve">
-    <value>Недавние</value>
-  </data>
-  <data name="TerminalBound" xml:space="preserve">
-    <value>Привязанные</value>
-  </data>
   <data name="TerminalChooseFolder" xml:space="preserve">
     <value>Выбрать другую папку</value>
   </data>
@@ -1266,5 +1260,44 @@
   </data>
   <data name="TerminalSessions" xml:space="preserve">
     <value>Сессии</value>
+  </data>
+  <data name="TerminalAllow" xml:space="preserve">
+    <value>Разрешить</value>
+  </data>
+  <data name="TerminalAllowEdits" xml:space="preserve">
+    <value>Разрешать правки в этой сессии</value>
+  </data>
+  <data name="TerminalAllowInProject" xml:space="preserve">
+    <value>Разрешать в этом проекте</value>
+  </data>
+  <data name="TerminalDeny" xml:space="preserve">
+    <value>Отказать</value>
+  </data>
+  <data name="TerminalStop" xml:space="preserve">
+    <value>Остановить</value>
+  </data>
+  <data name="TerminalTurnStopped" xml:space="preserve">
+    <value>Ход остановлен.</value>
+  </data>
+  <data name="TerminalQueued" xml:space="preserve">
+    <value>в очереди</value>
+  </data>
+  <data name="TerminalCompacted" xml:space="preserve">
+    <value>Разговор сжат, чтобы поместиться в память.</value>
+  </data>
+  <data name="TerminalFailed" xml:space="preserve">
+    <value>Claude Code остановился с ошибкой.</value>
+  </data>
+  <data name="TerminalDiffMore" xml:space="preserve">
+    <value>Ещё строк: {0}</value>
+  </data>
+  <data name="TerminalWaitsForYou" xml:space="preserve">
+    <value>Ждёт тебя: {0}</value>
+  </data>
+  <data name="TerminalShow" xml:space="preserve">
+    <value>Показать</value>
+  </data>
+  <data name="TerminalPictures" xml:space="preserve">
+    <value>Картинок: {0}</value>
   </data>
 </root>

@@ -7,7 +7,7 @@ namespace Aiko.App;
 /// can be looked at without Claude Code and without touching the sessions of the person.
 static class TerminalSnapshot
 {
-    public static readonly IReadOnlyList<string> States = ["talk", "empty", "form", "elsewhere", "login", "close"];
+    public static readonly IReadOnlyList<string> States = ["talk", "feed", "working", "empty", "form", "elsewhere", "login", "close"];
 
     /// --snapshot-terminal &lt;file&gt; &lt;state&gt; [width]
     public static bool Write(string path, string state, double width)
@@ -71,6 +71,47 @@ static class TerminalSnapshot
             SignedOut: state == "login",
             form,
             state == "close" ? new AskView(string.Format(Strings.TerminalCloseTitle, "terminal"), Strings.TerminalCloseBody) : null,
+            state == "feed" ? Feed(withCard: true) : state == "working" ? Feed(withCard: false) : null,
             now);
+    }
+
+    /// A short made up conversation: a message, steps, an answer, a queued message, and a card that
+    /// waits, or without it the turn that still works.
+    private static TalkView Feed(bool withCard)
+    {
+        using var input = System.Text.Json.JsonDocument.Parse(
+            "{\"file_path\":\"/work/aiko/NewSessionForm.cs\",\"old_string\":\"a\\nb\",\"new_string\":\"a\\nc\\nd\"}");
+        var edit = new StreamEvent.Request("r1", "Edit", "t3", input.RootElement.Clone(), "", true, false);
+
+        static FeedItem.Step Step(int id, StepKind kind, string subject, StepState state, int added = 0, int removed = 0) =>
+            new(id, $"t{id}", new StepLine(kind, "", subject, added, removed, false), state, "", [], "");
+
+        List<FeedItem> items =
+        [
+            new FeedItem.OwnerMessage(1, "Add the folder groups to the form of a new session.", 0, false, []),
+            Step(2, StepKind.Read, "NewSessionChoices.cs", StepState.Done),
+            Step(3, StepKind.Search, "FolderSource", StepState.Done),
+            new FeedItem.Answer(4, string.Join("\n",
+                "## Where the groups come from",
+                "",
+                "The groups come from the core: **`NewSessionChoices.Headers`** says where each one starts. See [the form](src/Aiko.App/Terminal/TerminalPanel.cs:502).",
+                "",
+                "1. A header before the first *recent* folder.",
+                "2. A header before the first bound folder.",
+                "",
+                "```csharp",
+                "var headers = NewSessionChoices.Headers(form.Folders);",
+                "```",
+                "",
+                "| Group | Starts at |",
+                "|---|---:|",
+                "| Recent | 0 |",
+                "| Bound | 3 |"), false),
+            Step(5, StepKind.Edit, "DropDown.cs", StepState.Done, 18, 2),
+            withCard ? new FeedItem.Card(6, RequestCard.From(edit), RequestState.Open) : Step(6, StepKind.Run, "dotnet test Aiko.Core.Tests", StepState.Running),
+            new FeedItem.OwnerMessage(7, "And the same on the Mac, please.", 0, true, []),
+        ];
+
+        return new TalkView("a2", items, Busy: true, HasOpenCard: withCard, PermissionMode.Manual, "Opus 5.5", "Aiko");
     }
 }

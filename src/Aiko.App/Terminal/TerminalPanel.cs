@@ -35,6 +35,10 @@ sealed class TerminalPanel : UserControl
     private TerminalView? _view;
     private bool _narrow;
 
+    // The conversation keeps its rows and what is typed while the view is drawn again.
+    private readonly TalkPanel _talk = new();
+    private string? _talkSession;
+
     // What is typed into the form stays here while the view is drawn again.
     private readonly TextBox _name = new();
     private readonly TextBox _message = new();
@@ -44,6 +48,14 @@ sealed class TerminalPanel : UserControl
         Background = Tokens.Brush("Background");
         FontFamily = Tokens.Get<FontFamily>("Sans");
         Focusable = false;
+
+        // Every scroll bar of the window is the thin one of the settings: the list, the feed and
+        // the field.
+        Resources.MergedDictionaries.Add(new ResourceDictionary
+        {
+            Source = new Uri("pack://application:,,,/Theme/Controls.xaml", UriKind.Absolute),
+        });
+        Resources[typeof(ScrollViewer)] = Resources["QuietScroll"];
 
         _listButton = Flat("", () => _listPopup.IsOpen = !_listPopup.IsOpen, ghost: false);
         _listButton.Margin = new Thickness(10, 0, 0, 0);
@@ -104,6 +116,11 @@ sealed class TerminalPanel : UserControl
             }
         };
 
+        _talk.SendAsked += (text, images) => SendAsked?.Invoke(text, images);
+        _talk.StopAsked += () => StopAsked?.Invoke();
+        _talk.ModeAsked += () => ModeAsked?.Invoke();
+        _talk.Chosen += (id, choice) => Chosen?.Invoke(id, choice);
+
         SizeChanged += (_, e) =>
         {
             var narrow = WindowPlace.IsNarrow(e.NewSize.Width);
@@ -137,6 +154,10 @@ sealed class TerminalPanel : UserControl
     public event Action? MinimizeAsked;
     public event Action? MaximizeAsked;
     public event Action? CloseAsked;
+    public event Action<string, IReadOnlyList<AttachedImage>>? SendAsked;
+    public event Action? StopAsked;
+    public event Action? ModeAsked;
+    public event Action<string, CardChoice>? Chosen;
 
     public void ShowMaximized(bool maximized)
     {
@@ -416,16 +437,7 @@ sealed class TerminalPanel : UserControl
     }
 
     /// The word of a step, the one the feed uses for it.
-    private static string StepWord(TalkGlance glance) => glance.Kind switch
-    {
-        StepKind.Read => Strings.TerminalStepRead,
-        StepKind.Search => Strings.TerminalStepSearch,
-        StepKind.Edit => Strings.TerminalStepEdit,
-        StepKind.Run => Strings.TerminalStepRun,
-        StepKind.Agent => Strings.TerminalStepAgent,
-        StepKind.Web => Strings.TerminalStepWeb,
-        _ => glance.Label,
-    };
+    private static string StepWord(TalkGlance glance) => TalkPanel.StepWord(glance.Kind, glance.Label);
 
     private static string UsedWords(long lastUsed, DateTimeOffset now)
     {
@@ -456,6 +468,7 @@ sealed class TerminalPanel : UserControl
                 string.Format(CultureInfo.CurrentCulture, Strings.TerminalLoginTitle, view.Environment),
                 Strings.TerminalLoginBody,
                 Flat(Strings.SignIn, () => SignInAsked?.Invoke(), ghost: false, main: true)),
+            MainView.Talk when view.Talk is { } talk => Talk(view, talk),
             MainView.Talk => Message(null, Strings.TerminalEmptyTalk, null),
             _ => Message(
                 string.Format(CultureInfo.CurrentCulture, Strings.TerminalNoSessionsTitle, view.Environment),
@@ -468,6 +481,19 @@ sealed class TerminalPanel : UserControl
         {
             _main.Children.Add(Ask(ask));
         }
+    }
+
+    private UIElement Talk(TerminalView view, TalkView talk)
+    {
+        (_talk.Parent as Panel)?.Children.Remove(_talk);
+        _talk.Show(talk);
+        if (_talkSession != view.SessionId)
+        {
+            _talkSession = view.SessionId;
+            Dispatcher.BeginInvoke(_talk.FocusInput, System.Windows.Threading.DispatcherPriority.Input);
+        }
+
+        return _talk;
     }
 
     private static UIElement Message(string? title, string body, UIElement? button)
@@ -655,7 +681,7 @@ sealed class TerminalPanel : UserControl
         return element;
     }
 
-    private static void Field(TextBox box)
+    internal static void Field(TextBox box)
     {
         box.FontFamily = Tokens.Get<FontFamily>("Sans");
         box.FontSize = Tokens.Get<double>("TextName");
@@ -692,7 +718,7 @@ sealed class TerminalPanel : UserControl
         return both;
     }
 
-    private static TextBlock Text(string text, string size, string tone, FontWeight weight) => new()
+    internal static TextBlock Text(string text, string size, string tone, FontWeight weight) => new()
     {
         Text = text,
         FontFamily = Tokens.Get<FontFamily>("Sans"),
@@ -702,7 +728,7 @@ sealed class TerminalPanel : UserControl
         VerticalAlignment = VerticalAlignment.Center,
     };
 
-    private static TextBlock Mono(string text, string tone) => new()
+    internal static TextBlock Mono(string text, string tone) => new()
     {
         Text = text,
         FontFamily = Tokens.Get<FontFamily>("Mono"),
@@ -711,7 +737,7 @@ sealed class TerminalPanel : UserControl
         VerticalAlignment = VerticalAlignment.Center,
     };
 
-    private static Path Line(string data, string tone = "Muted") => new()
+    internal static Path Line(string data, string tone = "Muted") => new()
     {
         Data = Geometry.Parse(data),
         Stroke = Tokens.Brush(tone),
@@ -725,7 +751,7 @@ sealed class TerminalPanel : UserControl
     /// The sign of "waits for you": a pause (D-299).
     private static FrameworkElement Pause() => Line("M1,0 L1,11 M6,0 L6,11", "Caution");
 
-    private static FrameworkElement Dot(bool filled) => new Ellipse
+    internal static FrameworkElement Dot(bool filled) => new Ellipse
     {
         Width = 6,
         Height = 6,
@@ -774,7 +800,7 @@ sealed class TerminalPanel : UserControl
 
     /// One button for the whole window: the filled one is the main action, the outlined one the
     /// second, the ghost one the quiet third (DESIGN, one fill per control).
-    private static Button Flat(string text, Action click, bool ghost, bool main = false, bool danger = false, bool plus = false)
+    internal static Button Flat(string text, Action click, bool ghost, bool main = false, bool danger = false, bool plus = false)
     {
         var row = new StackPanel { Orientation = Orientation.Horizontal };
         var ink = main ? "Background" : danger ? "Destructive" : ghost ? "Muted" : "Ink";

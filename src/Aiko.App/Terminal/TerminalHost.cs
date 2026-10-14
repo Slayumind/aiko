@@ -20,6 +20,10 @@ sealed class TerminalHost
     private readonly TerminalWindow _window;
     private readonly Dictionary<string, ConversationRunner> _talks = [];
 
+    /// What a conversation said before its process started this time, read from the file of
+    /// Claude Code (D-303). The process adds what comes after.
+    private readonly Dictionary<string, Conversation> _histories = [];
+
     private TerminalSessions _sessions;
     private TerminalWindowModel _model;
     private FormView? _form;
@@ -73,6 +77,17 @@ sealed class TerminalHost
         _panel.FormCancelled += () => Change(_model.WithForm(false));
         _panel.AskAnswered += Answer;
         _panel.SignInAsked += SignIn;
+        _panel.SendAsked += (text, images) =>
+        {
+            if (_model.Session(_sessions) is { } session)
+            {
+                Send(session.Id, text, images);
+                Draw();
+            }
+        };
+        _panel.StopAsked += () => Current()?.Interrupt();
+        _panel.ModeAsked += NextMode;
+        _panel.Chosen += (requestId, choice) => Current()?.Choose(requestId, choice);
     }
 
     public event Action? Closed;
@@ -205,8 +220,11 @@ sealed class TerminalHost
 
         var id = Guid.NewGuid().ToString();
         var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        var folder = form.Folders[form.Folder].Path;
+        var home = System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile);
+        var config = Environment()?.ConfigDirectories.FirstOrDefault() ?? ClaudeConfigFolder.Resolve(null, home);
         _sessions = _sessions
-            .Add(id, form.Environment, form.Folders[form.Folder].Path, name, NewSessionChoices.Models[form.Model], PermissionMode.Manual, now)
+            .Add(id, form.Environment, folder, name, NewSessionChoices.Models[form.Model], TerminalStore.DefaultMode(folder, config), now)
             .Opened(id);
         Save();
 
@@ -262,6 +280,8 @@ sealed class TerminalHost
             talk.Close();
         }
 
+        _histories.Remove(id);
+
         _sessions = _sessions.Close(id);
         Save();
         Change(_model.After(_sessions));
@@ -290,7 +310,7 @@ sealed class TerminalHost
 
     // ---- the conversations ----
 
-    private void Send(string id, string message)
+    private void Send(string id, string message, IReadOnlyList<AttachedImage>? images = null)
     {
         if (TalkFor(id) is not { } talk)
         {
@@ -301,14 +321,16 @@ sealed class TerminalHost
             .Where(one => one.Value.IsRunning)
             .Select(one => new RunningTalk(one.Key, one.Value.State.IsBusy, _sessions.Find(one.Key)?.LastUsed ?? 0))
             .ToList();
-        if (ProcessCap.ToStop(running, id) is { } idle)
+        if (ProcessCap.ToStop(running, id) is { } idle && _talks.Remove(idle, out var stopped))
         {
-            _talks[idle].Close();
+            // Its next process starts from the file again, which then holds this run too.
+            stopped.Close();
+            _histories.Remove(idle);
         }
 
         _sessions = _sessions.Used(id, DateTimeOffset.UtcNow.ToUnixTimeSeconds()).MarkStarted(id);
         Save();
-        talk.Send(message, []);
+        talk.Send(message, images ?? []);
     }
 
     private ConversationRunner? TalkFor(string id)
@@ -326,6 +348,7 @@ sealed class TerminalHost
         }
 
         var home = System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile);
+        ReadHistory(id);
         var talk = new ConversationRunner(
             new RunnerSetup(
                 claude,
@@ -344,6 +367,74 @@ sealed class TerminalHost
         talk.Changed = Draw;
         _talks[id] = talk;
         return talk;
+    }
+
+    /// The next mode of the session. It is kept for the next start, and a running Claude Code
+    /// takes it at once.
+    private void NextMode()
+    {
+        if (_model.Session(_sessions) is not { } session)
+        {
+            return;
+        }
+
+        var talk = Current();
+        var next = PermissionModes.Next(talk?.State.Mode ?? session.Mode);
+        _sessions = _sessions.SetMode(session.Id, next);
+        Save();
+        talk?.SetMode(next);
+        Draw();
+    }
+
+    private ConversationRunner? Current() =>
+        _model.Session(_sessions) is { } session && _talks.TryGetValue(session.Id, out var talk) ? talk : null;
+
+    private void ReadHistory(string id)
+    {
+        var session = _sessions.Find(id);
+        if (session is not { Started: true }
+            || _settings.Environments.FirstOrDefault(one => one.Name == session.Environment) is not { } environment)
+        {
+            _histories[id] = Conversation.Empty(session?.Mode ?? PermissionMode.Manual);
+            return;
+        }
+
+        var home = System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile);
+        _histories[id] = TerminalStore.History(
+            environment.ConfigDirectories.FirstOrDefault() ?? ClaudeConfigFolder.Resolve(null, home),
+            session.Folder,
+            session.Id,
+            session.Mode);
+    }
+
+    private TalkView? Talk(TerminalSession? session)
+    {
+        if (session is null)
+        {
+            return null;
+        }
+
+        // The window opens on a session nobody picked yet: its past is read here, once.
+        if (!_histories.ContainsKey(session.Id))
+        {
+            ReadHistory(session.Id);
+        }
+
+        var past = _histories[session.Id].Items;
+        if (!_talks.TryGetValue(session.Id, out var talk))
+        {
+            return new TalkView(session.Id, past, false, false, session.Mode, ModelName.Display(session.Model), session.Environment);
+        }
+
+        var state = talk.State;
+        return new TalkView(
+            session.Id,
+            [.. past, .. state.Items],
+            state.IsBusy,
+            state.HasOpenCard,
+            state.Mode,
+            ModelName.Display(state.Model.Length > 0 ? state.Model : session.Model),
+            session.Environment);
     }
 
     // ---- the view ----
@@ -380,6 +471,7 @@ sealed class TerminalHost
             signedOut,
             _form,
             ask,
+            signedOut ? null : Talk(session),
             DateTimeOffset.Now);
     }
 

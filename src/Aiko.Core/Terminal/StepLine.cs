@@ -71,7 +71,13 @@ public sealed record StepLine(StepKind Kind, string Label, string Subject, int A
     {
         var old = Lines(before);
         var now = Lines(after);
+        var (start, end) = EqualEnds(old, now);
+        return (now.Count - start - end, old.Count - start - end);
+    }
 
+    /// How many lines are equal at the start of two texts, and how many at the end after those.
+    public static (int Start, int End) EqualEnds(IReadOnlyList<string> old, IReadOnlyList<string> now)
+    {
         var start = 0;
         while (start < old.Count && start < now.Count && old[start] == now[start])
         {
@@ -84,7 +90,7 @@ public sealed record StepLine(StepKind Kind, string Label, string Subject, int A
             end++;
         }
 
-        return (now.Count - start - end, old.Count - start - end);
+        return (start, end);
     }
 
     /// The lines of a text. One line break at the very end does not start another line.

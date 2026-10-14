@@ -9,7 +9,7 @@ import AppKit
 /// window stands on the screen, and AikoShot takes the picture (/look).
 @MainActor
 enum TerminalWindowCheck {
-    static let states = ["talk", "empty", "form", "elsewhere", "login", "close"]
+    static let states = ["talk", "feed", "empty", "form", "elsewhere", "login", "close"]
 
     /// Kept alive while the window is shown.
     private static var shown: (TerminalWindow, TerminalPanelState)?
@@ -107,6 +107,55 @@ enum TerminalWindowCheck {
             ask: state == "close"
                 ? CloseAsk(title: Strings.format(Strings.terminalCloseTitle, "terminal"), body: Strings.terminalCloseBody)
                 : nil,
+            talk: state == "feed" ? feed() : nil,
             now: now)
+    }
+
+    /// A short made up conversation: a message, steps, a markdown answer, a card that waits and a
+    /// queued message. The same as the feed of TerminalSnapshot.cs.
+    private static func feed() -> TalkScreen {
+        func step(_ id: Int, _ kind: StepKind, _ subject: String, added: Int = 0, removed: Int = 0) -> FeedItem {
+            FeedItem(id: id, content: .step(FeedStep(
+                toolUseId: "t\(id)",
+                line: StepLine(kind: kind, label: "", subject: subject, added: added, removed: removed, hidden: false),
+                state: .done, result: "", images: [], progress: "")))
+        }
+
+        let answer = [
+            "## Where the groups come from",
+            "",
+            "The groups come from the core: **`NewSessionChoices.Headers`** says where each one starts. See [the form](mac/Sources/AikoMac/Terminal/TerminalPanel.swift:300).",
+            "",
+            "1. A header before the first *recent* folder.",
+            "2. A header before the first bound folder.",
+            "",
+            "```swift",
+            "let headers = NewSessionChoices.headers(form.folders)",
+            "```",
+            "",
+            "| Group | Starts at |",
+            "|---|---:|",
+            "| Recent | 0 |",
+            "| Bound | 3 |",
+        ].joined(separator: "\n")
+
+        let request = #"{"type":"control_request","request_id":"r1","request":{"subtype":"can_use_tool","tool_name":"Edit","tool_use_id":"t6","input":{"file_path":"/work/aiko/NewSessionForm.swift","old_string":"a\nb","new_string":"a\nc\nd"}}}"#
+        var items: [FeedItem] = [
+            FeedItem(id: 1, content: .ownerMessage(
+                text: "Add the folder groups to the form of a new session.", images: 0, queued: false, attachments: [])),
+            step(2, .read, "NewSessionChoices.swift"),
+            step(3, .search, "FolderSource"),
+            FeedItem(id: 4, content: .answer(text: answer, streaming: false)),
+            step(5, .edit, "SettingsControls.swift", added: 18, removed: 2),
+        ]
+        if case .request(let asked) = StreamEvent.fromLine(request) {
+            items.append(FeedItem(id: 6, content: .card(request: RequestCard.from(asked), state: .open)))
+        }
+        items.append(FeedItem(id: 7, content: .ownerMessage(
+            text: "And the same on Windows, please.", images: 0, queued: true, attachments: [])))
+
+        return TalkScreen(
+            session: "a2", items: items, busy: true, hasOpenCard: true, mode: .manual, model: "Opus 5.5",
+            environment: "Aiko")
     }
 }

@@ -65,6 +65,17 @@ public struct FeedStep: Sendable, Equatable {
     public var result: String
     public var images: [StreamImage]
     public var progress: String
+
+    public init(
+        toolUseId: String, line: StepLine, state: StepState, result: String, images: [StreamImage], progress: String
+    ) {
+        self.toolUseId = toolUseId
+        self.line = line
+        self.state = state
+        self.result = result
+        self.images = images
+        self.progress = progress
+    }
 }
 
 /// One thing in the feed of a conversation.

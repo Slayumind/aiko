@@ -520,6 +520,16 @@ public class SharedCaseTests
         {
             Assert.Equal(Mode(row.GetProperty("mode")), PermissionModes.FromStream(row.GetProperty("value").GetString()));
         }
+
+        foreach (var row in cases.GetProperty("defaults").EnumerateArray())
+        {
+            var settings = row.GetProperty("settings").EnumerateArray()
+                .Select(file => file.ValueKind == JsonValueKind.String ? file.GetString() : null)
+                .ToList();
+            Assert.True(
+                Mode(row.GetProperty("mode")) == PermissionModes.Default(settings),
+                row.GetProperty("name").GetString());
+        }
     }
 
     [Fact]
@@ -570,6 +580,27 @@ public class SharedCaseTests
 
             Assert.True(
                 JsonNode.DeepEquals(expected, described),
+                $"{row.GetProperty("name").GetString()}: {described.ToJsonString()}");
+        }
+    }
+
+    [Fact]
+    public void Every_edit_shows_the_same_diff()
+    {
+        foreach (var row in SpecCases.Json("edit-diff").GetProperty("diffs").EnumerateArray())
+        {
+            var diff = EditDiff.For(row.GetProperty("tool").GetString()!, row.GetProperty("input"));
+            var described = new JsonObject
+            {
+                ["lines"] = diff is null
+                    ? null
+                    : new JsonArray([.. diff.Lines.Select(line => (JsonNode)new JsonArray(Camel(line.Side), line.Text))]),
+                ["more"] = diff?.More,
+            };
+
+            Assert.True(
+                JsonNode.DeepEquals(JsonNode.Parse(row.GetProperty("lines").GetRawText()), described["lines"])
+                && JsonNode.DeepEquals(JsonNode.Parse(row.GetProperty("more").GetRawText()), described["more"]),
                 $"{row.GetProperty("name").GetString()}: {described.ToJsonString()}");
         }
     }

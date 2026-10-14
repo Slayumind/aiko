@@ -1,0 +1,321 @@
+{
+  "comment": "The diff of a card that asks to allow an edit (D-303): the lines an edit takes out, then the lines it puts in, without numbers. The equal lines at both ends are set aside. Write puts in every line. A long edit shows 40 lines and says how many more there are. Any other tool, and an edit that changes nothing, has no diff.",
+  "diffs": [
+    {
+      "name": "one line changed between equal ones",
+      "tool": "Edit",
+      "input": {
+        "file_path": "/a.cs",
+        "old_string": "a\nb\nc",
+        "new_string": "a\nB\nc"
+      },
+      "lines": [
+        [
+          "removed",
+          "b"
+        ],
+        [
+          "added",
+          "B"
+        ]
+      ],
+      "more": 0
+    },
+    {
+      "name": "lines only put in",
+      "tool": "Edit",
+      "input": {
+        "file_path": "/a.cs",
+        "old_string": "a\nc",
+        "new_string": "a\nb1\nb2\nc"
+      },
+      "lines": [
+        [
+          "added",
+          "b1"
+        ],
+        [
+          "added",
+          "b2"
+        ]
+      ],
+      "more": 0
+    },
+    {
+      "name": "Windows line breaks are line breaks",
+      "tool": "Edit",
+      "input": {
+        "file_path": "/a.cs",
+        "old_string": "a\r\nb\r\n",
+        "new_string": "a\r\nc\r\n"
+      },
+      "lines": [
+        [
+          "removed",
+          "b"
+        ],
+        [
+          "added",
+          "c"
+        ]
+      ],
+      "more": 0
+    },
+    {
+      "name": "a new file puts in every line",
+      "tool": "Write",
+      "input": {
+        "file_path": "/n.md",
+        "content": "# Title\n\ntext\n"
+      },
+      "lines": [
+        [
+          "added",
+          "# Title"
+        ],
+        [
+          "added",
+          ""
+        ],
+        [
+          "added",
+          "text"
+        ]
+      ],
+      "more": 0
+    },
+    {
+      "name": "several edits follow each other",
+      "tool": "MultiEdit",
+      "input": {
+        "file_path": "/a.cs",
+        "edits": [
+          {
+            "old_string": "x",
+            "new_string": "y"
+          },
+          {
+            "old_string": "p\nq",
+            "new_string": "p"
+          }
+        ]
+      },
+      "lines": [
+        [
+          "removed",
+          "x"
+        ],
+        [
+          "added",
+          "y"
+        ],
+        [
+          "removed",
+          "q"
+        ]
+      ],
+      "more": 0
+    },
+    {
+      "name": "a long new file shows its first forty lines",
+      "tool": "Write",
+      "input": {
+        "file_path": "/long.txt",
+        "content": "line 1\nline 2\nline 3\nline 4\nline 5\nline 6\nline 7\nline 8\nline 9\nline 10\nline 11\nline 12\nline 13\nline 14\nline 15\nline 16\nline 17\nline 18\nline 19\nline 20\nline 21\nline 22\nline 23\nline 24\nline 25\nline 26\nline 27\nline 28\nline 29\nline 30\nline 31\nline 32\nline 33\nline 34\nline 35\nline 36\nline 37\nline 38\nline 39\nline 40\nline 41\nline 42\nline 43\nline 44\nline 45\n"
+      },
+      "lines": [
+        [
+          "added",
+          "line 1"
+        ],
+        [
+          "added",
+          "line 2"
+        ],
+        [
+          "added",
+          "line 3"
+        ],
+        [
+          "added",
+          "line 4"
+        ],
+        [
+          "added",
+          "line 5"
+        ],
+        [
+          "added",
+          "line 6"
+        ],
+        [
+          "added",
+          "line 7"
+        ],
+        [
+          "added",
+          "line 8"
+        ],
+        [
+          "added",
+          "line 9"
+        ],
+        [
+          "added",
+          "line 10"
+        ],
+        [
+          "added",
+          "line 11"
+        ],
+        [
+          "added",
+          "line 12"
+        ],
+        [
+          "added",
+          "line 13"
+        ],
+        [
+          "added",
+          "line 14"
+        ],
+        [
+          "added",
+          "line 15"
+        ],
+        [
+          "added",
+          "line 16"
+        ],
+        [
+          "added",
+          "line 17"
+        ],
+        [
+          "added",
+          "line 18"
+        ],
+        [
+          "added",
+          "line 19"
+        ],
+        [
+          "added",
+          "line 20"
+        ],
+        [
+          "added",
+          "line 21"
+        ],
+        [
+          "added",
+          "line 22"
+        ],
+        [
+          "added",
+          "line 23"
+        ],
+        [
+          "added",
+          "line 24"
+        ],
+        [
+          "added",
+          "line 25"
+        ],
+        [
+          "added",
+          "line 26"
+        ],
+        [
+          "added",
+          "line 27"
+        ],
+        [
+          "added",
+          "line 28"
+        ],
+        [
+          "added",
+          "line 29"
+        ],
+        [
+          "added",
+          "line 30"
+        ],
+        [
+          "added",
+          "line 31"
+        ],
+        [
+          "added",
+          "line 32"
+        ],
+        [
+          "added",
+          "line 33"
+        ],
+        [
+          "added",
+          "line 34"
+        ],
+        [
+          "added",
+          "line 35"
+        ],
+        [
+          "added",
+          "line 36"
+        ],
+        [
+          "added",
+          "line 37"
+        ],
+        [
+          "added",
+          "line 38"
+        ],
+        [
+          "added",
+          "line 39"
+        ],
+        [
+          "added",
+          "line 40"
+        ]
+      ],
+      "more": 5
+    },
+    {
+      "name": "an edit that changes nothing",
+      "tool": "Edit",
+      "input": {
+        "file_path": "/a.cs",
+        "old_string": "same",
+        "new_string": "same"
+      },
+      "lines": null,
+      "more": null
+    },
+    {
+      "name": "another tool has no diff",
+      "tool": "Bash",
+      "input": {
+        "command": "dotnet test"
+      },
+      "lines": null,
+      "more": null
+    },
+    {
+      "name": "an edit list of another shape",
+      "tool": "MultiEdit",
+      "input": {
+        "file_path": "/a.cs",
+        "edits": "none"
+      },
+      "lines": null,
+      "more": null
+    }
+  ]
+}

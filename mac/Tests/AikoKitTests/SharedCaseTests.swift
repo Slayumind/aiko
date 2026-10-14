@@ -538,6 +538,13 @@ struct SharedCaseTests {
         for row in cases["fromStream"]?.arrayValue ?? [] {
             #expect(PermissionModes.fromStream(row["value"]?.stringValue) == Self.mode(row["mode"]))
         }
+
+        for row in cases["defaults"]?.arrayValue ?? [] {
+            let settings = (row["settings"]?.arrayValue ?? []).map(\.stringValue)
+            #expect(
+                PermissionModes.defaultMode(settings) == Self.mode(row["mode"]),
+                "\(row["name"]?.stringValue ?? "")")
+        }
     }
 
     @Test
@@ -583,6 +590,20 @@ struct SharedCaseTests {
             #expect(
                 described == row["blocks"],
                 "\(row["name"]?.stringValue ?? ""): \(described.toJsonString(escaping: .relaxed))")
+        }
+    }
+
+    @Test
+    func everyEditShowsTheSameDiff() {
+        for row in SpecCases.json("edit-diff")["diffs"]?.arrayValue ?? [] {
+            let diff = EditDiff.forTool(row["tool"]?.stringValue ?? "", row["input"]?.objectValue ?? JsonObject())
+            let lines: JsonNode = diff.map { found in
+                .array(found.lines.map { .array([.string(String(describing: $0.side)), .string($0.text)]) })
+            } ?? .null
+            let more: JsonNode = diff.map { .number(String($0.more)) } ?? .null
+
+            #expect(lines == row["lines"], "\(row["name"]?.stringValue ?? "")")
+            #expect(more == row["more"], "\(row["name"]?.stringValue ?? "")")
         }
     }
 

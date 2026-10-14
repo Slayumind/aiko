@@ -8,6 +8,16 @@ import Foundation
 ///
 /// The twin of Terminal/TerminalStore.cs.
 enum TerminalStore {
+    /// The mode Claude Code would start in for this folder and config folder (D-311): the local
+    /// settings of the project, its shared settings, then the settings of the config folder.
+    static func defaultMode(folder: String, configDirectory: String) -> PermissionMode {
+        PermissionModes.defaultMode([
+            try? String(contentsOfFile: "\(folder)/.claude/settings.local.json", encoding: .utf8),
+            try? String(contentsOfFile: "\(folder)/.claude/settings.json", encoding: .utf8),
+            try? String(contentsOfFile: "\(configDirectory)/settings.json", encoding: .utf8),
+        ])
+    }
+
     /// The file of a conversation, or nil when Claude Code has none.
     static func transcriptFile(configDirectory: String, folder: String, sessionId: String) -> String? {
         let manager = FileManager.default
