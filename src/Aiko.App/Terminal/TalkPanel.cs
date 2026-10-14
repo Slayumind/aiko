@@ -19,11 +19,12 @@ sealed record TalkView(IReadOnlyList<FeedItem> Items, bool Busy, bool HasOpenCar
 /// draws a TalkView and reports what the person did; the host decides the rest.
 sealed class TalkPanel : UserControl
 {
-    private readonly ObservableCollection<FeedItem> _items = [];
+    /// The rows of the feed: the items of the core, and the line "working" after them while a turn
+    /// goes on (D-308).
+    private readonly ObservableCollection<object> _items = [];
     private readonly ListBox _feed;
     private readonly TextBox _input = new();
     private readonly TextBlock _empty;
-    private readonly FrameworkElement _working;
     private readonly Button _stop;
     private TalkView? _view;
 
@@ -52,56 +53,55 @@ sealed class TalkPanel : UserControl
         _empty.HorizontalAlignment = HorizontalAlignment.Center;
         _empty.TextWrapping = TextWrapping.Wrap;
 
-        var dot = TerminalPanel.Dot(filled: true);
-        var word = TerminalPanel.Mono(Strings.TerminalWorking, "Muted");
-        word.Margin = new Thickness(8, 0, 0, 0);
-        _working = new StackPanel
-        {
-            Orientation = Orientation.Horizontal,
-            Margin = new Thickness(0, 6, 0, 10),
-            Children = { dot, word },
-        };
-
         TerminalPanel.Field(_input);
+        _input.Background = Brushes.Transparent;
+        _input.BorderThickness = new Thickness(0);
+        _input.Padding = new Thickness(0);
         _input.AcceptsReturn = true;
         _input.TextWrapping = TextWrapping.Wrap;
-        _input.MinHeight = 44;
-        _input.MaxHeight = 220;
+        _input.MinHeight = 24;
+        _input.MaxHeight = 200;
         _input.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
         _input.VerticalContentAlignment = VerticalAlignment.Top;
-        _input.Padding = new Thickness(11, 10, 11, 10);
         _input.PreviewKeyDown += OnInputKey;
 
-        _stop = TerminalPanel.Flat(Strings.TerminalStop, () => StopAsked?.Invoke(), ghost: false);
-        _stop.Margin = new Thickness(8, 0, 0, 0);
-        _stop.VerticalAlignment = VerticalAlignment.Bottom;
+        _stop = StopButton(() => StopAsked?.Invoke());
 
         var placeholder = TerminalPanel.Text(Strings.TerminalDescribeTask, "TextName", "Muted", FontWeights.Normal);
-        placeholder.Margin = new Thickness(14, 11, 14, 0);
+        placeholder.Margin = new Thickness(2, 1, 0, 0);
         placeholder.VerticalAlignment = VerticalAlignment.Top;
         placeholder.IsHitTestVisible = false;
         _input.TextChanged += (_, _) => placeholder.Visibility = _input.Text.Length == 0 ? Visibility.Visible : Visibility.Collapsed;
 
-        var field = new Grid();
-        field.Children.Add(_input);
-        field.Children.Add(placeholder);
-
-        var inputRow = new DockPanel { Margin = new Thickness(0, 0, 0, 16) };
+        // The stop button stands where the paper clip will be, at the right of the field (D-308).
+        var field = new DockPanel();
         DockPanel.SetDock(_stop, Dock.Right);
-        inputRow.Children.Add(_stop);
-        inputRow.Children.Add(field);
+        field.Children.Add(_stop);
+        var text = new Grid();
+        text.Children.Add(_input);
+        text.Children.Add(placeholder);
+        field.Children.Add(text);
 
-        var bottom = new StackPanel();
-        bottom.Children.Add(_working);
-        bottom.Children.Add(inputRow);
+        var compose = new Border
+        {
+            Background = Tokens.Brush("Surface"),
+            BorderBrush = Tokens.Brush("InputLine"),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(14),
+            Padding = new Thickness(14, 12, 14, 12),
+            Margin = new Thickness(0, 0, 0, 16),
+            Cursor = Cursors.IBeam,
+            Child = field,
+        };
+        compose.MouseLeftButtonDown += (_, _) => _input.Focus();
 
         var middle = new Grid();
         middle.Children.Add(_feed);
         middle.Children.Add(_empty);
 
         var all = new DockPanel { Margin = new Thickness(24, 0, 24, 0), MaxWidth = 860 };
-        DockPanel.SetDock(bottom, Dock.Bottom);
-        all.Children.Add(bottom);
+        DockPanel.SetDock(compose, Dock.Bottom);
+        all.Children.Add(compose);
         all.Children.Add(middle);
         Content = all;
     }
@@ -118,27 +118,32 @@ sealed class TalkPanel : UserControl
         var atEnd = AtEnd();
         _view = view;
 
+        List<object> rows = [.. view.Items];
+        if (view.Busy && !view.HasOpenCard)
+        {
+            rows.Add(WorkingMark.Row);
+        }
+
         // Rows that did not change keep their place and their control; the core gives the same
         // record for an item nothing happened to.
-        for (var at = 0; at < view.Items.Count; at++)
+        for (var at = 0; at < rows.Count; at++)
         {
             if (at >= _items.Count)
             {
-                _items.Add(view.Items[at]);
+                _items.Add(rows[at]);
             }
-            else if (!ReferenceEquals(_items[at], view.Items[at]) && !Equals(_items[at], view.Items[at]))
+            else if (!ReferenceEquals(_items[at], rows[at]) && !Equals(_items[at], rows[at]))
             {
-                _items[at] = view.Items[at];
+                _items[at] = rows[at];
             }
         }
 
-        while (_items.Count > view.Items.Count)
+        while (_items.Count > rows.Count)
         {
             _items.RemoveAt(_items.Count - 1);
         }
 
         _empty.Visibility = view.Items.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-        _working.Visibility = view.Busy && !view.HasOpenCard ? Visibility.Visible : Visibility.Collapsed;
         _stop.Visibility = view.Busy ? Visibility.Visible : Visibility.Collapsed;
 
         if (atEnd && _items.Count > 0)
@@ -160,6 +165,47 @@ sealed class TalkPanel : UserControl
         StepKind.Web => Strings.TerminalStepWeb,
         _ => label,
     };
+
+    /// A small square button with a square in it, as in the mockup of a turn that works.
+    private static Button StopButton(Action click)
+    {
+        var square = new Border
+        {
+            Width = 8,
+            Height = 8,
+            CornerRadius = new CornerRadius(2),
+            Background = Tokens.Brush("Ink"),
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+        var hover = new Border { CornerRadius = new CornerRadius(8), Background = Tokens.Brush("HoverLayer"), Opacity = 0 };
+        var face = new Grid { Width = 26, Height = 26 };
+        face.Children.Add(new Border
+        {
+            CornerRadius = new CornerRadius(8),
+            Background = new SolidColorBrush(Color.FromArgb(0x0B, 0xFF, 0xFF, 0xFF)),
+            BorderBrush = Tokens.Brush("InputLine"),
+            BorderThickness = new Thickness(1),
+        });
+        face.Children.Add(hover);
+        face.Children.Add(square);
+
+        var presenter = new FrameworkElementFactory(typeof(ContentPresenter));
+        var button = new Button
+        {
+            Content = face,
+            ToolTip = Strings.TerminalStop,
+            Cursor = Cursors.Hand,
+            Focusable = false,
+            Margin = new Thickness(10, -1, 0, -1),
+            VerticalAlignment = VerticalAlignment.Top,
+            Template = new ControlTemplate(typeof(Button)) { VisualTree = presenter },
+        };
+        button.MouseEnter += (_, _) => hover.BeginAnimation(OpacityProperty, Motion.To(1, Motion.Or0(Motion.Hover), Motion.Standard));
+        button.MouseLeave += (_, _) => hover.BeginAnimation(OpacityProperty, Motion.To(0, Motion.Or0(Motion.Hover), Motion.Standard));
+        button.Click += (_, _) => click();
+        return button;
+    }
 
     /// Enter sends, Shift+Enter is a new line, Esc stops the work (D-294).
     private void OnInputKey(object sender, KeyEventArgs e)
@@ -231,15 +277,27 @@ sealed class TalkPanel : UserControl
     }
 }
 
+/// The last row of the feed while a turn goes on. It is not an item of the core: the core says
+/// only that the session is busy.
+sealed class WorkingMark
+{
+    public static readonly WorkingMark Row = new();
+
+    private WorkingMark()
+    {
+    }
+}
+
 /// One row of the feed, built from its item whenever the item changes.
 sealed class FeedRow : ContentControl
 {
     public static readonly DependencyProperty ItemProperty = DependencyProperty.Register(
-        nameof(Item), typeof(FeedItem), typeof(FeedRow), new PropertyMetadata(null, (row, _) => ((FeedRow)row).Build()));
+        nameof(Item), typeof(object), typeof(FeedRow), new PropertyMetadata(null, (row, _) => ((FeedRow)row).Build()));
 
-    public FeedItem? Item
+    /// A FeedItem, or the WorkingMark.
+    public object? Item
     {
-        get => (FeedItem?)GetValue(ItemProperty);
+        get => GetValue(ItemProperty);
         set => SetValue(ItemProperty, value);
     }
 
@@ -247,6 +305,7 @@ sealed class FeedRow : ContentControl
     {
         Content = Item switch
         {
+            WorkingMark => Working(),
             FeedItem.OwnerMessage message => Message(message),
             FeedItem.Answer answer => Words(answer.Text, "Ink", new Thickness(0, 6, 0, 10)),
             FeedItem.Step { Line.Hidden: false } step => StepRow(step),
@@ -256,27 +315,59 @@ sealed class FeedRow : ContentControl
         };
     }
 
+    /// The word "working" and three dots that fade to the right.
+    private static UIElement Working()
+    {
+        var row = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 10, 0, 12) };
+        row.Children.Add(TerminalPanel.Mono(Strings.TerminalWorking, "Muted"));
+        foreach (var opacity in new[] { 1, 0.6, 0.3 })
+        {
+            row.Children.Add(new System.Windows.Shapes.Ellipse
+            {
+                Width = 4,
+                Height = 4,
+                Margin = new Thickness(opacity == 1 ? 8 : 3, 1, 0, 0),
+                Fill = Tokens.Brush("Muted"),
+                Opacity = opacity,
+                VerticalAlignment = VerticalAlignment.Center,
+            });
+        }
+
+        return row;
+    }
+
+    /// The words of the owner: a block on the right, at most 70% of the feed wide (D-299). A queued
+    /// message is dimmed and says so under the block (D-308).
     private static UIElement Message(FeedItem.OwnerMessage message)
     {
+        var block = new Border
+        {
+            Background = Tokens.Brush("Surface"),
+            BorderBrush = Tokens.Brush("Hairline"),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(14, 14, 4, 14),
+            Padding = new Thickness(14, 10, 14, 10),
+            HorizontalAlignment = HorizontalAlignment.Right,
+            Opacity = message.Queued ? 0.55 : 1,
+            Child = Words(message.Text, "Ink", new Thickness(0)),
+        };
+
         var column = new StackPanel();
-        column.Children.Add(Words(message.Text, "Ink", new Thickness(0)));
+        column.Children.Add(block);
         if (message.Queued)
         {
             var queued = TerminalPanel.Mono(Strings.TerminalQueued, "Muted");
             queued.Margin = new Thickness(0, 4, 0, 0);
+            queued.HorizontalAlignment = HorizontalAlignment.Right;
             column.Children.Add(queued);
         }
 
-        return new Border
-        {
-            Background = Tokens.Brush("Raised"),
-            CornerRadius = new CornerRadius(12),
-            Padding = new Thickness(12, 8, 12, 8),
-            Margin = new Thickness(80, 12, 0, 6),
-            HorizontalAlignment = HorizontalAlignment.Right,
-            Opacity = message.Queued ? 0.6 : 1,
-            Child = column,
-        };
+        var row = new Grid { Margin = new Thickness(0, 12, 0, 8) };
+        row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(3, GridUnitType.Star) });
+        row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(7, GridUnitType.Star) });
+        Grid.SetColumn(column, 1);
+        row.Children.Add(column);
+        return row;
     }
 
     /// Text that can be selected and copied, but not typed into.
@@ -296,14 +387,19 @@ sealed class FeedRow : ContentControl
         SelectionBrush = Tokens.Brush("Muted"),
     };
 
+    /// A step is one line behind a rule on the left; the rules of steps in a row join into one
+    /// line, so the rows keep no gap between them (D-299).
     private static UIElement StepRow(FeedItem.Step step)
     {
         var tone = step.State == StepState.Failed ? "Destructive" : "Muted";
-        var row = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 2, 0, 2) };
-        row.Children.Add(TerminalPanel.Mono(TalkPanel.StepWord(step.Line.Kind, step.Line.Label), tone));
+        var row = new StackPanel { Orientation = Orientation.Horizontal };
+        var verb = TerminalPanel.Text(TalkPanel.StepWord(step.Line.Kind, step.Line.Label), "TextNumber", tone, FontWeights.Normal);
+        verb.MinWidth = 52;
+        row.Children.Add(verb);
 
         var subject = TerminalPanel.Mono(step.Line.Subject, step.State == StepState.Failed ? "Destructive" : "Ink");
-        subject.Margin = new Thickness(8, 0, 0, 0);
+        subject.FontSize = 12.5;
+        subject.Margin = new Thickness(10, 0, 0, 0);
         subject.MaxWidth = 560;
         subject.TextTrimming = TextTrimming.CharacterEllipsis;
         row.Children.Add(subject);
@@ -311,8 +407,10 @@ sealed class FeedRow : ContentControl
         if (step.Line.Added > 0 || step.Line.Removed > 0)
         {
             var added = TerminalPanel.Mono($"+{step.Line.Added}", "Positive");
+            added.FontSize = 12.5;
             added.Margin = new Thickness(8, 0, 0, 0);
             var removed = TerminalPanel.Mono($"−{step.Line.Removed}", "Destructive");
+            removed.FontSize = 12.5;
             removed.Margin = new Thickness(4, 0, 0, 0);
             row.Children.Add(added);
             row.Children.Add(removed);
@@ -325,7 +423,14 @@ sealed class FeedRow : ContentControl
             row.Children.Add(dot);
         }
 
-        return row;
+        return new Border
+        {
+            BorderBrush = Tokens.Brush("Raised"),
+            BorderThickness = new Thickness(2, 0, 0, 0),
+            Padding = new Thickness(14, 0, 0, 0),
+            MinHeight = 24,
+            Child = row,
+        };
     }
 
     private UIElement Card(RequestCard request)

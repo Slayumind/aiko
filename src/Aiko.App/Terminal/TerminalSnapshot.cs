@@ -7,7 +7,7 @@ namespace Aiko.App;
 /// can be looked at without Claude Code and without touching the sessions of the person.
 static class TerminalSnapshot
 {
-    public static readonly IReadOnlyList<string> States = ["talk", "feed", "empty", "form", "elsewhere", "login", "close"];
+    public static readonly IReadOnlyList<string> States = ["talk", "feed", "working", "empty", "form", "elsewhere", "login", "close"];
 
     /// --snapshot-terminal &lt;file&gt; &lt;state&gt; [width]
     public static bool Write(string path, string state, double width)
@@ -71,12 +71,13 @@ static class TerminalSnapshot
             SignedOut: state == "login",
             form,
             state == "close" ? new AskView(string.Format(Strings.TerminalCloseTitle, "terminal"), Strings.TerminalCloseBody) : null,
-            state == "feed" ? Feed() : null,
+            state == "feed" ? Feed(withCard: true) : state == "working" ? Feed(withCard: false) : null,
             now);
     }
 
-    /// A short made up conversation: a message, steps, an answer, a card that waits and a queued message.
-    private static TalkView Feed()
+    /// A short made up conversation: a message, steps, an answer, a queued message, and a card that
+    /// waits, or without it the turn that still works.
+    private static TalkView Feed(bool withCard)
     {
         using var input = System.Text.Json.JsonDocument.Parse(
             "{\"file_path\":\"/work/aiko/NewSessionForm.cs\",\"old_string\":\"a\\nb\",\"new_string\":\"a\\nc\\nd\"}");
@@ -85,17 +86,17 @@ static class TerminalSnapshot
         static FeedItem.Step Step(int id, StepKind kind, string subject, StepState state, int added = 0, int removed = 0) =>
             new(id, $"t{id}", new StepLine(kind, "", subject, added, removed, false), state, "", [], "");
 
-        return new TalkView(
-            [
-                new FeedItem.OwnerMessage(1, "Add the folder groups to the form of a new session.", 0, false, []),
-                Step(2, StepKind.Read, "NewSessionChoices.cs", StepState.Done),
-                Step(3, StepKind.Search, "FolderSource", StepState.Done),
-                new FeedItem.Answer(4, "The groups come from the core. I add a header before the first folder of each group, and the drop-down draws it.", false),
-                Step(5, StepKind.Edit, "DropDown.cs", StepState.Done, 18, 2),
-                new FeedItem.Card(6, RequestCard.From(edit), RequestState.Open),
-                new FeedItem.OwnerMessage(7, "And the same on the Mac, please.", 0, true, []),
-            ],
-            Busy: true,
-            HasOpenCard: true);
+        List<FeedItem> items =
+        [
+            new FeedItem.OwnerMessage(1, "Add the folder groups to the form of a new session.", 0, false, []),
+            Step(2, StepKind.Read, "NewSessionChoices.cs", StepState.Done),
+            Step(3, StepKind.Search, "FolderSource", StepState.Done),
+            new FeedItem.Answer(4, "The groups come from the core. I add a header before the first folder of each group, and the drop-down draws it.", false),
+            Step(5, StepKind.Edit, "DropDown.cs", StepState.Done, 18, 2),
+            withCard ? new FeedItem.Card(6, RequestCard.From(edit), RequestState.Open) : Step(6, StepKind.Run, "dotnet test Aiko.Core.Tests", StepState.Running),
+            new FeedItem.OwnerMessage(7, "And the same on the Mac, please.", 0, true, []),
+        ];
+
+        return new TalkView(items, Busy: true, HasOpenCard: withCard);
     }
 }
