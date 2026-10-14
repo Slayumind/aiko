@@ -14,6 +14,8 @@ final class IslandHost {
 
     private(set) var window: IslandWindow?
     private var fullScreen: FullScreenWatch?
+    private var fullScreenInFront = false
+    private var underTerminal = false
 
     var isShown: Bool { window != nil }
 
@@ -69,15 +71,28 @@ final class IslandHost {
         window?.holds(point) == true
     }
 
+    /// The window of the terminal is on screen (D-310): its title shows the limit, so the island
+    /// steps aside. A minimized or closed terminal brings it back.
+    func followTerminal(_ inView: Bool) {
+        underTerminal = inView
+        apply()
+    }
+
     private func onFullScreen(_ full: Bool) {
+        fullScreenInFront = full
+        apply()
+    }
+
+    private func apply() {
         guard let window else { return }
 
-        let hide = full && Store.settings().hideIslandInFullScreen
+        let hide = (fullScreenInFront && Store.settings().hideIslandInFullScreen) || underTerminal
         guard window.isVisible == hide else { return }
 
         // Only a real change is worth a line: the space changes many times a minute.
         window.hide(hide)
-        Log.write("island \(hide ? "hidden behind a full screen window" : "shown again")")
+        let why = underTerminal ? "hidden while the terminal is open" : "hidden behind a full screen window"
+        Log.write("island \(hide ? why : "shown again")")
     }
 
     private func savePosition(_ position: IslandPosition) {

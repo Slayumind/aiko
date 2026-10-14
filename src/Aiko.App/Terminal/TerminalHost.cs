@@ -50,8 +50,10 @@ sealed class TerminalHost
                 Save();
             }
         };
+        _window.StateChanged += (_, _) => InViewChanged?.Invoke(_window.InView);
         _window.Closed += (_, _) =>
         {
+            InViewChanged?.Invoke(false);
             foreach (var talk in _talks.Values)
             {
                 talk.Close();
@@ -75,6 +77,9 @@ sealed class TerminalHost
 
     public event Action? Closed;
 
+    /// The window came on screen, or left it by being minimized or closed.
+    public event Action<bool>? InViewChanged;
+
     internal TerminalPanel Panel => _panel;
 
     public void Show()
@@ -82,6 +87,7 @@ sealed class TerminalHost
         Draw();
         _window.Show();
         _window.Activate();
+        InViewChanged?.Invoke(_window.InView);
     }
 
     /// Aiko quits: the window closes without asking, as the processes end with Aiko anyway.

@@ -27,6 +27,9 @@ final class TerminalHost {
 
     var onClosed: (() -> Void)?
 
+    /// The window came on screen, or left it by being minimized or closed.
+    var onInView: ((Bool) -> Void)?
+
     /// limitsOf gives the latest limits of an environment by its name.
     init(
         settings: EnvironmentSettings,
@@ -42,6 +45,7 @@ final class TerminalHost {
         window = TerminalWindow(panel: panel, place: WindowPlace.fit(sessions.window, TerminalWindow.screens()))
 
         window.mayClose = { [weak self] in self?.mayCloseWindow() ?? true }
+        window.onInView = { [weak self] in self?.onInView?($0) }
         window.onClosing = { [weak self] in
             guard let self else { return }
             self.sessions = self.sessions.placed(self.window.place)
