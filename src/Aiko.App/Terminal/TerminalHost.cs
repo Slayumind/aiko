@@ -20,6 +20,10 @@ sealed class TerminalHost
     private readonly TerminalWindow _window;
     private readonly Dictionary<string, ConversationRunner> _talks = [];
 
+    /// What a conversation said before its process started this time, read from the file of
+    /// Claude Code (D-303). The process adds what comes after.
+    private readonly Dictionary<string, Conversation> _histories = [];
+
     private TerminalSessions _sessions;
     private TerminalWindowModel _model;
     private FormView? _form;
@@ -73,6 +77,16 @@ sealed class TerminalHost
         _panel.FormCancelled += () => Change(_model.WithForm(false));
         _panel.AskAnswered += Answer;
         _panel.SignInAsked += SignIn;
+        _panel.SendAsked += text =>
+        {
+            if (_model.Session(_sessions) is { } session)
+            {
+                Send(session.Id, text);
+                Draw();
+            }
+        };
+        _panel.StopAsked += () => Current()?.Interrupt();
+        _panel.Chosen += (requestId, choice) => Current()?.Choose(requestId, choice);
     }
 
     public event Action? Closed;
@@ -262,6 +276,8 @@ sealed class TerminalHost
             talk.Close();
         }
 
+        _histories.Remove(id);
+
         _sessions = _sessions.Close(id);
         Save();
         Change(_model.After(_sessions));
@@ -301,9 +317,11 @@ sealed class TerminalHost
             .Where(one => one.Value.IsRunning)
             .Select(one => new RunningTalk(one.Key, one.Value.State.IsBusy, _sessions.Find(one.Key)?.LastUsed ?? 0))
             .ToList();
-        if (ProcessCap.ToStop(running, id) is { } idle)
+        if (ProcessCap.ToStop(running, id) is { } idle && _talks.Remove(idle, out var stopped))
         {
-            _talks[idle].Close();
+            // Its next process starts from the file again, which then holds this run too.
+            stopped.Close();
+            _histories.Remove(idle);
         }
 
         _sessions = _sessions.Used(id, DateTimeOffset.UtcNow.ToUnixTimeSeconds()).MarkStarted(id);
@@ -326,6 +344,7 @@ sealed class TerminalHost
         }
 
         var home = System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile);
+        ReadHistory(id);
         var talk = new ConversationRunner(
             new RunnerSetup(
                 claude,
@@ -344,6 +363,49 @@ sealed class TerminalHost
         talk.Changed = Draw;
         _talks[id] = talk;
         return talk;
+    }
+
+    private ConversationRunner? Current() =>
+        _model.Session(_sessions) is { } session && _talks.TryGetValue(session.Id, out var talk) ? talk : null;
+
+    private void ReadHistory(string id)
+    {
+        var session = _sessions.Find(id);
+        if (session is not { Started: true }
+            || _settings.Environments.FirstOrDefault(one => one.Name == session.Environment) is not { } environment)
+        {
+            _histories[id] = Conversation.Empty(session?.Mode ?? PermissionMode.Manual);
+            return;
+        }
+
+        var home = System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile);
+        _histories[id] = TerminalStore.History(
+            environment.ConfigDirectories.FirstOrDefault() ?? ClaudeConfigFolder.Resolve(null, home),
+            session.Folder,
+            session.Id,
+            session.Mode);
+    }
+
+    private TalkView? Talk(TerminalSession? session)
+    {
+        if (session is null)
+        {
+            return null;
+        }
+
+        // The window opens on a session nobody picked yet: its past is read here, once.
+        if (!_histories.ContainsKey(session.Id))
+        {
+            ReadHistory(session.Id);
+        }
+
+        var past = _histories[session.Id].Items;
+        if (!_talks.TryGetValue(session.Id, out var talk))
+        {
+            return new TalkView(past, false, false);
+        }
+
+        return new TalkView([.. past, .. talk.State.Items], talk.State.IsBusy, talk.State.HasOpenCard);
     }
 
     // ---- the view ----
@@ -380,6 +442,7 @@ sealed class TerminalHost
             signedOut,
             _form,
             ask,
+            signedOut ? null : Talk(session),
             DateTimeOffset.Now);
     }
 

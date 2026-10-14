@@ -1107,12 +1107,6 @@ public static class Strings
     /// Describe the task
     public static string TerminalDescribeTask => Get("TerminalDescribeTask");
 
-    /// Recent
-    public static string TerminalRecent => Get("TerminalRecent");
-
-    /// Bound folders
-    public static string TerminalBound => Get("TerminalBound");
-
     /// Choose another folder
     public static string TerminalChooseFolder => Get("TerminalChooseFolder");
 
@@ -1256,4 +1250,31 @@ public static class Strings
 
     /// Sessions
     public static string TerminalSessions => Get("TerminalSessions");
+
+    /// Allow
+    public static string TerminalAllow => Get("TerminalAllow");
+
+    /// Allow edits in this session
+    public static string TerminalAllowEdits => Get("TerminalAllowEdits");
+
+    /// Allow in this project
+    public static string TerminalAllowInProject => Get("TerminalAllowInProject");
+
+    /// Deny
+    public static string TerminalDeny => Get("TerminalDeny");
+
+    /// Stop
+    public static string TerminalStop => Get("TerminalStop");
+
+    /// Turn stopped.
+    public static string TerminalTurnStopped => Get("TerminalTurnStopped");
+
+    /// queued
+    public static string TerminalQueued => Get("TerminalQueued");
+
+    /// The conversation was made shorter to fit.
+    public static string TerminalCompacted => Get("TerminalCompacted");
+
+    /// Claude Code stopped with an error.
+    public static string TerminalFailed => Get("TerminalFailed");
 }

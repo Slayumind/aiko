@@ -402,8 +402,6 @@ public enum Strings {
         "TerminalName": ("Name", "Имя"),
         "TerminalNameHint": ("Optional. An empty name becomes the folder name with a number.", "Можно оставить пустым: сессия получит имя папки с номером."),
         "TerminalDescribeTask": ("Describe the task", "Опиши задачу"),
-        "TerminalRecent": ("Recent", "Недавние"),
-        "TerminalBound": ("Bound folders", "Привязанные"),
         "TerminalChooseFolder": ("Choose another folder", "Выбрать другую папку"),
         "TerminalFoldersRecent": ("Recent", "Недавние"),
         "TerminalFoldersBound": ("Bound to this environment", "Привязанные к среде"),
@@ -452,6 +450,15 @@ public enum Strings {
         "TerminalRestore": ("Restore", "Восстановить"),
         "TerminalCloseWindow": ("Close", "Закрыть"),
         "TerminalSessions": ("Sessions", "Сессии"),
+        "TerminalAllow": ("Allow", "Разрешить"),
+        "TerminalAllowEdits": ("Allow edits in this session", "Разрешать правки в этой сессии"),
+        "TerminalAllowInProject": ("Allow in this project", "Разрешать в этом проекте"),
+        "TerminalDeny": ("Deny", "Отказать"),
+        "TerminalStop": ("Stop", "Остановить"),
+        "TerminalTurnStopped": ("Turn stopped.", "Ход остановлен."),
+        "TerminalQueued": ("queued", "в очереди"),
+        "TerminalCompacted": ("The conversation was made shorter to fit.", "Разговор сжат, чтобы поместиться в память."),
+        "TerminalFailed": ("Claude Code stopped with an error.", "Claude Code остановился с ошибкой."),
     ]
 
     /// Session · 5 hours
@@ -1540,12 +1547,6 @@ public enum Strings {
     /// Describe the task
     public static var terminalDescribeTask: String { Strings.get("TerminalDescribeTask") }
 
-    /// Recent
-    public static var terminalRecent: String { Strings.get("TerminalRecent") }
-
-    /// Bound folders
-    public static var terminalBound: String { Strings.get("TerminalBound") }
-
     /// Choose another folder
     public static var terminalChooseFolder: String { Strings.get("TerminalChooseFolder") }
 
@@ -1689,4 +1690,31 @@ public enum Strings {
 
     /// Sessions
     public static var terminalSessions: String { Strings.get("TerminalSessions") }
+
+    /// Allow
+    public static var terminalAllow: String { Strings.get("TerminalAllow") }
+
+    /// Allow edits in this session
+    public static var terminalAllowEdits: String { Strings.get("TerminalAllowEdits") }
+
+    /// Allow in this project
+    public static var terminalAllowInProject: String { Strings.get("TerminalAllowInProject") }
+
+    /// Deny
+    public static var terminalDeny: String { Strings.get("TerminalDeny") }
+
+    /// Stop
+    public static var terminalStop: String { Strings.get("TerminalStop") }
+
+    /// Turn stopped.
+    public static var terminalTurnStopped: String { Strings.get("TerminalTurnStopped") }
+
+    /// queued
+    public static var terminalQueued: String { Strings.get("TerminalQueued") }
+
+    /// The conversation was made shorter to fit.
+    public static var terminalCompacted: String { Strings.get("TerminalCompacted") }
+
+    /// Claude Code stopped with an error.
+    public static var terminalFailed: String { Strings.get("TerminalFailed") }
 }

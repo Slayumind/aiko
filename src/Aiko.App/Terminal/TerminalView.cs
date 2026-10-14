@@ -34,4 +34,5 @@ sealed record TerminalView(
     bool SignedOut,
     FormView? Form,
     AskView? Ask,
+    TalkView? Talk,
     DateTimeOffset Now);

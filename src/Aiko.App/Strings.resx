@@ -1117,12 +1117,6 @@
   <data name="TerminalDescribeTask" xml:space="preserve">
     <value>Describe the task</value>
   </data>
-  <data name="TerminalRecent" xml:space="preserve">
-    <value>Recent</value>
-  </data>
-  <data name="TerminalBound" xml:space="preserve">
-    <value>Bound folders</value>
-  </data>
   <data name="TerminalChooseFolder" xml:space="preserve">
     <value>Choose another folder</value>
   </data>
@@ -1266,5 +1260,32 @@
   </data>
   <data name="TerminalSessions" xml:space="preserve">
     <value>Sessions</value>
+  </data>
+  <data name="TerminalAllow" xml:space="preserve">
+    <value>Allow</value>
+  </data>
+  <data name="TerminalAllowEdits" xml:space="preserve">
+    <value>Allow edits in this session</value>
+  </data>
+  <data name="TerminalAllowInProject" xml:space="preserve">
+    <value>Allow in this project</value>
+  </data>
+  <data name="TerminalDeny" xml:space="preserve">
+    <value>Deny</value>
+  </data>
+  <data name="TerminalStop" xml:space="preserve">
+    <value>Stop</value>
+  </data>
+  <data name="TerminalTurnStopped" xml:space="preserve">
+    <value>Turn stopped.</value>
+  </data>
+  <data name="TerminalQueued" xml:space="preserve">
+    <value>queued</value>
+  </data>
+  <data name="TerminalCompacted" xml:space="preserve">
+    <value>The conversation was made shorter to fit.</value>
+  </data>
+  <data name="TerminalFailed" xml:space="preserve">
+    <value>Claude Code stopped with an error.</value>
   </data>
 </root>
