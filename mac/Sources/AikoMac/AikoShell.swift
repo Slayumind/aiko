@@ -26,6 +26,7 @@ final class AikoShell {
     /// One settings window at a time (D-177). It is made when it is asked for and dropped when it
     /// closes, the way every other window of Aiko is.
     private var settings: SettingsWindow?
+    private var terminal: TerminalHost?
 
     /// The face for two seconds after a session event (D-211), and the way to it and back.
     private let faces = FacePlay()
@@ -116,6 +117,7 @@ final class AikoShell {
     }
 
     func stop() {
+        terminal?.close()
         cards.stop()
         watch?.stop()
         updates?.stop()
@@ -150,6 +152,11 @@ final class AikoShell {
 
         if what == "settings" || what == "wizard" {
             SettingsCheck.run(what, value: value, shell: self)
+            return
+        }
+
+        if what == "terminal" {
+            TerminalWindowCheck.run(value ?? "talk", shell: self)
             return
         }
 
@@ -261,6 +268,7 @@ final class AikoShell {
         icon.update()
         island.update(numbers.cards())
         cards.refresh()
+        terminal?.limitsChanged()
 
         if selfTesting {
             Log.write("self test: new numbers, tooltip \"\(icon.tooltipForCheck)\"")
@@ -329,6 +337,8 @@ final class AikoShell {
             if !changingNothing, ShellNumbers.swapRing() {
                 icon.update()
             }
+        case .terminal:
+            openTerminal()
         case .settings:
             openSettings(at: nil)
         case .refresh:
@@ -357,6 +367,29 @@ final class AikoShell {
         if !changingNothing {
             mood?.follow(Store.environments())
         }
+    }
+
+    // ---- The terminal ----
+
+    /// One terminal window, as with the settings. Closing it ends its sessions' processes; the
+    /// sessions come back from terminal.json the next time.
+    @discardableResult
+    func openTerminal() -> TerminalHost {
+        if let open = terminal {
+            open.activate()
+            return open
+        }
+
+        let host = TerminalHost(
+            settings: Store.environments(),
+            sessions: Store.terminal(),
+            newProcess: { ClaudeProcess() },
+            limitsOf: { [weak self] in self?.numbers.snapshot(for: $0) })
+        host.onClosed = { [weak self] in self?.terminal = nil }
+        terminal = host
+        host.show()
+        Log.write("terminal opened")
+        return host
     }
 
     // ---- The settings window ----

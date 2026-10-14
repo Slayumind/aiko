@@ -22,6 +22,11 @@ final class ShellNumbers {
         EnvironmentSnapshots.combine(Store.environments(), watch?.byFile ?? [:])
     }
 
+    /// The latest limits of one environment. Nil when nothing was reported for it yet.
+    func snapshot(for environment: String) -> LimitSnapshot? {
+        snapshots().first { $0.environment == environment }
+    }
+
     /// Every environment we know about, in the order the settings hold them. The card shows all of
     /// them, including the ones with nothing reported yet: an empty block says so in words.
     func cards() -> [CardState] {
