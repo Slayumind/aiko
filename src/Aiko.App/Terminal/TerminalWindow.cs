@@ -59,6 +59,9 @@ sealed class TerminalWindow : Window
         FollowState();
     }
 
+    /// Whether the window is on screen: open and not minimized.
+    public bool InView => IsVisible && WindowState != WindowState.Minimized;
+
     /// Says no to closing while something still works; the host then asks the person.
     public Func<bool>? MayClose { get; set; }
 

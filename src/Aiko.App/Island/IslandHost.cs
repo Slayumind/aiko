@@ -12,6 +12,8 @@ sealed class IslandHost(Dispatcher dispatcher)
 
     private IslandWindow? _window;
     private FullScreenWatch? _fullScreen;
+    private bool _fullScreenInFront;
+    private bool _underTerminal;
 
     /// The island asks for the card: true for a click, which pins it.
     public event Action<bool>? CardRequested;
@@ -67,6 +69,14 @@ sealed class IslandHost(Dispatcher dispatcher)
     /// that asks for the hiding changes.
     public void FollowFullScreen() => OnFullScreenChanged(FullScreenWatch.IsFullScreenInFront());
 
+    /// The window of the terminal is on screen (D-310): its title shows the limit, so the island
+    /// steps aside. A minimized or closed terminal brings it back.
+    public void FollowTerminal(bool inView)
+    {
+        _underTerminal = inView;
+        Apply();
+    }
+
     /// A face comes onto the island or goes (D-211). The island is always dark, whatever the taskbar.
     public void ShowFace(AikoFace? face, FaceStyle style)
     {
@@ -88,24 +98,31 @@ sealed class IslandHost(Dispatcher dispatcher)
     private void OnFullScreenChanged(bool fullScreen) =>
         dispatcher.BeginInvoke(() =>
         {
-            if (_window is not { } island)
-            {
-                return;
-            }
-
-            var hide = fullScreen && SettingsStore.Load().HideIslandInFullScreen;
-            var wanted = hide ? Visibility.Hidden : Visibility.Visible;
-
-            // Windows says which window came to the front on every switch, which is many times a
-            // minute. Only a real change is worth a line.
-            if (island.Visibility == wanted)
-            {
-                return;
-            }
-
-            island.Visibility = wanted;
-            Log.Write($"island {(hide ? "hidden behind a full screen window" : "shown again")}");
+            _fullScreenInFront = fullScreen;
+            Apply();
         });
+
+    private void Apply()
+    {
+        if (_window is not { } island)
+        {
+            return;
+        }
+
+        var behindFullScreen = _fullScreenInFront && SettingsStore.Load().HideIslandInFullScreen;
+        var hide = behindFullScreen || _underTerminal;
+        var wanted = hide ? Visibility.Hidden : Visibility.Visible;
+
+        // Windows says which window came to the front on every switch, which is many times a
+        // minute. Only a real change is worth a line.
+        if (island.Visibility == wanted)
+        {
+            return;
+        }
+
+        island.Visibility = wanted;
+        Log.Write($"island {(!hide ? "shown again" : _underTerminal ? "hidden while the terminal is open" : "hidden behind a full screen window")}");
+    }
 
     private void SavePosition(IslandPosition position)
     {

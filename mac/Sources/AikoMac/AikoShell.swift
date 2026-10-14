@@ -387,6 +387,7 @@ final class AikoShell {
             newProcess: { ClaudeProcess() },
             limitsOf: { [weak self] in self?.numbers.snapshot(for: $0) })
         host.onClosed = { [weak self] in self?.terminal = nil }
+        host.onInView = { [weak self] in self?.island.followTerminal($0) }
         terminal = host
         host.show()
         Log.write("terminal opened")

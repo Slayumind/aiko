@@ -18,6 +18,9 @@ final class TerminalWindow: NSObject, NSWindowDelegate {
     var onClosing: (() -> Void)?
     var onClosed: (() -> Void)?
 
+    /// The window came on screen, or left it by being minimized or closed.
+    var onInView: ((Bool) -> Void)?
+
     init(panel: TerminalPanelState, place: WindowPlace) {
         window = NSWindow(
             contentRect: Self.rect(place),
@@ -61,6 +64,7 @@ final class TerminalWindow: NSObject, NSWindowDelegate {
         NSApp.activate(ignoringOtherApps: true)
         window.makeKeyAndOrderFront(nil)
         centreWindowButtons()
+        onInView?(true)
     }
 
     func activate() {
@@ -112,7 +116,16 @@ final class TerminalWindow: NSObject, NSWindowDelegate {
         onClosing?()
         // The Dock icon goes with the window: Aiko is back in the menu bar only.
         NSApp.setActivationPolicy(.accessory)
+        onInView?(false)
         onClosed?()
+    }
+
+    func windowDidMiniaturize(_ notification: Notification) {
+        onInView?(false)
+    }
+
+    func windowDidDeminiaturize(_ notification: Notification) {
+        onInView?(true)
     }
 
     func windowDidResize(_ notification: Notification) {
