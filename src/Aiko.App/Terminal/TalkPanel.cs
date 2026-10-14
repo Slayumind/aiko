@@ -9,8 +9,10 @@ using Aiko.Core.Terminal;
 
 namespace Aiko.App;
 
-/// What the place of the conversation draws: the feed and whether Claude Code works now.
+/// What the place of the conversation draws: the feed, whether Claude Code works now, and what
+/// the line under the field says.
 sealed record TalkView(
+    string Session,
     IReadOnlyList<FeedItem> Items,
     bool Busy,
     bool HasOpenCard,
@@ -29,12 +31,12 @@ sealed class TalkPanel : UserControl
     /// goes on (D-308).
     private readonly ObservableCollection<object> _items = [];
     private readonly ListBox _feed;
-    private readonly TextBox _input = new();
     private readonly TextBlock _empty;
-    private readonly Button _stop;
-    private readonly TextBlock _mode = TerminalPanel.Mono("", "Muted");
-    private readonly TextBlock _where = TerminalPanel.Mono("", "Muted");
-    private TalkView? _view;
+    private readonly TalkInput _input = new();
+    private readonly Border _reminder;
+    private readonly TextBlock _reminderText = TerminalPanel.Text("", "TextNumber", "Caution", FontWeights.Normal);
+    private readonly HashSet<string> _open = [];
+    private ScrollViewer? _scroll;
 
     public TalkPanel()
     {
@@ -45,7 +47,9 @@ sealed class TalkPanel : UserControl
             ItemsSource = _items,
             Background = Brushes.Transparent,
             BorderThickness = new Thickness(0),
-            Padding = new Thickness(0),
+
+            // Room for the scroll bar, which lies over the right edge of the feed.
+            Padding = new Thickness(0, 0, 12, 0),
             Focusable = false,
             HorizontalContentAlignment = HorizontalAlignment.Stretch,
             ItemTemplate = new DataTemplate { VisualTree = RowFactory() },
@@ -56,65 +60,37 @@ sealed class TalkPanel : UserControl
         VirtualizingPanel.SetIsVirtualizing(_feed, true);
         VirtualizingPanel.SetVirtualizationMode(_feed, VirtualizationMode.Recycling);
         VirtualizingPanel.SetScrollUnit(_feed, ScrollUnit.Pixel);
+        _feed.AddHandler(ScrollViewer.ScrollChangedEvent, new ScrollChangedEventHandler((_, _) => FollowReminder()));
 
         _empty = TerminalPanel.Text(Strings.TerminalEmptyTalk, "TextName", "Muted", FontWeights.Normal);
         _empty.HorizontalAlignment = HorizontalAlignment.Center;
         _empty.TextWrapping = TextWrapping.Wrap;
 
-        TerminalPanel.Field(_input);
-        _input.Background = Brushes.Transparent;
-        _input.BorderThickness = new Thickness(0);
-        _input.Padding = new Thickness(0);
-        _input.AcceptsReturn = true;
-        _input.TextWrapping = TextWrapping.Wrap;
-        _input.MinHeight = 24;
-        _input.MaxHeight = 200;
-        _input.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
-        _input.VerticalContentAlignment = VerticalAlignment.Top;
-        _input.PreviewKeyDown += OnInputKey;
+        _input.Sent += (text, images) => SendAsked?.Invoke(text, images);
+        _input.StopAsked += () => StopAsked?.Invoke();
+        _input.ModeAsked += () => ModeAsked?.Invoke();
 
-        _stop = StopButton(() => StopAsked?.Invoke());
-
-        var placeholder = TerminalPanel.Text(Strings.TerminalDescribeTask, "TextName", "Muted", FontWeights.Normal);
-        placeholder.Margin = new Thickness(2, 1, 0, 0);
-        placeholder.VerticalAlignment = VerticalAlignment.Top;
-        placeholder.IsHitTestVisible = false;
-        _input.TextChanged += (_, _) => placeholder.Visibility = _input.Text.Length == 0 ? Visibility.Visible : Visibility.Collapsed;
-
-        // The stop button stands where the paper clip will be, at the right of the field (D-308).
-        var field = new DockPanel();
-        DockPanel.SetDock(_stop, Dock.Right);
-        field.Children.Add(_stop);
-        var text = new Grid();
-        text.Children.Add(_input);
-        text.Children.Add(placeholder);
-        field.Children.Add(text);
-
-        var compose = new Border
+        // A card that went out of view says so above the field (D-309).
+        var show = TerminalPanel.Flat(Strings.TerminalShow, ShowOpenCard, ghost: true);
+        show.Height = 26;
+        var reminderRow = new DockPanel();
+        DockPanel.SetDock(show, Dock.Right);
+        reminderRow.Children.Add(show);
+        _reminderText.VerticalAlignment = VerticalAlignment.Center;
+        reminderRow.Children.Add(_reminderText);
+        _reminder = new Border
         {
+            Padding = new Thickness(14, 2, 4, 2),
+            Margin = new Thickness(0, 8, 0, 0),
+            CornerRadius = new CornerRadius(10),
             Background = Tokens.Brush("Surface"),
-            BorderBrush = Tokens.Brush("InputLine"),
-            BorderThickness = new Thickness(1),
-            CornerRadius = new CornerRadius(14),
-            Padding = new Thickness(14, 12, 14, 12),
-            Margin = new Thickness(0, 10, 0, 0),
-            Cursor = Cursors.IBeam,
-            Child = field,
+            Visibility = Visibility.Collapsed,
+            Child = reminderRow,
         };
-        compose.MouseLeftButtonDown += (_, _) => _input.Focus();
-
-        // "mode · model · environment" under the field. The mode changes with a click or
-        // Shift+Tab, in the order of Claude Code (D-302).
-        _mode.Cursor = Cursors.Hand;
-        _mode.ToolTip = "Shift+Tab";
-        _mode.MouseLeftButtonUp += (_, _) => ModeAsked?.Invoke();
-        var status = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(14, 6, 0, 14) };
-        status.Children.Add(_mode);
-        status.Children.Add(_where);
 
         var bottom = new StackPanel();
-        bottom.Children.Add(compose);
-        bottom.Children.Add(status);
+        bottom.Children.Add(_reminder);
+        bottom.Children.Add(_input);
 
         var middle = new Grid();
         middle.Children.Add(_feed);
@@ -127,7 +103,7 @@ sealed class TalkPanel : UserControl
         Content = all;
     }
 
-    public event Action<string>? SendAsked;
+    public event Action<string, IReadOnlyList<AttachedImage>>? SendAsked;
     public event Action? StopAsked;
     public event Action? ModeAsked;
     public event Action<string, CardChoice>? Chosen;
@@ -138,7 +114,6 @@ sealed class TalkPanel : UserControl
     public void Show(TalkView view)
     {
         var atEnd = AtEnd();
-        _view = view;
 
         List<object> rows = [.. view.Items];
         if (view.Busy && !view.HasOpenCard)
@@ -166,17 +141,29 @@ sealed class TalkPanel : UserControl
         }
 
         _empty.Visibility = view.Items.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-        _stop.Visibility = view.Busy ? Visibility.Visible : Visibility.Collapsed;
-        _mode.Text = PermissionModes.Name(view.Mode);
-        _where.Text = string.Concat(view.Model.Length > 0 ? " · " + view.Model : "", " · ", view.Environment);
+        _input.Show(view.Session, view.Busy, view.Mode, view.Model, view.Environment);
 
         if (atEnd && _items.Count > 0)
         {
             Dispatcher.BeginInvoke(() => _feed.ScrollIntoView(_items[^1]), System.Windows.Threading.DispatcherPriority.Background);
         }
+
+        Dispatcher.BeginInvoke(FollowReminder, System.Windows.Threading.DispatcherPriority.Background);
     }
 
     internal void Choose(string requestId, CardChoice choice) => Chosen?.Invoke(requestId, choice);
+
+    /// Whether the content of a step is open. It is kept here, as a row is built again each time
+    /// it comes into view.
+    internal bool IsOpen(string toolUseId) => _open.Contains(toolUseId);
+
+    internal void Toggle(string toolUseId)
+    {
+        if (!_open.Remove(toolUseId))
+        {
+            _open.Add(toolUseId);
+        }
+    }
 
     /// The word of a step, the one the list of sessions uses for it too.
     internal static string StepWord(StepKind kind, string label) => kind switch
@@ -190,69 +177,42 @@ sealed class TalkPanel : UserControl
         _ => label,
     };
 
-    /// A small square button with a square in it, as in the mockup of a turn that works.
-    private static Button StopButton(Action click)
-    {
-        var square = new Border
-        {
-            Width = 8,
-            Height = 8,
-            CornerRadius = new CornerRadius(2),
-            Background = Tokens.Brush("Ink"),
-            HorizontalAlignment = HorizontalAlignment.Center,
-            VerticalAlignment = VerticalAlignment.Center,
-        };
-        var hover = new Border { CornerRadius = new CornerRadius(8), Background = Tokens.Brush("HoverLayer"), Opacity = 0 };
-        var face = new Grid { Width = 26, Height = 26 };
-        face.Children.Add(new Border
-        {
-            CornerRadius = new CornerRadius(8),
-            Background = new SolidColorBrush(Color.FromArgb(0x0B, 0xFF, 0xFF, 0xFF)),
-            BorderBrush = Tokens.Brush("InputLine"),
-            BorderThickness = new Thickness(1),
-        });
-        face.Children.Add(hover);
-        face.Children.Add(square);
+    private FeedItem.Card? OpenCard() =>
+        _items.OfType<FeedItem.Card>().LastOrDefault(card => card.State == RequestState.Open);
 
-        var presenter = new FrameworkElementFactory(typeof(ContentPresenter));
-        var button = new Button
+    /// The line "waiting for you: edit" shows while the open card is out of view, and names it
+    /// with the word of its step (D-309).
+    private void FollowReminder()
+    {
+        if (OpenCard() is not { } card || InView(card))
         {
-            Content = face,
-            ToolTip = Strings.TerminalStop,
-            Cursor = Cursors.Hand,
-            Focusable = false,
-            Margin = new Thickness(10, -1, 0, -1),
-            VerticalAlignment = VerticalAlignment.Top,
-            Template = new ControlTemplate(typeof(Button)) { VisualTree = presenter },
-        };
-        button.MouseEnter += (_, _) => hover.BeginAnimation(OpacityProperty, Motion.To(1, Motion.Or0(Motion.Hover), Motion.Standard));
-        button.MouseLeave += (_, _) => hover.BeginAnimation(OpacityProperty, Motion.To(0, Motion.Or0(Motion.Hover), Motion.Standard));
-        button.Click += (_, _) => click();
-        return button;
+            _reminder.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        _reminderText.Text = string.Format(
+            CultureInfo.CurrentCulture, Strings.TerminalWaitsForYou, StepWord(card.Request.Step.Kind, card.Request.Step.Label));
+        _reminder.Visibility = Visibility.Visible;
     }
 
-    /// Enter sends, Shift+Enter is a new line, Esc stops the work (D-294).
-    private void OnInputKey(object sender, KeyEventArgs e)
+    private bool InView(object item)
     {
-        if (e.Key == Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
+        if (_feed.ItemContainerGenerator.ContainerFromItem(item) is not FrameworkElement row || !row.IsVisible
+            || (_scroll ??= FindScroll(_feed)) is not { } scroll)
         {
-            e.Handled = true;
-            var text = _input.Text.Trim();
-            if (text.Length > 0)
-            {
-                _input.Clear();
-                SendAsked?.Invoke(text);
-            }
+            return false;
         }
-        else if (e.Key == Key.Escape && _view is { Busy: true })
+
+        // The buttons of a card are at its bottom: a card is in view when its bottom is.
+        var bottom = row.TranslatePoint(new Point(0, row.ActualHeight), scroll).Y;
+        return bottom > 0 && bottom <= scroll.ViewportHeight + 1;
+    }
+
+    private void ShowOpenCard()
+    {
+        if (OpenCard() is { } card)
         {
-            e.Handled = true;
-            StopAsked?.Invoke();
-        }
-        else if (e.Key == Key.Tab && Keyboard.Modifiers == ModifierKeys.Shift)
-        {
-            e.Handled = true;
-            ModeAsked?.Invoke();
+            _feed.ScrollIntoView(card);
         }
     }
 
@@ -418,7 +378,7 @@ sealed class FeedRow : ContentControl
 
     /// A step is one line behind a rule on the left; the rules of steps in a row join into one
     /// line, so the rows keep no gap between them (D-299).
-    private static UIElement StepRow(FeedItem.Step step)
+    private UIElement StepRow(FeedItem.Step step)
     {
         var tone = step.State == StepState.Failed ? "Destructive" : "Muted";
         var row = new StackPanel { Orientation = Orientation.Horizontal };
@@ -458,8 +418,37 @@ sealed class FeedRow : ContentControl
             BorderThickness = new Thickness(2, 0, 0, 0),
             Padding = new Thickness(14, 0, 0, 0),
             MinHeight = 24,
-            Child = row,
+            Child = WithResult(step, row),
         };
+    }
+
+    /// The line of a step opens to what the step gave back, with a click (D-294).
+    private UIElement WithResult(FeedItem.Step step, UIElement line)
+    {
+        if (step.Result.Trim().Length == 0)
+        {
+            return line;
+        }
+
+        var column = new StackPanel();
+        var head = new Border { Background = Brushes.Transparent, Cursor = Cursors.Hand, Child = line };
+        column.Children.Add(head);
+
+        var open = FindPanel()?.IsOpen(step.ToolUseId) == true;
+        var result = Words(step.Result.TrimEnd(), "Muted", new Thickness(0, 4, 0, 8));
+        result.FontFamily = Tokens.Get<FontFamily>("Mono");
+        result.FontSize = Tokens.Get<double>("TextSmall");
+        result.MaxHeight = 280;
+        result.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
+        result.Visibility = open ? Visibility.Visible : Visibility.Collapsed;
+        column.Children.Add(result);
+
+        head.MouseLeftButtonUp += (_, _) =>
+        {
+            FindPanel()?.Toggle(step.ToolUseId);
+            result.Visibility = result.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
+        };
+        return column;
     }
 
     private UIElement Card(RequestCard request)
@@ -472,14 +461,26 @@ sealed class FeedRow : ContentControl
 
         if (request.Kind == CardKind.Plan)
         {
-            column.Children.Add(Words(request.Plan, "Ink", new Thickness(0, 8, 0, 0)));
+            // A plan is markdown, like an answer.
+            column.Children.Add(AnswerView.For(request.Plan));
         }
-        else if (request.Kind == CardKind.Permission && request.Step.Subject.Length > 0)
+        else if (request.Kind == CardKind.Permission)
         {
-            var subject = Words(request.Step.Subject, "Ink", new Thickness(0, 6, 0, 0));
-            subject.FontFamily = Tokens.Get<FontFamily>("Mono");
-            subject.FontSize = Tokens.Get<double>("TextSmall");
-            column.Children.Add(subject);
+            // A command is shown whole: the step line keeps only its first line.
+            var command = request.Step.Kind == StepKind.Run ? InputText(request, "command") : "";
+            var subject = command.Length > 0 ? command : request.Step.Subject;
+            if (subject.Length > 0)
+            {
+                var words = Words(subject, "Ink", new Thickness(0, 6, 0, 0));
+                words.FontFamily = Tokens.Get<FontFamily>("Mono");
+                words.FontSize = Tokens.Get<double>("TextSmall");
+                column.Children.Add(words);
+            }
+
+            if (EditDiff.For(request.Source.ToolName, request.Source.Input) is { } diff)
+            {
+                column.Children.Add(Diff(diff));
+            }
         }
 
         if (request.Kind == CardKind.Question)
@@ -500,6 +501,54 @@ sealed class FeedRow : ContentControl
             Padding = new Thickness(16, 14, 16, 14),
             Margin = new Thickness(0, 8, 0, 8),
             Child = column,
+        };
+    }
+
+    private static string InputText(RequestCard request, string key) =>
+        request.Source.Input.ValueKind == System.Text.Json.JsonValueKind.Object
+        && request.Source.Input.TryGetProperty(key, out var value)
+        && value.ValueKind == System.Text.Json.JsonValueKind.String
+            ? value.GetString() ?? ""
+            : "";
+
+    /// The lines an edit takes out and puts in, without numbers (D-303). A long diff scrolls.
+    private static UIElement Diff(EditDiff diff)
+    {
+        var lines = new StackPanel();
+        foreach (var line in diff.Lines)
+        {
+            var removed = line.Side == DiffSide.Removed;
+            lines.Children.Add(new Border
+            {
+                Background = new SolidColorBrush(removed ? Color.FromArgb(0x1F, 0xFF, 0x64, 0x67) : Color.FromArgb(0x1F, 0x00, 0xBC, 0x7D)),
+                Padding = new Thickness(10, 1, 10, 1),
+                Child = new TextBlock
+                {
+                    Text = (removed ? "- " : "+ ") + line.Text,
+                    FontFamily = Tokens.Get<FontFamily>("Mono"),
+                    FontSize = Tokens.Get<double>("TextSmall"),
+                    Foreground = Tokens.Brush(removed ? "Destructive" : "Positive"),
+                    TextWrapping = TextWrapping.Wrap,
+                },
+            });
+        }
+
+        if (diff.More > 0)
+        {
+            var more = TerminalPanel.Mono(string.Format(CultureInfo.CurrentCulture, Strings.TerminalDiffMore, diff.More), "Muted");
+            more.Margin = new Thickness(10, 6, 0, 4);
+            lines.Children.Add(more);
+        }
+
+        return new Border
+        {
+            Background = Tokens.Brush("Background"),
+            BorderBrush = Tokens.Brush("Hairline"),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(8),
+            Margin = new Thickness(0, 10, 0, 0),
+            Padding = new Thickness(0, 6, 0, 6),
+            Child = new ScrollViewer { MaxHeight = 320, Content = lines },
         };
     }
 

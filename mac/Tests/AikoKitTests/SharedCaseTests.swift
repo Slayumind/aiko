@@ -594,6 +594,20 @@ struct SharedCaseTests {
     }
 
     @Test
+    func everyEditShowsTheSameDiff() {
+        for row in SpecCases.json("edit-diff")["diffs"]?.arrayValue ?? [] {
+            let diff = EditDiff.forTool(row["tool"]?.stringValue ?? "", row["input"]?.objectValue ?? JsonObject())
+            let lines: JsonNode = diff.map { found in
+                .array(found.lines.map { .array([.string(String(describing: $0.side)), .string($0.text)]) })
+            } ?? .null
+            let more: JsonNode = diff.map { .number(String($0.more)) } ?? .null
+
+            #expect(lines == row["lines"], "\(row["name"]?.stringValue ?? "")")
+            #expect(more == row["more"], "\(row["name"]?.stringValue ?? "")")
+        }
+    }
+
+    @Test
     func everyStepGetsTheSameLine() {
         for row in SpecCases.json("step-line")["steps"]?.arrayValue ?? [] {
             let tool = row["tool"]?.stringValue ?? ""

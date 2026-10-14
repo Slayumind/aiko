@@ -1288,4 +1288,13 @@
   <data name="TerminalFailed" xml:space="preserve">
     <value>Claude Code stopped with an error.</value>
   </data>
+  <data name="TerminalDiffMore" xml:space="preserve">
+    <value>{0} more lines</value>
+  </data>
+  <data name="TerminalWaitsForYou" xml:space="preserve">
+    <value>Waiting for you: {0}</value>
+  </data>
+  <data name="TerminalShow" xml:space="preserve">
+    <value>Show</value>
+  </data>
 </root>

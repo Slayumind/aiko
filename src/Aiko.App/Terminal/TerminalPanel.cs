@@ -116,7 +116,7 @@ sealed class TerminalPanel : UserControl
             }
         };
 
-        _talk.SendAsked += text => SendAsked?.Invoke(text);
+        _talk.SendAsked += (text, images) => SendAsked?.Invoke(text, images);
         _talk.StopAsked += () => StopAsked?.Invoke();
         _talk.ModeAsked += () => ModeAsked?.Invoke();
         _talk.Chosen += (id, choice) => Chosen?.Invoke(id, choice);
@@ -154,7 +154,7 @@ sealed class TerminalPanel : UserControl
     public event Action? MinimizeAsked;
     public event Action? MaximizeAsked;
     public event Action? CloseAsked;
-    public event Action<string>? SendAsked;
+    public event Action<string, IReadOnlyList<AttachedImage>>? SendAsked;
     public event Action? StopAsked;
     public event Action? ModeAsked;
     public event Action<string, CardChoice>? Chosen;

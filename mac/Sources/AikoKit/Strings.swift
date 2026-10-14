@@ -459,6 +459,9 @@ public enum Strings {
         "TerminalQueued": ("queued", "в очереди"),
         "TerminalCompacted": ("The conversation was made shorter to fit.", "Разговор сжат, чтобы поместиться в память."),
         "TerminalFailed": ("Claude Code stopped with an error.", "Claude Code остановился с ошибкой."),
+        "TerminalDiffMore": ("{0} more lines", "Ещё строк: {0}"),
+        "TerminalWaitsForYou": ("Waiting for you: {0}", "Ждёт тебя: {0}"),
+        "TerminalShow": ("Show", "Показать"),
     ]
 
     /// Session · 5 hours
@@ -1717,4 +1720,13 @@ public enum Strings {
 
     /// Claude Code stopped with an error.
     public static var terminalFailed: String { Strings.get("TerminalFailed") }
+
+    /// {0} more lines
+    public static var terminalDiffMore: String { Strings.get("TerminalDiffMore") }
+
+    /// Waiting for you: {0}
+    public static var terminalWaitsForYou: String { Strings.get("TerminalWaitsForYou") }
+
+    /// Show
+    public static var terminalShow: String { Strings.get("TerminalShow") }
 }

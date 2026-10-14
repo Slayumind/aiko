@@ -112,6 +112,6 @@ static class TerminalSnapshot
             new FeedItem.OwnerMessage(7, "And the same on the Mac, please.", 0, true, []),
         ];
 
-        return new TalkView(items, Busy: true, HasOpenCard: withCard, PermissionMode.Manual, "Opus 5.5", "Aiko");
+        return new TalkView("a2", items, Busy: true, HasOpenCard: withCard, PermissionMode.Manual, "Opus 5.5", "Aiko");
     }
 }

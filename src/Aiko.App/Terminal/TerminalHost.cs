@@ -77,11 +77,11 @@ sealed class TerminalHost
         _panel.FormCancelled += () => Change(_model.WithForm(false));
         _panel.AskAnswered += Answer;
         _panel.SignInAsked += SignIn;
-        _panel.SendAsked += text =>
+        _panel.SendAsked += (text, images) =>
         {
             if (_model.Session(_sessions) is { } session)
             {
-                Send(session.Id, text);
+                Send(session.Id, text, images);
                 Draw();
             }
         };
@@ -310,7 +310,7 @@ sealed class TerminalHost
 
     // ---- the conversations ----
 
-    private void Send(string id, string message)
+    private void Send(string id, string message, IReadOnlyList<AttachedImage>? images = null)
     {
         if (TalkFor(id) is not { } talk)
         {
@@ -330,7 +330,7 @@ sealed class TerminalHost
 
         _sessions = _sessions.Used(id, DateTimeOffset.UtcNow.ToUnixTimeSeconds()).MarkStarted(id);
         Save();
-        talk.Send(message, []);
+        talk.Send(message, images ?? []);
     }
 
     private ConversationRunner? TalkFor(string id)
@@ -423,11 +423,12 @@ sealed class TerminalHost
         var past = _histories[session.Id].Items;
         if (!_talks.TryGetValue(session.Id, out var talk))
         {
-            return new TalkView(past, false, false, session.Mode, ModelName.Display(session.Model), session.Environment);
+            return new TalkView(session.Id, past, false, false, session.Mode, ModelName.Display(session.Model), session.Environment);
         }
 
         var state = talk.State;
         return new TalkView(
+            session.Id,
             [.. past, .. state.Items],
             state.IsBusy,
             state.HasOpenCard,

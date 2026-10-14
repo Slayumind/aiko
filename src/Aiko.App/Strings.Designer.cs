@@ -1277,4 +1277,13 @@ public static class Strings
 
     /// Claude Code stopped with an error.
     public static string TerminalFailed => Get("TerminalFailed");
+
+    /// {0} more lines
+    public static string TerminalDiffMore => Get("TerminalDiffMore");
+
+    /// Waiting for you: {0}
+    public static string TerminalWaitsForYou => Get("TerminalWaitsForYou");
+
+    /// Show
+    public static string TerminalShow => Get("TerminalShow");
 }

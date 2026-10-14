@@ -585,6 +585,27 @@ public class SharedCaseTests
     }
 
     [Fact]
+    public void Every_edit_shows_the_same_diff()
+    {
+        foreach (var row in SpecCases.Json("edit-diff").GetProperty("diffs").EnumerateArray())
+        {
+            var diff = EditDiff.For(row.GetProperty("tool").GetString()!, row.GetProperty("input"));
+            var described = new JsonObject
+            {
+                ["lines"] = diff is null
+                    ? null
+                    : new JsonArray([.. diff.Lines.Select(line => (JsonNode)new JsonArray(Camel(line.Side), line.Text))]),
+                ["more"] = diff?.More,
+            };
+
+            Assert.True(
+                JsonNode.DeepEquals(JsonNode.Parse(row.GetProperty("lines").GetRawText()), described["lines"])
+                && JsonNode.DeepEquals(JsonNode.Parse(row.GetProperty("more").GetRawText()), described["more"]),
+                $"{row.GetProperty("name").GetString()}: {described.ToJsonString()}");
+        }
+    }
+
+    [Fact]
     public void Every_step_gets_the_same_line()
     {
         foreach (var row in SpecCases.Json("step-line").GetProperty("steps").EnumerateArray())

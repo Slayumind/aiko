@@ -85,10 +85,18 @@ public struct StepLine: Sendable, Equatable {
 
     /// The lines of an edit that differ, after the equal lines at both ends are set aside.
     public static func changed(_ before: String, _ after: String) -> (added: Int, removed: Int) {
-        // Compared unit by unit, as the Windows core compares strings: two spellings of one
-        // letter are two different lines.
-        let old = lines(before).map { Array($0.utf16) }
-        let now = lines(after).map { Array($0.utf16) }
+        let old = lines(before)
+        let now = lines(after)
+        let ends = equalEnds(old, now)
+        return (now.count - ends.start - ends.end, old.count - ends.start - ends.end)
+    }
+
+    /// How many lines are equal at the start of two texts, and how many at the end after those.
+    /// Compared unit by unit, as the Windows core compares strings: two spellings of one letter
+    /// are two different lines.
+    public static func equalEnds(_ before: [String], _ after: [String]) -> (start: Int, end: Int) {
+        let old = before.map { Array($0.utf16) }
+        let now = after.map { Array($0.utf16) }
 
         var start = 0
         while start < old.count && start < now.count && old[start] == now[start] {
@@ -101,7 +109,7 @@ public struct StepLine: Sendable, Equatable {
             end += 1
         }
 
-        return (now.count - start - end, old.count - start - end)
+        return (start, end)
     }
 
     /// The lines of a text. One line break at the very end does not start another line.

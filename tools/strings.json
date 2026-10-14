@@ -2931,5 +2931,26 @@
       "Claude Code stopped with an error.",
       "Claude Code остановился с ошибкой."
     ]
+  ],
+  [
+    "TerminalDiffMore",
+    [
+      "{0} more lines",
+      "Ещё строк: {0}"
+    ]
+  ],
+  [
+    "TerminalWaitsForYou",
+    [
+      "Waiting for you: {0}",
+      "Ждёт тебя: {0}"
+    ]
+  ],
+  [
+    "TerminalShow",
+    [
+      "Show",
+      "Показать"
+    ]
   ]
 ]
