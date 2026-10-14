@@ -52,6 +52,17 @@ struct AppTerminalLog: TerminalLog {
                 + "steps \(steps), notices \(notices)")
     }
 
+    /// The window of --try-terminal: the state by its number in TerminalWindowCheck.states, and
+    /// where the window stands. The count of the states is the real terminal, minus one a state
+    /// that does not exist.
+    static func windowChecked(state: Int, left: Int, top: Int, width: Int, height: Int, window: Int) {
+        Log.write("--try-terminal: state \(state) at \(left),\(top) \(width)x\(height), window \(window)")
+    }
+
+    static func windowCheckDone(state: Int) {
+        Log.write("--try-terminal: state \(state) done")
+    }
+
     static func realChecked(claudeFound: Bool, answered: Bool, signedOut: Bool, failed: Bool, items: Int) {
         Log.write(
             "--try-conversation real: claude found=\(claudeFound), answered=\(answered), "

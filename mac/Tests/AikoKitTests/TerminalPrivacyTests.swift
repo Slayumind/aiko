@@ -56,7 +56,8 @@ struct TerminalPrivacyTests {
             }
         }
 
-        // Four in the seam, the same four and the four of the doors in the app.
-        #expect(methods == 12)
+        // Four in the seam, the same four and the six of the doors in the app. Windows has two
+        // fewer: it draws the window of --snapshot-terminal into a file and logs nothing.
+        #expect(methods == 14)
     }
 }

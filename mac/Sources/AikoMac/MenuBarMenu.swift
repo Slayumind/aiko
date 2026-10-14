@@ -6,6 +6,7 @@ import AppKit
 /// a value, and here a closed menu simply calls nobody.
 enum TrayCommand {
     case swapRing
+    case terminal
     case settings
     case refresh
     case updates
@@ -33,6 +34,7 @@ final class MenuBarMenu: NSObject {
             menu.addItem(.separator())
         }
 
+        add(menu, Strings.menuTerminal, #selector(onTerminal))
         add(menu, Strings.settings, #selector(onSettings))
         add(menu, Strings.menuRefresh, #selector(onRefresh))
         add(menu, Strings.checkForUpdates, #selector(onCheckUpdates))
@@ -49,6 +51,7 @@ final class MenuBarMenu: NSObject {
     }
 
     @objc private func onSwapRing() { picked?(.swapRing) }
+    @objc private func onTerminal() { picked?(.terminal) }
     @objc private func onSettings() { picked?(.settings) }
     @objc private func onRefresh() { picked?(.refresh) }
     @objc private func onCheckUpdates() { picked?(.updates) }

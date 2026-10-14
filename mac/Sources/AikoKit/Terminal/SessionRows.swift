@@ -49,12 +49,26 @@ public struct SessionRow: Sendable, Equatable {
     public let state: RowState
     public let glance: TalkGlance?
     public let lastUsed: Int64
+
+    public init(id: String, name: String, state: RowState, glance: TalkGlance?, lastUsed: Int64) {
+        self.id = id
+        self.name = name
+        self.state = state
+        self.glance = glance
+        self.lastUsed = lastUsed
+    }
 }
 
 public struct RowGroup: Sendable, Equatable {
     public let folder: String
     public let name: String
     public let rows: [SessionRow]
+
+    public init(folder: String, name: String, rows: [SessionRow]) {
+        self.folder = folder
+        self.name = name
+        self.rows = rows
+    }
 }
 
 /// The list of sessions of one environment as rows, and the count for the tab of the environment.

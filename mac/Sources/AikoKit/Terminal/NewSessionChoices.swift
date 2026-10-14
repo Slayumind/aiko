@@ -16,6 +16,12 @@ public struct FolderChoice: Sendable, Equatable {
     public let path: String
     public let name: String
     public let source: FolderSource
+
+    public init(path: String, name: String, source: FolderSource) {
+        self.path = path
+        self.name = name
+        self.source = source
+    }
 }
 
 /// The two groups of the folder list: where sessions ran, and the folders of the environment.

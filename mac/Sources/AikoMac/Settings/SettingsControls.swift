@@ -341,11 +341,18 @@ struct CodeBlock: View {
 struct DropDown: View {
     let items: [String]
     let index: Int
+
+    /// Group titles, each above the item with its index. A title cannot be picked.
+    var headers: [Int: String] = [:]
     let pick: (Int) -> Void
 
     var body: some View {
         Menu {
             ForEach(Array(items.enumerated()), id: \.offset) { at, item in
+                if let header = headers[at] {
+                    if at > 0 { Divider() }
+                    Text(header)
+                }
                 Button(item) { pick(at) }
             }
         } label: {
