@@ -888,7 +888,7 @@ struct SharedCaseTests {
         for row in cases["forms"]?.arrayValue ?? [] {
             let described = Self.formDescribed(row, settings, Self.platformIn(.object(cases)))
 
-            for part in ["folders", "names", "elsewhere", "model"] {
+            for part in ["folders", "names", "elsewhere", "model", "headers"] {
                 #expect(
                     described[part] == row[part],
                     "\(row["name"]?.stringValue ?? ""), \(part): \(described[part]?.toJsonString(escaping: .relaxed) ?? "")")
@@ -989,6 +989,12 @@ struct SharedCaseTests {
                 text(NewSessionChoices.boundElsewhere(platform, $0, environment, settings))
             })),
             ("model", .string(NewSessionChoices.defaultModel(sessions, environment.name))),
+            ("headers", .array(NewSessionChoices.headers(folders).map { header in
+                node([
+                    ("before", .number(String(header.before))),
+                    ("group", .string(String(describing: header.group))),
+                ])
+            })),
         ])
     }
 
