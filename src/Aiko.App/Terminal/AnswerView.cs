@@ -31,6 +31,26 @@ static class AnswerView
         return column;
     }
 
+    /// A finished answer with a quiet button under it that copies the whole answer as its
+    /// markdown, the way Claude wrote it (D-303).
+    public static UIElement WithCopy(string markdown)
+    {
+        var column = new StackPanel();
+        column.Children.Add(For(markdown));
+
+        var copy = TerminalPanel.Flat(Strings.Copy, () => { }, ghost: true);
+        copy.Height = 24;
+        copy.Margin = new Thickness(-12, -8, 0, 4);
+        copy.HorizontalAlignment = HorizontalAlignment.Left;
+        copy.Click += (_, _) =>
+        {
+            Clipboard.SetText(markdown);
+            copy.Content = TerminalPanel.Text(Strings.Copied, "TextNumber", "Muted", FontWeights.Normal);
+        };
+        column.Children.Add(copy);
+        return column;
+    }
+
     // ---- prose ----
 
     private static UIElement Prose(IReadOnlyList<MarkdownBlock> blocks)

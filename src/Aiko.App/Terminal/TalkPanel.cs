@@ -296,7 +296,8 @@ sealed class FeedRow : ContentControl
         {
             WorkingMark => Working(),
             FeedItem.OwnerMessage message => Message(message),
-            FeedItem.Answer answer => AnswerView.For(answer.Text),
+            FeedItem.Answer { Streaming: true } answer => AnswerView.For(answer.Text),
+            FeedItem.Answer answer => AnswerView.WithCopy(answer.Text),
             FeedItem.Step { Line.Hidden: false } step => StepRow(step),
             FeedItem.Card { State: RequestState.Open } card => Card(card.Request),
             FeedItem.Notice notice => Notice(notice),
