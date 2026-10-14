@@ -97,6 +97,7 @@ sealed class TalkPanel : UserControl
             BorderThickness = new Thickness(1),
             CornerRadius = new CornerRadius(14),
             Padding = new Thickness(14, 12, 14, 12),
+            Margin = new Thickness(0, 10, 0, 0),
             Cursor = Cursors.IBeam,
             Child = field,
         };
@@ -335,7 +336,7 @@ sealed class FeedRow : ContentControl
         {
             WorkingMark => Working(),
             FeedItem.OwnerMessage message => Message(message),
-            FeedItem.Answer answer => Words(answer.Text, "Ink", new Thickness(0, 6, 0, 10)),
+            FeedItem.Answer answer => AnswerView.For(answer.Text),
             FeedItem.Step { Line.Hidden: false } step => StepRow(step),
             FeedItem.Card { State: RequestState.Open } card => Card(card.Request),
             FeedItem.Notice notice => Notice(notice),
