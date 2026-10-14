@@ -15,6 +15,8 @@ public partial class CardPanel : UserControl
     /// Raised by the gear. The window above decides what to open.
     public event Action? SettingsRequested;
 
+    public event Action? TerminalRequested;
+
     /// Raised by "Open Claude Code" under an environment, with its name.
     public event Action<string>? OpenClaudeRequested;
 
@@ -31,6 +33,8 @@ public partial class CardPanel : UserControl
     }
 
     private void OnSettings(object sender, RoutedEventArgs e) => SettingsRequested?.Invoke();
+
+    private void OnTerminal(object sender, RoutedEventArgs e) => TerminalRequested?.Invoke();
 
     private void OnClose(object sender, RoutedEventArgs e) => CloseRequested?.Invoke();
 

@@ -49,6 +49,7 @@ sealed class AikoShell : IDisposable
         _island = new IslandHost(application.Dispatcher);
         _cards = new CardHost(application.Dispatcher, _numbers, _tray, _island);
         _cards.SettingsRequested += () => OpenSettings();
+        _cards.TerminalRequested += OpenTerminal;
         _tray.MouseMoved += _cards.StartHover;
         _island.CardRequested += _cards.Open;
     }

@@ -40,6 +40,7 @@ final class AikoShell {
     init() {
         cards = CardHost(numbers: numbers, icon: icon, island: island)
         cards.onSettings = { [weak self] in self?.openSettings(at: nil) }
+        cards.onTerminal = { [weak self] in self?.openTerminal() }
 
         icon.faces = faces
         icon.rows = { [weak self] in self?.numbers.iconRows() ?? (nil, nil) }

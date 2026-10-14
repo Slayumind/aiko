@@ -13,6 +13,7 @@ public partial class CardWindow : Window
 
         Panel.CloseRequested += FadeAndClose;
         Panel.SettingsRequested += () => SettingsRequested?.Invoke();
+        Panel.TerminalRequested += () => TerminalRequested?.Invoke();
         Panel.OpenClaudeRequested += environment => OpenClaudeRequested?.Invoke(environment);
         Panel.DragHandle.MouseLeftButtonDown += OnDragHandlePressed;
 
@@ -22,6 +23,8 @@ public partial class CardWindow : Window
     }
 
     public event Action? SettingsRequested;
+
+    public event Action? TerminalRequested;
 
     public event Action<string>? OpenClaudeRequested;
 
