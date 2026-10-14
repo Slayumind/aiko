@@ -12,13 +12,22 @@ public partial class CardWindow : Window
         InitializeComponent();
 
         Panel.CloseRequested += FadeAndClose;
-        Panel.SettingsRequested += () => SettingsRequested?.Invoke();
-        Panel.TerminalRequested += () => TerminalRequested?.Invoke();
+        // The card has done its job once it opened another window, so it goes (D-310).
+        Panel.SettingsRequested += () =>
+        {
+            SettingsRequested?.Invoke();
+            FadeAndClose();
+        };
+        Panel.TerminalRequested += () =>
+        {
+            TerminalRequested?.Invoke();
+            FadeAndClose();
+        };
         Panel.OpenClaudeRequested += environment => OpenClaudeRequested?.Invoke(environment);
         Panel.DragHandle.MouseLeftButtonDown += OnDragHandlePressed;
 
-        // Touching the card at all keeps it: reading it, dragging it, or opening the settings from
-        // it. Somebody who reached for the card meant to use it.
+        // Touching the card at all keeps it: reading it or dragging it. Somebody who reached for
+        // the card meant to use it.
         PreviewMouseDown += (_, _) => Pin();
     }
 
