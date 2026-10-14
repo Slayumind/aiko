@@ -46,8 +46,15 @@ final class CardWindow {
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
         panel.animationBehavior = .none
 
-        state.onSettings = { [weak self] in self?.onSettings?() }
-        state.onTerminal = { [weak self] in self?.onTerminal?() }
+        // The card has done its job once it opened another window, so it goes (D-310).
+        state.onSettings = { [weak self] in
+            self?.onSettings?()
+            self?.fadeAndClose()
+        }
+        state.onTerminal = { [weak self] in
+            self?.onTerminal?()
+            self?.fadeAndClose()
+        }
         state.onClose = { [weak self] in self?.fadeAndClose() }
         state.onOpenClaude = { [weak self] name in self?.onOpenClaude?(name) }
 
