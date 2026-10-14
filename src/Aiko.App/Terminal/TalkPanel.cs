@@ -338,7 +338,7 @@ sealed class FeedRow : ContentControl
             Padding = new Thickness(14, 10, 14, 10),
             HorizontalAlignment = HorizontalAlignment.Right,
             Opacity = message.Queued ? 0.55 : 1,
-            Child = Words(message.Text, "Ink", new Thickness(0)),
+            Child = MessageInside(message),
         };
 
         var column = new StackPanel();
@@ -357,6 +357,50 @@ sealed class FeedRow : ContentControl
         Grid.SetColumn(column, 1);
         row.Children.Add(column);
         return row;
+    }
+
+    /// The text of a message and its pictures. While the message waits to go, its pictures are
+    /// there to draw; once sent, the core keeps only how many there were.
+    private static UIElement MessageInside(FeedItem.OwnerMessage message)
+    {
+        var column = new StackPanel();
+        if (message.Attachments.Count > 0)
+        {
+            var pictures = new WrapPanel { Margin = new Thickness(0, 0, 0, message.Text.Length > 0 ? 8 : 0) };
+            foreach (var picture in message.Attachments)
+            {
+                var image = new System.Windows.Media.Imaging.BitmapImage();
+                image.BeginInit();
+                image.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
+                image.DecodePixelHeight = 160;
+                image.StreamSource = new System.IO.MemoryStream(Convert.FromBase64String(picture.Base64));
+                image.EndInit();
+                image.Freeze();
+                pictures.Children.Add(new Border
+                {
+                    Width = 80,
+                    Height = 80,
+                    Margin = new Thickness(0, 0, 8, 0),
+                    CornerRadius = new CornerRadius(8),
+                    Background = new ImageBrush(image) { Stretch = Stretch.UniformToFill },
+                });
+            }
+
+            column.Children.Add(pictures);
+        }
+        else if (message.Images > 0)
+        {
+            var count = TerminalPanel.Mono(string.Format(CultureInfo.CurrentCulture, Strings.TerminalPictures, message.Images), "Muted");
+            count.Margin = new Thickness(0, 0, 0, message.Text.Length > 0 ? 6 : 0);
+            column.Children.Add(count);
+        }
+
+        if (message.Text.Length > 0)
+        {
+            column.Children.Add(Words(message.Text, "Ink", new Thickness(0)));
+        }
+
+        return column;
     }
 
     /// Text that can be selected and copied, but not typed into.

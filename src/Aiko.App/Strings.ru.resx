@@ -1297,4 +1297,7 @@
   <data name="TerminalShow" xml:space="preserve">
     <value>Показать</value>
   </data>
+  <data name="TerminalPictures" xml:space="preserve">
+    <value>Картинок: {0}</value>
+  </data>
 </root>

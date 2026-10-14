@@ -462,6 +462,7 @@ public enum Strings {
         "TerminalDiffMore": ("{0} more lines", "Ещё строк: {0}"),
         "TerminalWaitsForYou": ("Waiting for you: {0}", "Ждёт тебя: {0}"),
         "TerminalShow": ("Show", "Показать"),
+        "TerminalPictures": ("Pictures: {0}", "Картинок: {0}"),
     ]
 
     /// Session · 5 hours
@@ -1729,4 +1730,7 @@ public enum Strings {
 
     /// Show
     public static var terminalShow: String { Strings.get("TerminalShow") }
+
+    /// Pictures: {0}
+    public static var terminalPictures: String { Strings.get("TerminalPictures") }
 }
