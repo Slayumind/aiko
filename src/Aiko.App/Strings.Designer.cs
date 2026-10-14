@@ -90,6 +90,9 @@ public static class Strings
     /// Show {0} in the ring
     public static string MenuShowInRing => Get("MenuShowInRing");
 
+    /// Open terminal
+    public static string MenuTerminal => Get("MenuTerminal");
+
     /// Refresh limits
     public static string MenuRefresh => Get("MenuRefresh");
 
@@ -1112,6 +1115,12 @@ public static class Strings
 
     /// Choose another folder
     public static string TerminalChooseFolder => Get("TerminalChooseFolder");
+
+    /// Recent
+    public static string TerminalFoldersRecent => Get("TerminalFoldersRecent");
+
+    /// Bound to this environment
+    public static string TerminalFoldersBound => Get("TerminalFoldersBound");
 
     /// This folder is bound to {0}. The session starts in {1}.
     public static string TerminalElsewhere => Get("TerminalElsewhere");

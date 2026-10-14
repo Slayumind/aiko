@@ -100,6 +100,9 @@
   <data name="MenuShowInRing" xml:space="preserve">
     <value>Показать в кольце: {0}</value>
   </data>
+  <data name="MenuTerminal" xml:space="preserve">
+    <value>Открыть терминал</value>
+  </data>
   <data name="MenuRefresh" xml:space="preserve">
     <value>Обновить лимиты</value>
   </data>
@@ -1122,6 +1125,12 @@
   </data>
   <data name="TerminalChooseFolder" xml:space="preserve">
     <value>Выбрать другую папку</value>
+  </data>
+  <data name="TerminalFoldersRecent" xml:space="preserve">
+    <value>Недавние</value>
+  </data>
+  <data name="TerminalFoldersBound" xml:space="preserve">
+    <value>Привязанные к среде</value>
   </data>
   <data name="TerminalElsewhere" xml:space="preserve">
     <value>Эта папка привязана к среде {0}. Сессия запустится в среде {1}.</value>

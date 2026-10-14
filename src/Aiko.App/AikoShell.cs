@@ -25,6 +25,7 @@ sealed class AikoShell : IDisposable
     /// The face for two seconds after an event (D-211). Drawn by the icon and the island later.
     private TrayMoodPlayer? _mood;
     private SettingsWindow? _settings;
+    private TerminalHost? _terminal;
     private DirectPoller? _direct;
     private UpdateWatch? _updates;
 
@@ -192,6 +193,7 @@ sealed class AikoShell : IDisposable
 
         _cards.Dispose();
         _settings?.Close();
+        _terminal?.Close();
         _island.Close();
 
         _tray.Dispose();
@@ -234,6 +236,7 @@ sealed class AikoShell : IDisposable
             _tray.Update();
             _island.Update(cards);
             _cards.Refresh();
+            _terminal?.LimitsChanged();
         });
 
     /// A face comes or goes (D-211), on the tray icon or on the island, wherever Aiko lives.
@@ -267,6 +270,9 @@ sealed class AikoShell : IDisposable
                     _tray.Update();
                 }
 
+                break;
+            case TrayCommand.Terminal:
+                OpenTerminal();
                 break;
             case TrayCommand.Settings:
                 OpenSettings();
@@ -316,6 +322,25 @@ sealed class AikoShell : IDisposable
         {
             _mood?.Follow(SettingsStore.LoadEnvironments());
         }
+    }
+
+    /// One terminal window, as with the settings. Closing it ends its sessions' processes; the
+    /// sessions come back from terminal.json the next time.
+    private void OpenTerminal()
+    {
+        if (_terminal is not null)
+        {
+            _terminal.Activate();
+            return;
+        }
+
+        var terminal = new TerminalHost(
+            SettingsStore.LoadEnvironments(), SettingsStore.LoadTerminal(), () => new ClaudeProcess(), _numbers.SnapshotFor);
+        terminal.Closed += () => _terminal = null;
+        _terminal = terminal;
+        terminal.Show();
+
+        Log.Write("terminal opened");
     }
 
     /// One settings window at a time: asking twice brings the open one forward instead of

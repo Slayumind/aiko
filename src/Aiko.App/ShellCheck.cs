@@ -156,8 +156,9 @@ static class ShellCheck
         const uint Down = 0x28;
         const uint Enter = 0x0D;
 
-        // With two environments the menu starts with "show in the ring" and a separator.
-        var downs = SettingsStore.LoadEnvironments().Dot is null ? 1 : 2;
+        // Settings come after the terminal. With two environments the menu starts with "show in
+        // the ring" and a separator.
+        var downs = SettingsStore.LoadEnvironments().Dot is null ? 2 : 3;
 
         var keys = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(400) };
         keys.Tick += (_, _) =>

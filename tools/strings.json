@@ -161,6 +161,13 @@
     ]
   ],
   [
+    "MenuTerminal",
+    [
+      "Open terminal",
+      "Открыть терминал"
+    ]
+  ],
+  [
     "MenuRefresh",
     [
       "Refresh limits",
@@ -2545,6 +2552,20 @@
     [
       "Choose another folder",
       "Выбрать другую папку"
+    ]
+  ],
+  [
+    "TerminalFoldersRecent",
+    [
+      "Recent",
+      "Недавние"
+    ]
+  ],
+  [
+    "TerminalFoldersBound",
+    [
+      "Bound to this environment",
+      "Привязанные к среде"
     ]
   ],
   [

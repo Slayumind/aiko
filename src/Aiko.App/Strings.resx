@@ -100,6 +100,9 @@
   <data name="MenuShowInRing" xml:space="preserve">
     <value>Show {0} in the ring</value>
   </data>
+  <data name="MenuTerminal" xml:space="preserve">
+    <value>Open terminal</value>
+  </data>
   <data name="MenuRefresh" xml:space="preserve">
     <value>Refresh limits</value>
   </data>
@@ -1122,6 +1125,12 @@
   </data>
   <data name="TerminalChooseFolder" xml:space="preserve">
     <value>Choose another folder</value>
+  </data>
+  <data name="TerminalFoldersRecent" xml:space="preserve">
+    <value>Recent</value>
+  </data>
+  <data name="TerminalFoldersBound" xml:space="preserve">
+    <value>Bound to this environment</value>
   </data>
   <data name="TerminalElsewhere" xml:space="preserve">
     <value>This folder is bound to {0}. The session starts in {1}.</value>

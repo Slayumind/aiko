@@ -10,10 +10,12 @@ namespace Aiko.App;
 ///
 /// The window is made when the terminal is opened and is gone when it is closed; with it go the
 /// processes of Claude Code. The conversations come back from their files the next time.
+[System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763")]
 sealed class TerminalHost
 {
     private readonly EnvironmentSettings _settings;
     private readonly Func<IConversationProcess> _newProcess;
+    private readonly Func<string, LimitSnapshot?> _limitsOf;
     private readonly TerminalPanel _panel = new();
     private readonly TerminalWindow _window;
     private readonly Dictionary<string, ConversationRunner> _talks = [];
@@ -25,16 +27,29 @@ sealed class TerminalHost
     private bool _closingWindow;
     private bool _agreedToClose;
 
-    public TerminalHost(EnvironmentSettings settings, TerminalSessions sessions, Func<IConversationProcess> newProcess)
+    /// limitsOf gives the latest limits of an environment by its name.
+    public TerminalHost(
+        EnvironmentSettings settings,
+        TerminalSessions sessions,
+        Func<IConversationProcess> newProcess,
+        Func<string, LimitSnapshot?> limitsOf)
     {
         _settings = settings;
         _sessions = sessions;
         _newProcess = newProcess;
+        _limitsOf = limitsOf;
         _model = TerminalWindowModel.Opened(sessions, [.. settings.Environments.Select(environment => environment.Name)]);
 
-        var area = SystemParameters.WorkArea;
-        _window = new TerminalWindow(_panel, WindowPlace.Fit(null, [new ScreenArea(area.Left, area.Top, area.Width, area.Height)]));
+        _window = new TerminalWindow(_panel, WindowPlace.Fit(sessions.Window, WorkAreas.All()));
         _window.MayClose = MayCloseWindow;
+        _window.Closing += (_, e) =>
+        {
+            if (!e.Cancel)
+            {
+                _sessions = _sessions.Placed(_window.Place);
+                Save();
+            }
+        };
         _window.Closed += (_, _) =>
         {
             foreach (var talk in _talks.Values)
@@ -69,6 +84,13 @@ sealed class TerminalHost
         _window.Activate();
     }
 
+    /// Aiko quits: the window closes without asking, as the processes end with Aiko anyway.
+    public void Close()
+    {
+        _agreedToClose = true;
+        _window.Close();
+    }
+
     public void Activate()
     {
         if (_window.WindowState == WindowState.Minimized)
@@ -78,6 +100,9 @@ sealed class TerminalHost
 
         _window.Activate();
     }
+
+    /// New limits arrived: the percentage in the title follows them.
+    public void LimitsChanged() => Draw();
 
     // ---- what the person did ----
 
@@ -340,7 +365,7 @@ sealed class TerminalHost
                 environment.Name,
                 environment.Name == _model.Environment,
                 SessionRows.Waiting(_sessions, environment.Name, Live)))],
-            Badge: null,
+            Badge(DateTimeOffset.Now),
             SessionRows.For(_sessions, _model.Environment, Live),
             _model.Environment,
             session?.Id,
@@ -351,6 +376,11 @@ sealed class TerminalHost
             ask,
             DateTimeOffset.Now);
     }
+
+    private BadgeView? Badge(DateTimeOffset now) =>
+        _limitsOf(_model.Environment) is { } snapshot && LimitBadge.For(snapshot, now) is { } badge
+            ? new BadgeView(badge.Percent, badge.Tone, badge.Kind)
+            : null;
 
     private void Save() => SettingsStore.SaveTerminal(_sessions);
 }
