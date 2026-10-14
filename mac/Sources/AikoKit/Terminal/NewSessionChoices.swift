@@ -18,6 +18,18 @@ public struct FolderChoice: Sendable, Equatable {
     public let source: FolderSource
 }
 
+/// The two groups of the folder list: where sessions ran, and the folders of the environment.
+public enum FolderGroup: Sendable, Equatable {
+    case recent
+    case bound
+}
+
+/// A group title in the folder list, drawn above the folder at before.
+public struct FolderHeader: Sendable, Equatable {
+    public let before: Int
+    public let group: FolderGroup
+}
+
 /// What the form of a new session offers (D-293, D-300): the folders, the models and the name the
 /// session gets when the field is left empty.
 ///
@@ -72,6 +84,19 @@ public enum NewSessionChoices {
         }
 
         return choices
+    }
+
+    /// The group titles of a folder list: one above the first folder of each group. A folder
+    /// inside a bound one is in the group of the bound folders.
+    public static func headers(_ folders: [FolderChoice]) -> [FolderHeader] {
+        var headers: [FolderHeader] = []
+        for (at, folder) in folders.enumerated() {
+            let group: FolderGroup = folder.source == .recent ? .recent : .bound
+            if headers.last?.group != group {
+                headers.append(FolderHeader(before: at, group: group))
+            }
+        }
+        return headers
     }
 
     /// The model the form starts with: the one of the session of the environment that was used

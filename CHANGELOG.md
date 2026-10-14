@@ -5,6 +5,14 @@ All notable changes to Aiko are listed here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and Aiko uses
 [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **Terminal window, first part.** On Windows, the tray menu has "Open terminal". The window keeps
+  your Claude Code sessions, grouped by environment and folder, and opens where you closed it. You
+  can't talk in it yet: the conversation and the input field come next, and so does the Mac version.
+
 ## [0.4.1] - 2026-10-12
 
 A faster start on Windows. Nothing else changes for you.

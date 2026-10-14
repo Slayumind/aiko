@@ -15,6 +15,16 @@ public enum FolderSource
 
 public sealed record FolderChoice(string Path, string Name, FolderSource Source);
 
+/// The two groups of the folder list: where sessions ran, and the folders of the environment.
+public enum FolderGroup
+{
+    Recent,
+    Bound,
+}
+
+/// A group title in the folder list, drawn above the folder at Before.
+public sealed record FolderHeader(int Before, FolderGroup Group);
+
 /// What the form of a new session offers (D-293, D-300): the folders, the models and the name the
 /// session gets when the field is left empty.
 public static class NewSessionChoices
@@ -68,6 +78,23 @@ public static class NewSessionChoices
         }
 
         return choices;
+    }
+
+    /// The group titles of a folder list: one above the first folder of each group. A folder
+    /// inside a bound one is in the group of the bound folders.
+    public static IReadOnlyList<FolderHeader> Headers(IReadOnlyList<FolderChoice> folders)
+    {
+        var headers = new List<FolderHeader>();
+        for (var at = 0; at < folders.Count; at++)
+        {
+            var group = folders[at].Source == FolderSource.Recent ? FolderGroup.Recent : FolderGroup.Bound;
+            if (headers.Count == 0 || headers[^1].Group != group)
+            {
+                headers.Add(new FolderHeader(at, group));
+            }
+        }
+
+        return headers;
     }
 
     /// The model the form starts with: the one of the session of the environment that was used

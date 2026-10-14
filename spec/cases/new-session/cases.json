@@ -155,7 +155,17 @@
         null,
         null
       ],
-      "model": "sonnet"
+      "model": "sonnet",
+      "headers": [
+        {
+          "before": 0,
+          "group": "recent"
+        },
+        {
+          "before": 3,
+          "group": "bound"
+        }
+      ]
     },
     {
       "name": "the other environment sees its own",
@@ -249,7 +259,17 @@
         "Aiko",
         null
       ],
-      "model": "opus"
+      "model": "opus",
+      "headers": [
+        {
+          "before": 0,
+          "group": "recent"
+        },
+        {
+          "before": 1,
+          "group": "bound"
+        }
+      ]
     },
     {
       "name": "nothing yet: only the bound folders",
@@ -276,7 +296,13 @@
         "personal 1"
       ],
       "elsewhere": [],
-      "model": "opus"
+      "model": "opus",
+      "headers": [
+        {
+          "before": 0,
+          "group": "bound"
+        }
+      ]
     },
     {
       "name": "no more than five recent folders, the latest first",
@@ -397,7 +423,17 @@
       ],
       "names": [],
       "elsewhere": [],
-      "model": "opus"
+      "model": "opus",
+      "headers": [
+        {
+          "before": 0,
+          "group": "recent"
+        },
+        {
+          "before": 5,
+          "group": "bound"
+        }
+      ]
     }
   ]
 }

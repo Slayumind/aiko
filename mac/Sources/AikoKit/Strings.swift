@@ -63,6 +63,7 @@ public enum Strings {
         "TrayLastSeen": ("as of {0}", "данные на {0}"),
         "TrayUpdateOut": ("Aiko {0} is out", "вышла Aiko {0}"),
         "MenuShowInRing": ("Show {0} in the ring", "Показать в кольце: {0}"),
+        "MenuTerminal": ("Open terminal", "Открыть терминал"),
         "MenuRefresh": ("Refresh limits", "Обновить лимиты"),
         "Settings": ("Settings", "Настройки"),
         "Close": ("Close", "Закрыть"),
@@ -404,6 +405,8 @@ public enum Strings {
         "TerminalRecent": ("Recent", "Недавние"),
         "TerminalBound": ("Bound folders", "Привязанные"),
         "TerminalChooseFolder": ("Choose another folder", "Выбрать другую папку"),
+        "TerminalFoldersRecent": ("Recent", "Недавние"),
+        "TerminalFoldersBound": ("Bound to this environment", "Привязанные к среде"),
         "TerminalElsewhere": ("This folder is bound to {0}. The session starts in {1}.", "Эта папка привязана к среде {0}. Сессия запустится в среде {1}."),
         "TerminalNoSessionsTitle": ("Start your first session in {0}", "Начни первую сессию в среде {0}"),
         "TerminalNoSessionsBody": ("A session is one conversation with Claude Code in one folder.", "Сессия — это один разговор с Claude Code в одной папке."),
@@ -519,6 +522,9 @@ public enum Strings {
 
     /// Show {0} in the ring
     public static var menuShowInRing: String { Strings.get("MenuShowInRing") }
+
+    /// Open terminal
+    public static var menuTerminal: String { Strings.get("MenuTerminal") }
 
     /// Refresh limits
     public static var menuRefresh: String { Strings.get("MenuRefresh") }
@@ -1542,6 +1548,12 @@ public enum Strings {
 
     /// Choose another folder
     public static var terminalChooseFolder: String { Strings.get("TerminalChooseFolder") }
+
+    /// Recent
+    public static var terminalFoldersRecent: String { Strings.get("TerminalFoldersRecent") }
+
+    /// Bound to this environment
+    public static var terminalFoldersBound: String { Strings.get("TerminalFoldersBound") }
 
     /// This folder is bound to {0}. The session starts in {1}.
     public static var terminalElsewhere: String { Strings.get("TerminalElsewhere") }

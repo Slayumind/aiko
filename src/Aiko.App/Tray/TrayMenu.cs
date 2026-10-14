@@ -10,6 +10,7 @@ enum TrayCommand
 {
     None,
     SwapRing,
+    Terminal,
     Settings,
     Refresh,
     Updates,
@@ -26,6 +27,7 @@ static class TrayMenu
     private const uint Updates = 3;
     private const uint Exit = 4;
     private const uint Swap = 5;
+    private const uint Terminal = 6;
     private const uint TpmRightButton = 0x0002;
     private const uint TpmNoNotify = 0x0080;
     private const uint TpmReturnCommand = 0x0100;
@@ -52,11 +54,13 @@ static class TrayMenu
             PInvoke.AppendMenu(menu, MENU_ITEM_FLAGS.MF_SEPARATOR, 0, null);
         }
 
-        fixed (char* settings = Strings.Settings,
+        fixed (char* terminal = Strings.MenuTerminal,
+                     settings = Strings.Settings,
                      refresh = Strings.MenuRefresh,
                      updates = Strings.CheckForUpdates,
                      exit = Strings.QuitAiko)
         {
+            PInvoke.AppendMenu(menu, MENU_ITEM_FLAGS.MF_STRING, Terminal, terminal);
             PInvoke.AppendMenu(menu, MENU_ITEM_FLAGS.MF_STRING, Settings, settings);
             PInvoke.AppendMenu(menu, MENU_ITEM_FLAGS.MF_STRING, Refresh, refresh);
             PInvoke.AppendMenu(menu, MENU_ITEM_FLAGS.MF_STRING, Updates, updates);
@@ -73,6 +77,7 @@ static class TrayMenu
         return command switch
         {
             Swap => TrayCommand.SwapRing,
+            Terminal => TrayCommand.Terminal,
             Settings => TrayCommand.Settings,
             Refresh => TrayCommand.Refresh,
             Updates => TrayCommand.Updates,

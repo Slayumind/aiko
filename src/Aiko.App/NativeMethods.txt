@@ -9,6 +9,8 @@ FindWindow
 MonitorFromWindow
 MonitorFromPoint
 GetMonitorInfo
+EnumDisplayMonitors
+MONITORINFOF_PRIMARY
 GetDpiForMonitor
 GetSystemMetricsForDpi
 SetWinEventHook

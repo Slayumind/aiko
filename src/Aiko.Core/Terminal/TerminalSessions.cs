@@ -34,6 +34,9 @@ public sealed record TerminalSessions(IReadOnlyList<TerminalSession> Sessions, s
 {
     public static readonly TerminalSessions Empty = new([], null);
 
+    /// Where the window stood when it was closed. Null until it was closed once.
+    public WindowPlace? Window { get; init; }
+
     // ---- reading the list ----
 
     public TerminalSession? Find(string id) => Sessions.FirstOrDefault(session => session.Id == id);
@@ -93,7 +96,7 @@ public sealed record TerminalSessions(IReadOnlyList<TerminalSession> Sessions, s
             LastUsed = now,
         };
 
-        return new TerminalSessions([.. Sessions, session], id);
+        return this with { Sessions = [.. Sessions, session], LastId = id };
     }
 
     /// The names the open sessions of a folder already have.
@@ -161,6 +164,11 @@ public sealed record TerminalSessions(IReadOnlyList<TerminalSession> Sessions, s
         };
     }
 
+    /// The window was closed at this place. It is kept in whole units; a place that is not a
+    /// place at all changes nothing.
+    public TerminalSessions Placed(WindowPlace place) =>
+        Whole(place) is { } whole ? this with { Window = whole } : this;
+
     private TerminalSessions With(string id, Func<TerminalSession, TerminalSession> change) =>
         this with { Sessions = [.. Sessions.Select(session => session.Id == id ? change(session) : session)] };
 
@@ -197,7 +205,10 @@ public sealed record TerminalSessions(IReadOnlyList<TerminalSession> Sessions, s
             }
 
             var last = Word(root, "last");
-            return new TerminalSessions(sessions, sessions.Any(session => session.Id == last && !session.Closed) ? last : null);
+            return new TerminalSessions(sessions, sessions.Any(session => session.Id == last && !session.Closed) ? last : null)
+            {
+                Window = root.TryGetProperty("window", out var window) ? PlaceIn(window) : null,
+            };
         }
         catch (JsonException)
         {
@@ -234,6 +245,16 @@ public sealed record TerminalSessions(IReadOnlyList<TerminalSession> Sessions, s
             {
                 writer.WriteString("last", last);
             }
+            if (Window is { } window)
+            {
+                writer.WriteStartObject("window");
+                writer.WriteNumber("left", (long)window.Left);
+                writer.WriteNumber("top", (long)window.Top);
+                writer.WriteNumber("width", (long)window.Width);
+                writer.WriteNumber("height", (long)window.Height);
+                writer.WriteBoolean("maximized", window.Maximized);
+                writer.WriteEndObject();
+            }
             writer.WriteEndObject();
         }
 
@@ -262,6 +283,38 @@ public sealed record TerminalSessions(IReadOnlyList<TerminalSession> Sessions, s
                 : 0,
         };
     }
+
+    /// A place in the file needs all four numbers; a width or a height of zero or less is no place.
+    private static WindowPlace? PlaceIn(JsonElement node)
+    {
+        if (node.ValueKind != JsonValueKind.Object)
+        {
+            return null;
+        }
+
+        double? Number(string key) =>
+            node.TryGetProperty(key, out var value) && value.ValueKind == JsonValueKind.Number && value.TryGetDouble(out var number)
+                ? number
+                : null;
+
+        return Number("left") is { } left && Number("top") is { } top && Number("width") is { } width && Number("height") is { } height
+            ? Whole(new WindowPlace(left, top, width, height, Flag(node, "maximized")))
+            : null;
+    }
+
+    private static WindowPlace? Whole(WindowPlace place)
+    {
+        double[] numbers = [place.Left, place.Top, place.Width, place.Height];
+        if (!numbers.All(double.IsFinite) || place.Width <= 0 || place.Height <= 0)
+        {
+            return null;
+        }
+
+        return new WindowPlace(Round(place.Left), Round(place.Top), Round(place.Width), Round(place.Height), place.Maximized);
+    }
+
+    /// Half goes away from zero, as in Swift.
+    private static double Round(double number) => Math.Round(number, MidpointRounding.AwayFromZero);
 
     private static string Word(JsonElement node, string key) =>
         node.ValueKind == JsonValueKind.Object && node.TryGetProperty(key, out var value) && value.ValueKind == JsonValueKind.String

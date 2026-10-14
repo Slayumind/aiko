@@ -502,6 +502,9 @@ sealed class TerminalPanel : UserControl
         var folders = new DropDown
         {
             Items = [.. form.Folders.Select(folder => folder.Name + "   " + folder.Path), Strings.TerminalChooseFolder],
+            Headers = NewSessionChoices.Headers(form.Folders).ToDictionary(
+                header => header.Before,
+                header => header.Group == FolderGroup.Recent ? Strings.TerminalFoldersRecent : Strings.TerminalFoldersBound),
             SelectedIndex = form.Folder,
         };
         folders.Picked += index =>

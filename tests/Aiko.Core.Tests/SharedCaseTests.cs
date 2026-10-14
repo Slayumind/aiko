@@ -914,7 +914,7 @@ public class SharedCaseTests
         {
             var described = FormDescribed(row, settings);
 
-            foreach (var part in new[] { "folders", "names", "elsewhere", "model" })
+            foreach (var part in new[] { "folders", "names", "elsewhere", "model", "headers" })
             {
                 Assert.True(
                     JsonNode.DeepEquals(JsonNode.Parse(row.GetProperty(part).GetRawText()), described[part]),
@@ -952,6 +952,10 @@ public class SharedCaseTests
                 "opened" => sessions.Opened(Word("id")),
                 "close" => sessions.Close(Word("id")),
                 "move" => sessions.Move(Word("id"), step.GetProperty("before").GetString()),
+                "placed" => sessions.Placed(new WindowPlace(
+                    step.GetProperty("left").GetDouble(), step.GetProperty("top").GetDouble(),
+                    step.GetProperty("width").GetDouble(), step.GetProperty("height").GetDouble(),
+                    step.GetProperty("maximized").GetBoolean())),
                 var other => throw new InvalidOperationException($"unknown step {other}"),
             };
         }
@@ -1010,6 +1014,11 @@ public class SharedCaseTests
             ["elsewhere"] = new JsonArray([.. Strings(row.GetProperty("elsewhereFor"))
                 .Select(folder => (JsonNode?)NewSessionChoices.BoundElsewhere(folder, environment, settings))]),
             ["model"] = NewSessionChoices.DefaultModel(sessions, environment.Name),
+            ["headers"] = new JsonArray([.. NewSessionChoices.Headers(folders).Select(header => (JsonNode)new JsonObject
+            {
+                ["before"] = header.Before,
+                ["group"] = Camel(header.Group),
+            })]),
         };
     }
 

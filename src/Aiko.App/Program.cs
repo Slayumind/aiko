@@ -293,7 +293,7 @@ static class Program
         }
 
         // Opens the window of the terminal on the real sessions, without the rest of Aiko. A message
-        // sent there goes to the real Claude Code. The way in until the terminal is in the menu.
+        // sent there goes to the real Claude Code. The limits come from the status line only.
         if (args is ["--try-terminal", ..])
         {
             var environments = SettingsStore.LoadEnvironments();
@@ -304,7 +304,8 @@ static class Program
             }
 
             var terminalApp = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
-            var terminal = new TerminalHost(environments, SettingsStore.LoadTerminal(), () => new ClaudeProcess());
+            var numbers = new ShellNumbers(new SnapshotWatcher());
+            var terminal = new TerminalHost(environments, SettingsStore.LoadTerminal(), () => new ClaudeProcess(), numbers.SnapshotFor);
             terminal.Closed += terminalApp.Shutdown;
             terminal.Show();
             terminalApp.Run();

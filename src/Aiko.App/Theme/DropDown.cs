@@ -23,6 +23,7 @@ sealed class DropDown : UserControl
     private readonly ScaleTransform _listScale = new(1, 1);
     private readonly Border _listFrame = new();
     private IReadOnlyList<string> _items = [];
+    private IReadOnlyDictionary<int, string> _headers = new Dictionary<int, string>();
     private int _selected = -1;
     private int _highlighted = -1;
 
@@ -45,6 +46,18 @@ sealed class DropDown : UserControl
         {
             _items = value;
             _selected = Math.Clamp(_selected, -1, _items.Count - 1);
+            Refresh();
+        }
+    }
+
+    /// Group titles in the open list, each above the item with its index. A title is not an
+    /// item: it cannot be picked and the arrows step over it.
+    public IReadOnlyDictionary<int, string> Headers
+    {
+        get => _headers;
+        set
+        {
+            _headers = value;
             Refresh();
         }
     }
@@ -225,9 +238,23 @@ sealed class DropDown : UserControl
         _list.Children.Clear();
         for (var i = 0; i < _items.Count; i++)
         {
+            if (_headers.TryGetValue(i, out var header))
+            {
+                _list.Children.Add(Header(header, first: i == 0));
+            }
+
             _list.Children.Add(Item(i));
         }
     }
+
+    private static TextBlock Header(string text, bool first) => new()
+    {
+        Text = text,
+        FontFamily = Tokens.Get<FontFamily>("Sans"),
+        FontSize = Tokens.Get<double>("TextTiny"),
+        Foreground = Tokens.Brush("Muted"),
+        Margin = new Thickness(8, first ? 4 : 10, 8, 4),
+    };
 
     private Border Item(int index)
     {

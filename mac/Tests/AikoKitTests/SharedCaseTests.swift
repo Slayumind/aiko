@@ -888,7 +888,7 @@ struct SharedCaseTests {
         for row in cases["forms"]?.arrayValue ?? [] {
             let described = Self.formDescribed(row, settings, Self.platformIn(.object(cases)))
 
-            for part in ["folders", "names", "elsewhere", "model"] {
+            for part in ["folders", "names", "elsewhere", "model", "headers"] {
                 #expect(
                     described[part] == row[part],
                     "\(row["name"]?.stringValue ?? ""), \(part): \(described[part]?.toJsonString(escaping: .relaxed) ?? "")")
@@ -925,6 +925,11 @@ struct SharedCaseTests {
             case "opened": sessions = sessions.opened(word("id"))
             case "close": sessions = sessions.close(word("id"))
             case "move": sessions = sessions.move(word("id"), before: step["before"]?.stringValue)
+            case "placed":
+                sessions = sessions.placed(WindowPlace(
+                    left: step["left"]?.doubleValue ?? 0, top: step["top"]?.doubleValue ?? 0,
+                    width: step["width"]?.doubleValue ?? 0, height: step["height"]?.doubleValue ?? 0,
+                    maximized: step["maximized"]?.boolValue == true))
             default: Issue.record("unknown step")
             }
         }
@@ -984,6 +989,12 @@ struct SharedCaseTests {
                 text(NewSessionChoices.boundElsewhere(platform, $0, environment, settings))
             })),
             ("model", .string(NewSessionChoices.defaultModel(sessions, environment.name))),
+            ("headers", .array(NewSessionChoices.headers(folders).map { header in
+                node([
+                    ("before", .number(String(header.before))),
+                    ("group", .string(String(describing: header.group))),
+                ])
+            })),
         ])
     }
 
