@@ -2349,6 +2349,118 @@
         }
       ],
       "toOpen": "a1"
+    },
+    {
+      "name": "the place of the window is kept in whole units and stays after a new session",
+      "file": null,
+      "steps": [
+        {
+          "do": "placed",
+          "left": 100.4,
+          "top": 50.5,
+          "width": 1000.6,
+          "height": 700,
+          "maximized": false
+        },
+        {
+          "do": "add",
+          "id": "a1",
+          "environment": "Aiko",
+          "folder": "/work/aiko",
+          "name": "",
+          "model": null,
+          "mode": "manual",
+          "now": 0
+        }
+      ],
+      "environment": "Aiko",
+      "saved": {
+        "sessions": [
+          {
+            "id": "a1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 0
+          }
+        ],
+        "last": "a1",
+        "window": {
+          "left": 100,
+          "top": 51,
+          "width": 1001,
+          "height": 700,
+          "maximized": false
+        }
+      },
+      "groups": [
+        {
+          "folder": "/work/aiko",
+          "name": "aiko",
+          "sessions": [
+            "aiko 1"
+          ]
+        }
+      ],
+      "toOpen": "a1"
+    },
+    {
+      "name": "a window of no size changes nothing",
+      "file": {
+        "sessions": [],
+        "window": {
+          "left": -20,
+          "top": 0,
+          "width": 900,
+          "height": 600,
+          "maximized": true
+        }
+      },
+      "steps": [
+        {
+          "do": "placed",
+          "left": 10,
+          "top": 10,
+          "width": 0,
+          "height": 600,
+          "maximized": false
+        }
+      ],
+      "environment": "Aiko",
+      "saved": {
+        "sessions": [],
+        "window": {
+          "left": -20,
+          "top": 0,
+          "width": 900,
+          "height": 600,
+          "maximized": true
+        }
+      },
+      "groups": [],
+      "toOpen": null
+    },
+    {
+      "name": "a window without all four numbers is left out of the file",
+      "file": {
+        "sessions": [],
+        "window": {
+          "left": 0,
+          "top": "0",
+          "width": 900,
+          "height": 600
+        }
+      },
+      "steps": [],
+      "environment": "Aiko",
+      "saved": {
+        "sessions": []
+      },
+      "groups": [],
+      "toOpen": null
     }
   ]
 }

@@ -952,6 +952,10 @@ public class SharedCaseTests
                 "opened" => sessions.Opened(Word("id")),
                 "close" => sessions.Close(Word("id")),
                 "move" => sessions.Move(Word("id"), step.GetProperty("before").GetString()),
+                "placed" => sessions.Placed(new WindowPlace(
+                    step.GetProperty("left").GetDouble(), step.GetProperty("top").GetDouble(),
+                    step.GetProperty("width").GetDouble(), step.GetProperty("height").GetDouble(),
+                    step.GetProperty("maximized").GetBoolean())),
                 var other => throw new InvalidOperationException($"unknown step {other}"),
             };
         }

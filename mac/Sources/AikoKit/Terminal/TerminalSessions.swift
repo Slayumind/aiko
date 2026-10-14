@@ -47,6 +47,9 @@ public struct TerminalSessions: Sendable, Equatable {
     public private(set) var sessions: [TerminalSession]
     public private(set) var lastId: String?
 
+    /// Where the window stood when it was closed. Nil until it was closed once.
+    public private(set) var window: WindowPlace?
+
     public static let empty = TerminalSessions(sessions: [], lastId: nil)
 
     // MARK: - Reading the list
@@ -109,7 +112,10 @@ public struct TerminalSessions: Sendable, Equatable {
         session.mode = mode
         session.lastUsed = now
 
-        return TerminalSessions(sessions: sessions + [session], lastId: id)
+        var next = self
+        next.sessions.append(session)
+        next.lastId = id
+        return next
     }
 
     /// The names the open sessions of a folder already have.
@@ -202,6 +208,38 @@ public struct TerminalSessions: Sendable, Equatable {
         return next
     }
 
+    /// The window was closed at this place. It is kept in whole units; a place that is not a
+    /// place at all changes nothing.
+    public func placed(_ place: WindowPlace) -> TerminalSessions {
+        guard let whole = Self.whole(place) else {
+            return self
+        }
+        var next = self
+        next.window = whole
+        return next
+    }
+
+    /// A place in the file needs all four numbers; a width or a height of zero or less is no place.
+    private static func placeIn(_ node: JsonNode?) -> WindowPlace? {
+        guard let node, node.isObject,
+              let left = node["left"]?.doubleValue, let top = node["top"]?.doubleValue,
+              let width = node["width"]?.doubleValue, let height = node["height"]?.doubleValue else {
+            return nil
+        }
+        return whole(WindowPlace(
+            left: left, top: top, width: width, height: height, maximized: node["maximized"]?.boolValue == true))
+    }
+
+    private static func whole(_ place: WindowPlace) -> WindowPlace? {
+        let numbers = [place.left, place.top, place.width, place.height]
+        guard numbers.allSatisfy(\.isFinite), place.width > 0, place.height > 0 else {
+            return nil
+        }
+        return WindowPlace(
+            left: place.left.rounded(), top: place.top.rounded(),
+            width: place.width.rounded(), height: place.height.rounded(), maximized: place.maximized)
+    }
+
     private func with(_ id: String, _ change: (inout TerminalSession) -> Void) -> TerminalSessions {
         var next = self
         for index in next.sessions.indices where next.sessions[index].id == id {
@@ -234,7 +272,8 @@ public struct TerminalSessions: Sendable, Equatable {
         let last = root["last"]?.stringValue
         return TerminalSessions(
             sessions: sessions,
-            lastId: sessions.contains { $0.id == last && !$0.closed } ? last : nil)
+            lastId: sessions.contains { $0.id == last && !$0.closed } ? last : nil,
+            window: placeIn(root["window"]))
     }
 
     public func toJson() -> String {
@@ -256,6 +295,15 @@ public struct TerminalSessions: Sendable, Equatable {
         })
         if let lastId {
             root["last"] = .string(lastId)
+        }
+        if let window {
+            var place = JsonObject()
+            place["left"] = .number(String(Int64(window.left)))
+            place["top"] = .number(String(Int64(window.top)))
+            place["width"] = .number(String(Int64(window.width)))
+            place["height"] = .number(String(Int64(window.height)))
+            place["maximized"] = .bool(window.maximized)
+            root["window"] = .object(place)
         }
 
         return JsonNode.object(root).toJsonString(indented: true, escaping: .relaxed) + "\n"
