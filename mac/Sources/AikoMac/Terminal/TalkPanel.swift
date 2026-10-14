@@ -152,8 +152,14 @@ private struct FeedRowView: View {
         switch item.content {
         case .ownerMessage(let text, let images, let queued, let attachments):
             MessageRow(text: text, images: images, queued: queued, attachments: attachments)
-        case .answer(let text, _):
-            AnswerView(markdown: text)
+        case .answer(let text, let streaming):
+            VStack(alignment: .leading, spacing: 0) {
+                AnswerView(markdown: text)
+                // A finished answer copies whole, as the markdown Claude wrote (D-303).
+                if !streaming {
+                    CopyAnswerButton(markdown: text)
+                }
+            }
         case .step(let step) where !step.line.hidden:
             StepRow(step: step, state: state)
         case .card(let request, .open):
@@ -163,6 +169,23 @@ private struct FeedRowView: View {
         default:
             EmptyView()
         }
+    }
+}
+
+private struct CopyAnswerButton: View {
+    let markdown: String
+
+    @State private var copied = false
+
+    var body: some View {
+        FlatButton(title: copied ? Strings.copied : Strings.copy, look: .ghost) {
+            NSPasteboard.general.clearContents()
+            NSPasteboard.general.setString(markdown, forType: .string)
+            copied = true
+        }
+        .padding(.leading, -10)
+        .padding(.top, -8)
+        .padding(.bottom, 4)
     }
 }
 
