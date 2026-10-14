@@ -42,6 +42,8 @@ sealed class CardHost : IDisposable
     /// The gear on the card.
     public event Action? SettingsRequested;
 
+    public event Action? TerminalRequested;
+
     public CardWindow? Window => _card;
 
     /// Whether the pointer is over the icon, the island or the card: the places an open card stays for.
@@ -100,6 +102,7 @@ sealed class CardHost : IDisposable
 
         var card = new CardWindow();
         card.SettingsRequested += () => SettingsRequested?.Invoke();
+        card.TerminalRequested += () => TerminalRequested?.Invoke();
         card.OpenClaudeRequested += OpenClaude;
         card.Closed += (_, _) =>
         {

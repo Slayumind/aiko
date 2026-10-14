@@ -6,6 +6,7 @@ import SwiftUI
 struct CardView: View {
     let model: CardModel
     let onSettings: () -> Void
+    let onTerminal: () -> Void
     let onClose: () -> Void
     let onOpenClaude: (String) -> Void
 
@@ -42,6 +43,11 @@ struct CardView: View {
 
             Spacer(minLength: 8)
 
+            IconButton(help: Strings.menuTerminal, action: onTerminal) {
+                IconPath(data: Theme.terminalIcon)
+                    .fill(Theme.muted)
+                    .frame(width: 14, height: 14)
+            }
             IconButton(help: Strings.settings, action: onSettings) { GearShape() }
             IconButton(help: Strings.close, action: onClose) { CrossShape() }
         }
@@ -216,6 +222,34 @@ private struct GearShape: View {
         Image(systemName: "gearshape")
             .font(.system(size: 13, weight: .regular))
             .foregroundStyle(Theme.muted)
+    }
+}
+
+/// An icon of the slayumind set from its SVG path, drawn on a 24 unit square and scaled to the
+/// frame. The core reads the path, as it does for the faces.
+struct IconPath: Shape {
+    let data: String
+
+    func path(in rect: CGRect) -> Path {
+        let scale = min(rect.width, rect.height) / 24
+        func point(_ at: AikoKit.Point) -> CGPoint {
+            CGPoint(x: rect.minX + at.x * scale, y: rect.minY + at.y * scale)
+        }
+
+        var path = Path()
+        for step in SvgPath.steps(data) {
+            switch step {
+            case .move(let to):
+                path.move(to: point(to))
+            case .line(let to):
+                path.addLine(to: point(to))
+            case .curve(let one, let two, let to):
+                path.addCurve(to: point(to), control1: point(one), control2: point(two))
+            case .close:
+                path.closeSubpath()
+            }
+        }
+        return path
     }
 }
 

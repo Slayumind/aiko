@@ -133,6 +133,10 @@
                      Foreground="{StaticResource Muted}" />
 
           <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Style="{StaticResource IconButton}" Click="OnTerminal" ToolTip="{x:Static local:Strings.MenuTerminal}">
+              <Path Data="{StaticResource TerminalPath}" Fill="{StaticResource Muted}"
+                    Stretch="Uniform" Width="14" Height="14" />
+            </Button>
             <Button Style="{StaticResource IconButton}" Click="OnSettings" ToolTip="{x:Static local:Strings.Settings}">
               <Path Data="{StaticResource GearPath}" Fill="{StaticResource Muted}"
                     Stretch="Uniform" Width="14" Height="14" />
