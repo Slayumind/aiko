@@ -460,7 +460,6 @@ sealed class TerminalPanel : UserControl
 
     private void ShowMain(TerminalView view)
     {
-        _main.Children.Clear();
         UIElement content = view.Main switch
         {
             MainView.Form when view.Form is { } form => Form(form),
@@ -475,7 +474,18 @@ sealed class TerminalPanel : UserControl
                 Strings.TerminalNoSessionsBody,
                 Flat(Strings.TerminalCreateSession, () => CreateAsked?.Invoke(), ghost: false, main: true, plus: true)),
         };
-        _main.Children.Add(content);
+
+        // The feed stays in the tree from one draw to the next. Taken out and put back, it is
+        // measured again and its scroll goes back to the top.
+        if (_main.Children.Count > 0 && ReferenceEquals(_main.Children[0], content))
+        {
+            _main.Children.RemoveRange(1, _main.Children.Count - 1);
+        }
+        else
+        {
+            _main.Children.Clear();
+            _main.Children.Add(content);
+        }
 
         if (view.Ask is { } ask)
         {
@@ -485,7 +495,6 @@ sealed class TerminalPanel : UserControl
 
     private UIElement Talk(TerminalView view, TalkView talk)
     {
-        (_talk.Parent as Panel)?.Children.Remove(_talk);
         _talk.Show(talk);
         if (_talkSession != view.SessionId)
         {
