@@ -520,6 +520,16 @@ public class SharedCaseTests
         {
             Assert.Equal(Mode(row.GetProperty("mode")), PermissionModes.FromStream(row.GetProperty("value").GetString()));
         }
+
+        foreach (var row in cases.GetProperty("defaults").EnumerateArray())
+        {
+            var settings = row.GetProperty("settings").EnumerateArray()
+                .Select(file => file.ValueKind == JsonValueKind.String ? file.GetString() : null)
+                .ToList();
+            Assert.True(
+                Mode(row.GetProperty("mode")) == PermissionModes.Default(settings),
+                row.GetProperty("name").GetString());
+        }
     }
 
     [Fact]

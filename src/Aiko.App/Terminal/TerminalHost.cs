@@ -86,6 +86,7 @@ sealed class TerminalHost
             }
         };
         _panel.StopAsked += () => Current()?.Interrupt();
+        _panel.ModeAsked += NextMode;
         _panel.Chosen += (requestId, choice) => Current()?.Choose(requestId, choice);
     }
 
@@ -219,8 +220,11 @@ sealed class TerminalHost
 
         var id = Guid.NewGuid().ToString();
         var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        var folder = form.Folders[form.Folder].Path;
+        var home = System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile);
+        var config = Environment()?.ConfigDirectories.FirstOrDefault() ?? ClaudeConfigFolder.Resolve(null, home);
         _sessions = _sessions
-            .Add(id, form.Environment, form.Folders[form.Folder].Path, name, NewSessionChoices.Models[form.Model], PermissionMode.Manual, now)
+            .Add(id, form.Environment, folder, name, NewSessionChoices.Models[form.Model], TerminalStore.DefaultMode(folder, config), now)
             .Opened(id);
         Save();
 
@@ -365,6 +369,23 @@ sealed class TerminalHost
         return talk;
     }
 
+    /// The next mode of the session. It is kept for the next start, and a running Claude Code
+    /// takes it at once.
+    private void NextMode()
+    {
+        if (_model.Session(_sessions) is not { } session)
+        {
+            return;
+        }
+
+        var talk = Current();
+        var next = PermissionModes.Next(talk?.State.Mode ?? session.Mode);
+        _sessions = _sessions.SetMode(session.Id, next);
+        Save();
+        talk?.SetMode(next);
+        Draw();
+    }
+
     private ConversationRunner? Current() =>
         _model.Session(_sessions) is { } session && _talks.TryGetValue(session.Id, out var talk) ? talk : null;
 
@@ -402,10 +423,17 @@ sealed class TerminalHost
         var past = _histories[session.Id].Items;
         if (!_talks.TryGetValue(session.Id, out var talk))
         {
-            return new TalkView(past, false, false);
+            return new TalkView(past, false, false, session.Mode, ModelName.Display(session.Model), session.Environment);
         }
 
-        return new TalkView([.. past, .. talk.State.Items], talk.State.IsBusy, talk.State.HasOpenCard);
+        var state = talk.State;
+        return new TalkView(
+            [.. past, .. state.Items],
+            state.IsBusy,
+            state.HasOpenCard,
+            state.Mode,
+            ModelName.Display(state.Model.Length > 0 ? state.Model : session.Model),
+            session.Environment);
     }
 
     // ---- the view ----

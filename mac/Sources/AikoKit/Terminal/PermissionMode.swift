@@ -50,6 +50,22 @@ public enum PermissionModes {
         mode == .manual ? "default" : name(mode)
     }
 
+    /// The mode a new session starts in: the one Claude Code itself would start in (D-311). settings
+    /// are the texts of the settings files, the strongest first: the local settings of the project,
+    /// its shared settings, then the settings of the config folder. The first file that names a
+    /// default mode decides; a mode the terminal does not offer, and no mode at all, is manual.
+    public static func defaultMode(_ settings: [String?]) -> PermissionMode {
+        for text in settings {
+            guard let root = JsonNode.parse(text), root.isObject,
+                  let named = root["permissions"]?["defaultMode"]?.stringValue
+            else {
+                continue
+            }
+            return fromStream(named) ?? .manual
+        }
+        return .manual
+    }
+
     public static func next(_ mode: PermissionMode) -> PermissionMode {
         let index = all.firstIndex(of: mode) ?? 0
         return all[(index + 1) % all.count]

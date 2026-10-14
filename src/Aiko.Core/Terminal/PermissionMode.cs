@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 namespace Aiko.Core.Terminal;
 
 /// How much Claude Code asks before it acts. The four modes the terminal offers (D-302).
@@ -49,6 +51,47 @@ public static class PermissionModes
     /// "default", so that is the word sent back.
     public static string RequestValue(PermissionMode mode) =>
         mode == PermissionMode.Manual ? "default" : Name(mode);
+
+    /// The mode a new session starts in: the one Claude Code itself would start in (D-311). settings
+    /// are the texts of the settings files, the strongest first: the local settings of the project,
+    /// its shared settings, then the settings of the config folder. The first file that names a
+    /// default mode decides; a mode the terminal does not offer, and no mode at all, is manual.
+    public static PermissionMode Default(IReadOnlyList<string?> settings)
+    {
+        foreach (var text in settings)
+        {
+            if (DefaultModeIn(text) is { } named)
+            {
+                return FromStream(named) ?? PermissionMode.Manual;
+            }
+        }
+
+        return PermissionMode.Manual;
+    }
+
+    private static string? DefaultModeIn(string? text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return null;
+        }
+
+        try
+        {
+            using var document = JsonDocument.Parse(text);
+            return document.RootElement.ValueKind == JsonValueKind.Object
+                && document.RootElement.TryGetProperty("permissions", out var permissions)
+                && permissions.ValueKind == JsonValueKind.Object
+                && permissions.TryGetProperty("defaultMode", out var mode)
+                && mode.ValueKind == JsonValueKind.String
+                    ? mode.GetString()
+                    : null;
+        }
+        catch (JsonException)
+        {
+            return null;
+        }
+    }
 
     public static PermissionMode Next(PermissionMode mode) =>
         Order[(Array.IndexOf(Order, mode) + 1) % Order.Length];

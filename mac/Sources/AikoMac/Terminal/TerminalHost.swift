@@ -172,10 +172,13 @@ final class TerminalHost {
         guard let form, form.folder >= 0 else { return }
 
         let id = UUID().uuidString.lowercased()
+        let folder = form.folders[form.folder].path
+        let config = environment()?.configDirectories.first ?? ClaudeConfigFolder.resolve(.macOS, nil, Store.home)
         sessions = sessions
             .add(
-                id: id, environment: form.environment, folder: form.folders[form.folder].path, name: name,
-                model: NewSessionChoices.models[form.model], mode: .manual, now: Self.now())
+                id: id, environment: form.environment, folder: folder, name: name,
+                model: NewSessionChoices.models[form.model],
+                mode: TerminalStore.defaultMode(folder: folder, configDirectory: config), now: Self.now())
             .opened(id)
         save()
 

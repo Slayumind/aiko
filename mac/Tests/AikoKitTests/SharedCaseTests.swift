@@ -538,6 +538,13 @@ struct SharedCaseTests {
         for row in cases["fromStream"]?.arrayValue ?? [] {
             #expect(PermissionModes.fromStream(row["value"]?.stringValue) == Self.mode(row["mode"]))
         }
+
+        for row in cases["defaults"]?.arrayValue ?? [] {
+            let settings = (row["settings"]?.arrayValue ?? []).map(\.stringValue)
+            #expect(
+                PermissionModes.defaultMode(settings) == Self.mode(row["mode"]),
+                "\(row["name"]?.stringValue ?? "")")
+        }
     }
 
     @Test

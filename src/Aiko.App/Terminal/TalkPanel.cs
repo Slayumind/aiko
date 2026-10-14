@@ -10,7 +10,13 @@ using Aiko.Core.Terminal;
 namespace Aiko.App;
 
 /// What the place of the conversation draws: the feed and whether Claude Code works now.
-sealed record TalkView(IReadOnlyList<FeedItem> Items, bool Busy, bool HasOpenCard);
+sealed record TalkView(
+    IReadOnlyList<FeedItem> Items,
+    bool Busy,
+    bool HasOpenCard,
+    PermissionMode Mode,
+    string Model,
+    string Environment);
 
 /// The conversation with Claude Code: the feed above, the field below (D-294, D-302).
 ///
@@ -26,6 +32,8 @@ sealed class TalkPanel : UserControl
     private readonly TextBox _input = new();
     private readonly TextBlock _empty;
     private readonly Button _stop;
+    private readonly TextBlock _mode = TerminalPanel.Mono("", "Muted");
+    private readonly TextBlock _where = TerminalPanel.Mono("", "Muted");
     private TalkView? _view;
 
     public TalkPanel()
@@ -89,25 +97,38 @@ sealed class TalkPanel : UserControl
             BorderThickness = new Thickness(1),
             CornerRadius = new CornerRadius(14),
             Padding = new Thickness(14, 12, 14, 12),
-            Margin = new Thickness(0, 0, 0, 16),
             Cursor = Cursors.IBeam,
             Child = field,
         };
         compose.MouseLeftButtonDown += (_, _) => _input.Focus();
+
+        // "mode · model · environment" under the field. The mode changes with a click or
+        // Shift+Tab, in the order of Claude Code (D-302).
+        _mode.Cursor = Cursors.Hand;
+        _mode.ToolTip = "Shift+Tab";
+        _mode.MouseLeftButtonUp += (_, _) => ModeAsked?.Invoke();
+        var status = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(14, 6, 0, 14) };
+        status.Children.Add(_mode);
+        status.Children.Add(_where);
+
+        var bottom = new StackPanel();
+        bottom.Children.Add(compose);
+        bottom.Children.Add(status);
 
         var middle = new Grid();
         middle.Children.Add(_feed);
         middle.Children.Add(_empty);
 
         var all = new DockPanel { Margin = new Thickness(24, 0, 24, 0), MaxWidth = 860 };
-        DockPanel.SetDock(compose, Dock.Bottom);
-        all.Children.Add(compose);
+        DockPanel.SetDock(bottom, Dock.Bottom);
+        all.Children.Add(bottom);
         all.Children.Add(middle);
         Content = all;
     }
 
     public event Action<string>? SendAsked;
     public event Action? StopAsked;
+    public event Action? ModeAsked;
     public event Action<string, CardChoice>? Chosen;
 
     /// The field takes the keyboard, for a session the person just went into.
@@ -145,6 +166,8 @@ sealed class TalkPanel : UserControl
 
         _empty.Visibility = view.Items.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         _stop.Visibility = view.Busy ? Visibility.Visible : Visibility.Collapsed;
+        _mode.Text = PermissionModes.Name(view.Mode);
+        _where.Text = string.Concat(view.Model.Length > 0 ? " · " + view.Model : "", " · ", view.Environment);
 
         if (atEnd && _items.Count > 0)
         {
@@ -224,6 +247,11 @@ sealed class TalkPanel : UserControl
         {
             e.Handled = true;
             StopAsked?.Invoke();
+        }
+        else if (e.Key == Key.Tab && Keyboard.Modifiers == ModifierKeys.Shift)
+        {
+            e.Handled = true;
+            ModeAsked?.Invoke();
         }
     }
 

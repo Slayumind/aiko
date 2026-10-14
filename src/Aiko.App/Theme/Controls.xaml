@@ -511,7 +511,8 @@
       <Setter.Value>
         <ControlTemplate TargetType="ScrollViewer">
           <Grid>
-            <ScrollContentPresenter CanContentScroll="{TemplateBinding CanContentScroll}" />
+            <ScrollContentPresenter CanContentScroll="{TemplateBinding CanContentScroll}"
+                                    Margin="{TemplateBinding Padding}" />
             <ScrollBar x:Name="PART_VerticalScrollBar" Style="{StaticResource ThinScrollBar}"
                        HorizontalAlignment="Right" Margin="0,8,3,8"
                        Value="{TemplateBinding VerticalOffset}" Maximum="{TemplateBinding ScrollableHeight}"

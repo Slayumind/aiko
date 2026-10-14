@@ -49,6 +49,14 @@ sealed class TerminalPanel : UserControl
         FontFamily = Tokens.Get<FontFamily>("Sans");
         Focusable = false;
 
+        // Every scroll bar of the window is the thin one of the settings: the list, the feed and
+        // the field.
+        Resources.MergedDictionaries.Add(new ResourceDictionary
+        {
+            Source = new Uri("pack://application:,,,/Theme/Controls.xaml", UriKind.Absolute),
+        });
+        Resources[typeof(ScrollViewer)] = Resources["QuietScroll"];
+
         _listButton = Flat("", () => _listPopup.IsOpen = !_listPopup.IsOpen, ghost: false);
         _listButton.Margin = new Thickness(10, 0, 0, 0);
         _listButton.Visibility = Visibility.Collapsed;
@@ -110,6 +118,7 @@ sealed class TerminalPanel : UserControl
 
         _talk.SendAsked += text => SendAsked?.Invoke(text);
         _talk.StopAsked += () => StopAsked?.Invoke();
+        _talk.ModeAsked += () => ModeAsked?.Invoke();
         _talk.Chosen += (id, choice) => Chosen?.Invoke(id, choice);
 
         SizeChanged += (_, e) =>
@@ -147,6 +156,7 @@ sealed class TerminalPanel : UserControl
     public event Action? CloseAsked;
     public event Action<string>? SendAsked;
     public event Action? StopAsked;
+    public event Action? ModeAsked;
     public event Action<string, CardChoice>? Chosen;
 
     public void ShowMaximized(bool maximized)
