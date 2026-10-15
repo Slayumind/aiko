@@ -25,6 +25,10 @@ struct TalkPanelView: View {
     /// Whether the open card is on screen. A lazy row says so when it comes and goes.
     @State private var cardInView = true
 
+    /// Whether the last row is on screen. Only then a new row pulls the feed down: someone who
+    /// scrolled up to read stays where they are, as on Windows.
+    @State private var atEnd = true
+
     private static let endId = "end"
 
     var body: some View {
@@ -44,6 +48,8 @@ struct TalkPanelView: View {
                             WorkingRow()
                         }
                         Color.clear.frame(height: 1).id(Self.endId)
+                            .onAppear { atEnd = true }
+                            .onDisappear { atEnd = false }
                     }
                     .padding(.trailing, 12)
                 }
@@ -56,9 +62,11 @@ struct TalkPanelView: View {
                     }
                 }
                 .onChange(of: talk.items.count) { _, _ in
+                    guard atEnd else { return }
                     withAnimation(nil) { scroll.scrollTo(Self.endId, anchor: .bottom) }
                 }
                 .onChange(of: talk.items.last) { _, _ in
+                    guard atEnd else { return }
                     scroll.scrollTo(Self.endId, anchor: .bottom)
                 }
                 .onAppear { scroll.scrollTo(Self.endId, anchor: .bottom) }
