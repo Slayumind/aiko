@@ -219,7 +219,13 @@ sealed class TalkInput : UserControl
             VoiceWord.Finishing => Strings.VoiceFinishing,
             _ => "",
         };
-        _voiceWord.Foreground = Tokens.Brush(line.Word == VoiceWord.Warming ? "Muted" : "Ink");
+        // "listening 0:04" is red, like the button and the wave: the three say one thing.
+        _voiceWord.Foreground = Tokens.Brush(line.Word switch
+        {
+            VoiceWord.Warming => "Muted",
+            VoiceWord.Listening => "Destructive",
+            _ => "Ink",
+        });
         _voiceWhere.Text = line.Engine switch
         {
             VoiceEngine.Local => " · " + Strings.VoiceOnComputer,
