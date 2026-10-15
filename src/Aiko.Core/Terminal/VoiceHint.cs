@@ -66,6 +66,27 @@ public static class VoiceHint
         _ => systemLanguage.StartsWith("ru", StringComparison.OrdinalIgnoreCase) ? "ru" : "en",
     };
 
+    /// The branch a .git/HEAD file names: "ref: refs/heads/feature/voice" is feature/voice. A HEAD
+    /// that holds a commit (a detached checkout) names no branch.
+    public static string? Branch(string? head)
+    {
+        const string Prefix = "ref: refs/heads/";
+        var line = head?.Trim();
+        return line is not null && line.StartsWith(Prefix, StringComparison.Ordinal) && line.Length > Prefix.Length
+            ? line[Prefix.Length..]
+            : null;
+    }
+
+    /// In a worktree .git is a file, "gitdir: <folder>", and HEAD sits in that folder.
+    public static string? GitFolder(string? dotGitFile)
+    {
+        const string Prefix = "gitdir:";
+        var line = dotGitFile?.Trim();
+        return line is not null && line.StartsWith(Prefix, StringComparison.Ordinal) && line.Length > Prefix.Length
+            ? line[Prefix.Length..].Trim()
+            : null;
+    }
+
     /// The last part of a path written on either system: C:\work\Aiko\, /Users/me/Aiko.
     private static string? LastPart(string? path) =>
         path?.TrimEnd('\\', '/').Split('\\', '/').LastOrDefault();

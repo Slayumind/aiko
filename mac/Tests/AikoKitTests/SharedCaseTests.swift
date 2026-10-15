@@ -94,6 +94,7 @@ struct SharedCaseTests {
                 "marketplaceFile": folders.marketplaceFile,
                 "personaPluginsFolder": folders.personaPluginsFolder,
                 "logFile": folders.logFile,
+                "voiceModelFile": folders.voiceModelFile,
                 "installedAppFolder": folders.installedAppFolder,
             ]
 

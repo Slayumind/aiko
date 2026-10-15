@@ -75,6 +75,7 @@ public class SharedCaseTests
                 ["marketplaceFile"] = folders.MarketplaceFile,
                 ["personaPluginsFolder"] = folders.PersonaPluginsFolder,
                 ["logFile"] = folders.LogFile,
+                ["voiceModelFile"] = folders.VoiceModelFile,
                 ["installedAppFolder"] = folders.InstalledAppFolder,
             };
 

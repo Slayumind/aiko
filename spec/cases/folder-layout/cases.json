@@ -27,6 +27,7 @@
         "marketplaceFile": "C:\\Users\\someone\\AppData\\Local\\Aiko\\marketplace\\.claude-plugin\\marketplace.json",
         "personaPluginsFolder": "C:\\Users\\someone\\AppData\\Local\\Aiko\\plugins",
         "logFile": "C:\\Users\\someone\\AppData\\Local\\Aiko\\log.txt",
+        "voiceModelFile": "C:\\Users\\someone\\AppData\\Local\\Aiko\\models\\ggml-small.bin",
         "installedAppFolder": "C:\\Users\\someone\\AppData\\Local\\Slayumind.Aiko\\current"
       }
     },
@@ -52,7 +53,8 @@
         "marketplaceFolder": "/Users/someone/Library/Caches/Aiko/marketplace",
         "marketplaceFile": "/Users/someone/Library/Caches/Aiko/marketplace/.claude-plugin/marketplace.json",
         "personaPluginsFolder": "/Users/someone/Library/Caches/Aiko/plugins",
-        "logFile": "/Users/someone/Library/Caches/Aiko/log.txt"
+        "logFile": "/Users/someone/Library/Caches/Aiko/log.txt",
+        "voiceModelFile": "/Users/someone/Library/Caches/Aiko/models/ggml-small.bin"
       }
     },
     {

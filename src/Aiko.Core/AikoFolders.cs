@@ -76,6 +76,10 @@ public sealed record AikoFolders(PlatformConventions Platform, string SettingsBa
 
     public string LogFile => Platform.Join(LocalFolder, "log.txt");
 
+    /// The speech model of voice input, 465 MB, downloaded when voice input is first turned on
+    /// (D-313). It can be downloaded again, so it sits with what Aiko makes for itself.
+    public string VoiceModelFile => Platform.Join(LocalFolder, "models", "ggml-small.bin");
+
     /// The installed app itself, as Velopack lays it out. Windows only: on macOS the app is a
     /// bundle in /Applications and nothing under the base folders points at it.
     public string InstalledAppFolder => Platform.Join(LocalBase, InstallFolderName, "current");

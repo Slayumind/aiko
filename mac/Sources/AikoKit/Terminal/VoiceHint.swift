@@ -51,6 +51,23 @@ public enum VoiceHint {
         }
     }
 
+    /// The branch a .git/HEAD file names: "ref: refs/heads/feature/voice" is feature/voice. A HEAD
+    /// that holds a commit (a detached checkout) names no branch.
+    public static func branch(_ head: String?) -> String? {
+        let prefix = "ref: refs/heads/"
+        guard let line = head?.trimmingCharacters(in: .whitespacesAndNewlines),
+              line.hasPrefix(prefix), line.count > prefix.count else { return nil }
+        return String(line.dropFirst(prefix.count))
+    }
+
+    /// In a worktree .git is a file, "gitdir: <folder>", and HEAD sits in that folder.
+    public static func gitFolder(_ dotGitFile: String?) -> String? {
+        let prefix = "gitdir:"
+        guard let line = dotGitFile?.trimmingCharacters(in: .whitespacesAndNewlines),
+              line.hasPrefix(prefix), line.count > prefix.count else { return nil }
+        return line.dropFirst(prefix.count).trimmingCharacters(in: .whitespaces)
+    }
+
     /// The last part of a path written on either system: C:\work\Aiko\, /Users/me/Aiko.
     private static func lastPart(_ path: String?) -> String? {
         guard let path else { return nil }
