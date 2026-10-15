@@ -37,6 +37,13 @@ sealed class TalkPanel : UserControl
     private readonly TextBlock _reminderText = TerminalPanel.Text("", "TextNumber", "Caution", FontWeights.Normal);
     private readonly HashSet<string> _open = [];
     private ScrollViewer? _scroll;
+    private string? _shownSession;
+
+    /// Whether the feed follows its end as an answer grows. Only the reader's hand turns it off: the
+    /// wheel up, the scroll bar, the keys that go up. Reaching the bottom again turns it on. It used
+    /// to be guessed from the scroll itself, and the guess lost to the feed's own changes of offset:
+    /// a reader at the bottom could not scroll up while an answer was written (check of 2026-10-15).
+    private bool _follow = true;
 
     public TalkPanel()
     {
@@ -57,10 +64,37 @@ sealed class TalkPanel : UserControl
         };
         ScrollViewer.SetHorizontalScrollBarVisibility(_feed, ScrollBarVisibility.Disabled);
         ScrollViewer.SetCanContentScroll(_feed, true);
-        VirtualizingPanel.SetIsVirtualizing(_feed, true);
+        VirtualizingPanel.SetIsVirtualizing(_feed, Environment.GetEnvironmentVariable("AIKO_FEED_NOVIRT") != "1");
         VirtualizingPanel.SetVirtualizationMode(_feed, VirtualizationMode.Recycling);
         VirtualizingPanel.SetScrollUnit(_feed, ScrollUnit.Pixel);
-        _feed.AddHandler(ScrollViewer.ScrollChangedEvent, new ScrollChangedEventHandler((_, _) => FollowReminder()));
+        _feed.AddHandler(RequestBringIntoViewEvent, new RequestBringIntoViewEventHandler((_, e) =>
+            Trace($"bring into view asked by {e.OriginalSource?.GetType().Name} for {e.TargetObject?.GetType().Name}")), handledEventsToo: true);
+        _feed.AddHandler(PreviewMouseWheelEvent, new MouseWheelEventHandler((_, e) =>
+        {
+            if (e.Delta > 0)
+            {
+                ReaderGoesUp();
+            }
+        }), handledEventsToo: true);
+        _feed.AddHandler(PreviewMouseLeftButtonDownEvent, new MouseButtonEventHandler((_, e) =>
+        {
+            if (e.OriginalSource is DependencyObject hit && OnScrollBar(hit))
+            {
+                ReaderGoesUp();
+            }
+        }), handledEventsToo: true);
+        _feed.AddHandler(PreviewKeyDownEvent, new KeyEventHandler((_, e) =>
+        {
+            if (e.Key is Key.Up or Key.PageUp or Key.Home)
+            {
+                ReaderGoesUp();
+            }
+        }), handledEventsToo: true);
+        _feed.AddHandler(ScrollViewer.ScrollChangedEvent, new ScrollChangedEventHandler((_, e) =>
+        {
+            Follow(e);
+            FollowReminder();
+        }));
 
         _empty = TerminalPanel.Text(Strings.TerminalEmptyTalk, "TextName", "Muted", FontWeights.Normal);
         _empty.HorizontalAlignment = HorizontalAlignment.Center;
@@ -118,7 +152,13 @@ sealed class TalkPanel : UserControl
 
     public void Show(TalkView view)
     {
-        var atEnd = AtEnd();
+        // Another session opens at its end.
+        var newSession = view.Session != _shownSession;
+        _shownSession = view.Session;
+        if (newSession)
+        {
+            _follow = true;
+        }
 
         List<object> rows = [.. view.Items];
         if (view.Busy && !view.HasOpenCard)
@@ -148,9 +188,9 @@ sealed class TalkPanel : UserControl
         _empty.Visibility = view.Items.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         _input.Show(view.Session, view.Busy, view.Mode, view.Model, view.Environment);
 
-        if (atEnd && _items.Count > 0)
+        if (newSession && _items.Count > 0)
         {
-            Dispatcher.BeginInvoke(() => _feed.ScrollIntoView(_items[^1]), System.Windows.Threading.DispatcherPriority.Background);
+            Dispatcher.BeginInvoke(() => ToEnd(_scroll ??= FindScroll(_feed)), System.Windows.Threading.DispatcherPriority.Background);
         }
 
         Dispatcher.BeginInvoke(FollowReminder, System.Windows.Threading.DispatcherPriority.Background);
@@ -221,12 +261,61 @@ sealed class TalkPanel : UserControl
         }
     }
 
-    /// Whether the feed shows its last row, so a new one should come into view too. Someone who
-    /// scrolled up to read stays where they are.
-    private bool AtEnd()
+    private void Follow(ScrollChangedEventArgs e)
     {
-        var scroll = FindScroll(_feed);
-        return scroll is null || scroll.VerticalOffset >= scroll.ScrollableHeight - 2;
+        // A wide code block scrolls sideways inside a row; only the feed's own scroll counts.
+        if (e.OriginalSource is not ScrollViewer scroll || !ReferenceEquals(scroll.TemplatedParent, _feed))
+        {
+            return;
+        }
+
+        var atEnd = scroll.VerticalOffset >= scroll.ScrollableHeight - 2;
+        Trace($"changed: offset {scroll.VerticalOffset:0} by {e.VerticalChange:0}, extent by {e.ExtentHeightChange:0}, follow {_follow}");
+        if (!_follow && atEnd && e.VerticalChange > 0)
+        {
+            _follow = true;
+        }
+        else if (_follow && !atEnd && e.ExtentHeightChange != 0)
+        {
+            ToEnd(scroll);
+        }
+    }
+
+    private void ReaderGoesUp()
+    {
+        _follow = false;
+        Trace("reader goes up");
+    }
+
+    private static readonly bool Tracing = Environment.GetEnvironmentVariable("AIKO_TRACE_FEED") == "1";
+
+    private static void Trace(string what)
+    {
+        if (Tracing)
+        {
+            Log.Write("  feed: " + what);
+        }
+    }
+
+    /// To the bottom by number, not by ScrollToEnd: after ScrollToEnd the virtualizing panel kept
+    /// bringing the end into view as rows changed size, over the reader's own scroll (2026-10-15).
+    private static void ToEnd(ScrollViewer? scroll)
+    {
+        Trace($"to end from {scroll?.VerticalOffset:0}");
+        scroll?.ScrollToVerticalOffset(scroll.ScrollableHeight);
+    }
+
+    private static bool OnScrollBar(DependencyObject hit)
+    {
+        for (var at = hit; at is not null; at = at is Visual or System.Windows.Media.Media3D.Visual3D ? VisualTreeHelper.GetParent(at) : null)
+        {
+            if (at is System.Windows.Controls.Primitives.ScrollBar)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static ScrollViewer? FindScroll(DependencyObject parent)
