@@ -1400,4 +1400,7 @@ public static class Strings
 
     /// Kept in Windows Credential Manager. Removing Aiko erases it.
     public static string VoiceKeyWhere => Get("VoiceKeyWhere");
+
+    /// OpenAI did not take the recording. Check the key and the connection.
+    public static string VoiceCloudFailed => Get("VoiceCloudFailed");
 }

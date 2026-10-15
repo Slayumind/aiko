@@ -135,7 +135,7 @@ sealed class VoiceDictation
 
         _text = DictationText.Empty;
         _input.BeginDictation();
-        _recording = new Recording(this, ThisComputer.Folders.VoiceModelFile, language, hint);
+        _recording = new Recording(this, _settings.VoiceEngine, language, hint);
         if (!_recording.Open())
         {
             Cue(VoiceCue.NoMicrophone);
@@ -196,6 +196,30 @@ sealed class VoiceDictation
         }
     });
 
+    /// Text from OpenAI: the phrases that are done and the one being read (D-317).
+    private void Phrased(Recording from, string done, string reading, bool final) => _window.BeginInvoke(() =>
+    {
+        if (from != _recording)
+        {
+            return;
+        }
+
+        _text = DictationText.Phrases(done, reading);
+        _input.ShowDictation(_text);
+        if (final)
+        {
+            Cue(VoiceCue.Finished);
+        }
+    });
+
+    private void Failed(Recording from) => _window.BeginInvoke(() =>
+    {
+        if (from == _recording)
+        {
+            Cue(VoiceCue.CloudFailed);
+        }
+    });
+
     private static string? BranchOf(string folder)
     {
         try
@@ -215,7 +239,7 @@ sealed class VoiceDictation
 
     /// One recording: the open mic and the worker that reads it. Dropped or finished, it is done;
     /// the next press makes a new one, so a late answer of an old one is easy to tell apart.
-    private sealed class Recording(VoiceDictation owner, string model, string language, string hint)
+    private sealed class Recording(VoiceDictation owner, VoiceEngine engine, string language, string hint)
     {
         private readonly Microphone _mic = new();
         private readonly CancellationTokenSource _dropped = new();
@@ -233,7 +257,7 @@ sealed class VoiceDictation
                 return false;
             }
 
-            Task.Run(Work);
+            _ = engine == VoiceEngine.OpenAI ? Task.Run(WorkWithOpenAI) : Task.Run(WorkOnComputer);
             return true;
         }
 
@@ -250,9 +274,9 @@ sealed class VoiceDictation
             _mic.Dispose();
         }
 
-        private void Work()
+        private void WorkOnComputer()
         {
-            using var recognizer = LocalRecognizer.Open(model, language, hint);
+            using var recognizer = LocalRecognizer.Open(ThisComputer.Folders.VoiceModelFile, language, hint);
             if (recognizer is null)
             {
                 Log.Write("voice input: the speech model did not load");
@@ -285,6 +309,60 @@ sealed class VoiceDictation
             if (!_dropped.IsCancellationRequested)
             {
                 owner.Passed(this, recognizer.Read(_mic.Heard()), final: true);
+            }
+        }
+
+        /// The sound goes to OpenAI as it comes, a tenth of a second at a time; the text comes back
+        /// phrase by phrase (D-317).
+        private async Task WorkWithOpenAI()
+        {
+            await using var cloud = await CloudRecognizer.Open(language, hint, _dropped.Token).ConfigureAwait(false);
+            if (cloud is null)
+            {
+                owner.Failed(this);
+                return;
+            }
+
+            cloud.Changed += (done, reading) =>
+            {
+                if (!_dropped.IsCancellationRequested)
+                {
+                    owner.Phrased(this, done, reading, final: false);
+                }
+            };
+
+            var sent = 0;
+            while (!_dropped.IsCancellationRequested && cloud.Problem is null)
+            {
+                var finishing = _finishing;
+                var heard = _mic.Heard();
+                if (heard.Length > sent)
+                {
+                    await cloud.Append(heard.AsSpan(sent)).ConfigureAwait(false);
+                    sent = heard.Length;
+                }
+
+                if (finishing)
+                {
+                    break;
+                }
+
+                await Task.Delay(100).ConfigureAwait(false);
+            }
+
+            if (_dropped.IsCancellationRequested)
+            {
+                return;
+            }
+
+            var text = cloud.Problem is null ? await cloud.Finish().ConfigureAwait(false) : null;
+            if (text is null)
+            {
+                owner.Failed(this);
+            }
+            else
+            {
+                owner.Phrased(this, text, "", final: true);
             }
         }
 

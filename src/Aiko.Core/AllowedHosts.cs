@@ -36,7 +36,8 @@ public static class AllowedHosts
     public static readonly IReadOnlyList<string> All =
         [Anthropic, Site, GitHubApi, GitHub, GitHubFiles, GitHubObjects, OpenAI];
 
-    /// Exact host, https only.
+    /// Exact host, https only, or wss: the same TLS for a socket, which voice input with OpenAI
+    /// opens (D-317).
     ///
     /// Exact, because a suffix test would let `api.anthropic.com.example.net` through, and that is
     /// the classic way such a list is defeated. https only, because the token travels on one of
@@ -44,6 +45,6 @@ public static class AllowedHosts
     public static bool Allows(Uri? address) =>
         address is not null
         && address.IsAbsoluteUri
-        && address.Scheme == Uri.UriSchemeHttps
+        && (address.Scheme == Uri.UriSchemeHttps || address.Scheme == Uri.UriSchemeWss)
         && All.Contains(address.Host, StringComparer.OrdinalIgnoreCase);
 }

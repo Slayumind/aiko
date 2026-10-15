@@ -33,14 +33,15 @@ public enum AllowedHosts {
 
     public static let all = [anthropic, site, gitHubApi, gitHub, gitHubFiles, gitHubObjects, openAI]
 
-    /// Exact host, https only.
+    /// Exact host, https only, or wss: the same TLS for a socket, which voice input with OpenAI
+    /// opens (D-317).
     ///
     /// Exact, because a suffix test would let `api.anthropic.com.example.net` through, and that is
     /// the classic way such a list is defeated. https only, because the token travels on one of
     /// these connections and a downgrade would put it in the open.
     public static func allows(_ address: URL?) -> Bool {
         guard let address,
-              let scheme = address.scheme?.lowercased(), scheme == "https",
+              let scheme = address.scheme?.lowercased(), scheme == "https" || scheme == "wss",
               let host = address.host else {
             return false
         }

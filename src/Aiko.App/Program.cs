@@ -327,6 +327,14 @@ static class Program
             return;
         }
 
+        // The same with OpenAI (D-317), played in real time. The key comes from OPENAI_API_KEY, not
+        // from Credential Manager, so a check never touches the stored one. Costs a fraction of a cent.
+        if (args is ["--try-voice-cloud", var cloudWav, ..])
+        {
+            Environment.Exit(TryVoiceCloud(cloudWav).GetAwaiter().GetResult());
+            return;
+        }
+
         if (args is ["--try-pipe", ..])
         {
             Environment.Exit(TerminalCheck.Pipe());
@@ -560,6 +568,33 @@ static class Program
     }
 
     /// The last part of a folder path, whichever separator it ends with.
+    private static async Task<int> TryVoiceCloud(string wav)
+    {
+        var started = System.Diagnostics.Stopwatch.StartNew();
+        await using var cloud = await CloudRecognizer.Open("ru", "Aiko, in-progress, TalkInput.cs.", CancellationToken.None,
+            Environment.GetEnvironmentVariable("OPENAI_API_KEY"));
+        if (cloud is null)
+        {
+            Log.Write("--try-voice-cloud: did not open");
+            return 1;
+        }
+
+        var phrases = 0;
+        cloud.Changed += (_, reading) => phrases += reading.Length == 0 ? 1 : 0;
+        var sound = TryVoiceSamples(wav);
+        for (var at = 0; at < sound.Length; at += 1600)
+        {
+            await cloud.Append(sound.AsSpan(at, Math.Min(1600, sound.Length - at)));
+            await Task.Delay(100);
+        }
+
+        var spoken = started.ElapsedMilliseconds;
+        var text = await cloud.Finish();
+        Log.Write($"--try-voice-cloud: {(text is null ? "failed: " + cloud.Problem : "ok")}, phrases {phrases}, "
+            + $"last text {started.ElapsedMilliseconds - spoken} ms after the sound: {text}");
+        return text is null ? 1 : 0;
+    }
+
     /// The sound of a 16 kHz mono 16-bit wav, as the mic gives it.
     private static float[] TryVoiceSamples(string path)
     {

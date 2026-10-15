@@ -500,6 +500,7 @@ public enum Strings {
         "VoiceKeyBad": ("This does not look like an OpenAI key: it starts with sk-.", "Это не похоже на ключ OpenAI: он начинается с sk-."),
         "VoiceKeyNotSaved": ("Windows did not save the key.", "Windows не сохранила ключ."),
         "VoiceKeyWhere": ("Kept in Windows Credential Manager. Removing Aiko erases it.", "Хранится в Диспетчере учётных данных Windows. Удаление Aiko его сотрёт."),
+        "VoiceCloudFailed": ("OpenAI did not take the recording. Check the key and the connection.", "OpenAI не принял запись. Проверь ключ и соединение."),
     ]
 
     /// Session · 5 hours
@@ -1881,4 +1882,7 @@ public enum Strings {
 
     /// Kept in Windows Credential Manager. Removing Aiko erases it.
     public static var voiceKeyWhere: String { Strings.get("VoiceKeyWhere") }
+
+    /// OpenAI did not take the recording. Check the key and the connection.
+    public static var voiceCloudFailed: String { Strings.get("VoiceCloudFailed") }
 }
