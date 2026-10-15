@@ -106,6 +106,35 @@ struct VoiceCaseTests {
         }
     }
 
+    @Test
+    func theModelAndTheKeyFollowTheTable() {
+        let cases = SpecCases.json("voice-model")
+        #expect(cases["url"]?.stringValue == VoiceModel.url)
+        #expect(cases["bytes"]?.int64Value == VoiceModel.bytes)
+        #expect(cases["sha256"]?.stringValue == VoiceModel.sha256)
+        #expect(cases["cloudModel"]?.stringValue == VoiceModel.cloudModel)
+
+        for row in cases["megabytes"]?.arrayValue ?? [] {
+            #expect(VoiceModel.megabytes(row["bytes"]?.int64Value ?? 0) == row["megabytes"]?.int64Value)
+        }
+
+        for row in cases["readiness"]?.arrayValue ?? [] {
+            guard let engine = row["engine"]?.stringValue.flatMap(VoiceEngine.init(rawValue:)),
+                  let ready = row["ready"]?.stringValue.flatMap(VoiceReadiness.init(rawValue:)) else {
+                Issue.record("unreadable row in voice-model")
+                continue
+            }
+
+            #expect(VoiceModel.readiness(engine, modelBytes: row["modelBytes"]?.int64Value, keyStored: row["keyStored"]?.boolValue ?? false) == ready)
+        }
+
+        for row in cases["keys"]?.arrayValue ?? [] {
+            let key = VoiceModel.cleanKey(row["pasted"]?.stringValue)
+            #expect(key == row["key"]?.stringValue)
+            #expect(key.map(VoiceModel.maskKey) == row["mask"]?.stringValue)
+        }
+    }
+
     private static func state(_ node: JsonNode?) -> VoiceState? {
         guard let pair = node?.arrayValue, pair.count == 2,
               let phase = pair[0].stringValue.flatMap(VoicePhase.init(rawValue:)),

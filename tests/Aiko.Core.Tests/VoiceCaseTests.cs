@@ -120,6 +120,39 @@ public class VoiceCaseTests
         }
     }
 
+    [Fact]
+    public void The_model_and_the_key_follow_the_table()
+    {
+        var cases = SpecCases.Json("voice-model");
+        Assert.Equal(VoiceModel.Url, cases.GetProperty("url").GetString());
+        Assert.Equal(VoiceModel.Bytes, cases.GetProperty("bytes").GetInt64());
+        Assert.Equal(VoiceModel.Sha256, cases.GetProperty("sha256").GetString());
+        Assert.Equal(VoiceModel.CloudModel, cases.GetProperty("cloudModel").GetString());
+
+        foreach (var row in cases.GetProperty("megabytes").EnumerateArray())
+        {
+            Assert.Equal(row.GetProperty("megabytes").GetInt64(), VoiceModel.Megabytes(row.GetProperty("bytes").GetInt64()));
+        }
+
+        foreach (var row in cases.GetProperty("readiness").EnumerateArray())
+        {
+            var bytes = row.GetProperty("modelBytes");
+            Assert.Equal(
+                Enum.Parse<VoiceReadiness>(row.GetProperty("ready").GetString()!),
+                VoiceModel.Readiness(
+                    Enum.Parse<VoiceEngine>(row.GetProperty("engine").GetString()!),
+                    bytes.ValueKind == JsonValueKind.Null ? null : bytes.GetInt64(),
+                    row.GetProperty("keyStored").GetBoolean()));
+        }
+
+        foreach (var row in cases.GetProperty("keys").EnumerateArray())
+        {
+            var key = VoiceModel.CleanKey(row.GetProperty("pasted").GetString());
+            Assert.Equal(row.GetProperty("key").GetString(), key);
+            Assert.Equal(row.GetProperty("mask").GetString(), key is null ? null : VoiceModel.MaskKey(key));
+        }
+    }
+
     private static VoiceState State(JsonElement pair) => new(
         Enum.Parse<VoicePhase>(pair[0].GetString()!),
         Enum.Parse<VoiceNotice>(pair[1].GetString()!));
