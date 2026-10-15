@@ -41,6 +41,7 @@ stamp, not a table (D-255).
 | `transcript-path/` | where that file is (`TranscriptPath`) |
 | `markdown/` | the markdown of an answer read into blocks and inlines (`Markdown`) |
 | `answer-segments/` | the pieces an answer is drawn and selected in (`AnswerSegments`) |
+| `markdown-copy/` | what a selection inside the prose of an answer copies as markdown (`MarkdownCopy`) |
 | `file-link/` | which words look like a file with a line, and where a link leads (`FileLink`, `LinkTarget`) |
 
 A path in these files is written for the platform the case names. Windows cases keep the

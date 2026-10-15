@@ -1075,6 +1075,39 @@ public class SharedCaseTests
     }
 
     [Fact]
+    public void Every_selection_copies_the_same_markdown()
+    {
+        foreach (var row in SpecCases.Json("markdown-copy").GetProperty("selections").EnumerateArray())
+        {
+            static TextPlace Place(JsonElement place) => new(place[0].GetInt32(), place[1].GetInt32());
+
+            var copied = MarkdownCopy.Selected(
+                Markdown.Parse(row.GetProperty("markdown").GetString()),
+                Place(row.GetProperty("from")),
+                Place(row.GetProperty("to")));
+
+            Assert.True(
+                copied == row.GetProperty("copied").GetString(),
+                $"{row.GetProperty("name").GetString()}: {copied}");
+        }
+    }
+
+    [Fact]
+    public void Leaves_are_counted_in_the_order_they_are_drawn()
+    {
+        var blocks = Markdown.Parse("Plain **bold** and `code`.\n\n- item\n\n  ```sh\n  ls\n  ```");
+        var paragraph = (MarkdownBlock.Paragraph)blocks[0];
+        var list = (MarkdownBlock.List)blocks[1];
+
+        var leaves = MarkdownCopy.Leaves(blocks);
+
+        Assert.Equal(1, leaves[((MarkdownInline.Strong)paragraph.Inlines[1]).Inlines[0]]);
+        Assert.Equal(3, leaves[paragraph.Inlines[3]]);
+        Assert.Equal(6, leaves[list.Items[0][1]]);
+        Assert.Equal(7, leaves.Count);
+    }
+
+    [Fact]
     public void Every_file_link_is_found_the_same()
     {
         var cases = SpecCases.Json("file-link");
