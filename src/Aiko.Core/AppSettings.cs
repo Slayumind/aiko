@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Aiko.Core.Terminal;
 
 namespace Aiko.Core;
 
@@ -69,6 +70,11 @@ public sealed record AppSettings
 
     /// The checklist opens once on "Meet Aiko" for people who update from 0.1 (D-200).
     public bool MeetAikoShown { get; init; }
+
+    /// Off by default: it needs a 465 MB model or a key of the person's own (D-313).
+    public bool VoiceInput { get; init; }
+
+    public VoiceEngine VoiceEngine { get; init; } = VoiceEngine.Local;
 
     /// A settings file we cannot read is not a reason to stop: Aiko starts with the defaults.
     /// Putting the unreadable file aside before that happens is the store's job, so that the next

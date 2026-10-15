@@ -1,4 +1,5 @@
 using Aiko.Core;
+using Aiko.Core.Terminal;
 
 namespace Aiko.Core.Tests;
 
@@ -78,6 +79,8 @@ public class AppSettingsTests
             Language = AikoLanguage.Russian,
             HideIslandInFullScreen = false,
             Island = new IslandPosition(ScreenEdge.Right, 0.25),
+            VoiceInput = true,
+            VoiceEngine = VoiceEngine.OpenAI,
         };
 
         var back = AppSettings.FromJson(settings.ToJson());
@@ -141,5 +144,16 @@ public class AppSettingsTests
 
         Assert.True(back.MeetAikoShown);
         Assert.Equal(AppSettings.CurrentSchema, back.SchemaVersion);
+    }
+
+    /// It needs a 465 MB download or a key, so nobody gets it without turning it on (D-313).
+    [Fact]
+    public void Voice_input_is_off_and_local_until_turned_on()
+    {
+        var settings = AppSettings.FromJson("{ \"schemaVersion\": 3, \"place\": \"Tray\" }");
+
+        Assert.False(settings.VoiceInput);
+        Assert.Equal(VoiceEngine.Local, settings.VoiceEngine);
+        Assert.Contains("\"voiceEngine\": \"Local\"", AppSettings.Default.ToJson());
     }
 }

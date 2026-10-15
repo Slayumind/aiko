@@ -61,6 +61,11 @@ public struct AppSettings: Sendable, Equatable {
     /// The checklist opens once on "Meet Aiko" for people who update from 0.1 (D-200).
     public var meetAikoShown = false
 
+    /// Off by default: it needs a 465 MB model or a key of the person's own (D-313).
+    public var voiceInput = false
+
+    public var voiceEngine: VoiceEngine = .local
+
     public init() {}
 
     public static let `default` = AppSettings()
@@ -86,6 +91,10 @@ public struct AppSettings: Sendable, Equatable {
             guard let language = AikoLanguage(rawValue: text) else { return .default }
             settings.language = language
         }
+        if let text = root["voiceEngine"]?.stringValue {
+            guard let engine = VoiceEngine(rawValue: text) else { return .default }
+            settings.voiceEngine = engine
+        }
 
         if let value = root["schemaVersion"]?.int64Value { settings.schemaVersion = Int(value) }
         if let value = root["runAtStartup"]?.boolValue { settings.runAtStartup = value }
@@ -95,6 +104,7 @@ public struct AppSettings: Sendable, Equatable {
         if let value = root["memoryShown"]?.boolValue { settings.memoryShown = value }
         if let value = root["hideIslandInFullScreen"]?.boolValue { settings.hideIslandInFullScreen = value }
         if let value = root["meetAikoShown"]?.boolValue { settings.meetAikoShown = value }
+        if let value = root["voiceInput"]?.boolValue { settings.voiceInput = value }
 
         if let object = root["island"]?.objectValue {
             guard let text = object["edge"]?.stringValue, let edge = screenEdge(text) else { return .default }
@@ -124,6 +134,8 @@ public struct AppSettings: Sendable, Equatable {
                 ("along", .number(numberText(island.along))),
             ]))),
             ("meetAikoShown", .bool(meetAikoShown)),
+            ("voiceInput", .bool(voiceInput)),
+            ("voiceEngine", .string(voiceEngine.rawValue)),
         ])
 
         return JsonNode.object(root).toJsonString(indented: true) + "\n"
