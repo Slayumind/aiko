@@ -37,6 +37,8 @@ sealed class TerminalPanel : UserControl
 
     // The conversation keeps its rows and what is typed while the view is drawn again.
     private readonly TalkPanel _talk = new();
+
+    internal TalkInput Input => _talk.Input;
     private string? _talkSession;
 
     // What is typed into the form stays here while the view is drawn again.

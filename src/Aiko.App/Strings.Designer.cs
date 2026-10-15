@@ -1289,4 +1289,40 @@ public static class Strings
 
     /// Pictures: {0}
     public static string TerminalPictures => Get("TerminalPictures");
+
+    /// Voice input · Ctrl+Space
+    public static string VoiceButtonTip => Get("VoiceButtonTip");
+
+    /// Finish recording · Ctrl+Space
+    public static string VoiceStopTip => Get("VoiceStopTip");
+
+    /// starting the mic
+    public static string VoiceWarming => Get("VoiceWarming");
+
+    /// listening {0}
+    public static string VoiceListening => Get("VoiceListening");
+
+    /// finishing
+    public static string VoiceFinishing => Get("VoiceFinishing");
+
+    /// on this computer
+    public static string VoiceOnComputer => Get("VoiceOnComputer");
+
+    /// Esc to cancel
+    public static string VoiceCancelHint => Get("VoiceCancelHint");
+
+    /// No microphone found. Plug one in or allow access to it.
+    public static string VoiceNoMic => Get("VoiceNoMic");
+
+    /// Windows Settings
+    public static string VoiceNoMicLink => Get("VoiceNoMicLink");
+
+    /// Voice input needs a speech model, 465 MB.
+    public static string VoiceNeedsModel => Get("VoiceNeedsModel");
+
+    /// Recognition through OpenAI needs your key.
+    public static string VoiceNeedsKey => Get("VoiceNeedsKey");
+
+    /// Open settings
+    public static string VoiceOpenSettings => Get("VoiceOpenSettings");
 }

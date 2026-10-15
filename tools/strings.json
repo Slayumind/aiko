@@ -2959,5 +2959,89 @@
       "Pictures: {0}",
       "Картинок: {0}"
     ]
+  ],
+  [
+    "VoiceButtonTip",
+    [
+      "Voice input · Ctrl+Space",
+      "Голосовой ввод · Ctrl+Space"
+    ]
+  ],
+  [
+    "VoiceStopTip",
+    [
+      "Finish recording · Ctrl+Space",
+      "Закончить запись · Ctrl+Space"
+    ]
+  ],
+  [
+    "VoiceWarming",
+    [
+      "starting the mic",
+      "микрофон включается"
+    ]
+  ],
+  [
+    "VoiceListening",
+    [
+      "listening {0}",
+      "слушаю {0}"
+    ]
+  ],
+  [
+    "VoiceFinishing",
+    [
+      "finishing",
+      "дописываю"
+    ]
+  ],
+  [
+    "VoiceOnComputer",
+    [
+      "on this computer",
+      "на компьютере"
+    ]
+  ],
+  [
+    "VoiceCancelHint",
+    [
+      "Esc to cancel",
+      "Esc — отменить"
+    ]
+  ],
+  [
+    "VoiceNoMic",
+    [
+      "No microphone found. Plug one in or allow access to it.",
+      "Микрофон не найден. Подключи его или разреши доступ к нему."
+    ]
+  ],
+  [
+    "VoiceNoMicLink",
+    [
+      "Windows Settings",
+      "Параметры Windows"
+    ]
+  ],
+  [
+    "VoiceNeedsModel",
+    [
+      "Voice input needs a speech model, 465 MB.",
+      "Для голосового ввода нужна модель распознавания, 465 МБ."
+    ]
+  ],
+  [
+    "VoiceNeedsKey",
+    [
+      "Recognition through OpenAI needs your key.",
+      "Для распознавания через OpenAI нужен твой ключ."
+    ]
+  ],
+  [
+    "VoiceOpenSettings",
+    [
+      "Open settings",
+      "Открыть настройки"
+    ]
   ]
 ]

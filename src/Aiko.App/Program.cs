@@ -313,6 +313,20 @@ static class Program
         }
 
         // The pipes a conversation runs on, checked with Aiko as its own child. No Claude Code.
+        // Reads a recorded phrase with the whisper the app ships, the way a recording is read. A door
+        // for checks: the text goes to the log, so use a phrase made for testing.
+        if (args is ["--try-voice", var voiceModel, var voiceWav, ..])
+        {
+            var started = System.Diagnostics.Stopwatch.StartNew();
+            using var recognizer = LocalRecognizer.Open(voiceModel, "ru", "Aiko, in-progress, TalkInput.cs.");
+            var loaded = started.ElapsedMilliseconds;
+            var text = recognizer?.Read(TryVoiceSamples(voiceWav)) ?? "";
+            Log.Write($"--try-voice: whisper {(WhisperNative.Ready ? "ready" : "missing")}, loaded in {loaded} ms, "
+                + $"read in {started.ElapsedMilliseconds - loaded} ms: {text}");
+            Environment.Exit(recognizer is null ? 1 : 0);
+            return;
+        }
+
         if (args is ["--try-pipe", ..])
         {
             Environment.Exit(TerminalCheck.Pipe());
@@ -539,6 +553,30 @@ static class Program
     }
 
     /// The last part of a folder path, whichever separator it ends with.
+    /// The sound of a 16 kHz mono 16-bit wav, as the mic gives it.
+    private static float[] TryVoiceSamples(string path)
+    {
+        var bytes = File.ReadAllBytes(path);
+        for (var at = 12; at + 8 <= bytes.Length;)
+        {
+            var size = BitConverter.ToInt32(bytes, at + 4);
+            if (System.Text.Encoding.ASCII.GetString(bytes, at, 4) == "data")
+            {
+                var samples = new float[size / 2];
+                for (var i = 0; i < samples.Length; i++)
+                {
+                    samples[i] = BitConverter.ToInt16(bytes, at + 8 + i * 2) / 32768f;
+                }
+
+                return samples;
+            }
+
+            at += 8 + size + (size & 1);
+        }
+
+        return [];
+    }
+
     private static string FolderName(string path) =>
         Path.GetFileName(path.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
 }

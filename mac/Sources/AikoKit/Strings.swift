@@ -463,6 +463,18 @@ public enum Strings {
         "TerminalWaitsForYou": ("Waiting for you: {0}", "Ждёт тебя: {0}"),
         "TerminalShow": ("Show", "Показать"),
         "TerminalPictures": ("Pictures: {0}", "Картинок: {0}"),
+        "VoiceButtonTip": ("Voice input · Ctrl+Space", "Голосовой ввод · Ctrl+Space"),
+        "VoiceStopTip": ("Finish recording · Ctrl+Space", "Закончить запись · Ctrl+Space"),
+        "VoiceWarming": ("starting the mic", "микрофон включается"),
+        "VoiceListening": ("listening {0}", "слушаю {0}"),
+        "VoiceFinishing": ("finishing", "дописываю"),
+        "VoiceOnComputer": ("on this computer", "на компьютере"),
+        "VoiceCancelHint": ("Esc to cancel", "Esc — отменить"),
+        "VoiceNoMic": ("No microphone found. Plug one in or allow access to it.", "Микрофон не найден. Подключи его или разреши доступ к нему."),
+        "VoiceNoMicLink": ("Windows Settings", "Параметры Windows"),
+        "VoiceNeedsModel": ("Voice input needs a speech model, 465 MB.", "Для голосового ввода нужна модель распознавания, 465 МБ."),
+        "VoiceNeedsKey": ("Recognition through OpenAI needs your key.", "Для распознавания через OpenAI нужен твой ключ."),
+        "VoiceOpenSettings": ("Open settings", "Открыть настройки"),
     ]
 
     /// Session · 5 hours
@@ -1733,4 +1745,40 @@ public enum Strings {
 
     /// Pictures: {0}
     public static var terminalPictures: String { Strings.get("TerminalPictures") }
+
+    /// Voice input · Ctrl+Space
+    public static var voiceButtonTip: String { Strings.get("VoiceButtonTip") }
+
+    /// Finish recording · Ctrl+Space
+    public static var voiceStopTip: String { Strings.get("VoiceStopTip") }
+
+    /// starting the mic
+    public static var voiceWarming: String { Strings.get("VoiceWarming") }
+
+    /// listening {0}
+    public static var voiceListening: String { Strings.get("VoiceListening") }
+
+    /// finishing
+    public static var voiceFinishing: String { Strings.get("VoiceFinishing") }
+
+    /// on this computer
+    public static var voiceOnComputer: String { Strings.get("VoiceOnComputer") }
+
+    /// Esc to cancel
+    public static var voiceCancelHint: String { Strings.get("VoiceCancelHint") }
+
+    /// No microphone found. Plug one in or allow access to it.
+    public static var voiceNoMic: String { Strings.get("VoiceNoMic") }
+
+    /// Windows Settings
+    public static var voiceNoMicLink: String { Strings.get("VoiceNoMicLink") }
+
+    /// Voice input needs a speech model, 465 MB.
+    public static var voiceNeedsModel: String { Strings.get("VoiceNeedsModel") }
+
+    /// Recognition through OpenAI needs your key.
+    public static var voiceNeedsKey: String { Strings.get("VoiceNeedsKey") }
+
+    /// Open settings
+    public static var voiceOpenSettings: String { Strings.get("VoiceOpenSettings") }
 }

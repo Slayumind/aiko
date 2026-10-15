@@ -32,6 +32,28 @@
     <Content Include="..\..\plugins\**\*" Exclude="..\..\plugins\**\__pycache__\**" Link="plugins\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
+  <!--
+    whisper.cpp for voice input (D-314): its dlls and the VAD model go to a whisper folder next to
+    the app. They are fetched, checked by SHA256, into artifacts/whisper by tools/fetch-whisper.ps1
+    the first time the app is built; they are not in git.
+  -->
+  <PropertyGroup>
+    <WhisperFolder>$(MSBuildThisFileDirectory)..\..\artifacts\whisper\</WhisperFolder>
+  </PropertyGroup>
+  <Target Name="FetchWhisper" BeforeTargets="BeforeBuild" Condition="!Exists('$(WhisperFolder)whisper.dll')">
+    <Exec Command="pwsh -NoProfile -File &quot;$(MSBuildThisFileDirectory)..\..\tools\fetch-whisper.ps1&quot;" />
+    <!-- Inside a target %(Filename) would batch over every Content item, so a type of its own. -->
+    <ItemGroup>
+      <FetchedWhisper Include="$(WhisperFolder)*" />
+      <Content Include="@(FetchedWhisper)" Link="whisper\%(FetchedWhisper.Filename)%(FetchedWhisper.Extension)" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+  </Target>
+  <ItemGroup>
+    <Content Include="$(WhisperFolder)*" Link="whisper\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <!-- MIT asks for the licence to travel with the files. -->
+    <Content Include="Assets\Licenses\*.txt" Link="whisper\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Aiko.Core\Aiko.Core.csproj" />
   </ItemGroup>

@@ -14,6 +14,7 @@ namespace Aiko.App;
 sealed class TerminalHost
 {
     private readonly EnvironmentSettings _settings;
+    private readonly VoiceDictation _voice;
     private readonly Func<IConversationProcess> _newProcess;
     private readonly Func<string, LimitSnapshot?> _limitsOf;
     private readonly TerminalPanel _panel = new();
@@ -45,6 +46,11 @@ sealed class TerminalHost
         _model = TerminalWindowModel.Opened(sessions, [.. settings.Environments.Select(environment => environment.Name)]);
 
         _window = new TerminalWindow(_panel, WindowPlace.Fit(sessions.Window, WorkAreas.All()));
+        _voice = new VoiceDictation(_panel.Input, VoiceContextNow);
+        _voice.SettingsAsked += () => SettingsAsked?.Invoke();
+
+        // Voice input is turned on in the settings window; the window reads it again when it is used.
+        _window.Activated += (_, _) => _voice.Use(SettingsStore.Load());
         _window.MayClose = MayCloseWindow;
         _window.Closing += (_, e) =>
         {
@@ -57,6 +63,7 @@ sealed class TerminalHost
         _window.StateChanged += (_, _) => InViewChanged?.Invoke(_window.InView);
         _window.Closed += (_, _) =>
         {
+            _voice.Close();
             InViewChanged?.Invoke(false);
             foreach (var talk in _talks.Values)
             {
@@ -92,6 +99,9 @@ sealed class TerminalHost
     }
 
     public event Action? Closed;
+
+    /// Voice input needs its model or key: the settings window should open.
+    public event Action? SettingsAsked;
 
     /// The window came on screen, or left it by being minimized or closed.
     public event Action<bool>? InViewChanged;
@@ -457,6 +467,14 @@ sealed class TerminalHost
     }
 
     // ---- the view ----
+
+    private VoiceContext? VoiceContextNow() =>
+        _model.Session(_sessions) is { } session
+            ? new VoiceContext(
+                session.Folder,
+                [],
+                _settings.Environments.FirstOrDefault(one => one.Name == session.Environment)?.Persona == true)
+            : null;
 
     private AikoEnvironment? Environment() => _settings.Environments.FirstOrDefault(one => one.Name == _model.Environment);
 

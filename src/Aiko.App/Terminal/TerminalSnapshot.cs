@@ -7,7 +7,11 @@ namespace Aiko.App;
 /// can be looked at without Claude Code and without touching the sessions of the person.
 static class TerminalSnapshot
 {
-    public static readonly IReadOnlyList<string> States = ["talk", "feed", "working", "empty", "form", "elsewhere", "login", "close"];
+    public static readonly IReadOnlyList<string> States =
+    [
+        "talk", "feed", "working", "empty", "form", "elsewhere", "login", "close",
+        "voice-idle", "voice-warming", "voice-listening", "voice-finishing", "voice-nomic", "voice-model",
+    ];
 
     /// --snapshot-terminal &lt;file&gt; &lt;state&gt; [width]
     public static bool Write(string path, string state, double width)
@@ -19,8 +23,37 @@ static class TerminalSnapshot
 
         var panel = new TerminalPanel { Width = width, Height = 700 };
         panel.Show(View(state));
+        Voice(panel.Input, state);
         Snapshot.Write(panel, path);
         return true;
+    }
+
+    /// The moments of a recording (D-315), drawn on the field under a short conversation.
+    private static void Voice(TalkInput input, string state)
+    {
+        (VoicePhase phase, VoiceNotice notice) = state switch
+        {
+            "voice-idle" => (VoicePhase.Idle, VoiceNotice.None),
+            "voice-warming" => (VoicePhase.Warming, VoiceNotice.None),
+            "voice-listening" => (VoicePhase.Listening, VoiceNotice.None),
+            "voice-finishing" => (VoicePhase.Finishing, VoiceNotice.None),
+            "voice-nomic" => (VoicePhase.Idle, VoiceNotice.NoMicrophone),
+            "voice-model" => (VoicePhase.Idle, VoiceNotice.NeedsModel),
+            _ => (VoicePhase.Off, VoiceNotice.None),
+        };
+
+        input.ShowVoice(VoiceInput.Line(new VoiceState(phase, notice), TimeSpan.FromSeconds(4.2), VoiceEngine.Local), notice);
+        if (phase is VoicePhase.Warming or VoicePhase.Listening or VoicePhase.Finishing)
+        {
+            input.BeginDictation();
+            var said = phase == VoicePhase.Warming
+                ? DictationText.Empty
+                : DictationText.Empty
+                    .Pass("Сделай ветку feature/voice-input от in-progress и прогони")
+                    .Pass("Сделай ветку feature/voice-input от in-progress и прогони dotnet test");
+            input.ShowDictation(said);
+            input.SetLevel(0.6);
+        }
     }
 
     private static TerminalView View(string state)
@@ -71,7 +104,10 @@ static class TerminalSnapshot
             SignedOut: state == "login",
             form,
             state == "close" ? new AskView(string.Format(Strings.TerminalCloseTitle, "terminal"), Strings.TerminalCloseBody) : null,
-            state == "feed" ? Feed(withCard: true) : state == "working" ? Feed(withCard: false) : null,
+            state == "feed" ? Feed(withCard: true)
+                : state == "working" ? Feed(withCard: false)
+                : state.StartsWith("voice-", StringComparison.Ordinal) ? Feed(withCard: false) with { Busy = false }
+                : null,
             now);
     }
 
