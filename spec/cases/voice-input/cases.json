@@ -1,5 +1,5 @@
 {
-  "comment": "Voice input in the field (D-313, D-315). Two presses: press, speak, press. Listening is shown from the first sound, not from the press (D-314). A press with no model or no key shows a line above the field and starts nothing. Esc drops the recording. When OpenAI fails, the recording is dropped and a line above the field says so (D-317). The button is red from the press to the second press; the ring around it moves only while listening.",
+  "comment": "Voice input in the field (D-313, D-315). Two presses: press, speak, press. Listening is shown from the first sound, not from the press (D-314). A press with no model or no key shows a line above the field and starts nothing. Esc drops the recording. When OpenAI fails, the recording is dropped and a line above the field says so (D-317). The button is red from the press to the second press; the wave of the sound under the field moves only while listening (D-319).",
   "next": [
     { "name": "voice turned off ignores a press", "from": ["Off", "None"], "cue": "Press", "ready": "Ready", "to": ["Off", "None"] },
     { "name": "a press opens the mic", "from": ["Idle", "None"], "cue": "Press", "ready": "Ready", "to": ["Warming", "None"] },
@@ -28,12 +28,12 @@
     { "name": "a press that works clears the failure", "from": ["Idle", "CloudFailed"], "cue": "Press", "ready": "Ready", "to": ["Warming", "None"] }
   ],
   "lines": [
-    { "phase": "Off", "seconds": 0, "engine": "Local", "word": "None", "time": null, "where": null, "cancel": false, "button": "Hidden", "ring": false },
-    { "phase": "Idle", "seconds": 0, "engine": "Local", "word": "None", "time": null, "where": null, "cancel": false, "button": "Idle", "ring": false },
-    { "phase": "Warming", "seconds": 0, "engine": "Local", "word": "Warming", "time": null, "where": "Local", "cancel": true, "button": "Recording", "ring": false },
-    { "phase": "Listening", "seconds": 4.7, "engine": "Local", "word": "Listening", "time": "0:04", "where": "Local", "cancel": true, "button": "Recording", "ring": true },
-    { "phase": "Listening", "seconds": 4, "engine": "OpenAI", "word": "Listening", "time": "0:04", "where": "OpenAI", "cancel": true, "button": "Recording", "ring": true },
-    { "phase": "Finishing", "seconds": 9, "engine": "Local", "word": "Finishing", "time": null, "where": "Local", "cancel": false, "button": "Idle", "ring": false }
+    { "phase": "Off", "seconds": 0, "engine": "Local", "word": "None", "time": null, "where": null, "cancel": false, "button": "Hidden", "wave": false },
+    { "phase": "Idle", "seconds": 0, "engine": "Local", "word": "None", "time": null, "where": null, "cancel": false, "button": "Idle", "wave": false },
+    { "phase": "Warming", "seconds": 0, "engine": "Local", "word": "Warming", "time": null, "where": "Local", "cancel": true, "button": "Recording", "wave": false },
+    { "phase": "Listening", "seconds": 4.7, "engine": "Local", "word": "Listening", "time": "0:04", "where": "Local", "cancel": true, "button": "Recording", "wave": true },
+    { "phase": "Listening", "seconds": 4, "engine": "OpenAI", "word": "Listening", "time": "0:04", "where": "OpenAI", "cancel": true, "button": "Recording", "wave": true },
+    { "phase": "Finishing", "seconds": 9, "engine": "Local", "word": "Finishing", "time": null, "where": "Local", "cancel": false, "button": "Idle", "wave": false }
   ],
   "clock": [
     { "seconds": 0, "text": "0:00" },

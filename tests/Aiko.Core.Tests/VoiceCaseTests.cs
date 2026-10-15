@@ -39,7 +39,7 @@ public class VoiceCaseTests
                     where is null ? null : Enum.Parse<VoiceEngine>(where),
                     row.GetProperty("cancel").GetBoolean(),
                     Enum.Parse<VoiceButton>(row.GetProperty("button").GetString()!),
-                    row.GetProperty("ring").GetBoolean()),
+                    row.GetProperty("wave").GetBoolean()),
                 line);
         }
     }

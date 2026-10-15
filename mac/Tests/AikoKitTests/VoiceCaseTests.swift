@@ -36,7 +36,7 @@ struct VoiceCaseTests {
                 row["where"]?.stringValue.flatMap(VoiceEngine.init(rawValue:)),
                 row["cancel"]?.boolValue ?? false,
                 button,
-                row["ring"]?.boolValue ?? false)
+                row["wave"]?.boolValue ?? false)
             let line = VoiceInput.line(VoiceState(phase, .none), listened: row["seconds"]?.doubleValue ?? 0, engine: engine)
 
             #expect(line == expected)

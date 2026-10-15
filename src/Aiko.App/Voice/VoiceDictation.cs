@@ -39,7 +39,7 @@ sealed class VoiceDictation
         _context = context;
         _window = input.Dispatcher;
 
-        // Only while a recording goes on: the ring follows the sound and the clock counts.
+        // Only while a recording goes on: the wave follows the sound and the clock counts.
         _tick = new DispatcherTimer(TimeSpan.FromMilliseconds(80), DispatcherPriority.Render, (_, _) => Tick(), _window);
         _tick.Stop();
 
@@ -153,13 +153,12 @@ sealed class VoiceDictation
         else if (!moving && _tick.IsEnabled)
         {
             _tick.Stop();
-            _input.SetLevel(0);
         }
     }
 
     private void Tick()
     {
-        _input.SetLevel(_recording?.Level ?? 0);
+        _input.PushLevel(_recording?.Level ?? 0);
         Show();
     }
 

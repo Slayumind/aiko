@@ -41,13 +41,11 @@ sealed class TalkInput : UserControl
     private readonly TextBlock _where = TerminalPanel.Mono("", "Muted");
 
     private static readonly Brush RecordingTint = Frozen(Color.FromArgb(0x33, 0xFF, 0x64, 0x67));
-    private static readonly Brush RingTint = Frozen(Color.FromArgb(0x1F, 0xFF, 0x64, 0x67));
 
     private readonly Button _mic;
     private readonly Ellipse _micBack = new() { Width = 26, Height = 26, Fill = Brushes.Transparent };
     private readonly Shape _micIcon = MicIcon();
-    private readonly Ellipse _ring = new() { Width = 34, Height = 34, Margin = new Thickness(-4), Fill = RingTint, IsHitTestVisible = false, Visibility = Visibility.Collapsed };
-    private readonly ScaleTransform _ringScale = new(1, 1, 17, 17);
+    private readonly StackPanel _wave = Wave();
     private readonly TextBlock _dictation = new() { TextWrapping = TextWrapping.Wrap, MaxHeight = 200, IsHitTestVisible = false, Visibility = Visibility.Collapsed };
     private readonly Border _notice;
     private readonly TextBlock _noticeText = TerminalPanel.Text("", "TextName", "Ink", FontWeights.Normal);
@@ -144,6 +142,7 @@ sealed class TalkInput : UserControl
         status.Children.Add(_mode);
         status.Children.Add(_model);
         status.Children.Add(_where);
+        status.Children.Add(_wave);
         status.Children.Add(_voiceWord);
         status.Children.Add(_voiceWhere);
         status.Children.Add(_voiceCancel);
@@ -199,7 +198,15 @@ sealed class TalkInput : UserControl
         _micBack.Fill = recording ? RecordingTint : Brushes.Transparent;
         _micIcon.Stroke = Tokens.Brush(recording ? "Destructive" : "Muted");
         _mic.ToolTip = recording ? Strings.VoiceStopTip : Strings.VoiceButtonTip;
-        _ring.Visibility = line.Ring ? Visibility.Visible : Visibility.Collapsed;
+        if (!line.Wave && _wave.Visibility == Visibility.Visible)
+        {
+            foreach (FrameworkElement bar in _wave.Children)
+            {
+                bar.Height = BarLow;
+            }
+        }
+
+        _wave.Visibility = line.Wave ? Visibility.Visible : Visibility.Collapsed;
 
         var usual = _voiceActive ? Visibility.Collapsed : Visibility.Visible;
         var voice = _voiceActive ? Visibility.Visible : Visibility.Collapsed;
@@ -233,9 +240,18 @@ sealed class TalkInput : UserControl
         };
     }
 
-    /// The loudness of the last tenth of a second, from 0 to 1: the ring grows with it.
-    public void SetLevel(double level) =>
-        _ringScale.ScaleX = _ringScale.ScaleY = 1 + 0.3 * Math.Clamp(level, 0, 1);
+    /// The loudness of the last moment, from 0 to 1. The wave moves one bar to the left and the
+    /// new one comes in at the right, so the line shows the last 1.3 s (D-319).
+    public void PushLevel(double level)
+    {
+        var bars = _wave.Children;
+        for (var i = 0; i < bars.Count - 1; i++)
+        {
+            ((FrameworkElement)bars[i]).Height = ((FrameworkElement)bars[i + 1]).Height;
+        }
+
+        ((FrameworkElement)bars[^1]).Height = BarLow + (BarHigh - BarLow) * Math.Clamp(level, 0, 1);
+    }
 
     /// The words go where the caret stands; what is around it stays.
     public void BeginDictation()
@@ -629,15 +645,43 @@ sealed class TalkInput : UserControl
         StrokeLineJoin = PenLineJoin.Round,
     };
 
-    /// A round button with the mic (D-315). The ring behind it is tinted red and follows the sound.
+    private const double BarLow = 2;
+    private const double BarHigh = 14;
+
+    /// Sixteen red bars, 2 px wide with 2 px between them; silence is a low flat line (D-319).
+    private static StackPanel Wave()
+    {
+        var wave = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Height = BarHigh,
+            Margin = new Thickness(0, 0, 8, 0),
+            VerticalAlignment = VerticalAlignment.Center,
+            Visibility = Visibility.Collapsed,
+        };
+        for (var i = 0; i < 16; i++)
+        {
+            wave.Children.Add(new Border
+            {
+                Width = 2,
+                Height = BarLow,
+                CornerRadius = new CornerRadius(1),
+                Margin = new Thickness(0, 0, i < 15 ? 2 : 0, 0),
+                Background = Tokens.Brush("Destructive"),
+                VerticalAlignment = VerticalAlignment.Center,
+            });
+        }
+
+        return wave;
+    }
+
+    /// A round button with the mic, tinted red while it records (D-315).
     private Button MicButton()
     {
-        _ring.RenderTransform = _ringScale;
         var hover = new Ellipse { Width = 26, Height = 26, Fill = Tokens.Brush("HoverLayer"), Opacity = 0 };
         var icon = new Canvas { Width = 24, Height = 24 };
         icon.Children.Add(_micIcon);
         var face = new Grid { Width = 26, Height = 26 };
-        face.Children.Add(_ring);
         face.Children.Add(_micBack);
         face.Children.Add(hover);
         face.Children.Add(new Viewbox { Width = 16, Height = 16, Child = icon });

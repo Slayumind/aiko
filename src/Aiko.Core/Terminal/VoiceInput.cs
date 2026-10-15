@@ -82,7 +82,8 @@ public enum VoiceWord
     Finishing,
 }
 
-/// What the input shows for one moment of a recording (D-315). Time is set only while listening;
+/// What the input shows for one moment of a recording (D-315, D-319). Time and the wave of the sound
+/// show only while listening;
 /// Engine names where the sound goes while the mic is open or the text is finishing.
 public sealed record VoiceLine(
     VoiceWord Word,
@@ -90,7 +91,7 @@ public sealed record VoiceLine(
     VoiceEngine? Engine,
     bool CancelHint,
     VoiceButton Button,
-    bool Ring);
+    bool Wave);
 
 /// The rules of voice input in the input field (D-313, D-315). Two presses: press, speak, press.
 public static class VoiceInput
