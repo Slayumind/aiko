@@ -1,0 +1,58 @@
+{
+  "comment": "What the recogniser is told before it listens (D-313): the folder of the session, its branch, the names of files from the conversation, then the keys of Aiko's memory when the memory is on. A path gives only its last part. The same name twice goes once, whatever its case. The hint stops before the item that would make it longer than the limit. The language is the language of the interface; System follows the system, and anything but Russian is English (D-314).",
+  "hints": [
+    {
+      "name": "everything",
+      "folder": "C:\\Users\\me\\Desktop\\personal projects\\aiko",
+      "branch": "in-progress",
+      "files": ["src\\Aiko.App\\Terminal\\TalkInput.cs", "docs/DECISIONS.md"],
+      "keys": ["Code Crawler", "Ember", "Media Editor", "Swift", "C#"],
+      "max": 400,
+      "hint": "aiko, in-progress, TalkInput.cs, DECISIONS.md, Code Crawler, Ember, Media Editor, Swift, C#."
+    },
+    {
+      "name": "memory is off",
+      "folder": "/Users/me/aiko/",
+      "branch": "main",
+      "files": [],
+      "keys": null,
+      "max": 400,
+      "hint": "aiko, main."
+    },
+    {
+      "name": "no branch, a name twice",
+      "folder": "C:\\work\\Ember",
+      "branch": null,
+      "files": ["ember", "Ember.cs", "  "],
+      "keys": ["EMBER", "Unity"],
+      "max": 400,
+      "hint": "Ember, Ember.cs, Unity."
+    },
+    {
+      "name": "the limit drops whole items from the end",
+      "folder": "C:\\work\\aiko",
+      "branch": "feature/voice-core",
+      "files": ["VoiceInput.cs"],
+      "keys": ["Swift"],
+      "max": 40,
+      "hint": "aiko, feature/voice-core, VoiceInput.cs."
+    },
+    {
+      "name": "nothing at all",
+      "folder": null,
+      "branch": null,
+      "files": [],
+      "keys": null,
+      "max": 400,
+      "hint": ""
+    }
+  ],
+  "languages": [
+    { "setting": "Russian", "system": "en-US", "language": "ru" },
+    { "setting": "English", "system": "ru-RU", "language": "en" },
+    { "setting": "System", "system": "ru-RU", "language": "ru" },
+    { "setting": "System", "system": "ru", "language": "ru" },
+    { "setting": "System", "system": "sr-Latn-RS", "language": "en" },
+    { "setting": "System", "system": "en-GB", "language": "en" }
+  ]
+}

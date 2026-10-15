@@ -68,6 +68,8 @@ struct AppSettingsTests {
         settings.language = .russian
         settings.hideIslandInFullScreen = false
         settings.island = IslandPosition(.right, 0.25)
+        settings.voiceInput = true
+        settings.voiceEngine = .openAI
 
         #expect(AppSettings.fromJson(settings.toJson()) == settings)
     }
@@ -121,5 +123,15 @@ struct AppSettingsTests {
 
         #expect(back.meetAikoShown)
         #expect(back.schemaVersion == AppSettings.currentSchema)
+    }
+
+    /// It needs a 465 MB download or a key, so nobody gets it without turning it on (D-313).
+    @Test
+    func voiceInputIsOffAndLocalUntilTurnedOn() {
+        let settings = AppSettings.fromJson(#"{ "schemaVersion": 3, "place": "Tray" }"#)
+
+        #expect(settings.voiceInput == false)
+        #expect(settings.voiceEngine == .local)
+        #expect(AppSettings.default.toJson().contains(#""voiceEngine": "Local""#))
     }
 }

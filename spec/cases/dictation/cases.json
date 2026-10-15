@@ -1,0 +1,71 @@
+{
+  "comment": "The text of one recording while it is spoken (D-315). Every pass reads all the sound so far. Words two passes in a row agree on are confirmed and never change; case, punctuation and ё against е do not count as a difference. The rest is the grey tail. The final pass confirms everything, keeping the words already confirmed. Newly confirmed words take the spelling of the newer pass. Words are matched against the confirmed ones by their letters, so a pass that splits a word in another place does not repeat it. Sounds whisper writes in brackets are dropped. The first run is taken from the live spike (spike-voice-2026-10.md).",
+  "runs": [
+    {
+      "name": "a phrase grows over four passes",
+      "passes": [
+        "Делай.",
+        "Сделай ветку Feature Voicing.",
+        "Сделай ветку Feature Voice Input, add in progress и пригони.net.",
+        "Сделай ветку Feature Voice Input, add in progress и пригони.net test."
+      ],
+      "final": "Сделай ветку Feature Voice Input, add in progress и пригони .NET Test.",
+      "steps": [
+        { "confirmed": "", "tail": "Делай." },
+        { "confirmed": "", "tail": "Сделай ветку Feature Voicing." },
+        { "confirmed": "Сделай ветку Feature", "tail": "Voice Input, add in progress и пригони.net." },
+        { "confirmed": "Сделай ветку Feature Voice Input, add in progress и пригони.net", "tail": "test." }
+      ],
+      "text": "Сделай ветку Feature Voice Input, add in progress и пригони.net Test."
+    },
+    {
+      "name": "a confirmed word stays when a later pass changes it",
+      "passes": ["Делай ветку фичу.", "Делай ветку Feature 8.", "Делы ветку Feature Voice Input."],
+      "final": null,
+      "steps": [
+        { "confirmed": "", "tail": "Делай ветку фичу." },
+        { "confirmed": "Делай ветку", "tail": "Feature 8." },
+        { "confirmed": "Делай ветку", "tail": "Feature Voice Input." }
+      ],
+      "text": "Делай ветку Feature Voice Input."
+    },
+    {
+      "name": "case, commas and ё do not break agreement",
+      "passes": ["возьми каждую её", "Возьми, каждую ее карточку"],
+      "final": null,
+      "steps": [
+        { "confirmed": "", "tail": "возьми каждую её" },
+        { "confirmed": "Возьми, каждую ее", "tail": "карточку" }
+      ],
+      "text": "Возьми, каждую ее карточку"
+    },
+    {
+      "name": "silence heard as music is no text",
+      "passes": ["[Музыка]", "[Музыка] Ну вот (смех) хорошо", "Ну вот хорошо"],
+      "final": "Ну вот, хорошо.",
+      "steps": [
+        { "confirmed": "", "tail": "" },
+        { "confirmed": "", "tail": "Ну вот хорошо" },
+        { "confirmed": "Ну вот хорошо", "tail": "" }
+      ],
+      "text": "Ну вот хорошо"
+    },
+    {
+      "name": "the final pass is shorter than the confirmed words",
+      "passes": ["one two three", "one two three four"],
+      "final": "one two",
+      "steps": [
+        { "confirmed": "", "tail": "one two three" },
+        { "confirmed": "one two three", "tail": "four" }
+      ],
+      "text": "one two three"
+    },
+    {
+      "name": "nothing said",
+      "passes": [],
+      "final": "",
+      "steps": [],
+      "text": ""
+    }
+  ]
+}

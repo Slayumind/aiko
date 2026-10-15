@@ -43,6 +43,9 @@ stamp, not a table (D-255).
 | `answer-segments/` | the pieces an answer is drawn and selected in (`AnswerSegments`) |
 | `markdown-copy/` | what a selection inside the prose of an answer copies as markdown (`MarkdownCopy`) |
 | `file-link/` | which words look like a file with a line, and where a link leads (`FileLink`, `LinkTarget`) |
+| `voice-input/` | what a press, Esc and the mic do to a recording, and what the line under the input and the mic button show (`VoiceInput`) |
+| `dictation/` | which words of a recording are confirmed and which are the grey tail (`DictationText`) |
+| `voice-hint/` | what the recogniser is told before it listens, and in which language (`VoiceHint`) |
 
 A path in these files is written for the platform the case names. Windows cases keep the
 backslashes people have on their disks today.
