@@ -65,8 +65,8 @@ public enum NoticeKind
 /// One thing in the feed of a conversation.
 public abstract record FeedItem(int Id)
 {
-    /// Attachments are kept only until the message is sent; Images stays as the count to show.
-    public sealed record OwnerMessage(int Id, string Text, int Images, bool Queued, IReadOnlyList<AttachedImage> Attachments)
+    /// The pictures stay with the message after it is sent, so the feed shows what went.
+    public sealed record OwnerMessage(int Id, string Text, bool Queued, IReadOnlyList<AttachedImage> Attachments)
         : FeedItem(Id);
 
     /// The markdown of an answer. While it is still being written, Streaming is set.
@@ -250,7 +250,7 @@ public sealed record Conversation(
 
         var waits = InTurn || HasOpenCard;
         var next = (this with { Failure = TalkFailure.None, Unread = false })
-            .Add(id => new FeedItem.OwnerMessage(id, text, images.Count, true, images));
+            .Add(id => new FeedItem.OwnerMessage(id, text, true, images));
 
         return waits ? Quiet(next) : next.Sent((FeedItem.OwnerMessage)next.Items[^1]);
     }
@@ -311,7 +311,7 @@ public sealed record Conversation(
     {
         // The message moves to the end of the feed: the answer to it comes right under it, not
         // under whatever was said while it waited.
-        var sent = message with { Queued = false, Attachments = [] };
+        var sent = message with { Queued = false };
         var next = this with { Items = [.. Items.Where(item => item.Id != message.Id), sent], InTurn = true };
 
         return new Outcome(next, [HostLine.UserMessage(message.Text, message.Attachments)]);
