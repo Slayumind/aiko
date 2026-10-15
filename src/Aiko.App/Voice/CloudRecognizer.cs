@@ -21,6 +21,7 @@ sealed class CloudRecognizer : IAsyncDisposable
     private static readonly TimeSpan LastPhrase = TimeSpan.FromSeconds(10);
 
     private readonly ClientWebSocket _socket;
+    private readonly string _hint;
     private readonly CancellationTokenSource _closing = new();
     private readonly Task _listening;
     private readonly StringBuilder _done = new();
@@ -31,9 +32,10 @@ sealed class CloudRecognizer : IAsyncDisposable
     private bool _speaking;
     private bool _finishing;
 
-    private CloudRecognizer(ClientWebSocket socket)
+    private CloudRecognizer(ClientWebSocket socket, string hint)
     {
         _socket = socket;
+        _hint = hint;
         _listening = Task.Run(Listen);
     }
 
@@ -56,7 +58,11 @@ sealed class CloudRecognizer : IAsyncDisposable
 
     /// Null when no key is stored or the socket did not open. key is for checks only; the app
     /// always reads the stored one.
-    public static async Task<CloudRecognizer?> Open(string language, string hint, CancellationToken cancel, string? key = null)
+    ///
+    /// No language is named. With a language and a hint, gpt-4o-transcribe translated an English
+    /// sentence into Russian, or answered with the hint itself (2026-10-15); without a language it
+    /// keeps each sentence in the language it was said.
+    public static async Task<CloudRecognizer?> Open(string hint, CancellationToken cancel, string? key = null)
     {
         if ((key ?? VoiceKey.Load()) is not { } bearer)
         {
@@ -74,7 +80,7 @@ sealed class CloudRecognizer : IAsyncDisposable
             return null;
         }
 
-        var recognizer = new CloudRecognizer(socket);
+        var recognizer = new CloudRecognizer(socket, hint);
         await recognizer.Send(new JsonObject
         {
             ["type"] = "session.update",
@@ -90,7 +96,6 @@ sealed class CloudRecognizer : IAsyncDisposable
                         {
                             ["model"] = VoiceModel.CloudModel,
                             ["prompt"] = hint,
-                            ["language"] = language,
                         },
                         ["turn_detection"] = new JsonObject
                         {
@@ -232,7 +237,12 @@ sealed class CloudRecognizer : IAsyncDisposable
                     _reading.Append(root.GetProperty("delta").GetString());
                     break;
                 case "conversation.item.input_audio_transcription.completed":
-                    _done.Append(root.GetProperty("transcript").GetString()).Append(' ');
+                    var phrase = root.GetProperty("transcript").GetString() ?? "";
+                    if (!VoiceHint.IsEcho(phrase, _hint))
+                    {
+                        _done.Append(phrase).Append(' ');
+                    }
+
                     _reading.Clear();
                     _waiting = Math.Max(0, _waiting - 1);
                     if (_finishing && _waiting == 0)

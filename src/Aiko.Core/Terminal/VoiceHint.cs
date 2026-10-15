@@ -66,6 +66,21 @@ public static class VoiceHint
         _ => systemLanguage.StartsWith("ru", StringComparison.OrdinalIgnoreCase) ? "ru" : "en",
     };
 
+    /// Whether a phrase is the hint given back. A recogniser that does not catch the sound may
+    /// answer with its prompt: on 2026-10-15 OpenAI wrote the whole hint for an English sentence.
+    /// A phrase of three or more parts, every one an item of the hint, is that.
+    public static bool IsEcho(string phrase, string hint)
+    {
+        var items = Parts(hint).ToHashSet();
+        var parts = Parts(phrase).ToList();
+        return items.Count > 0 && parts.Count >= 3 && parts.All(items.Contains);
+    }
+
+    private static IEnumerable<string> Parts(string text) =>
+        text.Split(',', StringSplitOptions.RemoveEmptyEntries)
+            .Select(part => part.Trim().TrimEnd('.').Trim().ToLowerInvariant().Replace('ё', 'е'))
+            .Where(part => part.Length > 0);
+
     /// The files a conversation read or changed, the newest first, each once. The newest go first
     /// because the hint is cut from the end.
     public static IReadOnlyList<string> Files(IEnumerable<FeedItem> items) =>

@@ -294,7 +294,7 @@ sealed class VoiceDictation
                 }
 
                 var started = Stopwatch.StartNew();
-                var text = recognizer.Read(heard);
+                var text = Unechoed(recognizer.Read(heard));
                 if (!_finishing && !_dropped.IsCancellationRequested)
                 {
                     owner.Passed(this, text, final: false);
@@ -308,7 +308,7 @@ sealed class VoiceDictation
 
             if (!_dropped.IsCancellationRequested)
             {
-                owner.Passed(this, recognizer.Read(_mic.Heard()), final: true);
+                owner.Passed(this, Unechoed(recognizer.Read(_mic.Heard())), final: true);
             }
         }
 
@@ -316,7 +316,7 @@ sealed class VoiceDictation
         /// phrase by phrase (D-317).
         private async Task WorkWithOpenAI()
         {
-            await using var cloud = await CloudRecognizer.Open(language, hint, _dropped.Token).ConfigureAwait(false);
+            await using var cloud = await CloudRecognizer.Open(hint, _dropped.Token).ConfigureAwait(false);
             if (cloud is null)
             {
                 owner.Failed(this);
@@ -365,6 +365,9 @@ sealed class VoiceDictation
                 owner.Phrased(this, text, "", final: true);
             }
         }
+
+        /// whisper may give the hint back over noise as well; such a pass counts as silence.
+        private string Unechoed(string text) => VoiceHint.IsEcho(text, hint) ? "" : text;
 
         private static int Rate(TimeSpan time) => (int)(16000 * time.TotalSeconds);
     }
