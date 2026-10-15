@@ -13,6 +13,7 @@ public partial class SettingsPanel : UserControl
     public const string GeneralPageKey = "general";
     public const string PersonalityPageKey = "personality";
     public const string PrivacyPageKey = "privacy";
+    public const string TerminalPageKey = "terminal";
     public const string ChecklistPageKey = "setup";
     private const string EnvironmentPagePrefix = "env:";
 
@@ -154,7 +155,10 @@ public partial class SettingsPanel : UserControl
             Nav.Children.Add(NavItem(PersonalityPageKey, Strings.NavPersonality, talking > 0 ? string.Format(Strings.NavPersonaOn, talking) : Strings.NavPersonaOff));
         }
 
-        var stats = SettingsStore.Load().SendStats;
+        var app = SettingsStore.Load();
+        Nav.Children.Add(NavItem(TerminalPageKey, Strings.NavTerminal, app.VoiceInput ? Strings.NavVoiceOn : Strings.NavVoiceOff));
+
+        var stats = app.SendStats;
         Nav.Children.Add(NavItem(PrivacyPageKey, Strings.NavPrivacy, stats ? Strings.NavPrivacyStatsOn : Strings.NavPrivacyStatsOff));
 
         Nav.Children.Add(NavItem(GeneralPageKey, Strings.NavGeneral, null));
@@ -309,6 +313,13 @@ public partial class SettingsPanel : UserControl
             var personality = new PersonalityPage(_editor);
             personality.Saved += OnGeneralSaved;
             return personality;
+        }
+
+        if (key == TerminalPageKey)
+        {
+            var terminal = new TerminalPage();
+            terminal.Saved += OnGeneralSaved;
+            return terminal;
         }
 
         if (key == PrivacyPageKey)

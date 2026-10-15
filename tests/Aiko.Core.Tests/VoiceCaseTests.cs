@@ -120,6 +120,63 @@ public class VoiceCaseTests
         }
     }
 
+    [Fact]
+    public void The_model_and_the_key_follow_the_table()
+    {
+        var cases = SpecCases.Json("voice-model");
+        Assert.Equal(VoiceModel.Url, cases.GetProperty("url").GetString());
+        Assert.Equal(VoiceModel.Bytes, cases.GetProperty("bytes").GetInt64());
+        Assert.Equal(VoiceModel.Sha256, cases.GetProperty("sha256").GetString());
+        Assert.Equal(VoiceModel.CloudModel, cases.GetProperty("cloudModel").GetString());
+
+        foreach (var row in cases.GetProperty("megabytes").EnumerateArray())
+        {
+            Assert.Equal(row.GetProperty("megabytes").GetInt64(), VoiceModel.Megabytes(row.GetProperty("bytes").GetInt64()));
+        }
+
+        foreach (var row in cases.GetProperty("readiness").EnumerateArray())
+        {
+            var bytes = row.GetProperty("modelBytes");
+            Assert.Equal(
+                Enum.Parse<VoiceReadiness>(row.GetProperty("ready").GetString()!),
+                VoiceModel.Readiness(
+                    Enum.Parse<VoiceEngine>(row.GetProperty("engine").GetString()!),
+                    bytes.ValueKind == JsonValueKind.Null ? null : bytes.GetInt64(),
+                    row.GetProperty("keyStored").GetBoolean()));
+        }
+
+        foreach (var row in cases.GetProperty("keys").EnumerateArray())
+        {
+            var key = VoiceModel.CleanKey(row.GetProperty("pasted").GetString());
+            Assert.Equal(row.GetProperty("key").GetString(), key);
+            Assert.Equal(row.GetProperty("mask").GetString(), key is null ? null : VoiceModel.MaskKey(key));
+        }
+    }
+
+    /// The files of a conversation for the hint: read or changed, newest first, once each. A
+    /// search, a command and a picture the person attached are not files the person names.
+    [Fact]
+    public void The_hint_takes_the_files_a_conversation_read_or_changed()
+    {
+        static FeedItem.Step Step(int id, StepKind kind, string subject, bool hidden = false) =>
+            new(id, $"t{id}", new StepLine(kind, "", subject, 0, 0, hidden), StepState.Done, "", [], "");
+
+        List<FeedItem> items =
+        [
+            new FeedItem.OwnerMessage(1, "Look at the field.", false, []),
+            Step(2, StepKind.Read, "TalkInput.cs"),
+            Step(3, StepKind.Search, "VoiceLine"),
+            Step(4, StepKind.Edit, "VoiceInput.cs"),
+            Step(5, StepKind.Run, "dotnet test"),
+            Step(6, StepKind.Read, "image.png", hidden: true),
+            Step(7, StepKind.Read, "talkinput.cs"),
+            Step(8, StepKind.Edit, ""),
+        ];
+
+        Assert.Equal(["talkinput.cs", "VoiceInput.cs"], VoiceHint.Files(items));
+        Assert.Empty(VoiceHint.Files([]));
+    }
+
     private static VoiceState State(JsonElement pair) => new(
         Enum.Parse<VoicePhase>(pair[0].GetString()!),
         Enum.Parse<VoiceNotice>(pair[1].GetString()!));

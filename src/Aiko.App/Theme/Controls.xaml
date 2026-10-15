@@ -423,6 +423,39 @@
     </Setter>
   </Style>
 
+  <!-- One of a few choices, the round pair of Tick: a ring, filled to a thick edge when chosen. -->
+  <Style x:Key="Dot" TargetType="RadioButton">
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="Foreground" Value="{StaticResource Ink}" />
+    <Setter Property="FontFamily" Value="{StaticResource Sans}" />
+    <Setter Property="FontSize" Value="{StaticResource TextSmall}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="RadioButton">
+          <Grid Background="Transparent">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Top" local:Motion.Press="True">
+              <Ellipse x:Name="Ring" Stroke="{StaticResource InputLine}" StrokeThickness="1.5" />
+              <Ellipse x:Name="Chosen" Stroke="{StaticResource Ink}" StrokeThickness="5" Opacity="0" />
+            </Grid>
+            <ContentPresenter Grid.Column="1" VerticalAlignment="Top" />
+          </Grid>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsChecked" Value="True">
+              <Setter TargetName="Chosen" Property="Opacity" Value="1" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+              <Setter Property="Opacity" Value="0.45" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
   <!-- A plan name or a count: mono on a faint plate. -->
   <Style x:Key="Chip" TargetType="Border">
     <Setter Property="CornerRadius" Value="5" />

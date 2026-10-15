@@ -105,6 +105,10 @@ static class Uninstall
 
         Startup.Set(false);
 
+        // The OpenAI key of voice input is not in a folder of Aiko: Windows keeps it (D-313).
+        ModelDownload.Stop();
+        VoiceKey.Remove();
+
         // Before the folders go: the commands folder is one of them, and PATH must not keep
         // pointing at it. Profile functions come back on, because the commands that replaced them
         // are about to disappear.

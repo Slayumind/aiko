@@ -472,7 +472,7 @@ sealed class TerminalHost
         _model.Session(_sessions) is { } session
             ? new VoiceContext(
                 session.Folder,
-                [],
+                VoiceHint.Files(Talk(session)?.Items ?? []),
                 _settings.Environments.FirstOrDefault(one => one.Name == session.Environment)?.Persona == true)
             : null;
 

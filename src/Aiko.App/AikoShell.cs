@@ -338,7 +338,7 @@ sealed class AikoShell : IDisposable
         var terminal = new TerminalHost(
             SettingsStore.LoadEnvironments(), SettingsStore.LoadTerminal(), () => new ClaudeProcess(), _numbers.SnapshotFor);
         terminal.Closed += () => _terminal = null;
-        terminal.SettingsAsked += () => OpenSettings();
+        terminal.SettingsAsked += () => OpenSettings(page: SettingsPanel.TerminalPageKey);
         terminal.InViewChanged += _island.FollowTerminal;
         _terminal = terminal;
         terminal.Show();

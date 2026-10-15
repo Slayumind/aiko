@@ -1336,4 +1336,79 @@
   <data name="VoiceOpenSettings" xml:space="preserve">
     <value>Open settings</value>
   </data>
+  <data name="NavTerminal" xml:space="preserve">
+    <value>Terminal</value>
+  </data>
+  <data name="NavVoiceOn" xml:space="preserve">
+    <value>voice input on</value>
+  </data>
+  <data name="NavVoiceOff" xml:space="preserve">
+    <value>voice input off</value>
+  </data>
+  <data name="VoiceToggle" xml:space="preserve">
+    <value>Voice input</value>
+  </data>
+  <data name="VoiceToggleWhat" xml:space="preserve">
+    <value>Ctrl+Space or the microphone button in the field.</value>
+  </data>
+  <data name="VoiceEngineLabel" xml:space="preserve">
+    <value>Recognition</value>
+  </data>
+  <data name="VoiceLocalTitle" xml:space="preserve">
+    <value>On this computer</value>
+  </data>
+  <data name="VoiceLocalWhat" xml:space="preserve">
+    <value>Whisper small. Free, and the sound stays on this computer.</value>
+  </data>
+  <data name="VoiceModelWillDownload" xml:space="preserve">
+    <value>The speech model, {0} MB, downloads when you turn this on.</value>
+  </data>
+  <data name="VoiceModelDownloaded" xml:space="preserve">
+    <value>{0} of {1} MB downloaded</value>
+  </data>
+  <data name="VoiceModelReady" xml:space="preserve">
+    <value>Model downloaded, {0} MB.</value>
+  </data>
+  <data name="VoiceModelStopped" xml:space="preserve">
+    <value>Download stopped at {0} of {1} MB.</value>
+  </data>
+  <data name="VoiceModelFailed" xml:space="preserve">
+    <value>The model did not download. Check the connection and try again.</value>
+  </data>
+  <data name="VoiceDownloadStop" xml:space="preserve">
+    <value>Stop</value>
+  </data>
+  <data name="VoiceDownloadGo" xml:space="preserve">
+    <value>Download</value>
+  </data>
+  <data name="VoiceModelRemove" xml:space="preserve">
+    <value>Remove the model</value>
+  </data>
+  <data name="VoiceCloudTitle" xml:space="preserve">
+    <value>OpenAI with your own key</value>
+  </data>
+  <data name="VoiceCloudWhat" xml:space="preserve">
+    <value>gpt-4o-transcribe. Better with terms, billed to your key.</value>
+  </data>
+  <data name="VoiceHonest" xml:space="preserve">
+    <value>The sound of every recording goes to OpenAI.</value>
+  </data>
+  <data name="VoiceKeyLabel" xml:space="preserve">
+    <value>Key</value>
+  </data>
+  <data name="VoiceKeySave" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="VoiceKeyRemove" xml:space="preserve">
+    <value>Remove key</value>
+  </data>
+  <data name="VoiceKeyBad" xml:space="preserve">
+    <value>This does not look like an OpenAI key: it starts with sk-.</value>
+  </data>
+  <data name="VoiceKeyNotSaved" xml:space="preserve">
+    <value>Windows did not save the key.</value>
+  </data>
+  <data name="VoiceKeyWhere" xml:space="preserve">
+    <value>Kept in Windows Credential Manager. Removing Aiko erases it.</value>
+  </data>
 </root>

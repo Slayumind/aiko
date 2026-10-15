@@ -475,6 +475,31 @@ public enum Strings {
         "VoiceNeedsModel": ("Voice input needs a speech model, 465 MB.", "Для голосового ввода нужна модель распознавания, 465 МБ."),
         "VoiceNeedsKey": ("Recognition through OpenAI needs your key.", "Для распознавания через OpenAI нужен твой ключ."),
         "VoiceOpenSettings": ("Open settings", "Открыть настройки"),
+        "NavTerminal": ("Terminal", "Терминал"),
+        "NavVoiceOn": ("voice input on", "голос включён"),
+        "NavVoiceOff": ("voice input off", "голос выключен"),
+        "VoiceToggle": ("Voice input", "Голосовой ввод"),
+        "VoiceToggleWhat": ("Ctrl+Space or the microphone button in the field.", "Ctrl+Space или кнопка микрофона в поле."),
+        "VoiceEngineLabel": ("Recognition", "Распознавание"),
+        "VoiceLocalTitle": ("On this computer", "На компьютере"),
+        "VoiceLocalWhat": ("Whisper small. Free, and the sound stays on this computer.", "Whisper small. Бесплатно, звук не уходит с компьютера."),
+        "VoiceModelWillDownload": ("The speech model, {0} MB, downloads when you turn this on.", "Модель распознавания, {0} МБ, скачается при включении."),
+        "VoiceModelDownloaded": ("{0} of {1} MB downloaded", "Скачано {0} из {1} МБ"),
+        "VoiceModelReady": ("Model downloaded, {0} MB.", "Модель скачана, {0} МБ."),
+        "VoiceModelStopped": ("Download stopped at {0} of {1} MB.", "Загрузка остановлена на {0} из {1} МБ."),
+        "VoiceModelFailed": ("The model did not download. Check the connection and try again.", "Модель не скачалась. Проверь соединение и попробуй ещё раз."),
+        "VoiceDownloadStop": ("Stop", "Остановить"),
+        "VoiceDownloadGo": ("Download", "Скачать"),
+        "VoiceModelRemove": ("Remove the model", "Удалить модель"),
+        "VoiceCloudTitle": ("OpenAI with your own key", "OpenAI по своему ключу"),
+        "VoiceCloudWhat": ("gpt-4o-transcribe. Better with terms, billed to your key.", "gpt-4o-transcribe. Точнее на терминах, платишь по своему ключу."),
+        "VoiceHonest": ("The sound of every recording goes to OpenAI.", "Звук каждой записи уходит в OpenAI."),
+        "VoiceKeyLabel": ("Key", "Ключ"),
+        "VoiceKeySave": ("Save", "Сохранить"),
+        "VoiceKeyRemove": ("Remove key", "Удалить ключ"),
+        "VoiceKeyBad": ("This does not look like an OpenAI key: it starts with sk-.", "Это не похоже на ключ OpenAI: он начинается с sk-."),
+        "VoiceKeyNotSaved": ("Windows did not save the key.", "Windows не сохранила ключ."),
+        "VoiceKeyWhere": ("Kept in Windows Credential Manager. Removing Aiko erases it.", "Хранится в Диспетчере учётных данных Windows. Удаление Aiko его сотрёт."),
     ]
 
     /// Session · 5 hours
@@ -1781,4 +1806,79 @@ public enum Strings {
 
     /// Open settings
     public static var voiceOpenSettings: String { Strings.get("VoiceOpenSettings") }
+
+    /// Terminal
+    public static var navTerminal: String { Strings.get("NavTerminal") }
+
+    /// voice input on
+    public static var navVoiceOn: String { Strings.get("NavVoiceOn") }
+
+    /// voice input off
+    public static var navVoiceOff: String { Strings.get("NavVoiceOff") }
+
+    /// Voice input
+    public static var voiceToggle: String { Strings.get("VoiceToggle") }
+
+    /// Ctrl+Space or the microphone button in the field.
+    public static var voiceToggleWhat: String { Strings.get("VoiceToggleWhat") }
+
+    /// Recognition
+    public static var voiceEngineLabel: String { Strings.get("VoiceEngineLabel") }
+
+    /// On this computer
+    public static var voiceLocalTitle: String { Strings.get("VoiceLocalTitle") }
+
+    /// Whisper small. Free, and the sound stays on this computer.
+    public static var voiceLocalWhat: String { Strings.get("VoiceLocalWhat") }
+
+    /// The speech model, {0} MB, downloads when you turn this on.
+    public static var voiceModelWillDownload: String { Strings.get("VoiceModelWillDownload") }
+
+    /// {0} of {1} MB downloaded
+    public static var voiceModelDownloaded: String { Strings.get("VoiceModelDownloaded") }
+
+    /// Model downloaded, {0} MB.
+    public static var voiceModelReady: String { Strings.get("VoiceModelReady") }
+
+    /// Download stopped at {0} of {1} MB.
+    public static var voiceModelStopped: String { Strings.get("VoiceModelStopped") }
+
+    /// The model did not download. Check the connection and try again.
+    public static var voiceModelFailed: String { Strings.get("VoiceModelFailed") }
+
+    /// Stop
+    public static var voiceDownloadStop: String { Strings.get("VoiceDownloadStop") }
+
+    /// Download
+    public static var voiceDownloadGo: String { Strings.get("VoiceDownloadGo") }
+
+    /// Remove the model
+    public static var voiceModelRemove: String { Strings.get("VoiceModelRemove") }
+
+    /// OpenAI with your own key
+    public static var voiceCloudTitle: String { Strings.get("VoiceCloudTitle") }
+
+    /// gpt-4o-transcribe. Better with terms, billed to your key.
+    public static var voiceCloudWhat: String { Strings.get("VoiceCloudWhat") }
+
+    /// The sound of every recording goes to OpenAI.
+    public static var voiceHonest: String { Strings.get("VoiceHonest") }
+
+    /// Key
+    public static var voiceKeyLabel: String { Strings.get("VoiceKeyLabel") }
+
+    /// Save
+    public static var voiceKeySave: String { Strings.get("VoiceKeySave") }
+
+    /// Remove key
+    public static var voiceKeyRemove: String { Strings.get("VoiceKeyRemove") }
+
+    /// This does not look like an OpenAI key: it starts with sk-.
+    public static var voiceKeyBad: String { Strings.get("VoiceKeyBad") }
+
+    /// Windows did not save the key.
+    public static var voiceKeyNotSaved: String { Strings.get("VoiceKeyNotSaved") }
+
+    /// Kept in Windows Credential Manager. Removing Aiko erases it.
+    public static var voiceKeyWhere: String { Strings.get("VoiceKeyWhere") }
 }
