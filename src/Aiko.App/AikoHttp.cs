@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http;
+using System.Net.WebSockets;
 using Aiko.Core;
 
 namespace Aiko.App;
@@ -34,6 +35,26 @@ static class AikoHttp
         var client = new HttpClient(new OnlyAllowedHosts(inner)) { Timeout = timeout };
         client.DefaultRequestHeaders.UserAgent.ParseAdd($"Aiko/{UpdateClient.CurrentVersion()}");
         return client;
+    }
+
+    /// For voice input with OpenAI (D-317): a socket that opens through the same guard. The
+    /// opening request of a socket is an https request, so the list of hosts applies to it.
+    public static async Task<ClientWebSocket> Socket(Uri address, string bearer, CancellationToken cancel)
+    {
+        var socket = new ClientWebSocket();
+        socket.Options.SetRequestHeader("Authorization", "Bearer " + bearer);
+        socket.Options.SetRequestHeader("User-Agent", $"Aiko/{UpdateClient.CurrentVersion()}");
+        using var invoker = new HttpMessageInvoker(new OnlyAllowedHosts(new SocketsHttpHandler { AllowAutoRedirect = false }));
+        try
+        {
+            await socket.ConnectAsync(address, invoker, cancel).ConfigureAwait(false);
+            return socket;
+        }
+        catch
+        {
+            socket.Dispose();
+            throw;
+        }
     }
 }
 

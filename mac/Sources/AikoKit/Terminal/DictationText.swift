@@ -38,6 +38,12 @@ public struct DictationText: Sendable, Equatable {
         return DictationText(confirmed + words.dropFirst(covered(words)), [], words)
     }
 
+    /// Text that comes in phrases, from OpenAI (D-317): the phrases that are done are confirmed,
+    /// the one still being read is the tail.
+    public static func phrases(done: String, reading: String) -> DictationText {
+        DictationText(words(done), words(reading), [])
+    }
+
     /// The words of a pass. Whisper writes sounds it heard in brackets, "[Музыка]" or "(смех)";
     /// those are not words anybody said.
     public static func words(_ text: String?) -> [String] {

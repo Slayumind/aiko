@@ -52,6 +52,12 @@ struct VoiceCaseTests {
 
     @Test
     func confirmedWordsGrowAndNeverChange() {
+        for row in SpecCases.json("dictation")["phrases"]?.arrayValue ?? [] {
+            let phrases = DictationText.phrases(done: row["done"]?.stringValue ?? "", reading: row["reading"]?.stringValue ?? "")
+            #expect(phrases.confirmedText == row["confirmed"]?.stringValue)
+            #expect(phrases.tailText == row["tail"]?.stringValue)
+        }
+
         for run in SpecCases.json("dictation")["runs"]?.arrayValue ?? [] {
             let name = run["name"]?.stringValue ?? ""
             let passes = (run["passes"]?.arrayValue ?? []).compactMap(\.stringValue)

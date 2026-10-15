@@ -1411,4 +1411,7 @@
   <data name="VoiceKeyWhere" xml:space="preserve">
     <value>Хранится в Диспетчере учётных данных Windows. Удаление Aiko его сотрёт.</value>
   </data>
+  <data name="VoiceCloudFailed" xml:space="preserve">
+    <value>OpenAI не принял запись. Проверь ключ и соединение.</value>
+  </data>
 </root>

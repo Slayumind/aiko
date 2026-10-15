@@ -28,6 +28,9 @@ public enum VoiceNotice: String, Sendable, Equatable {
     case noMicrophone = "NoMicrophone"
     case needsModel = "NeedsModel"
     case needsKey = "NeedsKey"
+
+    /// OpenAI did not take the recording: a wrong key, no money on it, no connection (D-317).
+    case cloudFailed = "CloudFailed"
 }
 
 /// What happened: a press of Ctrl+Space or the button, Esc, or news from the mic and the engine.
@@ -38,6 +41,7 @@ public enum VoiceCue: String, Sendable, Equatable {
     case finished = "Finished"
     case noMicrophone = "NoMicrophone"
     case microphoneBack = "MicrophoneBack"
+    case cloudFailed = "CloudFailed"
 }
 
 /// Whether the chosen engine can work: the model is on disk, or the key is stored.
@@ -123,6 +127,8 @@ public enum VoiceInput {
             return VoiceState(.idle, .noMicrophone)
         case (_, .noMicrophone):
             return VoiceState(state.phase, .noMicrophone)
+        case (.warming, .cloudFailed), (.listening, .cloudFailed), (.finishing, .cloudFailed):
+            return VoiceState(.idle, .cloudFailed)
         case (_, .microphoneBack) where state.notice == .noMicrophone:
             return VoiceState(state.phase, .none)
         default:

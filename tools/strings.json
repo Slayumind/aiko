@@ -3218,5 +3218,12 @@
       "Kept in Windows Credential Manager. Removing Aiko erases it.",
       "Хранится в Диспетчере учётных данных Windows. Удаление Aiko его сотрёт."
     ]
+  ],
+  [
+    "VoiceCloudFailed",
+    [
+      "OpenAI did not take the recording. Check the key and the connection.",
+      "OpenAI не принял запись. Проверь ключ и соединение."
+    ]
   ]
 ]

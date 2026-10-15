@@ -1,5 +1,5 @@
 {
-  "comment": "Voice input in the field (D-313, D-315). Two presses: press, speak, press. Listening is shown from the first sound, not from the press (D-314). A press with no model or no key shows a line above the field and starts nothing. Esc drops the recording. The button is red from the press to the second press; the ring around it moves only while listening.",
+  "comment": "Voice input in the field (D-313, D-315). Two presses: press, speak, press. Listening is shown from the first sound, not from the press (D-314). A press with no model or no key shows a line above the field and starts nothing. Esc drops the recording. When OpenAI fails, the recording is dropped and a line above the field says so (D-317). The button is red from the press to the second press; the ring around it moves only while listening.",
   "next": [
     { "name": "voice turned off ignores a press", "from": ["Off", "None"], "cue": "Press", "ready": "Ready", "to": ["Off", "None"] },
     { "name": "a press opens the mic", "from": ["Idle", "None"], "cue": "Press", "ready": "Ready", "to": ["Warming", "None"] },
@@ -21,7 +21,11 @@
     { "name": "the mic is gone at rest", "from": ["Idle", "None"], "cue": "NoMicrophone", "ready": "Ready", "to": ["Idle", "NoMicrophone"] },
     { "name": "the mic is back", "from": ["Idle", "NoMicrophone"], "cue": "MicrophoneBack", "ready": "Ready", "to": ["Idle", "None"] },
     { "name": "a mic coming back does not hide another line", "from": ["Idle", "NeedsModel"], "cue": "MicrophoneBack", "ready": "Ready", "to": ["Idle", "NeedsModel"] },
-    { "name": "a stray Finished at rest", "from": ["Idle", "None"], "cue": "Finished", "ready": "Ready", "to": ["Idle", "None"] }
+    { "name": "a stray Finished at rest", "from": ["Idle", "None"], "cue": "Finished", "ready": "Ready", "to": ["Idle", "None"] },
+    { "name": "OpenAI failed while listening", "from": ["Listening", "None"], "cue": "CloudFailed", "ready": "Ready", "to": ["Idle", "CloudFailed"] },
+    { "name": "OpenAI failed on the last phrase", "from": ["Finishing", "None"], "cue": "CloudFailed", "ready": "Ready", "to": ["Idle", "CloudFailed"] },
+    { "name": "a late failure after the end changes nothing", "from": ["Idle", "None"], "cue": "CloudFailed", "ready": "Ready", "to": ["Idle", "None"] },
+    { "name": "a press that works clears the failure", "from": ["Idle", "CloudFailed"], "cue": "Press", "ready": "Ready", "to": ["Warming", "None"] }
   ],
   "lines": [
     { "phase": "Off", "seconds": 0, "engine": "Local", "word": "None", "time": null, "where": null, "cancel": false, "button": "Hidden", "ring": false },
