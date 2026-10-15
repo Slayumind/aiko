@@ -94,6 +94,11 @@ struct VoiceCaseTests {
             #expect(hint == row["hint"]?.stringValue, "\(row["name"]?.stringValue ?? "")")
         }
 
+        for row in cases["echoes"]?.arrayValue ?? [] {
+            #expect(VoiceHint.isEcho(row["phrase"]?.stringValue ?? "", hint: row["hint"]?.stringValue ?? "") == row["echo"]?.boolValue,
+                    "\(row["name"]?.stringValue ?? "")")
+        }
+
         for row in cases["branches"]?.arrayValue ?? [] {
             #expect(VoiceHint.branch(row["head"]?.stringValue) == row["branch"]?.stringValue)
         }

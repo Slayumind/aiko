@@ -571,7 +571,7 @@ static class Program
     private static async Task<int> TryVoiceCloud(string wav)
     {
         var started = System.Diagnostics.Stopwatch.StartNew();
-        await using var cloud = await CloudRecognizer.Open("ru", "Aiko, in-progress, TalkInput.cs.", CancellationToken.None,
+        await using var cloud = await CloudRecognizer.Open("Aiko, in-progress, TalkInput.cs.", CancellationToken.None,
             Environment.GetEnvironmentVariable("OPENAI_API_KEY"));
         if (cloud is null)
         {

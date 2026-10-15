@@ -107,6 +107,13 @@ public class VoiceCaseTests
             Assert.True(row.GetProperty("hint").GetString() == hint, $"{row.GetProperty("name").GetString()}: {hint}");
         }
 
+        foreach (var row in cases.GetProperty("echoes").EnumerateArray())
+        {
+            Assert.True(
+                row.GetProperty("echo").GetBoolean() == VoiceHint.IsEcho(row.GetProperty("phrase").GetString()!, row.GetProperty("hint").GetString()!),
+                row.GetProperty("name").GetString());
+        }
+
         foreach (var row in cases.GetProperty("branches").EnumerateArray())
         {
             Assert.Equal(row.GetProperty("branch").GetString(), VoiceHint.Branch(row.GetProperty("head").GetString()));

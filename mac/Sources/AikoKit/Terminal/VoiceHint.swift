@@ -51,6 +51,24 @@ public enum VoiceHint {
         }
     }
 
+    /// Whether a phrase is the hint given back. A recogniser that does not catch the sound may
+    /// answer with its prompt: on 2026-10-15 OpenAI wrote the whole hint for an English sentence.
+    /// A phrase of three or more parts, every one an item of the hint, is that.
+    public static func isEcho(_ phrase: String, hint: String) -> Bool {
+        let items = Set(parts(hint))
+        let said = parts(phrase)
+        return !items.isEmpty && said.count >= 3 && said.allSatisfy(items.contains)
+    }
+
+    private static func parts(_ text: String) -> [String] {
+        text.split(separator: ",").compactMap { part in
+            var trimmed = part.trimmingCharacters(in: .whitespaces)
+            while trimmed.hasSuffix(".") { trimmed.removeLast() }
+            let clean = trimmed.trimmingCharacters(in: .whitespaces).lowercased().replacingOccurrences(of: "ё", with: "е")
+            return clean.isEmpty ? nil : clean
+        }
+    }
+
     /// The files a conversation read or changed, the newest first, each once. The newest go first
     /// because the hint is cut from the end.
     public static func files(_ items: [FeedItem]) -> [String] {
