@@ -57,6 +57,8 @@ Nothing, unless you turn on one of these.
   address at all, and the site writes nothing. With update checks off and counting on, Aiko still
   makes that one request, because the count rides on it. It just doesn't read the version out of
   the answer.
+- **Voice input** (off by default, Windows for now): see **Voice input** below. On this computer it
+  sends no sound anywhere; with your own OpenAI key the sound of each recording goes to OpenAI.
 
 The `calendar` and `drive` skills don't change this. They are instructions for Claude: Claude reads
 and writes your Google Calendar and Drive through the connectors you set up in Claude, and the Aiko
@@ -127,6 +129,31 @@ the new one is in place, and if the swap fails the old one is put back.
 For this Aiko may open `github.com`, `api.github.com` and GitHub's two file stores, and nothing
 else. Redirects are checked against the same list before they are followed.
 
+## Voice input
+
+Voice input turns what you say in the terminal into text in the field. It's off until you turn it
+on, on the **Terminal** page in settings, and you choose who listens.
+
+- **On this computer** (the default). When you turn it on, Aiko downloads the speech model once:
+  `ggml-small.bin`, 465 MB, from Aiko's own release on GitHub, and checks its SHA-256 before it uses
+  it. The sound is read on your computer and goes nowhere.
+- **OpenAI with your own key**. Each recording is sent to `api.openai.com` with the model
+  `gpt-4o-transcribe` and your key, and is billed to that key. The page says this next to the
+  choice.
+
+What goes with the sound, as a hint to the recogniser: the name of the session's folder, its git
+branch, the names of files from the conversation and, if the personality is on in that
+environment, the keys of Aiko's memory (the short names, never the facts). On this computer the
+hint stays on the computer; with OpenAI it goes with the sound.
+
+**The key.** Aiko keeps your OpenAI key in Windows Credential Manager, as "Aiko: OpenAI key for
+voice input". Windows encrypts it for your account on this computer. Aiko never writes the key to
+a file, the log or the settings, and shows only its last four characters. **Remove key** on the
+page deletes it, and so does removing Aiko.
+
+The microphone is open only while you record: from the first press to the second. Aiko keeps no
+recording and no text of it. The sound lives in memory until the words are in the field.
+
 ## The token
 
 Claude Code keeps an access token in its own folder. In direct mode Aiko needs that token to ask
@@ -148,8 +175,9 @@ Without direct mode, Aiko never touches the token.
 - `%APPDATA%\Aiko`: your settings, the list of environments, the random value described above,
   which week and month have already been reported, and the memory file once the memory is used.
 - `%LOCALAPPDATA%\Aiko`: the limit numbers from Claude Code, the last direct mode answer, a short
-  log, and, where the personality is on, the session state files, the personality plugin and the
-  local marketplace with the skills.
+  log, the speech model of voice input in `models` once you turn it on, and, where the personality
+  is on, the session state files, the personality plugin and the local marketplace with the skills.
+- Windows Credential Manager: your OpenAI key for voice input, if you saved one.
 - `%USERPROFILE%\.claude*\settings.json`: one line added by Aiko, with a copy of the original next
   to it, and, where the personality is on, Aiko's plugins and marketplace and the permission line
   for the memory tools. Claude Code keeps its own copies of
@@ -161,8 +189,8 @@ Without direct mode, Aiko never touches the token.
   with Windows.
 
 Removing Aiko puts the status line back, removes its plugins from Claude Code, takes its folder out
-of `PATH`, turns the profile functions back on, removes that value and deletes both of Aiko's
-folders.
+of `PATH`, turns the profile functions back on, removes that value, deletes the OpenAI key from
+Credential Manager and deletes both of Aiko's folders.
 
 One file may stay: the memory. When you press **Remove Aiko** in settings and the memory holds
 something, Aiko asks whether to keep it, and the answer is "keep" unless you untick it. Then

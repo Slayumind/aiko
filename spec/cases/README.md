@@ -46,6 +46,7 @@ stamp, not a table (D-255).
 | `voice-input/` | what a press, Esc and the mic do to a recording, and what the line under the input and the mic button show (`VoiceInput`) |
 | `dictation/` | which words of a recording are confirmed and which are the grey tail (`DictationText`) |
 | `voice-hint/` | what the recogniser is told before it listens, and in which language (`VoiceHint`) |
+| `voice-model/` | where the speech model comes from, when each engine is ready, and how an OpenAI key is checked and shown (`VoiceModel`) |
 
 A path in these files is written for the platform the case names. Windows cases keep the
 backslashes people have on their disks today.

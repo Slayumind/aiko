@@ -51,6 +51,21 @@ public enum VoiceHint {
         }
     }
 
+    /// The files a conversation read or changed, the newest first, each once. The newest go first
+    /// because the hint is cut from the end.
+    public static func files(_ items: [FeedItem]) -> [String] {
+        var seen = Set<String>()
+        var files: [String] = []
+        for item in items.reversed() {
+            guard case .step(let step) = item.content,
+                  step.line.kind == .read || step.line.kind == .edit,
+                  !step.line.hidden, !step.line.subject.isEmpty,
+                  seen.insert(step.line.subject.lowercased()).inserted else { continue }
+            files.append(step.line.subject)
+        }
+        return files
+    }
+
     /// The branch a .git/HEAD file names: "ref: refs/heads/feature/voice" is feature/voice. A HEAD
     /// that holds a commit (a detached checkout) names no branch.
     public static func branch(_ head: String?) -> String? {

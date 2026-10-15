@@ -76,14 +76,15 @@ sealed class VoiceDictation
         }
     }
 
-    private VoiceReadiness Readiness() => _settings.VoiceEngine switch
+    private VoiceReadiness Readiness()
     {
-        // The key and OpenAI come with their own seam (AIKO-311); until then OpenAI is not ready.
-        VoiceEngine.OpenAI => VoiceReadiness.NeedsKey,
-        _ => File.Exists(ThisComputer.Folders.VoiceModelFile) && WhisperNative.Ready
-            ? VoiceReadiness.Ready
-            : VoiceReadiness.NeedsModel,
-    };
+        var ready = VoiceModel.Readiness(_settings.VoiceEngine, ModelDownload.ModelBytes, VoiceKey.Stored);
+
+        // A model on disk is no use without the engine that reads it.
+        return ready == VoiceReadiness.Ready && _settings.VoiceEngine == VoiceEngine.Local && !WhisperNative.Ready
+            ? VoiceReadiness.NeedsModel
+            : ready;
+    }
 
     private void Press()
     {

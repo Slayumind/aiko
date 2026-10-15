@@ -3043,5 +3043,180 @@
       "Open settings",
       "Открыть настройки"
     ]
+  ],
+  [
+    "NavTerminal",
+    [
+      "Terminal",
+      "Терминал"
+    ]
+  ],
+  [
+    "NavVoiceOn",
+    [
+      "voice input on",
+      "голос включён"
+    ]
+  ],
+  [
+    "NavVoiceOff",
+    [
+      "voice input off",
+      "голос выключен"
+    ]
+  ],
+  [
+    "VoiceToggle",
+    [
+      "Voice input",
+      "Голосовой ввод"
+    ]
+  ],
+  [
+    "VoiceToggleWhat",
+    [
+      "Ctrl+Space or the microphone button in the field.",
+      "Ctrl+Space или кнопка микрофона в поле."
+    ]
+  ],
+  [
+    "VoiceEngineLabel",
+    [
+      "Recognition",
+      "Распознавание"
+    ]
+  ],
+  [
+    "VoiceLocalTitle",
+    [
+      "On this computer",
+      "На компьютере"
+    ]
+  ],
+  [
+    "VoiceLocalWhat",
+    [
+      "Whisper small. Free, and the sound stays on this computer.",
+      "Whisper small. Бесплатно, звук не уходит с компьютера."
+    ]
+  ],
+  [
+    "VoiceModelWillDownload",
+    [
+      "The speech model, {0} MB, downloads when you turn this on.",
+      "Модель распознавания, {0} МБ, скачается при включении."
+    ]
+  ],
+  [
+    "VoiceModelDownloaded",
+    [
+      "{0} of {1} MB downloaded",
+      "Скачано {0} из {1} МБ"
+    ]
+  ],
+  [
+    "VoiceModelReady",
+    [
+      "Model downloaded, {0} MB.",
+      "Модель скачана, {0} МБ."
+    ]
+  ],
+  [
+    "VoiceModelStopped",
+    [
+      "Download stopped at {0} of {1} MB.",
+      "Загрузка остановлена на {0} из {1} МБ."
+    ]
+  ],
+  [
+    "VoiceModelFailed",
+    [
+      "The model did not download. Check the connection and try again.",
+      "Модель не скачалась. Проверь соединение и попробуй ещё раз."
+    ]
+  ],
+  [
+    "VoiceDownloadStop",
+    [
+      "Stop",
+      "Остановить"
+    ]
+  ],
+  [
+    "VoiceDownloadGo",
+    [
+      "Download",
+      "Скачать"
+    ]
+  ],
+  [
+    "VoiceModelRemove",
+    [
+      "Remove the model",
+      "Удалить модель"
+    ]
+  ],
+  [
+    "VoiceCloudTitle",
+    [
+      "OpenAI with your own key",
+      "OpenAI по своему ключу"
+    ]
+  ],
+  [
+    "VoiceCloudWhat",
+    [
+      "gpt-4o-transcribe. Better with terms, billed to your key.",
+      "gpt-4o-transcribe. Точнее на терминах, платишь по своему ключу."
+    ]
+  ],
+  [
+    "VoiceHonest",
+    [
+      "The sound of every recording goes to OpenAI.",
+      "Звук каждой записи уходит в OpenAI."
+    ]
+  ],
+  [
+    "VoiceKeyLabel",
+    [
+      "Key",
+      "Ключ"
+    ]
+  ],
+  [
+    "VoiceKeySave",
+    [
+      "Save",
+      "Сохранить"
+    ]
+  ],
+  [
+    "VoiceKeyRemove",
+    [
+      "Remove key",
+      "Удалить ключ"
+    ]
+  ],
+  [
+    "VoiceKeyBad",
+    [
+      "This does not look like an OpenAI key: it starts with sk-.",
+      "Это не похоже на ключ OpenAI: он начинается с sk-."
+    ]
+  ],
+  [
+    "VoiceKeyNotSaved",
+    [
+      "Windows did not save the key.",
+      "Windows не сохранила ключ."
+    ]
+  ],
+  [
+    "VoiceKeyWhere",
+    [
+      "Kept in Windows Credential Manager. Removing Aiko erases it.",
+      "Хранится в Диспетчере учётных данных Windows. Удаление Aiko его сотрёт."
+    ]
   ]
 ]

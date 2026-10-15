@@ -1325,4 +1325,79 @@ public static class Strings
 
     /// Open settings
     public static string VoiceOpenSettings => Get("VoiceOpenSettings");
+
+    /// Terminal
+    public static string NavTerminal => Get("NavTerminal");
+
+    /// voice input on
+    public static string NavVoiceOn => Get("NavVoiceOn");
+
+    /// voice input off
+    public static string NavVoiceOff => Get("NavVoiceOff");
+
+    /// Voice input
+    public static string VoiceToggle => Get("VoiceToggle");
+
+    /// Ctrl+Space or the microphone button in the field.
+    public static string VoiceToggleWhat => Get("VoiceToggleWhat");
+
+    /// Recognition
+    public static string VoiceEngineLabel => Get("VoiceEngineLabel");
+
+    /// On this computer
+    public static string VoiceLocalTitle => Get("VoiceLocalTitle");
+
+    /// Whisper small. Free, and the sound stays on this computer.
+    public static string VoiceLocalWhat => Get("VoiceLocalWhat");
+
+    /// The speech model, {0} MB, downloads when you turn this on.
+    public static string VoiceModelWillDownload => Get("VoiceModelWillDownload");
+
+    /// {0} of {1} MB downloaded
+    public static string VoiceModelDownloaded => Get("VoiceModelDownloaded");
+
+    /// Model downloaded, {0} MB.
+    public static string VoiceModelReady => Get("VoiceModelReady");
+
+    /// Download stopped at {0} of {1} MB.
+    public static string VoiceModelStopped => Get("VoiceModelStopped");
+
+    /// The model did not download. Check the connection and try again.
+    public static string VoiceModelFailed => Get("VoiceModelFailed");
+
+    /// Stop
+    public static string VoiceDownloadStop => Get("VoiceDownloadStop");
+
+    /// Download
+    public static string VoiceDownloadGo => Get("VoiceDownloadGo");
+
+    /// Remove the model
+    public static string VoiceModelRemove => Get("VoiceModelRemove");
+
+    /// OpenAI with your own key
+    public static string VoiceCloudTitle => Get("VoiceCloudTitle");
+
+    /// gpt-4o-transcribe. Better with terms, billed to your key.
+    public static string VoiceCloudWhat => Get("VoiceCloudWhat");
+
+    /// The sound of every recording goes to OpenAI.
+    public static string VoiceHonest => Get("VoiceHonest");
+
+    /// Key
+    public static string VoiceKeyLabel => Get("VoiceKeyLabel");
+
+    /// Save
+    public static string VoiceKeySave => Get("VoiceKeySave");
+
+    /// Remove key
+    public static string VoiceKeyRemove => Get("VoiceKeyRemove");
+
+    /// This does not look like an OpenAI key: it starts with sk-.
+    public static string VoiceKeyBad => Get("VoiceKeyBad");
+
+    /// Windows did not save the key.
+    public static string VoiceKeyNotSaved => Get("VoiceKeyNotSaved");
+
+    /// Kept in Windows Credential Manager. Removing Aiko erases it.
+    public static string VoiceKeyWhere => Get("VoiceKeyWhere");
 }

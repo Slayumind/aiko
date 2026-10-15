@@ -135,6 +135,31 @@ struct VoiceCaseTests {
         }
     }
 
+    /// The files of a conversation for the hint: read or changed, newest first, once each. A
+    /// search, a command and a picture the person attached are not files the person names.
+    @Test
+    func theHintTakesTheFilesAConversationReadOrChanged() {
+        func step(_ id: Int, _ kind: StepKind, _ subject: String, hidden: Bool = false) -> FeedItem {
+            FeedItem(id: id, content: .step(FeedStep(
+                toolUseId: "t\(id)", line: StepLine(kind: kind, label: "", subject: subject, added: 0, removed: 0, hidden: hidden),
+                state: .done, result: "", images: [], progress: "")))
+        }
+
+        let items = [
+            FeedItem(id: 1, content: .ownerMessage(text: "Look at the field.", images: 0, queued: false, attachments: [])),
+            step(2, .read, "TalkInput.cs"),
+            step(3, .search, "VoiceLine"),
+            step(4, .edit, "VoiceInput.cs"),
+            step(5, .run, "dotnet test"),
+            step(6, .read, "image.png", hidden: true),
+            step(7, .read, "talkinput.cs"),
+            step(8, .edit, ""),
+        ]
+
+        #expect(VoiceHint.files(items) == ["talkinput.cs", "VoiceInput.cs"])
+        #expect(VoiceHint.files([]).isEmpty)
+    }
+
     private static func state(_ node: JsonNode?) -> VoiceState? {
         guard let pair = node?.arrayValue, pair.count == 2,
               let phase = pair[0].stringValue.flatMap(VoicePhase.init(rawValue:)),

@@ -1,0 +1,87 @@
+<UserControl x:Class="Aiko.App.TerminalPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:Aiko.App">
+
+  <!-- Voice input of the terminal (D-313, D-315). The size of the model is on the page before
+       anything downloads, and the line about OpenAI stands next to the choice, not in the help. -->
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/Theme/Controls.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </UserControl.Resources>
+
+  <StackPanel>
+    <TextBlock Text="{x:Static local:Strings.NavTerminal}" FontFamily="{StaticResource Sans}" FontSize="16"
+               FontWeight="Medium" Foreground="{StaticResource Ink}" />
+
+    <CheckBox x:Name="VoiceOn" Style="{StaticResource Tick}" Margin="0,18,0,0"
+              Checked="OnVoiceChanged" Unchecked="OnVoiceChanged">
+      <StackPanel>
+        <TextBlock Text="{x:Static local:Strings.VoiceToggle}" FontWeight="Medium" />
+        <TextBlock Text="{x:Static local:Strings.VoiceToggleWhat}" Style="{StaticResource RowHint}" TextWrapping="Wrap" Margin="0,4,0,0" />
+      </StackPanel>
+    </CheckBox>
+
+    <TextBlock Text="{x:Static local:Strings.VoiceEngineLabel}" Style="{StaticResource SectionLabel}" Margin="0,22,0,8" />
+
+    <RadioButton x:Name="Local" Style="{StaticResource Dot}" GroupName="VoiceEngine" Checked="OnEngineChanged">
+      <StackPanel>
+        <TextBlock Text="{x:Static local:Strings.VoiceLocalTitle}" FontWeight="Medium" />
+        <TextBlock Text="{x:Static local:Strings.VoiceLocalWhat}" Style="{StaticResource RowHint}" TextWrapping="Wrap" Margin="0,4,0,0" />
+      </StackPanel>
+    </RadioButton>
+
+    <!-- The model: what it is now and the one thing to do with it. -->
+    <StackPanel Margin="24,10,0,0">
+      <Border x:Name="Track" Height="4" CornerRadius="2" Background="{StaticResource Raised}" Visibility="Collapsed">
+        <Border x:Name="TrackFill" HorizontalAlignment="Left" CornerRadius="2" Background="{StaticResource Ink}" Width="0" />
+      </Border>
+      <Grid Margin="0,8,0,0">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <TextBlock x:Name="ModelLine" Style="{StaticResource RowHint}" TextWrapping="Wrap" VerticalAlignment="Center" Margin="0,0,12,0" />
+        <Button x:Name="ModelAction" Grid.Column="1" Style="{StaticResource SmallButton}" Click="OnModelAction" />
+      </Grid>
+    </StackPanel>
+
+    <RadioButton x:Name="Cloud" Style="{StaticResource Dot}" GroupName="VoiceEngine" Margin="0,18,0,0" Checked="OnEngineChanged">
+      <StackPanel>
+        <TextBlock Text="{x:Static local:Strings.VoiceCloudTitle}" FontWeight="Medium" />
+        <TextBlock Text="{x:Static local:Strings.VoiceCloudWhat}" Style="{StaticResource RowHint}" TextWrapping="Wrap" Margin="0,4,0,0" />
+      </StackPanel>
+    </RadioButton>
+
+    <StackPanel x:Name="KeyPanel" Margin="24,12,0,0" Visibility="Collapsed">
+      <Border BorderBrush="{StaticResource Caution}" BorderThickness="2,0,0,0" Padding="10,0,0,0">
+        <TextBlock Text="{x:Static local:Strings.VoiceHonest}" Style="{StaticResource RowHint}" Foreground="{StaticResource Ink}" TextWrapping="Wrap" />
+      </Border>
+      <Grid Margin="0,12,0,0">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="Auto" />
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <TextBlock Text="{x:Static local:Strings.VoiceKeyLabel}" Style="{StaticResource RowHint}" VerticalAlignment="Center" Margin="0,0,10,0" />
+        <Border Grid.Column="1" CornerRadius="8" Background="{StaticResource Raised}" BorderBrush="{StaticResource Hairline}"
+                BorderThickness="1" Padding="8,5">
+          <Grid>
+            <PasswordBox x:Name="KeyBox" Background="Transparent" BorderThickness="0" Foreground="{StaticResource Ink}"
+                         CaretBrush="{StaticResource Ink}" FontFamily="{StaticResource Mono}" FontSize="{StaticResource TextTiny}"
+                         KeyDown="OnKeyBoxKey" />
+            <TextBlock x:Name="KeyMask" FontFamily="{StaticResource Mono}" FontSize="{StaticResource TextTiny}"
+                       Foreground="{StaticResource Ink}" VerticalAlignment="Center" Visibility="Collapsed" />
+          </Grid>
+        </Border>
+        <Button x:Name="KeyAction" Grid.Column="2" Style="{StaticResource SmallButton}" Margin="8,0,0,0" Click="OnKeyAction" />
+      </Grid>
+      <TextBlock x:Name="KeyProblem" Style="{StaticResource RowHint}" Foreground="{StaticResource Destructive}"
+                 TextWrapping="Wrap" Margin="0,6,0,0" Visibility="Collapsed" />
+      <TextBlock Text="{x:Static local:Strings.VoiceKeyWhere}" Style="{StaticResource RowHint}" TextWrapping="Wrap" Margin="0,6,0,0" />
+    </StackPanel>
+  </StackPanel>
+</UserControl>

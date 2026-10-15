@@ -1336,4 +1336,79 @@
   <data name="VoiceOpenSettings" xml:space="preserve">
     <value>Открыть настройки</value>
   </data>
+  <data name="NavTerminal" xml:space="preserve">
+    <value>Терминал</value>
+  </data>
+  <data name="NavVoiceOn" xml:space="preserve">
+    <value>голос включён</value>
+  </data>
+  <data name="NavVoiceOff" xml:space="preserve">
+    <value>голос выключен</value>
+  </data>
+  <data name="VoiceToggle" xml:space="preserve">
+    <value>Голосовой ввод</value>
+  </data>
+  <data name="VoiceToggleWhat" xml:space="preserve">
+    <value>Ctrl+Space или кнопка микрофона в поле.</value>
+  </data>
+  <data name="VoiceEngineLabel" xml:space="preserve">
+    <value>Распознавание</value>
+  </data>
+  <data name="VoiceLocalTitle" xml:space="preserve">
+    <value>На компьютере</value>
+  </data>
+  <data name="VoiceLocalWhat" xml:space="preserve">
+    <value>Whisper small. Бесплатно, звук не уходит с компьютера.</value>
+  </data>
+  <data name="VoiceModelWillDownload" xml:space="preserve">
+    <value>Модель распознавания, {0} МБ, скачается при включении.</value>
+  </data>
+  <data name="VoiceModelDownloaded" xml:space="preserve">
+    <value>Скачано {0} из {1} МБ</value>
+  </data>
+  <data name="VoiceModelReady" xml:space="preserve">
+    <value>Модель скачана, {0} МБ.</value>
+  </data>
+  <data name="VoiceModelStopped" xml:space="preserve">
+    <value>Загрузка остановлена на {0} из {1} МБ.</value>
+  </data>
+  <data name="VoiceModelFailed" xml:space="preserve">
+    <value>Модель не скачалась. Проверь соединение и попробуй ещё раз.</value>
+  </data>
+  <data name="VoiceDownloadStop" xml:space="preserve">
+    <value>Остановить</value>
+  </data>
+  <data name="VoiceDownloadGo" xml:space="preserve">
+    <value>Скачать</value>
+  </data>
+  <data name="VoiceModelRemove" xml:space="preserve">
+    <value>Удалить модель</value>
+  </data>
+  <data name="VoiceCloudTitle" xml:space="preserve">
+    <value>OpenAI по своему ключу</value>
+  </data>
+  <data name="VoiceCloudWhat" xml:space="preserve">
+    <value>gpt-4o-transcribe. Точнее на терминах, платишь по своему ключу.</value>
+  </data>
+  <data name="VoiceHonest" xml:space="preserve">
+    <value>Звук каждой записи уходит в OpenAI.</value>
+  </data>
+  <data name="VoiceKeyLabel" xml:space="preserve">
+    <value>Ключ</value>
+  </data>
+  <data name="VoiceKeySave" xml:space="preserve">
+    <value>Сохранить</value>
+  </data>
+  <data name="VoiceKeyRemove" xml:space="preserve">
+    <value>Удалить ключ</value>
+  </data>
+  <data name="VoiceKeyBad" xml:space="preserve">
+    <value>Это не похоже на ключ OpenAI: он начинается с sk-.</value>
+  </data>
+  <data name="VoiceKeyNotSaved" xml:space="preserve">
+    <value>Windows не сохранила ключ.</value>
+  </data>
+  <data name="VoiceKeyWhere" xml:space="preserve">
+    <value>Хранится в Диспетчере учётных данных Windows. Удаление Aiko его сотрёт.</value>
+  </data>
 </root>

@@ -440,9 +440,16 @@ static class Program
 
         if (args is ["--snapshot-settings", var settingsPath, ..])
         {
-            // The page to draw: --snapshot-settings out.png general | folders | personality | env1 | env2 [tall]
+            // The page to draw: --snapshot-settings out.png general | folders | personality | terminal |
+            // terminal-openai | env1 | env2 [tall]
             // "tall" draws the whole page, not only the part that fits the window.
             var page = args.Length > 2 ? args[2] : null;
+            if (page == "terminal-openai")
+            {
+                TerminalPage.TryEngine = Aiko.Core.Terminal.VoiceEngine.OpenAI;
+                page = SettingsPanel.TerminalPageKey;
+            }
+
             var panel = new SettingsPanel(page switch
             {
                 "env1" => new SettingsPanel().EnvironmentPage(0),

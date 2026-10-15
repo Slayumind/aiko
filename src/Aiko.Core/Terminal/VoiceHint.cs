@@ -66,6 +66,16 @@ public static class VoiceHint
         _ => systemLanguage.StartsWith("ru", StringComparison.OrdinalIgnoreCase) ? "ru" : "en",
     };
 
+    /// The files a conversation read or changed, the newest first, each once. The newest go first
+    /// because the hint is cut from the end.
+    public static IReadOnlyList<string> Files(IEnumerable<FeedItem> items) =>
+        [.. items.OfType<FeedItem.Step>()
+            .Select(step => step.Line)
+            .Where(line => line.Kind is StepKind.Read or StepKind.Edit && !line.Hidden && line.Subject.Length > 0)
+            .Select(line => line.Subject)
+            .Reverse()
+            .Distinct(StringComparer.OrdinalIgnoreCase)];
+
     /// The branch a .git/HEAD file names: "ref: refs/heads/feature/voice" is feature/voice. A HEAD
     /// that holds a commit (a detached checkout) names no branch.
     public static string? Branch(string? head)
