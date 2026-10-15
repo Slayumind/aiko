@@ -1,5 +1,10 @@
 {
-  "comment": "The text of one recording while it is spoken (D-315). Every pass reads all the sound so far. Words two passes in a row agree on are confirmed and never change; case, punctuation and ё against е do not count as a difference. The rest is the grey tail. The final pass confirms everything, keeping the words already confirmed. Newly confirmed words take the spelling of the newer pass. Words are matched against the confirmed ones by their letters, so a pass that splits a word in another place does not repeat it. Sounds whisper writes in brackets are dropped. The first run is taken from the live spike (spike-voice-2026-10.md).",
+  "comment": "Phrases: text from OpenAI comes phrase by phrase (D-317); the phrases that are done are confirmed and the one being read is the tail. The text of one recording while it is spoken (D-315). Every pass reads all the sound so far. Words two passes in a row agree on are confirmed and never change; case, punctuation and ё against е do not count as a difference. The rest is the grey tail. The final pass confirms everything, keeping the words already confirmed. Newly confirmed words take the spelling of the newer pass. Words are matched against the confirmed ones by their letters, so a pass that splits a word in another place does not repeat it. Sounds whisper writes in brackets are dropped. The first run is taken from the live spike (spike-voice-2026-10.md).",
+  "phrases": [
+    { "done": "", "reading": "Сделай ветку", "confirmed": "", "tail": "Сделай ветку" },
+    { "done": "Сделай ветку feature/voice-input.", "reading": "Прогони", "confirmed": "Сделай ветку feature/voice-input.", "tail": "Прогони" },
+    { "done": "Возьми карточку Aiko-311.  [Музыка]", "reading": "", "confirmed": "Возьми карточку Aiko-311.", "tail": "" }
+  ],
   "runs": [
     {
       "name": "a phrase grows over four passes",

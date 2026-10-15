@@ -63,6 +63,10 @@ public sealed partial record DictationText
         return count;
     }
 
+    /// Text that comes in phrases, from OpenAI (D-317): the phrases that are done are confirmed,
+    /// the one still being read is the tail.
+    public static DictationText Phrases(string done, string reading) => new([.. Words(done)], [.. Words(reading)], []);
+
     /// The words of a pass. Whisper writes sounds it heard in brackets, "[Музыка]" or "(смех)";
     /// those are not words anybody said.
     public static IReadOnlyList<string> Words(string? text) =>

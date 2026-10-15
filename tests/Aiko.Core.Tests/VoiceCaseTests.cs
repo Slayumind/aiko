@@ -58,6 +58,13 @@ public class VoiceCaseTests
     [Fact]
     public void Confirmed_words_grow_and_never_change()
     {
+        foreach (var row in SpecCases.Json("dictation").GetProperty("phrases").EnumerateArray())
+        {
+            var phrases = DictationText.Phrases(row.GetProperty("done").GetString()!, row.GetProperty("reading").GetString()!);
+            Assert.Equal(row.GetProperty("confirmed").GetString(), phrases.ConfirmedText);
+            Assert.Equal(row.GetProperty("tail").GetString(), phrases.TailText);
+        }
+
         foreach (var run in SpecCases.Json("dictation").GetProperty("runs").EnumerateArray())
         {
             var name = run.GetProperty("name").GetString();

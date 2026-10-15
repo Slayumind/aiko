@@ -31,6 +31,9 @@ public enum VoiceNotice
     NoMicrophone,
     NeedsModel,
     NeedsKey,
+
+    /// OpenAI did not take the recording: a wrong key, no money on it, no connection (D-317).
+    CloudFailed,
 }
 
 /// What happened: a press of Ctrl+Space or the button, Esc, or news from the mic and the engine.
@@ -42,6 +45,7 @@ public enum VoiceCue
     Finished,
     NoMicrophone,
     MicrophoneBack,
+    CloudFailed,
 }
 
 /// Whether the chosen engine can work: the model is on disk, or the key is stored.
@@ -114,6 +118,8 @@ public static class VoiceInput
             (VoicePhase.Warming or VoicePhase.Listening, VoiceCue.NoMicrophone) =>
                 new VoiceState(VoicePhase.Idle, VoiceNotice.NoMicrophone),
             (_, VoiceCue.NoMicrophone) => state with { Notice = VoiceNotice.NoMicrophone },
+            (VoicePhase.Warming or VoicePhase.Listening or VoicePhase.Finishing, VoiceCue.CloudFailed) =>
+                new VoiceState(VoicePhase.Idle, VoiceNotice.CloudFailed),
             (_, VoiceCue.MicrophoneBack) when state.Notice == VoiceNotice.NoMicrophone =>
                 state with { Notice = VoiceNotice.None },
             _ => state,

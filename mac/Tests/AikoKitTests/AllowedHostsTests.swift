@@ -14,6 +14,7 @@ struct AllowedHostsTests {
         "https://github.com/Slayumind/aiko/releases/download/v0.3.0/SHA256SUMS.txt",
         "https://release-assets.githubusercontent.com/github-production-release-asset/1",
         "https://objects.githubusercontent.com/github-production-release-asset/1",
+        "https://api.openai.com/v1/realtime?intent=transcription",
     ])
     func theHostsOfAnUpdateAndOfTheLimitsAreAllowed(address: String) {
         #expect(AllowedHosts.allows(URL(string: address)))

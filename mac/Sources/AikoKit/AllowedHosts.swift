@@ -28,7 +28,10 @@ public enum AllowedHosts {
 
     public static let gitHubObjects = "objects.githubusercontent.com"
 
-    public static let all = [anthropic, site, gitHubApi, gitHub, gitHubFiles, gitHubObjects]
+    /// Voice input with the person's own OpenAI key: the sound of a recording, nothing else (D-317).
+    public static let openAI = "api.openai.com"
+
+    public static let all = [anthropic, site, gitHubApi, gitHub, gitHubFiles, gitHubObjects, openAI]
 
     /// Exact host, https only.
     ///

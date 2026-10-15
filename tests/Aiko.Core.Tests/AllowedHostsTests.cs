@@ -16,6 +16,7 @@ public class AllowedHostsTests
     [InlineData("https://github.com/Slayumind/aiko/releases/download/v0.3.0/SHA256SUMS.txt")]
     [InlineData("https://release-assets.githubusercontent.com/github-production-release-asset/1")]
     [InlineData("https://objects.githubusercontent.com/github-production-release-asset/1")]
+    [InlineData("https://api.openai.com/v1/realtime?intent=transcription")]
     public void The_hosts_of_an_update_and_of_the_limits_are_allowed(string address)
     {
         Assert.True(AllowedHosts.Allows(new Uri(address)));
