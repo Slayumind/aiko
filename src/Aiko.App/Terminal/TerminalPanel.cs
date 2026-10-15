@@ -119,6 +119,7 @@ sealed class TerminalPanel : UserControl
         _talk.SendAsked += (text, images) => SendAsked?.Invoke(text, images);
         _talk.StopAsked += () => StopAsked?.Invoke();
         _talk.ModeAsked += () => ModeAsked?.Invoke();
+        _talk.ModelAsked += () => ModelAsked?.Invoke();
         _talk.Chosen += (id, choice) => Chosen?.Invoke(id, choice);
 
         SizeChanged += (_, e) =>
@@ -157,6 +158,7 @@ sealed class TerminalPanel : UserControl
     public event Action<string, IReadOnlyList<AttachedImage>>? SendAsked;
     public event Action? StopAsked;
     public event Action? ModeAsked;
+    public event Action? ModelAsked;
     public event Action<string, CardChoice>? Chosen;
 
     public void ShowMaximized(bool maximized)

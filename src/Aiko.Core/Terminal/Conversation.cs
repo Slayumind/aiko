@@ -283,6 +283,10 @@ public sealed record Conversation(
     public Outcome SetMode(PermissionMode mode) =>
         new(this with { Mode = mode, NextId = NextId + 1 }, [HostLine.SetMode($"mode-{NextId}", mode)]);
 
+    /// The line under the input shows the new model at once; the next init names its full id.
+    public Outcome SetModel(string model) =>
+        new(this with { Model = model, NextId = NextId + 1 }, [HostLine.SetModel($"model-{NextId}", model)]);
+
     public Conversation MarkRead() => this with { Unread = false };
 
     /// Claude Code is gone. If it was in the middle of something, that is a failure to show.

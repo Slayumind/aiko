@@ -87,6 +87,7 @@ sealed class TerminalHost
         };
         _panel.StopAsked += () => Current()?.Interrupt();
         _panel.ModeAsked += NextMode;
+        _panel.ModelAsked += NextModel;
         _panel.Chosen += (requestId, choice) => Current()?.Choose(requestId, choice);
     }
 
@@ -383,6 +384,24 @@ sealed class TerminalHost
         _sessions = _sessions.SetMode(session.Id, next);
         Save();
         talk?.SetMode(next);
+        Draw();
+    }
+
+    /// The next model of the session. It is kept for the next start, and a running Claude Code
+    /// takes it from the next turn.
+    private void NextModel()
+    {
+        if (_model.Session(_sessions) is not { } session)
+        {
+            return;
+        }
+
+        var talk = Current();
+        var shown = talk?.State.Model is { Length: > 0 } running ? running : session.Model;
+        var next = NewSessionChoices.NextModel(shown);
+        _sessions = _sessions.SetModel(session.Id, next);
+        Save();
+        talk?.SetModel(next);
         Draw();
     }
 

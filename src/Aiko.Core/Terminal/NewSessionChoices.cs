@@ -106,6 +106,15 @@ public static class NewSessionChoices
             .Select(session => session.Model)
             .FirstOrDefault() ?? Models[0];
 
+    /// The model after this one, for a click on the model under the input: in the order of the
+    /// form, and back to the first after the last. The model may be a short name or a full id
+    /// like "claude-sonnet-5-5"; a model outside the list goes to the first one.
+    public static string NextModel(string? model)
+    {
+        var at = Models.ToList().FindIndex(name => model?.Contains(name, StringComparison.OrdinalIgnoreCase) == true);
+        return Models[(at + 1) % Models.Count];
+    }
+
     /// The name of the other environment a folder is bound to, or null. The form says so before
     /// the session is made: Claude Code started there from a console would use that environment.
     public static string? BoundElsewhere(string folder, AikoEnvironment environment, EnvironmentSettings settings) =>

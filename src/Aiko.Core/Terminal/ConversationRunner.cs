@@ -59,6 +59,8 @@ public sealed class ConversationRunner(
     /// Without a process nothing is written: the next start carries the mode in its arguments.
     public void SetMode(PermissionMode mode) => Apply(State.SetMode(mode), startIfNeeded: false);
 
+    public void SetModel(string model) => Apply(State.SetModel(model), startIfNeeded: false);
+
     public void MarkRead()
     {
         State = State.MarkRead();

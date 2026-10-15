@@ -462,6 +462,7 @@ public class SharedCaseTests
                         answer.GetProperty("answer").GetString()!))]),
                 "interrupt" => HostLine.Interrupt(id),
                 "setMode" => HostLine.SetMode(id, Mode(action.GetProperty("mode"))!.Value),
+                "setModel" => HostLine.SetModel(id, action.GetProperty("model").GetString()!),
                 var other => throw new InvalidOperationException($"unknown action {other}"),
             };
 
