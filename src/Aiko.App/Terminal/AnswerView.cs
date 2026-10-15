@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
+using System.Windows.Input;
 using System.Windows.Media;
 using Aiko.Core.Terminal;
 using LinkTarget = Aiko.Core.Terminal.LinkTarget;
@@ -68,7 +69,7 @@ static class AnswerView
             document.Blocks.Add(Block(block));
         }
 
-        return new RichTextBox
+        var box = new RichTextBox
         {
             Document = document,
             IsReadOnly = true,
@@ -81,6 +82,46 @@ static class AnswerView
             SelectionBrush = Tokens.Brush("Muted"),
             Focusable = true,
         };
+
+        // Ctrl+C and the menu copy the markdown of the selection, not the text on screen (D-303).
+        box.CommandBindings.Add(new CommandBinding(ApplicationCommands.Copy, (_, e) =>
+        {
+            CopySelection(box.Selection, blocks);
+            e.Handled = true;
+        }));
+        return box;
+    }
+
+    private static void CopySelection(TextSelection selection, IReadOnlyList<MarkdownBlock> blocks)
+    {
+        var leaves = MarkdownCopy.Leaves(blocks);
+        if (Place(selection.Start, leaves, LogicalDirection.Forward) is { } from
+            && Place(selection.End, leaves, LogicalDirection.Backward) is { } to
+            && MarkdownCopy.Selected(blocks, from, to) is { Length: > 0 } markdown)
+        {
+            Clipboard.SetText(markdown);
+        }
+    }
+
+    /// The leaf and the character a point of the selection falls on. A point between two pieces
+    /// of text (at the edge of a paragraph or a bold word) moves to the nearest text inside the
+    /// selection.
+    private static TextPlace? Place(TextPointer point, IReadOnlyDictionary<object, int> leaves, LogicalDirection inward)
+    {
+        if (point.Parent is Run { Tag: { } tag } run && leaves.TryGetValue(tag, out var leaf))
+        {
+            return new TextPlace(leaf, run.ContentStart.GetOffsetToPosition(point));
+        }
+
+        for (var next = point.GetNextContextPosition(inward); next is not null; next = next.GetNextContextPosition(inward))
+        {
+            if (next.Parent is Run { Tag: { } found } text && leaves.TryGetValue(found, out var at))
+            {
+                return new TextPlace(at, inward == LogicalDirection.Forward ? 0 : text.Text.Length);
+            }
+        }
+
+        return null;
     }
 
     private static Block Block(MarkdownBlock block) => block switch
@@ -96,7 +137,7 @@ static class AnswerView
             Margin = new Thickness(0, 6, 0, 14),
         }),
         // Code and tables are pieces of their own; inside a list or a quote they stay text.
-        MarkdownBlock.Code code => CodeAsText(code.Text),
+        MarkdownBlock.Code code => CodeAsText(code),
         MarkdownBlock.Table => new Paragraph(),
         _ => new Paragraph(),
     };
@@ -164,7 +205,7 @@ static class AnswerView
         return section;
     }
 
-    private static Paragraph CodeAsText(string text) => new(new Run(text))
+    private static Paragraph CodeAsText(MarkdownBlock.Code code) => new(new Run(code.Text) { Tag = code })
     {
         FontFamily = Tokens.Get<FontFamily>("Mono"),
         FontSize = Tokens.Get<double>("TextSmall"),
@@ -177,9 +218,10 @@ static class AnswerView
         {
             yield return inline switch
             {
-                MarkdownInline.Text text => new Run(text.Value),
+                MarkdownInline.Text text => new Run(text.Value) { Tag = text },
                 MarkdownInline.Code code => new Run(code.Value)
                 {
+                    Tag = code,
                     FontFamily = Tokens.Get<FontFamily>("Mono"),
                     FontSize = Tokens.Get<double>("TextSmall"),
                     Background = Tokens.Brush("Raised"),
@@ -213,7 +255,7 @@ static class AnswerView
         {
             Foreground = Tokens.Brush("Ink"),
             TextDecorations = TextDecorations.Underline,
-            Cursor = System.Windows.Input.Cursors.Hand,
+            Cursor = Cursors.Hand,
             ToolTip = link.Target,
         };
         hyperlink.Inlines.AddRange(Inlines(link.Inlines));
