@@ -95,6 +95,15 @@ public enum HostLine {
         ])
     }
 
+    /// Claude Code takes the new model between turns and names it in the next init (spike of
+    /// 2026-10-15, RESEARCH).
+    public static func setModel(_ requestId: String, _ model: String) -> String {
+        ask(requestId, [
+            ("subtype", .string("set_model")),
+            ("model", .string(model)),
+        ])
+    }
+
     private static func respond(_ requestId: String, _ decision: [(String, JsonNode)]) -> String {
         write([
             ("type", .string("control_response")),

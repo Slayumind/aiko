@@ -69,6 +69,7 @@ sealed class TalkPanel : UserControl
         _input.Sent += (text, images) => SendAsked?.Invoke(text, images);
         _input.StopAsked += () => StopAsked?.Invoke();
         _input.ModeAsked += () => ModeAsked?.Invoke();
+        _input.ModelAsked += () => ModelAsked?.Invoke();
 
         // A card that went out of view says so above the field (D-309).
         var show = TerminalPanel.Flat(Strings.TerminalShow, ShowOpenCard, ghost: true);
@@ -106,6 +107,7 @@ sealed class TalkPanel : UserControl
     public event Action<string, IReadOnlyList<AttachedImage>>? SendAsked;
     public event Action? StopAsked;
     public event Action? ModeAsked;
+    public event Action? ModelAsked;
     public event Action<string, CardChoice>? Chosen;
 
     /// The field takes the keyboard, for a session the person just went into.

@@ -127,6 +127,15 @@ public static class HostLine
             writer.WriteString("mode", PermissionModes.RequestValue(mode));
         });
 
+    /// Claude Code takes the new model between turns and names it in the next init (spike of
+    /// 2026-10-15, RESEARCH).
+    public static string SetModel(string requestId, string model) =>
+        Ask(requestId, writer =>
+        {
+            writer.WriteString("subtype", "set_model");
+            writer.WriteString("model", model);
+        });
+
     private static IEnumerable<JsonProperty> Members(JsonElement input) =>
         input.ValueKind == JsonValueKind.Object ? input.EnumerateObject() : [];
 

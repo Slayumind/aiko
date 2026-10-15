@@ -481,6 +481,8 @@ struct SharedCaseTests {
                 line = HostLine.interrupt(id)
             case "setMode":
                 line = HostLine.setMode(id, Self.mode(action["mode"]) ?? .manual)
+            case "setModel":
+                line = HostLine.setModel(id, action["model"]?.stringValue ?? "")
             default:
                 line = "unknown action"
             }

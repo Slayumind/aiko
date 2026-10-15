@@ -28,6 +28,7 @@ sealed class TalkInput : UserControl
     private readonly List<AttachedImage> _attached = [];
     private readonly Button _stop;
     private readonly TextBlock _mode = TerminalPanel.Mono("", "Muted");
+    private readonly TextBlock _model = TerminalPanel.Mono("", "Muted");
     private readonly TextBlock _where = TerminalPanel.Mono("", "Muted");
 
     /// What was sent, per session, oldest first, and where the arrows stand in it.
@@ -96,8 +97,13 @@ sealed class TalkInput : UserControl
         _mode.Cursor = Cursors.Hand;
         _mode.ToolTip = "Shift+Tab";
         _mode.MouseLeftButtonUp += (_, _) => ModeAsked?.Invoke();
+
+        // The model changes with a click too, in the order of the form of a new session.
+        _model.Cursor = Cursors.Hand;
+        _model.MouseLeftButtonUp += (_, _) => ModelAsked?.Invoke();
         var status = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(14, 6, 0, 14) };
         status.Children.Add(_mode);
+        status.Children.Add(_model);
         status.Children.Add(_where);
 
         var all = new StackPanel();
@@ -109,6 +115,7 @@ sealed class TalkInput : UserControl
     public event Action<string, IReadOnlyList<AttachedImage>>? Sent;
     public event Action? StopAsked;
     public event Action? ModeAsked;
+    public event Action? ModelAsked;
 
     public new void Focus() => _text.Focus();
 
@@ -127,7 +134,8 @@ sealed class TalkInput : UserControl
         _busy = busy;
         _stop.Visibility = busy ? Visibility.Visible : Visibility.Collapsed;
         _mode.Text = PermissionModes.Name(mode);
-        _where.Text = string.Concat(model.Length > 0 ? " · " + model : "", " · ", environment);
+        _model.Text = model.Length > 0 ? " · " + model : "";
+        _where.Text = " · " + environment;
     }
 
     // ---- the keys ----
