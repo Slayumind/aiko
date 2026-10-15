@@ -52,7 +52,10 @@ static class TerminalSnapshot
                     .Pass("Сделай ветку feature/voice-input от in-progress и прогони")
                     .Pass("Сделай ветку feature/voice-input от in-progress и прогони dotnet test");
             input.ShowDictation(said);
-            input.SetLevel(0.6);
+            foreach (var level in new[] { 0.05, 0.1, 0.5, 0.8, 0.6, 0.9, 0.4, 0.7, 0.3, 0.05, 0.05, 0.6, 0.85, 0.5, 0.7, 0.35 })
+            {
+                input.PushLevel(level);
+            }
         }
     }
 

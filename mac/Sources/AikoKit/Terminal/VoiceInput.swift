@@ -83,7 +83,8 @@ public enum VoiceWord: String, Sendable, Equatable {
     case finishing = "Finishing"
 }
 
-/// What the input shows for one moment of a recording (D-315). time is set only while listening;
+/// What the input shows for one moment of a recording (D-315, D-319). time and the wave of the sound
+/// show only while listening;
 /// engine names where the sound goes while the mic is open or the text is finishing.
 public struct VoiceLine: Sendable, Equatable {
     public var word: VoiceWord
@@ -91,15 +92,15 @@ public struct VoiceLine: Sendable, Equatable {
     public var engine: VoiceEngine?
     public var cancelHint: Bool
     public var button: VoiceButton
-    public var ring: Bool
+    public var wave: Bool
 
-    public init(_ word: VoiceWord, _ time: String?, _ engine: VoiceEngine?, _ cancelHint: Bool, _ button: VoiceButton, _ ring: Bool) {
+    public init(_ word: VoiceWord, _ time: String?, _ engine: VoiceEngine?, _ cancelHint: Bool, _ button: VoiceButton, _ wave: Bool) {
         self.word = word
         self.time = time
         self.engine = engine
         self.cancelHint = cancelHint
         self.button = button
-        self.ring = ring
+        self.wave = wave
     }
 }
 
