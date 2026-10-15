@@ -82,6 +82,7 @@ sealed class TalkInput : UserControl
         _text.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
         _text.VerticalContentAlignment = VerticalAlignment.Top;
         _text.PreviewKeyDown += OnKey;
+        CommandManager.AddPreviewCanExecuteHandler(_text, OnCanPaste);
         CommandManager.AddPreviewExecutedHandler(_text, OnPasteCommand);
 
         _stop = StopButton(() => StopAsked?.Invoke());
@@ -469,6 +470,17 @@ sealed class TalkInput : UserControl
         _text.GetLineIndexFromCharacterIndex(_text.CaretIndex) >= Math.Max(0, _text.LineCount - 1);
 
     // ---- pictures and files ----
+
+    /// A TextBox allows Paste only when the clipboard holds text. A screenshot from Win+Shift+S
+    /// holds only a picture, so without this Ctrl+V did nothing at all (check of 2026-10-15).
+    private static void OnCanPaste(object sender, CanExecuteRoutedEventArgs e)
+    {
+        if (e.Command == ApplicationCommands.Paste && (Clipboard.ContainsImage() || Clipboard.ContainsFileDropList()))
+        {
+            e.CanExecute = true;
+            e.Handled = true;
+        }
+    }
 
     /// Ctrl+V with a picture in the clipboard attaches it; copied files are dropped. Text pastes
     /// as it always does.
