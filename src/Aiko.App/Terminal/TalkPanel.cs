@@ -360,8 +360,7 @@ sealed class FeedRow : ContentControl
         return row;
     }
 
-    /// The text of a message and its pictures. While the message waits to go, its pictures are
-    /// there to draw; once sent, the core keeps only how many there were.
+    /// The text of a message and its pictures, as small squares above the text.
     private static UIElement MessageInside(FeedItem.OwnerMessage message)
     {
         var column = new StackPanel();
@@ -388,12 +387,6 @@ sealed class FeedRow : ContentControl
             }
 
             column.Children.Add(pictures);
-        }
-        else if (message.Images > 0)
-        {
-            var count = TerminalPanel.Mono(string.Format(CultureInfo.CurrentCulture, Strings.TerminalPictures, message.Images), "Muted");
-            count.Margin = new Thickness(0, 0, 0, message.Text.Length > 0 ? 6 : 0);
-            column.Children.Add(count);
         }
 
         if (message.Text.Length > 0)

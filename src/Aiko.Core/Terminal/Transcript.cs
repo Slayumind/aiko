@@ -89,7 +89,7 @@ public static class Transcript
             return state.On(user).State;
         }
 
-        var images = Blocks(root).Count(block => Word(block, "type") == "image");
+        var images = Pictures(root);
         if (user.Text.StartsWith(Interrupted, StringComparison.Ordinal))
         {
             return state with
@@ -110,14 +110,14 @@ public static class Transcript
         }
 
         var text = Written(user.Text);
-        if (text.Length == 0 && images == 0)
+        if (text.Length == 0 && images.Count == 0)
         {
             return state;
         }
 
         return state with
         {
-            Items = [.. state.Items, new FeedItem.OwnerMessage(state.NextId, text, images, false, [])],
+            Items = [.. state.Items, new FeedItem.OwnerMessage(state.NextId, text, false, images)],
             NextId = state.NextId + 1,
         };
     }
@@ -153,6 +153,16 @@ public static class Transcript
     /// Claude Code fills a turn without an answer with a message of its own, from no model.
     private static bool IsEmptyReply(JsonElement root) =>
         Word(Member(root, "message"), "model") == "<synthetic>" && Word(root, "error").Length == 0;
+
+    /// The pictures the person sent, as Claude Code wrote them into the file.
+    private static IReadOnlyList<AttachedImage> Pictures(JsonElement root) =>
+    [
+        .. Blocks(root)
+            .Where(block => Word(block, "type") == "image")
+            .Select(block => Member(block, "source"))
+            .Where(source => Word(source, "type") == "base64" && Word(source, "data").Length > 0)
+            .Select(source => new AttachedImage(Word(source, "media_type"), Word(source, "data"))),
+    ];
 
     private static IEnumerable<JsonElement> Blocks(JsonElement root) =>
         Member(Member(root, "message"), "content") is { ValueKind: JsonValueKind.Array } content

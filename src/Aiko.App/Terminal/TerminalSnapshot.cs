@@ -88,7 +88,7 @@ static class TerminalSnapshot
 
         List<FeedItem> items =
         [
-            new FeedItem.OwnerMessage(1, "Add the folder groups to the form of a new session.", 0, false, []),
+            new FeedItem.OwnerMessage(1, "Add the folder groups to the form of a new session.", false, []),
             Step(2, StepKind.Read, "NewSessionChoices.cs", StepState.Done),
             Step(3, StepKind.Search, "FolderSource", StepState.Done),
             new FeedItem.Answer(4, string.Join("\n",
@@ -109,7 +109,7 @@ static class TerminalSnapshot
                 "| Bound | 3 |"), false),
             Step(5, StepKind.Edit, "DropDown.cs", StepState.Done, 18, 2),
             withCard ? new FeedItem.Card(6, RequestCard.From(edit), RequestState.Open) : Step(6, StepKind.Run, "dotnet test Aiko.Core.Tests", StepState.Running),
-            new FeedItem.OwnerMessage(7, "And the same on the Mac, please.", 0, true, []),
+            new FeedItem.OwnerMessage(7, "And the same on the Mac, please.", true, []),
         ];
 
         return new TalkView("a2", items, Busy: true, HasOpenCard: withCard, PermissionMode.Manual, "Opus 5.5", "Aiko");

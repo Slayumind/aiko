@@ -778,7 +778,7 @@ public class SharedCaseTests
         FeedItem.OwnerMessage message => new JsonObject
         {
             ["owner"] = message.Text,
-            ["images"] = message.Images,
+            ["images"] = message.Attachments.Count,
             ["queued"] = message.Queued,
         },
         FeedItem.Answer answer => new JsonObject { ["answer"] = answer.Text, ["streaming"] = answer.Streaming },
