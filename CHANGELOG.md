@@ -17,6 +17,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   shows the lines an edit changes. Under the field you see the mode, the model and the environment;
   Shift+Tab or a click changes the mode, and a click on the model takes the next one. Arrows bring back what you sent, Ctrl+V or Cmd+V adds a screenshot,
   and a dropped file adds its path. A new session starts in the mode your project settings name.
+- **Voice input in the terminal, on Windows.** Press Ctrl+Space or the microphone button, speak
+  Russian or English, press again. The words appear in the field as you speak and wait for you to
+  send them. Turn it on in the new **Terminal** page of the settings: recognition runs on your
+  computer after a one-time 465 MB download, or through OpenAI with your own key, kept in Windows
+  Credential Manager. The Mac follows before the release.
 
 ## [0.4.1] - 2026-10-12
 
