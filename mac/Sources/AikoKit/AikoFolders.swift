@@ -93,6 +93,10 @@ public struct AikoFolders: Sendable, Equatable {
 
     public var logFile: String { platform.join(localFolder, "log.txt") }
 
+    /// The speech model of voice input, 465 MB, downloaded when voice input is first turned on
+    /// (D-313). It can be downloaded again, so it sits with what Aiko makes for itself.
+    public var voiceModelFile: String { platform.join(localFolder, "models", "ggml-small.bin") }
+
     /// The installed app itself, as Velopack lays it out on Windows.
     public var installedAppFolder: String {
         platform.join(localBase, AikoFolders.installFolderName, "current")

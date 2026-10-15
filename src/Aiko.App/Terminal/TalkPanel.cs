@@ -110,6 +110,9 @@ sealed class TalkPanel : UserControl
     public event Action? ModelAsked;
     public event Action<string, CardChoice>? Chosen;
 
+    /// The field, for voice input to write into.
+    internal TalkInput Input => _input;
+
     /// The field takes the keyboard, for a session the person just went into.
     public void FocusInput() => _input.Focus();
 

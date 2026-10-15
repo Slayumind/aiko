@@ -26,6 +26,25 @@ Builds the installer and handles updates.
 - Licence: MIT
 - Source: https://github.com/velopack/velopack
 
+## whisper.cpp
+
+Turns speech into text for voice input, on the computer. Aiko ships its libraries (`whisper.dll`,
+`ggml*.dll`) from release b5454 (version 1.9.5). The speech model is not shipped: it is downloaded
+when voice input is turned on.
+
+- Licence: MIT, Copyright (c) 2023-2026 The ggml authors
+- Source: https://github.com/ggml-org/whisper.cpp
+- The full licence texts of both ship in the `whisper` folder of the app:
+  `src/Aiko.App/Assets/Licenses/`
+
+## Silero VAD
+
+Tells speech from silence before whisper.cpp reads the sound. Aiko ships the model in the ggml
+format (`ggml-silero-v5.1.2.bin`).
+
+- Licence: MIT, Copyright (c) 2020-present Silero Team
+- Source: https://github.com/snakers4/silero-vad, converted by https://huggingface.co/ggml-org/whisper-vad
+
 ## Not included
 
 Aiko is inspired by [notchi](https://github.com/sk-ruban/notchi), which is under GPL-3.0. Aiko

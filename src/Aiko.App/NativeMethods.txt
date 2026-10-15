@@ -48,3 +48,16 @@ AssignProcessToJobObject
 TerminateJobObject
 JOBOBJECT_EXTENDED_LIMIT_INFORMATION
 JOB_OBJECT_LIMIT
+waveInOpen
+waveInClose
+waveInPrepareHeader
+waveInUnprepareHeader
+waveInAddBuffer
+waveInStart
+waveInReset
+waveInGetNumDevs
+WAVEFORMATEX
+WAVEHDR
+WAVE_MAPPER
+WAVE_FORMAT_PCM
+WHDR_DONE

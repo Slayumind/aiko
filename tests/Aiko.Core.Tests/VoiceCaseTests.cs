@@ -100,6 +100,16 @@ public class VoiceCaseTests
             Assert.True(row.GetProperty("hint").GetString() == hint, $"{row.GetProperty("name").GetString()}: {hint}");
         }
 
+        foreach (var row in cases.GetProperty("branches").EnumerateArray())
+        {
+            Assert.Equal(row.GetProperty("branch").GetString(), VoiceHint.Branch(row.GetProperty("head").GetString()));
+        }
+
+        foreach (var row in cases.GetProperty("gitFolders").EnumerateArray())
+        {
+            Assert.Equal(row.GetProperty("folder").GetString(), VoiceHint.GitFolder(row.GetProperty("file").GetString()));
+        }
+
         foreach (var row in cases.GetProperty("languages").EnumerateArray())
         {
             Assert.Equal(

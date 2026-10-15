@@ -88,6 +88,14 @@ struct VoiceCaseTests {
             #expect(hint == row["hint"]?.stringValue, "\(row["name"]?.stringValue ?? "")")
         }
 
+        for row in cases["branches"]?.arrayValue ?? [] {
+            #expect(VoiceHint.branch(row["head"]?.stringValue) == row["branch"]?.stringValue)
+        }
+
+        for row in cases["gitFolders"]?.arrayValue ?? [] {
+            #expect(VoiceHint.gitFolder(row["file"]?.stringValue) == row["folder"]?.stringValue)
+        }
+
         for row in cases["languages"]?.arrayValue ?? [] {
             guard let setting = row["setting"]?.stringValue.flatMap(AikoLanguage.init(rawValue:)) else {
                 Issue.record("unreadable row in voice-hint")

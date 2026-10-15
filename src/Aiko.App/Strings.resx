@@ -1300,4 +1300,40 @@
   <data name="TerminalPictures" xml:space="preserve">
     <value>Pictures: {0}</value>
   </data>
+  <data name="VoiceButtonTip" xml:space="preserve">
+    <value>Voice input · Ctrl+Space</value>
+  </data>
+  <data name="VoiceStopTip" xml:space="preserve">
+    <value>Finish recording · Ctrl+Space</value>
+  </data>
+  <data name="VoiceWarming" xml:space="preserve">
+    <value>starting the mic</value>
+  </data>
+  <data name="VoiceListening" xml:space="preserve">
+    <value>listening {0}</value>
+  </data>
+  <data name="VoiceFinishing" xml:space="preserve">
+    <value>finishing</value>
+  </data>
+  <data name="VoiceOnComputer" xml:space="preserve">
+    <value>on this computer</value>
+  </data>
+  <data name="VoiceCancelHint" xml:space="preserve">
+    <value>Esc to cancel</value>
+  </data>
+  <data name="VoiceNoMic" xml:space="preserve">
+    <value>No microphone found. Plug one in or allow access to it.</value>
+  </data>
+  <data name="VoiceNoMicLink" xml:space="preserve">
+    <value>Windows Settings</value>
+  </data>
+  <data name="VoiceNeedsModel" xml:space="preserve">
+    <value>Voice input needs a speech model, 465 MB.</value>
+  </data>
+  <data name="VoiceNeedsKey" xml:space="preserve">
+    <value>Recognition through OpenAI needs your key.</value>
+  </data>
+  <data name="VoiceOpenSettings" xml:space="preserve">
+    <value>Open settings</value>
+  </data>
 </root>

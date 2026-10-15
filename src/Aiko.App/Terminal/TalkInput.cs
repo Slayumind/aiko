@@ -1,9 +1,13 @@
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Ellipse = System.Windows.Shapes.Ellipse;
+using Shape = System.Windows.Shapes.Path;
 using Aiko.Core.Terminal;
 
 namespace Aiko.App;
@@ -15,6 +19,11 @@ namespace Aiko.App;
 /// arrows walk through what was sent in this session. A picture comes from the clipboard or from
 /// a drop and waits above the text as a small picture with a cross; any other file or folder that
 /// is dropped becomes its path in the text.
+///
+/// Ctrl+Space or the round mic button starts and finishes voice input (D-313, D-315). While it
+/// goes on the button is tinted red, the line under the field says what is happening, and the
+/// words lie over the field: the confirmed ones white, the tail the recogniser may still change
+/// grey. A TextBox has one colour, so the field itself hides until the words are final.
 sealed class TalkInput : UserControl
 {
     /// Pictures larger than this are made smaller before they go: Claude Code takes up to about
@@ -30,6 +39,28 @@ sealed class TalkInput : UserControl
     private readonly TextBlock _mode = TerminalPanel.Mono("", "Muted");
     private readonly TextBlock _model = TerminalPanel.Mono("", "Muted");
     private readonly TextBlock _where = TerminalPanel.Mono("", "Muted");
+
+    private static readonly Brush RecordingTint = Frozen(Color.FromArgb(0x33, 0xFF, 0x64, 0x67));
+    private static readonly Brush RingTint = Frozen(Color.FromArgb(0x1F, 0xFF, 0x64, 0x67));
+
+    private readonly Button _mic;
+    private readonly Ellipse _micBack = new() { Width = 26, Height = 26, Fill = Brushes.Transparent };
+    private readonly Shape _micIcon = MicIcon();
+    private readonly Ellipse _ring = new() { Width = 34, Height = 34, Margin = new Thickness(-4), Fill = RingTint, IsHitTestVisible = false, Visibility = Visibility.Collapsed };
+    private readonly ScaleTransform _ringScale = new(1, 1, 17, 17);
+    private readonly TextBlock _dictation = new() { TextWrapping = TextWrapping.Wrap, MaxHeight = 200, IsHitTestVisible = false, Visibility = Visibility.Collapsed };
+    private readonly Border _notice;
+    private readonly TextBlock _noticeText = TerminalPanel.Text("", "TextName", "Ink", FontWeights.Normal);
+    private readonly TextBlock _noticeLink = TerminalPanel.Text("", "TextName", "Ink", FontWeights.Normal);
+    private readonly TextBlock _voiceWord = TerminalPanel.Mono("", "Ink");
+    private readonly TextBlock _voiceWhere = TerminalPanel.Mono("", "Muted");
+    private readonly TextBlock _voiceCancel = TerminalPanel.Mono("", "Muted");
+    private TextBlock _placeholder;
+    private VoiceNotice _shownNotice;
+    private bool _voiceActive;
+    private bool _dictating;
+    private string _before = "";
+    private string _after = "";
 
     /// What was sent, per session, oldest first, and where the arrows stand in it.
     private readonly Dictionary<string, List<string>> _sent = [];
@@ -56,20 +87,28 @@ sealed class TalkInput : UserControl
         CommandManager.AddPreviewExecutedHandler(_text, OnPasteCommand);
 
         _stop = StopButton(() => StopAsked?.Invoke());
+        _mic = MicButton();
 
-        var placeholder = TerminalPanel.Text(Strings.TerminalDescribeTask, "TextName", "Muted", FontWeights.Normal);
+        var placeholder = _placeholder = TerminalPanel.Text(Strings.TerminalDescribeTask, "TextName", "Muted", FontWeights.Normal);
         placeholder.Margin = new Thickness(2, 1, 0, 0);
         placeholder.VerticalAlignment = VerticalAlignment.Top;
         placeholder.IsHitTestVisible = false;
-        _text.TextChanged += (_, _) => placeholder.Visibility = _text.Text.Length == 0 ? Visibility.Visible : Visibility.Collapsed;
+        _text.TextChanged += (_, _) => ShowPlaceholder();
 
-        // The stop button stands where the paper clip will be, at the right of the field (D-308).
+        // The mic button is the last at the right; the stop button stands left of it, where the
+        // paper clip will be (D-308, D-315).
         var field = new DockPanel();
+        DockPanel.SetDock(_mic, Dock.Right);
         DockPanel.SetDock(_stop, Dock.Right);
+        field.Children.Add(_mic);
         field.Children.Add(_stop);
+        _dictation.FontFamily = _text.FontFamily;
+        _dictation.FontSize = _text.FontSize;
+        _dictation.Margin = new Thickness(2, 0, 2, 0);
         var words = new Grid();
         words.Children.Add(_text);
         words.Children.Add(placeholder);
+        words.Children.Add(_dictation);
         field.Children.Add(words);
 
         var inside = new StackPanel();
@@ -105,8 +144,31 @@ sealed class TalkInput : UserControl
         status.Children.Add(_mode);
         status.Children.Add(_model);
         status.Children.Add(_where);
+        status.Children.Add(_voiceWord);
+        status.Children.Add(_voiceWhere);
+        status.Children.Add(_voiceCancel);
+        _voiceWord.FontWeight = FontWeights.Medium;
+
+        // The line above the field when voice input cannot start, with the way to fix it.
+        _noticeLink.TextDecorations = TextDecorations.Underline;
+        _noticeLink.Cursor = Cursors.Hand;
+        _noticeLink.Margin = new Thickness(12, 0, 0, 0);
+        _noticeLink.MouseLeftButtonUp += (_, _) => NoticeLinkClicked();
+        var noticeWords = new WrapPanel();
+        noticeWords.Children.Add(_noticeText);
+        noticeWords.Children.Add(_noticeLink);
+        _notice = new Border
+        {
+            BorderBrush = Tokens.Brush("Caution"),
+            BorderThickness = new Thickness(2, 0, 0, 0),
+            Padding = new Thickness(12, 8, 12, 8),
+            Margin = new Thickness(0, 10, 0, 0),
+            Visibility = Visibility.Collapsed,
+            Child = noticeWords,
+        };
 
         var all = new StackPanel();
+        all.Children.Add(_notice);
         all.Children.Add(compose);
         all.Children.Add(status);
         Content = all;
@@ -117,13 +179,139 @@ sealed class TalkInput : UserControl
     public event Action? ModeAsked;
     public event Action? ModelAsked;
 
+    /// Ctrl+Space or the mic button.
+    public event Action? VoicePressed;
+
+    /// Esc while a recording goes on.
+    public event Action? VoiceCancelled;
+
+    /// The link of a line above the field that says the model or the key is missing.
+    public event Action? VoiceSettingsAsked;
+
     public new void Focus() => _text.Focus();
+
+    /// What voice input shows now: the button, the line under the field and the line above it.
+    public void ShowVoice(VoiceLine line, VoiceNotice notice)
+    {
+        _voiceActive = line.Word != VoiceWord.None;
+        _mic.Visibility = line.Button == VoiceButton.Hidden ? Visibility.Collapsed : Visibility.Visible;
+        var recording = line.Button == VoiceButton.Recording;
+        _micBack.Fill = recording ? RecordingTint : Brushes.Transparent;
+        _micIcon.Stroke = Tokens.Brush(recording ? "Destructive" : "Muted");
+        _mic.ToolTip = recording ? Strings.VoiceStopTip : Strings.VoiceButtonTip;
+        _ring.Visibility = line.Ring ? Visibility.Visible : Visibility.Collapsed;
+
+        var usual = _voiceActive ? Visibility.Collapsed : Visibility.Visible;
+        var voice = _voiceActive ? Visibility.Visible : Visibility.Collapsed;
+        _mode.Visibility = _model.Visibility = _where.Visibility = usual;
+        _voiceWord.Visibility = _voiceWhere.Visibility = _voiceCancel.Visibility = voice;
+        _voiceWord.Text = line.Word switch
+        {
+            VoiceWord.Warming => Strings.VoiceWarming,
+            VoiceWord.Listening => string.Format(Strings.VoiceListening, line.Time),
+            VoiceWord.Finishing => Strings.VoiceFinishing,
+            _ => "",
+        };
+        _voiceWord.Foreground = Tokens.Brush(line.Word == VoiceWord.Warming ? "Muted" : "Ink");
+        _voiceWhere.Text = line.Engine switch
+        {
+            VoiceEngine.Local => " · " + Strings.VoiceOnComputer,
+            VoiceEngine.OpenAI => " · OpenAI",
+            _ => "",
+        };
+        _voiceCancel.Text = line.CancelHint ? " · " + Strings.VoiceCancelHint : "";
+
+        _shownNotice = notice;
+        _notice.Visibility = notice == VoiceNotice.None ? Visibility.Collapsed : Visibility.Visible;
+        (_noticeText.Text, _noticeLink.Text) = notice switch
+        {
+            VoiceNotice.NoMicrophone => (Strings.VoiceNoMic, Strings.VoiceNoMicLink),
+            VoiceNotice.NeedsModel => (Strings.VoiceNeedsModel, Strings.VoiceOpenSettings),
+            VoiceNotice.NeedsKey => (Strings.VoiceNeedsKey, Strings.VoiceOpenSettings),
+            _ => ("", ""),
+        };
+    }
+
+    /// The loudness of the last tenth of a second, from 0 to 1: the ring grows with it.
+    public void SetLevel(double level) =>
+        _ringScale.ScaleX = _ringScale.ScaleY = 1 + 0.3 * Math.Clamp(level, 0, 1);
+
+    /// The words go where the caret stands; what is around it stays.
+    public void BeginDictation()
+    {
+        var at = _text.CaretIndex;
+        _before = _text.Text[..at];
+        _after = _text.Text[at..];
+        if (_before.Length > 0 && !char.IsWhiteSpace(_before[^1]))
+        {
+            _before += " ";
+        }
+
+        _dictating = true;
+        _text.IsReadOnly = true;
+        ShowDictation(DictationText.Empty);
+    }
+
+    public void ShowDictation(DictationText dictation)
+    {
+        if (!_dictating)
+        {
+            return;
+        }
+
+        _dictation.Inlines.Clear();
+        _dictation.Inlines.Add(new Run(_before + dictation.ConfirmedText) { Foreground = Tokens.Brush("Ink") });
+        if (dictation.Tail.Count > 0)
+        {
+            var gap = dictation.Confirmed.Count > 0 ? " " : "";
+            _dictation.Inlines.Add(new Run(gap + dictation.TailText) { Foreground = Tokens.Brush("Muted") });
+        }
+
+        _dictation.Inlines.Add(new Run(_after) { Foreground = Tokens.Brush("Ink") });
+        _dictation.Visibility = Visibility.Visible;
+        _text.Visibility = Visibility.Hidden;
+        ShowPlaceholder();
+    }
+
+    /// The words "describe the task" show in an empty field, but not over the words of a recording.
+    private void ShowPlaceholder() =>
+        _placeholder.Visibility = _text.Text.Length == 0 && !_dictating ? Visibility.Visible : Visibility.Collapsed;
+
+    /// The final words go into the field, with the caret after them. Null puts the field back as
+    /// it was before the recording.
+    public void EndDictation(string? words)
+    {
+        if (!_dictating)
+        {
+            return;
+        }
+
+        _dictating = false;
+        _text.IsReadOnly = false;
+        _dictation.Visibility = Visibility.Collapsed;
+        _text.Visibility = Visibility.Visible;
+        ShowPlaceholder();
+        if (words is { Length: > 0 })
+        {
+            var gap = _after.Length > 0 && !char.IsWhiteSpace(_after[0]) ? " " : "";
+            _text.Text = _before + words + gap + _after;
+            _text.CaretIndex = (_before + words).Length;
+        }
+
+        _text.Focus();
+    }
 
     /// A new session starts with an empty field: what was typed for another one stays out of it.
     public void Show(string session, bool busy, PermissionMode mode, string model, string environment)
     {
         if (session != _session)
         {
+            // A recording belongs to the session it started in.
+            if (_voiceActive)
+            {
+                VoiceCancelled?.Invoke();
+            }
+
             _session = session;
             _text.Clear();
             _attached.Clear();
@@ -143,7 +331,22 @@ sealed class TalkInput : UserControl
     private void OnKey(object sender, KeyEventArgs e)
     {
         var modifiers = Keyboard.Modifiers;
-        if (e.Key == Key.Enter && modifiers == ModifierKeys.None)
+        if (e.Key == Key.Space && modifiers == ModifierKeys.Control)
+        {
+            e.Handled = true;
+            VoicePressed?.Invoke();
+        }
+        else if (_dictating && e.Key == Key.Enter)
+        {
+            // The text of a recording is never sent by itself (D-313), not even half way.
+            e.Handled = true;
+        }
+        else if (e.Key == Key.Escape && _voiceActive)
+        {
+            e.Handled = true;
+            VoiceCancelled?.Invoke();
+        }
+        else if (e.Key == Key.Enter && modifiers == ModifierKeys.None)
         {
             e.Handled = true;
             Send();
@@ -393,6 +596,67 @@ sealed class TalkInput : UserControl
         });
         frame.Children.Add(remove);
         return frame;
+    }
+
+    private static Brush Frozen(Color color)
+    {
+        var brush = new SolidColorBrush(color);
+        brush.Freeze();
+        return brush;
+    }
+
+    private void NoticeLinkClicked()
+    {
+        if (_shownNotice == VoiceNotice.NoMicrophone)
+        {
+            Process.Start(new ProcessStartInfo("ms-settings:privacy-microphone") { UseShellExecute = true });
+        }
+        else
+        {
+            VoiceSettingsAsked?.Invoke();
+        }
+    }
+
+    /// The microphone of the slayumind set, drawn in a 24 box with a line of one unit (D-315).
+    private static Shape MicIcon() => new()
+    {
+        Data = Geometry.Parse("M12,1.5 A4,4 0 0 1 16,5.5 V10.5 A4,4 0 0 1 8,10.5 V5.5 A4,4 0 0 1 12,1.5 Z M4.5,11 A7.5,7.5 0 0 0 19.5,11 M12,18.5 V22.5 M8.5,22.5 H15.5"),
+        Stroke = Tokens.Brush("Muted"),
+        StrokeThickness = 1.95,
+        StrokeStartLineCap = PenLineCap.Round,
+        StrokeEndLineCap = PenLineCap.Round,
+        StrokeLineJoin = PenLineJoin.Round,
+    };
+
+    /// A round button with the mic (D-315). The ring behind it is tinted red and follows the sound.
+    private Button MicButton()
+    {
+        _ring.RenderTransform = _ringScale;
+        var hover = new Ellipse { Width = 26, Height = 26, Fill = Tokens.Brush("HoverLayer"), Opacity = 0 };
+        var icon = new Canvas { Width = 24, Height = 24 };
+        icon.Children.Add(_micIcon);
+        var face = new Grid { Width = 26, Height = 26 };
+        face.Children.Add(_ring);
+        face.Children.Add(_micBack);
+        face.Children.Add(hover);
+        face.Children.Add(new Viewbox { Width = 16, Height = 16, Child = icon });
+
+        var presenter = new FrameworkElementFactory(typeof(ContentPresenter));
+        var button = new Button
+        {
+            Content = face,
+            ToolTip = Strings.VoiceButtonTip,
+            Cursor = Cursors.Hand,
+            Focusable = false,
+            Margin = new Thickness(10, -1, 0, -1),
+            VerticalAlignment = VerticalAlignment.Top,
+            Visibility = Visibility.Collapsed,
+            Template = new ControlTemplate(typeof(Button)) { VisualTree = presenter },
+        };
+        button.MouseEnter += (_, _) => hover.BeginAnimation(OpacityProperty, Motion.To(1, Motion.Or0(Motion.Hover), Motion.Standard));
+        button.MouseLeave += (_, _) => hover.BeginAnimation(OpacityProperty, Motion.To(0, Motion.Or0(Motion.Hover), Motion.Standard));
+        button.Click += (_, _) => VoicePressed?.Invoke();
+        return button;
     }
 
     /// A small square button with a square in it, as in the mockup of a turn that works.
