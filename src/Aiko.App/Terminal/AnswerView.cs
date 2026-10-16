@@ -162,15 +162,27 @@ static class AnswerView
         return paragraph;
     }
 
+    private const double ListIndent = 22;
+    private const double MarkerGap = 8;
+
     private static List List(MarkdownBlock.List list)
     {
+        var start = Math.Max(1, list.Start);
         var drawn = new List
         {
             MarkerStyle = list.Ordered ? TextMarkerStyle.Decimal : TextMarkerStyle.Disc,
-            StartIndex = Math.Max(1, list.Start),
+            StartIndex = start,
             Margin = new Thickness(0, 0, 0, 10),
-            Padding = new Thickness(22, 0, 0, 0),
+            Padding = new Thickness(ListIndent, 0, 0, 0),
         };
+        if (list.Ordered)
+        {
+            // A marker is drawn inside the left padding. A fixed padding cut "28." on the left,
+            // so the padding fits the widest number of this list.
+            drawn.MarkerOffset = MarkerGap;
+            drawn.Padding = new Thickness(Math.Max(ListIndent, MarkerWidth(start + list.Items.Count - 1) + MarkerGap), 0, 0, 0);
+        }
+
         foreach (var item in list.Items)
         {
             var listItem = new ListItem();
@@ -186,6 +198,15 @@ static class AnswerView
 
         return drawn;
     }
+
+    private static double MarkerWidth(int number) => new FormattedText(
+        $"{number}.",
+        System.Globalization.CultureInfo.InvariantCulture,
+        FlowDirection.LeftToRight,
+        new Typeface(Tokens.Get<FontFamily>("Sans"), FontStyles.Normal, FontWeights.Normal, FontStretches.Normal),
+        Tokens.Get<double>("TextName"),
+        Brushes.Black,
+        pixelsPerDip: 1).WidthIncludingTrailingWhitespace;
 
     private static Section Quote(MarkdownBlock.Quote quote)
     {
