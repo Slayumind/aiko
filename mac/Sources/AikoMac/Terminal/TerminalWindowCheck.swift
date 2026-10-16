@@ -9,7 +9,7 @@ import AppKit
 /// window stands on the screen, and AikoShot takes the picture (/look).
 @MainActor
 enum TerminalWindowCheck {
-    static let states = ["talk", "feed", "compacting", "empty", "form", "elsewhere", "login", "close"]
+    static let states = ["talk", "feed", "compacting", "long-input", "empty", "form", "elsewhere", "login", "close"]
 
     /// Kept alive while the window is shown.
     private static var shown: (TerminalWindow, TerminalPanelState)?
@@ -38,6 +38,14 @@ enum TerminalWindowCheck {
         shown = (window, panel)
         window.show()
         report(number, window.frame, window.number)
+
+        // Twelve lines typed after the window opened: more than the field shows, so it scrolls
+        // and keeps the end in view (AIKO-245).
+        if state == "long-input" {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                panel.input.text = (1...12).map { "Line \($0) of a long message." }.joined(separator: "\n")
+            }
+        }
 
         DispatchQueue.main.asyncAfter(deadline: .now() + seconds) {
             AppTerminalLog.windowCheckDone(state: number)
@@ -107,7 +115,7 @@ enum TerminalWindowCheck {
             ask: state == "close"
                 ? CloseAsk(title: Strings.format(Strings.terminalCloseTitle, "terminal"), body: Strings.terminalCloseBody)
                 : nil,
-            talk: state == "feed" ? feed() : state == "compacting" ? feed(compacting: true) : nil,
+            talk: state == "feed" || state == "long-input" ? feed() : state == "compacting" ? feed(compacting: true) : nil,
             now: now)
     }
 
