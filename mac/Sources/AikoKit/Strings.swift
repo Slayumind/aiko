@@ -467,7 +467,6 @@ public enum Strings {
         "TerminalDiffMore": ("{0} more lines", "Ещё строк: {0}"),
         "TerminalWaitsForYou": ("Waiting for you: {0}", "Ждёт тебя: {0}"),
         "TerminalShow": ("Show", "Показать"),
-        "TerminalPictures": ("Pictures: {0}", "Картинок: {0}"),
         "VoiceButtonTip": ("Voice input · Ctrl+Space", "Голосовой ввод · Ctrl+Space"),
         "VoiceStopTip": ("Finish recording · Ctrl+Space", "Закончить запись · Ctrl+Space"),
         "VoiceWarming": ("starting the mic", "микрофон включается"),
@@ -1788,9 +1787,6 @@ public enum Strings {
 
     /// Show
     public static var terminalShow: String { Strings.get("TerminalShow") }
-
-    /// Pictures: {0}
-    public static var terminalPictures: String { Strings.get("TerminalPictures") }
 
     /// Voice input · Ctrl+Space
     public static var voiceButtonTip: String { Strings.get("VoiceButtonTip") }

@@ -1302,9 +1302,6 @@ public static class Strings
     /// Show
     public static string TerminalShow => Get("TerminalShow");
 
-    /// Pictures: {0}
-    public static string TerminalPictures => Get("TerminalPictures");
-
     /// Voice input · Ctrl+Space
     public static string VoiceButtonTip => Get("VoiceButtonTip");
 

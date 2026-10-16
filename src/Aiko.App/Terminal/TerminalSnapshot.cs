@@ -251,6 +251,9 @@ static class TerminalSnapshot
             now);
     }
 
+    /// A small picture the first message was sent with: a checkerboard of 32 by 32 pixels.
+    private const string Picture = "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAAAO0lEQVR42mOQ07TGiqybvmFFpKpnGLVg1IIhYAG1DMKlftSCUQuGggWjRcWoBaMWjNYHoxaMWiCnaQ0AjX5qPQtpTRsAAAAASUVORK5CYII=";
+
     /// The same conversation made shorter once and now made shorter again (D-325).
     private static TalkView Compacting()
     {
@@ -283,7 +286,7 @@ static class TerminalSnapshot
 
         List<FeedItem> items =
         [
-            new FeedItem.OwnerMessage(1, "Add the folder groups to the form of a new session.", false, []),
+            new FeedItem.OwnerMessage(1, "Add the folder groups to the form of a new session.", false, [new AttachedImage("image/png", Picture)]),
             Step(2, StepKind.Read, "NewSessionChoices.cs", StepState.Done),
             Step(3, StepKind.Search, "FolderSource", StepState.Done),
             new FeedItem.Answer(4, string.Join("\n",

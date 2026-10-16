@@ -769,8 +769,8 @@ struct SharedCaseTests {
 
     private static func describedItem(_ item: FeedItem) -> JsonNode {
         switch item.content {
-        case .ownerMessage(let words, let images, let queued, _):
-            return node([("owner", .string(words)), ("images", number(images)), ("queued", .bool(queued))])
+        case .ownerMessage(let words, let queued, let attachments):
+            return node([("owner", .string(words)), ("images", number(attachments.count)), ("queued", .bool(queued))])
         case .answer(let words, let streaming):
             return node([("answer", .string(words)), ("streaming", .bool(streaming))])
         case .step(let step):

@@ -1312,9 +1312,6 @@
   <data name="TerminalShow" xml:space="preserve">
     <value>Показать</value>
   </data>
-  <data name="TerminalPictures" xml:space="preserve">
-    <value>Картинок: {0}</value>
-  </data>
   <data name="VoiceButtonTip" xml:space="preserve">
     <value>Голосовой ввод · Ctrl+Space</value>
   </data>

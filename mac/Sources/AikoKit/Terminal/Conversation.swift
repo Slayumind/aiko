@@ -102,8 +102,8 @@ public struct FeedStep: Sendable, Equatable {
 /// One thing in the feed of a conversation.
 public struct FeedItem: Sendable, Equatable {
     public enum Content: Sendable, Equatable {
-        /// The attachments are kept only until the message is sent; images stays as the count to show.
-        case ownerMessage(text: String, images: Int, queued: Bool, attachments: [AttachedImage])
+        /// The pictures stay with the message after it is sent, so the feed shows what went.
+        case ownerMessage(text: String, queued: Bool, attachments: [AttachedImage])
 
         /// The markdown of an answer. While it is still being written, streaming is set.
         case answer(text: String, streaming: Bool)
@@ -302,7 +302,7 @@ public struct Conversation: Sendable, Equatable {
 
         // The queue is kept here, not in Claude Code: the next message goes when the turn is over (D-304).
         if let queued = next.items.first(where: { item in
-            if case .ownerMessage(_, _, true, _) = item.content { return true }
+            if case .ownerMessage(_, true, _) = item.content { return true }
             return false
         }) {
             return next.sent(queued)
@@ -322,7 +322,7 @@ public struct Conversation: Sendable, Equatable {
         var next = self
         next.failure = .none
         next.unread = false
-        next.queue(.ownerMessage(text: text, images: images.count, queued: true, attachments: images))
+        next.queue(.ownerMessage(text: text, queued: true, attachments: images))
 
         if waits {
             return Outcome(state: next, written: [])
@@ -404,7 +404,7 @@ public struct Conversation: Sendable, Equatable {
     // MARK: - Small steps
 
     private func sent(_ message: FeedItem) -> Outcome {
-        guard case .ownerMessage(let text, let images, _, let attachments) = message.content else {
+        guard case .ownerMessage(let text, _, let attachments) = message.content else {
             return Outcome(state: self, written: [])
         }
 
@@ -414,7 +414,7 @@ public struct Conversation: Sendable, Equatable {
         next.items.removeAll { $0.id == message.id }
         next.items.append(FeedItem(
             id: message.id,
-            content: .ownerMessage(text: text, images: images, queued: false, attachments: [])))
+            content: .ownerMessage(text: text, queued: false, attachments: attachments)))
         next.inTurn = true
 
         return Outcome(state: next, written: [HostLine.userMessage(text, images: attachments)])
@@ -459,7 +459,7 @@ public struct Conversation: Sendable, Equatable {
     private func queuedAtEnd() -> Int {
         var count = 0
         for item in items.reversed() {
-            guard case .ownerMessage(_, _, true, _) = item.content else { break }
+            guard case .ownerMessage(_, true, _) = item.content else { break }
             count += 1
         }
         return count

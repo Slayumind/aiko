@@ -68,9 +68,7 @@ public enum Transcript {
             return state.on(event).state
         }
 
-        let images = (root["message"]?["content"]?.arrayValue ?? [])
-            .filter { $0["type"]?.stringValue == "image" }
-            .count
+        let images = pictures(root)
         if said.hasPrefix(interrupted) {
             return added(state, .notice(kind: .interrupted, text: ""))
         }
@@ -82,11 +80,25 @@ public enum Transcript {
         }
 
         let text = written(said)
-        if text.isEmpty && images == 0 {
+        if text.isEmpty && images.isEmpty {
             return state
         }
 
-        return added(state, .ownerMessage(text: text, images: images, queued: false, attachments: []))
+        return added(state, .ownerMessage(text: text, queued: false, attachments: images))
+    }
+
+    /// The pictures the person sent, as Claude Code wrote them into the file.
+    private static func pictures(_ root: JsonNode) -> [AttachedImage] {
+        (root["message"]?["content"]?.arrayValue ?? []).compactMap { block in
+            guard block["type"]?.stringValue == "image",
+                  let source = block["source"]?.objectValue,
+                  source["type"]?.stringValue == "base64",
+                  let data = source["data"]?.stringValue, !data.isEmpty
+            else {
+                return nil
+            }
+            return AttachedImage(mediaType: source["media_type"]?.stringValue ?? "", base64: data)
+        }
     }
 
     private static func added(_ state: Conversation, _ content: FeedItem.Content) -> Conversation {

@@ -1152,6 +1152,61 @@
           }
         ]
       }
+    },
+    {
+      "name": "a picture without its bytes is left out",
+      "lines": [
+        {
+          "type": "user",
+          "message": {
+            "role": "user",
+            "content": [
+              {
+                "type": "image",
+                "source": {
+                  "type": "url",
+                  "url": "https://example.com/a.png"
+                }
+              },
+              {
+                "type": "image",
+                "source": {
+                  "type": "base64",
+                  "media_type": "image/png",
+                  "data": ""
+                }
+              },
+              {
+                "type": "image",
+                "source": {
+                  "type": "base64",
+                  "media_type": "image/png",
+                  "data": "AAAA"
+                }
+              },
+              {
+                "type": "text",
+                "text": "Only one is here."
+              }
+            ]
+          },
+          "isSidechain": false,
+          "cwd": "/secret/folder"
+        }
+      ],
+      "state": {
+        "activity": "idle",
+        "mode": "plan",
+        "busy": false,
+        "nextId": 2,
+        "items": [
+          {
+            "owner": "Only one is here.",
+            "images": 1,
+            "queued": false
+          }
+        ]
+      }
     }
   ]
 }
