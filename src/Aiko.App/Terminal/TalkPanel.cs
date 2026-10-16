@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
@@ -29,7 +30,7 @@ sealed class TalkPanel : UserControl
 {
     /// The rows of the feed: the items of the core, and the line "working" after them while a turn
     /// goes on (D-308).
-    private readonly ObservableCollection<object> _items = [];
+    private readonly ObservableCollection<FeedSlot> _slots = [];
     private readonly ListBox _feed;
     private readonly TextBlock _empty;
     private readonly TalkInput _input = new();
@@ -37,6 +38,13 @@ sealed class TalkPanel : UserControl
     private readonly TextBlock _reminderText = TerminalPanel.Text("", "TextNumber", "Caution", FontWeights.Normal);
     private readonly HashSet<string> _open = [];
     private ScrollViewer? _scroll;
+    private string? _shownSession;
+
+    /// Whether the feed follows its end as an answer grows. Only the reader's hand turns it off: the
+    /// wheel up, the scroll bar, the keys that go up. Reaching the bottom again turns it on. It used
+    /// to be guessed from the scroll itself, and the guess lost to the feed's own changes of offset:
+    /// a reader at the bottom could not scroll up while an answer was written (check of 2026-10-15).
+    private bool _follow = true;
 
     public TalkPanel()
     {
@@ -44,7 +52,7 @@ sealed class TalkPanel : UserControl
 
         _feed = new ListBox
         {
-            ItemsSource = _items,
+            ItemsSource = _slots,
             Background = Brushes.Transparent,
             BorderThickness = new Thickness(0),
 
@@ -60,7 +68,32 @@ sealed class TalkPanel : UserControl
         VirtualizingPanel.SetIsVirtualizing(_feed, true);
         VirtualizingPanel.SetVirtualizationMode(_feed, VirtualizationMode.Recycling);
         VirtualizingPanel.SetScrollUnit(_feed, ScrollUnit.Pixel);
-        _feed.AddHandler(ScrollViewer.ScrollChangedEvent, new ScrollChangedEventHandler((_, _) => FollowReminder()));
+        _feed.AddHandler(PreviewMouseWheelEvent, new MouseWheelEventHandler((_, e) =>
+        {
+            if (e.Delta > 0)
+            {
+                ReaderGoesUp();
+            }
+        }), handledEventsToo: true);
+        _feed.AddHandler(PreviewMouseLeftButtonDownEvent, new MouseButtonEventHandler((_, e) =>
+        {
+            if (e.OriginalSource is DependencyObject hit && OnScrollBar(hit))
+            {
+                ReaderGoesUp();
+            }
+        }), handledEventsToo: true);
+        _feed.AddHandler(PreviewKeyDownEvent, new KeyEventHandler((_, e) =>
+        {
+            if (e.Key is Key.Up or Key.PageUp or Key.Home)
+            {
+                ReaderGoesUp();
+            }
+        }), handledEventsToo: true);
+        _feed.AddHandler(ScrollViewer.ScrollChangedEvent, new ScrollChangedEventHandler((_, e) =>
+        {
+            Follow(e);
+            FollowReminder();
+        }));
 
         _empty = TerminalPanel.Text(Strings.TerminalEmptyTalk, "TextName", "Muted", FontWeights.Normal);
         _empty.HorizontalAlignment = HorizontalAlignment.Center;
@@ -118,7 +151,13 @@ sealed class TalkPanel : UserControl
 
     public void Show(TalkView view)
     {
-        var atEnd = AtEnd();
+        // Another session opens at its end.
+        var newSession = view.Session != _shownSession;
+        _shownSession = view.Session;
+        if (newSession)
+        {
+            _follow = true;
+        }
 
         List<object> rows = [.. view.Items];
         if (view.Busy && !view.HasOpenCard)
@@ -126,31 +165,36 @@ sealed class TalkPanel : UserControl
             rows.Add(WorkingMark.Row);
         }
 
-        // Rows that did not change keep their place and their control; the core gives the same
-        // record for an item nothing happened to.
+        // A row keeps its place while its item changes, as an answer does with each piece. A new
+        // place makes the list build the row again, and the virtualizing panel loses the reader
+        // whose view starts inside that row: it threw them to the end (check of 2026-10-16).
         for (var at = 0; at < rows.Count; at++)
         {
-            if (at >= _items.Count)
+            if (at >= _slots.Count)
             {
-                _items.Add(rows[at]);
+                _slots.Add(new FeedSlot(rows[at]));
             }
-            else if (!ReferenceEquals(_items[at], rows[at]) && !Equals(_items[at], rows[at]))
+            else if (_slots[at].Holds(rows[at]))
             {
-                _items[at] = rows[at];
+                _slots[at].Item = rows[at];
+            }
+            else
+            {
+                _slots[at] = new FeedSlot(rows[at]);
             }
         }
 
-        while (_items.Count > rows.Count)
+        while (_slots.Count > rows.Count)
         {
-            _items.RemoveAt(_items.Count - 1);
+            _slots.RemoveAt(_slots.Count - 1);
         }
 
         _empty.Visibility = view.Items.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         _input.Show(view.Session, view.Busy, view.Mode, view.Model, view.Environment);
 
-        if (atEnd && _items.Count > 0)
+        if (newSession && _slots.Count > 0)
         {
-            Dispatcher.BeginInvoke(() => _feed.ScrollIntoView(_items[^1]), System.Windows.Threading.DispatcherPriority.Background);
+            Dispatcher.BeginInvoke(() => ToEnd(_scroll ??= FindScroll(_feed)), System.Windows.Threading.DispatcherPriority.Background);
         }
 
         Dispatcher.BeginInvoke(FollowReminder, System.Windows.Threading.DispatcherPriority.Background);
@@ -182,14 +226,14 @@ sealed class TalkPanel : UserControl
         _ => label,
     };
 
-    private FeedItem.Card? OpenCard() =>
-        _items.OfType<FeedItem.Card>().LastOrDefault(card => card.State == RequestState.Open);
+    private FeedSlot? OpenCard() =>
+        _slots.LastOrDefault(slot => slot.Item is FeedItem.Card { State: RequestState.Open });
 
     /// The line "waiting for you: edit" shows while the open card is out of view, and names it
     /// with the word of its step (D-309).
     private void FollowReminder()
     {
-        if (OpenCard() is not { } card || InView(card))
+        if (OpenCard() is not { Item: FeedItem.Card card } slot || InView(slot))
         {
             _reminder.Visibility = Visibility.Collapsed;
             return;
@@ -200,9 +244,9 @@ sealed class TalkPanel : UserControl
         _reminder.Visibility = Visibility.Visible;
     }
 
-    private bool InView(object item)
+    private bool InView(FeedSlot slot)
     {
-        if (_feed.ItemContainerGenerator.ContainerFromItem(item) is not FrameworkElement row || !row.IsVisible
+        if (_feed.ItemContainerGenerator.ContainerFromItem(slot) is not FrameworkElement row || !row.IsVisible
             || (_scroll ??= FindScroll(_feed)) is not { } scroll)
         {
             return false;
@@ -215,18 +259,48 @@ sealed class TalkPanel : UserControl
 
     private void ShowOpenCard()
     {
-        if (OpenCard() is { } card)
+        if (OpenCard() is { } slot)
         {
-            _feed.ScrollIntoView(card);
+            _feed.ScrollIntoView(slot);
         }
     }
 
-    /// Whether the feed shows its last row, so a new one should come into view too. Someone who
-    /// scrolled up to read stays where they are.
-    private bool AtEnd()
+    private void Follow(ScrollChangedEventArgs e)
     {
-        var scroll = FindScroll(_feed);
-        return scroll is null || scroll.VerticalOffset >= scroll.ScrollableHeight - 2;
+        // A wide code block scrolls sideways inside a row; only the feed's own scroll counts.
+        if (e.OriginalSource is not ScrollViewer scroll || !ReferenceEquals(scroll.TemplatedParent, _feed))
+        {
+            return;
+        }
+
+        var atEnd = scroll.VerticalOffset >= scroll.ScrollableHeight - 2;
+        if (!_follow && atEnd && e.VerticalChange > 0)
+        {
+            _follow = true;
+        }
+        else if (_follow && !atEnd && e.ExtentHeightChange != 0)
+        {
+            ToEnd(scroll);
+        }
+    }
+
+    private void ReaderGoesUp() => _follow = false;
+
+    /// To the bottom by number, not by ScrollToEnd: after ScrollToEnd the virtualizing panel kept
+    /// bringing the end into view as rows changed size, over the reader's own scroll (2026-10-15).
+    private static void ToEnd(ScrollViewer? scroll) => scroll?.ScrollToVerticalOffset(scroll.ScrollableHeight);
+
+    private static bool OnScrollBar(DependencyObject hit)
+    {
+        for (var at = hit; at is not null; at = at is Visual or System.Windows.Media.Media3D.Visual3D ? VisualTreeHelper.GetParent(at) : null)
+        {
+            if (at is System.Windows.Controls.Primitives.ScrollBar)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static ScrollViewer? FindScroll(DependencyObject parent)
@@ -251,7 +325,7 @@ sealed class TalkPanel : UserControl
     private static FrameworkElementFactory RowFactory()
     {
         var row = new FrameworkElementFactory(typeof(FeedRow));
-        row.SetBinding(FeedRow.ItemProperty, new Binding());
+        row.SetBinding(FeedRow.ItemProperty, new Binding(nameof(FeedSlot.Item)));
         return row;
     }
 
@@ -269,6 +343,38 @@ sealed class TalkPanel : UserControl
             },
         };
     }
+}
+
+/// The place of one row in the feed. The list sees the place; the row draws the item in it.
+sealed class FeedSlot(object item) : INotifyPropertyChanged
+{
+    private object _item = item;
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// A FeedItem, or the WorkingMark. The core gives the same record for an item nothing
+    /// happened to, and then the row is not built again.
+    public object Item
+    {
+        get => _item;
+        set
+        {
+            if (ReferenceEquals(_item, value) || Equals(_item, value))
+            {
+                return;
+            }
+
+            _item = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Item)));
+        }
+    }
+
+    /// Whether the item is the one already in this place, maybe changed: the same id and kind.
+    public bool Holds(object item) => (_item, item) switch
+    {
+        (FeedItem shown, FeedItem next) => shown.Id == next.Id && shown.GetType() == next.GetType(),
+        _ => ReferenceEquals(_item, item),
+    };
 }
 
 /// The last row of the feed while a turn goes on. It is not an item of the core: the core says

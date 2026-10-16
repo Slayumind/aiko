@@ -17,7 +17,7 @@ static class ModelDownload
 {
     private static readonly string Model = ThisComputer.Folders.VoiceModelFile;
     private static readonly string Part = Model + ".part";
-    private static CancellationTokenSource? _running;
+    private static CancellationTokenSource? CurrentDownload;
 
     /// Bytes so far, on a thread of the pool. The page brings it to its own thread.
     public static event Action<long>? Progress;
@@ -25,7 +25,7 @@ static class ModelDownload
     /// The end: null when the model is in place, or a short reason for the log and the page.
     public static event Action<string?>? Ended;
 
-    public static bool Running => _running is not null;
+    public static bool Running => CurrentDownload is not null;
 
     public static long Done { get; private set; }
 
@@ -34,12 +34,12 @@ static class ModelDownload
 
     public static void Start()
     {
-        if (_running is not null || ModelBytes == VoiceModel.Bytes)
+        if (CurrentDownload is not null || ModelBytes == VoiceModel.Bytes)
         {
             return;
         }
 
-        var stop = _running = new CancellationTokenSource();
+        var stop = CurrentDownload = new CancellationTokenSource();
         Task.Run(async () =>
         {
             string? problem;
@@ -57,12 +57,12 @@ static class ModelDownload
             }
 
             Log.Write($"voice model download: {problem ?? "done"}");
-            _running = null;
+            CurrentDownload = null;
             Ended?.Invoke(problem);
         });
     }
 
-    public static void Stop() => _running?.Cancel();
+    public static void Stop() => CurrentDownload?.Cancel();
 
     /// Removes the model and any part of it: the page offers this when voice input is turned off.
     public static void Remove()

@@ -32,6 +32,9 @@ sealed class TerminalLog : ITerminalLog
     public static void HistoryChecked(bool found, int items, int messages, int answers, int steps, int notices) =>
         Log.Write($"--try-history: file found={found}, items {items}: messages {messages}, answers {answers}, steps {steps}, notices {notices}");
 
+    public static void FeedScrollChecked(bool found, int behind, int whileWriting, int insideAnswer, int aboveAnswer) =>
+        Log.Write($"--try-feed-scroll: feed found={found}; moved, px: at the end {behind}, up while it writes {whileWriting}, inside the answer {insideAnswer}, above the answer {aboveAnswer}");
+
     public static void RealChecked(bool claudeFound, bool answered, bool signedOut, bool failed, int items) =>
         Log.Write($"--try-conversation real: claude found={claudeFound}, answered={answered}, signed out={signedOut}, failed={failed}, items {items}");
 }

@@ -59,6 +59,119 @@ static class TerminalSnapshot
         }
     }
 
+    /// --try-feed-scroll: a long answer is written in pieces into the real feed, in a window off
+    /// the screen. Twice the reader scrolls up, into the answer and above it, and the feed must stay
+    /// where it was left while the answer goes on (check of 2026-10-15). The log says how far it
+    /// moved; the exit code is 0 when it did not.
+    public static int FeedScroll()
+    {
+        _ = System.Windows.Application.Current ?? new System.Windows.Application { ShutdownMode = System.Windows.ShutdownMode.OnExplicitShutdown };
+        var panel = new TerminalPanel();
+        var window = new System.Windows.Window
+        {
+            Content = panel,
+            Width = 1100,
+            Height = 700,
+            Left = -4000,
+            Top = 0,
+            WindowStyle = System.Windows.WindowStyle.None,
+            ShowInTaskbar = false,
+            ShowActivated = false,
+        };
+        window.Show();
+
+        var view = View("working");
+        var talk = view.Talk!;
+        var answer = "";
+
+        void Write(int pieces)
+        {
+            for (var i = 0; i < pieces; i++)
+            {
+                answer += $"Paragraph {answer.Length / 90 + 1}: the answer goes on and on, the way a long one does, line after line.\n\n";
+                panel.Show(view with { Talk = talk with { Items = [.. talk.Items, new FeedItem.Answer(100, answer, true)] } });
+                Settle();
+            }
+        }
+
+        Write(30);
+        var scroll = FeedScroller(panel);
+        if (scroll is null)
+        {
+            TerminalLog.FeedScrollChecked(false, 0, 0, 0, 0);
+            return 1;
+        }
+
+        // At the end, the feed follows the answer as it grows.
+        scroll.ScrollToVerticalOffset(scroll.ScrollableHeight);
+        Settle();
+        Write(5);
+        var behind = (int)Math.Round(scroll.ScrollableHeight - scroll.VerticalOffset);
+
+        // The reader at the end scrolls up while a piece is on its way: between the draw and the
+        // moment the window settles.
+        scroll.ScrollToVerticalOffset(scroll.ScrollableHeight);
+        Settle();
+        answer += "One more piece.\n\n";
+        panel.Show(view with { Talk = talk with { Items = [.. talk.Items, new FeedItem.Answer(100, answer, true)] } });
+        // The move lands on the next layout, and a virtualizing feed may land it elsewhere than
+        // asked: where it landed is where the reader is.
+        ReaderScrolls(scroll, scroll.VerticalOffset - 300);
+        Settle();
+        var leftAtWheel = scroll.VerticalOffset;
+        Write(5);
+        var whileWriting = (int)Math.Round(scroll.VerticalOffset - leftAtWheel);
+
+        var insideAnswer = MovedAfterScroll(500);
+        var aboveAnswer = MovedAfterScroll(scroll.ScrollableHeight - 150);
+
+        // The reader scrolls up so far from the end, and the answer goes on.
+        int MovedAfterScroll(double up)
+        {
+            ReaderScrolls(scroll, Math.Max(0, scroll.ScrollableHeight - up));
+            Settle();
+            var left = scroll.VerticalOffset;
+            Write(15);
+            return (int)Math.Round(scroll.VerticalOffset - left);
+        }
+
+        window.Close();
+        TerminalLog.FeedScrollChecked(true, behind, whileWriting, insideAnswer, aboveAnswer);
+        return new[] { behind, whileWriting, insideAnswer, aboveAnswer }.Any(moved => Math.Abs(moved) > 2) ? 1 : 0;
+    }
+
+    /// The reader turns the wheel up, as a hand does: the feed hears the wheel, then the offset moves.
+    private static void ReaderScrolls(System.Windows.Controls.ScrollViewer scroll, double to)
+    {
+        scroll.RaiseEvent(new System.Windows.Input.MouseWheelEventArgs(System.Windows.Input.Mouse.PrimaryDevice, 0, 120)
+        {
+            RoutedEvent = System.Windows.UIElement.PreviewMouseWheelEvent,
+        });
+        scroll.ScrollToVerticalOffset(to);
+    }
+
+    private static void Settle() =>
+        System.Windows.Threading.Dispatcher.CurrentDispatcher.Invoke(() => { }, System.Windows.Threading.DispatcherPriority.ContextIdle);
+
+    private static System.Windows.Controls.ScrollViewer? FeedScroller(System.Windows.DependencyObject parent)
+    {
+        for (var at = 0; at < System.Windows.Media.VisualTreeHelper.GetChildrenCount(parent); at++)
+        {
+            var child = System.Windows.Media.VisualTreeHelper.GetChild(parent, at);
+            if (child is System.Windows.Controls.ScrollViewer { TemplatedParent: System.Windows.Controls.ListBox } scroll)
+            {
+                return scroll;
+            }
+
+            if (FeedScroller(child) is { } found)
+            {
+                return found;
+            }
+        }
+
+        return null;
+    }
+
     private static TerminalView View(string state)
     {
         var now = DateTimeOffset.Now;

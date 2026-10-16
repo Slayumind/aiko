@@ -283,6 +283,12 @@ static class Program
 
         // The window of the terminal drawn into a file, on made up sessions. States: talk, feed,
         // working, empty, form, elsewhere, login, close. The width is 1100 unless a third word gives another.
+        if (args is ["--try-feed-scroll", ..])
+        {
+            Environment.Exit(TerminalSnapshot.FeedScroll());
+            return;
+        }
+
         if (args is ["--snapshot-terminal", var terminalPath, var terminalState, .. var terminalRest])
         {
             var width = terminalRest is [var word, ..] && double.TryParse(word, System.Globalization.CultureInfo.InvariantCulture, out var given)

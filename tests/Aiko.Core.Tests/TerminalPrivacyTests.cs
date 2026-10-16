@@ -43,8 +43,8 @@ public class TerminalPrivacyTests
             }
         }
 
-        // Four in the seam, the same four and the four of the doors in the app.
-        Assert.Equal(12, methods);
+        // Four in the seam, the same four and the five of the doors in the app.
+        Assert.Equal(13, methods);
     }
 
     private static IEnumerable<string> TerminalSources() =>
