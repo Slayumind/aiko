@@ -128,10 +128,11 @@ sealed class VoiceDictation
     private void Start()
     {
         var context = _context();
+        // InstalledUICulture is the language of Windows; CurrentUICulture follows Aiko's own.
+        var language = VoiceHint.Language(_settings.VoiceLanguage, CultureInfo.InstalledUICulture.Name);
         var hint = context is null
             ? ""
-            : VoiceHint.Build(context.Folder, BranchOf(context.Folder), context.Files, context.MemoryOn ? MemoryKeys() : null);
-        var language = VoiceHint.Language(_settings.Language, CultureInfo.CurrentUICulture.Name);
+            : VoiceHint.Build(context.Folder, BranchOf(context.Folder), context.Files, context.MemoryOn ? MemoryKeys() : null, language);
 
         _text = DictationText.Empty;
         _input.BeginDictation();

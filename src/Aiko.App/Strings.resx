@@ -1363,6 +1363,12 @@
   <data name="VoiceToggleWhat" xml:space="preserve">
     <value>Ctrl+Space or the microphone button in the field.</value>
   </data>
+  <data name="VoiceLanguageLabel" xml:space="preserve">
+    <value>Speech language</value>
+  </data>
+  <data name="VoiceLanguageWhat" xml:space="preserve">
+    <value>Whisper on your computer listens for this language. OpenAI hears the language by itself.</value>
+  </data>
   <data name="VoiceEngineLabel" xml:space="preserve">
     <value>Recognition</value>
   </data>

@@ -76,6 +76,10 @@ public sealed record AppSettings
 
     public VoiceEngine VoiceEngine { get; init; } = VoiceEngine.Local;
 
+    /// The language Whisper listens for. System is the language of the computer, not of Aiko's
+    /// interface: people often speak another language than the one they read in (D-326).
+    public AikoLanguage VoiceLanguage { get; init; } = AikoLanguage.System;
+
     /// A settings file we cannot read is not a reason to stop: Aiko starts with the defaults.
     /// Putting the unreadable file aside before that happens is the store's job, so that the next
     /// save does not quietly write over choices somebody may still want back.

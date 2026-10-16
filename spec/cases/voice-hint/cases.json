@@ -1,5 +1,5 @@
 {
-  "comment": "Echoes: a recogniser that does not catch the sound may give back the hint itself; a phrase of three or more parts, all of them items of the hint, is an echo and is dropped. What the recogniser is told before it listens (D-313): the folder of the session, its branch, the names of files from the conversation, then the keys of Aiko's memory when the memory is on. A path gives only its last part. The same name twice goes once, whatever its case. The hint stops before the item that would make it longer than the limit. The language is the language of the interface; System follows the system, and anything but Russian is English (D-314).",
+  "comment": "Echoes: a recogniser that does not catch the sound may give back the hint itself; a phrase of three or more parts, all of them items of the hint, is an echo and is dropped. What the recogniser is told before it listens (D-313): the folder of the session, its branch, words of the terminal in the language Whisper hears (none without a language), the names of files from the conversation, then the keys of Aiko's memory when the memory is on. A path gives only its last part. The same name twice goes once, whatever its case. The hint stops before the item that would make it longer than the limit. The language is the one chosen for speech on the Terminal page; System follows the language of the computer, and anything but Russian is English (D-314, D-326).",
   "hints": [
     {
       "name": "everything",
@@ -45,6 +45,36 @@
       "keys": null,
       "max": 400,
       "hint": ""
+    },
+    {
+      "name": "words of the terminal in Russian come right after the branch",
+      "folder": "C:\\work\\aiko",
+      "branch": "main",
+      "files": ["src/TalkInput.cs"],
+      "keys": null,
+      "language": "ru",
+      "max": 400,
+      "hint": "aiko, main, Enter, Esc, поле ввода, сессия, отрисовано, TalkInput.cs."
+    },
+    {
+      "name": "words of the terminal in English",
+      "folder": "/work/aiko",
+      "branch": null,
+      "files": [],
+      "keys": ["Ember"],
+      "language": "en",
+      "max": 400,
+      "hint": "aiko, Enter, Esc, input field, session, rendered, Ember."
+    },
+    {
+      "name": "a language without words of the terminal adds none",
+      "folder": "/work/aiko",
+      "branch": null,
+      "files": [],
+      "keys": null,
+      "language": "de",
+      "max": 400,
+      "hint": "aiko."
     }
   ],
   "echoes": [

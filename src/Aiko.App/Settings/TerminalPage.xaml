@@ -25,6 +25,18 @@
       </StackPanel>
     </CheckBox>
 
+    <!-- The language Whisper hears, apart from the language of the interface (D-326). -->
+    <TextBlock Text="{x:Static local:Strings.VoiceLanguageLabel}" Style="{StaticResource SectionLabel}" Margin="0,22,0,4" />
+    <TextBlock Text="{x:Static local:Strings.VoiceLanguageWhat}" Style="{StaticResource RowHint}" TextWrapping="Wrap" Margin="0,0,0,8" />
+    <StackPanel Orientation="Horizontal">
+      <RadioButton x:Name="SpeechSystem" Style="{StaticResource Dot}" GroupName="VoiceLanguage" Checked="OnSpeechChanged"
+                   Content="{x:Static local:Strings.LanguageSystem}" />
+      <RadioButton x:Name="SpeechRussian" Style="{StaticResource Dot}" GroupName="VoiceLanguage" Checked="OnSpeechChanged"
+                   Content="{x:Static local:Strings.LanguageRussian}" Margin="20,0,0,0" />
+      <RadioButton x:Name="SpeechEnglish" Style="{StaticResource Dot}" GroupName="VoiceLanguage" Checked="OnSpeechChanged"
+                   Content="{x:Static local:Strings.LanguageEnglish}" Margin="20,0,0,0" />
+    </StackPanel>
+
     <TextBlock Text="{x:Static local:Strings.VoiceEngineLabel}" Style="{StaticResource SectionLabel}" Margin="0,22,0,8" />
 
     <RadioButton x:Name="Local" Style="{StaticResource Dot}" GroupName="VoiceEngine" Checked="OnEngineChanged">

@@ -70,6 +70,7 @@ struct AppSettingsTests {
         settings.island = IslandPosition(.right, 0.25)
         settings.voiceInput = true
         settings.voiceEngine = .openAI
+        settings.voiceLanguage = .english
 
         #expect(AppSettings.fromJson(settings.toJson()) == settings)
     }
@@ -133,5 +134,7 @@ struct AppSettingsTests {
         #expect(settings.voiceInput == false)
         #expect(settings.voiceEngine == .local)
         #expect(AppSettings.default.toJson().contains(#""voiceEngine": "Local""#))
+        #expect(settings.voiceLanguage == .system)
+        #expect(AppSettings.default.toJson().contains(#""voiceLanguage": "System""#))
     }
 }

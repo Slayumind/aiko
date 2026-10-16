@@ -102,6 +102,7 @@ public class VoiceCaseTests
                 row.GetProperty("branch").GetString(),
                 row.GetProperty("files").EnumerateArray().Select(f => f.GetString()!),
                 keys.ValueKind == JsonValueKind.Null ? null : keys.EnumerateArray().Select(k => k.GetString()!),
+                row.TryGetProperty("language", out var language) ? language.GetString() : null,
                 row.GetProperty("max").GetInt32());
 
             Assert.True(row.GetProperty("hint").GetString() == hint, $"{row.GetProperty("name").GetString()}: {hint}");

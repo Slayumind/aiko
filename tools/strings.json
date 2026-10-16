@@ -3108,6 +3108,20 @@
     ]
   ],
   [
+    "VoiceLanguageLabel",
+    [
+      "Speech language",
+      "Язык речи"
+    ]
+  ],
+  [
+    "VoiceLanguageWhat",
+    [
+      "Whisper on your computer listens for this language. OpenAI hears the language by itself.",
+      "Whisper на компьютере слушает этот язык. OpenAI узнаёт язык сам."
+    ]
+  ],
+  [
     "VoiceEngineLabel",
     [
       "Recognition",

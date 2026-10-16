@@ -10,12 +10,22 @@ public static class VoiceHint
     /// stays inside both for Russian and English.
     public const int MaxLength = 400;
 
+    /// Words of the terminal a person says about their work, in the language Whisper hears. They
+    /// come right after the folder and the branch, so a long list of files never cuts them (AIKO-311).
+    private static readonly IReadOnlyDictionary<string, string[]> TerminalWords = new Dictionary<string, string[]>
+    {
+        ["ru"] = ["Enter", "Esc", "поле ввода", "сессия", "отрисовано"],
+        ["en"] = ["Enter", "Esc", "input field", "session", "rendered"],
+    };
+
     /// files are paths or names; only the name is kept. memoryKeys is null when the memory is off.
+    /// language is "ru" or "en", or null for no words of the terminal.
     public static string Build(
         string? folder,
         string? branch,
         IEnumerable<string> files,
         IEnumerable<string>? memoryKeys,
+        string? language = null,
         int maxLength = MaxLength)
     {
         var items = new List<string>();
@@ -32,6 +42,11 @@ public static class VoiceHint
 
         Add(LastPart(folder));
         Add(branch);
+        foreach (var word in language is not null && TerminalWords.TryGetValue(language, out var words) ? words : [])
+        {
+            Add(word);
+        }
+
         foreach (var file in files)
         {
             Add(LastPart(file));
@@ -57,8 +72,9 @@ public static class VoiceHint
         return hint.Length == 0 ? "" : hint + ".";
     }
 
-    /// The language the recogniser is told to hear: the language of Aiko's interface (D-314).
-    /// Automatic detection was worse and slower in the spike.
+    /// The language Whisper is told to hear: the one chosen on the Terminal page, and with System
+    /// the language of the computer (D-314, D-326). Automatic detection was worse and slower in
+    /// the spike.
     public static string Language(AikoLanguage setting, string systemLanguage) => setting switch
     {
         AikoLanguage.Russian => "ru",

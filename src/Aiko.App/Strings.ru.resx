@@ -1363,6 +1363,12 @@
   <data name="VoiceToggleWhat" xml:space="preserve">
     <value>Ctrl+Space или кнопка микрофона в поле.</value>
   </data>
+  <data name="VoiceLanguageLabel" xml:space="preserve">
+    <value>Язык речи</value>
+  </data>
+  <data name="VoiceLanguageWhat" xml:space="preserve">
+    <value>Whisper на компьютере слушает этот язык. OpenAI узнаёт язык сам.</value>
+  </data>
   <data name="VoiceEngineLabel" xml:space="preserve">
     <value>Распознавание</value>
   </data>

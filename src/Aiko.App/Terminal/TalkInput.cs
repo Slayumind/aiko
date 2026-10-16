@@ -490,6 +490,14 @@ sealed class TalkInput : UserControl
         }
     }
 
+    /// Ctrl+Space pressed in another place of the window: the words go into this field, so the
+    /// keyboard comes back to it first (AIKO-311).
+    public void PressVoice()
+    {
+        _text.Focus();
+        VoicePressed?.Invoke();
+    }
+
     /// Enter or Esc pressed in another place of the window, where the keyboard went after a
     /// click on the feed or the list. There they answer only a waiting card (AIKO-244).
     public bool AnswerCard(TalkKey key) => _cardWaits && Act(TalkKeys.For(key, KeyState()));
