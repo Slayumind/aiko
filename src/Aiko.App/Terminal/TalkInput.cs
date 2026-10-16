@@ -16,7 +16,8 @@ namespace Aiko.App;
 /// button and the line "mode · model · environment" under it.
 ///
 /// Enter sends, Shift+Enter is a new line, Esc stops the work, Shift+Tab changes the mode, the
-/// arrows walk through what was sent in this session. A picture comes from the clipboard or from
+/// arrows walk through what was sent in this session. While a card of permission or of a plan
+/// waits, Enter in an empty field allows it and Esc denies it (D-323). A picture comes from the clipboard or from
 /// a drop and waits above the text as a small picture with a cross; any other file or folder that
 /// is dropped becomes its path in the text.
 ///
@@ -66,6 +67,7 @@ sealed class TalkInput : UserControl
     private int _back = -1;
     private string _draft = "";
     private bool _busy;
+    private bool _cardWaits;
 
     public TalkInput()
     {
@@ -176,6 +178,10 @@ sealed class TalkInput : UserControl
 
     public event Action<string, IReadOnlyList<AttachedImage>>? Sent;
     public event Action? StopAsked;
+
+    /// Enter in an empty field and Esc while a card waits (D-323).
+    public event Action? AllowAsked;
+    public event Action? DenyAsked;
     public event Action? ModeAsked;
     public event Action? ModelAsked;
 
@@ -326,8 +332,9 @@ sealed class TalkInput : UserControl
     }
 
     /// A new session starts with an empty field: what was typed for another one stays out of it.
-    public void Show(string session, bool busy, PermissionMode mode, string model, string environment)
+    public void Show(string session, bool busy, bool cardWaits, PermissionMode mode, string model, string environment)
     {
+        _cardWaits = cardWaits;
         if (session != _session)
         {
             // A recording belongs to the session it started in.
@@ -360,25 +367,11 @@ sealed class TalkInput : UserControl
             e.Handled = true;
             VoicePressed?.Invoke();
         }
-        else if (_dictating && e.Key == Key.Enter)
+        else if ((e.Key == Key.Enter && (modifiers == ModifierKeys.None || _dictating)) || e.Key == Key.Escape)
         {
-            // The text of a recording is never sent by itself (D-313), not even half way.
-            e.Handled = true;
-        }
-        else if (e.Key == Key.Escape && _voiceActive)
-        {
-            e.Handled = true;
-            VoiceCancelled?.Invoke();
-        }
-        else if (e.Key == Key.Enter && modifiers == ModifierKeys.None)
-        {
-            e.Handled = true;
-            Send();
-        }
-        else if (e.Key == Key.Escape && _busy)
-        {
-            e.Handled = true;
-            StopAsked?.Invoke();
+            e.Handled = Act(TalkKeys.For(
+                e.Key == Key.Enter ? TalkKey.Enter : TalkKey.Escape,
+                new TalkKeyState(_cardWaits, _text.Text.Trim().Length == 0 && _attached.Count == 0, _busy, _dictating, _voiceActive)));
         }
         else if (e.Key == Key.Tab && modifiers == ModifierKeys.Shift)
         {
@@ -393,6 +386,33 @@ sealed class TalkInput : UserControl
         {
             e.Handled = Walk(+1);
         }
+    }
+
+    /// Whether the key was taken.
+    private bool Act(TalkKeyAction action)
+    {
+        switch (action)
+        {
+            case TalkKeyAction.Send:
+                Send();
+                break;
+            case TalkKeyAction.Allow:
+                AllowAsked?.Invoke();
+                break;
+            case TalkKeyAction.Deny:
+                DenyAsked?.Invoke();
+                break;
+            case TalkKeyAction.Stop:
+                StopAsked?.Invoke();
+                break;
+            case TalkKeyAction.CancelVoice:
+                VoiceCancelled?.Invoke();
+                break;
+            case TalkKeyAction.None:
+                return false;
+        }
+
+        return true;
     }
 
     private void Send()

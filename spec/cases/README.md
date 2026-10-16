@@ -33,6 +33,7 @@ stamp, not a table (D-255).
 | `conversation-runner/` | when Claude Code is started for a conversation, with which arguments, what is written to it and what is logged (`ConversationRunner`, played against `ScriptedClaude`) |
 | `step-line/` | one step of the work as one line of the feed (`StepLine`) |
 | `request-card/` | a request as a card, and the line each choice writes back (`RequestCard`) |
+| `talk-keys/` | what Enter and Esc in the field do, and which card they answer (`TalkKeys`) |
 | `terminal-sessions/` | the list of sessions as the file `terminal.json`: adding, closing, moving, and what a broken file reads as (`TerminalSessions`) |
 | `session-name/` | the name of a session with an empty name field, and how a name and a folder are kept (`SessionName`) |
 | `new-session/` | the folders the form of a new session offers, the model it starts with, and the other environment a folder is bound to (`NewSessionChoices`) |

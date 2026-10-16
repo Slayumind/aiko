@@ -398,6 +398,11 @@ private struct RequestCardView: View {
                         EmptyView()
                     }
                     FlatButton(title: Strings.terminalDeny, look: .ghost) { choose(.deny("")) }
+                    // The keyboard stays in the field, and the card says which keys answer it from there (D-323).
+                    Text(Strings.terminalCardKeys)
+                        .font(Theme.mono(Theme.textTiny))
+                        .foregroundStyle(Theme.muted)
+                        .padding(.leading, 4)
                 }
                 .padding(.top, 12)
             }
