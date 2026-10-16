@@ -88,6 +88,7 @@ final class TerminalHost {
         }
         panel.input.stopAsked = { [weak self] in self?.current()?.interrupt() }
         panel.input.modeAsked = { [weak self] in self?.nextMode() }
+        panel.input.chosen = panel.chosen
     }
 
     func show() {

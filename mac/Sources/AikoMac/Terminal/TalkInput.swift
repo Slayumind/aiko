@@ -20,6 +20,9 @@ final class TalkInputState: ObservableObject {
     var stopAsked: (() -> Void)?
     var modeAsked: (() -> Void)?
 
+    /// Return in an empty field and Esc while a card waits answer it (D-323).
+    var chosen: ((String, CardChoice) -> Void)?
+
     /// The field has the keyboard, so Cmd+V with a picture is ours.
     var focused = false
 
@@ -263,18 +266,17 @@ struct TalkInputView: View {
     }
 
     /// Return sends, Shift+Return is a new line, Esc stops the work, Shift+Tab changes the mode,
-    /// the arrows walk through what was sent (D-294).
+    /// the arrows walk through what was sent (D-294). While a card of permission or of a plan
+    /// waits, Return in an empty field allows it and Esc denies it (D-323).
     private func onKey(_ press: KeyPress) -> KeyPress.Result {
         switch press.key {
         case .return where press.modifiers.contains(.shift):
             input.text += "\n"
             return .handled
         case .return:
-            input.send()
-            return .handled
-        case .escape where talk.busy:
-            input.stopAsked?()
-            return .handled
+            return act(.enter)
+        case .escape:
+            return act(.escape)
         case .tab where press.modifiers.contains(.shift):
             input.modeAsked?()
             return .handled
@@ -285,6 +287,27 @@ struct TalkInputView: View {
         default:
             return .ignored
         }
+    }
+
+    /// Voice input is not on the Mac yet (D-312), so a recording never takes a key here.
+    private func act(_ key: TalkKey) -> KeyPress.Result {
+        let card = TalkKeys.card(talk.items)
+        let empty = input.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && input.attached.isEmpty
+        switch TalkKeys.action(key, TalkKeyState(cardWaits: card != nil, empty: empty, busy: talk.busy)) {
+        case .send:
+            input.send()
+        case .allow:
+            if let card { input.chosen?(card.requestId, .allow) }
+        case .deny:
+            if let card { input.chosen?(card.requestId, .deny("")) }
+        case .stop:
+            input.stopAsked?()
+        case .swallow, .cancelVoice:
+            break
+        case .none:
+            return .ignored
+        }
+        return .handled
     }
 
     private func drop(_ providers: [NSItemProvider]) -> Bool {

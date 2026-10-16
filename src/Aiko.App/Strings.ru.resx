@@ -1273,6 +1273,9 @@
   <data name="TerminalDeny" xml:space="preserve">
     <value>Отказать</value>
   </data>
+  <data name="TerminalCardKeys" xml:space="preserve">
+    <value>Enter — разрешить · Esc — отказать</value>
+  </data>
   <data name="TerminalStop" xml:space="preserve">
     <value>Остановить</value>
   </data>

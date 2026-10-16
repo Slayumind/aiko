@@ -1,0 +1,25 @@
+{
+  "comment": "Enter and Esc in the field of a conversation (D-323). The keyboard stays in the field. While a card of permission or of a plan waits, Enter in an empty field allows it and Esc denies it, also while Claude Code works. Enter with words or pictures in the field does nothing then: the message is not sent and the card is not allowed. The words of a recording are never sent by Enter (D-313), and Esc during a recording cancels the recording first. Without a card Enter sends and Esc stops the work. The keys answer the oldest open card, and nothing when that card asks questions: those have their own keys.",
+  "keys": [
+    { "name": "enter sends", "key": "enter", "card": false, "empty": false, "busy": false, "dictating": false, "voice": false, "action": "send" },
+    { "name": "enter in an empty field still goes to send, which sends nothing", "key": "enter", "card": false, "empty": true, "busy": false, "dictating": false, "voice": false, "action": "send" },
+    { "name": "enter allows a waiting card", "key": "enter", "card": true, "empty": true, "busy": true, "dictating": false, "voice": false, "action": "allow" },
+    { "name": "enter with words and a waiting card does nothing", "key": "enter", "card": true, "empty": false, "busy": true, "dictating": false, "voice": false, "action": "swallow" },
+    { "name": "enter during a recording does nothing", "key": "enter", "card": false, "empty": false, "busy": false, "dictating": true, "voice": true, "action": "swallow" },
+    { "name": "enter during a recording does not allow a card", "key": "enter", "card": true, "empty": true, "busy": true, "dictating": true, "voice": true, "action": "swallow" },
+    { "name": "esc denies a waiting card", "key": "escape", "card": true, "empty": true, "busy": true, "dictating": false, "voice": false, "action": "deny" },
+    { "name": "esc denies a waiting card with words in the field", "key": "escape", "card": true, "empty": false, "busy": true, "dictating": false, "voice": false, "action": "deny" },
+    { "name": "esc cancels a recording before it denies", "key": "escape", "card": true, "empty": true, "busy": true, "dictating": false, "voice": true, "action": "cancel-voice" },
+    { "name": "esc stops the work", "key": "escape", "card": false, "empty": true, "busy": true, "dictating": false, "voice": false, "action": "stop" },
+    { "name": "esc with nothing going on is left to the field", "key": "escape", "card": false, "empty": false, "busy": false, "dictating": false, "voice": false, "action": "none" }
+  ],
+  "cards": [
+    { "name": "no card", "feed": [], "answers": null },
+    { "name": "a permission", "feed": [{ "tool": "Bash", "state": "open" }], "answers": 0 },
+    { "name": "a plan", "feed": [{ "tool": "ExitPlanMode", "state": "open" }], "answers": 0 },
+    { "name": "questions have their own keys", "feed": [{ "tool": "AskUserQuestion", "state": "open" }], "answers": null },
+    { "name": "an answered card is left alone", "feed": [{ "tool": "Edit", "state": "allowed" }, { "tool": "Bash", "state": "open" }], "answers": 1 },
+    { "name": "the oldest open card first", "feed": [{ "tool": "Edit", "state": "open" }, { "tool": "Bash", "state": "open" }], "answers": 0 },
+    { "name": "questions first means nothing", "feed": [{ "tool": "AskUserQuestion", "state": "open" }, { "tool": "Bash", "state": "open" }], "answers": null }
+  ]
+}

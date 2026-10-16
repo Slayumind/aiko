@@ -1273,6 +1273,9 @@
   <data name="TerminalDeny" xml:space="preserve">
     <value>Deny</value>
   </data>
+  <data name="TerminalCardKeys" xml:space="preserve">
+    <value>Enter to allow · Esc to deny</value>
+  </data>
   <data name="TerminalStop" xml:space="preserve">
     <value>Stop</value>
   </data>

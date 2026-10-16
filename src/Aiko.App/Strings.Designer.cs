@@ -1263,6 +1263,9 @@ public static class Strings
     /// Deny
     public static string TerminalDeny => Get("TerminalDeny");
 
+    /// Enter to allow · Esc to deny
+    public static string TerminalCardKeys => Get("TerminalCardKeys");
+
     /// Stop
     public static string TerminalStop => Get("TerminalStop");
 

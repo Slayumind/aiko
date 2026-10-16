@@ -40,6 +40,9 @@ sealed class TalkPanel : UserControl
     private ScrollViewer? _scroll;
     private string? _shownSession;
 
+    /// The card Enter and Esc of the field answer, or null (D-323).
+    private FeedItem.Card? _keyCard;
+
     /// Whether the feed follows its end as an answer grows. Only the reader's hand turns it off: the
     /// wheel up, the scroll bar, the keys that go up. Reaching the bottom again turns it on. It used
     /// to be guessed from the scroll itself, and the guess lost to the feed's own changes of offset:
@@ -101,6 +104,8 @@ sealed class TalkPanel : UserControl
 
         _input.Sent += (text, images) => SendAsked?.Invoke(text, images);
         _input.StopAsked += () => StopAsked?.Invoke();
+        _input.AllowAsked += () => ChooseByKey(new CardChoice.Allow());
+        _input.DenyAsked += () => ChooseByKey(new CardChoice.Deny(""));
         _input.ModeAsked += () => ModeAsked?.Invoke();
         _input.ModelAsked += () => ModelAsked?.Invoke();
 
@@ -190,7 +195,8 @@ sealed class TalkPanel : UserControl
         }
 
         _empty.Visibility = view.Items.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-        _input.Show(view.Session, view.Busy, view.Mode, view.Model, view.Environment);
+        _keyCard = TalkKeys.Card(view.Items);
+        _input.Show(view.Session, view.Busy, _keyCard is not null, view.Mode, view.Model, view.Environment);
 
         if (newSession && _slots.Count > 0)
         {
@@ -201,6 +207,15 @@ sealed class TalkPanel : UserControl
     }
 
     internal void Choose(string requestId, CardChoice choice) => Chosen?.Invoke(requestId, choice);
+
+    /// Enter or Esc in the field answers the card the keys answer (D-323).
+    private void ChooseByKey(CardChoice choice)
+    {
+        if (_keyCard is { } card)
+        {
+            Choose(card.Request.RequestId, choice);
+        }
+    }
 
     /// Whether the content of a step is open. It is kept here, as a row is built again each time
     /// it comes into view.
@@ -718,6 +733,12 @@ sealed class FeedRow : ContentControl
         }
 
         row.Children.Add(Spaced(TerminalPanel.Flat(Strings.TerminalDeny, () => Choose(request, new CardChoice.Deny("")), ghost: true)));
+
+        // The keyboard stays in the field, and the card says which keys answer it from there (D-323).
+        var keys = TerminalPanel.Mono(Strings.TerminalCardKeys, "Muted");
+        keys.VerticalAlignment = VerticalAlignment.Center;
+        keys.Margin = new Thickness(4, 0, 0, 6);
+        row.Children.Add(keys);
         return row;
     }
 

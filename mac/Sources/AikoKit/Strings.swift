@@ -454,6 +454,7 @@ public enum Strings {
         "TerminalAllowEdits": ("Allow edits in this session", "Разрешать правки в этой сессии"),
         "TerminalAllowInProject": ("Allow in this project", "Разрешать в этом проекте"),
         "TerminalDeny": ("Deny", "Отказать"),
+        "TerminalCardKeys": ("Enter to allow · Esc to deny", "Enter — разрешить · Esc — отказать"),
         "TerminalStop": ("Stop", "Остановить"),
         "TerminalTurnStopped": ("Turn stopped.", "Ход остановлен."),
         "TerminalQueued": ("queued", "в очереди"),
@@ -1744,6 +1745,9 @@ public enum Strings {
 
     /// Deny
     public static var terminalDeny: String { Strings.get("TerminalDeny") }
+
+    /// Enter to allow · Esc to deny
+    public static var terminalCardKeys: String { Strings.get("TerminalCardKeys") }
 
     /// Stop
     public static var terminalStop: String { Strings.get("TerminalStop") }
