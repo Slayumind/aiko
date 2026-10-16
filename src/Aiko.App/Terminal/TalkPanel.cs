@@ -30,6 +30,13 @@ sealed class TalkPanel : UserControl
 {
     /// The rows of the feed: the items of the core, and the line "working" after them while a turn
     /// goes on (D-308).
+    /// The widest the conversation gets, and the space on its sides.
+    private const double ColumnWidth = 860;
+    private const double Gutter = 24;
+
+    /// Room for the scroll bar, which lies over the right edge of the feed.
+    private const double ScrollBarRoom = 12;
+
     private readonly ObservableCollection<FeedSlot> _slots = [];
     private readonly ListBox _feed;
     private readonly TextBlock _empty;
@@ -58,9 +65,7 @@ sealed class TalkPanel : UserControl
             ItemsSource = _slots,
             Background = Brushes.Transparent,
             BorderThickness = new Thickness(0),
-
-            // Room for the scroll bar, which lies over the right edge of the feed.
-            Padding = new Thickness(0, 0, 12, 0),
+            Padding = new Thickness(0),
             Focusable = false,
             HorizontalContentAlignment = HorizontalAlignment.Stretch,
             ItemTemplate = new DataTemplate { VisualTree = RowFactory() },
@@ -135,9 +140,13 @@ sealed class TalkPanel : UserControl
         middle.Children.Add(_feed);
         middle.Children.Add(_empty);
 
-        var all = new DockPanel { Margin = new Thickness(24, 0, 24, 0), MaxWidth = 860 };
-        DockPanel.SetDock(bottom, Dock.Bottom);
-        all.Children.Add(bottom);
+        // The feed takes the whole width, so its scroll bar stands at the right edge of the window.
+        // Its rows and the field below keep the same column (AIKO-244).
+        var column = new DockPanel { Margin = new Thickness(Gutter, 0, Gutter, 0), MaxWidth = ColumnWidth };
+        column.Children.Add(bottom);
+        var all = new DockPanel();
+        DockPanel.SetDock(column, Dock.Bottom);
+        all.Children.Add(column);
         all.Children.Add(middle);
         Content = all;
     }
@@ -341,6 +350,11 @@ sealed class TalkPanel : UserControl
     {
         var row = new FrameworkElementFactory(typeof(FeedRow));
         row.SetBinding(FeedRow.ItemProperty, new Binding(nameof(FeedSlot.Item)));
+
+        // The column of the field. A stretched row narrower than the feed stands in the middle. The
+        // right gutter is wider by the scroll bar, which lies over the right edge of the feed.
+        row.SetValue(MaxWidthProperty, ColumnWidth - ScrollBarRoom);
+        row.SetValue(MarginProperty, new Thickness(Gutter, 0, Gutter + ScrollBarRoom, 0));
         return row;
     }
 
