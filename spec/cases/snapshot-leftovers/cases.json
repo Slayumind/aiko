@@ -1,0 +1,15 @@
+{
+  "comment": "The temporary files a bridge left in the folder of snapshots (AIKO-267): \"<name>.json.<process id>.tmp\". Aiko removes them when it starts, but only those older than a minute: a younger one may belong to a bridge that is writing now. Age is in seconds before now.",
+  "files": [
+    { "name": "claude.json.13724.tmp", "age": 3600, "stale": true },
+    { "name": "claude-work.json.108364.tmp", "age": 61, "stale": true },
+    { "name": "claude.json.35448.tmp", "age": 59, "stale": false },
+    { "name": "claude.json", "age": 3600, "stale": false },
+    { "name": "claude.json.tmp", "age": 3600, "stale": false },
+    { "name": "claude.json.12a4.tmp", "age": 3600, "stale": false },
+    { "name": ".json.123.tmp", "age": 3600, "stale": false },
+    { "name": "notes.txt.123.tmp", "age": 3600, "stale": false },
+    { "name": "claude.json.123.tmp.bak", "age": 3600, "stale": false },
+    { "name": "claude.json..tmp", "age": 3600, "stale": false }
+  ]
+}

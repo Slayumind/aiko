@@ -19,6 +19,7 @@ stamp, not a table (D-255).
 | `hook-events/` | what a hook of the persona plugin says a session is doing (`HookEvent`, `ActivityRecord`) |
 | `tray-mood/` | which face an event brings (`TrayMood`) |
 | `snapshot-name/` | the file name one environment reports into (`SnapshotName`) |
+| `snapshot-leftovers/` | temporary files of a bridge that Aiko removes when it starts (`SnapshotLeftovers`) |
 | `update-manifest/` | a signed release manifest made with openssl (`UpdateManifest`) |
 | `memory-keys/` | what may be a key of a fact, and when a key is found in a message (`MemoryRules`) |
 | `memory-nudge/` | which messages speak in the first person and get the memory note (`MemoryNudge`) |

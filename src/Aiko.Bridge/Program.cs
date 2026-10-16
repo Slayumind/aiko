@@ -142,9 +142,7 @@ static void RecordActivity(string input)
     }
 
     Directory.CreateDirectory(folder);
-    var temporary = path + "." + Environment.ProcessId + ".tmp";
-    File.WriteAllText(temporary, new ActivityRecord(environment, hook.Activity, now).ToJson(), new UTF8Encoding(false));
-    File.Move(temporary, path, overwrite: true);
+    ReplaceFile(path, new ActivityRecord(environment, hook.Activity, now).ToJson());
 }
 
 /// The memory hooks of the persona plugin. The rules and the facts go to the model at the start of
@@ -255,9 +253,7 @@ static void WriteMemory(string json, bool keepBadFile)
         File.Move(path, path + ".bad", overwrite: true);
     }
 
-    var temporary = path + "." + Environment.ProcessId + ".tmp";
-    File.WriteAllText(temporary, json, new UTF8Encoding(false));
-    File.Move(temporary, path, overwrite: true);
+    ReplaceFile(path, json);
 }
 
 /// Writes the plugin folder for the environment this run belongs to and prints its path.
@@ -352,13 +348,43 @@ static string SnapshotPath(string environment)
     return ThisComputer.Folders.SnapshotFile(environment);
 }
 
+static void WriteSnapshot(string environment, string json) => ReplaceFile(SnapshotPath(environment), json);
+
 /// Write to a temporary file and move it over the old one, so the tray never sees half a file.
-static void WriteSnapshot(string environment, string json)
+/// While the tray reads the old file, Windows refuses to replace it, so the move is tried again
+/// for a short while. A temporary file that could not take the place is removed, not left in the
+/// folder (AIKO-267).
+static void ReplaceFile(string path, string text)
 {
-    var path = SnapshotPath(environment);
+    const int Attempts = 10;
     var temporary = path + "." + Environment.ProcessId + ".tmp";
-    File.WriteAllText(temporary, json, new UTF8Encoding(false));
-    File.Move(temporary, path, overwrite: true);
+    try
+    {
+        File.WriteAllText(temporary, text, new UTF8Encoding(false));
+        for (var attempt = 1; ; attempt++)
+        {
+            try
+            {
+                File.Move(temporary, path, overwrite: true);
+                return;
+            }
+            catch (Exception e) when (e is IOException or UnauthorizedAccessException && attempt < Attempts)
+            {
+                Thread.Sleep(20);
+            }
+        }
+    }
+    finally
+    {
+        try
+        {
+            File.Delete(temporary);
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            // Aiko removes it when it starts.
+        }
+    }
 }
 
 static string? ReadWrappedCommand(string? configDirectory)

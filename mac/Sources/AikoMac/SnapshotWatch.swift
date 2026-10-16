@@ -17,8 +17,23 @@ final class SnapshotWatch {
     init(folder: String) {
         self.folder = folder
         try? FileManager.default.createDirectory(atPath: folder, withIntermediateDirectories: true)
+        removeLeftovers()
         readAll()
         watch()
+    }
+
+    /// Temporary files of bridges that stopped in the middle of a write (AIKO-267).
+    private func removeLeftovers() {
+        let manager = FileManager.default
+        let names = (try? manager.contentsOfDirectory(atPath: folder)) ?? []
+        let files = names.compactMap { name -> (name: String, written: Date)? in
+            let path = (folder as NSString).appendingPathComponent(name)
+            guard let written = (try? manager.attributesOfItem(atPath: path))?[.modificationDate] as? Date else { return nil }
+            return (name: name, written: written)
+        }
+        for stale in SnapshotLeftovers.stale(files, now: Date()) {
+            try? manager.removeItem(atPath: (folder as NSString).appendingPathComponent(stale))
+        }
     }
 
     func stop() {

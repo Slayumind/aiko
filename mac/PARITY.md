@@ -54,6 +54,7 @@ a row cannot change in one core and stay as it was in the other. See `spec/cases
 | ClaudeShell.cs | PlatformConventions.swift | 4 | 4 | the shell of each system is in `spec/cases/platform-paths/`; the 8 cases left over are about WindowsGitBash |
 | AikoFolders.cs | AikoFolders.swift | 5 | 5 | both layouts, the trailing separator included, are pinned in `spec/cases/folder-layout/` |
 | SnapshotName.cs | SnapshotName.swift | — | — | every case is in `spec/cases/snapshot-name/`, read by both suites |
+| SnapshotLeftovers.cs | SnapshotLeftovers.swift | — | — | which temporary files of a bridge are old enough to remove at start; every case is in `spec/cases/snapshot-leftovers/`. Only the Windows bridge also retries a refused move: `rename` on macOS replaces a file that is being read |
 | SnapshotFile.cs | SnapshotFile.swift | 9 | 9 | |
 | EnvironmentSnapshots.cs | EnvironmentSnapshots.swift | 6 | 6 | |
 | EnvironmentSettings.cs, LaunchCommand.cs, ProjectBinding.cs | EnvironmentSettings.swift, LaunchCommand.swift, ProjectBinding.swift | 26 | 26 | EnvironmentSettingsTests (13) and EnvironmentModelTests (13); the command of an environment is in `spec/cases/launch-command/` |
