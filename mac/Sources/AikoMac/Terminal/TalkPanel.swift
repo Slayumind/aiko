@@ -10,7 +10,7 @@ struct TalkScreen: Equatable {
     let busy: Bool
     let hasOpenCard: Bool
     let mode: PermissionMode
-    let model: String
+    let model: ModelLabel
     let environment: String
 }
 

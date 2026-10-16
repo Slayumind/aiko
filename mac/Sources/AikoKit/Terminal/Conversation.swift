@@ -128,6 +128,7 @@ public struct Conversation: Sendable, Equatable {
     public var nextId = 1
     public var answeredInTurn = false
     public var failedInTurn = false
+    public var askedModel = ""
 
     public static func empty(mode: PermissionMode = .manual) -> Conversation {
         Conversation(mode: mode)
@@ -144,6 +145,9 @@ public struct Conversation: Sendable, Equatable {
     /// A turn can end while a subagent still works in the background (D-305).
     public var isBusy: Bool { inTurn || tasks > 0 }
 
+    /// The model asked last, or the one Claude Code named when nothing is asked.
+    public var latestModel: String { askedModel.isEmpty ? model : askedModel }
+
     public var hasOpenCard: Bool {
         items.contains { item in
             if case .card(_, .open) = item.content { return true }
@@ -158,13 +162,21 @@ public struct Conversation: Sendable, Equatable {
         switch event {
         case .ready(let session, let model, let mode, _):
             next.sessionId = session
-            if !model.isEmpty { next.model = model }
+            if !model.isEmpty {
+                next.model = model
+                next.askedModel = ""
+            }
             if let mode { next.mode = mode }
         case .textDelta(nil, let text):
             next.stream(text)
         case .assistant(nil, let blocks, let error):
             next.say(blocks, error)
-        case .user(nil, _, let results, _, _):
+        case .user(nil, let text, let results, _, _):
+            // After a change of model Claude Code names its full id at once, before the next turn.
+            if let model = ModelName.fromSwitch(text) {
+                next.model = model
+                next.askedModel = ""
+            }
             for result in results {
                 next.changeStep(result.toolUseId) { step in
                     step.state = result.isError ? .failed : .done
@@ -330,6 +342,15 @@ public struct Conversation: Sendable, Equatable {
         next.mode = mode
         next.nextId += 1
         return Outcome(state: next, written: [HostLine.setMode("mode-\(nextId)", mode)])
+    }
+
+    /// The model stays asked until Claude Code names its full id: in its answer to the change,
+    /// or in the init of the next start.
+    public func setModel(_ model: String) -> Outcome {
+        var next = self
+        next.askedModel = model
+        next.nextId += 1
+        return Outcome(state: next, written: [HostLine.setModel("model-\(nextId)", model)])
     }
 
     public func markRead() -> Conversation {

@@ -118,6 +118,11 @@ public final class ConversationRunner: @unchecked Sendable {
         apply(state.setMode(mode), startIfNeeded: false)
     }
 
+    /// Without a process nothing is written: the next start carries the model in its arguments.
+    public func setModel(_ model: String) {
+        apply(state.setModel(model), startIfNeeded: false)
+    }
+
     public func markRead() {
         state = state.markRead()
         changed?()
@@ -160,7 +165,7 @@ public final class ConversationRunner: @unchecked Sendable {
                 sessionId: setup.sessionId,
                 started: known,
                 mode: state.mode,
-                model: setup.model),
+                model: state.latestModel.isEmpty ? setup.model : state.latestModel),
             inheritedVariables: setup.inheritedVariables)
 
         let started = newProcess()

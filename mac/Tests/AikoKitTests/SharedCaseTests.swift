@@ -586,6 +586,22 @@ struct SharedCaseTests {
     }
 
     @Test
+    func everyModelLabelWaitsTheSameWay() {
+        for row in SpecCases.json("model-name")["labels"]?.arrayValue ?? [] {
+            let label = ModelName.label(asked: row["asked"]?.stringValue, known: row["known"]?.stringValue)
+            #expect(label.text == row["text"]?.stringValue)
+            #expect(label.waiting == row["waiting"]?.boolValue)
+        }
+    }
+
+    @Test
+    func everyChangeOfModelGivesTheSameFullId() {
+        for row in SpecCases.json("model-name")["switches"]?.arrayValue ?? [] {
+            #expect(ModelName.fromSwitch(row["text"]?.stringValue) == row["id"]?.stringValue)
+        }
+    }
+
+    @Test
     func everyMarkdownTextIsReadIntoTheSameBlocks() {
         for row in SpecCases.json("markdown")["texts"]?.arrayValue ?? [] {
             let described = JsonNode.array(Markdown.parse(row["markdown"]?.stringValue).map(Self.describedBlock))

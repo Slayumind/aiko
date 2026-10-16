@@ -19,6 +19,7 @@ final class TalkInputState: ObservableObject {
     var sent: ((String, [AttachedImage]) -> Void)?
     var stopAsked: (() -> Void)?
     var modeAsked: (() -> Void)?
+    var modelAsked: (() -> Void)?
 
     /// Return in an empty field and Esc while a card waits answer it (D-323).
     var chosen: ((String, CardChoice) -> Void)?
@@ -239,12 +240,20 @@ struct TalkInputView: View {
             .onDrop(of: [.fileURL], isTargeted: nil) { providers in drop(providers) }
             .padding(.top, 10)
 
-            // The mode changes with a click or Shift+Tab, in the order of Claude Code (D-302).
+            // The mode changes with a click or Shift+Tab, in the order of Claude Code (D-302); a
+            // click on the model takes the next one.
             HStack(spacing: 0) {
                 Text(PermissionModes.name(talk.mode))
                     .onTapGesture { input.modeAsked?() }
                     .help("Shift+Tab")
-                Text((talk.model.isEmpty ? "" : " · " + talk.model) + " · " + talk.environment)
+                if !talk.model.text.isEmpty {
+                    Text(" · ")
+                    // A model Claude Code has not named yet is quieter than the rest of the line.
+                    Text(talk.model.text)
+                        .opacity(talk.model.waiting ? 0.6 : 1)
+                        .onTapGesture { input.modelAsked?() }
+                }
+                Text(" · " + talk.environment)
             }
             .font(Theme.mono(Theme.textTiny))
             .foregroundStyle(Theme.muted)

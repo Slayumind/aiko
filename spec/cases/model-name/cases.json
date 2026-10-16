@@ -1,5 +1,5 @@
 {
-  "comment": "The name of a model in the line under the input of the terminal. The id of a Claude model becomes its family and version; the release date at the end of older ids is dropped. Anything that does not look like a model id is shown as it is.",
+  "comment": "The name of a model in the line under the input of the terminal. The id of a Claude model becomes its family and version; the release date at the end of older ids is dropped. Anything that does not look like a model id is shown as it is. A label waits, with \"…\" in a quiet colour, while Claude Code has not named the full id of the model: after a click on the model, or for a session that kept only a short name. After a change of model Claude Code names the full id in a line of its own; switches reads it.",
   "names": [
     { "id": "claude-opus-5-5", "name": "Opus 5.5" },
     { "id": "claude-sonnet-5-5", "name": "Sonnet 5.5" },
@@ -23,5 +23,29 @@
     { "id": "", "name": "" },
     { "id": "   ", "name": "" },
     { "id": null, "name": "" }
+  ],
+  "labels": [
+    { "asked": null, "known": "claude-opus-5-5", "text": "Opus 5.5", "waiting": false },
+    { "asked": "", "known": "claude-sonnet-5-5", "text": "Sonnet 5.5", "waiting": false },
+    { "asked": "sonnet", "known": "claude-opus-5-5", "text": "Sonnet …", "waiting": true },
+    { "asked": "  haiku ", "known": null, "text": "Haiku …", "waiting": true },
+    { "asked": null, "known": "opus", "text": "Opus …", "waiting": true },
+    { "asked": null, "known": "claude-haiku-4-5-20251001", "text": "Haiku 4.5", "waiting": false },
+    { "asked": null, "known": "claude-opus-5-5[1m]", "text": "claude-opus-5-5[1m]", "waiting": false },
+    { "asked": null, "known": "", "text": "", "waiting": false },
+    { "asked": null, "known": null, "text": "", "waiting": false },
+    { "asked": "   ", "known": "   ", "text": "", "waiting": false }
+  ],
+  "switches": [
+    { "text": "<local-command-stdout>Set model to `sonnet (claude-sonnet-5-5)`</local-command-stdout>", "id": "claude-sonnet-5-5" },
+    { "text": "<local-command-stdout>Set model to `opus (claude-opus-5-5[1m])`</local-command-stdout>", "id": "claude-opus-5-5[1m]" },
+    { "text": "<local-command-stdout>Set model to `haiku ( claude-haiku-5-5 )`</local-command-stdout>", "id": "claude-haiku-5-5" },
+    { "text": "<local-command-stdout>Set model to `sonnet`</local-command-stdout>", "id": null },
+    { "text": "<local-command-stdout>Set model to `x (gpt-4o)`</local-command-stdout>", "id": null },
+    { "text": "<local-command-stdout>Set model to `x (claude-)`</local-command-stdout>", "id": null },
+    { "text": "Set model to `sonnet (claude-sonnet-5-5)`", "id": null },
+    { "text": "<local-command-stdout>Compacted (claude-sonnet-5-5)</local-command-stdout>", "id": null },
+    { "text": "", "id": null },
+    { "text": null, "id": null }
   ]
 }
