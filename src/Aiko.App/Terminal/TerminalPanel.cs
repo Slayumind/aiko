@@ -39,6 +39,22 @@ sealed class TerminalPanel : UserControl
     private readonly TalkPanel _talk = new();
 
     internal TalkInput Input => _talk.Input;
+
+    /// Enter and Esc answer a waiting card from any place of the window, not only from the field
+    /// (AIKO-244). A field where one types, a button and a list keep their own Enter and Esc.
+    private void OnWindowKey(object sender, KeyEventArgs e)
+    {
+        if (e.Handled
+            || Keyboard.Modifiers != ModifierKeys.None
+            || e.Key is not (Key.Enter or Key.Escape)
+            || !_talk.IsVisible
+            || e.OriginalSource is TextBoxBase { IsReadOnly: false } or ButtonBase or ComboBox)
+        {
+            return;
+        }
+
+        e.Handled = _talk.Input.AnswerCard(e.Key == Key.Enter ? TalkKey.Enter : TalkKey.Escape);
+    }
     private string? _talkSession;
 
     // What is typed into the form stays here while the view is drawn again.
@@ -58,6 +74,7 @@ sealed class TerminalPanel : UserControl
             Source = new Uri("pack://application:,,,/Theme/Controls.xaml", UriKind.Absolute),
         });
         Resources[typeof(ScrollViewer)] = Resources["QuietScroll"];
+        KeyDown += OnWindowKey;
 
         _listButton = Flat("", () => _listPopup.IsOpen = !_listPopup.IsOpen, ghost: false);
         _listButton.Margin = new Thickness(10, 0, 0, 0);

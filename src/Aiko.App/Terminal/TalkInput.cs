@@ -473,9 +473,7 @@ sealed class TalkInput : UserControl
         }
         else if ((e.Key == Key.Enter && (modifiers == ModifierKeys.None || _dictating)) || e.Key == Key.Escape)
         {
-            e.Handled = Act(TalkKeys.For(
-                e.Key == Key.Enter ? TalkKey.Enter : TalkKey.Escape,
-                new TalkKeyState(_cardWaits, _text.Text.Trim().Length == 0 && _attached.Count == 0, _busy, _dictating, _voiceActive)));
+            e.Handled = Act(TalkKeys.For(e.Key == Key.Enter ? TalkKey.Enter : TalkKey.Escape, KeyState()));
         }
         else if (e.Key == Key.Tab && modifiers == ModifierKeys.Shift)
         {
@@ -491,6 +489,13 @@ sealed class TalkInput : UserControl
             e.Handled = Walk(+1);
         }
     }
+
+    /// Enter or Esc pressed in another place of the window, where the keyboard went after a
+    /// click on the feed or the list. There they answer only a waiting card (AIKO-244).
+    public bool AnswerCard(TalkKey key) => _cardWaits && Act(TalkKeys.For(key, KeyState()));
+
+    private TalkKeyState KeyState() =>
+        new(_cardWaits, _text.Text.Trim().Length == 0 && _attached.Count == 0, _busy, _dictating, _voiceActive);
 
     /// Whether the key was taken.
     private bool Act(TalkKeyAction action)
