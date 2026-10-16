@@ -14,6 +14,7 @@ sealed class SnapshotWatcher : IDisposable
     {
         Folder = ThisComputer.Folders.SnapshotsFolder;
         Directory.CreateDirectory(Folder);
+        RemoveLeftovers();
 
         foreach (var file in Directory.EnumerateFiles(Folder, "*.json"))
         {
@@ -65,6 +66,24 @@ sealed class SnapshotWatcher : IDisposable
             return _snapshots.TryGetValue(environment, out var snapshot)
                 ? snapshot
                 : LimitSnapshot.NoData(environment);
+        }
+    }
+
+    /// Temporary files of bridges that stopped in the middle of a write (AIKO-267).
+    private void RemoveLeftovers()
+    {
+        var files = new DirectoryInfo(Folder).GetFiles("*.tmp")
+            .Select(file => (file.Name, (DateTimeOffset)file.LastWriteTimeUtc));
+        foreach (var stale in SnapshotLeftovers.Stale(files, DateTimeOffset.UtcNow))
+        {
+            try
+            {
+                File.Delete(Path.Combine(Folder, stale));
+            }
+            catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+            {
+                // Another run holds it; the next start tries again.
+            }
         }
     }
 

@@ -563,6 +563,18 @@ public class SharedCaseTests
     }
 
     [Fact]
+    public void Every_leftover_of_a_bridge_is_found_the_same_way()
+    {
+        var now = new DateTimeOffset(2026, 10, 16, 12, 0, 0, TimeSpan.Zero);
+        foreach (var row in SpecCases.Json("snapshot-leftovers").GetProperty("files").EnumerateArray())
+        {
+            var name = row.GetProperty("name").GetString()!;
+            var stale = SnapshotLeftovers.Stale([(name, now.AddSeconds(-row.GetProperty("age").GetInt32()))], now);
+            Assert.True(row.GetProperty("stale").GetBoolean() == stale.Contains(name), name);
+        }
+    }
+
+    [Fact]
     public void Every_model_id_gets_the_same_name()
     {
         foreach (var row in SpecCases.Json("model-name").GetProperty("names").EnumerateArray())

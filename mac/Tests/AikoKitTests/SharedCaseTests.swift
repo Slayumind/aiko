@@ -579,6 +579,17 @@ struct SharedCaseTests {
     }
 
     @Test
+    func everyLeftoverOfABridgeIsFoundTheSameWay() {
+        let now = Date(timeIntervalSince1970: 1_792_152_000)
+        for row in SpecCases.json("snapshot-leftovers")["files"]?.arrayValue ?? [] {
+            let name = row["name"]?.stringValue ?? ""
+            let age = Double(row["age"]?.int64Value ?? 0)
+            let stale = SnapshotLeftovers.stale([(name: name, written: now.addingTimeInterval(-age))], now: now)
+            #expect(stale.contains(name) == row["stale"]?.boolValue, "\(name)")
+        }
+    }
+
+    @Test
     func everyModelIdGetsTheSameName() {
         for row in SpecCases.json("model-name")["names"]?.arrayValue ?? [] {
             #expect(ModelName.display(row["id"]?.stringValue) == row["name"]?.stringValue)
