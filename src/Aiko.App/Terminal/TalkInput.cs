@@ -6,9 +6,9 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Aiko.Core.Terminal;
 using Ellipse = System.Windows.Shapes.Ellipse;
 using Shape = System.Windows.Shapes.Path;
-using Aiko.Core.Terminal;
 
 namespace Aiko.App;
 
