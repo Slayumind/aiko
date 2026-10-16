@@ -431,8 +431,9 @@ sealed class TerminalPanel : UserControl
                 StepKind.Run => Strings.TerminalLineRunning,
                 StepKind.Agent => Strings.TerminalLineAgent,
                 StepKind.Web => Strings.TerminalLineOpening,
+                StepKind.Skill => Strings.TerminalLineSkill,
                 _ => Strings.TerminalLineCalling,
-            }, glance.Kind == StepKind.Other ? glance.Label : glance.Text),
+            }, glance.Kind == StepKind.Other ? Called(glance) : glance.Text),
             GlanceLine.Answer => glance.Text,
             GlanceLine.StoppedAt => With(Strings.TerminalLineStoppedAt, StepWord(glance)),
             GlanceLine.SignIn => Strings.TerminalLineSignIn,
@@ -442,6 +443,10 @@ sealed class TerminalPanel : UserControl
 
     /// The word of a step, the one the feed uses for it.
     private static string StepWord(TalkGlance glance) => TalkPanel.StepWord(glance.Kind, glance.Label);
+
+    /// A tool without a word of its own: "memory · remember" for an MCP tool, the name for others.
+    private static string Called(TalkGlance glance) =>
+        glance.Text.Length > 0 ? $"{glance.Label} · {glance.Text}" : glance.Label;
 
     private static string UsedWords(long lastUsed, DateTimeOffset now)
     {

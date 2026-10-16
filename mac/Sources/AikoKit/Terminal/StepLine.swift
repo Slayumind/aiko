@@ -8,6 +8,9 @@ public enum StepKind: Sendable, Equatable {
     case agent
     case web
 
+    /// A skill of Claude Code. The subject is its name.
+    case skill
+
     /// Any other tool. The label names it.
     case other
 }
@@ -15,9 +18,9 @@ public enum StepKind: Sendable, Equatable {
 /// One step of the work as one line of the feed: what kind it is and what it is about (D-294).
 ///
 /// The label is set for a tool the terminal has no word for: the name of the tool, or the name of
-/// the MCP server for a tool that comes from one. Added and removed count the lines an edit
-/// changes. A hidden step is not drawn: a question and a plan come as cards, and two tools are
-/// only noise.
+/// the MCP server for a tool that comes from one, written for a person (D-324). Added and removed
+/// count the lines an edit changes. A hidden step is not drawn: a question and a plan come as
+/// cards, and two tools are only noise.
 public struct StepLine: Sendable, Equatable {
     public var kind: StepKind
     public var label: String
@@ -59,7 +62,10 @@ public struct StepLine: Sendable, Equatable {
         case "Bash", "PowerShell":
             return line(.run, firstLine(text(input, "command")))
         case "Agent", "Task":
-            return line(.agent, text(input, "description"))
+            let task = text(input, "description")
+            return line(.agent, task.isEmpty ? text(input, "subagent_type") : task)
+        case "Skill":
+            return line(.skill, text(input, "skill"))
         case "WebFetch":
             return line(.web, text(input, "url"))
         case "WebSearch":
@@ -75,12 +81,31 @@ public struct StepLine: Sendable, Equatable {
         if toolName.hasPrefix("mcp__"), let cut = lastDoubleUnderscore(units), cut > 5, cut + 2 < units.count {
             return StepLine(
                 kind: .other,
-                label: String(decoding: units[5..<cut], as: UTF16.self),
+                label: serverName(String(decoding: units[5..<cut], as: UTF16.self)),
                 subject: String(decoding: units[(cut + 2)...], as: UTF16.self),
                 added: 0, removed: 0, hidden: false)
         }
 
         return StepLine(kind: .other, label: toolName, subject: "", added: 0, removed: 0, hidden: false)
+    }
+
+    /// The name of an MCP server as a person knows it. A server of a plugin comes as
+    /// plugin_<plugin>_<server>, and only the server stays. A connector of claude.ai comes as
+    /// claude_ai_Google_Calendar and reads Google Calendar. Plugin names are written with hyphens,
+    /// so the first underscore after the plugin is the cut.
+    public static func serverName(_ server: String) -> String {
+        let units = Array(server.utf16)
+        let plugin = Array("plugin_".utf16)
+        let claudeAi = Array("claude_ai_".utf16)
+        if units.starts(with: plugin) {
+            if let cut = units[plugin.count...].firstIndex(of: UInt16(UInt8(ascii: "_"))),
+               cut > plugin.count, cut + 1 < units.count {
+                return String(decoding: units[(cut + 1)...], as: UTF16.self)
+            }
+        } else if units.starts(with: claudeAi), units.count > claudeAi.count {
+            return String(decoding: units[claudeAi.count...], as: UTF16.self).replacingOccurrences(of: "_", with: " ")
+        }
+        return server
     }
 
     /// The lines of an edit that differ, after the equal lines at both ends are set aside.

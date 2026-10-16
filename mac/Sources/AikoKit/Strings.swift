@@ -421,6 +421,7 @@ public enum Strings {
         "TerminalStepEdit": ("edit", "правка"),
         "TerminalStepRun": ("run", "запуск"),
         "TerminalStepAgent": ("agent", "агент"),
+        "TerminalStepSkill": ("skill", "навык"),
         "TerminalStepWeb": ("web", "веб"),
         "TerminalLineRequest": ("Needs permission: {0} {1}", "Ждёт разрешения: {0} {1}"),
         "TerminalLineQuestion": ("Asks: {0}", "Спрашивает: {0}"),
@@ -430,6 +431,7 @@ public enum Strings {
         "TerminalLineEditing": ("Editing {0}", "Правит {0}"),
         "TerminalLineRunning": ("Running {0}", "Запускает {0}"),
         "TerminalLineAgent": ("Agent: {0}", "Агент: {0}"),
+        "TerminalLineSkill": ("Skill: {0}", "Навык: {0}"),
         "TerminalLineOpening": ("Opening {0}", "Открывает {0}"),
         "TerminalLineCalling": ("Calling {0}", "Вызывает {0}"),
         "TerminalLineStoppedAt": ("Stopped at the “{0}” step", "Остановилась на шаге «{0}»"),
@@ -1647,6 +1649,9 @@ public enum Strings {
     /// agent
     public static var terminalStepAgent: String { Strings.get("TerminalStepAgent") }
 
+    /// skill
+    public static var terminalStepSkill: String { Strings.get("TerminalStepSkill") }
+
     /// web
     public static var terminalStepWeb: String { Strings.get("TerminalStepWeb") }
 
@@ -1673,6 +1678,9 @@ public enum Strings {
 
     /// Agent: {0}
     public static var terminalLineAgent: String { Strings.get("TerminalLineAgent") }
+
+    /// Skill: {0}
+    public static var terminalLineSkill: String { Strings.get("TerminalLineSkill") }
 
     /// Opening {0}
     public static var terminalLineOpening: String { Strings.get("TerminalLineOpening") }

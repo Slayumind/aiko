@@ -1164,6 +1164,9 @@ public static class Strings
     /// agent
     public static string TerminalStepAgent => Get("TerminalStepAgent");
 
+    /// skill
+    public static string TerminalStepSkill => Get("TerminalStepSkill");
+
     /// web
     public static string TerminalStepWeb => Get("TerminalStepWeb");
 
@@ -1190,6 +1193,9 @@ public static class Strings
 
     /// Agent: {0}
     public static string TerminalLineAgent => Get("TerminalLineAgent");
+
+    /// Skill: {0}
+    public static string TerminalLineSkill => Get("TerminalLineSkill");
 
     /// Opening {0}
     public static string TerminalLineOpening => Get("TerminalLineOpening");

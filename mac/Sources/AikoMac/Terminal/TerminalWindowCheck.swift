@@ -121,6 +121,13 @@ enum TerminalWindowCheck {
                 state: .done, result: "", images: [], progress: "")))
         }
 
+        // A skill and two MCP tools, named the way the core names real calls (D-324).
+        func tool(_ id: Int, _ name: String, _ input: JsonObject = JsonObject()) -> FeedItem {
+            FeedItem(id: id, content: .step(FeedStep(
+                toolUseId: "t\(id)", line: StepLine.forTool(name, input),
+                state: .done, result: "", images: [], progress: "")))
+        }
+
         let answer = [
             "## Where the groups come from",
             "",
@@ -146,6 +153,9 @@ enum TerminalWindowCheck {
             step(2, .read, "NewSessionChoices.swift"),
             step(3, .search, "FolderSource"),
             FeedItem(id: 4, content: .answer(text: answer, streaming: false)),
+            tool(21, "Skill", JsonObject([("skill", .string("aiko:copy"))])),
+            tool(22, "mcp__plugin_aiko-persona_memory__remember"),
+            tool(23, "mcp__claude_ai_Google_Calendar__list_events"),
             step(5, .edit, "SettingsControls.swift", added: 18, removed: 2),
         ]
         if case .request(let asked) = StreamEvent.fromLine(request) {

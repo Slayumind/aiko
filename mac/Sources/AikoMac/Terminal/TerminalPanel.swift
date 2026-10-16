@@ -355,9 +355,10 @@ private struct SessionRowView: View {
             case .run: Strings.terminalLineRunning
             case .agent: Strings.terminalLineAgent
             case .web: Strings.terminalLineOpening
+            case .skill: Strings.terminalLineSkill
             case .other: Strings.terminalLineCalling
             }
-            return Strings.format(format, glance.kind == .other ? glance.label : glance.text)
+            return Strings.format(format, glance.kind == .other ? called(glance) : glance.text)
         case .answer:
             return glance.text
         case .stoppedAt:
@@ -378,8 +379,14 @@ private struct SessionRowView: View {
         case .run: Strings.terminalStepRun
         case .agent: Strings.terminalStepAgent
         case .web: Strings.terminalStepWeb
+        case .skill: Strings.terminalStepSkill
         case .other: glance.label
         }
+    }
+
+    /// A tool without a word of its own: "memory · remember" for an MCP tool, the name for others.
+    private static func called(_ glance: TalkGlance) -> String {
+        glance.text.isEmpty ? glance.label : "\(glance.label) · \(glance.text)"
     }
 
     private static func usedWords(_ lastUsed: Int64, _ now: Date) -> String {

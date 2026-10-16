@@ -238,6 +238,13 @@ static class TerminalSnapshot
         static FeedItem.Step Step(int id, StepKind kind, string subject, StepState state, int added = 0, int removed = 0) =>
             new(id, $"t{id}", new StepLine(kind, "", subject, added, removed, false), state, "", [], "");
 
+        // A skill and two MCP tools, named the way the core names real calls (D-324).
+        static FeedItem.Step Tool(int id, string tool, string json)
+        {
+            using var call = System.Text.Json.JsonDocument.Parse(json);
+            return new(id, $"t{id}", StepLine.For(tool, call.RootElement), StepState.Done, "", [], "");
+        }
+
         List<FeedItem> items =
         [
             new FeedItem.OwnerMessage(1, "Add the folder groups to the form of a new session.", false, []),
@@ -259,6 +266,9 @@ static class TerminalSnapshot
                 "|---|---:|",
                 "| Recent | 0 |",
                 "| Bound | 3 |"), false),
+            Tool(21, "Skill", "{\"skill\":\"aiko:copy\"}"),
+            Tool(22, "mcp__plugin_aiko-persona_memory__remember", "{}"),
+            Tool(23, "mcp__claude_ai_Google_Calendar__list_events", "{}"),
             Step(5, StepKind.Edit, "DropDown.cs", StepState.Done, 18, 2),
             withCard ? new FeedItem.Card(6, RequestCard.From(edit), RequestState.Open) : Step(6, StepKind.Run, "dotnet test Aiko.Core.Tests", StepState.Running),
             new FeedItem.OwnerMessage(7, "And the same on the Mac, please.", true, []),

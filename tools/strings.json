@@ -2667,6 +2667,13 @@
     ]
   ],
   [
+    "TerminalStepSkill",
+    [
+      "skill",
+      "навык"
+    ]
+  ],
+  [
     "TerminalStepWeb",
     [
       "web",
@@ -2727,6 +2734,13 @@
     [
       "Agent: {0}",
       "Агент: {0}"
+    ]
+  ],
+  [
+    "TerminalLineSkill",
+    [
+      "Skill: {0}",
+      "Навык: {0}"
     ]
   ],
   [

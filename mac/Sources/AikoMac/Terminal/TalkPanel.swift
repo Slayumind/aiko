@@ -154,6 +154,7 @@ enum StepWords {
         case .run: Strings.terminalStepRun
         case .agent: Strings.terminalStepAgent
         case .web: Strings.terminalStepWeb
+        case .skill: Strings.terminalStepSkill
         case .other: label
         }
     }
