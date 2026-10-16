@@ -89,6 +89,7 @@ struct VoiceCaseTests {
                 branch: row["branch"]?.stringValue,
                 files: (row["files"]?.arrayValue ?? []).compactMap(\.stringValue),
                 memoryKeys: row["keys"]?.arrayValue?.compactMap(\.stringValue),
+                language: row["language"]?.stringValue,
                 maxLength: Int(row["max"]?.int64Value ?? 0))
 
             #expect(hint == row["hint"]?.stringValue, "\(row["name"]?.stringValue ?? "")")

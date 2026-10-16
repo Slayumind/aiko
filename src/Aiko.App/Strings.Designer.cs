@@ -1353,6 +1353,12 @@ public static class Strings
     /// Ctrl+Space or the microphone button in the field.
     public static string VoiceToggleWhat => Get("VoiceToggleWhat");
 
+    /// Speech language
+    public static string VoiceLanguageLabel => Get("VoiceLanguageLabel");
+
+    /// Whisper on your computer listens for this language. OpenAI hears the language by itself.
+    public static string VoiceLanguageWhat => Get("VoiceLanguageWhat");
+
     /// Recognition
     public static string VoiceEngineLabel => Get("VoiceEngineLabel");
 

@@ -66,6 +66,10 @@ public struct AppSettings: Sendable, Equatable {
 
     public var voiceEngine: VoiceEngine = .local
 
+    /// The language Whisper listens for. System is the language of the computer, not of Aiko's
+    /// interface: people often speak another language than the one they read in (D-326).
+    public var voiceLanguage: AikoLanguage = .system
+
     public init() {}
 
     public static let `default` = AppSettings()
@@ -94,6 +98,10 @@ public struct AppSettings: Sendable, Equatable {
         if let text = root["voiceEngine"]?.stringValue {
             guard let engine = VoiceEngine(rawValue: text) else { return .default }
             settings.voiceEngine = engine
+        }
+        if let text = root["voiceLanguage"]?.stringValue {
+            guard let language = AikoLanguage(rawValue: text) else { return .default }
+            settings.voiceLanguage = language
         }
 
         if let value = root["schemaVersion"]?.int64Value { settings.schemaVersion = Int(value) }
@@ -136,6 +144,7 @@ public struct AppSettings: Sendable, Equatable {
             ("meetAikoShown", .bool(meetAikoShown)),
             ("voiceInput", .bool(voiceInput)),
             ("voiceEngine", .string(voiceEngine.rawValue)),
+            ("voiceLanguage", .string(voiceLanguage.rawValue)),
         ])
 
         return JsonNode.object(root).toJsonString(indented: true) + "\n"

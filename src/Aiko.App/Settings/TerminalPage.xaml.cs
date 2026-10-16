@@ -49,6 +49,9 @@ public partial class TerminalPage : UserControl
         var engine = TryEngine ?? _settings.VoiceEngine;
         Local.IsChecked = engine == VoiceEngine.Local;
         Cloud.IsChecked = engine == VoiceEngine.OpenAI;
+        SpeechSystem.IsChecked = _settings.VoiceLanguage == AikoLanguage.System;
+        SpeechRussian.IsChecked = _settings.VoiceLanguage == AikoLanguage.Russian;
+        SpeechEnglish.IsChecked = _settings.VoiceLanguage == AikoLanguage.English;
         _filling = false;
 
         ShowModel();
@@ -66,6 +69,14 @@ public partial class TerminalPage : UserControl
         SettingsStore.Save(settings);
         Saved?.Invoke();
     }
+
+    private void OnSpeechChanged(object sender, RoutedEventArgs e) =>
+        Save(_settings with
+        {
+            VoiceLanguage = SpeechRussian.IsChecked == true ? AikoLanguage.Russian
+                : SpeechEnglish.IsChecked == true ? AikoLanguage.English
+                : AikoLanguage.System,
+        });
 
     /// Turning voice on with the computer chosen starts the download: that is the first time
     /// voice is turned on (D-313), and the size was on the page before the tick.

@@ -40,20 +40,28 @@ sealed class TerminalPanel : UserControl
 
     internal TalkInput Input => _talk.Input;
 
-    /// Enter and Esc answer a waiting card from any place of the window, not only from the field
-    /// (AIKO-244). A field where one types, a button and a list keep their own Enter and Esc.
+    /// Keys of the conversation from any place of the window, not only from the field, which takes
+    /// them first. Enter and Esc answer a waiting card (AIKO-244); Ctrl+Space starts or ends a
+    /// recording into the field of the open session (AIKO-311). Another field where one types, a
+    /// button and a list keep their own keys.
     private void OnWindowKey(object sender, KeyEventArgs e)
     {
-        if (e.Handled
-            || Keyboard.Modifiers != ModifierKeys.None
-            || e.Key is not (Key.Enter or Key.Escape)
-            || !_talk.IsVisible
-            || e.OriginalSource is TextBoxBase { IsReadOnly: false } or ButtonBase or ComboBox)
+        if (e.Handled || !_talk.IsVisible || e.OriginalSource is TextBoxBase { IsReadOnly: false })
         {
             return;
         }
 
-        e.Handled = _talk.Input.AnswerCard(e.Key == Key.Enter ? TalkKey.Enter : TalkKey.Escape);
+        if (e.Key == Key.Space && Keyboard.Modifiers == ModifierKeys.Control)
+        {
+            e.Handled = true;
+            _talk.Input.PressVoice();
+        }
+        else if (Keyboard.Modifiers == ModifierKeys.None
+            && e.Key is Key.Enter or Key.Escape
+            && e.OriginalSource is not (ButtonBase or ComboBox))
+        {
+            e.Handled = _talk.Input.AnswerCard(e.Key == Key.Enter ? TalkKey.Enter : TalkKey.Escape);
+        }
     }
     private string? _talkSession;
 

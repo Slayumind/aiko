@@ -9,12 +9,21 @@ public enum VoiceHint {
     /// stays inside both for Russian and English.
     public static let maxLength = 400
 
+    /// Words of the terminal a person says about their work, in the language Whisper hears. They
+    /// come right after the folder and the branch, so a long list of files never cuts them (AIKO-311).
+    private static let terminalWords: [String: [String]] = [
+        "ru": ["Enter", "Esc", "поле ввода", "сессия", "отрисовано"],
+        "en": ["Enter", "Esc", "input field", "session", "rendered"],
+    ]
+
     /// files are paths or names; only the name is kept. memoryKeys is nil when the memory is off.
+    /// language is "ru" or "en", or nil for no words of the terminal.
     public static func build(
         folder: String?,
         branch: String?,
         files: [String],
         memoryKeys: [String]?,
+        language: String? = nil,
         maxLength: Int = maxLength
     ) -> String {
         var items: [String] = []
@@ -28,6 +37,7 @@ public enum VoiceHint {
 
         add(lastPart(folder))
         add(branch)
+        (language.flatMap { terminalWords[$0] } ?? []).forEach { add($0) }
         files.forEach { add(lastPart($0)) }
         (memoryKeys ?? []).forEach { add($0) }
 

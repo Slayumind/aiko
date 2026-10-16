@@ -81,6 +81,7 @@ public class AppSettingsTests
             Island = new IslandPosition(ScreenEdge.Right, 0.25),
             VoiceInput = true,
             VoiceEngine = VoiceEngine.OpenAI,
+            VoiceLanguage = AikoLanguage.English,
         };
 
         var back = AppSettings.FromJson(settings.ToJson());
@@ -155,5 +156,7 @@ public class AppSettingsTests
         Assert.False(settings.VoiceInput);
         Assert.Equal(VoiceEngine.Local, settings.VoiceEngine);
         Assert.Contains("\"voiceEngine\": \"Local\"", AppSettings.Default.ToJson());
+        Assert.Equal(AikoLanguage.System, settings.VoiceLanguage);
+        Assert.Contains("\"voiceLanguage\": \"System\"", AppSettings.Default.ToJson());
     }
 }

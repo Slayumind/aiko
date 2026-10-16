@@ -484,6 +484,8 @@ public enum Strings {
         "NavVoiceOff": ("voice input off", "голос выключен"),
         "VoiceToggle": ("Voice input", "Голосовой ввод"),
         "VoiceToggleWhat": ("Ctrl+Space or the microphone button in the field.", "Ctrl+Space или кнопка микрофона в поле."),
+        "VoiceLanguageLabel": ("Speech language", "Язык речи"),
+        "VoiceLanguageWhat": ("Whisper on your computer listens for this language. OpenAI hears the language by itself.", "Whisper на компьютере слушает этот язык. OpenAI узнаёт язык сам."),
         "VoiceEngineLabel": ("Recognition", "Распознавание"),
         "VoiceLocalTitle": ("On this computer", "На компьютере"),
         "VoiceLocalWhat": ("Whisper small. Free, and the sound stays on this computer.", "Whisper small. Бесплатно, звук не уходит с компьютера."),
@@ -1838,6 +1840,12 @@ public enum Strings {
 
     /// Ctrl+Space or the microphone button in the field.
     public static var voiceToggleWhat: String { Strings.get("VoiceToggleWhat") }
+
+    /// Speech language
+    public static var voiceLanguageLabel: String { Strings.get("VoiceLanguageLabel") }
+
+    /// Whisper on your computer listens for this language. OpenAI hears the language by itself.
+    public static var voiceLanguageWhat: String { Strings.get("VoiceLanguageWhat") }
 
     /// Recognition
     public static var voiceEngineLabel: String { Strings.get("VoiceEngineLabel") }
