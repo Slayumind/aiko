@@ -315,6 +315,8 @@ private struct StepRow: View {
                 Text(StepWords.word(step.line.kind, step.line.label))
                     .font(Theme.sans(Theme.textNumber))
                     .foregroundStyle(failed ? Theme.destructive : Theme.muted)
+                    // The word stays whole, the name of an MCP server too; only the subject is cut.
+                    .fixedSize()
                     .frame(minWidth: 52, alignment: .leading)
                 Text(step.line.subject)
                     .font(Theme.mono(12.5))
