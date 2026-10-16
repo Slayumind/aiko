@@ -40,11 +40,17 @@ struct TalkPanelView: View {
     /// scrolled up to read stays where they are, as on Windows.
     @State private var atEnd = true
 
+    /// The height of the field and the line above it, which lie over the bottom of the feed.
+    @State private var bottomHeight: CGFloat = 0
+
     private static let endId = "end"
 
+    /// The feed takes the whole panel, so its scroll bar runs along the right edge from the top to
+    /// the bottom. The field lies over the bottom of the feed, and an empty row of its height ends
+    /// the feed, so the last row stops above the field (AIKO-244).
     var body: some View {
-        VStack(spacing: 0) {
-            ScrollViewReader { scroll in
+        ScrollViewReader { scroll in
+            ZStack(alignment: .bottom) {
                 ScrollView(.vertical) {
                     LazyVStack(alignment: .leading, spacing: 0) {
                         // The past from the file and the present of the process both count their items
@@ -58,6 +64,9 @@ struct TalkPanelView: View {
                         if talk.busy && !talk.hasOpenCard {
                             WorkingRow()
                         }
+                        Color.clear.frame(height: bottomHeight)
+                        // The end is after the room of the field: it is on screen only when the
+                        // feed is scrolled all the way down.
                         Color.clear.frame(height: 1).id(Self.endId)
                             .onAppear { atEnd = true }
                             .onDisappear { atEnd = false }
@@ -84,16 +93,21 @@ struct TalkPanelView: View {
                 }
                 .onAppear { scroll.scrollTo(Self.endId, anchor: .bottom) }
 
-                if let at = openCard, !cardInView {
-                    reminder(talk.items[at]) {
-                        scroll.scrollTo(at, anchor: .bottom)
+                VStack(spacing: 0) {
+                    if let at = openCard, !cardInView {
+                        // In the middle: at the bottom the card would stand under the field.
+                        reminder(talk.items[at]) {
+                            scroll.scrollTo(at, anchor: .center)
+                        }
                     }
-                    .modifier(TalkColumn())
+                    TalkInputView(talk: talk, input: state.input)
                 }
-            }
-
-            TalkInputView(talk: talk, input: state.input)
+                // Hides the rows that go under the field. It stays inside the column, so the scroll
+                // bar at the edge of the window is not covered.
+                .background(Theme.background)
                 .modifier(TalkColumn())
+                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { bottomHeight = $0 }
+            }
         }
     }
 
