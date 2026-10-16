@@ -116,8 +116,9 @@ private struct BlockView: View {
             VStack(alignment: .leading, spacing: 4) {
                 ForEach(Array(items.enumerated()), id: \.offset) { at, item in
                     HStack(alignment: .firstTextBaseline, spacing: 8) {
-                        // The widest number of the list sits hidden behind each marker, so all
-                        // numbers end in one column and the text of all items starts in one place.
+                        // The last number of the list sits hidden behind each marker. With digits
+                        // of one width it is the widest, so all numbers end in one column and the
+                        // text of all items starts in one place.
                         ZStack(alignment: .trailing) {
                             if ordered {
                                 Text("\(max(1, start) + items.count - 1).").hidden()
@@ -125,6 +126,7 @@ private struct BlockView: View {
                             Text(ordered ? "\(max(1, start) + at)." : "•")
                         }
                         .font(Theme.sans(Theme.textName))
+                        .monospacedDigit()
                         .foregroundStyle(Theme.ink)
                         .frame(minWidth: 14, alignment: .trailing)
                         VStack(alignment: .leading, spacing: 4) {
