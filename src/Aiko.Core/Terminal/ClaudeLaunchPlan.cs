@@ -32,6 +32,29 @@ public sealed record ClaudeLaunchPlan(IReadOnlyList<string> Arguments, IReadOnly
         "--permission-prompt-tool", "stdio",
     ];
 
+    /// A short Claude Code that only lists its commands for the menu of "/" (AIKO-330). It has no
+    /// session, so no file of a conversation is left, and its hooks are off, so the bridge of Aiko
+    /// does not count it as a session: it answers "initialize" in under a second (RESEARCH).
+    public static ClaudeLaunchPlan ForCommands(string configDirectory, string userProfile, IEnumerable<string> inheritedVariables)
+    {
+        string[] arguments =
+        [
+            "-p",
+            "--input-format", "stream-json",
+            "--output-format", "stream-json",
+            "--verbose",
+            "--settings", """{"disableAllHooks":true}""",
+        ];
+
+        var variables = Leftovers(inheritedVariables);
+        if (!ClaudeConfigFolder.IsDefault(configDirectory, userProfile))
+        {
+            variables.Add(new VariableChange(ConfigVariableName, configDirectory));
+        }
+
+        return new ClaudeLaunchPlan(arguments, variables);
+    }
+
     /// inheritedVariables are the names in the environment of Aiko itself.
     public static ClaudeLaunchPlan For(LaunchRequest request, IEnumerable<string> inheritedVariables)
     {
@@ -51,14 +74,7 @@ public sealed record ClaudeLaunchPlan(IReadOnlyList<string> Arguments, IReadOnly
             arguments.Add(request.Model.Trim());
         }
 
-        var variables = new List<VariableChange>();
-        foreach (var name in inheritedVariables)
-        {
-            if (IsLeftover(name))
-            {
-                variables.Add(new VariableChange(name, null));
-            }
-        }
+        var variables = Leftovers(inheritedVariables);
 
         // Environment 1 runs without the variable, like a plain claude and the VS Code panel (D-156).
         if (!ClaudeConfigFolder.IsDefault(request.ConfigDirectory, request.UserProfile))
@@ -73,6 +89,9 @@ public sealed record ClaudeLaunchPlan(IReadOnlyList<string> Arguments, IReadOnly
 
         return new ClaudeLaunchPlan(arguments, variables);
     }
+
+    private static List<VariableChange> Leftovers(IEnumerable<string> inheritedVariables) =>
+        [.. inheritedVariables.Where(IsLeftover).Select(name => new VariableChange(name, null))];
 
     /// What another Claude Code or another Aiko left in the environment. Aiko may itself be
     /// started from a session, and those variables would send the new one to the wrong place.

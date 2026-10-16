@@ -51,6 +51,27 @@ public struct ClaudeLaunchPlan: Sendable, Equatable {
         "--permission-prompt-tool", "stdio",
     ]
 
+    /// A short Claude Code that only lists its commands for the menu of "/" (AIKO-330). It has no
+    /// session, so no file of a conversation is left, and its hooks are off, so the bridge of Aiko
+    /// does not count it as a session: it answers "initialize" in under a second (RESEARCH).
+    public static func forCommands(
+        _ platform: PlatformConventions, configDirectory: String, userProfile: String, inheritedVariables: [String]
+    ) -> ClaudeLaunchPlan {
+        let arguments = [
+            "-p",
+            "--input-format", "stream-json",
+            "--output-format", "stream-json",
+            "--verbose",
+            "--settings", #"{"disableAllHooks":true}"#,
+        ]
+
+        var variables = inheritedVariables.filter(isLeftover).map { VariableChange($0, nil) }
+        if !ClaudeConfigFolder.isDefault(platform, configDirectory, userProfile) {
+            variables.append(VariableChange(ClaudeConfigFolder.variableName, configDirectory))
+        }
+        return ClaudeLaunchPlan(arguments: arguments, variables: variables)
+    }
+
     /// inheritedVariables are the names in the environment of Aiko itself.
     public static func forRequest(
         _ platform: PlatformConventions, _ request: LaunchRequest, inheritedVariables: [String]

@@ -95,6 +95,11 @@ public enum HostLine {
         ])
     }
 
+    /// Asks for the commands Claude Code knows, with their descriptions (AIKO-330).
+    public static func initialize(_ requestId: String) -> String {
+        ask(requestId, [("subtype", .string("initialize"))])
+    }
+
     /// Claude Code takes the new model between turns and names it in the next init (spike of
     /// 2026-10-15, RESEARCH).
     public static func setModel(_ requestId: String, _ model: String) -> String {

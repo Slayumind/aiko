@@ -274,6 +274,20 @@
       "event": { "kind": "status", "activity": null, "mode": "auto" }
     },
     {
+      "name": "the commands Claude Code knows, in its answer to initialize; one without a name is left out",
+      "line": { "type": "control_response", "response": { "subtype": "success", "request_id": "commands-1", "response": { "commands": [
+        { "name": "clear", "description": "Start a new session with empty context", "argumentHint": "[name]", "aliases": ["reset", 7, "new"], "builtin": true },
+        { "description": "no name" },
+        { "name": "aiko:copy", "description": "(aiko) Write and edit text" }
+      ], "account": { "email": "someone@example.com" } } } },
+      "event": { "kind": "commands", "requestId": "commands-1", "names": ["clear", "aiko:copy"], "first": { "description": "Start a new session with empty context", "argumentHint": "[name]", "aliases": ["reset", "new"], "builtin": true } }
+    },
+    {
+      "name": "an answer to initialize without commands",
+      "line": { "type": "control_response", "response": { "subtype": "success", "request_id": "commands-2", "response": { "commands": [] } } },
+      "event": { "kind": "commands", "requestId": "commands-2", "names": [], "first": null }
+    },
+    {
       "name": "the conversation was made shorter",
       "line": { "type": "system", "subtype": "compact_boundary", "session_id": "s-1", "compact_metadata": { "trigger": "manual", "pre_tokens": 46425, "post_tokens": 6302, "duration_ms": 5486 } },
       "event": { "kind": "compacted", "before": 46425, "after": 6302 }

@@ -107,6 +107,9 @@ public enum StreamEvent: Sendable, Equatable {
     /// The answer to a request the terminal sent: an interrupt or a change of mode.
     case reply(requestId: String, ok: Bool, mode: PermissionMode?)
 
+    /// The answer to "initialize": the commands Claude Code knows, with their descriptions.
+    case commands(requestId: String, list: [SlashCommand])
+
     /// The activity is "compacting" or "requesting" while that goes on, nil when it is over.
     case status(activity: String?, mode: PermissionMode?)
 
@@ -349,10 +352,26 @@ public enum StreamEvent: Sendable, Equatable {
               let id = response["request_id"]?.stringValue, !id.isEmpty else {
             return .ignored
         }
+        if let list = response["response"]?["commands"]?.arrayValue {
+            return .commands(requestId: id, list: list.compactMap(readCommand))
+        }
         return .reply(
             requestId: id,
             ok: response["subtype"]?.stringValue == "success",
             mode: PermissionModes.fromStream(response["response"]?["mode"]?.stringValue))
+    }
+
+    /// A command without a name is left out; the rest of its fields may be missing.
+    private static func readCommand(_ node: JsonNode) -> SlashCommand? {
+        guard let command = node.objectValue, let name = command["name"]?.stringValue, !name.isEmpty else {
+            return nil
+        }
+        return SlashCommand(
+            name: name,
+            description: command["description"]?.stringValue ?? "",
+            argumentHint: command["argumentHint"]?.stringValue ?? "",
+            aliases: (command["aliases"]?.arrayValue ?? []).compactMap(\.stringValue),
+            builtin: command["builtin"]?.boolValue ?? false)
     }
 
     private static func readRateLimit(_ root: JsonObject) -> StreamEvent {

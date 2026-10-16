@@ -77,6 +77,9 @@ public abstract record StreamEvent
     /// The answer to a request the terminal sent: an interrupt or a change of mode.
     public sealed record Reply(string RequestId, bool Ok, PermissionMode? Mode) : StreamEvent;
 
+    /// The answer to "initialize": the commands Claude Code knows, with their descriptions.
+    public sealed record Commands(string RequestId, IReadOnlyList<SlashCommand> List) : StreamEvent;
+
     /// Activity is "compacting" or "requesting" while that goes on, null when it is over.
     public sealed record Status(string? Activity, PermissionMode? Mode) : StreamEvent;
 
@@ -305,13 +308,32 @@ public abstract record StreamEvent
     private static StreamEvent ReadReply(JsonElement root)
     {
         var response = Object(root, "response");
-        return Str(response, "request_id") is { Length: > 0 } id
-            ? new Reply(
-                id,
-                Str(response, "subtype") == "success",
-                PermissionModes.FromStream(Str(Object(response, "response"), "mode")))
-            : new Ignored();
+        if (Str(response, "request_id") is not { Length: > 0 } id)
+        {
+            return new Ignored();
+        }
+
+        var inner = Object(response, "response");
+        if (Member(inner, "commands") is { ValueKind: JsonValueKind.Array })
+        {
+            return new Commands(id, [.. Items(inner, "commands").Select(ReadCommand).OfType<SlashCommand>()]);
+        }
+
+        return new Reply(id, Str(response, "subtype") == "success", PermissionModes.FromStream(Str(inner, "mode")));
     }
+
+    /// A command without a name is left out; the rest of its fields may be missing.
+    private static SlashCommand? ReadCommand(JsonElement command) =>
+        Str(command, "name") is { Length: > 0 } name
+            ? new SlashCommand(
+                name,
+                Str(command, "description") ?? "",
+                Str(command, "argumentHint") ?? "",
+                Member(command, "aliases") is { ValueKind: JsonValueKind.Array } aliases
+                    ? [.. aliases.EnumerateArray().Where(alias => alias.ValueKind == JsonValueKind.String).Select(alias => alias.GetString()!)]
+                    : [],
+                Flag(command, "builtin"))
+            : null;
 
     private static StreamEvent ReadRateLimit(JsonElement root)
     {

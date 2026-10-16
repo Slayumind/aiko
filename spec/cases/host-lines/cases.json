@@ -79,6 +79,10 @@
     {
       "action": { "kind": "setModel", "requestId": "model-5", "model": "sonnet" },
       "line": "{\"type\":\"control_request\",\"request_id\":\"model-5\",\"request\":{\"subtype\":\"set_model\",\"model\":\"sonnet\"}}"
+    },
+    {
+      "action": { "kind": "initialize", "requestId": "commands-1" },
+      "line": "{\"type\":\"control_request\",\"request_id\":\"commands-1\",\"request\":{\"subtype\":\"initialize\"}}"
     }
   ]
 }
