@@ -11,6 +11,9 @@ public enum StepKind
     Agent,
     Web,
 
+    /// A skill of Claude Code. The subject is its name.
+    Skill,
+
     /// Any other tool. The label names it.
     Other,
 }
@@ -18,7 +21,8 @@ public enum StepKind
 /// One step of the work as one line of the feed: what kind it is and what it is about (D-294).
 ///
 /// Label is set for a tool the terminal has no word for: the name of the tool, or the name of the
-/// MCP server for a tool that comes from one. Added and Removed count the lines an edit changes.
+/// MCP server for a tool that comes from one, written for a person (D-324). Added and Removed count
+/// the lines an edit changes.
 /// A hidden step is not drawn: a question and a plan come as cards, and two tools are only noise.
 public sealed record StepLine(StepKind Kind, string Label, string Subject, int Added, int Removed, bool Hidden)
 {
@@ -44,7 +48,10 @@ public sealed record StepLine(StepKind Kind, string Label, string Subject, int A
             case "Bash" or "PowerShell":
                 return Line(StepKind.Run, FirstLine(Text(input, "command")));
             case "Agent" or "Task":
-                return Line(StepKind.Agent, Text(input, "description"));
+                var task = Text(input, "description");
+                return Line(StepKind.Agent, task.Length > 0 ? task : Text(input, "subagent_type"));
+            case "Skill":
+                return Line(StepKind.Skill, Text(input, "skill"));
             case "WebFetch":
                 return Line(StepKind.Web, Text(input, "url"));
             case "WebSearch":
@@ -59,11 +66,35 @@ public sealed record StepLine(StepKind Kind, string Label, string Subject, int A
             var cut = toolName.LastIndexOf("__", StringComparison.Ordinal);
             if (cut > 5 && cut + 2 < toolName.Length)
             {
-                return new StepLine(StepKind.Other, toolName[5..cut], toolName[(cut + 2)..], 0, 0, false);
+                return new StepLine(StepKind.Other, ServerName(toolName[5..cut]), toolName[(cut + 2)..], 0, 0, false);
             }
         }
 
         return new StepLine(StepKind.Other, toolName, "", 0, 0, false);
+    }
+
+    /// The name of an MCP server as a person knows it. A server of a plugin comes as
+    /// plugin_<plugin>_<server>, and only the server stays. A connector of claude.ai comes as
+    /// claude_ai_Google_Calendar and reads Google Calendar. Plugin names are written with hyphens,
+    /// so the first underscore after the plugin is the cut.
+    public static string ServerName(string server)
+    {
+        const string Plugin = "plugin_";
+        const string ClaudeAi = "claude_ai_";
+        if (server.StartsWith(Plugin, StringComparison.Ordinal))
+        {
+            var cut = server.IndexOf('_', Plugin.Length);
+            if (cut > Plugin.Length && cut + 1 < server.Length)
+            {
+                return server[(cut + 1)..];
+            }
+        }
+        else if (server.StartsWith(ClaudeAi, StringComparison.Ordinal) && server.Length > ClaudeAi.Length)
+        {
+            return server[ClaudeAi.Length..].Replace('_', ' ');
+        }
+
+        return server;
     }
 
     /// The lines of an edit that differ, after the equal lines at both ends are set aside.

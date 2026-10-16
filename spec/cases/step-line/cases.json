@@ -1,5 +1,5 @@
 {
-  "comment": "One step of the work as one line of the feed (D-294): the kind, what it is about and how many lines an edit changes. The label is set only for a tool the terminal has no word for. A hidden step is not drawn: a question and a plan come as cards, the search for tools is noise, and the read of a pasted picture repeats the picture the person already sees. Lines of an edit are counted after the equal lines at both ends are set aside.",
+  "comment": "One step of the work as one line of the feed (D-294): the kind, what it is about and how many lines an edit changes. The label is set only for a tool the terminal has no word for. A hidden step is not drawn: a question and a plan come as cards, the search for tools is noise, and the read of a pasted picture repeats the picture the person already sees. Lines of an edit are counted after the equal lines at both ends are set aside. A skill names itself. An agent without a description shows its type. An MCP server is named for a person (D-324): a server of a plugin keeps only its own name, a connector of claude.ai loses its prefix and its underscores; a name of another shape stays as it is.",
   "steps": [
     {
       "tool": "Read",
@@ -328,6 +328,48 @@
       }
     },
     {
+      "tool": "Agent",
+      "input": {
+        "prompt": "long text",
+        "subagent_type": "Explore"
+      },
+      "line": {
+        "kind": "agent",
+        "label": "",
+        "subject": "Explore",
+        "added": 0,
+        "removed": 0,
+        "hidden": false
+      }
+    },
+    {
+      "tool": "Skill",
+      "input": {
+        "skill": "aiko:copy",
+        "args": "the hint under the buttons"
+      },
+      "line": {
+        "kind": "skill",
+        "label": "",
+        "subject": "aiko:copy",
+        "added": 0,
+        "removed": 0,
+        "hidden": false
+      }
+    },
+    {
+      "tool": "Skill",
+      "input": {},
+      "line": {
+        "kind": "skill",
+        "label": "",
+        "subject": "",
+        "added": 0,
+        "removed": 0,
+        "hidden": false
+      }
+    },
+    {
       "tool": "WebFetch",
       "input": {
         "url": "https://example.com/docs",
@@ -419,7 +461,7 @@
       },
       "line": {
         "kind": "other",
-        "label": "plugin_aiko-persona_memory",
+        "label": "memory",
         "subject": "forget",
         "added": 0,
         "removed": 0,
@@ -433,6 +475,56 @@
         "kind": "other",
         "label": "blender",
         "subject": "get_scene_info",
+        "added": 0,
+        "removed": 0,
+        "hidden": false
+      }
+    },
+    {
+      "tool": "mcp__claude_ai_Google_Calendar__list_events",
+      "input": {},
+      "line": {
+        "kind": "other",
+        "label": "Google Calendar",
+        "subject": "list_events",
+        "added": 0,
+        "removed": 0,
+        "hidden": false
+      }
+    },
+    {
+      "tool": "mcp__claude-in-chrome__navigate",
+      "input": {
+        "url": "https://example.com"
+      },
+      "line": {
+        "kind": "other",
+        "label": "claude-in-chrome",
+        "subject": "navigate",
+        "added": 0,
+        "removed": 0,
+        "hidden": false
+      }
+    },
+    {
+      "tool": "mcp__plugin_figma__get_file",
+      "input": {},
+      "line": {
+        "kind": "other",
+        "label": "plugin_figma",
+        "subject": "get_file",
+        "added": 0,
+        "removed": 0,
+        "hidden": false
+      }
+    },
+    {
+      "tool": "mcp__claude_ai___tool",
+      "input": {},
+      "line": {
+        "kind": "other",
+        "label": "claude_ai_",
+        "subject": "tool",
         "added": 0,
         "removed": 0,
         "hidden": false

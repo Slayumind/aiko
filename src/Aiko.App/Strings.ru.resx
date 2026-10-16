@@ -1174,6 +1174,9 @@
   <data name="TerminalStepAgent" xml:space="preserve">
     <value>агент</value>
   </data>
+  <data name="TerminalStepSkill" xml:space="preserve">
+    <value>навык</value>
+  </data>
   <data name="TerminalStepWeb" xml:space="preserve">
     <value>веб</value>
   </data>
@@ -1200,6 +1203,9 @@
   </data>
   <data name="TerminalLineAgent" xml:space="preserve">
     <value>Агент: {0}</value>
+  </data>
+  <data name="TerminalLineSkill" xml:space="preserve">
+    <value>Навык: {0}</value>
   </data>
   <data name="TerminalLineOpening" xml:space="preserve">
     <value>Открывает {0}</value>

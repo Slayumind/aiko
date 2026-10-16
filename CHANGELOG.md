@@ -13,7 +13,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   button on the card, on Windows and macOS. The window keeps your Claude Code sessions, grouped by environment and folder, and opens
   where you closed it.
 - **Talk to Claude Code in the terminal.** Answers show as formatted text with code blocks you can
-  copy and tables. Selected text copies as the markdown Claude wrote. Each step of the work is one line that opens to its result. If you scroll up while an answer
+  copy and tables. Selected text copies as the markdown Claude wrote. Each step of the work is one line that opens to its result and names the skill, the task of an agent or the MCP server at work. If you scroll up while an answer
   is written, the feed stays where you left it. A permission card
   shows the lines an edit changes; Enter in an empty field allows it and Esc denies it, and the keyboard stays in the field. Under the field you see the mode, the model and the environment;
   Shift+Tab or a click changes the mode, and a click on the model takes the next one. Arrows bring back what you sent, Ctrl+V or Cmd+V adds a screenshot,

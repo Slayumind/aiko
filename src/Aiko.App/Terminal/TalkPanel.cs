@@ -256,6 +256,7 @@ sealed class TalkPanel : UserControl
         StepKind.Run => Strings.TerminalStepRun,
         StepKind.Agent => Strings.TerminalStepAgent,
         StepKind.Web => Strings.TerminalStepWeb,
+        StepKind.Skill => Strings.TerminalStepSkill,
         _ => label,
     };
 
