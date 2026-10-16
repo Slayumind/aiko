@@ -181,6 +181,12 @@ struct TalkInputView: View {
     @ObservedObject var input: TalkInputState
 
     @FocusState private var focused: Bool
+    @State private var textHeight: CGFloat = 20
+
+    /// The room between the text and the frame of the field, and its height before it scrolls.
+    private static let side: CGFloat = 14
+    private static let fieldHeight: CGFloat = 200
+    private static let fieldEnd = "field-end"
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -203,16 +209,36 @@ struct TalkInputView: View {
                                 }
                         }
                     }
+                    .padding(.horizontal, Self.side)
                 }
 
-                HStack(alignment: .top, spacing: 10) {
-                    TextField(Strings.terminalDescribeTask, text: $input.text, axis: .vertical)
-                        .textFieldStyle(.plain)
-                        .font(Theme.sans(Theme.textName))
-                        .foregroundStyle(Theme.ink)
-                        .lineLimit(1...8)
-                        .focused($focused)
-                        .onKeyPress(phases: .down) { press in onKey(press) }
+                // The text does not scroll itself: this does, over the whole width of the field, so
+                // its bar stands at the right edge, right of the buttons (AIKO-245).
+                ZStack(alignment: .topTrailing) {
+                    ScrollViewReader { reader in
+                        ScrollView(.vertical) {
+                            VStack(spacing: 0) {
+                                TextField(Strings.terminalDescribeTask, text: $input.text, axis: .vertical)
+                                    .textFieldStyle(.plain)
+                                    .font(Theme.sans(Theme.textName))
+                                    .foregroundStyle(Theme.ink)
+                                    .focused($focused)
+                                    .onKeyPress(phases: .down) { press in onKey(press) }
+                                    .padding(.leading, Self.side)
+                                    .padding(.trailing, Self.side + (talk.busy ? 36 : 0))
+                                Color.clear.frame(height: 0).id(Self.fieldEnd)
+                            }
+                            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { textHeight = $0 }
+                        }
+                        .frame(height: min(textHeight, Self.fieldHeight))
+                        // Typing at the end keeps the end in view, as the field did when it scrolled
+                        // itself; the caret elsewhere is kept in view by the text view.
+                        .onChange(of: input.text) { old, new in
+                            if new.count > old.count && new.hasPrefix(old) {
+                                reader.scrollTo(Self.fieldEnd, anchor: .bottom)
+                            }
+                        }
+                    }
 
                     // The stop button stands where the paper clip will be (D-308).
                     if talk.busy {
@@ -227,10 +253,10 @@ struct TalkInputView: View {
                         .buttonStyle(.plain)
                         .help(Strings.terminalStop)
                         .padding(.top, -1)
+                        .padding(.trailing, Self.side)
                     }
                 }
             }
-            .padding(.horizontal, 14)
             .padding(.vertical, 12)
             .background(Theme.surface)
             .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))

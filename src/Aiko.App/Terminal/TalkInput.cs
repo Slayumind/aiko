@@ -33,9 +33,17 @@ sealed class TalkInput : UserControl
 
     private const double WaitingOpacity = 0.6;
 
+    /// The room between the text and the frame of the field, and its height before it scrolls.
+    private const double FieldSide = 14;
+    private const double FieldHeight = 200;
+
+    /// One notch of the wheel, 120, scrolls the field by 40 pixels.
+    private const double WheelStep = 3;
+
     private static readonly string[] PictureFiles = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp"];
 
     private readonly TextBox _text = new();
+    private readonly ScrollViewer _scroll;
     private readonly WrapPanel _pictures = new() { Margin = new Thickness(0, 0, 0, 8), Visibility = Visibility.Collapsed };
     private readonly List<AttachedImage> _attached = [];
     private readonly Button _stop;
@@ -82,8 +90,7 @@ sealed class TalkInput : UserControl
         _text.AcceptsReturn = true;
         _text.TextWrapping = TextWrapping.Wrap;
         _text.MinHeight = 24;
-        _text.MaxHeight = 200;
-        _text.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
+        _text.VerticalScrollBarVisibility = ScrollBarVisibility.Disabled;
         _text.VerticalContentAlignment = VerticalAlignment.Top;
         _text.PreviewKeyDown += OnKey;
         CommandManager.AddPreviewCanExecuteHandler(_text, OnCanPaste);
@@ -100,21 +107,50 @@ sealed class TalkInput : UserControl
 
         // The mic button is the last at the right; the stop button stands left of it, where the
         // paper clip will be (D-308, D-315).
-        var field = new DockPanel();
-        DockPanel.SetDock(_mic, Dock.Right);
-        DockPanel.SetDock(_stop, Dock.Right);
-        field.Children.Add(_mic);
-        field.Children.Add(_stop);
+        var buttons = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Right,
+            VerticalAlignment = VerticalAlignment.Top,
+            Margin = new Thickness(0, 0, FieldSide, 0),
+        };
+        buttons.Children.Add(_stop);
+        buttons.Children.Add(_mic);
         _dictation.FontFamily = _text.FontFamily;
         _dictation.FontSize = _text.FontSize;
         _dictation.Margin = new Thickness(2, 0, 2, 0);
-        var words = new Grid();
+        var words = new Grid { Margin = new Thickness(0, 0, FieldSide, 0) };
         words.Children.Add(_text);
         words.Children.Add(placeholder);
         words.Children.Add(_dictation);
-        field.Children.Add(words);
+        buttons.SizeChanged += (_, size) => words.Margin = new Thickness(0, 0, FieldSide + size.NewSize.Width, 0);
+
+        // The text does not scroll itself: this does, over the whole width of the field, so its
+        // bar stands at the right edge, right of the buttons (AIKO-245). The window gives every
+        // scroll viewer the thin bar of QuietScroll.
+        _scroll = new ScrollViewer
+        {
+            MaxHeight = FieldHeight,
+            Focusable = false,
+            Content = words,
+        };
+        _scroll.PreviewMouseWheel += OnFieldWheel;
+        // A new line is laid out after the caret moved, so the caret is checked again then.
+        _text.SelectionChanged += (_, _) => KeepCaretInView();
+        _scroll.ScrollChanged += (_, e) =>
+        {
+            if (e.ExtentHeightChange != 0 || e.ViewportHeightChange != 0)
+            {
+                KeepCaretInView();
+            }
+        };
+
+        var field = new Grid();
+        field.Children.Add(_scroll);
+        field.Children.Add(buttons);
 
         var inside = new StackPanel();
+        _pictures.Margin = new Thickness(0, 0, FieldSide, 8);
         inside.Children.Add(_pictures);
         inside.Children.Add(field);
 
@@ -124,7 +160,7 @@ sealed class TalkInput : UserControl
             BorderBrush = Tokens.Brush("InputLine"),
             BorderThickness = new Thickness(1),
             CornerRadius = new CornerRadius(14),
-            Padding = new Thickness(14, 12, 14, 12),
+            Padding = new Thickness(FieldSide, 12, 0, 12),
             Margin = new Thickness(0, 10, 0, 0),
             Cursor = Cursors.IBeam,
             AllowDrop = true,
@@ -176,6 +212,51 @@ sealed class TalkInput : UserControl
         all.Children.Add(compose);
         all.Children.Add(status);
         Content = all;
+    }
+
+    /// Text as if it was typed, with the caret at its end. For the snapshot door.
+    public void Typed(string text)
+    {
+        _text.Text = text;
+        _text.CaretIndex = text.Length;
+    }
+
+    /// The text box would take the wheel for itself and not scroll; the field scrolls instead.
+    private void OnFieldWheel(object sender, MouseWheelEventArgs e)
+    {
+        if (_scroll.ScrollableHeight <= 0)
+        {
+            return;
+        }
+
+        _scroll.ScrollToVerticalOffset(_scroll.VerticalOffset - e.Delta / WheelStep);
+        e.Handled = true;
+    }
+
+    /// Typing and the arrows move the caret; the field follows it, as the text box did when it
+    /// scrolled itself.
+    private void KeepCaretInView()
+    {
+        if (_scroll.ScrollableHeight <= 0)
+        {
+            return;
+        }
+
+        var caret = _text.GetRectFromCharacterIndex(_text.CaretIndex);
+        if (caret.IsEmpty)
+        {
+            return;
+        }
+
+        var top = _text.TranslatePoint(caret.TopLeft, _scroll).Y;
+        if (top < 0)
+        {
+            _scroll.ScrollToVerticalOffset(_scroll.VerticalOffset + top);
+        }
+        else if (top + caret.Height > _scroll.ViewportHeight)
+        {
+            _scroll.ScrollToVerticalOffset(_scroll.VerticalOffset + top + caret.Height - _scroll.ViewportHeight);
+        }
     }
 
     public event Action<string, IReadOnlyList<AttachedImage>>? Sent;

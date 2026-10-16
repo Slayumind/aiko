@@ -9,7 +9,7 @@ static class TerminalSnapshot
 {
     public static readonly IReadOnlyList<string> States =
     [
-        "talk", "feed", "working", "compacting", "empty", "form", "elsewhere", "login", "close",
+        "talk", "feed", "working", "compacting", "long-input", "empty", "form", "elsewhere", "login", "close",
         "voice-idle", "voice-warming", "voice-listening", "voice-finishing", "voice-nomic", "voice-model",
     ];
 
@@ -24,6 +24,12 @@ static class TerminalSnapshot
         var panel = new TerminalPanel { Width = width, Height = 700 };
         panel.Show(View(state));
         Voice(panel.Input, state);
+        if (state == "long-input")
+        {
+            // Twelve lines: more than the field shows, so it scrolls (AIKO-245).
+            panel.Input.Typed(string.Join("\n", Enumerable.Range(1, 12).Select(line => $"Line {line} of a long message.")));
+        }
+
         Snapshot.Write(panel, path);
         return true;
     }
@@ -33,7 +39,7 @@ static class TerminalSnapshot
     {
         (VoicePhase phase, VoiceNotice notice) = state switch
         {
-            "voice-idle" => (VoicePhase.Idle, VoiceNotice.None),
+            "voice-idle" or "long-input" => (VoicePhase.Idle, VoiceNotice.None),
             "voice-warming" => (VoicePhase.Warming, VoiceNotice.None),
             "voice-listening" => (VoicePhase.Listening, VoiceNotice.None),
             "voice-finishing" => (VoicePhase.Finishing, VoiceNotice.None),
@@ -238,7 +244,7 @@ static class TerminalSnapshot
             form,
             state == "close" ? new AskView(string.Format(Strings.TerminalCloseTitle, "terminal"), Strings.TerminalCloseBody) : null,
             state == "feed" ? Feed(withCard: true)
-                : state == "working" ? Feed(withCard: false)
+                : state is "working" or "long-input" ? Feed(withCard: false)
                 : state == "compacting" ? Compacting()
                 : state.StartsWith("voice-", StringComparison.Ordinal) ? Feed(withCard: false) with { Busy = false }
                 : null,
