@@ -132,22 +132,31 @@ sealed class TalkPanel : UserControl
             Child = reminderRow,
         };
 
-        var bottom = new StackPanel();
+        // The feed takes the whole window, so its scroll bar runs along the right edge from the top
+        // to the bottom. Its rows and the field keep the same column, and the field lies over the
+        // bottom of the feed (AIKO-244).
+        var bottom = new StackPanel
+        {
+            Margin = new Thickness(Gutter, 0, Gutter, 0),
+            MaxWidth = ColumnWidth,
+            VerticalAlignment = VerticalAlignment.Bottom,
+        };
         bottom.Children.Add(_reminder);
         bottom.Children.Add(_input);
 
-        var middle = new Grid();
-        middle.Children.Add(_feed);
-        middle.Children.Add(_empty);
+        // The rows end above the field: the padding moves only the rows, the scroll bar keeps the
+        // whole height (QuietScroll in Theme/Controls.xaml). The field grows with its lines and
+        // the reminder comes and goes, so the padding follows its height.
+        bottom.SizeChanged += (_, e) =>
+        {
+            _feed.Padding = new Thickness(0, 0, 0, e.NewSize.Height);
+            _empty.Margin = new Thickness(0, 0, 0, e.NewSize.Height);
+        };
 
-        // The feed takes the whole width, so its scroll bar stands at the right edge of the window.
-        // Its rows and the field below keep the same column (AIKO-244).
-        var column = new DockPanel { Margin = new Thickness(Gutter, 0, Gutter, 0), MaxWidth = ColumnWidth };
-        column.Children.Add(bottom);
-        var all = new DockPanel();
-        DockPanel.SetDock(column, Dock.Bottom);
-        all.Children.Add(column);
-        all.Children.Add(middle);
+        var all = new Grid();
+        all.Children.Add(_feed);
+        all.Children.Add(_empty);
+        all.Children.Add(bottom);
         Content = all;
     }
 
