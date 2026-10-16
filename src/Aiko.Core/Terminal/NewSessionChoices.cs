@@ -101,19 +101,22 @@ public static class NewSessionChoices
     /// last and has a model of the list. With no such session it is the first of the list.
     public static string DefaultModel(TerminalSessions sessions, string environment) =>
         sessions.Sessions
-            .Where(session => session.Environment == environment && session.Model is { } model && Models.Contains(model))
+            .Where(session => session.Environment == environment && Family(session.Model) is not null)
             .OrderByDescending(session => session.LastUsed)
-            .Select(session => session.Model)
+            .Select(session => Family(session.Model))
             .FirstOrDefault() ?? Models[0];
 
     /// The model after this one, for a click on the model under the input: in the order of the
-    /// form, and back to the first after the last. The model may be a short name or a full id
-    /// like "claude-sonnet-5-5"; a model outside the list goes to the first one.
+    /// form, and back to the first after the last. A model outside the list goes to the first one.
     public static string NextModel(string? model)
     {
-        var at = Models.ToList().FindIndex(name => model?.Contains(name, StringComparison.OrdinalIgnoreCase) == true);
+        var at = Family(model) is { } family ? Models.ToList().IndexOf(family) : -1;
         return Models[(at + 1) % Models.Count];
     }
+
+    /// The model of the list a short name or a full id like "claude-sonnet-5-5" belongs to.
+    private static string? Family(string? model) =>
+        Models.FirstOrDefault(name => model?.Contains(name, StringComparison.OrdinalIgnoreCase) == true);
 
     /// The name of the other environment a folder is bound to, or null. The form says so before
     /// the session is made: Claude Code started there from a console would use that environment.

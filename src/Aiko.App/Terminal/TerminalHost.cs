@@ -375,9 +375,27 @@ sealed class TerminalHost
             _newProcess,
             work => _window.Dispatcher.BeginInvoke(work),
             new TerminalLog());
-        talk.Changed = Draw;
+        talk.Changed = () =>
+        {
+            KeepModel(id, talk.State);
+            Draw();
+        };
         _talks[id] = talk;
         return talk;
+    }
+
+    /// The full id Claude Code named is kept, so the session opens with it next time. While a
+    /// model is asked, the session already keeps that one.
+    private void KeepModel(string id, Conversation state)
+    {
+        if (state.AskedModel.Length == 0
+            && state.Model.Length > 0
+            && _sessions.Find(id) is { } session
+            && session.Model != state.Model)
+        {
+            _sessions = _sessions.SetModel(id, state.Model);
+            Save();
+        }
     }
 
     /// The next mode of the session. It is kept for the next start, and a running Claude Code
@@ -407,7 +425,7 @@ sealed class TerminalHost
         }
 
         var talk = Current();
-        var shown = talk?.State.Model is { Length: > 0 } running ? running : session.Model;
+        var shown = talk?.State.LatestModel is { Length: > 0 } running ? running : session.Model;
         var next = NewSessionChoices.NextModel(shown);
         _sessions = _sessions.SetModel(session.Id, next);
         Save();
@@ -452,7 +470,7 @@ sealed class TerminalHost
         var past = _histories[session.Id].Items;
         if (!_talks.TryGetValue(session.Id, out var talk))
         {
-            return new TalkView(session.Id, past, false, false, session.Mode, ModelName.Display(session.Model), session.Environment);
+            return new TalkView(session.Id, past, false, false, session.Mode, ModelName.Label(null, session.Model), session.Environment);
         }
 
         var state = talk.State;
@@ -462,7 +480,7 @@ sealed class TerminalHost
             state.IsBusy,
             state.HasOpenCard,
             state.Mode,
-            ModelName.Display(state.Model.Length > 0 ? state.Model : session.Model),
+            ModelName.Label(state.AskedModel, state.Model.Length > 0 ? state.Model : session.Model),
             session.Environment);
     }
 

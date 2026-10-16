@@ -110,11 +110,24 @@ public enum NewSessionChoices {
     public static func defaultModel(_ sessions: TerminalSessions, _ environment: String) -> String {
         var latest: (model: String, used: Int64)?
         for session in sessions.sessions where session.environment == environment {
-            if let model = session.model, models.contains(model), session.lastUsed > (latest?.used ?? Int64.min) {
+            if let model = family(session.model), session.lastUsed > (latest?.used ?? Int64.min) {
                 latest = (model, session.lastUsed)
             }
         }
         return latest?.model ?? models[0]
+    }
+
+    /// The model after this one, for a click on the model under the input: in the order of the
+    /// form, and back to the first after the last. A model outside the list goes to the first one.
+    public static func nextModel(_ model: String?) -> String {
+        let at = family(model).flatMap { models.firstIndex(of: $0) } ?? -1
+        return models[(at + 1) % models.count]
+    }
+
+    /// The model of the list a short name or a full id like "claude-sonnet-5-5" belongs to.
+    private static func family(_ model: String?) -> String? {
+        guard let model else { return nil }
+        return models.first { model.range(of: $0, options: .caseInsensitive) != nil }
     }
 
     /// The name of the other environment a folder is bound to, or nil. The form says so before

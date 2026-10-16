@@ -109,10 +109,11 @@ public sealed record Conversation(
     IReadOnlyList<LimitWindow> Limits,
     int NextId,
     bool AnsweredInTurn,
-    bool FailedInTurn)
+    bool FailedInTurn,
+    string AskedModel)
 {
     public static Conversation Empty(PermissionMode mode = PermissionMode.Manual) =>
-        new([], false, 0, mode, "", "", false, TalkFailure.None, false, [], 1, false, false);
+        new([], false, 0, mode, "", "", false, TalkFailure.None, false, [], 1, false, false, "");
 
     public TalkActivity Activity =>
         Failure == TalkFailure.SignedOut ? TalkActivity.SignedOut
@@ -125,6 +126,9 @@ public sealed record Conversation(
     /// A turn can end while a subagent still works in the background (D-305).
     public bool IsBusy => InTurn || Tasks > 0;
 
+    /// The model asked last, or the one Claude Code named when nothing is asked.
+    public string LatestModel => AskedModel.Length > 0 ? AskedModel : Model;
+
     public bool HasOpenCard => Items.Any(item => item is FeedItem.Card { State: RequestState.Open });
 
     // ---- what Claude Code says ----
@@ -135,6 +139,7 @@ public sealed record Conversation(
         {
             SessionId = ready.SessionId,
             Model = ready.Model.Length > 0 ? ready.Model : Model,
+            AskedModel = ready.Model.Length > 0 ? "" : AskedModel,
             Mode = ready.Mode ?? Mode,
         }),
         StreamEvent.TextDelta { ParentToolUseId: null } delta => Quiet(Streamed(delta.Text)),
@@ -196,7 +201,8 @@ public sealed record Conversation(
 
     private Conversation Returned(StreamEvent.User user)
     {
-        var next = this;
+        // After a change of model Claude Code names its full id at once, before the next turn.
+        var next = ModelName.FromSwitch(user.Text) is { } model ? this with { Model = model, AskedModel = "" } : this;
         foreach (var result in user.Results)
         {
             next = next.Changed<FeedItem.Step>(
@@ -283,9 +289,10 @@ public sealed record Conversation(
     public Outcome SetMode(PermissionMode mode) =>
         new(this with { Mode = mode, NextId = NextId + 1 }, [HostLine.SetMode($"mode-{NextId}", mode)]);
 
-    /// The line under the input shows the new model at once; the next init names its full id.
+    /// The model stays asked until Claude Code names its full id: in its answer to the change,
+    /// or in the init of the next start.
     public Outcome SetModel(string model) =>
-        new(this with { Model = model, NextId = NextId + 1 }, [HostLine.SetModel($"model-{NextId}", model)]);
+        new(this with { AskedModel = model, NextId = NextId + 1 }, [HostLine.SetModel($"model-{NextId}", model)]);
 
     public Conversation MarkRead() => this with { Unread = false };
 

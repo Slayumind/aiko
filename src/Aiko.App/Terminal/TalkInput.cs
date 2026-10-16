@@ -31,6 +31,8 @@ sealed class TalkInput : UserControl
     /// 5 MB of a picture, and a screenshot of a large screen is often more as PNG.
     private const int LargestSide = 1800;
 
+    private const double WaitingOpacity = 0.6;
+
     private static readonly string[] PictureFiles = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp"];
 
     private readonly TextBox _text = new();
@@ -332,7 +334,7 @@ sealed class TalkInput : UserControl
     }
 
     /// A new session starts with an empty field: what was typed for another one stays out of it.
-    public void Show(string session, bool busy, bool cardWaits, PermissionMode mode, string model, string environment)
+    public void Show(string session, bool busy, bool cardWaits, PermissionMode mode, ModelLabel model, string environment)
     {
         _cardWaits = cardWaits;
         if (session != _session)
@@ -353,8 +355,29 @@ sealed class TalkInput : UserControl
         _busy = busy;
         _stop.Visibility = busy ? Visibility.Visible : Visibility.Collapsed;
         _mode.Text = PermissionModes.Name(mode);
-        _model.Text = model.Length > 0 ? " · " + model : "";
+        DrawModel(model);
         _where.Text = " · " + environment;
+    }
+
+    /// A model Claude Code has not named yet is quieter than the rest of the line.
+    private void DrawModel(ModelLabel model)
+    {
+        _model.Inlines.Clear();
+        if (model.Text.Length == 0)
+        {
+            return;
+        }
+
+        var name = new Run(model.Text);
+        if (model.Waiting)
+        {
+            var quiet = Tokens.Brush("Muted").Clone();
+            quiet.Opacity = WaitingOpacity;
+            name.Foreground = quiet;
+        }
+
+        _model.Inlines.Add(new Run(" · "));
+        _model.Inlines.Add(name);
     }
 
     // ---- the keys ----

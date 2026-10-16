@@ -108,7 +108,7 @@ public sealed class ConversationRunner(
                 setup.SessionId,
                 _known,
                 State.Mode,
-                setup.Model),
+                State.LatestModel is { Length: > 0 } model ? model : setup.Model),
             setup.InheritedVariables);
 
         var started = newProcess();

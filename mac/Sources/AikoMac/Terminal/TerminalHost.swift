@@ -88,6 +88,7 @@ final class TerminalHost {
         }
         panel.input.stopAsked = { [weak self] in self?.current()?.interrupt() }
         panel.input.modeAsked = { [weak self] in self?.nextMode() }
+        panel.input.modelAsked = { [weak self] in self?.nextModel() }
         panel.input.chosen = panel.chosen
     }
 
@@ -307,9 +308,23 @@ final class TerminalHost {
             post: { work in DispatchQueue.main.async(execute: work) },
             log: AppTerminalLog())
         // The runner calls this on the main thread, through post.
-        talk.changed = { [weak self] in MainActor.assumeIsolated { self?.draw() } }
+        talk.changed = { [weak self, weak talk] in
+            MainActor.assumeIsolated {
+                if let talk { self?.keepModel(id, talk.state) }
+                self?.draw()
+            }
+        }
         talks[id] = talk
         return talk
+    }
+
+    /// The full id Claude Code named is kept, so the session opens with it next time. While a
+    /// model is asked, the session already keeps that one.
+    private func keepModel(_ id: String, _ state: Conversation) {
+        guard state.askedModel.isEmpty, !state.model.isEmpty,
+              let session = sessions.find(id), session.model != state.model else { return }
+        sessions = sessions.setModel(id, state.model)
+        save()
     }
 
     /// The next mode of the session. It is kept for the next start, and a running Claude Code
@@ -321,6 +336,19 @@ final class TerminalHost {
         sessions = sessions.setMode(session.id, next)
         save()
         talk?.setMode(next)
+        draw()
+    }
+
+    /// The next model of the session. It is kept for the next start, and a running Claude Code
+    /// takes it from the next turn.
+    private func nextModel() {
+        guard let session = model.session(sessions) else { return }
+        let talk = current()
+        let latest = talk?.state.latestModel ?? ""
+        let next = NewSessionChoices.nextModel(latest.isEmpty ? session.model : latest)
+        sessions = sessions.setModel(session.id, next)
+        save()
+        talk?.setModel(next)
         draw()
     }
 
@@ -355,7 +383,7 @@ final class TerminalHost {
         guard let talk = talks[session.id] else {
             return TalkScreen(
                 session: session.id, items: past, busy: false, hasOpenCard: false, mode: session.mode,
-                model: ModelName.display(session.model), environment: session.environment)
+                model: ModelName.label(asked: nil, known: session.model), environment: session.environment)
         }
 
         let state = talk.state
@@ -365,7 +393,7 @@ final class TerminalHost {
             busy: state.isBusy,
             hasOpenCard: state.hasOpenCard,
             mode: state.mode,
-            model: ModelName.display(state.model.isEmpty ? session.model : state.model),
+            model: ModelName.label(asked: state.askedModel, known: state.model.isEmpty ? session.model : state.model),
             environment: session.environment)
     }
 

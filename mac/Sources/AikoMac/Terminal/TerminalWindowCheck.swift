@@ -166,7 +166,7 @@ enum TerminalWindowCheck {
             text: "And the same on Windows, please.", images: 0, queued: true, attachments: [])))
 
         return TalkScreen(
-            session: "a2", items: items, busy: true, hasOpenCard: true, mode: .manual, model: "Opus 5.5",
+            session: "a2", items: items, busy: true, hasOpenCard: true, mode: .manual, model: ModelName.label(asked: nil, known: "claude-opus-5-5"),
             environment: "Aiko")
     }
 }

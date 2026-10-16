@@ -1,5 +1,5 @@
 {
-  "comment": "What the form of a new session offers (D-293, D-300). The folders, each once: the five where sessions of the environment were used last (closed ones too), then every bound folder followed by the folders right inside it. The form names the other environment a folder is bound to. An empty name field shows the name the session will get. The model the form starts with is the one of the session of the environment that was used last and has a model from the list; with none it is the first of the list.",
+  "comment": "What the form of a new session offers (D-293, D-300). The folders, each once: the five where sessions of the environment were used last (closed ones too), then every bound folder followed by the folders right inside it. The form names the other environment a folder is bound to. An empty name field shows the name the session will get. The model the form starts with is the one of the session of the environment that was used last and has a model from the list; a full id like \"claude-opus-4\" counts as its family, \"opus\". With none it is the first of the list.",
   "platform": "windows",
   "environments": [
     {
@@ -155,7 +155,7 @@
         null,
         null
       ],
-      "model": "sonnet",
+      "model": "opus",
       "headers": [
         {
           "before": 0,

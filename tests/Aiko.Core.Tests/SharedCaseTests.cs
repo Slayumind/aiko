@@ -572,6 +572,26 @@ public class SharedCaseTests
     }
 
     [Fact]
+    public void Every_model_label_waits_the_same_way()
+    {
+        foreach (var row in SpecCases.Json("model-name").GetProperty("labels").EnumerateArray())
+        {
+            var label = ModelName.Label(row.GetProperty("asked").GetString(), row.GetProperty("known").GetString());
+            Assert.Equal(row.GetProperty("text").GetString(), label.Text);
+            Assert.Equal(row.GetProperty("waiting").GetBoolean(), label.Waiting);
+        }
+    }
+
+    [Fact]
+    public void Every_change_of_model_gives_the_same_full_id()
+    {
+        foreach (var row in SpecCases.Json("model-name").GetProperty("switches").EnumerateArray())
+        {
+            Assert.Equal(row.GetProperty("id").GetString(), ModelName.FromSwitch(row.GetProperty("text").GetString()));
+        }
+    }
+
+    [Fact]
     public void Every_markdown_text_is_read_into_the_same_blocks()
     {
         foreach (var row in SpecCases.Json("markdown").GetProperty("texts").EnumerateArray())

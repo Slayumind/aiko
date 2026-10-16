@@ -18,7 +18,7 @@ sealed record TalkView(
     bool Busy,
     bool HasOpenCard,
     PermissionMode Mode,
-    string Model,
+    ModelLabel Model,
     string Environment);
 
 /// The conversation with Claude Code: the feed above, the field below (D-294, D-302).
