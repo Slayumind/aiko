@@ -98,7 +98,7 @@ static class TerminalSnapshot
         var scroll = FeedScroller(panel);
         if (scroll is null)
         {
-            TerminalLog.FeedScrollChecked(false, 0, 0, 0, 0);
+            TerminalLog.FeedScrollChecked(false, 0, 0, 0, 0, 0);
             return 1;
         }
 
@@ -107,6 +107,19 @@ static class TerminalSnapshot
         Settle();
         Write(5);
         var behind = (int)Math.Round(scroll.ScrollableHeight - scroll.VerticalOffset);
+
+        // The field grows to five lines over the feed, and the reader at the end stays at the end
+        // (check of 2026-10-16: the last paragraphs went under the field).
+        var field = Find<System.Windows.Controls.TextBox>(panel, box => box.AcceptsReturn);
+        var fieldGrows = -1;
+        if (field is not null)
+        {
+            field.Text = "one\ntwo\nthree\nfour\nfive";
+            Settle();
+            fieldGrows = (int)Math.Round(scroll.ScrollableHeight - scroll.VerticalOffset);
+            field.Text = "";
+            Settle();
+        }
 
         // The reader at the end scrolls up while a piece is on its way: between the draw and the
         // moment the window settles.
@@ -136,8 +149,8 @@ static class TerminalSnapshot
         }
 
         window.Close();
-        TerminalLog.FeedScrollChecked(true, behind, whileWriting, insideAnswer, aboveAnswer);
-        return new[] { behind, whileWriting, insideAnswer, aboveAnswer }.Any(moved => Math.Abs(moved) > 2) ? 1 : 0;
+        TerminalLog.FeedScrollChecked(true, behind, fieldGrows, whileWriting, insideAnswer, aboveAnswer);
+        return new[] { behind, fieldGrows, whileWriting, insideAnswer, aboveAnswer }.Any(moved => Math.Abs(moved) > 2) ? 1 : 0;
     }
 
     /// The reader turns the wheel up, as a hand does: the feed hears the wheel, then the offset moves.
@@ -153,19 +166,23 @@ static class TerminalSnapshot
     private static void Settle() =>
         System.Windows.Threading.Dispatcher.CurrentDispatcher.Invoke(() => { }, System.Windows.Threading.DispatcherPriority.ContextIdle);
 
-    private static System.Windows.Controls.ScrollViewer? FeedScroller(System.Windows.DependencyObject parent)
+    private static System.Windows.Controls.ScrollViewer? FeedScroller(System.Windows.DependencyObject parent) =>
+        Find<System.Windows.Controls.ScrollViewer>(parent, scroll => scroll.TemplatedParent is System.Windows.Controls.ListBox);
+
+    private static T? Find<T>(System.Windows.DependencyObject parent, Func<T, bool> wanted)
+        where T : System.Windows.DependencyObject
     {
         for (var at = 0; at < System.Windows.Media.VisualTreeHelper.GetChildrenCount(parent); at++)
         {
             var child = System.Windows.Media.VisualTreeHelper.GetChild(parent, at);
-            if (child is System.Windows.Controls.ScrollViewer { TemplatedParent: System.Windows.Controls.ListBox } scroll)
-            {
-                return scroll;
-            }
-
-            if (FeedScroller(child) is { } found)
+            if (child is T found && wanted(found))
             {
                 return found;
+            }
+
+            if (Find(child, wanted) is { } deeper)
+            {
+                return deeper;
             }
         }
 

@@ -106,7 +106,15 @@ struct TalkPanelView: View {
                 // bar at the edge of the window is not covered.
                 .background(Theme.background)
                 .modifier(TalkColumn())
-                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { bottomHeight = $0 }
+                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
+                    // A reader at the end stays there while the field grows over the feed. The
+                    // end is read before the room grows: a taller room pushes it out of view.
+                    let follow = atEnd
+                    bottomHeight = height
+                    if follow {
+                        DispatchQueue.main.async { scroll.scrollTo(Self.endId, anchor: .bottom) }
+                    }
+                }
             }
         }
     }
