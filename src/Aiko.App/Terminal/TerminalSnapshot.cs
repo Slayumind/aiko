@@ -69,15 +69,20 @@ static class TerminalSnapshot
         var panel = new TerminalPanel();
         var window = new System.Windows.Window
         {
-            Content = panel, Width = 1100, Height = 700, Left = -4000, Top = 0,
-            WindowStyle = System.Windows.WindowStyle.None, ShowInTaskbar = false, ShowActivated = false,
+            Content = panel,
+            Width = 1100,
+            Height = 700,
+            Left = -4000,
+            Top = 0,
+            WindowStyle = System.Windows.WindowStyle.None,
+            ShowInTaskbar = false,
+            ShowActivated = false,
         };
         window.Show();
 
         var view = View("working");
         var talk = view.Talk!;
         var answer = "";
-        var moved = new List<string>();
 
         void Write(int pieces)
         {
@@ -86,10 +91,6 @@ static class TerminalSnapshot
                 answer += $"Paragraph {answer.Length / 90 + 1}: the answer goes on and on, the way a long one does, line after line.\n\n";
                 panel.Show(view with { Talk = talk with { Items = [.. talk.Items, new FeedItem.Answer(100, answer, true)] } });
                 Settle();
-                if (FeedScroller(panel) is { } trace && Environment.GetEnvironmentVariable("AIKO_TRACE_FEED") == "1")
-                {
-                    Log.Write($"  piece: offset {trace.VerticalOffset:0}, scrollable {trace.ScrollableHeight:0}, extent {trace.ExtentHeight:0}");
-                }
             }
         }
 
@@ -97,7 +98,7 @@ static class TerminalSnapshot
         var scroll = FeedScroller(panel);
         if (scroll is null)
         {
-            Log.Write("--try-feed-scroll: the feed has no scroll");
+            TerminalLog.FeedScrollChecked(false, 0, 0, 0, 0);
             return 1;
         }
 
@@ -105,8 +106,7 @@ static class TerminalSnapshot
         scroll.ScrollToVerticalOffset(scroll.ScrollableHeight);
         Settle();
         Write(5);
-        var behind = scroll.ScrollableHeight - scroll.VerticalOffset;
-        moved.Add($"at the end, left behind by {behind:0} px" + (behind > 2 ? " (moved)" : ""));
+        var behind = (int)Math.Round(scroll.ScrollableHeight - scroll.VerticalOffset);
 
         // The reader at the end scrolls up while a piece is on its way: between the draw and the
         // moment the window settles.
@@ -120,28 +120,24 @@ static class TerminalSnapshot
         Settle();
         var leftAtWheel = scroll.VerticalOffset;
         Write(5);
-        moved.Add($"up from the end while it writes: {scroll.VerticalOffset - leftAtWheel:0} px");
-        if (Math.Abs(scroll.VerticalOffset - leftAtWheel) > 2)
-        {
-            moved[^1] += " (moved)";
-        }
+        var whileWriting = (int)Math.Round(scroll.VerticalOffset - leftAtWheel);
 
-        foreach (var (name, up) in new[] { ("inside the answer", 500.0), ("above the answer", scroll.ScrollableHeight - 150) })
+        var insideAnswer = MovedAfterScroll(500);
+        var aboveAnswer = MovedAfterScroll(scroll.ScrollableHeight - 150);
+
+        // The reader scrolls up so far from the end, and the answer goes on.
+        int MovedAfterScroll(double up)
         {
             ReaderScrolls(scroll, Math.Max(0, scroll.ScrollableHeight - up));
             Settle();
             var left = scroll.VerticalOffset;
             Write(15);
-            moved.Add($"{name}: {scroll.VerticalOffset - left:0} px");
-            if (Math.Abs(scroll.VerticalOffset - left) > 2)
-            {
-                moved[^1] += " (moved)";
-            }
+            return (int)Math.Round(scroll.VerticalOffset - left);
         }
 
         window.Close();
-        Log.Write("--try-feed-scroll: " + string.Join("; ", moved));
-        return moved.Any(line => line.EndsWith("(moved)", StringComparison.Ordinal)) ? 1 : 0;
+        TerminalLog.FeedScrollChecked(true, behind, whileWriting, insideAnswer, aboveAnswer);
+        return new[] { behind, whileWriting, insideAnswer, aboveAnswer }.Any(moved => Math.Abs(moved) > 2) ? 1 : 0;
     }
 
     /// The reader turns the wheel up, as a hand does: the feed hears the wheel, then the offset moves.
