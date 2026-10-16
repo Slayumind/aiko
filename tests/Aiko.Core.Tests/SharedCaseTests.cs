@@ -820,6 +820,13 @@ public class SharedCaseTests
             ["second"] = Camel(card.Request.Second),
             ["subagent"] = card.Request.FromSubagent,
         },
+        FeedItem.Notice { Size: { } size } notice => new JsonObject
+        {
+            ["notice"] = Camel(notice.Kind),
+            ["text"] = notice.Text,
+            ["before"] = size.Before,
+            ["after"] = size.After,
+        },
         FeedItem.Notice notice => new JsonObject { ["notice"] = Camel(notice.Kind), ["text"] = notice.Text },
         _ => throw new InvalidOperationException("unknown item"),
     };
@@ -1276,7 +1283,7 @@ public class SharedCaseTests
             ["activity"] = status.Activity,
             ["mode"] = ModeName(status.Mode),
         },
-        StreamEvent.Compacted => new JsonObject { ["kind"] = "compacted" },
+        StreamEvent.Compacted compacted => new JsonObject { ["kind"] = "compacted", ["before"] = compacted.Before, ["after"] = compacted.After },
         StreamEvent.Tasks tasks => new JsonObject { ["kind"] = "tasks", ["count"] = tasks.Count },
         StreamEvent.TaskProgress progress => new JsonObject
         {

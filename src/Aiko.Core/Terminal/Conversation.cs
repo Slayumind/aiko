@@ -45,6 +45,17 @@ public enum RequestState
     Closed,
 }
 
+/// The size of a conversation before and after it was made shorter, in tokens.
+public sealed record CompactSize(int Before, int After)
+{
+    /// Both numbers are needed: an older Claude Code names only the size before.
+    public static CompactSize? Of(StreamEvent.Compacted compacted) =>
+        compacted.Before > 0 && compacted.After > 0 ? new(compacted.Before, compacted.After) : null;
+
+    /// Tokens in thousands, as the notice shows them: at least 1.
+    public static int Thousands(int tokens) => Math.Max(1, (int)Math.Round(tokens / 1000.0, MidpointRounding.AwayFromZero));
+}
+
 public enum NoticeKind
 {
     /// The conversation was made shorter.
@@ -83,7 +94,8 @@ public abstract record FeedItem(int Id)
 
     public sealed record Card(int Id, RequestCard Request, RequestState State) : FeedItem(Id);
 
-    public sealed record Notice(int Id, NoticeKind Kind, string Text) : FeedItem(Id);
+    /// Size is set only for a conversation made shorter, when Claude Code named both sizes.
+    public sealed record Notice(int Id, NoticeKind Kind, string Text, CompactSize? Size = null) : FeedItem(Id);
 }
 
 /// A conversation after one more event or one more action, and the lines to write to Claude Code.
@@ -148,7 +160,7 @@ public sealed record Conversation(
         StreamEvent.Request request => Quiet(Add(id => new FeedItem.Card(id, RequestCard.From(request), RequestState.Open))),
         StreamEvent.Reply reply => Quiet(this with { Mode = reply.Mode ?? Mode }),
         StreamEvent.Status status => Quiet(this with { Mode = status.Mode ?? Mode, Compacting = status.Activity == "compacting" }),
-        StreamEvent.Compacted => Quiet(Add(id => new FeedItem.Notice(id, NoticeKind.Compacted, ""))),
+        StreamEvent.Compacted compacted => Quiet(Add(id => new FeedItem.Notice(id, NoticeKind.Compacted, "", CompactSize.Of(compacted)))),
         StreamEvent.RateLimit limit => Quiet(this with { Limits = limit.Windows }),
         StreamEvent.Tasks tasks => Quiet(this with { Tasks = tasks.Count }),
         StreamEvent.TaskProgress progress => Quiet(Changed<FeedItem.Step>(

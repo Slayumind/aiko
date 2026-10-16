@@ -1294,6 +1294,12 @@
   <data name="TerminalCompacted" xml:space="preserve">
     <value>Разговор сжат, чтобы поместиться в память.</value>
   </data>
+  <data name="TerminalCompactedSize" xml:space="preserve">
+    <value>Разговор сжат: было {0} тыс. токенов, стало {1} тыс.</value>
+  </data>
+  <data name="TerminalCompacting" xml:space="preserve">
+    <value>Сжимаю разговор…</value>
+  </data>
   <data name="TerminalFailed" xml:space="preserve">
     <value>Claude Code остановился с ошибкой.</value>
   </data>

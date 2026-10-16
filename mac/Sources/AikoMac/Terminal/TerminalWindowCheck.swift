@@ -9,7 +9,7 @@ import AppKit
 /// window stands on the screen, and AikoShot takes the picture (/look).
 @MainActor
 enum TerminalWindowCheck {
-    static let states = ["talk", "feed", "empty", "form", "elsewhere", "login", "close"]
+    static let states = ["talk", "feed", "compacting", "empty", "form", "elsewhere", "login", "close"]
 
     /// Kept alive while the window is shown.
     private static var shown: (TerminalWindow, TerminalPanelState)?
@@ -107,13 +107,14 @@ enum TerminalWindowCheck {
             ask: state == "close"
                 ? CloseAsk(title: Strings.format(Strings.terminalCloseTitle, "terminal"), body: Strings.terminalCloseBody)
                 : nil,
-            talk: state == "feed" ? feed() : nil,
+            talk: state == "feed" ? feed() : state == "compacting" ? feed(compacting: true) : nil,
             now: now)
     }
 
     /// A short made up conversation: a message, steps, a markdown answer, a card that waits and a
-    /// queued message. The same as the feed of TerminalSnapshot.cs.
-    private static func feed() -> TalkScreen {
+    /// queued message. The same as the feed of TerminalSnapshot.cs. While compacting, there is no
+    /// card, and a notice of an earlier compacting stands above the queued message (D-325).
+    private static func feed(compacting: Bool = false) -> TalkScreen {
         func step(_ id: Int, _ kind: StepKind, _ subject: String, added: Int = 0, removed: Int = 0) -> FeedItem {
             FeedItem(id: id, content: .step(FeedStep(
                 toolUseId: "t\(id)",
@@ -159,14 +160,17 @@ enum TerminalWindowCheck {
             tool(23, "mcp__claude_ai_Google_Calendar__list_events"),
             step(5, .edit, "SettingsControls.swift", added: 18, removed: 2),
         ]
-        if case .request(let asked) = StreamEvent.fromLine(request) {
+        if compacting {
+            items.append(FeedItem(id: 30, content: .notice(
+                kind: .compacted, text: "", size: CompactSize(before: 46425, after: 6302))))
+        } else if case .request(let asked) = StreamEvent.fromLine(request) {
             items.append(FeedItem(id: 6, content: .card(request: RequestCard.from(asked), state: .open)))
         }
         items.append(FeedItem(id: 7, content: .ownerMessage(
             text: "And the same on Windows, please.", images: 0, queued: true, attachments: [])))
 
         return TalkScreen(
-            session: "a2", items: items, busy: true, hasOpenCard: true, mode: .manual, model: ModelName.label(asked: nil, known: "claude-opus-5-5"),
+            session: "a2", items: items, busy: true, hasOpenCard: !compacting, compacting: compacting, mode: .manual, model: ModelName.label(asked: nil, known: "claude-opus-5-5"),
             environment: "Aiko")
     }
 }

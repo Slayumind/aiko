@@ -1294,6 +1294,12 @@
   <data name="TerminalCompacted" xml:space="preserve">
     <value>The conversation was made shorter to fit.</value>
   </data>
+  <data name="TerminalCompactedSize" xml:space="preserve">
+    <value>The conversation was made shorter: {0}k tokens before, {1}k now.</value>
+  </data>
+  <data name="TerminalCompacting" xml:space="preserve">
+    <value>Making the conversation shorter…</value>
+  </data>
   <data name="TerminalFailed" xml:space="preserve">
     <value>Claude Code stopped with an error.</value>
   </data>

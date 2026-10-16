@@ -1284,6 +1284,12 @@ public static class Strings
     /// The conversation was made shorter to fit.
     public static string TerminalCompacted => Get("TerminalCompacted");
 
+    /// The conversation was made shorter: {0}k tokens before, {1}k now.
+    public static string TerminalCompactedSize => Get("TerminalCompactedSize");
+
+    /// Making the conversation shorter…
+    public static string TerminalCompacting => Get("TerminalCompacting");
+
     /// Claude Code stopped with an error.
     public static string TerminalFailed => Get("TerminalFailed");
 

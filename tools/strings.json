@@ -2947,6 +2947,20 @@
     ]
   ],
   [
+    "TerminalCompactedSize",
+    [
+      "The conversation was made shorter: {0}k tokens before, {1}k now.",
+      "Разговор сжат: было {0} тыс. токенов, стало {1} тыс."
+    ]
+  ],
+  [
+    "TerminalCompacting",
+    [
+      "Making the conversation shorter…",
+      "Сжимаю разговор…"
+    ]
+  ],
+  [
     "TerminalFailed",
     [
       "Claude Code stopped with an error.",

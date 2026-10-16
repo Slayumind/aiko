@@ -41,6 +41,27 @@ public enum RequestState: Sendable, Equatable {
     case closed
 }
 
+/// The size of a conversation before and after it was made shorter, in tokens.
+public struct CompactSize: Sendable, Equatable {
+    public let before: Int
+    public let after: Int
+
+    public init(before: Int, after: Int) {
+        self.before = before
+        self.after = after
+    }
+
+    /// Both numbers are needed: an older Claude Code names only the size before.
+    public static func of(before: Int, after: Int) -> CompactSize? {
+        before > 0 && after > 0 ? CompactSize(before: before, after: after) : nil
+    }
+
+    /// Tokens in thousands, as the notice shows them: at least 1.
+    public static func thousands(_ tokens: Int) -> Int {
+        max(1, Int((Double(tokens) / 1000).rounded(.toNearestOrAwayFromZero)))
+    }
+}
+
 public enum NoticeKind: Sendable, Equatable {
     /// The conversation was made shorter.
     case compacted
@@ -89,7 +110,8 @@ public struct FeedItem: Sendable, Equatable {
 
         case step(FeedStep)
         case card(request: RequestCard, state: RequestState)
-        case notice(kind: NoticeKind, text: String)
+        /// Size is set only for a conversation made shorter, when Claude Code named both sizes.
+        case notice(kind: NoticeKind, text: String, size: CompactSize? = nil)
     }
 
     public let id: Int
@@ -191,8 +213,8 @@ public struct Conversation: Sendable, Equatable {
         case .status(let activity, let mode):
             if let mode { next.mode = mode }
             next.compacting = activity == "compacting"
-        case .compacted:
-            next.add(.notice(kind: .compacted, text: ""))
+        case .compacted(let before, let after):
+            next.add(.notice(kind: .compacted, text: "", size: CompactSize.of(before: before, after: after)))
         case .rateLimit(let windows):
             next.limits = windows
         case .tasks(let count):

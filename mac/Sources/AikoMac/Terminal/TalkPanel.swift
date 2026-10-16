@@ -9,6 +9,7 @@ struct TalkScreen: Equatable {
     let items: [FeedItem]
     let busy: Bool
     let hasOpenCard: Bool
+    let compacting: Bool
     let mode: PermissionMode
     let model: ModelLabel
     let environment: String
@@ -62,7 +63,11 @@ struct TalkPanelView: View {
                                 .onDisappear { if isOpenCard(item) { cardInView = false } }
                         }
                         if talk.busy && !talk.hasOpenCard {
-                            WorkingRow()
+                            if talk.compacting {
+                                CompactingRow()
+                            } else {
+                                WorkingRow()
+                            }
                         }
                         Color.clear.frame(height: bottomHeight)
                         // The end is after the room of the field: it is on screen only when the
@@ -185,6 +190,38 @@ private struct WorkingRow: View {
     }
 }
 
+/// "Making the conversation shorter" and a thin bar with a piece that runs along it. Claude Code
+/// does not say how far it is, so the bar shows only that the work goes on (D-325).
+private struct CompactingRow: View {
+    /// The running piece, as a share of the bar, and one run in seconds.
+    private static let piece = 0.25
+    private static let seconds = 1.6
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(Strings.terminalCompacting)
+                .font(Theme.mono(Theme.textTiny))
+                .foregroundStyle(Theme.muted)
+            GeometryReader { bar in
+                TimelineView(.animation) { time in
+                    let width = bar.size.width * Self.piece
+                    let share = time.date.timeIntervalSinceReferenceDate
+                        .truncatingRemainder(dividingBy: Self.seconds) / Self.seconds
+                    Rectangle()
+                        .fill(Theme.muted)
+                        .frame(width: width, height: 2)
+                        .offset(x: -width + share * (bar.size.width + width))
+                }
+            }
+            .frame(height: 2)
+            .background(Theme.hairline)
+            .clipped()
+        }
+        .padding(.top, 10)
+        .padding(.bottom, 12)
+    }
+}
+
 // MARK: - A row of the feed
 
 private struct FeedRowView: View {
@@ -207,8 +244,8 @@ private struct FeedRowView: View {
             StepRow(step: step, state: state)
         case .card(let request, .open):
             RequestCardView(request: request, choose: { state.chosen?(request.requestId, $0) })
-        case .notice(let kind, let text):
-            NoticeRow(kind: kind, text: text)
+        case .notice(let kind, let text, let size):
+            NoticeRow(kind: kind, text: text, size: size)
         default:
             EmptyView()
         }
@@ -367,11 +404,15 @@ private struct StepRow: View {
 private struct NoticeRow: View {
     let kind: NoticeKind
     let text: String
+    let size: CompactSize?
 
     var body: some View {
         let words: String = switch kind {
         case .interrupted: Strings.terminalTurnStopped
-        case .compacted: Strings.terminalCompacted
+        case .compacted: size.map {
+            Strings.format(
+                Strings.terminalCompactedSize, CompactSize.thousands($0.before), CompactSize.thousands($0.after))
+        } ?? Strings.terminalCompacted
         case .failed: text.isEmpty ? Strings.terminalFailed : text
         case .output: text
         case .signedOut: ""

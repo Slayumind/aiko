@@ -9,7 +9,7 @@ static class TerminalSnapshot
 {
     public static readonly IReadOnlyList<string> States =
     [
-        "talk", "feed", "working", "empty", "form", "elsewhere", "login", "close",
+        "talk", "feed", "working", "compacting", "empty", "form", "elsewhere", "login", "close",
         "voice-idle", "voice-warming", "voice-listening", "voice-finishing", "voice-nomic", "voice-model",
     ];
 
@@ -239,9 +239,22 @@ static class TerminalSnapshot
             state == "close" ? new AskView(string.Format(Strings.TerminalCloseTitle, "terminal"), Strings.TerminalCloseBody) : null,
             state == "feed" ? Feed(withCard: true)
                 : state == "working" ? Feed(withCard: false)
+                : state == "compacting" ? Compacting()
                 : state.StartsWith("voice-", StringComparison.Ordinal) ? Feed(withCard: false) with { Busy = false }
                 : null,
             now);
+    }
+
+    /// The same conversation made shorter once and now made shorter again (D-325).
+    private static TalkView Compacting()
+    {
+        var feed = Feed(withCard: false);
+        return feed with
+        {
+            // The core puts the notice above the queued message, the last item.
+            Items = [.. feed.Items.SkipLast(1), new FeedItem.Notice(30, NoticeKind.Compacted, "", new CompactSize(46425, 6302)), feed.Items[^1]],
+            Compacting = true,
+        };
     }
 
     /// A short made up conversation: a message, steps, an answer, a queued message, and a card that
@@ -292,6 +305,6 @@ static class TerminalSnapshot
             new FeedItem.OwnerMessage(7, "And the same on the Mac, please.", true, []),
         ];
 
-        return new TalkView("a2", items, Busy: true, HasOpenCard: withCard, PermissionMode.Manual, ModelName.Label(null, "claude-opus-5-5"), "Aiko");
+        return new TalkView("a2", items, Busy: true, HasOpenCard: withCard, Compacting: false, PermissionMode.Manual, ModelName.Label(null, "claude-opus-5-5"), "Aiko");
     }
 }
