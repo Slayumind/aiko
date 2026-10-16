@@ -208,8 +208,8 @@ public struct Conversation: Sendable, Equatable {
     }
 
     private mutating func stream(_ text: String) {
-        if let last = items.last, case .answer(let written, true) = last.content {
-            items[items.count - 1].content = .answer(text: written + text, streaming: true)
+        if let at = writing(), case .answer(let written, _) = items[at].content {
+            items[at].content = .answer(text: written + text, streaming: true)
         } else {
             add(.answer(text: text, streaming: true))
         }
@@ -250,8 +250,8 @@ public struct Conversation: Sendable, Equatable {
 
     /// The whole text of an answer takes the place of the pieces that came before it.
     private mutating func answer(_ text: String) {
-        if let last = items.last, case .answer(_, true) = last.content {
-            items[items.count - 1].content = .answer(text: text, streaming: false)
+        if let at = writing() {
+            items[at].content = .answer(text: text, streaming: false)
         } else {
             add(.answer(text: text, streaming: false))
         }
@@ -300,7 +300,7 @@ public struct Conversation: Sendable, Equatable {
         var next = self
         next.failure = .none
         next.unread = false
-        next.add(.ownerMessage(text: text, images: images.count, queued: true, attachments: images))
+        next.queue(.ownerMessage(text: text, images: images.count, queued: true, attachments: images))
 
         if waits {
             return Outcome(state: next, written: [])
@@ -415,9 +415,32 @@ public struct Conversation: Sendable, Equatable {
         }
     }
 
+    /// What Claude Code says goes above the messages that wait in the queue, so they stay at the
+    /// end of the feed and an answer is not cut in two (D-304).
     private mutating func add(_ content: FeedItem.Content) {
+        items.insert(FeedItem(id: nextId, content: content), at: items.count - queuedAtEnd())
+        nextId += 1
+    }
+
+    private mutating func queue(_ content: FeedItem.Content) {
         items.append(FeedItem(id: nextId, content: content))
         nextId += 1
+    }
+
+    /// The place of the answer Claude is writing now: the last item above the queued messages.
+    private func writing() -> Int? {
+        let at = items.count - queuedAtEnd() - 1
+        guard at >= 0, case .answer(_, true) = items[at].content else { return nil }
+        return at
+    }
+
+    private func queuedAtEnd() -> Int {
+        var count = 0
+        for item in items.reversed() {
+            guard case .ownerMessage(_, _, true, _) = item.content else { break }
+            count += 1
+        }
+        return count
     }
 
     private mutating func changeStep(_ toolUseId: String, _ change: (inout FeedStep) -> Void) {

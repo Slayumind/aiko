@@ -159,8 +159,8 @@ public sealed record Conversation(
     };
 
     private Conversation Streamed(string text) =>
-        Items.Count > 0 && Items[^1] is FeedItem.Answer { Streaming: true } writing
-            ? this with { Items = [.. Items.Take(Items.Count - 1), writing with { Text = writing.Text + text }] }
+        Writing() is { } writing
+            ? Changed<FeedItem.Answer>(answer => answer.Id == writing.Id, answer => answer with { Text = answer.Text + text })
             : Add(id => new FeedItem.Answer(id, text, true));
 
     private Conversation Said(StreamEvent.Assistant assistant)
@@ -193,8 +193,8 @@ public sealed record Conversation(
     /// The whole text of an answer takes the place of the pieces that came before it.
     private Conversation Answered(string text)
     {
-        var next = Items.Count > 0 && Items[^1] is FeedItem.Answer { Streaming: true } writing
-            ? this with { Items = [.. Items.Take(Items.Count - 1), writing with { Text = text, Streaming = false }] }
+        var next = Writing() is { } writing
+            ? Changed<FeedItem.Answer>(answer => answer.Id == writing.Id, answer => answer with { Text = text, Streaming = false })
             : Add(id => new FeedItem.Answer(id, text, false));
         return next with { AnsweredInTurn = true };
     }
@@ -256,7 +256,7 @@ public sealed record Conversation(
 
         var waits = InTurn || HasOpenCard;
         var next = (this with { Failure = TalkFailure.None, Unread = false })
-            .Add(id => new FeedItem.OwnerMessage(id, text, true, images));
+            .Queue(new FeedItem.OwnerMessage(NextId, text, true, images));
 
         return waits ? Quiet(next) : next.Sent((FeedItem.OwnerMessage)next.Items[^1]);
     }
@@ -340,8 +340,26 @@ public sealed record Conversation(
         })],
     };
 
-    private Conversation Add(Func<int, FeedItem> item) =>
-        this with { Items = [.. Items, item(NextId)], NextId = NextId + 1 };
+    /// What Claude Code says goes above the messages that wait in the queue, so they stay at the
+    /// end of the feed and an answer is not cut in two (D-304).
+    private Conversation Add(Func<int, FeedItem> item)
+    {
+        var at = Items.Count - QueuedAtEnd();
+        return this with { Items = [.. Items.Take(at), item(NextId), .. Items.Skip(at)], NextId = NextId + 1 };
+    }
+
+    private Conversation Queue(FeedItem.OwnerMessage message) =>
+        this with { Items = [.. Items, message], NextId = NextId + 1 };
+
+    /// The answer Claude is writing now: the last item above the queued messages.
+    private FeedItem.Answer? Writing()
+    {
+        var at = Items.Count - QueuedAtEnd() - 1;
+        return at >= 0 && Items[at] is FeedItem.Answer { Streaming: true } writing ? writing : null;
+    }
+
+    private int QueuedAtEnd() =>
+        Items.Reverse().TakeWhile(item => item is FeedItem.OwnerMessage { Queued: true }).Count();
 
     private Conversation Changed<T>(Func<T, bool> which, Func<T, T> change)
         where T : FeedItem =>
