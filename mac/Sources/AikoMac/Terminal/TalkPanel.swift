@@ -122,6 +122,27 @@ struct TalkPanelView: View {
                 }
             }
         }
+        // The field answers its keys first. A key from another place of the panel, where the
+        // keyboard went after a click on the feed, answers only a waiting card (AIKO-244).
+        .onKeyPress(keys: [.return, .escape], phases: .down) { press in answerCard(press) }
+    }
+
+    private func answerCard(_ press: KeyPress) -> KeyPress.Result {
+        guard press.modifiers.isEmpty, let card = TalkKeys.card(talk.items) else { return .ignored }
+        let input = state.input
+        let empty = input.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && input.attached.isEmpty
+        let key: TalkKey = press.key == .return ? .enter : .escape
+        switch TalkKeys.action(key, TalkKeyState(cardWaits: true, empty: empty, busy: talk.busy)) {
+        case .allow:
+            input.chosen?(card.requestId, .allow)
+        case .deny:
+            input.chosen?(card.requestId, .deny(""))
+        case .none:
+            return .ignored
+        default:
+            break
+        }
+        return .handled
     }
 
     /// Where the open card stands in the feed.
