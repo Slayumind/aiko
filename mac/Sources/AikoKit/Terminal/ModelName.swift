@@ -1,7 +1,7 @@
 import Foundation
 
 /// The model in the line under the input. Waiting is set while Claude Code has not named the
-/// full id yet: the line shows the family with "…" in a quiet colour.
+/// full id yet: the line shows the family in a quiet colour.
 public struct ModelLabel: Sendable, Equatable {
     public let text: String
     public let waiting: Bool
@@ -16,7 +16,6 @@ public struct ModelLabel: Sendable, Equatable {
 public enum ModelName {
     private static let prefix = "claude-"
     private static let switched = "<local-command-stdout>Set model to "
-    private static let notYet = " …"
 
     /// Asked is the model sent to Claude Code that it has not confirmed. Known is the last model
     /// Claude Code named, or the one kept for the session. A short name like "sonnet" has no
@@ -24,7 +23,7 @@ public enum ModelName {
     public static func label(asked: String?, known: String?) -> ModelLabel {
         let askedText = (asked ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         if !askedText.isEmpty {
-            return ModelLabel(text: display(askedText) + notYet, waiting: true)
+            return ModelLabel(text: display(askedText), waiting: true)
         }
 
         let knownText = (known ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
@@ -32,9 +31,7 @@ public enum ModelName {
             return ModelLabel(text: "", waiting: false)
         }
 
-        return knownText.hasPrefix(prefix)
-            ? ModelLabel(text: display(knownText), waiting: false)
-            : ModelLabel(text: display(knownText) + notYet, waiting: true)
+        return ModelLabel(text: display(knownText), waiting: !knownText.hasPrefix(prefix))
     }
 
     /// The full id from what Claude Code writes after a change of model:
