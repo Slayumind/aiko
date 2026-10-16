@@ -461,6 +461,8 @@ public enum Strings {
         "TerminalTurnStopped": ("Turn stopped.", "Ход остановлен."),
         "TerminalQueued": ("queued", "в очереди"),
         "TerminalCompacted": ("The conversation was made shorter to fit.", "Разговор сжат, чтобы поместиться в память."),
+        "TerminalCompactedSize": ("The conversation was made shorter: {0}k tokens before, {1}k now.", "Разговор сжат: было {0} тыс. токенов, стало {1} тыс."),
+        "TerminalCompacting": ("Making the conversation shorter…", "Сжимаю разговор…"),
         "TerminalFailed": ("Claude Code stopped with an error.", "Claude Code остановился с ошибкой."),
         "TerminalDiffMore": ("{0} more lines", "Ещё строк: {0}"),
         "TerminalWaitsForYou": ("Waiting for you: {0}", "Ждёт тебя: {0}"),
@@ -1768,6 +1770,12 @@ public enum Strings {
 
     /// The conversation was made shorter to fit.
     public static var terminalCompacted: String { Strings.get("TerminalCompacted") }
+
+    /// The conversation was made shorter: {0}k tokens before, {1}k now.
+    public static var terminalCompactedSize: String { Strings.get("TerminalCompactedSize") }
+
+    /// Making the conversation shorter…
+    public static var terminalCompacting: String { Strings.get("TerminalCompacting") }
 
     /// Claude Code stopped with an error.
     public static var terminalFailed: String { Strings.get("TerminalFailed") }

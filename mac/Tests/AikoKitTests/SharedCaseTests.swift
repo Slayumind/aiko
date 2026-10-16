@@ -785,8 +785,12 @@ struct SharedCaseTests {
                 ("requestId", .string(request.requestId)), ("second", .string(String(describing: request.second))),
                 ("subagent", .bool(request.fromSubagent)),
             ])
-        case .notice(let kind, let words):
-            return node([("notice", .string(String(describing: kind))), ("text", .string(words))])
+        case .notice(let kind, let words, let size):
+            var pairs: [(String, JsonNode)] = [("notice", .string(String(describing: kind))), ("text", .string(words))]
+            if let size {
+                pairs += [("before", .number(String(size.before))), ("after", .number(String(size.after)))]
+            }
+            return node(pairs)
         }
     }
 
@@ -1406,8 +1410,8 @@ struct SharedCaseTests {
             ])
         case .status(let activity, let mode):
             return node([("kind", .string("status")), ("activity", text(activity)), ("mode", modeName(mode))])
-        case .compacted:
-            return node([("kind", .string("compacted"))])
+        case .compacted(let before, let after):
+            return node([("kind", .string("compacted")), ("before", .number(String(before))), ("after", .number(String(after)))])
         case .rateLimit(let windows):
             return node([
                 ("kind", .string("rateLimit")),

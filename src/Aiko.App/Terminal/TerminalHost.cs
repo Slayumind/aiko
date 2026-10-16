@@ -470,7 +470,7 @@ sealed class TerminalHost
         var past = _histories[session.Id].Items;
         if (!_talks.TryGetValue(session.Id, out var talk))
         {
-            return new TalkView(session.Id, past, false, false, session.Mode, ModelName.Label(null, session.Model), session.Environment);
+            return new TalkView(session.Id, past, false, false, false, session.Mode, ModelName.Label(null, session.Model), session.Environment);
         }
 
         var state = talk.State;
@@ -479,6 +479,7 @@ sealed class TerminalHost
             [.. past, .. state.Items],
             state.IsBusy,
             state.HasOpenCard,
+            state.Compacting,
             state.Mode,
             ModelName.Label(state.AskedModel, state.Model.Length > 0 ? state.Model : session.Model),
             session.Environment);

@@ -111,7 +111,8 @@ public enum StreamEvent: Sendable, Equatable {
     case status(activity: String?, mode: PermissionMode?)
 
     /// The conversation was made shorter. What is above this point Claude remembers as a summary.
-    case compacted
+    /// Before and after are its size in tokens, or 0 when Claude Code did not say.
+    case compacted(before: Int, after: Int)
 
     case rateLimit([LimitWindow])
 
@@ -182,7 +183,8 @@ public enum StreamEvent: Sendable, Equatable {
                 activity: root["status"]?.stringValue,
                 mode: PermissionModes.fromStream(root["permissionMode"]?.stringValue))
         case "compact_boundary":
-            return .compacted
+            let size = root["compact_metadata"]?.objectValue
+            return .compacted(before: tokens(size?["pre_tokens"]), after: tokens(size?["post_tokens"]))
         case "background_tasks_changed":
             return .tasks(items(root["tasks"]).count)
         case "task_progress":
@@ -379,5 +381,10 @@ public enum StreamEvent: Sendable, Equatable {
     /// The objects of an array. Anything else in it is skipped.
     private static func items(_ node: JsonNode?) -> [JsonObject] {
         (node?.arrayValue ?? []).compactMap(\.objectValue)
+    }
+
+    private static func tokens(_ node: JsonNode?) -> Int {
+        guard let tokens = node?.doubleValue, tokens >= 0, tokens <= Double(Int32.max) else { return 0 }
+        return Int(tokens)
     }
 }

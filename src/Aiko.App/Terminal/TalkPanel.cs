@@ -17,6 +17,7 @@ sealed record TalkView(
     IReadOnlyList<FeedItem> Items,
     bool Busy,
     bool HasOpenCard,
+    bool Compacting,
     PermissionMode Mode,
     ModelLabel Model,
     string Environment);
@@ -185,7 +186,7 @@ sealed class TalkPanel : UserControl
         List<object> rows = [.. view.Items];
         if (view.Busy && !view.HasOpenCard)
         {
-            rows.Add(WorkingMark.Row);
+            rows.Add(view.Compacting ? WorkingMark.Compacting : WorkingMark.Row);
         }
 
         // A row keeps its place while its item changes, as an answer does with each piece. A new
@@ -421,16 +422,23 @@ sealed class FeedSlot(object item) : INotifyPropertyChanged
 /// only that the session is busy.
 sealed class WorkingMark
 {
-    public static readonly WorkingMark Row = new();
+    public static readonly WorkingMark Row = new(false);
 
-    private WorkingMark()
-    {
-    }
+    /// Claude Code makes the conversation shorter (D-325).
+    public static readonly WorkingMark Compacting = new(true);
+
+    private WorkingMark(bool compacting) => IsCompacting = compacting;
+
+    public bool IsCompacting { get; }
 }
 
 /// One row of the feed, built from its item whenever the item changes.
 sealed class FeedRow : ContentControl
 {
+    /// The running piece of the compacting bar, as a share of the bar, and one run in seconds.
+    private const double CompactingPiece = 0.25;
+    private const double CompactingSeconds = 1.6;
+
     public static readonly DependencyProperty ItemProperty = DependencyProperty.Register(
         nameof(Item), typeof(object), typeof(FeedRow), new PropertyMetadata(null, (row, _) => ((FeedRow)row).Build()));
 
@@ -445,6 +453,7 @@ sealed class FeedRow : ContentControl
     {
         Content = Item switch
         {
+            WorkingMark { IsCompacting: true } => Compacting(),
             WorkingMark => Working(),
             FeedItem.OwnerMessage message => Message(message),
             FeedItem.Answer { Streaming: true } answer => AnswerView.For(answer.Text),
@@ -475,6 +484,42 @@ sealed class FeedRow : ContentControl
         }
 
         return row;
+    }
+
+    /// "Making the conversation shorter" and a thin bar with a piece that runs along it. Claude
+    /// Code does not say how far it is, so the bar shows only that the work goes on (D-325).
+    private static UIElement Compacting()
+    {
+        var column = new StackPanel { Margin = new Thickness(0, 10, 0, 12) };
+        column.Children.Add(TerminalPanel.Mono(Strings.TerminalCompacting, "Muted"));
+
+        var run = new TranslateTransform();
+        var piece = new System.Windows.Shapes.Rectangle
+        {
+            Fill = Tokens.Brush("Muted"),
+            HorizontalAlignment = HorizontalAlignment.Left,
+            RenderTransform = run,
+        };
+        var bar = new Grid
+        {
+            Height = 2,
+            Margin = new Thickness(0, 8, 0, 0),
+            Background = Tokens.Brush("Hairline"),
+            ClipToBounds = true,
+        };
+        bar.Children.Add(piece);
+        bar.SizeChanged += (_, size) =>
+        {
+            var width = size.NewSize.Width;
+            piece.Width = width * CompactingPiece;
+            run.BeginAnimation(TranslateTransform.XProperty, new System.Windows.Media.Animation.DoubleAnimation(
+                -piece.Width, width, TimeSpan.FromSeconds(CompactingSeconds))
+            {
+                RepeatBehavior = System.Windows.Media.Animation.RepeatBehavior.Forever,
+            });
+        };
+        column.Children.Add(bar);
+        return column;
     }
 
     /// The words of the owner: a block on the right, at most 70% of the feed wide (D-299). A queued
@@ -818,6 +863,8 @@ sealed class FeedRow : ContentControl
         var text = notice.Kind switch
         {
             NoticeKind.Interrupted => Strings.TerminalTurnStopped,
+            NoticeKind.Compacted when notice.Size is { } size => string.Format(
+                Strings.TerminalCompactedSize, CompactSize.Thousands(size.Before), CompactSize.Thousands(size.After)),
             NoticeKind.Compacted => Strings.TerminalCompacted,
             NoticeKind.Failed => notice.Text.Length > 0 ? notice.Text : Strings.TerminalFailed,
             NoticeKind.Output => notice.Text,

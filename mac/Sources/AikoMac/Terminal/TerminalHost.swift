@@ -382,7 +382,7 @@ final class TerminalHost {
 
         guard let talk = talks[session.id] else {
             return TalkScreen(
-                session: session.id, items: past, busy: false, hasOpenCard: false, mode: session.mode,
+                session: session.id, items: past, busy: false, hasOpenCard: false, compacting: false, mode: session.mode,
                 model: ModelName.label(asked: nil, known: session.model), environment: session.environment)
         }
 
@@ -392,6 +392,7 @@ final class TerminalHost {
             items: past + state.items,
             busy: state.isBusy,
             hasOpenCard: state.hasOpenCard,
+            compacting: state.compacting,
             mode: state.mode,
             model: ModelName.label(asked: state.askedModel, known: state.model.isEmpty ? session.model : state.model),
             environment: session.environment)

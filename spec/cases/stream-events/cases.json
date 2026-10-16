@@ -275,8 +275,18 @@
     },
     {
       "name": "the conversation was made shorter",
+      "line": { "type": "system", "subtype": "compact_boundary", "session_id": "s-1", "compact_metadata": { "trigger": "manual", "pre_tokens": 46425, "post_tokens": 6302, "duration_ms": 5486 } },
+      "event": { "kind": "compacted", "before": 46425, "after": 6302 }
+    },
+    {
+      "name": "the conversation was made shorter, an older Claude Code without the size after",
       "line": { "type": "system", "subtype": "compact_boundary", "session_id": "s-1", "compact_metadata": { "trigger": "manual", "pre_tokens": 46425 } },
-      "event": { "kind": "compacted" }
+      "event": { "kind": "compacted", "before": 46425, "after": 0 }
+    },
+    {
+      "name": "the size of a compacting that is not a number is left out",
+      "line": { "type": "system", "subtype": "compact_boundary", "compact_metadata": { "pre_tokens": "many", "post_tokens": -5 } },
+      "event": { "kind": "compacted", "before": 0, "after": 0 }
     },
     {
       "name": "both limits, as shares of one",
@@ -342,7 +352,7 @@
     {
       "name": "a byte order mark and spaces in front",
       "raw": "  \uFEFF{\"type\":\"system\",\"subtype\":\"compact_boundary\"}  ",
-      "event": { "kind": "compacted" }
+      "event": { "kind": "compacted", "before": 0, "after": 0 }
     }
   ]
 }

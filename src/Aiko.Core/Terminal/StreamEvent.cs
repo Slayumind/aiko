@@ -81,7 +81,8 @@ public abstract record StreamEvent
     public sealed record Status(string? Activity, PermissionMode? Mode) : StreamEvent;
 
     /// The conversation was made shorter. What is above this point Claude remembers as a summary.
-    public sealed record Compacted : StreamEvent;
+    /// Before and After are its size in tokens, or 0 when Claude Code did not say.
+    public sealed record Compacted(int Before, int After) : StreamEvent;
 
     public sealed record RateLimit(IReadOnlyList<LimitWindow> Windows) : StreamEvent;
 
@@ -144,7 +145,8 @@ public abstract record StreamEvent
             case "status":
                 return new Status(Str(root, "status"), PermissionModes.FromStream(Str(root, "permissionMode")));
             case "compact_boundary":
-                return new Compacted();
+                var size = Object(root, "compact_metadata");
+                return new Compacted(Tokens(size, "pre_tokens"), Tokens(size, "post_tokens"));
             case "background_tasks_changed":
                 return new Tasks(Items(root, "tasks").Count());
             case "task_progress" when Str(root, "tool_use_id") is { Length: > 0 } task:
@@ -347,6 +349,9 @@ public abstract record StreamEvent
 
     private static double? Number(JsonElement? root, string key) =>
         Member(root, key) is { ValueKind: JsonValueKind.Number } value ? value.GetDouble() : null;
+
+    private static int Tokens(JsonElement? root, string key) =>
+        Number(root, key) is { } tokens && tokens is >= 0 and <= int.MaxValue ? (int)tokens : 0;
 
     private static JsonElement? Object(JsonElement? root, string key) =>
         Member(root, key) is { ValueKind: JsonValueKind.Object } value ? value : null;
