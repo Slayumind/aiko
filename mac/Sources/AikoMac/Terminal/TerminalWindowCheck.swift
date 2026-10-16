@@ -122,6 +122,9 @@ enum TerminalWindowCheck {
     /// A short made up conversation: a message, steps, a markdown answer, a card that waits and a
     /// queued message. The same as the feed of TerminalSnapshot.cs. While compacting, there is no
     /// card, and a notice of an earlier compacting stands above the queued message (D-325).
+    /// A small picture the first message was sent with: a checkerboard of 32 by 32 pixels.
+    static let picture = "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAAAO0lEQVR42mOQ07TGiqybvmFFpKpnGLVg1IIhYAG1DMKlftSCUQuGggWjRcWoBaMWjNYHoxaMWiCnaQ0AjX5qPQtpTRsAAAAASUVORK5CYII="
+
     private static func feed(compacting: Bool = false) -> TalkScreen {
         func step(_ id: Int, _ kind: StepKind, _ subject: String, added: Int = 0, removed: Int = 0) -> FeedItem {
             FeedItem(id: id, content: .step(FeedStep(
@@ -159,7 +162,8 @@ enum TerminalWindowCheck {
         let request = #"{"type":"control_request","request_id":"r1","request":{"subtype":"can_use_tool","tool_name":"Edit","tool_use_id":"t6","input":{"file_path":"/work/aiko/NewSessionForm.swift","old_string":"a\nb","new_string":"a\nc\nd"}}}"#
         var items: [FeedItem] = [
             FeedItem(id: 1, content: .ownerMessage(
-                text: "Add the folder groups to the form of a new session.", images: 0, queued: false, attachments: [])),
+                text: "Add the folder groups to the form of a new session.", queued: false,
+                attachments: [AttachedImage(mediaType: "image/png", base64: Self.picture)])),
             step(2, .read, "NewSessionChoices.swift"),
             step(3, .search, "FolderSource"),
             FeedItem(id: 4, content: .answer(text: answer, streaming: false)),
@@ -175,7 +179,7 @@ enum TerminalWindowCheck {
             items.append(FeedItem(id: 6, content: .card(request: RequestCard.from(asked), state: .open)))
         }
         items.append(FeedItem(id: 7, content: .ownerMessage(
-            text: "And the same on Windows, please.", images: 0, queued: true, attachments: [])))
+            text: "And the same on Windows, please.", queued: true, attachments: [])))
 
         return TalkScreen(
             session: "a2", items: items, busy: true, hasOpenCard: !compacting, compacting: compacting, mode: .manual, model: ModelName.label(asked: nil, known: "claude-opus-5-5"),

@@ -157,7 +157,7 @@ struct VoiceCaseTests {
         }
 
         let items = [
-            FeedItem(id: 1, content: .ownerMessage(text: "Look at the field.", images: 0, queued: false, attachments: [])),
+            FeedItem(id: 1, content: .ownerMessage(text: "Look at the field.", queued: false, attachments: [])),
             step(2, .read, "TalkInput.cs"),
             step(3, .search, "VoiceLine"),
             step(4, .edit, "VoiceInput.cs"),

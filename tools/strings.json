@@ -2989,13 +2989,6 @@
     ]
   ],
   [
-    "TerminalPictures",
-    [
-      "Pictures: {0}",
-      "Картинок: {0}"
-    ]
-  ],
-  [
     "VoiceButtonTip",
     [
       "Voice input · Ctrl+Space",

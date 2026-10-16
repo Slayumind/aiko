@@ -230,8 +230,8 @@ private struct FeedRowView: View {
 
     var body: some View {
         switch item.content {
-        case .ownerMessage(let text, let images, let queued, let attachments):
-            MessageRow(text: text, images: images, queued: queued, attachments: attachments)
+        case .ownerMessage(let text, let queued, let attachments):
+            MessageRow(text: text, queued: queued, attachments: attachments)
         case .answer(let text, let streaming):
             VStack(alignment: .leading, spacing: 0) {
                 AnswerView(markdown: text)
@@ -273,7 +273,6 @@ private struct CopyAnswerButton: View {
 /// message is dimmed and says so under the block (D-308).
 private struct MessageRow: View {
     let text: String
-    let images: Int
     let queued: Bool
     let attachments: [AttachedImage]
 
@@ -288,10 +287,6 @@ private struct MessageRow: View {
                                 Picture(base64: picture.base64, side: 80)
                             }
                         }
-                    } else if images > 0 {
-                        Text(Strings.format(Strings.terminalPictures, images))
-                            .font(Theme.mono(Theme.textTiny))
-                            .foregroundStyle(Theme.muted)
                     }
                     if !text.isEmpty {
                         Text(text)
