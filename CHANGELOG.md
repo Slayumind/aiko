@@ -15,14 +15,19 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - **Talk to Claude Code in the terminal.** Answers show as formatted text with code blocks you can
   copy and tables. Selected text copies as the markdown Claude wrote. Each step of the work is one line that opens to its result and names the skill, the task of an agent or the MCP server at work. If you scroll up while an answer
   is written, the feed stays where you left it. A permission card
-  shows the lines an edit changes; Enter in an empty field allows it and Esc denies it, and the keyboard stays in the field. Under the field you see the mode, the model and the environment;
+  shows the lines an edit changes; Enter in an empty field allows it and Esc denies it, from any place of the window. A message you send while Claude writes waits under the answer. While Claude Code makes the conversation shorter, the feed says so, and then names the size before and after. Under the field you see the mode, the model with its version and the environment;
   Shift+Tab or a click changes the mode, and a click on the model takes the next one. Arrows bring back what you sent, Ctrl+V or Cmd+V adds a screenshot,
   and a dropped file adds its path. A new session starts in the mode your project settings name.
-- **Voice input in the terminal, on Windows.** Press Ctrl+Space or the microphone button, speak
+- **Voice input in the terminal, on Windows.** Press Ctrl+Space anywhere in the window or the microphone button, speak
   Russian or English, press again. The words appear in the field as you speak and wait for you to
   send them. Turn it on in the new **Terminal** page of the settings: recognition runs on your
   computer after a one-time 465 MB download, or through OpenAI with your own key, kept in Windows
-  Credential Manager. The Mac follows before the release.
+  Credential Manager. The speech language is your own choice there, apart from the language of Aiko. The Mac follows before the release.
+
+### Fixed
+
+- The bridge no longer leaves temporary files in the folder of limit snapshots when Windows refuses
+  to replace a file Aiko is reading, and Aiko removes the old ones when it starts.
 
 ## [0.4.1] - 2026-10-12
 
