@@ -14,6 +14,17 @@ struct TalkScreen: Equatable {
     let environment: String
 }
 
+/// The column of the conversation: at most 860 points wide, in the middle. The feed itself takes
+/// the whole width, so its scroll bar stands at the right edge of the window (AIKO-244).
+private struct TalkColumn: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .padding(.horizontal, 24)
+            .frame(maxWidth: 860)
+            .frame(maxWidth: .infinity)
+    }
+}
+
 /// The conversation with Claude Code: the feed above, the field below (D-294, D-302).
 ///
 /// The feed is a lazy list: a row is built only when it comes into view. The twin of
@@ -51,7 +62,9 @@ struct TalkPanelView: View {
                             .onAppear { atEnd = true }
                             .onDisappear { atEnd = false }
                     }
+                    // Room for the scroll bar, which lies over the right edge of the feed.
                     .padding(.trailing, 12)
+                    .modifier(TalkColumn())
                 }
                 .scrollIndicators(.automatic)
                 .overlay {
@@ -75,14 +88,13 @@ struct TalkPanelView: View {
                     reminder(talk.items[at]) {
                         scroll.scrollTo(at, anchor: .bottom)
                     }
+                    .modifier(TalkColumn())
                 }
             }
 
             TalkInputView(talk: talk, input: state.input)
+                .modifier(TalkColumn())
         }
-        .padding(.horizontal, 24)
-        .frame(maxWidth: 860)
-        .frame(maxWidth: .infinity)
     }
 
     /// Where the open card stands in the feed.
