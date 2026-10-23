@@ -785,14 +785,21 @@ public class SharedCaseTests
             ["text"] = question.Text,
             ["header"] = question.Header,
             ["multi"] = question.MultiSelect,
-            ["options"] = new JsonArray([.. question.Options.Select(option => new JsonObject
-            {
-                ["label"] = option.Label,
-                ["description"] = option.Description,
-            })]),
+            ["options"] = new JsonArray([.. question.Options.Select(Described)]),
         })]),
         ["plan"] = card.Plan,
     };
+
+    private static JsonObject Described(QuestionOption option)
+    {
+        var described = new JsonObject { ["label"] = option.Label, ["description"] = option.Description };
+        if (option.Preview.Length > 0)
+        {
+            described["preview"] = option.Preview;
+        }
+
+        return described;
+    }
 
     private static JsonObject Described(Conversation state) => new()
     {

@@ -760,7 +760,8 @@ struct SharedCaseTests {
                     ("text", .string(question.text)), ("header", .string(question.header)),
                     ("multi", .bool(question.multiSelect)),
                     ("options", .array(question.options.map {
-                        node([("label", .string($0.label)), ("description", .string($0.description))])
+                        node([("label", .string($0.label)), ("description", .string($0.description))]
+                            + ($0.preview.isEmpty ? [] : [("preview", .string($0.preview))]))
                     })),
                 ])
             })),
