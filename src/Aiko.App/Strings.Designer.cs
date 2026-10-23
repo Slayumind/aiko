@@ -1272,6 +1272,27 @@ public static class Strings
     /// Enter to allow · Esc to deny
     public static string TerminalCardKeys => Get("TerminalCardKeys");
 
+    /// question {0} of {1}
+    public static string TerminalQuestionStep => Get("TerminalQuestionStep");
+
+    /// you can pick several
+    public static string TerminalQuestionMany => Get("TerminalQuestionMany");
+
+    /// Other
+    public static string TerminalQuestionOther => Get("TerminalQuestionOther");
+
+    /// Write your own answer
+    public static string TerminalQuestionOtherHint => Get("TerminalQuestionOtherHint");
+
+    /// Back
+    public static string TerminalQuestionBack => Get("TerminalQuestionBack");
+
+    /// Next
+    public static string TerminalQuestionNext => Get("TerminalQuestionNext");
+
+    /// Answer
+    public static string TerminalQuestionAnswer => Get("TerminalQuestionAnswer");
+
     /// Stop
     public static string TerminalStop => Get("TerminalStop");
 
@@ -1298,6 +1319,12 @@ public static class Strings
 
     /// Waiting for you: {0}
     public static string TerminalWaitsForYou => Get("TerminalWaitsForYou");
+
+    /// questions
+    public static string TerminalWaitsQuestions => Get("TerminalWaitsQuestions");
+
+    /// the plan
+    public static string TerminalWaitsPlan => Get("TerminalWaitsPlan");
 
     /// Show
     public static string TerminalShow => Get("TerminalShow");

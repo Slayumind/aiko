@@ -2919,6 +2919,55 @@
     ]
   ],
   [
+    "TerminalQuestionStep",
+    [
+      "question {0} of {1}",
+      "вопрос {0} из {1}"
+    ]
+  ],
+  [
+    "TerminalQuestionMany",
+    [
+      "you can pick several",
+      "можно выбрать несколько"
+    ]
+  ],
+  [
+    "TerminalQuestionOther",
+    [
+      "Other",
+      "Другое"
+    ]
+  ],
+  [
+    "TerminalQuestionOtherHint",
+    [
+      "Write your own answer",
+      "Написать свой ответ"
+    ]
+  ],
+  [
+    "TerminalQuestionBack",
+    [
+      "Back",
+      "Назад"
+    ]
+  ],
+  [
+    "TerminalQuestionNext",
+    [
+      "Next",
+      "Дальше"
+    ]
+  ],
+  [
+    "TerminalQuestionAnswer",
+    [
+      "Answer",
+      "Ответить"
+    ]
+  ],
+  [
     "TerminalStop",
     [
       "Stop",
@@ -2979,6 +3028,20 @@
     [
       "Waiting for you: {0}",
       "Ждёт тебя: {0}"
+    ]
+  ],
+  [
+    "TerminalWaitsQuestions",
+    [
+      "questions",
+      "вопросы"
+    ]
+  ],
+  [
+    "TerminalWaitsPlan",
+    [
+      "the plan",
+      "план"
     ]
   ],
   [

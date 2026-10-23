@@ -71,6 +71,7 @@ sealed class TerminalPanel : UserControl
         else if (modifiers == ModifierKeys.None
             && key is Key.Enter or Key.Escape
             && e.OriginalSource is not (ButtonBase or ComboBox or ComboBoxItem)
+            && !QuestionCardView.Holds(e.OriginalSource)
             && InThisWindow(e.OriginalSource))
         {
             e.Handled = _talk.Input.PressOutside(key == Key.Enter ? TalkKey.Enter : TalkKey.Escape);
@@ -78,10 +79,10 @@ sealed class TerminalPanel : UserControl
     }
 
     /// Letters typed in another place of the window go into the field (D-328). A space stays with
-    /// the button or the list it was pressed on.
+    /// the button or the list it was pressed on, and a digit with the card of questions (D-330).
     public void OnWindowText(object sender, TextCompositionEventArgs e)
     {
-        if (e.Handled || !_talk.IsVisible || OwnTyping(e.OriginalSource)
+        if (e.Handled || !_talk.IsVisible || OwnTyping(e.OriginalSource) || QuestionCardView.Holds(e.OriginalSource)
             || e.Text.Length == 0 || e.Text.All(c => char.IsWhiteSpace(c) || char.IsControl(c)))
         {
             return;

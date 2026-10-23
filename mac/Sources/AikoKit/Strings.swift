@@ -457,6 +457,13 @@ public enum Strings {
         "TerminalAllowInProject": ("Allow in this project", "Разрешать в этом проекте"),
         "TerminalDeny": ("Deny", "Отказать"),
         "TerminalCardKeys": ("Enter to allow · Esc to deny", "Enter — разрешить · Esc — отказать"),
+        "TerminalQuestionStep": ("question {0} of {1}", "вопрос {0} из {1}"),
+        "TerminalQuestionMany": ("you can pick several", "можно выбрать несколько"),
+        "TerminalQuestionOther": ("Other", "Другое"),
+        "TerminalQuestionOtherHint": ("Write your own answer", "Написать свой ответ"),
+        "TerminalQuestionBack": ("Back", "Назад"),
+        "TerminalQuestionNext": ("Next", "Дальше"),
+        "TerminalQuestionAnswer": ("Answer", "Ответить"),
         "TerminalStop": ("Stop", "Остановить"),
         "TerminalTurnStopped": ("Turn stopped.", "Ход остановлен."),
         "TerminalQueued": ("queued", "в очереди"),
@@ -466,6 +473,8 @@ public enum Strings {
         "TerminalFailed": ("Claude Code stopped with an error.", "Claude Code остановился с ошибкой."),
         "TerminalDiffMore": ("{0} more lines", "Ещё строк: {0}"),
         "TerminalWaitsForYou": ("Waiting for you: {0}", "Ждёт тебя: {0}"),
+        "TerminalWaitsQuestions": ("questions", "вопросы"),
+        "TerminalWaitsPlan": ("the plan", "план"),
         "TerminalShow": ("Show", "Показать"),
         "VoiceButtonTip": ("Voice input · Ctrl+Space", "Голосовой ввод · Ctrl+Space"),
         "VoiceStopTip": ("Finish recording · Ctrl+Space", "Закончить запись · Ctrl+Space"),
@@ -1760,6 +1769,27 @@ public enum Strings {
     /// Enter to allow · Esc to deny
     public static var terminalCardKeys: String { Strings.get("TerminalCardKeys") }
 
+    /// question {0} of {1}
+    public static var terminalQuestionStep: String { Strings.get("TerminalQuestionStep") }
+
+    /// you can pick several
+    public static var terminalQuestionMany: String { Strings.get("TerminalQuestionMany") }
+
+    /// Other
+    public static var terminalQuestionOther: String { Strings.get("TerminalQuestionOther") }
+
+    /// Write your own answer
+    public static var terminalQuestionOtherHint: String { Strings.get("TerminalQuestionOtherHint") }
+
+    /// Back
+    public static var terminalQuestionBack: String { Strings.get("TerminalQuestionBack") }
+
+    /// Next
+    public static var terminalQuestionNext: String { Strings.get("TerminalQuestionNext") }
+
+    /// Answer
+    public static var terminalQuestionAnswer: String { Strings.get("TerminalQuestionAnswer") }
+
     /// Stop
     public static var terminalStop: String { Strings.get("TerminalStop") }
 
@@ -1786,6 +1816,12 @@ public enum Strings {
 
     /// Waiting for you: {0}
     public static var terminalWaitsForYou: String { Strings.get("TerminalWaitsForYou") }
+
+    /// questions
+    public static var terminalWaitsQuestions: String { Strings.get("TerminalWaitsQuestions") }
+
+    /// the plan
+    public static var terminalWaitsPlan: String { Strings.get("TerminalWaitsPlan") }
 
     /// Show
     public static var terminalShow: String { Strings.get("TerminalShow") }

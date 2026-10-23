@@ -11,6 +11,7 @@ static class TerminalSnapshot
     [
         "talk", "feed", "working", "compacting", "long-input", "empty", "form", "elsewhere", "login", "close",
         "voice-idle", "voice-warming", "voice-listening", "voice-finishing", "voice-nomic", "voice-model",
+        "questions", "questions-preview",
     ];
 
     /// --snapshot-terminal &lt;file&gt; &lt;state&gt; [width]
@@ -243,12 +244,54 @@ static class TerminalSnapshot
             SignedOut: state == "login",
             form,
             state == "close" ? new AskView(string.Format(Strings.TerminalCloseTitle, "terminal"), Strings.TerminalCloseBody) : null,
-            state == "feed" ? Feed(withCard: true)
+            state.StartsWith("questions", StringComparison.Ordinal) ? Questions(state == "questions-preview")
+                : state == "feed" ? Feed(withCard: true)
                 : state is "working" or "long-input" ? Feed(withCard: false)
                 : state == "compacting" ? Compacting()
                 : state.StartsWith("voice-", StringComparison.Ordinal) ? Feed(withCard: false) with { Busy = false }
                 : null,
             now);
+    }
+
+    /// The worst case of a card of questions (AIKO-327): four questions of four options, long labels
+    /// and descriptions. "questions" stands on the second question, which takes several answers;
+    /// "questions-preview" on the last one, whose options have previews.
+    private static TalkView Questions(bool preview)
+    {
+        const string Json = """
+            {"questions":[
+              {"question":"Where should the list of commands keep what was typed last?","header":"Storage","multiSelect":false,
+               "options":[{"label":"In the memory of the window","description":"Gone when Aiko closes"},
+                          {"label":"In the settings file","description":"Stays after a restart"}]},
+              {"question":"Which commands should the menu of / show, and in which order should they go?","header":"What to show","multiSelect":true,
+               "options":[{"label":"Built-in commands of Claude Code","description":"compact, model, clear and about fifty more, without the internal ones"},
+                          {"label":"Skills: your own, the project's and the plugins' together in one list","description":"Skills of plugins carry the name of their plugin, your own ones carry nothing"},
+                          {"label":"Commands from .claude/commands","description":"Old command files that Claude Code still understands"},
+                          {"label":"Recent first","description":"What you used last goes to the top"}]},
+              {"question":"What does Tab do in the menu?","header":"Tab","multiSelect":false,
+               "options":[{"label":"Puts the command into the field","description":""},{"label":"Moves to the next one","description":""}]},
+              {"question":"How should the menu show the letters that match?","header":"Match","multiSelect":false,
+               "options":[{"label":"Brighter","description":"Matched letters white, the rest grey","preview":"/compact   Free up context by summarizing\n/config    Open config panel\n/aiko:copy (aiko) Write and edit text"},
+                          {"label":"Underlined","description":"A thin line under the matched letters","preview":"/compact\n/config"},
+                          {"label":"Not at all","description":""},
+                          {"label":"Bold","description":"Heavier letters where they match"}]}
+            ]}
+            """;
+        using var input = System.Text.Json.JsonDocument.Parse(Json);
+        var card = RequestCard.From(new StreamEvent.Request("q1", "AskUserQuestion", "tq", input.RootElement.Clone(), "", true, false));
+
+        var flow = QuestionFlow.Start(card.Questions).Click(0).Flow;
+        flow = preview
+            ? flow.Click(0).Flow.Click(1).Flow.Forward().Flow.Click(0).Flow
+            : flow.Click(0).Flow.Click(1).Flow.Press(QuestionKey.Next).Flow;
+        QuestionCardView.Preset(card, flow);
+
+        List<FeedItem> items =
+        [
+            new FeedItem.OwnerMessage(1, "Draw the menu of / in the terminal.", false, []),
+            new FeedItem.Card(2, card, RequestState.Open),
+        ];
+        return new TalkView("a2", items, Busy: true, HasOpenCard: true, Compacting: false, PermissionMode.Manual, ModelName.Label(null, "claude-opus-5-5"), "Aiko");
     }
 
     /// A small picture the first message was sent with: a checkerboard of 32 by 32 pixels.
