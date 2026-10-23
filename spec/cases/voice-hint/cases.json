@@ -1,5 +1,5 @@
 {
-  "comment": "Echoes: a recogniser that does not catch the sound may give back the hint itself; a phrase of three or more parts, all of them items of the hint, is an echo and is dropped. What the recogniser is told before it listens (D-313): the folder of the session, its branch, words of the terminal in the language Whisper hears (none without a language), the names of files from the conversation, then the keys of Aiko's memory when the memory is on. A path gives only its last part. The same name twice goes once, whatever its case. The hint stops before the item that would make it longer than the limit. The language is the one chosen for speech on the Terminal page; System follows the language of the computer, and anything but Russian is English (D-314, D-326).",
+  "comment": "Echoes: a recogniser that does not catch the sound may give back the hint itself, also in the middle of speech. A sentence of three or more parts, all of them items of the hint, is an echo; so is a sentence of four or more items of the hint and one other part, because the recogniser may spell one item its own way (kodland as кодland, 2026-10-23). An echo sentence is cut out, the speech around it stays. What the recogniser is told before it listens (D-313): the folder of the session, its branch, words of the terminal in the language Whisper hears (none without a language), the names of files from the conversation, then the keys of Aiko's memory when the memory is on. A path gives only its last part. The same name twice goes once, whatever its case. The hint stops before the item that would make it longer than the limit. The language is the one chosen for speech on the Terminal page; System follows the language of the computer, and anything but Russian is English (D-314, D-326).",
   "hints": [
     {
       "name": "everything",
@@ -83,7 +83,17 @@
     { "name": "a phrase that names hint words", "hint": "aiko, main, local-install.ps1, TerminalPanel.cs, Max.", "phrase": "Открой TerminalPanel.cs и запусти local-install.ps1 на main.", "echo": false },
     { "name": "a list the person said, one item is new", "hint": "aiko, main, TalkInput.cs, Max.", "phrase": "TalkInput.cs, TalkPanel.cs, AnswerView.cs", "echo": false },
     { "name": "two items are not an echo", "hint": "aiko, main, Max.", "phrase": "aiko, main", "echo": false },
-    { "name": "no hint", "hint": "", "phrase": "aiko, main, Max", "echo": false }
+    { "name": "no hint", "hint": "", "phrase": "aiko, main, Max", "echo": false },
+    { "name": "the hint with one item spelled another way, as OpenAI gave it on 2026-10-23", "hint": "kodland, Enter, Esc, поле ввода, сессия, отрисовано, Сербия, Черногория, Max, API credits, Kidsmed, KM, Мультиплатформа.", "phrase": "кодland, Enter, Esc, поле ввода, сессия, отрисовано, Сербия, Черногория, Max, API credits, Kidsmed, KM, Мультиплатформа.", "echo": true },
+    { "name": "four items of the hint and one more", "hint": "aiko, main, TalkInput.cs, TalkPanel.cs, Max.", "phrase": "aiko, main, TalkInput.cs, TalkPanel.cs, AnswerView.cs", "echo": true },
+    { "name": "three items of the hint and one more stay", "hint": "aiko, main, TalkInput.cs, Max.", "phrase": "main, TalkInput.cs, Max, AnswerView.cs", "echo": false },
+    { "name": "four items of the hint and two more stay", "hint": "aiko, main, TalkInput.cs, TalkPanel.cs, Max.", "phrase": "aiko, main, TalkInput.cs, TalkPanel.cs, AnswerView.cs, Log.cs", "echo": false }
+  ],
+  "unechoed": [
+    { "name": "the echo is cut out of the speech around it", "hint": "kodland, Enter, Esc, поле ввода, сессия, Сербия, Черногория, Max.", "phrase": "Собери вопросы команды. кодland, Enter, Esc, поле ввода, сессия, Сербия, Черногория, Max. Потом обсудим.", "text": "Собери вопросы команды. Потом обсудим.", "dropped": 1, "inHint": 7 },
+    { "name": "the hint twice in one phrase", "hint": "aiko, main, Сербия, Черногория, Max.", "phrase": "aiko, main, Сербия, Черногория, Max. aiko, main, Сербия, Черногория, Max.", "text": "", "dropped": 2, "inHint": 5 },
+    { "name": "speech that names hint words stays whole", "hint": "aiko, main, TerminalPanel.cs, Max.", "phrase": "Открой TerminalPanel.cs на main. Проверь, что aiko собирается.", "text": "Открой TerminalPanel.cs на main. Проверь, что aiko собирается.", "dropped": 0, "inHint": null },
+    { "name": "a file name keeps its dot", "hint": "aiko, main, Max.", "phrase": "Открой DECISIONS.md и прочитай.", "text": "Открой DECISIONS.md и прочитай.", "dropped": 0, "inHint": null }
   ],
   "branches": [
     { "head": "ref: refs/heads/in-progress\n", "branch": "in-progress" },

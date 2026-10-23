@@ -27,6 +27,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Fixed
 
+- Voice input no longer puts the list of hint words into your text when the recognizer gives it back
+  in the middle of speech, even with one word spelled its own way.
 - The bridge no longer leaves temporary files in the folder of limit snapshots when Windows refuses
   to replace a file Aiko is reading, and Aiko removes the old ones when it starts.
 

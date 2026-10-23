@@ -237,10 +237,11 @@ sealed class CloudRecognizer : IAsyncDisposable
                     _reading.Append(root.GetProperty("delta").GetString());
                     break;
                 case "conversation.item.input_audio_transcription.completed":
-                    var phrase = root.GetProperty("transcript").GetString() ?? "";
-                    if (!VoiceHint.IsEcho(phrase, _hint))
+                    var phrase = VoiceHint.WithoutEcho(root.GetProperty("transcript").GetString() ?? "", _hint);
+                    VoiceEchoLog.Write("OpenAI", phrase);
+                    if (phrase.Text.Length > 0)
                     {
-                        _done.Append(phrase).Append(' ');
+                        _done.Append(phrase.Text).Append(' ');
                     }
 
                     _reading.Clear();

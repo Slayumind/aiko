@@ -294,7 +294,7 @@ sealed class VoiceDictation
                 }
 
                 var started = Stopwatch.StartNew();
-                var text = Unechoed(recognizer.Read(heard));
+                var text = Unechoed(recognizer.Read(heard), final: false);
                 if (!_finishing && !_dropped.IsCancellationRequested)
                 {
                     owner.Passed(this, text, final: false);
@@ -308,7 +308,7 @@ sealed class VoiceDictation
 
             if (!_dropped.IsCancellationRequested)
             {
-                owner.Passed(this, Unechoed(recognizer.Read(_mic.Heard())), final: true);
+                owner.Passed(this, Unechoed(recognizer.Read(_mic.Heard()), final: true), final: true);
             }
         }
 
@@ -366,8 +366,18 @@ sealed class VoiceDictation
             }
         }
 
-        /// whisper may give the hint back over noise as well; such a pass counts as silence.
-        private string Unechoed(string text) => VoiceHint.IsEcho(text, hint) ? "" : text;
+        /// whisper may give the hint back over noise as well, alone or in the middle of speech; the
+        /// echo is cut out. Every pass reads the whole recording again, so only the last one is logged.
+        private string Unechoed(string text, bool final)
+        {
+            var result = VoiceHint.WithoutEcho(text, hint);
+            if (final)
+            {
+                VoiceEchoLog.Write("Whisper", result);
+            }
+
+            return result.Text;
+        }
 
         private static int Rate(TimeSpan time) => (int)(16000 * time.TotalSeconds);
     }
