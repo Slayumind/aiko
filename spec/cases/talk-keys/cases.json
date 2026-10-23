@@ -1,5 +1,5 @@
 {
-  "comment": "Enter and Esc in the field of a conversation (D-323). The keyboard stays in the field. While a card of permission or of a plan waits, Enter in an empty field allows it and Esc denies it, also while Claude Code works. Enter with words or pictures in the field does nothing then: the message is not sent and the card is not allowed. The words of a recording are never sent by Enter (D-313), and Esc during a recording cancels the recording first. Without a card Enter sends and Esc stops the work. The keys answer the oldest open card, and nothing when that card asks questions: those have their own keys.",
+  "comment": "Enter and Esc in the field of a conversation (D-323). The keyboard stays in the field. While a card of permission or of a plan waits, Enter in an empty field allows it and Esc denies it, also while Claude Code works. Enter with words or pictures in the field does nothing then: the message is not sent and the card is not allowed. The words of a recording are never sent by Enter (D-313), and Esc during a recording cancels the recording first. Without a card Enter sends and Esc stops the work. Outside: the key was pressed in another place of the window (D-328); there the keys only cancel a recording and answer a card, and never send or stop. A row without outside is in the field. The keys answer the oldest open card, and nothing when that card asks questions: those have their own keys.",
   "keys": [
     { "name": "enter sends", "key": "enter", "card": false, "empty": false, "busy": false, "dictating": false, "voice": false, "action": "send" },
     { "name": "enter in an empty field still goes to send, which sends nothing", "key": "enter", "card": false, "empty": true, "busy": false, "dictating": false, "voice": false, "action": "send" },
@@ -11,7 +11,14 @@
     { "name": "esc denies a waiting card with words in the field", "key": "escape", "card": true, "empty": false, "busy": true, "dictating": false, "voice": false, "action": "deny" },
     { "name": "esc cancels a recording before it denies", "key": "escape", "card": true, "empty": true, "busy": true, "dictating": false, "voice": true, "action": "cancel-voice" },
     { "name": "esc stops the work", "key": "escape", "card": false, "empty": true, "busy": true, "dictating": false, "voice": false, "action": "stop" },
-    { "name": "esc with nothing going on is left to the field", "key": "escape", "card": false, "empty": false, "busy": false, "dictating": false, "voice": false, "action": "none" }
+    { "name": "esc with nothing going on is left to the field", "key": "escape", "card": false, "empty": false, "busy": false, "dictating": false, "voice": false, "action": "none" },
+    { "name": "outside: enter allows a waiting card", "key": "enter", "card": true, "empty": true, "busy": true, "dictating": false, "voice": false, "outside": true, "action": "allow" },
+    { "name": "outside: enter with words and a waiting card does nothing", "key": "enter", "card": true, "empty": false, "busy": true, "dictating": false, "voice": false, "outside": true, "action": "swallow" },
+    { "name": "outside: enter without a card does not send", "key": "enter", "card": false, "empty": false, "busy": false, "dictating": false, "voice": false, "outside": true, "action": "none" },
+    { "name": "outside: enter during a recording does nothing", "key": "enter", "card": true, "empty": true, "busy": true, "dictating": true, "voice": true, "outside": true, "action": "swallow" },
+    { "name": "outside: esc cancels a recording", "key": "escape", "card": false, "empty": true, "busy": false, "dictating": true, "voice": true, "outside": true, "action": "cancel-voice" },
+    { "name": "outside: esc denies a waiting card", "key": "escape", "card": true, "empty": false, "busy": true, "dictating": false, "voice": false, "outside": true, "action": "deny" },
+    { "name": "outside: esc does not stop the work", "key": "escape", "card": false, "empty": true, "busy": true, "dictating": false, "voice": false, "outside": true, "action": "none" }
   ],
   "cards": [
     { "name": "no card", "feed": [], "answers": null },

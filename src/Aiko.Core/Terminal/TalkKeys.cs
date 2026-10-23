@@ -24,13 +24,15 @@ public enum TalkKeyAction
 
 /// What the field knows when a key comes. CardWaits: a card the keys answer is open. Empty: no
 /// words and no pictures. Dictating: the words of a recording are in the field. VoiceActive: a
-/// recording warms up, listens or finishes.
-public sealed record TalkKeyState(bool CardWaits, bool Empty, bool Busy, bool Dictating, bool VoiceActive);
+/// recording warms up, listens or finishes. Outside: the key was pressed in another place of the
+/// window, not in the field (D-328).
+public sealed record TalkKeyState(bool CardWaits, bool Empty, bool Busy, bool Dictating, bool VoiceActive, bool Outside = false);
 
 /// Enter and Esc in the field of a conversation (D-323). The keyboard stays in the field, and a
 /// card of permission or of a plan is answered from there: Enter in an empty field allows, Esc
 /// denies. Enter with words in the field does nothing while a card waits, so a message is not
-/// sent by mistake and the card is not allowed by mistake.
+/// sent by mistake and the card is not allowed by mistake. From another place of the window the keys
+/// only cancel a recording and answer a card (D-328): sending and stopping the work stay in the field.
 public static class TalkKeys
 {
     public static TalkKeyAction For(TalkKey key, TalkKeyState state) => key switch
@@ -38,10 +40,11 @@ public static class TalkKeys
         // The text of a recording is never sent by itself (D-313), not even half way.
         TalkKey.Enter when state.Dictating => TalkKeyAction.Swallow,
         TalkKey.Enter when state.CardWaits => state.Empty ? TalkKeyAction.Allow : TalkKeyAction.Swallow,
+        TalkKey.Enter when state.Outside => TalkKeyAction.None,
         TalkKey.Enter => TalkKeyAction.Send,
         TalkKey.Escape when state.VoiceActive => TalkKeyAction.CancelVoice,
         TalkKey.Escape when state.CardWaits => TalkKeyAction.Deny,
-        TalkKey.Escape when state.Busy => TalkKeyAction.Stop,
+        TalkKey.Escape when state.Busy && !state.Outside => TalkKeyAction.Stop,
         _ => TalkKeyAction.None,
     };
 

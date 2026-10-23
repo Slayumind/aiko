@@ -21,24 +21,30 @@ public enum TalkKeyAction: String, Sendable, Equatable {
 
 /// What the field knows when a key comes. cardWaits: a card the keys answer is open. empty: no
 /// words and no pictures. dictating: the words of a recording are in the field. voiceActive: a
-/// recording warms up, listens or finishes.
+/// recording warms up, listens or finishes. outside: the key was pressed in another place of the
+/// window, not in the field (D-328).
 public struct TalkKeyState: Sendable, Equatable {
     public let cardWaits: Bool
     public let empty: Bool
     public let busy: Bool
     public let dictating: Bool
     public let voiceActive: Bool
+    public let outside: Bool
 
-    public init(cardWaits: Bool, empty: Bool, busy: Bool, dictating: Bool = false, voiceActive: Bool = false) {
+    public init(
+        cardWaits: Bool, empty: Bool, busy: Bool, dictating: Bool = false, voiceActive: Bool = false, outside: Bool = false
+    ) {
         self.cardWaits = cardWaits
         self.empty = empty
         self.busy = busy
         self.dictating = dictating
         self.voiceActive = voiceActive
+        self.outside = outside
     }
 }
 
-/// Enter and Esc in the field of a conversation (D-323). The twin of Terminal/TalkKeys.cs.
+/// Enter and Esc in the field of a conversation (D-323), and from another place of the window, where
+/// they only cancel a recording and answer a card (D-328). The twin of Terminal/TalkKeys.cs.
 public enum TalkKeys {
     public static func action(_ key: TalkKey, _ state: TalkKeyState) -> TalkKeyAction {
         switch key {
@@ -46,11 +52,11 @@ public enum TalkKeys {
             // The text of a recording is never sent by itself (D-313), not even half way.
             if state.dictating { return .swallow }
             if state.cardWaits { return state.empty ? .allow : .swallow }
-            return .send
+            return state.outside ? .none : .send
         case .escape:
             if state.voiceActive { return .cancelVoice }
             if state.cardWaits { return .deny }
-            return state.busy ? .stop : .none
+            return state.busy && !state.outside ? .stop : .none
         }
     }
 

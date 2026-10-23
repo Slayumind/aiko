@@ -382,7 +382,8 @@ sealed class TalkInput : UserControl
 
         _dictation.Inlines.Add(new Run(_after) { Foreground = Tokens.Brush("Ink") });
         _dictation.Visibility = Visibility.Visible;
-        _text.Visibility = Visibility.Hidden;
+        // Hidden, the field would lose the keyboard, and the next Ctrl+Space would go nowhere (D-328).
+        _text.Opacity = 0;
         ShowPlaceholder();
     }
 
@@ -402,7 +403,7 @@ sealed class TalkInput : UserControl
         _dictating = false;
         _text.IsReadOnly = false;
         _dictation.Visibility = Visibility.Collapsed;
-        _text.Visibility = Visibility.Visible;
+        _text.Opacity = 1;
         ShowPlaceholder();
         if (words is { Length: > 0 })
         {
@@ -499,8 +500,37 @@ sealed class TalkInput : UserControl
     }
 
     /// Enter or Esc pressed in another place of the window, where the keyboard went after a
-    /// click on the feed or the list. There they answer only a waiting card (AIKO-244).
-    public bool AnswerCard(TalkKey key) => _cardWaits && Act(TalkKeys.For(key, KeyState()));
+    /// click on the feed or the list. There they only cancel a recording and answer a waiting
+    /// card (D-328). Whether the key was taken.
+    public bool PressOutside(TalkKey key) => Act(TalkKeys.For(key, KeyState() with { Outside = true }));
+
+    /// Shift+Tab pressed in another place of the window changes the mode, as in the field.
+    public void AskMode() => ModeAsked?.Invoke();
+
+    /// Ctrl+V pressed in another place of the window pastes into the field.
+    public void PasteHere()
+    {
+        _text.Focus();
+        ApplicationCommands.Paste.Execute(null, _text);
+    }
+
+    /// Letters typed in another place of the window go into the field at its caret. Not during a
+    /// recording: its words are not typed over. Whether the letters were taken.
+    public bool TypeHere(string text)
+    {
+        if (_dictating)
+        {
+            return false;
+        }
+
+        _text.Focus();
+        _text.SelectedText = text;
+        _text.CaretIndex = _text.SelectionStart + _text.SelectionLength;
+        return true;
+    }
+
+    /// Whether the keys come from the field itself.
+    public bool Owns(object source) => ReferenceEquals(source, _text);
 
     private TalkKeyState KeyState() =>
         new(_cardWaits, _text.Text.Trim().Length == 0 && _attached.Count == 0, _busy, _dictating, _voiceActive);

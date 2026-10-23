@@ -3,7 +3,7 @@ using Aiko.Core.Terminal;
 
 namespace Aiko.Core.Tests;
 
-/// Enter and Esc of the field read from spec/cases, the same table the Swift tests read.
+/// Enter and Esc of the field and of the window read from spec/cases, the same table the Swift tests read.
 public class TalkKeysCaseTests
 {
     [Fact]
@@ -16,7 +16,8 @@ public class TalkKeysCaseTests
                 row.GetProperty("empty").GetBoolean(),
                 row.GetProperty("busy").GetBoolean(),
                 row.GetProperty("dictating").GetBoolean(),
-                row.GetProperty("voice").GetBoolean());
+                row.GetProperty("voice").GetBoolean(),
+                row.TryGetProperty("outside", out var outside) && outside.GetBoolean());
 
             var action = TalkKeys.For(Parsed<TalkKey>(row.GetProperty("key")), state);
 
