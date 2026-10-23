@@ -20,17 +20,20 @@ static class AnswerView
         var column = new StackPanel { Margin = new Thickness(0, 6, 0, 10) };
         foreach (var segment in AnswerSegments.Of(Markdown.Parse(markdown)))
         {
-            column.Children.Add(segment switch
-            {
-                AnswerSegment.Prose prose => Prose(prose.Blocks),
-                AnswerSegment.Code code => CodeBlock(code.Language, code.Text),
-                AnswerSegment.Table table => Table(table.Value),
-                _ => new Border(),
-            });
+            column.Children.Add(Segment(segment));
         }
 
         return column;
     }
+
+    /// One piece of an answer, drawn the way it stays.
+    public static UIElement Segment(AnswerSegment segment) => segment switch
+    {
+        AnswerSegment.Prose prose => ProseBox(prose.Blocks),
+        AnswerSegment.Code code => CodeBlock(code.Language, code.Text),
+        AnswerSegment.Table table => Table(table.Value),
+        _ => new Border(),
+    };
 
     /// A finished answer with a quiet copy icon under it that copies the whole answer as its
     /// markdown, the way Claude wrote it (D-303). The icon shows while the mouse is over the
@@ -50,7 +53,9 @@ static class AnswerView
 
     // ---- prose ----
 
-    private static UIElement Prose(IReadOnlyList<MarkdownBlock> blocks)
+    /// The prose of an answer in a box one can select and copy from; the ink of a streaming
+    /// answer works on its document.
+    public static RichTextBox ProseBox(IReadOnlyList<MarkdownBlock> blocks)
     {
         var document = new FlowDocument
         {

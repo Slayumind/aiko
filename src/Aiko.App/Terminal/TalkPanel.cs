@@ -466,12 +466,19 @@ sealed class FeedRow : ContentControl
 
     private void Build()
     {
+        // A streaming answer keeps its view between lumps, so the words that are drying go on.
+        if (Item is FeedItem.Answer { Streaming: true } writing && Content is InkAnswer ink && ink.Id == writing.Id)
+        {
+            ink.Update(writing.Text);
+            return;
+        }
+
         Content = Item switch
         {
             WorkingMark { IsCompacting: true } => Compacting(),
             WorkingMark => Working(),
             FeedItem.OwnerMessage message => Message(message),
-            FeedItem.Answer { Streaming: true } answer => AnswerView.For(answer.Text),
+            FeedItem.Answer { Streaming: true } answer => new InkAnswer(answer.Id, answer.Text),
             FeedItem.Answer answer => AnswerView.WithCopy(answer.Text),
             FeedItem.Step { Answers.Count: > 0 } step => Answered(step.Answers),
             FeedItem.Step { Line.Label: QuestionAnswers.Tool, State: StepState.Failed } => Declined(),
