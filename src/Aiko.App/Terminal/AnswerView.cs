@@ -40,12 +40,15 @@ static class AnswerView
     /// answer (D-332).
     public static UIElement WithCopy(string markdown)
     {
-        var column = new StackPanel { Background = Brushes.Transparent };
+        // The icon lies over the margin under the answer instead of taking a line of its own,
+        // so a finished answer leaves no gap in the feed (D-332).
+        var column = new Grid { Background = Brushes.Transparent };
         column.Children.Add(For(markdown));
 
         var copy = CopyButton.For(() => markdown);
-        copy.Margin = new Thickness(-8, -10, 0, 2);
+        copy.Margin = new Thickness(-8, 0, 0, -18);
         copy.HorizontalAlignment = HorizontalAlignment.Left;
+        copy.VerticalAlignment = VerticalAlignment.Bottom;
         CopyButton.ShowOnHover(column, copy);
         column.Children.Add(copy);
         return column;
@@ -361,7 +364,7 @@ static class AnswerView
             TextWrapping = TextWrapping.Wrap,
             Background = Brushes.Transparent,
             BorderThickness = new Thickness(0),
-            Padding = new Thickness(12, 10, 12, 12),
+            Padding = new Thickness(12, 0, 12, 10),
             FontFamily = Tokens.Get<FontFamily>("Mono"),
             FontSize = Tokens.Get<double>("TextSmall"),
             Foreground = Tokens.Brush("Ink"),
@@ -370,7 +373,7 @@ static class AnswerView
 
         var copy = CopyButton.For(() => text);
 
-        var head = new DockPanel { Margin = new Thickness(12, 4, 4, 0) };
+        var head = new DockPanel { Margin = new Thickness(12, 2, 2, 0) };
         DockPanel.SetDock(copy, Dock.Right);
         head.Children.Add(copy);
         head.Children.Add(TerminalPanel.Mono(language.Length > 0 ? language : " ", "Muted"));

@@ -603,11 +603,15 @@ sealed class TerminalPanel : UserControl
         return column;
     }
 
+    /// A folder in the form: its name and the folder it sits in, not the whole path (D-332).
+    private static string FolderLabel(FolderChoice folder) =>
+        SessionName.ParentName(folder.Path) is { Length: > 0 } parent ? $"{folder.Name}  ·  {parent}" : folder.Name;
+
     private UIElement Form(FormView form)
     {
         var folders = new DropDown
         {
-            Items = [.. form.Folders.Select(folder => folder.Name + "   " + folder.Path), Strings.TerminalChooseFolder],
+            Items = [.. form.Folders.Select(FolderLabel), Strings.TerminalChooseFolder],
             Headers = NewSessionChoices.Headers(form.Folders).ToDictionary(
                 header => header.Before,
                 header => header.Group == FolderGroup.Recent ? Strings.TerminalFoldersRecent : Strings.TerminalFoldersBound),

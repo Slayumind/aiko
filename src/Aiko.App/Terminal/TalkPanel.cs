@@ -107,6 +107,7 @@ sealed class TalkPanel : UserControl
 
         _empty = TerminalPanel.Text(Strings.TerminalEmptyTalk, "TextName", "Muted", FontWeights.Normal);
         _empty.HorizontalAlignment = HorizontalAlignment.Center;
+        _empty.VerticalAlignment = VerticalAlignment.Bottom;
         _empty.TextWrapping = TextWrapping.Wrap;
 
         _input.Sent += (text, images) => SendAsked?.Invoke(text, images);
@@ -152,7 +153,7 @@ sealed class TalkPanel : UserControl
         bottom.SizeChanged += (_, e) =>
         {
             _feed.Padding = new Thickness(0, 0, 0, e.NewSize.Height);
-            _empty.Margin = new Thickness(0, 0, 0, e.NewSize.Height);
+            _empty.Margin = new Thickness(0, 0, 0, e.NewSize.Height + 16);
         };
 
         var all = new Grid();

@@ -963,6 +963,7 @@ public class SharedCaseTests
             var input = row.GetProperty("input").GetString()!;
             Assert.Equal(row.GetProperty("path").GetString(), SessionName.FolderPath(input));
             Assert.Equal(row.GetProperty("name").GetString(), SessionName.FolderName(input));
+            Assert.Equal(row.GetProperty("parent").GetString(), SessionName.ParentName(input));
         }
     }
 
