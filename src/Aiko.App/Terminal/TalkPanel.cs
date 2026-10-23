@@ -333,7 +333,6 @@ sealed class TalkPanel : UserControl
         // The rows grow, or the view gets lower as the field grows over the feed (check of 2026-10-16).
         else if (_follow && !atEnd && (e.ExtentHeightChange != 0 || e.ViewportHeightChange != 0))
         {
-            InkProbe.Jump(scroll.ScrollableHeight - scroll.VerticalOffset);
             _glide.ToEnd(scroll);
         }
     }

@@ -42,8 +42,6 @@ sealed partial class InkAnswer : StackPanel
     {
         Id = id;
         Margin = new Thickness(0, 6, 0, 10);
-        Loaded += (_, _) => InkProbe.Start();
-        Unloaded += (_, _) => InkProbe.Stop();
         Update(markdown);
     }
 
@@ -166,7 +164,6 @@ sealed partial class InkAnswer : StackPanel
             return;
         }
 
-        InkProbe.Lump(fresh, words);
 
         var now = DateTime.UtcNow;
         if (_lastLump != default)
