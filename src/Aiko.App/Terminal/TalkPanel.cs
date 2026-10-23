@@ -473,6 +473,19 @@ sealed class FeedRow : ContentControl
             return;
         }
 
+        // The end of a streaming answer waits for its last words to dry before the finished view.
+        if (Item is FeedItem.Answer { Streaming: false } written && Content is InkAnswer inked && inked.Id == written.Id)
+        {
+            inked.Finish(written.Text, () =>
+            {
+                if (Item is FeedItem.Answer { Streaming: false } still && still.Id == written.Id && ReferenceEquals(Content, inked))
+                {
+                    Content = AnswerView.WithCopy(still.Text);
+                }
+            });
+            return;
+        }
+
         Content = Item switch
         {
             WorkingMark { IsCompacting: true } => Compacting(),
