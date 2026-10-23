@@ -2590,6 +2590,13 @@
     ]
   ],
   [
+    "TerminalWorkingNow",
+    [
+      "working",
+      "работаю"
+    ]
+  ],
+  [
     "TerminalWaiting",
     [
       "waiting",
@@ -2683,15 +2690,15 @@
   [
     "TerminalLineRequest",
     [
-      "Needs permission: {0} {1}",
-      "Ждёт разрешения: {0} {1}"
+      "Waiting for permission: {0} {1}",
+      "Жду разрешения: {0} {1}"
     ]
   ],
   [
     "TerminalLineQuestion",
     [
-      "Asks: {0}",
-      "Спрашивает: {0}"
+      "Asking: {0}",
+      "Спрашиваю: {0}"
     ]
   ],
   [
@@ -2705,28 +2712,28 @@
     "TerminalLineReading",
     [
       "Reading {0}",
-      "Читает {0}"
+      "Читаю {0}"
     ]
   ],
   [
     "TerminalLineSearching",
     [
       "Searching {0}",
-      "Ищет {0}"
+      "Ищу {0}"
     ]
   ],
   [
     "TerminalLineEditing",
     [
       "Editing {0}",
-      "Правит {0}"
+      "Правлю {0}"
     ]
   ],
   [
     "TerminalLineRunning",
     [
       "Running {0}",
-      "Запускает {0}"
+      "Запускаю {0}"
     ]
   ],
   [
@@ -2747,14 +2754,14 @@
     "TerminalLineOpening",
     [
       "Opening {0}",
-      "Открывает {0}"
+      "Открываю {0}"
     ]
   ],
   [
     "TerminalLineCalling",
     [
       "Calling {0}",
-      "Вызывает {0}"
+      "Вызываю {0}"
     ]
   ],
   [
@@ -3034,7 +3041,7 @@
     "TerminalWaitsForYou",
     [
       "Waiting for you: {0}",
-      "Ждёт тебя: {0}"
+      "Жду тебя: {0}"
     ]
   ],
   [

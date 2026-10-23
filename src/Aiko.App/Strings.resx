@@ -1141,6 +1141,9 @@
   <data name="TerminalWorking" xml:space="preserve">
     <value>working</value>
   </data>
+  <data name="TerminalWorkingNow" xml:space="preserve">
+    <value>working</value>
+  </data>
   <data name="TerminalWaiting" xml:space="preserve">
     <value>waiting</value>
   </data>
@@ -1181,10 +1184,10 @@
     <value>web</value>
   </data>
   <data name="TerminalLineRequest" xml:space="preserve">
-    <value>Needs permission: {0} {1}</value>
+    <value>Waiting for permission: {0} {1}</value>
   </data>
   <data name="TerminalLineQuestion" xml:space="preserve">
-    <value>Asks: {0}</value>
+    <value>Asking: {0}</value>
   </data>
   <data name="TerminalLinePlan" xml:space="preserve">
     <value>The plan is ready for you</value>

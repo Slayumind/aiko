@@ -32,7 +32,7 @@ sealed class WorkingRow : Grid
         ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
         ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
-        var words = TerminalPanel.Mono(Strings.TerminalWorking, "Muted");
+        var words = TerminalPanel.Mono(Strings.TerminalWorkingNow, "Muted");
         words.Foreground = Light(_band);
         Children.Add(words);
 

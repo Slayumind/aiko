@@ -410,6 +410,7 @@ public enum Strings {
         "TerminalNoSessionsBody": ("A session is one conversation with Claude Code in one folder.", "Сессия — это один разговор с Claude Code в одной папке."),
         "TerminalEmptyTalk": ("Describe the task. Claude Code starts with your first message.", "Опиши задачу. Claude Code запустится с первым сообщением."),
         "TerminalWorking": ("working", "работает"),
+        "TerminalWorkingNow": ("working", "работаю"),
         "TerminalWaiting": ("waiting", "ждёт"),
         "TerminalDone": ("done", "готово"),
         "TerminalAsleep": ("asleep", "спит"),
@@ -423,17 +424,17 @@ public enum Strings {
         "TerminalStepAgent": ("agent", "агент"),
         "TerminalStepSkill": ("skill", "навык"),
         "TerminalStepWeb": ("web", "веб"),
-        "TerminalLineRequest": ("Needs permission: {0} {1}", "Ждёт разрешения: {0} {1}"),
-        "TerminalLineQuestion": ("Asks: {0}", "Спрашивает: {0}"),
+        "TerminalLineRequest": ("Waiting for permission: {0} {1}", "Жду разрешения: {0} {1}"),
+        "TerminalLineQuestion": ("Asking: {0}", "Спрашиваю: {0}"),
         "TerminalLinePlan": ("The plan is ready for you", "План готов, посмотри"),
-        "TerminalLineReading": ("Reading {0}", "Читает {0}"),
-        "TerminalLineSearching": ("Searching {0}", "Ищет {0}"),
-        "TerminalLineEditing": ("Editing {0}", "Правит {0}"),
-        "TerminalLineRunning": ("Running {0}", "Запускает {0}"),
+        "TerminalLineReading": ("Reading {0}", "Читаю {0}"),
+        "TerminalLineSearching": ("Searching {0}", "Ищу {0}"),
+        "TerminalLineEditing": ("Editing {0}", "Правлю {0}"),
+        "TerminalLineRunning": ("Running {0}", "Запускаю {0}"),
         "TerminalLineAgent": ("Agent: {0}", "Агент: {0}"),
         "TerminalLineSkill": ("Skill: {0}", "Навык: {0}"),
-        "TerminalLineOpening": ("Opening {0}", "Открывает {0}"),
-        "TerminalLineCalling": ("Calling {0}", "Вызывает {0}"),
+        "TerminalLineOpening": ("Opening {0}", "Открываю {0}"),
+        "TerminalLineCalling": ("Calling {0}", "Вызываю {0}"),
         "TerminalLineStoppedAt": ("Stopped at the “{0}” step", "Остановилась на шаге «{0}»"),
         "TerminalLineSignIn": ("Sign in needed", "Нужно войти"),
         "TerminalYesterday": ("Yesterday, {0}", "Вчера, {0}"),
@@ -473,7 +474,7 @@ public enum Strings {
         "TerminalCompacting": ("Making the conversation shorter…", "Сжимаю разговор…"),
         "TerminalFailed": ("Claude Code stopped with an error.", "Claude Code остановился с ошибкой."),
         "TerminalDiffMore": ("{0} more lines", "Ещё строк: {0}"),
-        "TerminalWaitsForYou": ("Waiting for you: {0}", "Ждёт тебя: {0}"),
+        "TerminalWaitsForYou": ("Waiting for you: {0}", "Жду тебя: {0}"),
         "TerminalWaitsQuestions": ("questions", "вопросы"),
         "TerminalWaitsPlan": ("the plan", "план"),
         "TerminalShow": ("Show", "Показать"),
@@ -1629,6 +1630,9 @@ public enum Strings {
     /// working
     public static var terminalWorking: String { Strings.get("TerminalWorking") }
 
+    /// working
+    public static var terminalWorkingNow: String { Strings.get("TerminalWorkingNow") }
+
     /// waiting
     public static var terminalWaiting: String { Strings.get("TerminalWaiting") }
 
@@ -1668,10 +1672,10 @@ public enum Strings {
     /// web
     public static var terminalStepWeb: String { Strings.get("TerminalStepWeb") }
 
-    /// Needs permission: {0} {1}
+    /// Waiting for permission: {0} {1}
     public static var terminalLineRequest: String { Strings.get("TerminalLineRequest") }
 
-    /// Asks: {0}
+    /// Asking: {0}
     public static var terminalLineQuestion: String { Strings.get("TerminalLineQuestion") }
 
     /// The plan is ready for you
