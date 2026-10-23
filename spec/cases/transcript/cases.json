@@ -1007,7 +1007,7 @@
       }
     },
     {
-      "name": "a question with options and a plan leave no step",
+      "name": "a plan leaves no step, a question a hidden one",
       "lines": [
         {
           "type": "user",
@@ -1129,12 +1129,26 @@
         "activity": "idle",
         "mode": "plan",
         "busy": false,
-        "nextId": 3,
+        "nextId": 4,
         "items": [
           {
             "owner": "ask me",
             "images": 0,
             "queued": false
+          },
+          {
+            "step": {
+              "kind": "other",
+              "label": "AskUserQuestion",
+              "subject": "",
+              "added": 0,
+              "removed": 0,
+              "hidden": true
+            },
+            "state": "done",
+            "result": "answered",
+            "images": 0,
+            "progress": ""
           },
           {
             "step": {
@@ -1204,6 +1218,149 @@
             "owner": "Only one is here.",
             "images": 1,
             "queued": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "answered questions stay in the feed",
+      "lines": [
+        {
+          "type": "user",
+          "message": {
+            "role": "user",
+            "content": "ask me"
+          },
+          "isSidechain": false
+        },
+        {
+          "type": "assistant",
+          "message": {
+            "role": "assistant",
+            "model": "claude-opus-5-5",
+            "content": [
+              {
+                "type": "tool_use",
+                "id": "toolu_1",
+                "name": "AskUserQuestion",
+                "input": {
+                  "questions": [
+                    {
+                      "question": "Where should it go?",
+                      "header": "Place",
+                      "multiSelect": false,
+                      "options": [
+                        {
+                          "label": "Left"
+                        },
+                        {
+                          "label": "Right"
+                        }
+                      ]
+                    },
+                    {
+                      "question": "Which checks?",
+                      "header": "",
+                      "multiSelect": true,
+                      "options": [
+                        {
+                          "label": "Unit"
+                        },
+                        {
+                          "label": "Format"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "isSidechain": false
+        },
+        {
+          "type": "user",
+          "message": {
+            "role": "user",
+            "content": [
+              {
+                "type": "tool_result",
+                "tool_use_id": "toolu_1",
+                "content": "Your questions have been answered."
+              }
+            ]
+          },
+          "isSidechain": false,
+          "toolUseResult": {
+            "questions": [
+              {
+                "question": "Where should it go?",
+                "header": "Place",
+                "multiSelect": false,
+                "options": [
+                  {
+                    "label": "Left"
+                  },
+                  {
+                    "label": "Right"
+                  }
+                ]
+              },
+              {
+                "question": "Which checks?",
+                "header": "",
+                "multiSelect": true,
+                "options": [
+                  {
+                    "label": "Unit"
+                  },
+                  {
+                    "label": "Format"
+                  }
+                ]
+              }
+            ],
+            "answers": {
+              "Where should it go?": "Right",
+              "Which checks?": "Unit, Format"
+            }
+          }
+        }
+      ],
+      "state": {
+        "activity": "idle",
+        "mode": "plan",
+        "busy": false,
+        "nextId": 3,
+        "items": [
+          {
+            "owner": "ask me",
+            "images": 0,
+            "queued": false
+          },
+          {
+            "step": {
+              "kind": "other",
+              "label": "AskUserQuestion",
+              "subject": "",
+              "added": 0,
+              "removed": 0,
+              "hidden": true
+            },
+            "state": "done",
+            "result": "Your questions have been answered.",
+            "images": 0,
+            "progress": "",
+            "answers": [
+              {
+                "header": "Place",
+                "answer": "Right"
+              },
+              {
+                "header": "Which checks?",
+                "answer": "Unit, Format"
+              }
+            ]
           }
         ]
       }

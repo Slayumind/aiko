@@ -790,6 +790,33 @@ public class SharedCaseTests
         ["plan"] = card.Plan,
     };
 
+    private static JsonObject Described(ToolResult result) => WithAnswers(new JsonObject
+    {
+        ["id"] = result.ToolUseId,
+        ["error"] = result.IsError,
+        ["text"] = result.Text,
+        ["images"] = new JsonArray([.. result.Images.Select(image => new JsonObject
+        {
+            ["mediaType"] = image.MediaType,
+            ["data"] = image.Data,
+        })]),
+    }, result.Answers);
+
+    /// The answers to questions are named only where there are some, so older cases stay as they are.
+    private static JsonObject WithAnswers(JsonObject described, IReadOnlyList<QuestionAnswer> answers)
+    {
+        if (answers.Count > 0)
+        {
+            described["answers"] = new JsonArray([.. answers.Select(answer => new JsonObject
+            {
+                ["header"] = answer.Header,
+                ["answer"] = answer.Answer,
+            })]);
+        }
+
+        return described;
+    }
+
     private static JsonObject Described(QuestionOption option)
     {
         var described = new JsonObject { ["label"] = option.Label, ["description"] = option.Description };
@@ -823,14 +850,14 @@ public class SharedCaseTests
             ["queued"] = message.Queued,
         },
         FeedItem.Answer answer => new JsonObject { ["answer"] = answer.Text, ["streaming"] = answer.Streaming },
-        FeedItem.Step step => new JsonObject
+        FeedItem.Step step => WithAnswers(new JsonObject
         {
             ["step"] = Described(step.Line),
             ["state"] = Camel(step.State),
             ["result"] = step.Result,
             ["images"] = step.Images.Count,
             ["progress"] = step.Progress,
-        },
+        }, step.Answers),
         FeedItem.Card card => new JsonObject
         {
             ["card"] = Camel(card.Request.Kind),
@@ -1258,17 +1285,7 @@ public class SharedCaseTests
             ["text"] = user.Text,
             ["replay"] = user.IsReplay,
             ["synthetic"] = user.IsSynthetic,
-            ["results"] = new JsonArray([.. user.Results.Select(result => new JsonObject
-            {
-                ["id"] = result.ToolUseId,
-                ["error"] = result.IsError,
-                ["text"] = result.Text,
-                ["images"] = new JsonArray([.. result.Images.Select(image => new JsonObject
-                {
-                    ["mediaType"] = image.MediaType,
-                    ["data"] = image.Data,
-                })]),
-            })]),
+            ["results"] = new JsonArray([.. user.Results.Select(Described)]),
         },
         StreamEvent.TextDelta delta => new JsonObject
         {

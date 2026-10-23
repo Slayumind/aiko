@@ -464,6 +464,7 @@ public enum Strings {
         "TerminalQuestionBack": ("Back", "Назад"),
         "TerminalQuestionNext": ("Next", "Дальше"),
         "TerminalQuestionAnswer": ("Answer", "Ответить"),
+        "TerminalQuestionsDenied": ("Questions: declined", "Вопросы: отказано"),
         "TerminalStop": ("Stop", "Остановить"),
         "TerminalTurnStopped": ("Turn stopped.", "Ход остановлен."),
         "TerminalQueued": ("queued", "в очереди"),
@@ -1789,6 +1790,9 @@ public enum Strings {
 
     /// Answer
     public static var terminalQuestionAnswer: String { Strings.get("TerminalQuestionAnswer") }
+
+    /// Questions: declined
+    public static var terminalQuestionsDenied: String { Strings.get("TerminalQuestionsDenied") }
 
     /// Stop
     public static var terminalStop: String { Strings.get("TerminalStop") }

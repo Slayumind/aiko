@@ -79,6 +79,7 @@ public enum NoticeKind: Sendable, Equatable {
 }
 
 /// A step of the work in the feed.
+/// answers: what the person chose, when the step is a card of questions they answered.
 public struct FeedStep: Sendable, Equatable {
     public var toolUseId: String
     public var line: StepLine
@@ -86,9 +87,11 @@ public struct FeedStep: Sendable, Equatable {
     public var result: String
     public var images: [StreamImage]
     public var progress: String
+    public var answers: [QuestionAnswer]
 
     public init(
-        toolUseId: String, line: StepLine, state: StepState, result: String, images: [StreamImage], progress: String
+        toolUseId: String, line: StepLine, state: StepState, result: String, images: [StreamImage], progress: String,
+        answers: [QuestionAnswer] = []
     ) {
         self.toolUseId = toolUseId
         self.line = line
@@ -96,6 +99,7 @@ public struct FeedStep: Sendable, Equatable {
         self.result = result
         self.images = images
         self.progress = progress
+        self.answers = answers
     }
 }
 
@@ -204,6 +208,7 @@ public struct Conversation: Sendable, Equatable {
                     step.state = result.isError ? .failed : .done
                     step.result = result.text
                     step.images = result.images
+                    step.answers = result.answers
                 }
             }
         case .request(let request):
@@ -261,7 +266,9 @@ public struct Conversation: Sendable, Equatable {
                 answer(value)
             case .toolUse(let id, let name, let input):
                 let line = StepLine.forTool(name, input)
-                if !line.hidden {
+                // The step of a card of questions stays in the feed, hidden: its answers come to it
+                // with its result, and the feed shows them after the card is gone.
+                if !line.hidden || name == QuestionAnswers.tool {
                     add(.step(FeedStep(toolUseId: id, line: line, state: .running, result: "", images: [], progress: "")))
                 }
             case .thinking:

@@ -473,6 +473,8 @@ sealed class FeedRow : ContentControl
             FeedItem.OwnerMessage message => Message(message),
             FeedItem.Answer { Streaming: true } answer => AnswerView.For(answer.Text),
             FeedItem.Answer answer => AnswerView.WithCopy(answer.Text),
+            FeedItem.Step { Answers.Count: > 0 } step => Answered(step.Answers),
+            FeedItem.Step { Line.Label: QuestionAnswers.Tool, State: StepState.Failed } => Declined(),
             FeedItem.Step { Line.Hidden: false } step => StepRow(step),
             FeedItem.Card { State: RequestState.Open } card => Card(card.Request),
             FeedItem.Notice notice => Notice(notice),
@@ -823,6 +825,61 @@ sealed class FeedRow : ContentControl
         keys.Margin = new Thickness(4, 0, 0, 6);
         row.Children.Add(keys);
         return row;
+    }
+
+    /// What the person chose on a card of questions, left in the feed after the card: one quiet
+    /// line per question, the header grey and the answer light, a green check in front.
+    private static UIElement Answered(IReadOnlyList<QuestionAnswer> answers)
+    {
+        var grid = new Grid { Margin = new Thickness(0, 6, 0, 6) };
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        for (var at = 0; at < answers.Count; at++)
+        {
+            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+            var check = new System.Windows.Shapes.Path
+            {
+                Data = Geometry.Parse(QuestionCardView.CheckPath),
+                Fill = Tokens.Brush("Positive"),
+                Stretch = Stretch.Uniform,
+                Width = 10,
+                Height = 10,
+                Margin = new Thickness(0, 5, 8, 0),
+                VerticalAlignment = VerticalAlignment.Top,
+            };
+            Grid.SetRow(check, at);
+            grid.Children.Add(check);
+
+            var header = TerminalPanel.Text(answers[at].Header, "TextNumber", "Muted", FontWeights.Normal);
+            header.MaxWidth = 240;
+            header.TextTrimming = TextTrimming.CharacterEllipsis;
+            header.VerticalAlignment = VerticalAlignment.Top;
+            header.Margin = new Thickness(0, 1, 12, 3);
+            Grid.SetRow(header, at);
+            Grid.SetColumn(header, 1);
+            grid.Children.Add(header);
+
+            var answer = TerminalPanel.Text(answers[at].Answer, "TextNumber", "Ink", FontWeights.Normal);
+            answer.TextWrapping = TextWrapping.Wrap;
+            answer.VerticalAlignment = VerticalAlignment.Top;
+            answer.Margin = new Thickness(0, 1, 0, 3);
+            Grid.SetRow(answer, at);
+            Grid.SetColumn(answer, 2);
+            grid.Children.Add(answer);
+        }
+
+        return grid;
+    }
+
+    /// The person said no to a card of questions.
+    private static UIElement Declined()
+    {
+        var words = TerminalPanel.Text(Strings.TerminalQuestionsDenied, "TextNumber", "Muted", FontWeights.Normal);
+        words.Margin = new Thickness(0, 6, 0, 6);
+        words.HorizontalAlignment = HorizontalAlignment.Left;
+        return words;
     }
 
     private static UIElement Notice(FeedItem.Notice notice)

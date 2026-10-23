@@ -16,8 +16,11 @@ public abstract record AssistantBlock
 /// A picture as it travels in the stream: its type and its bytes in base64.
 public sealed record StreamImage(string MediaType, string Data);
 
-/// What a tool gave back.
-public sealed record ToolResult(string ToolUseId, bool IsError, string Text, IReadOnlyList<StreamImage> Images);
+/// What a tool gave back. Answers: what the person chose on a card of questions.
+public sealed record ToolResult(string ToolUseId, bool IsError, string Text, IReadOnlyList<StreamImage> Images)
+{
+    public IReadOnlyList<QuestionAnswer> Answers { get; init; } = [];
+}
 
 /// One line Claude Code wrote to its output, as far as the terminal needs it (D-297).
 ///
@@ -203,6 +206,14 @@ public abstract record StreamEvent
                     results.Add(ReadResult(id, block));
                     break;
             }
+        }
+
+        // Claude Code keeps what a tool returned beside the message, once for it. Only the answers
+        // to questions are read from it; the rest holds paths and the contents of files.
+        if (results.Count == 1
+            && QuestionAnswers.From(Object(root, "tool_use_result") ?? Object(root, "toolUseResult")) is { Count: > 0 } chosen)
+        {
+            results[0] = results[0] with { Answers = chosen };
         }
 
         return new User(

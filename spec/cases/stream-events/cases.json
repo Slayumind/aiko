@@ -1,5 +1,5 @@
 {
-  "comment": "What the terminal reads from one line of Claude Code in stream-json mode (D-297). A row gives the line as an object, or as raw text when the text itself is the point, and the event both cores must make of it. The shapes come from Claude Code 2.1.296 and 2.1.277; the ids, paths and texts are made up. Paths and hook output are in the lines on purpose: a row that carries them proves that nothing of them reaches the event.",
+  "comment": "What the terminal reads from one line of Claude Code in stream-json mode (D-297). A row gives the line as an object, or as raw text when the text itself is the point, and the event both cores must make of it. The shapes come from Claude Code 2.1.296 and 2.1.277; the ids, paths and texts are made up. Paths and hook output are in the lines on purpose: a row that carries them proves that nothing of them reaches the event. Beside the results Claude Code keeps what the tool returned (tool_use_result); only the answers to a card of questions are read from it, by the header of each question or by its text without one.",
   "events": [
     {
       "name": "the start of a turn, with paths that are dropped",
@@ -78,6 +78,19 @@
       "name": "the result of a tool as text",
       "line": { "type": "user", "message": { "role": "user", "content": [{ "tool_use_id": "toolu_1", "type": "tool_result", "content": "File created" }] }, "parent_tool_use_id": null, "tool_use_result": { "filePath": "C:\\secret\\a.txt" } },
       "event": { "kind": "user", "parent": null, "text": "", "replay": false, "synthetic": false, "results": [{ "id": "toolu_1", "error": false, "text": "File created", "images": [] }] }
+    },
+    {
+      "name": "the answers to a card of questions, in the order of the questions",
+      "line": { "type": "user", "message": { "role": "user", "content": [{ "tool_use_id": "toolu_7", "type": "tool_result", "content": "Your questions have been answered." }] }, "parent_tool_use_id": null,
+        "tool_use_result": {
+          "questions": [
+            { "question": "Where should it go?", "header": "Place", "multiSelect": false, "options": [{ "label": "Left" }, { "label": "Right" }] },
+            { "question": "Which checks?", "header": "", "multiSelect": true, "options": [{ "label": "Unit" }, { "label": "Format" }] }
+          ],
+          "answers": { "Which checks?": "Unit, Format", "Where should it go?": "Right", "Asked later?": "Yes" }
+        } },
+      "event": { "kind": "user", "parent": null, "text": "", "replay": false, "synthetic": false, "results": [{ "id": "toolu_7", "error": false, "text": "Your questions have been answered.", "images": [],
+        "answers": [{ "header": "Place", "answer": "Right" }, { "header": "Which checks?", "answer": "Unit, Format" }, { "header": "Asked later?", "answer": "Yes" }] }] }
     },
     {
       "name": "a tool that failed",

@@ -18,7 +18,7 @@ sealed class QuestionCardView : Border
     private const double NarrowWidth = 600;
 
     /// The check of the slayumind icon set (.local/icons/check.svg), drawn in a box of 24.
-    private const string CheckPath =
+    internal const string CheckPath =
         "M23.855,6.353l-13.883,14c-.419,.418-.973,.647-1.562,.647s-1.144-.229-1.561-.646L.152,13.859" +
         "c-.198-.192-.203-.509-.012-.707,.194-.198,.51-.203,.707-.012l6.703,6.5c.469,.467,1.256,.461,1.713,.006" +
         "L23.145,5.647c.195-.194,.511-.197,.708-.003,.195,.195,.197,.512,.003,.708Z";
@@ -246,7 +246,7 @@ sealed class QuestionCardView : Border
     }
 
     /// One row: the box or the ring, the label with its number, the description under it. The row
-    /// the keyboard stands on has a ring around it while the card has the keyboard.
+    /// the keyboard stands on has a thicker, lighter frame while the card has the keyboard.
     private FrameworkElement Option(QuestionFlow flow, int row)
     {
         var own = row == flow.OwnRow;
@@ -308,16 +308,21 @@ sealed class QuestionCardView : Border
             Child = inside,
         };
 
-        var focused = row == flow.Focus && IsKeyboardFocusWithin && !ReferenceEquals(Keyboard.FocusedElement, _own);
-        var ring = new Border
+        // One frame per tile (check of 2026-10-23). The frame of the keyboard lies over the
+        // tile's own one instead of around it; it takes no room, so the words never move.
+        var ring = new Grid { Cursor = Cursors.Hand };
+        ring.Children.Add(face);
+        if (row == flow.Focus && IsKeyboardFocusWithin && !ReferenceEquals(Keyboard.FocusedElement, _own))
         {
-            BorderBrush = focused ? Tokens.Brush("Muted") : Brushes.Transparent,
-            BorderThickness = new Thickness(2),
-            CornerRadius = new CornerRadius(12),
-            Padding = new Thickness(1),
-            Cursor = Cursors.Hand,
-            Child = face,
-        };
+            ring.Children.Add(new Border
+            {
+                BorderBrush = Tokens.Brush("Muted"),
+                BorderThickness = new Thickness(2),
+                CornerRadius = new CornerRadius(10),
+                IsHitTestVisible = false,
+            });
+        }
+
         ring.MouseLeftButtonUp += (_, e) =>
         {
             // A click in the field of Other is for the words, not for the tile.

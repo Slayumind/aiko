@@ -83,6 +83,7 @@ public abstract record FeedItem(int Id)
     /// The markdown of an answer. While it is still being written, Streaming is set.
     public sealed record Answer(int Id, string Text, bool Streaming) : FeedItem(Id);
 
+    /// Answers: what the person chose, when the step is a card of questions they answered.
     public sealed record Step(
         int Id,
         string ToolUseId,
@@ -90,7 +91,10 @@ public abstract record FeedItem(int Id)
         StepState State,
         string Result,
         IReadOnlyList<StreamImage> Images,
-        string Progress) : FeedItem(Id);
+        string Progress) : FeedItem(Id)
+    {
+        public IReadOnlyList<QuestionAnswer> Answers { get; init; } = [];
+    }
 
     public sealed record Card(int Id, RequestCard Request, RequestState State) : FeedItem(Id);
 
@@ -194,7 +198,10 @@ public sealed record Conversation(
                 case AssistantBlock.Text text:
                     next = next.Answered(text.Value);
                     break;
-                case AssistantBlock.ToolUse tool when StepLine.For(tool.Name, tool.Input) is { Hidden: false } line:
+                // The step of a card of questions stays in the feed, hidden: its answers come to it
+                // with its result, and the feed shows them after the card is gone.
+                case AssistantBlock.ToolUse tool when StepLine.For(tool.Name, tool.Input) is var line
+                    && (!line.Hidden || tool.Name == QuestionAnswers.Tool):
                     next = next.Add(id => new FeedItem.Step(id, tool.Id, line, StepState.Running, "", [], ""));
                     break;
             }
@@ -224,6 +231,7 @@ public sealed record Conversation(
                     State = result.IsError ? StepState.Failed : StepState.Done,
                     Result = result.Text,
                     Images = result.Images,
+                    Answers = result.Answers,
                 });
         }
         return next;

@@ -2968,6 +2968,13 @@
     ]
   ],
   [
+    "TerminalQuestionsDenied",
+    [
+      "Questions: declined",
+      "Вопросы: отказано"
+    ]
+  ],
+  [
     "TerminalStop",
     [
       "Stop",
