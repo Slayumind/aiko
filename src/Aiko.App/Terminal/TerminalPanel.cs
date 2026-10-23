@@ -453,7 +453,7 @@ sealed class TerminalPanel : UserControl
         {
             RowState.Working => ((UIElement)Dot(filled: true), Strings.TerminalWorking, "Muted"),
             RowState.Waiting => (Pause(), Strings.TerminalWaiting, "Caution"),
-            RowState.Done => (Line("M0,4.5 L3.5,8 L10,1", "Positive"), Strings.TerminalDone, "Positive"),
+            RowState.Done => (SiteIcons.Draw(SiteIcons.Check, 10, "Positive"), Strings.TerminalDone, "Positive"),
             RowState.Asleep => (Dot(filled: false), Strings.TerminalAsleep, "Muted"),
             RowState.Stopped => (Line("M0,0 L8,8 M8,0 L0,8", "Destructive"), Strings.TerminalStopped, "Destructive"),
             _ => (new Border(), "", "Muted"),
@@ -817,11 +817,15 @@ sealed class TerminalPanel : UserControl
         VerticalAlignment = VerticalAlignment.Center,
     };
 
+    /// The width of the lines of the terminal's icons: as thin as the lines of the slayumind icon
+    /// set, one unit in twenty-four, at the sizes the terminal draws them (D-332).
+    internal const double LineWidth = 0.75;
+
     internal static Path Line(string data, string tone = "Muted") => new()
     {
         Data = Geometry.Parse(data),
         Stroke = Tokens.Brush(tone),
-        StrokeThickness = 1.3,
+        StrokeThickness = LineWidth,
         StrokeStartLineCap = PenLineCap.Round,
         StrokeEndLineCap = PenLineCap.Round,
         StrokeLineJoin = PenLineJoin.Round,
@@ -832,9 +836,7 @@ sealed class TerminalPanel : UserControl
     /// (one in twenty-four), so they read as a quiet mark and not as a pause button (D-299, D-332).
     private static FrameworkElement Pause()
     {
-        var bars = Line("M0.5,0.5 L0.5,9.5 M4.5,0.5 L4.5,9.5", "Caution");
-        bars.StrokeThickness = 0.75;
-        return bars;
+        return Line("M0.5,0.5 L0.5,9.5 M4.5,0.5 L4.5,9.5", "Caution");
     }
 
     internal static FrameworkElement Dot(bool filled) => new Ellipse
