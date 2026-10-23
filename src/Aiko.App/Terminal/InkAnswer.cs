@@ -124,11 +124,16 @@ sealed partial class InkAnswer : StackPanel
 
         Schedule(count);
 
-        // What is drawn around the words comes up with the first word inside it.
+        // What is drawn around the words comes up with the first word inside it; with no word
+        // yet, it waits unseen.
         var now = DateTime.UtcNow;
         foreach (var (frame, first) in Frames(box.Document.Blocks, firstWord))
         {
-            if (first >= 0 && first < _starts.Count && now - _starts[first] < Dry)
+            if (first < 0 || first >= _starts.Count)
+            {
+                InkFrame(frame, null);
+            }
+            else if (now - _starts[first] < Dry)
             {
                 InkFrame(frame, _starts[first] - now);
             }
@@ -212,25 +217,34 @@ sealed partial class InkAnswer : StackPanel
     private static int First(IEnumerable<Run> runs, IReadOnlyDictionary<Run, int> firstWord) =>
         runs.Select(run => firstWord.TryGetValue(run, out var at) ? at : -1).FirstOrDefault(at => at >= 0, -1);
 
-    /// A list item draws its marker in its own colour, and a quote its line in its border: both
-    /// come up from nothing with their first word.
-    private static void InkFrame(TextElement frame, TimeSpan begin)
+    /// The marker of a list item and the line of a quote come up from nothing with their first
+    /// word; begin is null while that word has not come, and they stay unseen.
+    private static void InkFrame(TextElement frame, TimeSpan? begin)
     {
         if (frame is Section section && section.BorderBrush is SolidColorBrush line)
         {
             section.BorderBrush = Rising(line.Color, begin);
         }
-        else if (frame is ListItem item)
+        else if (frame is ListItem { Blocks.FirstBlock: Paragraph first }
+            && first.Inlines.FirstInline is InlineUIContainer { Tag: var tag, Child: UIElement marker }
+            && ReferenceEquals(tag, AnswerView.ListMarker))
         {
-            var colour = item.Foreground is SolidColorBrush own ? own.Color : Tokens.Get<Color>("InkColor");
-            item.Foreground = Rising(colour, begin);
+            marker.Opacity = 0;
+            if (begin is { } start)
+            {
+                marker.BeginAnimation(UIElement.OpacityProperty, new DoubleAnimation(0, 1, new Duration(TimeSpan.FromTicks(Dry.Ticks * 6 / 10))) { BeginTime = start });
+            }
         }
     }
 
-    private static SolidColorBrush Rising(Color colour, TimeSpan begin)
+    private static SolidColorBrush Rising(Color colour, TimeSpan? begin)
     {
         var brush = new SolidColorBrush(colour) { Opacity = 0 };
-        brush.BeginAnimation(Brush.OpacityProperty, new DoubleAnimation(0, 1, new Duration(TimeSpan.FromTicks(Dry.Ticks * 6 / 10))) { BeginTime = begin });
+        if (begin is { } start)
+        {
+            brush.BeginAnimation(Brush.OpacityProperty, new DoubleAnimation(0, 1, new Duration(TimeSpan.FromTicks(Dry.Ticks * 6 / 10))) { BeginTime = start });
+        }
+
         return brush;
     }
 

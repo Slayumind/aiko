@@ -11,7 +11,7 @@ static class TerminalSnapshot
     [
         "talk", "feed", "working", "compacting", "long-input", "empty", "form", "elsewhere", "login", "close",
         "voice-idle", "voice-warming", "voice-listening", "voice-finishing", "voice-nomic", "voice-model",
-        "questions", "questions-preview", "questions-answered",
+        "questions", "questions-preview", "questions-answered", "lists",
     ];
 
     /// --snapshot-terminal &lt;file&gt; &lt;state&gt; [width]
@@ -244,7 +244,8 @@ static class TerminalSnapshot
             SignedOut: state == "login",
             form,
             state == "close" ? new AskView(string.Format(Strings.TerminalCloseTitle, "terminal"), Strings.TerminalCloseBody) : null,
-            state == "questions-answered" ? Answered()
+            state == "lists" ? Lists()
+                : state == "questions-answered" ? Answered()
                 : state.StartsWith("questions", StringComparison.Ordinal) ? Questions(state == "questions-preview")
                 : state == "feed" ? Feed(withCard: true)
                 : state is "working" or "long-input" ? Feed(withCard: false)
@@ -313,6 +314,28 @@ static class TerminalSnapshot
             new FeedItem.OwnerMessage(1, "Draw the menu of / in the terminal.", false, []),
             step,
             new FeedItem.Answer(3, "Got it. I will draw the menu with the built-in commands and the skills.", false),
+        ];
+        return new TalkView("a2", items, Busy: false, HasOpenCard: false, Compacting: false, PermissionMode.Manual, ModelName.Label(null, "claude-opus-5-5"), "Aiko");
+    }
+
+    /// An answer of lists only: markers Aiko draws herself, numbers that end in one column, a
+    /// list inside a list, inline code in an item.
+    private static TalkView Lists()
+    {
+        var text = string.Join("\n",
+            "What changed:",
+            "",
+            "- markers are drawn in the line, with `TextIndent`",
+            "- a long item wraps under its own text, not under the marker, as a list should when the window is narrow",
+            "  - and a list inside a list",
+            "",
+            "9. nine",
+            "10. ten",
+            "11. eleven");
+        List<FeedItem> items =
+        [
+            new FeedItem.OwnerMessage(1, "Show me the lists.", false, []),
+            new FeedItem.Answer(2, text, false),
         ];
         return new TalkView("a2", items, Busy: false, HasOpenCard: false, Compacting: false, PermissionMode.Manual, ModelName.Label(null, "claude-opus-5-5"), "Aiko");
     }

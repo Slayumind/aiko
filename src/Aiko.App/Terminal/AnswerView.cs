@@ -166,24 +166,23 @@ static class AnswerView
     private const double ListIndent = 22;
     private const double MarkerGap = 8;
 
+    /// The marker of a list item is drawn by Aiko, not by the list: a list draws its markers with
+    /// a brush of its own that no item can change, so the ink of a streaming answer could not hold
+    /// a marker back until the words of its item come (check of 2026-10-23). The marker stands in
+    /// the hanging indent of the item's first line; numbers stand right-aligned, so "9." and "10."
+    /// end in one column (AIKO-244).
     private static List List(MarkdownBlock.List list)
     {
         var start = Math.Max(1, list.Start);
+        var indent = list.Ordered ? Math.Max(ListIndent, MarkerWidth(start + list.Items.Count - 1) + MarkerGap) : ListIndent;
         var drawn = new List
         {
-            MarkerStyle = list.Ordered ? TextMarkerStyle.Decimal : TextMarkerStyle.Disc,
-            StartIndex = start,
+            MarkerStyle = TextMarkerStyle.None,
             Margin = new Thickness(0, 0, 0, 10),
-            Padding = new Thickness(ListIndent, 0, 0, 0),
+            Padding = new Thickness(indent, 0, 0, 0),
         };
-        if (list.Ordered)
-        {
-            // A marker is drawn inside the left padding. A fixed padding cut "28." on the left,
-            // so the padding fits the widest number of this list.
-            drawn.MarkerOffset = MarkerGap;
-            drawn.Padding = new Thickness(Math.Max(ListIndent, MarkerWidth(start + list.Items.Count - 1) + MarkerGap), 0, 0, 0);
-        }
 
+        var number = start;
         foreach (var item in list.Items)
         {
             var listItem = new ListItem();
@@ -194,11 +193,54 @@ static class AnswerView
                 listItem.Blocks.Add(inner);
             }
 
+            if (listItem.Blocks.FirstBlock is not Paragraph first)
+            {
+                first = new Paragraph { Margin = new Thickness(0, 0, 0, 4) };
+                if (listItem.Blocks.FirstBlock is { } before)
+                {
+                    listItem.Blocks.InsertBefore(before, first);
+                }
+                else
+                {
+                    listItem.Blocks.Add(first);
+                }
+            }
+
+            first.TextIndent = -indent;
+            var marker = Marker(list.Ordered ? $"{number}." : "\u2022", indent);
+            if (first.Inlines.FirstInline is { } firstInline)
+            {
+                first.Inlines.InsertBefore(firstInline, marker);
+            }
+            else
+            {
+                first.Inlines.Add(marker);
+            }
+
             drawn.ListItems.Add(listItem);
+            number++;
         }
 
         return drawn;
     }
+
+    /// The tag of the marker of a list item, so the ink can find it.
+    public static readonly object ListMarker = new();
+
+    private static InlineUIContainer Marker(string text, double indent) => new(new TextBlock
+    {
+        Text = text,
+        Width = indent,
+        Padding = new Thickness(0, 0, MarkerGap, 0),
+        TextAlignment = TextAlignment.Right,
+        FontFamily = Tokens.Get<FontFamily>("Sans"),
+        FontSize = Tokens.Get<double>("TextName"),
+        Foreground = Tokens.Brush("Ink"),
+    })
+    {
+        BaselineAlignment = BaselineAlignment.Baseline,
+        Tag = ListMarker,
+    };
 
     private static double MarkerWidth(int number) => new FormattedText(
         $"{number}.",
