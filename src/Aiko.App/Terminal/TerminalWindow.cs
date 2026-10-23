@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Shell;
 using Aiko.Core.Terminal;
 
@@ -45,6 +46,10 @@ sealed class TerminalWindow : Window
 
         _root.Child = panel;
         Content = _root;
+
+        // The window hears the keys of the conversation first, wherever the keyboard is (D-328).
+        PreviewKeyDown += panel.OnWindowKey;
+        PreviewTextInput += panel.OnWindowText;
 
         panel.MinimizeAsked += () => WindowState = WindowState.Minimized;
         panel.MaximizeAsked += () => WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;

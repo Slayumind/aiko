@@ -27,11 +27,19 @@ final class TalkInputState: ObservableObject {
     /// The field has the keyboard, so Cmd+V with a picture is ours.
     var focused = false
 
+    /// The window of the terminal and what its conversation shows now: the keys the window hears
+    /// in another place than the field are answered from them (D-328).
+    weak var window: NSWindow?
+    var screen: TalkScreen?
+
+    /// Asks the view to give the field the keyboard.
+    var focusAsked: (() -> Void)?
+
     private var history: [String: [String]] = [:]
     private var session = ""
     private var back = -1
     private var draft = ""
-    private var pasteWatch: Any?
+    private var keyWatch: Any?
 
     /// A new session starts with an empty field: what was typed for another one stays out of it.
     func show(session next: String) {
@@ -92,28 +100,97 @@ final class TalkInputState: ObservableObject {
 
     // MARK: - Pictures and files
 
-    /// Cmd+V with a picture in the pasteboard attaches it; copied files are dropped. Text pastes
-    /// as it always does. The field editor of AppKit takes the paste first, so it is caught here.
-    func watchPaste() {
-        guard pasteWatch == nil else { return }
-        pasteWatch = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
-            let paste = event.modifierFlags.intersection(.deviceIndependentFlagsMask) == .command
-                && event.charactersIgnoringModifiers == "v"
-            guard paste else { return event }
-            let taken = MainActor.assumeIsolated { self?.pasteIfFocused() ?? false }
+    /// The keys of the window (D-328). The field editor of AppKit takes Cmd+V first, so a paste
+    /// is caught here: with a picture in the pasteboard it is attached, copied files are dropped,
+    /// text pastes as it always does. From another place of the terminal window, where the
+    /// keyboard went after a click on the feed or the list, Shift+Tab changes the mode, Cmd+V
+    /// pastes into the field, Return and Esc answer a card, and letters go into the field.
+    func watchKeys() {
+        guard keyWatch == nil else { return }
+        keyWatch = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            let taken = MainActor.assumeIsolated { self?.windowKey(event) ?? false }
             return taken ? nil : event
         }
     }
 
-    private func pasteIfFocused() -> Bool {
-        focused && pasteFromBoard()
+    func stopWatchingKeys() {
+        if let keyWatch {
+            NSEvent.removeMonitor(keyWatch)
+        }
+        keyWatch = nil
     }
 
-    func stopWatchingPaste() {
-        if let pasteWatch {
-            NSEvent.removeMonitor(pasteWatch)
+    private func windowKey(_ event: NSEvent) -> Bool {
+        let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
+        let paste = flags == .command && event.charactersIgnoringModifiers == "v"
+        if paste && focused {
+            return pasteFromBoard()
         }
-        pasteWatch = nil
+        guard !focused, let window, event.window === window, !othersTyping(window) else { return false }
+
+        if paste {
+            focusAsked?()
+            if pasteFromBoard() { return true }
+            guard let words = NSPasteboard.general.string(forType: .string) else { return false }
+            text += words
+            return true
+        }
+        switch event.keyCode {
+        case Self.tabKey where flags == .shift:
+            modeAsked?()
+            return true
+        case Self.returnKey, Self.enterKey, Self.escapeKey:
+            guard flags.isEmpty, !(window.firstResponder is NSButton) else { return false }
+            return act(event.keyCode == Self.escapeKey ? .escape : .enter, outside: true)
+        default:
+            guard flags.isDisjoint(with: [.command, .control]), let letters = event.characters,
+                  Self.typed(letters) else { return false }
+            focusAsked?()
+            text += letters
+            return true
+        }
+    }
+
+    private static let tabKey: UInt16 = 48
+    private static let returnKey: UInt16 = 36
+    private static let enterKey: UInt16 = 76
+    private static let escapeKey: UInt16 = 53
+
+    /// Another field one types into has the keyboard: the name of a session, a search.
+    private func othersTyping(_ window: NSWindow) -> Bool {
+        (window.firstResponder as? NSTextView)?.isEditable == true
+    }
+
+    /// Letters and signs, not a space, a control key or the arrows and function keys of AppKit.
+    private static func typed(_ letters: String) -> Bool {
+        !letters.isEmpty && letters.unicodeScalars.allSatisfy { scalar in
+            !CharacterSet.whitespacesAndNewlines.contains(scalar)
+                && !CharacterSet.controlCharacters.contains(scalar)
+                && !(0xF700...0xF8FF).contains(scalar.value)
+        }
+    }
+
+    /// Return or Esc, in the field or from another place of the window. Voice input is not on the
+    /// Mac yet (D-312), so a recording never takes a key here. Whether the key was taken.
+    func act(_ key: TalkKey, outside: Bool = false) -> Bool {
+        guard let talk = screen else { return false }
+        let card = TalkKeys.card(talk.items)
+        let empty = text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && attached.isEmpty
+        switch TalkKeys.action(key, TalkKeyState(cardWaits: card != nil, empty: empty, busy: talk.busy, outside: outside)) {
+        case .send:
+            send()
+        case .allow:
+            if let card { chosen?(card.requestId, .allow) }
+        case .deny:
+            if let card { chosen?(card.requestId, .deny("")) }
+        case .stop:
+            stopAsked?()
+        case .swallow, .cancelVoice:
+            break
+        case .none:
+            return false
+        }
+        return true
     }
 
     private func pasteFromBoard() -> Bool {
@@ -289,14 +366,17 @@ struct TalkInputView: View {
         }
         .onAppear {
             input.show(session: talk.session)
-            input.watchPaste()
+            input.screen = talk
+            input.focusAsked = { focused = true }
+            input.watchKeys()
             focused = true
         }
-        .onDisappear { input.stopWatchingPaste() }
+        .onDisappear { input.stopWatchingKeys() }
         .onChange(of: talk.session) { _, next in
             input.show(session: next)
             focused = true
         }
+        .onChange(of: talk) { _, now in input.screen = now }
         .onChange(of: focused) { _, now in input.focused = now }
     }
 
@@ -324,25 +404,8 @@ struct TalkInputView: View {
         }
     }
 
-    /// Voice input is not on the Mac yet (D-312), so a recording never takes a key here.
     private func act(_ key: TalkKey) -> KeyPress.Result {
-        let card = TalkKeys.card(talk.items)
-        let empty = input.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && input.attached.isEmpty
-        switch TalkKeys.action(key, TalkKeyState(cardWaits: card != nil, empty: empty, busy: talk.busy)) {
-        case .send:
-            input.send()
-        case .allow:
-            if let card { input.chosen?(card.requestId, .allow) }
-        case .deny:
-            if let card { input.chosen?(card.requestId, .deny("")) }
-        case .stop:
-            input.stopAsked?()
-        case .swallow, .cancelVoice:
-            break
-        case .none:
-            return .ignored
-        }
-        return .handled
+        input.act(key) ? .handled : .ignored
     }
 
     private func drop(_ providers: [NSItemProvider]) -> Bool {

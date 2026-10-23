@@ -39,6 +39,8 @@ final class TerminalWindow: NSObject, NSWindowDelegate {
         window.collectionBehavior = [.fullScreenPrimary]
         window.delegate = self
         window.contentView = NSHostingView(rootView: TerminalPanelView(state: panel))
+        // The field hears the keys of this window wherever the keyboard is (D-328).
+        panel.input.window = window
         window.setFrame(Self.rect(place), display: false)
 
         if place.maximized {
