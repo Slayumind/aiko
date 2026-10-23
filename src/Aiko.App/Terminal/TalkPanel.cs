@@ -295,6 +295,13 @@ sealed class TalkPanel : UserControl
             return false;
         }
 
+        // A card the person is answering with the keyboard is in front of them, even when it grew
+        // past the bottom of the feed while they typed (check of 2026-10-23).
+        if (row.IsKeyboardFocusWithin)
+        {
+            return true;
+        }
+
         // The buttons of a card are at its bottom: a card is in view when its bottom is.
         var bottom = row.TranslatePoint(new Point(0, row.ActualHeight), scroll).Y;
         return bottom > 0 && bottom <= scroll.ViewportHeight + 1;

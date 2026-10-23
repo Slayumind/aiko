@@ -370,19 +370,37 @@ sealed class QuestionCardView : Border
         StrokeThickness = chosen ? 4 : 1,
     };
 
-    /// The person's own words, inside the tile of Other. Enter takes them; Esc gives the keyboard
-    /// back to the tiles.
+    /// The person's own words, inside the tile of Other, in the place and the letters of its hint:
+    /// no frame and no fill, only the caret. While it is empty the hint stays there in grey.
+    /// Enter takes the words; Esc gives the keyboard back to the tiles.
     private FrameworkElement OwnField(QuestionFlow flow)
     {
-        var field = new TextBox { Text = flow.Own[flow.At] };
-        TerminalPanel.Field(field);
-        field.TextWrapping = TextWrapping.Wrap;
-        field.Margin = new Thickness(7, 4, 0, 0);
-        field.Padding = new Thickness(0, 2, 0, 4);
-        field.Background = Brushes.Transparent;
-        field.BorderThickness = new Thickness(0, 0, 0, 1);
-        field.BorderBrush = Tokens.Brush("InputLine");
-        field.TextChanged += (_, _) => _flow.Value = Flow.Write(field.Text);
+        var field = new TextBox
+        {
+            Text = flow.Own[flow.At],
+            FontFamily = Tokens.Get<FontFamily>("Sans"),
+            FontSize = Tokens.Get<double>("TextNumber"),
+            Foreground = Tokens.Brush("Ink"),
+            CaretBrush = Tokens.Brush("Ink"),
+            Background = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Padding = new Thickness(0),
+            TextWrapping = TextWrapping.Wrap,
+            FocusVisualStyle = null,
+        };
+
+        var hint = TerminalPanel.Text(Strings.TerminalQuestionOtherHint, "TextNumber", "Muted", FontWeights.Normal);
+        hint.IsHitTestVisible = false;
+        hint.VerticalAlignment = VerticalAlignment.Top;
+        // The text of a TextBox stands two pixels in from its edge; the hint stands with it.
+        hint.Margin = new Thickness(2, 0, 0, 0);
+        hint.Visibility = field.Text.Length == 0 ? Visibility.Visible : Visibility.Collapsed;
+
+        field.TextChanged += (_, _) =>
+        {
+            _flow.Value = Flow.Write(field.Text);
+            hint.Visibility = field.Text.Length == 0 ? Visibility.Visible : Visibility.Collapsed;
+        };
         field.PreviewKeyDown += (_, e) =>
         {
             if (e.Key == Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
@@ -399,7 +417,12 @@ sealed class QuestionCardView : Border
             }
         };
         _own = field;
-        return field;
+
+        // Two pixels left, so the words start under the label above them.
+        var both = new Grid { Margin = new Thickness(8, 2, 0, 0) };
+        both.Children.Add(field);
+        both.Children.Add(hint);
+        return both;
     }
 
     /// The preview of an option: monospaced, as it was written, scrolled sideways when wide.
