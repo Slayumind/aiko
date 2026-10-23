@@ -246,7 +246,7 @@ sealed class QuestionCardView : Border
     }
 
     /// One row: the box or the ring, the label with its number, the description under it. The row
-    /// the keyboard stands on has a ring around it while the card has the keyboard.
+    /// the keyboard stands on has a thicker, lighter frame while the card has the keyboard.
     private FrameworkElement Option(QuestionFlow flow, int row)
     {
         var own = row == flow.OwnRow;
@@ -298,25 +298,19 @@ sealed class QuestionCardView : Border
             inside.Children.Add(more);
         }
 
-        var face = new Border
-        {
-            Background = Tokens.Brush("Background"),
-            BorderBrush = Tokens.Brush(picked ? "InputLine" : "Hairline"),
-            BorderThickness = new Thickness(1),
-            CornerRadius = new CornerRadius(10),
-            Padding = new Thickness(10, 8, 10, 8),
-            Child = inside,
-        };
-
+        // One frame per tile (check of 2026-10-23): the tile the keyboard stands on has its own
+        // frame thicker and lighter, and gives the extra pixel back from its padding, so the
+        // words do not move.
         var focused = row == flow.Focus && IsKeyboardFocusWithin && !ReferenceEquals(Keyboard.FocusedElement, _own);
         var ring = new Border
         {
-            BorderBrush = focused ? Tokens.Brush("Muted") : Brushes.Transparent,
-            BorderThickness = new Thickness(2),
-            CornerRadius = new CornerRadius(12),
-            Padding = new Thickness(1),
+            Background = Tokens.Brush("Background"),
+            BorderBrush = Tokens.Brush(focused ? "Muted" : picked ? "InputLine" : "Hairline"),
+            BorderThickness = new Thickness(focused ? 2 : 1),
+            CornerRadius = new CornerRadius(10),
+            Padding = focused ? new Thickness(9, 7, 9, 7) : new Thickness(10, 8, 10, 8),
             Cursor = Cursors.Hand,
-            Child = face,
+            Child = inside,
         };
         ring.MouseLeftButtonUp += (_, e) =>
         {
