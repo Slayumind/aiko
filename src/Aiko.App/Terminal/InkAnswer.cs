@@ -73,7 +73,9 @@ sealed partial class InkAnswer : StackPanel
 
     public void Update(string markdown)
     {
-        var segments = AnswerSegments.Of(Markdown.Parse(markdown));
+        // Marks the stream has not closed yet are closed for drawing, so no star or backtick
+        // shows as text and then vanishes.
+        var segments = AnswerSegments.Of(Markdown.Parse(MarkdownTail.Closed(markdown)));
         if (segments.Count == 0)
         {
             return;
