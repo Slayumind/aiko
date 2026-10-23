@@ -56,6 +56,7 @@ sealed class TalkPanel : UserControl
     /// to be guessed from the scroll itself, and the guess lost to the feed's own changes of offset:
     /// a reader at the bottom could not scroll up while an answer was written (check of 2026-10-15).
     private bool _follow = true;
+    private readonly FeedGlide _glide = new();
 
     public TalkPanel()
     {
@@ -219,7 +220,8 @@ sealed class TalkPanel : UserControl
 
         if (newSession && _slots.Count > 0)
         {
-            Dispatcher.BeginInvoke(() => ToEnd(_scroll ??= FindScroll(_feed)), System.Windows.Threading.DispatcherPriority.Background);
+            // Another session opens at its end at once; gliding there through its past would be noise.
+            Dispatcher.BeginInvoke(() => JumpToEnd(_scroll ??= FindScroll(_feed)), System.Windows.Threading.DispatcherPriority.Background);
         }
 
         Dispatcher.BeginInvoke(FollowReminder, System.Windows.Threading.DispatcherPriority.Background);
@@ -331,21 +333,22 @@ sealed class TalkPanel : UserControl
         // The rows grow, or the view gets lower as the field grows over the feed (check of 2026-10-16).
         else if (_follow && !atEnd && (e.ExtentHeightChange != 0 || e.ViewportHeightChange != 0))
         {
-            ToEnd(scroll);
+            InkProbe.Jump(scroll.ScrollableHeight - scroll.VerticalOffset);
+            _glide.ToEnd(scroll);
         }
     }
 
-    private void ReaderGoesUp() => _follow = false;
+    private void ReaderGoesUp()
+    {
+        _follow = false;
+        _glide.Stop();
+    }
 
     /// To the bottom by number, not by ScrollToEnd: after ScrollToEnd the virtualizing panel kept
     /// bringing the end into view as rows changed size, over the reader's own scroll (2026-10-15).
-    private static void ToEnd(ScrollViewer? scroll)
+    private void JumpToEnd(ScrollViewer? scroll)
     {
-        if (scroll is not null && scroll.ScrollableHeight - scroll.VerticalOffset > 0.5)
-        {
-            InkProbe.Jump(scroll.ScrollableHeight - scroll.VerticalOffset);
-        }
-
+        _glide.Stop();
         scroll?.ScrollToVerticalOffset(scroll.ScrollableHeight);
     }
 
