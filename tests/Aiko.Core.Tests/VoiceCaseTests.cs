@@ -115,6 +115,19 @@ public class VoiceCaseTests
                 row.GetProperty("name").GetString());
         }
 
+        foreach (var row in cases.GetProperty("unechoed").EnumerateArray())
+        {
+            var name = row.GetProperty("name").GetString();
+            var result = VoiceHint.WithoutEcho(row.GetProperty("phrase").GetString()!, row.GetProperty("hint").GetString()!);
+
+            Assert.True(row.GetProperty("text").GetString() == result.Text, $"{name}: {result.Text}");
+            Assert.True(row.GetProperty("dropped").GetInt32() == result.Dropped.Count, $"{name}: {result.Dropped.Count}");
+            var inHint = row.GetProperty("inHint");
+            Assert.True(
+                (inHint.ValueKind == JsonValueKind.Null ? null : inHint.GetInt32()) == result.Dropped.FirstOrDefault()?.InHint,
+                $"{name}: inHint");
+        }
+
         foreach (var row in cases.GetProperty("branches").EnumerateArray())
         {
             Assert.Equal(row.GetProperty("branch").GetString(), VoiceHint.Branch(row.GetProperty("head").GetString()));

@@ -1,5 +1,20 @@
 import Foundation
 
+/// A sentence cut out as the hint given back: how many parts it had and how many of them were items
+/// of the hint. The twin of EchoCut in VoiceHint.cs.
+public struct EchoCut: Sendable, Equatable {
+    public let parts: Int
+    public let inHint: Int
+}
+
+/// A phrase without the hint given back. lookAlikes: sentences kept although three or more of
+/// their parts are items of the hint. The twin of Unechoed in VoiceHint.cs.
+public struct Unechoed: Sendable, Equatable {
+    public let text: String
+    public let dropped: [EchoCut]
+    public let lookAlikes: Int
+}
+
 /// What the recogniser is told before it listens (D-313): the folder of the session, its branch,
 /// the names of files from the conversation and the keys of Aiko's memory. These are the names a
 /// person spells their own way, the words recognition gets wrong first. The facts of the memory
@@ -61,13 +76,57 @@ public enum VoiceHint {
         }
     }
 
-    /// Whether a phrase is the hint given back. A recogniser that does not catch the sound may
+    /// Whether a sentence is the hint given back. A recogniser that does not catch the sound may
     /// answer with its prompt: on 2026-10-15 OpenAI wrote the whole hint for an English sentence.
-    /// A phrase of three or more parts, every one an item of the hint, is that.
+    /// A sentence of three or more parts, every one an item of the hint, is that. So is one of four
+    /// or more items and one other part: on 2026-10-23 OpenAI gave the hint back in the middle of
+    /// speech five times, with the folder kodland spelled кодland.
     public static func isEcho(_ phrase: String, hint: String) -> Bool {
         let items = Set(parts(hint))
         let said = parts(phrase)
-        return !items.isEmpty && said.count >= 3 && said.allSatisfy(items.contains)
+        let inHint = said.filter(items.contains).count
+        return !items.isEmpty && said.count >= 3
+            && (inHint == said.count || (inHint >= 4 && inHint == said.count - 1))
+    }
+
+    /// The phrase without the sentences that are the hint given back (isEcho); the speech around
+    /// them stays. What was cut and what nearly was is counted for the log.
+    public static func withoutEcho(_ phrase: String, hint: String) -> Unechoed {
+        let items = Set(parts(hint))
+        var kept: [String] = []
+        var dropped: [EchoCut] = []
+        var lookAlikes = 0
+        for sentence in sentences(phrase.trimmingCharacters(in: .whitespacesAndNewlines)) {
+            let said = parts(sentence)
+            let inHint = said.filter(items.contains).count
+            if isEcho(sentence, hint: hint) {
+                dropped.append(EchoCut(parts: said.count, inHint: inHint))
+                continue
+            }
+            if !items.isEmpty && inHint >= 3 {
+                lookAlikes += 1
+            }
+            kept.append(sentence)
+        }
+        return Unechoed(text: kept.joined(separator: " "), dropped: dropped, lookAlikes: lookAlikes)
+    }
+
+    /// Sentences end with . ! ? or … and a space after it. The dot of a file name has no space after it.
+    private static func sentences(_ text: String) -> [String] {
+        var result: [String] = []
+        var current = ""
+        var afterEnd = false
+        for character in text {
+            if afterEnd && character.isWhitespace {
+                if !current.isEmpty { result.append(current) }
+                current = ""
+                continue
+            }
+            afterEnd = ".!?…".contains(character)
+            current.append(character)
+        }
+        if !current.isEmpty { result.append(current) }
+        return result
     }
 
     private static func parts(_ text: String) -> [String] {

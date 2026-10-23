@@ -1,4 +1,14 @@
+using System.Text.RegularExpressions;
+
 namespace Aiko.Core.Terminal;
+
+/// A sentence cut out as the hint given back: how many parts it had and how many of them were items
+/// of the hint. For the log, which keeps numbers and never the words (PRIVACY.md).
+public sealed record EchoCut(int Parts, int InHint);
+
+/// A phrase without the hint given back. LookAlikes: sentences kept although three or more of
+/// their parts are items of the hint, so the log can show a near miss.
+public sealed record Unechoed(string Text, IReadOnlyList<EchoCut> Dropped, int LookAlikes);
 
 /// What the recogniser is told before it listens (D-313): the folder of the session, its branch,
 /// the names of files from the conversation and the keys of Aiko's memory. These are the names a
@@ -82,15 +92,51 @@ public static class VoiceHint
         _ => systemLanguage.StartsWith("ru", StringComparison.OrdinalIgnoreCase) ? "ru" : "en",
     };
 
-    /// Whether a phrase is the hint given back. A recogniser that does not catch the sound may
+    /// Whether a sentence is the hint given back. A recogniser that does not catch the sound may
     /// answer with its prompt: on 2026-10-15 OpenAI wrote the whole hint for an English sentence.
-    /// A phrase of three or more parts, every one an item of the hint, is that.
+    /// A sentence of three or more parts, every one an item of the hint, is that. So is one of four
+    /// or more items and one other part: on 2026-10-23 OpenAI gave the hint back in the middle of
+    /// speech five times, with the folder kodland spelled кодland.
     public static bool IsEcho(string phrase, string hint)
     {
         var items = Parts(hint).ToHashSet();
         var parts = Parts(phrase).ToList();
-        return items.Count > 0 && parts.Count >= 3 && parts.All(items.Contains);
+        var inHint = parts.Count(items.Contains);
+        return items.Count > 0 && parts.Count >= 3
+            && (inHint == parts.Count || (inHint >= 4 && inHint == parts.Count - 1));
     }
+
+    /// The phrase without the sentences that are the hint given back (IsEcho); the speech around
+    /// them stays. What was cut and what nearly was is counted for the log.
+    public static Unechoed WithoutEcho(string phrase, string hint)
+    {
+        var items = Parts(hint).ToHashSet();
+        var kept = new List<string>();
+        var dropped = new List<EchoCut>();
+        var lookAlikes = 0;
+        foreach (var sentence in SentenceEnd.Split(phrase.Trim()).Where(s => s.Length > 0))
+        {
+            var parts = Parts(sentence).ToList();
+            var inHint = parts.Count(items.Contains);
+            if (IsEcho(sentence, hint))
+            {
+                dropped.Add(new EchoCut(parts.Count, inHint));
+                continue;
+            }
+
+            if (items.Count > 0 && inHint >= 3)
+            {
+                lookAlikes++;
+            }
+
+            kept.Add(sentence);
+        }
+
+        return new Unechoed(string.Join(' ', kept), dropped, lookAlikes);
+    }
+
+    /// The space after the end of a sentence. The dot of a file name has no space after it.
+    private static readonly Regex SentenceEnd = new(@"(?<=[.!?…])\s+", RegexOptions.Compiled);
 
     private static IEnumerable<string> Parts(string text) =>
         text.Split(',', StringSplitOptions.RemoveEmptyEntries)

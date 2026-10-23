@@ -100,6 +100,14 @@ struct VoiceCaseTests {
                     "\(row["name"]?.stringValue ?? "")")
         }
 
+        for row in cases["unechoed"]?.arrayValue ?? [] {
+            let name = row["name"]?.stringValue ?? ""
+            let result = VoiceHint.withoutEcho(row["phrase"]?.stringValue ?? "", hint: row["hint"]?.stringValue ?? "")
+            #expect(result.text == row["text"]?.stringValue, "\(name)")
+            #expect(Int64(result.dropped.count) == row["dropped"]?.int64Value, "\(name)")
+            #expect(result.dropped.first.map { Int64($0.inHint) } == row["inHint"]?.int64Value, "\(name)")
+        }
+
         for row in cases["branches"]?.arrayValue ?? [] {
             #expect(VoiceHint.branch(row["head"]?.stringValue) == row["branch"]?.stringValue)
         }
