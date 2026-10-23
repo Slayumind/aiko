@@ -261,6 +261,15 @@ sealed class TalkPanel : UserControl
         _ => label,
     };
 
+    /// What the reminder calls a card: questions and a plan by their own words, a permission by
+    /// the word of its step. The name of the tool behind a question or a plan means nothing to a person.
+    private static string CardWord(RequestCard request) => request.Kind switch
+    {
+        CardKind.Question => Strings.TerminalWaitsQuestions,
+        CardKind.Plan => Strings.TerminalWaitsPlan,
+        _ => StepWord(request.Step.Kind, request.Step.Label),
+    };
+
     private FeedSlot? OpenCard() =>
         _slots.LastOrDefault(slot => slot.Item is FeedItem.Card { State: RequestState.Open });
 
@@ -274,8 +283,7 @@ sealed class TalkPanel : UserControl
             return;
         }
 
-        _reminderText.Text = string.Format(
-            CultureInfo.CurrentCulture, Strings.TerminalWaitsForYou, StepWord(card.Request.Step.Kind, card.Request.Step.Label));
+        _reminderText.Text = string.Format(CultureInfo.CurrentCulture, Strings.TerminalWaitsForYou, CardWord(card.Request));
         _reminder.Visibility = Visibility.Visible;
     }
 
@@ -285,6 +293,13 @@ sealed class TalkPanel : UserControl
             || (_scroll ??= FindScroll(_feed)) is not { } scroll)
         {
             return false;
+        }
+
+        // A card the person is answering with the keyboard is in front of them, even when it grew
+        // past the bottom of the feed while they typed (check of 2026-10-23).
+        if (row.IsKeyboardFocusWithin)
+        {
+            return true;
         }
 
         // The buttons of a card are at its bottom: a card is in view when its bottom is.
@@ -687,6 +702,11 @@ sealed class FeedRow : ContentControl
 
     private UIElement Card(RequestCard request)
     {
+        if (request.Kind == CardKind.Question)
+        {
+            return new QuestionCardView(request, choice => Choose(request, choice));
+        }
+
         var column = new StackPanel();
 
         var word = TalkPanel.StepWord(request.Step.Kind, request.Step.Label);
@@ -717,14 +737,7 @@ sealed class FeedRow : ContentControl
             }
         }
 
-        if (request.Kind == CardKind.Question)
-        {
-            column.Children.Add(Questions(request));
-        }
-        else
-        {
-            column.Children.Add(Buttons(request));
-        }
+        column.Children.Add(Buttons(request));
 
         return new Border
         {
@@ -810,52 +823,6 @@ sealed class FeedRow : ContentControl
         keys.Margin = new Thickness(4, 0, 0, 6);
         row.Children.Add(keys);
         return row;
-    }
-
-    /// One button per option. With several questions the card waits until each has its answer.
-    private UIElement Questions(RequestCard request)
-    {
-        var picked = new string?[request.Questions.Count];
-        var column = new StackPanel();
-
-        for (var at = 0; at < request.Questions.Count; at++)
-        {
-            var question = request.Questions[at];
-            var text = TerminalPanel.Text(question.Text, "TextNumber", "Ink", FontWeights.Normal);
-            text.TextWrapping = TextWrapping.Wrap;
-            text.Margin = new Thickness(0, 10, 0, 6);
-            column.Children.Add(text);
-
-            var options = new WrapPanel();
-            var index = at;
-            foreach (var option in question.Options)
-            {
-                Button? button = null;
-                button = TerminalPanel.Flat(option.Label, () =>
-                {
-                    picked[index] = option.Label;
-                    foreach (var other in options.Children.OfType<Button>())
-                    {
-                        other.Opacity = ReferenceEquals(other, button) ? 1 : 0.5;
-                    }
-
-                    if (picked.All(answer => answer is not null))
-                    {
-                        Choose(request, new CardChoice.Answers([.. picked.Select(answer => (IReadOnlyList<string>)[answer!])]));
-                    }
-                }, ghost: false);
-                button.ToolTip = option.Description.Length > 0 ? option.Description : null;
-                options.Children.Add(Spaced(button));
-            }
-
-            column.Children.Add(options);
-        }
-
-        var deny = TerminalPanel.Flat(Strings.TerminalDeny, () => Choose(request, new CardChoice.Deny("")), ghost: true);
-        deny.Margin = new Thickness(0, 10, 0, 0);
-        deny.HorizontalAlignment = HorizontalAlignment.Left;
-        column.Children.Add(deny);
-        return column;
     }
 
     private static UIElement Notice(FeedItem.Notice notice)

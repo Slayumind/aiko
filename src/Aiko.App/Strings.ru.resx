@@ -1282,6 +1282,27 @@
   <data name="TerminalCardKeys" xml:space="preserve">
     <value>Enter — разрешить · Esc — отказать</value>
   </data>
+  <data name="TerminalQuestionStep" xml:space="preserve">
+    <value>вопрос {0} из {1}</value>
+  </data>
+  <data name="TerminalQuestionMany" xml:space="preserve">
+    <value>можно выбрать несколько</value>
+  </data>
+  <data name="TerminalQuestionOther" xml:space="preserve">
+    <value>Другое</value>
+  </data>
+  <data name="TerminalQuestionOtherHint" xml:space="preserve">
+    <value>Написать свой ответ</value>
+  </data>
+  <data name="TerminalQuestionBack" xml:space="preserve">
+    <value>Назад</value>
+  </data>
+  <data name="TerminalQuestionNext" xml:space="preserve">
+    <value>Дальше</value>
+  </data>
+  <data name="TerminalQuestionAnswer" xml:space="preserve">
+    <value>Ответить</value>
+  </data>
   <data name="TerminalStop" xml:space="preserve">
     <value>Остановить</value>
   </data>
@@ -1308,6 +1329,12 @@
   </data>
   <data name="TerminalWaitsForYou" xml:space="preserve">
     <value>Ждёт тебя: {0}</value>
+  </data>
+  <data name="TerminalWaitsQuestions" xml:space="preserve">
+    <value>вопросы</value>
+  </data>
+  <data name="TerminalWaitsPlan" xml:space="preserve">
+    <value>план</value>
   </data>
   <data name="TerminalShow" xml:space="preserve">
     <value>Показать</value>

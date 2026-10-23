@@ -22,13 +22,16 @@ public enum SecondChoice: Sendable, Equatable {
     case alwaysAllow
 }
 
+/// preview: what the option looks like, monospaced, shown under the options (AIKO-327).
 public struct QuestionOption: Sendable, Equatable {
     public let label: String
     public let description: String
+    public let preview: String
 
-    public init(label: String, description: String) {
+    public init(label: String, description: String, preview: String = "") {
         self.label = label
         self.description = description
+        self.preview = preview
     }
 }
 
@@ -142,7 +145,11 @@ public struct RequestCard: Sendable, Equatable {
         var questions: [CardQuestion] = []
         for question in objects(input["questions"]) {
             let options = objects(question["options"])
-                .map { QuestionOption(label: $0["label"]?.stringValue ?? "", description: $0["description"]?.stringValue ?? "") }
+                .map {
+                    QuestionOption(
+                        label: $0["label"]?.stringValue ?? "", description: $0["description"]?.stringValue ?? "",
+                        preview: $0["preview"]?.stringValue ?? "")
+                }
                 .filter { !$0.label.isEmpty }
 
             if let text = question["question"]?.stringValue, !text.isEmpty {

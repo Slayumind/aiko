@@ -1,0 +1,578 @@
+{
+  "comment": "The card of questions while the person answers it (D-330, AIKO-327). One question at a time. Rows are the options, then the person's own words (Other). With one answer a click, a digit or Enter takes the row and goes on to the next question; with several answers a click, a digit or Space ticks the row and Enter goes on. Other without words asks for them (writeOwn); words pick Other. Next and Answer wait until the open question has an answer; Answer on the last question goes back to the first one without an answer. Esc says no. The preview is the one of the focused option, or of the picked one when the keyboard is on Other. The arrows move over the grid of the card: up and down by the number of columns (two, or one in a narrow window), left and right one row in reading order; down from the line before the last goes to the last row. Actions: key (up, down, left, right, space, enter, escape, with columns for the arrows), number (from 1), click (row from 0), write, confirm, back, forward, show (question from 0). After the actions: the open question, the focused row, the outcome of the last action, the marks of the strip and the answers.",
+  "questions": {
+    "one": [
+      {
+        "text": "Which way?",
+        "header": "Way",
+        "multi": false,
+        "options": [
+          {
+            "label": "Left",
+            "description": "Short"
+          },
+          {
+            "label": "Right",
+            "description": "",
+            "preview": "-> right"
+          }
+        ]
+      }
+    ],
+    "many": [
+      {
+        "text": "Which checks?",
+        "header": "Checks",
+        "multi": true,
+        "options": [
+          {
+            "label": "Unit"
+          },
+          {
+            "label": "Format"
+          },
+          {
+            "label": "Lint"
+          }
+        ]
+      }
+    ],
+    "two": [
+      {
+        "text": "Which way?",
+        "header": "Way",
+        "multi": false,
+        "options": [
+          {
+            "label": "Left"
+          },
+          {
+            "label": "Right"
+          }
+        ]
+      },
+      {
+        "text": "Which checks?",
+        "header": "Checks",
+        "multi": true,
+        "options": [
+          {
+            "label": "Unit"
+          },
+          {
+            "label": "Format"
+          }
+        ]
+      }
+    ],
+    "five": [
+      {
+        "text": "Which one?",
+        "header": "One",
+        "multi": false,
+        "options": [
+          {
+            "label": "A"
+          },
+          {
+            "label": "B"
+          },
+          {
+            "label": "C"
+          },
+          {
+            "label": "D"
+          }
+        ]
+      }
+    ]
+  },
+  "flows": [
+    {
+      "name": "a click on one answer answers the last question",
+      "questions": "one",
+      "actions": [
+        {
+          "click": 1
+        }
+      ],
+      "at": 0,
+      "focus": 1,
+      "outcome": "answer",
+      "marks": [
+        "open"
+      ],
+      "answers": [
+        [
+          "Right"
+        ]
+      ]
+    },
+    {
+      "name": "enter takes the row the keyboard is on",
+      "questions": "one",
+      "actions": [
+        {
+          "key": "down"
+        },
+        {
+          "key": "enter"
+        }
+      ],
+      "at": 0,
+      "focus": 1,
+      "outcome": "answer",
+      "answers": [
+        [
+          "Right"
+        ]
+      ]
+    },
+    {
+      "name": "a digit takes its row",
+      "questions": "one",
+      "actions": [
+        {
+          "number": 1
+        }
+      ],
+      "outcome": "answer",
+      "answers": [
+        [
+          "Left"
+        ]
+      ]
+    },
+    {
+      "name": "a digit past the rows does nothing",
+      "questions": "one",
+      "actions": [
+        {
+          "number": 9
+        }
+      ],
+      "focus": 0,
+      "outcome": "none",
+      "answers": [
+        []
+      ]
+    },
+    {
+      "name": "the arrows stop at the first and the last row",
+      "questions": "one",
+      "actions": [
+        {
+          "key": "up"
+        },
+        {
+          "key": "down"
+        },
+        {
+          "key": "down"
+        },
+        {
+          "key": "down"
+        }
+      ],
+      "focus": 2,
+      "outcome": "none"
+    },
+    {
+      "name": "space ticks rows of several answers and enter answers",
+      "questions": "many",
+      "actions": [
+        {
+          "key": "space"
+        },
+        {
+          "key": "down"
+        },
+        {
+          "key": "down"
+        },
+        {
+          "key": "space"
+        },
+        {
+          "key": "enter"
+        }
+      ],
+      "focus": 2,
+      "outcome": "answer",
+      "answers": [
+        [
+          "Unit",
+          "Lint"
+        ]
+      ]
+    },
+    {
+      "name": "a second click takes the tick off",
+      "questions": "many",
+      "actions": [
+        {
+          "number": 2
+        },
+        {
+          "number": 2
+        },
+        {
+          "key": "enter"
+        }
+      ],
+      "outcome": "none",
+      "answers": [
+        []
+      ]
+    },
+    {
+      "name": "answers keep the order of the options",
+      "questions": "many",
+      "actions": [
+        {
+          "click": 2
+        },
+        {
+          "click": 0
+        },
+        {
+          "forward": true
+        }
+      ],
+      "outcome": "answer",
+      "answers": [
+        [
+          "Unit",
+          "Lint"
+        ]
+      ]
+    },
+    {
+      "name": "other without words asks for them",
+      "questions": "one",
+      "actions": [
+        {
+          "number": 3
+        }
+      ],
+      "focus": 2,
+      "outcome": "writeOwn",
+      "answers": [
+        []
+      ]
+    },
+    {
+      "name": "own words answer with enter",
+      "questions": "one",
+      "actions": [
+        {
+          "click": 2
+        },
+        {
+          "write": "  up the hill "
+        },
+        {
+          "confirm": true
+        }
+      ],
+      "outcome": "answer",
+      "answers": [
+        [
+          "up the hill"
+        ]
+      ]
+    },
+    {
+      "name": "empty own words pick nothing",
+      "questions": "one",
+      "actions": [
+        {
+          "write": "   "
+        },
+        {
+          "confirm": true
+        }
+      ],
+      "outcome": "none",
+      "answers": [
+        []
+      ]
+    },
+    {
+      "name": "own words beside ticked rows",
+      "questions": "many",
+      "actions": [
+        {
+          "click": 1
+        },
+        {
+          "write": "Types"
+        },
+        {
+          "key": "enter"
+        }
+      ],
+      "outcome": "answer",
+      "answers": [
+        [
+          "Format",
+          "Types"
+        ]
+      ]
+    },
+    {
+      "name": "one answer goes on to the next question",
+      "questions": "two",
+      "actions": [
+        {
+          "click": 1
+        }
+      ],
+      "at": 1,
+      "focus": 0,
+      "outcome": "none",
+      "marks": [
+        "answered",
+        "open"
+      ]
+    },
+    {
+      "name": "back opens the question before on its picked row",
+      "questions": "two",
+      "actions": [
+        {
+          "click": 1
+        },
+        {
+          "back": true
+        }
+      ],
+      "at": 0,
+      "focus": 1,
+      "marks": [
+        "open",
+        "ahead"
+      ]
+    },
+    {
+      "name": "next waits for an answer",
+      "questions": "two",
+      "actions": [
+        {
+          "forward": true
+        }
+      ],
+      "at": 0,
+      "outcome": "none",
+      "marks": [
+        "open",
+        "ahead"
+      ]
+    },
+    {
+      "name": "answer goes back to a question without one",
+      "questions": "two",
+      "actions": [
+        {
+          "show": 1
+        },
+        {
+          "click": 0
+        },
+        {
+          "forward": true
+        }
+      ],
+      "at": 0,
+      "outcome": "none",
+      "marks": [
+        "open",
+        "answered"
+      ]
+    },
+    {
+      "name": "both questions answered",
+      "questions": "two",
+      "actions": [
+        {
+          "number": 1
+        },
+        {
+          "number": 1
+        },
+        {
+          "number": 2
+        },
+        {
+          "key": "enter"
+        }
+      ],
+      "at": 1,
+      "outcome": "answer",
+      "answers": [
+        [
+          "Left"
+        ],
+        [
+          "Unit",
+          "Format"
+        ]
+      ]
+    },
+    {
+      "name": "esc says no",
+      "questions": "two",
+      "actions": [
+        {
+          "key": "escape"
+        }
+      ],
+      "outcome": "deny"
+    },
+    {
+      "name": "the preview of the focused option",
+      "questions": "one",
+      "actions": [
+        {
+          "key": "down"
+        }
+      ],
+      "preview": "-> right"
+    },
+    {
+      "name": "no preview on an option without one",
+      "questions": "one",
+      "actions": [],
+      "preview": null
+    },
+    {
+      "name": "on other the preview of the picked option stays",
+      "questions": "many",
+      "actions": [],
+      "preview": null
+    },
+    {
+      "name": "on other with right picked",
+      "questions": "one",
+      "actions": [
+        {
+          "click": 1
+        },
+        {
+          "key": "down"
+        }
+      ],
+      "focus": 2,
+      "preview": "-> right"
+    },
+    {
+      "name": "down in two columns goes to the option under",
+      "questions": "five",
+      "actions": [
+        {
+          "key": "down",
+          "columns": 2
+        }
+      ],
+      "focus": 2
+    },
+    {
+      "name": "right goes to the option beside",
+      "questions": "five",
+      "actions": [
+        {
+          "key": "right",
+          "columns": 2
+        }
+      ],
+      "focus": 1
+    },
+    {
+      "name": "down from the right column reaches other below the left one",
+      "questions": "five",
+      "actions": [
+        {
+          "key": "right",
+          "columns": 2
+        },
+        {
+          "key": "down",
+          "columns": 2
+        },
+        {
+          "key": "down",
+          "columns": 2
+        }
+      ],
+      "focus": 4
+    },
+    {
+      "name": "down on the last line stays",
+      "questions": "five",
+      "actions": [
+        {
+          "key": "down",
+          "columns": 2
+        },
+        {
+          "key": "down",
+          "columns": 2
+        },
+        {
+          "key": "down",
+          "columns": 2
+        }
+      ],
+      "focus": 4
+    },
+    {
+      "name": "up in two columns goes to the option above",
+      "questions": "five",
+      "actions": [
+        {
+          "key": "down",
+          "columns": 2
+        },
+        {
+          "key": "right",
+          "columns": 2
+        },
+        {
+          "key": "up",
+          "columns": 2
+        }
+      ],
+      "focus": 1
+    },
+    {
+      "name": "up on the first line stays",
+      "questions": "five",
+      "actions": [
+        {
+          "key": "right",
+          "columns": 2
+        },
+        {
+          "key": "up",
+          "columns": 2
+        }
+      ],
+      "focus": 1
+    },
+    {
+      "name": "in one column down goes one by one",
+      "questions": "five",
+      "actions": [
+        {
+          "key": "down",
+          "columns": 1
+        },
+        {
+          "key": "down",
+          "columns": 1
+        }
+      ],
+      "focus": 2
+    }
+  ]
+}
