@@ -1293,6 +1293,9 @@ public static class Strings
     /// Answer
     public static string TerminalQuestionAnswer => Get("TerminalQuestionAnswer");
 
+    /// Questions: declined
+    public static string TerminalQuestionsDenied => Get("TerminalQuestionsDenied");
+
     /// Stop
     public static string TerminalStop => Get("TerminalStop");
 

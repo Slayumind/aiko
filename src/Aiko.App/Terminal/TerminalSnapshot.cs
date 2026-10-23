@@ -11,7 +11,7 @@ static class TerminalSnapshot
     [
         "talk", "feed", "working", "compacting", "long-input", "empty", "form", "elsewhere", "login", "close",
         "voice-idle", "voice-warming", "voice-listening", "voice-finishing", "voice-nomic", "voice-model",
-        "questions", "questions-preview",
+        "questions", "questions-preview", "questions-answered",
     ];
 
     /// --snapshot-terminal &lt;file&gt; &lt;state&gt; [width]
@@ -244,7 +244,8 @@ static class TerminalSnapshot
             SignedOut: state == "login",
             form,
             state == "close" ? new AskView(string.Format(Strings.TerminalCloseTitle, "terminal"), Strings.TerminalCloseBody) : null,
-            state.StartsWith("questions", StringComparison.Ordinal) ? Questions(state == "questions-preview")
+            state == "questions-answered" ? Answered()
+                : state.StartsWith("questions", StringComparison.Ordinal) ? Questions(state == "questions-preview")
                 : state == "feed" ? Feed(withCard: true)
                 : state is "working" or "long-input" ? Feed(withCard: false)
                 : state == "compacting" ? Compacting()
@@ -292,6 +293,28 @@ static class TerminalSnapshot
             new FeedItem.Card(2, card, RequestState.Open),
         ];
         return new TalkView("a2", items, Busy: true, HasOpenCard: true, Compacting: false, PermissionMode.Manual, ModelName.Label(null, "claude-opus-5-5"), "Aiko");
+    }
+
+    /// The same questions answered: the card is gone, the answers stay as quiet lines.
+    private static TalkView Answered()
+    {
+        var step = new FeedItem.Step(2, "tq", StepLine.For(QuestionAnswers.Tool, default), StepState.Done, "", [], "")
+        {
+            Answers =
+            [
+                new QuestionAnswer("Storage", "In the memory of the window"),
+                new QuestionAnswer("What to show", "Built-in commands of Claude Code, Skills: your own, the project's and the plugins' together in one list"),
+                new QuestionAnswer("Tab", "Puts the command into the field"),
+                new QuestionAnswer("Match", "Brighter"),
+            ],
+        };
+        List<FeedItem> items =
+        [
+            new FeedItem.OwnerMessage(1, "Draw the menu of / in the terminal.", false, []),
+            step,
+            new FeedItem.Answer(3, "Got it. I will draw the menu with the built-in commands and the skills.", false),
+        ];
+        return new TalkView("a2", items, Busy: false, HasOpenCard: false, Compacting: false, PermissionMode.Manual, ModelName.Label(null, "claude-opus-5-5"), "Aiko");
     }
 
     /// A small picture the first message was sent with: a checkerboard of 32 by 32 pixels.

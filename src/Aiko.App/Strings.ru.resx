@@ -1303,6 +1303,9 @@
   <data name="TerminalQuestionAnswer" xml:space="preserve">
     <value>Ответить</value>
   </data>
+  <data name="TerminalQuestionsDenied" xml:space="preserve">
+    <value>Вопросы: отказано</value>
+  </data>
   <data name="TerminalStop" xml:space="preserve">
     <value>Остановить</value>
   </data>
