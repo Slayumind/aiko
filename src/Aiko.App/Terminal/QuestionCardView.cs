@@ -68,6 +68,9 @@ sealed class QuestionCardView : Border
 
     private QuestionFlow Flow => _flow.Value!;
 
+    /// How many options stand side by side now: the arrows move over the grid as it is drawn.
+    private int Columns => _narrow ? 1 : 2;
+
     /// Puts a card on a question before it is drawn: snapshots show a card half way through.
     public static void Preset(RequestCard request, QuestionFlow flow) =>
         Kept.AddOrUpdate(request, new StrongBox<QuestionFlow>(flow));
@@ -100,8 +103,10 @@ sealed class QuestionCardView : Border
 
         QuestionStep? step = e.Key switch
         {
-            Key.Up or Key.Left => Flow.Press(QuestionKey.Previous),
-            Key.Down or Key.Right => Flow.Press(QuestionKey.Next),
+            Key.Up => Flow.Press(QuestionKey.Up, Columns),
+            Key.Down => Flow.Press(QuestionKey.Down, Columns),
+            Key.Left => Flow.Press(QuestionKey.Left, Columns),
+            Key.Right => Flow.Press(QuestionKey.Right, Columns),
             Key.Space => Flow.Press(QuestionKey.Space),
             Key.Enter => Flow.Press(QuestionKey.Enter),
             Key.Escape => Flow.Press(QuestionKey.Escape),
@@ -169,11 +174,6 @@ sealed class QuestionCardView : Border
 
         _column.Children.Add(Options(flow));
 
-        if (flow.Focus == flow.OwnRow || flow.IsPicked(flow.OwnRow))
-        {
-            _column.Children.Add(OwnField(flow));
-        }
-
         if (flow.Preview is { } preview)
         {
             _column.Children.Add(Preview(preview));
@@ -221,7 +221,7 @@ sealed class QuestionCardView : Border
     /// The options and Other, in two columns, or in one in a narrow window.
     private UIElement Options(QuestionFlow flow)
     {
-        var columns = _narrow ? 1 : 2;
+        var columns = Columns;
         var grid = new Grid { Margin = new Thickness(0, 10, 0, 0) };
         for (var column = 0; column < columns; column++)
         {
@@ -277,7 +277,17 @@ sealed class QuestionCardView : Border
         Grid.SetColumn(number, 2);
         inside.Children.Add(number);
 
-        if (description.Length > 0)
+        // Other, chosen or with the keyboard on it, holds the field for the words in place of its hint.
+        var writing = own && (flow.Focus == row || picked);
+        if (writing)
+        {
+            var field = OwnField(flow);
+            Grid.SetRow(field, 1);
+            Grid.SetColumn(field, 1);
+            Grid.SetColumnSpan(field, 2);
+            inside.Children.Add(field);
+        }
+        else if (description.Length > 0)
         {
             var more = TerminalPanel.Text(description, "TextNumber", "Muted", FontWeights.Normal);
             more.TextWrapping = TextWrapping.Wrap;
@@ -310,6 +320,12 @@ sealed class QuestionCardView : Border
         };
         ring.MouseLeftButtonUp += (_, e) =>
         {
+            // A click in the field of Other is for the words, not for the tile.
+            if (_own is not null && e.OriginalSource is Visual clicked && (ReferenceEquals(clicked, _own) || _own.IsAncestorOf(clicked)))
+            {
+                return;
+            }
+
             e.Handled = true;
             Keyboard.Focus(this);
             Apply(Flow.Click(row));
@@ -354,13 +370,18 @@ sealed class QuestionCardView : Border
         StrokeThickness = chosen ? 4 : 1,
     };
 
-    /// The person's own words, under the options. Enter takes them; Esc gives the keyboard back
-    /// to the rows.
-    private UIElement OwnField(QuestionFlow flow)
+    /// The person's own words, inside the tile of Other. Enter takes them; Esc gives the keyboard
+    /// back to the tiles.
+    private FrameworkElement OwnField(QuestionFlow flow)
     {
         var field = new TextBox { Text = flow.Own[flow.At] };
         TerminalPanel.Field(field);
         field.TextWrapping = TextWrapping.Wrap;
+        field.Margin = new Thickness(7, 4, 0, 0);
+        field.Padding = new Thickness(0, 2, 0, 4);
+        field.Background = Brushes.Transparent;
+        field.BorderThickness = new Thickness(0, 0, 0, 1);
+        field.BorderBrush = Tokens.Brush("InputLine");
         field.TextChanged += (_, _) => _flow.Value = Flow.Write(field.Text);
         field.PreviewKeyDown += (_, e) =>
         {
@@ -378,17 +399,7 @@ sealed class QuestionCardView : Border
             }
         };
         _own = field;
-
-        return new Border
-        {
-            Background = Tokens.Brush("Background"),
-            BorderBrush = Tokens.Brush("InputLine"),
-            BorderThickness = new Thickness(1),
-            CornerRadius = new CornerRadius(10),
-            Padding = new Thickness(10, 6, 10, 6),
-            Margin = new Thickness(0, 0, 0, 6),
-            Child = field,
-        };
+        return field;
     }
 
     /// The preview of an option: monospaced, as it was written, scrolled sideways when wide.

@@ -59,7 +59,8 @@ public class QuestionFlowCaseTests
     {
         if (action.TryGetProperty("key", out var key))
         {
-            return flow.Press(Enum.Parse<QuestionKey>(key.GetString()!, ignoreCase: true));
+            var columns = action.TryGetProperty("columns", out var count) ? count.GetInt32() : 1;
+            return flow.Press(Enum.Parse<QuestionKey>(key.GetString()!, ignoreCase: true), columns);
         }
 
         if (action.TryGetProperty("number", out var number))

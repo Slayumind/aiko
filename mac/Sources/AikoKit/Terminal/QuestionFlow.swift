@@ -3,9 +3,12 @@ import Foundation
 /// A key the card of questions takes while it has the keyboard (D-330). The twin of
 /// Terminal/QuestionFlow.cs.
 public enum QuestionKey: String, Sendable, Equatable {
-    /// The arrows: up and left go back one row, down and right go on one row, in reading order.
-    case previous
-    case next
+    /// The arrows move over the options as they stand on the card: up and down between the lines
+    /// of the grid, left and right one option in reading order.
+    case up
+    case down
+    case left
+    case right
     case space
     case enter
     case escape
@@ -96,10 +99,13 @@ public struct QuestionFlow: Sendable, Equatable {
         }
     }
 
-    public func press(_ key: QuestionKey) -> QuestionStep {
+    /// columns: how many options stand side by side on the card now, two or one in a narrow window.
+    public func press(_ key: QuestionKey, columns: Int = 1) -> QuestionStep {
         switch key {
-        case .previous: return QuestionStep(with { $0.focus = max(0, focus - 1) })
-        case .next: return QuestionStep(with { $0.focus = min(ownRow, focus + 1) })
+        case .up: return QuestionStep(with { $0.focus = focus - columns >= 0 ? focus - columns : focus })
+        case .down: return QuestionStep(with { $0.focus = below(columns) })
+        case .left: return QuestionStep(with { $0.focus = max(0, focus - 1) })
+        case .right: return QuestionStep(with { $0.focus = min(ownRow, focus + 1) })
         case .space: return choose(focus)
         case .enter: return enter()
         case .escape: return QuestionStep(self, .deny)
@@ -156,6 +162,14 @@ public struct QuestionFlow: Sendable, Equatable {
     /// A click on a step of the strip: that question.
     public func show(_ question: Int) -> QuestionFlow {
         questions.indices.contains(question) ? go(question) : self
+    }
+
+    /// The option under the focused one. On the line before the last, short by one, down goes to
+    /// the last option, so Other is never out of reach.
+    private func below(_ columns: Int) -> Int {
+        let columns = max(1, columns)
+        if focus / columns >= ownRow / columns { return focus }
+        return min(ownRow, focus + columns)
     }
 
     private func enter() -> QuestionStep {

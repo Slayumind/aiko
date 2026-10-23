@@ -283,7 +283,7 @@ static class TerminalSnapshot
         var flow = QuestionFlow.Start(card.Questions).Click(0).Flow;
         flow = preview
             ? flow.Click(0).Flow.Click(1).Flow.Forward().Flow.Click(0).Flow
-            : flow.Click(0).Flow.Click(1).Flow.Press(QuestionKey.Next).Flow;
+            : flow.Click(0).Flow.Click(1).Flow.Press(QuestionKey.Down, 2).Flow.Press(QuestionKey.Down, 2).Flow.Write("Pinned ones first");
         QuestionCardView.Preset(card, flow);
 
         List<FeedItem> items =

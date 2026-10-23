@@ -32,7 +32,9 @@ struct QuestionFlowCaseTests {
     }
 
     private static func act(_ flow: QuestionFlow, _ action: JsonNode) -> QuestionStep {
-        if let key = action["key"]?.stringValue.flatMap(QuestionKey.init(rawValue:)) { return flow.press(key) }
+        if let key = action["key"]?.stringValue.flatMap(QuestionKey.init(rawValue:)) {
+            return flow.press(key, columns: Int(action["columns"]?.int64Value ?? 1))
+        }
         if let number = action["number"]?.int64Value { return flow.number(Int(number)) }
         if let row = action["click"]?.int64Value { return flow.click(Int(row)) }
         if let words = action["write"]?.stringValue { return QuestionStep(flow.write(words)) }

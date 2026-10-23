@@ -3,9 +3,12 @@ namespace Aiko.Core.Terminal;
 /// A key the card of questions takes while it has the keyboard (D-330).
 public enum QuestionKey
 {
-    /// The arrows: up and left go back one row, down and right go on one row, in reading order.
-    Previous,
-    Next,
+    /// The arrows move over the options as they stand on the card: up and down between the lines
+    /// of the grid, left and right one option in reading order.
+    Up,
+    Down,
+    Left,
+    Right,
     Space,
     Enter,
     Escape,
@@ -114,10 +117,13 @@ public sealed record QuestionFlow
             .Select(row => row < question.Options.Count ? question.Options[row].Label : Own[at].Trim())
             .Where(answer => answer.Length > 0)])];
 
-    public QuestionStep Press(QuestionKey key) => key switch
+    /// columns: how many options stand side by side on the card now, two or one in a narrow window.
+    public QuestionStep Press(QuestionKey key, int columns = 1) => key switch
     {
-        QuestionKey.Previous => new(this with { Focus = Math.Max(0, Focus - 1) }, QuestionOutcome.None),
-        QuestionKey.Next => new(this with { Focus = Math.Min(OwnRow, Focus + 1) }, QuestionOutcome.None),
+        QuestionKey.Up => new(this with { Focus = Focus - columns >= 0 ? Focus - columns : Focus }, QuestionOutcome.None),
+        QuestionKey.Down => new(this with { Focus = Below(columns) }, QuestionOutcome.None),
+        QuestionKey.Left => new(this with { Focus = Math.Max(0, Focus - 1) }, QuestionOutcome.None),
+        QuestionKey.Right => new(this with { Focus = Math.Min(OwnRow, Focus + 1) }, QuestionOutcome.None),
         QuestionKey.Space => Choose(Focus),
         QuestionKey.Enter => Enter(),
         QuestionKey.Escape => new(this, QuestionOutcome.Deny),
@@ -178,6 +184,19 @@ public sealed record QuestionFlow
 
     /// A click on a step of the strip: that question.
     public QuestionFlow Show(int question) => question >= 0 && question < Questions.Count ? Go(question) : this;
+
+    /// The option under the focused one. On the line before the last, short by one, down goes to
+    /// the last option, so Other is never out of reach.
+    private int Below(int columns)
+    {
+        columns = Math.Max(1, columns);
+        if (Focus / columns >= OwnRow / columns)
+        {
+            return Focus;
+        }
+
+        return Math.Min(OwnRow, Focus + columns);
+    }
 
     private QuestionStep Enter()
     {
