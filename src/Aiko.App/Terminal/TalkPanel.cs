@@ -339,7 +339,15 @@ sealed class TalkPanel : UserControl
 
     /// To the bottom by number, not by ScrollToEnd: after ScrollToEnd the virtualizing panel kept
     /// bringing the end into view as rows changed size, over the reader's own scroll (2026-10-15).
-    private static void ToEnd(ScrollViewer? scroll) => scroll?.ScrollToVerticalOffset(scroll.ScrollableHeight);
+    private static void ToEnd(ScrollViewer? scroll)
+    {
+        if (scroll is not null && scroll.ScrollableHeight - scroll.VerticalOffset > 0.5)
+        {
+            InkProbe.Jump(scroll.ScrollableHeight - scroll.VerticalOffset);
+        }
+
+        scroll?.ScrollToVerticalOffset(scroll.ScrollableHeight);
+    }
 
     private static bool OnScrollBar(DependencyObject hit)
     {
