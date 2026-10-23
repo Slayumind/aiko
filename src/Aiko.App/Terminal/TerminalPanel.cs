@@ -920,6 +920,23 @@ sealed class TerminalPanel : UserControl
         return button;
     }
 
+    /// A button that is only an icon: 28 by 28, a soft fill on hover, the same press and focus as
+    /// the other buttons (D-332).
+    internal static Button Icon(UIElement icon)
+    {
+        var hover = new Border { CornerRadius = new CornerRadius(8), Background = Tokens.Brush("HoverLayer"), Opacity = 0 };
+        var face = new Grid { Width = 28, Height = 28 };
+        face.Children.Add(hover);
+        face.Children.Add(icon);
+
+        var button = new Button { Content = face, Cursor = Cursors.Hand, Template = Bare(), FocusVisualStyle = FocusRing() };
+        button.MouseEnter += (_, _) => hover.BeginAnimation(OpacityProperty, Motion.To(1, Motion.Or0(Motion.Hover), Motion.Standard));
+        button.MouseLeave += (_, _) => hover.BeginAnimation(OpacityProperty, Motion.To(0, Motion.Or0(Motion.Hover), Motion.Standard));
+        Motion.SetPress(button, true);
+        WindowChromeHit(button);
+        return button;
+    }
+
     private static ControlTemplate Bare()
     {
         var template = new ControlTemplate(typeof(Button));

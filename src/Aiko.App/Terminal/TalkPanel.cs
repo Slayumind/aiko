@@ -482,26 +482,10 @@ sealed class FeedRow : ContentControl
         };
     }
 
-    /// The word "working" and three dots that fade to the right.
-    private static UIElement Working()
-    {
-        var row = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 10, 0, 12) };
-        row.Children.Add(TerminalPanel.Mono(Strings.TerminalWorking, "Muted"));
-        foreach (var opacity in new[] { 1, 0.6, 0.3 })
-        {
-            row.Children.Add(new System.Windows.Shapes.Ellipse
-            {
-                Width = 4,
-                Height = 4,
-                Margin = new Thickness(opacity == 1 ? 8 : 3, 1, 0, 0),
-                Fill = Tokens.Brush("Muted"),
-                Opacity = opacity,
-                VerticalAlignment = VerticalAlignment.Center,
-            });
-        }
-
-        return row;
-    }
+    /// The words "working" with a light that runs along them (D-332). The row waits half a second
+    /// before it shows, so it does not blink at the end of a turn; after thirty seconds it adds
+    /// the time of the turn. It moves only while it is on screen.
+    private static UIElement Working() => new WorkingRow();
 
     /// "Making the conversation shorter" and a thin bar with a piece that runs along it. Claude
     /// Code does not say how far it is, so the bar shows only that the work goes on (D-325).
@@ -841,7 +825,7 @@ sealed class FeedRow : ContentControl
 
             var check = new System.Windows.Shapes.Path
             {
-                Data = Geometry.Parse(QuestionCardView.CheckPath),
+                Data = Geometry.Parse(SiteIcons.Check),
                 Fill = Tokens.Brush("Positive"),
                 Stretch = Stretch.Uniform,
                 Width = 10,

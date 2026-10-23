@@ -32,22 +32,18 @@ static class AnswerView
         return column;
     }
 
-    /// A finished answer with a quiet button under it that copies the whole answer as its
-    /// markdown, the way Claude wrote it (D-303).
+    /// A finished answer with a quiet copy icon under it that copies the whole answer as its
+    /// markdown, the way Claude wrote it (D-303). The icon shows while the mouse is over the
+    /// answer (D-332).
     public static UIElement WithCopy(string markdown)
     {
-        var column = new StackPanel();
+        var column = new StackPanel { Background = Brushes.Transparent };
         column.Children.Add(For(markdown));
 
-        var copy = TerminalPanel.Flat(Strings.Copy, () => { }, ghost: true);
-        copy.Height = 24;
-        copy.Margin = new Thickness(-12, -8, 0, 4);
+        var copy = CopyButton.For(() => markdown);
+        copy.Margin = new Thickness(-8, -10, 0, 2);
         copy.HorizontalAlignment = HorizontalAlignment.Left;
-        copy.Click += (_, _) =>
-        {
-            Clipboard.SetText(markdown);
-            copy.Content = TerminalPanel.Text(Strings.Copied, "TextNumber", "Muted", FontWeights.Normal);
-        };
+        CopyButton.ShowOnHover(column, copy);
         column.Children.Add(copy);
         return column;
     }
@@ -325,13 +321,7 @@ static class AnswerView
             SelectionBrush = Tokens.Brush("Muted"),
         };
 
-        var copy = TerminalPanel.Flat(Strings.Copy, () => { }, ghost: true);
-        copy.Height = 26;
-        copy.Click += (_, _) =>
-        {
-            Clipboard.SetText(text);
-            copy.Content = TerminalPanel.Text(Strings.Copied, "TextSmall", "Muted", FontWeights.Normal);
-        };
+        var copy = CopyButton.For(() => text);
 
         var head = new DockPanel { Margin = new Thickness(12, 4, 4, 0) };
         DockPanel.SetDock(copy, Dock.Right);
