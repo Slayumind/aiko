@@ -298,20 +298,31 @@ sealed class QuestionCardView : Border
             inside.Children.Add(more);
         }
 
-        // One frame per tile (check of 2026-10-23): the tile the keyboard stands on has its own
-        // frame thicker and lighter, and gives the extra pixel back from its padding, so the
-        // words do not move.
-        var focused = row == flow.Focus && IsKeyboardFocusWithin && !ReferenceEquals(Keyboard.FocusedElement, _own);
-        var ring = new Border
+        var face = new Border
         {
             Background = Tokens.Brush("Background"),
-            BorderBrush = Tokens.Brush(focused ? "Muted" : picked ? "InputLine" : "Hairline"),
-            BorderThickness = new Thickness(focused ? 2 : 1),
+            BorderBrush = Tokens.Brush(picked ? "InputLine" : "Hairline"),
+            BorderThickness = new Thickness(1),
             CornerRadius = new CornerRadius(10),
-            Padding = focused ? new Thickness(9, 7, 9, 7) : new Thickness(10, 8, 10, 8),
-            Cursor = Cursors.Hand,
+            Padding = new Thickness(10, 8, 10, 8),
             Child = inside,
         };
+
+        // One frame per tile (check of 2026-10-23). The frame of the keyboard lies over the
+        // tile's own one instead of around it; it takes no room, so the words never move.
+        var ring = new Grid { Cursor = Cursors.Hand };
+        ring.Children.Add(face);
+        if (row == flow.Focus && IsKeyboardFocusWithin && !ReferenceEquals(Keyboard.FocusedElement, _own))
+        {
+            ring.Children.Add(new Border
+            {
+                BorderBrush = Tokens.Brush("Muted"),
+                BorderThickness = new Thickness(2),
+                CornerRadius = new CornerRadius(10),
+                IsHitTestVisible = false,
+            });
+        }
+
         ring.MouseLeftButtonUp += (_, e) =>
         {
             // A click in the field of Other is for the words, not for the tile.
