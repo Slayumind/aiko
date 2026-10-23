@@ -828,8 +828,14 @@ sealed class TerminalPanel : UserControl
         VerticalAlignment = VerticalAlignment.Center,
     };
 
-    /// The sign of "waits for you": a pause (D-299).
-    private static FrameworkElement Pause() => Line("M1,0 L1,11 M6,0 L6,11", "Caution");
+    /// The sign of "waits for you": two thin bars, drawn as thin as the lines of the slayumind icons
+    /// (one in twenty-four), so they read as a quiet mark and not as a pause button (D-299, D-332).
+    private static FrameworkElement Pause()
+    {
+        var bars = Line("M0.5,0.5 L0.5,9.5 M4.5,0.5 L4.5,9.5", "Caution");
+        bars.StrokeThickness = 0.75;
+        return bars;
+    }
 
     internal static FrameworkElement Dot(bool filled) => new Ellipse
     {
