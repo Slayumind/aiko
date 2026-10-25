@@ -55,16 +55,20 @@ enum TerminalStore {
         return Transcript.read(text.split(separator: "\n", omittingEmptySubsequences: true).map(String.init), mode: mode)
     }
 
-    /// The folders right inside one, by name, without the hidden ones.
+    /// The folders right inside one, the ones changed last first, without the hidden ones (D-335).
     static func foldersInside(_ folder: String) -> [String] {
         let inside = (try? FileManager.default.contentsOfDirectory(
             at: URL(fileURLWithPath: folder),
-            includingPropertiesForKeys: [.isDirectoryKey],
+            includingPropertiesForKeys: [.isDirectoryKey, .contentModificationDateKey],
             options: [.skipsHiddenFiles])) ?? []
+
+        func changed(_ url: URL) -> Date {
+            (try? url.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate) ?? .distantPast
+        }
 
         return inside
             .filter { (try? $0.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) == true }
+            .sorted { changed($0) > changed($1) }
             .map(\.path)
-            .sorted { $0.localizedCaseInsensitiveCompare($1) == .orderedAscending }
     }
 }

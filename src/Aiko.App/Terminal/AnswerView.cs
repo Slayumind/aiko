@@ -40,15 +40,20 @@ static class AnswerView
     /// answer (D-332).
     public static UIElement WithCopy(string markdown)
     {
-        // The icon lies over the margin under the answer instead of taking a line of its own,
-        // so a finished answer leaves no gap in the feed (D-332).
-        var column = new Grid { Background = Brushes.Transparent };
-        column.Children.Add(For(markdown));
+        // The icon takes a thin line of its own under the answer. Laid over the margin below, it
+        // went under the field of the last answer (check of 2026-10-25).
+        var column = new StackPanel { Background = Brushes.Transparent };
+        var answer = For(markdown);
+        if (answer is FrameworkElement body)
+        {
+            body.Margin = new Thickness(body.Margin.Left, body.Margin.Top, body.Margin.Right, 0);
+        }
+
+        column.Children.Add(answer);
 
         var copy = CopyButton.For(() => markdown);
-        copy.Margin = new Thickness(-8, 0, 0, -18);
+        copy.Margin = new Thickness(-8, -4, 0, 4);
         copy.HorizontalAlignment = HorizontalAlignment.Left;
-        copy.VerticalAlignment = VerticalAlignment.Bottom;
         CopyButton.ShowOnHover(column, copy);
         column.Children.Add(copy);
         return column;

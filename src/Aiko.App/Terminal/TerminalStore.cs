@@ -79,7 +79,7 @@ static class TerminalStore
         }
     }
 
-    /// The folders right inside one, by name, without the hidden ones.
+    /// The folders right inside one, the ones changed last first, without the hidden ones (D-335).
     public static IReadOnlyList<string> FoldersInside(string folder)
     {
         try
@@ -87,7 +87,7 @@ static class TerminalStore
             return [.. new DirectoryInfo(folder)
                 .EnumerateDirectories()
                 .Where(inside => !inside.Name.StartsWith('.') && !inside.Attributes.HasFlag(FileAttributes.Hidden))
-                .OrderBy(inside => inside.Name, StringComparer.OrdinalIgnoreCase)
+                .OrderByDescending(inside => inside.LastWriteTimeUtc)
                 .Select(inside => inside.FullName)];
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException or ArgumentException)

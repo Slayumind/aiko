@@ -43,14 +43,18 @@ public struct FolderHeader: Sendable, Equatable {
 public enum NewSessionChoices {
     public static let mostRecent = 5
 
+    /// The folders offered from inside one bound folder: the ones changed last (D-335).
+    public static let mostInside = 8
+
     /// The models of the form, as the words Claude Code takes for --model. They are the short
     /// names, which stay the same from one version of a model to the next. The form offers models
     /// only (D-308): a session always starts with one of them.
     public static let models = ["opus", "sonnet", "haiku"]
 
-    /// The folders, each once: where sessions of the environment ran last, then every bound
-    /// folder followed by the folders inside it. foldersInside gives the full paths of the folders
-    /// right inside one; reading the disk is not done here.
+    /// The folders, each once whatever the case of their letters: where sessions of the
+    /// environment ran last, then every bound folder followed by up to mostInside folders inside
+    /// it. foldersInside gives the full paths of the folders right inside one, the ones changed
+    /// last first; reading the disk is not done here.
     public static func folders(
         _ sessions: TerminalSessions,
         _ environment: AikoEnvironment,
@@ -58,11 +62,14 @@ public enum NewSessionChoices {
     ) -> [FolderChoice] {
         var choices: [FolderChoice] = []
 
-        func offer(_ path: String, _ source: FolderSource) {
+        @discardableResult
+        func offer(_ path: String, _ source: FolderSource) -> Bool {
             let folder = SessionName.folderPath(path)
-            if !folder.isEmpty && !choices.contains(where: { $0.path == folder }) {
-                choices.append(FolderChoice(path: folder, name: SessionName.folderName(folder), source: source))
+            guard !folder.isEmpty, !choices.contains(where: { $0.path.caseInsensitiveCompare(folder) == .orderedSame }) else {
+                return false
             }
+            choices.append(FolderChoice(path: folder, name: SessionName.folderName(folder), source: source))
+            return true
         }
 
         // A stable sort keeps the order of the list for sessions used at the same time.
@@ -75,8 +82,11 @@ public enum NewSessionChoices {
             }
 
         var recent: [String] = []
-        for session in used where !recent.contains(session.element.folder) {
-            recent.append(session.element.folder)
+        for session in used {
+            let folder = SessionName.folderPath(session.element.folder)
+            if !recent.contains(where: { $0.caseInsensitiveCompare(folder) == .orderedSame }) {
+                recent.append(folder)
+            }
         }
         for folder in recent.prefix(mostRecent) {
             offer(folder, .recent)
@@ -84,8 +94,9 @@ public enum NewSessionChoices {
 
         for bound in environment.projectFolders {
             offer(bound, .bound)
-            for inside in foldersInside(bound) {
-                offer(inside, .inside)
+            var offered = 0
+            for inside in foldersInside(bound) where offered < mostInside {
+                if offer(inside, .inside) { offered += 1 }
             }
         }
 

@@ -1,5 +1,5 @@
 {
-  "comment": "What the form of a new session offers (D-293, D-300). The folders, each once: the five where sessions of the environment were used last (closed ones too), then every bound folder followed by the folders right inside it. The form names the other environment a folder is bound to. An empty name field shows the name the session will get. The model the form starts with is the one of the session of the environment that was used last and has a model from the list; a full id like \"claude-opus-4\" counts as its family, \"opus\". With none it is the first of the list.",
+  "comment": "What the form of a new session offers (D-293, D-300). The folders, each once: the five where sessions of the environment were used last (closed ones too), then every bound folder followed by up to eight folders right inside it, the ones changed last (the list given here is in that order). A folder is one whatever the case of its letters. The form names the other environment a folder is bound to. An empty name field shows the name the session will get. The model the form starts with is the one of the session of the environment that was used last and has a model from the list; a full id like \"claude-opus-4\" counts as its family, \"opus\". With none it is the first of the list.",
   "platform": "windows",
   "environments": [
     {
@@ -431,6 +431,113 @@
         },
         {
           "before": 5,
+          "group": "bound"
+        }
+      ]
+    },
+    {
+      "name": "up to eight folders inside a bound one, and one path whatever its case",
+      "environment": "Aiko",
+      "sessions": {
+        "sessions": [
+          {
+            "id": "a1",
+            "environment": "Aiko",
+            "folder": "c:\\users\\someone\\personal\\aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 100,
+            "model": "sonnet"
+          }
+        ]
+      },
+      "inside": {
+        "C:\\Users\\someone\\personal": [
+          "C:\\Users\\someone\\personal\\p1",
+          "C:\\Users\\someone\\personal\\p2",
+          "C:\\Users\\someone\\personal\\Aiko",
+          "C:\\Users\\someone\\personal\\p3",
+          "C:\\Users\\someone\\personal\\p4",
+          "C:\\Users\\someone\\personal\\p5",
+          "C:\\Users\\someone\\personal\\p6",
+          "C:\\Users\\someone\\personal\\p7",
+          "C:\\Users\\someone\\personal\\p8",
+          "C:\\Users\\someone\\personal\\p9",
+          "C:\\Users\\someone\\personal\\p10"
+        ],
+        "D:\\games\\": []
+      },
+      "nameFor": [],
+      "elsewhereFor": [],
+      "folders": [
+        {
+          "path": "c:\\users\\someone\\personal\\aiko",
+          "name": "aiko",
+          "source": "recent"
+        },
+        {
+          "path": "C:\\Users\\someone\\personal",
+          "name": "personal",
+          "source": "bound"
+        },
+        {
+          "path": "C:\\Users\\someone\\personal\\p1",
+          "name": "p1",
+          "source": "inside"
+        },
+        {
+          "path": "C:\\Users\\someone\\personal\\p2",
+          "name": "p2",
+          "source": "inside"
+        },
+        {
+          "path": "C:\\Users\\someone\\personal\\p3",
+          "name": "p3",
+          "source": "inside"
+        },
+        {
+          "path": "C:\\Users\\someone\\personal\\p4",
+          "name": "p4",
+          "source": "inside"
+        },
+        {
+          "path": "C:\\Users\\someone\\personal\\p5",
+          "name": "p5",
+          "source": "inside"
+        },
+        {
+          "path": "C:\\Users\\someone\\personal\\p6",
+          "name": "p6",
+          "source": "inside"
+        },
+        {
+          "path": "C:\\Users\\someone\\personal\\p7",
+          "name": "p7",
+          "source": "inside"
+        },
+        {
+          "path": "C:\\Users\\someone\\personal\\p8",
+          "name": "p8",
+          "source": "inside"
+        },
+        {
+          "path": "D:\\games",
+          "name": "games",
+          "source": "bound"
+        }
+      ],
+      "names": [],
+      "elsewhere": [],
+      "model": "sonnet",
+      "headers": [
+        {
+          "before": 0,
+          "group": "recent"
+        },
+        {
+          "before": 1,
           "group": "bound"
         }
       ]

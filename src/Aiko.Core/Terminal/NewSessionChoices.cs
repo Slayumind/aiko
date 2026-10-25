@@ -31,14 +31,20 @@ public static class NewSessionChoices
 {
     public const int MostRecent = 5;
 
+    /// The folders offered from inside one bound folder: the ones changed last (D-335). A bound
+    /// folder such as a desktop of projects holds dozens, and a list of sixty took a moment to
+    /// open; the others are one "choose a folder" away.
+    public const int MostInside = 8;
+
     /// The models of the form, as the words Claude Code takes for --model. They are the short
     /// names, which stay the same from one version of a model to the next. The form offers models
     /// only (D-308): a session always starts with one of them.
     public static readonly IReadOnlyList<string> Models = ["opus", "sonnet", "haiku"];
 
-    /// The folders, each once: where sessions of the environment ran last, then every bound
-    /// folder followed by the folders inside it. foldersInside gives the full paths of the folders
-    /// right inside one; reading the disk is not done here.
+    /// The folders, each once whatever the case of their letters: where sessions of the
+    /// environment ran last, then every bound folder followed by up to MostInside folders inside
+    /// it. foldersInside gives the full paths of the folders right inside one, the ones changed
+    /// last first; reading the disk is not done here.
     public static IReadOnlyList<FolderChoice> Folders(
         TerminalSessions sessions,
         AikoEnvironment environment,
@@ -46,21 +52,24 @@ public static class NewSessionChoices
     {
         var choices = new List<FolderChoice>();
 
-        void Offer(string path, FolderSource source)
+        bool Offer(string path, FolderSource source)
         {
             var folder = SessionName.FolderPath(path);
-            if (folder.Length > 0 && choices.All(choice => choice.Path != folder))
+            if (folder.Length == 0 || choices.Any(choice => string.Equals(choice.Path, folder, StringComparison.OrdinalIgnoreCase)))
             {
-                choices.Add(new FolderChoice(folder, SessionName.FolderName(folder), source));
+                return false;
             }
+
+            choices.Add(new FolderChoice(folder, SessionName.FolderName(folder), source));
+            return true;
         }
 
         // OrderByDescending keeps the order of the list for sessions used at the same time.
         var recent = sessions.Sessions
             .Where(session => session.Environment == environment.Name)
             .OrderByDescending(session => session.LastUsed)
-            .Select(session => session.Folder)
-            .Distinct()
+            .Select(session => SessionName.FolderPath(session.Folder))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
             .Take(MostRecent);
 
         foreach (var folder in recent)
@@ -71,9 +80,18 @@ public static class NewSessionChoices
         foreach (var bound in environment.ProjectFolders)
         {
             Offer(bound, FolderSource.Bound);
+            var offered = 0;
             foreach (var inside in foldersInside(bound))
             {
-                Offer(inside, FolderSource.Inside);
+                if (offered == MostInside)
+                {
+                    break;
+                }
+
+                if (Offer(inside, FolderSource.Inside))
+                {
+                    offered++;
+                }
             }
         }
 
