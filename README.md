@@ -2,10 +2,16 @@
 
 # Aiko
 
-**See how much of your Claude Code limits is left, for two accounts at once, without opening a
-terminal.**
+**One place to work with AI agents.**
 
-Aiko sits in the Windows tray and in the macOS menu bar. Rest the mouse on it and a card shows every
+Aiko is a persona that sits above your agents and models. She remembers you across sessions and
+accounts, gives every session the same skills, and shows how much of your Claude Code limits is left.
+The model is a resource: when a better one comes out, Aiko gets better too.
+
+The goal is one window for agent sessions, your projects and your limits. Today Aiko lives in the
+Windows tray and the macOS menu bar; the window with sessions is in progress.
+
+Rest the mouse on the Aiko icon and a card shows every
 environment you set up: the five-hour window, the week, and the weekly limit of the heavy model. For
 each one you see when it resets and how long it lasts at your current pace.
 
