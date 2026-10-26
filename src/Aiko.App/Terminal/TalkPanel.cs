@@ -24,6 +24,9 @@ sealed record TalkView(
 {
     /// What the menu of "/" offers in this environment; empty until Claude Code named them.
     public IReadOnlyList<SlashCommand> Commands { get; init; } = [];
+
+    /// The folder of the session: the files "@" offers.
+    public string Folder { get; init; } = "";
 }
 
 /// The conversation with Claude Code: the feed above, the field below (D-294, D-302).
@@ -77,6 +80,7 @@ sealed class TalkPanel : UserControl
             ItemTemplate = new DataTemplate { VisualTree = RowFactory() },
             ItemContainerStyle = BareItem(),
         };
+        _feed.SizeChanged += (_, size) => _input.FitMenu(size.NewSize.Height);
         ScrollViewer.SetHorizontalScrollBarVisibility(_feed, ScrollBarVisibility.Disabled);
         ScrollViewer.SetCanContentScroll(_feed, true);
         VirtualizingPanel.SetIsVirtualizing(_feed, true);
@@ -223,6 +227,7 @@ sealed class TalkPanel : UserControl
         _keyCard = TalkKeys.Card(view.Items);
         _input.Show(view.Session, view.Busy, _keyCard is not null, view.Mode, view.Model, view.Environment);
         _input.SetCommands(view.Commands);
+        _input.SetFolder(view.Folder);
 
         if (newSession && _slots.Count > 0)
         {

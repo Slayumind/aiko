@@ -1311,9 +1311,6 @@ public static class Strings
     /// Skills
     public static string SlashGroupSkills => Get("SlashGroupSkills");
 
-    /// ↑ ↓ · Enter or Tab to insert · Esc to close
-    public static string SlashKeys => Get("SlashKeys");
-
     /// The conversation was made shorter to fit.
     public static string TerminalCompacted => Get("TerminalCompacted");
 

@@ -125,6 +125,16 @@ sealed class TerminalPanel : UserControl
         _listButton.Margin = new Thickness(10, 0, 0, 0);
         _listButton.Visibility = Visibility.Collapsed;
         _listPopup.PlacementTarget = _listButton;
+        // The list under the button, left edges together, as every drop-down of Aiko (DropDown).
+        _listPopup.Placement = PlacementMode.Custom;
+        _listPopup.CustomPopupPlacementCallback = (_, target, _) => [new CustomPopupPlacement(new Point(0, target.Height), PopupPrimaryAxis.Horizontal)];
+        _listPopup.Opened += (_, _) =>
+        {
+            if (_listPopup.Child is FrameworkElement list)
+            {
+                Motion.PopIn(list, above: false);
+            }
+        };
 
         _maximize = BarButton(_maximizeIcon, Strings.TerminalMaximize, () => MaximizeAsked?.Invoke());
         var minimize = BarButton(Line("M0,5 L10,5"), Strings.TerminalMinimize, () => MinimizeAsked?.Invoke());

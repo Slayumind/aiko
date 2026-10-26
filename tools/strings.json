@@ -3010,13 +3010,6 @@
     ]
   ],
   [
-    "SlashKeys",
-    [
-      "↑ ↓ · Enter or Tab to insert · Esc to close",
-      "↑ ↓ · Enter или Tab — подставить · Esc — закрыть"
-    ]
-  ],
-  [
     "TerminalCompacted",
     [
       "The conversation was made shorter to fit.",

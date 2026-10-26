@@ -482,6 +482,7 @@ sealed class TerminalHost
             return new TalkView(session.Id, past, false, false, false, session.Mode, ModelName.Label(null, session.Model), session.Environment)
             {
                 Commands = CommandsOf(session),
+                Folder = session.Folder,
             };
         }
 
@@ -497,6 +498,7 @@ sealed class TerminalHost
             session.Environment)
         {
             Commands = CommandsOf(session),
+            Folder = session.Folder,
         };
     }
 

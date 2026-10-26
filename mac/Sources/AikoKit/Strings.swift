@@ -470,7 +470,6 @@ public enum Strings {
         "TerminalTurnStopped": ("Turn stopped.", "Ход остановлен."),
         "TerminalQueued": ("queued", "в очереди"),
         "SlashGroupSkills": ("Skills", "Навыки"),
-        "SlashKeys": ("↑ ↓ · Enter or Tab to insert · Esc to close", "↑ ↓ · Enter или Tab — подставить · Esc — закрыть"),
         "TerminalCompacted": ("The conversation was made shorter to fit.", "Разговор сжат, чтобы поместиться в память."),
         "TerminalCompactedSize": ("The conversation was made shorter: {0}k tokens before, {1}k now.", "Разговор сжат: было {0} тыс. токенов, стало {1} тыс."),
         "TerminalCompacting": ("Making the conversation shorter…", "Сжимаю разговор…"),
@@ -1811,9 +1810,6 @@ public enum Strings {
 
     /// Skills
     public static var slashGroupSkills: String { Strings.get("SlashGroupSkills") }
-
-    /// ↑ ↓ · Enter or Tab to insert · Esc to close
-    public static var slashKeys: String { Strings.get("SlashKeys") }
 
     /// The conversation was made shorter to fit.
     public static var terminalCompacted: String { Strings.get("TerminalCompacted") }

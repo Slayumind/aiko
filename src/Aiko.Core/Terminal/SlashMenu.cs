@@ -56,6 +56,18 @@ public static class SlashMenu
             .Select(item => item.Match)];
     }
 
+    /// Whether the first line is lit, so that Enter and Tab take it. Only a real match lights it:
+    /// nothing typed yet, an alias, or the start of the name or of a part of it. A name that only
+    /// has the letters inside, as after a typo, leaves the menu dark, and Enter sends the text as
+    /// typed (Claude Code; research of 2026-10-26).
+    public static bool LightsFirst(IReadOnlyList<SlashMatch> matches) =>
+        matches.Count > 0 && IsStrong(matches[0]);
+
+    private static bool IsStrong(SlashMatch match) =>
+        match.MatchLength == 0
+        || match.MatchStart == 0
+        || match.Command.Name[match.MatchStart - 1] is ':' or '-' or '_';
+
     /// The text the field gets when a command is chosen: the command and a space for its
     /// arguments.
     public static string Chosen(SlashCommand command) => "/" + command.Name + " ";
