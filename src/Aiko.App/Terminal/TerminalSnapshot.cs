@@ -11,7 +11,18 @@ static class TerminalSnapshot
     [
         "talk", "feed", "working", "compacting", "long-input", "empty", "form", "elsewhere", "login", "close",
         "voice-idle", "voice-warming", "voice-listening", "voice-finishing", "voice-nomic", "voice-model",
-        "questions", "questions-preview", "questions-answered",
+        "questions", "questions-preview", "questions-answered", "slash",
+    ];
+
+    /// What Claude Code names in its answer to "initialize", a few of them (AIKO-330).
+    private static readonly SlashCommand[] Commands =
+    [
+        new("compact", "Free up context by summarizing the conversation so far", "<optional custom summarization instructions>", [], true),
+        new("config", "Open config panel", "", ["settings"], true),
+        new("context", "Visualize current context usage as a colored grid", "", [], true),
+        new("cost", "Show the total cost and duration of the current session", "", [], true),
+        new("aiko:copy", "(aiko) Write and edit text that reads as written by a person, in Russian and English", "", [], false),
+        new("doctor", "Diagnose and verify your Claude Code installation", "", [], true),
     ];
 
     /// --snapshot-terminal &lt;file&gt; &lt;state&gt; [width]
@@ -29,6 +40,10 @@ static class TerminalSnapshot
         {
             // Twelve lines: more than the field shows, so it scrolls (AIKO-245).
             panel.Input.Typed(string.Join("\n", Enumerable.Range(1, 12).Select(line => $"Line {line} of a long message.")));
+        }
+        else if (state == "slash")
+        {
+            panel.Input.TypedWithMenu("/co");
         }
 
         Snapshot.Write(panel, path);
@@ -250,6 +265,7 @@ static class TerminalSnapshot
                 : state is "working" or "long-input" ? Feed(withCard: false)
                 : state == "compacting" ? Compacting()
                 : state.StartsWith("voice-", StringComparison.Ordinal) ? Feed(withCard: false) with { Busy = false }
+                : state == "slash" ? Feed(withCard: false) with { Busy = false, Commands = Commands }
                 : null,
             now);
     }

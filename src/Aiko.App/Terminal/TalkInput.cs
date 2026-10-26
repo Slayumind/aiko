@@ -79,6 +79,12 @@ sealed class TalkInput : UserControl
     private bool _busy;
     private bool _cardWaits;
 
+    /// The menu of "/" and what it offers. Esc shuts it until the text changes again.
+    private readonly SlashMenuView _menu = new();
+    private IReadOnlyList<SlashCommand> _commands = [];
+    private bool _menuShut;
+    private bool _menuWithoutFocus;
+
     public TalkInput()
     {
         Focusable = false;
@@ -104,6 +110,14 @@ sealed class TalkInput : UserControl
         placeholder.VerticalAlignment = VerticalAlignment.Top;
         placeholder.IsHitTestVisible = false;
         _text.TextChanged += (_, _) => ShowPlaceholder();
+        _text.TextChanged += (_, _) =>
+        {
+            _menuShut = false;
+            ShowMenu();
+        };
+        _text.SelectionChanged += (_, _) => ShowMenu();
+        _text.LostKeyboardFocus += (_, _) => _menu.Close();
+        _menu.Picked += Pick;
 
         // The mic button is the last at the right; the stop button stands left of it, where the
         // paper clip will be (D-308, D-315).
@@ -207,8 +221,16 @@ sealed class TalkInput : UserControl
             Child = noticeWords,
         };
 
+        // The menu stands over the feed, right above the field, and moves nothing when it opens:
+        // a canvas of no height lets it reach up out of its place.
+        var menuPlace = new Canvas { Height = 0 };
+        menuPlace.Children.Add(_menu);
+        Canvas.SetBottom(_menu, -4);
+        menuPlace.SizeChanged += (_, size) => _menu.Width = size.NewSize.Width;
+
         var all = new StackPanel();
         all.Children.Add(_notice);
+        all.Children.Add(menuPlace);
         all.Children.Add(compose);
         all.Children.Add(status);
         Content = all;
@@ -219,6 +241,14 @@ sealed class TalkInput : UserControl
     {
         _text.Text = text;
         _text.CaretIndex = text.Length;
+    }
+
+    /// Text as if it was typed into a field with the keyboard in it, so the menu of "/" opens.
+    /// For the snapshot door, whose window never has the keyboard.
+    public void TypedWithMenu(string text)
+    {
+        _menuWithoutFocus = true;
+        Typed(text);
     }
 
     /// The text box would take the wheel for itself and not scroll; the field scrolls instead.
@@ -464,10 +494,82 @@ sealed class TalkInput : UserControl
 
     // ---- the keys ----
 
+    /// The commands of the environment of the session, for the menu of "/".
+    public void SetCommands(IReadOnlyList<SlashCommand> commands)
+    {
+        if (ReferenceEquals(commands, _commands))
+        {
+            return;
+        }
+
+        _commands = commands;
+        ShowMenu();
+    }
+
+    /// The menu is open while the caret stands in a "/" word at the very start of the field.
+    private void ShowMenu()
+    {
+        var query = _dictating || _menuShut || !(_text.IsKeyboardFocused || _menuWithoutFocus) ? null : SlashMenu.Query(_text.Text, _text.CaretIndex);
+        if (query is null)
+        {
+            _menu.Close();
+            return;
+        }
+
+        _menu.Show(SlashMenu.Matches(_commands, query));
+    }
+
+    /// The command takes the place of the "/" word; what was typed after that word stays.
+    private void Pick(SlashCommand command)
+    {
+        var text = _text.Text;
+        var end = text.IndexOfAny([' ', '\t', '\r', '\n']);
+        var rest = end < 0 ? "" : text[end..].TrimStart(' ', '\t');
+        var chosen = SlashMenu.Chosen(command);
+
+        _text.Text = chosen + rest;
+        _text.CaretIndex = chosen.Length;
+        _menuShut = true;
+        _menu.Close();
+        _text.Focus();
+    }
+
+    /// While the menu is open, the arrows, Enter, Tab and Esc are its own. Whether the key was taken.
+    private bool MenuKey(Key key, ModifierKeys modifiers)
+    {
+        if (!_menu.IsOpen || modifiers != ModifierKeys.None)
+        {
+            return false;
+        }
+
+        switch (key)
+        {
+            case Key.Up:
+                _menu.Move(-1);
+                return true;
+            case Key.Down:
+                _menu.Move(+1);
+                return true;
+            case Key.Enter or Key.Tab when _menu.Highlighted is { } command:
+                Pick(command);
+                return true;
+            case Key.Escape:
+                _menuShut = true;
+                _menu.Close();
+                return true;
+            default:
+                return false;
+        }
+    }
+
     private void OnKey(object sender, KeyEventArgs e)
     {
         var modifiers = Keyboard.Modifiers;
-        if (e.Key == Key.Space && modifiers == ModifierKeys.Control)
+        if (MenuKey(e.Key, modifiers))
+        {
+            e.Handled = true;
+        }
+        else if (e.Key == Key.Space && modifiers == ModifierKeys.Control)
         {
             e.Handled = true;
             VoicePressed?.Invoke();
