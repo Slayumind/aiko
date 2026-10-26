@@ -469,7 +469,9 @@ public enum Strings {
         "TerminalQuestionsDenied": ("Questions: declined", "Вопросы: отказано"),
         "TerminalStop": ("Stop", "Остановить"),
         "TerminalTurnStopped": ("Turn stopped.", "Ход остановлен."),
-        "TerminalQueued": ("queued", "в очереди"),
+        "TerminalQueued": ("goes in at the next step", "войдёт в ход на следующем шаге"),
+        "TerminalQueuedCommand": ("runs after this turn", "выполнится после этого хода"),
+        "TerminalMoreLines": ("… {0} more lines", "… ещё строк: {0}"),
         "SlashGroupSkills": ("Skills", "Навыки"),
         "TerminalCompacted": ("The conversation was made shorter to fit.", "Разговор сжат, чтобы поместиться в память."),
         "TerminalCompactedSize": ("The conversation was made shorter: {0}k tokens before, {1}k now.", "Разговор сжат: было {0} тыс. токенов, стало {1} тыс."),
@@ -1809,8 +1811,14 @@ public enum Strings {
     /// Turn stopped.
     public static var terminalTurnStopped: String { Strings.get("TerminalTurnStopped") }
 
-    /// queued
+    /// goes in at the next step
     public static var terminalQueued: String { Strings.get("TerminalQueued") }
+
+    /// runs after this turn
+    public static var terminalQueuedCommand: String { Strings.get("TerminalQueuedCommand") }
+
+    /// … {0} more lines
+    public static var terminalMoreLines: String { Strings.get("TerminalMoreLines") }
 
     /// Skills
     public static var slashGroupSkills: String { Strings.get("SlashGroupSkills") }

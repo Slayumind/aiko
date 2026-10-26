@@ -284,7 +284,7 @@ public sealed record Conversation(
 
     /// Claude Code runs a command only at the start of a turn; in the middle of one it would read
     /// it as plain words. So Aiko holds a command until the turn is over (D-341).
-    private static bool IsCommand(string text) => text.TrimStart().StartsWith('/');
+    public static bool IsCommand(string text) => text.TrimStart().StartsWith('/');
 
     /// Claude Code took a message sent during the work and says it back (--replay-user-messages):
     /// the message is no longer grey, and the work goes on with it. A message it says back that was

@@ -544,6 +544,55 @@ public class SharedCaseTests
     }
 
     [Fact]
+    public void Every_feed_joins_the_same_steps_and_cuts_the_same_output()
+    {
+        var cases = SpecCases.Json("feed-entries");
+
+        foreach (var feed in cases.GetProperty("feeds").EnumerateArray())
+        {
+            List<FeedItem> items = [.. feed.GetProperty("items").EnumerateArray().Select((item, at) => FeedItemIn(item, at + 1))];
+            var rows = new JsonArray([.. FeedEntries.Of(items).Select(Described)]);
+            Assert.True(JsonNode.DeepEquals(JsonNode.Parse(feed.GetProperty("rows").GetRawText()), rows),
+                $"{feed.GetProperty("name").GetString()}: {rows.ToJsonString()}");
+        }
+
+        foreach (var row in cases.GetProperty("outputs").EnumerateArray())
+        {
+            var count = row.GetProperty("lines").GetInt32();
+            var (text, hidden) = LongOutput.Cut(string.Join('\n', Enumerable.Range(1, count).Select(at => $"line {at}")) + "\n");
+            Assert.Equal(row.GetProperty("shown").GetInt32(), StepLine.Lines(text).Count);
+            Assert.Equal(row.GetProperty("hidden").GetInt32(), hidden);
+        }
+    }
+
+    private static FeedItem FeedItemIn(JsonElement item, int id)
+    {
+        if (item.TryGetProperty("other", out _))
+        {
+            return new FeedItem.Answer(id, "words", false);
+        }
+
+        var kind = Enum.Parse<StepKind>(item.GetProperty("kind").GetString()!, ignoreCase: true);
+        var hidden = item.TryGetProperty("hidden", out var flag) && flag.GetBoolean();
+        var line = new StepLine(kind, "", item.GetProperty("subject").GetString()!, 0, 0, hidden);
+        var state = Enum.Parse<StepState>(item.GetProperty("state").GetString()!, ignoreCase: true);
+        return new FeedItem.Step(id, $"toolu_{id}", line, state, "", [], "");
+    }
+
+    private static JsonObject Described(FeedEntry entry) => entry switch
+    {
+        FeedEntry.Run run => new JsonObject
+        {
+            ["run"] = new JsonArray([.. run.Steps.Select(step => (JsonNode)step.Id)]),
+            ["kind"] = Camel(run.Kind),
+            ["state"] = Camel(run.State),
+            ["names"] = new JsonArray([.. run.Subjects().Names.Select(name => (JsonNode)name)]),
+            ["more"] = run.Subjects().More,
+        },
+        _ => new JsonObject { ["one"] = entry.Id },
+    };
+
+    [Fact]
     public void Every_slash_menu_shows_the_same_commands()
     {
         var cases = SpecCases.Json("slash-menu");

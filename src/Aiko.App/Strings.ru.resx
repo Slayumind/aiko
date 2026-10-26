@@ -1319,7 +1319,13 @@
     <value>Ход остановлен.</value>
   </data>
   <data name="TerminalQueued" xml:space="preserve">
-    <value>в очереди</value>
+    <value>войдёт в ход на следующем шаге</value>
+  </data>
+  <data name="TerminalQueuedCommand" xml:space="preserve">
+    <value>выполнится после этого хода</value>
+  </data>
+  <data name="TerminalMoreLines" xml:space="preserve">
+    <value>… ещё строк: {0}</value>
   </data>
   <data name="SlashGroupSkills" xml:space="preserve">
     <value>Навыки</value>

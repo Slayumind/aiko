@@ -203,7 +203,7 @@ sealed class TalkPanel : UserControl
             _follow = true;
         }
 
-        List<object> rows = [.. view.Items];
+        List<object> rows = [.. FeedEntries.Of(view.Items).Select(entry => entry is FeedEntry.One one ? one.Item : (object)entry)];
         if (view.Busy && !view.HasOpenCard)
         {
             rows.Add(view.Compacting ? WorkingMark.Compacting : WorkingMark.Row);
@@ -443,8 +443,8 @@ sealed class FeedSlot(object item) : INotifyPropertyChanged
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    /// A FeedItem, or the WorkingMark. The core gives the same record for an item nothing
-    /// happened to, and then the row is not built again.
+    /// A FeedItem, a run of steps, or the WorkingMark. The core gives the same record for an item
+    /// nothing happened to, and then the row is not built again.
     public object Item
     {
         get => _item;
@@ -464,6 +464,7 @@ sealed class FeedSlot(object item) : INotifyPropertyChanged
     public bool Holds(object item) => (_item, item) switch
     {
         (FeedItem shown, FeedItem next) => shown.Id == next.Id && shown.GetType() == next.GetType(),
+        (FeedEntry.Run shown, FeedEntry.Run next) => shown.Id == next.Id,
         _ => ReferenceEquals(_item, item),
     };
 }
@@ -531,6 +532,7 @@ sealed class FeedRow : ContentControl
             FeedItem.Step { Answers.Count: > 0 } step => Answered(step.Answers),
             FeedItem.Step { Line.Label: QuestionAnswers.Tool, State: StepState.Failed } => Declined(),
             FeedItem.Step { Line.Hidden: false } step => StepRow(step),
+            FeedEntry.Run run => RunRow(run),
             FeedItem.Card { State: RequestState.Open } card => Card(card.Request),
             FeedItem.Notice notice => Notice(notice),
             _ => null,
@@ -604,7 +606,8 @@ sealed class FeedRow : ContentControl
         column.Children.Add(block);
         if (message.Queued)
         {
-            var queued = TerminalPanel.Mono(Strings.TerminalQueued, "Muted");
+            var queued = TerminalPanel.Mono(
+                Conversation.IsCommand(message.Text) ? Strings.TerminalQueuedCommand : Strings.TerminalQueued, "Muted");
             queued.Margin = new Thickness(0, 4, 0, 0);
             queued.HorizontalAlignment = HorizontalAlignment.Right;
             column.Children.Add(queued);
@@ -672,23 +675,91 @@ sealed class FeedRow : ContentControl
         SelectionBrush = Tokens.Brush("Muted"),
     };
 
-    /// A step is one line behind a rule on the left; the rules of steps in a row join into one
-    /// line, so the rows keep no gap between them (D-299).
-    private UIElement StepRow(FeedItem.Step step)
+    /// Reads or searches in a row: "read ×3 · a.cs, b.cs, +1" (D-342). A click opens the steps
+    /// themselves under the line, each with its own result.
+    private UIElement RunRow(FeedEntry.Run run)
     {
-        var tone = step.State == StepState.Failed ? "Destructive" : "Muted";
+        var (names, more) = run.Subjects();
+        var subject = string.Join(", ", names) + (more > 0 ? $", +{more}" : "");
+        var row = StepLineRow(TalkPanel.StepWord(run.Kind, ""), $"×{run.Steps.Count} · {subject}", run.State);
+        AddRunning(row, run.State);
+
+        var key = "run:" + run.Steps[0].ToolUseId;
+        var steps = new StackPanel { Margin = new Thickness(0, 2, 0, 4) };
+        void Fill()
+        {
+            steps.Children.Clear();
+            foreach (var step in run.Steps)
+            {
+                steps.Children.Add(StepRow(step));
+            }
+        }
+
+        var open = FindPanel()?.IsOpen(key) == true;
+        if (open)
+        {
+            Fill();
+        }
+        steps.Visibility = open ? Visibility.Visible : Visibility.Collapsed;
+
+        var head = new Border { Background = Brushes.Transparent, Cursor = Cursors.Hand, Child = row };
+        head.MouseLeftButtonUp += (_, _) =>
+        {
+            FindPanel()?.Toggle(key);
+            if (steps.Children.Count == 0)
+            {
+                Fill();
+            }
+            steps.Visibility = steps.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
+        };
+
+        var column = new StackPanel();
+        column.Children.Add(head);
+        column.Children.Add(steps);
+        return new Border
+        {
+            BorderBrush = Tokens.Brush("Raised"),
+            BorderThickness = new Thickness(2, 0, 0, 0),
+            Padding = new Thickness(14, 0, 0, 0),
+            MinHeight = 24,
+            Child = column,
+        };
+    }
+
+    /// The word of a step and what it is about, on one line.
+    private static StackPanel StepLineRow(string word, string about, StepState state)
+    {
+        var tone = state == StepState.Failed ? "Destructive" : "Muted";
         var row = new StackPanel { Orientation = Orientation.Horizontal };
-        var verb = TerminalPanel.Text(TalkPanel.StepWord(step.Line.Kind, step.Line.Label), "TextNumber", tone, FontWeights.Normal);
+        var verb = TerminalPanel.Text(word, "TextNumber", tone, FontWeights.Normal);
         verb.MinWidth = 52;
         row.Children.Add(verb);
 
-        var subject = TerminalPanel.Mono(step.Line.Subject, step.State == StepState.Failed ? "Destructive" : "Ink");
+        var subject = TerminalPanel.Mono(about, state == StepState.Failed ? "Destructive" : "Ink");
         subject.FontSize = 12.5;
         subject.Margin = new Thickness(10, 0, 0, 0);
         subject.MaxWidth = 560;
         subject.TextTrimming = TextTrimming.CharacterEllipsis;
         row.Children.Add(subject);
+        return row;
+    }
 
+    /// A step at work ends its line with an open dot.
+    private static void AddRunning(StackPanel row, StepState state)
+    {
+        if (state == StepState.Running)
+        {
+            var dot = TerminalPanel.Dot(filled: false);
+            dot.Margin = new Thickness(8, 0, 0, 0);
+            row.Children.Add(dot);
+        }
+    }
+
+    /// A step is one line behind a rule on the left; the rules of steps in a row join into one
+    /// line, so the rows keep no gap between them (D-299).
+    private UIElement StepRow(FeedItem.Step step)
+    {
+        var row = StepLineRow(TalkPanel.StepWord(step.Line.Kind, step.Line.Label), step.Line.Subject, step.State);
         if (step.Line.Added > 0 || step.Line.Removed > 0)
         {
             var added = TerminalPanel.Mono($"+{step.Line.Added}", "Positive");
@@ -701,13 +772,7 @@ sealed class FeedRow : ContentControl
             row.Children.Add(removed);
         }
 
-        if (step.State == StepState.Running)
-        {
-            var dot = TerminalPanel.Dot(filled: false);
-            dot.Margin = new Thickness(8, 0, 0, 0);
-            row.Children.Add(dot);
-        }
-
+        AddRunning(row, step.State);
         return new Border
         {
             BorderBrush = Tokens.Brush("Raised"),
@@ -753,11 +818,7 @@ sealed class FeedRow : ContentControl
         column.Children.Add(head);
 
         var open = FindPanel()?.IsOpen(step.ToolUseId) == true;
-        var result = Words(step.Result.TrimEnd(), "Muted", new Thickness(0, 4, 0, 8));
-        result.FontFamily = Tokens.Get<FontFamily>("Mono");
-        result.FontSize = Tokens.Get<double>("TextSmall");
-        result.MaxHeight = 280;
-        result.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
+        var result = Output(step.Result);
         result.Visibility = open ? Visibility.Visible : Visibility.Collapsed;
         column.Children.Add(result);
 
@@ -766,6 +827,37 @@ sealed class FeedRow : ContentControl
             FindPanel()?.Toggle(step.ToolUseId);
             result.Visibility = result.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
         };
+        return column;
+    }
+
+    /// An output in small mono letters. A long one shows its first 10 lines and a button for the
+    /// rest; the feed grows with it, with no scroll of its own inside the feed (D-342).
+    private static UIElement Output(string text)
+    {
+        var (shown, hidden) = LongOutput.Cut(text);
+        var words = Words(shown, "Muted", new Thickness(0, 4, 0, hidden > 0 ? 2 : 8));
+        words.FontFamily = Tokens.Get<FontFamily>("Mono");
+        words.FontSize = Tokens.Get<double>("TextSmall");
+
+        var column = new StackPanel();
+        column.Children.Add(words);
+        if (hidden > 0)
+        {
+            var more = TerminalPanel.Mono(string.Format(CultureInfo.CurrentCulture, Strings.TerminalMoreLines, hidden), "Muted");
+            more.FontSize = Tokens.Get<double>("TextSmall");
+            more.Margin = new Thickness(0, 0, 0, 8);
+            more.Cursor = Cursors.Hand;
+            more.HorizontalAlignment = HorizontalAlignment.Left;
+            more.MouseLeftButtonUp += (_, e) =>
+            {
+                words.Text = text.TrimEnd();
+                words.Margin = new Thickness(0, 4, 0, 8);
+                column.Children.Remove(more);
+                e.Handled = true;
+            };
+            column.Children.Add(more);
+        }
+
         return column;
     }
 
@@ -966,14 +1058,12 @@ sealed class FeedRow : ContentControl
             return new Border();
         }
 
-        var words = Words(text, notice.Kind == NoticeKind.Failed ? "Destructive" : "Muted", new Thickness(0, 4, 0, 4));
         if (notice.Kind == NoticeKind.Output)
         {
-            words.FontFamily = Tokens.Get<FontFamily>("Mono");
-            words.FontSize = Tokens.Get<double>("TextSmall");
+            return Output(text);
         }
 
-        return words;
+        return Words(text, notice.Kind == NoticeKind.Failed ? "Destructive" : "Muted", new Thickness(0, 4, 0, 4));
     }
 
     private void Choose(RequestCard request, CardChoice choice) =>

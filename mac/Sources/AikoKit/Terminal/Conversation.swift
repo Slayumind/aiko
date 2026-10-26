@@ -345,7 +345,7 @@ public struct Conversation: Sendable, Equatable {
 
     /// Claude Code runs a command only at the start of a turn; in the middle of one it would read
     /// it as plain words. So Aiko holds a command until the turn is over (D-341).
-    private static func isCommand(_ text: String) -> Bool {
+    public static func isCommand(_ text: String) -> Bool {
         text.drop(while: { $0.isWhitespace }).hasPrefix("/")
     }
 
