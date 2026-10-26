@@ -23,9 +23,14 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   above it, options with their descriptions, ticks when you can pick several, your own answer under
   Other, and the preview of an option under the list. Answer with the mouse or the keys: arrows,
   Space, digits, Enter, Esc. After you answer, your choices stay in the feed, also after a restart.
-- **Menu of commands.** Type / at the start of the field, and a list of the commands of Claude Code
-  and your skills opens over it, with their descriptions. Arrows move, Enter or Tab inserts the
-  command, Esc closes the list. On Windows; the Mac follows before the release.
+- **Menus of commands and files.** Type / at the start of the field, and a list of the commands of
+  Claude Code and your skills opens over it, with their descriptions. Type @ for the files of the
+  session's folder, the best matches first. Arrows move, Enter or Tab inserts, Esc closes the list;
+  after a typo Enter sends your text as typed. Each session keeps its own draft. On Windows; the
+  Mac follows before the release.
+- **Lists that behave the same everywhere.** Every drop-down opens on the press, right under its
+  button, and comes up the same short way. Rows follow the mouse only when it moves, so the keyboard
+  keeps its row, and Home, End, Page Up and Page Down work in lists.
 - **Models from Claude Code.** The form of a new session and a click on the model under the field
   offer the models Claude Code names, such as Fable 5.1, so a new model needs no new Aiko.
 - **Subagents in the feed.** Under the line of a subagent at work you see what it does now. A
