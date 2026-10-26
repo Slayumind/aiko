@@ -18,6 +18,36 @@ public static class SessionName
         }
     }
 
+    /// The longest name taken from a message, in UTF-16 units (Crush; research of 2026-10-26).
+    public const int MostFromMessage = 50;
+
+    /// The name a new session gets from its first message (D-342): its first line with the spaces
+    /// squeezed, cut to MostFromMessage at a space when one comes after the first 20 units. A message
+    /// with no words gives fallback.
+    public static string FromMessage(string message, string fallback)
+    {
+        var line = message.Replace("\r\n", "\n").Split('\n').Select(part => part.Trim(' ', '\t')).FirstOrDefault(part => part.Length > 0);
+        if (line is null)
+        {
+            return fallback;
+        }
+
+        line = string.Join(' ', line.Split([' ', '\t'], StringSplitOptions.RemoveEmptyEntries));
+        if (line.Length <= MostFromMessage)
+        {
+            return line;
+        }
+
+        var cut = line.LastIndexOf(' ', MostFromMessage);
+        var end = cut >= 20 ? cut : MostFromMessage;
+        if (char.IsHighSurrogate(line[end - 1]))
+        {
+            end--;
+        }
+
+        return line[..end].TrimEnd(' ', ',', ';', ':', '-', '—');
+    }
+
     /// A name as it is kept: one line, without spaces around it.
     public static string Clean(string? name) =>
         (name ?? "").Replace("\r\n", " ").Replace('\r', ' ').Replace('\n', ' ').Replace('\t', ' ').Trim(' ');

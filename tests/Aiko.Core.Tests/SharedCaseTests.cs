@@ -1044,6 +1044,13 @@ public class SharedCaseTests
             Assert.Equal(row.GetProperty("name").GetString(), SessionName.FolderName(input));
             Assert.Equal(row.GetProperty("parent").GetString(), SessionName.ParentName(input));
         }
+
+        foreach (var row in cases.GetProperty("fromMessages").EnumerateArray())
+        {
+            Assert.Equal(
+                row.GetProperty("name").GetString(),
+                SessionName.FromMessage(row.GetProperty("message").GetString()!, row.GetProperty("fallback").GetString()!));
+        }
     }
 
     [Fact]

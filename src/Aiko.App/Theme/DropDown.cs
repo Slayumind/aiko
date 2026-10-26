@@ -25,6 +25,7 @@ sealed class DropDown : UserControl
 
     private readonly Border _listFrame = new();
     private IReadOnlyList<string> _items = [];
+    private IReadOnlyList<string> _short = [];
     private IReadOnlyDictionary<int, string> _headers = new Dictionary<int, string>();
     private int _selected = -1;
     private int _highlighted = -1;
@@ -52,6 +53,18 @@ sealed class DropDown : UserControl
         }
     }
 
+    /// Shorter words for the chosen item on the button, in the order of Items: the list may say
+    /// more to tell two items apart than the button needs. Empty: the button shows the item.
+    public IReadOnlyList<string> Short
+    {
+        get => _short;
+        set
+        {
+            _short = value;
+            Refresh();
+        }
+    }
+
     /// Group titles in the open list, each above the item with its index. A title is not an
     /// item: it cannot be picked and the arrows step over it.
     public IReadOnlyDictionary<int, string> Headers
@@ -75,6 +88,23 @@ sealed class DropDown : UserControl
     }
 
     public bool IsOpen => _popup.IsOpen;
+
+    /// The quiet look for a line of small text, as under the field of the terminal: no fill and no
+    /// frame, the text in the mono face, the list as usual.
+    public void MakeQuiet()
+    {
+        _button.Background = Brushes.Transparent;
+        _button.BorderThickness = new Thickness(0);
+        _button.Height = 20;
+        _button.CornerRadius = new CornerRadius(5);
+        _chosen.FontFamily = Tokens.Get<FontFamily>("Mono");
+        _chosen.FontSize = 11.5;
+        _chosen.Foreground = Brush("Muted");
+        if (_button.Child is Grid { Children: [_, Border inner] })
+        {
+            inner.Padding = new Thickness(4, 0, 4, 0);
+        }
+    }
 
     private void Build()
     {
@@ -370,7 +400,9 @@ sealed class DropDown : UserControl
 
     private void Refresh()
     {
-        _chosen.Text = _selected >= 0 && _selected < _items.Count ? _items[_selected] : "";
+        _chosen.Text = _selected < 0 || _selected >= _items.Count ? ""
+            : _selected < _short.Count ? _short[_selected]
+            : _items[_selected];
         if (_popup.IsOpen)
         {
             FillList();

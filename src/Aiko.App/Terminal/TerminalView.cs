@@ -9,7 +9,9 @@ sealed record TabView(string Name, bool Selected, int Waiting);
 /// The one percentage in the title bar (D-296).
 sealed record BadgeView(int Percent, LimitTone Tone, LimitKind Kind);
 
-/// What the form of a new session offers and what is chosen in it.
+/// A new session before its first message (D-342): what it offers and what is chosen. There is no
+/// form any more: the session shows as an empty conversation, and these choices sit in the line
+/// under its field. DefaultName is the name when the first message has no words.
 sealed record FormView(
     string Environment,
     IReadOnlyList<FolderChoice> Folders,
@@ -20,6 +22,12 @@ sealed record FormView(
 {
     /// The models to choose from; Model is a place in this list.
     public IReadOnlyList<ClaudeModel> Models { get; init; } = NewSessionChoices.Offered([]);
+
+    /// The mode the session starts in: the one the folder's settings name, until changed.
+    public PermissionMode Mode { get; init; } = PermissionMode.Manual;
+
+    /// The commands of "/" in the environment, so the menu works before the first message.
+    public IReadOnlyList<SlashCommand> Commands { get; init; } = [];
 }
 
 /// A question over the conversation: close something that still works?
