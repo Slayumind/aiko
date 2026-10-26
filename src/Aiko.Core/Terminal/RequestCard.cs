@@ -26,7 +26,8 @@ public enum SecondChoice
     AlwaysAllow,
 }
 
-public sealed record QuestionOption(string Label, string Description);
+/// Preview: what the option looks like, monospaced, shown under the options (AIKO-327).
+public sealed record QuestionOption(string Label, string Description, string Preview = "");
 
 public sealed record CardQuestion(string Text, string Header, bool MultiSelect, IReadOnlyList<QuestionOption> Options);
 
@@ -137,7 +138,7 @@ public sealed record RequestCard(
         foreach (var question in Objects(input, "questions"))
         {
             var options = Objects(question, "options")
-                .Select(option => new QuestionOption(Text(option, "label"), Text(option, "description")))
+                .Select(option => new QuestionOption(Text(option, "label"), Text(option, "description"), Text(option, "preview")))
                 .Where(option => option.Label.Length > 0)
                 .ToList();
 

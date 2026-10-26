@@ -985,7 +985,7 @@
       }
     },
     {
-      "name": "a question waits for an answer",
+      "name": "a question waits for an answer, its step kept hidden for the answers",
       "steps": [
         {
           "do": "send",
@@ -1068,6 +1068,20 @@
             "queued": false
           },
           {
+            "step": {
+              "kind": "other",
+              "label": "AskUserQuestion",
+              "subject": "",
+              "added": 0,
+              "removed": 0,
+              "hidden": true
+            },
+            "state": "running",
+            "result": "",
+            "images": 0,
+            "progress": ""
+          },
+          {
             "card": "question",
             "state": "open",
             "requestId": "req-1",
@@ -1088,7 +1102,7 @@
       }
     },
     {
-      "name": "a question is a card without a step",
+      "name": "a question is a card, its step kept hidden for the answers",
       "steps": [
         {
           "do": "send",
@@ -1179,6 +1193,20 @@
             "owner": "decide",
             "images": 0,
             "queued": false
+          },
+          {
+            "step": {
+              "kind": "other",
+              "label": "AskUserQuestion",
+              "subject": "",
+              "added": 0,
+              "removed": 0,
+              "hidden": true
+            },
+            "state": "running",
+            "result": "",
+            "images": 0,
+            "progress": ""
           },
           {
             "card": "question",
@@ -1892,6 +1920,69 @@
         "kind": "other",
         "label": "",
         "text": ""
+      }
+    },
+    {
+      "name": "an answer that only talks about a sign-in is a plain answer",
+      "steps": [
+        {
+          "do": "send",
+          "text": "what does Not logged in mean?"
+        },
+        {
+          "line": {
+            "type": "assistant",
+            "message": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Not logged in · Please run /login"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "line": {
+            "type": "result",
+            "subtype": "success",
+            "is_error": false
+          }
+        },
+        {
+          "do": "markRead"
+        }
+      ],
+      "state": {
+        "activity": "idle",
+        "mode": "manual",
+        "model": "",
+        "session": "",
+        "tasks": 0,
+        "unread": false,
+        "compacting": false,
+        "limits": 0,
+        "items": [
+          {
+            "owner": "what does Not logged in mean?",
+            "images": 0,
+            "queued": false
+          },
+          {
+            "answer": "Not logged in · Please run /login",
+            "streaming": false
+          }
+        ]
+      },
+      "written": [
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"what does Not logged in mean?\"}]}}"
+      ],
+      "glance": {
+        "activity": "idle",
+        "line": "answer",
+        "kind": "other",
+        "label": "",
+        "text": "Not logged in · Please run /login"
       }
     },
     {

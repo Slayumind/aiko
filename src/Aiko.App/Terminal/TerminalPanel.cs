@@ -40,29 +40,67 @@ sealed class TerminalPanel : UserControl
 
     internal TalkInput Input => _talk.Input;
 
-    /// Keys of the conversation from any place of the window, not only from the field, which takes
-    /// them first. Enter and Esc answer a waiting card (AIKO-244); Ctrl+Space starts or ends a
-    /// recording into the field of the open session (AIKO-311). Another field where one types, a
-    /// button and a list keep their own keys.
-    private void OnWindowKey(object sender, KeyEventArgs e)
+    /// Keys of the conversation from any place of the window (D-328). The window hears a key first,
+    /// wherever the keyboard is, even nowhere after a click on a part that takes no keyboard. The
+    /// field of the conversation keeps its own keys, and so does any other field one types into.
+    /// Enter and Esc stay with a button, a drop-down and a popup of their own.
+    public void OnWindowKey(object sender, KeyEventArgs e)
     {
-        if (e.Handled || !_talk.IsVisible || e.OriginalSource is TextBoxBase { IsReadOnly: false })
+        if (e.Handled || !_talk.IsVisible || OwnTyping(e.OriginalSource))
         {
             return;
         }
 
-        if (e.Key == Key.Space && Keyboard.Modifiers == ModifierKeys.Control)
+        var modifiers = Keyboard.Modifiers;
+        var key = e.Key == Key.System ? e.SystemKey : e.Key;
+        if (key == Key.Space && modifiers == ModifierKeys.Control)
         {
             e.Handled = true;
             _talk.Input.PressVoice();
         }
-        else if (Keyboard.Modifiers == ModifierKeys.None
-            && e.Key is Key.Enter or Key.Escape
-            && e.OriginalSource is not (ButtonBase or ComboBox))
+        else if (key == Key.Tab && modifiers == ModifierKeys.Shift)
         {
-            e.Handled = _talk.Input.AnswerCard(e.Key == Key.Enter ? TalkKey.Enter : TalkKey.Escape);
+            e.Handled = true;
+            _talk.Input.AskMode();
+        }
+        else if (key == Key.V && modifiers == ModifierKeys.Control)
+        {
+            e.Handled = true;
+            _talk.Input.PasteHere();
+        }
+        else if (modifiers == ModifierKeys.None
+            && key is Key.Enter or Key.Escape
+            && e.OriginalSource is not (ButtonBase or ComboBox or ComboBoxItem)
+            && !QuestionCardView.Holds(e.OriginalSource)
+            && InThisWindow(e.OriginalSource))
+        {
+            e.Handled = _talk.Input.PressOutside(key == Key.Enter ? TalkKey.Enter : TalkKey.Escape);
         }
     }
+
+    /// Letters typed in another place of the window go into the field (D-328). A space stays with
+    /// the button or the list it was pressed on, and a digit with the card of questions (D-330).
+    public void OnWindowText(object sender, TextCompositionEventArgs e)
+    {
+        if (e.Handled || !_talk.IsVisible || OwnTyping(e.OriginalSource) || QuestionCardView.Holds(e.OriginalSource)
+            || e.Text.Length == 0 || e.Text.All(c => char.IsWhiteSpace(c) || char.IsControl(c)))
+        {
+            return;
+        }
+
+        e.Handled = _talk.Input.TypeHere(e.Text);
+    }
+
+    /// The field of the conversation, or another field one types into: the name of a session, the
+    /// first message of a new one.
+    private bool OwnTyping(object source) =>
+        _talk.Input.Owns(source) || source is TextBoxBase { IsReadOnly: false };
+
+    /// A popup, such as the list of a drop-down, is a window of its own, and Enter and Esc belong to
+    /// it. So do a link in the text of an answer, which is not a Visual.
+    private static bool InThisWindow(object source) =>
+        source is Visual visual && PresentationSource.FromVisual(visual)?.RootVisual is Window;
+
     private string? _talkSession;
 
     // What is typed into the form stays here while the view is drawn again.
@@ -82,7 +120,6 @@ sealed class TerminalPanel : UserControl
             Source = new Uri("pack://application:,,,/Theme/Controls.xaml", UriKind.Absolute),
         });
         Resources[typeof(ScrollViewer)] = Resources["QuietScroll"];
-        KeyDown += OnWindowKey;
 
         _listButton = Flat("", () => _listPopup.IsOpen = !_listPopup.IsOpen, ghost: false);
         _listButton.Margin = new Thickness(10, 0, 0, 0);

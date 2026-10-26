@@ -22,17 +22,20 @@ public struct StreamImage: Sendable, Equatable {
 }
 
 /// What a tool gave back.
+/// answers: what the person chose on a card of questions.
 public struct ToolResult: Sendable, Equatable {
     public let toolUseId: String
     public let isError: Bool
     public let text: String
     public let images: [StreamImage]
+    public var answers: [QuestionAnswer]
 
-    public init(toolUseId: String, isError: Bool, text: String, images: [StreamImage]) {
+    public init(toolUseId: String, isError: Bool, text: String, images: [StreamImage], answers: [QuestionAnswer] = []) {
         self.toolUseId = toolUseId
         self.isError = isError
         self.text = text
         self.images = images
+        self.answers = answers
     }
 }
 
@@ -251,6 +254,14 @@ public enum StreamEvent: Sendable, Equatable {
             default:
                 break
             }
+        }
+
+        // Claude Code keeps what a tool returned beside the message, once for it. Only the answers
+        // to questions are read from it; the rest holds paths and the contents of files.
+        if results.count == 1 {
+            let chosen = QuestionAnswers.from(
+                root["tool_use_result"]?.objectValue ?? root["toolUseResult"]?.objectValue)
+            if !chosen.isEmpty { results[0].answers = chosen }
         }
 
         return .user(

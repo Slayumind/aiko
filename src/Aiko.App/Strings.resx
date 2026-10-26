@@ -1282,6 +1282,30 @@
   <data name="TerminalCardKeys" xml:space="preserve">
     <value>Enter to allow · Esc to deny</value>
   </data>
+  <data name="TerminalQuestionStep" xml:space="preserve">
+    <value>question {0} of {1}</value>
+  </data>
+  <data name="TerminalQuestionMany" xml:space="preserve">
+    <value>you can pick several</value>
+  </data>
+  <data name="TerminalQuestionOther" xml:space="preserve">
+    <value>Other</value>
+  </data>
+  <data name="TerminalQuestionOtherHint" xml:space="preserve">
+    <value>Write your own answer</value>
+  </data>
+  <data name="TerminalQuestionBack" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="TerminalQuestionNext" xml:space="preserve">
+    <value>Next</value>
+  </data>
+  <data name="TerminalQuestionAnswer" xml:space="preserve">
+    <value>Answer</value>
+  </data>
+  <data name="TerminalQuestionsDenied" xml:space="preserve">
+    <value>Questions: declined</value>
+  </data>
   <data name="TerminalStop" xml:space="preserve">
     <value>Stop</value>
   </data>
@@ -1308,6 +1332,12 @@
   </data>
   <data name="TerminalWaitsForYou" xml:space="preserve">
     <value>Waiting for you: {0}</value>
+  </data>
+  <data name="TerminalWaitsQuestions" xml:space="preserve">
+    <value>questions</value>
+  </data>
+  <data name="TerminalWaitsPlan" xml:space="preserve">
+    <value>the plan</value>
   </data>
   <data name="TerminalShow" xml:space="preserve">
     <value>Show</value>

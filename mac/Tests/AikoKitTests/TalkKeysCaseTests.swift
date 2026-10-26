@@ -3,7 +3,7 @@ import Testing
 
 @testable import AikoKit
 
-/// Enter and Esc of the field read from spec/cases, the same table the xUnit tests read.
+/// Enter and Esc of the field and of the window read from spec/cases, the same table the xUnit tests read.
 struct TalkKeysCaseTests {
     @Test
     func everyKeyDoesWhatTheTableSays() {
@@ -17,7 +17,9 @@ struct TalkKeysCaseTests {
                 continue
             }
 
-            let state = TalkKeyState(cardWaits: card, empty: empty, busy: busy, dictating: dictating, voiceActive: voice)
+            let state = TalkKeyState(
+                cardWaits: card, empty: empty, busy: busy, dictating: dictating, voiceActive: voice,
+                outside: row["outside"]?.boolValue ?? false)
             #expect(TalkKeys.action(key, state) == expected, "\(row["name"]?.stringValue ?? "")")
         }
     }

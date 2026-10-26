@@ -809,7 +809,8 @@ struct SharedCaseTests {
                     ("text", .string(question.text)), ("header", .string(question.header)),
                     ("multi", .bool(question.multiSelect)),
                     ("options", .array(question.options.map {
-                        node([("label", .string($0.label)), ("description", .string($0.description))])
+                        node([("label", .string($0.label)), ("description", .string($0.description))]
+                            + ($0.preview.isEmpty ? [] : [("preview", .string($0.preview))]))
                     })),
                 ])
             })),
@@ -838,7 +839,7 @@ struct SharedCaseTests {
                 ("step", describedStep(step.line)), ("state", .string(String(describing: step.state))),
                 ("result", .string(step.result)), ("images", number(step.images.count)),
                 ("progress", .string(step.progress)),
-            ])
+            ] + answered(step.answers))
         case .card(let request, let state):
             return node([
                 ("card", .string(String(describing: request.kind))), ("state", .string(String(describing: state))),
@@ -1410,6 +1411,13 @@ struct SharedCaseTests {
         value.map(JsonNode.string) ?? .null
     }
 
+    /// The answers to questions are named only where there are some, so older cases stay as they are.
+    private static func answered(_ answers: [QuestionAnswer]) -> [(String, JsonNode)] {
+        answers.isEmpty ? [] : [("answers", .array(answers.map {
+            node([("header", .string($0.header)), ("answer", .string($0.answer))])
+        }))]
+    }
+
     private static func node(_ pairs: [(String, JsonNode)]) -> JsonNode {
         .object(JsonObject(pairs))
     }
@@ -1442,7 +1450,7 @@ struct SharedCaseTests {
                         ("images", .array(result.images.map {
                             node([("mediaType", .string($0.mediaType)), ("data", .string($0.data))])
                         })),
-                    ])
+                    ] + answered(result.answers))
                 })),
             ])
         case .textDelta(let parent, let words):

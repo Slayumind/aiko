@@ -261,6 +261,15 @@ sealed class TalkPanel : UserControl
         _ => label,
     };
 
+    /// What the reminder calls a card: questions and a plan by their own words, a permission by
+    /// the word of its step. The name of the tool behind a question or a plan means nothing to a person.
+    private static string CardWord(RequestCard request) => request.Kind switch
+    {
+        CardKind.Question => Strings.TerminalWaitsQuestions,
+        CardKind.Plan => Strings.TerminalWaitsPlan,
+        _ => StepWord(request.Step.Kind, request.Step.Label),
+    };
+
     private FeedSlot? OpenCard() =>
         _slots.LastOrDefault(slot => slot.Item is FeedItem.Card { State: RequestState.Open });
 
@@ -274,8 +283,7 @@ sealed class TalkPanel : UserControl
             return;
         }
 
-        _reminderText.Text = string.Format(
-            CultureInfo.CurrentCulture, Strings.TerminalWaitsForYou, StepWord(card.Request.Step.Kind, card.Request.Step.Label));
+        _reminderText.Text = string.Format(CultureInfo.CurrentCulture, Strings.TerminalWaitsForYou, CardWord(card.Request));
         _reminder.Visibility = Visibility.Visible;
     }
 
@@ -285,6 +293,13 @@ sealed class TalkPanel : UserControl
             || (_scroll ??= FindScroll(_feed)) is not { } scroll)
         {
             return false;
+        }
+
+        // A card the person is answering with the keyboard is in front of them, even when it grew
+        // past the bottom of the feed while they typed (check of 2026-10-23).
+        if (row.IsKeyboardFocusWithin)
+        {
+            return true;
         }
 
         // The buttons of a card are at its bottom: a card is in view when its bottom is.
@@ -458,6 +473,8 @@ sealed class FeedRow : ContentControl
             FeedItem.OwnerMessage message => Message(message),
             FeedItem.Answer { Streaming: true } answer => AnswerView.For(answer.Text),
             FeedItem.Answer answer => AnswerView.WithCopy(answer.Text),
+            FeedItem.Step { Answers.Count: > 0 } step => Answered(step.Answers),
+            FeedItem.Step { Line.Label: QuestionAnswers.Tool, State: StepState.Failed } => Declined(),
             FeedItem.Step { Line.Hidden: false } step => StepRow(step),
             FeedItem.Card { State: RequestState.Open } card => Card(card.Request),
             FeedItem.Notice notice => Notice(notice),
@@ -687,6 +704,11 @@ sealed class FeedRow : ContentControl
 
     private UIElement Card(RequestCard request)
     {
+        if (request.Kind == CardKind.Question)
+        {
+            return new QuestionCardView(request, choice => Choose(request, choice));
+        }
+
         var column = new StackPanel();
 
         var word = TalkPanel.StepWord(request.Step.Kind, request.Step.Label);
@@ -717,14 +739,7 @@ sealed class FeedRow : ContentControl
             }
         }
 
-        if (request.Kind == CardKind.Question)
-        {
-            column.Children.Add(Questions(request));
-        }
-        else
-        {
-            column.Children.Add(Buttons(request));
-        }
+        column.Children.Add(Buttons(request));
 
         return new Border
         {
@@ -812,50 +827,59 @@ sealed class FeedRow : ContentControl
         return row;
     }
 
-    /// One button per option. With several questions the card waits until each has its answer.
-    private UIElement Questions(RequestCard request)
+    /// What the person chose on a card of questions, left in the feed after the card: one quiet
+    /// line per question, the header grey and the answer light, a green check in front.
+    private static UIElement Answered(IReadOnlyList<QuestionAnswer> answers)
     {
-        var picked = new string?[request.Questions.Count];
-        var column = new StackPanel();
-
-        for (var at = 0; at < request.Questions.Count; at++)
+        var grid = new Grid { Margin = new Thickness(0, 6, 0, 6) };
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        for (var at = 0; at < answers.Count; at++)
         {
-            var question = request.Questions[at];
-            var text = TerminalPanel.Text(question.Text, "TextNumber", "Ink", FontWeights.Normal);
-            text.TextWrapping = TextWrapping.Wrap;
-            text.Margin = new Thickness(0, 10, 0, 6);
-            column.Children.Add(text);
+            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
-            var options = new WrapPanel();
-            var index = at;
-            foreach (var option in question.Options)
+            var check = new System.Windows.Shapes.Path
             {
-                Button? button = null;
-                button = TerminalPanel.Flat(option.Label, () =>
-                {
-                    picked[index] = option.Label;
-                    foreach (var other in options.Children.OfType<Button>())
-                    {
-                        other.Opacity = ReferenceEquals(other, button) ? 1 : 0.5;
-                    }
+                Data = Geometry.Parse(QuestionCardView.CheckPath),
+                Fill = Tokens.Brush("Positive"),
+                Stretch = Stretch.Uniform,
+                Width = 10,
+                Height = 10,
+                Margin = new Thickness(0, 5, 8, 0),
+                VerticalAlignment = VerticalAlignment.Top,
+            };
+            Grid.SetRow(check, at);
+            grid.Children.Add(check);
 
-                    if (picked.All(answer => answer is not null))
-                    {
-                        Choose(request, new CardChoice.Answers([.. picked.Select(answer => (IReadOnlyList<string>)[answer!])]));
-                    }
-                }, ghost: false);
-                button.ToolTip = option.Description.Length > 0 ? option.Description : null;
-                options.Children.Add(Spaced(button));
-            }
+            var header = TerminalPanel.Text(answers[at].Header, "TextNumber", "Muted", FontWeights.Normal);
+            header.MaxWidth = 240;
+            header.TextTrimming = TextTrimming.CharacterEllipsis;
+            header.VerticalAlignment = VerticalAlignment.Top;
+            header.Margin = new Thickness(0, 1, 12, 3);
+            Grid.SetRow(header, at);
+            Grid.SetColumn(header, 1);
+            grid.Children.Add(header);
 
-            column.Children.Add(options);
+            var answer = TerminalPanel.Text(answers[at].Answer, "TextNumber", "Ink", FontWeights.Normal);
+            answer.TextWrapping = TextWrapping.Wrap;
+            answer.VerticalAlignment = VerticalAlignment.Top;
+            answer.Margin = new Thickness(0, 1, 0, 3);
+            Grid.SetRow(answer, at);
+            Grid.SetColumn(answer, 2);
+            grid.Children.Add(answer);
         }
 
-        var deny = TerminalPanel.Flat(Strings.TerminalDeny, () => Choose(request, new CardChoice.Deny("")), ghost: true);
-        deny.Margin = new Thickness(0, 10, 0, 0);
-        deny.HorizontalAlignment = HorizontalAlignment.Left;
-        column.Children.Add(deny);
-        return column;
+        return grid;
+    }
+
+    /// The person said no to a card of questions.
+    private static UIElement Declined()
+    {
+        var words = TerminalPanel.Text(Strings.TerminalQuestionsDenied, "TextNumber", "Muted", FontWeights.Normal);
+        words.Margin = new Thickness(0, 6, 0, 6);
+        words.HorizontalAlignment = HorizontalAlignment.Left;
+        return words;
     }
 
     private static UIElement Notice(FeedItem.Notice notice)
