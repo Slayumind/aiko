@@ -20,7 +20,9 @@ sealed class DropDown : UserControl
     private readonly RotateTransform _chevronTurn = new();
     private readonly Popup _popup = new();
     private readonly StackPanel _list = new();
-    private readonly ScaleTransform _listScale = new(1, 1);
+    /// PageUp and PageDown move this many rows (Cherry Studio, research of 2026-10-26).
+    private const int PageRows = 7;
+
     private readonly Border _listFrame = new();
     private IReadOnlyList<string> _items = [];
     private IReadOnlyDictionary<int, string> _headers = new Dictionary<int, string>();
@@ -115,10 +117,13 @@ sealed class DropDown : UserControl
         _button.Child = face;
         _button.MouseEnter += (_, _) => hover.BeginAnimation(OpacityProperty, Motion.To(1, Motion.Hover, Motion.Standard));
         _button.MouseLeave += (_, _) => hover.BeginAnimation(OpacityProperty, Motion.To(0, Motion.Hover, Motion.Standard));
-        _button.MouseLeftButtonUp += (_, _) =>
+        // The list opens on the press, not the release, as native menus and Radix do: a press,
+        // a slide to an item and a release picks it.
+        _button.MouseLeftButtonDown += (_, e) =>
         {
             Focus();
             Toggle();
+            e.Handled = true;
         };
         Motion.SetPress(_button, true);
 
@@ -129,8 +134,6 @@ sealed class DropDown : UserControl
         _listFrame.Padding = new Thickness(4);
         _listFrame.Margin = new Thickness(0, 4, 0, 12);
         _listFrame.Effect = Tokens.Get<System.Windows.Media.Effects.Effect>("CardShadow");
-        _listFrame.RenderTransformOrigin = new Point(0.5, 0);
-        _listFrame.RenderTransform = _listScale;
         _listFrame.Child = _list;
 
         // A press on the list bubbles to the page through the drop-down. A scroll viewer there,
@@ -139,7 +142,27 @@ sealed class DropDown : UserControl
         _listFrame.MouseLeftButtonDown += (_, e) => e.Handled = true;
 
         _popup.PlacementTarget = _button;
-        _popup.Placement = PlacementMode.Bottom;
+
+        // Our own place: the left edges meet, the list under the button, above it if there is no
+        // room below. Bottom placement follows the "menus on the right" setting of Windows and can
+        // land beside the button; a left edge of 0 lands on it whatever the units of the screen.
+        _popup.Placement = PlacementMode.Custom;
+        _popup.CustomPopupPlacementCallback = (popup, target, _) =>
+        [
+            new CustomPopupPlacement(new Point(0, target.Height), PopupPrimaryAxis.Horizontal),
+            new CustomPopupPlacement(new Point(0, -popup.Height), PopupPrimaryAxis.Horizontal),
+        ];
+
+        // The list grows after it opened, when its rows are laid out. A nudge makes the popup
+        // place itself again for the final size.
+        _listFrame.SizeChanged += (_, _) =>
+        {
+            if (_popup.IsOpen)
+            {
+                _popup.HorizontalOffset += 0.01;
+                _popup.HorizontalOffset -= 0.01;
+            }
+        };
         _popup.AllowsTransparency = true;
         _popup.StaysOpen = false;
         _popup.Child = _listFrame;
@@ -177,8 +200,7 @@ sealed class DropDown : UserControl
         FillList();
         _popup.IsOpen = true;
 
-        _listFrame.BeginAnimation(OpacityProperty, new System.Windows.Media.Animation.DoubleAnimation(0, 1, Motion.Or0(Motion.Expand)) { EasingFunction = Motion.Standard });
-        _listScale.BeginAnimation(ScaleTransform.ScaleYProperty, new System.Windows.Media.Animation.DoubleAnimation(0.96, 1, Motion.Or0(Motion.Expand)) { EasingFunction = Motion.Standard });
+        Motion.PopIn(_listFrame, above: false);
         _chevronTurn.BeginAnimation(RotateTransform.AngleProperty, Motion.To(180, Motion.Expand, Motion.Standard));
     }
 
@@ -217,6 +239,18 @@ sealed class DropDown : UserControl
                 break;
             case Key.Up when _popup.IsOpen:
                 Highlight(Math.Max(_highlighted - 1, 0));
+                break;
+            case Key.Home when _popup.IsOpen:
+                Highlight(0);
+                break;
+            case Key.End when _popup.IsOpen:
+                Highlight(_items.Count - 1);
+                break;
+            case Key.PageUp when _popup.IsOpen:
+                Highlight(Math.Max(_highlighted - PageRows, 0));
+                break;
+            case Key.PageDown when _popup.IsOpen:
+                Highlight(Math.Min(_highlighted + PageRows, _items.Count - 1));
                 break;
             case Key.Escape when _popup.IsOpen:
                 Close();
@@ -295,8 +329,15 @@ sealed class DropDown : UserControl
             Child = row,
         };
 
-        item.MouseEnter += (_, _) =>
+        // Only a pointer that moves lights a row: a still one under a list that changed keeps the
+        // row of the keyboard.
+        item.MouseMove += (_, _) =>
         {
+            if (_highlighted == index || !PointerTrail.Moved(item))
+            {
+                return;
+            }
+
             _highlighted = index;
             foreach (var other in _list.Children.OfType<Border>())
             {

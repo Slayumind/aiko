@@ -562,6 +562,8 @@ sealed class TalkInput : UserControl
         }
     }
 
+    /// While an IME composes (the Japanese of the persona), WPF reports every key as
+    /// Key.ImeProcessed, so Enter that ends a composition never sends the message.
     private void OnKey(object sender, KeyEventArgs e)
     {
         var modifiers = Keyboard.Modifiers;

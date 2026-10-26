@@ -66,7 +66,12 @@ sealed class SlashMenuView : Border
         AddGroup("Claude Code", matches.Where(match => match.Command.Builtin));
         AddGroup(Strings.SlashGroupSkills, matches.Where(match => !match.Command.Builtin));
 
+        var opening = !IsOpen && _lines.Count > 0;
         Visibility = _lines.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+        if (opening)
+        {
+            Motion.PopIn(this, above: true);
+        }
         Light();
         _scroll.ScrollToTop();
     }
@@ -144,9 +149,17 @@ sealed class SlashMenuView : Border
             Child = grid,
         };
         var command = match.Command;
-        row.MouseEnter += (_, _) =>
+        // Only a pointer that moves lights a row: the list changes under a still pointer as the
+        // person types, and the row the keyboard chose must stay.
+        row.MouseMove += (_, _) =>
         {
-            _highlighted = _lines.FindIndex(line => line.Row == row);
+            var index = _lines.FindIndex(line => line.Row == row);
+            if (index == _highlighted || !PointerTrail.Moved(row))
+            {
+                return;
+            }
+
+            _highlighted = index;
             Light();
         };
         row.MouseLeftButtonUp += (_, _) => Picked?.Invoke(command);
