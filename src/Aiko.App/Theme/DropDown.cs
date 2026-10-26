@@ -125,6 +125,11 @@ sealed class DropDown : UserControl
             Toggle();
             e.Handled = true;
         };
+
+        // The release of the same press lands outside the list, and a popup that closes on any
+        // click outside would close at once (check of 2026-10-26). Open keeps the list until that
+        // release; the list itself is another window, so a release on it is caught here.
+        _listFrame.PreviewMouseLeftButtonUp += (_, _) => _popup.StaysOpen = false;
         Motion.SetPress(_button, true);
 
         _listFrame.Background = Brush("Surface");
@@ -198,6 +203,20 @@ sealed class DropDown : UserControl
         _highlighted = Math.Max(_selected, 0);
         _listFrame.MinWidth = _button.ActualWidth;
         FillList();
+        // Opened by a press: the list stays until that press is released anywhere in the window.
+        var pressed = Mouse.LeftButton == MouseButtonState.Pressed;
+        _popup.StaysOpen = pressed;
+        if (pressed && Window.GetWindow(this) is { } window)
+        {
+            void Released(object sender, MouseButtonEventArgs e)
+            {
+                window.PreviewMouseLeftButtonUp -= Released;
+                _popup.StaysOpen = false;
+            }
+
+            window.PreviewMouseLeftButtonUp += Released;
+        }
+
         _popup.IsOpen = true;
 
         Motion.PopIn(_listFrame, above: false);
