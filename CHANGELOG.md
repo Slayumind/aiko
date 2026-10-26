@@ -28,6 +28,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   session's folder, the best matches first. Arrows move, Enter or Tab inserts, Esc closes the list;
   after a typo Enter sends your text as typed. Each session keeps its own draft. On Windows; the
   Mac follows before the release.
+- **A new session starts as a conversation.** No form: write the task, and the session begins with
+  your first message and takes its name from it. The folder, model, mode and environment are in the
+  line under the field; until the first message you can pick another folder there.
 - **Lists that behave the same everywhere.** Every drop-down opens on the press, right under its
   button, and comes up the same short way. Rows follow the mouse only when it moves, so the keyboard
   keeps its row, and Home, End, Page Up and Page Down work in lists.
