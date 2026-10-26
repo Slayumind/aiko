@@ -25,6 +25,10 @@ public enum FolderGroup
 /// A group title in the folder list, drawn above the folder at Before.
 public sealed record FolderHeader(int Before, FolderGroup Group);
 
+/// A model as Claude Code names it in its answer to "initialize": the word for --model, and the
+/// name to show, like "fable" and "Fable 5.1".
+public sealed record ClaudeModel(string Value, string DisplayName);
+
 /// What the form of a new session offers (D-293, D-300): the folders, the models and the name the
 /// session gets when the field is left empty.
 public static class NewSessionChoices
@@ -36,10 +40,21 @@ public static class NewSessionChoices
     /// open; the others are one "choose a folder" away.
     public const int MostInside = 8;
 
-    /// The models of the form, as the words Claude Code takes for --model. They are the short
-    /// names, which stay the same from one version of a model to the next. The form offers models
-    /// only (D-308): a session always starts with one of them.
+    /// The models of the form until Claude Code named its own, as the words it takes for --model.
+    /// They are the short names, which stay the same from one version of a model to the next.
+    /// The form offers models only (D-308): a session always starts with one of them.
     public static readonly IReadOnlyList<string> Models = ["opus", "sonnet", "haiku"];
+
+    /// The models the form offers, from the ones Claude Code named: only the short names, in its
+    /// order (AIKO-387). A new family of models comes with no change in Aiko. "default" and the
+    /// full ids of single versions stay out. When Claude Code named none, the list above.
+    public static IReadOnlyList<ClaudeModel> Offered(IReadOnlyList<ClaudeModel> named)
+    {
+        var shortNames = named.Where(model => model.Value != "default" && model.Value.All(char.IsAsciiLetterLower)).ToList();
+        return shortNames.Count > 0
+            ? shortNames
+            : [.. Models.Select(model => new ClaudeModel(model, char.ToUpperInvariant(model[0]) + model[1..]))];
+    }
 
     /// The folders, each once whatever the case of their letters: where sessions of the
     /// environment ran last, then every bound folder followed by up to MostInside folders inside
@@ -117,24 +132,29 @@ public static class NewSessionChoices
 
     /// The model the form starts with: the one of the session of the environment that was used
     /// last and has a model of the list. With no such session it is the first of the list.
-    public static string DefaultModel(TerminalSessions sessions, string environment) =>
-        sessions.Sessions
-            .Where(session => session.Environment == environment && Family(session.Model) is not null)
+    /// models are the short names offered; without them, the list above.
+    public static string DefaultModel(TerminalSessions sessions, string environment, IReadOnlyList<string>? models = null)
+    {
+        var list = models is { Count: > 0 } ? models : Models;
+        return sessions.Sessions
+            .Where(session => session.Environment == environment && Family(session.Model, list) is not null)
             .OrderByDescending(session => session.LastUsed)
-            .Select(session => Family(session.Model))
-            .FirstOrDefault() ?? Models[0];
+            .Select(session => Family(session.Model, list))
+            .FirstOrDefault() ?? list[0];
+    }
 
     /// The model after this one, for a click on the model under the input: in the order of the
     /// form, and back to the first after the last. A model outside the list goes to the first one.
-    public static string NextModel(string? model)
+    public static string NextModel(string? model, IReadOnlyList<string>? models = null)
     {
-        var at = Family(model) is { } family ? Models.ToList().IndexOf(family) : -1;
-        return Models[(at + 1) % Models.Count];
+        var list = models is { Count: > 0 } ? models : Models;
+        var at = Family(model, list) is { } family ? list.ToList().IndexOf(family) : -1;
+        return list[(at + 1) % list.Count];
     }
 
     /// The model of the list a short name or a full id like "claude-sonnet-5-5" belongs to.
-    private static string? Family(string? model) =>
-        Models.FirstOrDefault(name => model?.Contains(name, StringComparison.OrdinalIgnoreCase) == true);
+    private static string? Family(string? model, IReadOnlyList<string> list) =>
+        list.FirstOrDefault(name => model?.Contains(name, StringComparison.OrdinalIgnoreCase) == true);
 
     /// The name of the other environment a folder is bound to, or null. The form says so before
     /// the session is made: Claude Code started there from a console would use that environment.

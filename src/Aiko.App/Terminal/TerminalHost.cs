@@ -25,8 +25,8 @@ sealed class TerminalHost
     /// Claude Code (D-303). The process adds what comes after.
     private readonly Dictionary<string, Conversation> _histories = [];
 
-    /// The commands of the menu of "/", by the name of the environment.
-    private readonly Dictionary<string, IReadOnlyList<SlashCommand>> _commands = [];
+    /// The commands of the menu of "/" and the models, by the name of the environment.
+    private readonly Dictionary<string, ClaudeOffer> _offers = [];
 
     private TerminalSessions _sessions;
     private TerminalWindowModel _model;
@@ -215,14 +215,19 @@ sealed class TerminalHost
         var folders = known ?? NewSessionChoices.Folders(_sessions, environment, TerminalStore.FoldersInside);
         var chosen = folders.Count == 0 ? -1 : Math.Clamp(folder ?? 0, 0, folders.Count - 1);
         var path = chosen >= 0 ? folders[chosen].Path : null;
+        var models = NewSessionChoices.Offered(OfferOf(environment.Name, path).Models);
+        var values = models.Select(one => one.Value).ToList();
 
         return new FormView(
             environment.Name,
             folders,
             chosen,
             path is null ? null : NewSessionChoices.BoundElsewhere(path, environment, _settings),
-            model ?? Math.Max(0, NewSessionChoices.Models.ToList().IndexOf(NewSessionChoices.DefaultModel(_sessions, environment.Name))),
-            path is null ? "" : NewSessionChoices.DefaultName(_sessions, environment.Name, path));
+            Math.Clamp(model ?? values.IndexOf(NewSessionChoices.DefaultModel(_sessions, environment.Name, values)), 0, models.Count - 1),
+            path is null ? "" : NewSessionChoices.DefaultName(_sessions, environment.Name, path))
+        {
+            Models = models,
+        };
     }
 
     private void Create(string name, string message)
@@ -238,7 +243,7 @@ sealed class TerminalHost
         var home = System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile);
         var config = Environment()?.ConfigDirectories.FirstOrDefault() ?? ClaudeConfigFolder.Resolve(null, home);
         _sessions = _sessions
-            .Add(id, form.Environment, folder, name, NewSessionChoices.Models[form.Model], TerminalStore.DefaultMode(folder, config), now)
+            .Add(id, form.Environment, folder, name, form.Models[form.Model].Value, TerminalStore.DefaultMode(folder, config), now)
             .Opened(id);
         Save();
 
@@ -429,7 +434,8 @@ sealed class TerminalHost
 
         var talk = Current();
         var shown = talk?.State.LatestModel is { Length: > 0 } running ? running : session.Model;
-        var next = NewSessionChoices.NextModel(shown);
+        var offered = NewSessionChoices.Offered(OfferOf(session.Environment, session.Folder).Models);
+        var next = NewSessionChoices.NextModel(shown, [.. offered.Select(one => one.Value)]);
         _sessions = _sessions.SetModel(session.Id, next);
         Save();
         talk?.SetModel(next);
@@ -494,36 +500,45 @@ sealed class TerminalHost
         };
     }
 
-    /// The commands of the menu of "/" for the environment of the session. An environment is
-    /// asked once, when its first session is shown; until the answer comes, its list is empty
-    /// and the menu stays shut.
-    private IReadOnlyList<SlashCommand> CommandsOf(TerminalSession session)
+    private IReadOnlyList<SlashCommand> CommandsOf(TerminalSession session) => OfferOf(session.Environment, session.Folder).Commands;
+
+    /// The commands of the menu of "/" and the models of an environment. An environment is asked
+    /// once, when its first session or its form is shown; until the answer comes, the offer is
+    /// empty: the menu stays shut and the form has its own three models.
+    private ClaudeOffer OfferOf(string environmentName, string? folder)
     {
-        if (_commands.TryGetValue(session.Environment, out var known))
+        if (_offers.TryGetValue(environmentName, out var known))
         {
             return known;
         }
 
-        _commands[session.Environment] = [];
-        if (_settings.Environments.FirstOrDefault(one => one.Name == session.Environment) is { } environment
+        _offers[environmentName] = ClaudeOffer.None;
+        if (_settings.Environments.FirstOrDefault(one => one.Name == environmentName) is { } environment
             && ClaudeLauncher.FindClaude() is { } claude)
         {
             var home = System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile);
             new CommandLoader(_newProcess, work => _window.Dispatcher.BeginInvoke(work)).Load(
                 new CommandSetup(
                     claude,
-                    Directory.Exists(session.Folder) ? session.Folder : home,
+                    folder is not null && Directory.Exists(folder) ? folder : home,
                     environment.ConfigDirectories.FirstOrDefault() ?? ClaudeConfigFolder.Resolve(null, home),
                     home,
                     [.. System.Environment.GetEnvironmentVariables().Keys.Cast<string>()]),
-                commands =>
+                offer =>
                 {
-                    _commands[session.Environment] = commands;
+                    _offers[environmentName] = offer;
+
+                    // An open form takes the models it did not have yet.
+                    if (_form is { } form && form.Environment == environmentName)
+                    {
+                        _form = FormFor(form.Folder, null, form.Folders);
+                    }
+
                     Draw();
                 });
         }
 
-        return [];
+        return ClaudeOffer.None;
     }
 
     // ---- the view ----

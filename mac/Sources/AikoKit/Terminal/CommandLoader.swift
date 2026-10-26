@@ -23,12 +23,25 @@ public struct CommandSetup: Sendable, Equatable {
     }
 }
 
-/// Asks a short Claude Code for the commands it knows, for the menu of "/" (AIKO-330).
+/// What Claude Code offers in one environment: the commands of the menu of "/" and the models.
+public struct ClaudeOffer: Sendable, Equatable {
+    public static let none = ClaudeOffer(commands: [], models: [])
+
+    public let commands: [SlashCommand]
+    public let models: [ClaudeModel]
+
+    public init(commands: [SlashCommand], models: [ClaudeModel]) {
+        self.commands = commands
+        self.models = models
+    }
+}
+
+/// Asks a short Claude Code for the commands and the models it knows (AIKO-330, AIKO-387).
 ///
-/// The process starts, gets "initialize", gives its commands and is asked to leave. One list per
-/// environment is enough for the life of the window: skills and plugins rarely change while it is
-/// open. done is called once, on the thread post brings the work to, with the list, or with an
-/// empty list when Claude Code did not start or left without one.
+/// The process starts, gets "initialize", names its commands and models and is asked to leave.
+/// One answer per environment is enough for the life of the window: skills, plugins and models
+/// rarely change while it is open. done is called once, on the thread post brings the work to,
+/// with the offer, or with an empty one when Claude Code did not start or left without one.
 ///
 /// Sendable by hand: the one flag it keeps is behind a lock.
 public final class CommandLoader: @unchecked Sendable {
@@ -48,7 +61,7 @@ public final class CommandLoader: @unchecked Sendable {
         self.post = post
     }
 
-    public func load(_ setup: CommandSetup, done: @escaping @Sendable ([SlashCommand]) -> Void) {
+    public func load(_ setup: CommandSetup, done: @escaping @Sendable (ClaudeOffer) -> Void) {
         let plan = ClaudeLaunchPlan.forCommands(
             platform,
             configDirectory: setup.configDirectory,
@@ -58,10 +71,10 @@ public final class CommandLoader: @unchecked Sendable {
         let once = Once()
         let post = self.post
 
-        let answer: @Sendable ([SlashCommand]) -> Void = { commands in
+        let answer: @Sendable (ClaudeOffer) -> Void = { offer in
             guard once.take() else { return }
             process.stop()
-            post { done(commands) }
+            post { done(offer) }
         }
 
         let started = process.start(
@@ -71,14 +84,14 @@ public final class CommandLoader: @unchecked Sendable {
                 variables: plan.variables,
                 workingDirectory: setup.workingDirectory),
             onLine: { line in
-                if case .commands(CommandLoader.requestId, let list) = StreamEvent.fromLine(line) {
-                    answer(list)
+                if case .commands(CommandLoader.requestId, let list, let models) = StreamEvent.fromLine(line) {
+                    answer(ClaudeOffer(commands: list, models: models))
                 }
             },
-            onExit: { _ in answer([]) })
+            onExit: { _ in answer(.none) })
 
         if !started || !process.write(HostLine.initialize(CommandLoader.requestId)) {
-            answer([])
+            answer(.none)
         }
     }
 

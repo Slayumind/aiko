@@ -629,7 +629,7 @@ sealed class TerminalPanel : UserControl
             }
         };
 
-        var models = new DropDown { Items = [.. NewSessionChoices.Models.Select(ModelWord)], SelectedIndex = form.Model, Width = 180, HorizontalAlignment = HorizontalAlignment.Left };
+        var models = new DropDown { Items = [.. form.Models.Select(model => model.DisplayName)], SelectedIndex = form.Model, Width = 180, HorizontalAlignment = HorizontalAlignment.Left };
         models.Picked += index => ModelPicked?.Invoke(index);
 
         var grid = new Grid { MaxWidth = 620, HorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment = VerticalAlignment.Top, Margin = new Thickness(40, 36, 40, 0) };
@@ -683,8 +683,6 @@ sealed class TerminalPanel : UserControl
     }
 
     private void Submit() => Submitted?.Invoke(_name.Text, _message.Text);
-
-    private static string ModelWord(string model) => char.ToUpperInvariant(model[0]) + model[1..];
 
     private UIElement Ask(AskView ask)
     {

@@ -110,8 +110,9 @@ public enum StreamEvent: Sendable, Equatable {
     /// The answer to a request the terminal sent: an interrupt or a change of mode.
     case reply(requestId: String, ok: Bool, mode: PermissionMode?)
 
-    /// The answer to "initialize": the commands Claude Code knows, with their descriptions.
-    case commands(requestId: String, list: [SlashCommand])
+    /// The answer to "initialize": the commands Claude Code knows, with their descriptions, and
+    /// the models it names: short names, full ids and "default", in its order.
+    case commands(requestId: String, list: [SlashCommand], models: [ClaudeModel])
 
     /// The activity is "compacting" or "requesting" while that goes on, nil when it is over.
     case status(activity: String?, mode: PermissionMode?)
@@ -380,7 +381,10 @@ public enum StreamEvent: Sendable, Equatable {
             return .ignored
         }
         if let list = response["response"]?["commands"]?.arrayValue {
-            return .commands(requestId: id, list: list.compactMap(readCommand))
+            return .commands(
+                requestId: id,
+                list: list.compactMap(readCommand),
+                models: (response["response"]?["models"]?.arrayValue ?? []).compactMap(readModel))
         }
         return .reply(
             requestId: id,
@@ -399,6 +403,15 @@ public enum StreamEvent: Sendable, Equatable {
             argumentHint: command["argumentHint"]?.stringValue ?? "",
             aliases: (command["aliases"]?.arrayValue ?? []).compactMap(\.stringValue),
             builtin: command["builtin"]?.boolValue ?? false)
+    }
+
+    /// A model without a value is left out; without a name to show, its value is the name.
+    private static func readModel(_ node: JsonNode) -> ClaudeModel? {
+        guard let model = node.objectValue, let value = model["value"]?.stringValue, !value.isEmpty else {
+            return nil
+        }
+        let shown = model["displayName"]?.stringValue ?? ""
+        return ClaudeModel(value: value, displayName: shown.isEmpty ? value : shown)
     }
 
     private static func readRateLimit(_ root: JsonObject) -> StreamEvent {

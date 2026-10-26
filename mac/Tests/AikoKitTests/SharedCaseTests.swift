@@ -1476,7 +1476,7 @@ struct SharedCaseTests {
             return node([("kind", .string("taskStarted")), ("toolUseId", .string(toolUseId))])
         case .taskEnded(let toolUseId, let how):
             return node([("kind", .string("taskEnded")), ("toolUseId", .string(toolUseId)), ("how", .string(how))])
-        case .commands(let requestId, let list):
+        case .commands(let requestId, let list, let models):
             var first: JsonNode = .null
             if let command = list.first {
                 first = node([
@@ -1487,6 +1487,7 @@ struct SharedCaseTests {
             return node([
                 ("kind", .string("commands")), ("requestId", .string(requestId)),
                 ("names", .array(list.map { .string($0.name) })), ("first", first),
+                ("models", .array(models.map { .string("\($0.value)=\($0.displayName)") })),
             ])
         case .reply(let requestId, let ok, let mode):
             return node([

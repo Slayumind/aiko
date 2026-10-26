@@ -26,6 +26,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - **Menu of commands.** Type / at the start of the field, and a list of the commands of Claude Code
   and your skills opens over it, with their descriptions. Arrows move, Enter or Tab inserts the
   command, Esc closes the list. On Windows; the Mac follows before the release.
+- **Models from Claude Code.** The form of a new session and a click on the model under the field
+  offer the models Claude Code names, such as Fable 5.1, so a new model needs no new Aiko.
 - **Subagents in the feed.** Under the line of a subagent at work you see what it does now. A
   subagent that works in the background keeps its line running until it is done.
 - **Voice input in the terminal, on Windows.** Press Ctrl+Space anywhere in the window or the microphone button, speak
