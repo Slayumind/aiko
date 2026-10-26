@@ -2639,6 +2639,277 @@
       }
     },
     {
+      "name": "a subagent in the background keeps its step running after the turn ended",
+      "steps": [
+        {
+          "do": "send",
+          "text": "start an agent"
+        },
+        {
+          "line": {
+            "type": "assistant",
+            "message": {
+              "content": [
+                {
+                  "type": "tool_use",
+                  "id": "toolu_1",
+                  "name": "Agent",
+                  "input": {
+                    "description": "Create sub.txt"
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "line": {
+            "type": "system",
+            "subtype": "task_started",
+            "task_id": "t-1",
+            "tool_use_id": "toolu_1",
+            "description": "Create sub.txt",
+            "is_backgrounded": true
+          }
+        },
+        {
+          "line": {
+            "type": "user",
+            "message": {
+              "content": [
+                {
+                  "tool_use_id": "toolu_1",
+                  "type": "tool_result",
+                  "content": "Async agent launched"
+                }
+              ]
+            },
+            "parent_tool_use_id": null
+          }
+        },
+        {
+          "line": {
+            "type": "system",
+            "subtype": "background_tasks_changed",
+            "tasks": [
+              {
+                "task_id": "t-1"
+              }
+            ]
+          }
+        },
+        {
+          "line": {
+            "type": "system",
+            "subtype": "task_progress",
+            "task_id": "t-1",
+            "tool_use_id": "toolu_1",
+            "description": "Writing sub.txt"
+          }
+        },
+        {
+          "line": {
+            "type": "result",
+            "subtype": "success",
+            "is_error": false
+          }
+        }
+      ],
+      "state": {
+        "activity": "working",
+        "mode": "manual",
+        "model": "",
+        "session": "",
+        "tasks": 1,
+        "unread": true,
+        "compacting": false,
+        "limits": 0,
+        "items": [
+          {
+            "owner": "start an agent",
+            "images": 0,
+            "queued": false
+          },
+          {
+            "step": {
+              "kind": "agent",
+              "label": "",
+              "subject": "Create sub.txt",
+              "added": 0,
+              "removed": 0,
+              "hidden": false
+            },
+            "state": "running",
+            "result": "Async agent launched",
+            "images": 0,
+            "progress": "Writing sub.txt"
+          }
+        ]
+      },
+      "written": [
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"start an agent\"}]}}"
+      ],
+      "glance": {
+        "activity": "working",
+        "line": "step",
+        "kind": "agent",
+        "label": "",
+        "text": "Create sub.txt"
+      }
+    },
+    {
+      "name": "Claude goes on by itself when the subagent is over: the session works",
+      "steps": [
+        {
+          "do": "send",
+          "text": "start an agent"
+        },
+        {
+          "line": {
+            "type": "assistant",
+            "message": {
+              "content": [
+                {
+                  "type": "tool_use",
+                  "id": "toolu_1",
+                  "name": "Agent",
+                  "input": {
+                    "description": "Create sub.txt"
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "line": {
+            "type": "system",
+            "subtype": "task_started",
+            "task_id": "t-1",
+            "tool_use_id": "toolu_1",
+            "description": "Create sub.txt",
+            "is_backgrounded": true
+          }
+        },
+        {
+          "line": {
+            "type": "user",
+            "message": {
+              "content": [
+                {
+                  "tool_use_id": "toolu_1",
+                  "type": "tool_result",
+                  "content": "Async agent launched"
+                }
+              ]
+            },
+            "parent_tool_use_id": null
+          }
+        },
+        {
+          "line": {
+            "type": "system",
+            "subtype": "background_tasks_changed",
+            "tasks": [
+              {
+                "task_id": "t-1"
+              }
+            ]
+          }
+        },
+        {
+          "line": {
+            "type": "result",
+            "subtype": "success",
+            "is_error": false
+          }
+        },
+        {
+          "line": {
+            "type": "system",
+            "subtype": "task_progress",
+            "task_id": "t-1",
+            "tool_use_id": "toolu_1",
+            "description": "Writing sub.txt"
+          }
+        },
+        {
+          "line": {
+            "type": "system",
+            "subtype": "task_notification",
+            "task_id": "t-1",
+            "tool_use_id": "toolu_1",
+            "status": "completed"
+          }
+        },
+        {
+          "line": {
+            "type": "system",
+            "subtype": "background_tasks_changed",
+            "tasks": []
+          }
+        },
+        {
+          "line": {
+            "type": "stream_event",
+            "event": {
+              "type": "content_block_delta",
+              "delta": {
+                "type": "text_delta",
+                "text": "The agent"
+              }
+            },
+            "parent_tool_use_id": null
+          }
+        }
+      ],
+      "state": {
+        "activity": "working",
+        "mode": "manual",
+        "model": "",
+        "session": "",
+        "tasks": 0,
+        "unread": true,
+        "compacting": false,
+        "limits": 0,
+        "items": [
+          {
+            "owner": "start an agent",
+            "images": 0,
+            "queued": false
+          },
+          {
+            "step": {
+              "kind": "agent",
+              "label": "",
+              "subject": "Create sub.txt",
+              "added": 0,
+              "removed": 0,
+              "hidden": false
+            },
+            "state": "done",
+            "result": "Async agent launched",
+            "images": 0,
+            "progress": "Writing sub.txt"
+          },
+          {
+            "answer": "The agent",
+            "streaming": true
+          }
+        ]
+      },
+      "written": [
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"start an agent\"}]}}"
+      ],
+      "glance": {
+        "activity": "working",
+        "line": "none",
+        "kind": "other",
+        "label": "",
+        "text": ""
+      }
+    },
+    {
       "name": "stopping while only a subagent runs",
       "steps": [
         {

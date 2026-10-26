@@ -232,8 +232,18 @@
       "event": { "kind": "taskProgress", "toolUseId": "toolu_7", "description": "Writing sub.txt" }
     },
     {
-      "name": "a subagent started: the list of tasks says the same",
-      "line": { "type": "system", "subtype": "task_started", "task_id": "t-1", "tool_use_id": "toolu_7", "description": "Create a file" },
+      "name": "a subagent started: its step goes on until it is over",
+      "line": { "type": "system", "subtype": "task_started", "task_id": "t-1", "tool_use_id": "toolu_7", "description": "Create a file", "is_backgrounded": true },
+      "event": { "kind": "taskStarted", "toolUseId": "toolu_7" }
+    },
+    {
+      "name": "a subagent is over",
+      "line": { "type": "system", "subtype": "task_notification", "task_id": "t-1", "tool_use_id": "toolu_7", "status": "completed", "summary": "Created the file" },
+      "event": { "kind": "taskEnded", "toolUseId": "toolu_7", "how": "completed" }
+    },
+    {
+      "name": "a task with no step of its own changes no step",
+      "line": { "type": "system", "subtype": "task_notification", "task_id": "t-2", "status": "completed" },
       "event": { "kind": "ignored" }
     },
     {

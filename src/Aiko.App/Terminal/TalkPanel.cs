@@ -690,8 +690,30 @@ sealed class FeedRow : ContentControl
             BorderThickness = new Thickness(2, 0, 0, 0),
             Padding = new Thickness(14, 0, 0, 0),
             MinHeight = 24,
-            Child = WithResult(step, row),
+            Child = WithResult(step, WithProgress(step, row)),
         };
+    }
+
+    /// A subagent at work says under its line what it is doing now, in its own few words. The
+    /// line goes when the subagent is over.
+    private static UIElement WithProgress(FeedItem.Step step, UIElement line)
+    {
+        if (step.Line.Kind != StepKind.Agent || step.State != StepState.Running || step.Progress.Trim().Length == 0)
+        {
+            return line;
+        }
+
+        var doing = TerminalPanel.Mono(step.Progress.Trim(), "Muted");
+        doing.FontSize = 12;
+        doing.Margin = new Thickness(62, 2, 0, 4);
+        doing.MaxWidth = 560;
+        doing.HorizontalAlignment = HorizontalAlignment.Left;
+        doing.TextTrimming = TextTrimming.CharacterEllipsis;
+
+        var column = new StackPanel();
+        column.Children.Add(line);
+        column.Children.Add(doing);
+        return column;
     }
 
     /// The line of a step opens to what the step gave back, with a click (D-294).

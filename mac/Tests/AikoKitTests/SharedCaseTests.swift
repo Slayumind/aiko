@@ -1423,6 +1423,10 @@ struct SharedCaseTests {
                 ("kind", .string("taskProgress")), ("toolUseId", .string(toolUseId)),
                 ("description", .string(description)),
             ])
+        case .taskStarted(let toolUseId):
+            return node([("kind", .string("taskStarted")), ("toolUseId", .string(toolUseId))])
+        case .taskEnded(let toolUseId, let how):
+            return node([("kind", .string("taskEnded")), ("toolUseId", .string(toolUseId)), ("how", .string(how))])
         case .reply(let requestId, let ok, let mode):
             return node([
                 ("kind", .string("reply")), ("requestId", .string(requestId)), ("ok", .bool(ok)),

@@ -399,6 +399,7 @@ static class TerminalSnapshot
             Tool(22, "mcp__plugin_aiko-persona_memory__remember", "{}"),
             Tool(23, "mcp__claude_ai_Google_Calendar__list_events", "{}"),
             Step(5, StepKind.Edit, "DropDown.cs", StepState.Done, 18, 2),
+            Step(24, StepKind.Agent, "Check the Mac twin", StepState.Running) with { Progress = "Reading Conversation.swift" },
             withCard ? new FeedItem.Card(6, RequestCard.From(edit), RequestState.Open) : Step(6, StepKind.Run, "dotnet test Aiko.Core.Tests", StepState.Running),
             new FeedItem.OwnerMessage(7, "And the same on the Mac, please.", true, []),
         ];

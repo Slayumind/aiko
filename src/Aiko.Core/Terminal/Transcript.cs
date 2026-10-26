@@ -34,6 +34,7 @@ public static class Transcript
                 : item)],
             InTurn = false,
             Tasks = 0,
+            Agents = [],
             Unread = false,
             Failure = TalkFailure.None,
             AnsweredInTurn = false,

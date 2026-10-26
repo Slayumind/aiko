@@ -1328,6 +1328,8 @@ public class SharedCaseTests
             ["toolUseId"] = progress.ToolUseId,
             ["description"] = progress.Description,
         },
+        StreamEvent.TaskStarted started => new JsonObject { ["kind"] = "taskStarted", ["toolUseId"] = started.ToolUseId },
+        StreamEvent.TaskEnded ended => new JsonObject { ["kind"] = "taskEnded", ["toolUseId"] = ended.ToolUseId, ["how"] = ended.How },
         StreamEvent.RateLimit limit => new JsonObject
         {
             ["kind"] = "rateLimit",

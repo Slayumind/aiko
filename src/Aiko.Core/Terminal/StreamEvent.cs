@@ -77,6 +77,12 @@ public abstract record StreamEvent
     /// What a subagent is doing now, in a few words of its own.
     public sealed record TaskProgress(string ToolUseId, string Description) : StreamEvent;
 
+    /// A subagent began its work. ToolUseId is the step that started it.
+    public sealed record TaskStarted(string ToolUseId) : StreamEvent;
+
+    /// A subagent is over. How is "completed" when it finished its work.
+    public sealed record TaskEnded(string ToolUseId, string How) : StreamEvent;
+
     /// The answer to a request the terminal sent: an interrupt or a change of mode.
     public sealed record Reply(string RequestId, bool Ok, PermissionMode? Mode) : StreamEvent;
 
@@ -154,6 +160,10 @@ public abstract record StreamEvent
                 return new Tasks(Items(root, "tasks").Count());
             case "task_progress" when Str(root, "tool_use_id") is { Length: > 0 } task:
                 return new TaskProgress(task, Str(root, "description") ?? "");
+            case "task_started" when Str(root, "tool_use_id") is { Length: > 0 } task:
+                return new TaskStarted(task);
+            case "task_notification" when Str(root, "tool_use_id") is { Length: > 0 } task:
+                return new TaskEnded(task, Str(root, "status") ?? "");
             default:
                 return new Ignored();
         }

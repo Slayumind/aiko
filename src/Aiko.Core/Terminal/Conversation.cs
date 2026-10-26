@@ -142,6 +142,10 @@ public sealed record Conversation(
     /// A turn can end while a subagent still works in the background (D-305).
     public bool IsBusy => InTurn || Tasks > 0;
 
+    /// The steps whose subagent still works. Such a step runs until its subagent is over, even
+    /// when the tool already gave back that the subagent went to the background.
+    public IReadOnlyList<string> Agents { get; init; } = [];
+
     /// The model asked last, or the one Claude Code named when nothing is asked.
     public string LatestModel => AskedModel.Length > 0 ? AskedModel : Model;
 
@@ -158,8 +162,8 @@ public sealed record Conversation(
             AskedModel = ready.Model.Length > 0 ? "" : AskedModel,
             Mode = ready.Mode ?? Mode,
         }),
-        StreamEvent.TextDelta { ParentToolUseId: null } delta => Quiet(Streamed(delta.Text)),
-        StreamEvent.Assistant { ParentToolUseId: null } assistant => Quiet(Said(assistant)),
+        StreamEvent.TextDelta { ParentToolUseId: null } delta => Quiet(Begun().Streamed(delta.Text)),
+        StreamEvent.Assistant { ParentToolUseId: null } assistant => Quiet(Begun().Said(assistant)),
         StreamEvent.User { ParentToolUseId: null } user => Quiet(Returned(user)),
         StreamEvent.Request request => Quiet(Add(id => new FeedItem.Card(id, RequestCard.From(request), RequestState.Open))),
         StreamEvent.Reply reply => Quiet(this with { Mode = reply.Mode ?? Mode }),
@@ -170,9 +174,20 @@ public sealed record Conversation(
         StreamEvent.TaskProgress progress => Quiet(Changed<FeedItem.Step>(
             step => step.ToolUseId == progress.ToolUseId,
             step => step with { Progress = progress.Description })),
+        StreamEvent.TaskStarted started => Quiet(this with { Agents = [.. Agents.Where(id => id != started.ToolUseId), started.ToolUseId] }),
+        StreamEvent.TaskEnded ended => Quiet(AgentEnded(ended)),
         StreamEvent.Result result => Ended(result),
         _ => Quiet(this),
     };
+
+    /// Claude Code also starts a turn on its own, with no message of the person: when a subagent
+    /// in the background is over, Claude reads what it did and answers. That is work too.
+    private Conversation Begun() => InTurn ? this : this with { InTurn = true };
+
+    private Conversation AgentEnded(StreamEvent.TaskEnded ended) =>
+        (this with { Agents = [.. Agents.Where(id => id != ended.ToolUseId)] }).Changed<FeedItem.Step>(
+            step => step.ToolUseId == ended.ToolUseId && step.State == StepState.Running,
+            step => step with { State = ended.How == "completed" ? StepState.Done : StepState.Failed });
 
     private Conversation Streamed(string text) =>
         Writing() is { } writing
@@ -228,7 +243,9 @@ public sealed record Conversation(
                 step => step.ToolUseId == result.ToolUseId,
                 step => step with
                 {
-                    State = result.IsError ? StepState.Failed : StepState.Done,
+                    State = result.IsError ? StepState.Failed
+                        : Agents.Contains(step.ToolUseId) ? StepState.Running
+                        : StepState.Done,
                     Result = result.Text,
                     Images = result.Images,
                     Answers = result.Answers,
@@ -324,7 +341,7 @@ public sealed record Conversation(
             return this;
         }
 
-        var next = Settled(StepState.Failed).Add(id => new FeedItem.Notice(id, NoticeKind.Failed, ""));
+        var next = (this with { Agents = [] }).Settled(StepState.Failed).Add(id => new FeedItem.Notice(id, NoticeKind.Failed, ""));
         return next with
         {
             InTurn = false,
@@ -348,13 +365,14 @@ public sealed record Conversation(
         return new Outcome(next, [HostLine.UserMessage(message.Text, message.Attachments)]);
     }
 
-    /// Nothing is left half done: an answer is whole, a step has ended, a card nobody answered is closed.
+    /// Nothing is left half done: an answer is whole, a step has ended, a card nobody answered is
+    /// closed. Only the step of a subagent that still works goes on.
     private Conversation Settled(StepState running) => this with
     {
         Items = [.. Items.Select(item => item switch
         {
             FeedItem.Answer { Streaming: true } answer => answer with { Streaming = false },
-            FeedItem.Step { State: StepState.Running } step => step with { State = running },
+            FeedItem.Step { State: StepState.Running } step when !Agents.Contains(step.ToolUseId) => step with { State = running },
             FeedItem.Card { State: RequestState.Open } card => card with { State = RequestState.Closed },
             _ => item,
         })],
