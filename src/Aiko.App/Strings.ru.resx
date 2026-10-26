@@ -1327,6 +1327,9 @@
   <data name="TerminalQueuedCommand" xml:space="preserve">
     <value>выполню, когда Claude закончит</value>
   </data>
+  <data name="TerminalShellExit" xml:space="preserve">
+    <value>код выхода {0}</value>
+  </data>
   <data name="TerminalMoreLines" xml:space="preserve">
     <value>… ещё строк: {0}</value>
   </data>

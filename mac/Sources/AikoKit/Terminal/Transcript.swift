@@ -29,6 +29,9 @@ public enum Transcript {
                 step.state = .failed
                 state.items[index].content = .step(step)
             }
+            if case .shell(let command, let shellState, let output, let exitCode) = state.items[index].content, shellState != .done {
+                state.items[index].content = .shell(command: command, state: .done, output: output, exitCode: exitCode)
+            }
         }
         state.inTurn = false
         state.tasks = 0
@@ -72,6 +75,17 @@ public enum Transcript {
         let images = pictures(root)
         if said.hasPrefix(interrupted) {
             return added(state, .notice(kind: .interrupted, text: ""))
+        }
+
+        // A command of "!". Claude Code writes its output as the next message; Aiko, in the same one.
+        if let shell = ShellCommand.read(said) {
+            return added(state, .shell(command: shell.command, state: .done, output: shell.output ?? "", exitCode: 0))
+        }
+        if let printed = ShellCommand.output(said), let last = state.items.last,
+           case .shell(let command, let shellState, _, let exitCode) = last.content {
+            var next = state
+            next.items[next.items.count - 1].content = .shell(command: command, state: shellState, output: printed, exitCode: exitCode)
+            return next
         }
 
         // What a command printed without the model. The stream shows it as a notice, so does this.

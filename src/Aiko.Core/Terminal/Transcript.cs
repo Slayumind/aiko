@@ -29,9 +29,12 @@ public static class Transcript
         // state of the session now.
         return state with
         {
-            Items = [.. state.Items.Select(item => item is FeedItem.Step { State: StepState.Running } step
-                ? step with { State = StepState.Failed }
-                : item)],
+            Items = [.. state.Items.Select(item => item switch
+            {
+                FeedItem.Step { State: StepState.Running } step => step with { State = StepState.Failed },
+                FeedItem.Shell { State: not ShellState.Done } shell => shell with { State = ShellState.Done },
+                _ => item,
+            })],
             InTurn = false,
             Tasks = 0,
             Agents = [],
@@ -98,6 +101,21 @@ public static class Transcript
                 Items = [.. state.Items, new FeedItem.Notice(state.NextId, NoticeKind.Interrupted, "")],
                 NextId = state.NextId + 1,
             };
+        }
+
+        // A command of "!". Claude Code writes its output as the next message; Aiko, in the same one.
+        if (ShellCommand.Read(user.Text) is { } shell)
+        {
+            return state with
+            {
+                Items = [.. state.Items, new FeedItem.Shell(state.NextId, shell.Command, ShellState.Done, shell.Output ?? "", 0)],
+                NextId = state.NextId + 1,
+            };
+        }
+
+        if (ShellCommand.Output(user.Text) is { } printed && state.Items is [.., FeedItem.Shell last])
+        {
+            return state with { Items = [.. state.Items.SkipLast(1), last with { Output = printed }] };
         }
 
         // What a command printed without the model. The stream shows it as a notice, so does this.

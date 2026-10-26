@@ -1327,6 +1327,9 @@
   <data name="TerminalQueuedCommand" xml:space="preserve">
     <value>runs when Claude is done</value>
   </data>
+  <data name="TerminalShellExit" xml:space="preserve">
+    <value>exit code {0}</value>
+  </data>
   <data name="TerminalMoreLines" xml:space="preserve">
     <value>… {0} more lines</value>
   </data>

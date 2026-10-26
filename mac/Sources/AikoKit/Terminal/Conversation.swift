@@ -119,6 +119,9 @@ public struct FeedItem: Sendable, Equatable {
 
         /// What Claude thought before a step, in the few words Claude Code gives of it.
         case thought(text: String)
+
+        /// A command of "!" that Aiko runs in the folder of the session (D-343).
+        case shell(command: String, state: ShellState, output: String, exitCode: Int)
     }
 
     public let id: Int
@@ -131,9 +134,35 @@ public struct FeedItem: Sendable, Equatable {
 }
 
 /// A conversation after one more event or one more action, and the lines to write to Claude Code.
+public enum ShellState: Sendable, Equatable {
+    /// Sent while Claude works: it runs when the turn is over (D-341).
+    case waiting
+    case running
+    case done
+}
+
+/// A command of "!" for the host to run now; the item of the feed it belongs to.
+public struct ShellRun: Sendable, Equatable {
+    public let itemId: Int
+    public let command: String
+
+    public init(itemId: Int, command: String) {
+        self.itemId = itemId
+        self.command = command
+    }
+}
+
+/// shell is a command of "!" the host runs now; its end comes back through shellEnded.
 public struct Outcome: Sendable, Equatable {
     public let state: Conversation
     public let written: [String]
+    public var shell: ShellRun?
+
+    public init(state: Conversation, written: [String], shell: ShellRun? = nil) {
+        self.state = state
+        self.written = written
+        self.shell = shell
+    }
 }
 
 /// One conversation with Claude Code: its feed and what it is doing (D-294, D-304, D-305).
@@ -329,12 +358,10 @@ public struct Conversation: Sendable, Equatable {
         }
 
         // Messages Claude Code has not taken yet are already in its hands (D-341): it goes on with
-        // them by itself, so the session stays at work. A command Aiko holds goes when nothing else waits.
-        let queued = next.items.filter { item in
-            if case .ownerMessage(_, true, _) = item.content { return true }
-            return false
-        }
-        let withClaude = queued.contains { item in
+        // them by itself, so the session stays at work. A command or a "!" that Aiko holds goes
+        // when nothing else waits.
+        let held = next.items.filter(Conversation.isWaiting)
+        let withClaude = held.contains { item in
             if case .ownerMessage(let text, _, _) = item.content { return !Conversation.isCommand(text) }
             return false
         }
@@ -343,10 +370,21 @@ public struct Conversation: Sendable, Equatable {
         next.failedInTurn = false
         next.unread = true
         next.compacting = false
-        if !withClaude, let held = queued.first {
-            return next.sent(held)
+        if !withClaude, let first = held.first {
+            if case .shell = first.content {
+                return next.shellStarted(first)
+            }
+            return next.sent(first)
         }
         return Outcome(state: next, written: [])
+    }
+
+    /// What waits at the end of the feed for the turn: a message, or a "!" Aiko has not run yet.
+    static func isWaiting(_ item: FeedItem) -> Bool {
+        switch item.content {
+        case .ownerMessage(_, true, _), .shell(_, .waiting, _, _): return true
+        default: return false
+        }
     }
 
     /// Claude Code runs a command only at the start of a turn; in the middle of one it would read
@@ -383,12 +421,43 @@ public struct Conversation: Sendable, Equatable {
         var next = self
         next.failure = .none
         next.unread = false
+        if let command = ShellCommand.of(text) {
+            next.queue(.shell(command: command, state: .waiting, output: "", exitCode: 0))
+            return waits ? Outcome(state: next, written: []) : next.shellStarted(next.items[next.items.count - 1])
+        }
+
         next.queue(.ownerMessage(text: text, queued: true, attachments: images))
 
         if !waits {
             return next.sent(next.items[next.items.count - 1])
         }
         return Outcome(state: next, written: Conversation.isCommand(text) ? [] : [HostLine.userMessage(text, images: images)])
+    }
+
+    /// The host ran a command of "!": its output stays in the feed, and Claude gets the command
+    /// and the output at once as a message of its own (D-343).
+    public func shellEnded(_ itemId: Int, output: String, exitCode: Int) -> Outcome {
+        for (index, item) in items.enumerated() {
+            guard item.id == itemId, case .shell(let command, .running, _, _) = item.content else { continue }
+            var next = self
+            next.items[index].content = .shell(command: command, state: .done, output: output, exitCode: exitCode)
+            next.inTurn = true
+            return Outcome(
+                state: next,
+                written: [HostLine.userMessage(ShellCommand.message(command, output: output, exitCode: exitCode), images: [])])
+        }
+        return Outcome(state: self, written: [])
+    }
+
+    /// The command moves to the end of the feed, as a sent message does, and runs.
+    private func shellStarted(_ item: FeedItem) -> Outcome {
+        guard case .shell(let command, _, let output, let exitCode) = item.content else {
+            return Outcome(state: self, written: [])
+        }
+        var next = self
+        next.items.removeAll { $0.id == item.id }
+        next.items.append(FeedItem(id: item.id, content: .shell(command: command, state: .running, output: output, exitCode: exitCode)))
+        return Outcome(state: next, written: [], shell: ShellRun(itemId: item.id, command: command))
     }
 
     public func choose(_ requestId: String, _ choice: CardChoice) -> Outcome {
@@ -522,7 +591,7 @@ public struct Conversation: Sendable, Equatable {
     private func queuedAtEnd() -> Int {
         var count = 0
         for item in items.reversed() {
-            guard case .ownerMessage(_, true, _) = item.content else { break }
+            guard Conversation.isWaiting(item) else { break }
             count += 1
         }
         return count

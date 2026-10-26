@@ -562,6 +562,7 @@ sealed class FeedRow : ContentControl
             FeedItem.Step { Line.Hidden: false } step => StepRow(step),
             FeedEntry.Run run => RunRow(run),
             FeedEntry.Thought thought => ThoughtRow(thought),
+            FeedItem.Shell shell => ShellRow(shell),
             FeedItem.Card { State: RequestState.Open } card => Card(card.Request),
             FeedItem.Notice notice => Notice(notice),
             _ => null,
@@ -802,6 +803,51 @@ sealed class FeedRow : ContentControl
         }
 
         return head;
+    }
+
+    /// A command of "!": the command as it was typed, a dot while it runs, then its output cut to
+    /// 10 lines (D-343). A command sent during the work says that it waits for the turn; a failed
+    /// one names its exit code.
+    private static UIElement ShellRow(FeedItem.Shell shell)
+    {
+        var column = new StackPanel { Margin = new Thickness(0, 6, 0, 2) };
+
+        var line = new StackPanel { Orientation = Orientation.Horizontal };
+        var command = TerminalPanel.Mono("! " + shell.Command, shell.State == ShellState.Waiting ? "Muted" : "Ink");
+        command.FontSize = 12.5;
+        command.MaxWidth = 640;
+        command.TextTrimming = TextTrimming.CharacterEllipsis;
+        line.Children.Add(command);
+        if (shell.State == ShellState.Running)
+        {
+            var dot = TerminalPanel.Dot(filled: false);
+            dot.Margin = new Thickness(8, 0, 0, 0);
+            line.Children.Add(dot);
+        }
+        column.Children.Add(line);
+
+        if (shell.State == ShellState.Waiting)
+        {
+            var waits = TerminalPanel.Mono(Strings.TerminalQueuedCommand, "Muted");
+            waits.Margin = new Thickness(0, 4, 0, 0);
+            column.Children.Add(waits);
+        }
+        else if (shell.State == ShellState.Done)
+        {
+            if (shell.Output.Trim().Length > 0)
+            {
+                column.Children.Add(Output(shell.Output));
+            }
+
+            if (shell.ExitCode != 0)
+            {
+                var failed = TerminalPanel.Mono(string.Format(CultureInfo.CurrentCulture, Strings.TerminalShellExit, shell.ExitCode), "Destructive");
+                failed.Margin = new Thickness(0, 0, 0, 6);
+                column.Children.Add(failed);
+            }
+        }
+
+        return column;
     }
 
     /// The word of a step and what it is about, on one line.
