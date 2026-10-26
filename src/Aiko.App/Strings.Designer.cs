@@ -1128,7 +1128,7 @@ public static class Strings
     /// A session is one conversation with Claude Code in one folder.
     public static string TerminalNoSessionsBody => Get("TerminalNoSessionsBody");
 
-    /// Describe the task. Claude Code starts with your first message.
+    /// The session starts with your first message. Change the folder, model or mode in the line ...
     public static string TerminalEmptyTalk => Get("TerminalEmptyTalk");
 
     /// working
@@ -1299,19 +1299,19 @@ public static class Strings
     /// Answer
     public static string TerminalQuestionAnswer => Get("TerminalQuestionAnswer");
 
-    /// Questions: declined
+    /// Questions skipped
     public static string TerminalQuestionsDenied => Get("TerminalQuestionsDenied");
 
     /// Stop
     public static string TerminalStop => Get("TerminalStop");
 
-    /// Turn stopped.
+    /// Stopped.
     public static string TerminalTurnStopped => Get("TerminalTurnStopped");
 
-    /// goes in at the next step
+    /// Claude reads it after this step
     public static string TerminalQueued => Get("TerminalQueued");
 
-    /// runs after this turn
+    /// runs when Claude is done
     public static string TerminalQueuedCommand => Get("TerminalQueuedCommand");
 
     /// … {0} more lines
@@ -1320,10 +1320,10 @@ public static class Strings
     /// Skills
     public static string SlashGroupSkills => Get("SlashGroupSkills");
 
-    /// The conversation was made shorter to fit.
+    /// Conversation compacted to fit the context.
     public static string TerminalCompacted => Get("TerminalCompacted");
 
-    /// The conversation was made shorter: {0}k tokens before, {1}k now.
+    /// Conversation compacted: {0}k tokens before, {1}k now.
     public static string TerminalCompactedSize => Get("TerminalCompactedSize");
 
     /// Making the conversation shorter…
@@ -1335,13 +1335,13 @@ public static class Strings
     /// {0} more lines
     public static string TerminalDiffMore => Get("TerminalDiffMore");
 
-    /// Waiting for you: {0}
-    public static string TerminalWaitsForYou => Get("TerminalWaitsForYou");
+    /// Waiting for permission: {0}
+    public static string TerminalWaitsPermission => Get("TerminalWaitsPermission");
 
-    /// questions
+    /// Waiting for your answers
     public static string TerminalWaitsQuestions => Get("TerminalWaitsQuestions");
 
-    /// the plan
+    /// Waiting for your call on the plan
     public static string TerminalWaitsPlan => Get("TerminalWaitsPlan");
 
     /// Show

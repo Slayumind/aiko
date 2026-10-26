@@ -1139,7 +1139,7 @@
     <value>Сессия — это один разговор с Claude Code в одной папке.</value>
   </data>
   <data name="TerminalEmptyTalk" xml:space="preserve">
-    <value>Опиши задачу. Claude Code запустится с первым сообщением.</value>
+    <value>Сессия начнётся с первого сообщения. Папку, модель и режим можно сменить в строке под полем.</value>
   </data>
   <data name="TerminalWorking" xml:space="preserve">
     <value>работает</value>
@@ -1283,10 +1283,10 @@
     <value>Разрешать в этом проекте</value>
   </data>
   <data name="TerminalDeny" xml:space="preserve">
-    <value>Отказать</value>
+    <value>Запретить</value>
   </data>
   <data name="TerminalCardKeys" xml:space="preserve">
-    <value>Enter — разрешить · Esc — отказать</value>
+    <value>Enter — разрешить · Esc — запретить</value>
   </data>
   <data name="TerminalQuestionStep" xml:space="preserve">
     <value>вопрос {0} из {1}</value>
@@ -1310,19 +1310,19 @@
     <value>Ответить</value>
   </data>
   <data name="TerminalQuestionsDenied" xml:space="preserve">
-    <value>Вопросы: отказано</value>
+    <value>Вопросы без ответа</value>
   </data>
   <data name="TerminalStop" xml:space="preserve">
     <value>Остановить</value>
   </data>
   <data name="TerminalTurnStopped" xml:space="preserve">
-    <value>Ход остановлен.</value>
+    <value>Остановлено.</value>
   </data>
   <data name="TerminalQueued" xml:space="preserve">
-    <value>войдёт в ход на следующем шаге</value>
+    <value>Claude прочтёт после текущего шага</value>
   </data>
   <data name="TerminalQueuedCommand" xml:space="preserve">
-    <value>выполнится после этого хода</value>
+    <value>выполню, когда Claude закончит</value>
   </data>
   <data name="TerminalMoreLines" xml:space="preserve">
     <value>… ещё строк: {0}</value>
@@ -1331,7 +1331,7 @@
     <value>Навыки</value>
   </data>
   <data name="TerminalCompacted" xml:space="preserve">
-    <value>Разговор сжат, чтобы поместиться в память.</value>
+    <value>Разговор сжат, чтобы влезть в контекст.</value>
   </data>
   <data name="TerminalCompactedSize" xml:space="preserve">
     <value>Разговор сжат: было {0} тыс. токенов, стало {1} тыс.</value>
@@ -1345,14 +1345,14 @@
   <data name="TerminalDiffMore" xml:space="preserve">
     <value>Ещё строк: {0}</value>
   </data>
-  <data name="TerminalWaitsForYou" xml:space="preserve">
-    <value>Жду тебя: {0}</value>
+  <data name="TerminalWaitsPermission" xml:space="preserve">
+    <value>Жду разрешения: {0}</value>
   </data>
   <data name="TerminalWaitsQuestions" xml:space="preserve">
-    <value>вопросы</value>
+    <value>Жду ответа на вопросы</value>
   </data>
   <data name="TerminalWaitsPlan" xml:space="preserve">
-    <value>план</value>
+    <value>Жду решения по плану</value>
   </data>
   <data name="TerminalShow" xml:space="preserve">
     <value>Показать</value>

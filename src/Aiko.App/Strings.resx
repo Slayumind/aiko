@@ -1139,7 +1139,7 @@
     <value>A session is one conversation with Claude Code in one folder.</value>
   </data>
   <data name="TerminalEmptyTalk" xml:space="preserve">
-    <value>Describe the task. Claude Code starts with your first message.</value>
+    <value>The session starts with your first message. Change the folder, model or mode in the line under the field.</value>
   </data>
   <data name="TerminalWorking" xml:space="preserve">
     <value>working</value>
@@ -1310,19 +1310,19 @@
     <value>Answer</value>
   </data>
   <data name="TerminalQuestionsDenied" xml:space="preserve">
-    <value>Questions: declined</value>
+    <value>Questions skipped</value>
   </data>
   <data name="TerminalStop" xml:space="preserve">
     <value>Stop</value>
   </data>
   <data name="TerminalTurnStopped" xml:space="preserve">
-    <value>Turn stopped.</value>
+    <value>Stopped.</value>
   </data>
   <data name="TerminalQueued" xml:space="preserve">
-    <value>goes in at the next step</value>
+    <value>Claude reads it after this step</value>
   </data>
   <data name="TerminalQueuedCommand" xml:space="preserve">
-    <value>runs after this turn</value>
+    <value>runs when Claude is done</value>
   </data>
   <data name="TerminalMoreLines" xml:space="preserve">
     <value>… {0} more lines</value>
@@ -1331,10 +1331,10 @@
     <value>Skills</value>
   </data>
   <data name="TerminalCompacted" xml:space="preserve">
-    <value>The conversation was made shorter to fit.</value>
+    <value>Conversation compacted to fit the context.</value>
   </data>
   <data name="TerminalCompactedSize" xml:space="preserve">
-    <value>The conversation was made shorter: {0}k tokens before, {1}k now.</value>
+    <value>Conversation compacted: {0}k tokens before, {1}k now.</value>
   </data>
   <data name="TerminalCompacting" xml:space="preserve">
     <value>Making the conversation shorter…</value>
@@ -1345,14 +1345,14 @@
   <data name="TerminalDiffMore" xml:space="preserve">
     <value>{0} more lines</value>
   </data>
-  <data name="TerminalWaitsForYou" xml:space="preserve">
-    <value>Waiting for you: {0}</value>
+  <data name="TerminalWaitsPermission" xml:space="preserve">
+    <value>Waiting for permission: {0}</value>
   </data>
   <data name="TerminalWaitsQuestions" xml:space="preserve">
-    <value>questions</value>
+    <value>Waiting for your answers</value>
   </data>
   <data name="TerminalWaitsPlan" xml:space="preserve">
-    <value>the plan</value>
+    <value>Waiting for your call on the plan</value>
   </data>
   <data name="TerminalShow" xml:space="preserve">
     <value>Show</value>

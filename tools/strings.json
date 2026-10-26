@@ -2585,8 +2585,8 @@
   [
     "TerminalEmptyTalk",
     [
-      "Describe the task. Claude Code starts with your first message.",
-      "Опиши задачу. Claude Code запустится с первым сообщением."
+      "The session starts with your first message. Change the folder, model or mode in the line under the field.",
+      "Сессия начнётся с первого сообщения. Папку, модель и режим можно сменить в строке под полем."
     ]
   ],
   [
@@ -2922,14 +2922,14 @@
     "TerminalDeny",
     [
       "Deny",
-      "Отказать"
+      "Запретить"
     ]
   ],
   [
     "TerminalCardKeys",
     [
       "Enter to allow · Esc to deny",
-      "Enter — разрешить · Esc — отказать"
+      "Enter — разрешить · Esc — запретить"
     ]
   ],
   [
@@ -2984,8 +2984,8 @@
   [
     "TerminalQuestionsDenied",
     [
-      "Questions: declined",
-      "Вопросы: отказано"
+      "Questions skipped",
+      "Вопросы без ответа"
     ]
   ],
   [
@@ -2998,22 +2998,22 @@
   [
     "TerminalTurnStopped",
     [
-      "Turn stopped.",
-      "Ход остановлен."
+      "Stopped.",
+      "Остановлено."
     ]
   ],
   [
     "TerminalQueued",
     [
-      "goes in at the next step",
-      "войдёт в ход на следующем шаге"
+      "Claude reads it after this step",
+      "Claude прочтёт после текущего шага"
     ]
   ],
   [
     "TerminalQueuedCommand",
     [
-      "runs after this turn",
-      "выполнится после этого хода"
+      "runs when Claude is done",
+      "выполню, когда Claude закончит"
     ]
   ],
   [
@@ -3033,14 +3033,14 @@
   [
     "TerminalCompacted",
     [
-      "The conversation was made shorter to fit.",
-      "Разговор сжат, чтобы поместиться в память."
+      "Conversation compacted to fit the context.",
+      "Разговор сжат, чтобы влезть в контекст."
     ]
   ],
   [
     "TerminalCompactedSize",
     [
-      "The conversation was made shorter: {0}k tokens before, {1}k now.",
+      "Conversation compacted: {0}k tokens before, {1}k now.",
       "Разговор сжат: было {0} тыс. токенов, стало {1} тыс."
     ]
   ],
@@ -3066,24 +3066,24 @@
     ]
   ],
   [
-    "TerminalWaitsForYou",
+    "TerminalWaitsPermission",
     [
-      "Waiting for you: {0}",
-      "Жду тебя: {0}"
+      "Waiting for permission: {0}",
+      "Жду разрешения: {0}"
     ]
   ],
   [
     "TerminalWaitsQuestions",
     [
-      "questions",
-      "вопросы"
+      "Waiting for your answers",
+      "Жду ответа на вопросы"
     ]
   ],
   [
     "TerminalWaitsPlan",
     [
-      "the plan",
-      "план"
+      "Waiting for your call on the plan",
+      "Жду решения по плану"
     ]
   ],
   [

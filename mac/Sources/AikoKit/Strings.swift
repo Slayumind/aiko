@@ -409,7 +409,7 @@ public enum Strings {
         "TerminalElsewhere": ("This folder is bound to {0}. The session starts in {1}.", "Эта папка привязана к среде {0}. Сессия запустится в среде {1}."),
         "TerminalNoSessionsTitle": ("Start your first session in {0}", "Начни первую сессию в среде {0}"),
         "TerminalNoSessionsBody": ("A session is one conversation with Claude Code in one folder.", "Сессия — это один разговор с Claude Code в одной папке."),
-        "TerminalEmptyTalk": ("Describe the task. Claude Code starts with your first message.", "Опиши задачу. Claude Code запустится с первым сообщением."),
+        "TerminalEmptyTalk": ("The session starts with your first message. Change the folder, model or mode in the line under the field.", "Сессия начнётся с первого сообщения. Папку, модель и режим можно сменить в строке под полем."),
         "TerminalWorking": ("working", "работает"),
         "TerminalWorkingNow": ("working", "работаю"),
         "TerminalWaiting": ("waiting", "ждёт"),
@@ -457,8 +457,8 @@ public enum Strings {
         "TerminalAllow": ("Allow", "Разрешить"),
         "TerminalAllowEdits": ("Allow edits in this session", "Разрешать правки в этой сессии"),
         "TerminalAllowInProject": ("Allow in this project", "Разрешать в этом проекте"),
-        "TerminalDeny": ("Deny", "Отказать"),
-        "TerminalCardKeys": ("Enter to allow · Esc to deny", "Enter — разрешить · Esc — отказать"),
+        "TerminalDeny": ("Deny", "Запретить"),
+        "TerminalCardKeys": ("Enter to allow · Esc to deny", "Enter — разрешить · Esc — запретить"),
         "TerminalQuestionStep": ("question {0} of {1}", "вопрос {0} из {1}"),
         "TerminalQuestionMany": ("you can pick several", "можно выбрать несколько"),
         "TerminalQuestionOther": ("Other", "Другое"),
@@ -466,21 +466,21 @@ public enum Strings {
         "TerminalQuestionBack": ("Back", "Назад"),
         "TerminalQuestionNext": ("Next", "Дальше"),
         "TerminalQuestionAnswer": ("Answer", "Ответить"),
-        "TerminalQuestionsDenied": ("Questions: declined", "Вопросы: отказано"),
+        "TerminalQuestionsDenied": ("Questions skipped", "Вопросы без ответа"),
         "TerminalStop": ("Stop", "Остановить"),
-        "TerminalTurnStopped": ("Turn stopped.", "Ход остановлен."),
-        "TerminalQueued": ("goes in at the next step", "войдёт в ход на следующем шаге"),
-        "TerminalQueuedCommand": ("runs after this turn", "выполнится после этого хода"),
+        "TerminalTurnStopped": ("Stopped.", "Остановлено."),
+        "TerminalQueued": ("Claude reads it after this step", "Claude прочтёт после текущего шага"),
+        "TerminalQueuedCommand": ("runs when Claude is done", "выполню, когда Claude закончит"),
         "TerminalMoreLines": ("… {0} more lines", "… ещё строк: {0}"),
         "SlashGroupSkills": ("Skills", "Навыки"),
-        "TerminalCompacted": ("The conversation was made shorter to fit.", "Разговор сжат, чтобы поместиться в память."),
-        "TerminalCompactedSize": ("The conversation was made shorter: {0}k tokens before, {1}k now.", "Разговор сжат: было {0} тыс. токенов, стало {1} тыс."),
+        "TerminalCompacted": ("Conversation compacted to fit the context.", "Разговор сжат, чтобы влезть в контекст."),
+        "TerminalCompactedSize": ("Conversation compacted: {0}k tokens before, {1}k now.", "Разговор сжат: было {0} тыс. токенов, стало {1} тыс."),
         "TerminalCompacting": ("Making the conversation shorter…", "Сжимаю разговор…"),
         "TerminalFailed": ("Claude Code stopped with an error.", "Claude Code остановился с ошибкой."),
         "TerminalDiffMore": ("{0} more lines", "Ещё строк: {0}"),
-        "TerminalWaitsForYou": ("Waiting for you: {0}", "Жду тебя: {0}"),
-        "TerminalWaitsQuestions": ("questions", "вопросы"),
-        "TerminalWaitsPlan": ("the plan", "план"),
+        "TerminalWaitsPermission": ("Waiting for permission: {0}", "Жду разрешения: {0}"),
+        "TerminalWaitsQuestions": ("Waiting for your answers", "Жду ответа на вопросы"),
+        "TerminalWaitsPlan": ("Waiting for your call on the plan", "Жду решения по плану"),
         "TerminalShow": ("Show", "Показать"),
         "VoiceButtonTip": ("Voice input · Ctrl+Space", "Голосовой ввод · Ctrl+Space"),
         "VoiceStopTip": ("Finish recording · Ctrl+Space", "Закончить запись · Ctrl+Space"),
@@ -1631,7 +1631,7 @@ public enum Strings {
     /// A session is one conversation with Claude Code in one folder.
     public static var terminalNoSessionsBody: String { Strings.get("TerminalNoSessionsBody") }
 
-    /// Describe the task. Claude Code starts with your first message.
+    /// The session starts with your first message. Change the folder, model or mode in the line ...
     public static var terminalEmptyTalk: String { Strings.get("TerminalEmptyTalk") }
 
     /// working
@@ -1802,19 +1802,19 @@ public enum Strings {
     /// Answer
     public static var terminalQuestionAnswer: String { Strings.get("TerminalQuestionAnswer") }
 
-    /// Questions: declined
+    /// Questions skipped
     public static var terminalQuestionsDenied: String { Strings.get("TerminalQuestionsDenied") }
 
     /// Stop
     public static var terminalStop: String { Strings.get("TerminalStop") }
 
-    /// Turn stopped.
+    /// Stopped.
     public static var terminalTurnStopped: String { Strings.get("TerminalTurnStopped") }
 
-    /// goes in at the next step
+    /// Claude reads it after this step
     public static var terminalQueued: String { Strings.get("TerminalQueued") }
 
-    /// runs after this turn
+    /// runs when Claude is done
     public static var terminalQueuedCommand: String { Strings.get("TerminalQueuedCommand") }
 
     /// … {0} more lines
@@ -1823,10 +1823,10 @@ public enum Strings {
     /// Skills
     public static var slashGroupSkills: String { Strings.get("SlashGroupSkills") }
 
-    /// The conversation was made shorter to fit.
+    /// Conversation compacted to fit the context.
     public static var terminalCompacted: String { Strings.get("TerminalCompacted") }
 
-    /// The conversation was made shorter: {0}k tokens before, {1}k now.
+    /// Conversation compacted: {0}k tokens before, {1}k now.
     public static var terminalCompactedSize: String { Strings.get("TerminalCompactedSize") }
 
     /// Making the conversation shorter…
@@ -1838,13 +1838,13 @@ public enum Strings {
     /// {0} more lines
     public static var terminalDiffMore: String { Strings.get("TerminalDiffMore") }
 
-    /// Waiting for you: {0}
-    public static var terminalWaitsForYou: String { Strings.get("TerminalWaitsForYou") }
+    /// Waiting for permission: {0}
+    public static var terminalWaitsPermission: String { Strings.get("TerminalWaitsPermission") }
 
-    /// questions
+    /// Waiting for your answers
     public static var terminalWaitsQuestions: String { Strings.get("TerminalWaitsQuestions") }
 
-    /// the plan
+    /// Waiting for your call on the plan
     public static var terminalWaitsPlan: String { Strings.get("TerminalWaitsPlan") }
 
     /// Show
