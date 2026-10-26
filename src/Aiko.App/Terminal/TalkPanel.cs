@@ -90,13 +90,7 @@ sealed class TalkPanel : UserControl
         VirtualizingPanel.SetIsVirtualizing(_feed, true);
         VirtualizingPanel.SetVirtualizationMode(_feed, VirtualizationMode.Recycling);
         VirtualizingPanel.SetScrollUnit(_feed, ScrollUnit.Pixel);
-        _feed.AddHandler(PreviewMouseWheelEvent, new MouseWheelEventHandler((_, e) =>
-        {
-            if (e.Delta > 0)
-            {
-                ReaderGoesUp();
-            }
-        }), handledEventsToo: true);
+        _feed.AddHandler(PreviewMouseWheelEvent, new MouseWheelEventHandler(Wheel), handledEventsToo: true);
         _feed.AddHandler(PreviewMouseLeftButtonDownEvent, new MouseButtonEventHandler((_, e) =>
         {
             if (e.OriginalSource is DependencyObject hit && OnScrollBar(hit))
@@ -360,6 +354,39 @@ sealed class TalkPanel : UserControl
         {
             _glide.ToEnd(scroll);
         }
+    }
+
+    /// The wheel glides the feed by the same distance a notch moved it before: the lines Windows
+    /// sets for the wheel, 16 px each. A box inside the feed that scrolls by itself keeps its wheel.
+    private void Wheel(object sender, MouseWheelEventArgs e)
+    {
+        if (e.Handled || (_scroll ??= FindScroll(_feed)) is not { } scroll || ScrollsInside(e.OriginalSource as DependencyObject, scroll))
+        {
+            return;
+        }
+
+        if (e.Delta > 0)
+        {
+            _follow = false;
+        }
+
+        var lines = SystemParameters.WheelScrollLines > 0 ? SystemParameters.WheelScrollLines : 3;
+        _glide.By(scroll, -e.Delta / (double)Mouse.MouseWheelDeltaForOneLine * lines * 16);
+        e.Handled = true;
+    }
+
+    /// Whether the wheel is over a box inside the feed that can scroll up or down by itself.
+    private static bool ScrollsInside(DependencyObject? hit, ScrollViewer feed)
+    {
+        for (var at = hit; at is not null && !ReferenceEquals(at, feed); at = at is Visual or System.Windows.Media.Media3D.Visual3D ? VisualTreeHelper.GetParent(at) : LogicalTreeHelper.GetParent(at))
+        {
+            if (at is ScrollViewer { ScrollableHeight: > 0 })
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void ReaderGoesUp()
