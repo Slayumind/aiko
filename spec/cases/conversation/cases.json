@@ -1,5 +1,5 @@
 {
-  "comment": "A conversation as a row of steps and what it has become after them (D-294, D-304, D-305). A step is a line of Claude Code, or something the person does. The answer is the state, the feed and every line written to Claude Code on the way. The queue is kept by Aiko: a message sent during a turn, or while a card waits, goes out when the turn is over. A turn that ended does not free the session while a subagent still runs. What a subagent says inside its own work stays out of the feed; its requests do not. glance is the conversation as the list of sessions sees it: what it does and the parts of the one line about it.",
+  "comment": "A conversation as a row of steps and what it has become after them (D-294, D-304, D-305). A step is a line of Claude Code, or something the person does. The answer is the state, the feed and every line written to Claude Code on the way. A message sent during a turn, or while a card waits, goes to Claude Code at once and stays grey until Claude Code says it back (--replay-user-messages): then it was taken into the turn (D-341). While a grey message waits, the session stays at work. A turn that ended does not free the session while a subagent still runs. What a subagent says inside its own work stays out of the feed; its requests do not. glance is the conversation as the list of sessions sees it: what it does and the parts of the one line about it.",
   "scenarios": [
     {
       "name": "nothing happened yet",
@@ -1428,7 +1428,7 @@
       }
     },
     {
-      "name": "two messages sent during the work go out one by one",
+      "name": "messages sent during the work go to Claude Code at once and stop being grey when it takes them",
       "steps": [
         {
           "do": "send",
@@ -1470,6 +1470,38 @@
         },
         {
           "line": {
+            "type": "user",
+            "message": {
+              "role": "user",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "second"
+                }
+              ]
+            },
+            "parent_tool_use_id": null,
+            "isReplay": true
+          }
+        },
+        {
+          "line": {
+            "type": "user",
+            "message": {
+              "role": "user",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "third"
+                }
+              ]
+            },
+            "parent_tool_use_id": null,
+            "isReplay": true
+          }
+        },
+        {
+          "line": {
             "type": "assistant",
             "message": {
               "content": [
@@ -1490,7 +1522,7 @@
         }
       ],
       "state": {
-        "activity": "working",
+        "activity": "done",
         "mode": "manual",
         "model": "",
         "session": "",
@@ -1514,13 +1546,13 @@
             "queued": false
           },
           {
-            "answer": "Two.",
-            "streaming": false
-          },
-          {
             "owner": "third",
             "images": 0,
             "queued": false
+          },
+          {
+            "answer": "Two.",
+            "streaming": false
           }
         ]
       },
@@ -1530,15 +1562,15 @@
         "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"third\"}]}}"
       ],
       "glance": {
-        "activity": "working",
-        "line": "none",
+        "activity": "done",
+        "line": "answer",
         "kind": "other",
         "label": "",
-        "text": ""
+        "text": "Two."
       }
     },
     {
-      "name": "a message sent while a card waits is queued too",
+      "name": "a message sent while a card waits goes to Claude Code at once and stays grey",
       "steps": [
         {
           "do": "send",
@@ -1626,7 +1658,8 @@
         ]
       },
       "written": [
-        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"write it\"}]}}"
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"write it\"}]}}",
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"and one more thing\"}]}}"
       ],
       "glance": {
         "activity": "waiting",
@@ -1637,7 +1670,7 @@
       }
     },
     {
-      "name": "the person stops the turn: the pieces are kept, the card closes, the queue moves",
+      "name": "the person stops the turn: the pieces are kept, the card closes, the waiting message stays with Claude Code",
       "steps": [
         {
           "do": "send",
@@ -1761,14 +1794,14 @@
           {
             "owner": "never mind",
             "images": 0,
-            "queued": false
+            "queued": true
           }
         ]
       },
       "written": [
         "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"a long story\"}]}}",
-        "{\"type\":\"control_request\",\"request_id\":\"int-6\",\"request\":{\"subtype\":\"interrupt\"}}",
-        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"never mind\"}]}}"
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"never mind\"}]}}",
+        "{\"type\":\"control_request\",\"request_id\":\"int-6\",\"request\":{\"subtype\":\"interrupt\"}}"
       ],
       "glance": {
         "activity": "working",
@@ -3245,7 +3278,7 @@
       }
     },
     {
-      "name": "a message sent while an answer is written waits under the whole answer",
+      "name": "a message sent while an answer is written goes at once and waits grey under the whole answer",
       "steps": [
         {
           "do": "send",
@@ -3333,7 +3366,8 @@
         ]
       },
       "written": [
-        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"Привет!\"}]}}"
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"Привет!\"}]}}",
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"И ещё?\"}]}}"
       ],
       "glance": {
         "activity": "working",
@@ -3344,7 +3378,7 @@
       }
     },
     {
-      "name": "the steps of a turn stay above a queued message, and it goes when the turn ends",
+      "name": "the steps of a turn stay above a waiting message, and the session stays at work for it",
       "steps": [
         {
           "do": "send",
@@ -3458,7 +3492,7 @@
           {
             "owner": "И ещё?",
             "images": 0,
-            "queued": false
+            "queued": true
           }
         ]
       },

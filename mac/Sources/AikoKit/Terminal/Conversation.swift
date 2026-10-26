@@ -205,6 +205,8 @@ public struct Conversation: Sendable, Equatable {
             // subagent in the background is over, Claude reads what it did and answers.
             next.inTurn = true
             next.say(blocks, error)
+        case .user(nil, let text, _, true, _):
+            next.take(text)
         case .user(nil, let text, let results, _, _):
             // After a change of model Claude Code names its full id at once, before the next turn.
             if let model = ModelName.fromSwitch(text) {
@@ -320,25 +322,37 @@ public struct Conversation: Sendable, Equatable {
             next.add(.notice(kind: .output, text: text))
         }
 
-        next.inTurn = false
+        // Messages Claude Code has not taken yet are already in its hands (D-341): it goes on with
+        // them by itself, so the session stays at work.
+        next.inTurn = next.items.contains { item in
+            if case .ownerMessage(_, true, _) = item.content { return true }
+            return false
+        }
         next.answeredInTurn = false
         next.failedInTurn = false
         next.unread = true
         next.compacting = false
-
-        // The queue is kept here, not in Claude Code: the next message goes when the turn is over (D-304).
-        if let queued = next.items.first(where: { item in
-            if case .ownerMessage(_, true, _) = item.content { return true }
-            return false
-        }) {
-            return next.sent(queued)
-        }
         return Outcome(state: next, written: [])
+    }
+
+    /// Claude Code took a message sent during the work and says it back (--replay-user-messages):
+    /// the message is no longer grey, and the work goes on with it. A message it says back that was
+    /// never waiting, as the first one of a turn, changes nothing.
+    private mutating func take(_ said: String) {
+        let wanted = said.trimmingCharacters(in: .whitespacesAndNewlines)
+        for index in items.indices {
+            guard case .ownerMessage(let text, true, let attachments) = items[index].content,
+                  text.trimmingCharacters(in: .whitespacesAndNewlines) == wanted else { continue }
+            items[index].content = .ownerMessage(text: text, queued: false, attachments: attachments)
+            inTurn = true
+            return
+        }
     }
 
     // MARK: - What the person does
 
-    /// A message sent while Claude works, or while a card waits, goes into the queue.
+    /// A message sent while Claude works, or while a card waits, goes to Claude Code at once and
+    /// stays grey until Claude Code takes it: at the next step of the turn (D-341).
     public func send(_ text: String, images: [AttachedImage]) -> Outcome {
         if RequestCard.trimmed(text).isEmpty && images.isEmpty {
             return Outcome(state: self, written: [])
@@ -351,7 +365,7 @@ public struct Conversation: Sendable, Equatable {
         next.queue(.ownerMessage(text: text, queued: true, attachments: images))
 
         if waits {
-            return Outcome(state: next, written: [])
+            return Outcome(state: next, written: [HostLine.userMessage(text, images: images)])
         }
         return next.sent(next.items[next.items.count - 1])
     }
