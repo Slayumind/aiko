@@ -5,7 +5,7 @@ namespace Aiko.Core.Tests;
 public class CommandLoaderTests
 {
     private const string Answer =
-        """{"type":"control_response","response":{"subtype":"success","request_id":"commands-1","response":{"commands":[{"name":"compact","description":"Free up context","argumentHint":"","builtin":true}]}}}""";
+        """{"type":"control_response","response":{"subtype":"success","request_id":"commands-1","response":{"commands":[{"name":"compact","description":"Free up context","argumentHint":"","builtin":true}],"models":[{"value":"default","displayName":"Default (recommended)"},{"value":"fable","displayName":"Fable 5.1"}]}}}""";
 
     private sealed class ScriptedProcess(bool starts) : IConversationProcess
     {
@@ -38,10 +38,10 @@ public class CommandLoaderTests
 
     private static readonly CommandSetup Setup = new("claude", "C:/work", "C:/Users/me/.claude", "C:/Users/me", []);
 
-    private static (ScriptedProcess Process, List<IReadOnlyList<SlashCommand>> Answers) Loaded(bool starts = true)
+    private static (ScriptedProcess Process, List<ClaudeOffer> Answers) Loaded(bool starts = true)
     {
         var process = new ScriptedProcess(starts);
-        var answers = new List<IReadOnlyList<SlashCommand>>();
+        var answers = new List<ClaudeOffer>();
         new CommandLoader(() => process, work => work()).Load(Setup, answers.Add);
         return (process, answers);
     }
@@ -58,15 +58,16 @@ public class CommandLoaderTests
     }
 
     [Fact]
-    public void GivesTheCommandsOnceAndLetsClaudeCodeGo()
+    public void GivesTheCommandsAndModelsOnceAndLetsClaudeCodeGo()
     {
         var (process, answers) = Loaded();
 
         process.Say(Answer);
         process.Exit(0);
 
-        var commands = Assert.Single(answers);
-        Assert.Equal("compact", Assert.Single(commands).Name);
+        var offer = Assert.Single(answers);
+        Assert.Equal("compact", Assert.Single(offer.Commands).Name);
+        Assert.Equal(["default", "fable"], offer.Models.Select(model => model.Value));
         Assert.True(process.Stopped);
     }
 
@@ -78,7 +79,7 @@ public class CommandLoaderTests
         process.Say("""{"type":"system","subtype":"init","session_id":"s"}""");
         process.Exit(1);
 
-        Assert.Empty(Assert.Single(answers));
+        Assert.Same(ClaudeOffer.None, Assert.Single(answers));
     }
 
     [Fact]
@@ -86,6 +87,6 @@ public class CommandLoaderTests
     {
         var (_, answers) = Loaded(starts: false);
 
-        Assert.Empty(Assert.Single(answers));
+        Assert.Same(ClaudeOffer.None, Assert.Single(answers));
     }
 }

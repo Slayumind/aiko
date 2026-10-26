@@ -243,7 +243,11 @@ static class TerminalSnapshot
         };
         var form = state switch
         {
-            "form" => new FormView("Aiko", folders, 0, null, 0, "aiko 3"),
+            "form" => new FormView("Aiko", folders, 0, null, 1, "aiko 3")
+            {
+                Models = NewSessionChoices.Offered(
+                    [new("default", "Default (recommended)"), new("opus", "Opus 5.5"), new("fable", "Fable 5.1"), new("sonnet", "Sonnet 5.5"), new("haiku", "Haiku 5.5"), new("claude-opus-4-8", "Opus 4.8")]),
+            },
             "elsewhere" => new FormView("Aiko", folders, 1, "Work · Kodland", 0, "for-work 1"),
             _ => null,
         };

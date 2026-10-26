@@ -36,6 +36,18 @@ public struct FolderHeader: Sendable, Equatable {
     public let group: FolderGroup
 }
 
+/// A model as Claude Code names it in its answer to "initialize": the word for --model, and the
+/// name to show, like "fable" and "Fable 5.1".
+public struct ClaudeModel: Sendable, Equatable {
+    public let value: String
+    public let displayName: String
+
+    public init(value: String, displayName: String) {
+        self.value = value
+        self.displayName = displayName
+    }
+}
+
 /// What the form of a new session offers (D-293, D-300): the folders, the models and the name the
 /// session gets when the field is left empty.
 ///
@@ -46,10 +58,24 @@ public enum NewSessionChoices {
     /// The folders offered from inside one bound folder: the ones changed last (D-335).
     public static let mostInside = 8
 
-    /// The models of the form, as the words Claude Code takes for --model. They are the short
-    /// names, which stay the same from one version of a model to the next. The form offers models
-    /// only (D-308): a session always starts with one of them.
+    /// The models of the form until Claude Code named its own, as the words it takes for --model.
+    /// They are the short names, which stay the same from one version of a model to the next.
+    /// The form offers models only (D-308): a session always starts with one of them.
     public static let models = ["opus", "sonnet", "haiku"]
+
+    /// The models the form offers, from the ones Claude Code named: only the short names, in its
+    /// order (AIKO-387). A new family of models comes with no change in Aiko. "default" and the
+    /// full ids of single versions stay out. When Claude Code named none, the list above.
+    public static func offered(_ named: [ClaudeModel]) -> [ClaudeModel] {
+        let shortNames = named.filter { model in
+            model.value != "default" && !model.value.isEmpty
+                && model.value.unicodeScalars.allSatisfy { ("a"..."z").contains($0) }
+        }
+        if !shortNames.isEmpty {
+            return shortNames
+        }
+        return models.map { ClaudeModel(value: $0, displayName: $0.prefix(1).uppercased() + $0.dropFirst()) }
+    }
 
     /// The folders, each once whatever the case of their letters: where sessions of the
     /// environment ran last, then every bound folder followed by up to mostInside folders inside
@@ -118,27 +144,30 @@ public enum NewSessionChoices {
 
     /// The model the form starts with: the one of the session of the environment that was used
     /// last and has a model of the list. With no such session it is the first of the list.
-    public static func defaultModel(_ sessions: TerminalSessions, _ environment: String) -> String {
+    /// offered are the short names offered; without them, the list above.
+    public static func defaultModel(_ sessions: TerminalSessions, _ environment: String, _ offered: [String] = []) -> String {
+        let list = offered.isEmpty ? models : offered
         var latest: (model: String, used: Int64)?
         for session in sessions.sessions where session.environment == environment {
-            if let model = family(session.model), session.lastUsed > (latest?.used ?? Int64.min) {
+            if let model = family(session.model, list), session.lastUsed > (latest?.used ?? Int64.min) {
                 latest = (model, session.lastUsed)
             }
         }
-        return latest?.model ?? models[0]
+        return latest?.model ?? list[0]
     }
 
     /// The model after this one, for a click on the model under the input: in the order of the
     /// form, and back to the first after the last. A model outside the list goes to the first one.
-    public static func nextModel(_ model: String?) -> String {
-        let at = family(model).flatMap { models.firstIndex(of: $0) } ?? -1
-        return models[(at + 1) % models.count]
+    public static func nextModel(_ model: String?, _ offered: [String] = []) -> String {
+        let list = offered.isEmpty ? models : offered
+        let at = family(model, list).flatMap { list.firstIndex(of: $0) } ?? -1
+        return list[(at + 1) % list.count]
     }
 
     /// The model of the list a short name or a full id like "claude-sonnet-5-5" belongs to.
-    private static func family(_ model: String?) -> String? {
+    private static func family(_ model: String?, _ list: [String]) -> String? {
         guard let model else { return nil }
-        return models.first { model.range(of: $0, options: .caseInsensitive) != nil }
+        return list.first { model.range(of: $0, options: .caseInsensitive) != nil }
     }
 
     /// The name of the other environment a folder is bound to, or nil. The form says so before

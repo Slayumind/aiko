@@ -16,7 +16,11 @@ sealed record FormView(
     int Folder,
     string? BoundElsewhere,
     int Model,
-    string DefaultName);
+    string DefaultName)
+{
+    /// The models to choose from; Model is a place in this list.
+    public IReadOnlyList<ClaudeModel> Models { get; init; } = NewSessionChoices.Offered([]);
+}
 
 /// A question over the conversation: close something that still works?
 sealed record AskView(string Title, string Body);

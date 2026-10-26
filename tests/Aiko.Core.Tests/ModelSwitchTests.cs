@@ -19,6 +19,36 @@ public class ModelSwitchTests
     public void A_click_on_the_model_takes_the_next_one(string? model, string next) =>
         Assert.Equal(next, NewSessionChoices.NextModel(model));
 
+    /// What Claude Code 2.1.301 named on 2026-10-26, cut down: "default", four short names and
+    /// full ids of single versions.
+    private static readonly ClaudeModel[] Named =
+    [
+        new("default", "Default (recommended)"),
+        new("opus", "Opus 5.5"),
+        new("fable", "Fable 5.1"),
+        new("sonnet", "Sonnet 5.5"),
+        new("haiku", "Haiku 5.5"),
+        new("claude-haiku-4-5-20251001", "Haiku 4.5"),
+        new("claude-opus-4-8", "Opus 4.8"),
+    ];
+
+    [Fact]
+    public void The_form_offers_the_short_names_Claude_Code_named_in_its_order() =>
+        Assert.Equal(
+            ["Opus 5.5", "Fable 5.1", "Sonnet 5.5", "Haiku 5.5"],
+            NewSessionChoices.Offered(Named).Select(model => model.DisplayName));
+
+    [Fact]
+    public void Without_models_from_Claude_Code_the_form_keeps_its_own_three() =>
+        Assert.Equal(["opus", "sonnet", "haiku"], NewSessionChoices.Offered([]).Select(model => model.Value));
+
+    [Theory]
+    [InlineData("opus", "fable")]
+    [InlineData("claude-fable-5-1", "sonnet")]
+    [InlineData("haiku", "opus")]
+    public void A_click_goes_through_the_models_Claude_Code_named(string model, string next) =>
+        Assert.Equal(next, NewSessionChoices.NextModel(model, [.. NewSessionChoices.Offered(Named).Select(offered => offered.Value)]));
+
     [Fact]
     public void A_new_model_is_asked_and_goes_to_Claude_Code()
     {

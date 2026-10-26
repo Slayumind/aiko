@@ -87,7 +87,11 @@ public abstract record StreamEvent
     public sealed record Reply(string RequestId, bool Ok, PermissionMode? Mode) : StreamEvent;
 
     /// The answer to "initialize": the commands Claude Code knows, with their descriptions.
-    public sealed record Commands(string RequestId, IReadOnlyList<SlashCommand> List) : StreamEvent;
+    public sealed record Commands(string RequestId, IReadOnlyList<SlashCommand> List) : StreamEvent
+    {
+        /// The models the same answer names: short names, full ids and "default", in its order.
+        public IReadOnlyList<ClaudeModel> Models { get; init; } = [];
+    }
 
     /// Activity is "compacting" or "requesting" while that goes on, null when it is over.
     public sealed record Status(string? Activity, PermissionMode? Mode) : StreamEvent;
@@ -337,7 +341,10 @@ public abstract record StreamEvent
         var inner = Object(response, "response");
         if (Member(inner, "commands") is { ValueKind: JsonValueKind.Array })
         {
-            return new Commands(id, [.. Items(inner, "commands").Select(ReadCommand).OfType<SlashCommand>()]);
+            return new Commands(id, [.. Items(inner, "commands").Select(ReadCommand).OfType<SlashCommand>()])
+            {
+                Models = [.. Items(inner, "models").Select(ReadModel).OfType<ClaudeModel>()],
+            };
         }
 
         return new Reply(id, Str(response, "subtype") == "success", PermissionModes.FromStream(Str(inner, "mode")));
@@ -354,6 +361,12 @@ public abstract record StreamEvent
                     ? [.. aliases.EnumerateArray().Where(alias => alias.ValueKind == JsonValueKind.String).Select(alias => alias.GetString()!)]
                     : [],
                 Flag(command, "builtin"))
+            : null;
+
+    /// A model without a value is left out; without a name to show, its value is the name.
+    private static ClaudeModel? ReadModel(JsonElement model) =>
+        Str(model, "value") is { Length: > 0 } value
+            ? new ClaudeModel(value, Str(model, "displayName") is { Length: > 0 } shown ? shown : value)
             : null;
 
     private static StreamEvent ReadRateLimit(JsonElement root)

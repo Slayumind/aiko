@@ -1367,6 +1367,7 @@ public class SharedCaseTests
                 ["aliases"] = new JsonArray([.. commands.List[0].Aliases.Select(alias => (JsonNode)alias)]),
                 ["builtin"] = commands.List[0].Builtin,
             },
+            ["models"] = new JsonArray([.. commands.Models.Select(model => (JsonNode)$"{model.Value}={model.DisplayName}")]),
         },
         StreamEvent.Reply reply => new JsonObject
         {

@@ -8,24 +8,30 @@ public sealed record CommandSetup(
     string UserProfile,
     IReadOnlyList<string> InheritedVariables);
 
-/// Asks a short Claude Code for the commands it knows, for the menu of "/" (AIKO-330).
+/// What Claude Code offers in one environment: the commands of the menu of "/" and the models.
+public sealed record ClaudeOffer(IReadOnlyList<SlashCommand> Commands, IReadOnlyList<ClaudeModel> Models)
+{
+    public static readonly ClaudeOffer None = new([], []);
+}
+
+/// Asks a short Claude Code for the commands and the models it knows (AIKO-330, AIKO-387).
 ///
-/// The process starts, gets "initialize", gives its commands and is asked to leave. One list per
-/// environment is enough for the life of the window: skills and plugins rarely change while it is
-/// open. done is called once, on the thread post brings the work to, with the list, or with an
-/// empty list when Claude Code did not start or left without one.
+/// The process starts, gets "initialize", names its commands and models and is asked to leave.
+/// One answer per environment is enough for the life of the window: skills, plugins and models
+/// rarely change while it is open. done is called once, on the thread post brings the work to,
+/// with the offer, or with an empty one when Claude Code did not start or left without one.
 public sealed class CommandLoader(Func<IConversationProcess> newProcess, Action<Action> post)
 {
     private const string RequestId = "commands-1";
 
-    public void Load(CommandSetup setup, Action<IReadOnlyList<SlashCommand>> done)
+    public void Load(CommandSetup setup, Action<ClaudeOffer> done)
     {
         var plan = ClaudeLaunchPlan.ForCommands(setup.ConfigDirectory, setup.UserProfile, setup.InheritedVariables);
         var process = newProcess();
         var gate = new object();
         var answered = false;
 
-        void Answer(IReadOnlyList<SlashCommand> commands)
+        void Answer(ClaudeOffer offer)
         {
             lock (gate)
             {
@@ -38,7 +44,7 @@ public sealed class CommandLoader(Func<IConversationProcess> newProcess, Action<
             }
 
             process.Stop();
-            post(() => done(commands));
+            post(() => done(offer));
         }
 
         var started = process.Start(
@@ -47,14 +53,14 @@ public sealed class CommandLoader(Func<IConversationProcess> newProcess, Action<
             {
                 if (StreamEvent.FromLine(line) is StreamEvent.Commands { RequestId: RequestId } commands)
                 {
-                    Answer(commands.List);
+                    Answer(new ClaudeOffer(commands.List, commands.Models));
                 }
             },
-            _ => Answer([]));
+            _ => Answer(ClaudeOffer.None));
 
         if (!started || !process.Write(HostLine.Initialize(RequestId)))
         {
-            Answer([]);
+            Answer(ClaudeOffer.None);
         }
     }
 }
