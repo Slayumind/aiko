@@ -138,6 +138,8 @@ static class TerminalSnapshot
         {
             field.Text = "one\ntwo\nthree\nfour\nfive";
             Settle();
+            // The feed glides to its end (D-332), it does not jump there.
+            Glided();
             fieldGrows = (int)Math.Round(scroll.ScrollableHeight - scroll.VerticalOffset);
             field.Text = "";
             Settle();
@@ -175,14 +177,34 @@ static class TerminalSnapshot
         return new[] { behind, fieldGrows, whileWriting, insideAnswer, aboveAnswer }.Any(moved => Math.Abs(moved) > 2) ? 1 : 0;
     }
 
-    /// The reader turns the wheel up, as a hand does: the feed hears the wheel, then the offset moves.
+    /// The reader turns the wheel up, as a hand does: notch after notch until the feed heads for the
+    /// place, then the feed glides there.
     private static void ReaderScrolls(System.Windows.Controls.ScrollViewer scroll, double to)
     {
-        scroll.RaiseEvent(new System.Windows.Input.MouseWheelEventArgs(System.Windows.Input.Mouse.PrimaryDevice, 0, 120)
+        var notch = Math.Max(1, System.Windows.SystemParameters.WheelScrollLines) * 16;
+        for (var way = scroll.VerticalOffset - to; way > 0; way -= notch)
         {
-            RoutedEvent = System.Windows.UIElement.PreviewMouseWheelEvent,
-        });
-        scroll.ScrollToVerticalOffset(to);
+            scroll.RaiseEvent(new System.Windows.Input.MouseWheelEventArgs(System.Windows.Input.Mouse.PrimaryDevice, 0, 120)
+            {
+                RoutedEvent = System.Windows.UIElement.PreviewMouseWheelEvent,
+            });
+        }
+
+        Glided();
+    }
+
+    /// The glide of the feed ends in about 200 ms; half a second leaves room on a slow machine.
+    private static void Glided()
+    {
+        var frame = new System.Windows.Threading.DispatcherFrame();
+        var timer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
+        timer.Tick += (_, _) =>
+        {
+            timer.Stop();
+            frame.Continue = false;
+        };
+        timer.Start();
+        System.Windows.Threading.Dispatcher.PushFrame(frame);
     }
 
     private static void Settle() =>

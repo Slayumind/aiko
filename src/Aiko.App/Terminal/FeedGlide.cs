@@ -3,11 +3,13 @@ using System.Windows.Media;
 
 namespace Aiko.App;
 
-/// The feed follows a growing answer by gliding down, not jumping (D-332, check of 2026-10-23).
+/// The feed moves by gliding, not jumping (D-332, check of 2026-10-23).
 ///
 /// A new line of an answer made the feed jump 20–32 px a few times a second, and that was what
-/// made the ink look uneven. Now each frame closes a part of the way left, so the feed slows as
-/// it arrives and is there in about 200 ms; a new line on the way only moves the end it heads
+/// made the ink look uneven. A notch of the wheel jumped 48 px in one frame, and on a screen of
+/// 240 Hz that read as a jerk, though the step itself took under a millisecond (measure of
+/// 2026-10-26). Now each frame closes a part of the way left, so the feed slows as it arrives and
+/// is there in about 200 ms; a new line or a new notch on the way only moves the place it heads
 /// for. It runs only while there is a way to go, and with animations off in Windows it jumps.
 sealed class FeedGlide
 {
@@ -18,8 +20,12 @@ sealed class FeedGlide
     private TimeSpan _lastFrame;
     private bool _running;
 
+    /// Where the glide heads; null is the end of the feed, wherever it moves to.
+    private double? _target;
+
     public void ToEnd(ScrollViewer scroll)
     {
+        _target = null;
         if (!Motion.IsOn)
         {
             Stop();
@@ -27,6 +33,28 @@ sealed class FeedGlide
             return;
         }
 
+        Start(scroll);
+    }
+
+    /// The wheel: the feed heads further by this many pixels, up when negative. A notch that comes
+    /// while the feed still moves adds to the place it heads for.
+    public void By(ScrollViewer scroll, double pixels)
+    {
+        var from = _running && _target is { } heading ? heading : scroll.VerticalOffset;
+        var to = Math.Clamp(from + pixels, 0, scroll.ScrollableHeight);
+        if (!Motion.IsOn)
+        {
+            Stop();
+            scroll.ScrollToVerticalOffset(to);
+            return;
+        }
+
+        _target = to;
+        Start(scroll);
+    }
+
+    private void Start(ScrollViewer scroll)
+    {
         _scroll = scroll;
         if (!_running)
         {
@@ -63,9 +91,9 @@ sealed class FeedGlide
         var passed = (frame.RenderingTime - _lastFrame).TotalMilliseconds;
         _lastFrame = frame.RenderingTime;
 
-        var end = scroll.ScrollableHeight;
+        var end = Math.Min(_target ?? scroll.ScrollableHeight, scroll.ScrollableHeight);
         var next = scroll.VerticalOffset + ((end - scroll.VerticalOffset) * (1 - Math.Exp(-passed / EaseMs)));
-        if (end - next < 0.5)
+        if (Math.Abs(end - next) < 0.5)
         {
             next = end;
             Stop();
