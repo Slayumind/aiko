@@ -5,6 +5,10 @@ public abstract record FeedEntry(int Id)
 {
     public sealed record One(FeedItem Item) : FeedEntry(Item.Id);
 
+    /// A thought of Claude. It stands open while Claude still works after it and nothing else
+    /// came yet; after that it folds into one line that opens with a click.
+    public sealed record Thought(FeedItem.Thought Item, bool Open) : FeedEntry(Item.Id);
+
     /// Steps of one kind in a row are one line: "read ×3 · TalkInput.cs, TalkPanel.cs, +1" (D-342).
     /// The line opens to the steps themselves.
     public sealed record Run(IReadOnlyList<FeedItem.Step> Steps) : FeedEntry(Steps[0].Id)
@@ -38,8 +42,11 @@ public static class FeedEntries
     /// The feed as rows. Reading and searching come in long series, and each step of a series
     /// says little alone, so two or more of one kind in a row become one line. An edit or a
     /// command stays its own line: each one matters.
-    public static IReadOnlyList<FeedEntry> Of(IReadOnlyList<FeedItem> items)
+    /// busy: Claude is at work on this conversation now.
+    public static IReadOnlyList<FeedEntry> Of(IReadOnlyList<FeedItem> items, bool busy)
     {
+        // Messages that wait for Claude stand under the turn and do not count as what came next.
+        var last = items.LastOrDefault(item => item is not FeedItem.OwnerMessage { Queued: true });
         var rows = new List<FeedEntry>();
         var run = new List<FeedItem.Step>();
 
@@ -69,7 +76,9 @@ public static class FeedEntries
             }
 
             Flush();
-            rows.Add(new FeedEntry.One(item));
+            rows.Add(item is FeedItem.Thought thought
+                ? new FeedEntry.Thought(thought, busy && ReferenceEquals(item, last))
+                : new FeedEntry.One(item));
         }
 
         Flush();

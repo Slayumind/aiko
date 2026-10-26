@@ -60,12 +60,15 @@
         "activity": "idle",
         "mode": "plan",
         "busy": false,
-        "nextId": 3,
+        "nextId": 4,
         "items": [
           {
             "owner": "Привет!",
             "images": 0,
             "queued": false
+          },
+          {
+            "thought": "hm"
           },
           {
             "answer": "Hello.",

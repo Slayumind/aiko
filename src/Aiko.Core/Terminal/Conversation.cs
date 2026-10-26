@@ -98,6 +98,9 @@ public abstract record FeedItem(int Id)
 
     public sealed record Card(int Id, RequestCard Request, RequestState State) : FeedItem(Id);
 
+    /// What Claude thought before a step, in the few words Claude Code gives of it.
+    public sealed record Thought(int Id, string Text) : FeedItem(Id);
+
     /// Size is set only for a conversation made shorter, when Claude Code named both sizes.
     public sealed record Notice(int Id, NoticeKind Kind, string Text, CompactSize? Size = null) : FeedItem(Id);
 }
@@ -213,6 +216,9 @@ public sealed record Conversation(
             {
                 case AssistantBlock.Text text:
                     next = next.Answered(text.Value);
+                    break;
+                case AssistantBlock.Thinking { Words: var thought } when thought.Trim().Length > 0:
+                    next = next.Add(id => new FeedItem.Thought(id, thought.Trim()));
                     break;
                 // The step of a card of questions stays in the feed, hidden: its answers come to it
                 // with its result, and the feed shows them after the card is gone.

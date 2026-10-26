@@ -1155,6 +1155,9 @@ public static class Strings
     /// {0} waiting
     public static string TerminalTabWaitingMany => Get("TerminalTabWaitingMany");
 
+    /// thought
+    public static string TerminalStepThought => Get("TerminalStepThought");
+
     /// read
     public static string TerminalStepRead => Get("TerminalStepRead");
 

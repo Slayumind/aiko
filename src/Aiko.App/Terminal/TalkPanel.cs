@@ -203,7 +203,7 @@ sealed class TalkPanel : UserControl
             _follow = true;
         }
 
-        List<object> rows = [.. FeedEntries.Of(view.Items).Select(entry => entry is FeedEntry.One one ? one.Item : (object)entry)];
+        List<object> rows = [.. FeedEntries.Of(view.Items, view.Busy).Select(entry => entry is FeedEntry.One one ? one.Item : (object)entry)];
         if (view.Busy && !view.HasOpenCard)
         {
             rows.Add(view.Compacting ? WorkingMark.Compacting : WorkingMark.Row);
@@ -465,6 +465,7 @@ sealed class FeedSlot(object item) : INotifyPropertyChanged
     {
         (FeedItem shown, FeedItem next) => shown.Id == next.Id && shown.GetType() == next.GetType(),
         (FeedEntry.Run shown, FeedEntry.Run next) => shown.Id == next.Id,
+        (FeedEntry.Thought shown, FeedEntry.Thought next) => shown.Id == next.Id,
         _ => ReferenceEquals(_item, item),
     };
 }
@@ -533,6 +534,7 @@ sealed class FeedRow : ContentControl
             FeedItem.Step { Line.Label: QuestionAnswers.Tool, State: StepState.Failed } => Declined(),
             FeedItem.Step { Line.Hidden: false } step => StepRow(step),
             FeedEntry.Run run => RunRow(run),
+            FeedEntry.Thought thought => ThoughtRow(thought),
             FeedItem.Card { State: RequestState.Open } card => Card(card.Request),
             FeedItem.Notice notice => Notice(notice),
             _ => null,
@@ -724,6 +726,55 @@ sealed class FeedRow : ContentControl
             MinHeight = 24,
             Child = column,
         };
+    }
+
+    /// What Claude thought before a step: open while Claude works on after it, then one line that a
+    /// click opens (D-342). The words are grey: they are not the answer.
+    private UIElement ThoughtRow(FeedEntry.Thought thought)
+    {
+        var key = "thought:" + thought.Id;
+        var open = thought.Open || FindPanel()?.IsOpen(key) == true;
+
+        var row = new Grid();
+        row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+
+        var verb = TerminalPanel.Text(Strings.TerminalStepThought, "TextNumber", "Muted", FontWeights.Normal);
+        verb.MinWidth = 52;
+        verb.VerticalAlignment = VerticalAlignment.Top;
+        row.Children.Add(verb);
+
+        var words = TerminalPanel.Text(thought.Item.Text, "TextNumber", "Muted", FontWeights.Normal);
+        words.FontStyle = FontStyles.Italic;
+        words.Margin = new Thickness(10, 0, 0, 0);
+        words.MaxWidth = 640;
+        words.HorizontalAlignment = HorizontalAlignment.Left;
+        void Fold(bool unfolded)
+        {
+            words.TextWrapping = unfolded ? TextWrapping.Wrap : TextWrapping.NoWrap;
+            words.TextTrimming = unfolded ? TextTrimming.None : TextTrimming.CharacterEllipsis;
+        }
+        Fold(open);
+        Grid.SetColumn(words, 1);
+        row.Children.Add(words);
+
+        var head = new Border
+        {
+            Background = Brushes.Transparent,
+            Cursor = thought.Open ? null : Cursors.Hand,
+            Padding = new Thickness(16, 2, 0, 2),
+            Child = row,
+        };
+        if (!thought.Open)
+        {
+            head.MouseLeftButtonUp += (_, _) =>
+            {
+                FindPanel()?.Toggle(key);
+                Fold(words.TextWrapping == TextWrapping.NoWrap);
+            };
+        }
+
+        return head;
     }
 
     /// The word of a step and what it is about, on one line.

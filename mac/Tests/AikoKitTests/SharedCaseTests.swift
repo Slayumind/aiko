@@ -578,7 +578,7 @@ struct SharedCaseTests {
             let items = (feed["items"]?.arrayValue ?? []).enumerated().map { at, item in
                 Self.feedItem(item, id: at + 1)
             }
-            let rows = FeedEntries.of(items).map(Self.described)
+            let rows = FeedEntries.of(items, busy: feed["busy"]?.boolValue ?? false).map(Self.described)
             #expect(rows == (feed["rows"]?.arrayValue ?? []).map(Self.expectedRow), "\(feed["name"]?.stringValue ?? "")")
         }
 
@@ -594,6 +594,12 @@ struct SharedCaseTests {
     private static func feedItem(_ item: JsonNode, id: Int) -> FeedItem {
         if item["other"] != nil {
             return FeedItem(id: id, content: .answer(text: "words", streaming: false))
+        }
+        if let thought = item["thought"]?.stringValue {
+            return FeedItem(id: id, content: .thought(text: thought))
+        }
+        if let waiting = item["waiting"]?.stringValue {
+            return FeedItem(id: id, content: .ownerMessage(text: waiting, queued: true, attachments: []))
         }
 
         let kind: StepKind = switch item["kind"]?.stringValue {
@@ -617,6 +623,9 @@ struct SharedCaseTests {
 
     /// A row as a plain string, so both sides compare without a JSON writer.
     private static func described(_ entry: FeedEntry) -> String {
+        if case .thought(_, let open) = entry {
+            return "thought \(entry.id) \(open)"
+        }
         guard case .run(let run) = entry else {
             return "one \(entry.id)"
         }
@@ -628,6 +637,9 @@ struct SharedCaseTests {
     private static func expectedRow(_ row: JsonNode) -> String {
         if let one = row["one"]?.int64Value {
             return "one \(one)"
+        }
+        if let thought = row["thought"]?.int64Value {
+            return "thought \(thought) \(row["open"]?.boolValue ?? false)"
         }
         let ids = (row["run"]?.arrayValue ?? []).map { String($0.int64Value ?? 0) }.joined(separator: ",")
         let names = (row["names"]?.arrayValue ?? []).compactMap(\.stringValue).joined(separator: ",")
@@ -946,6 +958,8 @@ struct SharedCaseTests {
                 pairs += [("before", .number(String(size.before))), ("after", .number(String(size.after)))]
             }
             return node(pairs)
+        case .thought(let text):
+            return node([("thought", .string(text))])
         }
     }
 
@@ -1629,8 +1643,10 @@ struct SharedCaseTests {
                 ("type", .string("toolUse")), ("id", .string(id)), ("name", .string(name)),
                 ("input", .object(input)),
             ])
-        case .thinking:
-            return node([("type", .string("thinking"))])
+        case .thinking(let words):
+            return words.isEmpty
+                ? node([("type", .string("thinking"))])
+                : node([("type", .string("thinking")), ("text", .string(words))])
         }
     }
 

@@ -420,6 +420,7 @@ static class TerminalSnapshot
             Tool(21, "Skill", "{\"skill\":\"aiko:copy\"}"),
             Tool(22, "mcp__plugin_aiko-persona_memory__remember", "{}"),
             Tool(23, "mcp__claude_ai_Google_Calendar__list_events", "{}"),
+            new FeedItem.Thought(28, "The groups are ready. Now I check how the list opens when there are many folders, and whether the headers stay above their groups while it scrolls."),
             Step(5, StepKind.Edit, "DropDown.cs", StepState.Done, 18, 2),
             new FeedItem.Notice(27, NoticeKind.Output, string.Join("\n", Enumerable.Range(1, 24).Select(at => $"  Passed SlashMenuTests.Case{at:00} [{3 + at % 5} ms]"))),
             Step(24, StepKind.Agent, "Check the Mac twin", StepState.Running) with { Progress = "Reading Conversation.swift" },

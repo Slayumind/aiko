@@ -2646,6 +2646,13 @@
     ]
   ],
   [
+    "TerminalStepThought",
+    [
+      "thought",
+      "мысль"
+    ]
+  ],
+  [
     "TerminalStepRead",
     [
       "read",

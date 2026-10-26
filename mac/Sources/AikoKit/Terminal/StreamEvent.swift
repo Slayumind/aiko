@@ -6,8 +6,9 @@ public enum AssistantBlock: Sendable, Equatable {
 
     case toolUse(id: String, name: String, input: JsonObject)
 
-    /// Claude is thinking. The thoughts themselves are not kept.
-    case thinking
+    /// Claude is thinking. On the newer models the thoughts come empty; the words, when there are
+    /// some, are a short summary Claude Code writes before a step (RESEARCH).
+    case thinking(words: String)
 }
 
 /// A picture as it travels in the stream: its type and its bytes in base64.
@@ -236,7 +237,7 @@ public enum StreamEvent: Sendable, Equatable {
                         input: block["input"]?.objectValue ?? JsonObject()))
                 }
             case "thinking":
-                blocks.append(.thinking)
+                blocks.append(.thinking(words: block["thinking"]?.stringValue ?? ""))
             default:
                 break
             }

@@ -1165,6 +1165,9 @@
   <data name="TerminalTabWaitingMany" xml:space="preserve">
     <value>{0} ждут</value>
   </data>
+  <data name="TerminalStepThought" xml:space="preserve">
+    <value>мысль</value>
+  </data>
   <data name="TerminalStepRead" xml:space="preserve">
     <value>чтение</value>
   </data>
