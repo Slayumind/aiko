@@ -25,6 +25,9 @@ sealed class TerminalHost
     /// Claude Code (D-303). The process adds what comes after.
     private readonly Dictionary<string, Conversation> _histories = [];
 
+    /// The commands of the menu of "/", by the name of the environment.
+    private readonly Dictionary<string, IReadOnlyList<SlashCommand>> _commands = [];
+
     private TerminalSessions _sessions;
     private TerminalWindowModel _model;
     private FormView? _form;
@@ -470,7 +473,10 @@ sealed class TerminalHost
         var past = _histories[session.Id].Items;
         if (!_talks.TryGetValue(session.Id, out var talk))
         {
-            return new TalkView(session.Id, past, false, false, false, session.Mode, ModelName.Label(null, session.Model), session.Environment);
+            return new TalkView(session.Id, past, false, false, false, session.Mode, ModelName.Label(null, session.Model), session.Environment)
+            {
+                Commands = CommandsOf(session),
+            };
         }
 
         var state = talk.State;
@@ -482,7 +488,42 @@ sealed class TerminalHost
             state.Compacting,
             state.Mode,
             ModelName.Label(state.AskedModel, state.Model.Length > 0 ? state.Model : session.Model),
-            session.Environment);
+            session.Environment)
+        {
+            Commands = CommandsOf(session),
+        };
+    }
+
+    /// The commands of the menu of "/" for the environment of the session. An environment is
+    /// asked once, when its first session is shown; until the answer comes, its list is empty
+    /// and the menu stays shut.
+    private IReadOnlyList<SlashCommand> CommandsOf(TerminalSession session)
+    {
+        if (_commands.TryGetValue(session.Environment, out var known))
+        {
+            return known;
+        }
+
+        _commands[session.Environment] = [];
+        if (_settings.Environments.FirstOrDefault(one => one.Name == session.Environment) is { } environment
+            && ClaudeLauncher.FindClaude() is { } claude)
+        {
+            var home = System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile);
+            new CommandLoader(_newProcess, work => _window.Dispatcher.BeginInvoke(work)).Load(
+                new CommandSetup(
+                    claude,
+                    Directory.Exists(session.Folder) ? session.Folder : home,
+                    environment.ConfigDirectories.FirstOrDefault() ?? ClaudeConfigFolder.Resolve(null, home),
+                    home,
+                    [.. System.Environment.GetEnvironmentVariables().Keys.Cast<string>()]),
+                commands =>
+                {
+                    _commands[session.Environment] = commands;
+                    Draw();
+                });
+        }
+
+        return [];
     }
 
     // ---- the view ----

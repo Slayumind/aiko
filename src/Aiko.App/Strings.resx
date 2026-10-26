@@ -1318,6 +1318,12 @@
   <data name="TerminalQueued" xml:space="preserve">
     <value>queued</value>
   </data>
+  <data name="SlashGroupSkills" xml:space="preserve">
+    <value>Skills</value>
+  </data>
+  <data name="SlashKeys" xml:space="preserve">
+    <value>↑ ↓ · Enter or Tab to insert · Esc to close</value>
+  </data>
   <data name="TerminalCompacted" xml:space="preserve">
     <value>The conversation was made shorter to fit.</value>
   </data>

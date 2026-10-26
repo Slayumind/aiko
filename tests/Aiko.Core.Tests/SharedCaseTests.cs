@@ -464,6 +464,7 @@ public class SharedCaseTests
                 "interrupt" => HostLine.Interrupt(id),
                 "setMode" => HostLine.SetMode(id, Mode(action.GetProperty("mode"))!.Value),
                 "setModel" => HostLine.SetModel(id, action.GetProperty("model").GetString()!),
+                "initialize" => HostLine.Initialize(id),
                 var other => throw new InvalidOperationException($"unknown action {other}"),
             };
 
@@ -496,6 +497,53 @@ public class SharedCaseTests
                     variable.GetProperty("name").GetString()!,
                     variable.GetProperty("value").GetString()))],
                 plan.Variables);
+        }
+
+        foreach (var row in cases.GetProperty("commands").EnumerateArray())
+        {
+            var plan = ClaudeLaunchPlan.ForCommands(
+                row.GetProperty("configDirectory").GetString()!, home, Strings(row.GetProperty("inherited")));
+
+            Assert.Equal(Strings(row.GetProperty("arguments")), plan.Arguments);
+            Assert.Equal(
+                [.. row.GetProperty("variables").EnumerateArray().Select(variable => new VariableChange(
+                    variable.GetProperty("name").GetString()!,
+                    variable.GetProperty("value").GetString()))],
+                plan.Variables);
+        }
+    }
+
+    [Fact]
+    public void Every_slash_menu_shows_the_same_commands()
+    {
+        var cases = SpecCases.Json("slash-menu");
+        List<SlashCommand> commands = [.. cases.GetProperty("commands").EnumerateArray().Select(command => new SlashCommand(
+            command.GetProperty("name").GetString()!,
+            command.GetProperty("description").GetString()!,
+            command.GetProperty("argumentHint").GetString()!,
+            Strings(command.GetProperty("aliases")),
+            command.GetProperty("builtin").GetBoolean()))];
+
+        foreach (var row in cases.GetProperty("queries").EnumerateArray())
+        {
+            var text = row.GetProperty("text").GetString()!;
+            Assert.True(row.GetProperty("query").GetString() == SlashMenu.Query(text, row.GetProperty("caret").GetInt32()), text);
+        }
+
+        foreach (var row in cases.GetProperty("matches").EnumerateArray())
+        {
+            var query = row.GetProperty("query").GetString()!;
+            var found = SlashMenu.Matches(commands, query);
+            Assert.Equal(Strings(row.GetProperty("names")), [.. found.Select(match => match.Command.Name)]);
+            Assert.Equal(
+                [.. row.GetProperty("marks").EnumerateArray().Select(mark => (mark[0].GetInt32(), mark[1].GetInt32()))],
+                found.Select(match => (match.MatchStart, match.MatchLength)).ToList());
+        }
+
+        foreach (var row in cases.GetProperty("chosen").EnumerateArray())
+        {
+            var command = commands.Single(one => one.Name == row.GetProperty("name").GetString());
+            Assert.Equal(row.GetProperty("text").GetString(), SlashMenu.Chosen(command));
         }
     }
 
@@ -1306,6 +1354,19 @@ public class SharedCaseTests
             ["needsAnswer"] = request.NeedsAnswer,
             ["agent"] = request.AgentId,
             ["rule"] = request.RuleText,
+        },
+        StreamEvent.Commands commands => new JsonObject
+        {
+            ["kind"] = "commands",
+            ["requestId"] = commands.RequestId,
+            ["names"] = new JsonArray([.. commands.List.Select(command => (JsonNode)command.Name)]),
+            ["first"] = commands.List.Count == 0 ? null : new JsonObject
+            {
+                ["description"] = commands.List[0].Description,
+                ["argumentHint"] = commands.List[0].ArgumentHint,
+                ["aliases"] = new JsonArray([.. commands.List[0].Aliases.Select(alias => (JsonNode)alias)]),
+                ["builtin"] = commands.List[0].Builtin,
+            },
         },
         StreamEvent.Reply reply => new JsonObject
         {

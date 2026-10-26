@@ -72,5 +72,26 @@
         { "name": "AIKO_LAUNCH", "value": "terminal" }
       ]
     }
+  ],
+  "commands": [
+    {
+      "name": "the list of commands in the first environment: no session, no hooks",
+      "configDirectory": "C:\\Users\\someone\\.claude",
+      "inherited": ["PATH", "CLAUDECODE"],
+      "arguments": ["-p", "--input-format", "stream-json", "--output-format", "stream-json", "--verbose", "--settings", "{\"disableAllHooks\":true}"],
+      "variables": [
+        { "name": "CLAUDECODE", "value": null }
+      ]
+    },
+    {
+      "name": "the list of commands in a second environment",
+      "configDirectory": "D:\\Claude Accounts\\.claude-team",
+      "inherited": ["AIKO_ENVIRONMENT"],
+      "arguments": ["-p", "--input-format", "stream-json", "--output-format", "stream-json", "--verbose", "--settings", "{\"disableAllHooks\":true}"],
+      "variables": [
+        { "name": "AIKO_ENVIRONMENT", "value": null },
+        { "name": "CLAUDE_CONFIG_DIR", "value": "D:\\Claude Accounts\\.claude-team" }
+      ]
+    }
   ]
 }

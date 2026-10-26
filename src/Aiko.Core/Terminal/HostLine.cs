@@ -127,6 +127,10 @@ public static class HostLine
             writer.WriteString("mode", PermissionModes.RequestValue(mode));
         });
 
+    /// Asks for the commands Claude Code knows, with their descriptions (AIKO-330).
+    public static string Initialize(string requestId) =>
+        Ask(requestId, writer => writer.WriteString("subtype", "initialize"));
+
     /// Claude Code takes the new model between turns and names it in the next init (spike of
     /// 2026-10-15, RESEARCH).
     public static string SetModel(string requestId, string model) =>

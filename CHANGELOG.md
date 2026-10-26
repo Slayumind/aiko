@@ -23,6 +23,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   above it, options with their descriptions, ticks when you can pick several, your own answer under
   Other, and the preview of an option under the list. Answer with the mouse or the keys: arrows,
   Space, digits, Enter, Esc. After you answer, your choices stay in the feed, also after a restart.
+- **Menu of commands.** Type / at the start of the field, and a list of the commands of Claude Code
+  and your skills opens over it, with their descriptions. Arrows move, Enter or Tab inserts the
+  command, Esc closes the list. On Windows; the Mac follows before the release.
+- **Subagents in the feed.** Under the line of a subagent at work you see what it does now. A
+  subagent that works in the background keeps its line running until it is done.
 - **Voice input in the terminal, on Windows.** Press Ctrl+Space anywhere in the window or the microphone button, speak
   Russian or English, press again. The words appear in the field as you speak and wait for you to
   send them. Turn it on in the new **Terminal** page of the settings: recognition runs on your
@@ -31,6 +36,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Fixed
 
+- A session no longer says "done" while Claude still writes. This happened when Claude Code went on
+  by itself after a subagent in the background was over.
+- With fewer animations asked for in Windows, the terminal no longer runs a bar while it makes the
+  conversation shorter.
 - Voice input no longer puts the list of hint words into your text when the recognizer gives it back
   in the middle of speech, even with one word spelled its own way.
 - The bridge no longer leaves temporary files in the folder of limit snapshots when Windows refuses

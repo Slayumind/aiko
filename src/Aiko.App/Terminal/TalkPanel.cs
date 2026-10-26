@@ -20,7 +20,11 @@ sealed record TalkView(
     bool Compacting,
     PermissionMode Mode,
     ModelLabel Model,
-    string Environment);
+    string Environment)
+{
+    /// What the menu of "/" offers in this environment; empty until Claude Code named them.
+    public IReadOnlyList<SlashCommand> Commands { get; init; } = [];
+}
 
 /// The conversation with Claude Code: the feed above, the field below (D-294, D-302).
 ///
@@ -218,6 +222,7 @@ sealed class TalkPanel : UserControl
         _empty.Visibility = view.Items.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         _keyCard = TalkKeys.Card(view.Items);
         _input.Show(view.Session, view.Busy, _keyCard is not null, view.Mode, view.Model, view.Environment);
+        _input.SetCommands(view.Commands);
 
         if (newSession && _slots.Count > 0)
         {

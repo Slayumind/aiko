@@ -484,6 +484,8 @@ struct SharedCaseTests {
                 line = HostLine.setMode(id, Self.mode(action["mode"]) ?? .manual)
             case "setModel":
                 line = HostLine.setModel(id, action["model"]?.stringValue ?? "")
+            case "initialize":
+                line = HostLine.initialize(id)
             default:
                 line = "unknown action"
             }
@@ -517,6 +519,53 @@ struct SharedCaseTests {
                     VariableChange($0["name"]?.stringValue ?? "", $0["value"]?.stringValue)
                 },
                 "\(name)")
+        }
+
+        for row in cases["commands"]?.arrayValue ?? [] {
+            let plan = ClaudeLaunchPlan.forCommands(
+                platform, configDirectory: row["configDirectory"]?.stringValue ?? "", userProfile: home,
+                inheritedVariables: Self.strings(row["inherited"]))
+            let name = row["name"]?.stringValue ?? ""
+
+            #expect(plan.arguments == Self.strings(row["arguments"]), "\(name)")
+            #expect(
+                plan.variables == (row["variables"]?.arrayValue ?? []).map {
+                    VariableChange($0["name"]?.stringValue ?? "", $0["value"]?.stringValue)
+                },
+                "\(name)")
+        }
+    }
+
+    @Test
+    func everySlashMenuShowsTheSameCommands() {
+        let cases = SpecCases.json("slash-menu")
+        let commands = (cases["commands"]?.arrayValue ?? []).map {
+            SlashCommand(
+                name: $0["name"]?.stringValue ?? "",
+                description: $0["description"]?.stringValue ?? "",
+                argumentHint: $0["argumentHint"]?.stringValue ?? "",
+                aliases: Self.strings($0["aliases"]),
+                builtin: $0["builtin"]?.boolValue ?? false)
+        }
+
+        for row in cases["queries"]?.arrayValue ?? [] {
+            let text = row["text"]?.stringValue ?? ""
+            #expect(SlashMenu.query(text, caret: Int(row["caret"]?.int64Value ?? 0)) == row["query"]?.stringValue, "\(text)")
+        }
+
+        for row in cases["matches"]?.arrayValue ?? [] {
+            let query = row["query"]?.stringValue ?? ""
+            let found = SlashMenu.matches(commands, query: query)
+            #expect(found.map(\.command.name) == Self.strings(row["names"]), "\(query)")
+            let marks = (row["marks"]?.arrayValue ?? []).map { mark in
+                (mark.arrayValue ?? []).map { Int($0.int64Value ?? -1) }
+            }
+            #expect(found.map { [$0.matchStart, $0.matchLength] } == marks, "\(query)")
+        }
+
+        for row in cases["chosen"]?.arrayValue ?? [] {
+            guard let command = commands.first(where: { $0.name == row["name"]?.stringValue }) else { continue }
+            #expect(SlashMenu.chosen(command) == row["text"]?.stringValue)
         }
     }
 
@@ -1427,6 +1476,18 @@ struct SharedCaseTests {
             return node([("kind", .string("taskStarted")), ("toolUseId", .string(toolUseId))])
         case .taskEnded(let toolUseId, let how):
             return node([("kind", .string("taskEnded")), ("toolUseId", .string(toolUseId)), ("how", .string(how))])
+        case .commands(let requestId, let list):
+            var first: JsonNode = .null
+            if let command = list.first {
+                first = node([
+                    ("description", .string(command.description)), ("argumentHint", .string(command.argumentHint)),
+                    ("aliases", .array(command.aliases.map { .string($0) })), ("builtin", .bool(command.builtin)),
+                ])
+            }
+            return node([
+                ("kind", .string("commands")), ("requestId", .string(requestId)),
+                ("names", .array(list.map { .string($0.name) })), ("first", first),
+            ])
         case .reply(let requestId, let ok, let mode):
             return node([
                 ("kind", .string("reply")), ("requestId", .string(requestId)), ("ok", .bool(ok)),

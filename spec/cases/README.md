@@ -30,6 +30,7 @@ stamp, not a table (D-255).
 | `permission-mode/` | the names of the four permission modes and their order (`PermissionModes`) |
 | `limit-badge/` | which limit the title bar of the terminal names (`LimitBadge`) |
 | `model-name/` | the name of a model in the line under the input (`ModelName`) |
+| `slash-menu/` | the menu of commands that "/" opens in the field: when it opens, what it shows, in which order (`SlashMenu`) |
 | `conversation/` | what a row of stream lines and actions of the person makes of a conversation (`Conversation`), and how the list of sessions sees it (`TalkGlance`) |
 | `conversation-runner/` | when Claude Code is started for a conversation, with which arguments, what is written to it and what is logged (`ConversationRunner`, played against `ScriptedClaude`) |
 | `step-line/` | one step of the work as one line of the feed (`StepLine`) |
