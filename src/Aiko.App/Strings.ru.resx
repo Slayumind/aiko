@@ -1321,9 +1321,6 @@
   <data name="SlashGroupSkills" xml:space="preserve">
     <value>Навыки</value>
   </data>
-  <data name="SlashKeys" xml:space="preserve">
-    <value>↑ ↓ · Enter или Tab — подставить · Esc — закрыть</value>
-  </data>
   <data name="TerminalCompacted" xml:space="preserve">
     <value>Разговор сжат, чтобы поместиться в память.</value>
   </data>

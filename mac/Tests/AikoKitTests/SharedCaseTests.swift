@@ -561,11 +561,41 @@ struct SharedCaseTests {
                 (mark.arrayValue ?? []).map { Int($0.int64Value ?? -1) }
             }
             #expect(found.map { [$0.matchStart, $0.matchLength] } == marks, "\(query)")
+            #expect(SlashMenu.lightsFirst(found) == (row["lit"]?.boolValue ?? false), "\(query)")
         }
 
         for row in cases["chosen"]?.arrayValue ?? [] {
             guard let command = commands.first(where: { $0.name == row["name"]?.stringValue }) else { continue }
             #expect(SlashMenu.chosen(command) == row["text"]?.stringValue)
+        }
+    }
+
+    @Test
+    func everyFileMentionOffersTheSameFiles() {
+        let cases = SpecCases.json("file-mention")
+        let paths = Self.strings(cases["paths"])
+
+        for row in cases["queries"]?.arrayValue ?? [] {
+            let text = row["text"]?.stringValue ?? ""
+            let found = FileMention.query(text, caret: Int(row["caret"]?.int64Value ?? 0))
+            #expect(found?.from == row["from"]?.int64Value.map(Int.init), "\(text)")
+            #expect(found?.text == row["query"]?.stringValue, "\(text)")
+        }
+
+        for row in cases["matches"]?.arrayValue ?? [] {
+            #expect(FileMention.matches(paths, query: row["query"]?.stringValue ?? "") == Self.strings(row["files"]))
+        }
+
+        for row in cases["chosen"]?.arrayValue ?? [] {
+            let text = row["text"]?.stringValue ?? ""
+            let caret = Int(row["caret"]?.int64Value ?? 0)
+            guard let query = FileMention.query(text, caret: caret) else {
+                Issue.record("no query in \(text)")
+                continue
+            }
+            let (result, at) = FileMention.chosen(text, query: query, caret: caret, path: row["path"]?.stringValue ?? "")
+            #expect(result == row["result"]?.stringValue)
+            #expect(at == Int(row["resultCaret"]?.int64Value ?? -1))
         }
     }
 

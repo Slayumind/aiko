@@ -73,6 +73,7 @@ sealed class TalkInput : UserControl
 
     /// What was sent, per session, oldest first, and where the arrows stand in it.
     private readonly Dictionary<string, List<string>> _sent = [];
+    private readonly Dictionary<string, string> _drafts = [];
     private string _session = "";
     private int _back = -1;
     private string _draft = "";
@@ -82,6 +83,10 @@ sealed class TalkInput : UserControl
     /// The menu of "/" and what it offers. Esc shuts it until the text changes again.
     private readonly SlashMenuView _menu = new();
     private IReadOnlyList<SlashCommand> _commands = [];
+    private IReadOnlyList<SlashMatch> _matches = [];
+    private IReadOnlyList<string> _files = [];
+    private MentionQuery? _mention;
+    private string _folder = "";
     private bool _menuShut;
     private bool _menuWithoutFocus;
 
@@ -457,8 +462,11 @@ sealed class TalkInput : UserControl
                 VoiceCancelled?.Invoke();
             }
 
+            // Each session keeps its own draft while the window lives (LobeChat, Zed).
+            _drafts[_session] = _text.Text;
             _session = session;
-            _text.Clear();
+            _text.Text = _drafts.GetValueOrDefault(session, "");
+            _text.CaretIndex = _text.Text.Length;
             _attached.Clear();
             DrawPictures();
             _back = -1;
@@ -506,29 +514,65 @@ sealed class TalkInput : UserControl
         ShowMenu();
     }
 
-    /// The menu is open while the caret stands in a "/" word at the very start of the field.
+    /// The folder of the session, for the files of "@".
+    public void SetFolder(string folder) => _folder = folder;
+
+    /// How much room the feed leaves above the field; the menu keeps 80 px of it in view.
+    public void FitMenu(double room) => _menu.Fit(room);
+
+    /// The menu is open while the caret stands in a "/" word at the very start of the field, or in
+    /// an "@" word anywhere.
     private void ShowMenu()
     {
-        var query = _dictating || _menuShut || !(_text.IsKeyboardFocused || _menuWithoutFocus) ? null : SlashMenu.Query(_text.Text, _text.CaretIndex);
-        if (query is null)
+        _matches = [];
+        _files = [];
+        _mention = null;
+        if (_dictating || _menuShut || !(_text.IsKeyboardFocused || _menuWithoutFocus))
         {
             _menu.Close();
             return;
         }
 
-        _menu.Show(SlashMenu.Matches(_commands, query));
+        var text = _text.Text;
+        var caret = _text.CaretIndex;
+        if (SlashMenu.Query(text, caret) is { } query)
+        {
+            _matches = SlashMenu.Matches(_commands, query);
+            _menu.ShowCommands(_matches);
+            return;
+        }
+
+        if (FileMention.Query(text, caret) is { } mention && ProjectFiles.Get(_folder, ShowMenu) is { } files)
+        {
+            _mention = mention;
+            _files = FileMention.Matches(files, mention.Text);
+            _menu.ShowFiles(_files, mention.Text);
+            return;
+        }
+
+        _menu.Close();
     }
 
-    /// The command takes the place of the "/" word; what was typed after that word stays.
-    private void Pick(SlashCommand command)
+    /// A command takes the place of the "/" word, and what was typed after it stays; a file takes
+    /// the place of the "@" word.
+    private void Pick(int index)
     {
         var text = _text.Text;
-        var end = text.IndexOfAny([' ', '\t', '\r', '\n']);
-        var rest = end < 0 ? "" : text[end..].TrimStart(' ', '\t');
-        var chosen = SlashMenu.Chosen(command);
+        if (_mention is { } mention && index >= 0 && index < _files.Count)
+        {
+            var (result, caret) = FileMention.Chosen(text, mention, _text.CaretIndex, _files[index]);
+            _text.Text = result;
+            _text.CaretIndex = caret;
+        }
+        else if (index >= 0 && index < _matches.Count)
+        {
+            var end = text.IndexOfAny([' ', '\t', '\r', '\n']);
+            var rest = end < 0 ? "" : text[end..].TrimStart(' ', '\t');
+            var chosen = SlashMenu.Chosen(_matches[index].Command);
+            _text.Text = chosen + rest;
+            _text.CaretIndex = chosen.Length;
+        }
 
-        _text.Text = chosen + rest;
-        _text.CaretIndex = chosen.Length;
         _menuShut = true;
         _menu.Close();
         _text.Focus();
@@ -550,8 +594,15 @@ sealed class TalkInput : UserControl
             case Key.Down:
                 _menu.Move(+1);
                 return true;
-            case Key.Enter or Key.Tab when _menu.Highlighted is { } command:
-                Pick(command);
+            case Key.PageUp or Key.PageDown:
+                _menu.MovePage(key == Key.PageDown ? 1 : -1);
+                return true;
+            case Key.Home or Key.End:
+                _menu.MoveToEnd(last: key == Key.End);
+                return true;
+            // With no line lit, as after a typo, Enter goes to the field and sends the text as typed.
+            case Key.Enter or Key.Tab when _menu.Highlighted >= 0:
+                Pick(_menu.Highlighted);
                 return true;
             case Key.Escape:
                 _menuShut = true;

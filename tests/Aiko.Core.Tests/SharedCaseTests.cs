@@ -514,6 +514,36 @@ public class SharedCaseTests
     }
 
     [Fact]
+    public void Every_file_mention_offers_the_same_files()
+    {
+        var cases = SpecCases.Json("file-mention");
+        var paths = Strings(cases.GetProperty("paths"));
+
+        foreach (var row in cases.GetProperty("queries").EnumerateArray())
+        {
+            var text = row.GetProperty("text").GetString()!;
+            var found = FileMention.Query(text, row.GetProperty("caret").GetInt32());
+            var from = row.GetProperty("from");
+            Assert.True(from.ValueKind == JsonValueKind.Null ? found is null : found?.From == from.GetInt32(), text);
+            Assert.True(row.GetProperty("query").GetString() == found?.Text, text);
+        }
+
+        foreach (var row in cases.GetProperty("matches").EnumerateArray())
+        {
+            Assert.Equal(Strings(row.GetProperty("files")), FileMention.Matches(paths, row.GetProperty("query").GetString()!));
+        }
+
+        foreach (var row in cases.GetProperty("chosen").EnumerateArray())
+        {
+            var text = row.GetProperty("text").GetString()!;
+            var caret = row.GetProperty("caret").GetInt32();
+            var (result, at) = FileMention.Chosen(text, FileMention.Query(text, caret)!, caret, row.GetProperty("path").GetString()!);
+            Assert.Equal(row.GetProperty("result").GetString(), result);
+            Assert.Equal(row.GetProperty("resultCaret").GetInt32(), at);
+        }
+    }
+
+    [Fact]
     public void Every_slash_menu_shows_the_same_commands()
     {
         var cases = SpecCases.Json("slash-menu");
@@ -538,6 +568,7 @@ public class SharedCaseTests
             Assert.Equal(
                 [.. row.GetProperty("marks").EnumerateArray().Select(mark => (mark[0].GetInt32(), mark[1].GetInt32()))],
                 found.Select(match => (match.MatchStart, match.MatchLength)).ToList());
+            Assert.True(row.GetProperty("lit").GetBoolean() == SlashMenu.LightsFirst(found), query);
         }
 
         foreach (var row in cases.GetProperty("chosen").EnumerateArray())

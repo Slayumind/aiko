@@ -6,18 +6,26 @@ using Aiko.Core.Terminal;
 
 namespace Aiko.App;
 
-/// The menu of "/" over the field, as wide as the field: one line per command, the built-in
-/// commands of Claude Code first, then the skills, and the keys at the bottom (AIKO-330, way 1
-/// in the artifact "Aiko"). The names and descriptions are the ones Claude Code gives, in English.
+/// The menu over the field, as wide as the field (D-338, D-342): the commands of "/" or the files
+/// of "@", one 28 px line each. Commands come in two groups, Claude Code first, then the skills;
+/// their names and descriptions are the ones Claude Code gives, in English. The numbers are those of
+/// the approved prototype in the artifact "Aiko".
 sealed class SlashMenuView : Border
 {
-    /// Rows shown before the list scrolls.
-    private const double ListHeight = 300;
+    /// The tallest the list gets, and the part of the feed that always stays in view above it.
+    public const double MostHeight = 320;
+    public const double FeedLeft = 80;
+
+    private const double RowHeight = 28;
+
+    /// PageUp and PageDown move this many lines (Cherry Studio, research of 2026-10-26).
+    private const int PageRows = 7;
 
     private readonly StackPanel _rows = new();
     private readonly ScrollViewer _scroll;
-    private readonly List<(Border Row, SlashCommand Command)> _lines = [];
-    private int _highlighted;
+    private readonly List<(Border Row, int Index)> _lines = [];
+    private int _highlighted = -1;
+    private int _count;
 
     public SlashMenuView()
     {
@@ -25,60 +33,54 @@ sealed class SlashMenuView : Border
         BorderBrush = Tokens.Brush("Hairline");
         BorderThickness = new Thickness(1);
         CornerRadius = new CornerRadius(12);
-        Padding = new Thickness(4);
+        Padding = new Thickness(6);
         Effect = Tokens.Get<System.Windows.Media.Effects.Effect>("CardShadow");
         Visibility = Visibility.Collapsed;
 
         Grid.SetIsSharedSizeScope(_rows, true);
-        _scroll = new ScrollViewer { MaxHeight = ListHeight, Focusable = false, Content = _rows };
-
-        var keys = TerminalPanel.Mono(Strings.SlashKeys, "Muted");
-        keys.FontSize = 11;
-        var foot = new Border
-        {
-            BorderBrush = Tokens.Brush("Hairline"),
-            BorderThickness = new Thickness(0, 1, 0, 0),
-            Margin = new Thickness(0, 4, 0, 0),
-            Padding = new Thickness(10, 6, 10, 4),
-            Child = keys,
-        };
-
-        var column = new StackPanel();
-        column.Children.Add(_scroll);
-        column.Children.Add(foot);
-        Child = column;
+        _scroll = new ScrollViewer { MaxHeight = MostHeight, Focusable = false, Content = _rows };
+        Child = _scroll;
     }
 
-    /// A line was chosen with the mouse.
-    public event Action<SlashCommand>? Picked;
+    /// A line was chosen with the mouse: its place in the list given to Show.
+    public event Action<int>? Picked;
 
     public bool IsOpen => Visibility == Visibility.Visible;
 
-    public SlashCommand? Highlighted => _lines.Count > 0 ? _lines[_highlighted].Command : null;
+    /// The place of the lit line, or -1 when none is lit and Enter belongs to the field.
+    public int Highlighted => _highlighted;
 
-    /// Shows the matches, or closes the menu when there are none. The first line is lit.
-    public void Show(IReadOnlyList<SlashMatch> matches)
+    /// How tall the list may be: the room above the field less the part of the feed that stays.
+    public void Fit(double room) => _scroll.MaxHeight = Math.Clamp(room - FeedLeft, RowHeight * 3, MostHeight);
+
+    /// The commands for what was typed after "/". The first line is lit only on a real match.
+    public void ShowCommands(IReadOnlyList<SlashMatch> matches)
     {
-        _rows.Children.Clear();
-        _lines.Clear();
-        _highlighted = 0;
+        Begin();
+        AddCommands("Claude Code", matches.Select((match, index) => (match, index)).Where(item => item.match.Command.Builtin));
+        AddCommands(Strings.SlashGroupSkills, matches.Select((match, index) => (match, index)).Where(item => !item.match.Command.Builtin));
+        End(matches.Count, SlashMenu.LightsFirst(matches) ? FirstShown() : -1);
+    }
 
-        AddGroup("Claude Code", matches.Where(match => match.Command.Builtin));
-        AddGroup(Strings.SlashGroupSkills, matches.Where(match => !match.Command.Builtin));
-
-        var opening = !IsOpen && _lines.Count > 0;
-        Visibility = _lines.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
-        if (opening)
+    /// The files for what was typed after "@": the file name with the match lit, its folder quiet.
+    public void ShowFiles(IReadOnlyList<string> files, string query)
+    {
+        Begin();
+        for (var index = 0; index < files.Count; index++)
         {
-            Motion.PopIn(this, above: true);
+            var path = files[index];
+            var cut = path.LastIndexOf('/');
+            var name = path[(cut + 1)..];
+            var at = query.Length == 0 ? -1 : name.IndexOf(query, StringComparison.OrdinalIgnoreCase);
+            AddLine(index, Lit(name, at, at < 0 ? 0 : query.Length), cut < 0 ? "" : path[..cut]);
         }
-        Light();
-        _scroll.ScrollToTop();
+
+        End(files.Count, files.Count > 0 ? 0 : -1);
     }
 
     public void Close() => Visibility = Visibility.Collapsed;
 
-    /// The arrows move the light; at an end it stays there.
+    /// Up and Down go round; PageUp and PageDown move by seven and stop at the ends.
     public void Move(int step)
     {
         if (_lines.Count == 0)
@@ -86,91 +88,133 @@ sealed class SlashMenuView : Border
             return;
         }
 
-        _highlighted = Math.Clamp(_highlighted + step, 0, _lines.Count - 1);
-        Light();
-        _lines[_highlighted].Row.BringIntoView();
+        var at = _lines.FindIndex(line => line.Index == _highlighted);
+        var n = _lines.Count;
+        var to = Math.Abs(step) == 1
+            ? (at < 0 ? (step > 0 ? 0 : n - 1) : (at + step + n) % n)
+            : Math.Clamp((at < 0 ? 0 : at) + step, 0, n - 1);
+        Light(_lines[to].Index, scroll: true);
     }
 
-    private void AddGroup(string name, IEnumerable<SlashMatch> matches)
+    public void MovePage(int direction) => Move(direction * PageRows);
+
+    public void MoveToEnd(bool last)
+    {
+        if (_lines.Count > 0)
+        {
+            Light(_lines[last ? ^1 : 0].Index, scroll: true);
+        }
+    }
+
+    private void Begin()
+    {
+        _rows.Children.Clear();
+        _lines.Clear();
+    }
+
+    private void End(int count, int lit)
+    {
+        _count = count;
+        var opening = !IsOpen && count > 0;
+        Visibility = count > 0 ? Visibility.Visible : Visibility.Collapsed;
+        Light(lit, scroll: false);
+        _scroll.ScrollToTop();
+        if (opening)
+        {
+            Motion.PopIn(this, above: true);
+        }
+    }
+
+    private int FirstShown() => _lines.Count > 0 ? _lines[0].Index : -1;
+
+    private void AddCommands(string group, IEnumerable<(SlashMatch Match, int Index)> items)
     {
         var first = true;
-        foreach (var match in matches)
+        foreach (var (match, index) in items)
         {
             if (first)
             {
-                var header = TerminalPanel.Mono(name, "Muted");
+                var header = TerminalPanel.Mono(group, "Muted");
                 header.FontSize = 11;
-                header.Margin = new Thickness(10, 8, 10, 2);
+                header.Margin = new Thickness(8, 6, 8, 2);
                 _rows.Children.Add(header);
                 first = false;
             }
 
-            var row = Line(match);
-            _lines.Add((row, match.Command));
-            _rows.Children.Add(row);
+            AddLine(index, Lit("/" + match.Command.Name, match.MatchStart + 1, match.MatchLength), match.Command.Description);
         }
     }
 
-    /// The name with the typed part lit, then the description, cut at the end of the line.
-    private Border Line(SlashMatch match)
+    private static TextBlock Lit(string text, int start, int length)
     {
         var name = TerminalPanel.Mono("", "Muted");
         name.FontSize = 12.5;
-        var text = "/" + match.Command.Name;
-        var start = match.MatchStart + 1;
-        name.Inlines.Add(new Run(text[..start]));
-        if (match.MatchLength > 0)
+        name.TextTrimming = TextTrimming.CharacterEllipsis;
+        if (start < 0 || length == 0)
         {
-            name.Inlines.Add(new Run(text.Substring(start, match.MatchLength)) { Foreground = Tokens.Brush("Ink"), FontWeight = FontWeights.Medium });
+            name.Inlines.Add(new Run(text));
+            return name;
         }
 
-        name.Inlines.Add(new Run(text[(start + match.MatchLength)..]));
+        name.Inlines.Add(new Run(text[..start]));
+        name.Inlines.Add(new Run(text.Substring(start, length)) { Foreground = Tokens.Brush("Ink"), FontWeight = FontWeights.Medium });
+        name.Inlines.Add(new Run(text[(start + length)..]));
+        return name;
+    }
 
-        var description = TerminalPanel.Text(match.Command.Description, "TextSmall", "Muted", FontWeights.Normal);
-        description.TextTrimming = TextTrimming.CharacterEllipsis;
-        description.TextWrapping = TextWrapping.NoWrap;
-        description.Margin = new Thickness(14, 0, 0, 0);
-        description.VerticalAlignment = VerticalAlignment.Center;
+    /// One 28 px line: the name in a column of its own, so the descriptions start in one place,
+    /// and the description cut at the end of the line.
+    private void AddLine(int index, TextBlock name, string description)
+    {
+        name.VerticalAlignment = VerticalAlignment.Center;
+
+        var rest = TerminalPanel.Text(description, "TextSmall", "Muted", FontWeights.Normal);
+        rest.TextTrimming = TextTrimming.CharacterEllipsis;
+        rest.TextWrapping = TextWrapping.NoWrap;
+        rest.Margin = new Thickness(14, 0, 0, 0);
+        rest.VerticalAlignment = VerticalAlignment.Center;
 
         var grid = new Grid();
-        // All names share one width, so the descriptions start in one column.
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto, SharedSizeGroup = "Name" });
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         grid.Children.Add(name);
-        Grid.SetColumn(description, 1);
-        grid.Children.Add(description);
+        Grid.SetColumn(rest, 1);
+        grid.Children.Add(rest);
 
         var row = new Border
         {
+            Height = RowHeight,
             CornerRadius = new CornerRadius(8),
-            Padding = new Thickness(10, 5, 10, 5),
+            Padding = new Thickness(8, 0, 8, 0),
             Background = System.Windows.Media.Brushes.Transparent,
             Cursor = Cursors.Hand,
             Child = grid,
         };
-        var command = match.Command;
-        // Only a pointer that moves lights a row: the list changes under a still pointer as the
-        // person types, and the row the keyboard chose must stay.
+
+        // Only a pointer that moves lights a line: the list changes under a still pointer as the
+        // person types, and the line the keyboard chose must stay.
         row.MouseMove += (_, _) =>
         {
-            var index = _lines.FindIndex(line => line.Row == row);
-            if (index == _highlighted || !PointerTrail.Moved(row))
+            if (index != _highlighted && PointerTrail.Moved(row))
             {
-                return;
+                Light(index, scroll: false);
             }
-
-            _highlighted = index;
-            Light();
         };
-        row.MouseLeftButtonUp += (_, _) => Picked?.Invoke(command);
-        return row;
+        row.MouseLeftButtonUp += (_, _) => Picked?.Invoke(index);
+        _lines.Add((row, index));
+        _rows.Children.Add(row);
     }
 
-    private void Light()
+    private void Light(int index, bool scroll)
     {
-        for (var index = 0; index < _lines.Count; index++)
+        _highlighted = index < _count ? index : -1;
+        foreach (var (row, at) in _lines)
         {
-            _lines[index].Row.Background = index == _highlighted ? Tokens.Brush("Raised") : System.Windows.Media.Brushes.Transparent;
+            row.Background = at == _highlighted ? Tokens.Brush("Raised") : System.Windows.Media.Brushes.Transparent;
+            if (scroll && at == _highlighted)
+            {
+                row.BringIntoView();
+            }
         }
     }
 }

@@ -58,6 +58,18 @@ public enum SlashMenu {
             .map(\.match)
     }
 
+    /// Whether the first line is lit, so that Enter and Tab take it. Only a real match lights it:
+    /// nothing typed yet, an alias, or the start of the name or of a part of it. A name that only
+    /// has the letters inside, as after a typo, leaves the menu dark, and Enter sends the text as
+    /// typed (Claude Code; research of 2026-10-26).
+    public static func lightsFirst(_ matches: [SlashMatch]) -> Bool {
+        guard let first = matches.first else { return false }
+        if first.matchLength == 0 || first.matchStart == 0 { return true }
+        let name = Array(first.command.name.utf16)
+        // ":" "-" "_" in UTF-16.
+        return [58, 45, 95].contains(name[first.matchStart - 1])
+    }
+
     /// The text the field gets when a command is chosen: the command and a space for its
     /// arguments.
     public static func chosen(_ command: SlashCommand) -> String {
