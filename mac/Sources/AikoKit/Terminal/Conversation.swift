@@ -116,6 +116,9 @@ public struct FeedItem: Sendable, Equatable {
         case card(request: RequestCard, state: RequestState)
         /// Size is set only for a conversation made shorter, when Claude Code named both sizes.
         case notice(kind: NoticeKind, text: String, size: CompactSize? = nil)
+
+        /// What Claude thought before a step, in the few words Claude Code gives of it.
+        case thought(text: String)
     }
 
     public let id: Int
@@ -292,8 +295,11 @@ public struct Conversation: Sendable, Equatable {
                 if !line.hidden || name == QuestionAnswers.tool {
                     add(.step(FeedStep(toolUseId: id, line: line, state: .running, result: "", images: [], progress: "")))
                 }
-            case .thinking:
-                break
+            case .thinking(let words):
+                let thought = words.trimmingCharacters(in: .whitespacesAndNewlines)
+                if !thought.isEmpty {
+                    add(.thought(text: thought))
+                }
             }
         }
     }

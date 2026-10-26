@@ -418,6 +418,7 @@ public enum Strings {
         "TerminalStopped": ("stopped", "остановилась"),
         "TerminalTabWaitingOne": ("{0} waiting", "{0} ждёт"),
         "TerminalTabWaitingMany": ("{0} waiting", "{0} ждут"),
+        "TerminalStepThought": ("thought", "мысль"),
         "TerminalStepRead": ("read", "чтение"),
         "TerminalStepSearch": ("search", "поиск"),
         "TerminalStepEdit": ("edit", "правка"),
@@ -1657,6 +1658,9 @@ public enum Strings {
 
     /// {0} waiting
     public static var terminalTabWaitingMany: String { Strings.get("TerminalTabWaitingMany") }
+
+    /// thought
+    public static var terminalStepThought: String { Strings.get("TerminalStepThought") }
 
     /// read
     public static var terminalStepRead: String { Strings.get("TerminalStepRead") }

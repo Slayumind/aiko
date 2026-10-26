@@ -124,6 +124,11 @@
       "event": { "kind": "textDelta", "parent": null, "text": "Привет" }
     },
     {
+      "name": "a thought with its words: the short summary before a step",
+      "line": { "type": "assistant", "message": { "content": [ { "type": "thinking", "thinking": "Reading the menu first.", "signature": "abc" } ] }, "parent_tool_use_id": null },
+      "event": { "kind": "assistant", "parent": null, "error": null, "blocks": [ { "type": "thinking", "text": "Reading the menu first." } ] }
+    },
+    {
       "name": "a piece of thinking",
       "line": { "type": "stream_event", "event": { "type": "content_block_delta", "index": 0, "delta": { "type": "thinking_delta", "thinking": "", "estimated_tokens": 50 } } },
       "event": { "kind": "ignored" }

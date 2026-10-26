@@ -42,10 +42,15 @@ public enum FeedEntry: Sendable, Equatable {
     case one(FeedItem)
     case run(StepRun)
 
+    /// A thought of Claude. It stands open while Claude still works after it and nothing else
+    /// came yet; after that it folds into one line that opens with a click.
+    case thought(FeedItem, open: Bool)
+
     public var id: Int {
         switch self {
         case .one(let item): return item.id
         case .run(let run): return run.id
+        case .thought(let item, _): return item.id
         }
     }
 }
@@ -54,7 +59,13 @@ public enum FeedEntries {
     /// The feed as rows. Reading and searching come in long series, and each step of a series
     /// says little alone, so two or more of one kind in a row become one line. An edit or a
     /// command stays its own line: each one matters.
-    public static func of(_ items: [FeedItem]) -> [FeedEntry] {
+    /// busy: Claude is at work on this conversation now.
+    public static func of(_ items: [FeedItem], busy: Bool) -> [FeedEntry] {
+        // Messages that wait for Claude stand under the turn and do not count as what came next.
+        let last = items.last { item in
+            if case .ownerMessage(_, true, _) = item.content { return false }
+            return true
+        }
         var rows: [FeedEntry] = []
         var run: [FeedItem] = []
 
@@ -77,7 +88,11 @@ public enum FeedEntries {
             }
 
             flush()
-            rows.append(.one(item))
+            if case .thought = item.content {
+                rows.append(.thought(item, open: busy && item.id == last?.id))
+            } else {
+                rows.append(.one(item))
+            }
         }
 
         flush()

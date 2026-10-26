@@ -9,8 +9,9 @@ public abstract record AssistantBlock
 
     public sealed record ToolUse(string Id, string Name, JsonElement Input) : AssistantBlock;
 
-    /// Claude is thinking. The thoughts themselves are not kept.
-    public sealed record Thinking : AssistantBlock;
+    /// Claude is thinking. On the newer models the thoughts come empty; the text, when there is
+    /// one, is a short summary Claude Code writes before a step (RESEARCH).
+    public sealed record Thinking(string Words) : AssistantBlock;
 }
 
 /// A picture as it travels in the stream: its type and its bytes in base64.
@@ -190,7 +191,7 @@ public abstract record StreamEvent
                     blocks.Add(new AssistantBlock.ToolUse(id, Str(block, "name") ?? "", Object(block, "input")?.Clone() ?? EmptyObject));
                     break;
                 case "thinking":
-                    blocks.Add(new AssistantBlock.Thinking());
+                    blocks.Add(new AssistantBlock.Thinking(Str(block, "thinking") ?? ""));
                     break;
             }
         }

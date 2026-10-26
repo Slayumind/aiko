@@ -551,7 +551,8 @@ public class SharedCaseTests
         foreach (var feed in cases.GetProperty("feeds").EnumerateArray())
         {
             List<FeedItem> items = [.. feed.GetProperty("items").EnumerateArray().Select((item, at) => FeedItemIn(item, at + 1))];
-            var rows = new JsonArray([.. FeedEntries.Of(items).Select(Described)]);
+            var busy = feed.TryGetProperty("busy", out var flag) && flag.GetBoolean();
+            var rows = new JsonArray([.. FeedEntries.Of(items, busy).Select(Described)]);
             Assert.True(JsonNode.DeepEquals(JsonNode.Parse(feed.GetProperty("rows").GetRawText()), rows),
                 $"{feed.GetProperty("name").GetString()}: {rows.ToJsonString()}");
         }
@@ -572,6 +573,16 @@ public class SharedCaseTests
             return new FeedItem.Answer(id, "words", false);
         }
 
+        if (item.TryGetProperty("thought", out var thought))
+        {
+            return new FeedItem.Thought(id, thought.GetString()!);
+        }
+
+        if (item.TryGetProperty("waiting", out var waiting))
+        {
+            return new FeedItem.OwnerMessage(id, waiting.GetString()!, true, []);
+        }
+
         var kind = Enum.Parse<StepKind>(item.GetProperty("kind").GetString()!, ignoreCase: true);
         var hidden = item.TryGetProperty("hidden", out var flag) && flag.GetBoolean();
         var line = new StepLine(kind, "", item.GetProperty("subject").GetString()!, 0, 0, hidden);
@@ -589,6 +600,7 @@ public class SharedCaseTests
             ["names"] = new JsonArray([.. run.Subjects().Names.Select(name => (JsonNode)name)]),
             ["more"] = run.Subjects().More,
         },
+        FeedEntry.Thought thought => new JsonObject { ["thought"] = entry.Id, ["open"] = thought.Open },
         _ => new JsonObject { ["one"] = entry.Id },
     };
 
@@ -1002,6 +1014,7 @@ public class SharedCaseTests
             ["after"] = size.After,
         },
         FeedItem.Notice notice => new JsonObject { ["notice"] = Camel(notice.Kind), ["text"] = notice.Text },
+        FeedItem.Thought thought => new JsonObject { ["thought"] = thought.Text },
         _ => throw new InvalidOperationException("unknown item"),
     };
 
@@ -1511,6 +1524,7 @@ public class SharedCaseTests
             ["name"] = tool.Name,
             ["input"] = JsonNode.Parse(tool.Input.GetRawText()),
         },
+        AssistantBlock.Thinking { Words.Length: > 0 } thinking => new JsonObject { ["type"] = "thinking", ["text"] = thinking.Words },
         _ => new JsonObject { ["type"] = "thinking" },
     };
 
