@@ -288,20 +288,20 @@ sealed class TalkPanel : UserControl
         _ => label,
     };
 
-    /// What the reminder calls a card: questions and a plan by their own words, a permission by
-    /// the word of its step. The name of the tool behind a question or a plan means nothing to a person.
-    private static string CardWord(RequestCard request) => request.Kind switch
+    /// What the reminder says about a card: questions and a plan have their own whole sentences, a
+    /// permission names the word of its step. The name of the tool behind a question or a plan
+    /// means nothing to a person.
+    private static string Reminder(RequestCard request) => request.Kind switch
     {
         CardKind.Question => Strings.TerminalWaitsQuestions,
         CardKind.Plan => Strings.TerminalWaitsPlan,
-        _ => StepWord(request.Step.Kind, request.Step.Label),
+        _ => string.Format(CultureInfo.CurrentCulture, Strings.TerminalWaitsPermission, StepWord(request.Step.Kind, request.Step.Label)),
     };
 
     private FeedSlot? OpenCard() =>
         _slots.LastOrDefault(slot => slot.Item is FeedItem.Card { State: RequestState.Open });
 
-    /// The line "waiting for you: edit" shows while the open card is out of view, and names it
-    /// with the word of its step (D-309).
+    /// The line "waiting for permission: edit" shows while the open card is out of view (D-309).
     private void FollowReminder()
     {
         if (OpenCard() is not { Item: FeedItem.Card card } slot || InView(slot))
@@ -310,7 +310,7 @@ sealed class TalkPanel : UserControl
             return;
         }
 
-        _reminderText.Text = string.Format(CultureInfo.CurrentCulture, Strings.TerminalWaitsForYou, CardWord(card.Request));
+        _reminderText.Text = Reminder(card.Request);
         _reminder.Visibility = Visibility.Visible;
     }
 

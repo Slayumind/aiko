@@ -134,15 +134,21 @@ struct TalkPanelView: View {
         return false
     }
 
-    /// "Waiting for you: edit" above the field while the open card is out of view (D-309).
+    /// "Waiting for permission: edit" above the field while the open card is out of view (D-309).
+    /// Questions and a plan have their own whole sentences.
     private func reminder(_ card: FeedItem, show: @escaping () -> Void) -> some View {
-        var word = ""
+        var words = ""
         if case .card(let request, _) = card.content {
-            word = StepWords.word(request.step.kind, request.step.label)
+            switch request.kind {
+            case .question: words = Strings.terminalWaitsQuestions
+            case .plan: words = Strings.terminalWaitsPlan
+            default:
+                words = Strings.format(Strings.terminalWaitsPermission, StepWords.word(request.step.kind, request.step.label))
+            }
         }
 
         return HStack {
-            Text(Strings.format(Strings.terminalWaitsForYou, word))
+            Text(words)
                 .font(Theme.sans(Theme.textNumber))
                 .foregroundStyle(Theme.caution)
             Spacer()
