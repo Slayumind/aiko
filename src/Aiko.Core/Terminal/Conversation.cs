@@ -275,11 +275,16 @@ public sealed record Conversation(
         }
 
         // Messages Claude Code has not taken yet are already in its hands (D-341): it goes on with
-        // them by itself, so the session stays at work.
-        var waiting = next.Items.OfType<FeedItem.OwnerMessage>().Any(message => message.Queued);
-        next = next with { InTurn = waiting, AnsweredInTurn = false, FailedInTurn = false, Unread = true, Compacting = false };
-        return Quiet(next);
+        // them by itself, so the session stays at work. A command Aiko holds goes when nothing else waits.
+        var queued = next.Items.OfType<FeedItem.OwnerMessage>().Where(message => message.Queued).ToList();
+        var withClaude = queued.Any(message => !IsCommand(message.Text));
+        next = next with { InTurn = withClaude, AnsweredInTurn = false, FailedInTurn = false, Unread = true, Compacting = false };
+        return !withClaude && queued.Count > 0 ? next.Sent(queued[0]) : Quiet(next);
     }
+
+    /// Claude Code runs a command only at the start of a turn; in the middle of one it would read
+    /// it as plain words. So Aiko holds a command until the turn is over (D-341).
+    private static bool IsCommand(string text) => text.TrimStart().StartsWith('/');
 
     /// Claude Code took a message sent during the work and says it back (--replay-user-messages):
     /// the message is no longer grey, and the work goes on with it. A message it says back that was
@@ -296,7 +301,8 @@ public sealed record Conversation(
     // ---- what the person does ----
 
     /// A message sent while Claude works, or while a card waits, goes to Claude Code at once and
-    /// stays grey until Claude Code takes it: at the next step of the turn (D-341).
+    /// stays grey until Claude Code takes it: at the next step of the turn (D-341). A command waits
+    /// in Aiko for the end of the turn.
     public Outcome Send(string text, IReadOnlyList<AttachedImage> images)
     {
         if (text.Trim().Length == 0 && images.Count == 0)
@@ -308,9 +314,11 @@ public sealed record Conversation(
         var next = (this with { Failure = TalkFailure.None, Unread = false })
             .Queue(new FeedItem.OwnerMessage(NextId, text, true, images));
 
-        return waits
-            ? new Outcome(next, [HostLine.UserMessage(text, images)])
-            : next.Sent((FeedItem.OwnerMessage)next.Items[^1]);
+        if (!waits)
+        {
+            return next.Sent((FeedItem.OwnerMessage)next.Items[^1]);
+        }
+        return IsCommand(text) ? Quiet(next) : new Outcome(next, [HostLine.UserMessage(text, images)]);
     }
 
     public Outcome Choose(string requestId, CardChoice choice)
