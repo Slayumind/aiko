@@ -1141,6 +1141,9 @@
   <data name="TerminalWorking" xml:space="preserve">
     <value>работает</value>
   </data>
+  <data name="TerminalWorkingNow" xml:space="preserve">
+    <value>работаю</value>
+  </data>
   <data name="TerminalWaiting" xml:space="preserve">
     <value>ждёт</value>
   </data>
@@ -1181,25 +1184,25 @@
     <value>веб</value>
   </data>
   <data name="TerminalLineRequest" xml:space="preserve">
-    <value>Ждёт разрешения: {0} {1}</value>
+    <value>Жду разрешения: {0} {1}</value>
   </data>
   <data name="TerminalLineQuestion" xml:space="preserve">
-    <value>Спрашивает: {0}</value>
+    <value>Спрашиваю: {0}</value>
   </data>
   <data name="TerminalLinePlan" xml:space="preserve">
     <value>План готов, посмотри</value>
   </data>
   <data name="TerminalLineReading" xml:space="preserve">
-    <value>Читает {0}</value>
+    <value>Читаю {0}</value>
   </data>
   <data name="TerminalLineSearching" xml:space="preserve">
-    <value>Ищет {0}</value>
+    <value>Ищу {0}</value>
   </data>
   <data name="TerminalLineEditing" xml:space="preserve">
-    <value>Правит {0}</value>
+    <value>Правлю {0}</value>
   </data>
   <data name="TerminalLineRunning" xml:space="preserve">
-    <value>Запускает {0}</value>
+    <value>Запускаю {0}</value>
   </data>
   <data name="TerminalLineAgent" xml:space="preserve">
     <value>Агент: {0}</value>
@@ -1208,10 +1211,10 @@
     <value>Навык: {0}</value>
   </data>
   <data name="TerminalLineOpening" xml:space="preserve">
-    <value>Открывает {0}</value>
+    <value>Открываю {0}</value>
   </data>
   <data name="TerminalLineCalling" xml:space="preserve">
-    <value>Вызывает {0}</value>
+    <value>Вызываю {0}</value>
   </data>
   <data name="TerminalLineStoppedAt" xml:space="preserve">
     <value>Остановилась на шаге «{0}»</value>
@@ -1331,7 +1334,7 @@
     <value>Ещё строк: {0}</value>
   </data>
   <data name="TerminalWaitsForYou" xml:space="preserve">
-    <value>Ждёт тебя: {0}</value>
+    <value>Жду тебя: {0}</value>
   </data>
   <data name="TerminalWaitsQuestions" xml:space="preserve">
     <value>вопросы</value>

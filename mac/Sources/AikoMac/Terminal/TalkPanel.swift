@@ -177,7 +177,7 @@ enum StepWords {
 private struct WorkingRow: View {
     var body: some View {
         HStack(spacing: 3) {
-            Text(Strings.terminalWorking)
+            Text(Strings.terminalWorkingNow)
                 .font(Theme.mono(Theme.textTiny))
                 .foregroundStyle(Theme.muted)
                 .padding(.trailing, 5)

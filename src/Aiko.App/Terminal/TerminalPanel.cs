@@ -453,7 +453,7 @@ sealed class TerminalPanel : UserControl
         {
             RowState.Working => ((UIElement)Dot(filled: true), Strings.TerminalWorking, "Muted"),
             RowState.Waiting => (Pause(), Strings.TerminalWaiting, "Caution"),
-            RowState.Done => (Line("M0,4.5 L3.5,8 L10,1", "Positive"), Strings.TerminalDone, "Positive"),
+            RowState.Done => (SiteIcons.Draw(SiteIcons.Check, 10, "Positive"), Strings.TerminalDone, "Positive"),
             RowState.Asleep => (Dot(filled: false), Strings.TerminalAsleep, "Muted"),
             RowState.Stopped => (Line("M0,0 L8,8 M8,0 L0,8", "Destructive"), Strings.TerminalStopped, "Destructive"),
             _ => (new Border(), "", "Muted"),
@@ -603,11 +603,15 @@ sealed class TerminalPanel : UserControl
         return column;
     }
 
+    /// A folder in the form: its name and the folder it sits in, not the whole path (D-332).
+    private static string FolderLabel(FolderChoice folder) =>
+        SessionName.ParentName(folder.Path) is { Length: > 0 } parent ? $"{folder.Name}  ·  {parent}" : folder.Name;
+
     private UIElement Form(FormView form)
     {
         var folders = new DropDown
         {
-            Items = [.. form.Folders.Select(folder => folder.Name + "   " + folder.Path), Strings.TerminalChooseFolder],
+            Items = [.. form.Folders.Select(FolderLabel), Strings.TerminalChooseFolder],
             Headers = NewSessionChoices.Headers(form.Folders).ToDictionary(
                 header => header.Before,
                 header => header.Group == FolderGroup.Recent ? Strings.TerminalFoldersRecent : Strings.TerminalFoldersBound),
@@ -817,19 +821,27 @@ sealed class TerminalPanel : UserControl
         VerticalAlignment = VerticalAlignment.Center,
     };
 
+    /// The width of the lines of the terminal's icons: as thin as the lines of the slayumind icon
+    /// set, one unit in twenty-four, at the sizes the terminal draws them (D-332).
+    internal const double LineWidth = 0.75;
+
     internal static Path Line(string data, string tone = "Muted") => new()
     {
         Data = Geometry.Parse(data),
         Stroke = Tokens.Brush(tone),
-        StrokeThickness = 1.3,
+        StrokeThickness = LineWidth,
         StrokeStartLineCap = PenLineCap.Round,
         StrokeEndLineCap = PenLineCap.Round,
         StrokeLineJoin = PenLineJoin.Round,
         VerticalAlignment = VerticalAlignment.Center,
     };
 
-    /// The sign of "waits for you": a pause (D-299).
-    private static FrameworkElement Pause() => Line("M1,0 L1,11 M6,0 L6,11", "Caution");
+    /// The sign of "waits for you": two thin bars, drawn as thin as the lines of the slayumind icons
+    /// (one in twenty-four), so they read as a quiet mark and not as a pause button (D-299, D-332).
+    private static FrameworkElement Pause()
+    {
+        return Line("M0.5,0.5 L0.5,9.5 M4.5,0.5 L4.5,9.5", "Caution");
+    }
 
     internal static FrameworkElement Dot(bool filled) => new Ellipse
     {
@@ -909,6 +921,23 @@ sealed class TerminalPanel : UserControl
         button.MouseEnter += (_, _) => hover.BeginAnimation(OpacityProperty, Motion.To(1, Motion.Or0(Motion.Hover), Motion.Standard));
         button.MouseLeave += (_, _) => hover.BeginAnimation(OpacityProperty, Motion.To(0, Motion.Or0(Motion.Hover), Motion.Standard));
         button.Click += (_, _) => click();
+        Motion.SetPress(button, true);
+        WindowChromeHit(button);
+        return button;
+    }
+
+    /// A button that is only an icon: 28 by 28, a soft fill on hover, the same press and focus as
+    /// the other buttons (D-332).
+    internal static Button Icon(UIElement icon)
+    {
+        var hover = new Border { CornerRadius = new CornerRadius(8), Background = Tokens.Brush("HoverLayer"), Opacity = 0 };
+        var face = new Grid { Width = 28, Height = 28 };
+        face.Children.Add(hover);
+        face.Children.Add(icon);
+
+        var button = new Button { Content = face, Cursor = Cursors.Hand, Template = Bare(), FocusVisualStyle = FocusRing() };
+        button.MouseEnter += (_, _) => hover.BeginAnimation(OpacityProperty, Motion.To(1, Motion.Or0(Motion.Hover), Motion.Standard));
+        button.MouseLeave += (_, _) => hover.BeginAnimation(OpacityProperty, Motion.To(0, Motion.Or0(Motion.Hover), Motion.Standard));
         Motion.SetPress(button, true);
         WindowChromeHit(button);
         return button;

@@ -1131,6 +1131,9 @@ public static class Strings
     /// working
     public static string TerminalWorking => Get("TerminalWorking");
 
+    /// working
+    public static string TerminalWorkingNow => Get("TerminalWorkingNow");
+
     /// waiting
     public static string TerminalWaiting => Get("TerminalWaiting");
 
@@ -1170,10 +1173,10 @@ public static class Strings
     /// web
     public static string TerminalStepWeb => Get("TerminalStepWeb");
 
-    /// Needs permission: {0} {1}
+    /// Waiting for permission: {0} {1}
     public static string TerminalLineRequest => Get("TerminalLineRequest");
 
-    /// Asks: {0}
+    /// Asking: {0}
     public static string TerminalLineQuestion => Get("TerminalLineQuestion");
 
     /// The plan is ready for you

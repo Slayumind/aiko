@@ -107,8 +107,9 @@ sealed class DropDown : UserControl
 
         _button.Height = 30;
         _button.CornerRadius = new CornerRadius(8);
-        _button.Background = Brush("Raised");
-        _button.BorderBrush = Brush("Hairline");
+        // The look of a text field of the site: a quiet fill and a thin line (D-332).
+        _button.Background = Brush("Surface");
+        _button.BorderBrush = Brush("InputLine");
         _button.BorderThickness = new Thickness(1);
         _button.Cursor = Cursors.Hand;
         _button.Child = face;

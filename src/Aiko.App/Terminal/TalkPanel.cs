@@ -56,6 +56,7 @@ sealed class TalkPanel : UserControl
     /// to be guessed from the scroll itself, and the guess lost to the feed's own changes of offset:
     /// a reader at the bottom could not scroll up while an answer was written (check of 2026-10-15).
     private bool _follow = true;
+    private readonly FeedGlide _glide = new();
 
     public TalkPanel()
     {
@@ -106,6 +107,7 @@ sealed class TalkPanel : UserControl
 
         _empty = TerminalPanel.Text(Strings.TerminalEmptyTalk, "TextName", "Muted", FontWeights.Normal);
         _empty.HorizontalAlignment = HorizontalAlignment.Center;
+        _empty.VerticalAlignment = VerticalAlignment.Bottom;
         _empty.TextWrapping = TextWrapping.Wrap;
 
         _input.Sent += (text, images) => SendAsked?.Invoke(text, images);
@@ -151,7 +153,7 @@ sealed class TalkPanel : UserControl
         bottom.SizeChanged += (_, e) =>
         {
             _feed.Padding = new Thickness(0, 0, 0, e.NewSize.Height);
-            _empty.Margin = new Thickness(0, 0, 0, e.NewSize.Height);
+            _empty.Margin = new Thickness(0, 0, 0, e.NewSize.Height + 16);
         };
 
         var all = new Grid();
@@ -219,7 +221,8 @@ sealed class TalkPanel : UserControl
 
         if (newSession && _slots.Count > 0)
         {
-            Dispatcher.BeginInvoke(() => ToEnd(_scroll ??= FindScroll(_feed)), System.Windows.Threading.DispatcherPriority.Background);
+            // Another session opens at its end at once; gliding there through its past would be noise.
+            Dispatcher.BeginInvoke(() => JumpToEnd(_scroll ??= FindScroll(_feed)), System.Windows.Threading.DispatcherPriority.Background);
         }
 
         Dispatcher.BeginInvoke(FollowReminder, System.Windows.Threading.DispatcherPriority.Background);
@@ -331,15 +334,23 @@ sealed class TalkPanel : UserControl
         // The rows grow, or the view gets lower as the field grows over the feed (check of 2026-10-16).
         else if (_follow && !atEnd && (e.ExtentHeightChange != 0 || e.ViewportHeightChange != 0))
         {
-            ToEnd(scroll);
+            _glide.ToEnd(scroll);
         }
     }
 
-    private void ReaderGoesUp() => _follow = false;
+    private void ReaderGoesUp()
+    {
+        _follow = false;
+        _glide.Stop();
+    }
 
     /// To the bottom by number, not by ScrollToEnd: after ScrollToEnd the virtualizing panel kept
     /// bringing the end into view as rows changed size, over the reader's own scroll (2026-10-15).
-    private static void ToEnd(ScrollViewer? scroll) => scroll?.ScrollToVerticalOffset(scroll.ScrollableHeight);
+    private void JumpToEnd(ScrollViewer? scroll)
+    {
+        _glide.Stop();
+        scroll?.ScrollToVerticalOffset(scroll.ScrollableHeight);
+    }
 
     private static bool OnScrollBar(DependencyObject hit)
     {
@@ -466,12 +477,32 @@ sealed class FeedRow : ContentControl
 
     private void Build()
     {
+        // A streaming answer keeps its view between lumps, so the words that are drying go on.
+        if (Item is FeedItem.Answer { Streaming: true } writing && Content is InkAnswer ink && ink.Id == writing.Id)
+        {
+            ink.Update(writing.Text);
+            return;
+        }
+
+        // The end of a streaming answer waits for its last words to dry before the finished view.
+        if (Item is FeedItem.Answer { Streaming: false } written && Content is InkAnswer inked && inked.Id == written.Id)
+        {
+            inked.Finish(written.Text, () =>
+            {
+                if (Item is FeedItem.Answer { Streaming: false } still && still.Id == written.Id && ReferenceEquals(Content, inked))
+                {
+                    Content = AnswerView.WithCopy(still.Text);
+                }
+            });
+            return;
+        }
+
         Content = Item switch
         {
             WorkingMark { IsCompacting: true } => Compacting(),
             WorkingMark => Working(),
             FeedItem.OwnerMessage message => Message(message),
-            FeedItem.Answer { Streaming: true } answer => AnswerView.For(answer.Text),
+            FeedItem.Answer { Streaming: true } answer => new InkAnswer(answer.Id, answer.Text),
             FeedItem.Answer answer => AnswerView.WithCopy(answer.Text),
             FeedItem.Step { Answers.Count: > 0 } step => Answered(step.Answers),
             FeedItem.Step { Line.Label: QuestionAnswers.Tool, State: StepState.Failed } => Declined(),
@@ -482,26 +513,10 @@ sealed class FeedRow : ContentControl
         };
     }
 
-    /// The word "working" and three dots that fade to the right.
-    private static UIElement Working()
-    {
-        var row = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 10, 0, 12) };
-        row.Children.Add(TerminalPanel.Mono(Strings.TerminalWorking, "Muted"));
-        foreach (var opacity in new[] { 1, 0.6, 0.3 })
-        {
-            row.Children.Add(new System.Windows.Shapes.Ellipse
-            {
-                Width = 4,
-                Height = 4,
-                Margin = new Thickness(opacity == 1 ? 8 : 3, 1, 0, 0),
-                Fill = Tokens.Brush("Muted"),
-                Opacity = opacity,
-                VerticalAlignment = VerticalAlignment.Center,
-            });
-        }
-
-        return row;
-    }
+    /// The words "working" with a light that runs along them (D-332). The row waits half a second
+    /// before it shows, so it does not blink at the end of a turn; after thirty seconds it adds
+    /// the time of the turn. It moves only while it is on screen.
+    private static UIElement Working() => new WorkingRow();
 
     /// "Making the conversation shorter" and a thin bar with a piece that runs along it. Claude
     /// Code does not say how far it is, so the bar shows only that the work goes on (D-325).
@@ -509,6 +524,12 @@ sealed class FeedRow : ContentControl
     {
         var column = new StackPanel { Margin = new Thickness(0, 10, 0, 12) };
         column.Children.Add(TerminalPanel.Mono(Strings.TerminalCompacting, "Muted"));
+
+        // The bar only means something while it runs; with motion off the words say it alone.
+        if (!Motion.IsOn)
+        {
+            return column;
+        }
 
         var run = new TranslateTransform();
         var piece = new System.Windows.Shapes.Rectangle
@@ -841,7 +862,7 @@ sealed class FeedRow : ContentControl
 
             var check = new System.Windows.Shapes.Path
             {
-                Data = Geometry.Parse(QuestionCardView.CheckPath),
+                Data = Geometry.Parse(SiteIcons.Check),
                 Fill = Tokens.Brush("Positive"),
                 Stretch = Stretch.Uniform,
                 Width = 10,

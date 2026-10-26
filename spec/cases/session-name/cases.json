@@ -1,5 +1,5 @@
 {
-  "comment": "The name of a session (D-299). An empty field gives the folder with the lowest number no open session of that folder has. A name is kept as one line without spaces around it. A folder is kept without a slash at its end, and its name is its last part; a slash of either kind is read on both systems.",
+  "comment": "The name of a session (D-299). An empty field gives the folder with the lowest number no open session of that folder has. A name is kept as one line without spaces around it. A folder is kept without a slash at its end, and its name is its last part; a slash of either kind is read on both systems. The parent of a folder is the name of the folder it sits in, shown beside the name in the form so two folders of one name differ; a drive or the root has none.",
   "defaults": [
     {
       "folder": "C:\\Users\\someone\\projects\\aiko",
@@ -81,42 +81,50 @@
     {
       "input": "C:\\Users\\someone\\projects\\aiko",
       "path": "C:\\Users\\someone\\projects\\aiko",
-      "name": "aiko"
+      "name": "aiko",
+      "parent": "projects"
     },
     {
       "input": "C:\\Users\\someone\\projects\\aiko\\",
       "path": "C:\\Users\\someone\\projects\\aiko",
-      "name": "aiko"
+      "name": "aiko",
+      "parent": "projects"
     },
     {
       "input": "/Users/someone/projects/aiko///",
       "path": "/Users/someone/projects/aiko",
-      "name": "aiko"
+      "name": "aiko",
+      "parent": "projects"
     },
     {
       "input": "C:/mixed\\slashes/",
       "path": "C:/mixed\\slashes",
-      "name": "slashes"
+      "name": "slashes",
+      "parent": "mixed"
     },
     {
       "input": "D:\\",
       "path": "D:\\",
-      "name": "D:"
+      "name": "D:",
+      "parent": ""
     },
     {
       "input": "/",
       "path": "/",
-      "name": "/"
+      "name": "/",
+      "parent": ""
     },
     {
       "input": "  /work/app  ",
       "path": "/work/app",
-      "name": "app"
+      "name": "app",
+      "parent": "work"
     },
     {
       "input": "",
       "path": "",
-      "name": ""
+      "name": "",
+      "parent": ""
     }
   ]
 }

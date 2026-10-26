@@ -894,6 +894,7 @@ struct SharedCaseTests {
             let input = row["input"]?.stringValue ?? ""
             #expect(SessionName.folderPath(input) == row["path"]?.stringValue)
             #expect(SessionName.folderName(input) == row["name"]?.stringValue)
+            #expect(SessionName.parentName(input) == row["parent"]?.stringValue)
         }
     }
 

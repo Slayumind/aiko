@@ -36,6 +36,21 @@ public static class SessionName
 
     /// The last part of a path, with a slash of either kind: the name of the folder. A root has
     /// no last part and is named as it is written.
+    /// The name of the folder this folder sits in, shown beside its name in the form of a new
+    /// session instead of the whole path (D-332). A drive or the root has none.
+    public static string ParentName(string folder)
+    {
+        var path = FolderPath(folder).TrimEnd('/', '\\');
+        var cut = path.LastIndexOfAny(['/', '\\']);
+        if (cut <= 0)
+        {
+            return "";
+        }
+
+        var parent = path[..cut];
+        return parent.EndsWith(':') ? "" : FolderName(parent);
+    }
+
     public static string FolderName(string folder)
     {
         var path = FolderPath(folder);

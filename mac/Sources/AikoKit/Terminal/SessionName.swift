@@ -51,6 +51,18 @@ public enum SessionName {
 
     /// The last part of a path, with a slash of either kind: the name of the folder. A root has
     /// no last part and is named as it is written.
+    /// The name of the folder this folder sits in, shown beside its name in the form of a new
+    /// session instead of the whole path (D-332). A drive or the root has none.
+    public static func parentName(_ folder: String) -> String {
+        var path = Array(folderPath(folder).utf16)
+        while let last = path.last, isSlash(last) {
+            path.removeLast()
+        }
+        guard let cut = path.lastIndex(where: isSlash), cut > 0 else { return "" }
+        let parent = Array(path[..<cut])
+        return parent.last == UInt16(UInt8(ascii: ":")) ? "" : folderName(text(parent))
+    }
+
     public static func folderName(_ folder: String) -> String {
         let path = Array(folderPath(folder).utf16)
         var name = path

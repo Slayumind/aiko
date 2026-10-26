@@ -1,0 +1,17 @@
+{
+  "comment": "The end of an answer still being written, made whole for drawing (D-332). Marks the last paragraph opened and has not closed yet get their closers, in the reverse order of opening. A mark at the very end, with nothing after it yet, is dropped instead. Inside inline code nothing counts. A star with a space after it at the start of a line is a list marker, not emphasis. Earlier paragraphs and an open code block are left as they are.",
+  "tails": [
+    { "name": "nothing open", "text": "plain words", "closed": "plain words" },
+    { "name": "bold not closed yet", "text": "a **bold wo", "closed": "a **bold wo**" },
+    { "name": "inline code not closed yet", "text": "run `dotnet te", "closed": "run `dotnet te`" },
+    { "name": "italic and strike", "text": "*soft and ~~gone", "closed": "*soft and ~~gone~~*" },
+    { "name": "a mark at the very end is dropped", "text": "then **", "closed": "then" },
+    { "name": "a backtick at the very end is dropped", "text": "call `", "closed": "call" },
+    { "name": "closed marks stay", "text": "**done** and `x` and *y*", "closed": "**done** and `x` and *y*" },
+    { "name": "stars inside code do not count", "text": "use `a**b` then **bo", "closed": "use `a**b` then **bo**" },
+    { "name": "a list marker is not emphasis", "text": "* first item with **bo", "closed": "* first item with **bo**" },
+    { "name": "only the last paragraph", "text": "a **broken\n\nnew *par", "closed": "a **broken\n\nnew *par*" },
+    { "name": "an open code block is left alone", "text": "```cs\nvar a = **b", "closed": "```cs\nvar a = **b" },
+    { "name": "empty", "text": "", "closed": "" }
+  ]
+}

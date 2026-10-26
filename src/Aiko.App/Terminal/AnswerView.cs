@@ -20,41 +20,50 @@ static class AnswerView
         var column = new StackPanel { Margin = new Thickness(0, 6, 0, 10) };
         foreach (var segment in AnswerSegments.Of(Markdown.Parse(markdown)))
         {
-            column.Children.Add(segment switch
-            {
-                AnswerSegment.Prose prose => Prose(prose.Blocks),
-                AnswerSegment.Code code => CodeBlock(code.Language, code.Text),
-                AnswerSegment.Table table => Table(table.Value),
-                _ => new Border(),
-            });
+            column.Children.Add(Segment(segment));
         }
 
         return column;
     }
 
-    /// A finished answer with a quiet button under it that copies the whole answer as its
-    /// markdown, the way Claude wrote it (D-303).
+    /// One piece of an answer, drawn the way it stays.
+    public static UIElement Segment(AnswerSegment segment) => segment switch
+    {
+        AnswerSegment.Prose prose => ProseBox(prose.Blocks),
+        AnswerSegment.Code code => CodeBlock(code.Language, code.Text),
+        AnswerSegment.Table table => Table(table.Value),
+        _ => new Border(),
+    };
+
+    /// A finished answer with a quiet copy icon under it that copies the whole answer as its
+    /// markdown, the way Claude wrote it (D-303). The icon shows while the mouse is over the
+    /// answer (D-332).
     public static UIElement WithCopy(string markdown)
     {
-        var column = new StackPanel();
-        column.Children.Add(For(markdown));
-
-        var copy = TerminalPanel.Flat(Strings.Copy, () => { }, ghost: true);
-        copy.Height = 24;
-        copy.Margin = new Thickness(-12, -8, 0, 4);
-        copy.HorizontalAlignment = HorizontalAlignment.Left;
-        copy.Click += (_, _) =>
+        // The icon takes a thin line of its own under the answer. Laid over the margin below, it
+        // went under the field of the last answer (check of 2026-10-25).
+        var column = new StackPanel { Background = Brushes.Transparent };
+        var answer = For(markdown);
+        if (answer is FrameworkElement body)
         {
-            Clipboard.SetText(markdown);
-            copy.Content = TerminalPanel.Text(Strings.Copied, "TextNumber", "Muted", FontWeights.Normal);
-        };
+            body.Margin = new Thickness(body.Margin.Left, body.Margin.Top, body.Margin.Right, 0);
+        }
+
+        column.Children.Add(answer);
+
+        var copy = CopyButton.For(() => markdown);
+        copy.Margin = new Thickness(-8, -4, 0, 4);
+        copy.HorizontalAlignment = HorizontalAlignment.Left;
+        CopyButton.ShowOnHover(column, copy);
         column.Children.Add(copy);
         return column;
     }
 
     // ---- prose ----
 
-    private static UIElement Prose(IReadOnlyList<MarkdownBlock> blocks)
+    /// The prose of an answer in a box one can select and copy from; the ink of a streaming
+    /// answer works on its document.
+    public static RichTextBox ProseBox(IReadOnlyList<MarkdownBlock> blocks)
     {
         var document = new FlowDocument
         {
@@ -165,24 +174,23 @@ static class AnswerView
     private const double ListIndent = 22;
     private const double MarkerGap = 8;
 
+    /// The marker of a list item is drawn by Aiko, not by the list: a list draws its markers with
+    /// a brush of its own that no item can change, so the ink of a streaming answer could not hold
+    /// a marker back until the words of its item come (check of 2026-10-23). The marker stands in
+    /// the hanging indent of the item's first line; numbers stand right-aligned, so "9." and "10."
+    /// end in one column (AIKO-244).
     private static List List(MarkdownBlock.List list)
     {
         var start = Math.Max(1, list.Start);
+        var indent = list.Ordered ? Math.Max(ListIndent, MarkerWidth(start + list.Items.Count - 1) + MarkerGap) : ListIndent;
         var drawn = new List
         {
-            MarkerStyle = list.Ordered ? TextMarkerStyle.Decimal : TextMarkerStyle.Disc,
-            StartIndex = start,
+            MarkerStyle = TextMarkerStyle.None,
             Margin = new Thickness(0, 0, 0, 10),
-            Padding = new Thickness(ListIndent, 0, 0, 0),
+            Padding = new Thickness(indent, 0, 0, 0),
         };
-        if (list.Ordered)
-        {
-            // A marker is drawn inside the left padding. A fixed padding cut "28." on the left,
-            // so the padding fits the widest number of this list.
-            drawn.MarkerOffset = MarkerGap;
-            drawn.Padding = new Thickness(Math.Max(ListIndent, MarkerWidth(start + list.Items.Count - 1) + MarkerGap), 0, 0, 0);
-        }
 
+        var number = start;
         foreach (var item in list.Items)
         {
             var listItem = new ListItem();
@@ -193,11 +201,54 @@ static class AnswerView
                 listItem.Blocks.Add(inner);
             }
 
+            if (listItem.Blocks.FirstBlock is not Paragraph first)
+            {
+                first = new Paragraph { Margin = new Thickness(0, 0, 0, 4) };
+                if (listItem.Blocks.FirstBlock is { } before)
+                {
+                    listItem.Blocks.InsertBefore(before, first);
+                }
+                else
+                {
+                    listItem.Blocks.Add(first);
+                }
+            }
+
+            first.TextIndent = -indent;
+            var marker = Marker(list.Ordered ? $"{number}." : "\u2022", indent);
+            if (first.Inlines.FirstInline is { } firstInline)
+            {
+                first.Inlines.InsertBefore(firstInline, marker);
+            }
+            else
+            {
+                first.Inlines.Add(marker);
+            }
+
             drawn.ListItems.Add(listItem);
+            number++;
         }
 
         return drawn;
     }
+
+    /// The tag of the marker of a list item, so the ink can find it.
+    public static readonly object ListMarker = new();
+
+    private static InlineUIContainer Marker(string text, double indent) => new(new TextBlock
+    {
+        Text = text,
+        Width = indent,
+        Padding = new Thickness(0, 0, MarkerGap, 0),
+        TextAlignment = TextAlignment.Right,
+        FontFamily = Tokens.Get<FontFamily>("Sans"),
+        FontSize = Tokens.Get<double>("TextName"),
+        Foreground = Tokens.Brush("Ink"),
+    })
+    {
+        BaselineAlignment = BaselineAlignment.Baseline,
+        Tag = ListMarker,
+    };
 
     private static double MarkerWidth(int number) => new FormattedText(
         $"{number}.",
@@ -318,22 +369,16 @@ static class AnswerView
             TextWrapping = TextWrapping.Wrap,
             Background = Brushes.Transparent,
             BorderThickness = new Thickness(0),
-            Padding = new Thickness(12, 10, 12, 12),
+            Padding = new Thickness(12, 0, 12, 10),
             FontFamily = Tokens.Get<FontFamily>("Mono"),
             FontSize = Tokens.Get<double>("TextSmall"),
             Foreground = Tokens.Brush("Ink"),
             SelectionBrush = Tokens.Brush("Muted"),
         };
 
-        var copy = TerminalPanel.Flat(Strings.Copy, () => { }, ghost: true);
-        copy.Height = 26;
-        copy.Click += (_, _) =>
-        {
-            Clipboard.SetText(text);
-            copy.Content = TerminalPanel.Text(Strings.Copied, "TextSmall", "Muted", FontWeights.Normal);
-        };
+        var copy = CopyButton.For(() => text);
 
-        var head = new DockPanel { Margin = new Thickness(12, 4, 4, 0) };
+        var head = new DockPanel { Margin = new Thickness(12, 2, 2, 0) };
         DockPanel.SetDock(copy, Dock.Right);
         head.Children.Add(copy);
         head.Children.Add(TerminalPanel.Mono(language.Length > 0 ? language : " ", "Muted"));
