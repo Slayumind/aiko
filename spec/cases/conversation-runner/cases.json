@@ -713,7 +713,7 @@
       "running": true
     },
     {
-      "name": "a message sent during the work goes out when the turn is over",
+      "name": "a message sent during the work goes at once, and Claude Code takes it after the stop",
       "started": false,
       "mode": "manual",
       "script": [
@@ -743,6 +743,10 @@
           ]
         },
         {
+          "after": "user",
+          "lines": []
+        },
+        {
           "after": "interrupt",
           "lines": [
             {
@@ -751,19 +755,20 @@
               "is_error": false,
               "terminal_reason": "completed",
               "result": "One."
-            }
-          ]
-        },
-        {
-          "after": "user",
-          "lines": [
+            },
             {
-              "type": "system",
-              "subtype": "init",
-              "session_id": "s-1",
-              "model": "claude-opus-5-5",
-              "permissionMode": "default",
-              "claude_code_version": "2.1.296"
+              "type": "user",
+              "message": {
+                "role": "user",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "two"
+                  }
+                ]
+              },
+              "parent_tool_use_id": null,
+              "isReplay": true
             },
             {
               "type": "assistant",
@@ -808,8 +813,8 @@
       ],
       "written": [
         "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"one\"}]}}",
-        "{\"type\":\"control_request\",\"request_id\":\"int-4\",\"request\":{\"subtype\":\"interrupt\"}}",
-        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"two\"}]}}"
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"two\"}]}}",
+        "{\"type\":\"control_request\",\"request_id\":\"int-4\",\"request\":{\"subtype\":\"interrupt\"}}"
       ],
       "log": [
         "started Work new"

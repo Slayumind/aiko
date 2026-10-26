@@ -12,7 +12,7 @@
       "mode": "manual",
       "model": null,
       "inherited": ["PATH", "USERPROFILE"],
-      "arguments": ["-p", "--input-format", "stream-json", "--output-format", "stream-json", "--verbose", "--include-partial-messages", "--permission-prompt-tool", "stdio", "--session-id", "5f0c2a8e-1b7d-4c1e-9f3a-2d6b8e4a7c10", "--permission-mode", "default"],
+      "arguments": ["-p", "--input-format", "stream-json", "--output-format", "stream-json", "--verbose", "--include-partial-messages", "--replay-user-messages", "--permission-prompt-tool", "stdio", "--session-id", "5f0c2a8e-1b7d-4c1e-9f3a-2d6b8e4a7c10", "--permission-mode", "default"],
       "variables": [
         { "name": "AIKO_ENVIRONMENT", "value": "Aiko" },
         { "name": "AIKO_LAUNCH", "value": "terminal" }
@@ -27,7 +27,7 @@
       "mode": "plan",
       "model": "opus",
       "inherited": [],
-      "arguments": ["-p", "--input-format", "stream-json", "--output-format", "stream-json", "--verbose", "--include-partial-messages", "--permission-prompt-tool", "stdio", "--resume", "s-2", "--permission-mode", "plan", "--model", "opus"],
+      "arguments": ["-p", "--input-format", "stream-json", "--output-format", "stream-json", "--verbose", "--include-partial-messages", "--replay-user-messages", "--permission-prompt-tool", "stdio", "--resume", "s-2", "--permission-mode", "plan", "--model", "opus"],
       "variables": [
         { "name": "CLAUDE_CONFIG_DIR", "value": "C:\\Users\\someone\\.claude-work" },
         { "name": "AIKO_ENVIRONMENT", "value": "Work · Kodland" },
@@ -43,7 +43,7 @@
       "mode": "acceptEdits",
       "model": "  claude-sonnet-5-5  ",
       "inherited": ["Path", "CLAUDECODE", "claude_config_dir", "CLAUDE_CODE_ENTRYPOINT", "Claude_Code_SSE_PORT", "AIKO_ENVIRONMENT", "aiko_launch", "ANTHROPIC_API_KEY", "CLAUDE", "CLAUDECODEX", "AIKO"],
-      "arguments": ["-p", "--input-format", "stream-json", "--output-format", "stream-json", "--verbose", "--include-partial-messages", "--permission-prompt-tool", "stdio", "--session-id", "s-3", "--permission-mode", "acceptEdits", "--model", "claude-sonnet-5-5"],
+      "arguments": ["-p", "--input-format", "stream-json", "--output-format", "stream-json", "--verbose", "--include-partial-messages", "--replay-user-messages", "--permission-prompt-tool", "stdio", "--session-id", "s-3", "--permission-mode", "acceptEdits", "--model", "claude-sonnet-5-5"],
       "variables": [
         { "name": "CLAUDECODE", "value": null },
         { "name": "claude_config_dir", "value": null },
@@ -64,7 +64,7 @@
       "mode": "auto",
       "model": "   ",
       "inherited": ["CLAUDE_CONFIG_DIR"],
-      "arguments": ["-p", "--input-format", "stream-json", "--output-format", "stream-json", "--verbose", "--include-partial-messages", "--permission-prompt-tool", "stdio", "--resume", "s-4", "--permission-mode", "auto"],
+      "arguments": ["-p", "--input-format", "stream-json", "--output-format", "stream-json", "--verbose", "--include-partial-messages", "--replay-user-messages", "--permission-prompt-tool", "stdio", "--resume", "s-4", "--permission-mode", "auto"],
       "variables": [
         { "name": "CLAUDE_CONFIG_DIR", "value": null },
         { "name": "CLAUDE_CONFIG_DIR", "value": "D:\\Claude Accounts\\.claude-team" },

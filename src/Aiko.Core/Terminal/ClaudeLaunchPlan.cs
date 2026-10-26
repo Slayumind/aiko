@@ -29,6 +29,9 @@ public sealed record ClaudeLaunchPlan(IReadOnlyList<string> Arguments, IReadOnly
         "--output-format", "stream-json",
         "--verbose",
         "--include-partial-messages",
+        // Says back each message when it takes it, so a message sent during the work stops being
+        // grey at that moment (D-341; spike of 2026-10-26).
+        "--replay-user-messages",
         "--permission-prompt-tool", "stdio",
     ];
 

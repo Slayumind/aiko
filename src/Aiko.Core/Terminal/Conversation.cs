@@ -164,6 +164,7 @@ public sealed record Conversation(
         }),
         StreamEvent.TextDelta { ParentToolUseId: null } delta => Quiet(Begun().Streamed(delta.Text)),
         StreamEvent.Assistant { ParentToolUseId: null } assistant => Quiet(Begun().Said(assistant)),
+        StreamEvent.User { ParentToolUseId: null, IsReplay: true } replay => Quiet(Taken(replay)),
         StreamEvent.User { ParentToolUseId: null } user => Quiet(Returned(user)),
         StreamEvent.Request request => Quiet(Add(id => new FeedItem.Card(id, RequestCard.From(request), RequestState.Open))),
         StreamEvent.Reply reply => Quiet(this with { Mode = reply.Mode ?? Mode }),
@@ -273,17 +274,29 @@ public sealed record Conversation(
             next = next.Add(id => new FeedItem.Notice(id, NoticeKind.Output, result.Text));
         }
 
-        next = next with { InTurn = false, AnsweredInTurn = false, FailedInTurn = false, Unread = true, Compacting = false };
+        // Messages Claude Code has not taken yet are already in its hands (D-341): it goes on with
+        // them by itself, so the session stays at work.
+        var waiting = next.Items.OfType<FeedItem.OwnerMessage>().Any(message => message.Queued);
+        next = next with { InTurn = waiting, AnsweredInTurn = false, FailedInTurn = false, Unread = true, Compacting = false };
+        return Quiet(next);
+    }
 
-        // The queue is kept here, not in Claude Code: the next message goes when the turn is over (D-304).
-        return next.Items.OfType<FeedItem.OwnerMessage>().FirstOrDefault(message => message.Queued) is { } queued
-            ? next.Sent(queued)
-            : Quiet(next);
+    /// Claude Code took a message sent during the work and says it back (--replay-user-messages):
+    /// the message is no longer grey, and the work goes on with it. A message it says back that was
+    /// never waiting, as the first one of a turn, changes nothing.
+    private Conversation Taken(StreamEvent.User replay)
+    {
+        var said = replay.Text.Trim();
+        var taken = Items.OfType<FeedItem.OwnerMessage>().FirstOrDefault(message => message.Queued && message.Text.Trim() == said);
+        return taken is null
+            ? this
+            : Changed<FeedItem.OwnerMessage>(message => message.Id == taken.Id, message => message with { Queued = false }) with { InTurn = true };
     }
 
     // ---- what the person does ----
 
-    /// A message sent while Claude works, or while a card waits, goes into the queue.
+    /// A message sent while Claude works, or while a card waits, goes to Claude Code at once and
+    /// stays grey until Claude Code takes it: at the next step of the turn (D-341).
     public Outcome Send(string text, IReadOnlyList<AttachedImage> images)
     {
         if (text.Trim().Length == 0 && images.Count == 0)
@@ -295,7 +308,9 @@ public sealed record Conversation(
         var next = (this with { Failure = TalkFailure.None, Unread = false })
             .Queue(new FeedItem.OwnerMessage(NextId, text, true, images));
 
-        return waits ? Quiet(next) : next.Sent((FeedItem.OwnerMessage)next.Items[^1]);
+        return waits
+            ? new Outcome(next, [HostLine.UserMessage(text, images)])
+            : next.Sent((FeedItem.OwnerMessage)next.Items[^1]);
     }
 
     public Outcome Choose(string requestId, CardChoice choice)

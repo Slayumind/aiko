@@ -15,7 +15,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - **Talk to Claude Code in the terminal.** Answers show as formatted text with code blocks you can
   copy and tables. Selected text copies as the markdown Claude wrote. Each step of the work is one line that opens to its result and names the skill, the task of an agent or the MCP server at work. If you scroll up while an answer
   is written, the feed stays where you left it. A permission card
-  shows the lines an edit changes; Enter in an empty field allows it and Esc denies it, from any place of the window. A message you send while Claude writes waits under the answer. While Claude Code makes the conversation shorter, the feed says so, and then names the size before and after. Under the field you see the mode, the model with its version and the environment;
+  shows the lines an edit changes; Enter in an empty field allows it and Esc denies it, from any place of the window. A message you send while Claude works goes to it at once. It stays grey under the answer until Claude takes it at the next step, so you don't wait for the end of the turn. While Claude Code makes the conversation shorter, the feed says so, and then names the size before and after. Under the field you see the mode, the model with its version and the environment;
   Shift+Tab or a click changes the mode, and a click on the model takes the next one. Arrows bring back what you sent, Ctrl+V or Cmd+V adds a screenshot,
   and a dropped file adds its path. A new session starts in the mode your project settings name.
   These keys work wherever you clicked in the window, and letters you type outside the field go into it.
