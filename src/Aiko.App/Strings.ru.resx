@@ -1096,6 +1096,9 @@
   <data name="TerminalCreateSession" xml:space="preserve">
     <value>Создать сессию</value>
   </data>
+  <data name="TerminalRenameSession" xml:space="preserve">
+    <value>Переименовать</value>
+  </data>
   <data name="TerminalCloseSession" xml:space="preserve">
     <value>Закрыть сессию</value>
   </data>

@@ -2485,6 +2485,13 @@
     ]
   ],
   [
+    "TerminalRenameSession",
+    [
+      "Rename",
+      "Переименовать"
+    ]
+  ],
+  [
     "TerminalCloseSession",
     [
       "Close session",
