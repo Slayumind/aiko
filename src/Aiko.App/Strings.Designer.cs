@@ -1086,6 +1086,9 @@ public static class Strings
     /// Create session
     public static string TerminalCreateSession => Get("TerminalCreateSession");
 
+    /// Rename
+    public static string TerminalRenameSession => Get("TerminalRenameSession");
+
     /// Close session
     public static string TerminalCloseSession => Get("TerminalCloseSession");
 

@@ -35,6 +35,9 @@ sealed class TerminalPanel : UserControl
     private TerminalView? _view;
     private bool _narrow;
 
+    /// The session whose name is being changed in the list, or null.
+    private string? _renaming;
+
     // The conversation keeps its rows and what is typed while the view is drawn again.
     private readonly TalkPanel _talk = new();
 
@@ -192,6 +195,9 @@ sealed class TerminalPanel : UserControl
     public event Action<string>? TabPicked;
     public event Action<string>? RowPicked;
     public event Action<string>? RowClosed;
+
+    /// The id of a session and the new name typed for it.
+    public event Action<string, string>? RowRenamed;
     public event Action? CreateAsked;
     public event Action<int>? FolderPicked;
     public event Action? OtherFolderAsked;
@@ -314,6 +320,13 @@ sealed class TerminalPanel : UserControl
 
     private void ShowList(TerminalView view)
     {
+        // While a name is being changed the list stands still: a new list would take the field
+        // away from under the keys.
+        if (_renaming is not null)
+        {
+            return;
+        }
+
         _rows.Children.Clear();
         foreach (var group in view.Groups)
         {
@@ -377,6 +390,16 @@ sealed class TerminalPanel : UserControl
         name.TextTrimming = TextTrimming.CharacterEllipsis;
         top.Children.Add(name);
 
+        // A double click on the name changes it in place (LibreChat, Open WebUI).
+        name.MouseLeftButtonDown += (_, e) =>
+        {
+            if (e.ClickCount == 2)
+            {
+                e.Handled = true;
+                Rename(row, top, name);
+            }
+        };
+
         var lines = new StackPanel();
         lines.Children.Add(top);
         var second = SecondLine(row, now);
@@ -402,7 +425,7 @@ sealed class TerminalPanel : UserControl
             BorderThickness = new Thickness(1),
             Cursor = Cursors.Hand,
             Child = face,
-            ContextMenu = RowMenu(row.Id),
+            ContextMenu = RowMenu(row.Id, () => Rename(row, top, name)),
         };
         back.MouseEnter += (_, _) => hover.BeginAnimation(OpacityProperty, Motion.To(1, Motion.Or0(Motion.Hover), Motion.Standard));
         back.MouseLeave += (_, _) => hover.BeginAnimation(OpacityProperty, Motion.To(0, Motion.Or0(Motion.Hover), Motion.Standard));
@@ -414,11 +437,60 @@ sealed class TerminalPanel : UserControl
         return back;
     }
 
-    private ContextMenu RowMenu(string id)
+    private ContextMenu RowMenu(string id, Action rename)
     {
+        var name = new MenuItem { Header = Strings.TerminalRenameSession };
+        name.Click += (_, _) => rename();
         var close = new MenuItem { Header = Strings.TerminalCloseSession };
         close.Click += (_, _) => RowClosed?.Invoke(id);
-        return new ContextMenu { Items = { close } };
+        return new ContextMenu { Items = { name, close } };
+    }
+
+    /// The name becomes a field with all of it selected: Enter or leaving the field keeps the new
+    /// name, Esc keeps the old one. An empty name changes nothing (TerminalSessions.Rename).
+    private void Rename(SessionRow row, DockPanel top, TextBlock name)
+    {
+        var field = new TextBox { Text = row.Name, MaxLength = 100 };
+        Field(field);
+        field.Padding = new Thickness(4, 1, 4, 1);
+        top.Children.Remove(name);
+        top.Children.Add(field);
+        _renaming = row.Id;
+
+        var done = false;
+        void Finish(bool keep)
+        {
+            if (done)
+            {
+                return;
+            }
+
+            done = true;
+            _renaming = null;
+            if (keep && field.Text.Trim() != row.Name)
+            {
+                RowRenamed?.Invoke(row.Id, field.Text);
+            }
+            else if (_view is { } view)
+            {
+                ShowList(view);
+            }
+        }
+
+        field.PreviewKeyDown += (_, e) =>
+        {
+            if (e.Key is Key.Enter or Key.Escape)
+            {
+                e.Handled = true;
+                Finish(keep: e.Key == Key.Enter);
+            }
+        };
+        field.LostKeyboardFocus += (_, _) => Finish(keep: true);
+        Dispatcher.BeginInvoke(() =>
+        {
+            field.Focus();
+            field.SelectAll();
+        }, System.Windows.Threading.DispatcherPriority.Input);
     }
 
     private static UIElement Mark(RowState state)
