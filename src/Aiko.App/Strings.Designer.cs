@@ -1308,8 +1308,14 @@ public static class Strings
     /// Turn stopped.
     public static string TerminalTurnStopped => Get("TerminalTurnStopped");
 
-    /// queued
+    /// goes in at the next step
     public static string TerminalQueued => Get("TerminalQueued");
+
+    /// runs after this turn
+    public static string TerminalQueuedCommand => Get("TerminalQueuedCommand");
+
+    /// … {0} more lines
+    public static string TerminalMoreLines => Get("TerminalMoreLines");
 
     /// Skills
     public static string SlashGroupSkills => Get("SlashGroupSkills");

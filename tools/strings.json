@@ -3005,8 +3005,22 @@
   [
     "TerminalQueued",
     [
-      "queued",
-      "в очереди"
+      "goes in at the next step",
+      "войдёт в ход на следующем шаге"
+    ]
+  ],
+  [
+    "TerminalQueuedCommand",
+    [
+      "runs after this turn",
+      "выполнится после этого хода"
+    ]
+  ],
+  [
+    "TerminalMoreLines",
+    [
+      "… {0} more lines",
+      "… ещё строк: {0}"
     ]
   ],
   [

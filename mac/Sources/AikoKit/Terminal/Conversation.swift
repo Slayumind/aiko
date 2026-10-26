@@ -323,16 +323,30 @@ public struct Conversation: Sendable, Equatable {
         }
 
         // Messages Claude Code has not taken yet are already in its hands (D-341): it goes on with
-        // them by itself, so the session stays at work.
-        next.inTurn = next.items.contains { item in
+        // them by itself, so the session stays at work. A command Aiko holds goes when nothing else waits.
+        let queued = next.items.filter { item in
             if case .ownerMessage(_, true, _) = item.content { return true }
             return false
         }
+        let withClaude = queued.contains { item in
+            if case .ownerMessage(let text, _, _) = item.content { return !Conversation.isCommand(text) }
+            return false
+        }
+        next.inTurn = withClaude
         next.answeredInTurn = false
         next.failedInTurn = false
         next.unread = true
         next.compacting = false
+        if !withClaude, let held = queued.first {
+            return next.sent(held)
+        }
         return Outcome(state: next, written: [])
+    }
+
+    /// Claude Code runs a command only at the start of a turn; in the middle of one it would read
+    /// it as plain words. So Aiko holds a command until the turn is over (D-341).
+    public static func isCommand(_ text: String) -> Bool {
+        text.drop(while: { $0.isWhitespace }).hasPrefix("/")
     }
 
     /// Claude Code took a message sent during the work and says it back (--replay-user-messages):
@@ -352,7 +366,8 @@ public struct Conversation: Sendable, Equatable {
     // MARK: - What the person does
 
     /// A message sent while Claude works, or while a card waits, goes to Claude Code at once and
-    /// stays grey until Claude Code takes it: at the next step of the turn (D-341).
+    /// stays grey until Claude Code takes it: at the next step of the turn (D-341). A command waits
+    /// in Aiko for the end of the turn.
     public func send(_ text: String, images: [AttachedImage]) -> Outcome {
         if RequestCard.trimmed(text).isEmpty && images.isEmpty {
             return Outcome(state: self, written: [])
@@ -364,10 +379,10 @@ public struct Conversation: Sendable, Equatable {
         next.unread = false
         next.queue(.ownerMessage(text: text, queued: true, attachments: images))
 
-        if waits {
-            return Outcome(state: next, written: [HostLine.userMessage(text, images: images)])
+        if !waits {
+            return next.sent(next.items[next.items.count - 1])
         }
-        return next.sent(next.items[next.items.count - 1])
+        return Outcome(state: next, written: Conversation.isCommand(text) ? [] : [HostLine.userMessage(text, images: images)])
     }
 
     public func choose(_ requestId: String, _ choice: CardChoice) -> Outcome {

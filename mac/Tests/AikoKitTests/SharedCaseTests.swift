@@ -571,6 +571,70 @@ struct SharedCaseTests {
     }
 
     @Test
+    func everyFeedJoinsTheSameStepsAndCutsTheSameOutput() {
+        let cases = SpecCases.json("feed-entries")
+
+        for feed in cases["feeds"]?.arrayValue ?? [] {
+            let items = (feed["items"]?.arrayValue ?? []).enumerated().map { at, item in
+                Self.feedItem(item, id: at + 1)
+            }
+            let rows = FeedEntries.of(items).map(Self.described)
+            #expect(rows == (feed["rows"]?.arrayValue ?? []).map(Self.expectedRow), "\(feed["name"]?.stringValue ?? "")")
+        }
+
+        for row in cases["outputs"]?.arrayValue ?? [] {
+            let count = Int(row["lines"]?.int64Value ?? 0)
+            let text = (1...max(1, count)).map { "line \($0)" }.joined(separator: "\n") + "\n"
+            let (shown, hidden) = LongOutput.cut(text)
+            #expect(StepLine.lines(shown).count == Int(row["shown"]?.int64Value ?? -1))
+            #expect(hidden == Int(row["hidden"]?.int64Value ?? -1))
+        }
+    }
+
+    private static func feedItem(_ item: JsonNode, id: Int) -> FeedItem {
+        if item["other"] != nil {
+            return FeedItem(id: id, content: .answer(text: "words", streaming: false))
+        }
+
+        let kind: StepKind = switch item["kind"]?.stringValue {
+        case "read": .read
+        case "search": .search
+        case "edit": .edit
+        case "run": .run
+        default: .other
+        }
+        let state: StepState = switch item["state"]?.stringValue {
+        case "running": .running
+        case "failed": .failed
+        default: .done
+        }
+        let line = StepLine(
+            kind: kind, label: "", subject: item["subject"]?.stringValue ?? "", added: 0, removed: 0,
+            hidden: item["hidden"]?.boolValue ?? false)
+        return FeedItem(id: id, content: .step(FeedStep(
+            toolUseId: "toolu_\(id)", line: line, state: state, result: "", images: [], progress: "")))
+    }
+
+    /// A row as a plain string, so both sides compare without a JSON writer.
+    private static func described(_ entry: FeedEntry) -> String {
+        guard case .run(let run) = entry else {
+            return "one \(entry.id)"
+        }
+        let (names, more) = run.subjects()
+        return "run \(run.steps.indices.map { String(run.items[$0].id) }.joined(separator: ",")) \(run.kind) \(run.state) "
+            + "\(names.joined(separator: ",")) +\(more)"
+    }
+
+    private static func expectedRow(_ row: JsonNode) -> String {
+        if let one = row["one"]?.int64Value {
+            return "one \(one)"
+        }
+        let ids = (row["run"]?.arrayValue ?? []).map { String($0.int64Value ?? 0) }.joined(separator: ",")
+        let names = (row["names"]?.arrayValue ?? []).compactMap(\.stringValue).joined(separator: ",")
+        return "run \(ids) \(row["kind"]?.stringValue ?? "") \(row["state"]?.stringValue ?? "") \(names) +\(row["more"]?.int64Value ?? -1)"
+    }
+
+    @Test
     func everyFileMentionOffersTheSameFiles() {
         let cases = SpecCases.json("file-mention")
         let paths = Self.strings(cases["paths"])

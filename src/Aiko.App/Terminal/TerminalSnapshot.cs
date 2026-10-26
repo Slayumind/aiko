@@ -397,6 +397,8 @@ static class TerminalSnapshot
         [
             new FeedItem.OwnerMessage(1, "Add the folder groups to the form of a new session.", false, [new AttachedImage("image/png", Picture)]),
             Step(2, StepKind.Read, "NewSessionChoices.cs", StepState.Done),
+            Step(25, StepKind.Read, "TerminalPanel.cs", StepState.Done),
+            Step(26, StepKind.Read, "FolderChoice.cs", StepState.Done),
             Step(3, StepKind.Search, "FolderSource", StepState.Done),
             new FeedItem.Answer(4, string.Join("\n",
                 "## Where the groups come from",
@@ -419,6 +421,7 @@ static class TerminalSnapshot
             Tool(22, "mcp__plugin_aiko-persona_memory__remember", "{}"),
             Tool(23, "mcp__claude_ai_Google_Calendar__list_events", "{}"),
             Step(5, StepKind.Edit, "DropDown.cs", StepState.Done, 18, 2),
+            new FeedItem.Notice(27, NoticeKind.Output, string.Join("\n", Enumerable.Range(1, 24).Select(at => $"  Passed SlashMenuTests.Case{at:00} [{3 + at % 5} ms]"))),
             Step(24, StepKind.Agent, "Check the Mac twin", StepState.Running) with { Progress = "Reading Conversation.swift" },
             withCard ? new FeedItem.Card(6, RequestCard.From(edit), RequestState.Open) : Step(6, StepKind.Run, "dotnet test Aiko.Core.Tests", StepState.Running),
             new FeedItem.OwnerMessage(7, "And the same on the Mac, please.", true, []),
