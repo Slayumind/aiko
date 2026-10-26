@@ -525,6 +525,12 @@ sealed class FeedRow : ContentControl
         var column = new StackPanel { Margin = new Thickness(0, 10, 0, 12) };
         column.Children.Add(TerminalPanel.Mono(Strings.TerminalCompacting, "Muted"));
 
+        // The bar only means something while it runs; with motion off the words say it alone.
+        if (!Motion.IsOn)
+        {
+            return column;
+        }
+
         var run = new TranslateTransform();
         var piece = new System.Windows.Shapes.Rectangle
         {
