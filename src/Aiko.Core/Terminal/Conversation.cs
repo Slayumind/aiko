@@ -101,12 +101,30 @@ public abstract record FeedItem(int Id)
     /// What Claude thought before a step, in the few words Claude Code gives of it.
     public sealed record Thought(int Id, string Text) : FeedItem(Id);
 
+    /// A command of "!" that Aiko runs in the folder of the session (D-343).
+    public sealed record Shell(int Id, string Command, ShellState State, string Output, int ExitCode) : FeedItem(Id);
+
     /// Size is set only for a conversation made shorter, when Claude Code named both sizes.
     public sealed record Notice(int Id, NoticeKind Kind, string Text, CompactSize? Size = null) : FeedItem(Id);
 }
 
+public enum ShellState
+{
+    /// Sent while Claude works: it runs when the turn is over (D-341).
+    Waiting,
+    Running,
+    Done,
+}
+
+/// A command of "!" for the host to run now; the item of the feed it belongs to.
+public sealed record ShellRun(int ItemId, string Command);
+
 /// A conversation after one more event or one more action, and the lines to write to Claude Code.
-public sealed record Outcome(Conversation State, IReadOnlyList<string> Written);
+/// Shell is a command of "!" the host runs now; its end comes back through ShellEnded.
+public sealed record Outcome(Conversation State, IReadOnlyList<string> Written)
+{
+    public ShellRun? Shell { get; init; }
+}
 
 /// One conversation with Claude Code: its feed and what it is doing (D-294, D-304, D-305).
 ///
@@ -281,12 +299,19 @@ public sealed record Conversation(
         }
 
         // Messages Claude Code has not taken yet are already in its hands (D-341): it goes on with
-        // them by itself, so the session stays at work. A command Aiko holds goes when nothing else waits.
-        var queued = next.Items.OfType<FeedItem.OwnerMessage>().Where(message => message.Queued).ToList();
-        var withClaude = queued.Any(message => !IsCommand(message.Text));
+        // them by itself, so the session stays at work. A command or a "!" that Aiko holds goes
+        // when nothing else waits.
+        var held = next.Items.Where(IsWaiting).ToList();
+        var withClaude = held.Any(item => item is FeedItem.OwnerMessage message && !IsCommand(message.Text));
         next = next with { InTurn = withClaude, AnsweredInTurn = false, FailedInTurn = false, Unread = true, Compacting = false };
-        return !withClaude && queued.Count > 0 ? next.Sent(queued[0]) : Quiet(next);
+        return withClaude || held.Count == 0 ? Quiet(next)
+            : held[0] is FeedItem.Shell shell ? next.ShellStarted(shell)
+            : next.Sent((FeedItem.OwnerMessage)held[0]);
     }
+
+    /// What waits at the end of the feed for the turn: a message, or a "!" Aiko has not run yet.
+    private static bool IsWaiting(FeedItem item) =>
+        item is FeedItem.OwnerMessage { Queued: true } or FeedItem.Shell { State: ShellState.Waiting };
 
     /// Claude Code runs a command only at the start of a turn; in the middle of one it would read
     /// it as plain words. So Aiko holds a command until the turn is over (D-341).
@@ -317,6 +342,13 @@ public sealed record Conversation(
         }
 
         var waits = InTurn || HasOpenCard;
+        if (ShellCommand.Of(text) is { } command)
+        {
+            var shell = new FeedItem.Shell(NextId, command, ShellState.Waiting, "", 0);
+            var held = (this with { Failure = TalkFailure.None, Unread = false }).Queue(shell);
+            return waits ? Quiet(held) : held.ShellStarted(shell);
+        }
+
         var next = (this with { Failure = TalkFailure.None, Unread = false })
             .Queue(new FeedItem.OwnerMessage(NextId, text, true, images));
 
@@ -325,6 +357,30 @@ public sealed record Conversation(
             return next.Sent((FeedItem.OwnerMessage)next.Items[^1]);
         }
         return IsCommand(text) ? Quiet(next) : new Outcome(next, [HostLine.UserMessage(text, images)]);
+    }
+
+    /// The host ran a command of "!": its output stays in the feed, and Claude gets the command
+    /// and the output at once as a message of its own (D-343).
+    public Outcome ShellEnded(int itemId, string output, int exitCode)
+    {
+        if (Items.OfType<FeedItem.Shell>().FirstOrDefault(shell => shell.Id == itemId && shell.State == ShellState.Running)
+            is not { } running)
+        {
+            return Quiet(this);
+        }
+
+        var next = Changed<FeedItem.Shell>(
+            shell => shell.Id == itemId,
+            shell => shell with { State = ShellState.Done, Output = output, ExitCode = exitCode });
+        return new Outcome(next with { InTurn = true }, [HostLine.UserMessage(ShellCommand.Message(running.Command, output, exitCode), [])]);
+    }
+
+    /// The command moves to the end of the feed, as a sent message does, and runs.
+    private Outcome ShellStarted(FeedItem.Shell shell)
+    {
+        var started = shell with { State = ShellState.Running };
+        var next = this with { Items = [.. Items.Where(item => item.Id != shell.Id), started] };
+        return new Outcome(next, []) { Shell = new ShellRun(shell.Id, shell.Command) };
     }
 
     public Outcome Choose(string requestId, CardChoice choice)
@@ -415,8 +471,8 @@ public sealed record Conversation(
         return this with { Items = [.. Items.Take(at), item(NextId), .. Items.Skip(at)], NextId = NextId + 1 };
     }
 
-    private Conversation Queue(FeedItem.OwnerMessage message) =>
-        this with { Items = [.. Items, message], NextId = NextId + 1 };
+    private Conversation Queue(FeedItem waiting) =>
+        this with { Items = [.. Items, waiting], NextId = NextId + 1 };
 
     /// The answer Claude is writing now: the last item above the queued messages.
     private FeedItem.Answer? Writing()
@@ -426,7 +482,7 @@ public sealed record Conversation(
     }
 
     private int QueuedAtEnd() =>
-        Items.Reverse().TakeWhile(item => item is FeedItem.OwnerMessage { Queued: true }).Count();
+        Items.Reverse().TakeWhile(IsWaiting).Count();
 
     private Conversation Changed<T>(Func<T, bool> which, Func<T, T> change)
         where T : FeedItem =>

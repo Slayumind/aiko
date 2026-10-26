@@ -45,8 +45,8 @@ public static class FeedEntries
     /// busy: Claude is at work on this conversation now.
     public static IReadOnlyList<FeedEntry> Of(IReadOnlyList<FeedItem> items, bool busy)
     {
-        // Messages that wait for Claude stand under the turn and do not count as what came next.
-        var last = items.LastOrDefault(item => item is not FeedItem.OwnerMessage { Queued: true });
+        // Messages and commands that wait for the turn stand under it and do not count as what came next.
+        var last = items.LastOrDefault(item => item is not (FeedItem.OwnerMessage { Queued: true } or FeedItem.Shell { State: ShellState.Waiting }));
         var rows = new List<FeedEntry>();
         var run = new List<FeedItem.Step>();
 

@@ -571,6 +571,29 @@ struct SharedCaseTests {
     }
 
     @Test
+    func everyShellCommandIsReadAndWrittenTheSame() {
+        let cases = SpecCases.json("shell-command")
+
+        for row in cases["of"]?.arrayValue ?? [] {
+            #expect(ShellCommand.of(row["text"]?.stringValue ?? "") == row["command"]?.stringValue)
+        }
+        for row in cases["message"]?.arrayValue ?? [] {
+            let text = ShellCommand.message(
+                row["command"]?.stringValue ?? "", output: row["output"]?.stringValue ?? "",
+                exitCode: Int(row["exitCode"]?.int64Value ?? 0))
+            #expect(text == row["text"]?.stringValue)
+        }
+        for row in cases["read"]?.arrayValue ?? [] {
+            let read = ShellCommand.read(row["text"]?.stringValue ?? "")
+            #expect(read?.command == row["command"]?.stringValue)
+            #expect(read?.output == row["output"]?.stringValue)
+        }
+        for row in cases["outputs"]?.arrayValue ?? [] {
+            #expect(ShellCommand.output(row["text"]?.stringValue ?? "") == row["output"]?.stringValue)
+        }
+    }
+
+    @Test
     func everyFeedJoinsTheSameStepsAndCutsTheSameOutput() {
         let cases = SpecCases.json("feed-entries")
 
@@ -854,9 +877,13 @@ struct SharedCaseTests {
         var state = Conversation.empty()
         var written: [String] = []
 
+        // A command the host is asked to run shows among the lines as "shell: <command>".
         func take(_ outcome: Outcome) {
             state = outcome.state
             written += outcome.written
+            if let run = outcome.shell {
+                written.append("shell: " + run.command)
+            }
         }
 
         for step in scenario["steps"]?.arrayValue ?? [] {
@@ -884,6 +911,15 @@ struct SharedCaseTests {
                     state = state.markRead()
                 case "exit":
                     state = state.processExited()
+                case "shellEnded":
+                    let running = state.items.last { item in
+                        if case .shell(_, .running, _, _) = item.content { return true }
+                        return false
+                    }
+                    take(state.shellEnded(
+                        running?.id ?? -1,
+                        output: step["output"]?.stringValue ?? "",
+                        exitCode: Int(step["exitCode"]?.int64Value ?? 0)))
                 default:
                     Issue.record("unknown step")
                 }
@@ -960,6 +996,11 @@ struct SharedCaseTests {
             return node(pairs)
         case .thought(let text):
             return node([("thought", .string(text))])
+        case .shell(let command, let state, let output, let exitCode):
+            return node([
+                ("shell", .string(command)), ("state", .string(String(describing: state))),
+                ("output", .string(output)), ("exitCode", .number(String(exitCode))),
+            ])
         }
     }
 

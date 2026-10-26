@@ -1,0 +1,75 @@
+{
+  "comment": "A command of \"!\" (D-343). of: the command typed after \"!\", null when the text is not one. message: what Claude gets, in the tags Claude Code writes for \"!\"; a failed command says its exit code in the place of the errors. read: a message of the person in the file of a conversation; command is null when it is not a \"!\", output is null when the message has none (Claude Code writes the output as the next message, and that message alone is in outputs).",
+  "of": [
+    {
+      "text": "!git status",
+      "command": "git status"
+    },
+    {
+      "text": "  ! ls -la  ",
+      "command": "ls -la"
+    },
+    {
+      "text": "!",
+      "command": null
+    },
+    {
+      "text": "! ",
+      "command": null
+    },
+    {
+      "text": "say !hi",
+      "command": null
+    },
+    {
+      "text": "",
+      "command": null
+    }
+  ],
+  "message": [
+    {
+      "command": "git status",
+      "output": "On branch main\n",
+      "exitCode": 0,
+      "text": "<bash-input>git status</bash-input>\n<bash-stdout>On branch main</bash-stdout><bash-stderr></bash-stderr>"
+    },
+    {
+      "command": "ls nowhere",
+      "output": "ls: cannot access 'nowhere'",
+      "exitCode": 2,
+      "text": "<bash-input>ls nowhere</bash-input>\n<bash-stdout>ls: cannot access 'nowhere'</bash-stdout><bash-stderr>Exit code 2</bash-stderr>"
+    }
+  ],
+  "read": [
+    {
+      "text": "<bash-input>git status</bash-input>\n<bash-stdout>On branch main</bash-stdout><bash-stderr></bash-stderr>",
+      "command": "git status",
+      "output": "On branch main"
+    },
+    {
+      "text": "<bash-input>pwd</bash-input>",
+      "command": "pwd",
+      "output": null
+    },
+    {
+      "text": "<bash-input>ls nowhere</bash-input>\n<bash-stdout>ls: cannot access 'nowhere'</bash-stdout><bash-stderr>Exit code 2</bash-stderr>",
+      "command": "ls nowhere",
+      "output": "ls: cannot access 'nowhere'\nExit code 2"
+    },
+    {
+      "text": "hello",
+      "command": null,
+      "output": null
+    }
+  ],
+  "outputs": [
+    {
+      "text": "<bash-stdout>/work/aiko</bash-stdout><bash-stderr></bash-stderr>",
+      "output": "/work/aiko"
+    },
+    {
+      "text": "hello",
+      "output": null
+    }
+  ]
+}

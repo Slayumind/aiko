@@ -39,6 +39,12 @@ public struct RunnerSetup: Sendable, Equatable {
     }
 }
 
+/// Runs a command of "!" in a folder (D-343). ended may be called on a thread of its own, with all
+/// the output, errors included, and the exit code.
+public protocol Shell: Sendable {
+    func run(_ command: String, folder: String, ended: @escaping @Sendable (String, Int) -> Void)
+}
+
 /// Runs one conversation: keeps its state, starts Claude Code when the first message is sent and
 /// passes lines both ways (D-304).
 ///
@@ -60,6 +66,7 @@ public final class ConversationRunner: @unchecked Sendable {
     private let newProcess: () -> ConversationProcess
     private let post: @Sendable (@escaping @Sendable () -> Void) -> Void
     private let log: TerminalLog
+    private let shell: Shell?
 
     private let gate = NSLock()
     private var arrived: [Arrival] = []
@@ -90,13 +97,15 @@ public final class ConversationRunner: @unchecked Sendable {
         _ setup: RunnerSetup,
         newProcess: @escaping () -> ConversationProcess,
         post: @escaping @Sendable (@escaping @Sendable () -> Void) -> Void,
-        log: TerminalLog
+        log: TerminalLog,
+        shell: Shell? = nil
     ) {
         self.platform = platform
         self.setup = setup
         self.newProcess = newProcess
         self.post = post
         self.log = log
+        self.shell = shell
         known = setup.started
         state = Conversation.empty(mode: setup.mode)
     }
@@ -152,7 +161,24 @@ public final class ConversationRunner: @unchecked Sendable {
         }
 
         write(outcome.written)
+        runShell(outcome.shell)
         changed?()
+    }
+
+    /// The command of "!" runs in the folder of the session; its end comes home like a line does.
+    private func runShell(_ shellRun: ShellRun?) {
+        guard let shellRun else {
+            return
+        }
+
+        guard let shell else {
+            post { [self] in apply(state.shellEnded(shellRun.itemId, output: "", exitCode: -1), startIfNeeded: true) }
+            return
+        }
+
+        shell.run(shellRun.command, folder: setup.workingDirectory) { [self] output, code in
+            post { [self] in apply(state.shellEnded(shellRun.itemId, output: output, exitCode: code), startIfNeeded: true) }
+        }
     }
 
     private func start() -> Bool {
@@ -290,5 +316,6 @@ public final class ConversationRunner: @unchecked Sendable {
         let outcome = state.on(event)
         state = outcome.state
         write(outcome.written)
+        runShell(outcome.shell)
     }
 }

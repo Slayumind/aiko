@@ -472,6 +472,7 @@ public enum Strings {
         "TerminalTurnStopped": ("Stopped.", "Остановлено."),
         "TerminalQueued": ("Claude reads it after this step", "Claude прочтёт после текущего шага"),
         "TerminalQueuedCommand": ("runs when Claude is done", "выполню, когда Claude закончит"),
+        "TerminalShellExit": ("exit code {0}", "код выхода {0}"),
         "TerminalMoreLines": ("… {0} more lines", "… ещё строк: {0}"),
         "SlashGroupSkills": ("Skills", "Навыки"),
         "TerminalCompacted": ("Conversation compacted to fit the context.", "Разговор сжат, чтобы влезть в контекст."),
@@ -1820,6 +1821,9 @@ public enum Strings {
 
     /// runs when Claude is done
     public static var terminalQueuedCommand: String { Strings.get("TerminalQueuedCommand") }
+
+    /// exit code {0}
+    public static var terminalShellExit: String { Strings.get("TerminalShellExit") }
 
     /// … {0} more lines
     public static var terminalMoreLines: String { Strings.get("TerminalMoreLines") }

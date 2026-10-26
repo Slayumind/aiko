@@ -3746,6 +3746,176 @@
         "label": "",
         "text": ""
       }
+    },
+    {
+      "name": "a \"!\" runs at once, and Claude gets the command with its output",
+      "steps": [
+        {
+          "do": "send",
+          "text": "!git status"
+        },
+        {
+          "do": "shellEnded",
+          "output": "On branch main\n",
+          "exitCode": 0
+        }
+      ],
+      "state": {
+        "activity": "working",
+        "mode": "manual",
+        "model": "",
+        "session": "",
+        "tasks": 0,
+        "unread": false,
+        "compacting": false,
+        "limits": 0,
+        "items": [
+          {
+            "shell": "git status",
+            "state": "done",
+            "output": "On branch main\n",
+            "exitCode": 0
+          }
+        ]
+      },
+      "written": [
+        "shell: git status",
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"<bash-input>git status</bash-input>\\n<bash-stdout>On branch main</bash-stdout><bash-stderr></bash-stderr>\"}]}}"
+      ],
+      "glance": {
+        "activity": "working",
+        "line": "none",
+        "kind": "other",
+        "label": "",
+        "text": ""
+      }
+    },
+    {
+      "name": "a \"!\" that fails says its exit code to Claude",
+      "steps": [
+        {
+          "do": "send",
+          "text": "! ls nowhere "
+        },
+        {
+          "do": "shellEnded",
+          "output": "ls: cannot access 'nowhere'",
+          "exitCode": 2
+        }
+      ],
+      "state": {
+        "activity": "working",
+        "mode": "manual",
+        "model": "",
+        "session": "",
+        "tasks": 0,
+        "unread": false,
+        "compacting": false,
+        "limits": 0,
+        "items": [
+          {
+            "shell": "ls nowhere",
+            "state": "done",
+            "output": "ls: cannot access 'nowhere'",
+            "exitCode": 2
+          }
+        ]
+      },
+      "written": [
+        "shell: ls nowhere",
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"<bash-input>ls nowhere</bash-input>\\n<bash-stdout>ls: cannot access 'nowhere'</bash-stdout><bash-stderr>Exit code 2</bash-stderr>\"}]}}"
+      ],
+      "glance": {
+        "activity": "working",
+        "line": "none",
+        "kind": "other",
+        "label": "",
+        "text": ""
+      }
+    },
+    {
+      "name": "a \"!\" sent during the work waits in Aiko and runs when the turn is over",
+      "steps": [
+        {
+          "do": "send",
+          "text": "fix a.txt"
+        },
+        {
+          "line": {
+            "type": "system",
+            "subtype": "init",
+            "session_id": "s-1",
+            "model": "claude-opus-5-5",
+            "permissionMode": "default",
+            "claude_code_version": "2.1.310"
+          }
+        },
+        {
+          "do": "send",
+          "text": "!git diff"
+        },
+        {
+          "line": {
+            "type": "assistant",
+            "message": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Done."
+                }
+              ]
+            },
+            "parent_tool_use_id": null
+          }
+        },
+        {
+          "line": {
+            "type": "result",
+            "subtype": "success",
+            "is_error": false,
+            "terminal_reason": "completed",
+            "result": "Done."
+          }
+        }
+      ],
+      "state": {
+        "activity": "done",
+        "mode": "manual",
+        "model": "claude-opus-5-5",
+        "session": "s-1",
+        "tasks": 0,
+        "unread": true,
+        "compacting": false,
+        "limits": 0,
+        "items": [
+          {
+            "owner": "fix a.txt",
+            "images": 0,
+            "queued": false
+          },
+          {
+            "answer": "Done.",
+            "streaming": false
+          },
+          {
+            "shell": "git diff",
+            "state": "running",
+            "output": "",
+            "exitCode": 0
+          }
+        ]
+      },
+      "written": [
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"fix a.txt\"}]}}",
+        "shell: git diff"
+      ],
+      "glance": {
+        "activity": "done",
+        "line": "answer",
+        "kind": "other",
+        "label": "",
+        "text": "Done."
+      }
     }
   ]
 }

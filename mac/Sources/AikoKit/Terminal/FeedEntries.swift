@@ -61,11 +61,8 @@ public enum FeedEntries {
     /// command stays its own line: each one matters.
     /// busy: Claude is at work on this conversation now.
     public static func of(_ items: [FeedItem], busy: Bool) -> [FeedEntry] {
-        // Messages that wait for Claude stand under the turn and do not count as what came next.
-        let last = items.last { item in
-            if case .ownerMessage(_, true, _) = item.content { return false }
-            return true
-        }
+        // Messages and commands that wait for the turn stand under it and do not count as what came next.
+        let last = items.last { !Conversation.isWaiting($0) }
         var rows: [FeedEntry] = []
         var run: [FeedItem] = []
 

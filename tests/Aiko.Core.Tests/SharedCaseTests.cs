@@ -544,6 +544,37 @@ public class SharedCaseTests
     }
 
     [Fact]
+    public void Every_shell_command_is_read_and_written_the_same()
+    {
+        var cases = SpecCases.Json("shell-command");
+        static string? Text(JsonElement value) => value.ValueKind == JsonValueKind.Null ? null : value.GetString();
+
+        foreach (var row in cases.GetProperty("of").EnumerateArray())
+        {
+            Assert.Equal(Text(row.GetProperty("command")), ShellCommand.Of(row.GetProperty("text").GetString()!));
+        }
+
+        foreach (var row in cases.GetProperty("message").EnumerateArray())
+        {
+            Assert.Equal(
+                row.GetProperty("text").GetString(),
+                ShellCommand.Message(row.GetProperty("command").GetString()!, row.GetProperty("output").GetString()!, row.GetProperty("exitCode").GetInt32()));
+        }
+
+        foreach (var row in cases.GetProperty("read").EnumerateArray())
+        {
+            var read = ShellCommand.Read(row.GetProperty("text").GetString()!);
+            Assert.Equal(Text(row.GetProperty("command")), read?.Command);
+            Assert.Equal(Text(row.GetProperty("output")), read?.Output);
+        }
+
+        foreach (var row in cases.GetProperty("outputs").EnumerateArray())
+        {
+            Assert.Equal(Text(row.GetProperty("output")), ShellCommand.Output(row.GetProperty("text").GetString()!));
+        }
+    }
+
+    [Fact]
     public void Every_feed_joins_the_same_steps_and_cuts_the_same_output()
     {
         var cases = SpecCases.Json("feed-entries");
@@ -843,10 +874,15 @@ public class SharedCaseTests
         var state = Conversation.Empty();
         var written = new List<string>();
 
+        // A command the host is asked to run shows among the lines as "shell: <command>".
         void Take(Outcome outcome)
         {
             state = outcome.State;
             written.AddRange(outcome.Written);
+            if (outcome.Shell is { } run)
+            {
+                written.Add("shell: " + run.Command);
+            }
         }
 
         foreach (var step in scenario.GetProperty("steps").EnumerateArray())
@@ -886,6 +922,10 @@ public class SharedCaseTests
                         break;
                     case "exit":
                         state = state.ProcessExited();
+                        break;
+                    case "shellEnded":
+                        var running = state.Items.OfType<FeedItem.Shell>().Last(shell => shell.State == ShellState.Running);
+                        Take(state.ShellEnded(running.Id, step.GetProperty("output").GetString()!, step.GetProperty("exitCode").GetInt32()));
                         break;
                     default:
                         throw new InvalidOperationException("unknown step");
@@ -1015,6 +1055,13 @@ public class SharedCaseTests
         },
         FeedItem.Notice notice => new JsonObject { ["notice"] = Camel(notice.Kind), ["text"] = notice.Text },
         FeedItem.Thought thought => new JsonObject { ["thought"] = thought.Text },
+        FeedItem.Shell shell => new JsonObject
+        {
+            ["shell"] = shell.Command,
+            ["state"] = Camel(shell.State),
+            ["output"] = shell.Output,
+            ["exitCode"] = shell.ExitCode,
+        },
         _ => throw new InvalidOperationException("unknown item"),
     };
 

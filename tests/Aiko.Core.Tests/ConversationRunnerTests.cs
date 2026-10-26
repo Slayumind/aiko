@@ -27,9 +27,23 @@ public class ConversationRunnerTests
             return true;
         }
 
-        public bool Write(string line) => !Stopped;
+        public List<string> Written { get; } = [];
+
+        public bool Write(string line)
+        {
+            Written.Add(line);
+            return !Stopped;
+        }
 
         public void Stop() => Stopped = true;
+    }
+
+    /// A shell the test ends by hand.
+    private sealed class HandShell : IShell
+    {
+        public List<(string Command, string Folder, Action<string, int> Ended)> Runs { get; } = [];
+
+        public void Run(string command, string folder, Action<string, int> ended) => Runs.Add((command, folder, ended));
     }
 
     private sealed class NoLog : ITerminalLog
@@ -52,7 +66,7 @@ public class ConversationRunnerTests
     }
 
     /// The runner with the work for the window thread kept in a list, to be done by hand.
-    private static (ConversationRunner Runner, List<HandProcess> Processes, List<Action> Posted) Made()
+    private static (ConversationRunner Runner, List<HandProcess> Processes, List<Action> Posted) Made(IShell? shell = null)
     {
         var processes = new List<HandProcess>();
         var posted = new List<Action>();
@@ -64,9 +78,33 @@ public class ConversationRunnerTests
                 return processes[^1];
             },
             posted.Add,
-            new NoLog());
+            new NoLog(),
+            shell);
 
         return (runner, processes, posted);
+    }
+
+    [Fact]
+    public void A_command_of_bang_runs_in_the_folder_and_its_end_starts_Claude_Code_with_the_output()
+    {
+        var shell = new HandShell();
+        var (runner, processes, posted) = Made(shell);
+
+        runner.Send("!git status", []);
+
+        var run = Assert.Single(shell.Runs);
+        Assert.Equal(("git status", "/work"), (run.Command, run.Folder));
+        Assert.Empty(processes);
+
+        // The shell ends on a thread of its own; the window thread takes it up.
+        run.Ended("On branch main", 0);
+        Assert.Empty(processes);
+        Assert.Single(posted);
+        posted[0]();
+
+        var process = Assert.Single(processes);
+        Assert.Contains("<bash-input>git status</bash-input>", Assert.Single(process.Written));
+        Assert.Equal(ShellState.Done, Assert.IsType<FeedItem.Shell>(Assert.Single(runner.State.Items)).State);
     }
 
     [Fact]

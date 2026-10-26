@@ -392,7 +392,8 @@ sealed class TerminalHost
                 [.. System.Environment.GetEnvironmentVariables().Keys.Cast<string>()]),
             _newProcess,
             work => _window.Dispatcher.BeginInvoke(work),
-            new TerminalLog());
+            new TerminalLog(),
+            new ShellProcess());
         talk.Changed = () =>
         {
             KeepModel(id, talk.State);

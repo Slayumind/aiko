@@ -1367,6 +1367,57 @@
           }
         ]
       }
+    },
+    {
+      "name": "commands of \"!\": two messages from Claude Code, one from Aiko",
+      "lines": [
+        {
+          "type": "user",
+          "message": {
+            "role": "user",
+            "content": "<bash-input>pwd</bash-input>"
+          }
+        },
+        {
+          "type": "user",
+          "message": {
+            "role": "user",
+            "content": "<bash-stdout>/work/aiko</bash-stdout><bash-stderr></bash-stderr>"
+          }
+        },
+        {
+          "type": "user",
+          "message": {
+            "role": "user",
+            "content": [
+              {
+                "type": "text",
+                "text": "<bash-input>git status</bash-input>\n<bash-stdout>On branch main</bash-stdout><bash-stderr></bash-stderr>"
+              }
+            ]
+          }
+        }
+      ],
+      "state": {
+        "activity": "idle",
+        "mode": "plan",
+        "busy": false,
+        "nextId": 3,
+        "items": [
+          {
+            "shell": "pwd",
+            "state": "done",
+            "output": "/work/aiko",
+            "exitCode": 0
+          },
+          {
+            "shell": "git status",
+            "state": "done",
+            "output": "On branch main",
+            "exitCode": 0
+          }
+        ]
+      }
     }
   ]
 }

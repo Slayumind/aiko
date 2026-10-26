@@ -1317,6 +1317,9 @@ public static class Strings
     /// runs when Claude is done
     public static string TerminalQueuedCommand => Get("TerminalQueuedCommand");
 
+    /// exit code {0}
+    public static string TerminalShellExit => Get("TerminalShellExit");
+
     /// … {0} more lines
     public static string TerminalMoreLines => Get("TerminalMoreLines");
 

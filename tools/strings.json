@@ -3024,6 +3024,13 @@
     ]
   ],
   [
+    "TerminalShellExit",
+    [
+      "exit code {0}",
+      "код выхода {0}"
+    ]
+  ],
+  [
     "TerminalMoreLines",
     [
       "… {0} more lines",

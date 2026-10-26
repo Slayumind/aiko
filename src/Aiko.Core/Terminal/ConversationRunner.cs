@@ -14,6 +14,13 @@ public sealed record RunnerSetup(
     string? Model,
     IReadOnlyList<string> InheritedVariables);
 
+/// Runs a command of "!" in a folder (D-343). Ended may be called on a thread of its own, with all
+/// the output, errors included, and the exit code.
+public interface IShell
+{
+    void Run(string command, string folder, Action<string, int> ended);
+}
+
 /// Runs one conversation: keeps its state, starts Claude Code when the first message is sent and
 /// passes lines both ways (D-304).
 ///
@@ -24,7 +31,8 @@ public sealed class ConversationRunner(
     RunnerSetup setup,
     Func<IConversationProcess> newProcess,
     Action<Action> post,
-    ITerminalLog log)
+    ITerminalLog log,
+    IShell? shell = null)
 {
     private readonly object _gate = new();
     private List<Arrival> _arrived = [];
@@ -95,7 +103,26 @@ public sealed class ConversationRunner(
         }
 
         Write(outcome.Written);
+        RunShell(outcome.Shell);
         Changed?.Invoke();
+    }
+
+    /// The command of "!" runs in the folder of the session; its end comes home like a line does.
+    private void RunShell(ShellRun? run)
+    {
+        if (run is null)
+        {
+            return;
+        }
+
+        if (shell is null)
+        {
+            post(() => Apply(State.ShellEnded(run.ItemId, "", -1), startIfNeeded: true));
+            return;
+        }
+
+        shell.Run(run.Command, setup.WorkingDirectory, (output, code) =>
+            post(() => Apply(State.ShellEnded(run.ItemId, output, code), startIfNeeded: true)));
     }
 
     private bool Start()
@@ -243,6 +270,7 @@ public sealed class ConversationRunner(
         var outcome = State.On(streamEvent);
         State = outcome.State;
         Write(outcome.Written);
+        RunShell(outcome.Shell);
     }
 
     /// A line of a process, or its exit when the line is null.

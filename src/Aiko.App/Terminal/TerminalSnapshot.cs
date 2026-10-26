@@ -445,6 +445,7 @@ static class TerminalSnapshot
             new FeedItem.Thought(28, "The groups are ready. Now I check how the list opens when there are many folders, and whether the headers stay above their groups while it scrolls."),
             Step(5, StepKind.Edit, "DropDown.cs", StepState.Done, 18, 2),
             new FeedItem.Notice(27, NoticeKind.Output, string.Join("\n", Enumerable.Range(1, 24).Select(at => $"  Passed SlashMenuTests.Case{at:00} [{3 + at % 5} ms]"))),
+            new FeedItem.Shell(29, "git status --short", ShellState.Done, " M src/Aiko.App/Terminal/DropDown.cs\n?? notes.txt\n", 1),
             Step(24, StepKind.Agent, "Check the Mac twin", StepState.Running) with { Progress = "Reading Conversation.swift" },
             withCard ? new FeedItem.Card(6, RequestCard.From(edit), RequestState.Open) : Step(6, StepKind.Run, "dotnet test Aiko.Core.Tests", StepState.Running),
             new FeedItem.OwnerMessage(7, "And the same on the Mac, please.", true, []),
