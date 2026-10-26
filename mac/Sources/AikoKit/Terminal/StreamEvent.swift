@@ -126,6 +126,12 @@ public enum StreamEvent: Sendable, Equatable {
     /// What a subagent is doing now, in a few words of its own.
     case taskProgress(toolUseId: String, description: String)
 
+    /// A subagent began its work. The id is the step that started it.
+    case taskStarted(toolUseId: String)
+
+    /// A subagent is over. How is "completed" when it finished its work.
+    case taskEnded(toolUseId: String, how: String)
+
     /// The turn is over. The text is the output of a command that ran without the model.
     case result(isError: Bool, subtype: String, terminalReason: String, text: String)
 
@@ -195,6 +201,16 @@ public enum StreamEvent: Sendable, Equatable {
                 return .ignored
             }
             return .taskProgress(toolUseId: task, description: root["description"]?.stringValue ?? "")
+        case "task_started":
+            guard let task = root["tool_use_id"]?.stringValue, !task.isEmpty else {
+                return .ignored
+            }
+            return .taskStarted(toolUseId: task)
+        case "task_notification":
+            guard let task = root["tool_use_id"]?.stringValue, !task.isEmpty else {
+                return .ignored
+            }
+            return .taskEnded(toolUseId: task, how: root["status"]?.stringValue ?? "")
         default:
             return .ignored
         }

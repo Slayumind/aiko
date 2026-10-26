@@ -32,6 +32,7 @@ public enum Transcript {
         }
         state.inTurn = false
         state.tasks = 0
+        state.agents = []
         state.unread = false
         state.failure = .none
         state.answeredInTurn = false

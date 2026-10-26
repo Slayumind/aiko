@@ -156,6 +156,10 @@ public struct Conversation: Sendable, Equatable {
     public var failedInTurn = false
     public var askedModel = ""
 
+    /// The steps whose subagent still works. Such a step runs until its subagent is over, even
+    /// when the tool already gave back that the subagent went to the background.
+    public var agents: [String] = []
+
     public static func empty(mode: PermissionMode = .manual) -> Conversation {
         Conversation(mode: mode)
     }
@@ -194,8 +198,12 @@ public struct Conversation: Sendable, Equatable {
             }
             if let mode { next.mode = mode }
         case .textDelta(nil, let text):
+            next.inTurn = true
             next.stream(text)
         case .assistant(nil, let blocks, let error):
+            // Claude Code also starts a turn on its own, with no message of the person: when a
+            // subagent in the background is over, Claude reads what it did and answers.
+            next.inTurn = true
             next.say(blocks, error)
         case .user(nil, let text, let results, _, _):
             // After a change of model Claude Code names its full id at once, before the next turn.
@@ -204,8 +212,9 @@ public struct Conversation: Sendable, Equatable {
                 next.askedModel = ""
             }
             for result in results {
+                let agentWorks = agents.contains(result.toolUseId)
                 next.changeStep(result.toolUseId) { step in
-                    step.state = result.isError ? .failed : .done
+                    step.state = result.isError ? .failed : agentWorks ? .running : .done
                     step.result = result.text
                     step.images = result.images
                     step.answers = result.answers
@@ -226,6 +235,16 @@ public struct Conversation: Sendable, Equatable {
             next.tasks = count
         case .taskProgress(let toolUseId, let description):
             next.changeStep(toolUseId) { $0.progress = description }
+        case .taskStarted(let toolUseId):
+            next.agents.removeAll { $0 == toolUseId }
+            next.agents.append(toolUseId)
+        case .taskEnded(let toolUseId, let how):
+            next.agents.removeAll { $0 == toolUseId }
+            next.changeStep(toolUseId) { step in
+                if step.state == .running {
+                    step.state = how == "completed" ? .done : .failed
+                }
+            }
         case .result(let isError, _, let terminalReason, let text):
             return next.ended(isError: isError, terminalReason: terminalReason, text: text)
         default:
@@ -395,6 +414,7 @@ public struct Conversation: Sendable, Equatable {
         }
 
         var next = self
+        next.agents = []
         next.settle(.failed)
         next.add(.notice(kind: .failed, text: ""))
         next.inTurn = false
@@ -427,13 +447,14 @@ public struct Conversation: Sendable, Equatable {
         return Outcome(state: next, written: [HostLine.userMessage(text, images: attachments)])
     }
 
-    /// Nothing is left half done: an answer is whole, a step has ended, a card nobody answered is closed.
+    /// Nothing is left half done: an answer is whole, a step has ended, a card nobody answered is
+    /// closed. Only the step of a subagent that still works goes on.
     private mutating func settle(_ running: StepState) {
         for index in items.indices {
             switch items[index].content {
             case .answer(let text, true):
                 items[index].content = .answer(text: text, streaming: false)
-            case .step(var step) where step.state == .running:
+            case .step(var step) where step.state == .running && !agents.contains(step.toolUseId):
                 step.state = running
                 items[index].content = .step(step)
             case .card(let request, .open):
