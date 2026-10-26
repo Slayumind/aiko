@@ -82,14 +82,16 @@ sealed class TerminalHost
         _panel.CreateAsked += OpenForm;
         _panel.FolderPicked += index => Refill(index, null);
         _panel.OtherFolderAsked += PickOtherFolder;
-        _panel.ModelPicked += index => Refill(null, index);
-        _panel.Submitted += Create;
-        _panel.FormCancelled += () => Change(_model.WithForm(false));
         _panel.AskAnswered += Answer;
         _panel.SignInAsked += SignIn;
         _panel.SendAsked += (text, images) =>
         {
-            if (_model.Session(_sessions) is { } session)
+            // The first message of a new session makes it (D-342).
+            if (_model.FormOpen && _form is { Folder: >= 0 })
+            {
+                Create(text, images);
+            }
+            else if (_model.Session(_sessions) is { } session)
             {
                 Send(session.Id, text, images);
                 Draw();
@@ -179,7 +181,8 @@ sealed class TerminalHost
             return;
         }
 
-        _form = FormFor(folder ?? _form.Folder, model ?? _form.Model, _form.Folders);
+        // Another folder brings the mode its settings name; another model keeps the mode chosen.
+        _form = FormFor(folder ?? _form.Folder, model ?? _form.Model, _form.Folders, folder is null ? _form.Mode : null);
         Draw();
     }
 
@@ -205,7 +208,7 @@ sealed class TerminalHost
         Draw();
     }
 
-    private FormView? FormFor(int? folder, int? model, IReadOnlyList<FolderChoice>? known = null)
+    private FormView? FormFor(int? folder, int? model, IReadOnlyList<FolderChoice>? known = null, PermissionMode? mode = null)
     {
         if (Environment() is not { } environment)
         {
@@ -215,8 +218,11 @@ sealed class TerminalHost
         var folders = known ?? NewSessionChoices.Folders(_sessions, environment, TerminalStore.FoldersInside);
         var chosen = folders.Count == 0 ? -1 : Math.Clamp(folder ?? 0, 0, folders.Count - 1);
         var path = chosen >= 0 ? folders[chosen].Path : null;
-        var models = NewSessionChoices.Offered(OfferOf(environment.Name, path).Models);
+        var offer = OfferOf(environment.Name, path);
+        var models = NewSessionChoices.Offered(offer.Models);
         var values = models.Select(one => one.Value).ToList();
+        var home = System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile);
+        var config = environment.ConfigDirectories.FirstOrDefault() ?? ClaudeConfigFolder.Resolve(null, home);
 
         return new FormView(
             environment.Name,
@@ -227,10 +233,13 @@ sealed class TerminalHost
             path is null ? "" : NewSessionChoices.DefaultName(_sessions, environment.Name, path))
         {
             Models = models,
+            Mode = mode ?? (path is null ? PermissionMode.Manual : TerminalStore.DefaultMode(path, config)),
+            Commands = offer.Commands,
         };
     }
 
-    private void Create(string name, string message)
+    /// The first message makes the session: its name comes from the message (D-342).
+    private void Create(string message, IReadOnlyList<AttachedImage> images)
     {
         if (_form is not { Folder: >= 0 } form)
         {
@@ -240,20 +249,15 @@ sealed class TerminalHost
         var id = Guid.NewGuid().ToString();
         var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         var folder = form.Folders[form.Folder].Path;
-        var home = System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile);
-        var config = Environment()?.ConfigDirectories.FirstOrDefault() ?? ClaudeConfigFolder.Resolve(null, home);
+        var name = SessionName.FromMessage(message, form.DefaultName);
         _sessions = _sessions
-            .Add(id, form.Environment, folder, name, form.Models[form.Model].Value, TerminalStore.DefaultMode(folder, config), now)
+            .Add(id, form.Environment, folder, name, form.Models[form.Model].Value, form.Mode, now)
             .Opened(id);
         Save();
 
         _form = null;
         _model = _model.WithForm(false).ToSession(id, _sessions);
-        if (!string.IsNullOrWhiteSpace(message))
-        {
-            Send(id, message);
-        }
-
+        Send(id, message, images);
         Draw();
     }
 
@@ -410,6 +414,14 @@ sealed class TerminalHost
     /// takes it at once.
     private void NextMode()
     {
+        // A new session takes the mode for its start.
+        if (_model.FormOpen && _form is { } form)
+        {
+            _form = form with { Mode = PermissionModes.Next(form.Mode) };
+            Draw();
+            return;
+        }
+
         if (_model.Session(_sessions) is not { } session)
         {
             return;
@@ -427,6 +439,13 @@ sealed class TerminalHost
     /// takes it from the next turn.
     private void NextModel()
     {
+        // A new session goes round the models it offers.
+        if (_model.FormOpen && _form is { Models.Count: > 0 } form)
+        {
+            Refill(null, (form.Model + 1) % form.Models.Count);
+            return;
+        }
+
         if (_model.Session(_sessions) is not { } session)
         {
             return;

@@ -50,6 +50,10 @@ sealed class TalkInput : UserControl
     private readonly TextBlock _mode = TerminalPanel.Mono("", "Muted");
     private readonly TextBlock _model = TerminalPanel.Mono("", "Muted");
     private readonly TextBlock _where = TerminalPanel.Mono("", "Muted");
+    private readonly TextBlock _modeDot = TerminalPanel.Mono(" · ", "Muted");
+    private readonly ContentControl _folderSlot = new() { Focusable = false };
+    private bool _folderShown;
+    private string? _folderKey;
 
     private static readonly Brush RecordingTint = Frozen(Color.FromArgb(0x33, 0xFF, 0x64, 0x67));
 
@@ -198,9 +202,14 @@ sealed class TalkInput : UserControl
         // The model changes with a click too, in the order of the form of a new session.
         _model.Cursor = Cursors.Hand;
         _model.MouseLeftButtonUp += (_, _) => ModelAsked?.Invoke();
-        var status = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(14, 6, 0, 14) };
-        status.Children.Add(_mode);
+        // The line under the field, in the order of the approved prototype (D-342): folder, model,
+        // mode, environment. Until the first message the folder is a quiet list to choose from.
+        var status = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(10, 6, 0, 14) };
+        _folderSlot.VerticalAlignment = VerticalAlignment.Center;
+        status.Children.Add(_folderSlot);
         status.Children.Add(_model);
+        status.Children.Add(_modeDot);
+        status.Children.Add(_mode);
         status.Children.Add(_where);
         status.Children.Add(_wave);
         status.Children.Add(_voiceWord);
@@ -335,7 +344,8 @@ sealed class TalkInput : UserControl
 
         var usual = _voiceActive ? Visibility.Collapsed : Visibility.Visible;
         var voice = _voiceActive ? Visibility.Visible : Visibility.Collapsed;
-        _mode.Visibility = _model.Visibility = _where.Visibility = usual;
+        _mode.Visibility = _modeDot.Visibility = _model.Visibility = _where.Visibility = usual;
+        _folderSlot.Visibility = _folderShown ? usual : Visibility.Collapsed;
         _voiceWord.Visibility = _voiceWhere.Visibility = _voiceCancel.Visibility = voice;
         _voiceWord.Text = line.Word switch
         {
@@ -476,7 +486,70 @@ sealed class TalkInput : UserControl
         _stop.Visibility = busy ? Visibility.Visible : Visibility.Collapsed;
         _mode.Text = PermissionModes.Name(mode);
         DrawModel(model);
+        _modeDot.Text = _folderShown || model.Text.Length > 0 ? " · " : "";
         _where.Text = " · " + environment;
+    }
+
+    /// Raised when a folder of the list under the field is picked, and when "Choose a folder"
+    /// is: before the first message of a new session only.
+    public event Action<int>? FolderPicked;
+    public event Action? OtherFolderAsked;
+
+    /// The folder at the start of the line under the field. In a new session (draft) it is a quiet
+    /// list of the folders to choose from; once the session started, its name only.
+    public void ShowFolder(string folder, FormView? draft)
+    {
+        // The list is built again only when what it shows changed: a draw while it is open would
+        // close it.
+        var key = draft is { Folder: >= 0 } ? $"draft|{draft.Folder}|{draft.Folders.Count}|{draft.Folders[draft.Folder].Path}" : folder;
+        if (key == _folderKey)
+        {
+            return;
+        }
+
+        _folderKey = key;
+        if (draft is { Folder: >= 0 })
+        {
+            var list = new DropDown
+            {
+                Items = [.. draft.Folders.Select(TerminalPanel.FolderLabel), Strings.TerminalChooseFolder],
+                Short = [.. draft.Folders.Select(choice => choice.Name)],
+                Headers = NewSessionChoices.Headers(draft.Folders).ToDictionary(
+                    header => header.Before,
+                    header => header.Group == FolderGroup.Recent ? Strings.TerminalFoldersRecent : Strings.TerminalFoldersBound),
+                SelectedIndex = draft.Folder,
+                ToolTip = draft.Folders[draft.Folder].Path,
+            };
+            list.MakeQuiet();
+            list.Picked += index =>
+            {
+                if (index < draft.Folders.Count)
+                {
+                    FolderPicked?.Invoke(index);
+                }
+                else
+                {
+                    OtherFolderAsked?.Invoke();
+                }
+            };
+            _folderSlot.Content = list;
+            _folderShown = true;
+        }
+        else if (folder.Length > 0)
+        {
+            var name = TerminalPanel.Mono(SessionName.FolderName(folder), "Muted");
+            name.Margin = new Thickness(4, 0, 0, 0);
+            name.ToolTip = folder;
+            _folderSlot.Content = name;
+            _folderShown = true;
+        }
+        else
+        {
+            _folderSlot.Content = null;
+            _folderShown = false;
+        }
+
+        _folderSlot.Visibility = _folderShown && !_voiceActive ? Visibility.Visible : Visibility.Collapsed;
     }
 
     /// A model Claude Code has not named yet is quieter than the rest of the line.
@@ -496,7 +569,11 @@ sealed class TalkInput : UserControl
             name.Foreground = quiet;
         }
 
-        _model.Inlines.Add(new Run(" · "));
+        if (_folderShown)
+        {
+            _model.Inlines.Add(new Run(" · "));
+        }
+
         _model.Inlines.Add(name);
     }
 

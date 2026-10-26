@@ -1,5 +1,5 @@
 {
-  "comment": "The name of a session (D-299). An empty field gives the folder with the lowest number no open session of that folder has. A name is kept as one line without spaces around it. A folder is kept without a slash at its end, and its name is its last part; a slash of either kind is read on both systems. The parent of a folder is the name of the folder it sits in, shown beside the name in the form so two folders of one name differ; a drive or the root has none.",
+  "comment": "The name of a session (D-299). An empty field gives the folder with the lowest number no open session of that folder has. A name is kept as one line without spaces around it. A folder is kept without a slash at its end, and its name is its last part; a slash of either kind is read on both systems. The parent of a folder is the name of the folder it sits in, shown beside the name in the form so two folders of one name differ; a drive or the root has none. fromMessages: the name a new session gets from its first message: the first line with words, its spaces squeezed, at most 50 UTF-16 units cut at a space when one comes after the first 20, without a comma or a dash at the end; a message with no words gives the fallback.",
   "defaults": [
     {
       "folder": "C:\\Users\\someone\\projects\\aiko",
@@ -125,6 +125,43 @@
       "path": "",
       "name": "",
       "parent": ""
+    }
+  ],
+  "fromMessages": [
+    {
+      "message": "Почему форма пропускает пустое имя?",
+      "fallback": "aiko 3",
+      "name": "Почему форма пропускает пустое имя?"
+    },
+    {
+      "message": "  \n\n  Сделай меню   плотнее\nи ещё одно",
+      "fallback": "aiko 3",
+      "name": "Сделай меню плотнее"
+    },
+    {
+      "message": "Проверь, что выпадающий список в настройках не закрывается сразу после нажатия мышью",
+      "fallback": "aiko 3",
+      "name": "Проверь, что выпадающий список в настройках не"
+    },
+    {
+      "message": "Сделай так: меню, поле, ленту, панель задач — всё как в прототипе",
+      "fallback": "aiko 3",
+      "name": "Сделай так: меню, поле, ленту, панель задач — всё"
+    },
+    {
+      "message": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "fallback": "aiko 3",
+      "name": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "message": "",
+      "fallback": "aiko 3",
+      "name": "aiko 3"
+    },
+    {
+      "message": " \n\t\n",
+      "fallback": "code-crawler 1",
+      "name": "code-crawler 1"
     }
   ]
 }

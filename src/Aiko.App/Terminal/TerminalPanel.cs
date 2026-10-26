@@ -104,8 +104,6 @@ sealed class TerminalPanel : UserControl
     private string? _talkSession;
 
     // What is typed into the form stays here while the view is drawn again.
-    private readonly TextBox _name = new();
-    private readonly TextBox _message = new();
 
     public TerminalPanel()
     {
@@ -166,35 +164,13 @@ sealed class TerminalPanel : UserControl
         all.Children.Add(body);
         Content = all;
 
-        Field(_name);
-        Field(_message);
-        _message.AcceptsReturn = true;
-        _message.TextWrapping = TextWrapping.Wrap;
-        _message.MinHeight = 64;
-        _message.VerticalContentAlignment = VerticalAlignment.Top;
-        _message.PreviewKeyDown += (_, e) =>
-        {
-            // Enter starts the session, Shift+Enter is a new line (D-294).
-            if (e.Key == Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
-            {
-                e.Handled = true;
-                Submit();
-            }
-        };
-        _name.KeyDown += (_, e) =>
-        {
-            if (e.Key == Key.Enter)
-            {
-                e.Handled = true;
-                Submit();
-            }
-        };
-
         _talk.SendAsked += (text, images) => SendAsked?.Invoke(text, images);
         _talk.StopAsked += () => StopAsked?.Invoke();
         _talk.ModeAsked += () => ModeAsked?.Invoke();
         _talk.ModelAsked += () => ModelAsked?.Invoke();
         _talk.Chosen += (id, choice) => Chosen?.Invoke(id, choice);
+        _talk.FolderPicked += index => FolderPicked?.Invoke(index);
+        _talk.OtherFolderAsked += () => OtherFolderAsked?.Invoke();
 
         SizeChanged += (_, e) =>
         {
@@ -219,11 +195,6 @@ sealed class TerminalPanel : UserControl
     public event Action? CreateAsked;
     public event Action<int>? FolderPicked;
     public event Action? OtherFolderAsked;
-    public event Action<int>? ModelPicked;
-
-    /// The name and the first message of the form.
-    public event Action<string, string>? Submitted;
-    public event Action? FormCancelled;
     public event Action<bool>? AskAnswered;
     public event Action? SignInAsked;
     public event Action? MinimizeAsked;
@@ -243,15 +214,8 @@ sealed class TerminalPanel : UserControl
 
     public void Show(TerminalView view)
     {
-        var formWasOpen = _view?.Form is not null;
         _view = view;
         _narrow = ActualWidth > 0 ? WindowPlace.IsNarrow(ActualWidth) : WindowPlace.IsNarrow(Width);
-
-        if (view.Form is null || !formWasOpen)
-        {
-            _name.Text = "";
-            _message.Text = "";
-        }
 
         ShowBar(view);
         ShowList(view);
@@ -543,7 +507,7 @@ sealed class TerminalPanel : UserControl
     {
         UIElement content = view.Main switch
         {
-            MainView.Form when view.Form is { } form => Form(form),
+            MainView.Form when view.Form is { } form => Draft(view, form),
             MainView.Talk when view.SignedOut => Message(
                 string.Format(CultureInfo.CurrentCulture, Strings.TerminalLoginTitle, view.Environment),
                 Strings.TerminalLoginBody,
@@ -586,6 +550,28 @@ sealed class TerminalPanel : UserControl
         return _talk;
     }
 
+    /// A new session before its first message (D-342): the conversation itself, empty, with the
+    /// folder, model and mode of the draft in the line under the field. The first message makes
+    /// the session.
+    private UIElement Draft(TerminalView view, FormView form)
+    {
+        var model = form.Models[Math.Clamp(form.Model, 0, form.Models.Count - 1)];
+        return Talk(view with { SessionId = "draft:" + form.Environment }, new TalkView(
+            "draft:" + form.Environment,
+            [],
+            Busy: false,
+            HasOpenCard: false,
+            Compacting: false,
+            form.Mode,
+            new ModelLabel(model.DisplayName, false),
+            form.Environment)
+        {
+            Commands = form.Commands,
+            Folder = form.Folder >= 0 ? form.Folders[form.Folder].Path : "",
+            Draft = form,
+        });
+    }
+
     private static UIElement Message(string? title, string body, UIElement? button)
     {
         var column = new StackPanel { MaxWidth = 520, VerticalAlignment = VerticalAlignment.Center, HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(40, 0, 40, 0) };
@@ -614,85 +600,8 @@ sealed class TerminalPanel : UserControl
     }
 
     /// A folder in the form: its name and the folder it sits in, not the whole path (D-332).
-    private static string FolderLabel(FolderChoice folder) =>
+    internal static string FolderLabel(FolderChoice folder) =>
         SessionName.ParentName(folder.Path) is { Length: > 0 } parent ? $"{folder.Name}  ·  {parent}" : folder.Name;
-
-    private UIElement Form(FormView form)
-    {
-        var folders = new DropDown
-        {
-            Items = [.. form.Folders.Select(FolderLabel), Strings.TerminalChooseFolder],
-            Headers = NewSessionChoices.Headers(form.Folders).ToDictionary(
-                header => header.Before,
-                header => header.Group == FolderGroup.Recent ? Strings.TerminalFoldersRecent : Strings.TerminalFoldersBound),
-            SelectedIndex = form.Folder,
-        };
-        folders.Picked += index =>
-        {
-            if (index < form.Folders.Count)
-            {
-                FolderPicked?.Invoke(index);
-            }
-            else
-            {
-                OtherFolderAsked?.Invoke();
-            }
-        };
-
-        var models = new DropDown { Items = [.. form.Models.Select(model => model.DisplayName)], SelectedIndex = form.Model, Width = 180, HorizontalAlignment = HorizontalAlignment.Left };
-        models.Picked += index => ModelPicked?.Invoke(index);
-
-        var grid = new Grid { MaxWidth = 620, HorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment = VerticalAlignment.Top, Margin = new Thickness(40, 36, 40, 0) };
-        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(96) });
-        grid.ColumnDefinitions.Add(new ColumnDefinition());
-
-        var title = Text(string.Format(CultureInfo.CurrentCulture, Strings.TerminalFormTitle, form.Environment), "TextName", "Ink", FontWeights.Medium);
-        title.FontSize = 16;
-        title.Margin = new Thickness(0, 0, 0, 18);
-        Grid.SetColumnSpan(title, 2);
-        AddRow(grid, title);
-
-        AddField(grid, Strings.TerminalFolder, folders);
-        if (form.BoundElsewhere is { } other)
-        {
-            var hint = Text(string.Format(CultureInfo.CurrentCulture, Strings.TerminalElsewhere, other, form.Environment), "TextSmall", "Muted", FontWeights.Normal);
-            hint.TextWrapping = TextWrapping.Wrap;
-            hint.Margin = new Thickness(0, -6, 0, 12);
-            Grid.SetColumn(hint, 1);
-            AddRow(grid, hint);
-        }
-
-        AddField(grid, Strings.TerminalModel, models);
-
-        AddField(grid, Strings.TerminalName, WithPlaceholder(_name, form.DefaultName));
-        var nameHint = Text(Strings.TerminalNameHint, "TextSmall", "Muted", FontWeights.Normal);
-        nameHint.TextWrapping = TextWrapping.Wrap;
-        nameHint.Margin = new Thickness(0, -6, 0, 12);
-        Grid.SetColumn(nameHint, 1);
-        AddRow(grid, nameHint);
-
-        var message = WithPlaceholder(_message, Strings.TerminalDescribeTask);
-        Grid.SetColumnSpan(message, 2);
-        AddRow(grid, message);
-
-        var create = Flat(Strings.TerminalCreateSession, Submit, ghost: false, main: true);
-        create.Margin = new Thickness(0, 12, 0, 0);
-        create.HorizontalAlignment = HorizontalAlignment.Left;
-        Grid.SetColumnSpan(create, 2);
-        AddRow(grid, create);
-
-        grid.KeyDown += (_, e) =>
-        {
-            if (e.Key == Key.Escape && !folders.IsOpen && !models.IsOpen)
-            {
-                e.Handled = true;
-                FormCancelled?.Invoke();
-            }
-        };
-        return grid;
-    }
-
-    private void Submit() => Submitted?.Invoke(_name.Text, _message.Text);
 
     private UIElement Ask(AskView ask)
     {
@@ -746,33 +655,6 @@ sealed class TerminalPanel : UserControl
 
     // ---- small parts ----
 
-    private static void AddRow(Grid grid, UIElement element)
-    {
-        grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-        Grid.SetRow(element, grid.RowDefinitions.Count - 1);
-        grid.Children.Add(element);
-    }
-
-    private static void AddField(Grid grid, string label, FrameworkElement field)
-    {
-        var name = Text(label, "TextNumber", "Muted", FontWeights.Normal);
-        name.VerticalAlignment = VerticalAlignment.Top;
-        name.Margin = new Thickness(0, 7, 0, 0);
-        AddRow(grid, name);
-
-        field.Margin = new Thickness(0, 0, 0, 12);
-        Grid.SetColumn(field, 1);
-        Grid.SetRow(field, grid.RowDefinitions.Count - 1);
-        grid.Children.Add(field);
-    }
-
-    /// A field is kept between two drawings of the form, so it has to leave its old place first.
-    private static FrameworkElement Unparented(FrameworkElement element)
-    {
-        (element.Parent as Panel)?.Children.Remove(element);
-        return element;
-    }
-
     internal static void Field(TextBox box)
     {
         box.FontFamily = Tokens.Get<FontFamily>("Sans");
@@ -784,30 +666,6 @@ sealed class TerminalPanel : UserControl
         box.BorderThickness = new Thickness(1);
         box.Padding = new Thickness(9, 6, 9, 6);
         box.Resources[typeof(Border)] = new Style(typeof(Border)) { Setters = { new Setter(Border.CornerRadiusProperty, new CornerRadius(8)) } };
-    }
-
-    /// The field with words that show while it is empty. They lie over the field and let every
-    /// click through, so the field never holds them as text.
-    private static FrameworkElement WithPlaceholder(TextBox box, string text)
-    {
-        var words = new TextBlock
-        {
-            Text = text,
-            FontFamily = box.FontFamily,
-            FontSize = box.FontSize,
-            Foreground = Tokens.Brush("Muted"),
-            Margin = new Thickness(12, 7, 12, 0),
-            VerticalAlignment = VerticalAlignment.Top,
-            TextTrimming = TextTrimming.CharacterEllipsis,
-            IsHitTestVisible = false,
-            Visibility = box.Text.Length == 0 ? Visibility.Visible : Visibility.Collapsed,
-        };
-        box.TextChanged += (_, _) => words.Visibility = box.Text.Length == 0 ? Visibility.Visible : Visibility.Collapsed;
-
-        var both = new Grid();
-        both.Children.Add(Unparented(box));
-        both.Children.Add(words);
-        return both;
     }
 
     internal static TextBlock Text(string text, string size, string tone, FontWeight weight) => new()

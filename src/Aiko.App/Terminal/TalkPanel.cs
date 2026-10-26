@@ -27,6 +27,10 @@ sealed record TalkView(
 
     /// The folder of the session: the files "@" offers.
     public string Folder { get; init; } = "";
+
+    /// Set for a new session before its first message (D-342): the folders to choose from in the
+    /// line under the field. The session is made when the first message goes.
+    public FormView? Draft { get; init; }
 }
 
 /// The conversation with Claude Code: the feed above, the field below (D-294, D-302).
@@ -119,6 +123,8 @@ sealed class TalkPanel : UserControl
         _empty.TextWrapping = TextWrapping.Wrap;
 
         _input.Sent += (text, images) => SendAsked?.Invoke(text, images);
+        _input.FolderPicked += index => FolderPicked?.Invoke(index);
+        _input.OtherFolderAsked += () => OtherFolderAsked?.Invoke();
         _input.StopAsked += () => StopAsked?.Invoke();
         _input.AllowAsked += () => ChooseByKey(new CardChoice.Allow());
         _input.DenyAsked += () => ChooseByKey(new CardChoice.Deny(""));
@@ -172,6 +178,10 @@ sealed class TalkPanel : UserControl
     }
 
     public event Action<string, IReadOnlyList<AttachedImage>>? SendAsked;
+
+    /// A new session: a folder of the line under the field was picked, or "Choose a folder".
+    public event Action<int>? FolderPicked;
+    public event Action? OtherFolderAsked;
     public event Action? StopAsked;
     public event Action? ModeAsked;
     public event Action? ModelAsked;
@@ -224,7 +234,11 @@ sealed class TalkPanel : UserControl
         }
 
         _empty.Visibility = view.Items.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        _empty.Text = view.Draft is { BoundElsewhere: { } other } draft
+            ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.TerminalElsewhere, other, draft.Environment) + "\n" + Strings.TerminalEmptyTalk
+            : Strings.TerminalEmptyTalk;
         _keyCard = TalkKeys.Card(view.Items);
+        _input.ShowFolder(view.Folder, view.Draft);
         _input.Show(view.Session, view.Busy, _keyCard is not null, view.Mode, view.Model, view.Environment);
         _input.SetCommands(view.Commands);
         _input.SetFolder(view.Folder);

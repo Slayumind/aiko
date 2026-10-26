@@ -975,6 +975,11 @@ struct SharedCaseTests {
             #expect(SessionName.folderName(input) == row["name"]?.stringValue)
             #expect(SessionName.parentName(input) == row["parent"]?.stringValue)
         }
+
+        for row in cases["fromMessages"]?.arrayValue ?? [] {
+            let name = SessionName.fromMessage(row["message"]?.stringValue ?? "", fallback: row["fallback"]?.stringValue ?? "")
+            #expect(name == row["name"]?.stringValue)
+        }
     }
 
     @Test

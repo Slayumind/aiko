@@ -12,6 +12,38 @@ public enum SessionName {
     private static let colon: UInt16 = 58
 
     /// The folder with the lowest number no session of that folder has yet.
+    /// The longest name taken from a message, in UTF-16 units (Crush; research of 2026-10-26).
+    public static let mostFromMessage = 50
+
+    /// The name a new session gets from its first message (D-342): its first line with the spaces
+    /// squeezed, cut to mostFromMessage at a space when one comes after the first 20 units. A message
+    /// with no words gives fallback. The twin of SessionName.FromMessage.
+    public static func fromMessage(_ message: String, fallback: String) -> String {
+        let lines = message.replacingOccurrences(of: "\r\n", with: "\n").split(separator: "\n", omittingEmptySubsequences: false)
+        guard let first = lines.map({ $0.trimmingCharacters(in: CharacterSet(charactersIn: " \t")) }).first(where: { !$0.isEmpty }) else {
+            return fallback
+        }
+
+        let line = first.split(whereSeparator: { $0 == " " || $0 == "\t" }).joined(separator: " ")
+        var units = Array(line.utf16)
+        if units.count <= mostFromMessage {
+            return line
+        }
+
+        let cut = units[0...mostFromMessage].lastIndex(of: space) ?? -1
+        var end = cut >= 20 ? cut : mostFromMessage
+        if UTF16.isLeadSurrogate(units[end - 1]) {
+            end -= 1
+        }
+
+        units = Array(units[0..<end])
+        let trailing: Set<UInt16> = [32, 44, 59, 58, 45, 0x2014]
+        while let last = units.last, trailing.contains(last) {
+            units.removeLast()
+        }
+        return String(decoding: units, as: UTF16.self)
+    }
+
     public static func defaultName(_ folder: String, taken: [String]) -> String {
         let name = folderName(folder)
         var number = 1
