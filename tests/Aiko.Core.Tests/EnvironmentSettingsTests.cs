@@ -133,4 +133,27 @@ public class EnvironmentSettingsTests
         Assert.False(back.Environments[1].Persona);
         Assert.Contains($"\"schemaVersion\": {EnvironmentSettings.CurrentSchema}", json);
     }
+
+    [Fact]
+    public void A_file_from_before_the_agent_todos_reads_with_them_off()
+    {
+        var settings = EnvironmentSettings.FromJson(TwoEnvironments);
+
+        Assert.All(settings.Environments, e => Assert.False(e.AgentTodos));
+    }
+
+    [Fact]
+    public void The_agent_todos_flag_survives_a_trip_through_the_file()
+    {
+        var settings = EnvironmentSettings.FromJson(TwoEnvironments);
+        var withTodos = settings with
+        {
+            Environments = [settings.Environments[0], settings.Environments[1] with { AgentTodos = true }],
+        };
+
+        var back = EnvironmentSettings.FromJson(withTodos.ToJson());
+
+        Assert.False(back.Environments[0].AgentTodos);
+        Assert.True(back.Environments[1].AgentTodos);
+    }
 }

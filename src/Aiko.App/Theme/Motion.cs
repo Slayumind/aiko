@@ -17,6 +17,9 @@ static class Motion
     public static readonly Duration Expand = new(TimeSpan.FromMilliseconds(180));
     public static readonly Duration Settle = new(TimeSpan.FromMilliseconds(280));
 
+    /// A panel that opens by its height, as the panel "Tasks" above the field (D-342).
+    public static readonly Duration Unfold = new(TimeSpan.FromMilliseconds(400));
+
     public const double PressedScale = 0.97;
     public const double AppearShift = 4;
 

@@ -167,6 +167,17 @@ public sealed record Conversation(
     /// when the tool already gave back that the subagent went to the background.
     public IReadOnlyList<string> Agents { get; init; } = [];
 
+    /// The to-do list of the agent (D-344). When a turn ends with every line done, the list goes.
+    public IReadOnlyList<TodoItem> Todos { get; init; } = [];
+
+    /// How much of the context the conversation fills, and the window of its model (ContextGauge).
+    public int ContextTokens { get; init; }
+
+    public int ContextWindow { get; init; }
+
+    /// Null until the first turn is over: only its result names the window.
+    public int? ContextPercent => ContextGauge.Percent(ContextTokens, ContextWindow);
+
     /// The model asked last, or the one Claude Code named when nothing is asked.
     public string LatestModel => AskedModel.Length > 0 ? AskedModel : Model;
 
@@ -190,7 +201,10 @@ public sealed record Conversation(
         StreamEvent.Request request => Quiet(Add(id => new FeedItem.Card(id, RequestCard.From(request), RequestState.Open))),
         StreamEvent.Reply reply => Quiet(this with { Mode = reply.Mode ?? Mode }),
         StreamEvent.Status status => Quiet(this with { Mode = status.Mode ?? Mode, Compacting = status.Activity == "compacting" }),
-        StreamEvent.Compacted compacted => Quiet(Add(id => new FeedItem.Notice(id, NoticeKind.Compacted, "", CompactSize.Of(compacted)))),
+        StreamEvent.Compacted compacted => Quiet(Add(id => new FeedItem.Notice(id, NoticeKind.Compacted, "", CompactSize.Of(compacted))) with
+        {
+            ContextTokens = compacted.After > 0 ? compacted.After : ContextTokens,
+        }),
         StreamEvent.RateLimit limit => Quiet(this with { Limits = limit.Windows }),
         StreamEvent.Tasks tasks => Quiet(this with { Tasks = tasks.Count }),
         StreamEvent.TaskProgress progress => Quiet(Changed<FeedItem.Step>(
@@ -227,13 +241,16 @@ public sealed record Conversation(
                 : Add(id => new FeedItem.Notice(id, NoticeKind.Failed, words)) with { FailedInTurn = true };
         }
 
-        var next = this;
+        var next = assistant.ContextTokens > 0 ? this with { ContextTokens = assistant.ContextTokens } : this;
         foreach (var block in assistant.Blocks)
         {
             switch (block)
             {
                 case AssistantBlock.Text text:
                     next = next.Answered(text.Value);
+                    break;
+                case AssistantBlock.ToolUse tool when AgentTodos.Owns(tool.Name):
+                    next = next with { Todos = AgentTodos.Used(next.Todos, tool.Name, tool.Id, tool.Input) };
                     break;
                 case AssistantBlock.Thinking { Words: var thought } when thought.Trim().Length > 0:
                     next = next.Add(id => new FeedItem.Thought(id, thought.Trim()));
@@ -264,6 +281,7 @@ public sealed record Conversation(
         var next = ModelName.FromSwitch(user.Text) is { } model ? this with { Model = model, AskedModel = "" } : this;
         foreach (var result in user.Results)
         {
+            next = next with { Todos = AgentTodos.Returned(next.Todos, result) };
             next = next.Changed<FeedItem.Step>(
                 step => step.ToolUseId == result.ToolUseId,
                 step => step with
@@ -281,7 +299,11 @@ public sealed record Conversation(
 
     private Outcome Ended(StreamEvent.Result result)
     {
-        var next = Settled(result.IsError ? StepState.Failed : StepState.Done);
+        var next = Settled(result.IsError ? StepState.Failed : StepState.Done) with
+        {
+            ContextWindow = ContextGauge.WindowFor(Model, result.ContextWindows, ContextWindow),
+            Todos = AgentTodos.AllDone(Todos) ? [] : Todos,
+        };
 
         // When Claude Code already said in this turn what went wrong, the feed has that notice.
         var stopped = result.TerminalReason.StartsWith("aborted", StringComparison.Ordinal);

@@ -38,6 +38,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   offer the models Claude Code names, such as Fable 5.1, so a new model needs no new Aiko.
 - **Subagents in the feed.** Under the line of a subagent at work you see what it does now. A
   subagent that works in the background keeps its line running until it is done.
+- **Tasks panel and context ring.** Above the field, a panel opens with the subagents at work and,
+  if you want it, the to-do list of Claude. A ring at the end of the line under the field shows how
+  much of the context is used: grey, orange from 76 %, red from 91 %. Newer models get no to-do list
+  from Claude Code; turn it on with **Agent to-do list** in the settings of an environment. On
+  Windows; the Mac follows before the release.
 - **Voice input in the terminal, on Windows.** Press Ctrl+Space anywhere in the window or the microphone button, speak
   Russian or English, press again. The words appear in the field as you speak and wait for you to
   send them. Turn it on in the new **Terminal** page of the settings: recognition runs on your

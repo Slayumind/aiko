@@ -189,6 +189,16 @@ struct EnvironmentEditsTests {
     }
 
     @Test
+    func theAgentTodosAreSwitchedInOneEnvironmentAndKeptThroughOtherEdits() {
+        let settings = EnvironmentEdits.setAgentTodos(twoEnvironments(), "Work", true)
+        let renamed = EnvironmentEdits.rename(settings, "Work", "Kodland", commandsInstalled: false).settings
+
+        #expect(settings.environments[1].agentTodos)
+        #expect(!settings.environments[0].agentTodos)
+        #expect(renamed.environments[1].agentTodos)
+    }
+
+    @Test
     func switchingThePersonaOfAnUnknownEnvironmentChangesNothing() {
         let settings = twoEnvironments()
 

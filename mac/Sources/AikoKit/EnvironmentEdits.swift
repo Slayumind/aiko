@@ -137,6 +137,16 @@ public enum EnvironmentEdits {
         }
     }
 
+    public static func setAgentTodos(
+        _ settings: EnvironmentSettings, _ environment: String, _ on: Bool
+    ) -> EnvironmentSettings {
+        change(settings, environment) { environment in
+            var copy = environment
+            copy.agentTodos = on
+            return copy
+        }
+    }
+
     public static func setDefault(_ settings: EnvironmentSettings, _ environment: String) -> EnvironmentSettings {
         guard find(settings, environment) != nil else { return settings }
         var copy = settings

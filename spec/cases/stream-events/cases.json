@@ -396,6 +396,16 @@
       "name": "a byte order mark and spaces in front",
       "raw": "  \uFEFF{\"type\":\"system\",\"subtype\":\"compact_boundary\"}  ",
       "event": { "kind": "compacted", "before": 0, "after": 0 }
+    },
+    {
+      "name": "a message of Claude names how much of the context its call took",
+      "line": { "type": "assistant", "message": { "content": [{ "type": "text", "text": "ok" }], "usage": { "input_tokens": 2, "cache_creation_input_tokens": 3981, "cache_read_input_tokens": 44728, "output_tokens": 3 } }, "parent_tool_use_id": null },
+      "event": { "kind": "assistant", "parent": null, "error": null, "blocks": [{ "type": "text", "text": "ok" }], "contextTokens": 48714 }
+    },
+    {
+      "name": "the end of a turn names the context window of each model",
+      "line": { "type": "result", "subtype": "success", "is_error": false, "terminal_reason": "completed", "result": "ok", "modelUsage": { "claude-haiku-5-5": { "inputTokens": 4, "contextWindow": 1000000 }, "claude-sonnet-5-5": { "contextWindow": 0 } } },
+      "event": { "kind": "result", "isError": false, "subtype": "success", "terminalReason": "completed", "text": "ok", "contextWindows": { "claude-haiku-5-5": 1000000 } }
     }
-  ]
+]
 }

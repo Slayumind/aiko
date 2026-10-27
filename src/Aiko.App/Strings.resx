@@ -1483,4 +1483,25 @@
   <data name="VoiceCloudFailed" xml:space="preserve">
     <value>OpenAI did not take the recording. Check the key and the connection.</value>
   </data>
+  <data name="TerminalTasks" xml:space="preserve">
+    <value>Tasks</value>
+  </data>
+  <data name="TerminalTasksCount" xml:space="preserve">
+    <value>Tasks · {0} of {1}</value>
+  </data>
+  <data name="TerminalAgent" xml:space="preserve">
+    <value>agent</value>
+  </data>
+  <data name="TerminalContextShare" xml:space="preserve">
+    <value>{0} %</value>
+  </data>
+  <data name="TerminalContextTip" xml:space="preserve">
+    <value>Context: {0} % used</value>
+  </data>
+  <data name="AgentTodos" xml:space="preserve">
+    <value>Agent to-do list</value>
+  </data>
+  <data name="AgentTodosWhat" xml:space="preserve">
+    <value>Claude keeps a to-do list, and the terminal shows it above the field. Newer models don't need it, and it takes a little context. Open sessions pick this up after Aiko restarts.</value>
+  </data>
 </root>

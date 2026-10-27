@@ -195,6 +195,17 @@ public class EnvironmentEditsTests
     }
 
     [Fact]
+    public void The_agent_todos_are_switched_in_one_environment_and_kept_through_other_edits()
+    {
+        var settings = EnvironmentEdits.SetAgentTodos(TwoEnvironments(), "Work", true);
+        var renamed = EnvironmentEdits.Rename(settings, "Work", "Kodland", commandsInstalled: false).Settings;
+
+        Assert.True(settings.Environments[1].AgentTodos);
+        Assert.False(settings.Environments[0].AgentTodos);
+        Assert.True(renamed.Environments[1].AgentTodos);
+    }
+
+    [Fact]
     public void Switching_the_persona_of_an_unknown_environment_changes_nothing()
     {
         var settings = TwoEnvironments();

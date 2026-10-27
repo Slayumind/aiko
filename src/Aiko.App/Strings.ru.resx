@@ -1483,4 +1483,25 @@
   <data name="VoiceCloudFailed" xml:space="preserve">
     <value>OpenAI не принял запись. Проверь ключ и соединение.</value>
   </data>
+  <data name="TerminalTasks" xml:space="preserve">
+    <value>Задачи</value>
+  </data>
+  <data name="TerminalTasksCount" xml:space="preserve">
+    <value>Задачи · {0} из {1}</value>
+  </data>
+  <data name="TerminalAgent" xml:space="preserve">
+    <value>агент</value>
+  </data>
+  <data name="TerminalContextShare" xml:space="preserve">
+    <value>{0} %</value>
+  </data>
+  <data name="TerminalContextTip" xml:space="preserve">
+    <value>Контекст занят на {0} %</value>
+  </data>
+  <data name="AgentTodos" xml:space="preserve">
+    <value>Список дел агента</value>
+  </data>
+  <data name="AgentTodosWhat" xml:space="preserve">
+    <value>Claude ведёт список дел, терминал показывает его над полем. Новым моделям он не нужен и занимает немного контекста. Открытые сессии увидят изменение после перезапуска Aiko.</value>
+  </data>
 </root>

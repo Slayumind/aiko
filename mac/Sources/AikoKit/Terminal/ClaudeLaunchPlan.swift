@@ -10,6 +10,9 @@ public struct LaunchRequest: Sendable, Equatable {
     public let mode: PermissionMode
     public let model: String?
 
+    /// The environment turned on the to-do list of the agent (D-344).
+    public let agentTodos: Bool
+
     public init(
         configDirectory: String,
         userProfile: String,
@@ -17,7 +20,8 @@ public struct LaunchRequest: Sendable, Equatable {
         sessionId: String,
         started: Bool,
         mode: PermissionMode,
-        model: String?
+        model: String?,
+        agentTodos: Bool = false
     ) {
         self.configDirectory = configDirectory
         self.userProfile = userProfile
@@ -26,12 +30,16 @@ public struct LaunchRequest: Sendable, Equatable {
         self.started = started
         self.mode = mode
         self.model = model
+        self.agentTodos = agentTodos
     }
 }
 
 /// How the terminal starts Claude Code for one conversation: the arguments and what changes in
 /// the environment of the process (D-297, D-304).
 public struct ClaudeLaunchPlan: Sendable, Equatable {
+    /// Gives newer models the to-do list tools that Claude Code leaves out for them (RESEARCH).
+    public static let todoToolsVariableName = "CLAUDE_CODE_ENABLE_TODO_TOOLS"
+
     public let arguments: [String]
     public let variables: [VariableChange]
 
@@ -106,6 +114,10 @@ public struct ClaudeLaunchPlan: Sendable, Equatable {
         // a new session already says which environment a folder belongs to.
         variables.append(VariableChange(SessionReminder.environmentVariable, request.environmentName))
         variables.append(VariableChange(SessionReminder.launchVariable, SessionReminder.launchedByTerminal))
+
+        if request.agentTodos {
+            variables.append(VariableChange(todoToolsVariableName, "1"))
+        }
 
         return ClaudeLaunchPlan(arguments: arguments, variables: variables)
     }

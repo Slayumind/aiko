@@ -12,7 +12,11 @@ public sealed record RunnerSetup(
     bool Started,
     PermissionMode Mode,
     string? Model,
-    IReadOnlyList<string> InheritedVariables);
+    IReadOnlyList<string> InheritedVariables)
+{
+    /// The environment turned on the to-do list of the agent (D-344).
+    public bool AgentTodos { get; init; }
+}
 
 /// Runs a command of "!" in a folder (D-343). Ended may be called on a thread of its own, with all
 /// the output, errors included, and the exit code.
@@ -135,7 +139,10 @@ public sealed class ConversationRunner(
                 setup.SessionId,
                 _known,
                 State.Mode,
-                State.LatestModel is { Length: > 0 } model ? model : setup.Model),
+                State.LatestModel is { Length: > 0 } model ? model : setup.Model)
+            {
+                AgentTodos = setup.AgentTodos,
+            },
             setup.InheritedVariables);
 
         var started = newProcess();

@@ -487,7 +487,10 @@ public class SharedCaseTests
                 row.GetProperty("sessionId").GetString()!,
                 row.GetProperty("started").GetBoolean(),
                 Mode(row.GetProperty("mode"))!.Value,
-                row.GetProperty("model").GetString());
+                row.GetProperty("model").GetString())
+            {
+                AgentTodos = row.TryGetProperty("agentTodos", out var todos) && todos.GetBoolean(),
+            };
 
             var plan = ClaudeLaunchPlan.For(request, Strings(row.GetProperty("inherited")));
 
@@ -843,6 +846,28 @@ public class SharedCaseTests
     }
 
     [Fact]
+    public void Every_context_gauge_reads_the_same()
+    {
+        var cases = SpecCases.Json("context-gauge");
+        foreach (var row in cases.GetProperty("percent").EnumerateArray())
+        {
+            var percent = ContextGauge.Percent(row.GetProperty("tokens").GetInt32(), row.GetProperty("window").GetInt32());
+            Assert.Equal(row.GetProperty("percent").ValueKind == JsonValueKind.Null ? null : row.GetProperty("percent").GetInt32(), percent);
+        }
+        foreach (var row in cases.GetProperty("level").EnumerateArray())
+        {
+            Assert.Equal(row.GetProperty("level").GetString(), Camel(ContextGauge.Level(row.GetProperty("percent").GetInt32())));
+        }
+        foreach (var row in cases.GetProperty("window").EnumerateArray())
+        {
+            var windows = row.GetProperty("windows").EnumerateObject().ToDictionary(model => model.Name, model => model.Value.GetInt32());
+            Assert.Equal(
+                row.GetProperty("window").GetInt32(),
+                ContextGauge.WindowFor(row.GetProperty("model").GetString()!, windows, row.GetProperty("known").GetInt32()));
+        }
+    }
+
+    [Fact]
     public void Every_conversation_ends_in_the_same_state()
     {
         foreach (var row in SpecCases.Json("conversation").GetProperty("scenarios").EnumerateArray())
@@ -1008,7 +1033,62 @@ public class SharedCaseTests
         return described;
     }
 
-    private static JsonObject Described(Conversation state) => new()
+    /// The size of the context is named only where the line has one, so older cases stay as they are.
+    private static JsonObject WithContextTokens(JsonObject described, int tokens)
+    {
+        if (tokens > 0)
+        {
+            described["contextTokens"] = tokens;
+        }
+
+        return described;
+    }
+
+    private static JsonObject WithContextWindows(JsonObject described, IReadOnlyDictionary<string, int> windows)
+    {
+        if (windows.Count > 0)
+        {
+            var named = new JsonObject();
+            foreach (var (model, window) in windows)
+            {
+                named[model] = window;
+            }
+            described["contextWindows"] = named;
+        }
+
+        return described;
+    }
+
+    /// The to-do list and the context are named only where a conversation has them, so older
+    /// cases stay as they are.
+    private static JsonObject Described(Conversation state)
+    {
+        var described = DescribedCore(state);
+        if (state.Todos.Count > 0)
+        {
+            described["todos"] = new JsonArray([.. state.Todos.Select(todo => new JsonObject
+            {
+                ["id"] = todo.Id,
+                ["text"] = todo.Text,
+                ["doing"] = todo.Doing,
+                ["state"] = Camel(todo.State),
+            })]);
+        }
+        if (state.ContextPercent is { } percent)
+        {
+            described["context"] = new JsonObject
+            {
+                ["tokens"] = state.ContextTokens,
+                ["window"] = state.ContextWindow,
+                ["percent"] = percent,
+                ["level"] = Camel(ContextGauge.Level(percent)),
+            };
+        }
+
+        return described;
+    }
+
+    private static JsonObject DescribedCore(Conversation state) => new()
     {
         ["activity"] = Camel(state.Activity),
         ["mode"] = PermissionModes.Name(state.Mode),
@@ -1467,13 +1547,13 @@ public class SharedCaseTests
             ["mode"] = ModeName(ready.Mode),
             ["version"] = ready.Version,
         },
-        StreamEvent.Assistant assistant => new JsonObject
+        StreamEvent.Assistant assistant => WithContextTokens(new JsonObject
         {
             ["kind"] = "assistant",
             ["parent"] = assistant.ParentToolUseId,
             ["error"] = assistant.Error,
             ["blocks"] = new JsonArray([.. assistant.Blocks.Select(Described)]),
-        },
+        }, assistant.ContextTokens),
         StreamEvent.User user => new JsonObject
         {
             ["kind"] = "user",
@@ -1549,14 +1629,14 @@ public class SharedCaseTests
                 ["resetsAt"] = window.ResetsAt.ToUnixTimeSeconds(),
             })]),
         },
-        StreamEvent.Result result => new JsonObject
+        StreamEvent.Result result => WithContextWindows(new JsonObject
         {
             ["kind"] = "result",
             ["isError"] = result.IsError,
             ["subtype"] = result.Subtype,
             ["terminalReason"] = result.TerminalReason,
             ["text"] = result.Text,
-        },
+        }, result.ContextWindows),
         StreamEvent.Unreadable => new JsonObject { ["kind"] = "unreadable" },
         _ => new JsonObject { ["kind"] = "ignored" },
     };

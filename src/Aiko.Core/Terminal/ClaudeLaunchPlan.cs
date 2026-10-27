@@ -12,13 +12,20 @@ public sealed record LaunchRequest(
     string SessionId,
     bool Started,
     PermissionMode Mode,
-    string? Model);
+    string? Model)
+{
+    /// The environment turned on the to-do list of the agent (D-344).
+    public bool AgentTodos { get; init; }
+}
 
 /// How the terminal starts Claude Code for one conversation: the arguments and what changes in
 /// the environment of the process (D-297, D-304).
 public sealed record ClaudeLaunchPlan(IReadOnlyList<string> Arguments, IReadOnlyList<VariableChange> Variables)
 {
     public const string ConfigVariableName = "CLAUDE_CONFIG_DIR";
+
+    /// Gives newer models the to-do list tools that Claude Code leaves out for them (RESEARCH).
+    public const string TodoToolsVariableName = "CLAUDE_CODE_ENABLE_TODO_TOOLS";
 
     /// Claude Code answers in JSON lines, asks the terminal for permissions and sends an answer
     /// piece by piece.
@@ -89,6 +96,11 @@ public sealed record ClaudeLaunchPlan(IReadOnlyList<string> Arguments, IReadOnly
         // a new session already says which environment a folder belongs to.
         variables.Add(new VariableChange(SessionReminder.EnvironmentVariable, request.EnvironmentName));
         variables.Add(new VariableChange(SessionReminder.LaunchVariable, SessionReminder.LaunchedByTerminal));
+
+        if (request.AgentTodos)
+        {
+            variables.Add(new VariableChange(TodoToolsVariableName, "1"));
+        }
 
         return new ClaudeLaunchPlan(arguments, variables);
     }

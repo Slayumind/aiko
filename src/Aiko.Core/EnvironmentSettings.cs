@@ -13,6 +13,10 @@ public sealed record AikoEnvironment(string Name, IReadOnlyList<string> ConfigDi
     /// are parts of one thing and come and go together (D-285). Off until the person turns it on.
     public bool Persona { get; init; }
 
+    /// Whether the terminal gives Claude its to-do list tools. Claude Code leaves them out on newer
+    /// models, so this is off until the person turns it on (D-344).
+    public bool AgentTodos { get; init; }
+
     /// A command name the person typed. Null means the command follows the environment name.
     public string? CustomCommand { get; init; }
 
@@ -34,7 +38,8 @@ public sealed record EnvironmentSettings(IReadOnlyList<AikoEnvironment> Environm
     /// 2 added custom commands, project folders and the default environment. A file of schema 1
     /// reads as before, with none of them set.
     /// 3 added the persona flag. Older files read with the persona off.
-    public const int CurrentSchema = 3;
+    /// 4 added the to-do list of the agent. Older files read with it off.
+    public const int CurrentSchema = 4;
 
     /// The tray has a ring and a dot, so Aiko keeps two environments (D-152).
     public const int MaxEnvironments = 2;
@@ -117,6 +122,7 @@ public sealed record EnvironmentSettings(IReadOnlyList<AikoEnvironment> Environm
                 {
                     DirectMode = e.DirectMode,
                     Persona = e.Persona,
+                    AgentTodos = e.AgentTodos,
                     CustomCommand = string.IsNullOrWhiteSpace(e.Command) ? null : e.Command,
                     ProjectFolders = e.ProjectFolders?.Where(p => !string.IsNullOrWhiteSpace(p)).ToList() ?? [],
                 })
@@ -150,6 +156,7 @@ public sealed record EnvironmentSettings(IReadOnlyList<AikoEnvironment> Environm
                         ConfigDirectories = e.ConfigDirectories,
                         DirectMode = e.DirectMode,
                         Persona = e.Persona,
+                        AgentTodos = e.AgentTodos,
                         Command = e.CustomCommand,
                         ProjectFolders = e.ProjectFolders.Count > 0 ? e.ProjectFolders : null,
                     })
@@ -171,6 +178,7 @@ public sealed record EnvironmentSettings(IReadOnlyList<AikoEnvironment> Environm
         public IReadOnlyList<string>? ConfigDirectories { get; set; }
         public bool DirectMode { get; set; }
         public bool Persona { get; set; }
+        public bool AgentTodos { get; set; }
         public string? Command { get; set; }
         public IReadOnlyList<string>? ProjectFolders { get; set; }
     }

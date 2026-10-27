@@ -524,6 +524,13 @@ public enum Strings {
         "VoiceKeyNotSaved": ("Windows did not save the key.", "Windows не сохранила ключ."),
         "VoiceKeyWhere": ("Kept in Windows Credential Manager. Removing Aiko erases it.", "Хранится в Диспетчере учётных данных Windows. Удаление Aiko его сотрёт."),
         "VoiceCloudFailed": ("OpenAI did not take the recording. Check the key and the connection.", "OpenAI не принял запись. Проверь ключ и соединение."),
+        "TerminalTasks": ("Tasks", "Задачи"),
+        "TerminalTasksCount": ("Tasks · {0} of {1}", "Задачи · {0} из {1}"),
+        "TerminalAgent": ("agent", "агент"),
+        "TerminalContextShare": ("{0} %", "{0} %"),
+        "TerminalContextTip": ("Context: {0} % used", "Контекст занят на {0} %"),
+        "AgentTodos": ("Agent to-do list", "Список дел агента"),
+        "AgentTodosWhat": ("Claude keeps a to-do list, and the terminal shows it above the field. Newer models don't need it, and it takes a little context. Open sessions pick this up after Aiko restarts.", "Claude ведёт список дел, терминал показывает его над полем. Новым моделям он не нужен и занимает немного контекста. Открытые сессии увидят изменение после перезапуска Aiko."),
     ]
 
     /// Session · 5 hours
@@ -1977,4 +1984,25 @@ public enum Strings {
 
     /// OpenAI did not take the recording. Check the key and the connection.
     public static var voiceCloudFailed: String { Strings.get("VoiceCloudFailed") }
+
+    /// Tasks
+    public static var terminalTasks: String { Strings.get("TerminalTasks") }
+
+    /// Tasks · {0} of {1}
+    public static var terminalTasksCount: String { Strings.get("TerminalTasksCount") }
+
+    /// agent
+    public static var terminalAgent: String { Strings.get("TerminalAgent") }
+
+    /// {0} %
+    public static var terminalContextShare: String { Strings.get("TerminalContextShare") }
+
+    /// Context: {0} % used
+    public static var terminalContextTip: String { Strings.get("TerminalContextTip") }
+
+    /// Agent to-do list
+    public static var agentTodos: String { Strings.get("AgentTodos") }
+
+    /// Claude keeps a to-do list, and the terminal shows it above the field. Newer models don't ...
+    public static var agentTodosWhat: String { Strings.get("AgentTodosWhat") }
 }

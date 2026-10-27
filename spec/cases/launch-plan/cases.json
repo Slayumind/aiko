@@ -71,6 +71,23 @@
         { "name": "AIKO_ENVIRONMENT", "value": "Team" },
         { "name": "AIKO_LAUNCH", "value": "terminal" }
       ]
+    },
+    {
+      "name": "an environment with the to-do list of the agent on",
+      "configDirectory": "C:\\Users\\someone\\.claude",
+      "environment": "Aiko",
+      "sessionId": "s-3",
+      "started": false,
+      "mode": "manual",
+      "model": null,
+      "agentTodos": true,
+      "inherited": [],
+      "arguments": ["-p", "--input-format", "stream-json", "--output-format", "stream-json", "--verbose", "--include-partial-messages", "--replay-user-messages", "--permission-prompt-tool", "stdio", "--session-id", "s-3", "--permission-mode", "default"],
+      "variables": [
+        { "name": "AIKO_ENVIRONMENT", "value": "Aiko" },
+        { "name": "AIKO_LAUNCH", "value": "terminal" },
+        { "name": "CLAUDE_CODE_ENABLE_TODO_TOOLS", "value": "1" }
+      ]
     }
   ],
   "commands": [

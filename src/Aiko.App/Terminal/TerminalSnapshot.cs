@@ -11,8 +11,18 @@ static class TerminalSnapshot
     [
         "talk", "feed", "working", "compacting", "long-input", "empty", "form", "elsewhere", "login", "close",
         "voice-idle", "voice-warming", "voice-listening", "voice-finishing", "voice-nomic", "voice-model",
-        "questions", "questions-preview", "questions-answered", "lists", "slash",
+        "questions", "questions-preview", "questions-answered", "lists", "slash", "tasks", "tasks-hot",
     ];
+
+    /// The middle of a turn of the prototype (D-342): two lines done, one at work, a subagent.
+    private static readonly TaskPanel Tasks = new(
+        [
+            new TodoItem("1", "Read the field and the menu", "Reading the field and the menu", TodoState.Done),
+            new TodoItem("2", "Guard Enter against IME", "Guarding Enter against IME", TodoState.Done),
+            new TodoItem("3", "Light rows by mouse movement", "Lighting rows by mouse movement", TodoState.Now),
+            new TodoItem("4", "Check the Swift twin", "Checking the Swift twin", TodoState.Pending),
+        ],
+        [new AgentAtWork("Check the Swift twin", "Reading TalkInput.swift")]);
 
     /// What Claude Code names in its answer to "initialize", a few of them (AIKO-330).
     private static readonly SlashCommand[] Commands =
@@ -293,6 +303,8 @@ static class TerminalSnapshot
                 : state == "compacting" ? Compacting()
                 : state.StartsWith("voice-", StringComparison.Ordinal) ? Feed(withCard: false) with { Busy = false }
                 : state == "slash" ? Feed(withCard: false) with { Busy = false, Commands = Commands }
+                : state == "tasks" ? Feed(withCard: false) with { Tasks = Tasks, ContextPercent = 63 }
+                : state == "tasks-hot" ? Feed(withCard: false) with { Tasks = Tasks, ContextPercent = 92 }
                 : null,
             now);
     }
