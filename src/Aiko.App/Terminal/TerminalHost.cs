@@ -389,7 +389,10 @@ sealed class TerminalHost
                 session.Started,
                 session.Mode,
                 session.Model,
-                [.. System.Environment.GetEnvironmentVariables().Keys.Cast<string>()]),
+                [.. System.Environment.GetEnvironmentVariables().Keys.Cast<string>()])
+            {
+                AgentTodos = environment.AgentTodos,
+            },
             _newProcess,
             work => _window.Dispatcher.BeginInvoke(work),
             new TerminalLog(),

@@ -34,6 +34,7 @@ stamp, not a table (D-255).
 | `file-mention/` | the files that "@" offers in the field: where the word starts, which files, in which order, what the field becomes (`FileMention`) |
 | `feed-entries/` | the rows of the feed: which steps in a row are one line, and how a long output is cut (`FeedEntries`, `LongOutput`) |
 | `shell-command/` | a command of "!": what is a command, what Claude gets, how the file reads back (`ShellCommand`) |
+| `context-gauge/` | how full the context of a conversation is, and the colour of its ring (`ContextGauge`) |
 | `conversation/` | what a row of stream lines and actions of the person makes of a conversation (`Conversation`), and how the list of sessions sees it (`TalkGlance`) |
 | `conversation-runner/` | when Claude Code is started for a conversation, with which arguments, what is written to it and what is logged (`ConversationRunner`, played against `ScriptedClaude`) |
 | `step-line/` | one step of the work as one line of the feed (`StepLine`) |

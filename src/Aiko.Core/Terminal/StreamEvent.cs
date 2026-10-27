@@ -36,7 +36,12 @@ public abstract record StreamEvent
 
     /// A message of Claude, whole. Error is set when Claude Code answered in its place:
     /// "authentication_failed" means the environment is not signed in.
-    public sealed record Assistant(string? ParentToolUseId, IReadOnlyList<AssistantBlock> Blocks, string? Error) : StreamEvent;
+    public sealed record Assistant(string? ParentToolUseId, IReadOnlyList<AssistantBlock> Blocks, string? Error) : StreamEvent
+    {
+        /// The tokens of the call that wrote this message: what it read and what it wrote. That is
+        /// how much of the context the conversation fills now. 0 when Claude Code did not say.
+        public int ContextTokens { get; init; }
+    }
 
     /// What came back to Claude: results of tools, or text Claude Code wrote on its own.
     public sealed record User(
@@ -104,7 +109,11 @@ public abstract record StreamEvent
     public sealed record RateLimit(IReadOnlyList<LimitWindow> Windows) : StreamEvent;
 
     /// The turn is over. Text is the output of a command that ran without the model.
-    public sealed record Result(bool IsError, string Subtype, string TerminalReason, string Text) : StreamEvent;
+    public sealed record Result(bool IsError, string Subtype, string TerminalReason, string Text) : StreamEvent
+    {
+        /// The context window of each model the turn used, by its id.
+        public IReadOnlyDictionary<string, int> ContextWindows { get; init; } = new Dictionary<string, int>();
+    }
 
     /// A line the terminal has no use for.
     public sealed record Ignored : StreamEvent;
@@ -145,7 +154,10 @@ public abstract record StreamEvent
             Flag(root, "is_error"),
             Str(root, "subtype") ?? "",
             Str(root, "terminal_reason") ?? "",
-            Str(root, "result") ?? ""),
+            Str(root, "result") ?? "")
+        {
+            ContextWindows = ContextWindowsOf(Object(root, "modelUsage")),
+        },
         _ => new Ignored(),
     };
 
@@ -199,7 +211,30 @@ public abstract record StreamEvent
         var error = Str(root, "error");
         return blocks.Count == 0 && error is null
             ? new Ignored()
-            : new Assistant(Str(root, "parent_tool_use_id"), blocks, error);
+            : new Assistant(Str(root, "parent_tool_use_id"), blocks, error) { ContextTokens = Filled(Object(Object(root, "message"), "usage")) };
+    }
+
+    private static int Filled(JsonElement? usage)
+    {
+        var sum = (long)Tokens(usage, "input_tokens") + Tokens(usage, "cache_creation_input_tokens")
+            + Tokens(usage, "cache_read_input_tokens") + Tokens(usage, "output_tokens");
+        return (int)Math.Min(sum, int.MaxValue);
+    }
+
+    private static Dictionary<string, int> ContextWindowsOf(JsonElement? modelUsage)
+    {
+        var windows = new Dictionary<string, int>();
+        if (modelUsage is { } models)
+        {
+            foreach (var model in models.EnumerateObject())
+            {
+                if (Tokens(model.Value, "contextWindow") is > 0 and var window)
+                {
+                    windows[model.Name] = window;
+                }
+            }
+        }
+        return windows;
     }
 
     private static StreamEvent ReadUser(JsonElement root)
