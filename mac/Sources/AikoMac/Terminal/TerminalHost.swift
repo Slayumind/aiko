@@ -303,7 +303,8 @@ final class TerminalHost {
                 started: session.started,
                 mode: session.mode,
                 model: session.model,
-                inheritedVariables: Array(ProcessInfo.processInfo.environment.keys)),
+                inheritedVariables: Array(ProcessInfo.processInfo.environment.keys),
+                agentTodos: environment.agentTodos),
             newProcess: newProcess,
             post: { work in DispatchQueue.main.async(execute: work) },
             log: AppTerminalLog())

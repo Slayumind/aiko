@@ -508,7 +508,8 @@ struct SharedCaseTests {
                 sessionId: row["sessionId"]?.stringValue ?? "",
                 started: row["started"]?.boolValue ?? false,
                 mode: Self.mode(row["mode"]) ?? .manual,
-                model: row["model"]?.stringValue)
+                model: row["model"]?.stringValue,
+                agentTodos: row["agentTodos"]?.boolValue ?? false)
 
             let plan = ClaudeLaunchPlan.forRequest(platform, request, inheritedVariables: Self.strings(row["inherited"]))
             let name = row["name"]?.stringValue ?? ""
@@ -967,7 +968,45 @@ struct SharedCaseTests {
             ("session", .string(state.sessionId)), ("tasks", number(state.tasks)), ("unread", .bool(state.unread)),
             ("compacting", .bool(state.compacting)), ("limits", number(state.limits.count)),
             ("items", .array(state.items.map(describedItem))),
-        ])
+        ] + describedTodos(state) + describedContext(state))
+    }
+
+    /// The to-do list and the context are named only where a conversation has them, so older
+    /// cases stay as they are.
+    private static func describedTodos(_ state: Conversation) -> [(String, JsonNode)] {
+        state.todos.isEmpty ? [] : [("todos", .array(state.todos.map {
+            node([("id", .string($0.id)), ("text", .string($0.text)), ("doing", .string($0.doing)), ("state", .string($0.state.rawValue))])
+        }))]
+    }
+
+    private static func describedContext(_ state: Conversation) -> [(String, JsonNode)] {
+        guard let percent = state.contextPercent else { return [] }
+        return [("context", node([
+            ("tokens", number(state.contextTokens)), ("window", number(state.contextWindow)),
+            ("percent", number(percent)), ("level", .string(ContextGauge.level(percent).rawValue)),
+        ]))]
+    }
+
+    @Test
+    func everyContextGaugeReadsTheSame() {
+        let cases = SpecCases.json("context-gauge")
+        for row in cases["percent"]?.arrayValue ?? [] {
+            let percent = ContextGauge.percent(tokens: Self.int(row["tokens"]), window: Self.int(row["window"]))
+            #expect(percent == row["percent"]?.doubleValue.map { Int($0) }, "\(row)")
+        }
+        for row in cases["level"]?.arrayValue ?? [] {
+            #expect(ContextGauge.level(Self.int(row["percent"])).rawValue == row["level"]?.stringValue)
+        }
+        for row in cases["window"]?.arrayValue ?? [] {
+            let windows = (row["windows"]?.objectValue?.members ?? []).map { ModelWindow(model: $0.key, window: Self.int($0.value)) }
+            #expect(
+                ContextGauge.windowFor(model: row["model"]?.stringValue ?? "", windows: windows, known: Self.int(row["known"]))
+                    == Self.int(row["window"]))
+        }
+    }
+
+    private static func int(_ node: JsonNode?) -> Int {
+        Int(node?.doubleValue ?? 0)
     }
 
     private static func describedItem(_ item: FeedItem) -> JsonNode {
@@ -1589,11 +1628,12 @@ struct SharedCaseTests {
                 ("kind", .string("ready")), ("sessionId", .string(sessionId)), ("model", .string(model)),
                 ("mode", modeName(mode)), ("version", .string(version)),
             ])
-        case .assistant(let parent, let blocks, let error):
+        case .assistant(let parent, let blocks, let error, let contextTokens):
+            // The size of the context is named only where the line has one, so older cases stay.
             return node([
                 ("kind", .string("assistant")), ("parent", text(parent)), ("error", text(error)),
                 ("blocks", .array(blocks.map(described))),
-            ])
+            ] + (contextTokens > 0 ? [("contextTokens", number(contextTokens))] : []))
         case .user(let parent, let words, let results, let isReplay, let isSynthetic):
             return node([
                 ("kind", .string("user")), ("parent", text(parent)), ("text", .string(words)),
@@ -1663,11 +1703,11 @@ struct SharedCaseTests {
                     ])
                 })),
             ])
-        case .result(let isError, let subtype, let terminalReason, let words):
+        case .result(let isError, let subtype, let terminalReason, let words, let windows):
             return node([
                 ("kind", .string("result")), ("isError", .bool(isError)), ("subtype", .string(subtype)),
                 ("terminalReason", .string(terminalReason)), ("text", .string(words)),
-            ])
+            ] + (windows.isEmpty ? [] : [("contextWindows", node(windows.map { ($0.model, number($0.window)) }))]))
         case .unreadable:
             return node([("kind", .string("unreadable"))])
         case .ignored:

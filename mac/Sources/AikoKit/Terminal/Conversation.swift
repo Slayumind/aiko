@@ -192,6 +192,16 @@ public struct Conversation: Sendable, Equatable {
     /// when the tool already gave back that the subagent went to the background.
     public var agents: [String] = []
 
+    /// The to-do list of the agent (D-344). When a turn ends with every line done, the list goes.
+    public var todos: [TodoItem] = []
+
+    /// How much of the context the conversation fills, and the window of its model (ContextGauge).
+    public var contextTokens = 0
+    public var contextWindow = 0
+
+    /// Nil until the first turn is over: only its result names the window.
+    public var contextPercent: Int? { ContextGauge.percent(tokens: contextTokens, window: contextWindow) }
+
     public static func empty(mode: PermissionMode = .manual) -> Conversation {
         Conversation(mode: mode)
     }
@@ -232,11 +242,11 @@ public struct Conversation: Sendable, Equatable {
         case .textDelta(nil, let text):
             next.inTurn = true
             next.stream(text)
-        case .assistant(nil, let blocks, let error):
+        case .assistant(nil, let blocks, let error, let contextTokens):
             // Claude Code also starts a turn on its own, with no message of the person: when a
             // subagent in the background is over, Claude reads what it did and answers.
             next.inTurn = true
-            next.say(blocks, error)
+            next.say(blocks, error, contextTokens)
         case .user(nil, let text, _, true, _):
             next.take(text)
         case .user(nil, let text, let results, _, _):
@@ -246,6 +256,7 @@ public struct Conversation: Sendable, Equatable {
                 next.askedModel = ""
             }
             for result in results {
+                next.todos = AgentTodos.returned(next.todos, result)
                 let agentWorks = agents.contains(result.toolUseId)
                 next.changeStep(result.toolUseId) { step in
                     step.state = result.isError ? .failed : agentWorks ? .running : .done
@@ -263,6 +274,9 @@ public struct Conversation: Sendable, Equatable {
             next.compacting = activity == "compacting"
         case .compacted(let before, let after):
             next.add(.notice(kind: .compacted, text: "", size: CompactSize.of(before: before, after: after)))
+            if after > 0 {
+                next.contextTokens = after
+            }
         case .rateLimit(let windows):
             next.limits = windows
         case .tasks(let count):
@@ -279,8 +293,8 @@ public struct Conversation: Sendable, Equatable {
                     step.state = how == "completed" ? .done : .failed
                 }
             }
-        case .result(let isError, _, let terminalReason, let text):
-            return next.ended(isError: isError, terminalReason: terminalReason, text: text)
+        case .result(let isError, _, let terminalReason, let text, let contextWindows):
+            return next.ended(isError: isError, terminalReason: terminalReason, text: text, contextWindows: contextWindows)
         default:
             break
         }
@@ -295,7 +309,7 @@ public struct Conversation: Sendable, Equatable {
         }
     }
 
-    private mutating func say(_ blocks: [AssistantBlock], _ error: String?) {
+    private mutating func say(_ blocks: [AssistantBlock], _ error: String?, _ tokens: Int) {
         if let error {
             // Claude Code answered in the place of Claude. Its words are a notice, not an answer.
             let words = blocks.compactMap { block -> String? in
@@ -313,10 +327,15 @@ public struct Conversation: Sendable, Equatable {
             return
         }
 
+        if tokens > 0 {
+            contextTokens = tokens
+        }
         for block in blocks {
             switch block {
             case .text(let value):
                 answer(value)
+            case .toolUse(let id, let name, let input) where AgentTodos.owns(name):
+                todos = AgentTodos.used(todos, toolName: name, toolUseId: id, input: input)
             case .toolUse(let id, let name, let input):
                 let line = StepLine.forTool(name, input)
                 // The step of a card of questions stays in the feed, hidden: its answers come to it
@@ -343,9 +362,13 @@ public struct Conversation: Sendable, Equatable {
         answeredInTurn = true
     }
 
-    private func ended(isError: Bool, terminalReason: String, text: String) -> Outcome {
+    private func ended(isError: Bool, terminalReason: String, text: String, contextWindows: [ModelWindow]) -> Outcome {
         var next = self
         next.settle(isError ? .failed : .done)
+        next.contextWindow = ContextGauge.windowFor(model: model, windows: contextWindows, known: contextWindow)
+        if AgentTodos.allDone(todos) {
+            next.todos = []
+        }
 
         // When Claude Code already said in this turn what went wrong, the feed has that notice.
         let stopped = terminalReason.hasPrefix("aborted")

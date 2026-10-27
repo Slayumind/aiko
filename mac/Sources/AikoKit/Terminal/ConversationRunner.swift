@@ -14,6 +14,9 @@ public struct RunnerSetup: Sendable, Equatable {
     public let model: String?
     public let inheritedVariables: [String]
 
+    /// The environment turned on the to-do list of the agent (D-344).
+    public let agentTodos: Bool
+
     public init(
         executable: String,
         workingDirectory: String,
@@ -24,7 +27,8 @@ public struct RunnerSetup: Sendable, Equatable {
         started: Bool,
         mode: PermissionMode,
         model: String?,
-        inheritedVariables: [String]
+        inheritedVariables: [String],
+        agentTodos: Bool = false
     ) {
         self.executable = executable
         self.workingDirectory = workingDirectory
@@ -36,6 +40,7 @@ public struct RunnerSetup: Sendable, Equatable {
         self.mode = mode
         self.model = model
         self.inheritedVariables = inheritedVariables
+        self.agentTodos = agentTodos
     }
 }
 
@@ -191,7 +196,8 @@ public final class ConversationRunner: @unchecked Sendable {
                 sessionId: setup.sessionId,
                 started: known,
                 mode: state.mode,
-                model: state.latestModel.isEmpty ? setup.model : state.latestModel),
+                model: state.latestModel.isEmpty ? setup.model : state.latestModel,
+                agentTodos: setup.agentTodos),
             inheritedVariables: setup.inheritedVariables)
 
         let started = newProcess()

@@ -11,6 +11,10 @@ public struct AikoEnvironment: Sendable, Equatable {
     /// are parts of one thing and come and go together (D-285). Off until the person turns it on.
     public var persona: Bool
 
+    /// Whether the terminal gives Claude its to-do list tools. Claude Code leaves them out on newer
+    /// models, so this is off until the person turns it on (D-344).
+    public var agentTodos: Bool
+
     /// A command name the person typed. Nil means the command follows the environment name.
     public var customCommand: String?
 
@@ -22,6 +26,7 @@ public struct AikoEnvironment: Sendable, Equatable {
         _ configDirectories: [String],
         directMode: Bool = false,
         persona: Bool = false,
+        agentTodos: Bool = false,
         customCommand: String? = nil,
         projectFolders: [String] = []
     ) {
@@ -29,6 +34,7 @@ public struct AikoEnvironment: Sendable, Equatable {
         self.configDirectories = configDirectories
         self.directMode = directMode
         self.persona = persona
+        self.agentTodos = agentTodos
         self.customCommand = customCommand
         self.projectFolders = projectFolders
     }
@@ -63,7 +69,8 @@ public struct EnvironmentSettings: Sendable, Equatable {
     /// 2 added custom commands, project folders and the default environment. A file of schema 1
     /// reads as before, with none of them set.
     /// 3 added the persona flag. Older files read with the persona off.
-    public static let currentSchema = 3
+    /// 4 added the to-do list of the agent. Older files read with it off.
+    public static let currentSchema = 4
 
     /// The tray has a ring and a dot, so Aiko keeps two environments (D-152).
     public static let maxEnvironments = 2
@@ -158,6 +165,7 @@ public struct EnvironmentSettings: Sendable, Equatable {
                 directories.compactMap(\.stringValue),
                 directMode: object["directMode"]?.boolValue ?? false,
                 persona: object["persona"]?.boolValue ?? false,
+                agentTodos: object["agentTodos"]?.boolValue ?? false,
                 customCommand: (command?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true) ? nil : command,
                 projectFolders: (object["projectFolders"]?.arrayValue ?? [])
                     .compactMap(\.stringValue)
@@ -190,6 +198,7 @@ public struct EnvironmentSettings: Sendable, Equatable {
             file["configDirectories"] = .array(environment.configDirectories.map(JsonNode.string))
             file["directMode"] = .bool(environment.directMode)
             file["persona"] = .bool(environment.persona)
+            file["agentTodos"] = .bool(environment.agentTodos)
             if let custom = environment.customCommand {
                 file["command"] = .string(custom)
             }

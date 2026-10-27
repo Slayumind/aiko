@@ -92,13 +92,25 @@ public struct ToolRequest: Sendable, Equatable {
 /// some of it must not be kept: the start event carries paths, and the hook events carry the text
 /// of the persona and of the memory. Those parts are dropped by this parser, so nothing after it
 /// can show or log them.
+/// The context window of one model a turn used, in the order the result names them.
+public struct ModelWindow: Sendable, Equatable {
+    public let model: String
+    public let window: Int
+
+    public init(model: String, window: Int) {
+        self.model = model
+        self.window = window
+    }
+}
+
 public enum StreamEvent: Sendable, Equatable {
     /// Claude Code is ready for a turn. It comes before every turn, not once.
     case ready(sessionId: String, model: String, mode: PermissionMode?, version: String)
 
     /// A message of Claude, whole. The error is set when Claude Code answered in its place:
-    /// "authentication_failed" means the environment is not signed in.
-    case assistant(parentToolUseId: String?, blocks: [AssistantBlock], error: String?)
+    /// "authentication_failed" means the environment is not signed in. The context tokens are those
+    /// of the call that wrote it: what it read and what it wrote, or 0 when Claude Code did not say.
+    case assistant(parentToolUseId: String?, blocks: [AssistantBlock], error: String?, contextTokens: Int)
 
     /// What came back to Claude: results of tools, or text Claude Code wrote on its own.
     case user(parentToolUseId: String?, text: String, results: [ToolResult], isReplay: Bool, isSynthetic: Bool)
@@ -137,8 +149,9 @@ public enum StreamEvent: Sendable, Equatable {
     /// A subagent is over. How is "completed" when it finished its work.
     case taskEnded(toolUseId: String, how: String)
 
-    /// The turn is over. The text is the output of a command that ran without the model.
-    case result(isError: Bool, subtype: String, terminalReason: String, text: String)
+    /// The turn is over. The text is the output of a command that ran without the model. The
+    /// windows are the context window of each model the turn used.
+    case result(isError: Bool, subtype: String, terminalReason: String, text: String, contextWindows: [ModelWindow])
 
     /// A line the terminal has no use for.
     case ignored
@@ -176,7 +189,8 @@ public enum StreamEvent: Sendable, Equatable {
                 isError: root["is_error"]?.boolValue ?? false,
                 subtype: root["subtype"]?.stringValue ?? "",
                 terminalReason: root["terminal_reason"]?.stringValue ?? "",
-                text: root["result"]?.stringValue ?? "")
+                text: root["result"]?.stringValue ?? "",
+                contextWindows: contextWindows(root["modelUsage"]?.objectValue))
         default: return .ignored
         }
     }
@@ -247,7 +261,32 @@ public enum StreamEvent: Sendable, Equatable {
         if blocks.isEmpty && error == nil {
             return .ignored
         }
-        return .assistant(parentToolUseId: root["parent_tool_use_id"]?.stringValue, blocks: blocks, error: error)
+        return .assistant(
+            parentToolUseId: root["parent_tool_use_id"]?.stringValue,
+            blocks: blocks,
+            error: error,
+            contextTokens: filled(root["message"]?["usage"]?.objectValue))
+    }
+
+    private static func filled(_ usage: JsonObject?) -> Int {
+        let sum = tokens(usage?["input_tokens"]) + tokens(usage?["cache_creation_input_tokens"])
+            + tokens(usage?["cache_read_input_tokens"]) + tokens(usage?["output_tokens"])
+        return min(sum, Int(Int32.max))
+    }
+
+    private static func contextWindows(_ modelUsage: JsonObject?) -> [ModelWindow] {
+        var windows: [ModelWindow] = []
+        for member in modelUsage?.members ?? [] {
+            let window = tokens(member.value.objectValue?["contextWindow"])
+            guard window > 0 else { continue }
+            // A model named twice keeps its place and takes the last value, as a dictionary does.
+            if let at = windows.firstIndex(where: { $0.model == member.key }) {
+                windows[at] = ModelWindow(model: member.key, window: window)
+            } else {
+                windows.append(ModelWindow(model: member.key, window: window))
+            }
+        }
+        return windows
     }
 
     private static func readUser(_ root: JsonObject) -> StreamEvent {
