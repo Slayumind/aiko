@@ -1472,4 +1472,25 @@ public static class Strings
 
     /// OpenAI did not take the recording. Check the key and the connection.
     public static string VoiceCloudFailed => Get("VoiceCloudFailed");
+
+    /// Tasks
+    public static string TerminalTasks => Get("TerminalTasks");
+
+    /// Tasks · {0} of {1}
+    public static string TerminalTasksCount => Get("TerminalTasksCount");
+
+    /// agent
+    public static string TerminalAgent => Get("TerminalAgent");
+
+    /// {0} %
+    public static string TerminalContextShare => Get("TerminalContextShare");
+
+    /// Context: {0} % used
+    public static string TerminalContextTip => Get("TerminalContextTip");
+
+    /// Agent to-do list
+    public static string AgentTodos => Get("AgentTodos");
+
+    /// Claude keeps a to-do list, and the terminal shows it above the field. Newer models don't ...
+    public static string AgentTodosWhat => Get("AgentTodosWhat");
 }

@@ -31,6 +31,11 @@ sealed record TalkView(
     /// Set for a new session before its first message (D-342): the folders to choose from in the
     /// line under the field. The session is made when the first message goes.
     public FormView? Draft { get; init; }
+
+    /// The panel "Tasks" above the field, and how full the context is: null until it is known.
+    public TaskPanel Tasks { get; init; } = TaskPanel.Empty;
+
+    public int? ContextPercent { get; init; }
 }
 
 /// The conversation with Claude Code: the feed above, the field below (D-294, D-302).
@@ -53,6 +58,7 @@ sealed class TalkPanel : UserControl
     private readonly ListBox _feed;
     private readonly TextBlock _empty;
     private readonly TalkInput _input = new();
+    private readonly TasksDock _tasks = new();
     private readonly Border _reminder;
     private readonly TextBlock _reminderText = TerminalPanel.Text("", "TextNumber", "Caution", FontWeights.Normal);
     private readonly HashSet<string> _open = [];
@@ -153,6 +159,7 @@ sealed class TalkPanel : UserControl
             VerticalAlignment = VerticalAlignment.Bottom,
         };
         bottom.Children.Add(_reminder);
+        bottom.Children.Add(_tasks);
         bottom.Children.Add(_input);
 
         // The rows end above the field: the padding moves only the rows, the scroll bar keeps the
@@ -234,6 +241,8 @@ sealed class TalkPanel : UserControl
         _keyCard = TalkKeys.Card(view.Items);
         _input.ShowFolder(view.Folder, view.Draft);
         _input.Show(view.Session, view.Busy, _keyCard is not null, view.Mode, view.Model, view.Environment);
+        _input.ShowContext(view.ContextPercent);
+        _tasks.Show(view.Tasks, view.ContextPercent, atOnce: newSession);
         _input.SetCommands(view.Commands);
         _input.SetFolder(view.Folder);
 

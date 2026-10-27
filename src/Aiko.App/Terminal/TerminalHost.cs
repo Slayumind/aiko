@@ -528,6 +528,8 @@ sealed class TerminalHost
         {
             Commands = CommandsOf(session),
             Folder = session.Folder,
+            Tasks = TaskPanel.Of(state),
+            ContextPercent = state.ContextPercent,
         };
     }
 

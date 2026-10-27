@@ -52,6 +52,7 @@ sealed class TalkInput : UserControl
     private readonly TextBlock _where = TerminalPanel.Mono("", "Muted");
     private readonly TextBlock _modeDot = TerminalPanel.Mono(" · ", "Muted");
     private readonly ContentControl _folderSlot = new() { Focusable = false };
+    private readonly ContextRing _ring = new();
     private bool _folderShown;
     private string? _folderKey;
 
@@ -246,7 +247,15 @@ sealed class TalkInput : UserControl
         all.Children.Add(_notice);
         all.Children.Add(menuPlace);
         all.Children.Add(compose);
-        all.Children.Add(status);
+
+        // The ring of the context stands at the right end of the line (D-342).
+        var line = new DockPanel { LastChildFill = true };
+        _ring.Margin = new Thickness(0, 6, 10, 14);
+        _ring.VerticalAlignment = VerticalAlignment.Center;
+        DockPanel.SetDock(_ring, Dock.Right);
+        line.Children.Add(_ring);
+        line.Children.Add(status);
+        all.Children.Add(line);
         Content = all;
     }
 
@@ -489,6 +498,9 @@ sealed class TalkInput : UserControl
         _modeDot.Text = _folderShown || model.Text.Length > 0 ? " · " : "";
         _where.Text = " · " + environment;
     }
+
+    /// How full the context is; no ring until it is known.
+    public void ShowContext(int? percent) => _ring.Show(percent);
 
     /// Raised when a folder of the list under the field is picked, and when "Choose a folder"
     /// is: before the first message of a new session only.
