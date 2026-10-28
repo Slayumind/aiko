@@ -73,6 +73,8 @@ sealed class TerminalHost
                 }
             };
             _keys.Dropped += Dropped;
+            _keys.TerminalFocused = () =>
+                System.Windows.Input.Keyboard.FocusedElement is DependencyObject focused && InTerminal(focused);
             _keys.TerminalTab = shift =>
             {
                 // Tab takes the grey hint of Claude Code, Shift+Tab changes its mode.
@@ -494,6 +496,20 @@ sealed class TerminalHost
         {
             OpenTerminal()?.FocusTerminal();
         }
+    }
+
+    /// Whether an element of the window lies inside a terminal: the control or a part of it.
+    private static bool InTerminal(DependencyObject element)
+    {
+        for (var at = element; at is not null; at = System.Windows.Media.VisualTreeHelper.GetParent(at) ?? System.Windows.LogicalTreeHelper.GetParent(at))
+        {
+            if (at is TerminalSurface)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// Files dropped on the terminal: into the line of Claude Code, or into the editor of a command line.

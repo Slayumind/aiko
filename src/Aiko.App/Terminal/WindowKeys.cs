@@ -37,6 +37,9 @@ sealed class WindowKeys : IDisposable
     /// Tab in a terminal, with Shift or without: true when it went to the program.
     public Func<bool, bool>? TerminalTab { get; set; }
 
+    /// Whether the focus of WPF stands in a terminal now.
+    public Func<bool>? TerminalFocused { get; set; }
+
     private const int VirtualTab = 0x09;
 
     private const int DropFiles = 0x0233;
@@ -66,11 +69,23 @@ sealed class WindowKeys : IDisposable
         }
 
         // Tab and Shift+Tab in a terminal belong to the program: WPF would move the focus over the
-        // buttons of the window with them, and the program would never see them (D-370).
-        if ((int)message.wParam == VirtualTab && message.hwnd != _window && !Held(VirtualControl) && !Held(VirtualAlt))
+        // buttons of the window with them, and the program would never see them (D-370). The
+        // terminal has the keys when the message came to its window, or when the focus of WPF
+        // stands in it: the control may take its keys through WPF, from the main window.
+        if ((int)message.wParam == VirtualTab && !Held(VirtualControl) && !Held(VirtualAlt))
         {
-            handled = TerminalTab?.Invoke(Held(VirtualShift)) ?? false;
-            return;
+            var inChild = message.hwnd != _window;
+            var focusIn = TerminalFocused?.Invoke() ?? false;
+            if (inChild || focusIn)
+            {
+                handled = TerminalTab?.Invoke(Held(VirtualShift)) ?? false;
+            }
+
+            TerminalLog.TabPressed(inChild, focusIn, handled);
+            if (handled || inChild || focusIn)
+            {
+                return;
+            }
         }
 
         // The state of the keys from the system: WPF has not seen the keys a child window got.
@@ -80,7 +95,7 @@ sealed class WindowKeys : IDisposable
         }
 
         var key = KeyInterop.KeyFromVirtualKey((int)message.wParam);
-        handled = _pressed(key, Held(VirtualShift), message.hwnd != _window);
+        handled = _pressed(key, Held(VirtualShift), message.hwnd != _window || (TerminalFocused?.Invoke() ?? false));
     }
 
     /// The paths of a drop, read once; the drop is let go after it.

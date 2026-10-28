@@ -35,8 +35,8 @@ public class TerminalPrivacyTests
             }
         }
 
-        // Started, StartFailed, Exited.
-        Assert.Equal(3, methods);
+        // Started, StartFailed, Exited, TabPressed.
+        Assert.Equal(4, methods);
     }
 
     private static IEnumerable<string> TerminalSources() =>
