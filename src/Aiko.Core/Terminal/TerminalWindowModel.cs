@@ -44,6 +44,23 @@ public sealed record TerminalWindowModel(string Environment, string? SessionId)
             ? this with { SessionId = id }
             : this;
 
+    /// Ctrl+Tab and Ctrl+Shift+Tab (D-353): the next or the previous session of the environment in
+    /// the order of the list, round at the ends. With no session chosen the first or the last.
+    public TerminalWindowModel ToNeighbour(int step, TerminalSessions sessions)
+    {
+        var order = sessions.Groups(Environment).SelectMany(group => group.Sessions).Select(session => session.Id).ToList();
+        if (order.Count == 0)
+        {
+            return this;
+        }
+
+        var at = SessionId is { } id ? order.IndexOf(id) : -1;
+        var next = at < 0
+            ? (step > 0 ? 0 : order.Count - 1)
+            : ((at + step) % order.Count + order.Count) % order.Count;
+        return this with { SessionId = order[next] };
+    }
+
     /// After the list has changed: a session was made, closed or the file was read again. The
     /// window stays on its session when it can; otherwise it takes the one the list opens on.
     public TerminalWindowModel After(TerminalSessions sessions) =>

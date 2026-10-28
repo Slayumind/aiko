@@ -82,6 +82,8 @@ public class AppSettingsTests
             VoiceInput = true,
             VoiceEngine = VoiceEngine.OpenAI,
             VoiceLanguage = AikoLanguage.English,
+            TerminalShown = true,
+            OpenTerminalAtStartup = true,
         };
 
         var back = AppSettings.FromJson(settings.ToJson());
@@ -158,5 +160,17 @@ public class AppSettingsTests
         Assert.Contains("\"voiceEngine\": \"Local\"", AppSettings.Default.ToJson());
         Assert.Equal(AikoLanguage.System, settings.VoiceLanguage);
         Assert.Contains("\"voiceLanguage\": \"System\"", AppSettings.Default.ToJson());
+    }
+
+    /// The terminal window opens by itself once, and a start with Windows opens only the tray
+    /// until the person asks for the terminal (D-350).
+    [Fact]
+    public void The_terminal_is_not_shown_yet_and_a_start_with_Windows_opens_only_the_tray()
+    {
+        var settings = AppSettings.FromJson("{ \"schemaVersion\": 3, \"place\": \"Tray\" }");
+
+        Assert.False(settings.TerminalShown);
+        Assert.False(settings.OpenTerminalAtStartup);
+        Assert.Contains("\"openTerminalAtStartup\": false", AppSettings.Default.ToJson());
     }
 }

@@ -80,6 +80,12 @@ public sealed record AppSettings
     /// interface: people often speak another language than the one they read in (D-326).
     public AikoLanguage VoiceLanguage { get; init; } = AikoLanguage.System;
 
+    /// The terminal window opened by itself once, after Aiko was set up (D-350).
+    public bool TerminalShown { get; init; }
+
+    /// What a start with Windows opens: only the tray, or the terminal window too (D-350).
+    public bool OpenTerminalAtStartup { get; init; }
+
     /// A settings file we cannot read is not a reason to stop: Aiko starts with the defaults.
     /// Putting the unreadable file aside before that happens is the store's job, so that the next
     /// save does not quietly write over choices somebody may still want back.

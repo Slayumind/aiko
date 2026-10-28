@@ -178,6 +178,9 @@
   <data name="StartWithWindows" xml:space="preserve">
     <value>Запускать вместе с Windows</value>
   </data>
+  <data name="OpenTerminalAtStartup" xml:space="preserve">
+    <value>Открывать и окно терминалов</value>
+  </data>
   <data name="StartAtLogin" xml:space="preserve">
     <value>Запускать при входе</value>
   </data>
@@ -1090,14 +1093,89 @@
   <data name="StateOn" xml:space="preserve">
     <value>включена</value>
   </data>
+  <data name="TerminalSearchHint" xml:space="preserve">
+    <value>Найти сессию или разговор</value>
+  </data>
+  <data name="TerminalSearchKeys" xml:space="preserve">
+    <value>↑ ↓ выбрать · Enter открыть · Esc закрыть</value>
+  </data>
+  <data name="TerminalSearchOpen" xml:space="preserve">
+    <value>Открытые</value>
+  </data>
+  <data name="TerminalSearchClosed" xml:space="preserve">
+    <value>Закрытые</value>
+  </data>
+  <data name="TerminalSearchOutside" xml:space="preserve">
+    <value>Начаты вне Aiko</value>
+  </data>
+  <data name="TerminalSourceTerminal" xml:space="preserve">
+    <value>терминал</value>
+  </data>
+  <data name="TerminalSourceOther" xml:space="preserve">
+    <value>другая программа</value>
+  </data>
+  <data name="TerminalNewSession" xml:space="preserve">
+    <value>Новая сессия</value>
+  </data>
+  <data name="TerminalNewSessionKey" xml:space="preserve">
+    <value>Ctrl+Shift+T</value>
+  </data>
+  <data name="TerminalGroupNewSession" xml:space="preserve">
+    <value>Новая сессия Claude Code в этой папке</value>
+  </data>
+  <data name="TerminalGroupNewShell" xml:space="preserve">
+    <value>Командная строка в этой папке</value>
+  </data>
+  <data name="TerminalPickFolderHint" xml:space="preserve">
+    <value>Папка для новой сессии</value>
+  </data>
+  <data name="TerminalPickFolderKeys" xml:space="preserve">
+    <value>↑ ↓ выбрать · Enter Claude Code · Ctrl+Enter командная строка · Esc закрыть</value>
+  </data>
+  <data name="TerminalPickOtherFolder" xml:space="preserve">
+    <value>Другая папка…</value>
+  </data>
+  <data name="TerminalEventThinking" xml:space="preserve">
+    <value>думает</value>
+  </data>
+  <data name="TerminalEventReading" xml:space="preserve">
+    <value>читает {0}</value>
+  </data>
+  <data name="TerminalEventEditing" xml:space="preserve">
+    <value>правит {0}</value>
+  </data>
+  <data name="TerminalEventRunning" xml:space="preserve">
+    <value>запускает: {0}</value>
+  </data>
+  <data name="TerminalEventSearching" xml:space="preserve">
+    <value>ищет: {0}</value>
+  </data>
+  <data name="TerminalEventBrowsing" xml:space="preserve">
+    <value>в сети: {0}</value>
+  </data>
+  <data name="TerminalEventDelegating" xml:space="preserve">
+    <value>агент: {0}</value>
+  </data>
+  <data name="TerminalEventUsing" xml:space="preserve">
+    <value>инструмент: {0}</value>
+  </data>
+  <data name="TerminalEventAsksPermission" xml:space="preserve">
+    <value>ждёт разрешения: {0}</value>
+  </data>
+  <data name="TerminalEventAsksQuestion" xml:space="preserve">
+    <value>ждёт ответа</value>
+  </data>
+  <data name="TerminalEventFailed" xml:space="preserve">
+    <value>ход прервался с ошибкой</value>
+  </data>
+  <data name="TerminalEventOutOfLimit" xml:space="preserve">
+    <value>упёрлась в лимит</value>
+  </data>
   <data name="TerminalTitle" xml:space="preserve">
     <value>Терминал</value>
   </data>
   <data name="TerminalCreateSession" xml:space="preserve">
     <value>Создать сессию</value>
-  </data>
-  <data name="TerminalNewShell" xml:space="preserve">
-    <value>Открыть командную строку</value>
   </data>
   <data name="TerminalStoppedLine" xml:space="preserve">
     <value>Claude Code остановился. Разговор сохранён: нажми Enter, чтобы продолжить.</value>
@@ -1120,8 +1198,14 @@
   <data name="TerminalNoSessionsBody" xml:space="preserve">
     <value>Сессия — это один разговор с Claude Code в одной папке.</value>
   </data>
-  <data name="TerminalEmptyTalk" xml:space="preserve">
-    <value>Сессия начнётся с первого сообщения. Папку, модель и режим можно сменить в строке под полем.</value>
+  <data name="TerminalStarting" xml:space="preserve">
+    <value>Запускается…</value>
+  </data>
+  <data name="TerminalNotStartedTitle" xml:space="preserve">
+    <value>Claude Code не запустился</value>
+  </data>
+  <data name="TerminalNotStartedBody" xml:space="preserve">
+    <value>Aiko не нашла его на этом компьютере. Установи Claude Code и открой сессию снова.</value>
   </data>
   <data name="TerminalWorking" xml:space="preserve">
     <value>работает</value>

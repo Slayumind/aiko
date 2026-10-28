@@ -1,0 +1,318 @@
+{
+  "comment": "The palette of sessions (D-346, D-347, D-353). It looks at the name of a session and at the first message of the person in it, in every environment, closed sessions too. A query matches as one piece of text: the case of letters does not count, ё and е are the same letter, and runs of spaces and line breaks are one space. A line is written with each match in square brackets. Sessions whose name matches come first, then those where only the first message does; inside each, the one used last is first. The snippet is shown only when the name did not match: a few words before the match and the rest up to 80 characters, with … where the message goes on. An empty query shows every open session and the last five closed ones. A closed session found and opened comes back to the list at its old place (terminal-sessions, reopen). The conversations are the ones Claude Code keeps in the folders of the environments; one with the id of a session of Aiko gives that session its first message, the others form the third group, started outside Aiko, with where they were started (source). An empty query shows the last five of it, a query up to 20.",
+  "file": {
+    "sessions": [
+      {
+        "id": "a1",
+        "environment": "Aiko",
+        "folder": "/work/aiko",
+        "name": "меню «/» и «@»",
+        "started": true,
+        "closed": false,
+        "lastUsed": 300
+      },
+      {
+        "id": "a2",
+        "environment": "Aiko",
+        "folder": "/work/aiko",
+        "name": "terminal",
+        "started": true,
+        "closed": false,
+        "lastUsed": 200
+      },
+      {
+        "id": "w1",
+        "environment": "Work",
+        "folder": "/work/sparks",
+        "name": "карточки меню значка",
+        "started": true,
+        "closed": false,
+        "lastUsed": 250
+      },
+      {
+        "id": "c1",
+        "environment": "Aiko",
+        "folder": "/work/aiko",
+        "name": "старое Меню команд",
+        "started": true,
+        "closed": true,
+        "lastUsed": 100
+      },
+      {
+        "id": "c2",
+        "environment": "Work",
+        "folder": "/work/sparks",
+        "name": "ёлка",
+        "started": true,
+        "closed": true,
+        "lastUsed": 50
+      },
+      {
+        "id": "a3",
+        "environment": "Aiko",
+        "folder": "/work/aiko",
+        "name": "long",
+        "started": true,
+        "closed": false,
+        "lastUsed": 10
+      },
+      {
+        "id": "a4",
+        "environment": "Aiko",
+        "folder": "/work/site",
+        "name": "прототип ленты",
+        "started": true,
+        "closed": false,
+        "lastUsed": 5
+      }
+    ],
+    "last": "a1"
+  },
+  "conversations": [
+    {
+      "id": "a1",
+      "environment": "Aiko",
+      "folder": "/work/aiko",
+      "name": "меню «/» и «@»",
+      "firstMessage": "Сделай меню «@» как в прототипе",
+      "lastUsed": 300,
+      "source": "terminal"
+    },
+    {
+      "id": "a2",
+      "environment": "Aiko",
+      "folder": "/work/aiko",
+      "name": "terminal",
+      "firstMessage": "Почини  прокрутку\nленты, когда приходит ответ",
+      "lastUsed": 200,
+      "source": "terminal"
+    },
+    {
+      "id": "c2",
+      "environment": "Work",
+      "folder": "/work/sparks",
+      "name": "ёлка",
+      "firstMessage": "Нарисуй ЕЛКУ",
+      "lastUsed": 50,
+      "source": "terminal"
+    },
+    {
+      "id": "a3",
+      "environment": "Aiko",
+      "folder": "/work/aiko",
+      "name": "long",
+      "firstMessage": "Начало длинного сообщения про всякое разное, а потом наконец слово поиск и дальше ещё много слов, которые не помещаются в одну строку снизу",
+      "lastUsed": 10,
+      "source": "terminal"
+    },
+    {
+      "id": "o1",
+      "environment": "Aiko",
+      "folder": "/work/aiko",
+      "name": "Почини эхо в меню значка",
+      "firstMessage": "Эхо подсказки в голосовом вводе",
+      "lastUsed": 400,
+      "source": "terminal"
+    },
+    {
+      "id": "o2",
+      "environment": "Work",
+      "folder": "/work/sparks",
+      "name": "Голос на маке",
+      "firstMessage": "Замерь Whisper на маке",
+      "lastUsed": 30,
+      "source": "vsCode"
+    }
+  ],
+  "queries": [
+    {
+      "name": "an empty query shows every open session, the latest first, and the last closed ones",
+      "query": "",
+      "open": [
+        {
+          "id": "a1",
+          "environment": "Aiko",
+          "folder": "aiko",
+          "name": "меню «/» и «@»"
+        },
+        {
+          "id": "w1",
+          "environment": "Work",
+          "folder": "sparks",
+          "name": "карточки меню значка"
+        },
+        {
+          "id": "a2",
+          "environment": "Aiko",
+          "folder": "aiko",
+          "name": "terminal"
+        },
+        {
+          "id": "a3",
+          "environment": "Aiko",
+          "folder": "aiko",
+          "name": "long"
+        },
+        {
+          "id": "a4",
+          "environment": "Aiko",
+          "folder": "site",
+          "name": "прототип ленты"
+        }
+      ],
+      "closed": [
+        {
+          "id": "c1",
+          "environment": "Aiko",
+          "folder": "aiko",
+          "name": "старое Меню команд"
+        },
+        {
+          "id": "c2",
+          "environment": "Work",
+          "folder": "sparks",
+          "name": "ёлка"
+        }
+      ],
+      "outside": [
+        {
+          "id": "o1",
+          "environment": "Aiko",
+          "folder": "aiko",
+          "name": "Почини эхо в меню значка",
+          "source": "terminal"
+        },
+        {
+          "id": "o2",
+          "environment": "Work",
+          "folder": "sparks",
+          "name": "Голос на маке",
+          "source": "vsCode"
+        }
+      ]
+    },
+    {
+      "name": "a word in the names of every environment, closed ones below",
+      "query": "меню",
+      "open": [
+        {
+          "id": "a1",
+          "environment": "Aiko",
+          "folder": "aiko",
+          "name": "[меню] «/» и «@»"
+        },
+        {
+          "id": "w1",
+          "environment": "Work",
+          "folder": "sparks",
+          "name": "карточки [меню] значка"
+        }
+      ],
+      "closed": [
+        {
+          "id": "c1",
+          "environment": "Aiko",
+          "folder": "aiko",
+          "name": "старое [Меню] команд"
+        }
+      ],
+      "outside": [
+        {
+          "id": "o1",
+          "environment": "Aiko",
+          "folder": "aiko",
+          "name": "Почини эхо в [меню] значка",
+          "source": "terminal"
+        }
+      ]
+    },
+    {
+      "name": "spaces and line breaks of the message are one space",
+      "query": "  прокрутку   ленты ",
+      "open": [
+        {
+          "id": "a2",
+          "environment": "Aiko",
+          "folder": "aiko",
+          "name": "terminal",
+          "snippet": "Почини [прокрутку ленты], когда приходит ответ"
+        }
+      ],
+      "closed": [],
+      "outside": []
+    },
+    {
+      "name": "ё and е are one letter",
+      "query": "елк",
+      "open": [],
+      "closed": [
+        {
+          "id": "c2",
+          "environment": "Work",
+          "folder": "sparks",
+          "name": "[ёлк]а"
+        }
+      ],
+      "outside": []
+    },
+    {
+      "name": "a match in the name comes before a match in the message, however old",
+      "query": "прото",
+      "open": [
+        {
+          "id": "a4",
+          "environment": "Aiko",
+          "folder": "site",
+          "name": "[прото]тип ленты"
+        },
+        {
+          "id": "a1",
+          "environment": "Aiko",
+          "folder": "aiko",
+          "name": "меню «/» и «@»",
+          "snippet": "Сделай меню «@» как в [прото]типе"
+        }
+      ],
+      "closed": [],
+      "outside": []
+    },
+    {
+      "name": "a long message is cut around the match on spaces",
+      "query": "поиск",
+      "open": [
+        {
+          "id": "a3",
+          "environment": "Aiko",
+          "folder": "aiko",
+          "name": "long",
+          "snippet": "…а потом наконец слово [поиск] и дальше ещё много слов, которые не помещаются в…"
+        }
+      ],
+      "closed": [],
+      "outside": []
+    },
+    {
+      "name": "nothing matches",
+      "query": "собака",
+      "open": [],
+      "closed": [],
+      "outside": []
+    },
+    {
+      "name": "a conversation outside Aiko is found by its first message",
+      "query": "whisper",
+      "open": [],
+      "closed": [],
+      "outside": [
+        {
+          "id": "o2",
+          "environment": "Work",
+          "folder": "sparks",
+          "name": "Голос на маке",
+          "snippet": "Замерь [Whisper] на маке",
+          "source": "vsCode"
+        }
+      ]
+    }
+  ]
+}

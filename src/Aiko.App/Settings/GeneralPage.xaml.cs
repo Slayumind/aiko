@@ -71,6 +71,8 @@ public partial class GeneralPage : UserControl
         // The switch shows what Windows actually holds, not what our file remembers: the person may
         // have removed the entry elsewhere.
         RunAtStartup.IsChecked = Startup.IsEnabled();
+        StartupOnly.IsOpen = RunAtStartup.IsChecked == true;
+        TerminalAtStartup.IsChecked = _settings.OpenTerminalAtStartup;
 
         LanguageChoiceDrop.Items = [Strings.LanguageSystem, "Русский", "English"];
         LanguageChoiceDrop.SelectedIndex = Array.IndexOf(Languages, _settings.Language);
@@ -112,7 +114,18 @@ public partial class GeneralPage : UserControl
 
         var wanted = RunAtStartup.IsChecked == true;
         Startup.Set(wanted);
+        StartupOnly.IsOpen = wanted;
         Save(_settings with { RunAtStartup = wanted });
+    }
+
+    private void OnTerminalAtStartupChanged(object sender, RoutedEventArgs e)
+    {
+        if (_filling)
+        {
+            return;
+        }
+
+        Save(_settings with { OpenTerminalAtStartup = TerminalAtStartup.IsChecked == true });
     }
 
     private void OnLanguagePicked(int index)

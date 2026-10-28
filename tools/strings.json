@@ -343,6 +343,13 @@
     ]
   ],
   [
+    "OpenTerminalAtStartup",
+    [
+      "Open the terminal window too",
+      "Открывать и окно терминалов"
+    ]
+  ],
+  [
     "StartAtLogin",
     [
       "Start at login",
@@ -2471,6 +2478,188 @@
     ]
   ],
   [
+    "TerminalSearchHint",
+    [
+      "Find a session or a conversation",
+      "Найти сессию или разговор"
+    ]
+  ],
+  [
+    "TerminalSearchKeys",
+    [
+      "↑ ↓ choose · Enter open · Esc close",
+      "↑ ↓ выбрать · Enter открыть · Esc закрыть"
+    ]
+  ],
+  [
+    "TerminalSearchOpen",
+    [
+      "Open",
+      "Открытые"
+    ]
+  ],
+  [
+    "TerminalSearchClosed",
+    [
+      "Closed",
+      "Закрытые"
+    ]
+  ],
+  [
+    "TerminalSearchOutside",
+    [
+      "Started outside Aiko",
+      "Начаты вне Aiko"
+    ]
+  ],
+  [
+    "TerminalSourceTerminal",
+    [
+      "terminal",
+      "терминал"
+    ]
+  ],
+  [
+    "TerminalSourceOther",
+    [
+      "other app",
+      "другая программа"
+    ]
+  ],
+  [
+    "TerminalNewSession",
+    [
+      "New session",
+      "Новая сессия"
+    ]
+  ],
+  [
+    "TerminalNewSessionKey",
+    [
+      "Ctrl+Shift+T",
+      "Ctrl+Shift+T"
+    ]
+  ],
+  [
+    "TerminalGroupNewSession",
+    [
+      "New session of Claude Code in this folder",
+      "Новая сессия Claude Code в этой папке"
+    ]
+  ],
+  [
+    "TerminalGroupNewShell",
+    [
+      "Command line in this folder",
+      "Командная строка в этой папке"
+    ]
+  ],
+  [
+    "TerminalPickFolderHint",
+    [
+      "Folder for the new session",
+      "Папка для новой сессии"
+    ]
+  ],
+  [
+    "TerminalPickFolderKeys",
+    [
+      "↑ ↓ choose · Enter Claude Code · Ctrl+Enter command line · Esc close",
+      "↑ ↓ выбрать · Enter Claude Code · Ctrl+Enter командная строка · Esc закрыть"
+    ]
+  ],
+  [
+    "TerminalPickOtherFolder",
+    [
+      "Another folder…",
+      "Другая папка…"
+    ]
+  ],
+  [
+    "TerminalEventThinking",
+    [
+      "thinking",
+      "думает"
+    ]
+  ],
+  [
+    "TerminalEventReading",
+    [
+      "reading {0}",
+      "читает {0}"
+    ]
+  ],
+  [
+    "TerminalEventEditing",
+    [
+      "editing {0}",
+      "правит {0}"
+    ]
+  ],
+  [
+    "TerminalEventRunning",
+    [
+      "running: {0}",
+      "запускает: {0}"
+    ]
+  ],
+  [
+    "TerminalEventSearching",
+    [
+      "searching: {0}",
+      "ищет: {0}"
+    ]
+  ],
+  [
+    "TerminalEventBrowsing",
+    [
+      "on the web: {0}",
+      "в сети: {0}"
+    ]
+  ],
+  [
+    "TerminalEventDelegating",
+    [
+      "agent: {0}",
+      "агент: {0}"
+    ]
+  ],
+  [
+    "TerminalEventUsing",
+    [
+      "tool: {0}",
+      "инструмент: {0}"
+    ]
+  ],
+  [
+    "TerminalEventAsksPermission",
+    [
+      "waits for permission: {0}",
+      "ждёт разрешения: {0}"
+    ]
+  ],
+  [
+    "TerminalEventAsksQuestion",
+    [
+      "waits for your answer",
+      "ждёт ответа"
+    ]
+  ],
+  [
+    "TerminalEventFailed",
+    [
+      "the turn failed",
+      "ход прервался с ошибкой"
+    ]
+  ],
+  [
+    "TerminalEventOutOfLimit",
+    [
+      "stopped on the limit",
+      "упёрлась в лимит"
+    ]
+  ],
+  [
     "TerminalTitle",
     [
       "Terminal",
@@ -2482,13 +2671,6 @@
     [
       "Create session",
       "Создать сессию"
-    ]
-  ],
-  [
-    "TerminalNewShell",
-    [
-      "Open command line",
-      "Открыть командную строку"
     ]
   ],
   [
@@ -2541,10 +2723,24 @@
     ]
   ],
   [
-    "TerminalEmptyTalk",
+    "TerminalStarting",
     [
-      "The session starts with your first message. Change the folder, model or mode in the line under the field.",
-      "Сессия начнётся с первого сообщения. Папку, модель и режим можно сменить в строке под полем."
+      "Starting…",
+      "Запускается…"
+    ]
+  ],
+  [
+    "TerminalNotStartedTitle",
+    [
+      "Claude Code did not start",
+      "Claude Code не запустился"
+    ]
+  ],
+  [
+    "TerminalNotStartedBody",
+    [
+      "Aiko did not find it on this computer. Install Claude Code, then open the session again.",
+      "Aiko не нашла его на этом компьютере. Установи Claude Code и открой сессию снова."
     ]
   ],
   [

@@ -69,6 +69,8 @@ public class SharedCaseTests
                 ["snapshotsFolder"] = folders.SnapshotsFolder,
                 ["snapshotFile"] = folders.SnapshotFile(snapshotName),
                 ["activityFolder"] = folders.ActivityFolder,
+                ["terminalEventsFolder"] = folders.TerminalEventsFolder,
+                ["terminalHooksFile"] = folders.TerminalHooksFile,
                 ["directCacheFolder"] = folders.DirectCacheFolder,
                 ["commandsFolder"] = folders.CommandsFolder,
                 ["marketplaceFolder"] = folders.MarketplaceFolder,
@@ -432,7 +434,8 @@ public class SharedCaseTests
                 home,
                 row.GetProperty("environment").GetString()!,
                 row.GetProperty("sessionId").GetString()!,
-                row.GetProperty("started").GetBoolean());
+                row.GetProperty("started").GetBoolean(),
+                row.TryGetProperty("hooksFile", out var hooks) ? hooks.GetString()! : "");
 
             var plan = ClaudeLaunchPlan.For(request, Strings(row.GetProperty("inherited")));
 
@@ -457,6 +460,225 @@ public class SharedCaseTests
                 plan.Variables);
         }
     }
+
+    [Fact]
+    public void Every_title_of_a_terminal_is_read_the_same()
+    {
+        var cases = SpecCases.Json("terminal-title");
+
+        foreach (var row in cases.GetProperty("reads").EnumerateArray())
+        {
+            var reader = new TitleReader();
+            var titles = row.GetProperty("pieces").EnumerateArray().Select(piece => reader.Read(piece.GetString()!)).ToList();
+            Assert.True(
+                titles.SequenceEqual(row.GetProperty("titles").EnumerateArray().Select(title => title.GetString())),
+                row.GetProperty("name").GetString());
+        }
+
+        foreach (var row in cases.GetProperty("long").GetProperty("rows").EnumerateArray())
+        {
+            var length = row.GetProperty("length").GetInt32();
+            var title = new TitleReader().Read("\u001b]0;" + new string('x', length) + "\u0007");
+            Assert.Equal(row.GetProperty("title").GetBoolean(), title is not null);
+        }
+
+        foreach (var row in cases.GetProperty("screen").EnumerateArray())
+        {
+            Assert.True(
+                row.GetProperty("text").GetBoolean() == TerminalScreen.HasText(row.GetProperty("output").GetString()!),
+                row.GetProperty("name").GetString());
+        }
+
+        foreach (var row in cases.GetProperty("claude").EnumerateArray())
+        {
+            var parsed = ClaudeTitle.Parse(row.GetProperty("title").GetString());
+            var working = row.GetProperty("working");
+            Assert.True(
+                working.ValueKind == JsonValueKind.Null ? parsed is null : parsed?.Working == working.GetBoolean(),
+                row.GetProperty("title").GetString());
+            Assert.Equal(row.GetProperty("name").GetString(), parsed?.SessionName);
+        }
+    }
+
+    [Fact]
+    public void Every_hook_of_the_terminal_says_the_same()
+    {
+        var cases = SpecCases.Json("terminal-events");
+        var now = cases.GetProperty("now").GetInt64();
+
+        foreach (var row in cases.GetProperty("hooks").EnumerateArray())
+        {
+            var input = row.GetProperty("input");
+            var found = TerminalEvent.FromHook(input.ValueKind == JsonValueKind.String ? input.GetString() : input.GetRawText(), now);
+            var expected = row.GetProperty("event");
+            var name = row.GetProperty("name").GetString();
+
+            if (expected.ValueKind == JsonValueKind.Null)
+            {
+                Assert.True(found is null, name);
+                continue;
+            }
+
+            Assert.True(
+                found == new TerminalEvent(KindIn(expected), expected.GetProperty("detail").GetString()!, now),
+                $"{name}: {found}");
+        }
+
+        foreach (var row in cases.GetProperty("files").EnumerateArray())
+        {
+            Assert.Equal(row.GetProperty("file").GetString(), TerminalEvent.FileName(row.GetProperty("id").GetString()));
+        }
+
+        foreach (var row in cases.GetProperty("saved").EnumerateArray())
+        {
+            var read = TerminalEvent.FromJson(FileIn(row.GetProperty("file")));
+            var expected = row.GetProperty("event");
+            Assert.Equal(
+                expected.ValueKind == JsonValueKind.Null
+                    ? null
+                    : new TerminalEvent(KindIn(expected), expected.GetProperty("detail").GetString()!, expected.GetProperty("at").GetInt64()),
+                read);
+
+            if (read is not null)
+            {
+                Assert.Equal(read, TerminalEvent.FromJson(read.ToJson()));
+            }
+        }
+
+        foreach (var row in cases.GetProperty("typed").EnumerateArray())
+        {
+            Assert.True(
+                row.GetProperty("typed").GetBoolean() == TerminalPulse.IsTyped(row.GetProperty("input").GetString()!),
+                row.GetProperty("name").GetString());
+        }
+
+        foreach (var row in cases.GetProperty("replaces").EnumerateArray())
+        {
+            var written = row.GetProperty("written");
+            var next = new TerminalEvent(Enum.Parse<TerminalEventKind>(row.GetProperty("next").GetString()!, ignoreCase: true), "", 2);
+            Assert.True(
+                row.GetProperty("replaces").GetBoolean() == next.Replaces(written.ValueKind == JsonValueKind.Null
+                    ? null
+                    : new TerminalEvent(Enum.Parse<TerminalEventKind>(written.GetString()!, ignoreCase: true), "", 1)),
+                $"{written} then {next.Kind}");
+        }
+
+        foreach (var row in cases.GetProperty("pulse").EnumerateArray())
+        {
+            var title = row.GetProperty("title");
+            var happened = row.GetProperty("event");
+            var activity = TerminalPulse.Of(
+                title.ValueKind == JsonValueKind.Null ? null : new ClaudeTitle(title.GetString() == "working", "name"),
+                happened.ValueKind == JsonValueKind.Null ? null : new TerminalEvent(KindIn(happened), "", happened.GetProperty("at").GetInt64()),
+                row.GetProperty("seenAt").GetInt64(),
+                row.GetProperty("answeredAt").GetInt64());
+
+            Assert.True(row.GetProperty("activity").GetString() == Camel(activity), row.GetProperty("name").GetString());
+        }
+    }
+
+    [Fact]
+    public void Every_list_matches_and_picks_folders_the_same()
+    {
+        var cases = SpecCases.Json("text-match");
+
+        static JsonNode? Described(IReadOnlyList<TextPart>? parts) =>
+            parts is null ? null : new JsonArray([.. parts.Select(part => (JsonNode)new JsonArray(part.Text, part.Match))]);
+
+        foreach (var row in cases.GetProperty("parts").EnumerateArray())
+        {
+            var found = Described(TextMatch.Parts(row.GetProperty("text").GetString()!, row.GetProperty("query").GetString()!));
+            Assert.True(
+                JsonNode.DeepEquals(JsonNode.Parse(row.GetProperty("parts").GetRawText()), found),
+                $"{row.GetProperty("text").GetString()}: {found?.ToJsonString()}");
+        }
+
+        var sessions = TerminalSessions.FromJson(cases.GetProperty("sessions").GetRawText());
+        foreach (var row in cases.GetProperty("folders").EnumerateArray())
+        {
+            var others = row.GetProperty("others").EnumerateArray().Select(other => (other[0].GetString()!, other[1].GetInt64()));
+            var hits = FolderPick.Find(sessions, row.GetProperty("environment").GetString()!, row.GetProperty("query").GetString()!, others);
+            var described = new JsonArray([.. hits.Select(hit => (JsonNode)new JsonArray(hit.Folder, Described(hit.Name), hit.Parent))]);
+            Assert.True(
+                JsonNode.DeepEquals(JsonNode.Parse(row.GetProperty("hits").GetRawText()), described),
+                $"{row.GetProperty("name").GetString()}: {described.ToJsonString()}");
+        }
+    }
+
+    private static Conversation ConversationIn(JsonElement row) => new(
+        row.GetProperty("id").GetString()!,
+        row.GetProperty("environment").GetString()!,
+        row.GetProperty("folder").GetString()!,
+        row.GetProperty("name").GetString()!,
+        row.GetProperty("firstMessage").GetString()!,
+        row.GetProperty("lastUsed").GetInt64(),
+        Enum.Parse<ConversationSource>(row.GetProperty("source").GetString()!, ignoreCase: true));
+
+    [Fact]
+    public void Every_conversation_file_is_read_the_same()
+    {
+        foreach (var row in SpecCases.Json("conversation-file").GetProperty("cases").EnumerateArray())
+        {
+            var read = ConversationFile.Read("c1", "Aiko", row.GetProperty("head").GetString()!, row.GetProperty("tail").GetString()!, 1000);
+            var expected = row.GetProperty("conversation");
+            Assert.True(
+                expected.ValueKind == JsonValueKind.Null
+                    ? read is null
+                    : read == new Conversation(
+                        "c1", "Aiko", expected.GetProperty("folder").GetString()!, expected.GetProperty("name").GetString()!,
+                        expected.GetProperty("firstMessage").GetString()!, 1000,
+                        Enum.Parse<ConversationSource>(expected.GetProperty("source").GetString()!, ignoreCase: true)),
+                $"{row.GetProperty("name").GetString()}: {read}");
+        }
+    }
+
+    [Fact]
+    public void Every_palette_of_sessions_finds_the_same()
+    {
+        var cases = SpecCases.Json("session-search");
+        var sessions = TerminalSessions.FromJson(cases.GetProperty("file").GetRawText());
+        var conversations = cases.GetProperty("conversations").EnumerateArray().Select(ConversationIn).ToList();
+
+        static string Marked(IReadOnlyList<TextPart> parts) =>
+            string.Concat(parts.Select(part => part.Match ? $"[{part.Text}]" : part.Text));
+
+        static JsonArray Described(IReadOnlyList<SearchHit> hits) => new([.. hits.Select(hit =>
+        {
+            var row = new JsonObject
+            {
+                ["id"] = hit.Id,
+                ["environment"] = hit.Environment,
+                ["folder"] = hit.Folder,
+                ["name"] = Marked(hit.Name),
+            };
+            if (hit.Snippet.Count > 0)
+            {
+                row["snippet"] = Marked(hit.Snippet);
+            }
+
+            if (hit.Source is { } source)
+            {
+                row["source"] = Camel(source);
+            }
+
+            return (JsonNode)row;
+        })]);
+
+        foreach (var row in cases.GetProperty("queries").EnumerateArray())
+        {
+            var found = SessionSearch.Find(sessions, conversations, row.GetProperty("query").GetString()!);
+            foreach (var (part, hits) in new[] { ("open", found.Open), ("closed", found.Closed), ("outside", found.Outside) })
+            {
+                var described = Described(hits);
+                Assert.True(
+                    JsonNode.DeepEquals(JsonNode.Parse(row.GetProperty(part).GetRawText()), described),
+                    $"{row.GetProperty("name").GetString()}, {part}: {described.ToJsonString()}");
+            }
+        }
+    }
+
+    private static TerminalEventKind KindIn(JsonElement terminalEvent) =>
+        Enum.Parse<TerminalEventKind>(terminalEvent.GetProperty("kind").GetString()!, ignoreCase: true);
 
     [Fact]
     public void Every_file_mention_offers_the_same_files()
@@ -637,6 +859,9 @@ public class SharedCaseTests
                     step.GetProperty("now").GetInt64(),
                     step.TryGetProperty("kind", out var kind) && kind.GetString() == "shell" ? SessionKind.Shell : SessionKind.Claude),
                 "rename" => sessions.Rename(Word("id"), Word("name")),
+                "titled" => sessions.Titled(Word("id"), Word("name")),
+                "reopen" => sessions.Reopen(Word("id"), step.GetProperty("now").GetInt64()),
+                "found" => sessions.Found(ConversationIn(step.GetProperty("conversation")), step.GetProperty("now").GetInt64()),
                 "renameEnvironment" => sessions.RenameEnvironment(Word("from"), Word("to")),
                 "started" => sessions.MarkStarted(Word("id")),
                 "used" => sessions.Used(Word("id"), step.GetProperty("now").GetInt64()),
@@ -821,6 +1046,9 @@ public class SharedCaseTests
                     break;
                 case "session":
                     window = window.ToSession(what, sessions);
+                    break;
+                case "next":
+                    window = window.ToNeighbour(int.Parse(what, System.Globalization.CultureInfo.InvariantCulture), sessions);
                     break;
                 default:
                     sessions = sessions.Close(what);

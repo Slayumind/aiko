@@ -88,6 +88,8 @@ struct SharedCaseTests {
                 "snapshotsFolder": folders.snapshotsFolder,
                 "snapshotFile": folders.snapshotFile(snapshotName),
                 "activityFolder": folders.activityFolder,
+                "terminalEventsFolder": folders.terminalEventsFolder,
+                "terminalHooksFile": folders.terminalHooksFile,
                 "directCacheFolder": folders.directCacheFolder,
                 "commandsFolder": folders.commandsFolder,
                 "marketplaceFolder": folders.marketplaceFolder,
@@ -446,7 +448,8 @@ struct SharedCaseTests {
                 userProfile: home,
                 environmentName: row["environment"]?.stringValue ?? "",
                 sessionId: row["sessionId"]?.stringValue ?? "",
-                started: row["started"]?.boolValue ?? false)
+                started: row["started"]?.boolValue ?? false,
+                hooksFile: row["hooksFile"]?.stringValue ?? "")
 
             let plan = ClaudeLaunchPlan.forRequest(platform, request, inheritedVariables: Self.strings(row["inherited"]))
             let name = row["name"]?.stringValue ?? ""
@@ -471,6 +474,188 @@ struct SharedCaseTests {
                     VariableChange($0["name"]?.stringValue ?? "", $0["value"]?.stringValue)
                 },
                 "\(name)")
+        }
+    }
+
+    @Test
+    func everyTitleOfATerminalIsReadTheSame() {
+        let cases = SpecCases.json("terminal-title")
+
+        for row in cases["reads"]?.arrayValue ?? [] {
+            let reader = TitleReader()
+            let titles = (row["pieces"]?.arrayValue ?? []).map { reader.read($0.stringValue ?? "") }
+            #expect(titles == (row["titles"]?.arrayValue ?? []).map(\.stringValue), "\(row["name"]?.stringValue ?? "")")
+        }
+
+        for row in cases["long"]?["rows"]?.arrayValue ?? [] {
+            let length = Int(row["length"]?.int64Value ?? 0)
+            let title = TitleReader().read("\u{1B}]0;" + String(repeating: "x", count: length) + "\u{07}")
+            #expect((title != nil) == (row["title"]?.boolValue ?? false), "\(length)")
+        }
+
+        for row in cases["screen"]?.arrayValue ?? [] {
+            #expect(
+                TerminalScreen.hasText(row["output"]?.stringValue ?? "") == row["text"]?.boolValue,
+                "\(row["name"]?.stringValue ?? "")")
+        }
+
+        for row in cases["claude"]?.arrayValue ?? [] {
+            let parsed = ClaudeTitle.parse(row["title"]?.stringValue)
+            let text = row["title"]?.stringValue ?? ""
+            #expect(parsed?.working == row["working"]?.boolValue, "\(text)")
+            #expect(parsed?.sessionName == row["name"]?.stringValue, "\(text)")
+        }
+    }
+
+    @Test
+    func everyHookOfTheTerminalSaysTheSame() {
+        let cases = SpecCases.json("terminal-events")
+        let now = cases["now"]?.int64Value ?? 0
+
+        func kind(_ node: JsonNode?) -> TerminalEventKind? {
+            let name = node?["kind"]?.stringValue?.lowercased()
+            return TerminalEventKind.allCases.first { $0.rawValue.lowercased() == name }
+        }
+
+        for row in cases["hooks"]?.arrayValue ?? [] {
+            let input = row["input"]
+            let found = TerminalEvent.fromHook(input?.stringValue ?? input?.toJsonString(escaping: .relaxed), now: now)
+            let expected = row["event"].flatMap { node -> TerminalEvent? in
+                guard let kind = kind(node) else { return nil }
+                return TerminalEvent(kind: kind, detail: node["detail"]?.stringValue ?? "", at: now)
+            }
+            #expect(found == expected, "\(row["name"]?.stringValue ?? "")")
+        }
+
+        for row in cases["files"]?.arrayValue ?? [] {
+            #expect(TerminalEvent.fileName(row["id"]?.stringValue) == row["file"]?.stringValue)
+        }
+
+        for row in cases["saved"]?.arrayValue ?? [] {
+            let read = TerminalEvent.fromJson(Self.fileIn(row["file"]))
+            let expected = row["event"].flatMap { node -> TerminalEvent? in
+                guard let kind = kind(node), let at = node["at"]?.int64Value else { return nil }
+                return TerminalEvent(kind: kind, detail: node["detail"]?.stringValue ?? "", at: at)
+            }
+            #expect(read == expected)
+            if let read {
+                #expect(TerminalEvent.fromJson(read.toJson()) == read)
+            }
+        }
+
+        func named(_ text: String?) -> TerminalEventKind? {
+            TerminalEventKind.allCases.first { $0.rawValue.lowercased() == text?.lowercased() }
+        }
+
+        for row in cases["typed"]?.arrayValue ?? [] {
+            #expect(
+                TerminalPulse.isTyped(row["input"]?.stringValue ?? "") == row["typed"]?.boolValue,
+                "\(row["name"]?.stringValue ?? "")")
+        }
+
+        for row in cases["replaces"]?.arrayValue ?? [] {
+            let written = named(row["written"]?.stringValue).map { TerminalEvent(kind: $0, detail: "", at: 1) }
+            let next = TerminalEvent(kind: named(row["next"]?.stringValue) ?? .using, detail: "", at: 2)
+            #expect(next.replaces(written) == row["replaces"]?.boolValue, "\(row["written"]?.stringValue ?? "nil") then \(next.kind)")
+        }
+
+        for row in cases["pulse"]?.arrayValue ?? [] {
+            let title = row["title"]?.stringValue.map { ClaudeTitle(working: $0 == "working", name: "name") }
+            let happened = row["event"].flatMap { node -> TerminalEvent? in
+                guard let kind = kind(node), let at = node["at"]?.int64Value else { return nil }
+                return TerminalEvent(kind: kind, detail: "", at: at)
+            }
+            let activity = TerminalPulse.of(
+                title, happened, seenAt: row["seenAt"]?.int64Value ?? 0, answeredAt: row["answeredAt"]?.int64Value ?? 0)
+            #expect(activity.rawValue == row["activity"]?.stringValue, "\(row["name"]?.stringValue ?? "")")
+        }
+    }
+
+    private static func conversation(_ row: JsonNode?) -> Conversation {
+        Conversation(
+            id: row?["id"]?.stringValue ?? "", environment: row?["environment"]?.stringValue ?? "",
+            folder: row?["folder"]?.stringValue ?? "", name: row?["name"]?.stringValue ?? "",
+            firstMessage: row?["firstMessage"]?.stringValue ?? "", lastUsed: row?["lastUsed"]?.int64Value ?? 0,
+            source: ConversationSource(rawValue: row?["source"]?.stringValue ?? "") ?? .other)
+    }
+
+    @Test
+    func everyConversationFileIsReadTheSame() {
+        for row in SpecCases.json("conversation-file")["cases"]?.arrayValue ?? [] {
+            let read = ConversationFile.read(
+                id: "c1", environment: "Aiko", head: row["head"]?.stringValue ?? "", tail: row["tail"]?.stringValue ?? "",
+                lastUsed: 1000)
+            let expected = row["conversation"].flatMap { node -> Conversation? in
+                guard node.objectValue != nil else { return nil }
+                return Conversation(
+                    id: "c1", environment: "Aiko", folder: node["folder"]?.stringValue ?? "", name: node["name"]?.stringValue ?? "",
+                    firstMessage: node["firstMessage"]?.stringValue ?? "", lastUsed: 1000,
+                    source: ConversationSource(rawValue: node["source"]?.stringValue ?? "") ?? .other)
+            }
+            #expect(read == expected, "\(row["name"]?.stringValue ?? "")")
+        }
+    }
+
+    @Test
+    func everyPaletteOfSessionsFindsTheSame() {
+        let cases = SpecCases.json("session-search")
+        let sessions = TerminalSessions.fromJson(cases["file"]?.toJsonString(escaping: .relaxed))
+        let conversations = (cases["conversations"]?.arrayValue ?? []).map { Self.conversation($0) }
+
+        func marked(_ parts: [TextPart]) -> String {
+            parts.map { $0.match ? "[\($0.text)]" : $0.text }.joined()
+        }
+
+        func described(_ hits: [SearchHit]) -> JsonNode {
+            .array(hits.map { hit in
+                var row = JsonObject()
+                row["id"] = .string(hit.id)
+                row["environment"] = .string(hit.environment)
+                row["folder"] = .string(hit.folder)
+                row["name"] = .string(marked(hit.name))
+                if !hit.snippet.isEmpty {
+                    row["snippet"] = .string(marked(hit.snippet))
+                }
+                if let source = hit.source {
+                    row["source"] = .string(source.rawValue)
+                }
+                return .object(row)
+            })
+        }
+
+        for row in cases["queries"]?.arrayValue ?? [] {
+            let found = SessionSearch.find(sessions, conversations, query: row["query"]?.stringValue ?? "")
+            let name = row["name"]?.stringValue ?? ""
+            #expect(described(found.open) == row["open"], "\(name), open")
+            #expect(described(found.closed) == row["closed"], "\(name), closed")
+            #expect(described(found.outside) == row["outside"], "\(name), outside")
+        }
+    }
+
+    @Test
+    func everyListMatchesAndPicksFoldersTheSame() {
+        let cases = SpecCases.json("text-match")
+
+        func described(_ parts: [TextPart]?) -> JsonNode {
+            guard let parts else { return .null }
+            return .array(parts.map { .array([.string($0.text), .bool($0.match)]) })
+        }
+
+        for row in cases["parts"]?.arrayValue ?? [] {
+            let found = described(TextMatch.parts(row["text"]?.stringValue ?? "", row["query"]?.stringValue ?? ""))
+            #expect(found == row["parts"], "\(row["text"]?.stringValue ?? "")")
+        }
+
+        let sessions = TerminalSessions.fromJson(cases["sessions"]?.toJsonString(escaping: .relaxed))
+        for row in cases["folders"]?.arrayValue ?? [] {
+            let others = (row["others"]?.arrayValue ?? []).map {
+                ($0.arrayValue?[0].stringValue ?? "", $0.arrayValue?[1].int64Value ?? 0)
+            }
+            let hits = FolderPick.find(
+                sessions, environment: row["environment"]?.stringValue ?? "", query: row["query"]?.stringValue ?? "",
+                others: others)
+            let found = JsonNode.array(hits.map { .array([.string($0.folder), described($0.name), .string($0.parent)]) })
+            #expect(found == row["hits"], "\(row["name"]?.stringValue ?? "")")
         }
     }
 
@@ -638,6 +823,9 @@ struct SharedCaseTests {
                     id: word("id"), environment: word("environment"), folder: word("folder"), name: word("name"),
                     now: step["now"]?.int64Value ?? 0, kind: step["kind"]?.stringValue == "shell" ? .shell : .claude)
             case "rename": sessions = sessions.rename(word("id"), word("name"))
+            case "titled": sessions = sessions.titled(word("id"), word("name"))
+            case "reopen": sessions = sessions.reopen(word("id"), now: step["now"]?.int64Value ?? 0)
+            case "found": sessions = sessions.found(Self.conversation(step["conversation"]), now: step["now"]?.int64Value ?? 0)
             case "renameEnvironment": sessions = sessions.renameEnvironment(word("from"), word("to"))
             case "started": sessions = sessions.markStarted(word("id"))
             case "used": sessions = sessions.used(word("id"), now: step["now"]?.int64Value ?? 0)
@@ -823,6 +1011,7 @@ struct SharedCaseTests {
             switch pair[0] {
             case "environment": window = window.toEnvironment(what, sessions)
             case "session": window = window.toSession(what, sessions)
+            case "next": window = window.toNeighbour(Int(what) ?? 0, sessions)
             default:
                 sessions = sessions.close(what)
                 window = window.after(sessions)

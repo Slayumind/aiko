@@ -56,6 +56,19 @@ public struct TerminalWindowModel: Sendable, Equatable {
         return TerminalWindowModel(environment: environment, sessionId: id)
     }
 
+    /// Ctrl+Tab and Ctrl+Shift+Tab (D-353): the next or the previous session of the environment in
+    /// the order of the list, round at the ends. With no session chosen the first or the last.
+    public func toNeighbour(_ step: Int, _ sessions: TerminalSessions) -> TerminalWindowModel {
+        let order = sessions.groups(environment).flatMap(\.sessions).map(\.id)
+        guard !order.isEmpty else {
+            return self
+        }
+
+        let at = sessionId.flatMap { order.firstIndex(of: $0) }
+        let next = at.map { (($0 + step) % order.count + order.count) % order.count } ?? (step > 0 ? 0 : order.count - 1)
+        return TerminalWindowModel(environment: environment, sessionId: order[next])
+    }
+
     /// After the list has changed: a session was made, closed or the file was read again. The
     /// window stays on its session when it can; otherwise it takes the one the list opens on.
     public func after(_ sessions: TerminalSessions) -> TerminalWindowModel {

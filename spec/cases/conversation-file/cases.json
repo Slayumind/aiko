@@ -1,0 +1,100 @@
+{
+  "comment": "A conversation of Claude Code read from the start (head) and the end (tail) of its file (D-353). The folder is the first cwd; the first message is the first message of the person on one line, not a meta note and not a command or its output in tags; a picture message gives its text. The name is the last title the person gave (custom-title), else the last title of Claude Code (ai-title), else the start of the first message. Where it was started comes from the entry point: cli is a terminal, claude-vscode VS Code, claude-desktop the desktop app; an sdk entry point is a program such as claude -p and is no conversation. A conversation with neither a message nor a title is none. A line cut at the edge of a piece is skipped. id, environment and lastUsed are passed as they are: c1, Aiko, 1000.",
+  "cases": [
+    {
+      "name": "a conversation from a terminal with a title",
+      "head": "{\"type\":\"mode\",\"mode\":\"x\"}\n{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":\"<command-name>/clear</command-name>\"},\"cwd\":\"C:workaiko\",\"entrypoint\":\"cli\",\"sessionId\":\"x\"}\n{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":\"Caveat: the messages below\"},\"cwd\":\"C:workaiko\",\"entrypoint\":\"cli\",\"sessionId\":\"x\",\"isMeta\":true}\n{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":\"  Почини   прокрутку\\nленты  \"},\"cwd\":\"C:workaiko\",\"entrypoint\":\"cli\",\"sessionId\":\"x\"}",
+      "tail": "{\"type\":\"assistant\"}\n{\"type\":\"ai-title\",\"aiTitle\":\"Fix the scroll\"}\n{\"type\":\"ai-title\",\"aiTitle\":\"Fix the scroll of the feed\"}",
+      "conversation": {
+        "folder": "C:workaiko",
+        "name": "Fix the scroll of the feed",
+        "firstMessage": "Почини прокрутку ленты",
+        "source": "terminal"
+      }
+    },
+    {
+      "name": "a title the person gave wins",
+      "head": "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":\"hello\"},\"cwd\":\"C:workaiko\",\"entrypoint\":\"cli\",\"sessionId\":\"x\"}",
+      "tail": "{\"type\":\"custom-title\",\"customTitle\":\"Mine\"}\n{\"type\":\"ai-title\",\"aiTitle\":\"Theirs\"}",
+      "conversation": {
+        "folder": "C:workaiko",
+        "name": "Mine",
+        "firstMessage": "hello",
+        "source": "terminal"
+      }
+    },
+    {
+      "name": "no title: the start of the first message names it",
+      "head": "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":\"Сделай меню как в прототипе\"},\"cwd\":\"C:workaiko\",\"entrypoint\":\"cli\",\"sessionId\":\"x\"}",
+      "tail": "",
+      "conversation": {
+        "folder": "C:workaiko",
+        "name": "Сделай меню как в прототипе",
+        "firstMessage": "Сделай меню как в прототипе",
+        "source": "terminal"
+      }
+    },
+    {
+      "name": "a message with a picture: its text part",
+      "head": "{\"type\":\"user\",\"message\":{\"content\":[{\"type\":\"image\",\"source\":{}},{\"type\":\"text\",\"text\":\"what is this\"}]},\"cwd\":\"/Users/someone/work/\",\"entrypoint\":\"claude-vscode\"}",
+      "tail": "",
+      "conversation": {
+        "folder": "/Users/someone/work",
+        "name": "what is this",
+        "firstMessage": "what is this",
+        "source": "vsCode"
+      }
+    },
+    {
+      "name": "from the desktop app",
+      "head": "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":\"hi\"},\"cwd\":\"C:workaiko\",\"entrypoint\":\"claude-desktop\",\"sessionId\":\"x\"}",
+      "tail": "",
+      "conversation": {
+        "folder": "C:workaiko",
+        "name": "hi",
+        "firstMessage": "hi",
+        "source": "desktop"
+      }
+    },
+    {
+      "name": "an unknown entry point",
+      "head": "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":\"hi\"},\"cwd\":\"C:workaiko\",\"entrypoint\":\"jetbrains\",\"sessionId\":\"x\"}",
+      "tail": "",
+      "conversation": {
+        "folder": "C:workaiko",
+        "name": "hi",
+        "firstMessage": "hi",
+        "source": "other"
+      }
+    },
+    {
+      "name": "claude -p is a program, not a conversation",
+      "head": "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":\"one word\"},\"cwd\":\"C:workaiko\",\"entrypoint\":\"sdk-cli\",\"sessionId\":\"x\"}",
+      "tail": "{\"type\":\"ai-title\",\"aiTitle\":\"Word\"}",
+      "conversation": null
+    },
+    {
+      "name": "nothing to find it by",
+      "head": "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":\"<local-command-stdout>ok</local-command-stdout>\"},\"cwd\":\"C:workaiko\",\"entrypoint\":\"cli\",\"sessionId\":\"x\"}",
+      "tail": "",
+      "conversation": null
+    },
+    {
+      "name": "a line cut at the edge of a piece is skipped",
+      "head": "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":\"first\"},\"cwd\":\"C:workaiko\",\"entrypoint\":\"cli\",\"sessionId\":\"x\"}\n{\"type\":\"user\",\"message\":{\"content\":\"cut",
+      "tail": "\"aiTitle\":\"cut\"}\n{\"type\":\"ai-title\",\"aiTitle\":\"Whole\"}",
+      "conversation": {
+        "folder": "C:workaiko",
+        "name": "Whole",
+        "firstMessage": "first",
+        "source": "terminal"
+      }
+    },
+    {
+      "name": "a broken file",
+      "head": "not json\n{",
+      "tail": "}",
+      "conversation": null
+    }
+  ]
+}

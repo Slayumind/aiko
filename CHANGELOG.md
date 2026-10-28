@@ -18,6 +18,21 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   runs in it, so the agents go on working. Quitting Aiko asks first when something still runs. After a
   restart of Aiko a session of Claude Code continues its conversation, and a command line opens again
   in the same folder. When Claude Code ends by itself, its row says so and Enter continues it.
+- **The list shows what each session does.** A mark says whether Claude Code works, waits for you
+  or is done, and a second line says what it did last: "reading office.mjs", "waits for permission:
+  npm test". A session takes the name Claude Code gives the conversation, until you rename it.
+  While a session starts, a loader stands in place of an empty terminal, and the text keeps a
+  little space from the edge.
+- **A new session in two clicks.** Point at a folder in the list: "+" starts Claude Code there and
+  ">_" a command line. "New session" opens a quick pick of the folders you used, latest first; Enter
+  starts Claude Code, Ctrl+Enter a command line, and the last line opens any other folder.
+- **Find any conversation.** Ctrl+Shift+K opens a palette of your sessions and of the conversations
+  you started outside Aiko, in another terminal or in VS Code. It finds them by name and by your first
+  message; the one you choose continues in Aiko.
+- **Keys of the window.** Ctrl+Shift+T opens a new session, Ctrl+Tab and Ctrl+Shift+Tab go to the
+  next and the previous one. Every other key goes to the program in the terminal.
+- **The terminal window opens once by itself** after Aiko is set up. A start with Windows opens only
+  the tray, unless you turn on "Open the terminal window too" in the settings.
 
 ### Fixed
 

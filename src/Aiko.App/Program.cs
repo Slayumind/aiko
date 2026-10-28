@@ -16,7 +16,7 @@ static class Program
     {
         // A plain start only. The installer's hooks and the snapshot and --try commands come with
         // arguments, and most of them never open a window.
-        if (args.Length == 0)
+        if (args is [] or [Startup.Argument])
         {
             GraphicsWarmUp.Start();
         }
@@ -318,6 +318,13 @@ static class Program
 
         // A program in a pseudo console, closed while it still prints: Aiko must outlive it. Opens
         // no window and starts no Claude Code.
+        // A real Claude Code with the hook of the terminal, in a pseudo console: --try-terminal-hooks <folder> <report>
+        if (args is ["--try-terminal-hooks", var hookFolder, var hookReport, ..])
+        {
+            Environment.Exit(TerminalHookCheck.Run(hookFolder, hookReport));
+            return;
+        }
+
         if (args is ["--try-pty", ..])
         {
             Environment.Exit(TryPty());
@@ -366,6 +373,13 @@ static class Program
 
             Log.Write($"--try-profile: found {found.Count} ({string.Join(", ", found.Select(f => f.Name))}), turned off={turnedOff}, left after={remaining}, backup={backupThere}, same bytes after on={same}");
             Environment.Exit(same && turnedOff && remaining == 0 ? 0 : 1);
+            return;
+        }
+
+        // The terminal window on made up sessions: --snapshot-terminal out.png [palette | folders | loader]
+        if (args is ["--snapshot-terminal", var terminalPath, ..])
+        {
+            TerminalSnapshot.Write(terminalPath, args.Length > 2 ? args[2] : null);
             return;
         }
 
@@ -440,7 +454,7 @@ static class Program
         application.Startup += (_, _) =>
         {
             shell = new AikoShell(application);
-            shell.Show();
+            shell.Show(withWindows: args is [Startup.Argument]);
         };
         application.Exit += (_, _) => shell?.Dispose();
 

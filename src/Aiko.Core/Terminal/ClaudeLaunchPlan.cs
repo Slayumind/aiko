@@ -4,13 +4,15 @@ namespace Aiko.Core.Terminal;
 /// is removed, not set to an empty string.
 public sealed record VariableChange(string Name, string? Value);
 
-/// What the terminal needs to know to start Claude Code for one session.
+/// What the terminal needs to know to start Claude Code for one session. HooksFile holds the
+/// settings with the hook of the terminal (TerminalHooks); empty when it could not be written.
 public sealed record LaunchRequest(
     string ConfigDirectory,
     string UserProfile,
     string EnvironmentName,
     string SessionId,
-    bool Started);
+    bool Started,
+    string HooksFile = "");
 
 /// How the terminal starts a program in a real terminal (D-349, D-360): the arguments of Claude
 /// Code and what changes in the environment of the process. Claude Code chooses its own mode and
@@ -24,7 +26,14 @@ public sealed record ClaudeLaunchPlan(IReadOnlyList<string> Arguments, IReadOnly
     {
         // A conversation gets its id from Aiko before the first turn, so the id is known even when
         // Claude Code never answers. After that the same id brings the conversation back.
-        string[] arguments = [request.Started ? "--resume" : "--session-id", request.SessionId];
+        List<string> arguments = [request.Started ? "--resume" : "--session-id", request.SessionId];
+
+        // The hook of the terminal tells the row what the session does, in every environment, with
+        // the personality or without it.
+        if (request.HooksFile.Length > 0)
+        {
+            arguments.AddRange(["--settings", request.HooksFile]);
+        }
 
         var variables = Environment(request.ConfigDirectory, request.UserProfile, inheritedVariables);
 
@@ -33,13 +42,21 @@ public sealed record ClaudeLaunchPlan(IReadOnlyList<string> Arguments, IReadOnly
         variables.Add(new VariableChange(SessionReminder.EnvironmentVariable, request.EnvironmentName));
         variables.Add(new VariableChange(SessionReminder.LaunchVariable, SessionReminder.LaunchedByTerminal));
 
-        return new ClaudeLaunchPlan(arguments, variables);
+        // The hook of the terminal writes to the file of this session, whatever id Claude Code uses.
+        variables.Add(new VariableChange(TerminalEvent.SessionVariable, request.SessionId));
+
+        return new ClaudeLaunchPlan(arguments, Settled(variables));
     }
 
     /// A shell of a session (D-350): the environment of the session, so a claude typed in it runs
     /// in the same environment, without the variables of the session start hook.
     public static ClaudeLaunchPlan ForShell(string configDirectory, string userProfile, IEnumerable<string> inheritedVariables) =>
-        new([], Environment(configDirectory, userProfile, inheritedVariables));
+        new([], Settled(Environment(configDirectory, userProfile, inheritedVariables)));
+
+    /// One change per name: a leftover that the plan sets again is not removed first, so the list
+    /// can go straight into a dictionary of the environment (names do not care for case on Windows).
+    private static List<VariableChange> Settled(List<VariableChange> variables) =>
+        [.. variables.Where((change, at) => !variables.Skip(at + 1).Any(later => later.Name.Equals(change.Name, StringComparison.OrdinalIgnoreCase)))];
 
     private static List<VariableChange> Environment(string configDirectory, string userProfile, IEnumerable<string> inheritedVariables)
     {

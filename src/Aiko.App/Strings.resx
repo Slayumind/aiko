@@ -178,6 +178,9 @@
   <data name="StartWithWindows" xml:space="preserve">
     <value>Start with Windows</value>
   </data>
+  <data name="OpenTerminalAtStartup" xml:space="preserve">
+    <value>Open the terminal window too</value>
+  </data>
   <data name="StartAtLogin" xml:space="preserve">
     <value>Start at login</value>
   </data>
@@ -1090,14 +1093,89 @@
   <data name="StateOn" xml:space="preserve">
     <value>on</value>
   </data>
+  <data name="TerminalSearchHint" xml:space="preserve">
+    <value>Find a session or a conversation</value>
+  </data>
+  <data name="TerminalSearchKeys" xml:space="preserve">
+    <value>↑ ↓ choose · Enter open · Esc close</value>
+  </data>
+  <data name="TerminalSearchOpen" xml:space="preserve">
+    <value>Open</value>
+  </data>
+  <data name="TerminalSearchClosed" xml:space="preserve">
+    <value>Closed</value>
+  </data>
+  <data name="TerminalSearchOutside" xml:space="preserve">
+    <value>Started outside Aiko</value>
+  </data>
+  <data name="TerminalSourceTerminal" xml:space="preserve">
+    <value>terminal</value>
+  </data>
+  <data name="TerminalSourceOther" xml:space="preserve">
+    <value>other app</value>
+  </data>
+  <data name="TerminalNewSession" xml:space="preserve">
+    <value>New session</value>
+  </data>
+  <data name="TerminalNewSessionKey" xml:space="preserve">
+    <value>Ctrl+Shift+T</value>
+  </data>
+  <data name="TerminalGroupNewSession" xml:space="preserve">
+    <value>New session of Claude Code in this folder</value>
+  </data>
+  <data name="TerminalGroupNewShell" xml:space="preserve">
+    <value>Command line in this folder</value>
+  </data>
+  <data name="TerminalPickFolderHint" xml:space="preserve">
+    <value>Folder for the new session</value>
+  </data>
+  <data name="TerminalPickFolderKeys" xml:space="preserve">
+    <value>↑ ↓ choose · Enter Claude Code · Ctrl+Enter command line · Esc close</value>
+  </data>
+  <data name="TerminalPickOtherFolder" xml:space="preserve">
+    <value>Another folder…</value>
+  </data>
+  <data name="TerminalEventThinking" xml:space="preserve">
+    <value>thinking</value>
+  </data>
+  <data name="TerminalEventReading" xml:space="preserve">
+    <value>reading {0}</value>
+  </data>
+  <data name="TerminalEventEditing" xml:space="preserve">
+    <value>editing {0}</value>
+  </data>
+  <data name="TerminalEventRunning" xml:space="preserve">
+    <value>running: {0}</value>
+  </data>
+  <data name="TerminalEventSearching" xml:space="preserve">
+    <value>searching: {0}</value>
+  </data>
+  <data name="TerminalEventBrowsing" xml:space="preserve">
+    <value>on the web: {0}</value>
+  </data>
+  <data name="TerminalEventDelegating" xml:space="preserve">
+    <value>agent: {0}</value>
+  </data>
+  <data name="TerminalEventUsing" xml:space="preserve">
+    <value>tool: {0}</value>
+  </data>
+  <data name="TerminalEventAsksPermission" xml:space="preserve">
+    <value>waits for permission: {0}</value>
+  </data>
+  <data name="TerminalEventAsksQuestion" xml:space="preserve">
+    <value>waits for your answer</value>
+  </data>
+  <data name="TerminalEventFailed" xml:space="preserve">
+    <value>the turn failed</value>
+  </data>
+  <data name="TerminalEventOutOfLimit" xml:space="preserve">
+    <value>stopped on the limit</value>
+  </data>
   <data name="TerminalTitle" xml:space="preserve">
     <value>Terminal</value>
   </data>
   <data name="TerminalCreateSession" xml:space="preserve">
     <value>Create session</value>
-  </data>
-  <data name="TerminalNewShell" xml:space="preserve">
-    <value>Open command line</value>
   </data>
   <data name="TerminalStoppedLine" xml:space="preserve">
     <value>Claude Code stopped. The conversation is saved: press Enter to continue.</value>
@@ -1120,8 +1198,14 @@
   <data name="TerminalNoSessionsBody" xml:space="preserve">
     <value>A session is one conversation with Claude Code in one folder.</value>
   </data>
-  <data name="TerminalEmptyTalk" xml:space="preserve">
-    <value>The session starts with your first message. Change the folder, model or mode in the line under the field.</value>
+  <data name="TerminalStarting" xml:space="preserve">
+    <value>Starting…</value>
+  </data>
+  <data name="TerminalNotStartedTitle" xml:space="preserve">
+    <value>Claude Code did not start</value>
+  </data>
+  <data name="TerminalNotStartedBody" xml:space="preserve">
+    <value>Aiko did not find it on this computer. Install Claude Code, then open the session again.</value>
   </data>
   <data name="TerminalWorking" xml:space="preserve">
     <value>working</value>

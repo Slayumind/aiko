@@ -168,6 +168,9 @@ public static class Strings
     /// Start with Windows
     public static string StartWithWindows => Get("StartWithWindows");
 
+    /// Open the terminal window too
+    public static string OpenTerminalAtStartup => Get("OpenTerminalAtStartup");
+
     /// Start at login
     public static string StartAtLogin => Get("StartAtLogin");
 
@@ -1080,14 +1083,89 @@ public static class Strings
     /// on
     public static string StateOn => Get("StateOn");
 
+    /// Find a session or a conversation
+    public static string TerminalSearchHint => Get("TerminalSearchHint");
+
+    /// ↑ ↓ choose · Enter open · Esc close
+    public static string TerminalSearchKeys => Get("TerminalSearchKeys");
+
+    /// Open
+    public static string TerminalSearchOpen => Get("TerminalSearchOpen");
+
+    /// Closed
+    public static string TerminalSearchClosed => Get("TerminalSearchClosed");
+
+    /// Started outside Aiko
+    public static string TerminalSearchOutside => Get("TerminalSearchOutside");
+
+    /// terminal
+    public static string TerminalSourceTerminal => Get("TerminalSourceTerminal");
+
+    /// other app
+    public static string TerminalSourceOther => Get("TerminalSourceOther");
+
+    /// New session
+    public static string TerminalNewSession => Get("TerminalNewSession");
+
+    /// Ctrl+Shift+T
+    public static string TerminalNewSessionKey => Get("TerminalNewSessionKey");
+
+    /// New session of Claude Code in this folder
+    public static string TerminalGroupNewSession => Get("TerminalGroupNewSession");
+
+    /// Command line in this folder
+    public static string TerminalGroupNewShell => Get("TerminalGroupNewShell");
+
+    /// Folder for the new session
+    public static string TerminalPickFolderHint => Get("TerminalPickFolderHint");
+
+    /// ↑ ↓ choose · Enter Claude Code · Ctrl+Enter command line · Esc close
+    public static string TerminalPickFolderKeys => Get("TerminalPickFolderKeys");
+
+    /// Another folder…
+    public static string TerminalPickOtherFolder => Get("TerminalPickOtherFolder");
+
+    /// thinking
+    public static string TerminalEventThinking => Get("TerminalEventThinking");
+
+    /// reading {0}
+    public static string TerminalEventReading => Get("TerminalEventReading");
+
+    /// editing {0}
+    public static string TerminalEventEditing => Get("TerminalEventEditing");
+
+    /// running: {0}
+    public static string TerminalEventRunning => Get("TerminalEventRunning");
+
+    /// searching: {0}
+    public static string TerminalEventSearching => Get("TerminalEventSearching");
+
+    /// on the web: {0}
+    public static string TerminalEventBrowsing => Get("TerminalEventBrowsing");
+
+    /// agent: {0}
+    public static string TerminalEventDelegating => Get("TerminalEventDelegating");
+
+    /// tool: {0}
+    public static string TerminalEventUsing => Get("TerminalEventUsing");
+
+    /// waits for permission: {0}
+    public static string TerminalEventAsksPermission => Get("TerminalEventAsksPermission");
+
+    /// waits for your answer
+    public static string TerminalEventAsksQuestion => Get("TerminalEventAsksQuestion");
+
+    /// the turn failed
+    public static string TerminalEventFailed => Get("TerminalEventFailed");
+
+    /// stopped on the limit
+    public static string TerminalEventOutOfLimit => Get("TerminalEventOutOfLimit");
+
     /// Terminal
     public static string TerminalTitle => Get("TerminalTitle");
 
     /// Create session
     public static string TerminalCreateSession => Get("TerminalCreateSession");
-
-    /// Open command line
-    public static string TerminalNewShell => Get("TerminalNewShell");
 
     /// Claude Code stopped. The conversation is saved: press Enter to continue.
     public static string TerminalStoppedLine => Get("TerminalStoppedLine");
@@ -1110,8 +1188,14 @@ public static class Strings
     /// A session is one conversation with Claude Code in one folder.
     public static string TerminalNoSessionsBody => Get("TerminalNoSessionsBody");
 
-    /// The session starts with your first message. Change the folder, model or mode in the line ...
-    public static string TerminalEmptyTalk => Get("TerminalEmptyTalk");
+    /// Starting…
+    public static string TerminalStarting => Get("TerminalStarting");
+
+    /// Claude Code did not start
+    public static string TerminalNotStartedTitle => Get("TerminalNotStartedTitle");
+
+    /// Aiko did not find it on this computer. Install Claude Code, then open the session again.
+    public static string TerminalNotStartedBody => Get("TerminalNotStartedBody");
 
     /// working
     public static string TerminalWorking => Get("TerminalWorking");

@@ -37,6 +37,14 @@ try
         return 0;
     }
 
+    // The hook of a session in the terminal of Aiko (D-360). It comes with --settings, so it runs
+    // in every environment, with the personality or without it.
+    if (args is [Aiko.Core.Terminal.TerminalEvent.HookArgument, ..])
+    {
+        RecordTerminalEvent(input);
+        return 0;
+    }
+
     // The persona plugin's hooks (D-206). Before this branch a hook call fell through to the status
     // line code, which could run the person's own status line with hook input.
     if (args is [PersonaPlugin.HookArgument, ..])
@@ -143,6 +151,28 @@ static void RecordActivity(string input)
 
     Directory.CreateDirectory(folder);
     ReplaceFile(path, new ActivityRecord(environment, hook.Activity, now).ToJson());
+}
+
+/// The last event of a session of the terminal, for its row. The session is named by the variable
+/// Aiko gave it, not by the id in the input: a file name never comes from what Claude Code sends.
+static void RecordTerminalEvent(string input)
+{
+    var file = Aiko.Core.Terminal.TerminalEvent.FileName(Environment.GetEnvironmentVariable(Aiko.Core.Terminal.TerminalEvent.SessionVariable));
+    if (file is null || Aiko.Core.Terminal.TerminalEvent.FromHook(input, DateTimeOffset.Now.ToUnixTimeMilliseconds()) is not { } terminalEvent)
+    {
+        return;
+    }
+
+    var folder = ThisComputer.Folders.TerminalEventsFolder;
+    var path = Path.Combine(folder, file);
+    var written = File.Exists(path) ? Aiko.Core.Terminal.TerminalEvent.FromJson(File.ReadAllText(path)) : null;
+    if (!terminalEvent.Replaces(written))
+    {
+        return;
+    }
+
+    Directory.CreateDirectory(folder);
+    ReplaceFile(path, terminalEvent.ToJson());
 }
 
 /// The memory hooks of the persona plugin. The rules and the facts go to the model at the start of

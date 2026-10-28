@@ -29,6 +29,9 @@ sealed class TerminalPanel : UserControl
     private readonly StackPanel _rows = new();
     private readonly Grid _main = new();
     private readonly Popup _listPopup = new() { StaysOpen = false, AllowsTransparency = true, Placement = PlacementMode.Bottom };
+
+    /// A palette is a window of its own: nothing drawn in this one can cover a real terminal.
+    private readonly Popup _palettePopup = new() { StaysOpen = false, AllowsTransparency = true, Placement = PlacementMode.Relative };
     private readonly Button _listButton;
     private readonly Path _maximizeIcon = Line("");
     private readonly Button _maximize;
@@ -43,6 +46,7 @@ sealed class TerminalPanel : UserControl
     /// and only the one of the chosen session is visible: a terminal taken out of the tree would lose
     /// its window and its screen.
     private readonly Grid _terminals = new();
+    private readonly TerminalLoader _loader = new();
 
     /// Under a terminal whose Claude Code ended by itself (D-351).
     private readonly DockPanel _stopped = new() { Visibility = Visibility.Collapsed };
@@ -120,11 +124,20 @@ sealed class TerminalPanel : UserControl
         stoppedLine.TextWrapping = TextWrapping.Wrap;
         _stopped.Children.Add(stoppedLine);
         _stopped.Margin = new Thickness(16, 10, 16, 12);
+        _loader.Visibility = Visibility.Collapsed;
+        _terminals.Children.Add(_loader);
         var terminalSide = new DockPanel();
         DockPanel.SetDock(_stopped, Dock.Bottom);
         terminalSide.Children.Add(_stopped);
         terminalSide.Children.Add(_terminals);
         _terminalSide = terminalSide;
+
+        _palettePopup.PlacementTarget = this;
+        _palettePopup.Closed += (_, _) =>
+        {
+            _palettePopup.Child = null;
+            PaletteClosed?.Invoke();
+        };
 
         SizeChanged += (_, e) =>
         {
@@ -149,8 +162,14 @@ sealed class TerminalPanel : UserControl
 
     /// The id of a session and the new name typed for it.
     public event Action<string, string>? RowRenamed;
+    /// A new session in a folder the person picks (D-350).
     public event Action? CreateAsked;
-    public event Action? ShellAsked;
+
+    /// A new session in the folder of a group, with no question: Claude Code or a command line.
+    public event Action<string, SessionKind>? GroupCreateAsked;
+
+    /// The palette closed: by Esc, by a click beside it, or by a choice.
+    public event Action? PaletteClosed;
 
     /// Continue a session whose Claude Code ended by itself (D-351).
     public event Action? ResumeAsked;
@@ -277,21 +296,20 @@ sealed class TerminalPanel : UserControl
         _rows.Children.Clear();
         foreach (var group in view.Groups)
         {
-            _rows.Children.Add(new Border { Padding = new Thickness(10, 10, 10, 4), Child = Mono(group.Name, "Muted") });
+            _rows.Children.Add(GroupHeader(group));
             foreach (var row in group.Rows)
             {
                 _rows.Children.Add(Row(row, row.Id == view.SessionId && view.Main == MainView.Terminal, view.Now));
             }
         }
 
-        var create = new StackPanel { Margin = new Thickness(8) };
-        foreach (var (text, ask) in new (string, Action)[] { (Strings.TerminalCreateSession, () => CreateAsked?.Invoke()), (Strings.TerminalNewShell, () => ShellAsked?.Invoke()) })
-        {
-            var button = Flat(text, ask, ghost: true, plus: true);
-            button.HorizontalAlignment = HorizontalAlignment.Stretch;
-            button.HorizontalContentAlignment = HorizontalAlignment.Left;
-            create.Children.Add(button);
-        }
+        // One button under the list: the quick pick of a folder, with its key (D-353).
+        var key = Mono(Strings.TerminalNewSessionKey, "Muted");
+        key.Margin = new Thickness(12, 0, 0, 0);
+        var newSession = Flat(Strings.TerminalNewSession, () => CreateAsked?.Invoke(), ghost: false, plus: true, aside: key);
+        newSession.HorizontalAlignment = HorizontalAlignment.Stretch;
+        newSession.HorizontalContentAlignment = HorizontalAlignment.Stretch;
+        var create = new Border { Margin = new Thickness(8), Child = newSession };
 
         // The list lives in the window or, in a narrow one, under the button with the session name.
         _list.Children.Clear();
@@ -331,12 +349,75 @@ sealed class TerminalPanel : UserControl
         }
     }
 
+    /// The folder of a group, and on hover two quiet buttons: a session of Claude Code and a command
+    /// line in this folder, with no question (D-350).
+    private UIElement GroupHeader(RowGroup group)
+    {
+        var buttons = new StackPanel { Orientation = Orientation.Horizontal, Opacity = 0 };
+        foreach (var (icon, tip, kind) in new (string, string, SessionKind)[]
+        {
+            ("M5,0 L5,10 M0,5 L10,5", Strings.TerminalGroupNewSession, SessionKind.Claude),
+            ("M0,1 L4,5 L0,9 M6,9 L11,9", Strings.TerminalGroupNewShell, SessionKind.Shell),
+        })
+        {
+            var button = Icon(Line(icon));
+            button.ToolTip = tip;
+            var face = (FrameworkElement)button.Content;
+            face.Width = 22;
+            face.Height = 22;
+            button.Click += (_, _) => GroupCreateAsked?.Invoke(group.Folder, kind);
+            // The keyboard reaches them too: a button in focus is shown.
+            button.GotKeyboardFocus += (_, _) => Fade(buttons, 1);
+            button.LostKeyboardFocus += (_, _) => Fade(buttons, 0);
+            buttons.Children.Add(button);
+        }
+
+        var header = new DockPanel { Margin = new Thickness(10, 8, 4, 0), Background = Brushes.Transparent, ToolTip = group.Folder };
+        DockPanel.SetDock(buttons, Dock.Right);
+        header.Children.Add(buttons);
+        var name = Mono(group.Name, "Muted");
+        name.TextTrimming = TextTrimming.CharacterEllipsis;
+        header.Children.Add(name);
+        header.MouseEnter += (_, _) => Fade(buttons, 1);
+        header.MouseLeave += (_, _) =>
+        {
+            if (!buttons.IsKeyboardFocusWithin)
+            {
+                Fade(buttons, 0);
+            }
+        };
+        return header;
+    }
+
+    private static void Fade(UIElement element, double to) =>
+        element.BeginAnimation(OpacityProperty, Motion.To(to, Motion.Or0(Motion.Hover), Motion.Standard));
+
+    /// For the snapshot: the buttons of the first group shown, and the hover of its first button.
+    internal void ShowGroupHoverForSnapshot()
+    {
+        if (_rows.Children.OfType<DockPanel>().FirstOrDefault() is { } header
+            && header.Children[0] is StackPanel { Children: [Button first, ..] } buttons)
+        {
+            buttons.Opacity = 1;
+            ((Panel)first.Content).Children.OfType<Border>().First().Opacity = 1;
+        }
+    }
+
     private UIElement Row(SessionRow row, bool selected, DateTimeOffset now)
     {
         var top = new DockPanel();
         var mark = Mark(row.State);
         DockPanel.SetDock(mark, Dock.Right);
         top.Children.Add(mark);
+
+        // What runs in the session (the mockup of D-362): the mark of Claude Code or "$".
+        UIElement kind = row.Kind == SessionKind.Shell
+            ? Mono("$", "Muted")
+            : Line("M6,1 L6,11 M1,6 L11,6 M2.5,2.5 L9.5,9.5 M9.5,2.5 L2.5,9.5");
+        var kindBox = new Border { Width = 14, Margin = new Thickness(0, 0, 8, 0), Child = kind };
+        ((FrameworkElement)kind).HorizontalAlignment = HorizontalAlignment.Center;
+        DockPanel.SetDock(kindBox, Dock.Left);
+        top.Children.Add(kindBox);
         var name = Text(row.Name, "TextName", "Ink", FontWeights.Normal);
         name.TextTrimming = TextTrimming.CharacterEllipsis;
         top.Children.Add(name);
@@ -358,7 +439,8 @@ sealed class TerminalPanel : UserControl
         {
             var line = Text(second, "TextSmall", "Muted", FontWeights.Normal);
             line.TextTrimming = TextTrimming.CharacterEllipsis;
-            line.Margin = new Thickness(0, 3, 0, 0);
+            // Under the name, past the mark of the kind.
+            line.Margin = new Thickness(22, 3, 0, 0);
             lines.Children.Add(line);
         }
 
@@ -474,7 +556,7 @@ sealed class TerminalPanel : UserControl
     /// What the terminal did last, or, for a sleeping session, when it was used.
     private static string SecondLine(SessionRow row, DateTimeOffset now) =>
         row.Line.Length > 0 ? row.Line : UsedWords(row.LastUsed, now);
-    private static string UsedWords(long lastUsed, DateTimeOffset now)
+    internal static string UsedWords(long lastUsed, DateTimeOffset now)
     {
         if (lastUsed <= 0)
         {
@@ -496,26 +578,54 @@ sealed class TerminalPanel : UserControl
     /// A terminal of a closed session leaves the panel.
     public void Release(TerminalSurface terminal) => _terminals.Children.Remove(terminal);
 
+    // ---- the palette ----
+
+    /// The palette at the top of the window, in the middle, over the terminal.
+    public void ShowPalette(PaletteView palette)
+    {
+        _listPopup.IsOpen = false;
+        _palettePopup.IsOpen = false;
+        _palettePopup.Child = palette;
+        palette.Width = Math.Max(240, Math.Min(PaletteView.CardWidth, ActualWidth - 32));
+        _palettePopup.HorizontalOffset = Math.Max(0, (ActualWidth - palette.Width) / 2 - palette.Margin.Left);
+        _palettePopup.VerticalOffset = BarHeight + 8;
+        _palettePopup.IsOpen = true;
+        Motion.PopIn(palette, above: false);
+        palette.FocusField();
+    }
+
+    public void ClosePalette() => _palettePopup.IsOpen = false;
+
+    public bool PaletteOpen => _palettePopup.IsOpen;
+
     private void ShowMain(TerminalView view)
     {
         // A terminal draws in a window of its own, over anything WPF puts on top of it. So a question
         // or a message takes the place of the terminals rather than covering them.
         var terminal = view.Main == MainView.Terminal && view.Ask is null ? view.Terminal : null;
-        foreach (UIElement child in _terminals.Children)
+
+        // Until its program draws a letter the terminal is hidden but keeps its place, so the size
+        // reaches the pseudo console, and the loader stands over it (D-368).
+        foreach (var child in _terminals.Children.OfType<TerminalSurface>())
         {
-            child.Visibility = ReferenceEquals(child, terminal) ? Visibility.Visible : Visibility.Collapsed;
+            child.Visibility = !ReferenceEquals(child, terminal) ? Visibility.Collapsed
+                : child.Drawn ? Visibility.Visible
+                : Visibility.Hidden;
         }
 
         if (terminal is not null && !_terminals.Children.Contains(terminal))
         {
-            _terminals.Children.Add(terminal);
+            _terminals.Children.Insert(0, terminal);
+            terminal.Visibility = terminal.Drawn ? Visibility.Visible : Visibility.Hidden;
         }
+
+        _loader.Visibility = terminal is { Drawn: false } ? Visibility.Visible : Visibility.Collapsed;
 
         _stopped.Visibility = terminal is not null && view.Stopped ? Visibility.Visible : Visibility.Collapsed;
 
         UIElement content = terminal is not null ? _terminalSide
             : view.Ask is { } ask ? Ask(ask)
-            : view.Main == MainView.Terminal ? Message(null, Strings.TerminalEmptyTalk, null)
+            : view.Main == MainView.Terminal ? Message(Strings.TerminalNotStartedTitle, Strings.TerminalNotStartedBody, null)
             : Message(
                 string.Format(CultureInfo.CurrentCulture, Strings.TerminalNoSessionsTitle, view.Environment),
                 Strings.TerminalNoSessionsBody,
@@ -735,14 +845,22 @@ sealed class TerminalPanel : UserControl
 
     /// One button for the whole window: the filled one is the main action, the outlined one the
     /// second, the ghost one the quiet third (DESIGN, one fill per control).
-    internal static Button Flat(string text, Action click, bool ghost, bool main = false, bool danger = false, bool plus = false)
+    /// aside stands at the right end of the button, such as the key of its action.
+    internal static Button Flat(string text, Action click, bool ghost, bool main = false, bool danger = false, bool plus = false, UIElement? aside = null)
     {
-        var row = new StackPanel { Orientation = Orientation.Horizontal };
+        var row = new DockPanel();
         var ink = main ? "Background" : danger ? "Destructive" : ghost ? "Muted" : "Ink";
+        if (aside is not null)
+        {
+            DockPanel.SetDock(aside, Dock.Right);
+            row.Children.Add(aside);
+        }
+
         if (plus)
         {
             var sign = Line("M5,0 L5,10 M0,5 L10,5", ink);
             sign.Margin = new Thickness(0, 0, 8, 0);
+            DockPanel.SetDock(sign, Dock.Left);
             row.Children.Add(sign);
         }
 
@@ -776,6 +894,13 @@ sealed class TerminalPanel : UserControl
         var hover = new Border { CornerRadius = new CornerRadius(8), Background = Tokens.Brush("HoverLayer"), Opacity = 0 };
         var face = new Grid { Width = 28, Height = 28 };
         face.Children.Add(hover);
+        // In the middle of its hover: a line left to stretch draws from the left edge.
+        if (icon is FrameworkElement drawn)
+        {
+            drawn.HorizontalAlignment = HorizontalAlignment.Center;
+            drawn.VerticalAlignment = VerticalAlignment.Center;
+        }
+
         face.Children.Add(icon);
 
         var button = new Button { Content = face, Cursor = Cursors.Hand, Template = Bare(), FocusVisualStyle = FocusRing() };

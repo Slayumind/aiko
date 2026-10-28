@@ -57,7 +57,8 @@ sealed class AikoShell : IDisposable
     /// With changingNothing the start skips everything that writes or asks the network: the repair
     /// of the status lines, the pages that open once and note that they did, the plugin sync, the
     /// commands in PATH, direct mode, the update check and the clean-up of old activity files.
-    public void Show(bool changingNothing = false)
+    /// withWindows: Windows started Aiko at sign-in (Startup.Argument).
+    public void Show(bool changingNothing = false, bool withWindows = false)
     {
         _changingNothing = changingNothing;
         _island.ChangingNothing = changingNothing;
@@ -107,10 +108,31 @@ sealed class AikoShell : IDisposable
             StartupChores.RepairOurStatusLines();
             OpenThePageShownOnce();
             StartupChores.RefreshPluginsAndCommands();
+            Startup.Refresh();
+
+            if (!ShowTerminalOnce() && withWindows && SettingsStore.Load().OpenTerminalAtStartup)
+            {
+                OpenTerminal();
+            }
         }
 
         _numbers.NoteWhereWeHaveNoAccess();
         StartupChores.ClearStaleActivity();
+    }
+
+    /// The terminal window opens by itself once, when Aiko is set up (D-350): at the start, or when
+    /// the settings of the first run close. Says whether it opened now.
+    private bool ShowTerminalOnce()
+    {
+        var app = SettingsStore.Load();
+        if (app.TerminalShown || !SettingsStore.LoadEnvironments().HasEnvironments)
+        {
+            return false;
+        }
+
+        SettingsStore.Save(app with { TerminalShown = true });
+        OpenTerminal();
+        return true;
     }
 
     /// A page that opens by itself one time, for someone who set Aiko up before the page existed.
@@ -395,6 +417,10 @@ sealed class AikoShell : IDisposable
             if (again is not null)
             {
                 OpenSettings(page: again);
+            }
+            else if (!_changingNothing)
+            {
+                ShowTerminalOnce();
             }
         };
         _settings = window;

@@ -3,6 +3,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Text;
+using Aiko.Core.Terminal;
 using Microsoft.Terminal.Wpf;
 using Microsoft.Win32.SafeHandles;
 
@@ -36,6 +37,9 @@ sealed class PseudoConsole : ITerminalConnection, IDisposable
     public PseudoConsole(PtyLaunch launch) => _launch = launch;
 
     public event EventHandler<TerminalOutputEventArgs>? TerminalOutput;
+
+    /// The person typed into the program: not only sequences of the terminal itself.
+    public event Action? Typed;
 
     /// The program ended, with its exit code. Raised on a background thread.
     public event Action<int>? Exited;
@@ -103,6 +107,10 @@ sealed class PseudoConsole : ITerminalConnection, IDisposable
         {
             _input.Write(bytes, 0, bytes.Length);
             _input.Flush();
+            if (TerminalPulse.IsTyped(data))
+            {
+                Typed?.Invoke();
+            }
         }
         catch (Exception e) when (e is IOException or ObjectDisposedException)
         {

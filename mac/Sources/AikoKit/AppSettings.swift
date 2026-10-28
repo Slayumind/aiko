@@ -70,6 +70,12 @@ public struct AppSettings: Sendable, Equatable {
     /// interface: people often speak another language than the one they read in (D-326).
     public var voiceLanguage: AikoLanguage = .system
 
+    /// The terminal window opened by itself once, after Aiko was set up (D-350).
+    public var terminalShown = false
+
+    /// What a start with the system opens: only the menu bar, or the terminal window too (D-350).
+    public var openTerminalAtStartup = false
+
 
     public init() {}
 
@@ -114,6 +120,8 @@ public struct AppSettings: Sendable, Equatable {
         if let value = root["hideIslandInFullScreen"]?.boolValue { settings.hideIslandInFullScreen = value }
         if let value = root["meetAikoShown"]?.boolValue { settings.meetAikoShown = value }
         if let value = root["voiceInput"]?.boolValue { settings.voiceInput = value }
+        if let value = root["terminalShown"]?.boolValue { settings.terminalShown = value }
+        if let value = root["openTerminalAtStartup"]?.boolValue { settings.openTerminalAtStartup = value }
 
         if let object = root["island"]?.objectValue {
             guard let text = object["edge"]?.stringValue, let edge = screenEdge(text) else { return .default }
@@ -146,6 +154,8 @@ public struct AppSettings: Sendable, Equatable {
             ("voiceInput", .bool(voiceInput)),
             ("voiceEngine", .string(voiceEngine.rawValue)),
             ("voiceLanguage", .string(voiceLanguage.rawValue)),
+            ("terminalShown", .bool(terminalShown)),
+            ("openTerminalAtStartup", .bool(openTerminalAtStartup)),
         ])
 
         return JsonNode.object(root).toJsonString(indented: true) + "\n"

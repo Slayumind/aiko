@@ -78,6 +78,12 @@ public struct AikoFolders: Sendable, Equatable {
     /// A folder of its own, because the tray reads every file in the snapshots folder as a snapshot.
     public var activityFolder: String { platform.join(localFolder, "activity") }
 
+    /// The last hook event of each session of the terminal, and the settings with that hook.
+    public var terminalEventsFolder: String { platform.join(localFolder, "terminal") }
+
+    /// The settings every session of the terminal starts with (TerminalHooks).
+    public var terminalHooksFile: String { platform.join(localFolder, "terminal-hooks.json") }
+
     /// The last answers of the usage API.
     public var directCacheFolder: String { platform.join(localFolder, "direct") }
 

@@ -89,6 +89,7 @@ public enum Strings {
         "PlaceMenuBar": ("Menu bar", "Строка меню"),
         "HideIslandInFullScreen": ("Hide the island in full screen", "Прятать остров в полноэкранных окнах"),
         "StartWithWindows": ("Start with Windows", "Запускать вместе с Windows"),
+        "OpenTerminalAtStartup": ("Open the terminal window too", "Открывать и окно терминалов"),
         "StartAtLogin": ("Start at login", "Запускать при входе"),
         "CheckUpdatesWhat": ("Once a day Aiko asks slayumind.org for the latest version. The files come from GitHub, and Aiko checks their signature before it replaces anything.", "Раз в сутки Aiko спрашивает у slayumind.org последнюю версию. Файлы приходят с GitHub, и Aiko проверяет их подпись, прежде чем что-то заменить."),
         "CheckNow": ("Check for updates", "Проверить обновления"),
@@ -393,9 +394,34 @@ public enum Strings {
         "MeetAikoSettings": ("The temperament, the mood, the skills and the memory are on the Personality page. It works in new sessions.", "Темперамент, настроение, навыки и память — на странице «Личность». Действует в новых сессиях."),
         "MeetAikoTurnOn": ("Turn on in {0}", "Включить в среде {0}"),
         "StateOn": ("on", "включена"),
+        "TerminalSearchHint": ("Find a session or a conversation", "Найти сессию или разговор"),
+        "TerminalSearchKeys": ("↑ ↓ choose · Enter open · Esc close", "↑ ↓ выбрать · Enter открыть · Esc закрыть"),
+        "TerminalSearchOpen": ("Open", "Открытые"),
+        "TerminalSearchClosed": ("Closed", "Закрытые"),
+        "TerminalSearchOutside": ("Started outside Aiko", "Начаты вне Aiko"),
+        "TerminalSourceTerminal": ("terminal", "терминал"),
+        "TerminalSourceOther": ("other app", "другая программа"),
+        "TerminalNewSession": ("New session", "Новая сессия"),
+        "TerminalNewSessionKey": ("Ctrl+Shift+T", "Ctrl+Shift+T"),
+        "TerminalGroupNewSession": ("New session of Claude Code in this folder", "Новая сессия Claude Code в этой папке"),
+        "TerminalGroupNewShell": ("Command line in this folder", "Командная строка в этой папке"),
+        "TerminalPickFolderHint": ("Folder for the new session", "Папка для новой сессии"),
+        "TerminalPickFolderKeys": ("↑ ↓ choose · Enter Claude Code · Ctrl+Enter command line · Esc close", "↑ ↓ выбрать · Enter Claude Code · Ctrl+Enter командная строка · Esc закрыть"),
+        "TerminalPickOtherFolder": ("Another folder…", "Другая папка…"),
+        "TerminalEventThinking": ("thinking", "думает"),
+        "TerminalEventReading": ("reading {0}", "читает {0}"),
+        "TerminalEventEditing": ("editing {0}", "правит {0}"),
+        "TerminalEventRunning": ("running: {0}", "запускает: {0}"),
+        "TerminalEventSearching": ("searching: {0}", "ищет: {0}"),
+        "TerminalEventBrowsing": ("on the web: {0}", "в сети: {0}"),
+        "TerminalEventDelegating": ("agent: {0}", "агент: {0}"),
+        "TerminalEventUsing": ("tool: {0}", "инструмент: {0}"),
+        "TerminalEventAsksPermission": ("waits for permission: {0}", "ждёт разрешения: {0}"),
+        "TerminalEventAsksQuestion": ("waits for your answer", "ждёт ответа"),
+        "TerminalEventFailed": ("the turn failed", "ход прервался с ошибкой"),
+        "TerminalEventOutOfLimit": ("stopped on the limit", "упёрлась в лимит"),
         "TerminalTitle": ("Terminal", "Терминал"),
         "TerminalCreateSession": ("Create session", "Создать сессию"),
-        "TerminalNewShell": ("Open command line", "Открыть командную строку"),
         "TerminalStoppedLine": ("Claude Code stopped. The conversation is saved: press Enter to continue.", "Claude Code остановился. Разговор сохранён: нажми Enter, чтобы продолжить."),
         "TerminalResume": ("Continue", "Продолжить"),
         "TerminalRenameSession": ("Rename", "Переименовать"),
@@ -403,7 +429,9 @@ public enum Strings {
         "TerminalChooseFolder": ("Choose another folder", "Выбрать другую папку"),
         "TerminalNoSessionsTitle": ("Start your first session in {0}", "Начни первую сессию в среде {0}"),
         "TerminalNoSessionsBody": ("A session is one conversation with Claude Code in one folder.", "Сессия — это один разговор с Claude Code в одной папке."),
-        "TerminalEmptyTalk": ("The session starts with your first message. Change the folder, model or mode in the line under the field.", "Сессия начнётся с первого сообщения. Папку, модель и режим можно сменить в строке под полем."),
+        "TerminalStarting": ("Starting…", "Запускается…"),
+        "TerminalNotStartedTitle": ("Claude Code did not start", "Claude Code не запустился"),
+        "TerminalNotStartedBody": ("Aiko did not find it on this computer. Install Claude Code, then open the session again.", "Aiko не нашла его на этом компьютере. Установи Claude Code и открой сессию снова."),
         "TerminalWorking": ("working", "работает"),
         "TerminalWaiting": ("waiting", "ждёт"),
         "TerminalDone": ("done", "готово"),
@@ -615,6 +643,9 @@ public enum Strings {
 
     /// Start with Windows
     public static var startWithWindows: String { Strings.get("StartWithWindows") }
+
+    /// Open the terminal window too
+    public static var openTerminalAtStartup: String { Strings.get("OpenTerminalAtStartup") }
 
     /// Start at login
     public static var startAtLogin: String { Strings.get("StartAtLogin") }
@@ -1528,14 +1559,89 @@ public enum Strings {
     /// on
     public static var stateOn: String { Strings.get("StateOn") }
 
+    /// Find a session or a conversation
+    public static var terminalSearchHint: String { Strings.get("TerminalSearchHint") }
+
+    /// ↑ ↓ choose · Enter open · Esc close
+    public static var terminalSearchKeys: String { Strings.get("TerminalSearchKeys") }
+
+    /// Open
+    public static var terminalSearchOpen: String { Strings.get("TerminalSearchOpen") }
+
+    /// Closed
+    public static var terminalSearchClosed: String { Strings.get("TerminalSearchClosed") }
+
+    /// Started outside Aiko
+    public static var terminalSearchOutside: String { Strings.get("TerminalSearchOutside") }
+
+    /// terminal
+    public static var terminalSourceTerminal: String { Strings.get("TerminalSourceTerminal") }
+
+    /// other app
+    public static var terminalSourceOther: String { Strings.get("TerminalSourceOther") }
+
+    /// New session
+    public static var terminalNewSession: String { Strings.get("TerminalNewSession") }
+
+    /// Ctrl+Shift+T
+    public static var terminalNewSessionKey: String { Strings.get("TerminalNewSessionKey") }
+
+    /// New session of Claude Code in this folder
+    public static var terminalGroupNewSession: String { Strings.get("TerminalGroupNewSession") }
+
+    /// Command line in this folder
+    public static var terminalGroupNewShell: String { Strings.get("TerminalGroupNewShell") }
+
+    /// Folder for the new session
+    public static var terminalPickFolderHint: String { Strings.get("TerminalPickFolderHint") }
+
+    /// ↑ ↓ choose · Enter Claude Code · Ctrl+Enter command line · Esc close
+    public static var terminalPickFolderKeys: String { Strings.get("TerminalPickFolderKeys") }
+
+    /// Another folder…
+    public static var terminalPickOtherFolder: String { Strings.get("TerminalPickOtherFolder") }
+
+    /// thinking
+    public static var terminalEventThinking: String { Strings.get("TerminalEventThinking") }
+
+    /// reading {0}
+    public static var terminalEventReading: String { Strings.get("TerminalEventReading") }
+
+    /// editing {0}
+    public static var terminalEventEditing: String { Strings.get("TerminalEventEditing") }
+
+    /// running: {0}
+    public static var terminalEventRunning: String { Strings.get("TerminalEventRunning") }
+
+    /// searching: {0}
+    public static var terminalEventSearching: String { Strings.get("TerminalEventSearching") }
+
+    /// on the web: {0}
+    public static var terminalEventBrowsing: String { Strings.get("TerminalEventBrowsing") }
+
+    /// agent: {0}
+    public static var terminalEventDelegating: String { Strings.get("TerminalEventDelegating") }
+
+    /// tool: {0}
+    public static var terminalEventUsing: String { Strings.get("TerminalEventUsing") }
+
+    /// waits for permission: {0}
+    public static var terminalEventAsksPermission: String { Strings.get("TerminalEventAsksPermission") }
+
+    /// waits for your answer
+    public static var terminalEventAsksQuestion: String { Strings.get("TerminalEventAsksQuestion") }
+
+    /// the turn failed
+    public static var terminalEventFailed: String { Strings.get("TerminalEventFailed") }
+
+    /// stopped on the limit
+    public static var terminalEventOutOfLimit: String { Strings.get("TerminalEventOutOfLimit") }
+
     /// Terminal
     public static var terminalTitle: String { Strings.get("TerminalTitle") }
 
     /// Create session
     public static var terminalCreateSession: String { Strings.get("TerminalCreateSession") }
-
-    /// Open command line
-    public static var terminalNewShell: String { Strings.get("TerminalNewShell") }
 
     /// Claude Code stopped. The conversation is saved: press Enter to continue.
     public static var terminalStoppedLine: String { Strings.get("TerminalStoppedLine") }
@@ -1558,8 +1664,14 @@ public enum Strings {
     /// A session is one conversation with Claude Code in one folder.
     public static var terminalNoSessionsBody: String { Strings.get("TerminalNoSessionsBody") }
 
-    /// The session starts with your first message. Change the folder, model or mode in the line ...
-    public static var terminalEmptyTalk: String { Strings.get("TerminalEmptyTalk") }
+    /// Starting…
+    public static var terminalStarting: String { Strings.get("TerminalStarting") }
+
+    /// Claude Code did not start
+    public static var terminalNotStartedTitle: String { Strings.get("TerminalNotStartedTitle") }
+
+    /// Aiko did not find it on this computer. Install Claude Code, then open the session again.
+    public static var terminalNotStartedBody: String { Strings.get("TerminalNotStartedBody") }
 
     /// working
     public static var terminalWorking: String { Strings.get("TerminalWorking") }

@@ -25,6 +25,9 @@ public sealed record TerminalSession(string Id, string Environment, string Folde
 
     /// When something last happened in it, in seconds since 1970. Zero when nothing did.
     public long LastUsed { get; init; }
+
+    /// The person gave the name: the title of Claude Code does not change it any more (D-352).
+    public bool Named { get; init; }
 }
 
 /// The sessions of one folder, as one group of the list.
@@ -108,7 +111,14 @@ public sealed record TerminalSessions(IReadOnlyList<TerminalSession> Sessions, s
 
     /// An empty name changes nothing: a session is never left without one.
     public TerminalSessions Rename(string id, string name) =>
-        SessionName.Clean(name) is { Length: > 0 } clean ? With(id, session => session with { Name = clean }) : this;
+        SessionName.Clean(name) is { Length: > 0 } clean ? With(id, session => session with { Name = clean, Named = true }) : this;
+
+    /// Claude Code named the conversation in its title (D-352). A name the person gave stays, and
+    /// a shell keeps its own.
+    public TerminalSessions Titled(string id, string name) =>
+        SessionName.Clean(name) is { Length: > 0 } clean && Find(id) is { Named: false, Kind: SessionKind.Claude } session && session.Name != clean
+            ? With(id, one => one with { Name = clean })
+            : this;
 
     /// Claude Code has the conversation now.
     public TerminalSessions MarkStarted(string id) => With(id, session => session with { Started = true });
@@ -139,6 +149,28 @@ public sealed record TerminalSessions(IReadOnlyList<TerminalSession> Sessions, s
         }
 
         return next;
+    }
+
+    /// A closed session the palette found comes back to the list at its old place, and the window
+    /// goes into it (D-346). A session in the list is only opened.
+    public TerminalSessions Reopen(string id, long now) => Find(id) switch
+    {
+        null => this,
+        { Closed: false } => Opened(id),
+        _ => With(id, session => session with { Closed = false, LastUsed = now }) with { LastId = id },
+    };
+
+    /// A conversation started outside Aiko joins the list as a session that Claude Code already
+    /// has, so it starts with --resume (D-353). One that is already a session is reopened.
+    public TerminalSessions Found(Conversation conversation, long now)
+    {
+        if (Find(conversation.Id) is not null)
+        {
+            return Reopen(conversation.Id, now);
+        }
+
+        var added = Add(conversation.Id, conversation.Environment, conversation.Folder, conversation.Name, now);
+        return added.Find(conversation.Id) is null ? this : added.MarkStarted(conversation.Id);
     }
 
     /// The person went into this session.
@@ -235,6 +267,11 @@ public sealed record TerminalSessions(IReadOnlyList<TerminalSession> Sessions, s
                 }
                 writer.WriteBoolean("started", session.Started);
                 writer.WriteBoolean("closed", session.Closed);
+                // Only a name the person gave is marked, so older files keep their shape.
+                if (session.Named)
+                {
+                    writer.WriteBoolean("named", true);
+                }
                 writer.WriteNumber("lastUsed", session.LastUsed);
                 writer.WriteEndObject();
             }
@@ -275,6 +312,7 @@ public sealed record TerminalSessions(IReadOnlyList<TerminalSession> Sessions, s
             Kind = Word(item, "kind") == "shell" ? SessionKind.Shell : SessionKind.Claude,
             Started = Flag(item, "started"),
             Closed = Flag(item, "closed"),
+            Named = Flag(item, "named"),
             LastUsed = item.TryGetProperty("lastUsed", out var used) && used.ValueKind == JsonValueKind.Number && used.TryGetInt64(out var seconds)
                 ? seconds
                 : 0,
