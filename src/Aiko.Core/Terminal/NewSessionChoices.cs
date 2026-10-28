@@ -130,6 +130,21 @@ public static class NewSessionChoices
         return headers;
     }
 
+    /// The folder a draft stands on: the one asked for, kept inside the list, or none in an empty list.
+    public static int ChosenFolder(int? asked, int count) => count == 0 ? -1 : Math.Clamp(asked ?? 0, 0, count - 1);
+
+    /// The folders after one is picked with the dialog: a folder of the list is chosen where it
+    /// is; another one comes first, among the recent ones. Its path is written as the list writes
+    /// paths, so the same folder picked again is found.
+    public static (IReadOnlyList<FolderChoice> Folders, int Chosen) Picked(IReadOnlyList<FolderChoice> folders, string picked)
+    {
+        var path = SessionName.FolderPath(picked);
+        var at = folders.ToList().FindIndex(folder => string.Equals(folder.Path, path, StringComparison.OrdinalIgnoreCase));
+        return at >= 0
+            ? (folders, at)
+            : ([new FolderChoice(path, SessionName.FolderName(path), FolderSource.Recent), .. folders], 0);
+    }
+
     /// The model the form starts with: the one of the session of the environment that was used
     /// last and has a model of the list. With no such session it is the first of the list.
     /// models are the short names offered; without them, the list above.

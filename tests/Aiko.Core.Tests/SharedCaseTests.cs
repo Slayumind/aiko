@@ -1326,6 +1326,27 @@ public class SharedCaseTests
     }
 
     [Fact]
+    public void Every_folder_picked_for_a_draft_lands_the_same()
+    {
+        var cases = SpecCases.Json("new-session");
+        foreach (var row in cases.GetProperty("picked").EnumerateArray())
+        {
+            List<FolderChoice> folders = [.. row.GetProperty("folders").EnumerateArray().Select(path =>
+                new FolderChoice(path.GetString()!, SessionName.FolderName(path.GetString()!), FolderSource.Bound))];
+            var (after, chosen) = NewSessionChoices.Picked(folders, row.GetProperty("picked").GetString()!);
+            var name = row.GetProperty("name").GetString();
+            Assert.True(Strings(row.GetProperty("after")).SequenceEqual(after.Select(folder => folder.Path)), $"{name}: {string.Join(", ", after.Select(folder => folder.Path))}");
+            Assert.True(row.GetProperty("chosen").GetInt32() == chosen, $"{name}: chosen {chosen}");
+        }
+
+        foreach (var row in cases.GetProperty("chosenFolder").EnumerateArray())
+        {
+            int? asked = row.GetProperty("asked").ValueKind == JsonValueKind.Null ? null : row.GetProperty("asked").GetInt32();
+            Assert.Equal(row.GetProperty("chosen").GetInt32(), NewSessionChoices.ChosenFolder(asked, row.GetProperty("count").GetInt32()));
+        }
+    }
+
+    [Fact]
     public void Every_form_of_a_new_session_offers_the_same()
     {
         var cases = SpecCases.Json("new-session");

@@ -1202,6 +1202,24 @@ struct SharedCaseTests {
     }
 
     @Test
+    func everyFolderPickedForADraftLandsTheSame() {
+        let cases = SpecCases.json("new-session")
+        for row in cases["picked"]?.arrayValue ?? [] {
+            let folders = (row["folders"]?.arrayValue ?? []).compactMap(\.stringValue).map {
+                FolderChoice(path: $0, name: SessionName.folderName($0), source: .bound)
+            }
+            let landed = NewSessionChoices.picked(folders, row["picked"]?.stringValue ?? "")
+            let name = row["name"]?.stringValue ?? ""
+            #expect(landed.folders.map(\.path) == (row["after"]?.arrayValue ?? []).compactMap(\.stringValue), "\(name)")
+            #expect(landed.chosen == Int(row["chosen"]?.int64Value ?? -2), "\(name): chosen")
+        }
+        for row in cases["chosenFolder"]?.arrayValue ?? [] {
+            let asked = row["asked"]?.int64Value.map { Int($0) }
+            #expect(NewSessionChoices.chosenFolder(asked, count: Int(row["count"]?.int64Value ?? 0)) == Int(row["chosen"]?.int64Value ?? -2))
+        }
+    }
+
+    @Test
     func everyFormOfANewSessionOffersTheSame() {
         let cases = SpecCases.json("new-session")
         let settings = EnvironmentSettings((cases["environments"]?.arrayValue ?? []).map(Self.environmentIn))

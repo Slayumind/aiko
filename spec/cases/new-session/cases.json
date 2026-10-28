@@ -1,5 +1,5 @@
 {
-  "comment": "What the form of a new session offers (D-293, D-300). The folders, each once: the five where sessions of the environment were used last (closed ones too), then every bound folder followed by up to eight folders right inside it, the ones changed last (the list given here is in that order). A folder is one whatever the case of its letters. The form names the other environment a folder is bound to. An empty name field shows the name the session will get. The model the form starts with is the one of the session of the environment that was used last and has a model from the list; a full id like \"claude-opus-4\" counts as its family, \"opus\". With none it is the first of the list.",
+  "comment": "What the form of a new session offers (D-293, D-300). The folders, each once: the five where sessions of the environment were used last (closed ones too), then every bound folder followed by up to eight folders right inside it, the ones changed last (the list given here is in that order). A folder is one whatever the case of its letters. The form names the other environment a folder is bound to. An empty name field shows the name the session will get. The model the form starts with is the one of the session of the environment that was used last and has a model from the list; a full id like \"claude-opus-4\" counts as its family, \"opus\". With none it is the first of the list. picked: a folder chosen with the dialog is chosen where it stands in the list, whatever its case; another one comes first, as a recent one. chosenFolder: the folder a draft stands on stays inside the list, none in an empty one.",
   "platform": "windows",
   "environments": [
     {
@@ -541,6 +541,82 @@
           "group": "bound"
         }
       ]
+    }
+  ],
+  "picked": [
+    {
+      "name": "a folder of the list is chosen where it is",
+      "folders": [
+        "/work/aiko",
+        "/work/site"
+      ],
+      "picked": "/work/site",
+      "after": [
+        "/work/aiko",
+        "/work/site"
+      ],
+      "chosen": 1
+    },
+    {
+      "name": "the case of its letters does not matter",
+      "folders": [
+        "/work/Aiko",
+        "/work/site"
+      ],
+      "picked": "/work/aiko",
+      "after": [
+        "/work/Aiko",
+        "/work/site"
+      ],
+      "chosen": 0
+    },
+    {
+      "name": "another folder comes first",
+      "folders": [
+        "/work/aiko"
+      ],
+      "picked": "/work/new",
+      "after": [
+        "/work/new",
+        "/work/aiko"
+      ],
+      "chosen": 0
+    },
+    {
+      "name": "into an empty list",
+      "folders": [],
+      "picked": "/work/new",
+      "after": [
+        "/work/new"
+      ],
+      "chosen": 0
+    }
+  ],
+  "chosenFolder": [
+    {
+      "asked": null,
+      "count": 3,
+      "chosen": 0
+    },
+    {
+      "asked": 2,
+      "count": 3,
+      "chosen": 2
+    },
+    {
+      "asked": 7,
+      "count": 3,
+      "chosen": 2
+    },
+    {
+      "asked": -1,
+      "count": 3,
+      "chosen": 0
+    },
+    {
+      "asked": 0,
+      "count": 0,
+      "chosen": -1
     }
   ]
 }
