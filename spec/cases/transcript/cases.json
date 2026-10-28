@@ -1418,6 +1418,37 @@
           }
         ]
       }
+    },
+    {
+      "name": "a command of \"!\" that failed comes back with its exit code",
+      "lines": [
+        {
+          "type": "user",
+          "message": {
+            "role": "user",
+            "content": [
+              {
+                "type": "text",
+                "text": "<bash-input>ls nowhere</bash-input>\n<bash-stdout>ls: cannot access 'nowhere'</bash-stdout><bash-stderr>Exit code 2</bash-stderr>"
+              }
+            ]
+          }
+        }
+      ],
+      "state": {
+        "activity": "idle",
+        "mode": "plan",
+        "busy": false,
+        "nextId": 2,
+        "items": [
+          {
+            "shell": "ls nowhere",
+            "state": "done",
+            "output": "ls: cannot access 'nowhere'",
+            "exitCode": 2
+          }
+        ]
+      }
     }
   ]
 }

@@ -38,15 +38,22 @@ public static class ShellCommand
     /// A message of a person in the file of a conversation that is a command of "!": its command,
     /// and its output when the same message has it. Claude Code writes the command and its output
     /// as two messages; Aiko writes them as one.
-    public static (string Command, string? Output)? Read(string text)
+    public static (string Command, string? Output, int ExitCode)? Read(string text)
     {
         if (Tagged(text, InputTag) is not { } command)
         {
             return null;
         }
 
-        return (command, Output(text));
+        return (command, Output(text), ExitCodeIn(Tagged(text, ErrorTag)));
     }
+
+    /// Aiko writes the exit code of a command that failed in the place of the errors.
+    private static int ExitCodeIn(string? errors) =>
+        errors is not null && errors.StartsWith("Exit code ", StringComparison.Ordinal)
+            && int.TryParse(errors["Exit code ".Length..], System.Globalization.NumberStyles.AllowLeadingSign, System.Globalization.CultureInfo.InvariantCulture, out var code)
+            ? code
+            : 0;
 
     /// The output alone: the second message Claude Code writes for a command of "!".
     public static string? Output(string text)
@@ -56,6 +63,12 @@ public static class ShellCommand
         if (output is null && errors is null)
         {
             return null;
+        }
+
+        // The exit code Aiko wrote there is not output: the feed shows it on a line of its own.
+        if (ExitCodeIn(errors) != 0)
+        {
+            errors = null;
         }
 
         return string.Join("\n", new[] { output, errors }.Where(part => part is { Length: > 0 }));

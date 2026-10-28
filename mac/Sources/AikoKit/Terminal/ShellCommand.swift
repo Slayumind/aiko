@@ -35,17 +35,28 @@ public enum ShellCommand {
     /// A message of a person in the file of a conversation that is a command of "!": its command,
     /// and its output when the same message has it. Claude Code writes the command and its output
     /// as two messages; Aiko writes them as one.
-    public static func read(_ text: String) -> (command: String, output: String?)? {
+    public static func read(_ text: String) -> (command: String, output: String?, exitCode: Int)? {
         guard let command = tagged(text, inputTag) else { return nil }
-        return (command, output(text))
+        return (command, output(text), exitCodeIn(tagged(text, errorTag)))
+    }
+
+    /// Aiko writes the exit code of a command that failed in the place of the errors.
+    private static func exitCodeIn(_ errors: String?) -> Int {
+        guard let errors, errors.hasPrefix("Exit code ") else { return 0 }
+        return Int(errors.dropFirst("Exit code ".count)) ?? 0
     }
 
     /// The output alone: the second message Claude Code writes for a command of "!".
     public static func output(_ text: String) -> String? {
         let printed = tagged(text, outputTag)
-        let errors = tagged(text, errorTag)
+        var errors = tagged(text, errorTag)
         if printed == nil && errors == nil {
             return nil
+        }
+
+        // The exit code Aiko wrote there is not output: the feed shows it on a line of its own.
+        if exitCodeIn(errors) != 0 {
+            errors = nil
         }
         return [printed, errors].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: "\n")
     }

@@ -108,7 +108,7 @@ public static class Transcript
         {
             return state with
             {
-                Items = [.. state.Items, new FeedItem.Shell(state.NextId, shell.Command, ShellState.Done, shell.Output ?? "", 0)],
+                Items = [.. state.Items, new FeedItem.Shell(state.NextId, shell.Command, ShellState.Done, shell.Output ?? "", shell.ExitCode)],
                 NextId = state.NextId + 1,
             };
         }

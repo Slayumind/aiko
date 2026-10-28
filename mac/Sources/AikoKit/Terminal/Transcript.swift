@@ -79,7 +79,7 @@ public enum Transcript {
 
         // A command of "!". Claude Code writes its output as the next message; Aiko, in the same one.
         if let shell = ShellCommand.read(said) {
-            return added(state, .shell(command: shell.command, state: .done, output: shell.output ?? "", exitCode: 0))
+            return added(state, .shell(command: shell.command, state: .done, output: shell.output ?? "", exitCode: shell.exitCode))
         }
         if let printed = ShellCommand.output(said), let last = state.items.last,
            case .shell(let command, let shellState, _, let exitCode) = last.content {

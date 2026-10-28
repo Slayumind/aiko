@@ -569,6 +569,7 @@ public class SharedCaseTests
             var read = ShellCommand.Read(row.GetProperty("text").GetString()!);
             Assert.Equal(Text(row.GetProperty("command")), read?.Command);
             Assert.Equal(Text(row.GetProperty("output")), read?.Output);
+            Assert.Equal(row.TryGetProperty("exitCode", out var code) ? code.GetInt32() : 0, read?.ExitCode ?? 0);
         }
 
         foreach (var row in cases.GetProperty("outputs").EnumerateArray())

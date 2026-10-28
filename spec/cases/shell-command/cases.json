@@ -1,5 +1,5 @@
 {
-  "comment": "A command of \"!\" (D-343). of: the command typed after \"!\", null when the text is not one. message: what Claude gets, in the tags Claude Code writes for \"!\"; a failed command says its exit code in the place of the errors. read: a message of the person in the file of a conversation; command is null when it is not a \"!\", output is null when the message has none (Claude Code writes the output as the next message, and that message alone is in outputs).",
+  "comment": "A command of \"!\" (D-343). of: the command typed after \"!\", null when the text is not one. message: what Claude gets, in the tags Claude Code writes for \"!\"; a failed command says its exit code in the place of the errors. read: a message of the person in the file of a conversation; command is null when it is not a \"!\", output is null when the message has none (Claude Code writes the output as the next message, and that message alone is in outputs). The exit code Aiko writes for a failed command is read back as the exit code, not as output.",
   "of": [
     {
       "text": "!git status",
@@ -54,7 +54,8 @@
     {
       "text": "<bash-input>ls nowhere</bash-input>\n<bash-stdout>ls: cannot access 'nowhere'</bash-stdout><bash-stderr>Exit code 2</bash-stderr>",
       "command": "ls nowhere",
-      "output": "ls: cannot access 'nowhere'\nExit code 2"
+      "output": "ls: cannot access 'nowhere'",
+      "exitCode": 2
     },
     {
       "text": "hello",

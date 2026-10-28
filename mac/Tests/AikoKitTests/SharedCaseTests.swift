@@ -588,6 +588,7 @@ struct SharedCaseTests {
             let read = ShellCommand.read(row["text"]?.stringValue ?? "")
             #expect(read?.command == row["command"]?.stringValue)
             #expect(read?.output == row["output"]?.stringValue)
+            #expect((read?.exitCode ?? 0) == Int(row["exitCode"]?.int64Value ?? 0))
         }
         for row in cases["outputs"]?.arrayValue ?? [] {
             #expect(ShellCommand.output(row["text"]?.stringValue ?? "") == row["output"]?.stringValue)
