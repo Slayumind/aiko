@@ -158,10 +158,14 @@ public struct Outcome: Sendable, Equatable {
     public let written: [String]
     public var shell: ShellRun?
 
-    public init(state: Conversation, written: [String], shell: ShellRun? = nil) {
+    /// Asks the host to stop the command of "!" that runs.
+    public var stopShell: Bool
+
+    public init(state: Conversation, written: [String], shell: ShellRun? = nil, stopShell: Bool = false) {
         self.state = state
         self.written = written
         self.shell = shell
+        self.stopShell = stopShell
     }
 }
 
@@ -199,6 +203,9 @@ public struct Conversation: Sendable, Equatable {
     public var contextTokens = 0
     public var contextWindow = 0
 
+    /// The command of "!" the person stopped: its end goes to the feed, not to Claude.
+    public var stoppedShell = 0
+
     /// Nil until the first turn is over: only its result names the window.
     public var contextPercent: Int? { ContextGauge.percent(tokens: contextTokens, window: contextWindow) }
 
@@ -215,7 +222,20 @@ public struct Conversation: Sendable, Equatable {
     }
 
     /// A turn can end while a subagent still works in the background (D-305).
-    public var isBusy: Bool { inTurn || tasks > 0 }
+    /// A command of "!" keeps the session busy too: closing it asks first, and nothing stops it as idle.
+    public var isBusy: Bool { claudeBusy || shellRunning }
+
+    /// Claude Code itself works: a turn, or a subagent in the background.
+    private var claudeBusy: Bool { inTurn || tasks > 0 }
+
+    public var shellRunning: Bool { runningShell != nil }
+
+    private var runningShell: FeedItem? {
+        items.first { item in
+            if case .shell(_, .running, _, _) = item.content { return true }
+            return false
+        }
+    }
 
     /// The model asked last, or the one Claude Code named when nothing is asked.
     public var latestModel: String { askedModel.isEmpty ? model : askedModel }
@@ -440,7 +460,7 @@ public struct Conversation: Sendable, Equatable {
             return Outcome(state: self, written: [])
         }
 
-        let waits = inTurn || hasOpenCard
+        let waits = inTurn || hasOpenCard || shellRunning
         var next = self
         next.failure = .none
         next.unread = false
@@ -454,7 +474,13 @@ public struct Conversation: Sendable, Equatable {
         if !waits {
             return next.sent(next.items[next.items.count - 1])
         }
-        return Outcome(state: next, written: Conversation.isCommand(text) ? [] : [HostLine.userMessage(text, images: images)])
+
+        // While a command of "!" runs and Claude does not, the message waits for its output: it
+        // goes to Claude together with it.
+        let holdsForShell = shellRunning && !inTurn
+        return Outcome(
+            state: next,
+            written: Conversation.isCommand(text) || holdsForShell ? [] : [HostLine.userMessage(text, images: images)])
     }
 
     /// The host ran a command of "!": its output stays in the feed, and Claude gets the command
@@ -464,10 +490,19 @@ public struct Conversation: Sendable, Equatable {
             guard item.id == itemId, case .shell(let command, .running, _, _) = item.content else { continue }
             var next = self
             next.items[index].content = .shell(command: command, state: .done, output: output, exitCode: exitCode)
-            next.inTurn = true
-            return Outcome(
-                state: next,
-                written: [HostLine.userMessage(ShellCommand.message(command, output: output, exitCode: exitCode), images: [])])
+
+            // The messages held while it ran go with it (or alone, when it was stopped), and stay
+            // grey until Claude Code takes them.
+            var written = stoppedShell == itemId
+                ? [] : [HostLine.userMessage(ShellCommand.message(command, output: output, exitCode: exitCode), images: [])]
+            for held in next.items {
+                if case .ownerMessage(let text, true, let attachments) = held.content, !Conversation.isCommand(text) {
+                    written.append(HostLine.userMessage(text, images: attachments))
+                }
+            }
+            next.inTurn = !written.isEmpty
+            next.stoppedShell = 0
+            return Outcome(state: next, written: written)
         }
         return Outcome(state: self, written: [])
     }
@@ -503,8 +538,14 @@ public struct Conversation: Sendable, Equatable {
         return Outcome(state: self, written: [])
     }
 
+    /// Esc stops Claude, or the command of "!" when only it runs.
     public func interrupt() -> Outcome {
-        guard isBusy else {
+        if !claudeBusy, let running = runningShell {
+            var next = self
+            next.stoppedShell = running.id
+            return Outcome(state: next, written: [], stopShell: true)
+        }
+        guard claudeBusy else {
             return Outcome(state: self, written: [])
         }
         var next = self
@@ -536,11 +577,18 @@ public struct Conversation: Sendable, Equatable {
 
     /// Claude Code is gone. If it was in the middle of something, that is a failure to show.
     public func processExited() -> Conversation {
-        if !isBusy && !hasOpenCard {
+        if !claudeBusy && !hasOpenCard {
             return self
         }
 
+        // Messages written to the process that is gone never reach Claude: they stop waiting, or
+        // the session would wait for them forever. The notice under them says what happened.
         var next = self
+        for (index, item) in next.items.enumerated() {
+            if case .ownerMessage(let text, true, let attachments) = item.content, !Conversation.isCommand(text) {
+                next.items[index].content = .ownerMessage(text: text, queued: false, attachments: attachments)
+            }
+        }
         next.agents = []
         next.settle(.failed)
         next.add(.notice(kind: .failed, text: ""))

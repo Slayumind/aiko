@@ -1,5 +1,5 @@
 {
-  "comment": "A conversation as a row of steps and what it has become after them (D-294, D-304, D-305). A step is a line of Claude Code, or something the person does. The answer is the state, the feed and every line written to Claude Code on the way. A message sent during a turn, or while a card waits, goes to Claude Code at once and stays grey until Claude Code says it back (--replay-user-messages): then it was taken into the turn (D-341). While a grey message waits, the session stays at work. A turn that ended does not free the session while a subagent still runs. What a subagent says inside its own work stays out of the feed; its requests do not. glance is the conversation as the list of sessions sees it: what it does and the parts of the one line about it.",
+  "comment": "A conversation as a row of steps and what it has become after them (D-294, D-304, D-305). A step is a line of Claude Code, or something the person does. The answer is the state, the feed and every line written to Claude Code on the way. A message sent during a turn, or while a card waits, goes to Claude Code at once and stays grey until Claude Code says it back (--replay-user-messages): then it was taken into the turn (D-341). While a grey message waits, the session stays at work. A turn that ended does not free the session while a subagent still runs. What a subagent says inside its own work stays out of the feed; its requests do not. glance is the conversation as the list of sessions sees it: what it does and the parts of the one line about it. A command of \"!\" that runs keeps the session at work; a message sent meanwhile waits and goes to Claude with its output, and Esc stops the command without a word to Claude. When Claude Code dies, the grey messages it was given stop waiting.",
   "scenarios": [
     {
       "name": "nothing happened yet",
@@ -3879,7 +3879,7 @@
         }
       ],
       "state": {
-        "activity": "done",
+        "activity": "working",
         "mode": "manual",
         "model": "claude-opus-5-5",
         "session": "s-1",
@@ -3910,11 +3910,11 @@
         "shell: git diff"
       ],
       "glance": {
-        "activity": "done",
-        "line": "answer",
+        "activity": "working",
+        "line": "none",
         "kind": "other",
         "label": "",
-        "text": "Done."
+        "text": ""
       }
     },
     {
@@ -4137,9 +4137,57 @@
           }
         }
       ],
-      "state": {"activity": "done", "mode": "manual", "model": "claude-opus-5-5", "session": "s-1", "tasks": 0, "unread": true, "compacting": false, "limits": 0, "items": [{"owner": "plan it", "images": 0, "queued": false}, {"answer": "Half done.", "streaming": false}], "todos": [{"id": "1", "text": "Read the field", "doing": "Reading the field", "state": "done"}, {"id": "2", "text": "Fix Enter for IME", "doing": "Fixing Enter", "state": "now"}], "context": {"tokens": 150003, "window": 200000, "percent": 75, "level": "quiet"}},
-      "written": ["{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"plan it\"}]}}"],
-      "glance": {"activity": "done", "line": "answer", "kind": "other", "label": "", "text": "Half done."}
+      "state": {
+        "activity": "done",
+        "mode": "manual",
+        "model": "claude-opus-5-5",
+        "session": "s-1",
+        "tasks": 0,
+        "unread": true,
+        "compacting": false,
+        "limits": 0,
+        "items": [
+          {
+            "owner": "plan it",
+            "images": 0,
+            "queued": false
+          },
+          {
+            "answer": "Half done.",
+            "streaming": false
+          }
+        ],
+        "todos": [
+          {
+            "id": "1",
+            "text": "Read the field",
+            "doing": "Reading the field",
+            "state": "done"
+          },
+          {
+            "id": "2",
+            "text": "Fix Enter for IME",
+            "doing": "Fixing Enter",
+            "state": "now"
+          }
+        ],
+        "context": {
+          "tokens": 150003,
+          "window": 200000,
+          "percent": 75,
+          "level": "quiet"
+        }
+      },
+      "written": [
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"plan it\"}]}}"
+      ],
+      "glance": {
+        "activity": "done",
+        "line": "answer",
+        "kind": "other",
+        "label": "",
+        "text": "Half done."
+      }
     },
     {
       "name": "a list with every line done goes when the turn ends; a deleted line goes at once",
@@ -4288,9 +4336,37 @@
           }
         }
       ],
-      "state": {"activity": "done", "mode": "manual", "model": "claude-opus-5-5", "session": "s-1", "tasks": 0, "unread": true, "compacting": false, "limits": 0, "items": [{"owner": "go", "images": 0, "queued": false}, {"answer": "Done.", "streaming": false}]},
-      "written": ["{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"go\"}]}}"],
-      "glance": {"activity": "done", "line": "answer", "kind": "other", "label": "", "text": "Done."}
+      "state": {
+        "activity": "done",
+        "mode": "manual",
+        "model": "claude-opus-5-5",
+        "session": "s-1",
+        "tasks": 0,
+        "unread": true,
+        "compacting": false,
+        "limits": 0,
+        "items": [
+          {
+            "owner": "go",
+            "images": 0,
+            "queued": false
+          },
+          {
+            "answer": "Done.",
+            "streaming": false
+          }
+        ]
+      },
+      "written": [
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"go\"}]}}"
+      ],
+      "glance": {
+        "activity": "done",
+        "line": "answer",
+        "kind": "other",
+        "label": "",
+        "text": "Done."
+      }
     },
     {
       "name": "a line whose creation failed goes, and a subagent's list is not the agent's",
@@ -4396,9 +4472,41 @@
           }
         }
       ],
-      "state": {"activity": "working", "mode": "manual", "model": "claude-opus-5-5", "session": "s-1", "tasks": 0, "unread": false, "compacting": false, "limits": 0, "items": [{"owner": "go", "images": 0, "queued": false}], "todos": [{"id": "4", "text": "beta", "doing": "", "state": "pending"}]},
-      "written": ["{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"go\"}]}}"],
-      "glance": {"activity": "working", "line": "none", "kind": "other", "label": "", "text": ""}
+      "state": {
+        "activity": "working",
+        "mode": "manual",
+        "model": "claude-opus-5-5",
+        "session": "s-1",
+        "tasks": 0,
+        "unread": false,
+        "compacting": false,
+        "limits": 0,
+        "items": [
+          {
+            "owner": "go",
+            "images": 0,
+            "queued": false
+          }
+        ],
+        "todos": [
+          {
+            "id": "4",
+            "text": "beta",
+            "doing": "",
+            "state": "pending"
+          }
+        ]
+      },
+      "written": [
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"go\"}]}}"
+      ],
+      "glance": {
+        "activity": "working",
+        "line": "none",
+        "kind": "other",
+        "label": "",
+        "text": ""
+      }
     },
     {
       "name": "the older tool sends the whole list each time",
@@ -4451,9 +4559,47 @@
           }
         }
       ],
-      "state": {"activity": "working", "mode": "manual", "model": "claude-opus-5-5", "session": "s-1", "tasks": 0, "unread": false, "compacting": false, "limits": 0, "items": [{"owner": "go", "images": 0, "queued": false}], "todos": [{"id": "1", "text": "alpha", "doing": "Doing alpha", "state": "done"}, {"id": "2", "text": "beta", "doing": "Doing beta", "state": "now"}]},
-      "written": ["{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"go\"}]}}"],
-      "glance": {"activity": "working", "line": "none", "kind": "other", "label": "", "text": ""}
+      "state": {
+        "activity": "working",
+        "mode": "manual",
+        "model": "claude-opus-5-5",
+        "session": "s-1",
+        "tasks": 0,
+        "unread": false,
+        "compacting": false,
+        "limits": 0,
+        "items": [
+          {
+            "owner": "go",
+            "images": 0,
+            "queued": false
+          }
+        ],
+        "todos": [
+          {
+            "id": "1",
+            "text": "alpha",
+            "doing": "Doing alpha",
+            "state": "done"
+          },
+          {
+            "id": "2",
+            "text": "beta",
+            "doing": "Doing beta",
+            "state": "now"
+          }
+        ]
+      },
+      "written": [
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"go\"}]}}"
+      ],
+      "glance": {
+        "activity": "working",
+        "line": "none",
+        "kind": "other",
+        "label": "",
+        "text": ""
+      }
     },
     {
       "name": "a conversation made shorter fills less of its context",
@@ -4517,9 +4663,211 @@
           }
         }
       ],
-      "state": {"activity": "done", "mode": "manual", "model": "claude-opus-5-5", "session": "s-1", "tasks": 0, "unread": true, "compacting": false, "limits": 0, "items": [{"owner": "go", "images": 0, "queued": false}, {"answer": "ok", "streaming": false}, {"notice": "compacted", "text": "", "before": 180005, "after": 12000}], "context": {"tokens": 12000, "window": 200000, "percent": 6, "level": "quiet"}},
-      "written": ["{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"go\"}]}}"],
-      "glance": {"activity": "done", "line": "answer", "kind": "other", "label": "", "text": "ok"}
+      "state": {
+        "activity": "done",
+        "mode": "manual",
+        "model": "claude-opus-5-5",
+        "session": "s-1",
+        "tasks": 0,
+        "unread": true,
+        "compacting": false,
+        "limits": 0,
+        "items": [
+          {
+            "owner": "go",
+            "images": 0,
+            "queued": false
+          },
+          {
+            "answer": "ok",
+            "streaming": false
+          },
+          {
+            "notice": "compacted",
+            "text": "",
+            "before": 180005,
+            "after": 12000
+          }
+        ],
+        "context": {
+          "tokens": 12000,
+          "window": 200000,
+          "percent": 6,
+          "level": "quiet"
+        }
+      },
+      "written": [
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"go\"}]}}"
+      ],
+      "glance": {
+        "activity": "done",
+        "line": "answer",
+        "kind": "other",
+        "label": "",
+        "text": "ok"
+      }
+    },
+    {
+      "name": "a running \"!\" keeps the session at work, and Esc stops it without a word to Claude",
+      "steps": [
+        {
+          "do": "send",
+          "text": "!npm test"
+        },
+        {
+          "do": "interrupt"
+        },
+        {
+          "do": "shellEnded",
+          "output": "one test\n(stopped)\n",
+          "exitCode": -1
+        }
+      ],
+      "state": {
+        "activity": "idle",
+        "mode": "manual",
+        "model": "",
+        "session": "",
+        "tasks": 0,
+        "unread": false,
+        "compacting": false,
+        "limits": 0,
+        "items": [
+          {
+            "shell": "npm test",
+            "state": "done",
+            "output": "one test\n(stopped)\n",
+            "exitCode": -1
+          }
+        ]
+      },
+      "written": [
+        "shell: npm test",
+        "stop shell"
+      ],
+      "glance": {
+        "activity": "idle",
+        "line": "none",
+        "kind": "other",
+        "label": "",
+        "text": ""
+      }
+    },
+    {
+      "name": "a message sent while \"!\" runs waits and goes to Claude with its output",
+      "steps": [
+        {
+          "do": "send",
+          "text": "!git status"
+        },
+        {
+          "do": "send",
+          "text": "and fix it"
+        },
+        {
+          "do": "shellEnded",
+          "output": "On branch main\n",
+          "exitCode": 0
+        }
+      ],
+      "state": {
+        "activity": "working",
+        "mode": "manual",
+        "model": "",
+        "session": "",
+        "tasks": 0,
+        "unread": false,
+        "compacting": false,
+        "limits": 0,
+        "items": [
+          {
+            "shell": "git status",
+            "state": "done",
+            "output": "On branch main\n",
+            "exitCode": 0
+          },
+          {
+            "owner": "and fix it",
+            "images": 0,
+            "queued": true
+          }
+        ]
+      },
+      "written": [
+        "shell: git status",
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"<bash-input>git status</bash-input>\\n<bash-stdout>On branch main</bash-stdout><bash-stderr></bash-stderr>\"}]}}",
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"and fix it\"}]}}"
+      ],
+      "glance": {
+        "activity": "working",
+        "line": "none",
+        "kind": "other",
+        "label": "",
+        "text": ""
+      }
+    },
+    {
+      "name": "when Claude Code dies, the grey messages it was given stop waiting",
+      "steps": [
+        {
+          "do": "send",
+          "text": "fix a.txt"
+        },
+        {
+          "line": {
+            "type": "system",
+            "subtype": "init",
+            "session_id": "s-1",
+            "model": "claude-opus-5-5",
+            "permissionMode": "default",
+            "claude_code_version": "2.1.310"
+          }
+        },
+        {
+          "do": "send",
+          "text": "and b.txt"
+        },
+        {
+          "do": "exit"
+        }
+      ],
+      "state": {
+        "activity": "failed",
+        "mode": "manual",
+        "model": "claude-opus-5-5",
+        "session": "s-1",
+        "tasks": 0,
+        "unread": false,
+        "compacting": false,
+        "limits": 0,
+        "items": [
+          {
+            "owner": "fix a.txt",
+            "images": 0,
+            "queued": false
+          },
+          {
+            "owner": "and b.txt",
+            "images": 0,
+            "queued": false
+          },
+          {
+            "notice": "failed",
+            "text": ""
+          }
+        ]
+      },
+      "written": [
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"fix a.txt\"}]}}",
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"and b.txt\"}]}}"
+      ],
+      "glance": {
+        "activity": "failed",
+        "line": "none",
+        "kind": "other",
+        "label": "",
+        "text": ""
+      }
     }
   ]
 }

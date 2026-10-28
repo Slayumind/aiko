@@ -17,14 +17,33 @@ sealed class ShellProcess : IShell
     /// More output than this is not kept: Claude gets far less anyway.
     private const int MostKept = 200_000;
 
+    /// One conversation runs one command at a time (Conversation holds the next one).
+    private Process? _running;
+    private volatile bool _stopped;
+
     public void Run(string command, string folder, Action<string, int> ended) =>
         _ = Task.Run(() =>
         {
+            _stopped = false;
             var (output, code) = RunNow(command, folder);
             ended(output, code);
         });
 
-    private static (string Output, int ExitCode) RunNow(string command, string folder)
+    /// Esc or a closed session: the command and what it started end now.
+    public void Stop()
+    {
+        _stopped = true;
+        try
+        {
+            _running?.Kill(entireProcessTree: true);
+        }
+        catch (Exception error) when (error is InvalidOperationException or System.ComponentModel.Win32Exception)
+        {
+            // It has just ended by itself.
+        }
+    }
+
+    private (string Output, int ExitCode) RunNow(string command, string folder)
     {
         var start = StartFor(command);
         start.WorkingDirectory = folder;
@@ -59,6 +78,7 @@ sealed class ShellProcess : IShell
             process.OutputDataReceived += (_, e) => Keep(e.Data);
             process.ErrorDataReceived += (_, e) => Keep(e.Data);
             process.Start();
+            _running = process;
             using var job = ProcessJob.Around(process);
             process.StandardInput.Close();
             process.BeginOutputReadLine();
@@ -81,6 +101,12 @@ sealed class ShellProcess : IShell
 
             // The last lines come after the exit; this waits for them.
             process.WaitForExit();
+            _running = null;
+            if (_stopped)
+            {
+                Keep("(stopped)");
+            }
+
             return (Text(output), process.ExitCode);
         }
         catch (Exception error) when (error is System.ComponentModel.Win32Exception or InvalidOperationException or IOException)

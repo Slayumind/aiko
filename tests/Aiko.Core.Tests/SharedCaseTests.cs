@@ -878,7 +878,7 @@ public class SharedCaseTests
             Assert.True(
                 JsonNode.DeepEquals(JsonNode.Parse(row.GetProperty("state").GetRawText()), Described(state)),
                 $"{name}: {Described(state).ToJsonString()}");
-            Assert.Equal(Strings(row.GetProperty("written")), written);
+            Assert.True(Strings(row.GetProperty("written")).SequenceEqual(written), $"{name}: written " + string.Join(" || ", written));
         }
     }
 
@@ -899,11 +899,17 @@ public class SharedCaseTests
         var state = Conversation.Empty();
         var written = new List<string>();
 
-        // A command the host is asked to run shows among the lines as "shell: <command>".
+        // A command the host is asked to run shows among the lines as "shell: <command>", and one
+        // it is asked to stop as "stop shell".
         void Take(Outcome outcome)
         {
             state = outcome.State;
             written.AddRange(outcome.Written);
+            if (outcome.StopShell)
+            {
+                written.Add("stop shell");
+            }
+
             if (outcome.Shell is { } run)
             {
                 written.Add("shell: " + run.Command);

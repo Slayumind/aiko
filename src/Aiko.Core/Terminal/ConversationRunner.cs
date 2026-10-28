@@ -23,6 +23,9 @@ public sealed record RunnerSetup(
 public interface IShell
 {
     void Run(string command, string folder, Action<string, int> ended);
+
+    /// Stops the command that runs; its end still comes through ended.
+    void Stop();
 }
 
 /// Runs one conversation: keeps its state, starts Claude Code when the first message is sent and
@@ -47,6 +50,10 @@ public sealed class ConversationRunner(
 
     /// Grows with every start and every stop: what an older process still says is dropped.
     private int _run;
+
+    /// Grows when the conversation is closed: the end of a command of "!" that ran before is
+    /// dropped, so it never starts Claude Code for a session nobody shows.
+    private int _shellRun;
 
     private bool _known = setup.Started;
 
@@ -82,6 +89,12 @@ public sealed class ConversationRunner(
     /// Ends Claude Code. The conversation stays and can go on later with a new process.
     public void Close()
     {
+        _shellRun++;
+        if (State.ShellRunning)
+        {
+            shell?.Stop();
+        }
+
         if (_process is null)
         {
             return;
@@ -107,6 +120,11 @@ public sealed class ConversationRunner(
         }
 
         Write(outcome.Written);
+        if (outcome.StopShell)
+        {
+            shell?.Stop();
+        }
+
         RunShell(outcome.Shell);
         Changed?.Invoke();
     }
@@ -125,8 +143,14 @@ public sealed class ConversationRunner(
             return;
         }
 
-        shell.Run(run.Command, setup.WorkingDirectory, (output, code) =>
-            post(() => Apply(State.ShellEnded(run.ItemId, output, code), startIfNeeded: true)));
+        var shellRun = _shellRun;
+        shell.Run(run.Command, setup.WorkingDirectory, (output, code) => post(() =>
+        {
+            if (shellRun == _shellRun)
+            {
+                Apply(State.ShellEnded(run.ItemId, output, code), startIfNeeded: true);
+            }
+        }));
     }
 
     private bool Start()
