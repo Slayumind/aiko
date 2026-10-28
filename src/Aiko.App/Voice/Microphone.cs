@@ -102,10 +102,13 @@ sealed unsafe class Microphone : IDisposable
             return;
         }
 
+        // The reader ends first, so it cannot give a buffer back to the device after the reset:
+        // a buffer queued then stayed with the driver, its header was freed under it and the
+        // device did not close.
         _stopping = true;
-        PInvoke.waveInReset(_device);
         _filled.Set();
         _reader?.Join();
+        PInvoke.waveInReset(_device);
         Close();
     }
 
