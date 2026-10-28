@@ -946,17 +946,15 @@ sealed class TalkInput : UserControl
             }
             else
             {
-                words.Add(path.Contains(' ') ? $"\"{path}\"" : path);
+                words.Add(path);
             }
         }
 
         if (words.Count > 0)
         {
-            var at = _text.CaretIndex;
-            var before = at > 0 && !char.IsWhiteSpace(_text.Text[at - 1]) ? " " : "";
-            var inserted = before + string.Join(" ", words) + " ";
-            _text.Text = _text.Text.Insert(at, inserted);
-            _text.CaretIndex = at + inserted.Length;
+            var (text, caret) = FileMention.Dropped(_text.Text, _text.CaretIndex, words);
+            _text.Text = text;
+            _text.CaretIndex = caret;
         }
     }
 

@@ -64,6 +64,20 @@ public static class FileMention
         return (text[..query.From] + word + rest, query.From + word.Length);
     }
 
+    /// The field after files are dropped or pasted into it: their paths at the caret, a path with
+    /// a space in quotes, a space before them after a word and one after them, the caret after it.
+    public static (string Text, int Caret) Dropped(string field, int caret, IReadOnlyList<string> paths)
+    {
+        if (paths.Count == 0)
+        {
+            return (field, caret);
+        }
+
+        var before = caret > 0 && !char.IsWhiteSpace(field[caret - 1]) ? " " : "";
+        var inserted = before + string.Join(" ", paths.Select(path => path.Contains(' ') ? $"\"{path}\"" : path)) + " ";
+        return (field.Insert(caret, inserted), caret + inserted.Length);
+    }
+
     /// The file name part of a path, for the menu.
     public static string Name(string path) => path[(path.LastIndexOf('/') + 1)..];
 

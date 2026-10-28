@@ -1,5 +1,5 @@
 {
-  "comment": "The files that \"@\" offers (AIKO-330, D-342). queries: the \"@\" word the caret stands in: \"@\" at the start or after a space, and no space between it and the caret; from is where \"@\" stands, null when there is no such word. matches: at most 10 files for what was typed, best first: the typed letters in the file name, then a name that starts with them, then a shallow folder; a long path costs a little; ties by length, then by the lower-case path. chosen: the field after a file is picked, with the caret after the space. A caret inside the @ word replaces the whole word, not only the part before the caret.",
+  "comment": "The files that \"@\" offers (AIKO-330, D-342). queries: the \"@\" word the caret stands in: \"@\" at the start or after a space, and no space between it and the caret; from is where \"@\" stands, null when there is no such word. matches: at most 10 files for what was typed, best first: the typed letters in the file name, then a name that starts with them, then a shallow folder; a long path costs a little; ties by length, then by the lower-case path. chosen: the field after a file is picked, with the caret after the space. A caret inside the @ word replaces the whole word, not only the part before the caret. Files dropped or pasted into the field go in at the caret as paths: one with a space in quotes, a space before them after a word and one after them.",
   "paths": [
     "README.md",
     "CHANGELOG.md",
@@ -130,6 +130,36 @@
       "path": "docs/talk.md",
       "result": "read @docs/talk.md now",
       "resultCaret": 19
+    }
+  ],
+  "dropped": [
+    {
+      "field": "",
+      "caret": 0,
+      "paths": [
+        "C:\\work\\a.txt"
+      ],
+      "result": "C:\\work\\a.txt ",
+      "resultCaret": 14
+    },
+    {
+      "field": "look at",
+      "caret": 7,
+      "paths": [
+        "C:\\my work\\a.txt",
+        "C:\\work\\b.txt"
+      ],
+      "result": "look at \"C:\\my work\\a.txt\" C:\\work\\b.txt ",
+      "resultCaret": 41
+    },
+    {
+      "field": "look at  now",
+      "caret": 8,
+      "paths": [
+        "a.txt"
+      ],
+      "result": "look at a.txt  now",
+      "resultCaret": 14
     }
   ]
 }

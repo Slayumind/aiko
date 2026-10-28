@@ -58,6 +58,18 @@ public enum FileMention {
         return (String(decoding: result, as: UTF16.self), query.from + word.count)
     }
 
+    /// The field after files are dropped or pasted into it: their paths at the caret, a path with
+    /// a space in quotes, a space before them after a word and one after them, the caret after it.
+    /// The caret counts UTF-16 units, as a text field does.
+    public static func dropped(_ field: String, caret: Int, paths: [String]) -> (text: String, caret: Int) {
+        guard !paths.isEmpty else { return (field, caret) }
+        let units = Array(field.utf16)
+        let afterWord = caret > 0 && ![32, 9, 10, 13].contains(units[caret - 1])
+        let inserted = (afterWord ? " " : "") + paths.map { $0.contains(" ") ? "\"\($0)\"" : $0 }.joined(separator: " ") + " "
+        let result = units[..<caret] + Array(inserted.utf16) + units[caret...]
+        return (String(decoding: result, as: UTF16.self), caret + inserted.utf16.count)
+    }
+
     /// The file name part of a path, for the menu.
     public static func name(_ path: String) -> String {
         path.split(separator: "/", omittingEmptySubsequences: false).last.map(String.init) ?? path
