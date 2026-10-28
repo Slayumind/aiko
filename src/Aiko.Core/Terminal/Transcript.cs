@@ -192,7 +192,7 @@ public static class Transcript
         node.ValueKind == JsonValueKind.Object && node.TryGetProperty(key, out var value) ? value : default;
 
     private static string Word(JsonElement node, string key) =>
-        Member(node, key) is { ValueKind: JsonValueKind.String } value ? value.GetString() ?? "" : "";
+        Member(node, key) is { ValueKind: JsonValueKind.String } value ? StreamEvent.Decoded(value) : "";
 
     private static bool Flag(JsonElement node, string key) => Member(node, key).ValueKind == JsonValueKind.True;
 }
