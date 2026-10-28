@@ -15,10 +15,4 @@ static class TerminalLog
 
     public static void Exited(string environment, bool shell, int exitCode) =>
         Log.Write($"terminal: {(shell ? "a shell" : "Claude Code")} for {environment} exited with {exitCode}");
-
-    /// Where a press of Tab arrived and where it went: for finding who takes the key. Only the
-    /// three answers, never what was typed.
-    public static void TabPressed(bool inChildWindow, bool focusInTerminal, bool toProgram) =>
-        Log.Write($"terminal: Tab came to {(inChildWindow ? "the window of the terminal" : "the main window")}, " +
-            $"focus {(focusInTerminal ? "in" : "outside")} the terminal, {(toProgram ? "sent to the program" : "left to the window")}");
 }

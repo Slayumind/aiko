@@ -51,9 +51,6 @@ sealed class WindowKeys : IDisposable
     /// Tab in a terminal, with Shift or without: true when it went to the program.
     public Func<bool, bool>? TerminalTab { get; set; }
 
-    /// Whether the focus of WPF stands in a terminal now.
-    public Func<bool>? TerminalFocused { get; set; }
-
     private const int VirtualTab = 0x09;
 
     private const int DropFiles = 0x0233;
@@ -89,7 +86,7 @@ sealed class WindowKeys : IDisposable
         }
 
         var key = KeyInterop.KeyFromVirtualKey((int)message.wParam);
-        handled = _pressed(key, Held(VirtualShift), message.hwnd != _window || (TerminalFocused?.Invoke() ?? false));
+        handled = _pressed(key, Held(VirtualShift), message.hwnd != _window);
     }
 
     // ---- Tab, before WPF ----
@@ -105,27 +102,20 @@ sealed class WindowKeys : IDisposable
     private IntPtr _hook;
 
     /// Tab and Shift+Tab in a terminal belong to the program: WPF would move the focus over the
-    /// buttons of the window with them (D-370). The terminal has the keys when the message came to
-    /// its window or when the focus of WPF stands in it. The key goes to the program, and the
-    /// message becomes an empty one, so WPF never sees it.
+    /// buttons of the window with them (D-370). The terminal has the keys when the message comes to
+    /// its window, as the log of the owner showed. The key goes to the program, and the message
+    /// becomes an empty one, so WPF never sees it.
     private IntPtr OnGetMessage(int code, IntPtr wParam, IntPtr lParam)
     {
         if (code >= 0 && wParam == Remove)
         {
             var message = Marshal.PtrToStructure<MSG>(lParam);
             if (message.message == KeyDown && (int)message.wParam == VirtualTab && !Held(VirtualControl) && !Held(VirtualAlt)
-                && (message.hwnd == _window || IsChild(_window, message.hwnd)))
+                && message.hwnd != _window && IsChild(_window, message.hwnd)
+                && (TerminalTab?.Invoke(Held(VirtualShift)) ?? false))
             {
-                var inChild = message.hwnd != _window;
-                var focusIn = TerminalFocused?.Invoke() ?? false;
-                var sent = (inChild || focusIn) && (TerminalTab?.Invoke(Held(VirtualShift)) ?? false);
-                if (sent)
-                {
-                    message.message = NoMessage;
-                    Marshal.StructureToPtr(message, lParam, false);
-                }
-
-                TerminalLog.TabPressed(inChild, focusIn, sent);
+                message.message = NoMessage;
+                Marshal.StructureToPtr(message, lParam, false);
             }
         }
 
