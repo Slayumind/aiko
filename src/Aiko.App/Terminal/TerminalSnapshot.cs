@@ -138,6 +138,9 @@ static class TerminalSnapshot
         scroll.ScrollToVerticalOffset(scroll.ScrollableHeight);
         Settle();
         Write(5);
+        // The feed glides to its end (D-332): measured before the glide is over, it is a few
+        // pixels short of a place it does reach.
+        Glided();
         var behind = (int)Math.Round(scroll.ScrollableHeight - scroll.VerticalOffset);
 
         // The field grows to five lines over the feed, and the reader at the end stays at the end
