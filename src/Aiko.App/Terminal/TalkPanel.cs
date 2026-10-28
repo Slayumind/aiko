@@ -214,6 +214,7 @@ sealed class TalkPanel : UserControl
             // Item ids are counted per conversation: a row of another session must not be
             // taken for the one with the same id here.
             _slots.Clear();
+            FeedRow.ForgetInk();
             _follow = true;
         }
 
@@ -536,6 +537,12 @@ sealed class WorkingMark
 /// One row of the feed, built from its item whenever the item changes.
 sealed class FeedRow : ContentControl
 {
+    /// The streaming answers of the shown session a row was already built for: built again, it
+    /// starts dry. Forgotten when another session comes into view.
+    private static readonly HashSet<int> InkShown = [];
+
+    public static void ForgetInk() => InkShown.Clear();
+
     /// The running piece of the compacting bar, as a share of the bar, and one run in seconds.
     private const double CompactingPiece = 0.25;
     private const double CompactingSeconds = 1.6;
@@ -577,7 +584,7 @@ sealed class FeedRow : ContentControl
             WorkingMark { IsCompacting: true } => Compacting(),
             WorkingMark => Working(),
             FeedItem.OwnerMessage message => Message(message),
-            FeedItem.Answer { Streaming: true } answer => new InkAnswer(answer.Id, answer.Text),
+            FeedItem.Answer { Streaming: true } answer => new InkAnswer(answer.Id, answer.Text, dry: !InkShown.Add(answer.Id)),
             FeedItem.Answer answer => AnswerView.WithCopy(answer.Text),
             FeedItem.Step { Answers.Count: > 0 } step => Answered(step.Answers),
             FeedItem.Step { Declined: true } => Declined(),

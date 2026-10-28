@@ -38,12 +38,18 @@ sealed partial class InkAnswer : StackPanel
     private int _liveAt = -1;
     private UIElement? _live;
 
-    public InkAnswer(int id, string markdown)
+    /// dry: the feed builds the row of an answer it already showed again (scrolled back into
+    /// view, or the session came back): the words already there are dry, only new ones ink.
+    public InkAnswer(int id, string markdown, bool dry = false)
     {
         Id = id;
         Margin = new Thickness(0, 6, 0, 10);
+        _dryAtOnce = dry;
         Update(markdown);
+        _dryAtOnce = false;
     }
+
+    private bool _dryAtOnce;
 
     /// The answer of the feed this view draws.
     public int Id { get; }
@@ -161,6 +167,13 @@ sealed partial class InkAnswer : StackPanel
         var fresh = words - _starts.Count;
         if (fresh <= 0)
         {
+            return;
+        }
+
+        if (_dryAtOnce)
+        {
+            var longAgo = DateTime.UtcNow - Dry;
+            _starts.AddRange(Enumerable.Repeat(longAgo, fresh));
             return;
         }
 

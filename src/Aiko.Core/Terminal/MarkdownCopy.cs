@@ -54,8 +54,29 @@ public static class MarkdownCopy
             MarkdownBlock.Paragraph paragraph => writer.Inlines(paragraph.Inlines),
             MarkdownBlock.Heading heading => writer.Inlines(heading.Inlines),
             MarkdownBlock.Code code => writer.Leaf(code.Text),
+            MarkdownBlock.Table table => InTable(writer, table, from, to),
             _ => "",
         };
+    }
+
+    /// Inside one cell only its selected words go, as in a paragraph; over several cells the
+    /// table goes with the selected words in its cells.
+    private static string InTable(Writer writer, MarkdownBlock.Table table, TextPlace from, TextPlace to)
+    {
+        var start = writer.Next;
+        foreach (var cell in Cells(table))
+        {
+            var count = Walk(cell).Count();
+            if (from.Leaf >= start && to.Leaf < start + count)
+            {
+                writer.Next = start;
+                return writer.Inlines(cell);
+            }
+
+            start += count;
+        }
+
+        return writer.Table(table);
     }
 
     /// Each leaf with the paragraph, heading or block of code it is drawn in.
@@ -70,6 +91,7 @@ public static class MarkdownCopy
                 MarkdownBlock.Code => [((object)block, block)],
                 MarkdownBlock.List list => list.Items.SelectMany(Walk),
                 MarkdownBlock.Quote quote => Walk(quote.Blocks),
+                MarkdownBlock.Table table => Cells(table).SelectMany(Walk).Select(leaf => (leaf, block)),
                 _ => [],
             };
             foreach (var leaf in leaves)
@@ -78,6 +100,10 @@ public static class MarkdownCopy
             }
         }
     }
+
+    /// The cells of a table in the order they are drawn: the header, then row after row.
+    private static IEnumerable<IReadOnlyList<MarkdownInline>> Cells(MarkdownBlock.Table table) =>
+        table.Header.Concat(table.Rows.SelectMany(row => row));
 
     private static IEnumerable<object> Walk(IEnumerable<MarkdownInline> inlines) =>
         inlines.SelectMany(inline => inline switch
@@ -150,8 +176,31 @@ public static class MarkdownCopy
             MarkdownBlock.List list => List(list),
             MarkdownBlock.Quote quote => Quote(Blocks(quote.Blocks)),
             MarkdownBlock.Rule => Rule(),
+            MarkdownBlock.Table table => Table(table),
             _ => "",
         };
+
+        /// A table as markdown, with only the selected words in its cells. A table with nothing
+        /// selected in it writes nothing.
+        public string Table(MarkdownBlock.Table table)
+        {
+            var header = table.Header.Select(Inlines).ToList();
+            var rows = table.Rows.Select(row => row.Select(Inlines).ToList()).ToList();
+            if (header.Concat(rows.SelectMany(row => row)).All(cell => cell.Length == 0))
+            {
+                return "";
+            }
+
+            static string Line(IEnumerable<string> cells) => "| " + string.Join(" | ", cells) + " |";
+            var rule = "|" + string.Join("|", table.Columns.Select(align => align switch
+            {
+                ColumnAlign.Left => ":---",
+                ColumnAlign.Center => ":---:",
+                ColumnAlign.Right => "---:",
+                _ => "---",
+            })) + "|";
+            return string.Join("\n", [Line(header), rule, .. rows.Select(Line)]);
+        }
 
         private static string Prefixed(string prefix, string text) => text.Length == 0 ? "" : prefix + text;
 
