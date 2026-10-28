@@ -1,0 +1,79 @@
+{
+  "comment": "The editor under the terminal (D-354, D-360, D-369). keys: a state of the editor (kind claude or shell, empty, caret on the first and the last line, passing) and a key give an action, the sequence for the program and whether the editor passes every key after it. An empty editor lets through what answers a program: arrows, Enter, Esc, Shift+Tab, Tab, Backspace, digits, \"/\" and Ctrl+C; \"/\" opens a menu of Claude Code, so every key passes after it until Enter, Esc or Ctrl+C. Esc always goes to the program. With text Enter sends and Shift+Enter starts a line. In a command line the arrows on the first and the last line walk the history, and Tab with text completes a path. sends: what goes to the program for a text and pictures, write by write; \\u001b[200~ and \\u001b[201~ open and close a paste. history: steps of the arrows over the commands of a command line. completions: Tab against a made-up folder tree.",
+  "keys": [
+    { "state": ["claude", true, true, true, false], "key": "up", "shift": false, "char": "", "press": ["pass", "\u001b[A", false] },
+    { "state": ["claude", true, true, true, false], "key": "down", "shift": false, "char": "", "press": ["pass", "\u001b[B", false] },
+    { "state": ["claude", true, true, true, false], "key": "left", "shift": false, "char": "", "press": ["pass", "\u001b[D", false] },
+    { "state": ["claude", true, true, true, false], "key": "right", "shift": false, "char": "", "press": ["pass", "\u001b[C", false] },
+    { "state": ["claude", true, true, true, false], "key": "enter", "shift": false, "char": "", "press": ["pass", "\r", false] },
+    { "state": ["claude", true, true, true, false], "key": "enter", "shift": true, "char": "", "press": ["newLine", "", false] },
+    { "state": ["claude", true, true, true, false], "key": "escape", "shift": false, "char": "", "press": ["pass", "\u001b", false] },
+    { "state": ["claude", true, true, true, false], "key": "tab", "shift": true, "char": "", "press": ["pass", "\u001b[Z", false] },
+    { "state": ["claude", true, true, true, false], "key": "tab", "shift": false, "char": "", "press": ["pass", "\t", false] },
+    { "state": ["claude", true, true, true, false], "key": "backspace", "shift": false, "char": "", "press": ["pass", "\u007f", false] },
+    { "state": ["claude", true, true, true, false], "key": "character", "shift": false, "char": "2", "press": ["pass", "2", false] },
+    { "state": ["claude", true, true, true, false], "key": "character", "shift": false, "char": "/", "press": ["pass", "/", true] },
+    { "state": ["claude", true, true, true, false], "key": "character", "shift": false, "char": "п", "press": ["keep", "", false] },
+    { "state": ["claude", true, true, true, false], "key": "interrupt", "shift": false, "char": "", "press": ["pass", "\u0003", false] },
+    { "state": ["claude", true, true, true, true], "key": "character", "shift": false, "char": "m", "press": ["pass", "m", true] },
+    { "state": ["claude", true, true, true, true], "key": "down", "shift": false, "char": "", "press": ["pass", "\u001b[B", true] },
+    { "state": ["claude", true, true, true, true], "key": "backspace", "shift": false, "char": "", "press": ["pass", "\u007f", true] },
+    { "state": ["claude", true, true, true, true], "key": "enter", "shift": false, "char": "", "press": ["pass", "\r", false] },
+    { "state": ["claude", true, true, true, true], "key": "escape", "shift": false, "char": "", "press": ["pass", "\u001b", false] },
+    { "state": ["claude", true, true, true, true], "key": "interrupt", "shift": false, "char": "", "press": ["pass", "\u0003", false] },
+    { "state": ["claude", false, true, true, false], "key": "escape", "shift": false, "char": "", "press": ["pass", "\u001b", false] },
+    { "state": ["claude", false, true, true, false], "key": "enter", "shift": false, "char": "", "press": ["send", "", false] },
+    { "state": ["claude", false, true, true, false], "key": "enter", "shift": true, "char": "", "press": ["newLine", "", false] },
+    { "state": ["claude", false, true, true, false], "key": "up", "shift": false, "char": "", "press": ["keep", "", false] },
+    { "state": ["claude", false, true, true, false], "key": "tab", "shift": false, "char": "", "press": ["keep", "", false] },
+    { "state": ["claude", false, true, true, false], "key": "character", "shift": false, "char": "1", "press": ["keep", "", false] },
+    { "state": ["claude", false, true, true, false], "key": "interrupt", "shift": false, "char": "", "press": ["keep", "", false] },
+    { "state": ["shell", true, true, true, false], "key": "up", "shift": false, "char": "", "press": ["historyBack", "", false] },
+    { "state": ["shell", true, true, true, false], "key": "down", "shift": false, "char": "", "press": ["historyForward", "", false] },
+    { "state": ["shell", true, true, true, false], "key": "tab", "shift": false, "char": "", "press": ["pass", "\t", false] },
+    { "state": ["shell", false, true, false, false], "key": "up", "shift": false, "char": "", "press": ["historyBack", "", false] },
+    { "state": ["shell", false, true, false, false], "key": "down", "shift": false, "char": "", "press": ["keep", "", false] },
+    { "state": ["shell", false, false, true, false], "key": "down", "shift": false, "char": "", "press": ["historyForward", "", false] },
+    { "state": ["shell", false, false, true, false], "key": "up", "shift": false, "char": "", "press": ["keep", "", false] },
+    { "state": ["shell", false, true, true, false], "key": "tab", "shift": false, "char": "", "press": ["complete", "", false] },
+    { "state": ["shell", false, true, true, false], "key": "tab", "shift": true, "char": "", "press": ["keep", "", false] }
+  ],
+  "sends": [
+    { "text": "Почини прокрутку", "pictures": [], "writes": ["\u001b[200~Почини прокрутку\u001b[201~", "\r"] },
+    { "text": "Сначала тесты.\r\nПотом сборка.\n", "pictures": [], "writes": ["\u001b[200~Сначала тесты.\rПотом сборка.\u001b[201~", "\r"] },
+    { "text": "Что на картинке?", "pictures": ["C:\\Users\\someone\\AppData\\Local\\Aiko\\pastes\\s1\\1.png", "C:\\x\\2.png"], "writes": ["\u001b[200~C:\\Users\\someone\\AppData\\Local\\Aiko\\pastes\\s1\\1.png\u001b[201~", "\u001b[200~C:\\x\\2.png\u001b[201~", "\u001b[200~Что на картинке?\u001b[201~", "\r"] },
+    { "text": "", "pictures": ["C:\\x\\2.png"], "writes": ["\u001b[200~C:\\x\\2.png\u001b[201~", "\r"] },
+    { "text": "\n\n", "pictures": [], "writes": [] }
+  ],
+  "history": {
+    "sent": ["git status", "git status", "  ", "npm test"],
+    "steps": [
+      { "do": "back", "text": "dra", "shows": "npm test" },
+      { "do": "back", "text": "npm test", "shows": "git status" },
+      { "do": "back", "text": "git status", "shows": null },
+      { "do": "forward", "shows": "npm test" },
+      { "do": "forward", "shows": "dra" },
+      { "do": "forward", "shows": null }
+    ]
+  },
+  "completions": {
+    "folder": "C:\\work",
+    "tree": {
+      "C:\\work": [["src", true], ["spec", true], ["Spikes", true], ["README.md", false], ["My Notes.txt", false]],
+      "C:\\work\\src": [["Aiko.App", true], ["Aiko.Core", true]],
+      "C:\\other": [["one.txt", false]]
+    },
+    "rows": [
+      { "name": "one folder", "text": "cd sr", "caret": 5, "separator": "/", "result": ["cd src/", 7, []] },
+      { "name": "several agree as far as they go", "text": "cd sp", "caret": 5, "separator": "/", "result": ["cd sp", 5, ["spec/", "Spikes/"]] },
+      { "name": "case does not matter", "text": "cat rea", "caret": 7, "separator": "/", "result": ["cat README.md ", 14, []] },
+      { "name": "inside a folder, with the separator typed", "text": "cd src/Aiko.C", "caret": 13, "separator": "/", "result": ["cd src/Aiko.Core/", 17, []] },
+      { "name": "a common start longer than the typed one", "text": "cd src/a", "caret": 8, "separator": "\\", "result": ["cd src/Aiko.", 12, ["Aiko.App\\", "Aiko.Core\\"]] },
+      { "name": "a name with a space is quoted", "text": "type my", "caret": 7, "separator": "\\", "result": ["type \"My Notes.txt\" ", 20, []] },
+      { "name": "a path from the root of a drive", "text": "cat C:\\other\\o", "caret": 14, "separator": "\\", "result": ["cat C:\\other\\one.txt ", 21, []] },
+      { "name": "the text after the caret stays", "text": "cd sr && ls", "caret": 5, "separator": "/", "result": ["cd src/ && ls", 7, []] },
+      { "name": "nothing fits", "text": "cd zz", "caret": 5, "separator": "/", "result": null },
+      { "name": "an empty word offers the whole folder", "text": "ls ", "caret": 3, "separator": "/", "result": ["ls ", 3, ["My Notes.txt", "README.md", "spec/", "Spikes/", "src/"]] }
+    ]
+  }
+}

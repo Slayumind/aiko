@@ -67,6 +67,9 @@ public sealed record AikoFolders(PlatformConventions Platform, string SettingsBa
     /// The settings every session of the terminal starts with (TerminalHooks).
     public string TerminalHooksFile => Platform.Join(LocalFolder, "terminal-hooks.json");
 
+    /// The pictures pasted into the editor of one session. The folder goes when the session is closed.
+    public string PicturesFolder(string sessionId) => Platform.Join(LocalFolder, "pictures", sessionId);
+
     /// The last answers of the usage API.
     public string DirectCacheFolder => Platform.Join(LocalFolder, "direct");
 

@@ -6,13 +6,15 @@ public sealed record VariableChange(string Name, string? Value);
 
 /// What the terminal needs to know to start Claude Code for one session. HooksFile holds the
 /// settings with the hook of the terminal (TerminalHooks); empty when it could not be written.
+/// PicturesFolder is where the editor keeps the pictures of the session; empty for none.
 public sealed record LaunchRequest(
     string ConfigDirectory,
     string UserProfile,
     string EnvironmentName,
     string SessionId,
     bool Started,
-    string HooksFile = "");
+    string HooksFile = "",
+    string PicturesFolder = "");
 
 /// How the terminal starts a program in a real terminal (D-349, D-360): the arguments of Claude
 /// Code and what changes in the environment of the process. Claude Code chooses its own mode and
@@ -33,6 +35,13 @@ public sealed record ClaudeLaunchPlan(IReadOnlyList<string> Arguments, IReadOnly
         if (request.HooksFile.Length > 0)
         {
             arguments.AddRange(["--settings", request.HooksFile]);
+        }
+
+        // A picture pasted into the editor lies outside the project: without this Claude Code asks
+        // for leave to read it (spike 2026-10).
+        if (request.PicturesFolder.Length > 0)
+        {
+            arguments.AddRange(["--add-dir", request.PicturesFolder]);
         }
 
         var variables = Environment(request.ConfigDirectory, request.UserProfile, inheritedVariables);

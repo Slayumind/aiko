@@ -82,11 +82,13 @@ a row cannot change in one core and stay as it was in the other. See `spec/cases
 | Terminal/FileMention.cs | Terminal/FileMention.swift | 1 | 1 | the files that "@" offers: where the "@" word starts, which files in which order, what the field becomes; a table in `spec/cases/file-mention`. Places are in UTF-16 units on both sides. The Swift twin was not built: the Mac did not answer |
 | Terminal/TextMatch.cs | Terminal/TextMatch.swift | — | — | how the lists of the terminal match what is typed (case and ё do not count), and the quick pick of a folder for a new session (D-350). A table in `spec/cases/text-match`. Places are UTF-16 units in both |
 | Terminal/ConversationFile.cs, SessionSearch.cs | the same names under Terminal/ | — | — | the palette of sessions (D-347, D-353): a conversation of Claude Code read from the start and the end of its file, and what the palette finds in three groups. Tables in `spec/cases/` (`conversation-file`, `session-search`). The snippet counts UTF-16 units in both |
+| Terminal/EditorKeys.cs | Terminal/EditorKeys.swift | — | — | the editor under the terminal (D-354, D-369): what a key does, what a send writes, the history of a command line and Tab for a path. A table in `spec/cases/editor`. Places are UTF-16 units in both; a line break of a send is worked on in units in Swift, where "
+" is one Character |
 | Terminal/TerminalSessions.cs, SessionName.cs | the same names under Terminal/ | — | — | the list of sessions that is the file `terminal.json` and the name a session gets. A name the person gave is marked `named`, and the title of Claude Code does not change it (D-352). Tables in `spec/cases/` (`terminal-sessions`, `session-name`). Names and paths are read as UTF-16 units in both cores |
 | Terminal/SessionRows.cs, WindowPlace.cs, TerminalWindowModel.cs | the same names under Terminal/ | — | — | the window of the terminal without its view: the rows of the list, where the window stands, and which session is chosen. Tables in `spec/cases/terminal-window` |
 | Terminal/TranscriptPath.cs | Terminal/TranscriptPath.swift | — | — | where Claude Code keeps the file of a conversation; a table in `spec/cases/transcript-path` |
 | TerminalPrivacyTests.cs | not yet | 2 | 0 | the source scan: in the terminal only `TerminalLog` writes to the log, and its methods take no text but the name of an environment. The Mac terminal comes back with its own scan (AIKO-351) |
-| — | SharedCaseTests.swift | 26 | 26 | the case files under `spec/cases/`, read by both suites |
+| — | SharedCaseTests.swift | 27 | 27 | the case files under `spec/cases/`, read by both suites |
 | — | UpdateInstaller.swift | — | 6 | the macOS half of an update: the zip, `ditto` and the bundle swap. Windows has Velopack instead, and UpdateInstall.cs holds the same steps around it where no xUnit case can reach them |
 
 The words and the numbers of the card sit in `src/Aiko.App` on Windows, where no xUnit case can

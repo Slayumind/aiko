@@ -84,6 +84,9 @@ public struct AikoFolders: Sendable, Equatable {
     /// The settings every session of the terminal starts with (TerminalHooks).
     public var terminalHooksFile: String { platform.join(localFolder, "terminal-hooks.json") }
 
+    /// The pictures pasted into the editor of one session. The folder goes when the session is closed.
+    public func picturesFolder(_ sessionId: String) -> String { platform.join(localFolder, "pictures", sessionId) }
+
     /// The last answers of the usage API.
     public var directCacheFolder: String { platform.join(localFolder, "direct") }
 

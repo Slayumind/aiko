@@ -90,6 +90,7 @@ struct SharedCaseTests {
                 "activityFolder": folders.activityFolder,
                 "terminalEventsFolder": folders.terminalEventsFolder,
                 "terminalHooksFile": folders.terminalHooksFile,
+                "picturesFolder": folders.picturesFolder(snapshotName),
                 "directCacheFolder": folders.directCacheFolder,
                 "commandsFolder": folders.commandsFolder,
                 "marketplaceFolder": folders.marketplaceFolder,
@@ -449,7 +450,7 @@ struct SharedCaseTests {
                 environmentName: row["environment"]?.stringValue ?? "",
                 sessionId: row["sessionId"]?.stringValue ?? "",
                 started: row["started"]?.boolValue ?? false,
-                hooksFile: row["hooksFile"]?.stringValue ?? "")
+                hooksFile: row["hooksFile"]?.stringValue ?? "", picturesFolder: row["picturesFolder"]?.stringValue ?? "")
 
             let plan = ClaudeLaunchPlan.forRequest(platform, request, inheritedVariables: Self.strings(row["inherited"]))
             let name = row["name"]?.stringValue ?? ""
@@ -629,6 +630,68 @@ struct SharedCaseTests {
             #expect(described(found.open) == row["open"], "\(name), open")
             #expect(described(found.closed) == row["closed"], "\(name), closed")
             #expect(described(found.outside) == row["outside"], "\(name), outside")
+        }
+    }
+
+    @Test
+    func everyEditorDoesTheSame() {
+        let cases = SpecCases.json("editor")
+
+        for row in cases["keys"]?.arrayValue ?? [] {
+            let state = row["state"]?.arrayValue ?? []
+            let press = EditorKeys.press(
+                EditorState(
+                    kind: state[0].stringValue == "shell" ? .shell : .claude, empty: state[1].boolValue ?? false,
+                    firstLine: state[2].boolValue ?? false, lastLine: state[3].boolValue ?? false, passing: state[4].boolValue ?? false),
+                EditorKey(rawValue: row["key"]?.stringValue ?? "") ?? .character,
+                shift: row["shift"]?.boolValue ?? false,
+                character: row["char"]?.stringValue?.first)
+            let expected = row["press"]?.arrayValue ?? []
+            #expect(
+                press == EditorPress(
+                    EditorAction(rawValue: expected[0].stringValue ?? "") ?? .keep, expected[1].stringValue ?? "",
+                    expected[2].boolValue ?? false),
+                "\(row["key"]?.stringValue ?? "") \(row["char"]?.stringValue ?? "")")
+        }
+
+        for row in cases["sends"]?.arrayValue ?? [] {
+            #expect(
+                EditorSend.writes(row["text"]?.stringValue ?? "", pictures: Self.strings(row["pictures"]))
+                    == Self.strings(row["writes"]))
+        }
+
+        let history = cases["history"]
+        var walk = CommandHistory.empty
+        for command in history?["sent"]?.arrayValue ?? [] {
+            walk = walk.sent(command.stringValue ?? "")
+        }
+        for step in history?["steps"]?.arrayValue ?? [] {
+            let shown: String?
+            if step["do"]?.stringValue == "back" {
+                (walk, shown) = walk.back(step["text"]?.stringValue ?? "")
+            } else {
+                (walk, shown) = walk.forward()
+            }
+            #expect(shown == step["shows"]?.stringValue)
+        }
+
+        let completions = cases["completions"]
+        var tree: [String: [FolderEntry]] = [:]
+        for member in completions?["tree"]?.objectValue?.members ?? [] {
+            tree[member.key] = (member.value.arrayValue ?? []).map {
+                FolderEntry($0.arrayValue?[0].stringValue ?? "", $0.arrayValue?[1].boolValue ?? false)
+            }
+        }
+        for row in completions?["rows"]?.arrayValue ?? [] {
+            let done = PathCompletion.complete(
+                row["text"]?.stringValue ?? "", caret: Int(row["caret"]?.int64Value ?? 0),
+                folder: completions?["folder"]?.stringValue ?? "",
+                separator: row["separator"]?.stringValue?.first ?? "/", list: { tree[$0] ?? [] })
+            let expected = row["result"]?.arrayValue
+            #expect(
+                done.map { [$0.text, String($0.caret), $0.choices.joined(separator: ",")] }
+                    == expected.map { [$0[0].stringValue ?? "", String($0[1].int64Value ?? 0), Self.strings($0[2]).joined(separator: ",")] },
+                "\(row["name"]?.stringValue ?? "")")
         }
     }
 
