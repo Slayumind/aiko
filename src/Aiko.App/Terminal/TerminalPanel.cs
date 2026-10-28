@@ -56,6 +56,12 @@ sealed class TerminalPanel : UserControl
     /// The editor under the terminal (D-354): the keyboard is always here.
     public TerminalEditor Editor { get; } = new();
 
+    /// Whether the open session has room for the editor: a terminal that runs.
+    private bool _editorRoom;
+
+    private void ShowEditor() =>
+        Editor.Visibility = _editorRoom && Editor.Wanted ? Visibility.Visible : Visibility.Collapsed;
+
     public TerminalPanel()
     {
         Background = Tokens.Brush("Background");
@@ -134,6 +140,7 @@ sealed class TerminalPanel : UserControl
         terminalSide.Children.Add(_stopped);
         DockPanel.SetDock(Editor, Dock.Bottom);
         terminalSide.Children.Add(Editor);
+        Editor.WantedChanged += ShowEditor;
         terminalSide.Children.Add(_terminals);
         _terminalSide = terminalSide;
 
@@ -628,7 +635,8 @@ sealed class TerminalPanel : UserControl
 
         _stopped.Visibility = terminal is not null && view.Stopped ? Visibility.Visible : Visibility.Collapsed;
         // A program that ended takes no text: the bar to continue it stands in place of the editor.
-        Editor.Visibility = terminal is not null && !view.Stopped ? Visibility.Visible : Visibility.Collapsed;
+        _editorRoom = terminal is not null && !view.Stopped;
+        ShowEditor();
 
         UIElement content = terminal is not null ? _terminalSide
             : view.Ask is { } ask ? Ask(ask)
@@ -663,7 +671,18 @@ sealed class TerminalPanel : UserControl
         }
         else if (_shownTerminal != view.SessionId)
         {
-            Dispatcher.BeginInvoke(Editor.FocusText, System.Windows.Threading.DispatcherPriority.Input);
+            // The keys go where the text is typed: the editor, or the line of Claude Code (D-370).
+            Dispatcher.BeginInvoke(() =>
+            {
+                if (Editor.Wanted)
+                {
+                    Editor.FocusText();
+                }
+                else
+                {
+                    terminal!.FocusTerminal();
+                }
+            }, System.Windows.Threading.DispatcherPriority.Input);
         }
 
         _shownTerminal = view.SessionId;

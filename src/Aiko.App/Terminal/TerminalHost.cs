@@ -64,7 +64,15 @@ sealed class TerminalHost
         {
             _keys = new WindowKeys(new System.Windows.Interop.WindowInteropHelper(_window).Handle, KeyPressed);
             // A click in the terminal selects there, and the keys come back to the editor.
-            _keys.ClickedInside += () => _window.Dispatcher.BeginInvoke(FocusOpenTerminal, System.Windows.Threading.DispatcherPriority.Input);
+            _keys.ClickedInside += () =>
+            {
+                // In a session of Claude Code the keys stay with the terminal (D-370).
+                if (_panel.Editor.Wanted)
+                {
+                    _window.Dispatcher.BeginInvoke(FocusOpenTerminal, System.Windows.Threading.DispatcherPriority.Input);
+                }
+            };
+            _keys.Dropped += Dropped;
         };
         _window.Activated += (_, _) => _voice.Use(SettingsStore.Load());
         _window.Closing += (_, e) =>
@@ -247,10 +255,26 @@ sealed class TerminalHost
     }
 
     /// Ctrl and the key, with Shift or without (D-353). False leaves the key to the program.
-    private bool KeyPressed(System.Windows.Input.Key key, bool shift)
+    private bool KeyPressed(System.Windows.Input.Key key, bool shift, bool inTerminal)
     {
         switch (key)
         {
+            case System.Windows.Input.Key.G when !shift && _model.Session(_sessions)?.Kind == SessionKind.Claude:
+                // A long text for Claude Code in the editor, as the rich input of Warp (D-370).
+                _panel.Editor.Compose();
+                return true;
+            case System.Windows.Input.Key.V when !shift && inTerminal:
+                // A picture goes as a picture, a file as its path, text as text (D-370).
+                if (OpenTerminal() is { } pasteInto && _model.Session(_sessions) is { } pasted)
+                {
+                    _ = WriteInTurn(pasteInto, TerminalPaste.FromClipboard(ThisComputer.Folders.PicturesFolder(pasted.Id)));
+                }
+
+                return true;
+            case System.Windows.Input.Key.C when !shift && inTerminal && OpenTerminal()?.SelectedText is { Length: > 0 } chosen:
+                // With a selection Ctrl+C copies, as in Windows Terminal; without one it stops the program.
+                CopyText(chosen);
+                return true;
             case System.Windows.Input.Key.T when shift:
                 PickFolderQuickly();
                 return true;
@@ -267,14 +291,7 @@ sealed class TerminalHost
                 // Copies what is selected in the terminal, as in Windows Terminal.
                 if (OpenTerminal()?.SelectedText is { Length: > 0 } selected)
                 {
-                    try
-                    {
-                        Clipboard.SetText(selected);
-                    }
-                    catch (System.Runtime.InteropServices.COMException)
-                    {
-                        // Another program holds the clipboard.
-                    }
+                    CopyText(selected);
                 }
 
                 return true;
@@ -391,6 +408,14 @@ sealed class TerminalHost
     {
         var editor = _panel.Editor;
         editor.Passed += sequence => OpenTerminal()?.Type(sequence);
+        editor.Inserted += writes =>
+        {
+            if (OpenTerminal() is { } terminal)
+            {
+                _ = WriteInTurn(terminal, writes);
+            }
+        };
+        editor.WantedChanged += () => _window.Dispatcher.BeginInvoke(FocusOpenTerminal, System.Windows.Threading.DispatcherPriority.Input);
         editor.Sent += writes =>
         {
             if (OpenTerminal() is { } terminal)
@@ -448,7 +473,43 @@ sealed class TerminalHost
 
     /// The editor takes the keys again, after a palette, a dialog or a click in the terminal: the
     /// keyboard is always there (D-354, D-369).
-    private void FocusOpenTerminal() => _panel.Editor.FocusText();
+    private void FocusOpenTerminal()
+    {
+        if (_panel.Editor.Wanted)
+        {
+            _panel.Editor.FocusText();
+        }
+        else
+        {
+            OpenTerminal()?.FocusTerminal();
+        }
+    }
+
+    /// Files dropped on the terminal: into the line of Claude Code, or into the editor of a command line.
+    private void Dropped(IReadOnlyList<string> paths)
+    {
+        if (_panel.Editor.Wanted)
+        {
+            _panel.Editor.DropFiles(paths);
+        }
+        else if (OpenTerminal() is { } terminal)
+        {
+            _ = WriteInTurn(terminal, TerminalPaste.ForFiles(paths));
+            terminal.FocusTerminal();
+        }
+    }
+
+    private static void CopyText(string text)
+    {
+        try
+        {
+            Clipboard.SetText(text);
+        }
+        catch (System.Runtime.InteropServices.COMException)
+        {
+            // Another program holds the clipboard.
+        }
+    }
 
     /// A new session in a folder, in the environment of the open tab, with no question.
     private void StartIn(string folder, SessionKind kind)

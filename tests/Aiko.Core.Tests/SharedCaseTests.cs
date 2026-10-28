@@ -690,7 +690,8 @@ public class SharedCaseTests
             var press = EditorKeys.For(
                 new EditorState(
                     state[0].GetString() == "shell" ? SessionKind.Shell : SessionKind.Claude,
-                    state[1].GetBoolean(), state[2].GetBoolean(), state[3].GetBoolean(), state[4].GetBoolean()),
+                    state[1].GetBoolean(), state[2].GetBoolean(), state[3].GetBoolean(), state[4].GetBoolean(),
+                    state.GetArrayLength() > 5 && state[5].GetBoolean()),
                 Enum.Parse<EditorKey>(row.GetProperty("key").GetString()!, ignoreCase: true),
                 row.GetProperty("shift").GetBoolean(),
                 row.GetProperty("char").GetString() is { Length: > 0 } typed ? typed[0] : '\0');
@@ -705,6 +706,13 @@ public class SharedCaseTests
             Assert.Equal(
                 Strings(row.GetProperty("writes")),
                 EditorSend.Writes(row.GetProperty("text").GetString()!, Strings(row.GetProperty("pictures"))));
+        }
+
+        foreach (var row in cases.GetProperty("inserts").EnumerateArray())
+        {
+            Assert.Equal(
+                Strings(row.GetProperty("writes")),
+                EditorSend.Inserts(row.GetProperty("text").GetString()!, Strings(row.GetProperty("pictures"))));
         }
 
         var history = cases.GetProperty("history");

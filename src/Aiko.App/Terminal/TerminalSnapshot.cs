@@ -67,7 +67,7 @@ static class TerminalSnapshot
         Snapshot.Write(panel, path);
     }
 
-    /// editor (empty), editor-text, editor-shell, editor-voice.
+    /// editor (empty), editor-text, editor-compose, editor-shell, editor-voice.
     private static System.Windows.FrameworkElement Editor(string part)
     {
         var editor = new TerminalEditor { Width = 760 };
@@ -77,6 +77,10 @@ static class TerminalSnapshot
         switch (part)
         {
             case "editor-text":
+                editor.TypedForSnapshot("Сначала проверь, что Esc в пустом редакторе доходит до карточки.\nПотом прогони тесты.", 1);
+                break;
+            case "editor-compose":
+                editor.Compose();
                 editor.TypedForSnapshot("Сначала проверь, что Esc в пустом редакторе доходит до карточки.\nПотом прогони тесты.", 1);
                 break;
             case "editor-shell":

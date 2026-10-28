@@ -160,6 +160,14 @@ static class TerminalEditorCheck
             return done();
         }
 
+        string Plain()
+        {
+            lock (screen)
+            {
+                return Sequence.Replace(screen.ToString(), " ");
+            }
+        }
+
         if (!await Until(() => idle, 30))
         {
             console.WriteInput("\r");
@@ -169,74 +177,87 @@ static class TerminalEditorCheck
         check("Claude Code is ready", idle, "");
         await Task.Delay(1000);
 
-        // 1. Two lines, one message.
+        // 1. One field: the editor of a session of Claude Code is away until Ctrl+G (D-370).
+        check("the editor is away in a session of Claude Code", !editor.Wanted, "");
+        var inserted = new List<string>();
+        editor.Inserted += async writes =>
+        {
+            inserted.AddRange(writes);
+            for (var at = 0; at < writes.Count; at++)
+            {
+                if (at > 0)
+                {
+                    await Task.Delay(60);
+                }
+
+                current.WriteInput(writes[at]);
+            }
+        };
+
+        // 2. Ctrl+G: two lines in the editor go into the line of Claude Code, Enter there sends them.
+        editor.Compose();
+        check("Ctrl+G opens the editor", editor.Wanted && editor.ComposingForCheck, "");
         editor.TypeForCheck("Answer with one word: what is 2+2?");
         editor.Press(Key.Enter, ModifierKeys.Shift);
         editor.TypeForCheck("This second line is part of the same message.");
-        check("Shift+Enter starts a line in the editor", editor.TextForCheck.Contains('\n'), "");
         editor.Press(Key.Enter, ModifierKeys.None);
-        check("Enter sends and empties the editor", sends == 1 && editor.TextForCheck.Length == 0, "");
+        check("Enter puts the text into the line of Claude Code and closes the editor", inserted.Count == 1 && !editor.Wanted && sends == 0, "");
+        await Task.Delay(800);
+        console.WriteInput("\r");
         await Until(() => Last()?.Kind == TerminalEventKind.Finished, 90);
         var transcript = TranscriptPath.For(PlatformConventions.Windows, config, folder, id);
         var messages = UserMessages(transcript).Where(message => !message.Command).ToList();
         check(
             "Claude Code got one message with both lines",
-            messages.Count == 1 && messages[0].Text.Contains("2+2") && messages[0].Text.Contains("second line") && messages[0].Text.Contains('\n'),
+            messages.Count == 1 && messages[0].Text.Contains("2+2") && messages[0].Text.Contains("second line") && (messages[0].Text.Contains('\n') || messages[0].Text.Contains('\r')),
             $"{messages.Count} message(s)");
 
-        // 2. "/" in an empty editor: every key goes to the menu of Claude Code until Enter.
+        // 3. A picture goes straight into the line of Claude Code, as Ctrl+V or a drop puts it there.
         await Until(() => idle, 20);
-        passed.Clear();
-        editor.TypeForCheck("/cost");
-        check("/cost goes key by key to the terminal, the editor stays empty", string.Concat(passed) == "/cost" && editor.TextForCheck.Length == 0, string.Join("|", passed));
-        editor.Press(Key.Enter, ModifierKeys.None);
-        check("Enter ends the menu in the terminal", passed.LastOrDefault() == "\r", "");
-        await Task.Delay(3000);
-        // /cost opens a panel of Claude Code that Esc closes, as a person would.
-        editor.Press(Key.Escape, ModifierKeys.None);
-        await Task.Delay(1000);
-        check("/cost was a command, not a message", UserMessages(transcript).Count(message => message.Text.Contains("/cost") && !message.Command) == 0, "");
+        foreach (var write in TerminalPaste.ForFiles([picture]))
+        {
+            console.WriteInput(write);
+            await Task.Delay(60);
+        }
 
-        // 3. A dropped picture goes as a picture.
-        await Until(() => idle, 20);
-        editor.DropForCheck([picture]);
-        editor.TypeForCheck("What colour is the picture? One word.");
-        editor.Press(Key.Enter, ModifierKeys.None);
+        console.WriteInput(EditorSend.PasteStart + "What colour is the picture? One word." + EditorSend.PasteEnd);
+        await Task.Delay(300);
         var before = Last()?.At ?? 0;
+        console.WriteInput("\r");
         await Until(() => Last() is { Kind: TerminalEventKind.Finished } last && last.At > before, 90);
-        var withPicture = UserMessages(transcript).Any(message => message.Images > 0);
-        check("Claude Code got the picture as an attachment", withPicture, $"{UserMessages(transcript).Sum(message => message.Images)} image(s)");
-        check("the picture lies in the folder of the session", Directory.Exists(pictures) && Directory.EnumerateFiles(pictures, "*.png").Any(), "");
+        check("Claude Code got the picture as an attachment", UserMessages(transcript).Any(message => message.Images > 0), $"{UserMessages(transcript).Sum(message => message.Images)} image(s)");
 
-        // 4. "@" offers the files of the folder.
+        // 4. "@" in the open editor offers the files; the first Esc closes the list, the second the editor.
         await Until(() => idle, 20);
+        editor.Compose();
         editor.TypeForCheck("@not");
         await Until(() => editor.ChoicesOpenForCheck, 10);
         check("@ offers the files of the project", editor.ChoicesOpenForCheck && editor.OfferedForCheck.Contains("note.txt"), string.Join(",", editor.OfferedForCheck));
         editor.Press(Key.Escape, ModifierKeys.None);
-        editor.ClearForCheck();
-
-        // 5. Esc goes to the program even with text in the editor.
-        editor.TypeForCheck("text that stays");
-        passed.Clear();
+        check("the first Esc closes the list and keeps the editor", !editor.ChoicesOpenForCheck && editor.Wanted, "");
         editor.Press(Key.Escape, ModifierKeys.None);
-        check("Esc goes to the program and the text stays", passed.SequenceEqual([EditorKeys.Escape]) && editor.TextForCheck == "text that stays", "");
+        check("the second Esc closes the editor", !editor.Wanted, "");
         editor.ClearForCheck();
 
-        // 6. Voice writes at the caret and Enter ends the recording without sending.
-        editor.TypeForCheck("Добавь тест");
+        // 5. Voice without the editor: the words show in it while heard, then go into the line.
+        inserted.Clear();
         var sendsBefore = sends;
         editor.BeginDictation();
-        editor.ShowDictation(DictationText.Phrases("про Esc", ""));
+        check("a recording brings the editor up for its words", editor.Wanted, "");
+        editor.ShowDictation(DictationText.Phrases("hello lantern", ""));
         editor.Press(Key.Enter, ModifierKeys.None);
-        editor.EndDictation("про Esc");
-        check("Enter during a recording ends it and sends nothing", voicePresses == 1 && sends == sendsBefore, "");
-        check("the words stand after the text", editor.TextForCheck == "Добавь тест про Esc", editor.TextForCheck);
-        editor.ClearForCheck();
+        editor.EndDictation("hello lantern");
+        await Task.Delay(500);
+        check("Enter ends the recording and sends nothing", voicePresses == 1 && sends == sendsBefore, "");
+        check("the words go into the line of Claude Code, and the editor goes", !editor.Wanted && string.Concat(inserted).Contains("hello lantern") && editor.TextForCheck.Length == 0, "");
+        check("the line of Claude Code shows them", await Until(() => Plain().Contains("hello lantern"), 5), "");
+        console.WriteInput("\u0003");
+        await Task.Delay(500);
 
-        // The end: /exit through the menu path.
-        editor.TypeForCheck("/exit");
-        editor.Press(Key.Enter, ModifierKeys.None);
+        // The end: /exit typed in the line of Claude Code.
+        console.WriteInput(EditorSend.PasteStart + "/exit" + EditorSend.PasteEnd);
+        await Task.Delay(300);
+        console.WriteInput("\r");
         await Task.Delay(3000);
         console.Dispose();
 

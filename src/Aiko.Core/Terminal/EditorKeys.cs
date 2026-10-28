@@ -41,13 +41,20 @@ public enum EditorAction
 
     /// The path before the caret is completed.
     Complete,
+
+    /// The text and the pictures go into the line of Claude Code, without Enter (D-370).
+    Insert,
+
+    /// The editor of a session of Claude Code closes; the keys go to the terminal again.
+    Hide,
 }
 
 /// What a key did, and whether the editor now passes every key to the program.
 public sealed record EditorPress(EditorAction Action, string Sequence, bool Passing);
 
-/// Where the editor stands when a key comes.
-public sealed record EditorState(SessionKind Kind, bool Empty, bool FirstLine, bool LastLine, bool Passing);
+/// Where the editor stands when a key comes. Composing: the editor of a session of Claude Code was
+/// opened with Ctrl+G for a long text (D-370).
+public sealed record EditorState(SessionKind Kind, bool Empty, bool FirstLine, bool LastLine, bool Passing, bool Composing = false);
 
 /// The keys of the editor (D-354, D-369). An empty editor lets the keys that answer a program
 /// through: arrows, Enter, Esc, Shift+Tab, digits, "/" and Ctrl+C. "/" opens a menu of Claude Code
@@ -61,6 +68,18 @@ public static class EditorKeys
 
     public static EditorPress For(EditorState state, EditorKey key, bool shift, char character = '\0')
     {
+        // A long text for Claude Code: nothing passes; Enter puts the text into its line, Esc closes.
+        if (state.Composing)
+        {
+            return key switch
+            {
+                EditorKey.Escape => new(EditorAction.Hide, "", false),
+                EditorKey.Enter when shift => new(EditorAction.NewLine, "", false),
+                EditorKey.Enter => new(state.Empty ? EditorAction.Hide : EditorAction.Insert, "", false),
+                _ => new(EditorAction.Keep, "", false),
+            };
+        }
+
         if (key == EditorKey.Escape)
         {
             return new(EditorAction.Pass, Escape, false);
@@ -134,6 +153,18 @@ public static class EditorSend
 
     public static IReadOnlyList<string> Writes(string text, IReadOnlyList<string> pictures)
     {
+        var writes = Inserts(text, pictures).ToList();
+        if (writes.Count > 0)
+        {
+            writes.Add("\r");
+        }
+
+        return writes;
+    }
+
+    /// The same writes without the Enter: the text waits in the line of the program (D-370).
+    public static IReadOnlyList<string> Inserts(string text, IReadOnlyList<string> pictures)
+    {
         var writes = new List<string>();
         foreach (var picture in pictures)
         {
@@ -145,11 +176,6 @@ public static class EditorSend
         if (lines.Length > 0)
         {
             writes.Add(PasteStart + lines.Replace('\n', '\r') + PasteEnd);
-        }
-
-        if (writes.Count > 0)
-        {
-            writes.Add("\r");
         }
 
         return writes;

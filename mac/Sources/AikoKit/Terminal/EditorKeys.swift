@@ -14,6 +14,10 @@ public enum EditorKey: String, Sendable, CaseIterable {
 /// What a key does.
 public enum EditorAction: String, Sendable {
     case keep, pass, send, newLine, historyBack, historyForward, complete
+    /// The text goes into the line of Claude Code without Enter (D-370).
+    case insert
+    /// The editor of a session of Claude Code closes.
+    case hide
 }
 
 /// What a key did, and whether the editor now passes every key to the program.
@@ -36,13 +40,16 @@ public struct EditorState: Sendable, Equatable {
     public let firstLine: Bool
     public let lastLine: Bool
     public let passing: Bool
+    /// The editor of a session of Claude Code was opened with Ctrl+G (D-370).
+    public let composing: Bool
 
-    public init(kind: SessionKind, empty: Bool, firstLine: Bool, lastLine: Bool, passing: Bool) {
+    public init(kind: SessionKind, empty: Bool, firstLine: Bool, lastLine: Bool, passing: Bool, composing: Bool = false) {
         self.kind = kind
         self.empty = empty
         self.firstLine = firstLine
         self.lastLine = lastLine
         self.passing = passing
+        self.composing = composing
     }
 }
 
@@ -51,6 +58,16 @@ public enum EditorKeys {
     public static let escape = "\u{1B}"
 
     public static func press(_ state: EditorState, _ key: EditorKey, shift: Bool, character: Character? = nil) -> EditorPress {
+        // A long text for Claude Code: nothing passes; Enter puts the text into its line, Esc closes.
+        if state.composing {
+            switch key {
+            case .escape: return EditorPress(.hide, "", false)
+            case .enter where shift: return EditorPress(.newLine, "", false)
+            case .enter: return EditorPress(state.empty ? .hide : .insert, "", false)
+            default: return EditorPress(.keep, "", false)
+            }
+        }
+
         if key == .escape {
             return EditorPress(.pass, escape, false)
         }
@@ -123,6 +140,15 @@ public enum EditorSend {
     public static let pasteEnd = "\u{1B}[201~"
 
     public static func writes(_ text: String, pictures: [String]) -> [String] {
+        var writes = inserts(text, pictures: pictures)
+        if !writes.isEmpty {
+            writes.append("\r")
+        }
+        return writes
+    }
+
+    /// The same writes without the Enter: the text waits in the line of the program (D-370).
+    public static func inserts(_ text: String, pictures: [String]) -> [String] {
         var writes = pictures.map { pasteStart + $0 + pasteEnd }
 
         // A terminal pastes a line break as a carriage return, as Windows Terminal does. "\r\n" is
@@ -145,10 +171,6 @@ public enum EditorSend {
         }
         if !lines.isEmpty {
             writes.append(pasteStart + String(decoding: lines, as: UTF16.self) + pasteEnd)
-        }
-
-        if !writes.isEmpty {
-            writes.append("\r")
         }
         return writes
     }

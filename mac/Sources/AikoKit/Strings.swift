@@ -395,6 +395,7 @@ public enum Strings {
         "MeetAikoTurnOn": ("Turn on in {0}", "Включить в среде {0}"),
         "StateOn": ("on", "включена"),
         "TerminalEditorHintPassing": ("Keys go to the menu of Claude Code · **Enter** or **Esc** ends it", "Клавиши уходят в меню Claude Code · **Enter** или **Esc** — закончить"),
+        "TerminalEditorHintCompose": ("**Enter** into the line of Claude Code · **Shift+Enter** new line · **Esc** close", "**Enter** вставить в строку Claude Code · **Shift+Enter** новая строка · **Esc** закрыть"),
         "TerminalEditorHintShellText": ("**Enter** run · **Tab** path · **Shift+Enter** new line", "**Enter** выполнить · **Tab** путь · **Shift+Enter** новая строка"),
         "TerminalEditorHintShellEmpty": ("Empty: **↑ ↓** history; **Enter**, **Esc**, **Tab** go to the terminal", "Пусто: **↑ ↓** история; **Enter**, **Esc**, **Tab** уходят в терминал"),
         "TerminalEditorHintText": ("**Enter** send · **Shift+Enter** new line · **Ctrl+Shift+Space** voice", "**Enter** отправить · **Shift+Enter** новая строка · **Ctrl+Shift+Space** голос"),
@@ -1568,6 +1569,9 @@ public enum Strings {
 
     /// Keys go to the menu of Claude Code · **Enter** or **Esc** ends it
     public static var terminalEditorHintPassing: String { Strings.get("TerminalEditorHintPassing") }
+
+    /// **Enter** into the line of Claude Code · **Shift+Enter** new line · **Esc** close
+    public static var terminalEditorHintCompose: String { Strings.get("TerminalEditorHintCompose") }
 
     /// **Enter** run · **Tab** path · **Shift+Enter** new line
     public static var terminalEditorHintShellText: String { Strings.get("TerminalEditorHintShellText") }

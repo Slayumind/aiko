@@ -71,6 +71,7 @@ sealed class TerminalSurface : Grid
             }
 
             Dispatcher.BeginInvoke(SyncSize, DispatcherPriority.Background);
+            Dispatcher.BeginInvoke(AcceptDrops, DispatcherPriority.Background);
         };
         _control.SizeChanged += (_, _) => Dispatcher.BeginInvoke(SyncSize, DispatcherPriority.Background);
     }
@@ -109,6 +110,32 @@ sealed class TerminalSurface : Grid
 
     /// Ends the program and everything it started.
     public void Close() => _console.Dispose();
+
+    /// Files dropped on the terminal reach the window: its window is not WPF's, so WPF never sees
+    /// the drop (D-370).
+    private void AcceptDrops()
+    {
+        foreach (var host in Descendants(_control).OfType<System.Windows.Interop.HwndHost>())
+        {
+            if (host.Handle != IntPtr.Zero)
+            {
+                WindowKeys.AcceptDrops(host.Handle);
+            }
+        }
+    }
+
+    private static IEnumerable<DependencyObject> Descendants(DependencyObject parent)
+    {
+        for (var at = 0; at < VisualTreeHelper.GetChildrenCount(parent); at++)
+        {
+            var child = VisualTreeHelper.GetChild(parent, at);
+            yield return child;
+            foreach (var deeper in Descendants(child))
+            {
+                yield return deeper;
+            }
+        }
+    }
 
     private void SyncSize()
     {

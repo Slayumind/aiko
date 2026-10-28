@@ -25,14 +25,8 @@ sealed record EditorSession(string Id, SessionKind Kind, string Folder, char Sep
 [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763")]
 sealed class TerminalEditor : UserControl, IDictationField
 {
-    /// Pictures larger than this are made smaller before they go: Claude Code takes up to about
-    /// 5 MB of a picture, and a screenshot of a large screen is often more as PNG.
-    private const int LargestSide = 1800;
-
     /// The field grows with its text up to this height, then scrolls.
     private const double MostHeight = 180;
-
-    private static readonly string[] PictureFiles = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp"];
 
     private sealed class Draft
     {
@@ -65,6 +59,11 @@ sealed class TerminalEditor : UserControl, IDictationField
 
     private EditorSession? _session;
     private Draft _draft = new();
+
+    // A session of Claude Code: the editor opened with Ctrl+G, or a recording that shows its words in
+    // the editor and puts them into the line of Claude Code at its end (D-370).
+    private bool _composing;
+    private bool _strip;
     private VoiceNotice _shownNotice;
     private bool _voiceActive;
     private bool _dictating;
@@ -186,6 +185,40 @@ sealed class TerminalEditor : UserControl, IDictationField
     /// Keys and text for the program as they are.
     public event Action<string>? Passed;
 
+    /// Text and pictures for the line of Claude Code, without Enter (D-370).
+    public event Action<IReadOnlyList<string>>? Inserted;
+
+    /// The editor came on screen or left it: a command line always has it, a session of Claude
+    /// Code only while it is opened with Ctrl+G or a recording goes on (D-370).
+    public event Action? WantedChanged;
+
+    public bool Wanted => _session?.Kind == SessionKind.Shell || _composing || _strip;
+
+    /// Ctrl+G in a session of Claude Code opens the editor for a long text, and closes it again.
+    public void Compose()
+    {
+        if (_session?.Kind != SessionKind.Claude || _dictating)
+        {
+            return;
+        }
+
+        _composing = !_composing;
+        ShowHint();
+        WantedChanged?.Invoke();
+        if (_composing)
+        {
+            FocusText();
+        }
+    }
+
+    private void Hide()
+    {
+        _composing = false;
+        _choices.Close();
+        ShowHint();
+        WantedChanged?.Invoke();
+    }
+
     /// A message: the writes in their order (EditorSend).
     public event Action<IReadOnlyList<string>>? Sent;
 
@@ -221,13 +254,20 @@ sealed class TerminalEditor : UserControl, IDictationField
         }
 
         Keep();
+        var wanted = Wanted;
         _session = session;
+        _composing = false;
+        _strip = false;
         _draft = _drafts.TryGetValue(session.Id, out var draft) ? draft : _drafts[session.Id] = new Draft();
         _text.Text = _draft.Text;
         _text.CaretIndex = Math.Min(_draft.Caret, _text.Text.Length);
         _choices.Close();
         DrawPictures();
         ShowHint();
+        if (Wanted != wanted)
+        {
+            WantedChanged?.Invoke();
+        }
     }
 
     /// A session was closed: what was typed for it goes.
@@ -266,7 +306,8 @@ sealed class TerminalEditor : UserControl, IDictationField
             empty,
             line <= 0,
             line < 0 || line >= _text.LineCount - 1,
-            _draft.Passing);
+            _draft.Passing,
+            _composing);
     }
 
     private void OnKey(object sender, KeyEventArgs e) =>
@@ -357,6 +398,8 @@ sealed class TerminalEditor : UserControl, IDictationField
 
     internal bool ChoicesOpenForCheck => _choices.IsOpen;
 
+    internal bool ComposingForCheck => _composing;
+
     internal IReadOnlyList<string> OfferedForCheck => _offered;
 
     /// A letter the editor does not take goes into the text, as a key would put it there.
@@ -374,6 +417,13 @@ sealed class TerminalEditor : UserControl, IDictationField
     }
 
     internal void DropForCheck(IReadOnlyList<string> paths) => Take(paths);
+
+    /// Files dropped on the terminal of a command line, or while the editor is open.
+    public void DropFiles(IReadOnlyList<string> paths)
+    {
+        Take(paths);
+        FocusText();
+    }
 
     /// Does what the core said. True when the key was used up.
     private bool Act(EditorPress press)
@@ -401,6 +451,17 @@ sealed class TerminalEditor : UserControl, IDictationField
                 return true;
             case EditorAction.Complete:
                 Complete();
+                return true;
+            case EditorAction.Insert:
+                var inserts = EditorSend.Inserts(_text.Text, _draft.Pictures);
+                _text.Clear();
+                _draft.Pictures.Clear();
+                DrawPictures();
+                Hide();
+                Inserted?.Invoke(inserts);
+                return true;
+            case EditorAction.Hide:
+                Hide();
                 return true;
             default:
                 return false;
@@ -580,7 +641,8 @@ sealed class TerminalEditor : UserControl, IDictationField
     {
         var state = State();
         var shell = state.Kind == SessionKind.Shell;
-        var words = state.Passing && state.Empty ? Strings.TerminalEditorHintPassing
+        var words = state.Composing ? Strings.TerminalEditorHintCompose
+            : state.Passing && state.Empty ? Strings.TerminalEditorHintPassing
             : state.Empty ? (shell ? Strings.TerminalEditorHintShellEmpty : Strings.TerminalEditorHintEmpty)
             : shell ? Strings.TerminalEditorHintShellText
             : Strings.TerminalEditorHintText;
@@ -654,7 +716,7 @@ sealed class TerminalEditor : UserControl, IDictationField
         var words = new List<string>();
         foreach (var path in paths)
         {
-            if (PictureFiles.Contains(Path.GetExtension(path).ToLowerInvariant()) && Load(path) is { } picture)
+            if (TerminalPaste.IsPicture(path) && Load(path) is { } picture)
             {
                 Attach(picture);
             }
@@ -693,32 +755,12 @@ sealed class TerminalEditor : UserControl, IDictationField
     /// The picture is written as a PNG into the folder of the session; its path goes to Claude Code.
     private void Attach(BitmapSource picture)
     {
-        if (_session is null)
+        if (_session is null || TerminalPaste.Save(picture, _session.PicturesFolder) is not { } path)
         {
             return;
         }
 
-        var scale = Math.Min(1.0, LargestSide / (double)Math.Max(picture.PixelWidth, picture.PixelHeight));
-        BitmapSource sized = scale < 1 ? new TransformedBitmap(picture, new ScaleTransform(scale, scale)) : picture;
-        var encoder = new PngBitmapEncoder();
-        encoder.Frames.Add(BitmapFrame.Create(sized));
-
-        try
-        {
-            Directory.CreateDirectory(_session.PicturesFolder);
-            var path = Path.Combine(_session.PicturesFolder, $"picture-{Guid.NewGuid().ToString("N")[..8]}.png");
-            using (var file = File.Create(path))
-            {
-                encoder.Save(file);
-            }
-
-            _draft.Pictures.Add(path);
-        }
-        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
-        {
-            return;
-        }
-
+        _draft.Pictures.Add(path);
         DrawPictures();
         ShowHint();
     }
@@ -837,10 +879,18 @@ sealed class TerminalEditor : UserControl, IDictationField
     public void BeginDictation()
     {
         _choices.Close();
-        (_before, _after) = DictationText.Around(_text.Text, _text.CaretIndex);
+
+        // In a session of Claude Code without the editor, the editor comes up only to show the words;
+        // they go into the line of Claude Code at the end (D-370).
+        _strip = !Wanted;
+        (_before, _after) = _strip ? ("", "") : DictationText.Around(_text.Text, _text.CaretIndex);
         _dictating = true;
         _text.IsReadOnly = true;
         ShowDictation(DictationText.Empty);
+        if (_strip)
+        {
+            WantedChanged?.Invoke();
+        }
     }
 
     public void ShowDictation(DictationText dictation)
@@ -878,6 +928,20 @@ sealed class TerminalEditor : UserControl, IDictationField
         _text.IsReadOnly = false;
         _dictation.Visibility = Visibility.Collapsed;
         _text.Opacity = 1;
+        _placeholder.Visibility = _text.Text.Length == 0 ? Visibility.Visible : Visibility.Collapsed;
+
+        if (_strip)
+        {
+            _strip = false;
+            WantedChanged?.Invoke();
+            if (words is { Length: > 0 })
+            {
+                Inserted?.Invoke(EditorSend.Inserts(words, []));
+            }
+
+            return;
+        }
+
         if (words is { Length: > 0 })
         {
             var (text, caret) = DictationText.Placed(_before, words, _after);
@@ -885,7 +949,6 @@ sealed class TerminalEditor : UserControl, IDictationField
             _text.CaretIndex = caret;
         }
 
-        _placeholder.Visibility = _text.Text.Length == 0 ? Visibility.Visible : Visibility.Collapsed;
         FocusText();
     }
 

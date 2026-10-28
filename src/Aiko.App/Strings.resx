@@ -1096,6 +1096,9 @@
   <data name="TerminalEditorHintPassing" xml:space="preserve">
     <value>Keys go to the menu of Claude Code · **Enter** or **Esc** ends it</value>
   </data>
+  <data name="TerminalEditorHintCompose" xml:space="preserve">
+    <value>**Enter** into the line of Claude Code · **Shift+Enter** new line · **Esc** close</value>
+  </data>
   <data name="TerminalEditorHintShellText" xml:space="preserve">
     <value>**Enter** run · **Tab** path · **Shift+Enter** new line</value>
   </data>

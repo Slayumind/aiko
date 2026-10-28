@@ -642,7 +642,8 @@ struct SharedCaseTests {
             let press = EditorKeys.press(
                 EditorState(
                     kind: state[0].stringValue == "shell" ? .shell : .claude, empty: state[1].boolValue ?? false,
-                    firstLine: state[2].boolValue ?? false, lastLine: state[3].boolValue ?? false, passing: state[4].boolValue ?? false),
+                    firstLine: state[2].boolValue ?? false, lastLine: state[3].boolValue ?? false, passing: state[4].boolValue ?? false,
+                    composing: state.count > 5 ? state[5].boolValue ?? false : false),
                 EditorKey(rawValue: row["key"]?.stringValue ?? "") ?? .character,
                 shift: row["shift"]?.boolValue ?? false,
                 character: row["char"]?.stringValue?.first)
@@ -657,6 +658,12 @@ struct SharedCaseTests {
         for row in cases["sends"]?.arrayValue ?? [] {
             #expect(
                 EditorSend.writes(row["text"]?.stringValue ?? "", pictures: Self.strings(row["pictures"]))
+                    == Self.strings(row["writes"]))
+        }
+
+        for row in cases["inserts"]?.arrayValue ?? [] {
+            #expect(
+                EditorSend.inserts(row["text"]?.stringValue ?? "", pictures: Self.strings(row["pictures"]))
                     == Self.strings(row["writes"]))
         }
 

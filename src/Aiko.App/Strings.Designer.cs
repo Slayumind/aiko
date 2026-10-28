@@ -1086,6 +1086,9 @@ public static class Strings
     /// Keys go to the menu of Claude Code · **Enter** or **Esc** ends it
     public static string TerminalEditorHintPassing => Get("TerminalEditorHintPassing");
 
+    /// **Enter** into the line of Claude Code · **Shift+Enter** new line · **Esc** close
+    public static string TerminalEditorHintCompose => Get("TerminalEditorHintCompose");
+
     /// **Enter** run · **Tab** path · **Shift+Enter** new line
     public static string TerminalEditorHintShellText => Get("TerminalEditorHintShellText");
 
