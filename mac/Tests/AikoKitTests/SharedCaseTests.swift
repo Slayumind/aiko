@@ -693,6 +693,11 @@ struct SharedCaseTests {
             #expect(FileMention.matches(paths, query: row["query"]?.stringValue ?? "") == Self.strings(row["files"]))
         }
 
+        for row in cases["lit"]?.arrayValue ?? [] {
+            let lit = FileMention.lit(row["path"]?.stringValue ?? "", query: row["query"]?.stringValue ?? "")
+            #expect(lit.start == Int(row["start"]?.int64Value ?? -2))
+            #expect(lit.length == Int(row["length"]?.int64Value ?? -2))
+        }
         for row in cases["dropped"]?.arrayValue ?? [] {
             let dropped = FileMention.dropped(
                 row["field"]?.stringValue ?? "", caret: Int(row["caret"]?.int64Value ?? 0),

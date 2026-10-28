@@ -70,9 +70,8 @@ sealed class SlashMenuView : Border
         {
             var path = files[index];
             var cut = path.LastIndexOf('/');
-            var name = path[(cut + 1)..];
-            var at = query.Length == 0 ? -1 : name.IndexOf(query, StringComparison.OrdinalIgnoreCase);
-            AddLine(index, Lit(name, at, at < 0 ? 0 : query.Length), cut < 0 ? "" : path[..cut]);
+            var (at, length) = FileMention.Lit(path, query);
+            AddLine(index, Lit(FileMention.Name(path), at, length), cut < 0 ? "" : path[..cut]);
         }
 
         End(files.Count, files.Count > 0 ? 0 : -1);

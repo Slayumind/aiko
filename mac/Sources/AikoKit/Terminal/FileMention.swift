@@ -75,6 +75,17 @@ public enum FileMention {
         path.split(separator: "/", omittingEmptySubsequences: false).last.map(String.init) ?? path
     }
 
+    /// The part of the file name the menu lights: where what was typed stands in it, whatever the
+    /// case of its letters. -1 when nothing was typed or it stands only in the folder. Counted in
+    /// UTF-16 units, as the Windows core counts.
+    public static func lit(_ path: String, query: String) -> (start: Int, length: Int) {
+        let shown = name(path)
+        guard !query.isEmpty, let found = shown.range(of: query, options: .caseInsensitive) else {
+            return (-1, 0)
+        }
+        return (shown.utf16.distance(from: shown.utf16.startIndex, to: found.lowerBound), query.utf16.count)
+    }
+
     private static func isSpace(_ unit: UTF16.CodeUnit) -> Bool {
         Character(Unicode.Scalar(unit) ?? " ").isWhitespace
     }

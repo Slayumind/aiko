@@ -536,6 +536,12 @@ public class SharedCaseTests
             Assert.Equal(Strings(row.GetProperty("files")), FileMention.Matches(paths, row.GetProperty("query").GetString()!));
         }
 
+        foreach (var row in cases.GetProperty("lit").EnumerateArray())
+        {
+            var (start, length) = FileMention.Lit(row.GetProperty("path").GetString()!, row.GetProperty("query").GetString()!);
+            Assert.Equal((row.GetProperty("start").GetInt32(), row.GetProperty("length").GetInt32()), (start, length));
+        }
+
         foreach (var row in cases.GetProperty("dropped").EnumerateArray())
         {
             var (dropped, at) = FileMention.Dropped(

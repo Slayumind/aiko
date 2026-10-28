@@ -81,6 +81,14 @@ public static class FileMention
     /// The file name part of a path, for the menu.
     public static string Name(string path) => path[(path.LastIndexOf('/') + 1)..];
 
+    /// The part of the file name the menu lights: where what was typed stands in it, whatever the
+    /// case of its letters. -1 when nothing was typed or it stands only in the folder.
+    public static (int Start, int Length) Lit(string path, string query)
+    {
+        var at = query.Length == 0 ? -1 : Name(path).IndexOf(query, StringComparison.OrdinalIgnoreCase);
+        return (at, at < 0 ? 0 : query.Length);
+    }
+
     private static double? Score(string path, string query)
     {
         var depth = path.Count(c => c == '/');

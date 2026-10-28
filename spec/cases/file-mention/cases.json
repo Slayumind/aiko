@@ -1,5 +1,5 @@
 {
-  "comment": "The files that \"@\" offers (AIKO-330, D-342). queries: the \"@\" word the caret stands in: \"@\" at the start or after a space, and no space between it and the caret; from is where \"@\" stands, null when there is no such word. matches: at most 10 files for what was typed, best first: the typed letters in the file name, then a name that starts with them, then a shallow folder; a long path costs a little; ties by length, then by the lower-case path. chosen: the field after a file is picked, with the caret after the space. A caret inside the @ word replaces the whole word, not only the part before the caret. Files dropped or pasted into the field go in at the caret as paths: one with a space in quotes, a space before them after a word and one after them.",
+  "comment": "The files that \"@\" offers (AIKO-330, D-342). queries: the \"@\" word the caret stands in: \"@\" at the start or after a space, and no space between it and the caret; from is where \"@\" stands, null when there is no such word. matches: at most 10 files for what was typed, best first: the typed letters in the file name, then a name that starts with them, then a shallow folder; a long path costs a little; ties by length, then by the lower-case path. chosen: the field after a file is picked, with the caret after the space. A caret inside the @ word replaces the whole word, not only the part before the caret. Files dropped or pasted into the field go in at the caret as paths: one with a space in quotes, a space before them after a word and one after them. lit: the part of the file name the menu lights, whatever the case; nothing when what was typed stands only in the folder.",
   "paths": [
     "README.md",
     "CHANGELOG.md",
@@ -160,6 +160,32 @@
       ],
       "result": "look at a.txt  now",
       "resultCaret": 14
+    }
+  ],
+  "lit": [
+    {
+      "path": "src/Aiko.App/Terminal/TalkInput.cs",
+      "query": "talk",
+      "start": 0,
+      "length": 4
+    },
+    {
+      "path": "docs/reference/talk-notes.md",
+      "query": "NOTES",
+      "start": 5,
+      "length": 5
+    },
+    {
+      "path": "talk/readme.md",
+      "query": "talk",
+      "start": -1,
+      "length": 0
+    },
+    {
+      "path": "docs/talk.md",
+      "query": "",
+      "start": -1,
+      "length": 0
     }
   ]
 }
