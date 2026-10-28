@@ -89,6 +89,10 @@ public struct FeedStep: Sendable, Equatable {
     public var progress: String
     public var answers: [QuestionAnswer]
 
+    /// The person said no to the questions. Their refusal comes back from Claude Code as the
+    /// result of the step; a step cut off by a crash or a failed turn has no result.
+    public var declined: Bool { line.label == QuestionAnswers.tool && state == .failed && !result.isEmpty }
+
     public init(
         toolUseId: String, line: StepLine, state: StepState, result: String, images: [StreamImage], progress: String,
         answers: [QuestionAnswer] = []

@@ -94,6 +94,10 @@ public abstract record FeedItem(int Id)
         string Progress) : FeedItem(Id)
     {
         public IReadOnlyList<QuestionAnswer> Answers { get; init; } = [];
+
+        /// The person said no to the questions. Their refusal comes back from Claude Code as the
+        /// result of the step; a step cut off by a crash or a failed turn has no result.
+        public bool Declined => Line.Label == QuestionAnswers.Tool && State == StepState.Failed && Result.Length > 0;
     }
 
     public sealed record Card(int Id, RequestCard Request, RequestState State) : FeedItem(Id);

@@ -1024,7 +1024,7 @@ struct SharedCaseTests {
                 ("step", describedStep(step.line)), ("state", .string(String(describing: step.state))),
                 ("result", .string(step.result)), ("images", number(step.images.count)),
                 ("progress", .string(step.progress)),
-            ] + answered(step.answers))
+            ] + answered(step.answers) + (step.declined ? [("declined", .bool(true))] : []))
         case .card(let request, let state):
             return node([
                 ("card", .string(String(describing: request.kind))), ("state", .string(String(describing: state))),

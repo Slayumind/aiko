@@ -580,7 +580,7 @@ sealed class FeedRow : ContentControl
             FeedItem.Answer { Streaming: true } answer => new InkAnswer(answer.Id, answer.Text),
             FeedItem.Answer answer => AnswerView.WithCopy(answer.Text),
             FeedItem.Step { Answers.Count: > 0 } step => Answered(step.Answers),
-            FeedItem.Step { Line.Label: QuestionAnswers.Tool, State: StepState.Failed } => Declined(),
+            FeedItem.Step { Declined: true } => Declined(),
             FeedItem.Step { Line.Hidden: false } step => StepRow(step),
             FeedEntry.Run run => RunRow(run),
             FeedEntry.Thought thought => ThoughtRow(thought),

@@ -4926,6 +4926,261 @@
         "label": "",
         "text": ""
       }
+    },
+    {
+      "name": "questions cut off by a crash are not a refusal",
+      "steps": [
+        {
+          "do": "send",
+          "text": "ask me"
+        },
+        {
+          "line": {
+            "type": "system",
+            "subtype": "init",
+            "session_id": "s-1",
+            "model": "claude-opus-5-5",
+            "permissionMode": "default",
+            "claude_code_version": "2.1.312"
+          }
+        },
+        {
+          "line": {
+            "type": "assistant",
+            "message": {
+              "content": [
+                {
+                  "type": "tool_use",
+                  "id": "toolu_q",
+                  "name": "AskUserQuestion",
+                  "input": {
+                    "questions": [
+                      {
+                        "question": "Which way?",
+                        "header": "Way",
+                        "multiSelect": false,
+                        "options": [
+                          {
+                            "label": "Left",
+                            "description": ""
+                          },
+                          {
+                            "label": "Right",
+                            "description": ""
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "parent_tool_use_id": null
+          }
+        },
+        {
+          "do": "exit"
+        }
+      ],
+      "state": {
+        "activity": "failed",
+        "mode": "manual",
+        "model": "claude-opus-5-5",
+        "session": "s-1",
+        "tasks": 0,
+        "unread": false,
+        "compacting": false,
+        "limits": 0,
+        "items": [
+          {
+            "owner": "ask me",
+            "images": 0,
+            "queued": false
+          },
+          {
+            "step": {
+              "kind": "other",
+              "label": "AskUserQuestion",
+              "subject": "",
+              "added": 0,
+              "removed": 0,
+              "hidden": true
+            },
+            "state": "failed",
+            "result": "",
+            "images": 0,
+            "progress": ""
+          },
+          {
+            "notice": "failed",
+            "text": ""
+          }
+        ]
+      },
+      "written": [
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"ask me\"}]}}"
+      ],
+      "glance": {
+        "activity": "failed",
+        "line": "none",
+        "kind": "other",
+        "label": "",
+        "text": ""
+      }
+    },
+    {
+      "name": "questions the person said no to are a refusal",
+      "steps": [
+        {
+          "do": "send",
+          "text": "ask me"
+        },
+        {
+          "line": {
+            "type": "system",
+            "subtype": "init",
+            "session_id": "s-1",
+            "model": "claude-opus-5-5",
+            "permissionMode": "default",
+            "claude_code_version": "2.1.312"
+          }
+        },
+        {
+          "line": {
+            "type": "assistant",
+            "message": {
+              "content": [
+                {
+                  "type": "tool_use",
+                  "id": "toolu_q",
+                  "name": "AskUserQuestion",
+                  "input": {
+                    "questions": [
+                      {
+                        "question": "Which way?",
+                        "header": "Way",
+                        "multiSelect": false,
+                        "options": [
+                          {
+                            "label": "Left",
+                            "description": ""
+                          },
+                          {
+                            "label": "Right",
+                            "description": ""
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "parent_tool_use_id": null
+          }
+        },
+        {
+          "line": {
+            "type": "control_request",
+            "request_id": "req-q",
+            "request": {
+              "subtype": "can_use_tool",
+              "tool_name": "AskUserQuestion",
+              "input": {
+                "questions": [
+                  {
+                    "question": "Which way?",
+                    "header": "Way",
+                    "multiSelect": false,
+                    "options": [
+                      {
+                        "label": "Left",
+                        "description": ""
+                      },
+                      {
+                        "label": "Right",
+                        "description": ""
+                      }
+                    ]
+                  }
+                ]
+              },
+              "tool_use_id": "toolu_q"
+            }
+          }
+        },
+        {
+          "do": "choose",
+          "requestId": "req-q",
+          "choice": "deny",
+          "message": ""
+        },
+        {
+          "line": {
+            "type": "user",
+            "message": {
+              "content": [
+                {
+                  "type": "tool_result",
+                  "tool_use_id": "toolu_q",
+                  "is_error": true,
+                  "content": "The user said no."
+                }
+              ]
+            },
+            "parent_tool_use_id": null
+          }
+        }
+      ],
+      "state": {
+        "activity": "working",
+        "mode": "manual",
+        "model": "claude-opus-5-5",
+        "session": "s-1",
+        "tasks": 0,
+        "unread": false,
+        "compacting": false,
+        "limits": 0,
+        "items": [
+          {
+            "owner": "ask me",
+            "images": 0,
+            "queued": false
+          },
+          {
+            "step": {
+              "kind": "other",
+              "label": "AskUserQuestion",
+              "subject": "",
+              "added": 0,
+              "removed": 0,
+              "hidden": true
+            },
+            "state": "failed",
+            "result": "The user said no.",
+            "images": 0,
+            "progress": "",
+            "declined": true
+          },
+          {
+            "card": "question",
+            "state": "denied",
+            "requestId": "req-q",
+            "second": "none"
+          }
+        ]
+      },
+      "written": [
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"ask me\"}]}}",
+        "{\"type\":\"control_response\",\"response\":{\"subtype\":\"success\",\"request_id\":\"req-q\",\"response\":{\"behavior\":\"deny\",\"message\":\"The user said no.\"}}}"
+      ],
+      "glance": {
+        "activity": "working",
+        "line": "none",
+        "kind": "other",
+        "label": "",
+        "text": ""
+      }
     }
   ]
 }

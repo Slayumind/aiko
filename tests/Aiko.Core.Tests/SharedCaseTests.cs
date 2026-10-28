@@ -867,6 +867,16 @@ public class SharedCaseTests
         }
     }
 
+    private static JsonObject WithDeclined(JsonObject step, bool declined)
+    {
+        if (declined)
+        {
+            step["declined"] = true;
+        }
+
+        return step;
+    }
+
     [Fact]
     public void Every_conversation_ends_in_the_same_state()
     {
@@ -1115,14 +1125,14 @@ public class SharedCaseTests
             ["queued"] = message.Queued,
         },
         FeedItem.Answer answer => new JsonObject { ["answer"] = answer.Text, ["streaming"] = answer.Streaming },
-        FeedItem.Step step => WithAnswers(new JsonObject
+        FeedItem.Step step => WithDeclined(WithAnswers(new JsonObject
         {
             ["step"] = Described(step.Line),
             ["state"] = Camel(step.State),
             ["result"] = step.Result,
             ["images"] = step.Images.Count,
             ["progress"] = step.Progress,
-        }, step.Answers),
+        }, step.Answers), step.Declined),
         FeedItem.Card card => new JsonObject
         {
             ["card"] = Camel(card.Request.Kind),
