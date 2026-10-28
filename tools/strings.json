@@ -343,6 +343,13 @@
     ]
   ],
   [
+    "OpenTerminalAtStartup",
+    [
+      "Open the terminal window too",
+      "Открывать и окно терминалов"
+    ]
+  ],
+  [
     "StartAtLogin",
     [
       "Start at login",

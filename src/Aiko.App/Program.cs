@@ -16,7 +16,7 @@ static class Program
     {
         // A plain start only. The installer's hooks and the snapshot and --try commands come with
         // arguments, and most of them never open a window.
-        if (args.Length == 0)
+        if (args is [] or [Startup.Argument])
         {
             GraphicsWarmUp.Start();
         }
@@ -440,7 +440,7 @@ static class Program
         application.Startup += (_, _) =>
         {
             shell = new AikoShell(application);
-            shell.Show();
+            shell.Show(withWindows: args is [Startup.Argument]);
         };
         application.Exit += (_, _) => shell?.Dispose();
 

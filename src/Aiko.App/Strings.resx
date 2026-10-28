@@ -178,6 +178,9 @@
   <data name="StartWithWindows" xml:space="preserve">
     <value>Start with Windows</value>
   </data>
+  <data name="OpenTerminalAtStartup" xml:space="preserve">
+    <value>Open the terminal window too</value>
+  </data>
   <data name="StartAtLogin" xml:space="preserve">
     <value>Start at login</value>
   </data>

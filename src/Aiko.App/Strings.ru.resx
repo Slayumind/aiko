@@ -178,6 +178,9 @@
   <data name="StartWithWindows" xml:space="preserve">
     <value>Запускать вместе с Windows</value>
   </data>
+  <data name="OpenTerminalAtStartup" xml:space="preserve">
+    <value>Открывать и окно терминалов</value>
+  </data>
   <data name="StartAtLogin" xml:space="preserve">
     <value>Запускать при входе</value>
   </data>

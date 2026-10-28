@@ -71,6 +71,8 @@ struct AppSettingsTests {
         settings.voiceInput = true
         settings.voiceEngine = .openAI
         settings.voiceLanguage = .english
+        settings.terminalShown = true
+        settings.openTerminalAtStartup = true
 
         #expect(AppSettings.fromJson(settings.toJson()) == settings)
     }
@@ -136,5 +138,16 @@ struct AppSettingsTests {
         #expect(AppSettings.default.toJson().contains(#""voiceEngine": "Local""#))
         #expect(settings.voiceLanguage == .system)
         #expect(AppSettings.default.toJson().contains(#""voiceLanguage": "System""#))
+    }
+
+    /// The terminal window opens by itself once, and a start with the system opens only the menu
+    /// bar until the person asks for the terminal (D-350).
+    @Test
+    func theTerminalIsNotShownYetAndAStartWithTheSystemOpensOnlyTheMenuBar() {
+        let settings = AppSettings.fromJson(#"{ "schemaVersion": 3, "place": "Tray" }"#)
+
+        #expect(!settings.terminalShown)
+        #expect(!settings.openTerminalAtStartup)
+        #expect(AppSettings.default.toJson().contains(#""openTerminalAtStartup": false"#))
     }
 }

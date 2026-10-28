@@ -168,6 +168,9 @@ public static class Strings
     /// Start with Windows
     public static string StartWithWindows => Get("StartWithWindows");
 
+    /// Open the terminal window too
+    public static string OpenTerminalAtStartup => Get("OpenTerminalAtStartup");
+
     /// Start at login
     public static string StartAtLogin => Get("StartAtLogin");
 

@@ -89,6 +89,7 @@ public enum Strings {
         "PlaceMenuBar": ("Menu bar", "Строка меню"),
         "HideIslandInFullScreen": ("Hide the island in full screen", "Прятать остров в полноэкранных окнах"),
         "StartWithWindows": ("Start with Windows", "Запускать вместе с Windows"),
+        "OpenTerminalAtStartup": ("Open the terminal window too", "Открывать и окно терминалов"),
         "StartAtLogin": ("Start at login", "Запускать при входе"),
         "CheckUpdatesWhat": ("Once a day Aiko asks slayumind.org for the latest version. The files come from GitHub, and Aiko checks their signature before it replaces anything.", "Раз в сутки Aiko спрашивает у slayumind.org последнюю версию. Файлы приходят с GitHub, и Aiko проверяет их подпись, прежде чем что-то заменить."),
         "CheckNow": ("Check for updates", "Проверить обновления"),
@@ -641,6 +642,9 @@ public enum Strings {
 
     /// Start with Windows
     public static var startWithWindows: String { Strings.get("StartWithWindows") }
+
+    /// Open the terminal window too
+    public static var openTerminalAtStartup: String { Strings.get("OpenTerminalAtStartup") }
 
     /// Start at login
     public static var startAtLogin: String { Strings.get("StartAtLogin") }

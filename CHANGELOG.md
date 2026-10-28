@@ -29,6 +29,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   message; the one you choose continues in Aiko.
 - **Keys of the window.** Ctrl+Shift+T opens a new session, Ctrl+Tab and Ctrl+Shift+Tab go to the
   next and the previous one. Every other key goes to the program in the terminal.
+- **The terminal window opens once by itself** after Aiko is set up. A start with Windows opens only
+  the tray, unless you turn on "Open the terminal window too" in the settings.
 
 ### Fixed
 
