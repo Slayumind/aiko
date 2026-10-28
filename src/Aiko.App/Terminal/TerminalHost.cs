@@ -33,6 +33,12 @@ sealed class TerminalHost
     private readonly Dictionary<string, long> _seenAt = [];
     private readonly Dictionary<string, long> _answeredAt = [];
 
+    private WindowKeys? _keys;
+
+    // The conversations of the environments, for the palette; read when it opens.
+    private readonly ConversationShelf _shelf = new();
+    private IReadOnlyList<Conversation> _conversations = [];
+
     private TerminalSessions _sessions;
     private TerminalWindowModel _model;
     private string? _closing;
@@ -53,6 +59,8 @@ sealed class TerminalHost
         _window.MayClose = MayCloseWindow;
         _events = new TerminalEvents(_window.Dispatcher);
         _events.Changed += EventCame;
+        _window.SourceInitialized += (_, _) =>
+            _keys = new WindowKeys(new System.Windows.Interop.WindowInteropHelper(_window).Handle, KeyPressed);
         _window.Closing += (_, e) =>
         {
             if (!e.Cancel)
@@ -72,6 +80,7 @@ sealed class TerminalHost
             }
 
             _events.Dispose();
+            _keys?.Dispose();
             Closed?.Invoke();
         };
 
@@ -224,6 +233,127 @@ sealed class TerminalHost
             }
         };
         _panel.ShowPalette(palette);
+    }
+
+    /// Ctrl and the key, with Shift or without (D-353). False leaves the key to the program.
+    private bool KeyPressed(System.Windows.Input.Key key, bool shift)
+    {
+        switch (key)
+        {
+            case System.Windows.Input.Key.T when shift:
+                PickFolderQuickly();
+                return true;
+            case System.Windows.Input.Key.K when shift:
+                OpenSessionPalette();
+                return true;
+            case System.Windows.Input.Key.Tab:
+                GoRound(shift ? -1 : 1);
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private void GoRound(int step)
+    {
+        var next = _model.ToNeighbour(step, _sessions);
+        if (next.SessionId is not { } id || next == _model)
+        {
+            return;
+        }
+
+        _sessions = _sessions.Opened(id);
+        Save();
+        Change(next);
+        _window.Dispatcher.BeginInvoke(FocusOpenTerminal, System.Windows.Threading.DispatcherPriority.Input);
+    }
+
+    /// The palette of sessions (D-347, D-353): the sessions of Aiko at once, and the conversations
+    /// Claude Code keeps in the folders of the environments as soon as they are read.
+    public void OpenSessionPalette()
+    {
+        if (!_window.IsVisible)
+        {
+            Show();
+        }
+
+        var palette = new PaletteView(Strings.TerminalSearchHint, Strings.TerminalSearchKeys, query =>
+        {
+            var found = SessionSearch.Find(_sessions, _conversations, query);
+            var now = DateTimeOffset.Now;
+            return
+            [
+                new PaletteGroup(Strings.TerminalSearchOpen, [.. found.Open.Select(hit => SearchRow(hit, now, quiet: false))]),
+                new PaletteGroup(Strings.TerminalSearchClosed, [.. found.Closed.Select(hit => SearchRow(hit, now, quiet: true))]),
+                new PaletteGroup(Strings.TerminalSearchOutside, [.. found.Outside.Select(hit => SearchRow(hit, now, quiet: true))]),
+            ];
+        });
+        palette.Closed += _panel.ClosePalette;
+        palette.Picked += (id, _) =>
+        {
+            _panel.ClosePalette();
+            OpenFound(id);
+        };
+        _panel.ShowPalette(palette);
+
+        var home = System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile);
+        var folders = _settings.Environments
+            .Select(environment => (environment.Name, environment.ConfigDirectories.FirstOrDefault() ?? ClaudeConfigFolder.Resolve(null, home)))
+            .ToList();
+        _ = LoadConversations(folders, palette);
+    }
+
+    private async Task LoadConversations(IReadOnlyList<(string, string)> folders, PaletteView palette)
+    {
+        _conversations = await _shelf.LoadAsync(folders);
+        if (_panel.PaletteOpen)
+        {
+            palette.Refresh();
+        }
+    }
+
+    private static PaletteRow SearchRow(SearchHit hit, DateTimeOffset now, bool quiet)
+    {
+        var when = TerminalPanel.UsedWords(hit.LastUsed, now);
+        // "Yesterday, 16:02" stands in the middle of the line here, so it starts small.
+        if (when.Length > 0)
+        {
+            when = char.ToLower(when[0], System.Globalization.CultureInfo.CurrentCulture) + when[1..];
+        }
+
+        var where = hit.Source switch
+        {
+            null => hit.Environment,
+            ConversationSource.Terminal => Strings.TerminalSourceTerminal,
+            ConversationSource.VsCode => "VS Code",
+            ConversationSource.Desktop => "Claude Desktop",
+            _ => Strings.TerminalSourceOther,
+        };
+        var meta = string.Join(" · ", new[] { where, hit.Folder, when }.Where(part => part.Length > 0));
+        return new PaletteRow(hit.Id, hit.Name, meta, hit.Snippet, quiet);
+    }
+
+    /// A choice of the palette: a session of the list opens, a closed one comes back, and a
+    /// conversation started outside Aiko joins the list and continues with --resume.
+    private void OpenFound(string id)
+    {
+        var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        if (_sessions.Find(id) is not null)
+        {
+            _sessions = _sessions.Reopen(id, now);
+        }
+        else if (_conversations.FirstOrDefault(conversation => conversation.Id == id) is { } conversation)
+        {
+            _sessions = _sessions.Found(conversation, now);
+        }
+
+        if (_sessions.Find(id) is not { } session)
+        {
+            return;
+        }
+
+        Save();
+        Change(_model.ToEnvironment(session.Environment, _sessions).ToSession(id, _sessions));
     }
 
     /// The terminal of the open session takes the keys again, after a palette or a dialog.

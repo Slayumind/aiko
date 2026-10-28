@@ -1090,6 +1090,27 @@
   <data name="StateOn" xml:space="preserve">
     <value>включена</value>
   </data>
+  <data name="TerminalSearchHint" xml:space="preserve">
+    <value>Найти сессию или разговор</value>
+  </data>
+  <data name="TerminalSearchKeys" xml:space="preserve">
+    <value>↑ ↓ выбрать · Enter открыть · Esc закрыть</value>
+  </data>
+  <data name="TerminalSearchOpen" xml:space="preserve">
+    <value>Открытые</value>
+  </data>
+  <data name="TerminalSearchClosed" xml:space="preserve">
+    <value>Закрытые</value>
+  </data>
+  <data name="TerminalSearchOutside" xml:space="preserve">
+    <value>Начаты вне Aiko</value>
+  </data>
+  <data name="TerminalSourceTerminal" xml:space="preserve">
+    <value>терминал</value>
+  </data>
+  <data name="TerminalSourceOther" xml:space="preserve">
+    <value>другая программа</value>
+  </data>
   <data name="TerminalNewSession" xml:space="preserve">
     <value>Новая сессия</value>
   </data>

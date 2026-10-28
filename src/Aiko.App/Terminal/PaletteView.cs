@@ -110,6 +110,9 @@ sealed class PaletteView : Border
 
     public void FocusField() => Keyboard.Focus(_field);
 
+    /// More to find came in, such as conversations read in the background: the same query again.
+    public void Refresh() => Fill();
+
     private void OnKey(object sender, KeyEventArgs e)
     {
         switch (e.Key)

@@ -393,6 +393,13 @@ public enum Strings {
         "MeetAikoSettings": ("The temperament, the mood, the skills and the memory are on the Personality page. It works in new sessions.", "Темперамент, настроение, навыки и память — на странице «Личность». Действует в новых сессиях."),
         "MeetAikoTurnOn": ("Turn on in {0}", "Включить в среде {0}"),
         "StateOn": ("on", "включена"),
+        "TerminalSearchHint": ("Find a session or a conversation", "Найти сессию или разговор"),
+        "TerminalSearchKeys": ("↑ ↓ choose · Enter open · Esc close", "↑ ↓ выбрать · Enter открыть · Esc закрыть"),
+        "TerminalSearchOpen": ("Open", "Открытые"),
+        "TerminalSearchClosed": ("Closed", "Закрытые"),
+        "TerminalSearchOutside": ("Started outside Aiko", "Начаты вне Aiko"),
+        "TerminalSourceTerminal": ("terminal", "терминал"),
+        "TerminalSourceOther": ("other app", "другая программа"),
         "TerminalNewSession": ("New session", "Новая сессия"),
         "TerminalNewSessionKey": ("Ctrl+Shift+T", "Ctrl+Shift+T"),
         "TerminalGroupNewSession": ("New session of Claude Code in this folder", "Новая сессия Claude Code в этой папке"),
@@ -1546,6 +1553,27 @@ public enum Strings {
 
     /// on
     public static var stateOn: String { Strings.get("StateOn") }
+
+    /// Find a session or a conversation
+    public static var terminalSearchHint: String { Strings.get("TerminalSearchHint") }
+
+    /// ↑ ↓ choose · Enter open · Esc close
+    public static var terminalSearchKeys: String { Strings.get("TerminalSearchKeys") }
+
+    /// Open
+    public static var terminalSearchOpen: String { Strings.get("TerminalSearchOpen") }
+
+    /// Closed
+    public static var terminalSearchClosed: String { Strings.get("TerminalSearchClosed") }
+
+    /// Started outside Aiko
+    public static var terminalSearchOutside: String { Strings.get("TerminalSearchOutside") }
+
+    /// terminal
+    public static var terminalSourceTerminal: String { Strings.get("TerminalSourceTerminal") }
+
+    /// other app
+    public static var terminalSourceOther: String { Strings.get("TerminalSourceOther") }
 
     /// New session
     public static var terminalNewSession: String { Strings.get("TerminalNewSession") }

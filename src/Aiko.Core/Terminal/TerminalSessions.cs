@@ -151,6 +151,28 @@ public sealed record TerminalSessions(IReadOnlyList<TerminalSession> Sessions, s
         return next;
     }
 
+    /// A closed session the palette found comes back to the list at its old place, and the window
+    /// goes into it (D-346). A session in the list is only opened.
+    public TerminalSessions Reopen(string id, long now) => Find(id) switch
+    {
+        null => this,
+        { Closed: false } => Opened(id),
+        _ => With(id, session => session with { Closed = false, LastUsed = now }) with { LastId = id },
+    };
+
+    /// A conversation started outside Aiko joins the list as a session that Claude Code already
+    /// has, so it starts with --resume (D-353). One that is already a session is reopened.
+    public TerminalSessions Found(Conversation conversation, long now)
+    {
+        if (Find(conversation.Id) is not null)
+        {
+            return Reopen(conversation.Id, now);
+        }
+
+        var added = Add(conversation.Id, conversation.Environment, conversation.Folder, conversation.Name, now);
+        return added.Find(conversation.Id) is null ? this : added.MarkStarted(conversation.Id);
+    }
+
     /// The person went into this session.
     public TerminalSessions Opened(string id) =>
         Find(id) is { Closed: false } ? this with { LastId = id } : this;

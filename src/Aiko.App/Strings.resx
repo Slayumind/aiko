@@ -1090,6 +1090,27 @@
   <data name="StateOn" xml:space="preserve">
     <value>on</value>
   </data>
+  <data name="TerminalSearchHint" xml:space="preserve">
+    <value>Find a session or a conversation</value>
+  </data>
+  <data name="TerminalSearchKeys" xml:space="preserve">
+    <value>↑ ↓ choose · Enter open · Esc close</value>
+  </data>
+  <data name="TerminalSearchOpen" xml:space="preserve">
+    <value>Open</value>
+  </data>
+  <data name="TerminalSearchClosed" xml:space="preserve">
+    <value>Closed</value>
+  </data>
+  <data name="TerminalSearchOutside" xml:space="preserve">
+    <value>Started outside Aiko</value>
+  </data>
+  <data name="TerminalSourceTerminal" xml:space="preserve">
+    <value>terminal</value>
+  </data>
+  <data name="TerminalSourceOther" xml:space="preserve">
+    <value>other app</value>
+  </data>
   <data name="TerminalNewSession" xml:space="preserve">
     <value>New session</value>
   </data>

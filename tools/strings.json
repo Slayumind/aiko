@@ -2471,6 +2471,55 @@
     ]
   ],
   [
+    "TerminalSearchHint",
+    [
+      "Find a session or a conversation",
+      "Найти сессию или разговор"
+    ]
+  ],
+  [
+    "TerminalSearchKeys",
+    [
+      "↑ ↓ choose · Enter open · Esc close",
+      "↑ ↓ выбрать · Enter открыть · Esc закрыть"
+    ]
+  ],
+  [
+    "TerminalSearchOpen",
+    [
+      "Open",
+      "Открытые"
+    ]
+  ],
+  [
+    "TerminalSearchClosed",
+    [
+      "Closed",
+      "Закрытые"
+    ]
+  ],
+  [
+    "TerminalSearchOutside",
+    [
+      "Started outside Aiko",
+      "Начаты вне Aiko"
+    ]
+  ],
+  [
+    "TerminalSourceTerminal",
+    [
+      "terminal",
+      "терминал"
+    ]
+  ],
+  [
+    "TerminalSourceOther",
+    [
+      "other app",
+      "другая программа"
+    ]
+  ],
+  [
     "TerminalNewSession",
     [
       "New session",

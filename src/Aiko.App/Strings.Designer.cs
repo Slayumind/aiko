@@ -1080,6 +1080,27 @@ public static class Strings
     /// on
     public static string StateOn => Get("StateOn");
 
+    /// Find a session or a conversation
+    public static string TerminalSearchHint => Get("TerminalSearchHint");
+
+    /// ↑ ↓ choose · Enter open · Esc close
+    public static string TerminalSearchKeys => Get("TerminalSearchKeys");
+
+    /// Open
+    public static string TerminalSearchOpen => Get("TerminalSearchOpen");
+
+    /// Closed
+    public static string TerminalSearchClosed => Get("TerminalSearchClosed");
+
+    /// Started outside Aiko
+    public static string TerminalSearchOutside => Get("TerminalSearchOutside");
+
+    /// terminal
+    public static string TerminalSourceTerminal => Get("TerminalSourceTerminal");
+
+    /// other app
+    public static string TerminalSourceOther => Get("TerminalSourceOther");
+
     /// New session
     public static string TerminalNewSession => Get("TerminalNewSession");
 

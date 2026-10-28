@@ -149,6 +149,37 @@ public struct TerminalSessions: Sendable, Equatable {
         return with(id) { $0.name = clean }
     }
 
+    /// A closed session the palette found comes back to the list at its old place, and the window
+    /// goes into it (D-346). A session in the list is only opened.
+    public func reopen(_ id: String, now: Int64) -> TerminalSessions {
+        guard let session = find(id) else {
+            return self
+        }
+        if !session.closed {
+            return opened(id)
+        }
+
+        var next = with(id) {
+            $0.closed = false
+            $0.lastUsed = now
+        }
+        next.lastId = id
+        return next
+    }
+
+    /// A conversation started outside Aiko joins the list as a session that Claude Code already
+    /// has, so it starts with --resume (D-353). One that is already a session is reopened.
+    public func found(_ conversation: Conversation, now: Int64) -> TerminalSessions {
+        if find(conversation.id) != nil {
+            return reopen(conversation.id, now: now)
+        }
+
+        let added = add(
+            id: conversation.id, environment: conversation.environment, folder: conversation.folder,
+            name: conversation.name, now: now)
+        return added.find(conversation.id) == nil ? self : added.markStarted(conversation.id)
+    }
+
     /// Claude Code has the conversation now.
     public func markStarted(_ id: String) -> TerminalSessions {
         with(id) { $0.started = true }

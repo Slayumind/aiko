@@ -31,6 +31,11 @@ the update check.
   answers of the model are never read. Aiko keeps only the last event, in a small file per session
   on this computer, and removes the file when you close the session. The title the program sets
   for its terminal gives the name of the session.
+- **Your conversations, when you search them.** The palette of sessions (Ctrl+Shift+K) finds your
+  conversations with Claude Code, also the ones you started in another terminal or in VS Code. For
+  this Aiko reads the start and the end of each conversation file in the folders of your
+  environments: the folder it ran in, your first message and its title. Aiko keeps them in memory
+  while it runs and writes them nowhere. Conversations of programs, such as `claude -p`, are left out.
 - **Your message, where the personality is on.** Aiko's memory comes with her personality: they
   are turned on together for an environment. There Claude Code hands each message you send to a
   second hook of Aiko. It looks for two things: the keys of the facts in the memory, to note that a

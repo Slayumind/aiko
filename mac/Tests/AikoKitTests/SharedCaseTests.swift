@@ -565,6 +565,67 @@ struct SharedCaseTests {
         }
     }
 
+    private static func conversation(_ row: JsonNode?) -> Conversation {
+        Conversation(
+            id: row?["id"]?.stringValue ?? "", environment: row?["environment"]?.stringValue ?? "",
+            folder: row?["folder"]?.stringValue ?? "", name: row?["name"]?.stringValue ?? "",
+            firstMessage: row?["firstMessage"]?.stringValue ?? "", lastUsed: row?["lastUsed"]?.int64Value ?? 0,
+            source: ConversationSource(rawValue: row?["source"]?.stringValue ?? "") ?? .other)
+    }
+
+    @Test
+    func everyConversationFileIsReadTheSame() {
+        for row in SpecCases.json("conversation-file")["cases"]?.arrayValue ?? [] {
+            let read = ConversationFile.read(
+                id: "c1", environment: "Aiko", head: row["head"]?.stringValue ?? "", tail: row["tail"]?.stringValue ?? "",
+                lastUsed: 1000)
+            let expected = row["conversation"].flatMap { node -> Conversation? in
+                guard node.objectValue != nil else { return nil }
+                return Conversation(
+                    id: "c1", environment: "Aiko", folder: node["folder"]?.stringValue ?? "", name: node["name"]?.stringValue ?? "",
+                    firstMessage: node["firstMessage"]?.stringValue ?? "", lastUsed: 1000,
+                    source: ConversationSource(rawValue: node["source"]?.stringValue ?? "") ?? .other)
+            }
+            #expect(read == expected, "\(row["name"]?.stringValue ?? "")")
+        }
+    }
+
+    @Test
+    func everyPaletteOfSessionsFindsTheSame() {
+        let cases = SpecCases.json("session-search")
+        let sessions = TerminalSessions.fromJson(cases["file"]?.toJsonString(escaping: .relaxed))
+        let conversations = (cases["conversations"]?.arrayValue ?? []).map { Self.conversation($0) }
+
+        func marked(_ parts: [TextPart]) -> String {
+            parts.map { $0.match ? "[\($0.text)]" : $0.text }.joined()
+        }
+
+        func described(_ hits: [SearchHit]) -> JsonNode {
+            .array(hits.map { hit in
+                var row = JsonObject()
+                row["id"] = .string(hit.id)
+                row["environment"] = .string(hit.environment)
+                row["folder"] = .string(hit.folder)
+                row["name"] = .string(marked(hit.name))
+                if !hit.snippet.isEmpty {
+                    row["snippet"] = .string(marked(hit.snippet))
+                }
+                if let source = hit.source {
+                    row["source"] = .string(source.rawValue)
+                }
+                return .object(row)
+            })
+        }
+
+        for row in cases["queries"]?.arrayValue ?? [] {
+            let found = SessionSearch.find(sessions, conversations, query: row["query"]?.stringValue ?? "")
+            let name = row["name"]?.stringValue ?? ""
+            #expect(described(found.open) == row["open"], "\(name), open")
+            #expect(described(found.closed) == row["closed"], "\(name), closed")
+            #expect(described(found.outside) == row["outside"], "\(name), outside")
+        }
+    }
+
     @Test
     func everyListMatchesAndPicksFoldersTheSame() {
         let cases = SpecCases.json("text-match")
@@ -757,6 +818,8 @@ struct SharedCaseTests {
                     now: step["now"]?.int64Value ?? 0, kind: step["kind"]?.stringValue == "shell" ? .shell : .claude)
             case "rename": sessions = sessions.rename(word("id"), word("name"))
             case "titled": sessions = sessions.titled(word("id"), word("name"))
+            case "reopen": sessions = sessions.reopen(word("id"), now: step["now"]?.int64Value ?? 0)
+            case "found": sessions = sessions.found(Self.conversation(step["conversation"]), now: step["now"]?.int64Value ?? 0)
             case "renameEnvironment": sessions = sessions.renameEnvironment(word("from"), word("to"))
             case "started": sessions = sessions.markStarted(word("id"))
             case "used": sessions = sessions.used(word("id"), now: step["now"]?.int64Value ?? 0)
@@ -942,6 +1005,7 @@ struct SharedCaseTests {
             switch pair[0] {
             case "environment": window = window.toEnvironment(what, sessions)
             case "session": window = window.toSession(what, sessions)
+            case "next": window = window.toNeighbour(Int(what) ?? 0, sessions)
             default:
                 sessions = sessions.close(what)
                 window = window.after(sessions)

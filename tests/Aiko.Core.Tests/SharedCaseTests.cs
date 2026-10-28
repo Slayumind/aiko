@@ -598,6 +598,78 @@ public class SharedCaseTests
         }
     }
 
+    private static Conversation ConversationIn(JsonElement row) => new(
+        row.GetProperty("id").GetString()!,
+        row.GetProperty("environment").GetString()!,
+        row.GetProperty("folder").GetString()!,
+        row.GetProperty("name").GetString()!,
+        row.GetProperty("firstMessage").GetString()!,
+        row.GetProperty("lastUsed").GetInt64(),
+        Enum.Parse<ConversationSource>(row.GetProperty("source").GetString()!, ignoreCase: true));
+
+    [Fact]
+    public void Every_conversation_file_is_read_the_same()
+    {
+        foreach (var row in SpecCases.Json("conversation-file").GetProperty("cases").EnumerateArray())
+        {
+            var read = ConversationFile.Read("c1", "Aiko", row.GetProperty("head").GetString()!, row.GetProperty("tail").GetString()!, 1000);
+            var expected = row.GetProperty("conversation");
+            Assert.True(
+                expected.ValueKind == JsonValueKind.Null
+                    ? read is null
+                    : read == new Conversation(
+                        "c1", "Aiko", expected.GetProperty("folder").GetString()!, expected.GetProperty("name").GetString()!,
+                        expected.GetProperty("firstMessage").GetString()!, 1000,
+                        Enum.Parse<ConversationSource>(expected.GetProperty("source").GetString()!, ignoreCase: true)),
+                $"{row.GetProperty("name").GetString()}: {read}");
+        }
+    }
+
+    [Fact]
+    public void Every_palette_of_sessions_finds_the_same()
+    {
+        var cases = SpecCases.Json("session-search");
+        var sessions = TerminalSessions.FromJson(cases.GetProperty("file").GetRawText());
+        var conversations = cases.GetProperty("conversations").EnumerateArray().Select(ConversationIn).ToList();
+
+        static string Marked(IReadOnlyList<TextPart> parts) =>
+            string.Concat(parts.Select(part => part.Match ? $"[{part.Text}]" : part.Text));
+
+        static JsonArray Described(IReadOnlyList<SearchHit> hits) => new([.. hits.Select(hit =>
+        {
+            var row = new JsonObject
+            {
+                ["id"] = hit.Id,
+                ["environment"] = hit.Environment,
+                ["folder"] = hit.Folder,
+                ["name"] = Marked(hit.Name),
+            };
+            if (hit.Snippet.Count > 0)
+            {
+                row["snippet"] = Marked(hit.Snippet);
+            }
+
+            if (hit.Source is { } source)
+            {
+                row["source"] = Camel(source);
+            }
+
+            return (JsonNode)row;
+        })]);
+
+        foreach (var row in cases.GetProperty("queries").EnumerateArray())
+        {
+            var found = SessionSearch.Find(sessions, conversations, row.GetProperty("query").GetString()!);
+            foreach (var (part, hits) in new[] { ("open", found.Open), ("closed", found.Closed), ("outside", found.Outside) })
+            {
+                var described = Described(hits);
+                Assert.True(
+                    JsonNode.DeepEquals(JsonNode.Parse(row.GetProperty(part).GetRawText()), described),
+                    $"{row.GetProperty("name").GetString()}, {part}: {described.ToJsonString()}");
+            }
+        }
+    }
+
     private static TerminalEventKind KindIn(JsonElement terminalEvent) =>
         Enum.Parse<TerminalEventKind>(terminalEvent.GetProperty("kind").GetString()!, ignoreCase: true);
 
@@ -781,6 +853,8 @@ public class SharedCaseTests
                     step.TryGetProperty("kind", out var kind) && kind.GetString() == "shell" ? SessionKind.Shell : SessionKind.Claude),
                 "rename" => sessions.Rename(Word("id"), Word("name")),
                 "titled" => sessions.Titled(Word("id"), Word("name")),
+                "reopen" => sessions.Reopen(Word("id"), step.GetProperty("now").GetInt64()),
+                "found" => sessions.Found(ConversationIn(step.GetProperty("conversation")), step.GetProperty("now").GetInt64()),
                 "renameEnvironment" => sessions.RenameEnvironment(Word("from"), Word("to")),
                 "started" => sessions.MarkStarted(Word("id")),
                 "used" => sessions.Used(Word("id"), step.GetProperty("now").GetInt64()),
@@ -965,6 +1039,9 @@ public class SharedCaseTests
                     break;
                 case "session":
                     window = window.ToSession(what, sessions);
+                    break;
+                case "next":
+                    window = window.ToNeighbour(int.Parse(what, System.Globalization.CultureInfo.InvariantCulture), sessions);
                     break;
                 default:
                     sessions = sessions.Close(what);

@@ -1,5 +1,5 @@
 {
-  "comment": "The window of the terminal (D-292, D-293, D-349, D-352). rows: the list of one environment as rows, drawn from what the terminal of each session does: working, waiting, done, idle (a row without a mark) or exited (stopped, Enter brings Claude Code back, D-351). A session without a terminal sleeps, and its second line says when it was used. line is the last thing the terminal did, in the words of the second line. waiting is the number on the tab. places: where the window opens; a saved place is kept when 80 units of its title bar are on a screen, its size is brought into the limits of that screen, and otherwise the window stands in the middle of the first screen at 1100 by 760. windows: what is chosen after each action; the place on the right is the terminal of the chosen session, or a sentence and a button when the environment has none. days: how long ago a session was used, by the clock of the person; each row is the time of use and the time now in seconds, the offset of the clock in minutes, and the answer.",
+  "comment": "The window of the terminal (D-292, D-293, D-349, D-352). rows: the list of one environment as rows, drawn from what the terminal of each session does: working, waiting, done, idle (a row without a mark) or exited (stopped, Enter brings Claude Code back, D-351). A session without a terminal sleeps, and its second line says when it was used. line is the last thing the terminal did, in the words of the second line. waiting is the number on the tab. places: where the window opens; a saved place is kept when 80 units of its title bar are on a screen, its size is brought into the limits of that screen, and otherwise the window stands in the middle of the first screen at 1100 by 760. windows: what is chosen after each action; the place on the right is the terminal of the chosen session, or a sentence and a button when the environment has none. days: how long ago a session was used, by the clock of the person; each row is the time of use and the time now in seconds, the offset of the clock in minutes, and the answer. next: Ctrl+Tab (1) and Ctrl+Shift+Tab (-1) go to the next or the previous session of the environment in the order of the list, round at the ends.",
   "sessions": {
     "sessions": [
       {
@@ -927,6 +927,85 @@
           "environment": "Nobody",
           "session": null,
           "view": "noSessions"
+        }
+      ]
+    },
+    {
+      "name": "Ctrl+Tab goes round the sessions of the environment in the order of the list (D-353)",
+      "environments": [
+        "Aiko",
+        "Work"
+      ],
+      "actions": [
+        [
+          "next",
+          "1"
+        ],
+        [
+          "next",
+          "1"
+        ],
+        [
+          "next",
+          "1"
+        ],
+        [
+          "next",
+          "-1"
+        ],
+        [
+          "session",
+          "c4"
+        ],
+        [
+          "next",
+          "1"
+        ],
+        [
+          "next",
+          "-1"
+        ]
+      ],
+      "steps": [
+        {
+          "environment": "Aiko",
+          "session": "a2",
+          "view": "terminal"
+        },
+        {
+          "environment": "Aiko",
+          "session": "a3",
+          "view": "terminal"
+        },
+        {
+          "environment": "Aiko",
+          "session": "a4",
+          "view": "terminal"
+        },
+        {
+          "environment": "Aiko",
+          "session": "c1",
+          "view": "terminal"
+        },
+        {
+          "environment": "Aiko",
+          "session": "a4",
+          "view": "terminal"
+        },
+        {
+          "environment": "Aiko",
+          "session": "c4",
+          "view": "terminal"
+        },
+        {
+          "environment": "Aiko",
+          "session": "a1",
+          "view": "terminal"
+        },
+        {
+          "environment": "Aiko",
+          "session": "c4",
+          "view": "terminal"
         }
       ]
     }

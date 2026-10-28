@@ -534,7 +534,7 @@ sealed class TerminalPanel : UserControl
     /// What the terminal did last, or, for a sleeping session, when it was used.
     private static string SecondLine(SessionRow row, DateTimeOffset now) =>
         row.Line.Length > 0 ? row.Line : UsedWords(row.LastUsed, now);
-    private static string UsedWords(long lastUsed, DateTimeOffset now)
+    internal static string UsedWords(long lastUsed, DateTimeOffset now)
     {
         if (lastUsed <= 0)
         {
