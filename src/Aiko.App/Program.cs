@@ -318,6 +318,13 @@ static class Program
 
         // A program in a pseudo console, closed while it still prints: Aiko must outlive it. Opens
         // no window and starts no Claude Code.
+        // The editor with a real Claude Code and a Git Bash, off the screen: --try-editor <folder> <report>
+        if (args is ["--try-editor", var editorFolder, var editorReport, ..])
+        {
+            Environment.Exit(TerminalEditorCheck.Run(editorFolder, editorReport));
+            return;
+        }
+
         // A real Claude Code with the hook of the terminal, in a pseudo console: --try-terminal-hooks <folder> <report>
         if (args is ["--try-terminal-hooks", var hookFolder, var hookReport, ..])
         {

@@ -131,6 +131,12 @@ sealed class PseudoConsole : ITerminalConnection, IDisposable
     /// Ends the program and everything it started.
     public void Close()
     {
+        if (_closed)
+        {
+            return;
+        }
+
+        _closed = true;
         if (_console != IntPtr.Zero)
         {
             ConptyClosePseudoConsole(_console);
@@ -140,14 +146,25 @@ sealed class PseudoConsole : ITerminalConnection, IDisposable
         _job?.End();
     }
 
+    private bool _closed;
+
     /// The output and the handle of the process are not closed here: their threads are still
-    /// waiting on them, and each thread closes its own when the program has ended.
+    /// waiting on them, and each thread closes its own when the program has ended. A second call
+    /// does nothing: the job is gone, and ending it again would throw.
     public void Dispose()
     {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _disposed = true;
         Close();
         _job?.Dispose();
         _input?.Dispose();
     }
+
+    private bool _disposed;
 
     private void Read()
     {

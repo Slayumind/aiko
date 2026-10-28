@@ -269,34 +269,38 @@ sealed class TerminalEditor : UserControl, IDictationField
             _draft.Passing);
     }
 
-    private void OnKey(object sender, KeyEventArgs e)
+    private void OnKey(object sender, KeyEventArgs e) =>
+        e.Handled = Press(e.Key == Key.System ? e.SystemKey : e.Key, Keyboard.Modifiers);
+
+    /// A key with its modifiers; true when the editor used it up. The live keys come here, and so
+    /// do the keys of the check door (--try-editor), which has no keyboard.
+    internal bool Press(Key key, ModifierKeys modifiers)
     {
         if (_dictating)
         {
-            if (e.Key == Key.Escape)
+            if (key == Key.Escape)
             {
-                e.Handled = true;
                 VoiceCancelled?.Invoke();
+                return true;
             }
-            else if (e.Key is Key.Enter)
+
+            if (key == Key.Enter)
             {
                 // The second press of Enter ends the recording: the words go into the field, not out.
-                e.Handled = true;
                 VoicePressed?.Invoke();
+                return true;
             }
 
-            return;
+            return false;
         }
 
-        var key = e.Key == Key.System ? e.SystemKey : e.Key;
-        var control = Keyboard.Modifiers.HasFlag(ModifierKeys.Control);
-        var shift = Keyboard.Modifiers.HasFlag(ModifierKeys.Shift);
-        var alt = Keyboard.Modifiers.HasFlag(ModifierKeys.Alt);
+        var control = modifiers.HasFlag(ModifierKeys.Control);
+        var shift = modifiers.HasFlag(ModifierKeys.Shift);
+        var alt = modifiers.HasFlag(ModifierKeys.Alt);
 
         if (_choices.IsOpen && OnChoiceKey(key))
         {
-            e.Handled = true;
-            return;
+            return true;
         }
 
         EditorKey? editorKey = (key, control, alt) switch
@@ -314,33 +318,62 @@ sealed class TerminalEditor : UserControl, IDictationField
         };
         if (editorKey is not { } pressed)
         {
-            return;
+            return false;
         }
 
         if (pressed == EditorKey.Interrupt && _text.Text.Length == 0 && TerminalSelection?.Invoke() is { Length: > 0 } selected)
         {
-            e.Handled = true;
             CopyText(selected);
-            return;
+            return true;
         }
 
-        e.Handled = Act(EditorKeys.For(State(), pressed, shift));
+        return Act(EditorKeys.For(State(), pressed, shift));
     }
 
-    /// A digit, "/" or a letter while the editor passes keys to a menu of the program.
-    private void OnTextInput(object sender, TextCompositionEventArgs e)
+    private void OnTextInput(object sender, TextCompositionEventArgs e) =>
+        e.Handled = e.Text.Length == 1 && Typed(e.Text[0]);
+
+    /// A digit, "/" or a letter while the editor passes keys to a menu of the program. True when it
+    /// went to the program; otherwise the text box takes it.
+    internal bool Typed(char character)
     {
-        if (_dictating || e.Text.Length != 1)
+        if (_dictating)
         {
-            return;
+            return false;
         }
 
-        var press = EditorKeys.For(State(), EditorKey.Character, false, e.Text[0]);
-        if (press.Action == EditorAction.Pass)
+        var press = EditorKeys.For(State(), EditorKey.Character, false, character);
+        return press.Action == EditorAction.Pass && Act(press);
+    }
+
+    // ---- doors for --try-editor: what the check reads and does without a keyboard ----
+
+    /// The check door runs in a window that never has the keyboard.
+    internal bool CheckWithoutFocus { get; set; }
+
+    internal string TextForCheck => _text.Text;
+
+    internal void ClearForCheck() => _text.Clear();
+
+    internal bool ChoicesOpenForCheck => _choices.IsOpen;
+
+    internal IReadOnlyList<string> OfferedForCheck => _offered;
+
+    /// A letter the editor does not take goes into the text, as a key would put it there.
+    internal void TypeForCheck(string text)
+    {
+        foreach (var character in text)
         {
-            e.Handled = Act(press);
+            if (!Typed(character))
+            {
+                var at = _text.CaretIndex;
+                _text.Text = _text.Text.Insert(at, character.ToString());
+                _text.CaretIndex = at + 1;
+            }
         }
     }
+
+    internal void DropForCheck(IReadOnlyList<string> paths) => Take(paths);
 
     /// Does what the core said. True when the key was used up.
     private bool Act(EditorPress press)
@@ -446,7 +479,7 @@ sealed class TerminalEditor : UserControl, IDictationField
             return;
         }
 
-        _mention = _session?.Kind == SessionKind.Claude && _text.IsKeyboardFocused ? FileMention.Query(_text.Text, _text.CaretIndex) : null;
+        _mention = _session?.Kind == SessionKind.Claude && (_text.IsKeyboardFocused || CheckWithoutFocus) ? FileMention.Query(_text.Text, _text.CaretIndex) : null;
         if (_mention is not { } mention || _session is null)
         {
             _choices.Close();
