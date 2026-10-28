@@ -53,6 +53,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 - A session no longer says "done" while Claude still writes. This happened when Claude Code went on
   by itself after a subagent in the background was over.
+- In the card of questions, your own answer can be changed after Back: a click on it opens the
+  words with the caret at their end, and the card no longer jumps to the next question. Next works
+  as soon as you type your own answer, and erasing it leaves the other ticked answers in place.
 - With fewer animations asked for in Windows, the terminal no longer runs a bar while it makes the
   conversation shorter.
 - Voice input no longer puts the list of hint words into your text when the recognizer gives it back

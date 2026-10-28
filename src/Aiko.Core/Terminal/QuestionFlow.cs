@@ -147,16 +147,17 @@ public sealed record QuestionFlow
         return chosen.Flow.Forward();
     }
 
-    /// The person's own words in the open question. Words pick Other; no words leave it as it was.
+    /// The person's own words in the open question. Words pick Other, and erased words untick it,
+    /// so the rows ticked beside it still answer the question.
     public QuestionFlow Write(string words)
     {
         var flow = this with { Own = Replace(Own, At, words) };
-        if (words.Trim().Length == 0 || IsPicked(OwnRow))
+        if (words.Trim().Length == 0)
         {
-            return flow;
+            return IsPicked(OwnRow) ? flow with { Picked = Replace(Picked, At, [.. Picked[At].Where(pick => pick != OwnRow)]) } : flow;
         }
 
-        return flow with { Picked = Replace(Picked, At, Open.MultiSelect ? [.. Picked[At], OwnRow] : [OwnRow]) };
+        return IsPicked(OwnRow) ? flow : flow with { Picked = Replace(Picked, At, Open.MultiSelect ? [.. Picked[At], OwnRow] : [OwnRow]) };
     }
 
     /// Enter in the field of the person's own words: the words stand, and the card goes on.
@@ -216,10 +217,12 @@ public sealed record QuestionFlow
             return new(this, QuestionOutcome.None);
         }
 
+        // Other always opens its words and never goes on by itself: after Back the words can be
+        // changed. Words already there pick it again.
         var focused = this with { Focus = row };
-        if (row == OwnRow && Own[At].Trim().Length == 0)
+        if (row == OwnRow)
         {
-            return new(focused, QuestionOutcome.WriteOwn);
+            return new(focused.Write(Own[At]), QuestionOutcome.WriteOwn);
         }
 
         IReadOnlyList<int> picks = Open.MultiSelect
