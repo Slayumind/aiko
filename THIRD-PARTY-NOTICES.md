@@ -19,6 +19,16 @@ build-time tool, and none of it ends up in the program.
 - Licence: MIT
 - Source: https://github.com/microsoft/CsWin32
 
+## Windows Terminal control and ConPTY
+
+The terminal in the Aiko window. The control (`Microsoft.Terminal.Wpf`, `Microsoft.Terminal.Control.dll`)
+draws the screen of the program, and ConPTY (`conpty.dll`, `OpenConsole.exe`) runs the program in a
+pseudo console. Both come from the Windows Terminal project.
+
+- Licence: MIT, Copyright (c) Microsoft Corporation
+- Source: https://github.com/microsoft/terminal
+- The licence text ships next to the app: `src/Aiko.App/Assets/Licenses/windows-terminal-LICENSE.txt`
+
 ## Velopack
 
 Builds the installer and handles updates.
