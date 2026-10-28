@@ -63,6 +63,10 @@ sealed class TerminalPanel : UserControl
         });
         Resources[typeof(ScrollViewer)] = Resources["QuietScroll"];
 
+        // The terminal control has a scroll bar of its own, not inside a ScrollViewer: it takes the
+        // same thin one by its type.
+        Resources[typeof(System.Windows.Controls.Primitives.ScrollBar)] = Resources["ThinScrollBar"];
+
         _listButton = Flat("", () => _listPopup.IsOpen = !_listPopup.IsOpen, ghost: false);
         _listButton.Margin = new Thickness(10, 0, 0, 0);
         _listButton.Visibility = Visibility.Collapsed;
