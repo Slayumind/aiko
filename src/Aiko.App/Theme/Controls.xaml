@@ -514,6 +514,53 @@
     </Setter>
   </Style>
 
+  <!--
+    A right-click menu looks like the list of a drop-down (DropDown): Surface, one line, radius 10,
+    padding 4 and the shadow of a card, rows of 30 with radius 8. The margin keeps room for the
+    shadow inside the popup. Both styles have no key, so they reach every menu of a window that
+    merges this file, the menu of a text field too.
+  -->
+  <Style TargetType="ContextMenu">
+    <Setter Property="OverridesDefaultStyle" Value="True" />
+    <Setter Property="HasDropShadow" Value="False" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ContextMenu">
+          <Border Margin="0,0,12,12" MinWidth="180" Padding="4" CornerRadius="10"
+                  Background="{StaticResource Surface}" BorderBrush="{StaticResource InputLine}" BorderThickness="1"
+                  Effect="{StaticResource CardShadow}">
+            <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle" />
+          </Border>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style TargetType="MenuItem">
+    <Setter Property="OverridesDefaultStyle" Value="True" />
+    <Setter Property="FontFamily" Value="{StaticResource Sans}" />
+    <Setter Property="FontSize" Value="{StaticResource TextNumber}" />
+    <Setter Property="Foreground" Value="{StaticResource Ink}" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="MenuItem">
+          <Border x:Name="Back" Height="30" Padding="10,0,10,0" CornerRadius="8" Background="Transparent">
+            <ContentPresenter ContentSource="Header" VerticalAlignment="Center" RecognizesAccessKey="True" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsHighlighted" Value="True">
+              <Setter TargetName="Back" Property="Background" Value="{StaticResource Raised}" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+              <Setter Property="Foreground" Value="{StaticResource Muted}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
   <!-- A thin scroll bar that only shows when there is something to scroll. -->
   <Style x:Key="ThinScrollBar" TargetType="ScrollBar">
     <Setter Property="Width" Value="6" />

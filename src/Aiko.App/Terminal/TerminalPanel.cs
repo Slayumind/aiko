@@ -394,7 +394,10 @@ sealed class TerminalPanel : UserControl
         name.Click += (_, _) => rename();
         var close = new MenuItem { Header = Strings.TerminalCloseSession };
         close.Click += (_, _) => RowClosed?.Invoke(id);
-        return new ContextMenu { Items = { name, close } };
+        // A menu set on an element is not in its tree, so the styles of the panel are handed to it.
+        var menu = new ContextMenu { Items = { name, close }, Style = (Style)FindResource(typeof(ContextMenu)) };
+        menu.Resources[typeof(MenuItem)] = FindResource(typeof(MenuItem));
+        return menu;
     }
 
     /// The name becomes a field with all of it selected: Enter or leaving the field keeps the new
