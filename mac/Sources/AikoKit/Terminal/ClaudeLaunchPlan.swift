@@ -2,6 +2,7 @@ import Foundation
 
 /// What the terminal needs to know to start Claude Code for one session. hooksFile holds the
 /// settings with the hook of the terminal (TerminalHooks); empty when it could not be written.
+/// picturesFolder is where the editor keeps the pictures of the session; empty for none.
 public struct LaunchRequest: Sendable, Equatable {
     public let configDirectory: String
     public let userProfile: String
@@ -9,10 +10,11 @@ public struct LaunchRequest: Sendable, Equatable {
     public let sessionId: String
     public let started: Bool
     public let hooksFile: String
+    public let picturesFolder: String
 
     public init(
         configDirectory: String, userProfile: String, environmentName: String, sessionId: String, started: Bool,
-        hooksFile: String = ""
+        hooksFile: String = "", picturesFolder: String = ""
     ) {
         self.configDirectory = configDirectory
         self.userProfile = userProfile
@@ -20,6 +22,7 @@ public struct LaunchRequest: Sendable, Equatable {
         self.sessionId = sessionId
         self.started = started
         self.hooksFile = hooksFile
+        self.picturesFolder = picturesFolder
     }
 }
 
@@ -49,6 +52,12 @@ public struct ClaudeLaunchPlan: Sendable, Equatable {
         // the personality or without it.
         if !request.hooksFile.isEmpty {
             arguments += ["--settings", request.hooksFile]
+        }
+
+        // A picture pasted into the editor lies outside the project: without this Claude Code asks
+        // for leave to read it (spike 2026-10).
+        if !request.picturesFolder.isEmpty {
+            arguments += ["--add-dir", request.picturesFolder]
         }
 
         var variables = environment(

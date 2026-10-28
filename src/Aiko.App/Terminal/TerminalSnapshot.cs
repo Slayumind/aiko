@@ -24,6 +24,12 @@ static class TerminalSnapshot
             return;
         }
 
+        if (part?.StartsWith("editor", StringComparison.Ordinal) == true)
+        {
+            Snapshot.Write(Editor(part), path);
+            return;
+        }
+
         if (part is "palette" or "folders")
         {
             Snapshot.Write(Palette(part == "folders"), path);
@@ -59,6 +65,43 @@ static class TerminalSnapshot
             now));
         panel.ShowGroupHoverForSnapshot();
         Snapshot.Write(panel, path);
+    }
+
+    /// editor (empty), editor-text, editor-compose, editor-shell, editor-voice.
+    private static System.Windows.FrameworkElement Editor(string part)
+    {
+        var editor = new TerminalEditor { Width = 760 };
+        var shell = part == "editor-shell";
+        editor.Show(new EditorSession("s1", shell ? SessionKind.Shell : SessionKind.Claude, "C:\\work", '/', "C:\\work\\pictures"));
+        editor.ShowVoice(new VoiceLine(VoiceWord.None, null, null, false, VoiceButton.Idle, false), VoiceNotice.None);
+        switch (part)
+        {
+            case "editor-text":
+                editor.TypedForSnapshot("Сначала проверь, что Esc в пустом редакторе доходит до карточки.\nПотом прогони тесты.", 1);
+                break;
+            case "editor-compose":
+                editor.Compose();
+                editor.TypedForSnapshot("Сначала проверь, что Esc в пустом редакторе доходит до карточки.\nПотом прогони тесты.", 1);
+                break;
+            case "editor-shell":
+                editor.TypedForSnapshot("git log --oneline -5", 0);
+                break;
+            case "editor-voice":
+                editor.TypedForSnapshot("Добавь тест, что Esc в пустом редакторе", 0);
+                editor.ShowVoice(new VoiceLine(VoiceWord.Listening, "0:04", VoiceEngine.Local, true, VoiceButton.Recording, true), VoiceNotice.None);
+                foreach (var level in new[] { 0.2, 0.6, 0.9, 0.4, 0.7, 0.3, 0.8, 0.5, 0.95, 0.35, 0.6, 0.25, 0.7, 0.45 })
+                {
+                    editor.PushLevel(level);
+                }
+
+                break;
+        }
+
+        return new System.Windows.Controls.Border
+        {
+            Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x0A, 0x0A, 0x0A)),
+            Child = editor,
+        };
     }
 
     private static PaletteView Palette(bool folders)

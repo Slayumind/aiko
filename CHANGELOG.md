@@ -26,6 +26,13 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - **A new session in two clicks.** Point at a folder in the list: "+" starts Claude Code there and
   ">_" a command line. "New session" opens a quick pick of the folders you used, latest first; Enter
   starts Claude Code, Ctrl+Enter a command line, and the last line opens any other folder.
+- **One place to type.** In a session of Claude Code you type in its own line, with its menus.
+  Ctrl+G opens an editor for a long text: fix it with the mouse and Ctrl+Z, and Enter puts it into
+  the line of Claude Code. Ctrl+V with a screenshot or a dropped file puts it there as a picture or a
+  path. Ctrl+Shift+Space shows your words as you speak and puts them into the line when you stop.
+  Ctrl+C copies what you selected in the terminal, its paragraphs whole: the lines Claude Code
+  broke by the width of the window are joined again. A command line has an editor under it: Enter runs
+  the command, the arrows bring back your commands and Tab completes a path.
 - **Find any conversation.** Ctrl+Shift+K opens a palette of your sessions and of the conversations
   you started outside Aiko, in another terminal or in VS Code. It finds them by name and by your first
   message; the one you choose continues in Aiko.

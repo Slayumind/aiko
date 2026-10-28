@@ -1,6 +1,7 @@
 using System.Runtime.Versioning;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using Aiko.Core.Terminal;
@@ -57,6 +58,11 @@ sealed class TerminalSurface : Grid
         // A little air between the text and the edges of the window; the background around the
         // control is the background of the terminal, so the two read as one.
         Background = new SolidColorBrush(Color.FromRgb(0x0A, 0x0A, 0x0A));
+
+        // Tab and the arrows are the program's, not ways to move the focus of the window (D-370).
+        KeyboardNavigation.SetTabNavigation(this, KeyboardNavigationMode.None);
+        KeyboardNavigation.SetDirectionalNavigation(this, KeyboardNavigationMode.None);
+        KeyboardNavigation.SetControlTabNavigation(this, KeyboardNavigationMode.None);
         _control.Margin = new Thickness(TextInset, TextInset - 4, 0, 0);
         Children.Add(_control);
 
@@ -71,6 +77,7 @@ sealed class TerminalSurface : Grid
             }
 
             Dispatcher.BeginInvoke(SyncSize, DispatcherPriority.Background);
+            Dispatcher.BeginInvoke(AcceptDrops, DispatcherPriority.Background);
         };
         _control.SizeChanged += (_, _) => Dispatcher.BeginInvoke(SyncSize, DispatcherPriority.Background);
     }
@@ -97,8 +104,47 @@ sealed class TerminalSurface : Grid
 
     public void FocusTerminal() => _control.Focus();
 
+    /// What the mouse selected in the terminal, ready for the clipboard, or null. The rows Claude
+    /// Code wrapped by the width are joined again (D-371).
+    public string? SelectedText
+    {
+        get
+        {
+            var text = _control.GetSelectedText();
+            return string.IsNullOrEmpty(text)
+                ? null
+                : TerminalCopy.Unwrap(text, _control.Columns).Replace("\n", Environment.NewLine, StringComparison.Ordinal);
+        }
+    }
+
     /// Ends the program and everything it started.
     public void Close() => _console.Dispose();
+
+    /// Files dropped on the terminal reach the window: its window is not WPF's, so WPF never sees
+    /// the drop (D-370).
+    private void AcceptDrops()
+    {
+        foreach (var host in Descendants(_control).OfType<System.Windows.Interop.HwndHost>())
+        {
+            if (host.Handle != IntPtr.Zero)
+            {
+                WindowKeys.AcceptDrops(host.Handle);
+            }
+        }
+    }
+
+    private static IEnumerable<DependencyObject> Descendants(DependencyObject parent)
+    {
+        for (var at = 0; at < VisualTreeHelper.GetChildrenCount(parent); at++)
+        {
+            var child = VisualTreeHelper.GetChild(parent, at);
+            yield return child;
+            foreach (var deeper in Descendants(child))
+            {
+                yield return deeper;
+            }
+        }
+    }
 
     private void SyncSize()
     {

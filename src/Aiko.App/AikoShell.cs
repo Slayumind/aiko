@@ -382,6 +382,7 @@ sealed class AikoShell : IDisposable
         var terminal = new TerminalHost(environments, SettingsStore.LoadTerminal(), _numbers.SnapshotFor);
         terminal.Closed += () => _terminal = null;
         terminal.InViewChanged += _island.FollowTerminal;
+        terminal.VoiceSettingsAsked += () => OpenSettings(page: SettingsPanel.TerminalPageKey);
         _terminal = terminal;
         terminal.Show();
 

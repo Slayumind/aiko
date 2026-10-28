@@ -71,6 +71,7 @@ public class SharedCaseTests
                 ["activityFolder"] = folders.ActivityFolder,
                 ["terminalEventsFolder"] = folders.TerminalEventsFolder,
                 ["terminalHooksFile"] = folders.TerminalHooksFile,
+                ["picturesFolder"] = folders.PicturesFolder(snapshotName),
                 ["directCacheFolder"] = folders.DirectCacheFolder,
                 ["commandsFolder"] = folders.CommandsFolder,
                 ["marketplaceFolder"] = folders.MarketplaceFolder,
@@ -435,7 +436,8 @@ public class SharedCaseTests
                 row.GetProperty("environment").GetString()!,
                 row.GetProperty("sessionId").GetString()!,
                 row.GetProperty("started").GetBoolean(),
-                row.TryGetProperty("hooksFile", out var hooks) ? hooks.GetString()! : "");
+                row.TryGetProperty("hooksFile", out var hooks) ? hooks.GetString()! : "",
+                row.TryGetProperty("picturesFolder", out var pictures) ? pictures.GetString()! : "");
 
             var plan = ClaudeLaunchPlan.For(request, Strings(row.GetProperty("inherited")));
 
@@ -674,6 +676,88 @@ public class SharedCaseTests
                     JsonNode.DeepEquals(JsonNode.Parse(row.GetProperty(part).GetRawText()), described),
                     $"{row.GetProperty("name").GetString()}, {part}: {described.ToJsonString()}");
             }
+        }
+    }
+
+    [Fact]
+    public void Every_editor_does_the_same()
+    {
+        var cases = SpecCases.Json("editor");
+
+        foreach (var row in cases.GetProperty("keys").EnumerateArray())
+        {
+            var state = row.GetProperty("state");
+            var press = EditorKeys.For(
+                new EditorState(
+                    state[0].GetString() == "shell" ? SessionKind.Shell : SessionKind.Claude,
+                    state[1].GetBoolean(), state[2].GetBoolean(), state[3].GetBoolean(), state[4].GetBoolean(),
+                    state.GetArrayLength() > 5 && state[5].GetBoolean()),
+                Enum.Parse<EditorKey>(row.GetProperty("key").GetString()!, ignoreCase: true),
+                row.GetProperty("shift").GetBoolean(),
+                row.GetProperty("char").GetString() is { Length: > 0 } typed ? typed[0] : '\0');
+            var expected = row.GetProperty("press");
+            Assert.True(
+                Camel(press.Action) == expected[0].GetString() && press.Sequence == expected[1].GetString() && press.Passing == expected[2].GetBoolean(),
+                $"{state.GetRawText()} {row.GetProperty("key").GetString()} {row.GetProperty("char").GetString()}: {press}");
+        }
+
+        foreach (var row in cases.GetProperty("sends").EnumerateArray())
+        {
+            Assert.Equal(
+                Strings(row.GetProperty("writes")),
+                EditorSend.Writes(row.GetProperty("text").GetString()!, Strings(row.GetProperty("pictures"))));
+        }
+
+        foreach (var row in cases.GetProperty("inserts").EnumerateArray())
+        {
+            Assert.Equal(
+                Strings(row.GetProperty("writes")),
+                EditorSend.Inserts(row.GetProperty("text").GetString()!, Strings(row.GetProperty("pictures"))));
+        }
+
+        var history = cases.GetProperty("history");
+        var walk = CommandHistory.Empty;
+        foreach (var command in history.GetProperty("sent").EnumerateArray())
+        {
+            walk = walk.Sent(command.GetString()!);
+        }
+
+        foreach (var step in history.GetProperty("steps").EnumerateArray())
+        {
+            string? shown;
+            (walk, shown) = step.GetProperty("do").GetString() == "back"
+                ? walk.Back(step.GetProperty("text").GetString()!)
+                : walk.Forward();
+            Assert.Equal(step.GetProperty("shows").GetString(), shown);
+        }
+
+        var completions = cases.GetProperty("completions");
+        var tree = completions.GetProperty("tree").EnumerateObject().ToDictionary(
+            folder => folder.Name,
+            folder => (IReadOnlyList<FolderEntry>)[.. folder.Value.EnumerateArray().Select(entry => new FolderEntry(entry[0].GetString()!, entry[1].GetBoolean()))]);
+        foreach (var row in completions.GetProperty("rows").EnumerateArray())
+        {
+            var done = PathCompletion.Complete(
+                row.GetProperty("text").GetString()!, row.GetProperty("caret").GetInt32(), completions.GetProperty("folder").GetString()!,
+                row.GetProperty("separator").GetString()![0], folder => tree.GetValueOrDefault(folder) ?? []);
+            var expected = row.GetProperty("result");
+            Assert.True(
+                expected.ValueKind == JsonValueKind.Null
+                    ? done is null
+                    : done is not null && done.Text == expected[0].GetString() && done.Caret == expected[1].GetInt32()
+                        && done.Choices.SequenceEqual(Strings(expected[2])),
+                $"{row.GetProperty("name").GetString()}: {done?.Text}|{done?.Caret}|{string.Join(",", done?.Choices ?? [])}");
+        }
+    }
+
+    [Fact]
+    public void Every_copy_out_of_a_terminal_reads_the_same()
+    {
+        foreach (var row in SpecCases.Json("terminal-copy").GetProperty("rows").EnumerateArray())
+        {
+            Assert.True(
+                row.GetProperty("copied").GetString() == TerminalCopy.Unwrap(row.GetProperty("text").GetString()!, row.GetProperty("columns").GetInt32()),
+                $"{row.GetProperty("name").GetString()}: {TerminalCopy.Unwrap(row.GetProperty("text").GetString()!, row.GetProperty("columns").GetInt32())}");
         }
     }
 

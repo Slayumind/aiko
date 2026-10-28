@@ -1093,6 +1093,30 @@
   <data name="StateOn" xml:space="preserve">
     <value>включена</value>
   </data>
+  <data name="TerminalEditorHintPassing" xml:space="preserve">
+    <value>Клавиши уходят в меню Claude Code · **Enter** или **Esc** — закончить</value>
+  </data>
+  <data name="TerminalEditorHintCompose" xml:space="preserve">
+    <value>**Enter** вставить в строку Claude Code · **Shift+Enter** новая строка · **Esc** закрыть</value>
+  </data>
+  <data name="TerminalEditorHintShellText" xml:space="preserve">
+    <value>**Enter** выполнить · **Tab** путь · **Shift+Enter** новая строка</value>
+  </data>
+  <data name="TerminalEditorHintShellEmpty" xml:space="preserve">
+    <value>Пусто: **↑ ↓** история; **Enter**, **Esc**, **Tab** уходят в терминал</value>
+  </data>
+  <data name="TerminalEditorHintText" xml:space="preserve">
+    <value>**Enter** отправить · **Shift+Enter** новая строка · **Ctrl+Shift+Space** голос</value>
+  </data>
+  <data name="TerminalEditorHintEmpty" xml:space="preserve">
+    <value>Пусто: **стрелки**, **Enter**, **Esc**, **Shift+Tab** уходят в терминал</value>
+  </data>
+  <data name="TerminalEditorPicture" xml:space="preserve">
+    <value>картинка {0}</value>
+  </data>
+  <data name="TerminalEditorPlaceholder" xml:space="preserve">
+    <value>Напиши или скажи</value>
+  </data>
   <data name="TerminalSearchHint" xml:space="preserve">
     <value>Найти сессию или разговор</value>
   </data>
@@ -1277,10 +1301,10 @@
     <value>Сессии</value>
   </data>
   <data name="VoiceButtonTip" xml:space="preserve">
-    <value>Голосовой ввод · Ctrl+Space</value>
+    <value>Голосовой ввод · Ctrl+Shift+Space</value>
   </data>
   <data name="VoiceStopTip" xml:space="preserve">
-    <value>Закончить запись · Ctrl+Space</value>
+    <value>Закончить запись · Ctrl+Shift+Space</value>
   </data>
   <data name="VoiceWarming" xml:space="preserve">
     <value>микрофон включается</value>
@@ -1325,7 +1349,7 @@
     <value>Голосовой ввод</value>
   </data>
   <data name="VoiceToggleWhat" xml:space="preserve">
-    <value>Ctrl+Space или кнопка микрофона в поле.</value>
+    <value>Ctrl+Shift+Space или кнопка микрофона в редакторе.</value>
   </data>
   <data name="VoiceLanguageLabel" xml:space="preserve">
     <value>Язык речи</value>

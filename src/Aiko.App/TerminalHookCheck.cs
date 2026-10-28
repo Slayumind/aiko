@@ -96,7 +96,7 @@ static class TerminalHookCheck
             exited.Set();
         };
         console.Start();
-        console.Resize(30, 120);
+        console.Resize(30, int.TryParse(Environment.GetEnvironmentVariable("AIKO_TRY_COLUMNS"), out var columns) ? (uint)columns : 120);
 
         var eventFile = Path.Combine(ThisComputer.Folders.TerminalEventsFolder, id + ".json");
         TerminalEvent? last = null;
@@ -144,7 +144,11 @@ static class TerminalHookCheck
         }
 
         Thread.Sleep(1500);
-        console.WriteInput("\u001b[200~Read note.txt, then create a file named out.txt with that word in it.\u001b[201~");
+        // AIKO_TRY_PROMPT asks something else, for a look at how the answer is drawn (with AIKO_TRY_RAW).
+        var prompt = Environment.GetEnvironmentVariable("AIKO_TRY_PROMPT") is { Length: > 0 } asked
+            ? asked
+            : "Read note.txt, then create a file named out.txt with that word in it.";
+        console.WriteInput("\u001b[200~" + prompt + "\u001b[201~");
         Thread.Sleep(300);
         console.WriteInput("\r");
 
@@ -167,6 +171,15 @@ static class TerminalHookCheck
         lock (report)
         {
             File.WriteAllLines(reportPath, report);
+
+            // AIKO_TRY_RAW: the output of the terminal as it came, escapes and all, for a look at it.
+            if (Environment.GetEnvironmentVariable("AIKO_TRY_RAW") is { Length: > 0 } raw)
+            {
+                lock (screen)
+                {
+                    File.WriteAllText(raw, screen.ToString());
+                }
+            }
         }
 
         try

@@ -394,6 +394,14 @@ public enum Strings {
         "MeetAikoSettings": ("The temperament, the mood, the skills and the memory are on the Personality page. It works in new sessions.", "Темперамент, настроение, навыки и память — на странице «Личность». Действует в новых сессиях."),
         "MeetAikoTurnOn": ("Turn on in {0}", "Включить в среде {0}"),
         "StateOn": ("on", "включена"),
+        "TerminalEditorHintPassing": ("Keys go to the menu of Claude Code · **Enter** or **Esc** ends it", "Клавиши уходят в меню Claude Code · **Enter** или **Esc** — закончить"),
+        "TerminalEditorHintCompose": ("**Enter** into the line of Claude Code · **Shift+Enter** new line · **Esc** close", "**Enter** вставить в строку Claude Code · **Shift+Enter** новая строка · **Esc** закрыть"),
+        "TerminalEditorHintShellText": ("**Enter** run · **Tab** path · **Shift+Enter** new line", "**Enter** выполнить · **Tab** путь · **Shift+Enter** новая строка"),
+        "TerminalEditorHintShellEmpty": ("Empty: **↑ ↓** history; **Enter**, **Esc**, **Tab** go to the terminal", "Пусто: **↑ ↓** история; **Enter**, **Esc**, **Tab** уходят в терминал"),
+        "TerminalEditorHintText": ("**Enter** send · **Shift+Enter** new line · **Ctrl+Shift+Space** voice", "**Enter** отправить · **Shift+Enter** новая строка · **Ctrl+Shift+Space** голос"),
+        "TerminalEditorHintEmpty": ("Empty: **arrows**, **Enter**, **Esc**, **Shift+Tab** go to the terminal", "Пусто: **стрелки**, **Enter**, **Esc**, **Shift+Tab** уходят в терминал"),
+        "TerminalEditorPicture": ("picture {0}", "картинка {0}"),
+        "TerminalEditorPlaceholder": ("Type or say", "Напиши или скажи"),
         "TerminalSearchHint": ("Find a session or a conversation", "Найти сессию или разговор"),
         "TerminalSearchKeys": ("↑ ↓ choose · Enter open · Esc close", "↑ ↓ выбрать · Enter открыть · Esc закрыть"),
         "TerminalSearchOpen": ("Open", "Открытые"),
@@ -455,8 +463,8 @@ public enum Strings {
         "TerminalRestore": ("Restore", "Восстановить"),
         "TerminalCloseWindow": ("Close", "Закрыть"),
         "TerminalSessions": ("Sessions", "Сессии"),
-        "VoiceButtonTip": ("Voice input · Ctrl+Space", "Голосовой ввод · Ctrl+Space"),
-        "VoiceStopTip": ("Finish recording · Ctrl+Space", "Закончить запись · Ctrl+Space"),
+        "VoiceButtonTip": ("Voice input · Ctrl+Shift+Space", "Голосовой ввод · Ctrl+Shift+Space"),
+        "VoiceStopTip": ("Finish recording · Ctrl+Shift+Space", "Закончить запись · Ctrl+Shift+Space"),
         "VoiceWarming": ("starting the mic", "микрофон включается"),
         "VoiceListening": ("listening {0}", "слушаю {0}"),
         "VoiceFinishing": ("finishing", "дописываю"),
@@ -471,7 +479,7 @@ public enum Strings {
         "NavVoiceOn": ("voice input on", "голос включён"),
         "NavVoiceOff": ("voice input off", "голос выключен"),
         "VoiceToggle": ("Voice input", "Голосовой ввод"),
-        "VoiceToggleWhat": ("Ctrl+Space or the microphone button in the field.", "Ctrl+Space или кнопка микрофона в поле."),
+        "VoiceToggleWhat": ("Ctrl+Shift+Space or the microphone button in the editor.", "Ctrl+Shift+Space или кнопка микрофона в редакторе."),
         "VoiceLanguageLabel": ("Speech language", "Язык речи"),
         "VoiceLanguageWhat": ("Whisper on your computer listens for this language. OpenAI hears the language by itself.", "Whisper на компьютере слушает этот язык. OpenAI узнаёт язык сам."),
         "VoiceEngineLabel": ("Recognition", "Распознавание"),
@@ -1559,6 +1567,30 @@ public enum Strings {
     /// on
     public static var stateOn: String { Strings.get("StateOn") }
 
+    /// Keys go to the menu of Claude Code · **Enter** or **Esc** ends it
+    public static var terminalEditorHintPassing: String { Strings.get("TerminalEditorHintPassing") }
+
+    /// **Enter** into the line of Claude Code · **Shift+Enter** new line · **Esc** close
+    public static var terminalEditorHintCompose: String { Strings.get("TerminalEditorHintCompose") }
+
+    /// **Enter** run · **Tab** path · **Shift+Enter** new line
+    public static var terminalEditorHintShellText: String { Strings.get("TerminalEditorHintShellText") }
+
+    /// Empty: **↑ ↓** history; **Enter**, **Esc**, **Tab** go to the terminal
+    public static var terminalEditorHintShellEmpty: String { Strings.get("TerminalEditorHintShellEmpty") }
+
+    /// **Enter** send · **Shift+Enter** new line · **Ctrl+Shift+Space** voice
+    public static var terminalEditorHintText: String { Strings.get("TerminalEditorHintText") }
+
+    /// Empty: **arrows**, **Enter**, **Esc**, **Shift+Tab** go to the terminal
+    public static var terminalEditorHintEmpty: String { Strings.get("TerminalEditorHintEmpty") }
+
+    /// picture {0}
+    public static var terminalEditorPicture: String { Strings.get("TerminalEditorPicture") }
+
+    /// Type or say
+    public static var terminalEditorPlaceholder: String { Strings.get("TerminalEditorPlaceholder") }
+
     /// Find a session or a conversation
     public static var terminalSearchHint: String { Strings.get("TerminalSearchHint") }
 
@@ -1742,10 +1774,10 @@ public enum Strings {
     /// Sessions
     public static var terminalSessions: String { Strings.get("TerminalSessions") }
 
-    /// Voice input · Ctrl+Space
+    /// Voice input · Ctrl+Shift+Space
     public static var voiceButtonTip: String { Strings.get("VoiceButtonTip") }
 
-    /// Finish recording · Ctrl+Space
+    /// Finish recording · Ctrl+Shift+Space
     public static var voiceStopTip: String { Strings.get("VoiceStopTip") }
 
     /// starting the mic
@@ -1790,7 +1822,7 @@ public enum Strings {
     /// Voice input
     public static var voiceToggle: String { Strings.get("VoiceToggle") }
 
-    /// Ctrl+Space or the microphone button in the field.
+    /// Ctrl+Shift+Space or the microphone button in the editor.
     public static var voiceToggleWhat: String { Strings.get("VoiceToggleWhat") }
 
     /// Speech language

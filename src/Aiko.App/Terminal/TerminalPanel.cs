@@ -53,6 +53,15 @@ sealed class TerminalPanel : UserControl
     private readonly Button _resume;
     private readonly DockPanel _terminalSide;
 
+    /// The editor under the terminal (D-354): the keyboard is always here.
+    public TerminalEditor Editor { get; } = new();
+
+    /// Whether the open session has room for the editor: a terminal that runs.
+    private bool _editorRoom;
+
+    private void ShowEditor() =>
+        Editor.Visibility = _editorRoom && Editor.Wanted ? Visibility.Visible : Visibility.Collapsed;
+
     public TerminalPanel()
     {
         Background = Tokens.Brush("Background");
@@ -129,6 +138,9 @@ sealed class TerminalPanel : UserControl
         var terminalSide = new DockPanel();
         DockPanel.SetDock(_stopped, Dock.Bottom);
         terminalSide.Children.Add(_stopped);
+        DockPanel.SetDock(Editor, Dock.Bottom);
+        terminalSide.Children.Add(Editor);
+        Editor.WantedChanged += ShowEditor;
         terminalSide.Children.Add(_terminals);
         _terminalSide = terminalSide;
 
@@ -622,6 +634,9 @@ sealed class TerminalPanel : UserControl
         _loader.Visibility = terminal is { Drawn: false } ? Visibility.Visible : Visibility.Collapsed;
 
         _stopped.Visibility = terminal is not null && view.Stopped ? Visibility.Visible : Visibility.Collapsed;
+        // A program that ended takes no text: the bar to continue it stands in place of the editor.
+        _editorRoom = terminal is not null && !view.Stopped;
+        ShowEditor();
 
         UIElement content = terminal is not null ? _terminalSide
             : view.Ask is { } ask ? Ask(ask)
@@ -656,7 +671,18 @@ sealed class TerminalPanel : UserControl
         }
         else if (_shownTerminal != view.SessionId)
         {
-            Dispatcher.BeginInvoke(terminal!.FocusTerminal, System.Windows.Threading.DispatcherPriority.Input);
+            // The keys go where the text is typed: the editor, or the line of Claude Code (D-370).
+            Dispatcher.BeginInvoke(() =>
+            {
+                if (Editor.Wanted)
+                {
+                    Editor.FocusText();
+                }
+                else
+                {
+                    terminal!.FocusTerminal();
+                }
+            }, System.Windows.Threading.DispatcherPriority.Input);
         }
 
         _shownTerminal = view.SessionId;

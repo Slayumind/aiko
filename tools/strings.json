@@ -2478,6 +2478,62 @@
     ]
   ],
   [
+    "TerminalEditorHintPassing",
+    [
+      "Keys go to the menu of Claude Code · **Enter** or **Esc** ends it",
+      "Клавиши уходят в меню Claude Code · **Enter** или **Esc** — закончить"
+    ]
+  ],
+  [
+    "TerminalEditorHintCompose",
+    [
+      "**Enter** into the line of Claude Code · **Shift+Enter** new line · **Esc** close",
+      "**Enter** вставить в строку Claude Code · **Shift+Enter** новая строка · **Esc** закрыть"
+    ]
+  ],
+  [
+    "TerminalEditorHintShellText",
+    [
+      "**Enter** run · **Tab** path · **Shift+Enter** new line",
+      "**Enter** выполнить · **Tab** путь · **Shift+Enter** новая строка"
+    ]
+  ],
+  [
+    "TerminalEditorHintShellEmpty",
+    [
+      "Empty: **↑ ↓** history; **Enter**, **Esc**, **Tab** go to the terminal",
+      "Пусто: **↑ ↓** история; **Enter**, **Esc**, **Tab** уходят в терминал"
+    ]
+  ],
+  [
+    "TerminalEditorHintText",
+    [
+      "**Enter** send · **Shift+Enter** new line · **Ctrl+Shift+Space** voice",
+      "**Enter** отправить · **Shift+Enter** новая строка · **Ctrl+Shift+Space** голос"
+    ]
+  ],
+  [
+    "TerminalEditorHintEmpty",
+    [
+      "Empty: **arrows**, **Enter**, **Esc**, **Shift+Tab** go to the terminal",
+      "Пусто: **стрелки**, **Enter**, **Esc**, **Shift+Tab** уходят в терминал"
+    ]
+  ],
+  [
+    "TerminalEditorPicture",
+    [
+      "picture {0}",
+      "картинка {0}"
+    ]
+  ],
+  [
+    "TerminalEditorPlaceholder",
+    [
+      "Type or say",
+      "Напиши или скажи"
+    ]
+  ],
+  [
     "TerminalSearchHint",
     [
       "Find a session or a conversation",
@@ -2907,15 +2963,15 @@
   [
     "VoiceButtonTip",
     [
-      "Voice input · Ctrl+Space",
-      "Голосовой ввод · Ctrl+Space"
+      "Voice input · Ctrl+Shift+Space",
+      "Голосовой ввод · Ctrl+Shift+Space"
     ]
   ],
   [
     "VoiceStopTip",
     [
-      "Finish recording · Ctrl+Space",
-      "Закончить запись · Ctrl+Space"
+      "Finish recording · Ctrl+Shift+Space",
+      "Закончить запись · Ctrl+Shift+Space"
     ]
   ],
   [
@@ -3019,8 +3075,8 @@
   [
     "VoiceToggleWhat",
     [
-      "Ctrl+Space or the microphone button in the field.",
-      "Ctrl+Space или кнопка микрофона в поле."
+      "Ctrl+Shift+Space or the microphone button in the editor.",
+      "Ctrl+Shift+Space или кнопка микрофона в редакторе."
     ]
   ],
   [

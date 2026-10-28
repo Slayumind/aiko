@@ -1,0 +1,59 @@
+{
+  "comment": "Text copied out of a terminal (D-371). Claude Code lays out its text by the width of the terminal itself, the rows after the first indented by two spaces, so a copied paragraph breaks in the middle of a sentence. A row is joined to the next with a space when the first word of the next would not have fit on it (its length on the screen, a space and that word are more than the width); the indent the following rows share goes. Empty lines, points of a list, lines of a table or a box and lines indented deeper (code) keep their breaks. Lines are given with \\n and come back with \\n. The first row of a selection usually starts after the mark of a message, so it counts as wide as its text and the indent of the rows after it.",
+  "rows": [
+    {
+      "name": "a paragraph of Claude Code at 80 columns",
+      "columns": 80,
+      "text": "Tip: You can control how big a workflow is just by prompting. Ask for a\n     small workflow, cap it with \"use at most 5 agents\", or set the default with\n     Dynamic workflow size in /config.",
+      "copied": "Tip: You can control how big a workflow is just by prompting. Ask for a small workflow, cap it with \"use at most 5 agents\", or set the default with Dynamic workflow size in /config."
+    },
+    {
+      "name": "two paragraphs keep the empty line between them",
+      "columns": 40,
+      "text": "The first paragraph is long enough that\n  it wraps here.\n\n  The second one is short.",
+      "copied": "The first paragraph is long enough that it wraps here.\n\nThe second one is short."
+    },
+    {
+      "name": "a line that ends early is not joined",
+      "columns": 80,
+      "text": "Done.\n  Next I run the tests.",
+      "copied": "Done.\nNext I run the tests."
+    },
+    {
+      "name": "points of a list stay points",
+      "columns": 30,
+      "text": "Steps to take before the merge:\n  - run the tests\n  - 2. check the build\n  1. look at it",
+      "copied": "Steps to take before the merge:\n- run the tests\n- 2. check the build\n1. look at it"
+    },
+    {
+      "name": "a point of a list that wraps is joined",
+      "columns": 30,
+      "text": "- this point of the list is long\n  and goes on here",
+      "copied": "- this point of the list is long and goes on here"
+    },
+    {
+      "name": "a table keeps its rows",
+      "columns": 20,
+      "text": "┌──────┬─────────┐\n│ name │ value   │\n└──────┴─────────┘",
+      "copied": "┌──────┬─────────┐\n│ name │ value   │\n└──────┴─────────┘"
+    },
+    {
+      "name": "code indented deeper keeps its lines",
+      "columns": 80,
+      "text": "Run this in the folder:\n  first\n      git status --short --branch\n  then",
+      "copied": "Run this in the folder:\nfirst\n    git status --short --branch\nthen"
+    },
+    {
+      "name": "trailing spaces of the rows go",
+      "columns": 20,
+      "text": "one two three four   \n  five",
+      "copied": "one two three four five"
+    },
+    {
+      "name": "one line stays as it is",
+      "columns": 80,
+      "text": "just one line",
+      "copied": "just one line"
+    }
+  ]
+}
