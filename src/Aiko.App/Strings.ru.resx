@@ -1090,6 +1090,27 @@
   <data name="StateOn" xml:space="preserve">
     <value>включена</value>
   </data>
+  <data name="TerminalNewSession" xml:space="preserve">
+    <value>Новая сессия</value>
+  </data>
+  <data name="TerminalNewSessionKey" xml:space="preserve">
+    <value>Ctrl+Shift+T</value>
+  </data>
+  <data name="TerminalGroupNewSession" xml:space="preserve">
+    <value>Новая сессия Claude Code в этой папке</value>
+  </data>
+  <data name="TerminalGroupNewShell" xml:space="preserve">
+    <value>Командная строка в этой папке</value>
+  </data>
+  <data name="TerminalPickFolderHint" xml:space="preserve">
+    <value>Папка для новой сессии</value>
+  </data>
+  <data name="TerminalPickFolderKeys" xml:space="preserve">
+    <value>↑ ↓ выбрать · Enter Claude Code · Ctrl+Enter командная строка · Esc закрыть</value>
+  </data>
+  <data name="TerminalPickOtherFolder" xml:space="preserve">
+    <value>Другая папка…</value>
+  </data>
   <data name="TerminalEventThinking" xml:space="preserve">
     <value>думает</value>
   </data>
@@ -1134,9 +1155,6 @@
   </data>
   <data name="TerminalCreateSession" xml:space="preserve">
     <value>Создать сессию</value>
-  </data>
-  <data name="TerminalNewShell" xml:space="preserve">
-    <value>Открыть командную строку</value>
   </data>
   <data name="TerminalStoppedLine" xml:space="preserve">
     <value>Claude Code остановился. Разговор сохранён: нажми Enter, чтобы продолжить.</value>

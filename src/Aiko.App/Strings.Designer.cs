@@ -1080,6 +1080,27 @@ public static class Strings
     /// on
     public static string StateOn => Get("StateOn");
 
+    /// New session
+    public static string TerminalNewSession => Get("TerminalNewSession");
+
+    /// Ctrl+Shift+T
+    public static string TerminalNewSessionKey => Get("TerminalNewSessionKey");
+
+    /// New session of Claude Code in this folder
+    public static string TerminalGroupNewSession => Get("TerminalGroupNewSession");
+
+    /// Command line in this folder
+    public static string TerminalGroupNewShell => Get("TerminalGroupNewShell");
+
+    /// Folder for the new session
+    public static string TerminalPickFolderHint => Get("TerminalPickFolderHint");
+
+    /// ↑ ↓ choose · Enter Claude Code · Ctrl+Enter command line · Esc close
+    public static string TerminalPickFolderKeys => Get("TerminalPickFolderKeys");
+
+    /// Another folder…
+    public static string TerminalPickOtherFolder => Get("TerminalPickOtherFolder");
+
     /// thinking
     public static string TerminalEventThinking => Get("TerminalEventThinking");
 
@@ -1124,9 +1145,6 @@ public static class Strings
 
     /// Create session
     public static string TerminalCreateSession => Get("TerminalCreateSession");
-
-    /// Open command line
-    public static string TerminalNewShell => Get("TerminalNewShell");
 
     /// Claude Code stopped. The conversation is saved: press Enter to continue.
     public static string TerminalStoppedLine => Get("TerminalStoppedLine");

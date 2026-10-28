@@ -570,6 +570,34 @@ public class SharedCaseTests
         }
     }
 
+    [Fact]
+    public void Every_list_matches_and_picks_folders_the_same()
+    {
+        var cases = SpecCases.Json("text-match");
+
+        static JsonNode? Described(IReadOnlyList<TextPart>? parts) =>
+            parts is null ? null : new JsonArray([.. parts.Select(part => (JsonNode)new JsonArray(part.Text, part.Match))]);
+
+        foreach (var row in cases.GetProperty("parts").EnumerateArray())
+        {
+            var found = Described(TextMatch.Parts(row.GetProperty("text").GetString()!, row.GetProperty("query").GetString()!));
+            Assert.True(
+                JsonNode.DeepEquals(JsonNode.Parse(row.GetProperty("parts").GetRawText()), found),
+                $"{row.GetProperty("text").GetString()}: {found?.ToJsonString()}");
+        }
+
+        var sessions = TerminalSessions.FromJson(cases.GetProperty("sessions").GetRawText());
+        foreach (var row in cases.GetProperty("folders").EnumerateArray())
+        {
+            var others = row.GetProperty("others").EnumerateArray().Select(other => (other[0].GetString()!, other[1].GetInt64()));
+            var hits = FolderPick.Find(sessions, row.GetProperty("environment").GetString()!, row.GetProperty("query").GetString()!, others);
+            var described = new JsonArray([.. hits.Select(hit => (JsonNode)new JsonArray(hit.Folder, Described(hit.Name), hit.Parent))]);
+            Assert.True(
+                JsonNode.DeepEquals(JsonNode.Parse(row.GetProperty("hits").GetRawText()), described),
+                $"{row.GetProperty("name").GetString()}: {described.ToJsonString()}");
+        }
+    }
+
     private static TerminalEventKind KindIn(JsonElement terminalEvent) =>
         Enum.Parse<TerminalEventKind>(terminalEvent.GetProperty("kind").GetString()!, ignoreCase: true);
 

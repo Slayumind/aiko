@@ -84,8 +84,9 @@ sealed class TerminalHost
             Save();
             Draw();
         };
-        _panel.CreateAsked += () => Create(SessionKind.Claude);
-        _panel.ShellAsked += () => Create(SessionKind.Shell);
+        _panel.CreateAsked += PickFolderQuickly;
+        _panel.GroupCreateAsked += StartIn;
+        _panel.PaletteClosed += FocusOpenTerminal;
         _panel.ResumeAsked += Resume;
         _panel.AskAnswered += Answer;
     }
@@ -193,13 +194,51 @@ sealed class TerminalHost
         Change(_model.ToSession(id, _sessions));
     }
 
-    /// A new session in a folder the person picks, in the environment of the open tab. The quick
-    /// pick of a folder and "+" at a group of the list come with the list of sessions (AIKO-411).
-    private void Create(SessionKind kind)
+    /// The id of the last line of the quick pick, the one that opens the folder dialog.
+    private const string OtherFolder = "\u0000other";
+
+    /// The quick pick of a folder for a new session (D-350): the folders of the environment, the
+    /// latest used first, and the folder dialog as the last line. Enter starts Claude Code there,
+    /// Ctrl+Enter a command line.
+    private void PickFolderQuickly()
     {
-        var current = _model.Session(_sessions);
-        var folder = kind == SessionKind.Shell && current is not null ? current.Folder : PickFolder(current?.Folder);
-        if (folder is null || Environment() is not { } environment)
+        var environment = _model.Environment;
+        var palette = new PaletteView(Strings.TerminalPickFolderHint, Strings.TerminalPickFolderKeys, query =>
+        [
+            new PaletteGroup("", [.. FolderPick.Find(_sessions, environment, query)
+                .Select(hit => new PaletteRow(hit.Folder, hit.Name, hit.Parent, []))]),
+            new PaletteGroup("", [new PaletteRow(OtherFolder, [new TextPart(Strings.TerminalPickOtherFolder, false)], "", [], Quiet: true)]),
+        ]);
+        palette.Closed += _panel.ClosePalette;
+        palette.Picked += (folder, control) =>
+        {
+            _panel.ClosePalette();
+            var kind = control ? SessionKind.Shell : SessionKind.Claude;
+            if (folder != OtherFolder)
+            {
+                StartIn(folder, kind);
+            }
+            else if (PickFolder(_model.Session(_sessions)?.Folder) is { } picked)
+            {
+                StartIn(picked, kind);
+            }
+        };
+        _panel.ShowPalette(palette);
+    }
+
+    /// The terminal of the open session takes the keys again, after a palette or a dialog.
+    private void FocusOpenTerminal()
+    {
+        if (_model.Session(_sessions) is { } open && _terminals.TryGetValue(open.Id, out var terminal))
+        {
+            terminal.FocusTerminal();
+        }
+    }
+
+    /// A new session in a folder, in the environment of the open tab, with no question.
+    private void StartIn(string folder, SessionKind kind)
+    {
+        if (Environment() is not { } environment)
         {
             return;
         }

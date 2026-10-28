@@ -2471,6 +2471,55 @@
     ]
   ],
   [
+    "TerminalNewSession",
+    [
+      "New session",
+      "Новая сессия"
+    ]
+  ],
+  [
+    "TerminalNewSessionKey",
+    [
+      "Ctrl+Shift+T",
+      "Ctrl+Shift+T"
+    ]
+  ],
+  [
+    "TerminalGroupNewSession",
+    [
+      "New session of Claude Code in this folder",
+      "Новая сессия Claude Code в этой папке"
+    ]
+  ],
+  [
+    "TerminalGroupNewShell",
+    [
+      "Command line in this folder",
+      "Командная строка в этой папке"
+    ]
+  ],
+  [
+    "TerminalPickFolderHint",
+    [
+      "Folder for the new session",
+      "Папка для новой сессии"
+    ]
+  ],
+  [
+    "TerminalPickFolderKeys",
+    [
+      "↑ ↓ choose · Enter Claude Code · Ctrl+Enter command line · Esc close",
+      "↑ ↓ выбрать · Enter Claude Code · Ctrl+Enter командная строка · Esc закрыть"
+    ]
+  ],
+  [
+    "TerminalPickOtherFolder",
+    [
+      "Another folder…",
+      "Другая папка…"
+    ]
+  ],
+  [
     "TerminalEventThinking",
     [
       "thinking",
@@ -2573,13 +2622,6 @@
     [
       "Create session",
       "Создать сессию"
-    ]
-  ],
-  [
-    "TerminalNewShell",
-    [
-      "Open command line",
-      "Открыть командную строку"
     ]
   ],
   [

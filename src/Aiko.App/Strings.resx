@@ -1090,6 +1090,27 @@
   <data name="StateOn" xml:space="preserve">
     <value>on</value>
   </data>
+  <data name="TerminalNewSession" xml:space="preserve">
+    <value>New session</value>
+  </data>
+  <data name="TerminalNewSessionKey" xml:space="preserve">
+    <value>Ctrl+Shift+T</value>
+  </data>
+  <data name="TerminalGroupNewSession" xml:space="preserve">
+    <value>New session of Claude Code in this folder</value>
+  </data>
+  <data name="TerminalGroupNewShell" xml:space="preserve">
+    <value>Command line in this folder</value>
+  </data>
+  <data name="TerminalPickFolderHint" xml:space="preserve">
+    <value>Folder for the new session</value>
+  </data>
+  <data name="TerminalPickFolderKeys" xml:space="preserve">
+    <value>↑ ↓ choose · Enter Claude Code · Ctrl+Enter command line · Esc close</value>
+  </data>
+  <data name="TerminalPickOtherFolder" xml:space="preserve">
+    <value>Another folder…</value>
+  </data>
   <data name="TerminalEventThinking" xml:space="preserve">
     <value>thinking</value>
   </data>
@@ -1134,9 +1155,6 @@
   </data>
   <data name="TerminalCreateSession" xml:space="preserve">
     <value>Create session</value>
-  </data>
-  <data name="TerminalNewShell" xml:space="preserve">
-    <value>Open command line</value>
   </data>
   <data name="TerminalStoppedLine" xml:space="preserve">
     <value>Claude Code stopped. The conversation is saved: press Enter to continue.</value>

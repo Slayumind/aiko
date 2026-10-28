@@ -393,6 +393,13 @@ public enum Strings {
         "MeetAikoSettings": ("The temperament, the mood, the skills and the memory are on the Personality page. It works in new sessions.", "Темперамент, настроение, навыки и память — на странице «Личность». Действует в новых сессиях."),
         "MeetAikoTurnOn": ("Turn on in {0}", "Включить в среде {0}"),
         "StateOn": ("on", "включена"),
+        "TerminalNewSession": ("New session", "Новая сессия"),
+        "TerminalNewSessionKey": ("Ctrl+Shift+T", "Ctrl+Shift+T"),
+        "TerminalGroupNewSession": ("New session of Claude Code in this folder", "Новая сессия Claude Code в этой папке"),
+        "TerminalGroupNewShell": ("Command line in this folder", "Командная строка в этой папке"),
+        "TerminalPickFolderHint": ("Folder for the new session", "Папка для новой сессии"),
+        "TerminalPickFolderKeys": ("↑ ↓ choose · Enter Claude Code · Ctrl+Enter command line · Esc close", "↑ ↓ выбрать · Enter Claude Code · Ctrl+Enter командная строка · Esc закрыть"),
+        "TerminalPickOtherFolder": ("Another folder…", "Другая папка…"),
         "TerminalEventThinking": ("thinking", "думает"),
         "TerminalEventReading": ("reading {0}", "читает {0}"),
         "TerminalEventEditing": ("editing {0}", "правит {0}"),
@@ -408,7 +415,6 @@ public enum Strings {
         "TerminalEventOutOfLimit": ("stopped on the limit", "упёрлась в лимит"),
         "TerminalTitle": ("Terminal", "Терминал"),
         "TerminalCreateSession": ("Create session", "Создать сессию"),
-        "TerminalNewShell": ("Open command line", "Открыть командную строку"),
         "TerminalStoppedLine": ("Claude Code stopped. The conversation is saved: press Enter to continue.", "Claude Code остановился. Разговор сохранён: нажми Enter, чтобы продолжить."),
         "TerminalResume": ("Continue", "Продолжить"),
         "TerminalRenameSession": ("Rename", "Переименовать"),
@@ -1541,6 +1547,27 @@ public enum Strings {
     /// on
     public static var stateOn: String { Strings.get("StateOn") }
 
+    /// New session
+    public static var terminalNewSession: String { Strings.get("TerminalNewSession") }
+
+    /// Ctrl+Shift+T
+    public static var terminalNewSessionKey: String { Strings.get("TerminalNewSessionKey") }
+
+    /// New session of Claude Code in this folder
+    public static var terminalGroupNewSession: String { Strings.get("TerminalGroupNewSession") }
+
+    /// Command line in this folder
+    public static var terminalGroupNewShell: String { Strings.get("TerminalGroupNewShell") }
+
+    /// Folder for the new session
+    public static var terminalPickFolderHint: String { Strings.get("TerminalPickFolderHint") }
+
+    /// ↑ ↓ choose · Enter Claude Code · Ctrl+Enter command line · Esc close
+    public static var terminalPickFolderKeys: String { Strings.get("TerminalPickFolderKeys") }
+
+    /// Another folder…
+    public static var terminalPickOtherFolder: String { Strings.get("TerminalPickOtherFolder") }
+
     /// thinking
     public static var terminalEventThinking: String { Strings.get("TerminalEventThinking") }
 
@@ -1585,9 +1612,6 @@ public enum Strings {
 
     /// Create session
     public static var terminalCreateSession: String { Strings.get("TerminalCreateSession") }
-
-    /// Open command line
-    public static var terminalNewShell: String { Strings.get("TerminalNewShell") }
 
     /// Claude Code stopped. The conversation is saved: press Enter to continue.
     public static var terminalStoppedLine: String { Strings.get("TerminalStoppedLine") }

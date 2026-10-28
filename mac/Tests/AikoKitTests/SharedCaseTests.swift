@@ -566,6 +566,33 @@ struct SharedCaseTests {
     }
 
     @Test
+    func everyListMatchesAndPicksFoldersTheSame() {
+        let cases = SpecCases.json("text-match")
+
+        func described(_ parts: [TextPart]?) -> JsonNode {
+            guard let parts else { return .null }
+            return .array(parts.map { .array([.string($0.text), .bool($0.match)]) })
+        }
+
+        for row in cases["parts"]?.arrayValue ?? [] {
+            let found = described(TextMatch.parts(row["text"]?.stringValue ?? "", row["query"]?.stringValue ?? ""))
+            #expect(found == row["parts"], "\(row["text"]?.stringValue ?? "")")
+        }
+
+        let sessions = TerminalSessions.fromJson(cases["sessions"]?.toJsonString(escaping: .relaxed))
+        for row in cases["folders"]?.arrayValue ?? [] {
+            let others = (row["others"]?.arrayValue ?? []).map {
+                ($0.arrayValue?[0].stringValue ?? "", $0.arrayValue?[1].int64Value ?? 0)
+            }
+            let hits = FolderPick.find(
+                sessions, environment: row["environment"]?.stringValue ?? "", query: row["query"]?.stringValue ?? "",
+                others: others)
+            let found = JsonNode.array(hits.map { .array([.string($0.folder), described($0.name), .string($0.parent)]) })
+            #expect(found == row["hits"], "\(row["name"]?.stringValue ?? "")")
+        }
+    }
+
+    @Test
     func everyFileMentionOffersTheSameFiles() {
         let cases = SpecCases.json("file-mention")
         let paths = Self.strings(cases["paths"])
