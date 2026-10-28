@@ -1097,7 +1097,7 @@
     <value>Create session</value>
   </data>
   <data name="TerminalNewShell" xml:space="preserve">
-    <value>Open shell</value>
+    <value>Open command line</value>
   </data>
   <data name="TerminalStoppedLine" xml:space="preserve">
     <value>Claude Code stopped. The conversation is saved: press Enter to continue.</value>
@@ -1157,7 +1157,7 @@
     <value>Some sessions are still running</value>
   </data>
   <data name="TerminalQuitBody" xml:space="preserve">
-    <value>If you quit Aiko now, Claude Code and the shells in its window stop.</value>
+    <value>If you quit Aiko now, Claude Code and the command lines in its window stop.</value>
   </data>
   <data name="TerminalStopAndQuit" xml:space="preserve">
     <value>Stop and quit</value>

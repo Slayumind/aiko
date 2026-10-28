@@ -104,9 +104,9 @@ sealed class PseudoConsole : ITerminalConnection, IDisposable
             _input.Write(bytes, 0, bytes.Length);
             _input.Flush();
         }
-        catch (IOException)
+        catch (Exception e) when (e is IOException or ObjectDisposedException)
         {
-            // The program has just ended; Exited comes next.
+            // The program has just ended or the terminal was closed; Exited comes next.
         }
     }
 
@@ -132,13 +132,13 @@ sealed class PseudoConsole : ITerminalConnection, IDisposable
         _job?.End();
     }
 
+    /// The output and the handle of the process are not closed here: their threads are still
+    /// waiting on them, and each thread closes its own when the program has ended.
     public void Dispose()
     {
         Close();
         _job?.Dispose();
         _input?.Dispose();
-        _output?.Dispose();
-        _process?.Dispose();
     }
 
     private void Read()
@@ -156,9 +156,13 @@ sealed class PseudoConsole : ITerminalConnection, IDisposable
                 TerminalOutput?.Invoke(this, new TerminalOutputEventArgs(new string(chars, 0, length)));
             }
         }
-        catch (IOException)
+        catch (Exception e) when (e is IOException or ObjectDisposedException)
         {
             // The pseudo console was closed.
+        }
+        finally
+        {
+            _output?.Dispose();
         }
     }
 
@@ -168,6 +172,7 @@ sealed class PseudoConsole : ITerminalConnection, IDisposable
         ended.WaitOne();
         GetExitCodeProcess(_process.DangerousGetHandle(), out var code);
         IsRunning = false;
+        _process.Dispose();
         Exited?.Invoke((int)code);
     }
 

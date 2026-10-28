@@ -316,6 +316,14 @@ static class Program
             return;
         }
 
+        // A program in a pseudo console, closed while it still prints: Aiko must outlive it. Opens
+        // no window and starts no Claude Code.
+        if (args is ["--try-pty", ..])
+        {
+            Environment.Exit(TryPty());
+            return;
+        }
+
         // Where Aiko would find Claude Code, read from a fresh PATH. Opens nothing.
         if (args is ["--try-claude", ..])
         {
@@ -437,6 +445,30 @@ static class Program
         application.Exit += (_, _) => shell?.Dispose();
 
         application.Run();
+    }
+
+    /// --try-pty: a command that prints for a few seconds, closed after the first output. The output
+    /// thread is still reading then; the check passes when Aiko is alive a second later and the
+    /// program has ended.
+    private static int TryPty()
+    {
+        var printed = new ManualResetEventSlim(false);
+        var ended = new ManualResetEventSlim(false);
+        var console = new PseudoConsole(new PtyLaunch(
+            "cmd.exe /c ping -n 6 127.0.0.1",
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+            new Dictionary<string, string?>()));
+        console.TerminalOutput += (_, _) => printed.Set();
+        console.Exited += _ => ended.Set();
+        console.Start();
+
+        var sawOutput = printed.Wait(TimeSpan.FromSeconds(5));
+        console.Dispose();
+        var endedSoon = ended.Wait(TimeSpan.FromSeconds(5));
+        Thread.Sleep(1000);
+
+        Log.Write($"--try-pty: output seen={sawOutput}, ended after close={endedSoon}, alive=True");
+        return sawOutput && endedSoon ? 0 : 1;
     }
 
     private static int TryDirectExpired(string folder)

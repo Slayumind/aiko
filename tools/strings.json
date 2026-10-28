@@ -2487,8 +2487,8 @@
   [
     "TerminalNewShell",
     [
-      "Open shell",
-      "Открыть оболочку"
+      "Open command line",
+      "Открыть командную строку"
     ]
   ],
   [
@@ -2627,8 +2627,8 @@
   [
     "TerminalQuitBody",
     [
-      "If you quit Aiko now, Claude Code and the shells in its window stop.",
-      "Если выйти из Aiko сейчас, Claude Code и оболочки в её окне остановятся."
+      "If you quit Aiko now, Claude Code and the command lines in its window stop.",
+      "Если выйти из Aiko сейчас, Claude Code и командные строки в её окне остановятся."
     ]
   ],
   [

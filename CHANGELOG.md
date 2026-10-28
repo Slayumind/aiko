@@ -11,13 +11,13 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 - **Terminal window with real terminals, on Windows.** Open it from the menu of the Aiko icon or
   with the terminal button on the card. Each session is a real terminal: Claude Code as it is, with
-  its own input, menus and permission prompts, or a shell (Git Bash or PowerShell) in the folder of
-  the session. Sessions are grouped by environment and folder, and the window opens where you
+  its own input, menus and permission prompts, or a command line (Git Bash or PowerShell) in the
+  folder of the session. Sessions are grouped by environment and folder, and the window opens where you
   closed it. The Mac follows before the release.
-- **Sessions keep running.** Closing the window hides it while Claude Code or a shell still runs
-  in it, so the agents go on working. Quitting Aiko asks first when something still runs. After a
-  restart of Aiko a session of Claude Code continues its conversation, and a shell opens again in
-  the same folder. When Claude Code ends by itself, its row says so and Enter continues it.
+- **Sessions keep running.** Closing the window hides it while Claude Code or a command line still
+  runs in it, so the agents go on working. Quitting Aiko asks first when something still runs. After a
+  restart of Aiko a session of Claude Code continues its conversation, and a command line opens again
+  in the same folder. When Claude Code ends by itself, its row says so and Enter continues it.
 
 ### Fixed
 

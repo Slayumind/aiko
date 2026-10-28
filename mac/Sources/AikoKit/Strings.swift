@@ -395,7 +395,7 @@ public enum Strings {
         "StateOn": ("on", "включена"),
         "TerminalTitle": ("Terminal", "Терминал"),
         "TerminalCreateSession": ("Create session", "Создать сессию"),
-        "TerminalNewShell": ("Open shell", "Открыть оболочку"),
+        "TerminalNewShell": ("Open command line", "Открыть командную строку"),
         "TerminalStoppedLine": ("Claude Code stopped. The conversation is saved: press Enter to continue.", "Claude Code остановился. Разговор сохранён: нажми Enter, чтобы продолжить."),
         "TerminalResume": ("Continue", "Продолжить"),
         "TerminalRenameSession": ("Rename", "Переименовать"),
@@ -415,7 +415,7 @@ public enum Strings {
         "TerminalCloseTitle": ("Session “{0}” is still running", "Сессия «{0}» ещё работает"),
         "TerminalCloseBody": ("If you close it now, the program in it stops.", "Если закрыть её сейчас, программа в ней остановится."),
         "TerminalQuitTitle": ("Some sessions are still running", "Часть сессий ещё работает"),
-        "TerminalQuitBody": ("If you quit Aiko now, Claude Code and the shells in its window stop.", "Если выйти из Aiko сейчас, Claude Code и оболочки в её окне остановятся."),
+        "TerminalQuitBody": ("If you quit Aiko now, Claude Code and the command lines in its window stop.", "Если выйти из Aiko сейчас, Claude Code и командные строки в её окне остановятся."),
         "TerminalStopAndQuit": ("Stop and quit", "Остановить и выйти"),
         "TerminalDontQuit": ("Don’t quit", "Не выходить"),
         "TerminalStopAndClose": ("Stop and close", "Остановить и закрыть"),
@@ -1534,7 +1534,7 @@ public enum Strings {
     /// Create session
     public static var terminalCreateSession: String { Strings.get("TerminalCreateSession") }
 
-    /// Open shell
+    /// Open command line
     public static var terminalNewShell: String { Strings.get("TerminalNewShell") }
 
     /// Claude Code stopped. The conversation is saved: press Enter to continue.
@@ -1594,7 +1594,7 @@ public enum Strings {
     /// Some sessions are still running
     public static var terminalQuitTitle: String { Strings.get("TerminalQuitTitle") }
 
-    /// If you quit Aiko now, Claude Code and the shells in its window stop.
+    /// If you quit Aiko now, Claude Code and the command lines in its window stop.
     public static var terminalQuitBody: String { Strings.get("TerminalQuitBody") }
 
     /// Stop and quit

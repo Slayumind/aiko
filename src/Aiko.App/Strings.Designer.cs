@@ -1086,7 +1086,7 @@ public static class Strings
     /// Create session
     public static string TerminalCreateSession => Get("TerminalCreateSession");
 
-    /// Open shell
+    /// Open command line
     public static string TerminalNewShell => Get("TerminalNewShell");
 
     /// Claude Code stopped. The conversation is saved: press Enter to continue.
@@ -1146,7 +1146,7 @@ public static class Strings
     /// Some sessions are still running
     public static string TerminalQuitTitle => Get("TerminalQuitTitle");
 
-    /// If you quit Aiko now, Claude Code and the shells in its window stop.
+    /// If you quit Aiko now, Claude Code and the command lines in its window stop.
     public static string TerminalQuitBody => Get("TerminalQuitBody");
 
     /// Stop and quit

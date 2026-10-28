@@ -1097,7 +1097,7 @@
     <value>Создать сессию</value>
   </data>
   <data name="TerminalNewShell" xml:space="preserve">
-    <value>Открыть оболочку</value>
+    <value>Открыть командную строку</value>
   </data>
   <data name="TerminalStoppedLine" xml:space="preserve">
     <value>Claude Code остановился. Разговор сохранён: нажми Enter, чтобы продолжить.</value>
@@ -1157,7 +1157,7 @@
     <value>Часть сессий ещё работает</value>
   </data>
   <data name="TerminalQuitBody" xml:space="preserve">
-    <value>Если выйти из Aiko сейчас, Claude Code и оболочки в её окне остановятся.</value>
+    <value>Если выйти из Aiko сейчас, Claude Code и командные строки в её окне остановятся.</value>
   </data>
   <data name="TerminalStopAndQuit" xml:space="preserve">
     <value>Остановить и выйти</value>
