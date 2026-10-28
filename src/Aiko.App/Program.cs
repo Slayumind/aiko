@@ -318,6 +318,13 @@ static class Program
 
         // A program in a pseudo console, closed while it still prints: Aiko must outlive it. Opens
         // no window and starts no Claude Code.
+        // Whether Tab in a terminal reaches the program before WPF: --try-tab <report>
+        if (args is ["--try-tab", var tabReport, ..])
+        {
+            Environment.Exit(TerminalTabCheck.Run(tabReport));
+            return;
+        }
+
         // The editor with a real Claude Code and a Git Bash, off the screen: --try-editor <folder> <report>
         if (args is ["--try-editor", var editorFolder, var editorReport, ..])
         {

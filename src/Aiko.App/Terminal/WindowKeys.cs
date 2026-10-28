@@ -24,9 +24,23 @@ sealed class WindowKeys : IDisposable
         _window = window;
         _pressed = pressed;
         ComponentDispatcher.ThreadPreprocessMessage += OnMessage;
+
+        // Tab is taken earlier than that: WPF listens to the messages of the thread before this
+        // class does, and its navigation marks Tab as handled before any other listener sees it
+        // (D-370). A hook of this thread sees a message when it is taken from the queue.
+        _hookProc = OnGetMessage;
+        _hook = SetWindowsHookEx(GetMessageHook, _hookProc, IntPtr.Zero, GetCurrentThreadId());
     }
 
-    public void Dispose() => ComponentDispatcher.ThreadPreprocessMessage -= OnMessage;
+    public void Dispose()
+    {
+        ComponentDispatcher.ThreadPreprocessMessage -= OnMessage;
+        if (_hook != IntPtr.Zero)
+        {
+            UnhookWindowsHookEx(_hook);
+            _hook = IntPtr.Zero;
+        }
+    }
 
     /// A mouse button came up in a window inside the terminal window: a real terminal (D-369).
     public event Action? ClickedInside;
@@ -68,26 +82,6 @@ sealed class WindowKeys : IDisposable
             return;
         }
 
-        // Tab and Shift+Tab in a terminal belong to the program: WPF would move the focus over the
-        // buttons of the window with them, and the program would never see them (D-370). The
-        // terminal has the keys when the message came to its window, or when the focus of WPF
-        // stands in it: the control may take its keys through WPF, from the main window.
-        if ((int)message.wParam == VirtualTab && !Held(VirtualControl) && !Held(VirtualAlt))
-        {
-            var inChild = message.hwnd != _window;
-            var focusIn = TerminalFocused?.Invoke() ?? false;
-            if (inChild || focusIn)
-            {
-                handled = TerminalTab?.Invoke(Held(VirtualShift)) ?? false;
-            }
-
-            TerminalLog.TabPressed(inChild, focusIn, handled);
-            if (handled || inChild || focusIn)
-            {
-                return;
-            }
-        }
-
         // The state of the keys from the system: WPF has not seen the keys a child window got.
         if (!Held(VirtualControl) || Held(VirtualAlt))
         {
@@ -97,6 +91,59 @@ sealed class WindowKeys : IDisposable
         var key = KeyInterop.KeyFromVirtualKey((int)message.wParam);
         handled = _pressed(key, Held(VirtualShift), message.hwnd != _window || (TerminalFocused?.Invoke() ?? false));
     }
+
+    // ---- Tab, before WPF ----
+
+    private delegate IntPtr HookProc(int code, IntPtr wParam, IntPtr lParam);
+
+    private const int GetMessageHook = 3;
+    private const int Remove = 1;
+    private const int NoMessage = 0;
+
+    /// Kept here: the system calls it, and a collected delegate would crash the hook.
+    private readonly HookProc _hookProc;
+    private IntPtr _hook;
+
+    /// Tab and Shift+Tab in a terminal belong to the program: WPF would move the focus over the
+    /// buttons of the window with them (D-370). The terminal has the keys when the message came to
+    /// its window or when the focus of WPF stands in it. The key goes to the program, and the
+    /// message becomes an empty one, so WPF never sees it.
+    private IntPtr OnGetMessage(int code, IntPtr wParam, IntPtr lParam)
+    {
+        if (code >= 0 && wParam == Remove)
+        {
+            var message = Marshal.PtrToStructure<MSG>(lParam);
+            if (message.message == KeyDown && (int)message.wParam == VirtualTab && !Held(VirtualControl) && !Held(VirtualAlt)
+                && (message.hwnd == _window || IsChild(_window, message.hwnd)))
+            {
+                var inChild = message.hwnd != _window;
+                var focusIn = TerminalFocused?.Invoke() ?? false;
+                var sent = (inChild || focusIn) && (TerminalTab?.Invoke(Held(VirtualShift)) ?? false);
+                if (sent)
+                {
+                    message.message = NoMessage;
+                    Marshal.StructureToPtr(message, lParam, false);
+                }
+
+                TerminalLog.TabPressed(inChild, focusIn, sent);
+            }
+        }
+
+        return CallNextHookEx(_hook, code, wParam, lParam);
+    }
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern IntPtr SetWindowsHookEx(int hook, HookProc proc, IntPtr module, uint thread);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool UnhookWindowsHookEx(IntPtr hook);
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr CallNextHookEx(IntPtr hook, int code, IntPtr wParam, IntPtr lParam);
+
+    [DllImport("kernel32.dll")]
+    private static extern uint GetCurrentThreadId();
 
     /// The paths of a drop, read once; the drop is let go after it.
     private static List<string> DroppedPaths(IntPtr drop)
