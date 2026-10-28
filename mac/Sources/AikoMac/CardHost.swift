@@ -8,7 +8,6 @@ import AppKit
 final class CardHost {
     /// The gear on the card.
     var onSettings: (() -> Void)?
-    var onTerminal: (() -> Void)?
 
     private let numbers: ShellNumbers
     private let icon: MenuBarIcon
@@ -63,7 +62,6 @@ final class CardHost {
 
         let card = CardWindow(model: numbers.card())
         card.onSettings = { [weak self] in self?.onSettings?() }
-        card.onTerminal = { [weak self] in self?.onTerminal?() }
         card.onOpenClaude = { [weak self] name in self?.openClaudeCode(named: name) }
         card.onClosed = { [weak self] in
             guard let self, self.window === card else { return }

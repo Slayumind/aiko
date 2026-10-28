@@ -6,7 +6,6 @@ import SwiftUI
 struct CardView: View {
     let model: CardModel
     let onSettings: () -> Void
-    let onTerminal: () -> Void
     let onClose: () -> Void
     let onOpenClaude: (String) -> Void
 
@@ -43,11 +42,6 @@ struct CardView: View {
 
             Spacer(minLength: 8)
 
-            IconButton(help: Strings.menuTerminal, action: onTerminal) {
-                IconPath(data: Theme.terminalIcon)
-                    .fill(Theme.muted)
-                    .frame(width: 14, height: 14)
-            }
             IconButton(help: Strings.settings, action: onSettings) { GearShape() }
             IconButton(help: Strings.close, action: onClose) { CrossShape() }
         }

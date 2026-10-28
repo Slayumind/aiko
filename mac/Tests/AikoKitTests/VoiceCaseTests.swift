@@ -173,23 +173,16 @@ struct VoiceCaseTests {
     @Test
     func theHintTakesTheFilesAConversationReadOrChanged() {
         for row in SpecCases.json("voice-hint")["files"]?.arrayValue ?? [] {
-            var items = [FeedItem(id: 1, content: .ownerMessage(text: "Look at the field.", queued: false, attachments: []))]
+            var items: [FileTouch] = []
             for step in row["steps"]?.arrayValue ?? [] {
-                let id = items.count + 1
-                let kind: StepKind = switch step["kind"]?.stringValue {
+                let kind: TouchKind = switch step["kind"]?.stringValue {
                 case "read": .read
-                case "search": .search
                 case "edit": .edit
-                case "run": .run
                 default: .other
                 }
-                let line = StepLine(
-                    kind: kind, label: "", subject: step["subject"]?.stringValue ?? "", added: 0, removed: 0,
-                    hidden: step["hidden"]?.boolValue ?? false)
-                items.append(FeedItem(id: id, content: .step(FeedStep(
-                    toolUseId: "t\(id)", line: line, state: .done, result: "", images: [], progress: ""))))
+                items.append(FileTouch(
+                    kind: kind, path: step["subject"]?.stringValue ?? "", hidden: step["hidden"]?.boolValue ?? false))
             }
-
             let files = (row["files"]?.arrayValue ?? []).compactMap(\.stringValue)
             #expect(VoiceHint.files(items) == files, "\(row["name"]?.stringValue ?? "")")
         }
