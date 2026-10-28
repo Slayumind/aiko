@@ -82,7 +82,6 @@ public class AppSettingsTests
             VoiceInput = true,
             VoiceEngine = VoiceEngine.OpenAI,
             VoiceLanguage = AikoLanguage.English,
-            AgentTodos = true,
         };
 
         var back = AppSettings.FromJson(settings.ToJson());
@@ -155,7 +154,6 @@ public class AppSettingsTests
         var settings = AppSettings.FromJson("{ \"schemaVersion\": 3, \"place\": \"Tray\" }");
 
         Assert.False(settings.VoiceInput);
-        Assert.False(settings.AgentTodos);
         Assert.Equal(VoiceEngine.Local, settings.VoiceEngine);
         Assert.Contains("\"voiceEngine\": \"Local\"", AppSettings.Default.ToJson());
         Assert.Equal(AikoLanguage.System, settings.VoiceLanguage);

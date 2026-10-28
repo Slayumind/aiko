@@ -504,41 +504,6 @@ public class SharedCaseTests
     }
 
     [Fact]
-    public void Every_permission_mode_has_the_same_names()
-    {
-        var cases = SpecCases.Json("permission-mode");
-
-        Assert.Equal(
-            Strings(cases.GetProperty("order")),
-            PermissionModes.All.Select(PermissionModes.Name));
-
-        foreach (var row in cases.GetProperty("modes").EnumerateArray())
-        {
-            var mode = Mode(row.GetProperty("mode"))!.Value;
-
-            Assert.Equal(row.GetProperty("name").GetString(), PermissionModes.Name(mode));
-            Assert.Equal(row.GetProperty("flag").GetString(), PermissionModes.FlagValue(mode));
-            Assert.Equal(row.GetProperty("request").GetString(), PermissionModes.RequestValue(mode));
-            Assert.Equal(Mode(row.GetProperty("next")), PermissionModes.Next(mode));
-        }
-
-        foreach (var row in cases.GetProperty("fromStream").EnumerateArray())
-        {
-            Assert.Equal(Mode(row.GetProperty("mode")), PermissionModes.FromStream(row.GetProperty("value").GetString()));
-        }
-
-        foreach (var row in cases.GetProperty("defaults").EnumerateArray())
-        {
-            var settings = row.GetProperty("settings").EnumerateArray()
-                .Select(file => file.ValueKind == JsonValueKind.String ? file.GetString() : null)
-                .ToList();
-            Assert.True(
-                Mode(row.GetProperty("mode")) == PermissionModes.Default(settings),
-                row.GetProperty("name").GetString());
-        }
-    }
-
-    [Fact]
     public void Every_limit_badge_names_the_same_limit()
     {
         var now = new DateTimeOffset(2026, 10, 13, 12, 0, 0, TimeSpan.Zero);
@@ -669,12 +634,10 @@ public class SharedCaseTests
             {
                 "add" => sessions.Add(
                     Word("id"), Word("environment"), Word("folder"), Word("name"),
-                    step.GetProperty("model").GetString(), Mode(step.GetProperty("mode"))!.Value, step.GetProperty("now").GetInt64(),
+                    step.GetProperty("now").GetInt64(),
                     step.TryGetProperty("kind", out var kind) && kind.GetString() == "shell" ? SessionKind.Shell : SessionKind.Claude),
                 "rename" => sessions.Rename(Word("id"), Word("name")),
                 "renameEnvironment" => sessions.RenameEnvironment(Word("from"), Word("to")),
-                "setMode" => sessions.SetMode(Word("id"), Mode(step.GetProperty("mode"))!.Value),
-                "setModel" => sessions.SetModel(Word("id"), step.GetProperty("model").GetString()),
                 "started" => sessions.MarkStarted(Word("id")),
                 "used" => sessions.Used(Word("id"), step.GetProperty("now").GetInt64()),
                 "opened" => sessions.Opened(Word("id")),
@@ -732,14 +695,7 @@ public class SharedCaseTests
         }
     }
 
-    /// Markdown blocks as the case files write them down.
-    private static PermissionMode? Mode(JsonElement name) =>
-        name.ValueKind == JsonValueKind.Null ? null : Enum.Parse<PermissionMode>(name.GetString()!, ignoreCase: true);
-
     /// A stream event as the case files write it down.
-    private static string? ModeName(PermissionMode? mode) =>
-        mode is { } known ? PermissionModes.Name(known) : null;
-
     private static string Repeated(JsonElement row, string name) =>
         string.Concat(Enumerable.Repeat(row.GetProperty(name).GetString()!, row.GetProperty(name + "Times").GetInt32()));
 
@@ -865,9 +821,6 @@ public class SharedCaseTests
                     break;
                 case "session":
                     window = window.ToSession(what, sessions);
-                    break;
-                case "form":
-                    window = window.WithForm(what == "open");
                     break;
                 default:
                     sessions = sessions.Close(what);

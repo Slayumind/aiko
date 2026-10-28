@@ -7,8 +7,8 @@ namespace Aiko.Core.Tests;
 public class TerminalSessionsFollowTests
 {
     private static readonly TerminalSessions Two = TerminalSessions.Empty
-        .Add("a1", "Aiko", "/work/aiko", "aiko 1", null, PermissionMode.Manual, 1)
-        .Add("w1", "Work", "/work/site", "site 1", null, PermissionMode.Manual, 2);
+        .Add("a1", "Aiko", "/work/aiko", "aiko 1", 1)
+        .Add("w1", "Work", "/work/site", "site 1", 2);
 
     private static EnvironmentSettings Settings(params (string Name, string Folder)[] environments) =>
         new([.. environments.Select(environment => new AikoEnvironment(environment.Name, [environment.Folder]))]);

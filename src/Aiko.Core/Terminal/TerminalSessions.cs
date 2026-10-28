@@ -17,11 +17,6 @@ public sealed record TerminalSession(string Id, string Environment, string Folde
 {
     public SessionKind Kind { get; init; } = SessionKind.Claude;
 
-    /// Null leaves the choice of the model to Claude Code.
-    public string? Model { get; init; }
-
-    public PermissionMode Mode { get; init; } = PermissionMode.Manual;
-
     /// Claude Code has the conversation on disk, so the next start resumes it.
     public bool Started { get; init; }
 
@@ -85,7 +80,7 @@ public sealed record TerminalSessions(IReadOnlyList<TerminalSession> Sessions, s
 
     /// A new session at the end of the list. An empty name becomes the folder with a number. An
     /// id that is already taken, or one without an environment or a folder, changes nothing.
-    public TerminalSessions Add(string id, string environment, string folder, string name, string? model, PermissionMode mode, long now, SessionKind kind = SessionKind.Claude)
+    public TerminalSessions Add(string id, string environment, string folder, string name, long now, SessionKind kind = SessionKind.Claude)
     {
         var place = SessionName.FolderPath(folder);
         if (id.Length == 0 || environment.Length == 0 || place.Length == 0 || Find(id) is not null)
@@ -100,9 +95,7 @@ public sealed record TerminalSessions(IReadOnlyList<TerminalSession> Sessions, s
             place,
             given.Length > 0 ? given : SessionName.Default(place, NamesIn(environment, place)))
         {
-            Model = string.IsNullOrWhiteSpace(model) ? null : model.Trim(),
             Kind = kind,
-            Mode = mode,
             LastUsed = now,
         };
 
@@ -116,11 +109,6 @@ public sealed record TerminalSessions(IReadOnlyList<TerminalSession> Sessions, s
     /// An empty name changes nothing: a session is never left without one.
     public TerminalSessions Rename(string id, string name) =>
         SessionName.Clean(name) is { Length: > 0 } clean ? With(id, session => session with { Name = clean }) : this;
-
-    public TerminalSessions SetMode(string id, PermissionMode mode) => With(id, session => session with { Mode = mode });
-
-    public TerminalSessions SetModel(string id, string? model) =>
-        With(id, session => session with { Model = string.IsNullOrWhiteSpace(model) ? null : model.Trim() });
 
     /// Claude Code has the conversation now.
     public TerminalSessions MarkStarted(string id) => With(id, session => session with { Started = true });
@@ -245,11 +233,6 @@ public sealed record TerminalSessions(IReadOnlyList<TerminalSession> Sessions, s
                 {
                     writer.WriteString("kind", "shell");
                 }
-                if (session.Model is { } model)
-                {
-                    writer.WriteString("model", model);
-                }
-                writer.WriteString("mode", PermissionModes.Name(session.Mode));
                 writer.WriteBoolean("started", session.Started);
                 writer.WriteBoolean("closed", session.Closed);
                 writer.WriteNumber("lastUsed", session.LastUsed);
@@ -290,8 +273,6 @@ public sealed record TerminalSessions(IReadOnlyList<TerminalSession> Sessions, s
         return new TerminalSession(id, environment, folder, name.Length > 0 ? name : SessionName.FolderName(folder))
         {
             Kind = Word(item, "kind") == "shell" ? SessionKind.Shell : SessionKind.Claude,
-            Model = Word(item, "model") is { Length: > 0 } model ? model : null,
-            Mode = PermissionModes.FromStream(Word(item, "mode")) ?? PermissionMode.Manual,
             Started = Flag(item, "started"),
             Closed = Flag(item, "closed"),
             LastUsed = item.TryGetProperty("lastUsed", out var used) && used.ValueKind == JsonValueKind.Number && used.TryGetInt64(out var seconds)

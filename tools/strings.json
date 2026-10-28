@@ -2520,73 +2520,10 @@
     ]
   ],
   [
-    "TerminalFormTitle",
-    [
-      "New session in {0}",
-      "Новая сессия в среде {0}"
-    ]
-  ],
-  [
-    "TerminalFolder",
-    [
-      "Folder",
-      "Папка"
-    ]
-  ],
-  [
-    "TerminalModel",
-    [
-      "Model",
-      "Модель"
-    ]
-  ],
-  [
-    "TerminalName",
-    [
-      "Name",
-      "Имя"
-    ]
-  ],
-  [
-    "TerminalNameHint",
-    [
-      "Optional. An empty name becomes the folder name with a number.",
-      "Можно оставить пустым: сессия получит имя папки с номером."
-    ]
-  ],
-  [
-    "TerminalDescribeTask",
-    [
-      "Describe the task",
-      "Опиши задачу"
-    ]
-  ],
-  [
     "TerminalChooseFolder",
     [
       "Choose another folder",
       "Выбрать другую папку"
-    ]
-  ],
-  [
-    "TerminalFoldersRecent",
-    [
-      "Recent",
-      "Недавние"
-    ]
-  ],
-  [
-    "TerminalFoldersBound",
-    [
-      "Bound to this environment",
-      "Привязанные к среде"
-    ]
-  ],
-  [
-    "TerminalElsewhere",
-    [
-      "This folder is bound to {0}. The session starts in {1}.",
-      "Эта папка привязана к среде {0}. Сессия запустится в среде {1}."
     ]
   ],
   [
@@ -2615,13 +2552,6 @@
     [
       "working",
       "работает"
-    ]
-  ],
-  [
-    "TerminalWorkingNow",
-    [
-      "working",
-      "работаю"
     ]
   ],
   [
@@ -2667,153 +2597,6 @@
     ]
   ],
   [
-    "TerminalStepThought",
-    [
-      "thought",
-      "мысль"
-    ]
-  ],
-  [
-    "TerminalStepRead",
-    [
-      "read",
-      "чтение"
-    ]
-  ],
-  [
-    "TerminalStepSearch",
-    [
-      "search",
-      "поиск"
-    ]
-  ],
-  [
-    "TerminalStepEdit",
-    [
-      "edit",
-      "правка"
-    ]
-  ],
-  [
-    "TerminalStepRun",
-    [
-      "run",
-      "запуск"
-    ]
-  ],
-  [
-    "TerminalStepAgent",
-    [
-      "agent",
-      "агент"
-    ]
-  ],
-  [
-    "TerminalStepSkill",
-    [
-      "skill",
-      "навык"
-    ]
-  ],
-  [
-    "TerminalStepWeb",
-    [
-      "web",
-      "веб"
-    ]
-  ],
-  [
-    "TerminalLineRequest",
-    [
-      "Waiting for permission: {0} {1}",
-      "Жду разрешения: {0} {1}"
-    ]
-  ],
-  [
-    "TerminalLineQuestion",
-    [
-      "Asking: {0}",
-      "Спрашиваю: {0}"
-    ]
-  ],
-  [
-    "TerminalLinePlan",
-    [
-      "The plan is ready for you",
-      "План готов, посмотри"
-    ]
-  ],
-  [
-    "TerminalLineReading",
-    [
-      "Reading {0}",
-      "Читаю {0}"
-    ]
-  ],
-  [
-    "TerminalLineSearching",
-    [
-      "Searching {0}",
-      "Ищу {0}"
-    ]
-  ],
-  [
-    "TerminalLineEditing",
-    [
-      "Editing {0}",
-      "Правлю {0}"
-    ]
-  ],
-  [
-    "TerminalLineRunning",
-    [
-      "Running {0}",
-      "Запускаю {0}"
-    ]
-  ],
-  [
-    "TerminalLineAgent",
-    [
-      "Agent: {0}",
-      "Агент: {0}"
-    ]
-  ],
-  [
-    "TerminalLineSkill",
-    [
-      "Skill: {0}",
-      "Навык: {0}"
-    ]
-  ],
-  [
-    "TerminalLineOpening",
-    [
-      "Opening {0}",
-      "Открываю {0}"
-    ]
-  ],
-  [
-    "TerminalLineCalling",
-    [
-      "Calling {0}",
-      "Вызываю {0}"
-    ]
-  ],
-  [
-    "TerminalLineStoppedAt",
-    [
-      "Stopped at the “{0}” step",
-      "Остановилась на шаге «{0}»"
-    ]
-  ],
-  [
-    "TerminalLineSignIn",
-    [
-      "Sign in needed",
-      "Нужно войти"
-    ]
-  ],
-  [
     "TerminalYesterday",
     [
       "Yesterday, {0}",
@@ -2821,45 +2604,45 @@
     ]
   ],
   [
-    "TerminalLoginTitle",
-    [
-      "{0} isn’t signed in",
-      "В среде {0} нет входа"
-    ]
-  ],
-  [
-    "TerminalLoginBody",
-    [
-      "You can sign in only in Claude Code itself. Aiko opens it in the system terminal and starts the conversation here once you’re in.",
-      "Войти можно только в самом Claude Code. Aiko откроет его в терминале системы, а после входа начнёт разговор здесь."
-    ]
-  ],
-  [
     "TerminalCloseTitle",
     [
-      "Session “{0}” is still working",
+      "Session “{0}” is still running",
       "Сессия «{0}» ещё работает"
     ]
   ],
   [
     "TerminalCloseBody",
     [
-      "If you close it now, Claude Code stops in the middle of the work.",
-      "Если закрыть её сейчас, Claude Code остановится посреди работы."
+      "If you close it now, the program in it stops.",
+      "Если закрыть её сейчас, программа в ней остановится."
     ]
   ],
   [
-    "TerminalCloseWindowTitle",
+    "TerminalQuitTitle",
     [
-      "Some sessions are still working",
+      "Some sessions are still running",
       "Часть сессий ещё работает"
     ]
   ],
   [
-    "TerminalCloseWindowBody",
+    "TerminalQuitBody",
     [
-      "If you close the window now, Claude Code stops in the middle of the work.",
-      "Если закрыть окно сейчас, Claude Code остановится посреди работы."
+      "If you quit Aiko now, Claude Code and the shells in its window stop.",
+      "Если выйти из Aiko сейчас, Claude Code и оболочки в её окне остановятся."
+    ]
+  ],
+  [
+    "TerminalStopAndQuit",
+    [
+      "Stop and quit",
+      "Остановить и выйти"
+    ]
+  ],
+  [
+    "TerminalDontQuit",
+    [
+      "Don’t quit",
+      "Не выходить"
     ]
   ],
   [
@@ -2923,209 +2706,6 @@
     [
       "Sessions",
       "Сессии"
-    ]
-  ],
-  [
-    "TerminalAllow",
-    [
-      "Allow",
-      "Разрешить"
-    ]
-  ],
-  [
-    "TerminalAllowEdits",
-    [
-      "Allow edits in this session",
-      "Разрешать правки в этой сессии"
-    ]
-  ],
-  [
-    "TerminalAllowInProject",
-    [
-      "Allow in this project",
-      "Разрешать в этом проекте"
-    ]
-  ],
-  [
-    "TerminalDeny",
-    [
-      "Deny",
-      "Запретить"
-    ]
-  ],
-  [
-    "TerminalCardKeys",
-    [
-      "Enter to allow · Esc to deny",
-      "Enter — разрешить · Esc — запретить"
-    ]
-  ],
-  [
-    "TerminalQuestionStep",
-    [
-      "question {0} of {1}",
-      "вопрос {0} из {1}"
-    ]
-  ],
-  [
-    "TerminalQuestionMany",
-    [
-      "you can pick several",
-      "можно выбрать несколько"
-    ]
-  ],
-  [
-    "TerminalQuestionOther",
-    [
-      "Other",
-      "Другое"
-    ]
-  ],
-  [
-    "TerminalQuestionOtherHint",
-    [
-      "Write your own answer",
-      "Написать свой ответ"
-    ]
-  ],
-  [
-    "TerminalQuestionBack",
-    [
-      "Back",
-      "Назад"
-    ]
-  ],
-  [
-    "TerminalQuestionNext",
-    [
-      "Next",
-      "Дальше"
-    ]
-  ],
-  [
-    "TerminalQuestionAnswer",
-    [
-      "Answer",
-      "Ответить"
-    ]
-  ],
-  [
-    "TerminalQuestionsDenied",
-    [
-      "Questions skipped",
-      "Вопросы без ответа"
-    ]
-  ],
-  [
-    "TerminalStop",
-    [
-      "Stop",
-      "Остановить"
-    ]
-  ],
-  [
-    "TerminalTurnStopped",
-    [
-      "Stopped.",
-      "Остановлено."
-    ]
-  ],
-  [
-    "TerminalQueued",
-    [
-      "Claude reads it after this step",
-      "Claude прочтёт после текущего шага"
-    ]
-  ],
-  [
-    "TerminalQueuedCommand",
-    [
-      "runs when Claude is done",
-      "выполню, когда Claude закончит"
-    ]
-  ],
-  [
-    "TerminalShellExit",
-    [
-      "exit code {0}",
-      "код выхода {0}"
-    ]
-  ],
-  [
-    "TerminalMoreLines",
-    [
-      "… {0} more lines",
-      "… ещё строк: {0}"
-    ]
-  ],
-  [
-    "SlashGroupSkills",
-    [
-      "Skills",
-      "Навыки"
-    ]
-  ],
-  [
-    "TerminalCompacted",
-    [
-      "Conversation compacted to fit the context.",
-      "Разговор сжат, чтобы влезть в контекст."
-    ]
-  ],
-  [
-    "TerminalCompactedSize",
-    [
-      "Conversation compacted: {0}k tokens before, {1}k now.",
-      "Разговор сжат: было {0} тыс. токенов, стало {1} тыс."
-    ]
-  ],
-  [
-    "TerminalCompacting",
-    [
-      "Making the conversation shorter…",
-      "Сжимаю разговор…"
-    ]
-  ],
-  [
-    "TerminalFailed",
-    [
-      "Claude Code stopped with an error.",
-      "Claude Code остановился с ошибкой."
-    ]
-  ],
-  [
-    "TerminalDiffMore",
-    [
-      "{0} more lines",
-      "Ещё строк: {0}"
-    ]
-  ],
-  [
-    "TerminalWaitsPermission",
-    [
-      "Waiting for permission: {0}",
-      "Жду разрешения: {0}"
-    ]
-  ],
-  [
-    "TerminalWaitsQuestions",
-    [
-      "Waiting for your answers",
-      "Жду ответа на вопросы"
-    ]
-  ],
-  [
-    "TerminalWaitsPlan",
-    [
-      "Waiting for your call on the plan",
-      "Жду решения по плану"
-    ]
-  ],
-  [
-    "TerminalShow",
-    [
-      "Show",
-      "Показать"
     ]
   ],
   [
@@ -3406,55 +2986,6 @@
     [
       "OpenAI did not take the recording. Check the key and the connection.",
       "OpenAI не принял запись. Проверь ключ и соединение."
-    ]
-  ],
-  [
-    "TerminalTasks",
-    [
-      "Tasks",
-      "Задачи"
-    ]
-  ],
-  [
-    "TerminalTasksCount",
-    [
-      "Tasks · {0} of {1}",
-      "Задачи · {0} из {1}"
-    ]
-  ],
-  [
-    "TerminalAgent",
-    [
-      "agent",
-      "агент"
-    ]
-  ],
-  [
-    "TerminalContextShare",
-    [
-      "context {0}%",
-      "контекст {0}%"
-    ]
-  ],
-  [
-    "TerminalContextTip",
-    [
-      "How much of this session's memory is used. /compact frees it.",
-      "Сколько занято в памяти этой сессии. Освобождает /compact."
-    ]
-  ],
-  [
-    "AgentTodos",
-    [
-      "Agent to-do list",
-      "Список дел агента"
-    ]
-  ],
-  [
-    "AgentTodosWhat",
-    [
-      "Claude keeps a to-do list, and the terminal shows it above the field. Newer models don't need it, and it takes a little context. Open sessions pick this up after Aiko restarts.",
-      "Claude ведёт список дел, терминал показывает его над полем. Новым моделям он не нужен и занимает немного контекста. Открытые сессии увидят изменение после перезапуска Aiko."
     ]
   ]
 ]

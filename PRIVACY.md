@@ -39,6 +39,11 @@ the update check.
 - **One permission line, where the personality is on.** Aiko adds one rule to that environment's
   `settings.json`, so the model may use Aiko's two memory tools without asking you each time. The
   rule goes away when you turn the personality off there or remove Aiko.
+- **The terminal window.** Its sessions are real terminals on your computer: Claude Code or a shell,
+  run as you would run them yourself. Aiko shows what they print and passes your keys to them. It
+  doesn't store, log or send anything that appears in a terminal. The list of sessions is kept in
+  `terminal.json` next to Aiko's settings: for each session its name, folder, environment and the
+  ID of its Claude Code conversation, never the conversation itself.
 - **If the personality was on before Aiko had a memory**, the memory starts with the update. Aiko
   opens the Personality page once after it, where this is said and where you can turn her off.
 

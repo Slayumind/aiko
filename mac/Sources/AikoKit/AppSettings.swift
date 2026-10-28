@@ -70,9 +70,6 @@ public struct AppSettings: Sendable, Equatable {
     /// interface: people often speak another language than the one they read in (D-326).
     public var voiceLanguage: AikoLanguage = .system
 
-    /// Whether the terminal gives Claude its to-do list tools. Claude Code leaves them out on newer
-    /// models, so this is off until the person turns it on (D-344).
-    public var agentTodos = false
 
     public init() {}
 
@@ -117,7 +114,6 @@ public struct AppSettings: Sendable, Equatable {
         if let value = root["hideIslandInFullScreen"]?.boolValue { settings.hideIslandInFullScreen = value }
         if let value = root["meetAikoShown"]?.boolValue { settings.meetAikoShown = value }
         if let value = root["voiceInput"]?.boolValue { settings.voiceInput = value }
-        if let value = root["agentTodos"]?.boolValue { settings.agentTodos = value }
 
         if let object = root["island"]?.objectValue {
             guard let text = object["edge"]?.stringValue, let edge = screenEdge(text) else { return .default }
@@ -150,7 +146,6 @@ public struct AppSettings: Sendable, Equatable {
             ("voiceInput", .bool(voiceInput)),
             ("voiceEngine", .string(voiceEngine.rawValue)),
             ("voiceLanguage", .string(voiceLanguage.rawValue)),
-            ("agentTodos", .bool(agentTodos)),
         ])
 
         return JsonNode.object(root).toJsonString(indented: true) + "\n"

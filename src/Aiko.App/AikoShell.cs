@@ -289,7 +289,7 @@ sealed class AikoShell : IDisposable
                 OpenSettings(checkUpdates: true);
                 break;
             case TrayCommand.Exit:
-                _application.Shutdown();
+                Quit();
                 break;
         }
     }
@@ -324,6 +324,19 @@ sealed class AikoShell : IDisposable
         {
             _mood?.Follow(SettingsStore.LoadEnvironments());
         }
+    }
+
+    /// Aiko quits from the tray or the settings. While programs run in the terminal the window asks
+    /// first (D-351); a quit for an update or the end of Windows does not come through here.
+    private void Quit()
+    {
+        if (_terminal is { AnyRunning: true } terminal)
+        {
+            terminal.AskToQuit(_application.Shutdown);
+            return;
+        }
+
+        _application.Shutdown();
     }
 
     /// One terminal window, as with the settings. Closing it hides it while a program runs in it
@@ -368,7 +381,7 @@ sealed class AikoShell : IDisposable
         }
 
         var window = new SettingsWindow(page);
-        window.QuitRequested += () => _application.Shutdown();
+        window.QuitRequested += Quit;
 
         // Changes apply at once (D-179): the tray or the island, direct mode and our access follow
         // each one while the window is still open.

@@ -45,7 +45,6 @@ public partial class TerminalPage : UserControl
     private void Fill()
     {
         _filling = true;
-        TodosOn.IsChecked = _settings.AgentTodos;
         VoiceOn.IsChecked = _settings.VoiceInput;
         var engine = TryEngine ?? _settings.VoiceEngine;
         Local.IsChecked = engine == VoiceEngine.Local;
@@ -70,9 +69,6 @@ public partial class TerminalPage : UserControl
         SettingsStore.Save(settings);
         Saved?.Invoke();
     }
-
-    private void OnTodosChanged(object sender, RoutedEventArgs e) =>
-        Save(_settings with { AgentTodos = TodosOn.IsChecked == true });
 
     private void OnSpeechChanged(object sender, RoutedEventArgs e) =>
         Save(_settings with

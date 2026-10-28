@@ -28,8 +28,10 @@ sealed class TerminalHost
     private TerminalSessions _sessions;
     private TerminalWindowModel _model;
     private string? _closing;
-    private bool _closingWindow;
     private bool _quitting;
+
+    /// Aiko asked to quit while programs run: what to do once the person agrees.
+    private Action? _quitAfter;
 
     /// limitsOf gives the latest limits of an environment by its name.
     public TerminalHost(EnvironmentSettings settings, TerminalSessions sessions, Func<string, LimitSnapshot?> limitsOf)
@@ -128,6 +130,16 @@ sealed class TerminalHost
         Draw();
     }
 
+    /// Aiko is asked to quit while programs still run in the window (D-351): the window comes
+    /// forward with the question, and quit runs only after the person agrees.
+    public void AskToQuit(Action quit)
+    {
+        _quitAfter = quit;
+        _closing = null;
+        Activate();
+        Draw();
+    }
+
     /// Aiko quits: the window closes without asking, and every terminal ends with it.
     public void Close()
     {
@@ -184,7 +196,7 @@ sealed class TerminalHost
         var id = Guid.NewGuid().ToString();
         var name = kind == SessionKind.Shell ? Shell().Name : "";
         _sessions = _sessions
-            .Add(id, environment.Name, folder, name, null, PermissionMode.Manual, DateTimeOffset.UtcNow.ToUnixTimeSeconds(), kind)
+            .Add(id, environment.Name, folder, name, DateTimeOffset.UtcNow.ToUnixTimeSeconds(), kind)
             .Opened(id);
         Save();
         Change(_model.ToSession(id, _sessions));
@@ -206,7 +218,7 @@ sealed class TerminalHost
         if (_terminals.TryGetValue(id, out var terminal) && terminal.IsRunning)
         {
             _closing = id;
-            _closingWindow = false;
+            _quitAfter = null;
             Draw();
             return;
         }
@@ -217,14 +229,15 @@ sealed class TerminalHost
     private void Answer(bool stop)
     {
         var id = _closing;
-        var window = _closingWindow;
+        var quit = _quitAfter;
         _closing = null;
-        _closingWindow = false;
+        _quitAfter = null;
 
-        if (stop && window)
+        if (stop && quit is not null)
         {
+            // The window must not hide itself on the way out.
             _quitting = true;
-            _window.Close();
+            quit();
         }
         else if (stop && id is not null)
         {
@@ -375,10 +388,10 @@ sealed class TerminalHost
     {
         var session = _model.Session(_sessions);
 
-        AskView? ask = _closingWindow
-            ? new AskView(Strings.TerminalCloseWindowTitle, Strings.TerminalCloseWindowBody)
+        AskView? ask = _quitAfter is not null
+            ? new AskView(Strings.TerminalQuitTitle, Strings.TerminalQuitBody, Strings.TerminalStopAndQuit, Strings.TerminalDontQuit)
             : _closing is { } id && _sessions.Find(id) is { } closing
-                ? new AskView(string.Format(Strings.TerminalCloseTitle, closing.Name), Strings.TerminalCloseBody)
+                ? new AskView(string.Format(Strings.TerminalCloseTitle, closing.Name), Strings.TerminalCloseBody, Strings.TerminalStopAndClose, Strings.TerminalKeepOpen)
                 : null;
 
         return new TerminalView(

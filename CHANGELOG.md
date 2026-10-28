@@ -9,87 +9,22 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Added
 
-- **Terminal window, first part.** Open it from the menu of the Aiko icon or with the terminal
-  button on the card, on Windows and macOS. The window keeps your Claude Code sessions, grouped by environment and folder, and opens
-  where you closed it.
-- **Talk to Claude Code in the terminal.** Answers show as formatted text with code blocks you can
-  copy and tables. Selected text copies as the markdown Claude wrote. Each step of the work is one line that opens to its result and names the skill, the task of an agent or the MCP server at work. If you scroll up while an answer
-  is written, the feed stays where you left it. A permission card
-  shows the lines an edit changes; Enter in an empty field allows it and Esc denies it, from any place of the window. A message you send while Claude works goes to it at once. It stays grey under the answer until Claude takes it at the next step, so you don't wait for the end of the turn. A command waits for the end of the turn. Reads or searches in a row show as one line, such as "read ×3", that opens to each of them. A long output shows 10 lines and a button for the rest. The short notes Claude writes about its thinking show in grey: open while Claude works on, then one line that opens with a click. The mouse wheel glides the feed instead of jumping. Type ! and a command to run it in the folder of the session: the feed shows its output, and Claude gets it at once. While Claude Code makes the conversation shorter, the feed says so, and then names the size before and after. Under the field you see the mode, the model with its version and the environment;
-  Shift+Tab or a click changes the mode, and a click on the model takes the next one. Arrows bring back what you sent, Ctrl+V or Cmd+V adds a screenshot,
-  and a dropped file adds its path. A new session starts in the mode your project settings name.
-  These keys work wherever you clicked in the window, and letters you type outside the field go into it.
-- **Questions from Claude Code as a card of steps.** One question at a time with a strip of steps
-  above it, options with their descriptions, ticks when you can pick several, your own answer under
-  Other, and the preview of an option under the list. Answer with the mouse or the keys: arrows,
-  Space, digits, Enter, Esc. After you answer, your choices stay in the feed, also after a restart.
-- **Menus of commands and files.** Type / at the start of the field, and a list of the commands of
-  Claude Code and your skills opens over it, with their descriptions. Type @ for the files of the
-  session's folder, the best matches first. Arrows move, Enter or Tab inserts, Esc closes the list;
-  after a typo Enter sends your text as typed. Each session keeps its own draft. On Windows; the
-  Mac follows before the release.
-- **A new session starts as a conversation.** No form: write the task, and the session begins with
-  your first message and takes its name from it. The folder, model, mode and environment are in the
-  line under the field; until the first message you can pick another folder there.
-- **Lists that behave the same everywhere.** Every drop-down opens on the press, right under its
-  button, and comes up the same short way. Rows follow the mouse only when it moves, so the keyboard
-  keeps its row, and Home, End, Page Up and Page Down work in lists.
-- **Models from Claude Code.** The form of a new session and a click on the model under the field
-  offer the models Claude Code names, such as Fable 5.1, so a new model needs no new Aiko.
-- **Subagents in the feed.** Under the line of a subagent at work you see what it does now. A
-  subagent that works in the background keeps its line running until it is done.
-- **Tasks panel and context.** Above the field, a panel opens with the subagents at work and,
-  if you want it, the to-do list of Claude. The end of the line under the field shows how much of
-  the context is used, as "context 63%": grey, orange from 76%, red from 91%. Newer models get no
-  to-do list from Claude Code; turn it on with **Agent to-do list** in the terminal settings. On
-  Windows; the Mac follows before the release.
-- **Voice input in the terminal, on Windows.** Press Ctrl+Space anywhere in the window or the microphone button, speak
-  Russian or English, press again. The words appear in the field as you speak and wait for you to
-  send them. Turn it on in the new **Terminal** page of the settings: recognition runs on your
-  computer after a one-time 465 MB download, or through OpenAI with your own key, kept in Windows
-  Credential Manager. The speech language is your own choice there, apart from the language of Aiko. The Mac follows before the release.
+- **Terminal window with real terminals, on Windows.** Open it from the menu of the Aiko icon or
+  with the terminal button on the card. Each session is a real terminal: Claude Code as it is, with
+  its own input, menus and permission prompts, or a shell (Git Bash or PowerShell) in the folder of
+  the session. Sessions are grouped by environment and folder, and the window opens where you
+  closed it. The Mac follows before the release.
+- **Sessions keep running.** Closing the window hides it while Claude Code or a shell still runs
+  in it, so the agents go on working. Quitting Aiko asks first when something still runs. After a
+  restart of Aiko a session of Claude Code continues its conversation, and a shell opens again in
+  the same folder. When Claude Code ends by itself, its row says so and Enter continues it.
 
 ### Fixed
 
-- A session no longer says "done" while Claude still writes. This happened when Claude Code went on
-  by itself after a subagent in the background was over.
-- In the card of questions, your own answer can be changed after Back: a click on it opens the
-  words with the caret at their end, and the card no longer jumps to the next question. Next works
-  as soon as you type your own answer, and erasing it leaves the other ticked answers in place.
-- A command of "!" that runs keeps its session at work: closing the session asks first, Esc stops
-  the command, and a message sent meanwhile goes to Claude with the output. Before, a session closed
-  during the command started Claude Code by itself when the command ended.
-- A session no longer stays at work forever when Claude Code stops with messages in its queue.
-- A line of Claude Code with an emoji cut in half no longer closes Aiko.
-- A new session in an environment with no folders asks for a folder instead of losing the first
-  message, and the terminal with no environment opens the first run checklist instead of closing Aiko.
-- "@" shows file names outside English as they are and follows .gitignore in large repositories.
-- A code block no longer breaks while an answer is written, and a file link that starts with a dash
-  is not opened in VS Code.
-- The working row no longer blinks after every step and shows the time of a long turn; a session
-  switch no longer shows words of another session in a streaming answer.
-- Your own settings of Claude Code, such as CLAUDE_CODE_GIT_BASH_PATH, now reach terminal sessions.
+- Your own settings of Claude Code, such as CLAUDE_CODE_GIT_BASH_PATH, reach terminal sessions.
 - Renaming an environment keeps its terminal sessions, also with the terminal open.
-- The terminal opens maximized again after it was closed while minimized, "@" picked in the middle
-  of a word replaces the whole word, and a MultiEdit step shows its file and its changed lines.
-- Messages you sent while Claude worked come back when a session is opened again, and a failed
-  command of "!" keeps its exit code there.
-- A request Claude Code takes back closes its card; Esc during a subagent ends its step; questions
-  cut off by a crash are no longer shown as declined.
-- A finished answer nobody read keeps its mark when Aiko stops an idle session.
-- A table inside a list item or a quote is drawn and copied; copying text that is still being
-  written takes the right words.
-- A file link opens in the folder of the session and only when the file is there; "@" shows files
-  made during the session; "Always in this project" shows its rule on hover.
-- The microphone no longer stays open after a quick second press, and voice input asks for the model
-  when the model of silence is missing.
-- With fewer animations asked for in Windows, the terminal no longer runs a bar while it makes the
-  conversation shorter.
-- Voice input no longer puts the list of hint words into your text when the recognizer gives it back
-  in the middle of speech, even with one word spelled its own way.
 - The bridge no longer leaves temporary files in the folder of limit snapshots when Windows refuses
   to replace a file Aiko is reading, and Aiko removes the old ones when it starts.
-
 ## [0.4.1] - 2026-10-12
 
 A faster start on Windows. Nothing else changes for you.

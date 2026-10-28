@@ -9,8 +9,9 @@ sealed record TabView(string Name, bool Selected, int Waiting);
 /// The one percentage in the title bar (D-296).
 sealed record BadgeView(int Percent, LimitTone Tone, LimitKind Kind);
 
-/// A question over the terminal: close something that still works?
-sealed record AskView(string Title, string Body);
+/// A question in place of the terminal: stop something that still runs? Stop and Keep are the words
+/// of its two buttons.
+sealed record AskView(string Title, string Body, string Stop, string Keep);
 
 /// Everything the window of the terminal draws at one moment. The panel only draws it; what is
 /// in it is decided by the core and put together by the host. Terminal is the real terminal of

@@ -12,6 +12,7 @@ namespace Aiko.App;
 ///
 /// WindowChrome keeps what Windows gives a window for free: dragging by the title bar, resizing by
 /// the edges, a double click to maximize, Snap and the rounded corners of Windows 11.
+[System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763")]
 sealed class TerminalWindow : Window
 {
     /// A maximized window with its own frame goes past the work area by the width of the frame

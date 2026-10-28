@@ -516,36 +516,6 @@ struct SharedCaseTests {
     }
 
     @Test
-    func everyPermissionModeHasTheSameNames() {
-        let cases = SpecCases.json("permission-mode")
-
-        #expect(PermissionModes.all.map(PermissionModes.name) == Self.strings(cases["order"]))
-
-        for row in cases["modes"]?.arrayValue ?? [] {
-            guard let mode = Self.mode(row["mode"]) else {
-                Issue.record("unknown mode in the cases")
-                continue
-            }
-
-            #expect(PermissionModes.name(mode) == row["name"]?.stringValue)
-            #expect(PermissionModes.flagValue(mode) == row["flag"]?.stringValue)
-            #expect(PermissionModes.requestValue(mode) == row["request"]?.stringValue)
-            #expect(PermissionModes.next(mode) == Self.mode(row["next"]))
-        }
-
-        for row in cases["fromStream"]?.arrayValue ?? [] {
-            #expect(PermissionModes.fromStream(row["value"]?.stringValue) == Self.mode(row["mode"]))
-        }
-
-        for row in cases["defaults"]?.arrayValue ?? [] {
-            let settings = (row["settings"]?.arrayValue ?? []).map(\.stringValue)
-            #expect(
-                PermissionModes.defaultMode(settings) == Self.mode(row["mode"]),
-                "\(row["name"]?.stringValue ?? "")")
-        }
-    }
-
-    @Test
     func everyLimitBadgeNamesTheSameLimit() {
         let now = Date(timeIntervalSince1970: 1_791_892_800)
 
@@ -666,12 +636,9 @@ struct SharedCaseTests {
             case "add":
                 sessions = sessions.add(
                     id: word("id"), environment: word("environment"), folder: word("folder"), name: word("name"),
-                    model: step["model"]?.stringValue, mode: mode(step["mode"]) ?? .manual,
                     now: step["now"]?.int64Value ?? 0, kind: step["kind"]?.stringValue == "shell" ? .shell : .claude)
             case "rename": sessions = sessions.rename(word("id"), word("name"))
             case "renameEnvironment": sessions = sessions.renameEnvironment(word("from"), word("to"))
-            case "setMode": sessions = sessions.setMode(word("id"), mode(step["mode"]) ?? .manual)
-            case "setModel": sessions = sessions.setModel(word("id"), step["model"]?.stringValue)
             case "started": sessions = sessions.markStarted(word("id"))
             case "used": sessions = sessions.used(word("id"), now: step["now"]?.int64Value ?? 0)
             case "opened": sessions = sessions.opened(word("id"))
@@ -722,11 +689,6 @@ struct SharedCaseTests {
 
             #expect(LinkTarget.of(row["href"]?.stringValue) == expected, "\(row["href"]?.stringValue ?? "nil")")
         }
-    }
-
-    /// Markdown blocks as the case files write them down, with the keys in the order of the files.
-    private static func mode(_ node: JsonNode?) -> PermissionMode? {
-        PermissionModes.all.first { PermissionModes.name($0) == node?.stringValue }
     }
 
     private static func tone(_ name: String?) -> LimitTone {
@@ -861,7 +823,6 @@ struct SharedCaseTests {
             switch pair[0] {
             case "environment": window = window.toEnvironment(what, sessions)
             case "session": window = window.toSession(what, sessions)
-            case "form": window = window.withForm(what == "open")
             default:
                 sessions = sessions.close(what)
                 window = window.after(sessions)
@@ -879,10 +840,6 @@ struct SharedCaseTests {
     /// The answers to questions are named only where there are some, so older cases stay as they are.
     private static func node(_ pairs: [(String, JsonNode)]) -> JsonNode {
         .object(JsonObject(pairs))
-    }
-
-    private static func modeName(_ mode: PermissionMode?) -> JsonNode {
-        text(mode.map(PermissionModes.name))
     }
 
     /// A stream event as the case files write it down, with the keys in the order of the files.

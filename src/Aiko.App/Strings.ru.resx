@@ -1111,35 +1111,8 @@
   <data name="TerminalCloseSession" xml:space="preserve">
     <value>Закрыть сессию</value>
   </data>
-  <data name="TerminalFormTitle" xml:space="preserve">
-    <value>Новая сессия в среде {0}</value>
-  </data>
-  <data name="TerminalFolder" xml:space="preserve">
-    <value>Папка</value>
-  </data>
-  <data name="TerminalModel" xml:space="preserve">
-    <value>Модель</value>
-  </data>
-  <data name="TerminalName" xml:space="preserve">
-    <value>Имя</value>
-  </data>
-  <data name="TerminalNameHint" xml:space="preserve">
-    <value>Можно оставить пустым: сессия получит имя папки с номером.</value>
-  </data>
-  <data name="TerminalDescribeTask" xml:space="preserve">
-    <value>Опиши задачу</value>
-  </data>
   <data name="TerminalChooseFolder" xml:space="preserve">
     <value>Выбрать другую папку</value>
-  </data>
-  <data name="TerminalFoldersRecent" xml:space="preserve">
-    <value>Недавние</value>
-  </data>
-  <data name="TerminalFoldersBound" xml:space="preserve">
-    <value>Привязанные к среде</value>
-  </data>
-  <data name="TerminalElsewhere" xml:space="preserve">
-    <value>Эта папка привязана к среде {0}. Сессия запустится в среде {1}.</value>
   </data>
   <data name="TerminalNoSessionsTitle" xml:space="preserve">
     <value>Начни первую сессию в среде {0}</value>
@@ -1152,9 +1125,6 @@
   </data>
   <data name="TerminalWorking" xml:space="preserve">
     <value>работает</value>
-  </data>
-  <data name="TerminalWorkingNow" xml:space="preserve">
-    <value>работаю</value>
   </data>
   <data name="TerminalWaiting" xml:space="preserve">
     <value>ждёт</value>
@@ -1174,89 +1144,26 @@
   <data name="TerminalTabWaitingMany" xml:space="preserve">
     <value>{0} ждут</value>
   </data>
-  <data name="TerminalStepThought" xml:space="preserve">
-    <value>мысль</value>
-  </data>
-  <data name="TerminalStepRead" xml:space="preserve">
-    <value>чтение</value>
-  </data>
-  <data name="TerminalStepSearch" xml:space="preserve">
-    <value>поиск</value>
-  </data>
-  <data name="TerminalStepEdit" xml:space="preserve">
-    <value>правка</value>
-  </data>
-  <data name="TerminalStepRun" xml:space="preserve">
-    <value>запуск</value>
-  </data>
-  <data name="TerminalStepAgent" xml:space="preserve">
-    <value>агент</value>
-  </data>
-  <data name="TerminalStepSkill" xml:space="preserve">
-    <value>навык</value>
-  </data>
-  <data name="TerminalStepWeb" xml:space="preserve">
-    <value>веб</value>
-  </data>
-  <data name="TerminalLineRequest" xml:space="preserve">
-    <value>Жду разрешения: {0} {1}</value>
-  </data>
-  <data name="TerminalLineQuestion" xml:space="preserve">
-    <value>Спрашиваю: {0}</value>
-  </data>
-  <data name="TerminalLinePlan" xml:space="preserve">
-    <value>План готов, посмотри</value>
-  </data>
-  <data name="TerminalLineReading" xml:space="preserve">
-    <value>Читаю {0}</value>
-  </data>
-  <data name="TerminalLineSearching" xml:space="preserve">
-    <value>Ищу {0}</value>
-  </data>
-  <data name="TerminalLineEditing" xml:space="preserve">
-    <value>Правлю {0}</value>
-  </data>
-  <data name="TerminalLineRunning" xml:space="preserve">
-    <value>Запускаю {0}</value>
-  </data>
-  <data name="TerminalLineAgent" xml:space="preserve">
-    <value>Агент: {0}</value>
-  </data>
-  <data name="TerminalLineSkill" xml:space="preserve">
-    <value>Навык: {0}</value>
-  </data>
-  <data name="TerminalLineOpening" xml:space="preserve">
-    <value>Открываю {0}</value>
-  </data>
-  <data name="TerminalLineCalling" xml:space="preserve">
-    <value>Вызываю {0}</value>
-  </data>
-  <data name="TerminalLineStoppedAt" xml:space="preserve">
-    <value>Остановилась на шаге «{0}»</value>
-  </data>
-  <data name="TerminalLineSignIn" xml:space="preserve">
-    <value>Нужно войти</value>
-  </data>
   <data name="TerminalYesterday" xml:space="preserve">
     <value>Вчера, {0}</value>
-  </data>
-  <data name="TerminalLoginTitle" xml:space="preserve">
-    <value>В среде {0} нет входа</value>
-  </data>
-  <data name="TerminalLoginBody" xml:space="preserve">
-    <value>Войти можно только в самом Claude Code. Aiko откроет его в терминале системы, а после входа начнёт разговор здесь.</value>
   </data>
   <data name="TerminalCloseTitle" xml:space="preserve">
     <value>Сессия «{0}» ещё работает</value>
   </data>
   <data name="TerminalCloseBody" xml:space="preserve">
-    <value>Если закрыть её сейчас, Claude Code остановится посреди работы.</value>
+    <value>Если закрыть её сейчас, программа в ней остановится.</value>
   </data>
-  <data name="TerminalCloseWindowTitle" xml:space="preserve">
+  <data name="TerminalQuitTitle" xml:space="preserve">
     <value>Часть сессий ещё работает</value>
   </data>
-  <data name="TerminalCloseWindowBody" xml:space="preserve">
-    <value>Если закрыть окно сейчас, Claude Code остановится посреди работы.</value>
+  <data name="TerminalQuitBody" xml:space="preserve">
+    <value>Если выйти из Aiko сейчас, Claude Code и оболочки в её окне остановятся.</value>
+  </data>
+  <data name="TerminalStopAndQuit" xml:space="preserve">
+    <value>Остановить и выйти</value>
+  </data>
+  <data name="TerminalDontQuit" xml:space="preserve">
+    <value>Не выходить</value>
   </data>
   <data name="TerminalStopAndClose" xml:space="preserve">
     <value>Остановить и закрыть</value>
@@ -1284,93 +1191,6 @@
   </data>
   <data name="TerminalSessions" xml:space="preserve">
     <value>Сессии</value>
-  </data>
-  <data name="TerminalAllow" xml:space="preserve">
-    <value>Разрешить</value>
-  </data>
-  <data name="TerminalAllowEdits" xml:space="preserve">
-    <value>Разрешать правки в этой сессии</value>
-  </data>
-  <data name="TerminalAllowInProject" xml:space="preserve">
-    <value>Разрешать в этом проекте</value>
-  </data>
-  <data name="TerminalDeny" xml:space="preserve">
-    <value>Запретить</value>
-  </data>
-  <data name="TerminalCardKeys" xml:space="preserve">
-    <value>Enter — разрешить · Esc — запретить</value>
-  </data>
-  <data name="TerminalQuestionStep" xml:space="preserve">
-    <value>вопрос {0} из {1}</value>
-  </data>
-  <data name="TerminalQuestionMany" xml:space="preserve">
-    <value>можно выбрать несколько</value>
-  </data>
-  <data name="TerminalQuestionOther" xml:space="preserve">
-    <value>Другое</value>
-  </data>
-  <data name="TerminalQuestionOtherHint" xml:space="preserve">
-    <value>Написать свой ответ</value>
-  </data>
-  <data name="TerminalQuestionBack" xml:space="preserve">
-    <value>Назад</value>
-  </data>
-  <data name="TerminalQuestionNext" xml:space="preserve">
-    <value>Дальше</value>
-  </data>
-  <data name="TerminalQuestionAnswer" xml:space="preserve">
-    <value>Ответить</value>
-  </data>
-  <data name="TerminalQuestionsDenied" xml:space="preserve">
-    <value>Вопросы без ответа</value>
-  </data>
-  <data name="TerminalStop" xml:space="preserve">
-    <value>Остановить</value>
-  </data>
-  <data name="TerminalTurnStopped" xml:space="preserve">
-    <value>Остановлено.</value>
-  </data>
-  <data name="TerminalQueued" xml:space="preserve">
-    <value>Claude прочтёт после текущего шага</value>
-  </data>
-  <data name="TerminalQueuedCommand" xml:space="preserve">
-    <value>выполню, когда Claude закончит</value>
-  </data>
-  <data name="TerminalShellExit" xml:space="preserve">
-    <value>код выхода {0}</value>
-  </data>
-  <data name="TerminalMoreLines" xml:space="preserve">
-    <value>… ещё строк: {0}</value>
-  </data>
-  <data name="SlashGroupSkills" xml:space="preserve">
-    <value>Навыки</value>
-  </data>
-  <data name="TerminalCompacted" xml:space="preserve">
-    <value>Разговор сжат, чтобы влезть в контекст.</value>
-  </data>
-  <data name="TerminalCompactedSize" xml:space="preserve">
-    <value>Разговор сжат: было {0} тыс. токенов, стало {1} тыс.</value>
-  </data>
-  <data name="TerminalCompacting" xml:space="preserve">
-    <value>Сжимаю разговор…</value>
-  </data>
-  <data name="TerminalFailed" xml:space="preserve">
-    <value>Claude Code остановился с ошибкой.</value>
-  </data>
-  <data name="TerminalDiffMore" xml:space="preserve">
-    <value>Ещё строк: {0}</value>
-  </data>
-  <data name="TerminalWaitsPermission" xml:space="preserve">
-    <value>Жду разрешения: {0}</value>
-  </data>
-  <data name="TerminalWaitsQuestions" xml:space="preserve">
-    <value>Жду ответа на вопросы</value>
-  </data>
-  <data name="TerminalWaitsPlan" xml:space="preserve">
-    <value>Жду решения по плану</value>
-  </data>
-  <data name="TerminalShow" xml:space="preserve">
-    <value>Показать</value>
   </data>
   <data name="VoiceButtonTip" xml:space="preserve">
     <value>Голосовой ввод · Ctrl+Space</value>
@@ -1491,26 +1311,5 @@
   </data>
   <data name="VoiceCloudFailed" xml:space="preserve">
     <value>OpenAI не принял запись. Проверь ключ и соединение.</value>
-  </data>
-  <data name="TerminalTasks" xml:space="preserve">
-    <value>Задачи</value>
-  </data>
-  <data name="TerminalTasksCount" xml:space="preserve">
-    <value>Задачи · {0} из {1}</value>
-  </data>
-  <data name="TerminalAgent" xml:space="preserve">
-    <value>агент</value>
-  </data>
-  <data name="TerminalContextShare" xml:space="preserve">
-    <value>контекст {0}%</value>
-  </data>
-  <data name="TerminalContextTip" xml:space="preserve">
-    <value>Сколько занято в памяти этой сессии. Освобождает /compact.</value>
-  </data>
-  <data name="AgentTodos" xml:space="preserve">
-    <value>Список дел агента</value>
-  </data>
-  <data name="AgentTodosWhat" xml:space="preserve">
-    <value>Claude ведёт список дел, терминал показывает его над полем. Новым моделям он не нужен и занимает немного контекста. Открытые сессии увидят изменение после перезапуска Aiko.</value>
   </data>
 </root>

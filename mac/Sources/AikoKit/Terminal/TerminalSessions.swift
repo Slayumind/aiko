@@ -17,11 +17,6 @@ public struct TerminalSession: Sendable, Equatable {
 
     public var kind: SessionKind = .claude
 
-    /// Nil leaves the choice of the model to Claude Code.
-    public var model: String?
-
-    public var mode: PermissionMode = .manual
-
     /// Claude Code has the conversation on disk, so the next start resumes it.
     public var started = false
 
@@ -103,8 +98,7 @@ public struct TerminalSessions: Sendable, Equatable {
     /// A new session at the end of the list. An empty name becomes the folder with a number. An
     /// id that is already taken, or one without an environment or a folder, changes nothing.
     public func add(
-        id: String, environment: String, folder: String, name: String, model: String?, mode: PermissionMode,
-        now: Int64, kind: SessionKind = .claude
+        id: String, environment: String, folder: String, name: String, now: Int64, kind: SessionKind = .claude
     ) -> TerminalSessions {
         let place = SessionName.folderPath(folder)
         if id.isEmpty || environment.isEmpty || place.isEmpty || find(id) != nil {
@@ -118,8 +112,6 @@ public struct TerminalSessions: Sendable, Equatable {
             folder: place,
             name: given.isEmpty ? SessionName.defaultName(place, taken: namesIn(environment, place)) : given)
         session.kind = kind
-        session.model = Self.model(model)
-        session.mode = mode
         session.lastUsed = now
 
         var next = self
@@ -138,14 +130,6 @@ public struct TerminalSessions: Sendable, Equatable {
     public func rename(_ id: String, _ name: String) -> TerminalSessions {
         let clean = SessionName.clean(name)
         return clean.isEmpty ? self : with(id) { $0.name = clean }
-    }
-
-    public func setMode(_ id: String, _ mode: PermissionMode) -> TerminalSessions {
-        with(id) { $0.mode = mode }
-    }
-
-    public func setModel(_ id: String, _ model: String?) -> TerminalSessions {
-        with(id) { $0.model = Self.model(model) }
     }
 
     /// Claude Code has the conversation now.
@@ -253,11 +237,6 @@ public struct TerminalSessions: Sendable, Equatable {
         return next
     }
 
-    private static func model(_ model: String?) -> String? {
-        let trimmed = (model ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
-        return trimmed.isEmpty ? nil : trimmed
-    }
-
     // MARK: - The file
 
     /// Never fails. A broken file is an empty list; a session without an id, an environment or
@@ -293,10 +272,6 @@ public struct TerminalSessions: Sendable, Equatable {
             if session.kind == .shell {
                 file["kind"] = .string("shell")
             }
-            if let model = session.model {
-                file["model"] = .string(model)
-            }
-            file["mode"] = .string(PermissionModes.name(session.mode))
             file["started"] = .bool(session.started)
             file["closed"] = .bool(session.closed)
             file["lastUsed"] = .number(String(session.lastUsed))
@@ -332,10 +307,6 @@ public struct TerminalSessions: Sendable, Equatable {
             name: name.isEmpty ? SessionName.folderName(folder) : name)
 
         session.kind = item["kind"]?.stringValue == "shell" ? .shell : .claude
-        if let model = item["model"]?.stringValue, !model.isEmpty {
-            session.model = model
-        }
-        session.mode = PermissionModes.fromStream(item["mode"]?.stringValue) ?? .manual
         session.started = item["started"]?.boolValue == true
         session.closed = item["closed"]?.boolValue == true
         session.lastUsed = item["lastUsed"]?.int64Value ?? 0

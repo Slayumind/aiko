@@ -15,6 +15,7 @@ namespace Aiko.App;
 ///
 /// It draws a TerminalView and reports what the person did. It decides nothing: the host answers
 /// every event with a new view. It is a control and not a window, so a snapshot can draw it.
+[System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763")]
 sealed class TerminalPanel : UserControl
 {
     public const double BarHeight = 44;
@@ -275,7 +276,7 @@ sealed class TerminalPanel : UserControl
             _rows.Children.Add(new Border { Padding = new Thickness(10, 10, 10, 4), Child = Mono(group.Name, "Muted") });
             foreach (var row in group.Rows)
             {
-                _rows.Children.Add(Row(row, row.Id == view.SessionId && view.Main == MainView.Talk, view.Now));
+                _rows.Children.Add(Row(row, row.Id == view.SessionId && view.Main == MainView.Terminal, view.Now));
             }
         }
 
@@ -492,7 +493,7 @@ sealed class TerminalPanel : UserControl
     {
         // A terminal draws in a window of its own, over anything WPF puts on top of it. So a question
         // or a message takes the place of the terminals rather than covering them.
-        var terminal = view.Main == MainView.Talk && view.Ask is null ? view.Terminal : null;
+        var terminal = view.Main == MainView.Terminal && view.Ask is null ? view.Terminal : null;
         foreach (UIElement child in _terminals.Children)
         {
             child.Visibility = ReferenceEquals(child, terminal) ? Visibility.Visible : Visibility.Collapsed;
@@ -507,7 +508,7 @@ sealed class TerminalPanel : UserControl
 
         UIElement content = terminal is not null ? _terminalSide
             : view.Ask is { } ask ? Ask(ask)
-            : view.Main == MainView.Talk ? Message(null, Strings.TerminalEmptyTalk, null)
+            : view.Main == MainView.Terminal ? Message(null, Strings.TerminalEmptyTalk, null)
             : Message(
                 string.Format(CultureInfo.CurrentCulture, Strings.TerminalNoSessionsTitle, view.Environment),
                 Strings.TerminalNoSessionsBody,
@@ -538,7 +539,7 @@ sealed class TerminalPanel : UserControl
         }
         else if (_shownTerminal != view.SessionId)
         {
-            Dispatcher.BeginInvoke(terminal.FocusTerminal, System.Windows.Threading.DispatcherPriority.Input);
+            Dispatcher.BeginInvoke(terminal!.FocusTerminal, System.Windows.Threading.DispatcherPriority.Input);
         }
 
         _shownTerminal = view.SessionId;
@@ -575,13 +576,13 @@ sealed class TerminalPanel : UserControl
     private UIElement Ask(AskView ask)
     {
         var buttons = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 14, 0, 0) };
-        var stop = Flat(Strings.TerminalStopAndClose, () => AskAnswered?.Invoke(true), ghost: false, danger: true);
-        var keep = Flat(Strings.TerminalKeepOpen, () => AskAnswered?.Invoke(false), ghost: false);
+        var stop = Flat(ask.Stop, () => AskAnswered?.Invoke(true), ghost: false, danger: true);
+        var keep = Flat(ask.Keep, () => AskAnswered?.Invoke(false), ghost: false);
         keep.Margin = new Thickness(8, 0, 0, 0);
         buttons.Children.Add(stop);
         buttons.Children.Add(keep);
 
-        var cross = BarButton(Line("M0,0 L8,8 M8,0 L0,8"), Strings.TerminalKeepOpen, () => AskAnswered?.Invoke(false));
+        var cross = BarButton(Line("M0,0 L8,8 M8,0 L0,8"), ask.Keep, () => AskAnswered?.Invoke(false));
         cross.HorizontalAlignment = HorizontalAlignment.Right;
         cross.VerticalAlignment = VerticalAlignment.Top;
         cross.Margin = new Thickness(0, -6, -8, 0);
