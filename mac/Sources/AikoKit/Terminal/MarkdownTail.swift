@@ -1,22 +1,19 @@
 import Foundation
 
 /// The end of an answer that is still being written, made whole for drawing (D-332). The twin of
-/// Terminal/MarkdownTail.cs: the last paragraph gets the marks it still waits for, an opening mark
-/// with nothing after it is dropped, and an open code block is left alone.
+/// Terminal/MarkdownTail.cs: the words after the last blank line or code block get the marks they
+/// still wait for, an opening mark with nothing after it is dropped, and an open code block is
+/// left alone.
 public enum MarkdownTail {
     public static func closed(_ markdown: String) -> String {
-        if markdown.isEmpty || inOpenFence(markdown) { return markdown }
-
         let all = Array(markdown)
-        var cut = -1
-        if all.count >= 2 {
-            for index in stride(from: all.count - 2, through: 0, by: -1) where all[index] == "\n" && all[index + 1] == "\n" {
-                cut = index
-                break
-            }
-        }
-        let head = cut < 0 ? "" : String(all[..<(cut + 2)])
-        let tail = cut < 0 ? all : Array(all[(cut + 2)...])
+        let (inFence, tailStart) = scan(all)
+        if all.isEmpty || inFence { return markdown }
+
+        // Inline marks never cross a blank line or a code block, so only the words after the
+        // last of them can wait for one.
+        let head = String(all[..<tailStart])
+        let tail = Array(all[tailStart...])
 
         var open = openMarks(tail)
         if open.isEmpty { return markdown }
@@ -40,7 +37,11 @@ public enum MarkdownTail {
         var open: [OpenMark] = []
         var at = 0
         while at < text.count {
-            let lineStart = at == 0 || text[at - 1] == "\n"
+            // Only spaces before it on its line: a star there may be a list marker.
+            var lineBegin = at
+            while lineBegin > 0 && text[lineBegin - 1] != "\n" { lineBegin -= 1 }
+            let lineStart = text[lineBegin..<at].allSatisfy(\.isWhitespace)
+
             if text[at] == "`" {
                 guard let end = text[(at + 1)...].firstIndex(of: "`") else {
                     open.append(OpenMark(mark: "`", at: at))
@@ -51,12 +52,15 @@ public enum MarkdownTail {
             }
 
             let next: Character? = at + 1 < text.count ? text[at + 1] : nil
+
+            // A star with spaces on both sides, as in "2 * 3", is not emphasis.
+            let spaced = (at == 0 || text[at - 1].isWhitespace) && (next == nil || next!.isWhitespace)
             let mark: String?
             if text[at] == "*" && next == "*" {
                 mark = "**"
             } else if text[at] == "~" && next == "~" {
                 mark = "~~"
-            } else if text[at] == "*" && !(lineStart && next == " ") {
+            } else if text[at] == "*" && !(lineStart && next == " ") && !spaced {
                 mark = "*"
             } else {
                 mark = nil
@@ -82,9 +86,30 @@ public enum MarkdownTail {
         return Array(text[..<end])
     }
 
-    private static func inOpenFence(_ markdown: String) -> Bool {
-        markdown.split(separator: "\n", omittingEmptySubsequences: false)
-            .filter { $0.drop(while: { $0 == " " || $0 == "\t" }).hasPrefix("```") }
-            .count % 2 == 1
+    /// Whether the text ends inside a code block (``` or ~~~), and where the words after the last
+    /// blank line or the last closed code block start. A blank line inside a block is not one.
+    private static func scan(_ all: [Character]) -> (inFence: Bool, tailStart: Int) {
+        var fence: String?
+        var tailStart = 0
+        var start = 0
+        while true {
+            let end = all[start...].firstIndex(of: "\n")
+            let line = all[start..<(end ?? all.count)]
+            let next = end.map { $0 + 1 } ?? all.count
+            let trimmed = String(line.drop(while: { $0 == " " || $0 == "\t" }))
+            if fence == nil && (trimmed.hasPrefix("```") || trimmed.hasPrefix("~~~")) {
+                fence = String(trimmed.prefix(3))
+            } else if let open = fence, trimmed.hasPrefix(open) {
+                fence = nil
+                tailStart = next
+            } else if fence == nil && trimmed.isEmpty && end != nil {
+                tailStart = next
+            }
+
+            guard end != nil else {
+                return (fence != nil, tailStart)
+            }
+            start = next
+        }
     }
 }

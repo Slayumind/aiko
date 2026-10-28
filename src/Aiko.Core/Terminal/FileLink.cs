@@ -12,7 +12,8 @@ public sealed record FileLink(string Path, int? Line)
     public static FileLink? Parse(string? text)
     {
         var path = (text ?? "").Trim(' ', '\t');
-        if (path.Length == 0 || path.IndexOfAny(['\n', '\r']) >= 0)
+        // A dash first would reach VS Code as an option of its own, not as a file.
+        if (path.Length == 0 || path.IndexOfAny(['\n', '\r']) >= 0 || path.StartsWith('-'))
         {
             return null;
         }

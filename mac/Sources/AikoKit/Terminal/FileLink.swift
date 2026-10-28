@@ -19,7 +19,8 @@ public struct FileLink: Sendable, Equatable {
     /// The text is read in UTF-16 units, the way the Windows core reads a string.
     public static func parse(_ text: String?) -> FileLink? {
         var path = trim(Array((text ?? "").utf16))
-        if path.isEmpty || path.contains(10) || path.contains(13) {
+        // A dash first would reach VS Code as an option of its own, not as a file.
+        if path.isEmpty || path.contains(10) || path.contains(13) || path.first == 45 {
             return nil
         }
 
