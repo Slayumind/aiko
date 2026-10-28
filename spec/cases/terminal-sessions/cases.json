@@ -80,6 +80,71 @@
       "toOpen": "a1"
     },
     {
+      "name": "a shell is a session of its folder too, and only a shell names its kind in the file",
+      "file": null,
+      "steps": [
+        {
+          "do": "add",
+          "id": "a1",
+          "environment": "Aiko",
+          "folder": "/work/aiko",
+          "name": "voice",
+          "model": null,
+          "mode": "manual",
+          "now": 100
+        },
+        {
+          "do": "add",
+          "id": "s1",
+          "environment": "Aiko",
+          "folder": "/work/aiko",
+          "name": "pwsh",
+          "model": null,
+          "mode": "manual",
+          "now": 110,
+          "kind": "shell"
+        }
+      ],
+      "environment": "Aiko",
+      "saved": {
+        "sessions": [
+          {
+            "id": "a1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "voice",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 100
+          },
+          {
+            "id": "s1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "pwsh",
+            "kind": "shell",
+            "mode": "manual",
+            "started": false,
+            "closed": false,
+            "lastUsed": 110
+          }
+        ],
+        "last": "s1"
+      },
+      "groups": [
+        {
+          "folder": "/work/aiko",
+          "name": "aiko",
+          "sessions": [
+            "voice",
+            "pwsh"
+          ]
+        }
+      ],
+      "toOpen": "s1"
+    },
+    {
       "name": "the second session of a folder gets the next number, a name of the person is kept",
       "file": null,
       "steps": [

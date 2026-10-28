@@ -203,14 +203,16 @@ public class VoiceCaseTests
     {
         foreach (var row in SpecCases.Json("voice-hint").GetProperty("files").EnumerateArray())
         {
-            List<FeedItem> items = [new FeedItem.OwnerMessage(1, "Look at the field.", false, [])];
+            List<FileTouch> items = [];
             foreach (var step in row.GetProperty("steps").EnumerateArray())
             {
-                var id = items.Count + 1;
-                var line = new StepLine(
-                    Enum.Parse<StepKind>(step.GetProperty("kind").GetString()!, ignoreCase: true), "", step.GetProperty("subject").GetString()!, 0, 0,
-                    step.TryGetProperty("hidden", out var hidden) && hidden.GetBoolean());
-                items.Add(new FeedItem.Step(id, $"t{id}", line, StepState.Done, "", [], ""));
+                var kind = step.GetProperty("kind").GetString() switch
+                {
+                    "read" => TouchKind.Read,
+                    "edit" => TouchKind.Edit,
+                    _ => TouchKind.Other,
+                };
+                items.Add(new FileTouch(kind, step.GetProperty("subject").GetString()!, step.TryGetProperty("hidden", out var hidden) && hidden.GetBoolean()));
             }
 
             Assert.True(

@@ -1086,6 +1086,15 @@ public static class Strings
     /// Create session
     public static string TerminalCreateSession => Get("TerminalCreateSession");
 
+    /// Open shell
+    public static string TerminalNewShell => Get("TerminalNewShell");
+
+    /// Claude Code stopped. The conversation is saved: press Enter to continue.
+    public static string TerminalStoppedLine => Get("TerminalStoppedLine");
+
+    /// Continue
+    public static string TerminalResume => Get("TerminalResume");
+
     /// Rename
     public static string TerminalRenameSession => Get("TerminalRenameSession");
 

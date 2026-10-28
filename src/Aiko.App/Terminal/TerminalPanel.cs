@@ -38,73 +38,15 @@ sealed class TerminalPanel : UserControl
     /// The session whose name is being changed in the list, or null.
     private string? _renaming;
 
-    // The conversation keeps its rows and what is typed while the view is drawn again.
-    private readonly TalkPanel _talk = new();
+    /// The real terminals of the sessions that were opened (D-349). They stay in the tree once added,
+    /// and only the one of the chosen session is visible: a terminal taken out of the tree would lose
+    /// its window and its screen.
+    private readonly Grid _terminals = new();
 
-    internal TalkInput Input => _talk.Input;
-
-    /// Keys of the conversation from any place of the window (D-328). The window hears a key first,
-    /// wherever the keyboard is, even nowhere after a click on a part that takes no keyboard. The
-    /// field of the conversation keeps its own keys, and so does any other field one types into.
-    /// Enter and Esc stay with a button, a drop-down and a popup of their own.
-    public void OnWindowKey(object sender, KeyEventArgs e)
-    {
-        if (e.Handled || !_talk.IsVisible || OwnTyping(e.OriginalSource))
-        {
-            return;
-        }
-
-        var modifiers = Keyboard.Modifiers;
-        var key = e.Key == Key.System ? e.SystemKey : e.Key;
-        if (key == Key.Space && modifiers == ModifierKeys.Control)
-        {
-            e.Handled = true;
-            _talk.Input.PressVoice();
-        }
-        else if (key == Key.Tab && modifiers == ModifierKeys.Shift)
-        {
-            e.Handled = true;
-            _talk.Input.AskMode();
-        }
-        else if (key == Key.V && modifiers == ModifierKeys.Control)
-        {
-            e.Handled = true;
-            _talk.Input.PasteHere();
-        }
-        else if (modifiers == ModifierKeys.None
-            && key is Key.Enter or Key.Escape
-            && e.OriginalSource is not (ButtonBase or ComboBox or ComboBoxItem)
-            && !QuestionCardView.Holds(e.OriginalSource)
-            && InThisWindow(e.OriginalSource))
-        {
-            e.Handled = _talk.Input.PressOutside(key == Key.Enter ? TalkKey.Enter : TalkKey.Escape);
-        }
-    }
-
-    /// Letters typed in another place of the window go into the field (D-328). A space stays with
-    /// the button or the list it was pressed on, and a digit with the card of questions (D-330).
-    public void OnWindowText(object sender, TextCompositionEventArgs e)
-    {
-        if (e.Handled || !_talk.IsVisible || OwnTyping(e.OriginalSource) || QuestionCardView.Holds(e.OriginalSource)
-            || e.Text.Length == 0 || e.Text.All(c => char.IsWhiteSpace(c) || char.IsControl(c)))
-        {
-            return;
-        }
-
-        e.Handled = _talk.Input.TypeHere(e.Text);
-    }
-
-    /// The field of the conversation, or another field one types into: the name of a session, the
-    /// first message of a new one.
-    private bool OwnTyping(object source) =>
-        _talk.Input.Owns(source) || source is TextBoxBase { IsReadOnly: false };
-
-    /// A popup, such as the list of a drop-down, is a window of its own, and Enter and Esc belong to
-    /// it. So do a link in the text of an answer, which is not a Visual.
-    private static bool InThisWindow(object source) =>
-        source is Visual visual && PresentationSource.FromVisual(visual)?.RootVisual is Window;
-
-    private string? _talkSession;
+    /// Under a terminal whose Claude Code ended by itself (D-351).
+    private readonly DockPanel _stopped = new() { Visibility = Visibility.Collapsed };
+    private readonly Button _resume;
+    private readonly DockPanel _terminalSide;
 
     public TerminalPanel()
     {
@@ -165,13 +107,19 @@ sealed class TerminalPanel : UserControl
         all.Children.Add(body);
         Content = all;
 
-        _talk.SendAsked += (text, images) => SendAsked?.Invoke(text, images);
-        _talk.StopAsked += () => StopAsked?.Invoke();
-        _talk.ModeAsked += () => ModeAsked?.Invoke();
-        _talk.ModelAsked += () => ModelAsked?.Invoke();
-        _talk.Chosen += (id, choice) => Chosen?.Invoke(id, choice);
-        _talk.FolderPicked += index => FolderPicked?.Invoke(index);
-        _talk.OtherFolderAsked += () => OtherFolderAsked?.Invoke();
+        _resume = Flat(Strings.TerminalResume, () => ResumeAsked?.Invoke(), ghost: false, main: true);
+        DockPanel.SetDock(_resume, Dock.Right);
+        _stopped.Children.Add(_resume);
+        var stoppedLine = Text(Strings.TerminalStoppedLine, "TextNumber", "Muted", FontWeights.Normal);
+        stoppedLine.VerticalAlignment = VerticalAlignment.Center;
+        stoppedLine.TextWrapping = TextWrapping.Wrap;
+        _stopped.Children.Add(stoppedLine);
+        _stopped.Margin = new Thickness(16, 10, 16, 12);
+        var terminalSide = new DockPanel();
+        DockPanel.SetDock(_stopped, Dock.Bottom);
+        terminalSide.Children.Add(_stopped);
+        terminalSide.Children.Add(_terminals);
+        _terminalSide = terminalSide;
 
         SizeChanged += (_, e) =>
         {
@@ -197,18 +145,14 @@ sealed class TerminalPanel : UserControl
     /// The id of a session and the new name typed for it.
     public event Action<string, string>? RowRenamed;
     public event Action? CreateAsked;
-    public event Action<int>? FolderPicked;
-    public event Action? OtherFolderAsked;
+    public event Action? ShellAsked;
+
+    /// Continue a session whose Claude Code ended by itself (D-351).
+    public event Action? ResumeAsked;
     public event Action<bool>? AskAnswered;
-    public event Action? SignInAsked;
     public event Action? MinimizeAsked;
     public event Action? MaximizeAsked;
     public event Action? CloseAsked;
-    public event Action<string, IReadOnlyList<AttachedImage>>? SendAsked;
-    public event Action? StopAsked;
-    public event Action? ModeAsked;
-    public event Action? ModelAsked;
-    public event Action<string, CardChoice>? Chosen;
 
     public void ShowMaximized(bool maximized)
     {
@@ -335,10 +279,14 @@ sealed class TerminalPanel : UserControl
             }
         }
 
-        var create = Flat(Strings.TerminalCreateSession, () => CreateAsked?.Invoke(), ghost: true, plus: true);
-        create.HorizontalAlignment = HorizontalAlignment.Stretch;
-        create.HorizontalContentAlignment = HorizontalAlignment.Left;
-        create.Margin = new Thickness(8);
+        var create = new StackPanel { Margin = new Thickness(8) };
+        foreach (var (text, ask) in new (string, Action)[] { (Strings.TerminalCreateSession, () => CreateAsked?.Invoke()), (Strings.TerminalNewShell, () => ShellAsked?.Invoke()) })
+        {
+            var button = Flat(text, ask, ghost: true, plus: true);
+            button.HorizontalAlignment = HorizontalAlignment.Stretch;
+            button.HorizontalContentAlignment = HorizontalAlignment.Left;
+            create.Children.Add(button);
+        }
 
         // The list lives in the window or, in a narrow one, under the button with the session name.
         _list.Children.Clear();
@@ -515,45 +463,9 @@ sealed class TerminalPanel : UserControl
         return row;
     }
 
-    private static string SecondLine(SessionRow row, DateTimeOffset now)
-    {
-        if (row.Glance is not { } glance)
-        {
-            return UsedWords(row.LastUsed, now);
-        }
-
-        string With(string format, params object[] parts) => string.Format(CultureInfo.CurrentCulture, format, parts);
-
-        return glance.Line switch
-        {
-            GlanceLine.Request => With(Strings.TerminalLineRequest, StepWord(glance), glance.Text).TrimEnd(),
-            GlanceLine.Question => With(Strings.TerminalLineQuestion, glance.Text),
-            GlanceLine.Plan => Strings.TerminalLinePlan,
-            GlanceLine.Step => With(glance.Kind switch
-            {
-                StepKind.Read => Strings.TerminalLineReading,
-                StepKind.Search => Strings.TerminalLineSearching,
-                StepKind.Edit => Strings.TerminalLineEditing,
-                StepKind.Run => Strings.TerminalLineRunning,
-                StepKind.Agent => Strings.TerminalLineAgent,
-                StepKind.Web => Strings.TerminalLineOpening,
-                StepKind.Skill => Strings.TerminalLineSkill,
-                _ => Strings.TerminalLineCalling,
-            }, glance.Kind == StepKind.Other ? Called(glance) : glance.Text),
-            GlanceLine.Answer => glance.Text,
-            GlanceLine.StoppedAt => With(Strings.TerminalLineStoppedAt, StepWord(glance)),
-            GlanceLine.SignIn => Strings.TerminalLineSignIn,
-            _ => "",
-        };
-    }
-
-    /// The word of a step, the one the feed uses for it.
-    private static string StepWord(TalkGlance glance) => TalkPanel.StepWord(glance.Kind, glance.Label);
-
-    /// A tool without a word of its own: "memory · remember" for an MCP tool, the name for others.
-    private static string Called(TalkGlance glance) =>
-        glance.Text.Length > 0 ? $"{glance.Label} · {glance.Text}" : glance.Label;
-
+    /// What the terminal did last, or, for a sleeping session, when it was used.
+    private static string SecondLine(SessionRow row, DateTimeOffset now) =>
+        row.Line.Length > 0 ? row.Line : UsedWords(row.LastUsed, now);
     private static string UsedWords(long lastUsed, DateTimeOffset now)
     {
         if (lastUsed <= 0)
@@ -571,77 +483,68 @@ sealed class TerminalPanel : UserControl
         };
     }
 
-    // ---- the place of the conversation ----
+    // ---- the place of the terminal ----
+
+    /// A terminal of a closed session leaves the panel.
+    public void Release(TerminalSurface terminal) => _terminals.Children.Remove(terminal);
 
     private void ShowMain(TerminalView view)
     {
-        UIElement content = view.Main switch
+        // A terminal draws in a window of its own, over anything WPF puts on top of it. So a question
+        // or a message takes the place of the terminals rather than covering them.
+        var terminal = view.Main == MainView.Talk && view.Ask is null ? view.Terminal : null;
+        foreach (UIElement child in _terminals.Children)
         {
-            MainView.Form when view.Form is { } form => Draft(view, form),
-            MainView.Talk when view.SignedOut => Message(
-                string.Format(CultureInfo.CurrentCulture, Strings.TerminalLoginTitle, view.Environment),
-                Strings.TerminalLoginBody,
-                Flat(Strings.SignIn, () => SignInAsked?.Invoke(), ghost: false, main: true)),
-            MainView.Talk when view.Talk is { } talk => Talk(view, talk),
-            MainView.Talk => Message(null, Strings.TerminalEmptyTalk, null),
-            _ => Message(
+            child.Visibility = ReferenceEquals(child, terminal) ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        if (terminal is not null && !_terminals.Children.Contains(terminal))
+        {
+            _terminals.Children.Add(terminal);
+        }
+
+        _stopped.Visibility = terminal is not null && view.Stopped ? Visibility.Visible : Visibility.Collapsed;
+
+        UIElement content = terminal is not null ? _terminalSide
+            : view.Ask is { } ask ? Ask(ask)
+            : view.Main == MainView.Talk ? Message(null, Strings.TerminalEmptyTalk, null)
+            : Message(
                 string.Format(CultureInfo.CurrentCulture, Strings.TerminalNoSessionsTitle, view.Environment),
                 Strings.TerminalNoSessionsBody,
-                Flat(Strings.TerminalCreateSession, () => CreateAsked?.Invoke(), ghost: false, main: true, plus: true)),
-        };
+                Flat(Strings.TerminalCreateSession, () => CreateAsked?.Invoke(), ghost: false, main: true, plus: true));
 
-        // The feed stays in the tree from one draw to the next. Taken out and put back, it is
-        // measured again and its scroll goes back to the top.
-        if (_main.Children.Count > 0 && ReferenceEquals(_main.Children[0], content))
+        // The terminals stay in the tree from one draw to the next: taken out and put back, each
+        // would build its window again.
+        if (!ReferenceEquals(content, _terminalSide))
         {
-            _main.Children.RemoveRange(1, _main.Children.Count - 1);
+            _terminalSide.Visibility = Visibility.Collapsed;
+            _main.Children.Clear();
+            _main.Children.Add(_terminalSide);
+            _main.Children.Add(content);
+            return;
         }
-        else
+
+        _terminalSide.Visibility = Visibility.Visible;
+        if (_main.Children.Count != 1 || !ReferenceEquals(_main.Children[0], _terminalSide))
         {
             _main.Children.Clear();
-            _main.Children.Add(content);
+            _main.Children.Add(_terminalSide);
         }
 
-        if (view.Ask is { } ask)
+        if (view.Stopped)
         {
-            _main.Children.Add(Ask(ask));
+            // Enter presses the button: the terminal of a program that ended takes no keys.
+            Dispatcher.BeginInvoke(() => _resume.Focus(), System.Windows.Threading.DispatcherPriority.Input);
         }
-    }
-
-    private UIElement Talk(TerminalView view, TalkView talk)
-    {
-        _talk.Show(talk);
-        if (_talkSession != view.SessionId)
+        else if (_shownTerminal != view.SessionId)
         {
-            _talkSession = view.SessionId;
-            Dispatcher.BeginInvoke(_talk.FocusInput, System.Windows.Threading.DispatcherPriority.Input);
+            Dispatcher.BeginInvoke(terminal.FocusTerminal, System.Windows.Threading.DispatcherPriority.Input);
         }
 
-        return _talk;
+        _shownTerminal = view.SessionId;
     }
 
-    /// A new session before its first message (D-342): the conversation itself, empty, with the
-    /// folder, model and mode of the draft in the line under the field. The first message makes
-    /// the session.
-    private UIElement Draft(TerminalView view, FormView form)
-    {
-        var model = form.Models[Math.Clamp(form.Model, 0, form.Models.Count - 1)];
-        return Talk(view with { SessionId = "draft:" + form.Environment }, new TalkView(
-            "draft:" + form.Environment,
-            [],
-            Busy: false,
-            HasOpenCard: false,
-            Compacting: false,
-            form.Mode,
-            new ModelLabel(model.DisplayName, false),
-            form.Environment)
-        {
-            Commands = form.Commands,
-            Folder = form.Folder >= 0 ? form.Folders[form.Folder].Path : "",
-            Draft = form,
-        });
-    }
-
+    private string? _shownTerminal;
     private static UIElement Message(string? title, string body, UIElement? button)
     {
         var column = new StackPanel { MaxWidth = 520, VerticalAlignment = VerticalAlignment.Center, HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(40, 0, 40, 0) };
@@ -668,10 +571,6 @@ sealed class TerminalPanel : UserControl
 
         return column;
     }
-
-    /// A folder in the form: its name and the folder it sits in, not the whole path (D-332).
-    internal static string FolderLabel(FolderChoice folder) =>
-        SessionName.ParentName(folder.Path) is { Length: > 0 } parent ? $"{folder.Name}  ·  {parent}" : folder.Name;
 
     private UIElement Ask(AskView ask)
     {

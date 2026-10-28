@@ -2485,6 +2485,27 @@
     ]
   ],
   [
+    "TerminalNewShell",
+    [
+      "Open shell",
+      "Открыть оболочку"
+    ]
+  ],
+  [
+    "TerminalStoppedLine",
+    [
+      "Claude Code stopped. The conversation is saved: press Enter to continue.",
+      "Claude Code остановился. Разговор сохранён: нажми Enter, чтобы продолжить."
+    ]
+  ],
+  [
+    "TerminalResume",
+    [
+      "Continue",
+      "Продолжить"
+    ]
+  ],
+  [
     "TerminalRenameSession",
     [
       "Rename",

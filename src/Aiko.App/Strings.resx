@@ -1096,6 +1096,15 @@
   <data name="TerminalCreateSession" xml:space="preserve">
     <value>Create session</value>
   </data>
+  <data name="TerminalNewShell" xml:space="preserve">
+    <value>Open shell</value>
+  </data>
+  <data name="TerminalStoppedLine" xml:space="preserve">
+    <value>Claude Code stopped. The conversation is saved: press Enter to continue.</value>
+  </data>
+  <data name="TerminalResume" xml:space="preserve">
+    <value>Continue</value>
+  </data>
   <data name="TerminalRenameSession" xml:space="preserve">
     <value>Rename</value>
   </data>

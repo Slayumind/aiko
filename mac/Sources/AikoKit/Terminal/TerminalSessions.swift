@@ -1,5 +1,11 @@
 import Foundation
 
+/// What runs in a session: Claude Code, or a shell in the same folder (D-350).
+public enum SessionKind: String, Sendable {
+    case claude
+    case shell
+}
+
 /// One session of the terminal as Aiko remembers it between runs (D-293): which conversation of
 /// Claude Code it is and where it runs. Not a word of the conversation is here.
 public struct TerminalSession: Sendable, Equatable {
@@ -8,6 +14,8 @@ public struct TerminalSession: Sendable, Equatable {
     public internal(set) var environment: String
     public let folder: String
     public var name: String
+
+    public var kind: SessionKind = .claude
 
     /// Nil leaves the choice of the model to Claude Code.
     public var model: String?
@@ -96,7 +104,7 @@ public struct TerminalSessions: Sendable, Equatable {
     /// id that is already taken, or one without an environment or a folder, changes nothing.
     public func add(
         id: String, environment: String, folder: String, name: String, model: String?, mode: PermissionMode,
-        now: Int64
+        now: Int64, kind: SessionKind = .claude
     ) -> TerminalSessions {
         let place = SessionName.folderPath(folder)
         if id.isEmpty || environment.isEmpty || place.isEmpty || find(id) != nil {
@@ -109,6 +117,7 @@ public struct TerminalSessions: Sendable, Equatable {
             environment: environment,
             folder: place,
             name: given.isEmpty ? SessionName.defaultName(place, taken: namesIn(environment, place)) : given)
+        session.kind = kind
         session.model = Self.model(model)
         session.mode = mode
         session.lastUsed = now
@@ -280,6 +289,10 @@ public struct TerminalSessions: Sendable, Equatable {
             file["environment"] = .string(session.environment)
             file["folder"] = .string(session.folder)
             file["name"] = .string(session.name)
+            // A session of Claude Code is the old shape of the file: only a shell is named.
+            if session.kind == .shell {
+                file["kind"] = .string("shell")
+            }
             if let model = session.model {
                 file["model"] = .string(model)
             }
@@ -318,6 +331,7 @@ public struct TerminalSessions: Sendable, Equatable {
             id: id, environment: environment, folder: folder,
             name: name.isEmpty ? SessionName.folderName(folder) : name)
 
+        session.kind = item["kind"]?.stringValue == "shell" ? .shell : .claude
         if let model = item["model"]?.stringValue, !model.isEmpty {
             session.model = model
         }

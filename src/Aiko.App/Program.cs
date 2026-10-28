@@ -31,13 +31,6 @@ static class Program
             .OnBeforeUninstallFastCallback(_ => Uninstall.Cleanup(keepMemory: null))
             .Run();
 
-        // Aiko as a child of itself, in the place of Claude Code: the other end of --try-pipe.
-        if (args is [PipeChild.Argument, ..])
-        {
-            PipeChild.Run(args);
-            return;
-        }
-
         // Software rendering: the spike measured 33 MB against 92 MB with the DirectX stack, and
         // Aiko draws a small card a few times an hour. Nobody needs the GPU for that.
         RenderOptions.ProcessRenderMode = RenderMode.SoftwareOnly;
@@ -281,25 +274,8 @@ static class Program
             return;
         }
 
-        // The window of the terminal drawn into a file, on made up sessions. States: talk, feed,
-        // working, empty, form, elsewhere, login, close. The width is 1100 unless a third word gives another.
-        if (args is ["--try-feed-scroll", ..])
-        {
-            Environment.Exit(TerminalSnapshot.FeedScroll());
-            return;
-        }
-
-        if (args is ["--snapshot-terminal", var terminalPath, var terminalState, .. var terminalRest])
-        {
-            var width = terminalRest is [var word, ..] && double.TryParse(word, System.Globalization.CultureInfo.InvariantCulture, out var given)
-                ? given
-                : Aiko.Core.Terminal.WindowPlace.DefaultWidth;
-            Environment.Exit(TerminalSnapshot.Write(terminalPath, terminalState, width) ? 0 : 1);
-            return;
-        }
-
-        // Opens the window of the terminal on the real sessions, without the rest of Aiko. A message
-        // sent there goes to the real Claude Code. The limits come from the status line only.
+        // Opens the window of the terminal on the real sessions, without the rest of Aiko. Its
+        // terminals run the real Claude Code and shells. The limits come from the status line only.
         if (args is ["--try-terminal", ..])
         {
             var environments = SettingsStore.LoadEnvironments();
@@ -311,14 +287,13 @@ static class Program
 
             var terminalApp = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
             var numbers = new ShellNumbers(new SnapshotWatcher());
-            var terminal = new TerminalHost(environments, SettingsStore.LoadTerminal(), () => new ClaudeProcess(), numbers.SnapshotFor);
+            var terminal = new TerminalHost(environments, SettingsStore.LoadTerminal(), numbers.SnapshotFor);
             terminal.Closed += terminalApp.Shutdown;
             terminal.Show();
             terminalApp.Run();
             return;
         }
 
-        // The pipes a conversation runs on, checked with Aiko as its own child. No Claude Code.
         // Reads a recorded phrase with the whisper the app ships, the way a recording is read. A door
         // for checks: the text goes to the log, so use a phrase made for testing.
         if (args is ["--try-voice", var voiceModel, var voiceWav, ..])
@@ -338,33 +313,6 @@ static class Program
         if (args is ["--try-voice-cloud", var cloudWav, ..])
         {
             Environment.Exit(TryVoiceCloud(cloudWav).GetAwaiter().GetResult());
-            return;
-        }
-
-        if (args is ["--try-pipe", ..])
-        {
-            Environment.Exit(TerminalCheck.Pipe());
-            return;
-        }
-
-        // Reads the history of one conversation from the file of Claude Code and counts the items.
-        if (args is ["--try-history", var historyFolder, var historySession, ..])
-        {
-            Environment.Exit(TerminalCheck.History(historyFolder, historySession, args.Length > 3 ? args[3] : null));
-            return;
-        }
-
-        // One short turn with the real Claude Code. Spends a little of the limits.
-        if (args is ["--try-conversation", "real", var talkFolder, ..])
-        {
-            Environment.Exit(TerminalCheck.Real(talkFolder, args.Length > 3 ? args[3] : null));
-            return;
-        }
-
-        // A conversation played from a script, against a scripted Claude Code.
-        if (args is ["--try-conversation", var talkScript, ..])
-        {
-            Environment.Exit(TerminalCheck.Conversation(talkScript));
             return;
         }
 

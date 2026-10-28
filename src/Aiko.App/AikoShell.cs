@@ -326,8 +326,8 @@ sealed class AikoShell : IDisposable
         }
     }
 
-    /// One terminal window, as with the settings. Closing it ends its sessions' processes; the
-    /// sessions come back from terminal.json the next time.
+    /// One terminal window, as with the settings. Closing it hides it while a program runs in it
+    /// (D-351); the sessions come back from terminal.json the next time Aiko starts.
     private void OpenTerminal()
     {
         if (_terminal is not null)
@@ -344,10 +344,8 @@ sealed class AikoShell : IDisposable
             return;
         }
 
-        var terminal = new TerminalHost(
-            environments, SettingsStore.LoadTerminal(), () => new ClaudeProcess(), _numbers.SnapshotFor);
+        var terminal = new TerminalHost(environments, SettingsStore.LoadTerminal(), _numbers.SnapshotFor);
         terminal.Closed += () => _terminal = null;
-        terminal.SettingsAsked += () => OpenSettings(page: SettingsPanel.TerminalPageKey);
         terminal.InViewChanged += _island.FollowTerminal;
         _terminal = terminal;
         terminal.Show();

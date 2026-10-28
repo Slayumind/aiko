@@ -1255,7 +1255,7 @@ struct SharedCaseTests {
                 sessions = sessions.add(
                     id: word("id"), environment: word("environment"), folder: word("folder"), name: word("name"),
                     model: step["model"]?.stringValue, mode: mode(step["mode"]) ?? .manual,
-                    now: step["now"]?.int64Value ?? 0)
+                    now: step["now"]?.int64Value ?? 0, kind: step["kind"]?.stringValue == "shell" ? .shell : .claude)
             case "rename": sessions = sessions.rename(word("id"), word("name"))
             case "renameEnvironment": sessions = sessions.renameEnvironment(word("from"), word("to"))
             case "setMode": sessions = sessions.setMode(word("id"), mode(step["mode"]) ?? .manual)

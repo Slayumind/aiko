@@ -48,8 +48,6 @@ sealed class TerminalWindow : Window
         Content = _root;
 
         // The window hears the keys of the conversation first, wherever the keyboard is (D-328).
-        PreviewKeyDown += panel.OnWindowKey;
-        PreviewTextInput += panel.OnWindowText;
 
         panel.MinimizeAsked += () => WindowState = WindowState.Minimized;
         panel.MaximizeAsked += () => WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;

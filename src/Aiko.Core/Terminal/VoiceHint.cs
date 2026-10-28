@@ -2,6 +2,18 @@ using System.Text.RegularExpressions;
 
 namespace Aiko.Core.Terminal;
 
+/// What a step of Claude Code did with a file, as far as the hint of voice input cares.
+public enum TouchKind
+{
+    Read,
+    Edit,
+    Other,
+}
+
+/// A file a session touched. Hidden is a file of Aiko itself, such as its memory, which the hint
+/// leaves out.
+public sealed record FileTouch(TouchKind Kind, string Path, bool Hidden = false);
+
 /// A sentence cut out as the hint given back: how many parts it had and how many of them were items
 /// of the hint. For the log, which keeps numbers and never the words (PRIVACY.md).
 public sealed record EchoCut(int Parts, int InHint);
@@ -143,13 +155,12 @@ public static class VoiceHint
             .Select(part => part.Trim().TrimEnd('.').Trim().ToLowerInvariant().Replace('ё', 'е'))
             .Where(part => part.Length > 0);
 
-    /// The files a conversation read or changed, the newest first, each once. The newest go first
-    /// because the hint is cut from the end.
-    public static IReadOnlyList<string> Files(IEnumerable<FeedItem> items) =>
-        [.. items.OfType<FeedItem.Step>()
-            .Select(step => step.Line)
-            .Where(line => line.Kind is StepKind.Read or StepKind.Edit && !line.Hidden && line.Subject.Length > 0)
-            .Select(line => line.Subject)
+    /// The files a session read or changed, the newest first, each once. The newest go first
+    /// because the hint is cut from the end. The touches come in the order they happened.
+    public static IReadOnlyList<string> Files(IEnumerable<FileTouch> touches) =>
+        [.. touches
+            .Where(touch => touch.Kind is TouchKind.Read or TouchKind.Edit && !touch.Hidden && touch.Path.Length > 0)
+            .Select(touch => touch.Path)
             .Reverse()
             .Distinct(StringComparer.OrdinalIgnoreCase)];
 

@@ -17,10 +17,8 @@ public enum RowState
     /// No process runs for the session. The second line says when it was used last.
     Asleep,
 
-    /// Claude Code ended in the middle of the work.
+    /// The program ended by itself (D-351): Enter brings Claude Code back.
     Stopped,
-
-    SignedOut,
 }
 
 /// How long ago a session was used, as the second line of a sleeping row says it.
@@ -34,26 +32,47 @@ public enum UsedDay
     Earlier,
 }
 
-/// A conversation that is in memory: what it looks like and whether Claude Code runs for it.
-public sealed record LiveTalk(TalkGlance Glance, bool Running);
+/// What a running terminal is doing, as far as Aiko knows it.
+public enum TerminalActivity
+{
+    /// It runs and waits for nothing in particular.
+    Idle,
+    Working,
 
-public sealed record SessionRow(string Id, string Name, RowState State, TalkGlance? Glance, long LastUsed);
+    /// Claude Code asks the person something.
+    Waiting,
+
+    /// A turn ended and the person has not looked yet.
+    Done,
+
+    /// The program ended by itself.
+    Exited,
+}
+
+/// A terminal that runs for a session, or ran and ended. Line is the last thing it did, in the
+/// words of the second line of the row; empty when nothing is known.
+public sealed record LiveTerminal(TerminalActivity Activity, string Line);
+
+public sealed record SessionRow(string Id, string Name, RowState State, string Line, long LastUsed)
+{
+    public SessionKind Kind { get; init; } = SessionKind.Claude;
+}
 
 public sealed record RowGroup(string Folder, string Name, IReadOnlyList<SessionRow> Rows);
 
 /// The list of sessions of one environment as rows, and the count for the tab of the environment.
 public static class SessionRows
 {
-    /// live gives the conversation of a session that is in memory, or null.
-    public static IReadOnlyList<RowGroup> For(TerminalSessions sessions, string environment, Func<string, LiveTalk?> live) =>
+    /// live gives the terminal of a session, or null when none was started.
+    public static IReadOnlyList<RowGroup> For(TerminalSessions sessions, string environment, Func<string, LiveTerminal?> live) =>
         [.. sessions.Groups(environment).Select(group => new RowGroup(
             group.Folder,
             group.Name,
             [.. group.Sessions.Select(session => Row(session, live(session.Id)))]))];
 
     /// How many sessions of the environment wait for the person: the number on its tab.
-    public static int Waiting(TerminalSessions sessions, string environment, Func<string, LiveTalk?> live) =>
-        sessions.Open(environment).Count(session => live(session.Id)?.Glance.Activity == TalkActivity.Waiting);
+    public static int Waiting(TerminalSessions sessions, string environment, Func<string, LiveTerminal?> live) =>
+        sessions.Open(environment).Count(session => live(session.Id)?.Activity == TerminalActivity.Waiting);
 
     /// The day a session was used on, counted by the clock of the person: offsetMinutes is how far
     /// that clock is from UTC. A time that is still to come reads as today.
@@ -72,19 +91,22 @@ public static class SessionRows
 
     private static long FloorDay(long seconds, long day) => (seconds - (((seconds % day) + day) % day)) / day;
 
-    private static SessionRow Row(TerminalSession session, LiveTalk? talk)
+    private static SessionRow Row(TerminalSession session, LiveTerminal? terminal)
     {
-        var state = talk is null ? RowState.Asleep : talk.Glance.Activity switch
+        var state = terminal?.Activity switch
         {
-            TalkActivity.Working => RowState.Working,
-            TalkActivity.Waiting => RowState.Waiting,
-            TalkActivity.Done => RowState.Done,
-            TalkActivity.Failed => RowState.Stopped,
-            TalkActivity.SignedOut => RowState.SignedOut,
-            _ => talk.Running ? RowState.Read : RowState.Asleep,
+            null => RowState.Asleep,
+            TerminalActivity.Working => RowState.Working,
+            TerminalActivity.Waiting => RowState.Waiting,
+            TerminalActivity.Done => RowState.Done,
+            TerminalActivity.Exited => RowState.Stopped,
+            _ => RowState.Read,
         };
 
-        // A sleeping session says when it was used, not what was said last.
-        return new SessionRow(session.Id, session.Name, state, state == RowState.Asleep ? null : talk?.Glance, session.LastUsed);
+        // A sleeping session says when it was used, not what it did last.
+        return new SessionRow(session.Id, session.Name, state, state == RowState.Asleep ? "" : terminal?.Line ?? "", session.LastUsed)
+        {
+            Kind = session.Kind,
+        };
     }
 }

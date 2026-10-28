@@ -23,7 +23,7 @@ sealed class VoiceDictation
     private static readonly TimeSpan FirstSound = TimeSpan.FromSeconds(0.5);
     private static readonly TimeSpan Breath = TimeSpan.FromMilliseconds(250);
 
-    private readonly TalkInput _input;
+    private readonly IDictationField _input;
     private readonly Func<VoiceContext?> _context;
     private readonly Dispatcher _window;
     private readonly DispatcherTimer _tick;
@@ -33,7 +33,7 @@ sealed class VoiceDictation
     private Recording? _recording;
     private DictationText _text = DictationText.Empty;
 
-    public VoiceDictation(TalkInput input, Func<VoiceContext?> context)
+    public VoiceDictation(IDictationField input, Func<VoiceContext?> context)
     {
         _input = input;
         _context = context;

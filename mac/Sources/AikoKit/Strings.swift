@@ -395,6 +395,9 @@ public enum Strings {
         "StateOn": ("on", "включена"),
         "TerminalTitle": ("Terminal", "Терминал"),
         "TerminalCreateSession": ("Create session", "Создать сессию"),
+        "TerminalNewShell": ("Open shell", "Открыть оболочку"),
+        "TerminalStoppedLine": ("Claude Code stopped. The conversation is saved: press Enter to continue.", "Claude Code остановился. Разговор сохранён: нажми Enter, чтобы продолжить."),
+        "TerminalResume": ("Continue", "Продолжить"),
         "TerminalRenameSession": ("Rename", "Переименовать"),
         "TerminalCloseSession": ("Close session", "Закрыть сессию"),
         "TerminalFormTitle": ("New session in {0}", "Новая сессия в среде {0}"),
@@ -1597,6 +1600,15 @@ public enum Strings {
 
     /// Create session
     public static var terminalCreateSession: String { Strings.get("TerminalCreateSession") }
+
+    /// Open shell
+    public static var terminalNewShell: String { Strings.get("TerminalNewShell") }
+
+    /// Claude Code stopped. The conversation is saved: press Enter to continue.
+    public static var terminalStoppedLine: String { Strings.get("TerminalStoppedLine") }
+
+    /// Continue
+    public static var terminalResume: String { Strings.get("TerminalResume") }
 
     /// Rename
     public static var terminalRenameSession: String { Strings.get("TerminalRenameSession") }

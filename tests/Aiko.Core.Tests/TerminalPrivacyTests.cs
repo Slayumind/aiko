@@ -21,30 +21,22 @@ public class TerminalPrivacyTests
     [Fact]
     public void The_terminal_log_takes_no_text_but_the_name_of_an_environment()
     {
-        var seam = File.ReadAllText(Path.Combine(Repository(), "src", "Aiko.Core", "Terminal", "ConversationProcess.cs"));
-        var sources = new[]
-        {
-            seam[seam.IndexOf("interface ITerminalLog", StringComparison.Ordinal)..],
-            File.ReadAllText(Path.Combine(Repository(), "src", "Aiko.App", "Terminal", "TerminalLog.cs")),
-        };
+        var source = File.ReadAllText(Path.Combine(Repository(), "src", "Aiko.App", "Terminal", "TerminalLog.cs"));
 
         var methods = 0;
-        foreach (var source in sources)
+        foreach (Match method in Regex.Matches(source, @"\bvoid\s+(\w+)\s*\(([^)]*)\)"))
         {
-            foreach (Match method in Regex.Matches(source, @"\bvoid\s+(\w+)\s*\(([^)]*)\)"))
+            methods++;
+            foreach (var parameter in method.Groups[2].Value.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
             {
-                methods++;
-                foreach (var parameter in method.Groups[2].Value.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
-                {
-                    Assert.True(
-                        Regex.IsMatch(parameter, @"^(bool|int)\s+\w+$") || parameter == "string environment",
-                        $"{method.Groups[1].Value} takes \"{parameter}\". The terminal log takes numbers, yes or no, and the name of an environment.");
-                }
+                Assert.True(
+                    Regex.IsMatch(parameter, @"^(bool|int)\s+\w+$") || parameter == "string environment",
+                    $"{method.Groups[1].Value} takes \"{parameter}\". The terminal log takes numbers, yes or no, and the name of an environment.");
             }
         }
 
-        // Four in the seam, the same four and the five of the doors in the app.
-        Assert.Equal(13, methods);
+        // Started, StartFailed, Exited.
+        Assert.Equal(3, methods);
     }
 
     private static IEnumerable<string> TerminalSources() =>
