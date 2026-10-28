@@ -309,6 +309,7 @@ sealed class AikoShell : IDisposable
         }
 
         FollowDirectMode();
+        _terminal?.Follow(SettingsStore.LoadEnvironments());
         _numbers.NoteWhereWeHaveNoAccess();
         FollowMoods();
         _tray.Update();

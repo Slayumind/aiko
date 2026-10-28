@@ -218,6 +218,10 @@ public partial class EnvironmentPage : UserControl
 
         var renamed = EnvironmentEdits.Rename(_editor.Current, environment.Name, wanted, _editor.CommandsInstalled);
         _suggestion = renamed.SuggestedCommand;
+
+        // The sessions of the terminal know their environment by its name: they go with it. An
+        // open terminal window does the same when it follows the settings.
+        SettingsStore.SaveTerminal(SettingsStore.LoadTerminal().RenameEnvironment(environment.Name, wanted));
         _editor.Commit(renamed.Settings, "renamed an environment");
         ShowSuggestion();
     }

@@ -1,5 +1,5 @@
 {
-  "comment": "The list of sessions of the terminal, the file terminal.json (D-293). A scenario reads a file, does the steps and gives what is saved, the groups of one environment and the session the window opens on. The list keeps the order of the person; a group is a folder, in the order the folders first appear. A closed session leaves the list and stays in the file. Not a word of a conversation is in the file.",
+  "comment": "The list of sessions of the terminal, the file terminal.json (D-293). A scenario reads a file, does the steps and gives what is saved, the groups of one environment and the session the window opens on. The list keeps the order of the person; a group is a folder, in the order the folders first appear. A closed session leaves the list and stays in the file. Not a word of a conversation is in the file. A renamed environment takes its sessions with it.",
   "scenarios": [
     {
       "name": "no file yet",
@@ -2461,6 +2461,77 @@
       },
       "groups": [],
       "toOpen": null
+    },
+    {
+      "name": "a renamed environment keeps its sessions",
+      "file": {
+        "last": "w1",
+        "sessions": [
+          {
+            "id": "a1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": true,
+            "closed": false,
+            "lastUsed": 10
+          },
+          {
+            "id": "w1",
+            "environment": "Work",
+            "folder": "/work/site",
+            "name": "site 1",
+            "mode": "manual",
+            "started": true,
+            "closed": false,
+            "lastUsed": 20
+          }
+        ]
+      },
+      "steps": [
+        {
+          "do": "renameEnvironment",
+          "from": "Work",
+          "to": "Job"
+        }
+      ],
+      "environment": "Job",
+      "saved": {
+        "sessions": [
+          {
+            "id": "a1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "mode": "manual",
+            "started": true,
+            "closed": false,
+            "lastUsed": 10
+          },
+          {
+            "id": "w1",
+            "environment": "Job",
+            "folder": "/work/site",
+            "name": "site 1",
+            "mode": "manual",
+            "started": true,
+            "closed": false,
+            "lastUsed": 20
+          }
+        ],
+        "last": "w1"
+      },
+      "groups": [
+        {
+          "folder": "/work/site",
+          "name": "site",
+          "sessions": [
+            "site 1"
+          ]
+        }
+      ],
+      "toOpen": "w1"
     }
   ]
 }
