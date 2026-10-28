@@ -1083,6 +1083,27 @@ public static class Strings
     /// on
     public static string StateOn => Get("StateOn");
 
+    /// Keys go to the menu of Claude Code · **Enter** or **Esc** ends it
+    public static string TerminalEditorHintPassing => Get("TerminalEditorHintPassing");
+
+    /// **Enter** run · **Tab** path · **Shift+Enter** new line
+    public static string TerminalEditorHintShellText => Get("TerminalEditorHintShellText");
+
+    /// Empty: **↑ ↓** history; **Enter**, **Esc**, **Tab** go to the terminal
+    public static string TerminalEditorHintShellEmpty => Get("TerminalEditorHintShellEmpty");
+
+    /// **Enter** send · **Shift+Enter** new line · **Ctrl+Shift+Space** voice
+    public static string TerminalEditorHintText => Get("TerminalEditorHintText");
+
+    /// Empty: **arrows**, **Enter**, **Esc**, **Shift+Tab** go to the terminal
+    public static string TerminalEditorHintEmpty => Get("TerminalEditorHintEmpty");
+
+    /// picture {0}
+    public static string TerminalEditorPicture => Get("TerminalEditorPicture");
+
+    /// Type or say
+    public static string TerminalEditorPlaceholder => Get("TerminalEditorPlaceholder");
+
     /// Find a session or a conversation
     public static string TerminalSearchHint => Get("TerminalSearchHint");
 
@@ -1266,10 +1287,10 @@ public static class Strings
     /// Sessions
     public static string TerminalSessions => Get("TerminalSessions");
 
-    /// Voice input · Ctrl+Space
+    /// Voice input · Ctrl+Shift+Space
     public static string VoiceButtonTip => Get("VoiceButtonTip");
 
-    /// Finish recording · Ctrl+Space
+    /// Finish recording · Ctrl+Shift+Space
     public static string VoiceStopTip => Get("VoiceStopTip");
 
     /// starting the mic
@@ -1314,7 +1335,7 @@ public static class Strings
     /// Voice input
     public static string VoiceToggle => Get("VoiceToggle");
 
-    /// Ctrl+Space or the microphone button in the field.
+    /// Ctrl+Shift+Space or the microphone button in the editor.
     public static string VoiceToggleWhat => Get("VoiceToggleWhat");
 
     /// Speech language

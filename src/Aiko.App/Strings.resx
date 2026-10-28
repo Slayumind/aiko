@@ -1093,6 +1093,27 @@
   <data name="StateOn" xml:space="preserve">
     <value>on</value>
   </data>
+  <data name="TerminalEditorHintPassing" xml:space="preserve">
+    <value>Keys go to the menu of Claude Code · **Enter** or **Esc** ends it</value>
+  </data>
+  <data name="TerminalEditorHintShellText" xml:space="preserve">
+    <value>**Enter** run · **Tab** path · **Shift+Enter** new line</value>
+  </data>
+  <data name="TerminalEditorHintShellEmpty" xml:space="preserve">
+    <value>Empty: **↑ ↓** history; **Enter**, **Esc**, **Tab** go to the terminal</value>
+  </data>
+  <data name="TerminalEditorHintText" xml:space="preserve">
+    <value>**Enter** send · **Shift+Enter** new line · **Ctrl+Shift+Space** voice</value>
+  </data>
+  <data name="TerminalEditorHintEmpty" xml:space="preserve">
+    <value>Empty: **arrows**, **Enter**, **Esc**, **Shift+Tab** go to the terminal</value>
+  </data>
+  <data name="TerminalEditorPicture" xml:space="preserve">
+    <value>picture {0}</value>
+  </data>
+  <data name="TerminalEditorPlaceholder" xml:space="preserve">
+    <value>Type or say</value>
+  </data>
   <data name="TerminalSearchHint" xml:space="preserve">
     <value>Find a session or a conversation</value>
   </data>
@@ -1277,10 +1298,10 @@
     <value>Sessions</value>
   </data>
   <data name="VoiceButtonTip" xml:space="preserve">
-    <value>Voice input · Ctrl+Space</value>
+    <value>Voice input · Ctrl+Shift+Space</value>
   </data>
   <data name="VoiceStopTip" xml:space="preserve">
-    <value>Finish recording · Ctrl+Space</value>
+    <value>Finish recording · Ctrl+Shift+Space</value>
   </data>
   <data name="VoiceWarming" xml:space="preserve">
     <value>starting the mic</value>
@@ -1325,7 +1346,7 @@
     <value>Voice input</value>
   </data>
   <data name="VoiceToggleWhat" xml:space="preserve">
-    <value>Ctrl+Space or the microphone button in the field.</value>
+    <value>Ctrl+Shift+Space or the microphone button in the editor.</value>
   </data>
   <data name="VoiceLanguageLabel" xml:space="preserve">
     <value>Speech language</value>

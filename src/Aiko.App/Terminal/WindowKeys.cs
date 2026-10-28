@@ -27,8 +27,20 @@ sealed class WindowKeys : IDisposable
 
     public void Dispose() => ComponentDispatcher.ThreadPreprocessMessage -= OnMessage;
 
+    /// A mouse button came up in a window inside the terminal window: a real terminal (D-369).
+    public event Action? ClickedInside;
+
+    private const int LeftButtonUp = 0x0202;
+    private const int RightButtonUp = 0x0205;
+
     private void OnMessage(ref MSG message, ref bool handled)
     {
+        if (message.message is LeftButtonUp or RightButtonUp && message.hwnd != _window && IsChild(_window, message.hwnd))
+        {
+            ClickedInside?.Invoke();
+            return;
+        }
+
         if (handled || message.message is not (KeyDown or SystemKeyDown)
             || (message.hwnd != _window && !IsChild(_window, message.hwnd)))
         {

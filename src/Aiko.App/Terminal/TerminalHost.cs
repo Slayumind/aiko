@@ -34,6 +34,7 @@ sealed class TerminalHost
     private readonly Dictionary<string, long> _answeredAt = [];
 
     private WindowKeys? _keys;
+    private VoiceDictation _voice = null!;
 
     // The conversations of the environments, for the palette; read when it opens.
     private readonly ConversationShelf _shelf = new();
@@ -60,7 +61,12 @@ sealed class TerminalHost
         _events = new TerminalEvents(_window.Dispatcher);
         _events.Changed += EventCame;
         _window.SourceInitialized += (_, _) =>
+        {
             _keys = new WindowKeys(new System.Windows.Interop.WindowInteropHelper(_window).Handle, KeyPressed);
+            // A click in the terminal selects there, and the keys come back to the editor.
+            _keys.ClickedInside += () => _window.Dispatcher.BeginInvoke(FocusOpenTerminal, System.Windows.Threading.DispatcherPriority.Input);
+        };
+        _window.Activated += (_, _) => _voice.Use(SettingsStore.Load());
         _window.Closing += (_, e) =>
         {
             if (!e.Cancel)
@@ -81,6 +87,7 @@ sealed class TerminalHost
 
             _events.Dispose();
             _keys?.Dispose();
+            _voice.Close();
             Closed?.Invoke();
         };
 
@@ -96,6 +103,7 @@ sealed class TerminalHost
         _panel.CreateAsked += PickFolderQuickly;
         _panel.GroupCreateAsked += StartIn;
         _panel.PaletteClosed += FocusOpenTerminal;
+        WireEditor();
         _panel.ResumeAsked += Resume;
         _panel.AskAnswered += Answer;
     }
@@ -104,6 +112,9 @@ sealed class TerminalHost
 
     /// The window came on screen, or left it by being minimized, hidden or closed.
     public event Action<bool>? InViewChanged;
+
+    /// The line above the editor asks for the settings of voice input.
+    public event Action? VoiceSettingsAsked;
 
     internal TerminalPanel Panel => _panel;
 
@@ -249,6 +260,24 @@ sealed class TerminalHost
             case System.Windows.Input.Key.Tab:
                 GoRound(shift ? -1 : 1);
                 return true;
+            case System.Windows.Input.Key.Space when shift:
+                _panel.Editor.PressVoice();
+                return true;
+            case System.Windows.Input.Key.C when shift:
+                // Copies what is selected in the terminal, as in Windows Terminal.
+                if (OpenTerminal()?.SelectedText is { Length: > 0 } selected)
+                {
+                    try
+                    {
+                        Clipboard.SetText(selected);
+                    }
+                    catch (System.Runtime.InteropServices.COMException)
+                    {
+                        // Another program holds the clipboard.
+                    }
+                }
+
+                return true;
             default:
                 return false;
         }
@@ -356,14 +385,70 @@ sealed class TerminalHost
         Change(_model.ToEnvironment(session.Environment, _sessions).ToSession(id, _sessions));
     }
 
-    /// The terminal of the open session takes the keys again, after a palette or a dialog.
-    private void FocusOpenTerminal()
+    // ---- the editor (D-354, D-369) ----
+
+    private void WireEditor()
     {
-        if (_model.Session(_sessions) is { } open && _terminals.TryGetValue(open.Id, out var terminal))
+        var editor = _panel.Editor;
+        editor.Passed += sequence => OpenTerminal()?.Type(sequence);
+        editor.Sent += writes =>
         {
-            terminal.FocusTerminal();
+            if (OpenTerminal() is { } terminal)
+            {
+                _ = WriteInTurn(terminal, writes);
+            }
+        };
+        editor.TerminalSelection = () => OpenTerminal()?.SelectedText;
+        _voice = new VoiceDictation(editor, VoiceContextNow);
+        _voice.SettingsAsked += () => VoiceSettingsAsked?.Invoke();
+    }
+
+    /// The writes of one message, one after another with a breath between them: Claude Code takes
+    /// a paste and the Enter after it as one thing when they come together (spike 2026-10).
+    private static async Task WriteInTurn(TerminalSurface terminal, IReadOnlyList<string> writes)
+    {
+        for (var at = 0; at < writes.Count; at++)
+        {
+            if (at > 0)
+            {
+                await Task.Delay(60);
+            }
+
+            terminal.Type(writes[at]);
         }
     }
+
+    private TerminalSurface? OpenTerminal() =>
+        _model.Session(_sessions) is { } open && _terminals.TryGetValue(open.Id, out var terminal) ? terminal : null;
+
+    private VoiceContext? VoiceContextNow() =>
+        _model.Session(_sessions) is { } session
+            ? new VoiceContext(
+                session.Folder,
+                [],
+                _settings.Environments.FirstOrDefault(one => one.Name == session.Environment)?.Persona == true)
+            : null;
+
+    /// The pictures pasted for a session go with it.
+    private static void RemovePictures(string id)
+    {
+        try
+        {
+            var folder = ThisComputer.Folders.PicturesFolder(id);
+            if (Directory.Exists(folder))
+            {
+                Directory.Delete(folder, recursive: true);
+            }
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            // Claude Code may still read one; the folder of a closed session is not used again.
+        }
+    }
+
+    /// The editor takes the keys again, after a palette, a dialog or a click in the terminal: the
+    /// keyboard is always there (D-354, D-369).
+    private void FocusOpenTerminal() => _panel.Editor.FocusText();
 
     /// A new session in a folder, in the environment of the open tab, with no question.
     private void StartIn(string folder, SessionKind kind)
@@ -440,6 +525,8 @@ sealed class TerminalHost
         _exited.Remove(id);
         Forget(id);
         _events.Forget(id);
+        _panel.Editor.Forget(id);
+        RemovePictures(id);
         _sessions = _sessions.Close(id);
         Save();
         Change(_model.After(_sessions));
@@ -477,11 +564,11 @@ sealed class TerminalHost
         terminal.Exited += code => Ended(session.Id, code);
         terminal.DrawnFirst += () =>
         {
-            // The loader gives way to the terminal, and the terminal takes the keys.
+            // The loader gives way to the terminal; the keys stay with the editor.
             Draw();
             if (_model.Session(_sessions)?.Id == session.Id)
             {
-                terminal.FocusTerminal();
+                _panel.Editor.FocusText();
             }
         };
         if (session.Kind == SessionKind.Claude)
@@ -534,7 +621,10 @@ sealed class TerminalHost
         }
 
         var claudePlan = ClaudeLaunchPlan.For(
-            new LaunchRequest(config, home, environment.Name, session.Id, session.Started, TerminalEvents.HooksFile()), inherited);
+            new LaunchRequest(
+                config, home, environment.Name, session.Id, session.Started, TerminalEvents.HooksFile(),
+                ThisComputer.Folders.PicturesFolder(session.Id)),
+            inherited);
         return new PtyLaunch(CommandLine(claude, claudePlan.Arguments), folder, Variables(claudePlan));
     }
 
@@ -679,6 +769,17 @@ sealed class TerminalHost
         if (_window.InView && _model.Session(_sessions) is { } open)
         {
             _seenAt[open.Id] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        }
+
+        // The editor writes for the open session; a command line gets its own separator for Tab.
+        if (_model.Session(_sessions) is { } session)
+        {
+            _panel.Editor.Show(new EditorSession(
+                session.Id,
+                session.Kind,
+                session.Folder,
+                session.Kind == SessionKind.Shell && Shell().Name != "bash" ? '\\' : '/',
+                ThisComputer.Folders.PicturesFolder(session.Id)));
         }
 
         _panel.Show(View());

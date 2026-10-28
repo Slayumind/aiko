@@ -97,6 +97,16 @@ sealed class TerminalSurface : Grid
 
     public void FocusTerminal() => _control.Focus();
 
+    /// What the mouse selected in the terminal, or null.
+    public string? SelectedText
+    {
+        get
+        {
+            var text = _control.GetSelectedText();
+            return string.IsNullOrEmpty(text) ? null : text;
+        }
+    }
+
     /// Ends the program and everything it started.
     public void Close() => _console.Dispose();
 

@@ -53,6 +53,9 @@ sealed class TerminalPanel : UserControl
     private readonly Button _resume;
     private readonly DockPanel _terminalSide;
 
+    /// The editor under the terminal (D-354): the keyboard is always here.
+    public TerminalEditor Editor { get; } = new();
+
     public TerminalPanel()
     {
         Background = Tokens.Brush("Background");
@@ -129,6 +132,8 @@ sealed class TerminalPanel : UserControl
         var terminalSide = new DockPanel();
         DockPanel.SetDock(_stopped, Dock.Bottom);
         terminalSide.Children.Add(_stopped);
+        DockPanel.SetDock(Editor, Dock.Bottom);
+        terminalSide.Children.Add(Editor);
         terminalSide.Children.Add(_terminals);
         _terminalSide = terminalSide;
 
@@ -622,6 +627,8 @@ sealed class TerminalPanel : UserControl
         _loader.Visibility = terminal is { Drawn: false } ? Visibility.Visible : Visibility.Collapsed;
 
         _stopped.Visibility = terminal is not null && view.Stopped ? Visibility.Visible : Visibility.Collapsed;
+        // A program that ended takes no text: the bar to continue it stands in place of the editor.
+        Editor.Visibility = terminal is not null && !view.Stopped ? Visibility.Visible : Visibility.Collapsed;
 
         UIElement content = terminal is not null ? _terminalSide
             : view.Ask is { } ask ? Ask(ask)
@@ -656,7 +663,7 @@ sealed class TerminalPanel : UserControl
         }
         else if (_shownTerminal != view.SessionId)
         {
-            Dispatcher.BeginInvoke(terminal!.FocusTerminal, System.Windows.Threading.DispatcherPriority.Input);
+            Dispatcher.BeginInvoke(Editor.FocusText, System.Windows.Threading.DispatcherPriority.Input);
         }
 
         _shownTerminal = view.SessionId;
