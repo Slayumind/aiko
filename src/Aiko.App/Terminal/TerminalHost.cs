@@ -5,55 +5,43 @@ using Aiko.Core.Terminal;
 
 namespace Aiko.App;
 
-/// The terminal behind its window (D-292, D-293, D-304): the sessions of the file, the
-/// conversations in memory and what is chosen. Every event of the panel ends in a new view.
+/// The terminal behind its window (D-292, D-293, D-349): the sessions of the file, a real terminal
+/// for each session that was opened, and what is chosen. Every event of the panel ends in a new view.
 ///
-/// The window is made when the terminal is opened and is gone when it is closed; with it go the
-/// processes of Claude Code. The conversations come back from their files the next time.
+/// The terminals live while Aiko runs (D-351). Closing the window only hides it while a program
+/// still runs in it, so the agents work on and their screens stay as they were; with nothing running
+/// the window really closes. After a restart of Aiko a session of Claude Code comes back with
+/// --resume, and a shell opens again in the same folder.
 [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763")]
 sealed class TerminalHost
 {
     private EnvironmentSettings _settings;
-    private readonly VoiceDictation _voice;
-    private readonly Func<IConversationProcess> _newProcess;
     private readonly Func<string, LimitSnapshot?> _limitsOf;
     private readonly TerminalPanel _panel = new();
     private readonly TerminalWindow _window;
-    private readonly Dictionary<string, ConversationRunner> _talks = [];
+    private readonly Dictionary<string, TerminalSurface> _terminals = [];
 
-    /// What a conversation said before its process started this time, read from the file of
-    /// Claude Code (D-303). The process adds what comes after.
-    private readonly Dictionary<string, Conversation> _histories = [];
-
-    /// The commands of the menu of "/" and the models, by the name of the environment.
-    private readonly Dictionary<string, ClaudeOffer> _offers = [];
+    /// Sessions of Claude Code whose program ended by itself (D-351): the row says "stopped" and
+    /// Enter starts it again with --resume.
+    private readonly HashSet<string> _exited = [];
 
     private TerminalSessions _sessions;
     private TerminalWindowModel _model;
-    private FormView? _form;
     private string? _closing;
-    private bool _closingWindow;
-    private bool _agreedToClose;
+    private bool _quitting;
+
+    /// Aiko asked to quit while programs run: what to do once the person agrees.
+    private Action? _quitAfter;
 
     /// limitsOf gives the latest limits of an environment by its name.
-    public TerminalHost(
-        EnvironmentSettings settings,
-        TerminalSessions sessions,
-        Func<IConversationProcess> newProcess,
-        Func<string, LimitSnapshot?> limitsOf)
+    public TerminalHost(EnvironmentSettings settings, TerminalSessions sessions, Func<string, LimitSnapshot?> limitsOf)
     {
         _settings = settings;
         _sessions = sessions;
-        _newProcess = newProcess;
         _limitsOf = limitsOf;
         _model = TerminalWindowModel.Opened(sessions, [.. settings.Environments.Select(environment => environment.Name)]);
 
         _window = new TerminalWindow(_panel, WindowPlace.Fit(sessions.Window, WorkAreas.All()));
-        _voice = new VoiceDictation(_panel.Input, VoiceContextNow);
-        _voice.SettingsAsked += () => SettingsAsked?.Invoke();
-
-        // Voice input is turned on in the settings window; the window reads it again when it is used.
-        _window.Activated += (_, _) => _voice.Use(SettingsStore.Load());
         _window.MayClose = MayCloseWindow;
         _window.Closing += (_, e) =>
         {
@@ -64,13 +52,13 @@ sealed class TerminalHost
             }
         };
         _window.StateChanged += (_, _) => InViewChanged?.Invoke(_window.InView);
+        _window.IsVisibleChanged += (_, _) => InViewChanged?.Invoke(_window.InView);
         _window.Closed += (_, _) =>
         {
-            _voice.Close();
             InViewChanged?.Invoke(false);
-            foreach (var talk in _talks.Values)
+            foreach (var terminal in _terminals.Values)
             {
-                talk.Close();
+                terminal.Close();
             }
 
             Closed?.Invoke();
@@ -85,45 +73,21 @@ sealed class TerminalHost
             Save();
             Draw();
         };
-        _panel.CreateAsked += OpenForm;
-        _panel.FolderPicked += index => Refill(index, null);
-        _panel.OtherFolderAsked += PickOtherFolder;
+        _panel.CreateAsked += () => Create(SessionKind.Claude);
+        _panel.ShellAsked += () => Create(SessionKind.Shell);
+        _panel.ResumeAsked += Resume;
         _panel.AskAnswered += Answer;
-        _panel.SignInAsked += SignIn;
-        _panel.SendAsked += (text, images) =>
-        {
-            // The first message of a new session makes it (D-342).
-            if (_model.FormOpen && _form is { Folder: >= 0 })
-            {
-                Create(text, images);
-            }
-            else if (_model.FormOpen && _form is not null)
-            {
-                // No folder yet: the words go back into the field, and the folder is asked for.
-                _panel.Input.Typed(text);
-                PickOtherFolder();
-            }
-            else if (_model.Session(_sessions) is { } session)
-            {
-                Send(session.Id, text, images);
-                Draw();
-            }
-        };
-        _panel.StopAsked += () => Current()?.Interrupt();
-        _panel.ModeAsked += NextMode;
-        _panel.ModelAsked += NextModel;
-        _panel.Chosen += (requestId, choice) => Current()?.Choose(requestId, choice);
     }
 
     public event Action? Closed;
 
-    /// Voice input needs its model or key: the settings window should open.
-    public event Action? SettingsAsked;
-
-    /// The window came on screen, or left it by being minimized or closed.
+    /// The window came on screen, or left it by being minimized, hidden or closed.
     public event Action<bool>? InViewChanged;
 
     internal TerminalPanel Panel => _panel;
+
+    /// Whether a program still runs in a terminal of the window.
+    public bool AnyRunning => _terminals.Values.Any(terminal => terminal.IsRunning);
 
     public void Show()
     {
@@ -161,26 +125,37 @@ sealed class TerminalHost
         _model = names.Contains(_model.Environment) ? _model
             : renamedTab is not null ? _model with { Environment = renamedTab }
             : TerminalWindowModel.Opened(_sessions, names);
-        // A draft of a renamed environment is drawn again under the new name; another one stays
-        // as the person left it.
-        if (_form is { } draft && !names.Contains(draft.Environment))
-        {
-            _form = _model.FormOpen ? FormFor(draft.Folder, null, null, draft.Mode) : null;
-        }
 
         Save();
         Draw();
     }
 
-    /// Aiko quits: the window closes without asking, as the processes end with Aiko anyway.
+    /// Aiko is asked to quit while programs still run in the window (D-351): the window comes
+    /// forward with the question, and quit runs only after the person agrees.
+    public void AskToQuit(Action quit)
+    {
+        _quitAfter = quit;
+        _closing = null;
+        Activate();
+        Draw();
+    }
+
+    /// Aiko quits: the window closes without asking, and every terminal ends with it.
     public void Close()
     {
-        _agreedToClose = true;
+        _quitting = true;
         _window.Close();
     }
 
+    /// The window again: from the tray or the card, also after it was hidden with programs running.
     public void Activate()
     {
+        if (!_window.IsVisible)
+        {
+            Show();
+            return;
+        }
+
         if (_window.WindowState == WindowState.Minimized)
         {
             _window.WindowState = WindowState.Normal;
@@ -197,11 +172,6 @@ sealed class TerminalHost
     private void Change(TerminalWindowModel model)
     {
         _model = model;
-        if (!model.FormOpen)
-        {
-            _form = null;
-        }
-
         Draw();
     }
 
@@ -209,107 +179,46 @@ sealed class TerminalHost
     {
         _sessions = _sessions.Opened(id);
         Save();
-        if (_talks.TryGetValue(id, out var talk))
-        {
-            talk.MarkRead();
-        }
-
         Change(_model.ToSession(id, _sessions));
     }
 
-    private void OpenForm()
+    /// A new session in a folder the person picks, in the environment of the open tab. The quick
+    /// pick of a folder and "+" at a group of the list come with the list of sessions (AIKO-411).
+    private void Create(SessionKind kind)
     {
-        _model = _model.WithForm(true);
-        _form = FormFor(null, null);
-        Draw();
-    }
-
-    /// The form again after a choice in it: another folder changes the hint and the name.
-    private void Refill(int? folder, int? model)
-    {
-        if (_form is null)
-        {
-            return;
-        }
-
-        // Another folder brings the mode its settings name; another model keeps the mode chosen.
-        _form = FormFor(folder ?? _form.Folder, model ?? _form.Model, _form.Folders, folder is null ? _form.Mode : null);
-        Draw();
-    }
-
-    private void PickOtherFolder()
-    {
-        var dialog = new Microsoft.Win32.OpenFolderDialog { Title = Strings.TerminalChooseFolder };
-        if (_form is null || dialog.ShowDialog(_window) != true)
-        {
-            Draw();
-            return;
-        }
-
-        var (folders, at) = NewSessionChoices.Picked(_form.Folders, dialog.FolderName);
-        _form = FormFor(at, _form.Model, folders);
-        Draw();
-    }
-
-    private FormView? FormFor(int? folder, int? model, IReadOnlyList<FolderChoice>? known = null, PermissionMode? mode = null)
-    {
-        if (Environment() is not { } environment)
-        {
-            return null;
-        }
-
-        var folders = known ?? NewSessionChoices.Folders(_sessions, environment, TerminalStore.FoldersInside);
-        var chosen = NewSessionChoices.ChosenFolder(folder, folders.Count);
-        var path = chosen >= 0 ? folders[chosen].Path : null;
-        var offer = OfferOf(environment.Name, path);
-        var models = NewSessionChoices.Offered(offer.Models);
-        var values = models.Select(one => one.Value).ToList();
-        var home = System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile);
-        var config = environment.ConfigDirectories.FirstOrDefault() ?? ClaudeConfigFolder.Resolve(null, home);
-
-        return new FormView(
-            environment.Name,
-            folders,
-            chosen,
-            path is null ? null : NewSessionChoices.BoundElsewhere(path, environment, _settings),
-            Math.Clamp(model ?? values.IndexOf(NewSessionChoices.DefaultModel(_sessions, environment.Name, values)), 0, models.Count - 1),
-            path is null ? "" : NewSessionChoices.DefaultName(_sessions, environment.Name, path))
-        {
-            Models = models,
-            Mode = mode ?? (path is null ? PermissionMode.Manual : TerminalStore.DefaultMode(path, config)),
-            Commands = offer.Commands,
-        };
-    }
-
-    /// The first message makes the session: its name comes from the message (D-342).
-    private void Create(string message, IReadOnlyList<AttachedImage> images)
-    {
-        if (_form is not { Folder: >= 0 } form)
+        var current = _model.Session(_sessions);
+        var folder = kind == SessionKind.Shell && current is not null ? current.Folder : PickFolder(current?.Folder);
+        if (folder is null || Environment() is not { } environment)
         {
             return;
         }
 
         var id = Guid.NewGuid().ToString();
-        var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-        var folder = form.Folders[form.Folder].Path;
-        var name = SessionName.FromMessage(message, form.DefaultName);
+        var name = kind == SessionKind.Shell ? Shell().Name : "";
         _sessions = _sessions
-            .Add(id, form.Environment, folder, name, form.Models[form.Model].Value, form.Mode, now)
+            .Add(id, environment.Name, folder, name, DateTimeOffset.UtcNow.ToUnixTimeSeconds(), kind)
             .Opened(id);
         Save();
+        Change(_model.ToSession(id, _sessions));
+    }
 
-        _form = null;
-        _model = _model.WithForm(false).ToSession(id, _sessions);
-        Send(id, message, images);
-        Draw();
+    private string? PickFolder(string? start)
+    {
+        var dialog = new Microsoft.Win32.OpenFolderDialog { Title = Strings.TerminalChooseFolder };
+        if (start is not null && Directory.Exists(start))
+        {
+            dialog.InitialDirectory = start;
+        }
+
+        return dialog.ShowDialog(_window) == true ? dialog.FolderName : null;
     }
 
     private void AskToClose(string id)
     {
-        if (_talks.TryGetValue(id, out var talk) && talk.State.IsBusy)
+        if (_terminals.TryGetValue(id, out var terminal) && terminal.IsRunning)
         {
             _closing = id;
-            _closingWindow = false;
+            _quitAfter = null;
             Draw();
             return;
         }
@@ -320,14 +229,15 @@ sealed class TerminalHost
     private void Answer(bool stop)
     {
         var id = _closing;
-        var window = _closingWindow;
+        var quit = _quitAfter;
         _closing = null;
-        _closingWindow = false;
+        _quitAfter = null;
 
-        if (stop && window)
+        if (stop && quit is not null)
         {
-            _agreedToClose = true;
-            _window.Close();
+            // The window must not hide itself on the way out.
+            _quitting = true;
+            quit();
         }
         else if (stop && id is not null)
         {
@@ -341,310 +251,147 @@ sealed class TerminalHost
 
     private void CloseSession(string id)
     {
-        if (_talks.Remove(id, out var talk))
+        if (_terminals.Remove(id, out var terminal))
         {
-            talk.Close();
+            _panel.Release(terminal);
+            terminal.Close();
         }
 
-        _histories.Remove(id);
-
+        _exited.Remove(id);
         _sessions = _sessions.Close(id);
         Save();
         Change(_model.After(_sessions));
     }
 
+    /// The window is asked to close. With programs running it only hides (D-351), unless Aiko quits
+    /// or the person agreed to stop them.
     private bool MayCloseWindow()
     {
-        if (_agreedToClose || !_talks.Values.Any(talk => talk.State.IsBusy))
+        if (_quitting || !AnyRunning)
         {
             return true;
         }
 
-        _closing = null;
-        _closingWindow = true;
-        Draw();
+        _window.Hide();
         return false;
     }
 
-    private void SignIn()
+    // ---- the terminals ----
+
+    /// The terminal of a session, started the first time the session is shown.
+    private TerminalSurface? TerminalOf(TerminalSession session)
     {
-        if (Environment() is { } environment && _model.Session(_sessions) is { } session)
-        {
-            ClaudeLauncher.Open(environment.ConfigDirectories.FirstOrDefault() ?? "", session.Folder);
-        }
-    }
-
-    // ---- the conversations ----
-
-    private void Send(string id, string message, IReadOnlyList<AttachedImage>? images = null)
-    {
-        if (TalkFor(id) is not { } talk)
-        {
-            return;
-        }
-
-        var running = _talks
-            .Where(one => one.Value.IsRunning)
-            .Select(one => new RunningTalk(one.Key, one.Value.State.IsBusy, _sessions.Find(one.Key)?.LastUsed ?? 0))
-            .ToList();
-        // Only the process goes: the conversation stays, with its mark of an answer not read yet,
-        // and the next message resumes it in a new process.
-        if (ProcessCap.ToStop(running, id) is { } idle && _talks.TryGetValue(idle, out var stopped))
-        {
-            stopped.Close();
-        }
-
-        _sessions = _sessions.Used(id, DateTimeOffset.UtcNow.ToUnixTimeSeconds()).MarkStarted(id);
-        Save();
-        talk.Send(message, images ?? []);
-    }
-
-    private ConversationRunner? TalkFor(string id)
-    {
-        if (_talks.TryGetValue(id, out var known))
+        if (_terminals.TryGetValue(session.Id, out var known))
         {
             return known;
         }
 
-        if (_sessions.Find(id) is not { } session
-            || _settings.Environments.FirstOrDefault(one => one.Name == session.Environment) is not { } environment
-            || ClaudeLauncher.FindClaude() is not { } claude)
+        if (Launch(session) is not { } launch)
+        {
+            return null;
+        }
+
+        var terminal = new TerminalSurface(launch);
+        terminal.Exited += code => Ended(session.Id, code);
+        _terminals[session.Id] = terminal;
+
+        var shell = session.Kind == SessionKind.Shell;
+        TerminalLog.Started(session.Environment, shell, session.Started);
+        if (!shell && !session.Started)
+        {
+            // From now on the conversation is Claude Code's, and the next start resumes it.
+            _sessions = _sessions.MarkStarted(session.Id);
+        }
+
+        _sessions = _sessions.Used(session.Id, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+        Save();
+        return terminal;
+    }
+
+    private PtyLaunch? Launch(TerminalSession session)
+    {
+        if (_settings.Environments.FirstOrDefault(one => one.Name == session.Environment) is not { } environment)
         {
             return null;
         }
 
         var home = System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile);
-        ReadHistory(id);
-        var talk = new ConversationRunner(
-            new RunnerSetup(
-                claude,
-                Directory.Exists(session.Folder) ? session.Folder : home,
-                environment.ConfigDirectories.FirstOrDefault() ?? ClaudeConfigFolder.Resolve(null, home),
-                home,
-                environment.Name,
-                session.Id,
-                session.Started,
-                session.Mode,
-                session.Model,
-                [.. System.Environment.GetEnvironmentVariables().Keys.Cast<string>()])
-            {
-                AgentTodos = SettingsStore.Load().AgentTodos,
-            },
-            _newProcess,
-            work => _window.Dispatcher.BeginInvoke(work),
-            new TerminalLog(),
-            new ShellProcess());
-        talk.Changed = () =>
-        {
-            KeepModel(id, talk.State);
-            Draw();
-        };
-        _talks[id] = talk;
-        return talk;
-    }
+        var config = environment.ConfigDirectories.FirstOrDefault() ?? ClaudeConfigFolder.Resolve(null, home);
+        var folder = Directory.Exists(session.Folder) ? session.Folder : home;
+        var inherited = System.Environment.GetEnvironmentVariables().Keys.Cast<string>().ToList();
 
-    /// The full id Claude Code named is kept, so the session opens with it next time. While a
-    /// model is asked, the session already keeps that one.
-    private void KeepModel(string id, Conversation state)
-    {
-        if (state.AskedModel.Length == 0
-            && state.Model.Length > 0
-            && _sessions.Find(id) is { } session
-            && session.Model != state.Model)
+        if (session.Kind == SessionKind.Shell)
         {
-            _sessions = _sessions.SetModel(id, state.Model);
-            Save();
-        }
-    }
-
-    /// The next mode of the session. It is kept for the next start, and a running Claude Code
-    /// takes it at once.
-    private void NextMode()
-    {
-        // A new session takes the mode for its start.
-        if (_model.FormOpen && _form is { } form)
-        {
-            _form = form with { Mode = PermissionModes.Next(form.Mode) };
-            Draw();
-            return;
+            var plan = ClaudeLaunchPlan.ForShell(config, home, inherited);
+            var shell = Shell();
+            return new PtyLaunch(shell.CommandLine, folder, Variables(plan));
         }
 
-        if (_model.Session(_sessions) is not { } session)
-        {
-            return;
-        }
-
-        var talk = Current();
-        var next = PermissionModes.Next(talk?.State.Mode ?? session.Mode);
-        _sessions = _sessions.SetMode(session.Id, next);
-        Save();
-        talk?.SetMode(next);
-        Draw();
-    }
-
-    /// The next model of the session. It is kept for the next start, and a running Claude Code
-    /// takes it from the next turn.
-    private void NextModel()
-    {
-        // A new session goes round the models it offers.
-        if (_model.FormOpen && _form is { Models.Count: > 0 } form)
-        {
-            Refill(null, (form.Model + 1) % form.Models.Count);
-            return;
-        }
-
-        if (_model.Session(_sessions) is not { } session)
-        {
-            return;
-        }
-
-        var talk = Current();
-        var shown = talk?.State.LatestModel is { Length: > 0 } running ? running : session.Model;
-        var offered = NewSessionChoices.Offered(OfferOf(session.Environment, session.Folder).Models);
-        var next = NewSessionChoices.NextModel(shown, [.. offered.Select(one => one.Value)]);
-        _sessions = _sessions.SetModel(session.Id, next);
-        Save();
-        talk?.SetModel(next);
-        Draw();
-    }
-
-    private ConversationRunner? Current() =>
-        _model.Session(_sessions) is { } session && _talks.TryGetValue(session.Id, out var talk) ? talk : null;
-
-    private void ReadHistory(string id)
-    {
-        var session = _sessions.Find(id);
-        if (session is not { Started: true }
-            || _settings.Environments.FirstOrDefault(one => one.Name == session.Environment) is not { } environment)
-        {
-            _histories[id] = Conversation.Empty(session?.Mode ?? PermissionMode.Manual);
-            return;
-        }
-
-        var home = System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile);
-        var history = TerminalStore.History(
-            environment.ConfigDirectories.FirstOrDefault() ?? ClaudeConfigFolder.Resolve(null, home),
-            session.Folder,
-            session.Id,
-            session.Mode);
-
-        // The past and the live conversation both count their items from 1, and the feed shows
-        // them one after the other: the past ones get ids below zero, so no two items share one.
-        _histories[id] = history with { Items = [.. history.Items.Select(item => item with { Id = -item.Id })] };
-    }
-
-    private TalkView? Talk(TerminalSession? session)
-    {
-        if (session is null)
+        if (ClaudeLauncher.FindClaude() is not { } claude)
         {
             return null;
         }
 
-        // The window opens on a session nobody picked yet: its past is read here, once.
-        if (!_histories.ContainsKey(session.Id))
-        {
-            ReadHistory(session.Id);
-        }
-
-        var past = _histories[session.Id].Items;
-        if (!_talks.TryGetValue(session.Id, out var talk))
-        {
-            return new TalkView(session.Id, past, false, false, false, session.Mode, ModelName.Label(null, session.Model), session.Environment)
-            {
-                Commands = CommandsOf(session),
-                Folder = session.Folder,
-            };
-        }
-
-        var state = talk.State;
-        return new TalkView(
-            session.Id,
-            [.. past, .. state.Items],
-            state.IsBusy,
-            state.HasOpenCard,
-            state.Compacting,
-            state.Mode,
-            ModelName.Label(state.AskedModel, state.Model.Length > 0 ? state.Model : session.Model),
-            session.Environment)
-        {
-            Commands = CommandsOf(session),
-            Folder = session.Folder,
-            Tasks = TaskPanel.Of(state),
-            ContextPercent = state.ContextPercent,
-        };
+        var claudePlan = ClaudeLaunchPlan.For(new LaunchRequest(config, home, environment.Name, session.Id, session.Started), inherited);
+        return new PtyLaunch(CommandLine(claude, claudePlan.Arguments), folder, Variables(claudePlan));
     }
 
-    private IReadOnlyList<SlashCommand> CommandsOf(TerminalSession session) => OfferOf(session.Environment, session.Folder).Commands;
-
-    /// The commands of the menu of "/" and the models of an environment. An environment is asked
-    /// once, when its first session or its form is shown; until the answer comes, the offer is
-    /// empty: the menu stays shut and the form has its own three models.
-    private ClaudeOffer OfferOf(string environmentName, string? folder)
+    /// Claude Code ended by itself: its row says so, and Enter brings it back (D-351). A shell that
+    /// ended leaves the list.
+    private void Ended(string id, int code)
     {
-        if (_offers.TryGetValue(environmentName, out var known))
+        if (_sessions.Find(id) is not { } session)
         {
-            return known;
+            return;
         }
 
-        _offers[environmentName] = ClaudeOffer.None;
-        if (_settings.Environments.FirstOrDefault(one => one.Name == environmentName) is { } environment
-            && ClaudeLauncher.FindClaude() is { } claude)
+        TerminalLog.Exited(session.Environment, session.Kind == SessionKind.Shell, code);
+        if (session.Kind == SessionKind.Shell)
         {
-            var home = System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile);
-            new CommandLoader(_newProcess, work => _window.Dispatcher.BeginInvoke(work)).Load(
-                new CommandSetup(
-                    claude,
-                    folder is not null && Directory.Exists(folder) ? folder : home,
-                    environment.ConfigDirectories.FirstOrDefault() ?? ClaudeConfigFolder.Resolve(null, home),
-                    home,
-                    [.. System.Environment.GetEnvironmentVariables().Keys.Cast<string>()]),
-                offer =>
-                {
-                    _offers[environmentName] = offer;
-
-                    // An open form takes the models it did not have yet, and keeps the model and
-                    // the mode the person already chose.
-                    if (_form is { } form && form.Environment == environmentName)
-                    {
-                        var chosen = form.Models.Count > 0 ? form.Models[form.Model].Value : null;
-                        var fresh = FormFor(form.Folder, null, form.Folders, form.Mode);
-                        var still = fresh is null || chosen is null ? -1 : fresh.Models.ToList().FindIndex(model => model.Value == chosen);
-                        _form = still >= 0 ? fresh! with { Model = still } : fresh;
-                    }
-
-                    Draw();
-                });
+            CloseSession(id);
+            return;
         }
 
-        return ClaudeOffer.None;
+        _exited.Add(id);
+        Draw();
+    }
+
+    /// A stopped Claude Code starts again in the same terminal place, with --resume.
+    private void Resume()
+    {
+        if (_model.Session(_sessions) is not { } session || !_exited.Remove(session.Id))
+        {
+            return;
+        }
+
+        if (_terminals.Remove(session.Id, out var old))
+        {
+            _panel.Release(old);
+            old.Close();
+        }
+
+        Draw();
     }
 
     // ---- the view ----
 
-    private VoiceContext? VoiceContextNow() =>
-        _model.Session(_sessions) is { } session
-            ? new VoiceContext(
-                session.Folder,
-                VoiceHint.Files(Talk(session)?.Items ?? []),
-                _settings.Environments.FirstOrDefault(one => one.Name == session.Environment)?.Persona == true)
-            : null;
-
     private AikoEnvironment? Environment() => _settings.Environments.FirstOrDefault(one => one.Name == _model.Environment);
 
-    private LiveTalk? Live(string id) =>
-        _talks.TryGetValue(id, out var talk) ? new LiveTalk(TalkGlance.Of(talk.State), talk.IsRunning) : null;
+    private LiveTerminal? Live(string id) =>
+        _exited.Contains(id) ? new LiveTerminal(TerminalActivity.Exited, "")
+        : _terminals.TryGetValue(id, out var terminal) && terminal.IsRunning ? new LiveTerminal(TerminalActivity.Idle, "")
+        : null;
 
     private void Draw() => _panel.Show(View());
 
     private TerminalView View()
     {
         var session = _model.Session(_sessions);
-        var signedOut = session is not null && Live(session.Id)?.Glance.Activity == TalkActivity.SignedOut;
 
-        AskView? ask = _closingWindow
-            ? new AskView(Strings.TerminalCloseWindowTitle, Strings.TerminalCloseWindowBody)
+        AskView? ask = _quitAfter is not null
+            ? new AskView(Strings.TerminalQuitTitle, Strings.TerminalQuitBody, Strings.TerminalStopAndQuit, Strings.TerminalDontQuit)
             : _closing is { } id && _sessions.Find(id) is { } closing
-                ? new AskView(string.Format(Strings.TerminalCloseTitle, closing.Name), Strings.TerminalCloseBody)
+                ? new AskView(string.Format(Strings.TerminalCloseTitle, closing.Name), Strings.TerminalCloseBody, Strings.TerminalStopAndClose, Strings.TerminalKeepOpen)
                 : null;
 
         return new TerminalView(
@@ -658,11 +405,12 @@ sealed class TerminalHost
             session?.Id,
             session?.Name,
             _model.View(_sessions),
-            signedOut,
-            _form,
             ask,
-            signedOut ? null : Talk(session),
-            DateTimeOffset.Now);
+            session is null ? null : TerminalOf(session),
+            DateTimeOffset.Now)
+        {
+            Stopped = session is not null && _exited.Contains(session.Id),
+        };
     }
 
     private BadgeView? Badge(DateTimeOffset now) =>
@@ -670,5 +418,38 @@ sealed class TerminalHost
             ? new BadgeView(badge.Percent, badge.Tone, badge.Kind)
             : null;
 
+
     private void Save() => SettingsStore.SaveTerminal(_sessions);
+
+    /// The shell of a session and the name its row starts with.
+    private sealed record ShellProgram(string CommandLine, string Name);
+
+    /// Git Bash when it is there, as Claude Code itself prefers it (RESEARCH); otherwise PowerShell 7,
+    /// otherwise Windows PowerShell.
+    private static ShellProgram Shell()
+    {
+        var gitBash = System.Environment.GetEnvironmentVariable("CLAUDE_CODE_GIT_BASH_PATH") is { Length: > 0 } set && File.Exists(set)
+            ? set
+            : new[]
+            {
+                Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Git", "bin", "bash.exe"),
+                Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData), "Programs", "Git", "bin", "bash.exe"),
+            }.FirstOrDefault(File.Exists);
+
+        return gitBash is not null ? new ShellProgram($"\"{gitBash}\" --login -i", "bash")
+            : FindOnPath("pwsh.exe") is { } pwsh ? new ShellProgram($"\"{pwsh}\" -NoLogo", "pwsh")
+            : new ShellProgram("powershell.exe -NoLogo", "powershell");
+    }
+
+    private static string? FindOnPath(string file) =>
+        (System.Environment.GetEnvironmentVariable("PATH") ?? "")
+            .Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries)
+            .Select(folder => Path.Combine(folder.Trim(), file))
+            .FirstOrDefault(File.Exists);
+
+    private static string CommandLine(string program, IReadOnlyList<string> arguments) =>
+        string.Join(' ', [$"\"{program}\"", .. arguments.Select(argument => argument.Contains(' ') ? $"\"{argument}\"" : argument)]);
+
+    private static Dictionary<string, string?> Variables(ClaudeLaunchPlan plan) =>
+        plan.Variables.ToDictionary(change => change.Name, change => change.Value, StringComparer.OrdinalIgnoreCase);
 }

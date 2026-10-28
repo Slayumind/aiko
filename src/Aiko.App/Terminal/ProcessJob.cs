@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using Microsoft.Win32.SafeHandles;
 using Windows.Win32;
@@ -20,7 +21,10 @@ sealed class ProcessJob : IDisposable
     private ProcessJob(SafeFileHandle job) => _job = job;
 
     /// Null when Windows refused; the caller then ends the process tree the slower way.
-    public static unsafe ProcessJob? Around(Process process)
+    public static ProcessJob? Around(Process process) => Around(process.SafeHandle);
+
+    /// The same for a process Aiko started itself, by its handle (a pseudo console).
+    public static unsafe ProcessJob? Around(SafeHandle process)
     {
         var job = PInvoke.CreateJobObject(null, null);
         if (job.IsInvalid)
@@ -39,7 +43,7 @@ sealed class ProcessJob : IDisposable
                 JOBOBJECTINFOCLASS.JobObjectExtendedLimitInformation,
                 &limits,
                 (uint)sizeof(JOBOBJECT_EXTENDED_LIMIT_INFORMATION))
-            || !PInvoke.AssignProcessToJobObject(job, process.SafeHandle))
+            || !PInvoke.AssignProcessToJobObject(job, process))
         {
             job.Dispose();
             return null;

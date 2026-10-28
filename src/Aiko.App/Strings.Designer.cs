@@ -1086,41 +1086,23 @@ public static class Strings
     /// Create session
     public static string TerminalCreateSession => Get("TerminalCreateSession");
 
+    /// Open command line
+    public static string TerminalNewShell => Get("TerminalNewShell");
+
+    /// Claude Code stopped. The conversation is saved: press Enter to continue.
+    public static string TerminalStoppedLine => Get("TerminalStoppedLine");
+
+    /// Continue
+    public static string TerminalResume => Get("TerminalResume");
+
     /// Rename
     public static string TerminalRenameSession => Get("TerminalRenameSession");
 
     /// Close session
     public static string TerminalCloseSession => Get("TerminalCloseSession");
 
-    /// New session in {0}
-    public static string TerminalFormTitle => Get("TerminalFormTitle");
-
-    /// Folder
-    public static string TerminalFolder => Get("TerminalFolder");
-
-    /// Model
-    public static string TerminalModel => Get("TerminalModel");
-
-    /// Name
-    public static string TerminalName => Get("TerminalName");
-
-    /// Optional. An empty name becomes the folder name with a number.
-    public static string TerminalNameHint => Get("TerminalNameHint");
-
-    /// Describe the task
-    public static string TerminalDescribeTask => Get("TerminalDescribeTask");
-
     /// Choose another folder
     public static string TerminalChooseFolder => Get("TerminalChooseFolder");
-
-    /// Recent
-    public static string TerminalFoldersRecent => Get("TerminalFoldersRecent");
-
-    /// Bound to this environment
-    public static string TerminalFoldersBound => Get("TerminalFoldersBound");
-
-    /// This folder is bound to {0}. The session starts in {1}.
-    public static string TerminalElsewhere => Get("TerminalElsewhere");
 
     /// Start your first session in {0}
     public static string TerminalNoSessionsTitle => Get("TerminalNoSessionsTitle");
@@ -1133,9 +1115,6 @@ public static class Strings
 
     /// working
     public static string TerminalWorking => Get("TerminalWorking");
-
-    /// working
-    public static string TerminalWorkingNow => Get("TerminalWorkingNow");
 
     /// waiting
     public static string TerminalWaiting => Get("TerminalWaiting");
@@ -1155,89 +1134,26 @@ public static class Strings
     /// {0} waiting
     public static string TerminalTabWaitingMany => Get("TerminalTabWaitingMany");
 
-    /// thought
-    public static string TerminalStepThought => Get("TerminalStepThought");
-
-    /// read
-    public static string TerminalStepRead => Get("TerminalStepRead");
-
-    /// search
-    public static string TerminalStepSearch => Get("TerminalStepSearch");
-
-    /// edit
-    public static string TerminalStepEdit => Get("TerminalStepEdit");
-
-    /// run
-    public static string TerminalStepRun => Get("TerminalStepRun");
-
-    /// agent
-    public static string TerminalStepAgent => Get("TerminalStepAgent");
-
-    /// skill
-    public static string TerminalStepSkill => Get("TerminalStepSkill");
-
-    /// web
-    public static string TerminalStepWeb => Get("TerminalStepWeb");
-
-    /// Waiting for permission: {0} {1}
-    public static string TerminalLineRequest => Get("TerminalLineRequest");
-
-    /// Asking: {0}
-    public static string TerminalLineQuestion => Get("TerminalLineQuestion");
-
-    /// The plan is ready for you
-    public static string TerminalLinePlan => Get("TerminalLinePlan");
-
-    /// Reading {0}
-    public static string TerminalLineReading => Get("TerminalLineReading");
-
-    /// Searching {0}
-    public static string TerminalLineSearching => Get("TerminalLineSearching");
-
-    /// Editing {0}
-    public static string TerminalLineEditing => Get("TerminalLineEditing");
-
-    /// Running {0}
-    public static string TerminalLineRunning => Get("TerminalLineRunning");
-
-    /// Agent: {0}
-    public static string TerminalLineAgent => Get("TerminalLineAgent");
-
-    /// Skill: {0}
-    public static string TerminalLineSkill => Get("TerminalLineSkill");
-
-    /// Opening {0}
-    public static string TerminalLineOpening => Get("TerminalLineOpening");
-
-    /// Calling {0}
-    public static string TerminalLineCalling => Get("TerminalLineCalling");
-
-    /// Stopped at the “{0}” step
-    public static string TerminalLineStoppedAt => Get("TerminalLineStoppedAt");
-
-    /// Sign in needed
-    public static string TerminalLineSignIn => Get("TerminalLineSignIn");
-
     /// Yesterday, {0}
     public static string TerminalYesterday => Get("TerminalYesterday");
 
-    /// {0} isn’t signed in
-    public static string TerminalLoginTitle => Get("TerminalLoginTitle");
-
-    /// You can sign in only in Claude Code itself. Aiko opens it in the system terminal and star...
-    public static string TerminalLoginBody => Get("TerminalLoginBody");
-
-    /// Session “{0}” is still working
+    /// Session “{0}” is still running
     public static string TerminalCloseTitle => Get("TerminalCloseTitle");
 
-    /// If you close it now, Claude Code stops in the middle of the work.
+    /// If you close it now, the program in it stops.
     public static string TerminalCloseBody => Get("TerminalCloseBody");
 
-    /// Some sessions are still working
-    public static string TerminalCloseWindowTitle => Get("TerminalCloseWindowTitle");
+    /// Some sessions are still running
+    public static string TerminalQuitTitle => Get("TerminalQuitTitle");
 
-    /// If you close the window now, Claude Code stops in the middle of the work.
-    public static string TerminalCloseWindowBody => Get("TerminalCloseWindowBody");
+    /// If you quit Aiko now, Claude Code and the command lines in its window stop.
+    public static string TerminalQuitBody => Get("TerminalQuitBody");
+
+    /// Stop and quit
+    public static string TerminalStopAndQuit => Get("TerminalStopAndQuit");
+
+    /// Don’t quit
+    public static string TerminalDontQuit => Get("TerminalDontQuit");
 
     /// Stop and close
     public static string TerminalStopAndClose => Get("TerminalStopAndClose");
@@ -1265,93 +1181,6 @@ public static class Strings
 
     /// Sessions
     public static string TerminalSessions => Get("TerminalSessions");
-
-    /// Allow
-    public static string TerminalAllow => Get("TerminalAllow");
-
-    /// Allow edits in this session
-    public static string TerminalAllowEdits => Get("TerminalAllowEdits");
-
-    /// Allow in this project
-    public static string TerminalAllowInProject => Get("TerminalAllowInProject");
-
-    /// Deny
-    public static string TerminalDeny => Get("TerminalDeny");
-
-    /// Enter to allow · Esc to deny
-    public static string TerminalCardKeys => Get("TerminalCardKeys");
-
-    /// question {0} of {1}
-    public static string TerminalQuestionStep => Get("TerminalQuestionStep");
-
-    /// you can pick several
-    public static string TerminalQuestionMany => Get("TerminalQuestionMany");
-
-    /// Other
-    public static string TerminalQuestionOther => Get("TerminalQuestionOther");
-
-    /// Write your own answer
-    public static string TerminalQuestionOtherHint => Get("TerminalQuestionOtherHint");
-
-    /// Back
-    public static string TerminalQuestionBack => Get("TerminalQuestionBack");
-
-    /// Next
-    public static string TerminalQuestionNext => Get("TerminalQuestionNext");
-
-    /// Answer
-    public static string TerminalQuestionAnswer => Get("TerminalQuestionAnswer");
-
-    /// Questions skipped
-    public static string TerminalQuestionsDenied => Get("TerminalQuestionsDenied");
-
-    /// Stop
-    public static string TerminalStop => Get("TerminalStop");
-
-    /// Stopped.
-    public static string TerminalTurnStopped => Get("TerminalTurnStopped");
-
-    /// Claude reads it after this step
-    public static string TerminalQueued => Get("TerminalQueued");
-
-    /// runs when Claude is done
-    public static string TerminalQueuedCommand => Get("TerminalQueuedCommand");
-
-    /// exit code {0}
-    public static string TerminalShellExit => Get("TerminalShellExit");
-
-    /// … {0} more lines
-    public static string TerminalMoreLines => Get("TerminalMoreLines");
-
-    /// Skills
-    public static string SlashGroupSkills => Get("SlashGroupSkills");
-
-    /// Conversation compacted to fit the context.
-    public static string TerminalCompacted => Get("TerminalCompacted");
-
-    /// Conversation compacted: {0}k tokens before, {1}k now.
-    public static string TerminalCompactedSize => Get("TerminalCompactedSize");
-
-    /// Making the conversation shorter…
-    public static string TerminalCompacting => Get("TerminalCompacting");
-
-    /// Claude Code stopped with an error.
-    public static string TerminalFailed => Get("TerminalFailed");
-
-    /// {0} more lines
-    public static string TerminalDiffMore => Get("TerminalDiffMore");
-
-    /// Waiting for permission: {0}
-    public static string TerminalWaitsPermission => Get("TerminalWaitsPermission");
-
-    /// Waiting for your answers
-    public static string TerminalWaitsQuestions => Get("TerminalWaitsQuestions");
-
-    /// Waiting for your call on the plan
-    public static string TerminalWaitsPlan => Get("TerminalWaitsPlan");
-
-    /// Show
-    public static string TerminalShow => Get("TerminalShow");
 
     /// Voice input · Ctrl+Space
     public static string VoiceButtonTip => Get("VoiceButtonTip");
@@ -1472,25 +1301,4 @@ public static class Strings
 
     /// OpenAI did not take the recording. Check the key and the connection.
     public static string VoiceCloudFailed => Get("VoiceCloudFailed");
-
-    /// Tasks
-    public static string TerminalTasks => Get("TerminalTasks");
-
-    /// Tasks · {0} of {1}
-    public static string TerminalTasksCount => Get("TerminalTasksCount");
-
-    /// agent
-    public static string TerminalAgent => Get("TerminalAgent");
-
-    /// context {0}%
-    public static string TerminalContextShare => Get("TerminalContextShare");
-
-    /// How much of this session's memory is used. /compact frees it.
-    public static string TerminalContextTip => Get("TerminalContextTip");
-
-    /// Agent to-do list
-    public static string AgentTodos => Get("AgentTodos");
-
-    /// Claude keeps a to-do list, and the terminal shows it above the field. Newer models don't ...
-    public static string AgentTodosWhat => Get("AgentTodosWhat");
 }

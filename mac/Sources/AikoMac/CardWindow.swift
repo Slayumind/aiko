@@ -12,7 +12,6 @@ final class CardWindow {
     private let state = CardViewState()
 
     var onSettings: (() -> Void)?
-    var onTerminal: (() -> Void)?
     var onClosed: (() -> Void)?
 
     /// "Open Claude Code" on a block, with the name of the environment it belongs to.
@@ -51,10 +50,7 @@ final class CardWindow {
             self?.onSettings?()
             self?.fadeAndClose()
         }
-        state.onTerminal = { [weak self] in
-            self?.onTerminal?()
-            self?.fadeAndClose()
-        }
+
         state.onClose = { [weak self] in self?.fadeAndClose() }
         state.onOpenClaude = { [weak self] name in self?.onOpenClaude?(name) }
 
@@ -166,7 +162,6 @@ final class CardViewState: ObservableObject {
     @Published var shown = false
 
     var onSettings: () -> Void = {}
-    var onTerminal: () -> Void = {}
     var onClose: () -> Void = {}
     var onOpenClaude: (String) -> Void = { _ in }
 }
@@ -180,7 +175,6 @@ struct CardRoot: View {
         CardView(
             model: state.model,
             onSettings: state.onSettings,
-            onTerminal: state.onTerminal,
             onClose: state.onClose,
             onOpenClaude: state.onOpenClaude)
             .opacity(state.shown ? 1 : 0)

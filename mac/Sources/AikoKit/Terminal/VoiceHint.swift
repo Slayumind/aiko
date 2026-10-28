@@ -1,5 +1,26 @@
 import Foundation
 
+/// What a step of Claude Code did with a file, as far as the hint of voice input cares.
+public enum TouchKind: Sendable, Equatable {
+    case read
+    case edit
+    case other
+}
+
+/// A file a session touched. Hidden is a file of Aiko itself, such as its memory, which the hint
+/// leaves out.
+public struct FileTouch: Sendable, Equatable {
+    public let kind: TouchKind
+    public let path: String
+    public let hidden: Bool
+
+    public init(kind: TouchKind, path: String, hidden: Bool = false) {
+        self.kind = kind
+        self.path = path
+        self.hidden = hidden
+    }
+}
+
 /// A sentence cut out as the hint given back: how many parts it had and how many of them were items
 /// of the hint. The twin of EchoCut in VoiceHint.cs.
 public struct EchoCut: Sendable, Equatable {
@@ -138,17 +159,16 @@ public enum VoiceHint {
         }
     }
 
-    /// The files a conversation read or changed, the newest first, each once. The newest go first
-    /// because the hint is cut from the end.
-    public static func files(_ items: [FeedItem]) -> [String] {
+    /// The files a session read or changed, the newest first, each once. The newest go first
+    /// because the hint is cut from the end. The touches come in the order they happened.
+    public static func files(_ touches: [FileTouch]) -> [String] {
         var seen = Set<String>()
         var files: [String] = []
-        for item in items.reversed() {
-            guard case .step(let step) = item.content,
-                  step.line.kind == .read || step.line.kind == .edit,
-                  !step.line.hidden, !step.line.subject.isEmpty,
-                  seen.insert(step.line.subject.lowercased()).inserted else { continue }
-            files.append(step.line.subject)
+        for touch in touches.reversed() {
+            guard touch.kind == .read || touch.kind == .edit,
+                  !touch.hidden, !touch.path.isEmpty,
+                  seen.insert(touch.path.lowercased()).inserted else { continue }
+            files.append(touch.path)
         }
         return files
     }

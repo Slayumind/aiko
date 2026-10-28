@@ -1096,41 +1096,23 @@
   <data name="TerminalCreateSession" xml:space="preserve">
     <value>Create session</value>
   </data>
+  <data name="TerminalNewShell" xml:space="preserve">
+    <value>Open command line</value>
+  </data>
+  <data name="TerminalStoppedLine" xml:space="preserve">
+    <value>Claude Code stopped. The conversation is saved: press Enter to continue.</value>
+  </data>
+  <data name="TerminalResume" xml:space="preserve">
+    <value>Continue</value>
+  </data>
   <data name="TerminalRenameSession" xml:space="preserve">
     <value>Rename</value>
   </data>
   <data name="TerminalCloseSession" xml:space="preserve">
     <value>Close session</value>
   </data>
-  <data name="TerminalFormTitle" xml:space="preserve">
-    <value>New session in {0}</value>
-  </data>
-  <data name="TerminalFolder" xml:space="preserve">
-    <value>Folder</value>
-  </data>
-  <data name="TerminalModel" xml:space="preserve">
-    <value>Model</value>
-  </data>
-  <data name="TerminalName" xml:space="preserve">
-    <value>Name</value>
-  </data>
-  <data name="TerminalNameHint" xml:space="preserve">
-    <value>Optional. An empty name becomes the folder name with a number.</value>
-  </data>
-  <data name="TerminalDescribeTask" xml:space="preserve">
-    <value>Describe the task</value>
-  </data>
   <data name="TerminalChooseFolder" xml:space="preserve">
     <value>Choose another folder</value>
-  </data>
-  <data name="TerminalFoldersRecent" xml:space="preserve">
-    <value>Recent</value>
-  </data>
-  <data name="TerminalFoldersBound" xml:space="preserve">
-    <value>Bound to this environment</value>
-  </data>
-  <data name="TerminalElsewhere" xml:space="preserve">
-    <value>This folder is bound to {0}. The session starts in {1}.</value>
   </data>
   <data name="TerminalNoSessionsTitle" xml:space="preserve">
     <value>Start your first session in {0}</value>
@@ -1142,9 +1124,6 @@
     <value>The session starts with your first message. Change the folder, model or mode in the line under the field.</value>
   </data>
   <data name="TerminalWorking" xml:space="preserve">
-    <value>working</value>
-  </data>
-  <data name="TerminalWorkingNow" xml:space="preserve">
     <value>working</value>
   </data>
   <data name="TerminalWaiting" xml:space="preserve">
@@ -1165,89 +1144,26 @@
   <data name="TerminalTabWaitingMany" xml:space="preserve">
     <value>{0} waiting</value>
   </data>
-  <data name="TerminalStepThought" xml:space="preserve">
-    <value>thought</value>
-  </data>
-  <data name="TerminalStepRead" xml:space="preserve">
-    <value>read</value>
-  </data>
-  <data name="TerminalStepSearch" xml:space="preserve">
-    <value>search</value>
-  </data>
-  <data name="TerminalStepEdit" xml:space="preserve">
-    <value>edit</value>
-  </data>
-  <data name="TerminalStepRun" xml:space="preserve">
-    <value>run</value>
-  </data>
-  <data name="TerminalStepAgent" xml:space="preserve">
-    <value>agent</value>
-  </data>
-  <data name="TerminalStepSkill" xml:space="preserve">
-    <value>skill</value>
-  </data>
-  <data name="TerminalStepWeb" xml:space="preserve">
-    <value>web</value>
-  </data>
-  <data name="TerminalLineRequest" xml:space="preserve">
-    <value>Waiting for permission: {0} {1}</value>
-  </data>
-  <data name="TerminalLineQuestion" xml:space="preserve">
-    <value>Asking: {0}</value>
-  </data>
-  <data name="TerminalLinePlan" xml:space="preserve">
-    <value>The plan is ready for you</value>
-  </data>
-  <data name="TerminalLineReading" xml:space="preserve">
-    <value>Reading {0}</value>
-  </data>
-  <data name="TerminalLineSearching" xml:space="preserve">
-    <value>Searching {0}</value>
-  </data>
-  <data name="TerminalLineEditing" xml:space="preserve">
-    <value>Editing {0}</value>
-  </data>
-  <data name="TerminalLineRunning" xml:space="preserve">
-    <value>Running {0}</value>
-  </data>
-  <data name="TerminalLineAgent" xml:space="preserve">
-    <value>Agent: {0}</value>
-  </data>
-  <data name="TerminalLineSkill" xml:space="preserve">
-    <value>Skill: {0}</value>
-  </data>
-  <data name="TerminalLineOpening" xml:space="preserve">
-    <value>Opening {0}</value>
-  </data>
-  <data name="TerminalLineCalling" xml:space="preserve">
-    <value>Calling {0}</value>
-  </data>
-  <data name="TerminalLineStoppedAt" xml:space="preserve">
-    <value>Stopped at the “{0}” step</value>
-  </data>
-  <data name="TerminalLineSignIn" xml:space="preserve">
-    <value>Sign in needed</value>
-  </data>
   <data name="TerminalYesterday" xml:space="preserve">
     <value>Yesterday, {0}</value>
   </data>
-  <data name="TerminalLoginTitle" xml:space="preserve">
-    <value>{0} isn’t signed in</value>
-  </data>
-  <data name="TerminalLoginBody" xml:space="preserve">
-    <value>You can sign in only in Claude Code itself. Aiko opens it in the system terminal and starts the conversation here once you’re in.</value>
-  </data>
   <data name="TerminalCloseTitle" xml:space="preserve">
-    <value>Session “{0}” is still working</value>
+    <value>Session “{0}” is still running</value>
   </data>
   <data name="TerminalCloseBody" xml:space="preserve">
-    <value>If you close it now, Claude Code stops in the middle of the work.</value>
+    <value>If you close it now, the program in it stops.</value>
   </data>
-  <data name="TerminalCloseWindowTitle" xml:space="preserve">
-    <value>Some sessions are still working</value>
+  <data name="TerminalQuitTitle" xml:space="preserve">
+    <value>Some sessions are still running</value>
   </data>
-  <data name="TerminalCloseWindowBody" xml:space="preserve">
-    <value>If you close the window now, Claude Code stops in the middle of the work.</value>
+  <data name="TerminalQuitBody" xml:space="preserve">
+    <value>If you quit Aiko now, Claude Code and the command lines in its window stop.</value>
+  </data>
+  <data name="TerminalStopAndQuit" xml:space="preserve">
+    <value>Stop and quit</value>
+  </data>
+  <data name="TerminalDontQuit" xml:space="preserve">
+    <value>Don’t quit</value>
   </data>
   <data name="TerminalStopAndClose" xml:space="preserve">
     <value>Stop and close</value>
@@ -1275,93 +1191,6 @@
   </data>
   <data name="TerminalSessions" xml:space="preserve">
     <value>Sessions</value>
-  </data>
-  <data name="TerminalAllow" xml:space="preserve">
-    <value>Allow</value>
-  </data>
-  <data name="TerminalAllowEdits" xml:space="preserve">
-    <value>Allow edits in this session</value>
-  </data>
-  <data name="TerminalAllowInProject" xml:space="preserve">
-    <value>Allow in this project</value>
-  </data>
-  <data name="TerminalDeny" xml:space="preserve">
-    <value>Deny</value>
-  </data>
-  <data name="TerminalCardKeys" xml:space="preserve">
-    <value>Enter to allow · Esc to deny</value>
-  </data>
-  <data name="TerminalQuestionStep" xml:space="preserve">
-    <value>question {0} of {1}</value>
-  </data>
-  <data name="TerminalQuestionMany" xml:space="preserve">
-    <value>you can pick several</value>
-  </data>
-  <data name="TerminalQuestionOther" xml:space="preserve">
-    <value>Other</value>
-  </data>
-  <data name="TerminalQuestionOtherHint" xml:space="preserve">
-    <value>Write your own answer</value>
-  </data>
-  <data name="TerminalQuestionBack" xml:space="preserve">
-    <value>Back</value>
-  </data>
-  <data name="TerminalQuestionNext" xml:space="preserve">
-    <value>Next</value>
-  </data>
-  <data name="TerminalQuestionAnswer" xml:space="preserve">
-    <value>Answer</value>
-  </data>
-  <data name="TerminalQuestionsDenied" xml:space="preserve">
-    <value>Questions skipped</value>
-  </data>
-  <data name="TerminalStop" xml:space="preserve">
-    <value>Stop</value>
-  </data>
-  <data name="TerminalTurnStopped" xml:space="preserve">
-    <value>Stopped.</value>
-  </data>
-  <data name="TerminalQueued" xml:space="preserve">
-    <value>Claude reads it after this step</value>
-  </data>
-  <data name="TerminalQueuedCommand" xml:space="preserve">
-    <value>runs when Claude is done</value>
-  </data>
-  <data name="TerminalShellExit" xml:space="preserve">
-    <value>exit code {0}</value>
-  </data>
-  <data name="TerminalMoreLines" xml:space="preserve">
-    <value>… {0} more lines</value>
-  </data>
-  <data name="SlashGroupSkills" xml:space="preserve">
-    <value>Skills</value>
-  </data>
-  <data name="TerminalCompacted" xml:space="preserve">
-    <value>Conversation compacted to fit the context.</value>
-  </data>
-  <data name="TerminalCompactedSize" xml:space="preserve">
-    <value>Conversation compacted: {0}k tokens before, {1}k now.</value>
-  </data>
-  <data name="TerminalCompacting" xml:space="preserve">
-    <value>Making the conversation shorter…</value>
-  </data>
-  <data name="TerminalFailed" xml:space="preserve">
-    <value>Claude Code stopped with an error.</value>
-  </data>
-  <data name="TerminalDiffMore" xml:space="preserve">
-    <value>{0} more lines</value>
-  </data>
-  <data name="TerminalWaitsPermission" xml:space="preserve">
-    <value>Waiting for permission: {0}</value>
-  </data>
-  <data name="TerminalWaitsQuestions" xml:space="preserve">
-    <value>Waiting for your answers</value>
-  </data>
-  <data name="TerminalWaitsPlan" xml:space="preserve">
-    <value>Waiting for your call on the plan</value>
-  </data>
-  <data name="TerminalShow" xml:space="preserve">
-    <value>Show</value>
   </data>
   <data name="VoiceButtonTip" xml:space="preserve">
     <value>Voice input · Ctrl+Space</value>
@@ -1482,26 +1311,5 @@
   </data>
   <data name="VoiceCloudFailed" xml:space="preserve">
     <value>OpenAI did not take the recording. Check the key and the connection.</value>
-  </data>
-  <data name="TerminalTasks" xml:space="preserve">
-    <value>Tasks</value>
-  </data>
-  <data name="TerminalTasksCount" xml:space="preserve">
-    <value>Tasks · {0} of {1}</value>
-  </data>
-  <data name="TerminalAgent" xml:space="preserve">
-    <value>agent</value>
-  </data>
-  <data name="TerminalContextShare" xml:space="preserve">
-    <value>context {0}%</value>
-  </data>
-  <data name="TerminalContextTip" xml:space="preserve">
-    <value>How much of this session's memory is used. /compact frees it.</value>
-  </data>
-  <data name="AgentTodos" xml:space="preserve">
-    <value>Agent to-do list</value>
-  </data>
-  <data name="AgentTodosWhat" xml:space="preserve">
-    <value>Claude keeps a to-do list, and the terminal shows it above the field. Newer models don't need it, and it takes a little context. Open sessions pick this up after Aiko restarts.</value>
   </data>
 </root>

@@ -71,7 +71,6 @@ struct AppSettingsTests {
         settings.voiceInput = true
         settings.voiceEngine = .openAI
         settings.voiceLanguage = .english
-        settings.agentTodos = true
 
         #expect(AppSettings.fromJson(settings.toJson()) == settings)
     }
@@ -133,7 +132,6 @@ struct AppSettingsTests {
         let settings = AppSettings.fromJson(#"{ "schemaVersion": 3, "place": "Tray" }"#)
 
         #expect(settings.voiceInput == false)
-        #expect(settings.agentTodos == false)
         #expect(settings.voiceEngine == .local)
         #expect(AppSettings.default.toJson().contains(#""voiceEngine": "Local""#))
         #expect(settings.voiceLanguage == .system)

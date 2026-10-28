@@ -1,45 +1,28 @@
 import Foundation
 
-/// What the terminal needs to know to start Claude Code for one conversation.
+/// What the terminal needs to know to start Claude Code for one session.
 public struct LaunchRequest: Sendable, Equatable {
     public let configDirectory: String
     public let userProfile: String
     public let environmentName: String
     public let sessionId: String
     public let started: Bool
-    public let mode: PermissionMode
-    public let model: String?
 
-    /// The environment turned on the to-do list of the agent (D-344).
-    public let agentTodos: Bool
-
-    public init(
-        configDirectory: String,
-        userProfile: String,
-        environmentName: String,
-        sessionId: String,
-        started: Bool,
-        mode: PermissionMode,
-        model: String?,
-        agentTodos: Bool = false
-    ) {
+    public init(configDirectory: String, userProfile: String, environmentName: String, sessionId: String, started: Bool) {
         self.configDirectory = configDirectory
         self.userProfile = userProfile
         self.environmentName = environmentName
         self.sessionId = sessionId
         self.started = started
-        self.mode = mode
-        self.model = model
-        self.agentTodos = agentTodos
     }
 }
 
-/// How the terminal starts Claude Code for one conversation: the arguments and what changes in
-/// the environment of the process (D-297, D-304).
+/// How the terminal starts a program in a real terminal (D-349, D-360): the arguments of Claude
+/// Code and what changes in the environment of the process. Claude Code chooses its own mode and
+/// model, so only the id of the conversation is passed.
+///
+/// The twin of ClaudeLaunchPlan.cs.
 public struct ClaudeLaunchPlan: Sendable, Equatable {
-    /// Gives newer models the to-do list tools that Claude Code leaves out for them (RESEARCH).
-    public static let todoToolsVariableName = "CLAUDE_CODE_ENABLE_TODO_TOOLS"
-
     public let arguments: [String]
     public let variables: [VariableChange]
 
@@ -48,84 +31,54 @@ public struct ClaudeLaunchPlan: Sendable, Equatable {
         self.variables = variables
     }
 
-    /// Claude Code answers in JSON lines, asks the terminal for permissions and sends an answer
-    /// piece by piece.
-    private static let channelArguments = [
-        "-p",
-        "--input-format", "stream-json",
-        "--output-format", "stream-json",
-        "--verbose",
-        "--include-partial-messages",
-        // Says back each message when it takes it, so a message sent during the work stops being
-        // grey at that moment (D-341; spike of 2026-10-26).
-        "--replay-user-messages",
-        "--permission-prompt-tool", "stdio",
-    ]
-
-    /// A short Claude Code that only lists its commands for the menu of "/" (AIKO-330). It has no
-    /// session, so no file of a conversation is left, and its hooks are off, so the bridge of Aiko
-    /// does not count it as a session: it answers "initialize" in under a second (RESEARCH).
-    public static func forCommands(
-        _ platform: PlatformConventions, configDirectory: String, userProfile: String, inheritedVariables: [String]
-    ) -> ClaudeLaunchPlan {
-        let arguments = [
-            "-p",
-            "--input-format", "stream-json",
-            "--output-format", "stream-json",
-            "--verbose",
-            "--settings", #"{"disableAllHooks":true}"#,
-        ]
-
-        var variables = inheritedVariables.filter(isLeftover).map { VariableChange($0, nil) }
-        if !ClaudeConfigFolder.isDefault(platform, configDirectory, userProfile) {
-            variables.append(VariableChange(ClaudeConfigFolder.variableName, configDirectory))
-        }
-        return ClaudeLaunchPlan(arguments: arguments, variables: variables)
-    }
-
     /// inheritedVariables are the names in the environment of Aiko itself.
     public static func forRequest(
         _ platform: PlatformConventions, _ request: LaunchRequest, inheritedVariables: [String]
     ) -> ClaudeLaunchPlan {
-        var arguments = channelArguments
-
         // A conversation gets its id from Aiko before the first turn, so the id is known even when
         // Claude Code never answers. After that the same id brings the conversation back.
-        arguments.append(request.started ? "--resume" : "--session-id")
-        arguments.append(request.sessionId)
+        let arguments = [request.started ? "--resume" : "--session-id", request.sessionId]
 
-        arguments.append("--permission-mode")
-        arguments.append(PermissionModes.flagValue(request.mode))
+        var variables = environment(
+            platform, configDirectory: request.configDirectory, userProfile: request.userProfile,
+            inheritedVariables: inheritedVariables)
 
-        let model = (request.model ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
-        if !model.isEmpty {
-            arguments.append("--model")
-            arguments.append(model)
-        }
-
-        var variables = inheritedVariables.filter(isLeftover).map { VariableChange($0, nil) }
-
-        // Environment 1 runs without the variable, like a plain claude and the VS Code panel (D-156).
-        if !ClaudeConfigFolder.isDefault(platform, request.configDirectory, request.userProfile) {
-            variables.append(VariableChange(ClaudeConfigFolder.variableName, request.configDirectory))
-        }
-
-        // The session start hook reads these two. "terminal" keeps its reminder quiet: the form of
-        // a new session already says which environment a folder belongs to.
+        // The session start hook reads these two. "terminal" keeps its reminder quiet: the session
+        // was started in the folder and the environment the person chose.
         variables.append(VariableChange(SessionReminder.environmentVariable, request.environmentName))
         variables.append(VariableChange(SessionReminder.launchVariable, SessionReminder.launchedByTerminal))
-
-        if request.agentTodos {
-            variables.append(VariableChange(todoToolsVariableName, "1"))
-        }
 
         return ClaudeLaunchPlan(arguments: arguments, variables: variables)
     }
 
-    /// What another Claude Code or another Aiko left in the environment. Aiko may itself be
-    /// started from a session, and those variables would send the new one to the wrong place.
-    /// What a session of Claude Code leaves for its children (seen in 2.1.312, RESEARCH). The
-    /// person's own settings of Claude Code, such as CLAUDE_CODE_GIT_BASH_PATH, are not among them.
+    /// A shell of a session (D-350): the environment of the session, so a claude typed in it runs
+    /// in the same environment, without the variables of the session start hook.
+    public static func forShell(
+        _ platform: PlatformConventions, configDirectory: String, userProfile: String, inheritedVariables: [String]
+    ) -> ClaudeLaunchPlan {
+        ClaudeLaunchPlan(
+            arguments: [],
+            variables: environment(
+                platform, configDirectory: configDirectory, userProfile: userProfile,
+                inheritedVariables: inheritedVariables))
+    }
+
+    private static func environment(
+        _ platform: PlatformConventions, configDirectory: String, userProfile: String, inheritedVariables: [String]
+    ) -> [VariableChange] {
+        var variables = inheritedVariables.filter(isLeftover).map { VariableChange($0, nil) }
+
+        // Environment 1 runs without the variable, like a plain claude and the VS Code panel (D-156).
+        if !ClaudeConfigFolder.isDefault(platform, configDirectory, userProfile) {
+            variables.append(VariableChange(ClaudeConfigFolder.variableName, configDirectory))
+        }
+
+        return variables
+    }
+
+    /// What a session of Claude Code leaves for its children (seen in 2.1.312, RESEARCH). Aiko may
+    /// itself be started from a session, and these would tie the new one to it. The person's own
+    /// settings of Claude Code, such as CLAUDE_CODE_GIT_BASH_PATH, are not among them and stay.
     private static let sessionVariables: Set<String> = [
         "CLAUDECODE", "CLAUDE_PID", "CLAUDE_EFFORT", ClaudeConfigFolder.variableName,
         "CLAUDE_CODE_ENTRYPOINT", "CLAUDE_CODE_CHILD_SESSION", "CLAUDE_CODE_EXECPATH", "CLAUDE_CODE_SSE_PORT",
@@ -133,6 +86,7 @@ public struct ClaudeLaunchPlan: Sendable, Equatable {
 
     private static let sessionPrefixes = ["CLAUDE_CODE_SESSION_", "CLAUDE_CODE_MESSAGING_", "AIKO_"]
 
+    /// What another Claude Code or another Aiko left in the environment.
     private static func isLeftover(_ name: String) -> Bool {
         let upper = name.uppercased()
         return sessionVariables.contains(upper) || sessionPrefixes.contains { upper.hasPrefix($0) }

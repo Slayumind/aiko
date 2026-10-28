@@ -395,57 +395,29 @@ public enum Strings {
         "StateOn": ("on", "включена"),
         "TerminalTitle": ("Terminal", "Терминал"),
         "TerminalCreateSession": ("Create session", "Создать сессию"),
+        "TerminalNewShell": ("Open command line", "Открыть командную строку"),
+        "TerminalStoppedLine": ("Claude Code stopped. The conversation is saved: press Enter to continue.", "Claude Code остановился. Разговор сохранён: нажми Enter, чтобы продолжить."),
+        "TerminalResume": ("Continue", "Продолжить"),
         "TerminalRenameSession": ("Rename", "Переименовать"),
         "TerminalCloseSession": ("Close session", "Закрыть сессию"),
-        "TerminalFormTitle": ("New session in {0}", "Новая сессия в среде {0}"),
-        "TerminalFolder": ("Folder", "Папка"),
-        "TerminalModel": ("Model", "Модель"),
-        "TerminalName": ("Name", "Имя"),
-        "TerminalNameHint": ("Optional. An empty name becomes the folder name with a number.", "Можно оставить пустым: сессия получит имя папки с номером."),
-        "TerminalDescribeTask": ("Describe the task", "Опиши задачу"),
         "TerminalChooseFolder": ("Choose another folder", "Выбрать другую папку"),
-        "TerminalFoldersRecent": ("Recent", "Недавние"),
-        "TerminalFoldersBound": ("Bound to this environment", "Привязанные к среде"),
-        "TerminalElsewhere": ("This folder is bound to {0}. The session starts in {1}.", "Эта папка привязана к среде {0}. Сессия запустится в среде {1}."),
         "TerminalNoSessionsTitle": ("Start your first session in {0}", "Начни первую сессию в среде {0}"),
         "TerminalNoSessionsBody": ("A session is one conversation with Claude Code in one folder.", "Сессия — это один разговор с Claude Code в одной папке."),
         "TerminalEmptyTalk": ("The session starts with your first message. Change the folder, model or mode in the line under the field.", "Сессия начнётся с первого сообщения. Папку, модель и режим можно сменить в строке под полем."),
         "TerminalWorking": ("working", "работает"),
-        "TerminalWorkingNow": ("working", "работаю"),
         "TerminalWaiting": ("waiting", "ждёт"),
         "TerminalDone": ("done", "готово"),
         "TerminalAsleep": ("asleep", "спит"),
         "TerminalStopped": ("stopped", "остановилась"),
         "TerminalTabWaitingOne": ("{0} waiting", "{0} ждёт"),
         "TerminalTabWaitingMany": ("{0} waiting", "{0} ждут"),
-        "TerminalStepThought": ("thought", "мысль"),
-        "TerminalStepRead": ("read", "чтение"),
-        "TerminalStepSearch": ("search", "поиск"),
-        "TerminalStepEdit": ("edit", "правка"),
-        "TerminalStepRun": ("run", "запуск"),
-        "TerminalStepAgent": ("agent", "агент"),
-        "TerminalStepSkill": ("skill", "навык"),
-        "TerminalStepWeb": ("web", "веб"),
-        "TerminalLineRequest": ("Waiting for permission: {0} {1}", "Жду разрешения: {0} {1}"),
-        "TerminalLineQuestion": ("Asking: {0}", "Спрашиваю: {0}"),
-        "TerminalLinePlan": ("The plan is ready for you", "План готов, посмотри"),
-        "TerminalLineReading": ("Reading {0}", "Читаю {0}"),
-        "TerminalLineSearching": ("Searching {0}", "Ищу {0}"),
-        "TerminalLineEditing": ("Editing {0}", "Правлю {0}"),
-        "TerminalLineRunning": ("Running {0}", "Запускаю {0}"),
-        "TerminalLineAgent": ("Agent: {0}", "Агент: {0}"),
-        "TerminalLineSkill": ("Skill: {0}", "Навык: {0}"),
-        "TerminalLineOpening": ("Opening {0}", "Открываю {0}"),
-        "TerminalLineCalling": ("Calling {0}", "Вызываю {0}"),
-        "TerminalLineStoppedAt": ("Stopped at the “{0}” step", "Остановилась на шаге «{0}»"),
-        "TerminalLineSignIn": ("Sign in needed", "Нужно войти"),
         "TerminalYesterday": ("Yesterday, {0}", "Вчера, {0}"),
-        "TerminalLoginTitle": ("{0} isn’t signed in", "В среде {0} нет входа"),
-        "TerminalLoginBody": ("You can sign in only in Claude Code itself. Aiko opens it in the system terminal and starts the conversation here once you’re in.", "Войти можно только в самом Claude Code. Aiko откроет его в терминале системы, а после входа начнёт разговор здесь."),
-        "TerminalCloseTitle": ("Session “{0}” is still working", "Сессия «{0}» ещё работает"),
-        "TerminalCloseBody": ("If you close it now, Claude Code stops in the middle of the work.", "Если закрыть её сейчас, Claude Code остановится посреди работы."),
-        "TerminalCloseWindowTitle": ("Some sessions are still working", "Часть сессий ещё работает"),
-        "TerminalCloseWindowBody": ("If you close the window now, Claude Code stops in the middle of the work.", "Если закрыть окно сейчас, Claude Code остановится посреди работы."),
+        "TerminalCloseTitle": ("Session “{0}” is still running", "Сессия «{0}» ещё работает"),
+        "TerminalCloseBody": ("If you close it now, the program in it stops.", "Если закрыть её сейчас, программа в ней остановится."),
+        "TerminalQuitTitle": ("Some sessions are still running", "Часть сессий ещё работает"),
+        "TerminalQuitBody": ("If you quit Aiko now, Claude Code and the command lines in its window stop.", "Если выйти из Aiko сейчас, Claude Code и командные строки в её окне остановятся."),
+        "TerminalStopAndQuit": ("Stop and quit", "Остановить и выйти"),
+        "TerminalDontQuit": ("Don’t quit", "Не выходить"),
         "TerminalStopAndClose": ("Stop and close", "Остановить и закрыть"),
         "TerminalKeepOpen": ("Keep open", "Не закрывать"),
         "TerminalLimitFiveHour": ("5-hour limit", "Лимит на 5 часов"),
@@ -455,35 +427,6 @@ public enum Strings {
         "TerminalRestore": ("Restore", "Восстановить"),
         "TerminalCloseWindow": ("Close", "Закрыть"),
         "TerminalSessions": ("Sessions", "Сессии"),
-        "TerminalAllow": ("Allow", "Разрешить"),
-        "TerminalAllowEdits": ("Allow edits in this session", "Разрешать правки в этой сессии"),
-        "TerminalAllowInProject": ("Allow in this project", "Разрешать в этом проекте"),
-        "TerminalDeny": ("Deny", "Запретить"),
-        "TerminalCardKeys": ("Enter to allow · Esc to deny", "Enter — разрешить · Esc — запретить"),
-        "TerminalQuestionStep": ("question {0} of {1}", "вопрос {0} из {1}"),
-        "TerminalQuestionMany": ("you can pick several", "можно выбрать несколько"),
-        "TerminalQuestionOther": ("Other", "Другое"),
-        "TerminalQuestionOtherHint": ("Write your own answer", "Написать свой ответ"),
-        "TerminalQuestionBack": ("Back", "Назад"),
-        "TerminalQuestionNext": ("Next", "Дальше"),
-        "TerminalQuestionAnswer": ("Answer", "Ответить"),
-        "TerminalQuestionsDenied": ("Questions skipped", "Вопросы без ответа"),
-        "TerminalStop": ("Stop", "Остановить"),
-        "TerminalTurnStopped": ("Stopped.", "Остановлено."),
-        "TerminalQueued": ("Claude reads it after this step", "Claude прочтёт после текущего шага"),
-        "TerminalQueuedCommand": ("runs when Claude is done", "выполню, когда Claude закончит"),
-        "TerminalShellExit": ("exit code {0}", "код выхода {0}"),
-        "TerminalMoreLines": ("… {0} more lines", "… ещё строк: {0}"),
-        "SlashGroupSkills": ("Skills", "Навыки"),
-        "TerminalCompacted": ("Conversation compacted to fit the context.", "Разговор сжат, чтобы влезть в контекст."),
-        "TerminalCompactedSize": ("Conversation compacted: {0}k tokens before, {1}k now.", "Разговор сжат: было {0} тыс. токенов, стало {1} тыс."),
-        "TerminalCompacting": ("Making the conversation shorter…", "Сжимаю разговор…"),
-        "TerminalFailed": ("Claude Code stopped with an error.", "Claude Code остановился с ошибкой."),
-        "TerminalDiffMore": ("{0} more lines", "Ещё строк: {0}"),
-        "TerminalWaitsPermission": ("Waiting for permission: {0}", "Жду разрешения: {0}"),
-        "TerminalWaitsQuestions": ("Waiting for your answers", "Жду ответа на вопросы"),
-        "TerminalWaitsPlan": ("Waiting for your call on the plan", "Жду решения по плану"),
-        "TerminalShow": ("Show", "Показать"),
         "VoiceButtonTip": ("Voice input · Ctrl+Space", "Голосовой ввод · Ctrl+Space"),
         "VoiceStopTip": ("Finish recording · Ctrl+Space", "Закончить запись · Ctrl+Space"),
         "VoiceWarming": ("starting the mic", "микрофон включается"),
@@ -524,13 +467,6 @@ public enum Strings {
         "VoiceKeyNotSaved": ("Windows did not save the key.", "Windows не сохранила ключ."),
         "VoiceKeyWhere": ("Kept in Windows Credential Manager. Removing Aiko erases it.", "Хранится в Диспетчере учётных данных Windows. Удаление Aiko его сотрёт."),
         "VoiceCloudFailed": ("OpenAI did not take the recording. Check the key and the connection.", "OpenAI не принял запись. Проверь ключ и соединение."),
-        "TerminalTasks": ("Tasks", "Задачи"),
-        "TerminalTasksCount": ("Tasks · {0} of {1}", "Задачи · {0} из {1}"),
-        "TerminalAgent": ("agent", "агент"),
-        "TerminalContextShare": ("context {0}%", "контекст {0}%"),
-        "TerminalContextTip": ("How much of this session's memory is used. /compact frees it.", "Сколько занято в памяти этой сессии. Освобождает /compact."),
-        "AgentTodos": ("Agent to-do list", "Список дел агента"),
-        "AgentTodosWhat": ("Claude keeps a to-do list, and the terminal shows it above the field. Newer models don't need it, and it takes a little context. Open sessions pick this up after Aiko restarts.", "Claude ведёт список дел, терминал показывает его над полем. Новым моделям он не нужен и занимает немного контекста. Открытые сессии увидят изменение после перезапуска Aiko."),
     ]
 
     /// Session · 5 hours
@@ -1598,41 +1534,23 @@ public enum Strings {
     /// Create session
     public static var terminalCreateSession: String { Strings.get("TerminalCreateSession") }
 
+    /// Open command line
+    public static var terminalNewShell: String { Strings.get("TerminalNewShell") }
+
+    /// Claude Code stopped. The conversation is saved: press Enter to continue.
+    public static var terminalStoppedLine: String { Strings.get("TerminalStoppedLine") }
+
+    /// Continue
+    public static var terminalResume: String { Strings.get("TerminalResume") }
+
     /// Rename
     public static var terminalRenameSession: String { Strings.get("TerminalRenameSession") }
 
     /// Close session
     public static var terminalCloseSession: String { Strings.get("TerminalCloseSession") }
 
-    /// New session in {0}
-    public static var terminalFormTitle: String { Strings.get("TerminalFormTitle") }
-
-    /// Folder
-    public static var terminalFolder: String { Strings.get("TerminalFolder") }
-
-    /// Model
-    public static var terminalModel: String { Strings.get("TerminalModel") }
-
-    /// Name
-    public static var terminalName: String { Strings.get("TerminalName") }
-
-    /// Optional. An empty name becomes the folder name with a number.
-    public static var terminalNameHint: String { Strings.get("TerminalNameHint") }
-
-    /// Describe the task
-    public static var terminalDescribeTask: String { Strings.get("TerminalDescribeTask") }
-
     /// Choose another folder
     public static var terminalChooseFolder: String { Strings.get("TerminalChooseFolder") }
-
-    /// Recent
-    public static var terminalFoldersRecent: String { Strings.get("TerminalFoldersRecent") }
-
-    /// Bound to this environment
-    public static var terminalFoldersBound: String { Strings.get("TerminalFoldersBound") }
-
-    /// This folder is bound to {0}. The session starts in {1}.
-    public static var terminalElsewhere: String { Strings.get("TerminalElsewhere") }
 
     /// Start your first session in {0}
     public static var terminalNoSessionsTitle: String { Strings.get("TerminalNoSessionsTitle") }
@@ -1645,9 +1563,6 @@ public enum Strings {
 
     /// working
     public static var terminalWorking: String { Strings.get("TerminalWorking") }
-
-    /// working
-    public static var terminalWorkingNow: String { Strings.get("TerminalWorkingNow") }
 
     /// waiting
     public static var terminalWaiting: String { Strings.get("TerminalWaiting") }
@@ -1667,89 +1582,26 @@ public enum Strings {
     /// {0} waiting
     public static var terminalTabWaitingMany: String { Strings.get("TerminalTabWaitingMany") }
 
-    /// thought
-    public static var terminalStepThought: String { Strings.get("TerminalStepThought") }
-
-    /// read
-    public static var terminalStepRead: String { Strings.get("TerminalStepRead") }
-
-    /// search
-    public static var terminalStepSearch: String { Strings.get("TerminalStepSearch") }
-
-    /// edit
-    public static var terminalStepEdit: String { Strings.get("TerminalStepEdit") }
-
-    /// run
-    public static var terminalStepRun: String { Strings.get("TerminalStepRun") }
-
-    /// agent
-    public static var terminalStepAgent: String { Strings.get("TerminalStepAgent") }
-
-    /// skill
-    public static var terminalStepSkill: String { Strings.get("TerminalStepSkill") }
-
-    /// web
-    public static var terminalStepWeb: String { Strings.get("TerminalStepWeb") }
-
-    /// Waiting for permission: {0} {1}
-    public static var terminalLineRequest: String { Strings.get("TerminalLineRequest") }
-
-    /// Asking: {0}
-    public static var terminalLineQuestion: String { Strings.get("TerminalLineQuestion") }
-
-    /// The plan is ready for you
-    public static var terminalLinePlan: String { Strings.get("TerminalLinePlan") }
-
-    /// Reading {0}
-    public static var terminalLineReading: String { Strings.get("TerminalLineReading") }
-
-    /// Searching {0}
-    public static var terminalLineSearching: String { Strings.get("TerminalLineSearching") }
-
-    /// Editing {0}
-    public static var terminalLineEditing: String { Strings.get("TerminalLineEditing") }
-
-    /// Running {0}
-    public static var terminalLineRunning: String { Strings.get("TerminalLineRunning") }
-
-    /// Agent: {0}
-    public static var terminalLineAgent: String { Strings.get("TerminalLineAgent") }
-
-    /// Skill: {0}
-    public static var terminalLineSkill: String { Strings.get("TerminalLineSkill") }
-
-    /// Opening {0}
-    public static var terminalLineOpening: String { Strings.get("TerminalLineOpening") }
-
-    /// Calling {0}
-    public static var terminalLineCalling: String { Strings.get("TerminalLineCalling") }
-
-    /// Stopped at the “{0}” step
-    public static var terminalLineStoppedAt: String { Strings.get("TerminalLineStoppedAt") }
-
-    /// Sign in needed
-    public static var terminalLineSignIn: String { Strings.get("TerminalLineSignIn") }
-
     /// Yesterday, {0}
     public static var terminalYesterday: String { Strings.get("TerminalYesterday") }
 
-    /// {0} isn’t signed in
-    public static var terminalLoginTitle: String { Strings.get("TerminalLoginTitle") }
-
-    /// You can sign in only in Claude Code itself. Aiko opens it in the system terminal and star...
-    public static var terminalLoginBody: String { Strings.get("TerminalLoginBody") }
-
-    /// Session “{0}” is still working
+    /// Session “{0}” is still running
     public static var terminalCloseTitle: String { Strings.get("TerminalCloseTitle") }
 
-    /// If you close it now, Claude Code stops in the middle of the work.
+    /// If you close it now, the program in it stops.
     public static var terminalCloseBody: String { Strings.get("TerminalCloseBody") }
 
-    /// Some sessions are still working
-    public static var terminalCloseWindowTitle: String { Strings.get("TerminalCloseWindowTitle") }
+    /// Some sessions are still running
+    public static var terminalQuitTitle: String { Strings.get("TerminalQuitTitle") }
 
-    /// If you close the window now, Claude Code stops in the middle of the work.
-    public static var terminalCloseWindowBody: String { Strings.get("TerminalCloseWindowBody") }
+    /// If you quit Aiko now, Claude Code and the command lines in its window stop.
+    public static var terminalQuitBody: String { Strings.get("TerminalQuitBody") }
+
+    /// Stop and quit
+    public static var terminalStopAndQuit: String { Strings.get("TerminalStopAndQuit") }
+
+    /// Don’t quit
+    public static var terminalDontQuit: String { Strings.get("TerminalDontQuit") }
 
     /// Stop and close
     public static var terminalStopAndClose: String { Strings.get("TerminalStopAndClose") }
@@ -1777,93 +1629,6 @@ public enum Strings {
 
     /// Sessions
     public static var terminalSessions: String { Strings.get("TerminalSessions") }
-
-    /// Allow
-    public static var terminalAllow: String { Strings.get("TerminalAllow") }
-
-    /// Allow edits in this session
-    public static var terminalAllowEdits: String { Strings.get("TerminalAllowEdits") }
-
-    /// Allow in this project
-    public static var terminalAllowInProject: String { Strings.get("TerminalAllowInProject") }
-
-    /// Deny
-    public static var terminalDeny: String { Strings.get("TerminalDeny") }
-
-    /// Enter to allow · Esc to deny
-    public static var terminalCardKeys: String { Strings.get("TerminalCardKeys") }
-
-    /// question {0} of {1}
-    public static var terminalQuestionStep: String { Strings.get("TerminalQuestionStep") }
-
-    /// you can pick several
-    public static var terminalQuestionMany: String { Strings.get("TerminalQuestionMany") }
-
-    /// Other
-    public static var terminalQuestionOther: String { Strings.get("TerminalQuestionOther") }
-
-    /// Write your own answer
-    public static var terminalQuestionOtherHint: String { Strings.get("TerminalQuestionOtherHint") }
-
-    /// Back
-    public static var terminalQuestionBack: String { Strings.get("TerminalQuestionBack") }
-
-    /// Next
-    public static var terminalQuestionNext: String { Strings.get("TerminalQuestionNext") }
-
-    /// Answer
-    public static var terminalQuestionAnswer: String { Strings.get("TerminalQuestionAnswer") }
-
-    /// Questions skipped
-    public static var terminalQuestionsDenied: String { Strings.get("TerminalQuestionsDenied") }
-
-    /// Stop
-    public static var terminalStop: String { Strings.get("TerminalStop") }
-
-    /// Stopped.
-    public static var terminalTurnStopped: String { Strings.get("TerminalTurnStopped") }
-
-    /// Claude reads it after this step
-    public static var terminalQueued: String { Strings.get("TerminalQueued") }
-
-    /// runs when Claude is done
-    public static var terminalQueuedCommand: String { Strings.get("TerminalQueuedCommand") }
-
-    /// exit code {0}
-    public static var terminalShellExit: String { Strings.get("TerminalShellExit") }
-
-    /// … {0} more lines
-    public static var terminalMoreLines: String { Strings.get("TerminalMoreLines") }
-
-    /// Skills
-    public static var slashGroupSkills: String { Strings.get("SlashGroupSkills") }
-
-    /// Conversation compacted to fit the context.
-    public static var terminalCompacted: String { Strings.get("TerminalCompacted") }
-
-    /// Conversation compacted: {0}k tokens before, {1}k now.
-    public static var terminalCompactedSize: String { Strings.get("TerminalCompactedSize") }
-
-    /// Making the conversation shorter…
-    public static var terminalCompacting: String { Strings.get("TerminalCompacting") }
-
-    /// Claude Code stopped with an error.
-    public static var terminalFailed: String { Strings.get("TerminalFailed") }
-
-    /// {0} more lines
-    public static var terminalDiffMore: String { Strings.get("TerminalDiffMore") }
-
-    /// Waiting for permission: {0}
-    public static var terminalWaitsPermission: String { Strings.get("TerminalWaitsPermission") }
-
-    /// Waiting for your answers
-    public static var terminalWaitsQuestions: String { Strings.get("TerminalWaitsQuestions") }
-
-    /// Waiting for your call on the plan
-    public static var terminalWaitsPlan: String { Strings.get("TerminalWaitsPlan") }
-
-    /// Show
-    public static var terminalShow: String { Strings.get("TerminalShow") }
 
     /// Voice input · Ctrl+Space
     public static var voiceButtonTip: String { Strings.get("VoiceButtonTip") }
@@ -1984,25 +1749,4 @@ public enum Strings {
 
     /// OpenAI did not take the recording. Check the key and the connection.
     public static var voiceCloudFailed: String { Strings.get("VoiceCloudFailed") }
-
-    /// Tasks
-    public static var terminalTasks: String { Strings.get("TerminalTasks") }
-
-    /// Tasks · {0} of {1}
-    public static var terminalTasksCount: String { Strings.get("TerminalTasksCount") }
-
-    /// agent
-    public static var terminalAgent: String { Strings.get("TerminalAgent") }
-
-    /// context {0}%
-    public static var terminalContextShare: String { Strings.get("TerminalContextShare") }
-
-    /// How much of this session's memory is used. /compact frees it.
-    public static var terminalContextTip: String { Strings.get("TerminalContextTip") }
-
-    /// Agent to-do list
-    public static var agentTodos: String { Strings.get("AgentTodos") }
-
-    /// Claude keeps a to-do list, and the terminal shows it above the field. Newer models don't ...
-    public static var agentTodosWhat: String { Strings.get("AgentTodosWhat") }
 }

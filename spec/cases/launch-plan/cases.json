@@ -1,5 +1,5 @@
 {
-  "comment": "How the terminal starts Claude Code for one conversation (D-297, D-304): the arguments in order, and what changes in the environment. A variable with a null value is removed. The first environment runs with CLAUDE_CONFIG_DIR removed, never pointed at .claude (D-156). The paths are Windows ones, as in shim-launch. Only what a Claude Code session leaves for its children is removed (CLAUDECODE, CLAUDE_PID, CLAUDE_EFFORT, the entry point, the session, messaging and exec path of Claude Code, and AIKO_*); the person's own settings, such as CLAUDE_CODE_GIT_BASH_PATH, stay.",
+  "comment": "How the terminal starts Claude Code for one session in a real terminal (D-349, D-360): the arguments in order, and what changes in the environment. Claude Code chooses its own mode and model, so only the id of the conversation is passed: --session-id the first time, --resume after that. A variable with a null value is removed. The first environment runs with CLAUDE_CONFIG_DIR removed, never pointed at .claude (D-156). The paths are Windows ones, as in shim-launch. Only what a Claude Code session leaves for its children is removed (CLAUDECODE, CLAUDE_PID, CLAUDE_EFFORT, the entry point, the session, messaging and exec path of Claude Code, and AIKO_*); the person's own settings, such as CLAUDE_CODE_GIT_BASH_PATH, stay. A shell gets the environment of its session too, so a claude typed in it runs in the same environment, but none of the variables of the session start hook.",
   "platform": "windows",
   "userProfile": "C:\\Users\\someone",
   "cases": [
@@ -9,27 +9,13 @@
       "environment": "Aiko",
       "sessionId": "5f0c2a8e-1b7d-4c1e-9f3a-2d6b8e4a7c10",
       "started": false,
-      "mode": "manual",
-      "model": null,
       "inherited": [
         "PATH",
         "USERPROFILE"
       ],
       "arguments": [
-        "-p",
-        "--input-format",
-        "stream-json",
-        "--output-format",
-        "stream-json",
-        "--verbose",
-        "--include-partial-messages",
-        "--replay-user-messages",
-        "--permission-prompt-tool",
-        "stdio",
         "--session-id",
-        "5f0c2a8e-1b7d-4c1e-9f3a-2d6b8e4a7c10",
-        "--permission-mode",
-        "default"
+        "5f0c2a8e-1b7d-4c1e-9f3a-2d6b8e4a7c10"
       ],
       "variables": [
         {
@@ -43,31 +29,15 @@
       ]
     },
     {
-      "name": "a conversation that already ran, in the second environment, in plan mode with a model",
+      "name": "a conversation that already ran, in the second environment",
       "configDirectory": "C:\\Users\\someone\\.claude-work",
       "environment": "Work · Kodland",
       "sessionId": "s-2",
       "started": true,
-      "mode": "plan",
-      "model": "opus",
       "inherited": [],
       "arguments": [
-        "-p",
-        "--input-format",
-        "stream-json",
-        "--output-format",
-        "stream-json",
-        "--verbose",
-        "--include-partial-messages",
-        "--replay-user-messages",
-        "--permission-prompt-tool",
-        "stdio",
         "--resume",
-        "s-2",
-        "--permission-mode",
-        "plan",
-        "--model",
-        "opus"
+        "s-2"
       ],
       "variables": [
         {
@@ -90,8 +60,6 @@
       "environment": "Aiko",
       "sessionId": "s-3",
       "started": false,
-      "mode": "acceptEdits",
-      "model": "  claude-sonnet-5-5  ",
       "inherited": [
         "Path",
         "CLAUDECODE",
@@ -106,22 +74,8 @@
         "AIKO"
       ],
       "arguments": [
-        "-p",
-        "--input-format",
-        "stream-json",
-        "--output-format",
-        "stream-json",
-        "--verbose",
-        "--include-partial-messages",
-        "--replay-user-messages",
-        "--permission-prompt-tool",
-        "stdio",
         "--session-id",
-        "s-3",
-        "--permission-mode",
-        "acceptEdits",
-        "--model",
-        "claude-sonnet-5-5"
+        "s-3"
       ],
       "variables": [
         {
@@ -159,100 +113,11 @@
       ]
     },
     {
-      "name": "auto mode, and a model that is only spaces",
-      "configDirectory": "D:\\Claude Accounts\\.claude-team",
-      "environment": "Team",
-      "sessionId": "s-4",
-      "started": true,
-      "mode": "auto",
-      "model": "   ",
-      "inherited": [
-        "CLAUDE_CONFIG_DIR"
-      ],
-      "arguments": [
-        "-p",
-        "--input-format",
-        "stream-json",
-        "--output-format",
-        "stream-json",
-        "--verbose",
-        "--include-partial-messages",
-        "--replay-user-messages",
-        "--permission-prompt-tool",
-        "stdio",
-        "--resume",
-        "s-4",
-        "--permission-mode",
-        "auto"
-      ],
-      "variables": [
-        {
-          "name": "CLAUDE_CONFIG_DIR",
-          "value": null
-        },
-        {
-          "name": "CLAUDE_CONFIG_DIR",
-          "value": "D:\\Claude Accounts\\.claude-team"
-        },
-        {
-          "name": "AIKO_ENVIRONMENT",
-          "value": "Team"
-        },
-        {
-          "name": "AIKO_LAUNCH",
-          "value": "terminal"
-        }
-      ]
-    },
-    {
-      "name": "an environment with the to-do list of the agent on",
-      "configDirectory": "C:\\Users\\someone\\.claude",
-      "environment": "Aiko",
-      "sessionId": "s-3",
-      "started": false,
-      "mode": "manual",
-      "model": null,
-      "agentTodos": true,
-      "inherited": [],
-      "arguments": [
-        "-p",
-        "--input-format",
-        "stream-json",
-        "--output-format",
-        "stream-json",
-        "--verbose",
-        "--include-partial-messages",
-        "--replay-user-messages",
-        "--permission-prompt-tool",
-        "stdio",
-        "--session-id",
-        "s-3",
-        "--permission-mode",
-        "default"
-      ],
-      "variables": [
-        {
-          "name": "AIKO_ENVIRONMENT",
-          "value": "Aiko"
-        },
-        {
-          "name": "AIKO_LAUNCH",
-          "value": "terminal"
-        },
-        {
-          "name": "CLAUDE_CODE_ENABLE_TODO_TOOLS",
-          "value": "1"
-        }
-      ]
-    },
-    {
       "name": "the person's own settings of Claude Code stay; what a session left goes",
       "configDirectory": "C:\\Users\\someone\\.claude",
       "environment": "Aiko",
       "sessionId": "5f0c2a8e-1b7d-4c1e-9f3a-2d6b8e4a7c10",
       "started": false,
-      "mode": "manual",
-      "model": null,
       "inherited": [
         "PATH",
         "CLAUDE_CODE_GIT_BASH_PATH",
@@ -268,20 +133,8 @@
         "CLAUDE_EFFORT"
       ],
       "arguments": [
-        "-p",
-        "--input-format",
-        "stream-json",
-        "--output-format",
-        "stream-json",
-        "--verbose",
-        "--include-partial-messages",
-        "--replay-user-messages",
-        "--permission-prompt-tool",
-        "stdio",
         "--session-id",
-        "5f0c2a8e-1b7d-4c1e-9f3a-2d6b8e4a7c10",
-        "--permission-mode",
-        "default"
+        "5f0c2a8e-1b7d-4c1e-9f3a-2d6b8e4a7c10"
       ],
       "variables": [
         {
@@ -327,55 +180,36 @@
       ]
     }
   ],
-  "commands": [
+  "shells": [
     {
-      "name": "the list of commands in the first environment: no session, no hooks",
+      "name": "a shell in the first environment: only what a session left goes",
       "configDirectory": "C:\\Users\\someone\\.claude",
       "inherited": [
         "PATH",
-        "CLAUDECODE"
-      ],
-      "arguments": [
-        "-p",
-        "--input-format",
-        "stream-json",
-        "--output-format",
-        "stream-json",
-        "--verbose",
-        "--settings",
-        "{\"disableAllHooks\":true}"
+        "CLAUDECODE",
+        "AIKO_ENVIRONMENT"
       ],
       "variables": [
         {
           "name": "CLAUDECODE",
           "value": null
+        },
+        {
+          "name": "AIKO_ENVIRONMENT",
+          "value": null
         }
       ]
     },
     {
-      "name": "the list of commands in a second environment",
-      "configDirectory": "D:\\Claude Accounts\\.claude-team",
+      "name": "a shell in the second environment points claude at its folder",
+      "configDirectory": "C:\\Users\\someone\\.claude-work",
       "inherited": [
-        "AIKO_ENVIRONMENT"
-      ],
-      "arguments": [
-        "-p",
-        "--input-format",
-        "stream-json",
-        "--output-format",
-        "stream-json",
-        "--verbose",
-        "--settings",
-        "{\"disableAllHooks\":true}"
+        "PATH"
       ],
       "variables": [
         {
-          "name": "AIKO_ENVIRONMENT",
-          "value": null
-        },
-        {
           "name": "CLAUDE_CONFIG_DIR",
-          "value": "D:\\Claude Accounts\\.claude-team"
+          "value": "C:\\Users\\someone\\.claude-work"
         }
       ]
     }

@@ -1,5 +1,5 @@
 {
-  "comment": "The window of the terminal (D-292, D-293, D-299, D-304). rows: the list of one environment as rows. A session with no conversation in memory is asleep; one whose conversation is idle is read while Claude Code runs for it and asleep when it does not; a sleeping row has no line about the conversation. waiting is the number on the tab. caps: no more than four processes; the one to stop before the next start is idle and was used longest ago, and when all are busy none is stopped. places: where the window opens; a saved place is kept when 80 units of its title bar are on a screen, its size is brought into the limits of that screen, and otherwise the window stands in the middle of the first screen at 1100 by 760. windows: what is chosen after each action. days: how long ago a session was used, by the clock of the person; each row is the time of use and the time now in seconds, the offset of the clock in minutes, and the answer.",
+  "comment": "The window of the terminal (D-292, D-293, D-349, D-352). rows: the list of one environment as rows, drawn from what the terminal of each session does: working, waiting, done, idle (a row without a mark) or exited (stopped, Enter brings Claude Code back, D-351). A session without a terminal sleeps, and its second line says when it was used. line is the last thing the terminal did, in the words of the second line. waiting is the number on the tab. places: where the window opens; a saved place is kept when 80 units of its title bar are on a screen, its size is brought into the limits of that screen, and otherwise the window stands in the middle of the first screen at 1100 by 760. windows: what is chosen after each action; the place on the right is the terminal of the chosen session, or a sentence and a button when the environment has none. days: how long ago a session was used, by the clock of the person; each row is the time of use and the time now in seconds, the offset of the clock in minutes, and the answer.",
   "sessions": {
     "sessions": [
       {
@@ -122,67 +122,27 @@
       "live": {
         "a1": {
           "activity": "working",
-          "line": "step",
-          "kind": "read",
-          "label": "",
-          "text": "office.mjs",
-          "running": true
+          "line": "office.mjs"
         },
         "a2": {
           "activity": "waiting",
-          "line": "request",
-          "kind": "edit",
-          "label": "",
-          "text": "NewSessionForm.cs",
-          "running": true
+          "line": "NewSessionForm.cs"
         },
         "a3": {
           "activity": "done",
-          "line": "answer",
-          "kind": "other",
-          "label": "",
-          "text": "Done. Snapshots match in both locales",
-          "running": true
+          "line": "Done. Snapshots match in both locales"
         },
         "a4": {
           "activity": "idle",
-          "line": "answer",
-          "kind": "other",
-          "label": "",
-          "text": "Both locales checked, no differences",
-          "running": true
+          "line": "Both locales checked, no differences"
         },
         "a5": {
           "activity": "waiting",
-          "line": "plan",
-          "kind": "other",
-          "label": "",
-          "text": "",
-          "running": true
+          "line": ""
         },
         "c2": {
-          "activity": "failed",
-          "line": "stoppedAt",
-          "kind": "run",
-          "label": "",
-          "text": "dotnet publish",
-          "running": false
-        },
-        "c3": {
-          "activity": "idle",
-          "line": "answer",
-          "kind": "other",
-          "label": "",
-          "text": "Said before the process was stopped",
-          "running": false
-        },
-        "c4": {
-          "activity": "signedOut",
-          "line": "signIn",
-          "kind": "other",
-          "label": "",
-          "text": "",
-          "running": false
+          "activity": "exited",
+          "line": "dotnet publish"
         }
       },
       "groups": [
@@ -192,29 +152,25 @@
             {
               "id": "a1",
               "state": "working",
-              "line": "step",
-              "text": "office.mjs",
+              "line": "office.mjs",
               "lastUsed": 100
             },
             {
               "id": "a2",
               "state": "waiting",
-              "line": "request",
-              "text": "NewSessionForm.cs",
+              "line": "NewSessionForm.cs",
               "lastUsed": 200
             },
             {
               "id": "a3",
               "state": "done",
-              "line": "answer",
-              "text": "Done. Snapshots match in both locales",
+              "line": "Done. Snapshots match in both locales",
               "lastUsed": 300
             },
             {
               "id": "a4",
               "state": "read",
-              "line": "answer",
-              "text": "Both locales checked, no differences",
+              "line": "Both locales checked, no differences",
               "lastUsed": 400
             }
           ]
@@ -225,29 +181,25 @@
             {
               "id": "c1",
               "state": "asleep",
-              "line": null,
-              "text": null,
+              "line": "",
               "lastUsed": 500
             },
             {
               "id": "c2",
               "state": "stopped",
-              "line": "stoppedAt",
-              "text": "dotnet publish",
+              "line": "dotnet publish",
               "lastUsed": 600
             },
             {
               "id": "c3",
               "state": "asleep",
-              "line": null,
-              "text": null,
+              "line": "",
               "lastUsed": 700
             },
             {
               "id": "c4",
-              "state": "signedOut",
-              "line": "signIn",
-              "text": "",
+              "state": "asleep",
+              "line": "",
               "lastUsed": 800
             }
           ]
@@ -261,19 +213,7 @@
       "live": {
         "w1": {
           "activity": "waiting",
-          "line": "question",
-          "kind": "other",
-          "label": "",
-          "text": "Session name",
-          "running": true
-        },
-        "w2": {
-          "activity": "done",
-          "line": "none",
-          "kind": "other",
-          "label": "",
-          "text": "",
-          "running": false
+          "line": "Session name"
         }
       },
       "groups": [
@@ -283,15 +223,13 @@
             {
               "id": "w1",
               "state": "waiting",
-              "line": "question",
-              "text": "Session name",
+              "line": "Session name",
               "lastUsed": 900
             },
             {
               "id": "w2",
-              "state": "done",
-              "line": "none",
-              "text": "",
+              "state": "asleep",
+              "line": "",
               "lastUsed": 950
             }
           ]
@@ -310,29 +248,25 @@
             {
               "id": "a1",
               "state": "asleep",
-              "line": null,
-              "text": null,
+              "line": "",
               "lastUsed": 100
             },
             {
               "id": "a2",
               "state": "asleep",
-              "line": null,
-              "text": null,
+              "line": "",
               "lastUsed": 200
             },
             {
               "id": "a3",
               "state": "asleep",
-              "line": null,
-              "text": null,
+              "line": "",
               "lastUsed": 300
             },
             {
               "id": "a4",
               "state": "asleep",
-              "line": null,
-              "text": null,
+              "line": "",
               "lastUsed": 400
             }
           ]
@@ -343,29 +277,25 @@
             {
               "id": "c1",
               "state": "asleep",
-              "line": null,
-              "text": null,
+              "line": "",
               "lastUsed": 500
             },
             {
               "id": "c2",
               "state": "asleep",
-              "line": null,
-              "text": null,
+              "line": "",
               "lastUsed": 600
             },
             {
               "id": "c3",
               "state": "asleep",
-              "line": null,
-              "text": null,
+              "line": "",
               "lastUsed": 700
             },
             {
               "id": "c4",
               "state": "asleep",
-              "line": null,
-              "text": null,
+              "line": "",
               "lastUsed": 800
             }
           ]
@@ -379,176 +309,6 @@
       "live": {},
       "groups": [],
       "waiting": 0
-    }
-  ],
-  "caps": [
-    {
-      "name": "three run: room for one more",
-      "starting": "new",
-      "running": [
-        [
-          "a",
-          false,
-          10
-        ],
-        [
-          "b",
-          false,
-          20
-        ],
-        [
-          "c",
-          true,
-          30
-        ]
-      ],
-      "stop": null
-    },
-    {
-      "name": "four run: the idle one used longest ago goes",
-      "starting": "new",
-      "running": [
-        [
-          "a",
-          false,
-          40
-        ],
-        [
-          "b",
-          false,
-          20
-        ],
-        [
-          "c",
-          true,
-          10
-        ],
-        [
-          "d",
-          false,
-          30
-        ]
-      ],
-      "stop": "b"
-    },
-    {
-      "name": "the session that starts is not counted and not stopped",
-      "starting": "a",
-      "running": [
-        [
-          "a",
-          false,
-          1
-        ],
-        [
-          "b",
-          false,
-          20
-        ],
-        [
-          "c",
-          false,
-          30
-        ],
-        [
-          "d",
-          false,
-          40
-        ]
-      ],
-      "stop": null
-    },
-    {
-      "name": "it is counted out, and the other four are full",
-      "starting": "a",
-      "running": [
-        [
-          "a",
-          false,
-          1
-        ],
-        [
-          "b",
-          false,
-          20
-        ],
-        [
-          "c",
-          false,
-          15
-        ],
-        [
-          "d",
-          false,
-          40
-        ],
-        [
-          "e",
-          true,
-          5
-        ]
-      ],
-      "stop": "c"
-    },
-    {
-      "name": "all four are busy: none is stopped",
-      "starting": "new",
-      "running": [
-        [
-          "a",
-          true,
-          10
-        ],
-        [
-          "b",
-          true,
-          20
-        ],
-        [
-          "c",
-          true,
-          30
-        ],
-        [
-          "d",
-          true,
-          40
-        ]
-      ],
-      "stop": null
-    },
-    {
-      "name": "used at the same time: the first in the list goes",
-      "starting": "new",
-      "running": [
-        [
-          "a",
-          false,
-          10
-        ],
-        [
-          "b",
-          false,
-          10
-        ],
-        [
-          "c",
-          true,
-          1
-        ],
-        [
-          "d",
-          false,
-          10
-        ]
-      ],
-      "stop": "a"
-    },
-    {
-      "name": "nothing runs",
-      "starting": "new",
-      "running": [],
-      "stop": null
     }
   ],
   "places": [
@@ -898,7 +658,7 @@
         {
           "environment": "Aiko",
           "session": "a2",
-          "view": "talk"
+          "view": "terminal"
         }
       ]
     },
@@ -912,7 +672,7 @@
         {
           "environment": "Work",
           "session": "w1",
-          "view": "talk"
+          "view": "terminal"
         }
       ]
     },
@@ -936,31 +696,27 @@
         {
           "environment": "Aiko",
           "session": "a2",
-          "view": "talk"
+          "view": "terminal"
         },
         {
           "environment": "Work",
           "session": "w1",
-          "view": "talk"
+          "view": "terminal"
         },
         {
           "environment": "Aiko",
           "session": "a2",
-          "view": "talk"
+          "view": "terminal"
         }
       ]
     },
     {
-      "name": "the same tab changes nothing, even with the form open",
+      "name": "the same tab changes nothing",
       "environments": [
         "Aiko",
         "Work"
       ],
       "actions": [
-        [
-          "form",
-          "open"
-        ],
         [
           "environment",
           "Aiko"
@@ -970,65 +726,22 @@
         {
           "environment": "Aiko",
           "session": "a2",
-          "view": "talk"
+          "view": "terminal"
         },
         {
           "environment": "Aiko",
           "session": "a2",
-          "view": "form"
-        },
-        {
-          "environment": "Aiko",
-          "session": "a2",
-          "view": "form"
+          "view": "terminal"
         }
       ]
     },
     {
-      "name": "another tab closes the form",
+      "name": "a click on a row opens that session",
       "environments": [
         "Aiko",
         "Work"
       ],
       "actions": [
-        [
-          "form",
-          "open"
-        ],
-        [
-          "environment",
-          "Work"
-        ]
-      ],
-      "steps": [
-        {
-          "environment": "Aiko",
-          "session": "a2",
-          "view": "talk"
-        },
-        {
-          "environment": "Aiko",
-          "session": "a2",
-          "view": "form"
-        },
-        {
-          "environment": "Work",
-          "session": "w1",
-          "view": "talk"
-        }
-      ]
-    },
-    {
-      "name": "a click on a row closes the form",
-      "environments": [
-        "Aiko",
-        "Work"
-      ],
-      "actions": [
-        [
-          "form",
-          "open"
-        ],
         [
           "session",
           "c1"
@@ -1038,51 +751,12 @@
         {
           "environment": "Aiko",
           "session": "a2",
-          "view": "talk"
-        },
-        {
-          "environment": "Aiko",
-          "session": "a2",
-          "view": "form"
+          "view": "terminal"
         },
         {
           "environment": "Aiko",
           "session": "c1",
-          "view": "talk"
-        }
-      ]
-    },
-    {
-      "name": "the form is closed without a session: the conversation is back",
-      "environments": [
-        "Aiko",
-        "Work"
-      ],
-      "actions": [
-        [
-          "form",
-          "open"
-        ],
-        [
-          "form",
-          "close"
-        ]
-      ],
-      "steps": [
-        {
-          "environment": "Aiko",
-          "session": "a2",
-          "view": "talk"
-        },
-        {
-          "environment": "Aiko",
-          "session": "a2",
-          "view": "form"
-        },
-        {
-          "environment": "Aiko",
-          "session": "a2",
-          "view": "talk"
+          "view": "terminal"
         }
       ]
     },
@@ -1110,22 +784,22 @@
         {
           "environment": "Aiko",
           "session": "a2",
-          "view": "talk"
+          "view": "terminal"
         },
         {
           "environment": "Aiko",
           "session": "a2",
-          "view": "talk"
+          "view": "terminal"
         },
         {
           "environment": "Aiko",
           "session": "a2",
-          "view": "talk"
+          "view": "terminal"
         },
         {
           "environment": "Aiko",
           "session": "a2",
-          "view": "talk"
+          "view": "terminal"
         }
       ]
     },
@@ -1145,12 +819,12 @@
         {
           "environment": "Aiko",
           "session": "a2",
-          "view": "talk"
+          "view": "terminal"
         },
         {
           "environment": "Aiko",
           "session": "a3",
-          "view": "talk"
+          "view": "terminal"
         }
       ]
     },
@@ -1174,17 +848,17 @@
         {
           "environment": "Aiko",
           "session": "a2",
-          "view": "talk"
+          "view": "terminal"
         },
         {
           "environment": "Aiko",
           "session": "c1",
-          "view": "talk"
+          "view": "terminal"
         },
         {
           "environment": "Aiko",
           "session": "c1",
-          "view": "talk"
+          "view": "terminal"
         }
       ]
     },
@@ -1212,17 +886,17 @@
         {
           "environment": "Aiko",
           "session": "a2",
-          "view": "talk"
+          "view": "terminal"
         },
         {
           "environment": "Work",
           "session": "w1",
-          "view": "talk"
+          "view": "terminal"
         },
         {
           "environment": "Work",
           "session": "w2",
-          "view": "talk"
+          "view": "terminal"
         },
         {
           "environment": "Work",
@@ -1232,7 +906,7 @@
       ]
     },
     {
-      "name": "an environment without sessions, then the form",
+      "name": "an environment without sessions has nothing to show",
       "environments": [
         "Aiko",
         "Nobody"
@@ -1241,27 +915,18 @@
         [
           "environment",
           "Nobody"
-        ],
-        [
-          "form",
-          "open"
         ]
       ],
       "steps": [
         {
           "environment": "Aiko",
           "session": "a2",
-          "view": "talk"
+          "view": "terminal"
         },
         {
           "environment": "Nobody",
           "session": null,
           "view": "noSessions"
-        },
-        {
-          "environment": "Nobody",
-          "session": null,
-          "view": "form"
         }
       ]
     }

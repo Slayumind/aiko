@@ -51,7 +51,8 @@
   <ItemGroup>
     <Content Include="$(WhisperFolder)*" Link="whisper\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <!-- MIT asks for the licence to travel with the files. -->
-    <Content Include="Assets\Licenses\*.txt" Link="whisper\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="Assets\Licenses\*.txt" Exclude="Assets\Licenses\windows-terminal-LICENSE.txt" Link="whisper\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="Assets\Licenses\windows-terminal-LICENSE.txt" Link="windows-terminal-LICENSE.txt" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>
@@ -64,6 +65,17 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Velopack" />
+    <!-- The terminal control of Windows Terminal (D-360). Its native renderer comes with it. -->
+    <PackageReference Include="CI.Microsoft.Terminal.Wpf" />
+    <!--
+      ConPTY newer than the one in Windows. Its own targets put OpenConsole.exe into an x64 folder
+      while conpty.dll lands elsewhere; the spike ran both side by side, so they are copied here by hand.
+    -->
+    <PackageReference Include="Microsoft.Windows.Console.ConPTY" ExcludeAssets="all" GeneratePathProperty="true" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(PkgMicrosoft_Windows_Console_ConPTY)\runtimes\win-x64\native\conpty.dll" Link="conpty.dll" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="$(PkgMicrosoft_Windows_Console_ConPTY)\build\native\runtimes\x64\OpenConsole.exe" Link="OpenConsole.exe" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <!--

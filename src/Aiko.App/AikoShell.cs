@@ -289,7 +289,7 @@ sealed class AikoShell : IDisposable
                 OpenSettings(checkUpdates: true);
                 break;
             case TrayCommand.Exit:
-                _application.Shutdown();
+                Quit();
                 break;
         }
     }
@@ -326,8 +326,21 @@ sealed class AikoShell : IDisposable
         }
     }
 
-    /// One terminal window, as with the settings. Closing it ends its sessions' processes; the
-    /// sessions come back from terminal.json the next time.
+    /// Aiko quits from the tray or the settings. While programs run in the terminal the window asks
+    /// first (D-351); a quit for an update or the end of Windows does not come through here.
+    private void Quit()
+    {
+        if (_terminal is { AnyRunning: true } terminal)
+        {
+            terminal.AskToQuit(_application.Shutdown);
+            return;
+        }
+
+        _application.Shutdown();
+    }
+
+    /// One terminal window, as with the settings. Closing it hides it while a program runs in it
+    /// (D-351); the sessions come back from terminal.json the next time Aiko starts.
     private void OpenTerminal()
     {
         if (_terminal is not null)
@@ -344,10 +357,8 @@ sealed class AikoShell : IDisposable
             return;
         }
 
-        var terminal = new TerminalHost(
-            environments, SettingsStore.LoadTerminal(), () => new ClaudeProcess(), _numbers.SnapshotFor);
+        var terminal = new TerminalHost(environments, SettingsStore.LoadTerminal(), _numbers.SnapshotFor);
         terminal.Closed += () => _terminal = null;
-        terminal.SettingsAsked += () => OpenSettings(page: SettingsPanel.TerminalPageKey);
         terminal.InViewChanged += _island.FollowTerminal;
         _terminal = terminal;
         terminal.Show();
@@ -370,7 +381,7 @@ sealed class AikoShell : IDisposable
         }
 
         var window = new SettingsWindow(page);
-        window.QuitRequested += () => _application.Shutdown();
+        window.QuitRequested += Quit;
 
         // Changes apply at once (D-179): the tray or the island, direct mode and our access follow
         // each one while the window is still open.
