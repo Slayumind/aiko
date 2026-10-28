@@ -70,10 +70,11 @@ public final class CommandLoader: @unchecked Sendable {
         let process = newProcess()
         let once = Once()
         let post = self.post
+        let stopper = Stopper(process)
 
         let answer: @Sendable (ClaudeOffer) -> Void = { offer in
             guard once.take() else { return }
-            process.stop()
+            stopper.stop()
             post { done(offer) }
         }
 
@@ -98,6 +99,20 @@ public final class CommandLoader: @unchecked Sendable {
         // Claude Code answers in under a second. One that hangs on its start is stopped after
         // this, so no process waits until Aiko quits.
         DispatchQueue.global().asyncAfter(deadline: .now() + 20) { answer(.none) }
+    }
+
+    /// Stops the process from the thread its answer comes on. A process may be stopped from any
+    /// thread: ClaudeProcess guards its stop with a lock.
+    private final class Stopper: @unchecked Sendable {
+        private let process: ConversationProcess
+
+        init(_ process: ConversationProcess) {
+            self.process = process
+        }
+
+        func stop() {
+            process.stop()
+        }
     }
 
     /// True the first time only.

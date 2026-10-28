@@ -44,7 +44,7 @@ struct QuestionFlowCaseTests {
         return QuestionStep(flow.show(Int(action["show"]?.int64Value ?? -1)))
     }
 
-    private static func questions(_ cases: JsonNode, _ set: String) -> [CardQuestion] {
+    private static func questions(_ cases: JsonObject, _ set: String) -> [CardQuestion] {
         (cases["questions"]?[set]?.arrayValue ?? []).map { question in
             CardQuestion(
                 text: question["text"]?.stringValue ?? "",

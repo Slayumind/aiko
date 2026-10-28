@@ -11,7 +11,7 @@ namespace Aiko.App;
 /// the row the keyboard chose. cmdk and Radix light a row only when the pointer itself moves.
 static class PointerTrail
 {
-    private static Point _last = new(double.NaN, double.NaN);
+    private static Point Last = new(double.NaN, double.NaN);
 
     public static bool Moved(Visual relativeTo)
     {
@@ -21,8 +21,8 @@ static class PointerTrail
         }
 
         var now = relativeTo.PointToScreen(Mouse.GetPosition((IInputElement)relativeTo));
-        var moved = now != _last;
-        _last = now;
+        var moved = now != Last;
+        Last = now;
         return moved;
     }
 }
