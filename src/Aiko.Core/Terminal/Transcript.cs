@@ -74,10 +74,44 @@ public static class Transcript
                     return FromPerson(state, root, line);
                 case "system" when Word(root, "subtype") == "compact_boundary":
                     return state.On(StreamEvent.FromLine(line)).State;
+                case "attachment" when QueuedByPerson(Member(root, "attachment")) is { } said:
+                    return FromPerson(state, said.RootElement, said.RootElement.GetRawText());
                 default:
                     return state;
             }
         }
+    }
+
+    /// A message the person sent while Claude worked. Claude Code writes it into the file as an
+    /// attachment when it takes the message, not as a message of the person (2.1.312, RESEARCH).
+    /// Notices of tasks and messages of other sessions come the same way and stay out of the feed.
+    /// The words are given back as the message they were, so they read like any other.
+    private static JsonDocument? QueuedByPerson(JsonElement attachment)
+    {
+        var origin = Member(attachment, "origin");
+        var from = origin.ValueKind == JsonValueKind.Object ? Word(origin, "kind") : Word(attachment, "origin");
+        if (Word(attachment, "type") != "queued_command" || Word(attachment, "commandMode") != "prompt"
+            || Flag(attachment, "isMeta") || from is not ("" or "human"))
+        {
+            return null;
+        }
+
+        var prompt = Member(attachment, "prompt");
+        if (prompt.ValueKind is not (JsonValueKind.String or JsonValueKind.Array))
+        {
+            return null;
+        }
+
+        var said = new System.Text.Json.Nodes.JsonObject
+        {
+            ["type"] = "user",
+            ["message"] = new System.Text.Json.Nodes.JsonObject
+            {
+                ["role"] = "user",
+                ["content"] = System.Text.Json.Nodes.JsonNode.Parse(prompt.GetRawText()),
+            },
+        };
+        return JsonDocument.Parse(said.ToJsonString());
     }
 
     /// A "user" line is either what tools gave back, or what the person wrote.

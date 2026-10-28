@@ -56,9 +56,29 @@ public enum Transcript {
             return fromPerson(state, root, line)
         case "system" where root["subtype"]?.stringValue == "compact_boundary":
             return state.on(StreamEvent.fromLine(line)).state
+        case "attachment":
+            guard let said = queuedByPerson(root["attachment"]) else { return state }
+            return fromPerson(state, said, said.toJsonString())
         default:
             return state
         }
+    }
+
+    /// A message the person sent while Claude worked. Claude Code writes it into the file as an
+    /// attachment when it takes the message, not as a message of the person (2.1.312, RESEARCH).
+    /// Notices of tasks and messages of other sessions come the same way and stay out of the feed.
+    /// The words are given back as the message they were, so they read like any other.
+    private static func queuedByPerson(_ attachment: JsonNode?) -> JsonNode? {
+        guard let attachment, attachment["type"]?.stringValue == "queued_command",
+              attachment["commandMode"]?.stringValue == "prompt",
+              attachment["isMeta"]?.boolValue != true else { return nil }
+        let from = attachment["origin"]?.objectValue?["kind"]?.stringValue ?? attachment["origin"]?.stringValue ?? ""
+        guard from.isEmpty || from == "human", let prompt = attachment["prompt"],
+              prompt.stringValue != nil || prompt.arrayValue != nil else { return nil }
+        return .object(JsonObject([
+            ("type", .string("user")),
+            ("message", .object(JsonObject([("role", .string("user")), ("content", prompt)]))),
+        ]))
     }
 
     /// A "user" line is either what tools gave back, or what the person wrote.
