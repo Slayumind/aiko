@@ -92,7 +92,12 @@ public final class CommandLoader: @unchecked Sendable {
 
         if !started || !process.write(HostLine.initialize(CommandLoader.requestId)) {
             answer(.none)
+            return
         }
+
+        // Claude Code answers in under a second. One that hangs on its start is stopped after
+        // this, so no process waits until Aiko quits.
+        DispatchQueue.global().asyncAfter(deadline: .now() + 20) { answer(.none) }
     }
 
     /// True the first time only.

@@ -74,7 +74,7 @@ sealed class TerminalWindow : Window
     public WindowPlace Place =>
         WindowState == WindowState.Normal
             ? new WindowPlace(Left, Top, Width, Height, false)
-            : new WindowPlace(RestoreBounds.Left, RestoreBounds.Top, RestoreBounds.Width, RestoreBounds.Height, WindowState == WindowState.Maximized);
+            : new WindowPlace(RestoreBounds.Left, RestoreBounds.Top, RestoreBounds.Width, RestoreBounds.Height, _maximized);
 
     protected override void OnClosing(CancelEventArgs e)
     {
@@ -86,9 +86,18 @@ sealed class TerminalWindow : Window
         base.OnClosing(e);
     }
 
+    /// Whether the window was maximized before it was minimized: closed from the taskbar while
+    /// minimized, it opens maximized again.
+    private bool _maximized;
+
     private void FollowState()
     {
         var maximized = WindowState == WindowState.Maximized;
+        if (WindowState != WindowState.Minimized)
+        {
+            _maximized = maximized;
+        }
+
         _root.Padding = new Thickness(maximized ? MaximizedInset : 0);
         _panel.ShowMaximized(maximized);
     }

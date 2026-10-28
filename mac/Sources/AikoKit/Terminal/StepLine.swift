@@ -57,6 +57,14 @@ public struct StepLine: Sendable, Equatable {
             step.added = change.added
             step.removed = change.removed
             return step
+        case "MultiEdit":
+            let edits = (input["edits"]?.arrayValue ?? []).compactMap(\.objectValue).map { edit in
+                changed(text(edit, "old_string"), text(edit, "new_string"))
+            }
+            var step = line(.edit, fileName(text(input, "file_path")))
+            step.added = edits.reduce(0) { $0 + $1.added }
+            step.removed = edits.reduce(0) { $0 + $1.removed }
+            return step
         case "NotebookEdit":
             return line(.edit, fileName(text(input, "notebook_path")))
         case "Bash", "PowerShell":

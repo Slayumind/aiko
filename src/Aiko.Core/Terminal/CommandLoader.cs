@@ -24,6 +24,10 @@ public sealed class CommandLoader(Func<IConversationProcess> newProcess, Action<
 {
     private const string RequestId = "commands-1";
 
+    /// Claude Code answers in under a second. One that hangs on its start is stopped after this,
+    /// so no process waits until Aiko quits.
+    private static readonly TimeSpan MostWait = TimeSpan.FromSeconds(20);
+
     public void Load(CommandSetup setup, Action<ClaudeOffer> done)
     {
         var plan = ClaudeLaunchPlan.ForCommands(setup.ConfigDirectory, setup.UserProfile, setup.InheritedVariables);
@@ -61,6 +65,9 @@ public sealed class CommandLoader(Func<IConversationProcess> newProcess, Action<
         if (!started || !process.Write(HostLine.Initialize(RequestId)))
         {
             Answer(ClaudeOffer.None);
+            return;
         }
+
+        _ = Task.Delay(MostWait).ContinueWith(_ => Answer(ClaudeOffer.None), TaskScheduler.Default);
     }
 }

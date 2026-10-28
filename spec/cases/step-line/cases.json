@@ -581,6 +581,30 @@
         "removed": 0,
         "hidden": false
       }
+    },
+    {
+      "tool": "MultiEdit",
+      "input": {
+        "file_path": "C:/work/src/TalkInput.cs",
+        "edits": [
+          {
+            "old_string": "a\nb",
+            "new_string": "a\nc\nd"
+          },
+          {
+            "old_string": "x",
+            "new_string": ""
+          }
+        ]
+      },
+      "line": {
+        "kind": "edit",
+        "label": "",
+        "subject": "TalkInput.cs",
+        "added": 2,
+        "removed": 2,
+        "hidden": false
+      }
     }
   ]
 }

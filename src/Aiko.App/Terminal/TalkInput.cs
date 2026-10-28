@@ -482,8 +482,9 @@ sealed class TalkInput : UserControl
                 VoiceCancelled?.Invoke();
             }
 
-            // Each session keeps its own draft while the window lives (LobeChat, Zed).
-            _drafts[_session] = _text.Text;
+            // Each session keeps its own draft while the window lives (LobeChat, Zed). While the
+            // arrows walk the history the field shows an old message: the draft is what was typed.
+            _drafts[_session] = _back >= 0 ? _draft : _text.Text;
 
             // The first message of a session is sent from its draft, and the draft becomes the
             // session: what was sent goes with it, so Up shows it there and not in the next draft.
@@ -960,6 +961,13 @@ sealed class TalkInput : UserControl
     /// when it has a space.
     private void Take(IReadOnlyList<string> paths)
     {
+        // While words are heard the field is not the person's to change: the end of the
+        // recording writes it again.
+        if (_dictating)
+        {
+            return;
+        }
+
         var words = new List<string>();
         foreach (var path in paths)
         {

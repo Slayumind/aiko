@@ -76,7 +76,9 @@ static class ModelDownload
     {
         Directory.CreateDirectory(Path.GetDirectoryName(Model)!);
         var have = File.Exists(Part) ? new FileInfo(Part).Length : 0;
-        if (have > VoiceModel.Bytes)
+        // A part as long as the model itself asks the server for nothing, and it answers 416 every
+        // time: such a part is read again from the start.
+        if (have >= VoiceModel.Bytes)
         {
             File.Delete(Part);
             have = 0;
