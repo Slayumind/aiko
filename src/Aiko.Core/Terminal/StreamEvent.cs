@@ -32,7 +32,7 @@ public sealed record ToolResult(string ToolUseId, bool IsError, string Text, IRe
 public abstract record StreamEvent
 {
     /// Claude Code is ready for a turn. It comes before every turn, not once.
-    public sealed record Ready(string SessionId, string Model, PermissionMode? Mode, string Version) : StreamEvent;
+    public sealed record Ready(string SessionId, string Model, PermissionMode? Mode) : StreamEvent;
 
     /// A message of Claude, whole. Error is set when Claude Code answered in its place:
     /// "authentication_failed" means the environment is not signed in.
@@ -115,11 +115,8 @@ public abstract record StreamEvent
         public IReadOnlyDictionary<string, int> ContextWindows { get; init; } = new Dictionary<string, int>();
     }
 
-    /// A line the terminal has no use for.
+    /// A line the terminal has no use for, or cannot read.
     public sealed record Ignored : StreamEvent;
-
-    /// Not a JSON object.
-    public sealed record Unreadable : StreamEvent;
 
     /// Never throws: one broken line must not end a conversation.
     public static StreamEvent FromLine(string? line)
@@ -133,12 +130,12 @@ public abstract record StreamEvent
         try
         {
             using var document = JsonDocument.Parse(text);
-            return document.RootElement.ValueKind == JsonValueKind.Object ? Read(document.RootElement) : new Unreadable();
+            return document.RootElement.ValueKind == JsonValueKind.Object ? Read(document.RootElement) : new Ignored();
         }
         catch (Exception error) when (error is JsonException or InvalidOperationException or ArgumentOutOfRangeException)
         {
             // A line Aiko cannot read is dropped; it must never take the window down with it.
-            return new Unreadable();
+            return new Ignored();
         }
     }
 
@@ -170,8 +167,7 @@ public abstract record StreamEvent
                 return new Ready(
                     session,
                     Str(root, "model") ?? "",
-                    PermissionModes.FromStream(Str(root, "permissionMode")),
-                    Str(root, "claude_code_version") ?? "");
+                    PermissionModes.FromStream(Str(root, "permissionMode")));
             case "status":
                 return new Status(Str(root, "status"), PermissionModes.FromStream(Str(root, "permissionMode")));
             case "compact_boundary":

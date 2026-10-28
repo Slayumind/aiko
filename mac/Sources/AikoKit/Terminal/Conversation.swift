@@ -252,7 +252,7 @@ public struct Conversation: Sendable, Equatable {
     public func on(_ event: StreamEvent) -> Outcome {
         var next = self
         switch event {
-        case .ready(let session, let model, let mode, _):
+        case .ready(let session, let model, let mode):
             next.sessionId = session
             if !model.isEmpty {
                 next.model = model
@@ -267,7 +267,9 @@ public struct Conversation: Sendable, Equatable {
             // subagent in the background is over, Claude reads what it did and answers.
             next.inTurn = true
             next.say(blocks, error, contextTokens)
-        case .user(nil, let text, _, true, _):
+        // What Claude Code wrote itself, such as the answer to a change of model, is never a
+        // message of the person that waited.
+        case .user(nil, let text, _, true, false):
             next.take(text)
         case .user(nil, let text, let results, _, _):
             // After a change of model Claude Code names its full id at once, before the next turn.

@@ -39,8 +39,6 @@ sealed unsafe class Microphone : IDisposable
     /// Raised on the reading thread when the device stops giving sound: unplugged mid-sentence.
     public event Action? Lost;
 
-    public static bool Present => PInvoke.waveInGetNumDevs() > 0;
-
     /// How loud the last tenth of a second was, from 0 to 1.
     public double Level => Volatile.Read(ref _level);
 

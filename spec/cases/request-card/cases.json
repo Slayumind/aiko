@@ -50,7 +50,6 @@
         "kind": "permission",
         "second": "editsInSession",
         "rule": "",
-        "subagent": false,
         "step": {
           "kind": "edit",
           "label": "",
@@ -122,7 +121,6 @@
         "kind": "permission",
         "second": "alwaysAllow",
         "rule": "mkdir build *",
-        "subagent": false,
         "step": {
           "kind": "run",
           "label": "",
@@ -166,7 +164,6 @@
         "kind": "permission",
         "second": "none",
         "rule": "",
-        "subagent": false,
         "step": {
           "kind": "run",
           "label": "",
@@ -212,7 +209,6 @@
         "kind": "permission",
         "second": "editsInSession",
         "rule": "",
-        "subagent": true,
         "step": {
           "kind": "edit",
           "label": "",
@@ -253,7 +249,6 @@
         "kind": "permission",
         "second": "none",
         "rule": "",
-        "subagent": false,
         "step": {
           "kind": "other",
           "label": "blender",
@@ -306,7 +301,6 @@
         "kind": "permission",
         "second": "alwaysAllow",
         "rule": "mcp__office__add_card",
-        "subagent": false,
         "step": {
           "kind": "other",
           "label": "office",
@@ -412,7 +406,6 @@
         "kind": "question",
         "second": "none",
         "rule": "",
-        "subagent": false,
         "step": {
           "kind": "other",
           "label": "AskUserQuestion",
@@ -491,7 +484,6 @@
         "kind": "plan",
         "second": "none",
         "rule": "",
-        "subagent": false,
         "step": {
           "kind": "other",
           "label": "ExitPlanMode",
@@ -541,7 +533,6 @@
         "kind": "question",
         "second": "none",
         "rule": "",
-        "subagent": false,
         "step": {
           "kind": "other",
           "label": "AskUserQuestion",

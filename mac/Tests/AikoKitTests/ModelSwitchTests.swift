@@ -83,7 +83,7 @@ struct ModelSwitchTests {
     func theNextStartNamesTheFullIdOfAnAskedModel() {
         let asked = Conversation.empty().setModel("haiku").state
 
-        let named = asked.on(.ready(sessionId: "s1", model: "claude-haiku-5-5", mode: nil, version: "")).state
+        let named = asked.on(.ready(sessionId: "s1", model: "claude-haiku-5-5", mode: nil)).state
 
         #expect(named.model == "claude-haiku-5-5")
         #expect(named.askedModel == "")
@@ -93,7 +93,7 @@ struct ModelSwitchTests {
     func aStartWithoutAModelKeepsTheAskedOne() {
         let asked = Conversation.empty().setModel("haiku").state
 
-        let next = asked.on(.ready(sessionId: "s1", model: "", mode: nil, version: "")).state
+        let next = asked.on(.ready(sessionId: "s1", model: "", mode: nil)).state
 
         #expect(next.askedModel == "haiku")
     }
@@ -107,6 +107,6 @@ struct ModelSwitchTests {
     }
 
     private static func ready(_ model: String) -> Conversation {
-        Conversation.empty().on(.ready(sessionId: "s1", model: model, mode: nil, version: "")).state
+        Conversation.empty().on(.ready(sessionId: "s1", model: model, mode: nil)).state
     }
 }

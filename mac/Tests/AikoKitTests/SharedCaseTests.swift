@@ -949,7 +949,7 @@ struct SharedCaseTests {
     private static func describedCard(_ card: RequestCard) -> JsonNode {
         node([
             ("kind", .string(String(describing: card.kind))), ("second", .string(String(describing: card.second))),
-            ("rule", .string(card.ruleText)), ("subagent", .bool(card.fromSubagent)),
+            ("rule", .string(card.ruleText)),
             ("step", describedStep(card.step)),
             ("questions", .array(card.questions.map { question in
                 node([
@@ -1029,7 +1029,6 @@ struct SharedCaseTests {
             return node([
                 ("card", .string(String(describing: request.kind))), ("state", .string(String(describing: state))),
                 ("requestId", .string(request.requestId)), ("second", .string(String(describing: request.second))),
-                ("subagent", .bool(request.fromSubagent)),
             ])
         case .notice(let kind, let words, let size):
             var pairs: [(String, JsonNode)] = [("notice", .string(String(describing: kind))), ("text", .string(words))]
@@ -1228,7 +1227,6 @@ struct SharedCaseTests {
             case "used": sessions = sessions.used(word("id"), now: step["now"]?.int64Value ?? 0)
             case "opened": sessions = sessions.opened(word("id"))
             case "close": sessions = sessions.close(word("id"))
-            case "move": sessions = sessions.move(word("id"), before: step["before"]?.stringValue)
             case "placed":
                 sessions = sessions.placed(WindowPlace(
                     left: step["left"]?.doubleValue ?? 0, top: step["top"]?.doubleValue ?? 0,
@@ -1628,10 +1626,10 @@ struct SharedCaseTests {
     /// A stream event as the case files write it down, with the keys in the order of the files.
     private static func described(_ event: StreamEvent) -> JsonNode {
         switch event {
-        case .ready(let sessionId, let model, let mode, let version):
+        case .ready(let sessionId, let model, let mode):
             return node([
                 ("kind", .string("ready")), ("sessionId", .string(sessionId)), ("model", .string(model)),
-                ("mode", modeName(mode)), ("version", .string(version)),
+                ("mode", modeName(mode)),
             ])
         case .assistant(let parent, let blocks, let error, let contextTokens):
             // The size of the context is named only where the line has one, so older cases stay.
@@ -1713,8 +1711,6 @@ struct SharedCaseTests {
                 ("kind", .string("result")), ("isError", .bool(isError)), ("subtype", .string(subtype)),
                 ("terminalReason", .string(terminalReason)), ("text", .string(words)),
             ] + (windows.isEmpty ? [] : [("contextWindows", node(windows.map { ($0.model, number($0.window)) }))]))
-        case .unreadable:
-            return node([("kind", .string("unreadable"))])
         case .ignored:
             return node([("kind", .string("ignored"))])
         }

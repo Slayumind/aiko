@@ -40,7 +40,6 @@ public enum VoiceCue: String, Sendable, Equatable {
     case cancel = "Cancel"
     case finished = "Finished"
     case noMicrophone = "NoMicrophone"
-    case microphoneBack = "MicrophoneBack"
     case cloudFailed = "CloudFailed"
 }
 
@@ -130,8 +129,6 @@ public enum VoiceInput {
             return VoiceState(state.phase, .noMicrophone)
         case (.warming, .cloudFailed), (.listening, .cloudFailed), (.finishing, .cloudFailed):
             return VoiceState(.idle, .cloudFailed)
-        case (_, .microphoneBack) where state.notice == .noMicrophone:
-            return VoiceState(state.phase, .none)
         default:
             return state
         }

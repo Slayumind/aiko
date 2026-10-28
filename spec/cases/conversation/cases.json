@@ -592,8 +592,7 @@
             "card": "permission",
             "state": "open",
             "requestId": "req-1",
-            "second": "editsInSession",
-            "subagent": false
+            "second": "editsInSession"
           }
         ]
       },
@@ -730,8 +729,7 @@
             "card": "permission",
             "state": "allowed",
             "requestId": "req-1",
-            "second": "editsInSession",
-            "subagent": false
+            "second": "editsInSession"
           },
           {
             "answer": "Done.",
@@ -845,8 +843,7 @@
             "card": "permission",
             "state": "allowed",
             "requestId": "req-1",
-            "second": "editsInSession",
-            "subagent": false
+            "second": "editsInSession"
           }
         ]
       },
@@ -967,8 +964,7 @@
             "card": "permission",
             "state": "denied",
             "requestId": "req-1",
-            "second": "none",
-            "subagent": false
+            "second": "none"
           }
         ]
       },
@@ -1085,8 +1081,7 @@
             "card": "question",
             "state": "open",
             "requestId": "req-1",
-            "second": "none",
-            "subagent": false
+            "second": "none"
           }
         ]
       },
@@ -1212,8 +1207,7 @@
             "card": "question",
             "state": "answered",
             "requestId": "req-1",
-            "second": "none",
-            "subagent": false
+            "second": "none"
           }
         ]
       },
@@ -1304,8 +1298,7 @@
             "card": "plan",
             "state": "open",
             "requestId": "req-1",
-            "second": "none",
-            "subagent": false
+            "second": "none"
           }
         ]
       },
@@ -1409,8 +1402,7 @@
             "card": "plan",
             "state": "allowed",
             "requestId": "req-1",
-            "second": "none",
-            "subagent": false
+            "second": "none"
           }
         ]
       },
@@ -1647,8 +1639,7 @@
             "card": "permission",
             "state": "open",
             "requestId": "req-1",
-            "second": "none",
-            "subagent": false
+            "second": "none"
           },
           {
             "owner": "and one more thing",
@@ -1784,8 +1775,7 @@
             "card": "permission",
             "state": "closed",
             "requestId": "req-1",
-            "second": "none",
-            "subagent": false
+            "second": "none"
           },
           {
             "notice": "interrupted",
@@ -2481,8 +2471,7 @@
             "card": "permission",
             "state": "open",
             "requestId": "req-1",
-            "second": "none",
-            "subagent": true
+            "second": "none"
           }
         ]
       },
@@ -2650,8 +2639,7 @@
             "card": "permission",
             "state": "allowed",
             "requestId": "req-1",
-            "second": "none",
-            "subagent": true
+            "second": "none"
           },
           {
             "answer": "The agent created sub.txt.",
@@ -4863,6 +4851,76 @@
       ],
       "glance": {
         "activity": "failed",
+        "line": "none",
+        "kind": "other",
+        "label": "",
+        "text": ""
+      }
+    },
+    {
+      "name": "the answer to a change of model that Claude Code says back on its own names the model",
+      "steps": [
+        {
+          "do": "send",
+          "text": "go"
+        },
+        {
+          "line": {
+            "type": "system",
+            "subtype": "init",
+            "session_id": "s-1",
+            "model": "claude-opus-5-5",
+            "permissionMode": "default",
+            "claude_code_version": "2.1.312"
+          }
+        },
+        {
+          "line": {
+            "type": "result",
+            "subtype": "success",
+            "is_error": false,
+            "terminal_reason": "completed",
+            "result": "ok"
+          }
+        },
+        {
+          "line": {
+            "type": "user",
+            "message": {
+              "role": "user",
+              "content": "<local-command-stdout>Set model to `sonnet (claude-sonnet-5-5)`</local-command-stdout>"
+            },
+            "isReplay": true,
+            "isSynthetic": true
+          }
+        }
+      ],
+      "state": {
+        "activity": "done",
+        "mode": "manual",
+        "model": "claude-sonnet-5-5",
+        "session": "s-1",
+        "tasks": 0,
+        "unread": true,
+        "compacting": false,
+        "limits": 0,
+        "items": [
+          {
+            "owner": "go",
+            "images": 0,
+            "queued": false
+          },
+          {
+            "notice": "output",
+            "text": "ok"
+          }
+        ]
+      },
+      "written": [
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"go\"}]}}"
+      ],
+      "glance": {
+        "activity": "done",
         "line": "none",
         "kind": "other",
         "label": "",

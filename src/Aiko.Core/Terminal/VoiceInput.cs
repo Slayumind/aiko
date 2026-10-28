@@ -44,7 +44,6 @@ public enum VoiceCue
     Cancel,
     Finished,
     NoMicrophone,
-    MicrophoneBack,
     CloudFailed,
 }
 
@@ -121,8 +120,6 @@ public static class VoiceInput
             (_, VoiceCue.NoMicrophone) => state with { Notice = VoiceNotice.NoMicrophone },
             (VoicePhase.Warming or VoicePhase.Listening or VoicePhase.Finishing, VoiceCue.CloudFailed) =>
                 new VoiceState(VoicePhase.Idle, VoiceNotice.CloudFailed),
-            (_, VoiceCue.MicrophoneBack) when state.Notice == VoiceNotice.NoMicrophone =>
-                state with { Notice = VoiceNotice.None },
             _ => state,
         };
     }

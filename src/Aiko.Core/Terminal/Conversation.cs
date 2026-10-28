@@ -208,6 +208,9 @@ public sealed record Conversation(
         }),
         StreamEvent.TextDelta { ParentToolUseId: null } delta => Quiet(Begun().Streamed(delta.Text)),
         StreamEvent.Assistant { ParentToolUseId: null } assistant => Quiet(Begun().Said(assistant)),
+        // What Claude Code wrote itself, such as the answer to a change of model, is never a
+        // message of the person that waited.
+        StreamEvent.User { ParentToolUseId: null, IsReplay: true, IsSynthetic: true } own => Quiet(Returned(own)),
         StreamEvent.User { ParentToolUseId: null, IsReplay: true } replay => Quiet(Taken(replay)),
         StreamEvent.User { ParentToolUseId: null } user => Quiet(Returned(user)),
         StreamEvent.Request request => Quiet(Add(id => new FeedItem.Card(id, RequestCard.From(request), RequestState.Open))),

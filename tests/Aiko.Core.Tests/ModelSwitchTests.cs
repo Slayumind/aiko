@@ -81,7 +81,7 @@ public class ModelSwitchTests
     {
         var asked = Conversation.Empty().SetModel("haiku").State;
 
-        var named = asked.On(new StreamEvent.Ready("s1", "claude-haiku-5-5", null, "")).State;
+        var named = asked.On(new StreamEvent.Ready("s1", "claude-haiku-5-5", null)).State;
 
         Assert.Equal("claude-haiku-5-5", named.Model);
         Assert.Equal("", named.AskedModel);
@@ -92,7 +92,7 @@ public class ModelSwitchTests
     {
         var asked = Conversation.Empty().SetModel("haiku").State;
 
-        var next = asked.On(new StreamEvent.Ready("s1", "", null, "")).State;
+        var next = asked.On(new StreamEvent.Ready("s1", "", null)).State;
 
         Assert.Equal("haiku", next.AskedModel);
     }
@@ -106,5 +106,5 @@ public class ModelSwitchTests
     }
 
     private static Conversation Ready(string model) =>
-        Conversation.Empty().On(new StreamEvent.Ready("s1", model, null, "")).State;
+        Conversation.Empty().On(new StreamEvent.Ready("s1", model, null)).State;
 }

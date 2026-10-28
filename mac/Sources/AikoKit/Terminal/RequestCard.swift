@@ -69,7 +69,6 @@ public struct RequestCard: Sendable, Equatable {
     public let kind: CardKind
     public let requestId: String
     public let toolUseId: String
-    public let fromSubagent: Bool
     public let step: StepLine
     public let second: SecondChoice
     public let ruleText: String
@@ -93,7 +92,6 @@ public struct RequestCard: Sendable, Equatable {
             kind: kind,
             requestId: request.requestId,
             toolUseId: request.toolUseId,
-            fromSubagent: !(request.agentId ?? "").isEmpty,
             step: step,
             second: kind == .permission ? secondFor(step, request) : .none,
             ruleText: request.ruleText,

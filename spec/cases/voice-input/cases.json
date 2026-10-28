@@ -19,8 +19,6 @@
     { "name": "the mic is gone while listening", "from": ["Listening", "None"], "cue": "NoMicrophone", "ready": "Ready", "to": ["Idle", "NoMicrophone"] },
     { "name": "the mic did not open", "from": ["Warming", "None"], "cue": "NoMicrophone", "ready": "Ready", "to": ["Idle", "NoMicrophone"] },
     { "name": "the mic is gone at rest", "from": ["Idle", "None"], "cue": "NoMicrophone", "ready": "Ready", "to": ["Idle", "NoMicrophone"] },
-    { "name": "the mic is back", "from": ["Idle", "NoMicrophone"], "cue": "MicrophoneBack", "ready": "Ready", "to": ["Idle", "None"] },
-    { "name": "a mic coming back does not hide another line", "from": ["Idle", "NeedsModel"], "cue": "MicrophoneBack", "ready": "Ready", "to": ["Idle", "NeedsModel"] },
     { "name": "a stray Finished at rest", "from": ["Idle", "None"], "cue": "Finished", "ready": "Ready", "to": ["Idle", "None"] },
     { "name": "OpenAI failed while listening", "from": ["Listening", "None"], "cue": "CloudFailed", "ready": "Ready", "to": ["Idle", "CloudFailed"] },
     { "name": "OpenAI failed on the last phrase", "from": ["Finishing", "None"], "cue": "CloudFailed", "ready": "Ready", "to": ["Idle", "CloudFailed"] },

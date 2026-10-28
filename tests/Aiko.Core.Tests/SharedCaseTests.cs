@@ -989,7 +989,6 @@ public class SharedCaseTests
         ["kind"] = Camel(card.Kind),
         ["second"] = Camel(card.Second),
         ["rule"] = card.RuleText,
-        ["subagent"] = card.FromSubagent,
         ["step"] = Described(card.Step),
         ["questions"] = new JsonArray([.. card.Questions.Select(question => new JsonObject
         {
@@ -1130,7 +1129,6 @@ public class SharedCaseTests
             ["state"] = Camel(card.State),
             ["requestId"] = card.Request.RequestId,
             ["second"] = Camel(card.Request.Second),
-            ["subagent"] = card.Request.FromSubagent,
         },
         FeedItem.Notice { Size: { } size } notice => new JsonObject
         {
@@ -1340,7 +1338,6 @@ public class SharedCaseTests
                 "used" => sessions.Used(Word("id"), step.GetProperty("now").GetInt64()),
                 "opened" => sessions.Opened(Word("id")),
                 "close" => sessions.Close(Word("id")),
-                "move" => sessions.Move(Word("id"), step.GetProperty("before").GetString()),
                 "placed" => sessions.Placed(new WindowPlace(
                     step.GetProperty("left").GetDouble(), step.GetProperty("top").GetDouble(),
                     step.GetProperty("width").GetDouble(), step.GetProperty("height").GetDouble(),
@@ -1552,7 +1549,6 @@ public class SharedCaseTests
             ["sessionId"] = ready.SessionId,
             ["model"] = ready.Model,
             ["mode"] = ModeName(ready.Mode),
-            ["version"] = ready.Version,
         },
         StreamEvent.Assistant assistant => WithContextTokens(new JsonObject
         {
@@ -1644,7 +1640,6 @@ public class SharedCaseTests
             ["terminalReason"] = result.TerminalReason,
             ["text"] = result.Text,
         }, result.ContextWindows),
-        StreamEvent.Unreadable => new JsonObject { ["kind"] = "unreadable" },
         _ => new JsonObject { ["kind"] = "ignored" },
     };
 
