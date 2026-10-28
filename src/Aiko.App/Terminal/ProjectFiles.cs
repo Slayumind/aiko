@@ -8,15 +8,23 @@ namespace Aiko.App;
 ///
 /// A git folder answers with git ls-files: the tracked files and the new ones it does not ignore.
 /// Any other folder is walked, without the folders nobody mentions (.git, node_modules, bin, obj),
-/// up to MostFiles. The list is made once per folder, on a thread of its own, and kept while the
-/// window lives; until it is ready, "@" shows nothing.
+/// up to MostFiles. The list is made per folder on a thread of its own; until it is ready, "@"
+/// shows nothing. A list older than FreshFor is shown once more while a new one is made, so files
+/// made during the session come into "@" too.
 static class ProjectFiles
 {
     private const int MostFiles = 5000;
     private static readonly TimeSpan GitWait = TimeSpan.FromSeconds(3);
     private static readonly HashSet<string> Skipped = new(StringComparer.OrdinalIgnoreCase) { ".git", "node_modules", "bin", "obj", ".vs", ".idea" };
 
-    private static readonly ConcurrentDictionary<string, Lazy<Task<IReadOnlyList<string>>>> Lists = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly TimeSpan FreshFor = TimeSpan.FromSeconds(30);
+
+    private sealed record Listing(Lazy<Task<IReadOnlyList<string>>> Files, DateTime Made);
+
+    private static readonly ConcurrentDictionary<string, Listing> Lists = new(StringComparer.OrdinalIgnoreCase);
+
+    private static Listing Start(string folder) =>
+        new(new Lazy<Task<IReadOnlyList<string>>>(() => Task.Run(() => Read(folder))), DateTime.UtcNow);
 
     /// The list if it is ready, or null; ready is called on the window's thread once it is.
     public static IReadOnlyList<string>? Get(string folder, Action ready)
@@ -26,9 +34,20 @@ static class ProjectFiles
             return [];
         }
 
-        var list = Lists.GetOrAdd(folder, key => new Lazy<Task<IReadOnlyList<string>>>(() => Task.Run(() => Read(key)))).Value;
+        var listing = Lists.GetOrAdd(folder, Start);
+        var list = listing.Files.Value;
         if (list.IsCompletedSuccessfully)
         {
+            if (DateTime.UtcNow - listing.Made > FreshFor)
+            {
+                // The next "@" gets the new list; this one shows what is known.
+                var fresh = Start(folder);
+                if (Lists.TryUpdate(folder, fresh, listing))
+                {
+                    _ = fresh.Files.Value;
+                }
+            }
+
             return list.Result;
         }
 

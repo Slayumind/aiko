@@ -259,6 +259,7 @@ sealed class TalkPanel : UserControl
         _tasks.Show(view.Tasks, atOnce: newSession);
         _input.SetCommands(view.Commands);
         _input.SetFolder(view.Folder);
+        AnswerView.Folder = view.Folder;
 
         if (newSession && _slots.Count > 0)
         {
@@ -1138,7 +1139,14 @@ sealed class FeedRow : ContentControl
         };
         if (second is not null)
         {
-            row.Children.Add(Spaced(TerminalPanel.Flat(second, () => Choose(request, new CardChoice.Second()), ghost: false)));
+            // "Always in this project" says on hover what it lets through from now on (D-306).
+            var always = TerminalPanel.Flat(second, () => Choose(request, new CardChoice.Second()), ghost: false);
+            if (request.Second == SecondChoice.AlwaysAllow && request.RuleText.Length > 0)
+            {
+                always.ToolTip = request.RuleText;
+            }
+
+            row.Children.Add(Spaced(always));
         }
 
         row.Children.Add(Spaced(TerminalPanel.Flat(Strings.TerminalDeny, () => Choose(request, new CardChoice.Deny("")), ghost: true)));

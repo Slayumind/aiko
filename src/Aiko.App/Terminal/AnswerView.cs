@@ -391,6 +391,10 @@ static class AnswerView
         return hyperlink;
     }
 
+    /// The folder of the conversation in view: a link to "src/Form.cs" means a file there, not
+    /// next to Aiko. The feed shows one conversation at a time, and sets it when it does.
+    internal static string Folder { get; set; } = "";
+
     private static void Open(LinkTarget target)
     {
         try
@@ -401,7 +405,14 @@ static class AnswerView
                     Process.Start(new ProcessStartInfo(web.Url) { UseShellExecute = true });
                     break;
                 case LinkTarget.File file:
-                    var place = file.Link.Line is { } line ? $"{file.Link.Path}:{line}" : file.Link.Path;
+                    // Words that only look like a file, such as "string.Empty", open nothing.
+                    var path = System.IO.Path.IsPathRooted(file.Link.Path) || Folder.Length == 0 ? file.Link.Path : System.IO.Path.Combine(Folder, file.Link.Path);
+                    if (!System.IO.File.Exists(path))
+                    {
+                        break;
+                    }
+
+                    var place = file.Link.Line is { } line ? $"{path}:{line}" : path;
                     Process.Start(new ProcessStartInfo("code", ["-g", place]) { UseShellExecute = true, WindowStyle = ProcessWindowStyle.Hidden });
                     break;
             }
