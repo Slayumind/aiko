@@ -21,6 +21,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - **The list shows what each session does.** A mark says whether Claude Code works, waits for you
   or is done, and a second line says what it did last: "reading office.mjs", "waits for permission:
   npm test". A session takes the name Claude Code gives the conversation, until you rename it.
+  While a session starts, a loader stands in place of an empty terminal, and the text keeps a
+  little space from the edge.
 - **A new session in two clicks.** Point at a folder in the list: "+" starts Claude Code there and
   ">_" a command line. "New session" opens a quick pick of the folders you used, latest first; Enter
   starts Claude Code, Ctrl+Enter a command line, and the last line opens any other folder.
