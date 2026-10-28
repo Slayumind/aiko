@@ -1583,6 +1583,7 @@ public class SharedCaseTests
             ["parent"] = delta.ParentToolUseId,
             ["text"] = delta.Text,
         },
+        StreamEvent.Withdrawn withdrawn => new JsonObject { ["kind"] = "withdrawn", ["requestId"] = withdrawn.RequestId },
         StreamEvent.Request request => new JsonObject
         {
             ["kind"] = "request",

@@ -1648,6 +1648,26 @@
           "claude-haiku-5-5": 1000000
         }
       }
+    },
+    {
+      "name": "Claude Code takes back a request",
+      "line": {
+        "type": "control_cancel_request",
+        "request_id": "req-1"
+      },
+      "event": {
+        "kind": "withdrawn",
+        "requestId": "req-1"
+      }
+    },
+    {
+      "name": "a take-back without an id is nothing",
+      "line": {
+        "type": "control_cancel_request"
+      },
+      "event": {
+        "kind": "ignored"
+      }
     }
   ]
 }

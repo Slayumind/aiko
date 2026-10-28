@@ -293,6 +293,13 @@ public struct Conversation: Sendable, Equatable {
             }
         case .request(let request):
             next.add(.card(request: RequestCard.from(request), state: .open))
+        case .withdrawn(let requestId):
+            // A card Claude Code no longer waits for closes, so nothing held behind it waits forever.
+            for (index, item) in next.items.enumerated() {
+                if case .card(let request, .open) = item.content, request.requestId == requestId {
+                    next.items[index].content = .card(request: request, state: .closed)
+                }
+            }
         case .reply(_, _, let mode):
             if let mode { next.mode = mode }
         case .status(let activity, let mode):
@@ -389,7 +396,13 @@ public struct Conversation: Sendable, Equatable {
     }
 
     private func ended(isError: Bool, terminalReason: String, text: String, contextWindows: [ModelWindow]) -> Outcome {
+        // A stopped turn with nothing in the background stopped its subagents too: their steps
+        // end with it, and Claude Code may not say so for each of them.
+        let stopped = terminalReason.hasPrefix("aborted")
         var next = self
+        if stopped && tasks == 0 {
+            next.agents = []
+        }
         next.settle(isError ? .failed : .done)
         next.contextWindow = ContextGauge.windowFor(model: model, windows: contextWindows, known: contextWindow)
         if AgentTodos.allDone(todos) {
@@ -397,7 +410,6 @@ public struct Conversation: Sendable, Equatable {
         }
 
         // When Claude Code already said in this turn what went wrong, the feed has that notice.
-        let stopped = terminalReason.hasPrefix("aborted")
         if isError && stopped {
             next.add(.notice(kind: .interrupted, text: ""))
         } else if isError && !failedInTurn && failure != .signedOut {

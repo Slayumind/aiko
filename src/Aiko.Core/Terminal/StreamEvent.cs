@@ -54,6 +54,9 @@ public abstract record StreamEvent
     /// A piece of an answer that is still being written.
     public sealed record TextDelta(string? ParentToolUseId, string Text) : StreamEvent;
 
+    /// Claude Code takes back a request it asked: it stopped waiting for the answer.
+    public sealed record Withdrawn(string RequestId) : StreamEvent;
+
     /// Claude Code asks whether a tool may run. A question with options and a plan to approve
     /// arrive the same way, with NeedsAnswer set.
     public sealed record Request(
@@ -146,6 +149,7 @@ public abstract record StreamEvent
         "user" => ReadUser(root),
         "stream_event" => ReadDelta(root),
         "control_request" => ReadRequest(root),
+        "control_cancel_request" when Str(root, "request_id") is { Length: > 0 } withdrawn => new Withdrawn(withdrawn),
         "control_response" => ReadReply(root),
         "rate_limit_event" => ReadRateLimit(root),
         "result" => new Result(

@@ -218,6 +218,11 @@ public sealed record Conversation(
         StreamEvent.User { ParentToolUseId: null, IsReplay: true } replay => Quiet(Taken(replay)),
         StreamEvent.User { ParentToolUseId: null } user => Quiet(Returned(user)),
         StreamEvent.Request request => Quiet(Add(id => new FeedItem.Card(id, RequestCard.From(request), RequestState.Open))),
+
+        // A card Claude Code no longer waits for closes, so nothing held behind it waits forever.
+        StreamEvent.Withdrawn withdrawn => Quiet(Changed<FeedItem.Card>(
+            card => card.State == RequestState.Open && card.Request.RequestId == withdrawn.RequestId,
+            card => card with { State = RequestState.Closed })),
         StreamEvent.Reply reply => Quiet(this with { Mode = reply.Mode ?? Mode }),
         StreamEvent.Status status => Quiet(this with { Mode = status.Mode ?? Mode, Compacting = status.Activity == "compacting" }),
         StreamEvent.Compacted compacted => Quiet(Add(id => new FeedItem.Notice(id, NoticeKind.Compacted, "", CompactSize.Of(compacted))) with
@@ -318,14 +323,17 @@ public sealed record Conversation(
 
     private Outcome Ended(StreamEvent.Result result)
     {
-        var next = Settled(result.IsError ? StepState.Failed : StepState.Done) with
+        // A stopped turn with nothing in the background stopped its subagents too: their steps
+        // end with it, and Claude Code may not say so for each of them.
+        var stopped = result.TerminalReason.StartsWith("aborted", StringComparison.Ordinal);
+        var settling = stopped && Tasks == 0 ? this with { Agents = [] } : this;
+        var next = settling.Settled(result.IsError ? StepState.Failed : StepState.Done) with
         {
             ContextWindow = ContextGauge.WindowFor(Model, result.ContextWindows, ContextWindow),
             Todos = AgentTodos.AllDone(Todos) ? [] : Todos,
         };
 
         // When Claude Code already said in this turn what went wrong, the feed has that notice.
-        var stopped = result.TerminalReason.StartsWith("aborted", StringComparison.Ordinal);
         if (result.IsError && stopped)
         {
             next = next.Add(id => new FeedItem.Notice(id, NoticeKind.Interrupted, ""));

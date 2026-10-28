@@ -1654,6 +1654,8 @@ struct SharedCaseTests {
             ])
         case .textDelta(let parent, let words):
             return node([("kind", .string("textDelta")), ("parent", text(parent)), ("text", .string(words))])
+        case .withdrawn(let requestId):
+            return node([("kind", .string("withdrawn")), ("requestId", .string(requestId))])
         case .request(let request):
             return node([
                 ("kind", .string("request")), ("requestId", .string(request.requestId)),

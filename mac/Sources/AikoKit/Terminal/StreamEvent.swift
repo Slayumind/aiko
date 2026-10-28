@@ -120,6 +120,9 @@ public enum StreamEvent: Sendable, Equatable {
 
     case request(ToolRequest)
 
+    /// Claude Code takes back a request it asked: it stopped waiting for the answer.
+    case withdrawn(requestId: String)
+
     /// The answer to a request the terminal sent: an interrupt or a change of mode.
     case reply(requestId: String, ok: Bool, mode: PermissionMode?)
 
@@ -179,6 +182,9 @@ public enum StreamEvent: Sendable, Equatable {
         case "user": return readUser(root)
         case "stream_event": return readDelta(root)
         case "control_request": return readRequest(root)
+        case "control_cancel_request":
+            guard let id = root["request_id"]?.stringValue, !id.isEmpty else { return .ignored }
+            return .withdrawn(requestId: id)
         case "control_response": return readReply(root)
         case "rate_limit_event": return readRateLimit(root)
         case "result":
