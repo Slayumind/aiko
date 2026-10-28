@@ -635,7 +635,8 @@ sealed class TerminalHost
 
         var last = _lastEvents.GetValueOrDefault(id);
         var activity = TerminalPulse.Of(_titles.GetValueOrDefault(id), last, _seenAt.GetValueOrDefault(id), _answeredAt.GetValueOrDefault(id));
-        return new LiveTerminal(activity, last is null ? "" : EventLine(last));
+        // The end of a turn says nothing the mark does not: the line shows the time again.
+        return new LiveTerminal(activity, last is null || last.Kind == TerminalEventKind.Finished ? "" : EventLine(last));
     }
 
     /// The second line of a row (D-352): what the session did last, in the words of the person.
@@ -653,7 +654,6 @@ sealed class TerminalHost
             TerminalEventKind.Using => Strings.TerminalEventUsing,
             TerminalEventKind.AsksPermission => Strings.TerminalEventAsksPermission,
             TerminalEventKind.AsksQuestion => Strings.TerminalEventAsksQuestion,
-            TerminalEventKind.Finished => Strings.TerminalEventFinished,
             TerminalEventKind.Failed => Strings.TerminalEventFailed,
             _ => Strings.TerminalEventOutOfLimit,
         };

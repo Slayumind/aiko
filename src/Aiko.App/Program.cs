@@ -369,6 +369,13 @@ static class Program
             return;
         }
 
+        // The terminal window on made up sessions: --snapshot-terminal out.png [palette | folders]
+        if (args is ["--snapshot-terminal", var terminalPath, ..])
+        {
+            TerminalSnapshot.Write(terminalPath, args.Length > 2 ? args[2] : null);
+            return;
+        }
+
         if (args is ["--snapshot-island", var islandPath, ..])
         {
             var edge = args.Length > 2 && Enum.TryParse<ScreenEdge>(args[2], true, out var asked)

@@ -1097,7 +1097,7 @@
     <value>Find a session or a conversation</value>
   </data>
   <data name="TerminalSearchKeys" xml:space="preserve">
-    <value>↑ ↓ choose · Enter open · Esc close</value>
+    <value>↑ ↓ choose · Enter open · Esc close</value>
   </data>
   <data name="TerminalSearchOpen" xml:space="preserve">
     <value>Open</value>
@@ -1130,7 +1130,7 @@
     <value>Folder for the new session</value>
   </data>
   <data name="TerminalPickFolderKeys" xml:space="preserve">
-    <value>↑ ↓ choose · Enter Claude Code · Ctrl+Enter command line · Esc close</value>
+    <value>↑ ↓ choose · Enter Claude Code · Ctrl+Enter command line · Esc close</value>
   </data>
   <data name="TerminalPickOtherFolder" xml:space="preserve">
     <value>Another folder…</value>
@@ -1165,9 +1165,6 @@
   <data name="TerminalEventAsksQuestion" xml:space="preserve">
     <value>waits for your answer</value>
   </data>
-  <data name="TerminalEventFinished" xml:space="preserve">
-    <value>done</value>
-  </data>
   <data name="TerminalEventFailed" xml:space="preserve">
     <value>the turn failed</value>
   </data>
@@ -1201,8 +1198,11 @@
   <data name="TerminalNoSessionsBody" xml:space="preserve">
     <value>A session is one conversation with Claude Code in one folder.</value>
   </data>
-  <data name="TerminalEmptyTalk" xml:space="preserve">
-    <value>The session starts with your first message. Change the folder, model or mode in the line under the field.</value>
+  <data name="TerminalNotStartedTitle" xml:space="preserve">
+    <value>Claude Code did not start</value>
+  </data>
+  <data name="TerminalNotStartedBody" xml:space="preserve">
+    <value>Aiko did not find it on this computer. Install Claude Code, then open the session again.</value>
   </data>
   <data name="TerminalWorking" xml:space="preserve">
     <value>working</value>

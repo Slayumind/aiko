@@ -68,6 +68,8 @@ sealed class PaletteView : Border
 
         var keyLine = TerminalPanel.Mono(keys, "Muted");
         keyLine.Margin = new Thickness(14, 8, 14, 9);
+        // Russian keys are longer than the card: they go on, never cut at its edge.
+        keyLine.TextWrapping = TextWrapping.Wrap;
 
         var column = new DockPanel();
         DockPanel.SetDock(top, Dock.Top);

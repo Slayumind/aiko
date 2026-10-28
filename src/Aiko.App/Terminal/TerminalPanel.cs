@@ -359,26 +359,45 @@ sealed class TerminalPanel : UserControl
         {
             var button = Icon(Line(icon));
             button.ToolTip = tip;
-            button.Width = 22;
-            button.Height = 22;
-            ((FrameworkElement)button.Content).Width = 22;
-            ((FrameworkElement)button.Content).Height = 22;
+            var face = (FrameworkElement)button.Content;
+            face.Width = 22;
+            face.Height = 22;
             button.Click += (_, _) => GroupCreateAsked?.Invoke(group.Folder, kind);
             // The keyboard reaches them too: a button in focus is shown.
-            button.GotKeyboardFocus += (_, _) => buttons.Opacity = 1;
-            button.LostKeyboardFocus += (_, _) => buttons.Opacity = 0;
+            button.GotKeyboardFocus += (_, _) => Fade(buttons, 1);
+            button.LostKeyboardFocus += (_, _) => Fade(buttons, 0);
             buttons.Children.Add(button);
         }
 
-        var header = new DockPanel { Margin = new Thickness(10, 10, 4, 2), Background = Brushes.Transparent, ToolTip = group.Folder };
+        var header = new DockPanel { Margin = new Thickness(10, 8, 4, 0), Background = Brushes.Transparent, ToolTip = group.Folder };
         DockPanel.SetDock(buttons, Dock.Right);
         header.Children.Add(buttons);
         var name = Mono(group.Name, "Muted");
         name.TextTrimming = TextTrimming.CharacterEllipsis;
         header.Children.Add(name);
-        header.MouseEnter += (_, _) => buttons.BeginAnimation(OpacityProperty, Motion.To(1, Motion.Or0(Motion.Hover), Motion.Standard));
-        header.MouseLeave += (_, _) => buttons.BeginAnimation(OpacityProperty, Motion.To(0, Motion.Or0(Motion.Hover), Motion.Standard));
+        header.MouseEnter += (_, _) => Fade(buttons, 1);
+        header.MouseLeave += (_, _) =>
+        {
+            if (!buttons.IsKeyboardFocusWithin)
+            {
+                Fade(buttons, 0);
+            }
+        };
         return header;
+    }
+
+    private static void Fade(UIElement element, double to) =>
+        element.BeginAnimation(OpacityProperty, Motion.To(to, Motion.Or0(Motion.Hover), Motion.Standard));
+
+    /// For the snapshot: the buttons of the first group shown, and the hover of its first button.
+    internal void ShowGroupHoverForSnapshot()
+    {
+        if (_rows.Children.OfType<DockPanel>().FirstOrDefault() is { } header
+            && header.Children[0] is StackPanel { Children: [Button first, ..] } buttons)
+        {
+            buttons.Opacity = 1;
+            ((Panel)first.Content).Children.OfType<Border>().First().Opacity = 1;
+        }
     }
 
     private UIElement Row(SessionRow row, bool selected, DateTimeOffset now)
@@ -595,7 +614,7 @@ sealed class TerminalPanel : UserControl
 
         UIElement content = terminal is not null ? _terminalSide
             : view.Ask is { } ask ? Ask(ask)
-            : view.Main == MainView.Terminal ? Message(null, Strings.TerminalEmptyTalk, null)
+            : view.Main == MainView.Terminal ? Message(Strings.TerminalNotStartedTitle, Strings.TerminalNotStartedBody, null)
             : Message(
                 string.Format(CultureInfo.CurrentCulture, Strings.TerminalNoSessionsTitle, view.Environment),
                 Strings.TerminalNoSessionsBody,
@@ -864,6 +883,13 @@ sealed class TerminalPanel : UserControl
         var hover = new Border { CornerRadius = new CornerRadius(8), Background = Tokens.Brush("HoverLayer"), Opacity = 0 };
         var face = new Grid { Width = 28, Height = 28 };
         face.Children.Add(hover);
+        // In the middle of its hover: a line left to stretch draws from the left edge.
+        if (icon is FrameworkElement drawn)
+        {
+            drawn.HorizontalAlignment = HorizontalAlignment.Center;
+            drawn.VerticalAlignment = VerticalAlignment.Center;
+        }
+
         face.Children.Add(icon);
 
         var button = new Button { Content = face, Cursor = Cursors.Hand, Template = Bare(), FocusVisualStyle = FocusRing() };

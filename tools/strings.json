@@ -2487,8 +2487,8 @@
   [
     "TerminalSearchKeys",
     [
-      "↑ ↓ choose · Enter open · Esc close",
-      "↑ ↓ выбрать · Enter открыть · Esc закрыть"
+      "↑ ↓ choose · Enter open · Esc close",
+      "↑ ↓ выбрать · Enter открыть · Esc закрыть"
     ]
   ],
   [
@@ -2564,8 +2564,8 @@
   [
     "TerminalPickFolderKeys",
     [
-      "↑ ↓ choose · Enter Claude Code · Ctrl+Enter command line · Esc close",
-      "↑ ↓ выбрать · Enter Claude Code · Ctrl+Enter командная строка · Esc закрыть"
+      "↑ ↓ choose · Enter Claude Code · Ctrl+Enter command line · Esc close",
+      "↑ ↓ выбрать · Enter Claude Code · Ctrl+Enter командная строка · Esc закрыть"
     ]
   ],
   [
@@ -2646,13 +2646,6 @@
     ]
   ],
   [
-    "TerminalEventFinished",
-    [
-      "done",
-      "готово"
-    ]
-  ],
-  [
     "TerminalEventFailed",
     [
       "the turn failed",
@@ -2730,10 +2723,17 @@
     ]
   ],
   [
-    "TerminalEmptyTalk",
+    "TerminalNotStartedTitle",
     [
-      "The session starts with your first message. Change the folder, model or mode in the line under the field.",
-      "Сессия начнётся с первого сообщения. Папку, модель и режим можно сменить в строке под полем."
+      "Claude Code did not start",
+      "Claude Code не запустился"
+    ]
+  ],
+  [
+    "TerminalNotStartedBody",
+    [
+      "Aiko did not find it on this computer. Install Claude Code, then open the session again.",
+      "Aiko не нашла его на этом компьютере. Установи Claude Code и открой сессию снова."
     ]
   ],
   [

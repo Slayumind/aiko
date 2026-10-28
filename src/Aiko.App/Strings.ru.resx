@@ -1097,7 +1097,7 @@
     <value>Найти сессию или разговор</value>
   </data>
   <data name="TerminalSearchKeys" xml:space="preserve">
-    <value>↑ ↓ выбрать · Enter открыть · Esc закрыть</value>
+    <value>↑ ↓ выбрать · Enter открыть · Esc закрыть</value>
   </data>
   <data name="TerminalSearchOpen" xml:space="preserve">
     <value>Открытые</value>
@@ -1130,7 +1130,7 @@
     <value>Папка для новой сессии</value>
   </data>
   <data name="TerminalPickFolderKeys" xml:space="preserve">
-    <value>↑ ↓ выбрать · Enter Claude Code · Ctrl+Enter командная строка · Esc закрыть</value>
+    <value>↑ ↓ выбрать · Enter Claude Code · Ctrl+Enter командная строка · Esc закрыть</value>
   </data>
   <data name="TerminalPickOtherFolder" xml:space="preserve">
     <value>Другая папка…</value>
@@ -1165,9 +1165,6 @@
   <data name="TerminalEventAsksQuestion" xml:space="preserve">
     <value>ждёт ответа</value>
   </data>
-  <data name="TerminalEventFinished" xml:space="preserve">
-    <value>готово</value>
-  </data>
   <data name="TerminalEventFailed" xml:space="preserve">
     <value>ход прервался с ошибкой</value>
   </data>
@@ -1201,8 +1198,11 @@
   <data name="TerminalNoSessionsBody" xml:space="preserve">
     <value>Сессия — это один разговор с Claude Code в одной папке.</value>
   </data>
-  <data name="TerminalEmptyTalk" xml:space="preserve">
-    <value>Сессия начнётся с первого сообщения. Папку, модель и режим можно сменить в строке под полем.</value>
+  <data name="TerminalNotStartedTitle" xml:space="preserve">
+    <value>Claude Code не запустился</value>
+  </data>
+  <data name="TerminalNotStartedBody" xml:space="preserve">
+    <value>Aiko не нашла его на этом компьютере. Установи Claude Code и открой сессию снова.</value>
   </data>
   <data name="TerminalWorking" xml:space="preserve">
     <value>работает</value>

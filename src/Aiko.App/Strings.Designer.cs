@@ -1086,7 +1086,7 @@ public static class Strings
     /// Find a session or a conversation
     public static string TerminalSearchHint => Get("TerminalSearchHint");
 
-    /// ↑ ↓ choose · Enter open · Esc close
+    /// ↑ ↓ choose · Enter open · Esc close
     public static string TerminalSearchKeys => Get("TerminalSearchKeys");
 
     /// Open
@@ -1119,7 +1119,7 @@ public static class Strings
     /// Folder for the new session
     public static string TerminalPickFolderHint => Get("TerminalPickFolderHint");
 
-    /// ↑ ↓ choose · Enter Claude Code · Ctrl+Enter command line · Esc close
+    /// ↑ ↓ choose · Enter Claude Code · Ctrl+Enter command line · Esc close
     public static string TerminalPickFolderKeys => Get("TerminalPickFolderKeys");
 
     /// Another folder…
@@ -1155,9 +1155,6 @@ public static class Strings
     /// waits for your answer
     public static string TerminalEventAsksQuestion => Get("TerminalEventAsksQuestion");
 
-    /// done
-    public static string TerminalEventFinished => Get("TerminalEventFinished");
-
     /// the turn failed
     public static string TerminalEventFailed => Get("TerminalEventFailed");
 
@@ -1191,8 +1188,11 @@ public static class Strings
     /// A session is one conversation with Claude Code in one folder.
     public static string TerminalNoSessionsBody => Get("TerminalNoSessionsBody");
 
-    /// The session starts with your first message. Change the folder, model or mode in the line ...
-    public static string TerminalEmptyTalk => Get("TerminalEmptyTalk");
+    /// Claude Code did not start
+    public static string TerminalNotStartedTitle => Get("TerminalNotStartedTitle");
+
+    /// Aiko did not find it on this computer. Install Claude Code, then open the session again.
+    public static string TerminalNotStartedBody => Get("TerminalNotStartedBody");
 
     /// working
     public static string TerminalWorking => Get("TerminalWorking");

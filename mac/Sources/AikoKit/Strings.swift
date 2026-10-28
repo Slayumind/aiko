@@ -395,7 +395,7 @@ public enum Strings {
         "MeetAikoTurnOn": ("Turn on in {0}", "Включить в среде {0}"),
         "StateOn": ("on", "включена"),
         "TerminalSearchHint": ("Find a session or a conversation", "Найти сессию или разговор"),
-        "TerminalSearchKeys": ("↑ ↓ choose · Enter open · Esc close", "↑ ↓ выбрать · Enter открыть · Esc закрыть"),
+        "TerminalSearchKeys": ("↑ ↓ choose · Enter open · Esc close", "↑ ↓ выбрать · Enter открыть · Esc закрыть"),
         "TerminalSearchOpen": ("Open", "Открытые"),
         "TerminalSearchClosed": ("Closed", "Закрытые"),
         "TerminalSearchOutside": ("Started outside Aiko", "Начаты вне Aiko"),
@@ -406,7 +406,7 @@ public enum Strings {
         "TerminalGroupNewSession": ("New session of Claude Code in this folder", "Новая сессия Claude Code в этой папке"),
         "TerminalGroupNewShell": ("Command line in this folder", "Командная строка в этой папке"),
         "TerminalPickFolderHint": ("Folder for the new session", "Папка для новой сессии"),
-        "TerminalPickFolderKeys": ("↑ ↓ choose · Enter Claude Code · Ctrl+Enter command line · Esc close", "↑ ↓ выбрать · Enter Claude Code · Ctrl+Enter командная строка · Esc закрыть"),
+        "TerminalPickFolderKeys": ("↑ ↓ choose · Enter Claude Code · Ctrl+Enter command line · Esc close", "↑ ↓ выбрать · Enter Claude Code · Ctrl+Enter командная строка · Esc закрыть"),
         "TerminalPickOtherFolder": ("Another folder…", "Другая папка…"),
         "TerminalEventThinking": ("thinking", "думает"),
         "TerminalEventReading": ("reading {0}", "читает {0}"),
@@ -418,7 +418,6 @@ public enum Strings {
         "TerminalEventUsing": ("tool: {0}", "инструмент: {0}"),
         "TerminalEventAsksPermission": ("waits for permission: {0}", "ждёт разрешения: {0}"),
         "TerminalEventAsksQuestion": ("waits for your answer", "ждёт ответа"),
-        "TerminalEventFinished": ("done", "готово"),
         "TerminalEventFailed": ("the turn failed", "ход прервался с ошибкой"),
         "TerminalEventOutOfLimit": ("stopped on the limit", "упёрлась в лимит"),
         "TerminalTitle": ("Terminal", "Терминал"),
@@ -430,7 +429,8 @@ public enum Strings {
         "TerminalChooseFolder": ("Choose another folder", "Выбрать другую папку"),
         "TerminalNoSessionsTitle": ("Start your first session in {0}", "Начни первую сессию в среде {0}"),
         "TerminalNoSessionsBody": ("A session is one conversation with Claude Code in one folder.", "Сессия — это один разговор с Claude Code в одной папке."),
-        "TerminalEmptyTalk": ("The session starts with your first message. Change the folder, model or mode in the line under the field.", "Сессия начнётся с первого сообщения. Папку, модель и режим можно сменить в строке под полем."),
+        "TerminalNotStartedTitle": ("Claude Code did not start", "Claude Code не запустился"),
+        "TerminalNotStartedBody": ("Aiko did not find it on this computer. Install Claude Code, then open the session again.", "Aiko не нашла его на этом компьютере. Установи Claude Code и открой сессию снова."),
         "TerminalWorking": ("working", "работает"),
         "TerminalWaiting": ("waiting", "ждёт"),
         "TerminalDone": ("done", "готово"),
@@ -1561,7 +1561,7 @@ public enum Strings {
     /// Find a session or a conversation
     public static var terminalSearchHint: String { Strings.get("TerminalSearchHint") }
 
-    /// ↑ ↓ choose · Enter open · Esc close
+    /// ↑ ↓ choose · Enter open · Esc close
     public static var terminalSearchKeys: String { Strings.get("TerminalSearchKeys") }
 
     /// Open
@@ -1594,7 +1594,7 @@ public enum Strings {
     /// Folder for the new session
     public static var terminalPickFolderHint: String { Strings.get("TerminalPickFolderHint") }
 
-    /// ↑ ↓ choose · Enter Claude Code · Ctrl+Enter command line · Esc close
+    /// ↑ ↓ choose · Enter Claude Code · Ctrl+Enter command line · Esc close
     public static var terminalPickFolderKeys: String { Strings.get("TerminalPickFolderKeys") }
 
     /// Another folder…
@@ -1630,9 +1630,6 @@ public enum Strings {
     /// waits for your answer
     public static var terminalEventAsksQuestion: String { Strings.get("TerminalEventAsksQuestion") }
 
-    /// done
-    public static var terminalEventFinished: String { Strings.get("TerminalEventFinished") }
-
     /// the turn failed
     public static var terminalEventFailed: String { Strings.get("TerminalEventFailed") }
 
@@ -1666,8 +1663,11 @@ public enum Strings {
     /// A session is one conversation with Claude Code in one folder.
     public static var terminalNoSessionsBody: String { Strings.get("TerminalNoSessionsBody") }
 
-    /// The session starts with your first message. Change the folder, model or mode in the line ...
-    public static var terminalEmptyTalk: String { Strings.get("TerminalEmptyTalk") }
+    /// Claude Code did not start
+    public static var terminalNotStartedTitle: String { Strings.get("TerminalNotStartedTitle") }
+
+    /// Aiko did not find it on this computer. Install Claude Code, then open the session again.
+    public static var terminalNotStartedBody: String { Strings.get("TerminalNotStartedBody") }
 
     /// working
     public static var terminalWorking: String { Strings.get("TerminalWorking") }
