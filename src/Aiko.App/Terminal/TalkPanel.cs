@@ -611,15 +611,27 @@ sealed class FeedRow : ContentControl
             ClipToBounds = true,
         };
         bar.Children.Add(piece);
-        bar.SizeChanged += (_, size) =>
+        void Move(double width)
         {
-            var width = size.NewSize.Width;
             piece.Width = width * CompactingPiece;
             run.BeginAnimation(TranslateTransform.XProperty, new System.Windows.Media.Animation.DoubleAnimation(
                 -piece.Width, width, TimeSpan.FromSeconds(CompactingSeconds))
             {
                 RepeatBehavior = System.Windows.Media.Animation.RepeatBehavior.Forever,
             });
+        }
+
+        bar.SizeChanged += (_, size) => Move(size.NewSize.Width);
+
+        // A bar that left the feed stops moving: nothing draws frames for a row nobody sees. A row
+        // the list takes back moves again.
+        bar.Unloaded += (_, _) => run.BeginAnimation(TranslateTransform.XProperty, null);
+        bar.Loaded += (_, _) =>
+        {
+            if (bar.ActualWidth > 0)
+            {
+                Move(bar.ActualWidth);
+            }
         };
         column.Children.Add(bar);
         return column;

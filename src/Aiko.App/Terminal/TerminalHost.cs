@@ -97,6 +97,12 @@ sealed class TerminalHost
             {
                 Create(text, images);
             }
+            else if (_model.FormOpen && _form is not null)
+            {
+                // No folder yet: the words go back into the field, and the folder is asked for.
+                _panel.Input.Typed(text);
+                PickOtherFolder();
+            }
             else if (_model.Session(_sessions) is { } session)
             {
                 Send(session.Id, text, images);
@@ -561,10 +567,14 @@ sealed class TerminalHost
                 {
                     _offers[environmentName] = offer;
 
-                    // An open form takes the models it did not have yet.
+                    // An open form takes the models it did not have yet, and keeps the model and
+                    // the mode the person already chose.
                     if (_form is { } form && form.Environment == environmentName)
                     {
-                        _form = FormFor(form.Folder, null, form.Folders);
+                        var chosen = form.Models.Count > 0 ? form.Models[form.Model].Value : null;
+                        var fresh = FormFor(form.Folder, null, form.Folders, form.Mode);
+                        var still = fresh is null || chosen is null ? -1 : fresh.Models.ToList().FindIndex(model => model.Value == chosen);
+                        _form = still >= 0 ? fresh! with { Model = still } : fresh;
                     }
 
                     Draw();

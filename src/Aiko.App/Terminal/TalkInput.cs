@@ -405,6 +405,8 @@ sealed class TalkInput : UserControl
     /// The words go where the caret stands; what is around it stays.
     public void BeginDictation()
     {
+        // The menu of "/" or "@" goes: while the words are heard, Enter and the arrows are not its.
+        _menu.Close();
         var at = _text.CaretIndex;
         _before = _text.Text[..at];
         _after = _text.Text[at..];
@@ -512,7 +514,9 @@ sealed class TalkInput : UserControl
     {
         // The list is built again only when what it shows changed: a draw while it is open would
         // close it.
-        var key = draft is { Folder: >= 0 } ? $"draft|{draft.Folder}|{draft.Folders.Count}|{draft.Folders[draft.Folder].Path}" : folder;
+        var key = draft is { Folder: >= 0 } ? $"draft|{draft.Folder}|{draft.Folders.Count}|{draft.Folders[draft.Folder].Path}"
+            : draft is not null ? "draft|none"
+            : folder;
         if (key == _folderKey)
         {
             return;
@@ -544,6 +548,20 @@ sealed class TalkInput : UserControl
                 }
             };
             _folderSlot.Content = list;
+            _folderShown = true;
+        }
+        else if (draft is not null)
+        {
+            // Nothing is bound and nothing was opened before: the folder is still to be chosen.
+            var choose = new DropDown
+            {
+                Items = [Strings.TerminalChooseFolder],
+                Short = [Strings.TerminalChooseFolder],
+                SelectedIndex = 0,
+            };
+            choose.MakeQuiet();
+            choose.Picked += _ => OtherFolderAsked?.Invoke();
+            _folderSlot.Content = choose;
             _folderShown = true;
         }
         else if (folder.Length > 0)

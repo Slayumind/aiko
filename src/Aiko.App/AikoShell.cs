@@ -335,8 +335,16 @@ sealed class AikoShell : IDisposable
             return;
         }
 
+        // A terminal has tabs of environments; with none yet, the first run checklist makes one.
+        var environments = SettingsStore.LoadEnvironments();
+        if (environments.Environments.Count == 0)
+        {
+            OpenSettings(page: SettingsPanel.ChecklistPageKey);
+            return;
+        }
+
         var terminal = new TerminalHost(
-            SettingsStore.LoadEnvironments(), SettingsStore.LoadTerminal(), () => new ClaudeProcess(), _numbers.SnapshotFor);
+            environments, SettingsStore.LoadTerminal(), () => new ClaudeProcess(), _numbers.SnapshotFor);
         terminal.Closed += () => _terminal = null;
         terminal.SettingsAsked += () => OpenSettings(page: SettingsPanel.TerminalPageKey);
         terminal.InViewChanged += _island.FollowTerminal;

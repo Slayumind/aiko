@@ -48,7 +48,8 @@ static class ProjectFiles
 
         try
         {
-            var start = new ProcessStartInfo("git", ["-C", folder, "ls-files", "--cached", "--others", "--exclude-standard"])
+            // Names as they are: by default git writes names outside ASCII as quoted octal escapes.
+            var start = new ProcessStartInfo("git", ["-c", "core.quotePath=false", "-C", folder, "ls-files", "--cached", "--others", "--exclude-standard"])
             {
                 UseShellExecute = false,
                 CreateNoWindow = true,
@@ -64,9 +65,11 @@ static class ProjectFiles
 
             _ = git.StandardError.ReadToEndAsync();
             var files = new List<string>();
-            while (git.StandardOutput.ReadLine() is { } line && files.Count < MostFiles)
+            // Read to the end even past the limit: a full pipe would hold git until it is killed,
+            // and the list would fall back to the walk that knows nothing of .gitignore.
+            while (git.StandardOutput.ReadLine() is { } line)
             {
-                if (line.Length > 0)
+                if (line.Length > 0 && files.Count < MostFiles)
                 {
                     files.Add(line);
                 }

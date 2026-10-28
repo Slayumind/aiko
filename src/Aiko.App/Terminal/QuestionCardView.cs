@@ -45,7 +45,15 @@ sealed class QuestionCardView : Border
         Child = _column;
 
         KeyDown += OnKey;
-        IsKeyboardFocusWithinChanged += (_, _) => Draw();
+        // The frame of the keyboard follows the focus. Focus that comes straight into the field of
+        // Other needs no frame, and drawing again would take the field away from under the click.
+        IsKeyboardFocusWithinChanged += (_, _) =>
+        {
+            if (_own is null || !ReferenceEquals(Keyboard.FocusedElement, _own))
+            {
+                Draw();
+            }
+        };
         SizeChanged += (_, size) =>
         {
             var narrow = size.NewSize.Width < NarrowWidth;
