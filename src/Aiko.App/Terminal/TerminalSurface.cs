@@ -1,6 +1,7 @@
 using System.Runtime.Versioning;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using Aiko.Core.Terminal;
@@ -57,6 +58,11 @@ sealed class TerminalSurface : Grid
         // A little air between the text and the edges of the window; the background around the
         // control is the background of the terminal, so the two read as one.
         Background = new SolidColorBrush(Color.FromRgb(0x0A, 0x0A, 0x0A));
+
+        // Tab and the arrows are the program's, not ways to move the focus of the window (D-370).
+        KeyboardNavigation.SetTabNavigation(this, KeyboardNavigationMode.None);
+        KeyboardNavigation.SetDirectionalNavigation(this, KeyboardNavigationMode.None);
+        KeyboardNavigation.SetControlTabNavigation(this, KeyboardNavigationMode.None);
         _control.Margin = new Thickness(TextInset, TextInset - 4, 0, 0);
         Children.Add(_control);
 

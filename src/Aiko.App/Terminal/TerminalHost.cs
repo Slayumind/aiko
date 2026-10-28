@@ -73,6 +73,17 @@ sealed class TerminalHost
                 }
             };
             _keys.Dropped += Dropped;
+            _keys.TerminalTab = shift =>
+            {
+                // Tab takes the grey hint of Claude Code, Shift+Tab changes its mode.
+                if (OpenTerminal() is not { } terminal)
+                {
+                    return false;
+                }
+
+                terminal.Type(shift ? "\u001b[Z" : "\t");
+                return true;
+            };
         };
         _window.Activated += (_, _) => _voice.Use(SettingsStore.Load());
         _window.Closing += (_, e) =>

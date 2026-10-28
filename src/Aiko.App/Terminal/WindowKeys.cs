@@ -34,6 +34,11 @@ sealed class WindowKeys : IDisposable
     /// Files were dropped on a terminal (D-370).
     public event Action<IReadOnlyList<string>>? Dropped;
 
+    /// Tab in a terminal, with Shift or without: true when it went to the program.
+    public Func<bool, bool>? TerminalTab { get; set; }
+
+    private const int VirtualTab = 0x09;
+
     private const int DropFiles = 0x0233;
 
     private const int LeftButtonUp = 0x0202;
@@ -57,6 +62,14 @@ sealed class WindowKeys : IDisposable
         if (handled || message.message is not (KeyDown or SystemKeyDown)
             || (message.hwnd != _window && !IsChild(_window, message.hwnd)))
         {
+            return;
+        }
+
+        // Tab and Shift+Tab in a terminal belong to the program: WPF would move the focus over the
+        // buttons of the window with them, and the program would never see them (D-370).
+        if ((int)message.wParam == VirtualTab && message.hwnd != _window && !Held(VirtualControl) && !Held(VirtualAlt))
+        {
+            handled = TerminalTab?.Invoke(Held(VirtualShift)) ?? false;
             return;
         }
 
