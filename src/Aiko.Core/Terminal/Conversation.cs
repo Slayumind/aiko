@@ -121,9 +121,12 @@ public sealed record ShellRun(int ItemId, string Command);
 
 /// A conversation after one more event or one more action, and the lines to write to Claude Code.
 /// Shell is a command of "!" the host runs now; its end comes back through ShellEnded.
+/// StopShell asks the host to stop the command of "!" that runs.
 public sealed record Outcome(Conversation State, IReadOnlyList<string> Written)
 {
     public ShellRun? Shell { get; init; }
+
+    public bool StopShell { get; init; }
 }
 
 /// One conversation with Claude Code: its feed and what it is doing (D-294, D-304, D-305).
@@ -160,8 +163,17 @@ public sealed record Conversation(
         : Unread ? TalkActivity.Done
         : TalkActivity.Idle;
 
-    /// A turn can end while a subagent still works in the background (D-305).
-    public bool IsBusy => InTurn || Tasks > 0;
+    /// A turn can end while a subagent still works in the background (D-305). A command of "!"
+    /// keeps the session busy too: closing it asks first, and nothing stops it as idle.
+    public bool IsBusy => ClaudeBusy || ShellRunning;
+
+    /// Claude Code itself works: a turn, or a subagent in the background.
+    private bool ClaudeBusy => InTurn || Tasks > 0;
+
+    public bool ShellRunning => Items.Any(item => item is FeedItem.Shell { State: ShellState.Running });
+
+    /// The command of "!" the person stopped: its end goes to the feed, not to Claude.
+    public int StoppedShell { get; init; }
 
     /// The steps whose subagent still works. Such a step runs until its subagent is over, even
     /// when the tool already gave back that the subagent went to the background.
@@ -363,7 +375,7 @@ public sealed record Conversation(
             return Quiet(this);
         }
 
-        var waits = InTurn || HasOpenCard;
+        var waits = InTurn || HasOpenCard || ShellRunning;
         if (ShellCommand.Of(text) is { } command)
         {
             var shell = new FeedItem.Shell(NextId, command, ShellState.Waiting, "", 0);
@@ -378,7 +390,11 @@ public sealed record Conversation(
         {
             return next.Sent((FeedItem.OwnerMessage)next.Items[^1]);
         }
-        return IsCommand(text) ? Quiet(next) : new Outcome(next, [HostLine.UserMessage(text, images)]);
+
+        // While a command of "!" runs and Claude does not, the message waits for its output: it
+        // goes to Claude together with it.
+        var holdsForShell = ShellRunning && !InTurn;
+        return IsCommand(text) || holdsForShell ? Quiet(next) : new Outcome(next, [HostLine.UserMessage(text, images)]);
     }
 
     /// The host ran a command of "!": its output stays in the feed, and Claude gets the command
@@ -394,7 +410,16 @@ public sealed record Conversation(
         var next = Changed<FeedItem.Shell>(
             shell => shell.Id == itemId,
             shell => shell with { State = ShellState.Done, Output = output, ExitCode = exitCode });
-        return new Outcome(next with { InTurn = true }, [HostLine.UserMessage(ShellCommand.Message(running.Command, output, exitCode), [])]);
+
+        // The messages held while it ran go with it (or alone, when it was stopped), and stay grey
+        // until Claude Code takes them.
+        var stopped = StoppedShell == itemId;
+        List<string> written = stopped ? [] : [HostLine.UserMessage(ShellCommand.Message(running.Command, output, exitCode), [])];
+        written.AddRange(next.Items
+            .OfType<FeedItem.OwnerMessage>()
+            .Where(message => message.Queued && !IsCommand(message.Text))
+            .Select(message => HostLine.UserMessage(message.Text, message.Attachments)));
+        return new Outcome(next with { InTurn = written.Count > 0, StoppedShell = 0 }, written);
     }
 
     /// The command moves to the end of the feed, as a sent message does, and runs.
@@ -425,10 +450,12 @@ public sealed record Conversation(
             [open.Request.LineFor(choice)]);
     }
 
+    /// Esc stops Claude, or the command of "!" when only it runs.
     public Outcome Interrupt() =>
-        IsBusy
-            ? new Outcome(this with { NextId = NextId + 1 }, [HostLine.Interrupt($"int-{NextId}")])
-            : Quiet(this);
+        ClaudeBusy ? new Outcome(this with { NextId = NextId + 1 }, [HostLine.Interrupt($"int-{NextId}")])
+        : Items.OfType<FeedItem.Shell>().FirstOrDefault(shell => shell.State == ShellState.Running) is { } running
+            ? new Outcome(this with { StoppedShell = running.Id }, []) { StopShell = true }
+        : Quiet(this);
 
     public Outcome SetMode(PermissionMode mode) =>
         new(this with { Mode = mode, NextId = NextId + 1 }, [HostLine.SetMode($"mode-{NextId}", mode)]);
@@ -443,12 +470,17 @@ public sealed record Conversation(
     /// Claude Code is gone. If it was in the middle of something, that is a failure to show.
     public Conversation ProcessExited()
     {
-        if (!IsBusy && !HasOpenCard)
+        if (!ClaudeBusy && !HasOpenCard)
         {
             return this;
         }
 
-        var next = (this with { Agents = [] }).Settled(StepState.Failed).Add(id => new FeedItem.Notice(id, NoticeKind.Failed, ""));
+        // Messages written to the process that is gone never reach Claude: they stop waiting, or
+        // the session would wait for them forever. The notice under them says what happened.
+        var next = (this with { Agents = [] })
+            .Changed<FeedItem.OwnerMessage>(message => message.Queued && !IsCommand(message.Text), message => message with { Queued = false })
+            .Settled(StepState.Failed)
+            .Add(id => new FeedItem.Notice(id, NoticeKind.Failed, ""));
         return next with
         {
             InTurn = false,

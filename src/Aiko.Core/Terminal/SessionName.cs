@@ -1,7 +1,7 @@
 namespace Aiko.Core.Terminal;
 
-/// The name of a session (D-299). The form does not ask for one: an empty field gives the folder
-/// with a number, "aiko 3", and the form shows that name before the session is made.
+/// The name of a session (D-299, D-342). Nobody types it: it comes from the first message, and the
+/// folder with a number, "aiko 3", stands in when the message gives none.
 public static class SessionName
 {
     /// The folder with the lowest number no session of that folder has yet.
@@ -64,10 +64,8 @@ public static class SessionName
         return path;
     }
 
-    /// The last part of a path, with a slash of either kind: the name of the folder. A root has
-    /// no last part and is named as it is written.
-    /// The name of the folder this folder sits in, shown beside its name in the form of a new
-    /// session instead of the whole path (D-332). A drive or the root has none.
+    /// The name of the folder this folder sits in, shown beside its name in the list of folders of
+    /// a new session instead of the whole path (D-332). A drive or the root has none.
     public static string ParentName(string folder)
     {
         var path = FolderPath(folder).TrimEnd('/', '\\');

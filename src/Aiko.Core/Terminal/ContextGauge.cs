@@ -1,6 +1,6 @@
 namespace Aiko.Core.Terminal;
 
-/// How the ring of the context looks: quiet up to 75 %, orange up to 90 %, red above (D-342).
+/// How the word of the context looks: quiet up to 75 %, orange up to 90 %, red above (D-345).
 public enum ContextLevel
 {
     Quiet,

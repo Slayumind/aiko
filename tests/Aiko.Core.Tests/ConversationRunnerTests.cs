@@ -43,7 +43,11 @@ public class ConversationRunnerTests
     {
         public List<(string Command, string Folder, Action<string, int> Ended)> Runs { get; } = [];
 
+        public int Stops { get; private set; }
+
         public void Run(string command, string folder, Action<string, int> ended) => Runs.Add((command, folder, ended));
+
+        public void Stop() => Stops++;
     }
 
     private sealed class NoLog : ITerminalLog
@@ -105,6 +109,45 @@ public class ConversationRunnerTests
         var process = Assert.Single(processes);
         Assert.Contains("<bash-input>git status</bash-input>", Assert.Single(process.Written));
         Assert.Equal(ShellState.Done, Assert.IsType<FeedItem.Shell>(Assert.Single(runner.State.Items)).State);
+    }
+
+    /// A closed session must not wake up when its command of "!" ends later: that started a turn
+    /// of Claude Code nobody saw (review of 2026-10-28).
+    [Fact]
+    public void A_command_of_bang_that_ends_after_the_close_starts_nothing()
+    {
+        var shell = new HandShell();
+        var (runner, processes, posted) = Made(shell);
+
+        runner.Send("!npm test", []);
+        Assert.True(runner.State.IsBusy);
+        runner.Close();
+        Assert.Equal(1, shell.Stops);
+
+        Assert.Single(shell.Runs).Ended("(stopped)", -1);
+        foreach (var work in posted.ToList())
+        {
+            work();
+        }
+
+        Assert.Empty(processes);
+    }
+
+    [Fact]
+    public void Esc_stops_a_command_of_bang_and_Claude_Code_is_not_started()
+    {
+        var shell = new HandShell();
+        var (runner, processes, posted) = Made(shell);
+
+        runner.Send("!npm test", []);
+        runner.Interrupt();
+        Assert.Equal(1, shell.Stops);
+
+        Assert.Single(shell.Runs).Ended("one test\n(stopped)", -1);
+        posted[^1]();
+
+        Assert.Empty(processes);
+        Assert.False(runner.State.IsBusy);
     }
 
     [Fact]

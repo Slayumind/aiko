@@ -11,15 +11,16 @@ public static class MarkdownTail
 {
     public static string Closed(string markdown)
     {
-        if (markdown.Length == 0 || InOpenFence(markdown))
+        var (inFence, tailStart) = Scan(markdown);
+        if (markdown.Length == 0 || inFence)
         {
             return markdown;
         }
 
-        // Inline marks never cross a blank line, so only the last paragraph can wait for one.
-        var cut = markdown.LastIndexOf("\n\n", StringComparison.Ordinal);
-        var head = cut < 0 ? "" : markdown[..(cut + 2)];
-        var tail = cut < 0 ? markdown : markdown[(cut + 2)..];
+        // Inline marks never cross a blank line or a code block, so only the words after the
+        // last of them can wait for one.
+        var head = markdown[..tailStart];
+        var tail = markdown[tailStart..];
 
         var open = OpenMarks(tail);
         if (open.Count == 0)
@@ -48,7 +49,12 @@ public static class MarkdownTail
         var at = 0;
         while (at < text.Length)
         {
-            var lineStart = at == 0 || text[at - 1] == '\n';
+            // Only spaces before it on its line: a star there may be a list marker.
+            var lineBegin = at == 0 ? 0 : text.LastIndexOf('\n', at - 1) + 1;
+            var lineStart = text.AsSpan(lineBegin, at - lineBegin).IsWhiteSpace();
+
+            // A star with spaces on both sides, as in "2 * 3", is not emphasis.
+            var spaced = (at == 0 || char.IsWhiteSpace(text[at - 1])) && (at + 1 >= text.Length || char.IsWhiteSpace(text[at + 1]));
             if (text[at] == '`')
             {
                 var end = text.IndexOf('`', at + 1);
@@ -64,7 +70,7 @@ public static class MarkdownTail
 
             var mark = text.AsSpan(at).StartsWith("**") ? "**"
                 : text.AsSpan(at).StartsWith("~~") ? "~~"
-                : text[at] == '*' && !(lineStart && at + 1 < text.Length && text[at + 1] == ' ') ? "*"
+                : text[at] == '*' && !(lineStart && at + 1 < text.Length && text[at + 1] == ' ') && !spaced ? "*"
                 : null;
             if (mark is null)
             {
@@ -88,6 +94,39 @@ public static class MarkdownTail
         return open;
     }
 
-    private static bool InOpenFence(string markdown) =>
-        markdown.Split('\n').Count(line => line.TrimStart().StartsWith("```", StringComparison.Ordinal)) % 2 == 1;
+    /// Whether the text ends inside a code block (``` or ~~~), and where the words after the last
+    /// blank line or the last closed code block start. A blank line inside a block is not one.
+    private static (bool InFence, int TailStart) Scan(string markdown)
+    {
+        string? fence = null;
+        var tailStart = 0;
+        var start = 0;
+        while (true)
+        {
+            var end = markdown.IndexOf('\n', start);
+            var line = end < 0 ? markdown[start..] : markdown[start..end];
+            var next = end < 0 ? markdown.Length : end + 1;
+            var trimmed = line.TrimStart();
+            if (fence is null && (trimmed.StartsWith("```", StringComparison.Ordinal) || trimmed.StartsWith("~~~", StringComparison.Ordinal)))
+            {
+                fence = trimmed[..3];
+            }
+            else if (fence is not null && trimmed.StartsWith(fence, StringComparison.Ordinal))
+            {
+                fence = null;
+                tailStart = next;
+            }
+            else if (fence is null && trimmed.Length == 0 && end >= 0)
+            {
+                tailStart = next;
+            }
+
+            if (end < 0)
+            {
+                return (fence is not null, tailStart);
+            }
+
+            start = next;
+        }
+    }
 }

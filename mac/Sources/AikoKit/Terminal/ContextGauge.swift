@@ -1,6 +1,6 @@
 import Foundation
 
-/// How the ring of the context looks: quiet up to 75 %, orange up to 90 %, red above (D-342).
+/// How the word of the context looks: quiet up to 75 %, orange up to 90 %, red above (D-345).
 public enum ContextLevel: String, Sendable, Equatable {
     case quiet
     case warm

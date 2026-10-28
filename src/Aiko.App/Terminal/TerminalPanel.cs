@@ -106,8 +106,6 @@ sealed class TerminalPanel : UserControl
 
     private string? _talkSession;
 
-    // What is typed into the form stays here while the view is drawn again.
-
     public TerminalPanel()
     {
         Background = Tokens.Brush("Background");

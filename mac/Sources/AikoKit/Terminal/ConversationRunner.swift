@@ -48,6 +48,9 @@ public struct RunnerSetup: Sendable, Equatable {
 /// the output, errors included, and the exit code.
 public protocol Shell: Sendable {
     func run(_ command: String, folder: String, ended: @escaping @Sendable (String, Int) -> Void)
+
+    /// Stops the command that runs; its end still comes through ended.
+    func stop()
 }
 
 /// Runs one conversation: keeps its state, starts Claude Code when the first message is sent and
@@ -82,6 +85,10 @@ public final class ConversationRunner: @unchecked Sendable {
 
     /// Grows with every start and every stop: what an older process still says is dropped.
     private var run = 0
+
+    /// Grows when the conversation is closed: the end of a command of "!" that ran before is
+    /// dropped, so it never starts Claude Code for a session nobody shows.
+    private var shellRun = 0
 
     private var known: Bool
 
@@ -144,6 +151,11 @@ public final class ConversationRunner: @unchecked Sendable {
 
     /// Ends Claude Code. The conversation stays and can go on later with a new process.
     public func close() {
+        shellRun += 1
+        if state.shellRunning {
+            shell?.stop()
+        }
+
         guard let running = process else {
             return
         }
@@ -166,6 +178,10 @@ public final class ConversationRunner: @unchecked Sendable {
         }
 
         write(outcome.written)
+        if outcome.stopShell {
+            shell?.stop()
+        }
+
         runShell(outcome.shell)
         changed?()
     }
@@ -181,8 +197,12 @@ public final class ConversationRunner: @unchecked Sendable {
             return
         }
 
+        let runNow = self.shellRun
         shell.run(shellRun.command, folder: setup.workingDirectory) { [self] output, code in
-            post { [self] in apply(state.shellEnded(shellRun.itemId, output: output, exitCode: code), startIfNeeded: true) }
+            post { [self] in
+                guard runNow == self.shellRun else { return }
+                apply(state.shellEnded(shellRun.itemId, output: output, exitCode: code), startIfNeeded: true)
+            }
         }
     }
 

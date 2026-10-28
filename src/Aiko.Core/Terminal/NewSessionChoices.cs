@@ -163,7 +163,7 @@ public static class NewSessionChoices
             ? other.Name
             : null;
 
-    /// The name the session gets when the field is left empty.
+    /// The name the session gets when its first message gives none.
     public static string DefaultName(TerminalSessions sessions, string environment, string folder) =>
         SessionName.Default(folder, sessions.NamesIn(environment, folder));
 }

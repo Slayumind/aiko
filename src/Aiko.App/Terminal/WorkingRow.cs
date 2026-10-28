@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
@@ -18,10 +17,15 @@ sealed class WorkingRow : Grid
     private static readonly TimeSpan Sweep = TimeSpan.FromMilliseconds(1400);
     private static readonly TimeSpan TimeAfter = TimeSpan.FromSeconds(30);
 
-    private readonly Stopwatch _turn = Stopwatch.StartNew();
     private readonly TextBlock _time = TerminalPanel.Mono("", "Muted");
     private readonly DispatcherTimer _tick = new() { Interval = TimeSpan.FromSeconds(1) };
     private readonly TranslateTransform _band = new();
+
+    /// When the turn began. The feed builds this row again whenever an item lands above it, so
+    /// the row cannot keep the time itself: it blinked and lost the time after every step.
+    internal static DateTime TurnStarted { get; set; } = DateTime.UtcNow;
+
+    private static TimeSpan Turn => DateTime.UtcNow - TurnStarted;
 
     public WorkingRow()
     {
@@ -76,9 +80,18 @@ sealed class WorkingRow : Grid
 
     private void Start()
     {
-        var wait = Motion.IsOn ? Delay - _turn.Elapsed : TimeSpan.Zero;
-        var appear = new DoubleAnimation(0, 1, Motion.Or0(Motion.Expand)) { BeginTime = wait > TimeSpan.Zero ? wait : TimeSpan.Zero };
-        BeginAnimation(OpacityProperty, appear);
+        // A row built again in the middle of a turn is there at once; only a new turn fades in.
+        var wait = Motion.IsOn ? Delay - Turn : TimeSpan.Zero;
+        if (wait > TimeSpan.Zero)
+        {
+            BeginAnimation(OpacityProperty, new DoubleAnimation(0, 1, Motion.Or0(Motion.Expand)) { BeginTime = wait });
+        }
+        else
+        {
+            BeginAnimation(OpacityProperty, null);
+            Opacity = 1;
+        }
+
         if (Motion.IsOn)
         {
             _band.BeginAnimation(TranslateTransform.XProperty, new DoubleAnimation(1, -1, new Duration(Sweep)) { RepeatBehavior = RepeatBehavior.Forever });
@@ -90,7 +103,7 @@ sealed class WorkingRow : Grid
 
     private void ShowTime()
     {
-        var time = _turn.Elapsed;
+        var time = Turn;
         _time.Text = time < TimeAfter
             ? ""
             : time.TotalMinutes < 1

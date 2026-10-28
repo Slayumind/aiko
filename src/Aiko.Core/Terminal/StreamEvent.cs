@@ -135,8 +135,9 @@ public abstract record StreamEvent
             using var document = JsonDocument.Parse(text);
             return document.RootElement.ValueKind == JsonValueKind.Object ? Read(document.RootElement) : new Unreadable();
         }
-        catch (JsonException)
+        catch (Exception error) when (error is JsonException or InvalidOperationException or ArgumentOutOfRangeException)
         {
+            // A line Aiko cannot read is dropped; it must never take the window down with it.
             return new Unreadable();
         }
     }
@@ -418,7 +419,8 @@ public abstract record StreamEvent
     private static void AddWindow(List<LimitWindow> windows, JsonElement? limits, string name, LimitKind kind)
     {
         var window = Object(limits, name);
-        if (Number(window, "utilization") is { } share && Number(window, "resetsAt") is { } resetsAt)
+        if (Number(window, "utilization") is { } share && Number(window, "resetsAt") is { } resetsAt
+            && resetsAt is >= 0 and <= 253402300799)
         {
             windows.Add(new LimitWindow(
                 kind,
@@ -434,7 +436,22 @@ public abstract record StreamEvent
         root is { ValueKind: JsonValueKind.Object } element && element.TryGetProperty(key, out var value) ? value : null;
 
     private static string? Str(JsonElement? root, string key) =>
-        Member(root, key) is { ValueKind: JsonValueKind.String } value ? value.GetString() : null;
+        Member(root, key) is { ValueKind: JsonValueKind.String } value ? Decoded(value) : null;
+
+    /// A string as written. A string cut in the middle of an emoji (a lone half of a surrogate
+    /// pair, as Node writes it) cannot be decoded; it stays as its escaped text instead.
+    internal static string Decoded(JsonElement value)
+    {
+        try
+        {
+            return value.GetString() ?? "";
+        }
+        catch (InvalidOperationException)
+        {
+            var raw = value.GetRawText();
+            return raw.Length >= 2 ? raw[1..^1] : "";
+        }
+    }
 
     private static bool Flag(JsonElement? root, string key) =>
         Member(root, key) is { ValueKind: JsonValueKind.True };

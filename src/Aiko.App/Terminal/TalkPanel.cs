@@ -32,7 +32,7 @@ sealed record TalkView(
     /// line under the field. The session is made when the first message goes.
     public FormView? Draft { get; init; }
 
-    /// The panel "Tasks" above the field, and how full the context is: null until it is known.
+    /// The panel "Tasks" above the field (D-342).
     public TaskPanel Tasks { get; init; } = TaskPanel.Empty;
 
     public int? ContextPercent { get; init; }
@@ -45,8 +45,6 @@ sealed record TalkView(
 /// draws a TalkView and reports what the person did; the host decides the rest.
 sealed class TalkPanel : UserControl
 {
-    /// The rows of the feed: the items of the core, and the line "working" after them while a turn
-    /// goes on (D-308).
     /// The widest the conversation gets, and the space on its sides.
     private const double ColumnWidth = 860;
     private const double Gutter = 24;
@@ -65,6 +63,8 @@ sealed class TalkPanel : UserControl
     private ScrollViewer? _scroll;
     private string? _shownSession;
 
+    internal string? ShownSession => _shownSession;
+
     /// The card Enter and Esc of the field answer, or null (D-323).
     private FeedItem.Card? _keyCard;
 
@@ -73,6 +73,10 @@ sealed class TalkPanel : UserControl
     /// to be guessed from the scroll itself, and the guess lost to the feed's own changes of offset:
     /// a reader at the bottom could not scroll up while an answer was written (check of 2026-10-15).
     private bool _follow = true;
+
+    /// Whether the shown session worked at the last draw: a new turn starts the clock of the
+    /// working row.
+    private bool _wasBusy;
     private readonly FeedGlide _glide = new();
 
     public TalkPanel()
@@ -199,8 +203,17 @@ sealed class TalkPanel : UserControl
         // Another session opens at its end.
         var newSession = view.Session != _shownSession;
         _shownSession = view.Session;
+        if (view.Busy && (!_wasBusy || newSession))
+        {
+            WorkingRow.TurnStarted = DateTime.UtcNow;
+        }
+
+        _wasBusy = view.Busy;
         if (newSession)
         {
+            // Item ids are counted per conversation: a row of another session must not be
+            // taken for the one with the same id here.
+            _slots.Clear();
             _follow = true;
         }
 
@@ -611,15 +624,27 @@ sealed class FeedRow : ContentControl
             ClipToBounds = true,
         };
         bar.Children.Add(piece);
-        bar.SizeChanged += (_, size) =>
+        void Move(double width)
         {
-            var width = size.NewSize.Width;
             piece.Width = width * CompactingPiece;
             run.BeginAnimation(TranslateTransform.XProperty, new System.Windows.Media.Animation.DoubleAnimation(
                 -piece.Width, width, TimeSpan.FromSeconds(CompactingSeconds))
             {
                 RepeatBehavior = System.Windows.Media.Animation.RepeatBehavior.Forever,
             });
+        }
+
+        bar.SizeChanged += (_, size) => Move(size.NewSize.Width);
+
+        // A bar that left the feed stops moving: nothing draws frames for a row nobody sees. A row
+        // the list takes back moves again.
+        bar.Unloaded += (_, _) => run.BeginAnimation(TranslateTransform.XProperty, null);
+        bar.Loaded += (_, _) =>
+        {
+            if (bar.ActualWidth > 0)
+            {
+                Move(bar.ActualWidth);
+            }
         };
         column.Children.Add(bar);
         return column;
@@ -769,7 +794,7 @@ sealed class FeedRow : ContentControl
     /// click opens (D-342). The words are grey: they are not the answer.
     private UIElement ThoughtRow(FeedEntry.Thought thought)
     {
-        var key = "thought:" + thought.Id;
+        var key = $"thought:{FindPanel()?.ShownSession}:{thought.Id}";
         var open = thought.Open || FindPanel()?.IsOpen(key) == true;
 
         var row = new Grid();

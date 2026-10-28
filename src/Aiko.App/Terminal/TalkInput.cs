@@ -405,6 +405,8 @@ sealed class TalkInput : UserControl
     /// The words go where the caret stands; what is around it stays.
     public void BeginDictation()
     {
+        // The menu of "/" or "@" goes: while the words are heard, Enter and the arrows are not its.
+        _menu.Close();
         var at = _text.CaretIndex;
         _before = _text.Text[..at];
         _after = _text.Text[at..];
@@ -482,6 +484,15 @@ sealed class TalkInput : UserControl
 
             // Each session keeps its own draft while the window lives (LobeChat, Zed).
             _drafts[_session] = _text.Text;
+
+            // The first message of a session is sent from its draft, and the draft becomes the
+            // session: what was sent goes with it, so Up shows it there and not in the next draft.
+            if (_session.StartsWith("draft:", StringComparison.Ordinal) && !_sent.ContainsKey(session)
+                && _sent.Remove(_session, out var sentFromDraft))
+            {
+                _sent[session] = sentFromDraft;
+            }
+
             _session = session;
             _text.Text = _drafts.GetValueOrDefault(session, "");
             _text.CaretIndex = _text.Text.Length;
@@ -498,7 +509,7 @@ sealed class TalkInput : UserControl
         _where.Text = " · " + environment;
     }
 
-    /// How full the context is; no ring until it is known.
+    /// How full the context is; no word until it is known.
     public void ShowContext(int? percent) => _context.Show(percent);
 
     /// Raised when a folder of the list under the field is picked, and when "Choose a folder"
@@ -512,7 +523,9 @@ sealed class TalkInput : UserControl
     {
         // The list is built again only when what it shows changed: a draw while it is open would
         // close it.
-        var key = draft is { Folder: >= 0 } ? $"draft|{draft.Folder}|{draft.Folders.Count}|{draft.Folders[draft.Folder].Path}" : folder;
+        var key = draft is { Folder: >= 0 } ? $"draft|{draft.Folder}|{draft.Folders.Count}|{draft.Folders[draft.Folder].Path}"
+            : draft is not null ? "draft|none"
+            : folder;
         if (key == _folderKey)
         {
             return;
@@ -544,6 +557,20 @@ sealed class TalkInput : UserControl
                 }
             };
             _folderSlot.Content = list;
+            _folderShown = true;
+        }
+        else if (draft is not null)
+        {
+            // Nothing is bound and nothing was opened before: the folder is still to be chosen.
+            var choose = new DropDown
+            {
+                Items = [Strings.TerminalChooseFolder],
+                Short = [Strings.TerminalChooseFolder],
+                SelectedIndex = 0,
+            };
+            choose.MakeQuiet();
+            choose.Picked += _ => OtherFolderAsked?.Invoke();
+            _folderSlot.Content = choose;
             _folderShown = true;
         }
         else if (folder.Length > 0)

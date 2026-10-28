@@ -878,10 +878,14 @@ struct SharedCaseTests {
         var state = Conversation.empty()
         var written: [String] = []
 
-        // A command the host is asked to run shows among the lines as "shell: <command>".
+        // A command the host is asked to run shows among the lines as "shell: <command>", and one
+        // it is asked to stop as "stop shell".
         func take(_ outcome: Outcome) {
             state = outcome.state
             written += outcome.written
+            if outcome.stopShell {
+                written.append("stop shell")
+            }
             if let run = outcome.shell {
                 written.append("shell: " + run.command)
             }
