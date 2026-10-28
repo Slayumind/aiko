@@ -567,7 +567,13 @@ struct SharedCaseTests {
 
         for row in cases["chosen"]?.arrayValue ?? [] {
             guard let command = commands.first(where: { $0.name == row["name"]?.stringValue }) else { continue }
-            #expect(SlashMenu.chosen(command) == row["text"]?.stringValue)
+            if let field = row["field"]?.stringValue {
+                let picked = SlashMenu.into(field, command)
+                #expect(picked.text == row["text"]?.stringValue)
+                #expect(picked.caret == Int(row["caret"]?.int64Value ?? -1))
+            } else {
+                #expect(SlashMenu.chosen(command) == row["text"]?.stringValue)
+            }
         }
     }
 

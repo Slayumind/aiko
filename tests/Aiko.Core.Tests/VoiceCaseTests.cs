@@ -56,6 +56,19 @@ public class VoiceCaseTests
     }
 
     [Fact]
+    public void Dictated_words_go_where_the_caret_stood()
+    {
+        foreach (var row in SpecCases.Json("dictation").GetProperty("placed").EnumerateArray())
+        {
+            var name = row.GetProperty("name").GetString();
+            var (before, after) = DictationText.Around(row.GetProperty("field").GetString()!, row.GetProperty("caret").GetInt32());
+            var (text, caret) = DictationText.Placed(before, row.GetProperty("words").GetString()!, after);
+            Assert.True(row.GetProperty("text").GetString() == text, $"{name}: {text}");
+            Assert.True(row.GetProperty("resultCaret").GetInt32() == caret, $"{name}: caret {caret}");
+        }
+    }
+
+    [Fact]
     public void Confirmed_words_grow_and_never_change()
     {
         foreach (var row in SpecCases.Json("dictation").GetProperty("phrases").EnumerateArray())

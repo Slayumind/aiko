@@ -80,8 +80,7 @@ sealed class TalkInput : UserControl
     private readonly Dictionary<string, List<string>> _sent = [];
     private readonly Dictionary<string, string> _drafts = [];
     private string _session = "";
-    private int _back = -1;
-    private string _draft = "";
+    private FieldWalk _walk = FieldWalk.None;
     private bool _busy;
     private bool _cardWaits;
 
@@ -407,13 +406,7 @@ sealed class TalkInput : UserControl
     {
         // The menu of "/" or "@" goes: while the words are heard, Enter and the arrows are not its.
         _menu.Close();
-        var at = _text.CaretIndex;
-        _before = _text.Text[..at];
-        _after = _text.Text[at..];
-        if (_before.Length > 0 && !char.IsWhiteSpace(_before[^1]))
-        {
-            _before += " ";
-        }
+        (_before, _after) = DictationText.Around(_text.Text, _text.CaretIndex);
 
         _dictating = true;
         _text.IsReadOnly = true;
@@ -462,9 +455,9 @@ sealed class TalkInput : UserControl
         ShowPlaceholder();
         if (words is { Length: > 0 })
         {
-            var gap = _after.Length > 0 && !char.IsWhiteSpace(_after[0]) ? " " : "";
-            _text.Text = _before + words + gap + _after;
-            _text.CaretIndex = (_before + words).Length;
+            var (text, caret) = DictationText.Placed(_before, words, _after);
+            _text.Text = text;
+            _text.CaretIndex = caret;
         }
 
         _text.Focus();
@@ -484,7 +477,7 @@ sealed class TalkInput : UserControl
 
             // Each session keeps its own draft while the window lives (LobeChat, Zed). While the
             // arrows walk the history the field shows an old message: the draft is what was typed.
-            _drafts[_session] = _back >= 0 ? _draft : _text.Text;
+            _drafts[_session] = FieldHistory.Draft(_walk, _text.Text);
 
             // The first message of a session is sent from its draft, and the draft becomes the
             // session: what was sent goes with it, so Up shows it there and not in the next draft.
@@ -499,7 +492,7 @@ sealed class TalkInput : UserControl
             _text.CaretIndex = _text.Text.Length;
             _attached.Clear();
             DrawPictures();
-            _back = -1;
+            _walk = FieldWalk.None;
         }
 
         _busy = busy;
@@ -682,11 +675,9 @@ sealed class TalkInput : UserControl
         }
         else if (index >= 0 && index < _matches.Count)
         {
-            var end = text.IndexOfAny([' ', '\t', '\r', '\n']);
-            var rest = end < 0 ? "" : text[end..].TrimStart(' ', '\t');
-            var chosen = SlashMenu.Chosen(_matches[index].Command);
-            _text.Text = chosen + rest;
-            _text.CaretIndex = chosen.Length;
+            var (result, caret) = SlashMenu.Into(text, _matches[index].Command);
+            _text.Text = result;
+            _text.CaretIndex = caret;
         }
 
         _menuShut = true;
@@ -756,7 +747,7 @@ sealed class TalkInput : UserControl
         {
             e.Handled = Walk(-1);
         }
-        else if (e.Key == Key.Down && modifiers == ModifierKeys.None && _back >= 0 && OnLastLine())
+        else if (e.Key == Key.Down && modifiers == ModifierKeys.None && _walk.Walking && OnLastLine())
         {
             e.Handled = Walk(+1);
         }
@@ -850,44 +841,22 @@ sealed class TalkInput : UserControl
         _text.Clear();
         _attached.Clear();
         DrawPictures();
-        _back = -1;
+        _walk = FieldWalk.None;
         Sent?.Invoke(text, pictures);
     }
 
-    /// One step through what was sent: up is older, down is newer, past the newest is the draft.
+    /// One step through what was sent (FieldHistory). Whether the arrow was the walk's.
     private bool Walk(int step)
     {
-        var history = History();
-        if (history.Count == 0)
+        var next = FieldHistory.Step(History(), _walk, _text.Text, step);
+        _walk = next.Walk;
+        if (next.Field is not { } field)
         {
             return false;
         }
 
-        if (_back < 0)
-        {
-            if (step > 0)
-            {
-                return false;
-            }
-
-            _draft = _text.Text;
-            _back = history.Count;
-        }
-
-        var next = _back + step;
-        if (next < 0)
-        {
-            return true;
-        }
-
-        _back = next;
-        _text.Text = next < history.Count ? history[next] : _draft;
-        if (next >= history.Count)
-        {
-            _back = -1;
-        }
-
-        _text.CaretIndex = _text.Text.Length;
+        _text.Text = field;
+        _text.CaretIndex = field.Length;
         return true;
     }
 

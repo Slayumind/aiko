@@ -76,6 +76,18 @@ public enum SlashMenu {
         "/" + command.name + " "
     }
 
+    /// The field after a command is chosen: the command takes the place of the "/" word, what was
+    /// typed after that word stays, and the caret stands after the command. The caret counts
+    /// UTF-16 units, as a text field does.
+    public static func into(_ field: String, _ command: SlashCommand) -> (text: String, caret: Int) {
+        let units = Array(field.utf16)
+        let end = units.firstIndex { $0 == 32 || $0 == 9 || $0 == 13 || $0 == 10 }
+        var rest = end.map { Array(units[$0...]) } ?? []
+        while let first = rest.first, first == 32 || first == 9 { rest.removeFirst() }
+        let picked = chosen(command)
+        return (picked + String(decoding: rest, as: UTF16.self), picked.utf16.count)
+    }
+
     private static func isHidden(_ name: String) -> Bool {
         name.hasPrefix("__") || terminalOnly.contains(name)
     }

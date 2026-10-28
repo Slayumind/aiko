@@ -40,6 +40,24 @@ public struct DictationText: Sendable, Equatable {
 
     /// Text that comes in phrases, from OpenAI (D-317): the phrases that are done are confirmed,
     /// the one still being read is the tail.
+    /// The field around the caret when a recording starts: the words go between the two parts,
+    /// with a space after a word before them. The caret counts UTF-16 units, as a text field does.
+    public static func around(_ field: String, caret: Int) -> (before: String, after: String) {
+        let units = Array(field.utf16)
+        var before = String(decoding: units[..<caret], as: UTF16.self)
+        if let last = before.last, !last.isWhitespace {
+            before += " "
+        }
+        return (before, String(decoding: units[caret...], as: UTF16.self))
+    }
+
+    /// The field after the recording: the words in their place, a space before a word after them,
+    /// and the caret right after the words.
+    public static func placed(before: String, words: String, after: String) -> (text: String, caret: Int) {
+        let gap = after.first.map { $0.isWhitespace ? "" : " " } ?? ""
+        return (before + words + gap + after, before.utf16.count + words.utf16.count)
+    }
+
     public static func phrases(done: String, reading: String) -> DictationText {
         DictationText(words(done), words(reading), [])
     }

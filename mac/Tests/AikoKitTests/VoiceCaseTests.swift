@@ -51,6 +51,17 @@ struct VoiceCaseTests {
     }
 
     @Test
+    func dictatedWordsGoWhereTheCaretStood() {
+        for row in SpecCases.json("dictation")["placed"]?.arrayValue ?? [] {
+            let name = row["name"]?.stringValue ?? ""
+            let parts = DictationText.around(row["field"]?.stringValue ?? "", caret: Int(row["caret"]?.int64Value ?? 0))
+            let placed = DictationText.placed(before: parts.before, words: row["words"]?.stringValue ?? "", after: parts.after)
+            #expect(placed.text == row["text"]?.stringValue, "\(name)")
+            #expect(placed.caret == Int(row["resultCaret"]?.int64Value ?? -1), "\(name): caret")
+        }
+    }
+
+    @Test
     func confirmedWordsGrowAndNeverChange() {
         for row in SpecCases.json("dictation")["phrases"]?.arrayValue ?? [] {
             let phrases = DictationText.phrases(done: row["done"]?.stringValue ?? "", reading: row["reading"]?.stringValue ?? "")

@@ -1,47 +1,326 @@
 {
-  "comment": "The menu that \"/\" opens at the start of the field (AIKO-330). queries: what was typed after \"/\" while the caret is in the first word, or null when the menu is closed. matches: the commands for a query, best first: a name that starts with it, a name with a part after \":\", \"-\" or \"_\" that starts with it, an alias that starts with it, a name that has it inside. Built-in commands go before skills inside each group, then the alphabet. Names that start with \"__\" and the commands for the screen of Claude Code itself (doctor, color, focus, reload-plugins) never show. mark is where the match is in the name: [start, length]; [0, 0] for an empty query and for an alias. lit: whether the first line is lit, so that Enter takes it: only for a real match, the start of the name or of a part of it, an alias or nothing typed; a name with the letters only inside leaves it dark, and Enter sends the text.",
+  "comment": "The menu that \"/\" opens at the start of the field (AIKO-330). queries: what was typed after \"/\" while the caret is in the first word, or null when the menu is closed. matches: the commands for a query, best first: a name that starts with it, a name with a part after \":\", \"-\" or \"_\" that starts with it, an alias that starts with it, a name that has it inside. Built-in commands go before skills inside each group, then the alphabet. Names that start with \"__\" and the commands for the screen of Claude Code itself (doctor, color, focus, reload-plugins) never show. mark is where the match is in the name: [start, length]; [0, 0] for an empty query and for an alias. lit: whether the first line is lit, so that Enter takes it: only for a real match, the start of the name or of a part of it, an alias or nothing typed; a name with the letters only inside leaves it dark, and Enter sends the text. A command chosen takes the place of the \"/\" word; what was typed after that word stays, and the caret stands after the command.",
   "commands": [
-    { "name": "compact", "description": "Free up context by summarizing the conversation so far", "argumentHint": "<optional custom summarization instructions>", "aliases": [], "builtin": true },
-    { "name": "clear", "description": "Start a new session with empty context", "argumentHint": "[name]", "aliases": ["reset", "new"], "builtin": true },
-    { "name": "context", "description": "Show what fills the context", "argumentHint": "", "aliases": [], "builtin": true },
-    { "name": "model", "description": "Set the AI model for Claude Code", "argumentHint": "<model>", "aliases": [], "builtin": true },
-    { "name": "config", "description": "Open the settings", "argumentHint": "", "aliases": [], "builtin": true },
-    { "name": "doctor", "description": "Health-check the setup", "argumentHint": "", "aliases": ["checkup"], "builtin": true },
-    { "name": "__remote-workflow", "description": "Run a workflow of the server", "argumentHint": "", "aliases": [], "builtin": true },
-    { "name": "aiko:copy", "description": "(aiko) Write and edit text that reads as written by a person", "argumentHint": "", "aliases": [], "builtin": false },
-    { "name": "aiko:balance", "description": "(aiko) Balance the numbers of a game", "argumentHint": "", "aliases": [], "builtin": false },
-    { "name": "slayumind-office", "description": "Read and change the project office", "argumentHint": "", "aliases": [], "builtin": false },
-    { "name": "deep-research", "description": "Deep research harness", "argumentHint": "", "aliases": [], "builtin": false },
-    { "name": "frontend-design:frontend-design", "description": "(frontend-design) Guidance for visual design", "argumentHint": "", "aliases": [], "builtin": false }
+    {
+      "name": "compact",
+      "description": "Free up context by summarizing the conversation so far",
+      "argumentHint": "<optional custom summarization instructions>",
+      "aliases": [],
+      "builtin": true
+    },
+    {
+      "name": "clear",
+      "description": "Start a new session with empty context",
+      "argumentHint": "[name]",
+      "aliases": [
+        "reset",
+        "new"
+      ],
+      "builtin": true
+    },
+    {
+      "name": "context",
+      "description": "Show what fills the context",
+      "argumentHint": "",
+      "aliases": [],
+      "builtin": true
+    },
+    {
+      "name": "model",
+      "description": "Set the AI model for Claude Code",
+      "argumentHint": "<model>",
+      "aliases": [],
+      "builtin": true
+    },
+    {
+      "name": "config",
+      "description": "Open the settings",
+      "argumentHint": "",
+      "aliases": [],
+      "builtin": true
+    },
+    {
+      "name": "doctor",
+      "description": "Health-check the setup",
+      "argumentHint": "",
+      "aliases": [
+        "checkup"
+      ],
+      "builtin": true
+    },
+    {
+      "name": "__remote-workflow",
+      "description": "Run a workflow of the server",
+      "argumentHint": "",
+      "aliases": [],
+      "builtin": true
+    },
+    {
+      "name": "aiko:copy",
+      "description": "(aiko) Write and edit text that reads as written by a person",
+      "argumentHint": "",
+      "aliases": [],
+      "builtin": false
+    },
+    {
+      "name": "aiko:balance",
+      "description": "(aiko) Balance the numbers of a game",
+      "argumentHint": "",
+      "aliases": [],
+      "builtin": false
+    },
+    {
+      "name": "slayumind-office",
+      "description": "Read and change the project office",
+      "argumentHint": "",
+      "aliases": [],
+      "builtin": false
+    },
+    {
+      "name": "deep-research",
+      "description": "Deep research harness",
+      "argumentHint": "",
+      "aliases": [],
+      "builtin": false
+    },
+    {
+      "name": "frontend-design:frontend-design",
+      "description": "(frontend-design) Guidance for visual design",
+      "argumentHint": "",
+      "aliases": [],
+      "builtin": false
+    }
   ],
   "queries": [
-    { "text": "/", "caret": 1, "query": "" },
-    { "text": "/co", "caret": 3, "query": "co" },
-    { "text": "/compact now", "caret": 3, "query": "co" },
-    { "text": "/compact now", "caret": 12, "query": null },
-    { "text": "/compact ", "caret": 9, "query": null },
-    { "text": "hi /co", "caret": 6, "query": null },
-    { "text": "/co", "caret": 0, "query": null },
-    { "text": "/co", "caret": 4, "query": null },
-    { "text": "", "caret": 0, "query": null }
+    {
+      "text": "/",
+      "caret": 1,
+      "query": ""
+    },
+    {
+      "text": "/co",
+      "caret": 3,
+      "query": "co"
+    },
+    {
+      "text": "/compact now",
+      "caret": 3,
+      "query": "co"
+    },
+    {
+      "text": "/compact now",
+      "caret": 12,
+      "query": null
+    },
+    {
+      "text": "/compact ",
+      "caret": 9,
+      "query": null
+    },
+    {
+      "text": "hi /co",
+      "caret": 6,
+      "query": null
+    },
+    {
+      "text": "/co",
+      "caret": 0,
+      "query": null
+    },
+    {
+      "text": "/co",
+      "caret": 4,
+      "query": null
+    },
+    {
+      "text": "",
+      "caret": 0,
+      "query": null
+    }
   ],
   "matches": [
     {
       "query": "",
-      "names": ["clear", "compact", "config", "context", "model", "aiko:balance", "aiko:copy", "deep-research", "frontend-design:frontend-design", "slayumind-office"],
-      "marks": [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]],
+      "names": [
+        "clear",
+        "compact",
+        "config",
+        "context",
+        "model",
+        "aiko:balance",
+        "aiko:copy",
+        "deep-research",
+        "frontend-design:frontend-design",
+        "slayumind-office"
+      ],
+      "marks": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
       "lit": true
     },
-    { "query": "co", "names": ["compact", "config", "context", "aiko:copy"], "marks": [[0, 2], [0, 2], [0, 2], [5, 2]], "lit": true },
-    { "query": "re", "names": ["deep-research", "clear"], "marks": [[5, 2], [0, 0]], "lit": true },
-    { "query": "design", "names": ["frontend-design:frontend-design"], "marks": [[9, 6]], "lit": true },
-    { "query": "OFF", "names": ["slayumind-office"], "marks": [[10, 3]], "lit": true },
-    { "query": "ntex", "names": ["context"], "marks": [[2, 4]], "lit": false },
-    { "query": "doc", "names": [], "marks": [], "lit": false },
-    { "query": "xyz", "names": [], "marks": [], "lit": false }
+    {
+      "query": "co",
+      "names": [
+        "compact",
+        "config",
+        "context",
+        "aiko:copy"
+      ],
+      "marks": [
+        [
+          0,
+          2
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          5,
+          2
+        ]
+      ],
+      "lit": true
+    },
+    {
+      "query": "re",
+      "names": [
+        "deep-research",
+        "clear"
+      ],
+      "marks": [
+        [
+          5,
+          2
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "lit": true
+    },
+    {
+      "query": "design",
+      "names": [
+        "frontend-design:frontend-design"
+      ],
+      "marks": [
+        [
+          9,
+          6
+        ]
+      ],
+      "lit": true
+    },
+    {
+      "query": "OFF",
+      "names": [
+        "slayumind-office"
+      ],
+      "marks": [
+        [
+          10,
+          3
+        ]
+      ],
+      "lit": true
+    },
+    {
+      "query": "ntex",
+      "names": [
+        "context"
+      ],
+      "marks": [
+        [
+          2,
+          4
+        ]
+      ],
+      "lit": false
+    },
+    {
+      "query": "doc",
+      "names": [],
+      "marks": [],
+      "lit": false
+    },
+    {
+      "query": "xyz",
+      "names": [],
+      "marks": [],
+      "lit": false
+    }
   ],
   "chosen": [
-    { "name": "aiko:copy", "text": "/aiko:copy " },
-    { "name": "compact", "text": "/compact " }
+    {
+      "name": "aiko:copy",
+      "text": "/aiko:copy "
+    },
+    {
+      "name": "compact",
+      "text": "/compact "
+    },
+    {
+      "name": "compact",
+      "field": "/comp keep the plan",
+      "text": "/compact keep the plan",
+      "caret": 9
+    },
+    {
+      "name": "aiko:copy",
+      "field": "/co",
+      "text": "/aiko:copy ",
+      "caret": 11
+    },
+    {
+      "name": "compact",
+      "field": "/compact   and more",
+      "text": "/compact and more",
+      "caret": 9
+    }
   ]
 }

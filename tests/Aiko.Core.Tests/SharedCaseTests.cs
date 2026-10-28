@@ -670,7 +670,16 @@ public class SharedCaseTests
         foreach (var row in cases.GetProperty("chosen").EnumerateArray())
         {
             var command = commands.Single(one => one.Name == row.GetProperty("name").GetString());
-            Assert.Equal(row.GetProperty("text").GetString(), SlashMenu.Chosen(command));
+            if (row.TryGetProperty("field", out var field))
+            {
+                var (text, caret) = SlashMenu.Into(field.GetString()!, command);
+                Assert.Equal(row.GetProperty("text").GetString(), text);
+                Assert.Equal(row.GetProperty("caret").GetInt32(), caret);
+            }
+            else
+            {
+                Assert.Equal(row.GetProperty("text").GetString(), SlashMenu.Chosen(command));
+            }
         }
     }
 
