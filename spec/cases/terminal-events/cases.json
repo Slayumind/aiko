@@ -1,5 +1,5 @@
 {
-  "comment": "The hook of the terminal (D-352, D-360). hooks: what one hook call becomes, at the time now (milliseconds); event null means the call changes nothing. The detail is one line of at most 40 characters, the last one an ellipsis when cut: the name of a file without its folder, the first line of a command, the host of a page, the tool part of a server tool. A permission notification is skipped: PermissionRequest tells it six seconds earlier, with the detail. files: the file of a session; an id that is not letters, digits and dashes, or longer than 64, has none. pulse: what a running session of Claude Code does, from its title (null, idle or working), its last event, and when the person last looked at it and typed into it. replaces: whether an event goes into the file over the one there. Async hooks run side by side, so a tool event after the end of a turn is a late one and is dropped; a message, a question or another end goes in. typed: whether input that went to the program was typed by the person; control sequences of the terminal itself (focus, cursor answers, arrows) are not, Enter, a digit and Esc are.",
+  "comment": "The hook of the terminal (D-352, D-360). hooks: what one hook call becomes, at the time now (milliseconds); event null means the call changes nothing; the end of a tool is one of those, since async hooks overtake each other. The detail is one line of at most 40 characters, the last one an ellipsis when cut: the name of a file without its folder, the first line of a command, the host of a page, the tool part of a server tool. A permission notification is skipped: PermissionRequest tells it six seconds earlier, with the detail. files: the file of a session; an id that is not letters, digits and dashes, or longer than 64, has none. pulse: what a running session of Claude Code does, from its title (null, idle or working), its last event, and when the person last looked at it and typed into it. replaces: whether an event goes into the file over the one there. Async hooks run side by side, so a tool event after the end of a turn is a late one and is dropped; a message, a question or another end goes in. typed: whether input that went to the program was typed by the person; control sequences of the terminal itself (focus, cursor answers, arrows) are not, Enter, a digit and Esc are.",
   "now": 1761650000000,
   "hooks": [
     {
@@ -32,7 +32,7 @@
     {
       "name": "a file with forward slashes",
       "input": {
-        "hook_event_name": "PostToolUse",
+        "hook_event_name": "PreToolUse",
         "session_id": "s",
         "tool_name": "Edit",
         "tool_input": {
@@ -43,6 +43,18 @@
         "kind": "editing",
         "detail": "App.swift"
       }
+    },
+    {
+      "name": "the end of a tool changes nothing: async hooks overtake each other",
+      "input": {
+        "hook_event_name": "PostToolUse",
+        "session_id": "s",
+        "tool_name": "Read",
+        "tool_input": {
+          "file_path": "C:alate.cs"
+        }
+      },
+      "event": null
     },
     {
       "name": "writing a notebook",

@@ -475,6 +475,15 @@ sealed class TerminalHost
 
         var terminal = new TerminalSurface(launch);
         terminal.Exited += code => Ended(session.Id, code);
+        terminal.DrawnFirst += () =>
+        {
+            // The loader gives way to the terminal, and the terminal takes the keys.
+            Draw();
+            if (_model.Session(_sessions)?.Id == session.Id)
+            {
+                terminal.FocusTerminal();
+            }
+        };
         if (session.Kind == SessionKind.Claude)
         {
             terminal.TitleChanged += title => TitleCame(session.Id, title);

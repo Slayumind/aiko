@@ -1198,6 +1198,9 @@
   <data name="TerminalNoSessionsBody" xml:space="preserve">
     <value>A session is one conversation with Claude Code in one folder.</value>
   </data>
+  <data name="TerminalStarting" xml:space="preserve">
+    <value>Starting…</value>
+  </data>
   <data name="TerminalNotStartedTitle" xml:space="preserve">
     <value>Claude Code did not start</value>
   </data>

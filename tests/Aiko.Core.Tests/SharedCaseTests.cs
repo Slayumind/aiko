@@ -482,6 +482,13 @@ public class SharedCaseTests
             Assert.Equal(row.GetProperty("title").GetBoolean(), title is not null);
         }
 
+        foreach (var row in cases.GetProperty("screen").EnumerateArray())
+        {
+            Assert.True(
+                row.GetProperty("text").GetBoolean() == TerminalScreen.HasText(row.GetProperty("output").GetString()!),
+                row.GetProperty("name").GetString());
+        }
+
         foreach (var row in cases.GetProperty("claude").EnumerateArray())
         {
             var parsed = ClaudeTitle.Parse(row.GetProperty("title").GetString());

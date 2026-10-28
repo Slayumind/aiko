@@ -429,6 +429,7 @@ public enum Strings {
         "TerminalChooseFolder": ("Choose another folder", "Выбрать другую папку"),
         "TerminalNoSessionsTitle": ("Start your first session in {0}", "Начни первую сессию в среде {0}"),
         "TerminalNoSessionsBody": ("A session is one conversation with Claude Code in one folder.", "Сессия — это один разговор с Claude Code в одной папке."),
+        "TerminalStarting": ("Starting…", "Запускается…"),
         "TerminalNotStartedTitle": ("Claude Code did not start", "Claude Code не запустился"),
         "TerminalNotStartedBody": ("Aiko did not find it on this computer. Install Claude Code, then open the session again.", "Aiko не нашла его на этом компьютере. Установи Claude Code и открой сессию снова."),
         "TerminalWorking": ("working", "работает"),
@@ -1662,6 +1663,9 @@ public enum Strings {
 
     /// A session is one conversation with Claude Code in one folder.
     public static var terminalNoSessionsBody: String { Strings.get("TerminalNoSessionsBody") }
+
+    /// Starting…
+    public static var terminalStarting: String { Strings.get("TerminalStarting") }
 
     /// Claude Code did not start
     public static var terminalNotStartedTitle: String { Strings.get("TerminalNotStartedTitle") }

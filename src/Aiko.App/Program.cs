@@ -318,6 +318,13 @@ static class Program
 
         // A program in a pseudo console, closed while it still prints: Aiko must outlive it. Opens
         // no window and starts no Claude Code.
+        // A real Claude Code with the hook of the terminal, in a pseudo console: --try-terminal-hooks <folder> <report>
+        if (args is ["--try-terminal-hooks", var hookFolder, var hookReport, ..])
+        {
+            Environment.Exit(TerminalHookCheck.Run(hookFolder, hookReport));
+            return;
+        }
+
         if (args is ["--try-pty", ..])
         {
             Environment.Exit(TryPty());
@@ -369,7 +376,7 @@ static class Program
             return;
         }
 
-        // The terminal window on made up sessions: --snapshot-terminal out.png [palette | folders]
+        // The terminal window on made up sessions: --snapshot-terminal out.png [palette | folders | loader]
         if (args is ["--snapshot-terminal", var terminalPath, ..])
         {
             TerminalSnapshot.Write(terminalPath, args.Length > 2 ? args[2] : null);

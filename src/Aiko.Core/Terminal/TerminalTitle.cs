@@ -95,6 +95,67 @@ public sealed class TitleReader
     }
 }
 
+/// Whether output of a terminal draws something a person can see. A program starts with sequences
+/// that only clear the screen, move the cursor and set the title; until a letter comes the terminal
+/// shows a loader instead (D-368).
+public static class TerminalScreen
+{
+    public static bool HasText(string output)
+    {
+        for (var at = 0; at < output.Length; at++)
+        {
+            var c = output[at];
+            if (c == '\u001b' && at + 1 < output.Length)
+            {
+                at = SequenceEnd(output, at);
+                continue;
+            }
+
+            if (!char.IsWhiteSpace(c) && !char.IsControl(c))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// The last place of the escape sequence that starts at the escape: a control sequence ends with
+    /// its final character, a command of the system with a bell or ESC \, a choice of a character
+    /// set (ESC ( B) after two characters, others after one.
+    private static int SequenceEnd(string output, int escape)
+    {
+        var kind = output[escape + 1];
+        var at = escape + 2;
+        if (kind is '(' or ')' or '*' or '+')
+        {
+            return Math.Min(escape + 2, output.Length - 1);
+        }
+
+        if (kind == '[')
+        {
+            while (at < output.Length && output[at] is < '@' or > '~')
+            {
+                at++;
+            }
+
+            return at;
+        }
+
+        if (kind == ']')
+        {
+            while (at < output.Length && output[at] != '\u0007' && !(output[at] == '\u001b' && at + 1 < output.Length && output[at + 1] == '\\'))
+            {
+                at++;
+            }
+
+            return at < output.Length && output[at] == '\u001b' ? at + 1 : at;
+        }
+
+        return escape + 1;
+    }
+}
+
 /// The title of Claude Code (spike 2026-10): "✳ name" waits for input, a turning half circle before
 /// the name means a turn is going on. The name is "Claude Code" until the first turn, then the
 /// subject of the conversation.

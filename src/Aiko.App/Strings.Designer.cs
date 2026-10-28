@@ -1188,6 +1188,9 @@ public static class Strings
     /// A session is one conversation with Claude Code in one folder.
     public static string TerminalNoSessionsBody => Get("TerminalNoSessionsBody");
 
+    /// Starting…
+    public static string TerminalStarting => Get("TerminalStarting");
+
     /// Claude Code did not start
     public static string TerminalNotStartedTitle => Get("TerminalNotStartedTitle");
 

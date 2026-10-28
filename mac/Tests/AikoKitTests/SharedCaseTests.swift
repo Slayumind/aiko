@@ -493,6 +493,12 @@ struct SharedCaseTests {
             #expect((title != nil) == (row["title"]?.boolValue ?? false), "\(length)")
         }
 
+        for row in cases["screen"]?.arrayValue ?? [] {
+            #expect(
+                TerminalScreen.hasText(row["output"]?.stringValue ?? "") == row["text"]?.boolValue,
+                "\(row["name"]?.stringValue ?? "")")
+        }
+
         for row in cases["claude"]?.arrayValue ?? [] {
             let parsed = ClaudeTitle.parse(row["title"]?.stringValue)
             let text = row["title"]?.stringValue ?? ""

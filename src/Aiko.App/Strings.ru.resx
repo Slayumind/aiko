@@ -1198,6 +1198,9 @@
   <data name="TerminalNoSessionsBody" xml:space="preserve">
     <value>Сессия — это один разговор с Claude Code в одной папке.</value>
   </data>
+  <data name="TerminalStarting" xml:space="preserve">
+    <value>Запускается…</value>
+  </data>
   <data name="TerminalNotStartedTitle" xml:space="preserve">
     <value>Claude Code не запустился</value>
   </data>

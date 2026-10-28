@@ -63,7 +63,7 @@ public struct ClaudeLaunchPlan: Sendable, Equatable {
         // The hook of the terminal writes to the file of this session, whatever id Claude Code uses.
         variables.append(VariableChange(TerminalEvent.sessionVariable, request.sessionId))
 
-        return ClaudeLaunchPlan(arguments: arguments, variables: variables)
+        return ClaudeLaunchPlan(arguments: arguments, variables: settled(variables))
     }
 
     /// A shell of a session (D-350): the environment of the session, so a claude typed in it runs
@@ -73,9 +73,17 @@ public struct ClaudeLaunchPlan: Sendable, Equatable {
     ) -> ClaudeLaunchPlan {
         ClaudeLaunchPlan(
             arguments: [],
-            variables: environment(
+            variables: settled(environment(
                 platform, configDirectory: configDirectory, userProfile: userProfile,
-                inheritedVariables: inheritedVariables))
+                inheritedVariables: inheritedVariables)))
+    }
+
+    /// One change per name: a leftover that the plan sets again is not removed first, so the list
+    /// can go straight into a dictionary of the environment (names do not care for case on Windows).
+    private static func settled(_ variables: [VariableChange]) -> [VariableChange] {
+        variables.enumerated().filter { at, change in
+            !variables[(at + 1)...].contains { $0.name.lowercased() == change.name.lowercased() }
+        }.map(\.element)
     }
 
     private static func environment(

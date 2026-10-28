@@ -1,5 +1,5 @@
 {
-  "comment": "How the terminal starts Claude Code for one session in a real terminal (D-349, D-360): the arguments in order, and what changes in the environment. Claude Code chooses its own mode and model, so only the id of the conversation is passed: --session-id the first time, --resume after that. A variable with a null value is removed. The first environment runs with CLAUDE_CONFIG_DIR removed, never pointed at .claude (D-156). The paths are Windows ones, as in shim-launch. Only what a Claude Code session leaves for its children is removed (CLAUDECODE, CLAUDE_PID, CLAUDE_EFFORT, the entry point, the session, messaging and exec path of Claude Code, and AIKO_*); the person's own settings, such as CLAUDE_CODE_GIT_BASH_PATH, stay. A shell gets the environment of its session too, so a claude typed in it runs in the same environment, but none of the variables of the session start hook. The hook of the terminal comes with --settings and its file, when the file is there (hooksFile), and the variable AIKO_TERMINAL_SESSION names the session for it.",
+  "comment": "How the terminal starts Claude Code for one session in a real terminal (D-349, D-360): the arguments in order, and what changes in the environment. Claude Code chooses its own mode and model, so only the id of the conversation is passed: --session-id the first time, --resume after that. A variable with a null value is removed. The first environment runs with CLAUDE_CONFIG_DIR removed, never pointed at .claude (D-156). The paths are Windows ones, as in shim-launch. Only what a Claude Code session leaves for its children is removed (CLAUDECODE, CLAUDE_PID, CLAUDE_EFFORT, the entry point, the session, messaging and exec path of Claude Code, and AIKO_*); the person's own settings, such as CLAUDE_CODE_GIT_BASH_PATH, stay. A shell gets the environment of its session too, so a claude typed in it runs in the same environment, but none of the variables of the session start hook. The hook of the terminal comes with --settings and its file, when the file is there (hooksFile), and the variable AIKO_TERMINAL_SESSION names the session for it. Each name comes once: a leftover that the plan sets again is set, not removed first.",
   "platform": "windows",
   "userProfile": "C:\\Users\\someone",
   "cases": [
@@ -100,14 +100,6 @@
         },
         {
           "name": "Claude_Code_SSE_PORT",
-          "value": null
-        },
-        {
-          "name": "AIKO_ENVIRONMENT",
-          "value": null
-        },
-        {
-          "name": "aiko_launch",
           "value": null
         },
         {

@@ -45,13 +45,18 @@ public sealed record ClaudeLaunchPlan(IReadOnlyList<string> Arguments, IReadOnly
         // The hook of the terminal writes to the file of this session, whatever id Claude Code uses.
         variables.Add(new VariableChange(TerminalEvent.SessionVariable, request.SessionId));
 
-        return new ClaudeLaunchPlan(arguments, variables);
+        return new ClaudeLaunchPlan(arguments, Settled(variables));
     }
 
     /// A shell of a session (D-350): the environment of the session, so a claude typed in it runs
     /// in the same environment, without the variables of the session start hook.
     public static ClaudeLaunchPlan ForShell(string configDirectory, string userProfile, IEnumerable<string> inheritedVariables) =>
-        new([], Environment(configDirectory, userProfile, inheritedVariables));
+        new([], Settled(Environment(configDirectory, userProfile, inheritedVariables)));
+
+    /// One change per name: a leftover that the plan sets again is not removed first, so the list
+    /// can go straight into a dictionary of the environment (names do not care for case on Windows).
+    private static List<VariableChange> Settled(List<VariableChange> variables) =>
+        [.. variables.Where((change, at) => !variables.Skip(at + 1).Any(later => later.Name.Equals(change.Name, StringComparison.OrdinalIgnoreCase)))];
 
     private static List<VariableChange> Environment(string configDirectory, string userProfile, IEnumerable<string> inheritedVariables)
     {

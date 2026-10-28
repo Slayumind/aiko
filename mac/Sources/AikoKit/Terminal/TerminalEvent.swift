@@ -37,7 +37,7 @@ public struct TerminalEvent: Sendable, Equatable {
 
     /// The events the hook of the terminal is called for.
     public static let hookEvents = [
-        "UserPromptSubmit", "PreToolUse", "PostToolUse", "PermissionRequest", "Notification", "Stop", "StopFailure",
+        "UserPromptSubmit", "PreToolUse", "PermissionRequest", "Notification", "Stop", "StopFailure",
     ]
 
     /// Characters of a detail at most; a longer one ends in an ellipsis.
@@ -62,7 +62,7 @@ public struct TerminalEvent: Sendable, Equatable {
     public var isEnd: Bool { kind == .finished || kind == .failed || kind == .outOfLimit }
 
     /// Whether this event goes into the file over the one written there. Async hooks run side by
-    /// side, so the PostToolUse of the last tool can finish after Stop; a turn that ended stays
+    /// side, so the hook of the last tool can finish after Stop; a turn that ended stays
     /// ended until the person sends a message or Claude Code asks something.
     public func replaces(_ written: TerminalEvent?) -> Bool {
         guard let written, written.isEnd else { return true }
@@ -94,7 +94,9 @@ public struct TerminalEvent: Sendable, Equatable {
         switch root["hook_event_name"]?.stringValue {
         case "UserPromptSubmit":
             found = (.thinking, "")
-        case "PreToolUse", "PostToolUse":
+        case "PreToolUse":
+            // Only the start of a tool: async hooks overtake each other, and the end of one tool
+            // came seconds after the start of the next (a live check, D-366).
             found = toolEvent(tool, input)
         case "PermissionRequest":
             found = (.asksPermission, toolEvent(tool, input).1)

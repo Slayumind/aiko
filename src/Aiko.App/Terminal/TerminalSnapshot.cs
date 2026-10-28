@@ -9,9 +9,21 @@ namespace Aiko.App;
 [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763")]
 static class TerminalSnapshot
 {
-    /// --snapshot-terminal out.png [palette | folders]
+    /// --snapshot-terminal out.png [palette | folders | loader]
     public static void Write(string path, string? part)
     {
+        if (part == "loader")
+        {
+            Snapshot.Write(new System.Windows.Controls.Border
+            {
+                Width = 480,
+                Height = 240,
+                Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x0A, 0x0A, 0x0A)),
+                Child = new TerminalLoader(),
+            }, path);
+            return;
+        }
+
         if (part is "palette" or "folders")
         {
             Snapshot.Write(Palette(part == "folders"), path);

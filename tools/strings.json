@@ -2723,6 +2723,13 @@
     ]
   ],
   [
+    "TerminalStarting",
+    [
+      "Starting…",
+      "Запускается…"
+    ]
+  ],
+  [
     "TerminalNotStartedTitle",
     [
       "Claude Code did not start",

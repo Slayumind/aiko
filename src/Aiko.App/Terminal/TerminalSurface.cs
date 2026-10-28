@@ -29,6 +29,12 @@ sealed class TerminalSurface : Grid
     private readonly TitleReader _titles = new();
     private bool _connected;
 
+    /// Space between the text and the left edge, in units.
+    private const double TextInset = 12;
+
+    /// Set on the thread of the output, once.
+    private volatile bool _drawn;
+
     public TerminalSurface(PtyLaunch launch)
     {
         _console = new PseudoConsole(launch);
@@ -40,7 +46,18 @@ sealed class TerminalSurface : Grid
             {
                 Dispatcher.BeginInvoke(() => TitleChanged?.Invoke(title));
             }
+
+            if (!_drawn && TerminalScreen.HasText(e.Data))
+            {
+                _drawn = true;
+                Dispatcher.BeginInvoke(() => DrawnFirst?.Invoke());
+            }
         };
+
+        // A little air between the text and the edges of the window; the background around the
+        // control is the background of the terminal, so the two read as one.
+        Background = new SolidColorBrush(Color.FromRgb(0x0A, 0x0A, 0x0A));
+        _control.Margin = new Thickness(TextInset, TextInset - 4, 0, 0);
         Children.Add(_control);
 
         Loaded += (_, _) =>
@@ -66,6 +83,12 @@ sealed class TerminalSurface : Grid
 
     /// The person typed into the program. Raised on the window's thread.
     public event Action? Typed;
+
+    /// The program drew its first letter: until then a loader stands in place of the terminal
+    /// (D-368). Raised on the window's thread.
+    public event Action? DrawnFirst;
+
+    public bool Drawn => _drawn;
 
     public bool IsRunning => _console.IsRunning;
 

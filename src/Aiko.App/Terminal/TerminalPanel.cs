@@ -46,6 +46,7 @@ sealed class TerminalPanel : UserControl
     /// and only the one of the chosen session is visible: a terminal taken out of the tree would lose
     /// its window and its screen.
     private readonly Grid _terminals = new();
+    private readonly TerminalLoader _loader = new();
 
     /// Under a terminal whose Claude Code ended by itself (D-351).
     private readonly DockPanel _stopped = new() { Visibility = Visibility.Collapsed };
@@ -123,6 +124,8 @@ sealed class TerminalPanel : UserControl
         stoppedLine.TextWrapping = TextWrapping.Wrap;
         _stopped.Children.Add(stoppedLine);
         _stopped.Margin = new Thickness(16, 10, 16, 12);
+        _loader.Visibility = Visibility.Collapsed;
+        _terminals.Children.Add(_loader);
         var terminalSide = new DockPanel();
         DockPanel.SetDock(_stopped, Dock.Bottom);
         terminalSide.Children.Add(_stopped);
@@ -600,15 +603,23 @@ sealed class TerminalPanel : UserControl
         // A terminal draws in a window of its own, over anything WPF puts on top of it. So a question
         // or a message takes the place of the terminals rather than covering them.
         var terminal = view.Main == MainView.Terminal && view.Ask is null ? view.Terminal : null;
-        foreach (UIElement child in _terminals.Children)
+
+        // Until its program draws a letter the terminal is hidden but keeps its place, so the size
+        // reaches the pseudo console, and the loader stands over it (D-368).
+        foreach (var child in _terminals.Children.OfType<TerminalSurface>())
         {
-            child.Visibility = ReferenceEquals(child, terminal) ? Visibility.Visible : Visibility.Collapsed;
+            child.Visibility = !ReferenceEquals(child, terminal) ? Visibility.Collapsed
+                : child.Drawn ? Visibility.Visible
+                : Visibility.Hidden;
         }
 
         if (terminal is not null && !_terminals.Children.Contains(terminal))
         {
-            _terminals.Children.Add(terminal);
+            _terminals.Children.Insert(0, terminal);
+            terminal.Visibility = terminal.Drawn ? Visibility.Visible : Visibility.Hidden;
         }
+
+        _loader.Visibility = terminal is { Drawn: false } ? Visibility.Visible : Visibility.Collapsed;
 
         _stopped.Visibility = terminal is not null && view.Stopped ? Visibility.Visible : Visibility.Collapsed;
 

@@ -47,7 +47,7 @@ public sealed record TerminalEvent(TerminalEventKind Kind, string Detail, long A
     /// The events the hook of the terminal is called for.
     public static readonly IReadOnlyList<string> HookEvents =
     [
-        "UserPromptSubmit", "PreToolUse", "PostToolUse", "PermissionRequest", "Notification", "Stop", "StopFailure",
+        "UserPromptSubmit", "PreToolUse", "PermissionRequest", "Notification", "Stop", "StopFailure",
     ];
 
     /// Characters of a detail at most; a longer one ends in an ellipsis.
@@ -61,7 +61,7 @@ public sealed record TerminalEvent(TerminalEventKind Kind, string Detail, long A
     public bool IsEnd => Kind is TerminalEventKind.Finished or TerminalEventKind.Failed or TerminalEventKind.OutOfLimit;
 
     /// Whether this event goes into the file over the one written there. Async hooks run side by
-    /// side, so the PostToolUse of the last tool can finish after Stop; a turn that ended stays
+    /// side, so the hook of the last tool can finish after Stop; a turn that ended stays
     /// ended until the person sends a message or Claude Code asks something.
     public bool Replaces(TerminalEvent? written) =>
         written is not { IsEnd: true } || IsEnd || IsWaiting || Kind == TerminalEventKind.Thinking;
@@ -87,7 +87,9 @@ public sealed record TerminalEvent(TerminalEventKind Kind, string Detail, long A
         (TerminalEventKind Kind, string Detail)? found = Text(root, "hook_event_name") switch
         {
             "UserPromptSubmit" => (TerminalEventKind.Thinking, ""),
-            "PreToolUse" or "PostToolUse" => ToolEvent(tool, input),
+            // Only the start of a tool: async hooks overtake each other, and the end of one tool
+            // came seconds after the start of the next (a live check, D-366).
+            "PreToolUse" => ToolEvent(tool, input),
             "PermissionRequest" => (TerminalEventKind.AsksPermission, ToolEvent(tool, input).Detail),
             // A permission prompt is told by PermissionRequest six seconds earlier (spike 2026-10),
             // and with the detail; the notification would only wipe it.

@@ -77,6 +77,60 @@ public final class TitleReader {
     }
 }
 
+/// Whether output of a terminal draws something a person can see. A program starts with sequences
+/// that only clear the screen, move the cursor and set the title; until a letter comes the terminal
+/// shows a loader instead (D-368). Places are UTF-16 units, as in C#.
+///
+/// The twin of TerminalScreen in TerminalTitle.cs.
+public enum TerminalScreen {
+    public static func hasText(_ output: String) -> Bool {
+        let units = Array(output.utf16)
+        var at = 0
+        while at < units.count {
+            let unit = units[at]
+            if unit == 0x1B, at + 1 < units.count {
+                at = sequenceEnd(units, at) + 1
+                continue
+            }
+
+            if let scalar = Unicode.Scalar(unit), !scalar.properties.isWhitespace,
+               scalar.properties.generalCategory != .control {
+                return true
+            }
+            if Unicode.Scalar(unit) == nil {
+                // Half of a pair: a letter outside the first plane.
+                return true
+            }
+            at += 1
+        }
+        return false
+    }
+
+    private static func sequenceEnd(_ units: [UInt16], _ escape: Int) -> Int {
+        let kind = units[escape + 1]
+        var at = escape + 2
+        // A choice of a character set, ESC ( B: two characters after the escape.
+        if [0x28, 0x29, 0x2A, 0x2B].contains(kind) {
+            return min(escape + 2, units.count - 1)
+        }
+        if kind == 0x5B {
+            while at < units.count, !(0x40...0x7E).contains(units[at]) {
+                at += 1
+            }
+            return at
+        }
+
+        if kind == 0x5D {
+            while at < units.count, units[at] != 0x07, !(units[at] == 0x1B && at + 1 < units.count && units[at + 1] == 0x5C) {
+                at += 1
+            }
+            return at < units.count && units[at] == 0x1B ? at + 1 : at
+        }
+
+        return escape + 1
+    }
+}
+
 /// The title of Claude Code (spike 2026-10): "✳ name" waits for input, a turning half circle before
 /// the name means a turn is going on. The name is "Claude Code" until the first turn, then the
 /// subject of the conversation.
