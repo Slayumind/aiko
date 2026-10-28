@@ -393,6 +393,19 @@ public enum Strings {
         "MeetAikoSettings": ("The temperament, the mood, the skills and the memory are on the Personality page. It works in new sessions.", "Темперамент, настроение, навыки и память — на странице «Личность». Действует в новых сессиях."),
         "MeetAikoTurnOn": ("Turn on in {0}", "Включить в среде {0}"),
         "StateOn": ("on", "включена"),
+        "TerminalEventThinking": ("thinking", "думает"),
+        "TerminalEventReading": ("reading {0}", "читает {0}"),
+        "TerminalEventEditing": ("editing {0}", "правит {0}"),
+        "TerminalEventRunning": ("running: {0}", "запускает: {0}"),
+        "TerminalEventSearching": ("searching: {0}", "ищет: {0}"),
+        "TerminalEventBrowsing": ("on the web: {0}", "в сети: {0}"),
+        "TerminalEventDelegating": ("agent: {0}", "агент: {0}"),
+        "TerminalEventUsing": ("tool: {0}", "инструмент: {0}"),
+        "TerminalEventAsksPermission": ("waits for permission: {0}", "ждёт разрешения: {0}"),
+        "TerminalEventAsksQuestion": ("waits for your answer", "ждёт ответа"),
+        "TerminalEventFinished": ("done", "готово"),
+        "TerminalEventFailed": ("the turn failed", "ход прервался с ошибкой"),
+        "TerminalEventOutOfLimit": ("stopped on the limit", "упёрлась в лимит"),
         "TerminalTitle": ("Terminal", "Терминал"),
         "TerminalCreateSession": ("Create session", "Создать сессию"),
         "TerminalNewShell": ("Open command line", "Открыть командную строку"),
@@ -1527,6 +1540,45 @@ public enum Strings {
 
     /// on
     public static var stateOn: String { Strings.get("StateOn") }
+
+    /// thinking
+    public static var terminalEventThinking: String { Strings.get("TerminalEventThinking") }
+
+    /// reading {0}
+    public static var terminalEventReading: String { Strings.get("TerminalEventReading") }
+
+    /// editing {0}
+    public static var terminalEventEditing: String { Strings.get("TerminalEventEditing") }
+
+    /// running: {0}
+    public static var terminalEventRunning: String { Strings.get("TerminalEventRunning") }
+
+    /// searching: {0}
+    public static var terminalEventSearching: String { Strings.get("TerminalEventSearching") }
+
+    /// on the web: {0}
+    public static var terminalEventBrowsing: String { Strings.get("TerminalEventBrowsing") }
+
+    /// agent: {0}
+    public static var terminalEventDelegating: String { Strings.get("TerminalEventDelegating") }
+
+    /// tool: {0}
+    public static var terminalEventUsing: String { Strings.get("TerminalEventUsing") }
+
+    /// waits for permission: {0}
+    public static var terminalEventAsksPermission: String { Strings.get("TerminalEventAsksPermission") }
+
+    /// waits for your answer
+    public static var terminalEventAsksQuestion: String { Strings.get("TerminalEventAsksQuestion") }
+
+    /// done
+    public static var terminalEventFinished: String { Strings.get("TerminalEventFinished") }
+
+    /// the turn failed
+    public static var terminalEventFailed: String { Strings.get("TerminalEventFailed") }
+
+    /// stopped on the limit
+    public static var terminalEventOutOfLimit: String { Strings.get("TerminalEventOutOfLimit") }
 
     /// Terminal
     public static var terminalTitle: String { Strings.get("TerminalTitle") }

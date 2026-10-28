@@ -1,0 +1,605 @@
+{
+  "comment": "The hook of the terminal (D-352, D-360). hooks: what one hook call becomes, at the time now (milliseconds); event null means the call changes nothing. The detail is one line of at most 40 characters, the last one an ellipsis when cut: the name of a file without its folder, the first line of a command, the host of a page, the tool part of a server tool. A permission notification is skipped: PermissionRequest tells it six seconds earlier, with the detail. files: the file of a session; an id that is not letters, digits and dashes, or longer than 64, has none. pulse: what a running session of Claude Code does, from its title (null, idle or working), its last event, and when the person last looked at it and typed into it. replaces: whether an event goes into the file over the one there. Async hooks run side by side, so a tool event after the end of a turn is a late one and is dropped; a message, a question or another end goes in. typed: whether input that went to the program was typed by the person; control sequences of the terminal itself (focus, cursor answers, arrows) are not, Enter, a digit and Esc are.",
+  "now": 1761650000000,
+  "hooks": [
+    {
+      "name": "a message of the person",
+      "input": {
+        "hook_event_name": "UserPromptSubmit",
+        "session_id": "s",
+        "prompt": "secret words"
+      },
+      "event": {
+        "kind": "thinking",
+        "detail": ""
+      }
+    },
+    {
+      "name": "reading a file shows its name only",
+      "input": {
+        "hook_event_name": "PreToolUse",
+        "session_id": "s",
+        "tool_name": "Read",
+        "tool_input": {
+          "file_path": "C:\\Users\\someone\\work\\office.mjs"
+        }
+      },
+      "event": {
+        "kind": "reading",
+        "detail": "office.mjs"
+      }
+    },
+    {
+      "name": "a file with forward slashes",
+      "input": {
+        "hook_event_name": "PostToolUse",
+        "session_id": "s",
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "/Users/someone/work/App.swift"
+        }
+      },
+      "event": {
+        "kind": "editing",
+        "detail": "App.swift"
+      }
+    },
+    {
+      "name": "writing a notebook",
+      "input": {
+        "hook_event_name": "PreToolUse",
+        "session_id": "s",
+        "tool_name": "NotebookEdit",
+        "tool_input": {
+          "notebook_path": "C:\\a\\b.ipynb"
+        }
+      },
+      "event": {
+        "kind": "editing",
+        "detail": "b.ipynb"
+      }
+    },
+    {
+      "name": "a command shows its first line",
+      "input": {
+        "hook_event_name": "PreToolUse",
+        "session_id": "s",
+        "tool_name": "Bash",
+        "tool_input": {
+          "command": "npm test\necho done"
+        }
+      },
+      "event": {
+        "kind": "running",
+        "detail": "npm test"
+      }
+    },
+    {
+      "name": "a long command is cut",
+      "input": {
+        "hook_event_name": "PreToolUse",
+        "session_id": "s",
+        "tool_name": "PowerShell",
+        "tool_input": {
+          "command": "dotnet test Aiko.slnx --filter FullyQualifiedName~Terminal"
+        }
+      },
+      "event": {
+        "kind": "running",
+        "detail": "dotnet test Aiko.slnx --filter FullyQua…"
+      }
+    },
+    {
+      "name": "spaces and tabs are squeezed",
+      "input": {
+        "hook_event_name": "PreToolUse",
+        "session_id": "s",
+        "tool_name": "Bash",
+        "tool_input": {
+          "command": "  git   status\t-s  "
+        }
+      },
+      "event": {
+        "kind": "running",
+        "detail": "git status -s"
+      }
+    },
+    {
+      "name": "a search",
+      "input": {
+        "hook_event_name": "PreToolUse",
+        "session_id": "s",
+        "tool_name": "Grep",
+        "tool_input": {
+          "pattern": "TitleReader"
+        }
+      },
+      "event": {
+        "kind": "searching",
+        "detail": "TitleReader"
+      }
+    },
+    {
+      "name": "a page shows its host",
+      "input": {
+        "hook_event_name": "PreToolUse",
+        "session_id": "s",
+        "tool_name": "WebFetch",
+        "tool_input": {
+          "url": "https://learn.microsoft.com/en-us/windows/console/"
+        }
+      },
+      "event": {
+        "kind": "browsing",
+        "detail": "learn.microsoft.com"
+      }
+    },
+    {
+      "name": "a web search",
+      "input": {
+        "hook_event_name": "PreToolUse",
+        "session_id": "s",
+        "tool_name": "WebSearch",
+        "tool_input": {
+          "query": "conpty resize"
+        }
+      },
+      "event": {
+        "kind": "browsing",
+        "detail": "conpty resize"
+      }
+    },
+    {
+      "name": "an agent",
+      "input": {
+        "hook_event_name": "PreToolUse",
+        "session_id": "s",
+        "tool_name": "Agent",
+        "tool_input": {
+          "description": "Find the hooks"
+        }
+      },
+      "event": {
+        "kind": "delegating",
+        "detail": "Find the hooks"
+      }
+    },
+    {
+      "name": "a tool of a server",
+      "input": {
+        "hook_event_name": "PreToolUse",
+        "session_id": "s",
+        "tool_name": "mcp__plugin_aiko-persona_memory__remember",
+        "tool_input": {
+          "fact": "private"
+        }
+      },
+      "event": {
+        "kind": "using",
+        "detail": "remember"
+      }
+    },
+    {
+      "name": "another tool",
+      "input": {
+        "hook_event_name": "PreToolUse",
+        "session_id": "s",
+        "tool_name": "TodoWrite",
+        "tool_input": {}
+      },
+      "event": {
+        "kind": "using",
+        "detail": "TodoWrite"
+      }
+    },
+    {
+      "name": "a permission prompt keeps the detail",
+      "input": {
+        "hook_event_name": "PermissionRequest",
+        "session_id": "s",
+        "tool_name": "Bash",
+        "tool_input": {
+          "command": "rm build.log"
+        }
+      },
+      "event": {
+        "kind": "asksPermission",
+        "detail": "rm build.log"
+      }
+    },
+    {
+      "name": "the permission notification changes nothing",
+      "input": {
+        "hook_event_name": "Notification",
+        "session_id": "s",
+        "notification_type": "permission_prompt",
+        "message": "Claude needs your permission"
+      },
+      "event": null
+    },
+    {
+      "name": "a question",
+      "input": {
+        "hook_event_name": "Notification",
+        "session_id": "s",
+        "notification_type": "elicitation_dialog"
+      },
+      "event": {
+        "kind": "asksQuestion",
+        "detail": ""
+      }
+    },
+    {
+      "name": "the idle reminder changes nothing",
+      "input": {
+        "hook_event_name": "Notification",
+        "session_id": "s",
+        "notification_type": "idle_prompt"
+      },
+      "event": null
+    },
+    {
+      "name": "the end of a turn",
+      "input": {
+        "hook_event_name": "Stop",
+        "session_id": "s"
+      },
+      "event": {
+        "kind": "finished",
+        "detail": ""
+      }
+    },
+    {
+      "name": "a turn on the limit",
+      "input": {
+        "hook_event_name": "StopFailure",
+        "session_id": "s",
+        "error_type": "rate_limit"
+      },
+      "event": {
+        "kind": "outOfLimit",
+        "detail": ""
+      }
+    },
+    {
+      "name": "a turn that failed",
+      "input": {
+        "hook_event_name": "StopFailure",
+        "session_id": "s",
+        "error_type": "server_error"
+      },
+      "event": {
+        "kind": "failed",
+        "detail": ""
+      }
+    },
+    {
+      "name": "an event the row does not need",
+      "input": {
+        "hook_event_name": "SessionStart",
+        "session_id": "s"
+      },
+      "event": null
+    },
+    {
+      "name": "not a hook call",
+      "input": "not json",
+      "event": null
+    }
+  ],
+  "files": [
+    {
+      "id": "5f0c2a8e-1b7d-4c1e-9f3a-2d6b8e4a7c10",
+      "file": "5f0c2a8e-1b7d-4c1e-9f3a-2d6b8e4a7c10.json"
+    },
+    {
+      "id": "..\\settings",
+      "file": null
+    },
+    {
+      "id": "a/b",
+      "file": null
+    },
+    {
+      "id": "",
+      "file": null
+    },
+    {
+      "id": null,
+      "file": null
+    },
+    {
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "file": null
+    }
+  ],
+  "saved": [
+    {
+      "file": {
+        "kind": "reading",
+        "detail": "a.cs",
+        "at": 5
+      },
+      "event": {
+        "kind": "reading",
+        "detail": "a.cs",
+        "at": 5
+      }
+    },
+    {
+      "file": {
+        "kind": "AsksPermission",
+        "detail": "npm test",
+        "at": 7
+      },
+      "event": {
+        "kind": "asksPermission",
+        "detail": "npm test",
+        "at": 7
+      }
+    },
+    {
+      "file": {
+        "kind": "3",
+        "detail": "",
+        "at": 5
+      },
+      "event": null
+    },
+    {
+      "file": {
+        "kind": "dancing",
+        "detail": "",
+        "at": 5
+      },
+      "event": null
+    },
+    {
+      "file": {
+        "kind": "finished",
+        "detail": ""
+      },
+      "event": null
+    },
+    {
+      "file": "{ broken",
+      "event": null
+    }
+  ],
+  "pulse": [
+    {
+      "name": "nothing known",
+      "title": null,
+      "event": null,
+      "seenAt": 0,
+      "answeredAt": 0,
+      "activity": "idle"
+    },
+    {
+      "name": "the title turns",
+      "title": "working",
+      "event": null,
+      "seenAt": 0,
+      "answeredAt": 0,
+      "activity": "working"
+    },
+    {
+      "name": "a tool while the title turns",
+      "title": "working",
+      "event": {
+        "kind": "reading",
+        "at": 100
+      },
+      "seenAt": 0,
+      "answeredAt": 0,
+      "activity": "working"
+    },
+    {
+      "name": "a permission prompt beats the title",
+      "title": "idle",
+      "event": {
+        "kind": "asksPermission",
+        "at": 100
+      },
+      "seenAt": 0,
+      "answeredAt": 0,
+      "activity": "waiting"
+    },
+    {
+      "name": "the person answered",
+      "title": "idle",
+      "event": {
+        "kind": "asksPermission",
+        "at": 100
+      },
+      "seenAt": 0,
+      "answeredAt": 150,
+      "activity": "idle"
+    },
+    {
+      "name": "a question after the answer",
+      "title": "idle",
+      "event": {
+        "kind": "asksQuestion",
+        "at": 200
+      },
+      "seenAt": 0,
+      "answeredAt": 150,
+      "activity": "waiting"
+    },
+    {
+      "name": "a finished turn not seen",
+      "title": "idle",
+      "event": {
+        "kind": "finished",
+        "at": 100
+      },
+      "seenAt": 50,
+      "answeredAt": 0,
+      "activity": "done"
+    },
+    {
+      "name": "a finished turn seen",
+      "title": "idle",
+      "event": {
+        "kind": "finished",
+        "at": 100
+      },
+      "seenAt": 100,
+      "answeredAt": 0,
+      "activity": "idle"
+    },
+    {
+      "name": "a failed turn not seen",
+      "title": "idle",
+      "event": {
+        "kind": "failed",
+        "at": 100
+      },
+      "seenAt": 0,
+      "answeredAt": 0,
+      "activity": "done"
+    },
+    {
+      "name": "a turn stopped with Esc",
+      "title": "idle",
+      "event": {
+        "kind": "running",
+        "at": 100
+      },
+      "seenAt": 0,
+      "answeredAt": 0,
+      "activity": "idle"
+    },
+    {
+      "name": "a new turn after a finished one",
+      "title": "working",
+      "event": {
+        "kind": "finished",
+        "at": 100
+      },
+      "seenAt": 0,
+      "answeredAt": 0,
+      "activity": "working"
+    }
+  ],
+  "replaces": [
+    {
+      "written": null,
+      "next": "reading",
+      "replaces": true
+    },
+    {
+      "written": "reading",
+      "next": "running",
+      "replaces": true
+    },
+    {
+      "written": "asksPermission",
+      "next": "running",
+      "replaces": true
+    },
+    {
+      "written": "finished",
+      "next": "reading",
+      "replaces": false
+    },
+    {
+      "written": "finished",
+      "next": "using",
+      "replaces": false
+    },
+    {
+      "written": "failed",
+      "next": "editing",
+      "replaces": false
+    },
+    {
+      "written": "finished",
+      "next": "thinking",
+      "replaces": true
+    },
+    {
+      "written": "finished",
+      "next": "asksQuestion",
+      "replaces": true
+    },
+    {
+      "written": "finished",
+      "next": "finished",
+      "replaces": true
+    },
+    {
+      "written": "outOfLimit",
+      "next": "failed",
+      "replaces": true
+    }
+  ],
+  "typed": [
+    {
+      "input": "\r",
+      "typed": true,
+      "name": "Enter"
+    },
+    {
+      "input": "1",
+      "typed": true,
+      "name": "a digit"
+    },
+    {
+      "input": "\u001b",
+      "typed": true,
+      "name": "Esc alone"
+    },
+    {
+      "input": "y\r",
+      "typed": true,
+      "name": "letters"
+    },
+    {
+      "input": "\u001b[I",
+      "typed": false,
+      "name": "focus in"
+    },
+    {
+      "input": "\u001b[O",
+      "typed": false,
+      "name": "focus out"
+    },
+    {
+      "input": "\u001b[12;40R",
+      "typed": false,
+      "name": "where the cursor is"
+    },
+    {
+      "input": "\u001b[A",
+      "typed": false,
+      "name": "an arrow"
+    },
+    {
+      "input": "\u001bOB",
+      "typed": false,
+      "name": "an arrow in application mode"
+    },
+    {
+      "input": "\u001b[B\r",
+      "typed": true,
+      "name": "an arrow and Enter"
+    },
+    {
+      "input": "\u001b[200~text\u001b[201~",
+      "typed": true,
+      "name": "a paste"
+    },
+    {
+      "input": "\u001b[",
+      "typed": true,
+      "name": "a cut sequence"
+    },
+    {
+      "input": "",
+      "typed": false,
+      "name": "nothing"
+    }
+  ]
+}

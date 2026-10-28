@@ -61,6 +61,12 @@ public sealed record AikoFolders(PlatformConventions Platform, string SettingsBa
     /// A folder of its own, because the tray reads every file in the snapshots folder as a limit snapshot.
     public string ActivityFolder => Platform.Join(LocalFolder, "activity");
 
+    /// The last hook event of each session of the terminal, and the settings with that hook.
+    public string TerminalEventsFolder => Platform.Join(LocalFolder, "terminal");
+
+    /// The settings every session of the terminal starts with (TerminalHooks).
+    public string TerminalHooksFile => Platform.Join(LocalFolder, "terminal-hooks.json");
+
     /// The last answers of the usage API.
     public string DirectCacheFolder => Platform.Join(LocalFolder, "direct");
 

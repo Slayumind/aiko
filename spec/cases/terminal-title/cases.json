@@ -1,0 +1,59 @@
+{
+  "comment": "The title of a terminal from its output (D-360). The output comes in pieces; reads gives, for each piece in order, the last title that ended in it, or null. A title is OSC 0 or OSC 2 and ends with a bell or with an escape and a backslash; other commands of the operating system are no title. A title over 1024 characters is not one. In the pieces, \\u001b is the escape and \\u0007 the bell. claude is how a title of Claude Code reads (spike 2026-10): the star waits for input, a turning mark means a turn goes on; name is what the session takes as its name, null while Claude Code does not know the subject.",
+  "reads": [
+    {
+      "name": "one title with a bell",
+      "pieces": ["\u001b]0;\u2733 Claude Code\u0007"],
+      "titles": ["\u2733 Claude Code"]
+    },
+    {
+      "name": "OSC 2 ends with an escape and a backslash",
+      "pieces": ["text \u001b]2;bash\u001b\\ more"],
+      "titles": ["bash"]
+    },
+    {
+      "name": "a title cut between pieces",
+      "pieces": ["abc\u001b", "]0;\u25D0 Fix the ", "build\u0007tail"],
+      "titles": [null, null, "\u25D0 Fix the build"]
+    },
+    {
+      "name": "the last of two titles in one piece",
+      "pieces": ["\u001b]0;one\u0007\u001b]0;two\u0007"],
+      "titles": ["two"]
+    },
+    {
+      "name": "other commands and sequences are no title",
+      "pieces": ["\u001b[31mred\u001b[0m", "\u001b]133;A\u0007", "\u001b]9;9;C:\\work\u0007", "\u001b]8;;https://a.b\u0007link"],
+      "titles": [null, null, null, null]
+    },
+    {
+      "name": "a new escape sequence cuts a command short",
+      "pieces": ["\u001b]0;broken\u001b[0m", "\u001b]0;whole\u0007"],
+      "titles": [null, "whole"]
+    },
+    {
+      "name": "an empty title",
+      "pieces": ["\u001b]0;\u0007"],
+      "titles": [""]
+    }
+  ],
+  "long": {
+    "comment": "A title of length characters x, then a bell.",
+    "rows": [
+      { "length": 1024, "title": true },
+      { "length": 1025, "title": false }
+    ]
+  },
+  "claude": [
+    { "title": "\u2733 Claude Code", "working": false, "name": null },
+    { "title": "\u2733 Fix the build", "working": false, "name": "Fix the build" },
+    { "title": "\u25D0 Fix the build", "working": true, "name": "Fix the build" },
+    { "title": "\u25D1 Fix the build", "working": true, "name": "Fix the build" },
+    { "title": "\u280B Ответ одним словом", "working": true, "name": "Ответ одним словом" },
+    { "title": "  \u2733   spaces around  ", "working": false, "name": "spaces around" },
+    { "title": "\u2733\uFE0F Emoji form", "working": false, "name": "Emoji form" },
+    { "title": "\u25D0", "working": true, "name": null },
+    { "title": "MINGW64:/c/work", "working": null, "name": null },
+    { "title": "", "working": null, "name": null }
+  ]
+}

@@ -26,6 +26,9 @@ public struct TerminalSession: Sendable, Equatable {
     /// When something last happened in it, in seconds since 1970. Zero when nothing did.
     public var lastUsed: Int64 = 0
 
+    /// The person gave the name: the title of Claude Code does not change it any more (D-352).
+    public var named = false
+
     public init(id: String, environment: String, folder: String, name: String) {
         self.id = id
         self.environment = environment
@@ -129,7 +132,21 @@ public struct TerminalSessions: Sendable, Equatable {
     /// An empty name changes nothing: a session is never left without one.
     public func rename(_ id: String, _ name: String) -> TerminalSessions {
         let clean = SessionName.clean(name)
-        return clean.isEmpty ? self : with(id) { $0.name = clean }
+        return clean.isEmpty ? self : with(id) {
+            $0.name = clean
+            $0.named = true
+        }
+    }
+
+    /// Claude Code named the conversation in its title (D-352). A name the person gave stays, and
+    /// a shell keeps its own.
+    public func titled(_ id: String, _ name: String) -> TerminalSessions {
+        let clean = SessionName.clean(name)
+        guard !clean.isEmpty, let session = find(id), !session.named, session.kind == .claude, session.name != clean else {
+            return self
+        }
+
+        return with(id) { $0.name = clean }
     }
 
     /// Claude Code has the conversation now.
@@ -274,6 +291,10 @@ public struct TerminalSessions: Sendable, Equatable {
             }
             file["started"] = .bool(session.started)
             file["closed"] = .bool(session.closed)
+            // Only a name the person gave is marked, so older files keep their shape.
+            if session.named {
+                file["named"] = .bool(true)
+            }
             file["lastUsed"] = .number(String(session.lastUsed))
             return .object(file)
         })
@@ -309,6 +330,7 @@ public struct TerminalSessions: Sendable, Equatable {
         session.kind = item["kind"]?.stringValue == "shell" ? .shell : .claude
         session.started = item["started"]?.boolValue == true
         session.closed = item["closed"]?.boolValue == true
+        session.named = item["named"]?.boolValue == true
         session.lastUsed = item["lastUsed"]?.int64Value ?? 0
         return session
     }

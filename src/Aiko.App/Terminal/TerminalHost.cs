@@ -25,6 +25,14 @@ sealed class TerminalHost
     /// Enter starts it again with --resume.
     private readonly HashSet<string> _exited = [];
 
+    // What each running session of Claude Code does (D-352): its title, its last hook event, and
+    // when the person last looked at it and typed into it, in milliseconds.
+    private readonly TerminalEvents _events;
+    private readonly Dictionary<string, ClaudeTitle> _titles = [];
+    private readonly Dictionary<string, TerminalEvent> _lastEvents = [];
+    private readonly Dictionary<string, long> _seenAt = [];
+    private readonly Dictionary<string, long> _answeredAt = [];
+
     private TerminalSessions _sessions;
     private TerminalWindowModel _model;
     private string? _closing;
@@ -43,6 +51,8 @@ sealed class TerminalHost
 
         _window = new TerminalWindow(_panel, WindowPlace.Fit(sessions.Window, WorkAreas.All()));
         _window.MayClose = MayCloseWindow;
+        _events = new TerminalEvents(_window.Dispatcher);
+        _events.Changed += EventCame;
         _window.Closing += (_, e) =>
         {
             if (!e.Cancel)
@@ -61,6 +71,7 @@ sealed class TerminalHost
                 terminal.Close();
             }
 
+            _events.Dispose();
             Closed?.Invoke();
         };
 
@@ -258,6 +269,8 @@ sealed class TerminalHost
         }
 
         _exited.Remove(id);
+        Forget(id);
+        _events.Forget(id);
         _sessions = _sessions.Close(id);
         Save();
         Change(_model.After(_sessions));
@@ -293,7 +306,17 @@ sealed class TerminalHost
 
         var terminal = new TerminalSurface(launch);
         terminal.Exited += code => Ended(session.Id, code);
+        if (session.Kind == SessionKind.Claude)
+        {
+            terminal.TitleChanged += title => TitleCame(session.Id, title);
+            terminal.Typed += () => Typed(session.Id);
+        }
+
         _terminals[session.Id] = terminal;
+        // An event left from an earlier run is not news.
+        Forget(session.Id);
+        _events.Forget(session.Id);
+        _seenAt[session.Id] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
         var shell = session.Kind == SessionKind.Shell;
         TerminalLog.Started(session.Environment, shell, session.Started);
@@ -332,7 +355,8 @@ sealed class TerminalHost
             return null;
         }
 
-        var claudePlan = ClaudeLaunchPlan.For(new LaunchRequest(config, home, environment.Name, session.Id, session.Started), inherited);
+        var claudePlan = ClaudeLaunchPlan.For(
+            new LaunchRequest(config, home, environment.Name, session.Id, session.Started, TerminalEvents.HooksFile()), inherited);
         return new PtyLaunch(CommandLine(claude, claudePlan.Arguments), folder, Variables(claudePlan));
     }
 
@@ -373,16 +397,114 @@ sealed class TerminalHost
         Draw();
     }
 
+    // ---- what the sessions do ----
+
+    /// Claude Code set its title. The turning mark changes every second while a turn goes on, so
+    /// the list is drawn only when working or the name changed.
+    private void TitleCame(string id, string text)
+    {
+        if (ClaudeTitle.Parse(text) is not { } title || (_titles.TryGetValue(id, out var before) && before == title))
+        {
+            return;
+        }
+
+        _titles[id] = title;
+        if (title.SessionName is { } name && _sessions.Titled(id, name) is var titled && titled != _sessions)
+        {
+            _sessions = titled;
+            Save();
+        }
+
+        Draw();
+    }
+
+    private void EventCame(string id, TerminalEvent terminalEvent)
+    {
+        if (!_terminals.ContainsKey(id))
+        {
+            return;
+        }
+
+        _lastEvents[id] = terminalEvent;
+        Draw();
+    }
+
+    /// The person typed into the session: a question it asked is answered.
+    private void Typed(string id)
+    {
+        var waiting = Live(id)?.Activity == TerminalActivity.Waiting;
+        _answeredAt[id] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        if (waiting)
+        {
+            Draw();
+        }
+    }
+
+    private void Forget(string id)
+    {
+        _titles.Remove(id);
+        _lastEvents.Remove(id);
+        _seenAt.Remove(id);
+        _answeredAt.Remove(id);
+    }
+
     // ---- the view ----
 
     private AikoEnvironment? Environment() => _settings.Environments.FirstOrDefault(one => one.Name == _model.Environment);
 
-    private LiveTerminal? Live(string id) =>
-        _exited.Contains(id) ? new LiveTerminal(TerminalActivity.Exited, "")
-        : _terminals.TryGetValue(id, out var terminal) && terminal.IsRunning ? new LiveTerminal(TerminalActivity.Idle, "")
-        : null;
+    private LiveTerminal? Live(string id)
+    {
+        if (_exited.Contains(id))
+        {
+            return new LiveTerminal(TerminalActivity.Exited, "");
+        }
 
-    private void Draw() => _panel.Show(View());
+        if (!_terminals.TryGetValue(id, out var terminal) || !terminal.IsRunning)
+        {
+            return null;
+        }
+
+        var last = _lastEvents.GetValueOrDefault(id);
+        var activity = TerminalPulse.Of(_titles.GetValueOrDefault(id), last, _seenAt.GetValueOrDefault(id), _answeredAt.GetValueOrDefault(id));
+        return new LiveTerminal(activity, last is null ? "" : EventLine(last));
+    }
+
+    /// The second line of a row (D-352): what the session did last, in the words of the person.
+    private static string EventLine(TerminalEvent last)
+    {
+        var format = last.Kind switch
+        {
+            TerminalEventKind.Thinking => Strings.TerminalEventThinking,
+            TerminalEventKind.Reading => Strings.TerminalEventReading,
+            TerminalEventKind.Editing => Strings.TerminalEventEditing,
+            TerminalEventKind.Running => Strings.TerminalEventRunning,
+            TerminalEventKind.Searching => Strings.TerminalEventSearching,
+            TerminalEventKind.Browsing => Strings.TerminalEventBrowsing,
+            TerminalEventKind.Delegating => Strings.TerminalEventDelegating,
+            TerminalEventKind.Using => Strings.TerminalEventUsing,
+            TerminalEventKind.AsksPermission => Strings.TerminalEventAsksPermission,
+            TerminalEventKind.AsksQuestion => Strings.TerminalEventAsksQuestion,
+            TerminalEventKind.Finished => Strings.TerminalEventFinished,
+            TerminalEventKind.Failed => Strings.TerminalEventFailed,
+            _ => Strings.TerminalEventOutOfLimit,
+        };
+
+        // A format without its detail drops the colon too: "running" rather than "running: ".
+        return last.Detail.Length > 0 || !format.Contains("{0}", StringComparison.Ordinal)
+            ? string.Format(System.Globalization.CultureInfo.CurrentCulture, format, last.Detail)
+            : format.Replace(": {0}", "", StringComparison.Ordinal).Replace(" {0}", "", StringComparison.Ordinal);
+    }
+
+    private void Draw()
+    {
+        // The open session in a window in view is seen: a turn that ends there is no news.
+        if (_window.InView && _model.Session(_sessions) is { } open)
+        {
+            _seenAt[open.Id] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        }
+
+        _panel.Show(View());
+    }
 
     private TerminalView View()
     {

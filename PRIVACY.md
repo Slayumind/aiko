@@ -23,6 +23,14 @@ the update check.
   session ID, keeps a small file per session with the state and the time, and hashes the session ID
   into the file name. For this the prompt, tool input, paths and answers are never read or stored.
   The file goes away when the session ends, and files older than a day are removed when Aiko starts.
+- **What a session in Aiko's terminal does.** A session that Aiko starts in its terminal window
+  runs one more hook of Aiko, in every environment. It shows in the list of sessions what the
+  session does now: "reading office.mjs", "running: npm test", "waits for permission". For this
+  Aiko reads the kind of event, the name of the tool, the name of a file without its folder, and
+  the first 40 characters of a command, a search or the host of a web page. Your messages and the
+  answers of the model are never read. Aiko keeps only the last event, in a small file per session
+  on this computer, and removes the file when you close the session. The title the program sets
+  for its terminal gives the name of the session.
 - **Your message, where the personality is on.** Aiko's memory comes with her personality: they
   are turned on together for an environment. There Claude Code hands each message you send to a
   second hook of Aiko. It looks for two things: the keys of the facts in the memory, to note that a

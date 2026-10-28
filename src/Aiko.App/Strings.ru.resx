@@ -1090,6 +1090,45 @@
   <data name="StateOn" xml:space="preserve">
     <value>включена</value>
   </data>
+  <data name="TerminalEventThinking" xml:space="preserve">
+    <value>думает</value>
+  </data>
+  <data name="TerminalEventReading" xml:space="preserve">
+    <value>читает {0}</value>
+  </data>
+  <data name="TerminalEventEditing" xml:space="preserve">
+    <value>правит {0}</value>
+  </data>
+  <data name="TerminalEventRunning" xml:space="preserve">
+    <value>запускает: {0}</value>
+  </data>
+  <data name="TerminalEventSearching" xml:space="preserve">
+    <value>ищет: {0}</value>
+  </data>
+  <data name="TerminalEventBrowsing" xml:space="preserve">
+    <value>в сети: {0}</value>
+  </data>
+  <data name="TerminalEventDelegating" xml:space="preserve">
+    <value>агент: {0}</value>
+  </data>
+  <data name="TerminalEventUsing" xml:space="preserve">
+    <value>инструмент: {0}</value>
+  </data>
+  <data name="TerminalEventAsksPermission" xml:space="preserve">
+    <value>ждёт разрешения: {0}</value>
+  </data>
+  <data name="TerminalEventAsksQuestion" xml:space="preserve">
+    <value>ждёт ответа</value>
+  </data>
+  <data name="TerminalEventFinished" xml:space="preserve">
+    <value>готово</value>
+  </data>
+  <data name="TerminalEventFailed" xml:space="preserve">
+    <value>ход прервался с ошибкой</value>
+  </data>
+  <data name="TerminalEventOutOfLimit" xml:space="preserve">
+    <value>упёрлась в лимит</value>
+  </data>
   <data name="TerminalTitle" xml:space="preserve">
     <value>Терминал</value>
   </data>

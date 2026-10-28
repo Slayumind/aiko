@@ -1080,6 +1080,45 @@ public static class Strings
     /// on
     public static string StateOn => Get("StateOn");
 
+    /// thinking
+    public static string TerminalEventThinking => Get("TerminalEventThinking");
+
+    /// reading {0}
+    public static string TerminalEventReading => Get("TerminalEventReading");
+
+    /// editing {0}
+    public static string TerminalEventEditing => Get("TerminalEventEditing");
+
+    /// running: {0}
+    public static string TerminalEventRunning => Get("TerminalEventRunning");
+
+    /// searching: {0}
+    public static string TerminalEventSearching => Get("TerminalEventSearching");
+
+    /// on the web: {0}
+    public static string TerminalEventBrowsing => Get("TerminalEventBrowsing");
+
+    /// agent: {0}
+    public static string TerminalEventDelegating => Get("TerminalEventDelegating");
+
+    /// tool: {0}
+    public static string TerminalEventUsing => Get("TerminalEventUsing");
+
+    /// waits for permission: {0}
+    public static string TerminalEventAsksPermission => Get("TerminalEventAsksPermission");
+
+    /// waits for your answer
+    public static string TerminalEventAsksQuestion => Get("TerminalEventAsksQuestion");
+
+    /// done
+    public static string TerminalEventFinished => Get("TerminalEventFinished");
+
+    /// the turn failed
+    public static string TerminalEventFailed => Get("TerminalEventFailed");
+
+    /// stopped on the limit
+    public static string TerminalEventOutOfLimit => Get("TerminalEventOutOfLimit");
+
     /// Terminal
     public static string TerminalTitle => Get("TerminalTitle");
 

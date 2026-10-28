@@ -18,6 +18,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   runs in it, so the agents go on working. Quitting Aiko asks first when something still runs. After a
   restart of Aiko a session of Claude Code continues its conversation, and a command line opens again
   in the same folder. When Claude Code ends by itself, its row says so and Enter continues it.
+- **The list shows what each session does.** A mark says whether Claude Code works, waits for you
+  or is done, and a second line says what it did last: "reading office.mjs", "waits for permission:
+  npm test". A session takes the name Claude Code gives the conversation, until you rename it.
 
 ### Fixed
 

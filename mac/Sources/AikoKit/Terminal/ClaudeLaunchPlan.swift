@@ -1,19 +1,25 @@
 import Foundation
 
-/// What the terminal needs to know to start Claude Code for one session.
+/// What the terminal needs to know to start Claude Code for one session. hooksFile holds the
+/// settings with the hook of the terminal (TerminalHooks); empty when it could not be written.
 public struct LaunchRequest: Sendable, Equatable {
     public let configDirectory: String
     public let userProfile: String
     public let environmentName: String
     public let sessionId: String
     public let started: Bool
+    public let hooksFile: String
 
-    public init(configDirectory: String, userProfile: String, environmentName: String, sessionId: String, started: Bool) {
+    public init(
+        configDirectory: String, userProfile: String, environmentName: String, sessionId: String, started: Bool,
+        hooksFile: String = ""
+    ) {
         self.configDirectory = configDirectory
         self.userProfile = userProfile
         self.environmentName = environmentName
         self.sessionId = sessionId
         self.started = started
+        self.hooksFile = hooksFile
     }
 }
 
@@ -37,7 +43,13 @@ public struct ClaudeLaunchPlan: Sendable, Equatable {
     ) -> ClaudeLaunchPlan {
         // A conversation gets its id from Aiko before the first turn, so the id is known even when
         // Claude Code never answers. After that the same id brings the conversation back.
-        let arguments = [request.started ? "--resume" : "--session-id", request.sessionId]
+        var arguments = [request.started ? "--resume" : "--session-id", request.sessionId]
+
+        // The hook of the terminal tells the row what the session does, in every environment, with
+        // the personality or without it.
+        if !request.hooksFile.isEmpty {
+            arguments += ["--settings", request.hooksFile]
+        }
 
         var variables = environment(
             platform, configDirectory: request.configDirectory, userProfile: request.userProfile,
@@ -47,6 +59,9 @@ public struct ClaudeLaunchPlan: Sendable, Equatable {
         // was started in the folder and the environment the person chose.
         variables.append(VariableChange(SessionReminder.environmentVariable, request.environmentName))
         variables.append(VariableChange(SessionReminder.launchVariable, SessionReminder.launchedByTerminal))
+
+        // The hook of the terminal writes to the file of this session, whatever id Claude Code uses.
+        variables.append(VariableChange(TerminalEvent.sessionVariable, request.sessionId))
 
         return ClaudeLaunchPlan(arguments: arguments, variables: variables)
     }

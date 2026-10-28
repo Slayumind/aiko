@@ -2471,6 +2471,97 @@
     ]
   ],
   [
+    "TerminalEventThinking",
+    [
+      "thinking",
+      "думает"
+    ]
+  ],
+  [
+    "TerminalEventReading",
+    [
+      "reading {0}",
+      "читает {0}"
+    ]
+  ],
+  [
+    "TerminalEventEditing",
+    [
+      "editing {0}",
+      "правит {0}"
+    ]
+  ],
+  [
+    "TerminalEventRunning",
+    [
+      "running: {0}",
+      "запускает: {0}"
+    ]
+  ],
+  [
+    "TerminalEventSearching",
+    [
+      "searching: {0}",
+      "ищет: {0}"
+    ]
+  ],
+  [
+    "TerminalEventBrowsing",
+    [
+      "on the web: {0}",
+      "в сети: {0}"
+    ]
+  ],
+  [
+    "TerminalEventDelegating",
+    [
+      "agent: {0}",
+      "агент: {0}"
+    ]
+  ],
+  [
+    "TerminalEventUsing",
+    [
+      "tool: {0}",
+      "инструмент: {0}"
+    ]
+  ],
+  [
+    "TerminalEventAsksPermission",
+    [
+      "waits for permission: {0}",
+      "ждёт разрешения: {0}"
+    ]
+  ],
+  [
+    "TerminalEventAsksQuestion",
+    [
+      "waits for your answer",
+      "ждёт ответа"
+    ]
+  ],
+  [
+    "TerminalEventFinished",
+    [
+      "done",
+      "готово"
+    ]
+  ],
+  [
+    "TerminalEventFailed",
+    [
+      "the turn failed",
+      "ход прервался с ошибкой"
+    ]
+  ],
+  [
+    "TerminalEventOutOfLimit",
+    [
+      "stopped on the limit",
+      "упёрлась в лимит"
+    ]
+  ],
+  [
     "TerminalTitle",
     [
       "Terminal",

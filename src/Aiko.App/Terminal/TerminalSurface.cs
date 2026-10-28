@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
+using Aiko.Core.Terminal;
 using Microsoft.Terminal.Wpf;
 
 namespace Aiko.App;
@@ -23,12 +24,23 @@ sealed class TerminalSurface : Grid
 
     private readonly TerminalControl _control = new();
     private readonly PseudoConsole _console;
+
+    /// Read only on the thread of the output, one piece after another.
+    private readonly TitleReader _titles = new();
     private bool _connected;
 
     public TerminalSurface(PtyLaunch launch)
     {
         _console = new PseudoConsole(launch);
         _console.Exited += code => Dispatcher.BeginInvoke(() => Exited?.Invoke(code));
+        _console.Typed += () => Dispatcher.BeginInvoke(() => Typed?.Invoke());
+        _console.TerminalOutput += (_, e) =>
+        {
+            if (_titles.Read(e.Data) is { } title)
+            {
+                Dispatcher.BeginInvoke(() => TitleChanged?.Invoke(title));
+            }
+        };
         Children.Add(_control);
 
         Loaded += (_, _) =>
@@ -48,6 +60,12 @@ sealed class TerminalSurface : Grid
 
     /// The program ended, with its exit code. Raised on the window's thread.
     public event Action<int>? Exited;
+
+    /// The program set the title of the terminal (OSC 0 or 2). Raised on the window's thread.
+    public event Action<string>? TitleChanged;
+
+    /// The person typed into the program. Raised on the window's thread.
+    public event Action? Typed;
 
     public bool IsRunning => _console.IsRunning;
 
