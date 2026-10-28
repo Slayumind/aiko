@@ -108,11 +108,19 @@ public sealed record ClaudeLaunchPlan(IReadOnlyList<string> Arguments, IReadOnly
     private static List<VariableChange> Leftovers(IEnumerable<string> inheritedVariables) =>
         [.. inheritedVariables.Where(IsLeftover).Select(name => new VariableChange(name, null))];
 
-    /// What another Claude Code or another Aiko left in the environment. Aiko may itself be
-    /// started from a session, and those variables would send the new one to the wrong place.
+    /// What a session of Claude Code leaves for its children (seen in 2.1.312, RESEARCH). Aiko may
+    /// itself be started from a session, and these would tie the new one to it. The person's own
+    /// settings of Claude Code, such as CLAUDE_CODE_GIT_BASH_PATH, are not among them and stay.
+    private static readonly string[] SessionVariables =
+    [
+        "CLAUDECODE", "CLAUDE_PID", "CLAUDE_EFFORT", ConfigVariableName,
+        "CLAUDE_CODE_ENTRYPOINT", "CLAUDE_CODE_CHILD_SESSION", "CLAUDE_CODE_EXECPATH", "CLAUDE_CODE_SSE_PORT",
+    ];
+
+    private static readonly string[] SessionPrefixes = ["CLAUDE_CODE_SESSION_", "CLAUDE_CODE_MESSAGING_", "AIKO_"];
+
+    /// What another Claude Code or another Aiko left in the environment.
     private static bool IsLeftover(string name) =>
-        name.Equals("CLAUDECODE", StringComparison.OrdinalIgnoreCase)
-        || name.Equals(ConfigVariableName, StringComparison.OrdinalIgnoreCase)
-        || name.StartsWith("CLAUDE_CODE_", StringComparison.OrdinalIgnoreCase)
-        || name.StartsWith("AIKO_", StringComparison.OrdinalIgnoreCase);
+        SessionVariables.Any(variable => name.Equals(variable, StringComparison.OrdinalIgnoreCase))
+        || SessionPrefixes.Any(prefix => name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
 }

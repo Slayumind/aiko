@@ -124,11 +124,17 @@ public struct ClaudeLaunchPlan: Sendable, Equatable {
 
     /// What another Claude Code or another Aiko left in the environment. Aiko may itself be
     /// started from a session, and those variables would send the new one to the wrong place.
+    /// What a session of Claude Code leaves for its children (seen in 2.1.312, RESEARCH). The
+    /// person's own settings of Claude Code, such as CLAUDE_CODE_GIT_BASH_PATH, are not among them.
+    private static let sessionVariables: Set<String> = [
+        "CLAUDECODE", "CLAUDE_PID", "CLAUDE_EFFORT", ClaudeConfigFolder.variableName,
+        "CLAUDE_CODE_ENTRYPOINT", "CLAUDE_CODE_CHILD_SESSION", "CLAUDE_CODE_EXECPATH", "CLAUDE_CODE_SSE_PORT",
+    ]
+
+    private static let sessionPrefixes = ["CLAUDE_CODE_SESSION_", "CLAUDE_CODE_MESSAGING_", "AIKO_"]
+
     private static func isLeftover(_ name: String) -> Bool {
         let upper = name.uppercased()
-        return upper == "CLAUDECODE"
-            || upper == ClaudeConfigFolder.variableName
-            || upper.hasPrefix("CLAUDE_CODE_")
-            || upper.hasPrefix("AIKO_")
+        return sessionVariables.contains(upper) || sessionPrefixes.contains { upper.hasPrefix($0) }
     }
 }
