@@ -750,6 +750,17 @@ public class SharedCaseTests
         }
     }
 
+    [Fact]
+    public void Every_copy_out_of_a_terminal_reads_the_same()
+    {
+        foreach (var row in SpecCases.Json("terminal-copy").GetProperty("rows").EnumerateArray())
+        {
+            Assert.True(
+                row.GetProperty("copied").GetString() == TerminalCopy.Unwrap(row.GetProperty("text").GetString()!, row.GetProperty("columns").GetInt32()),
+                $"{row.GetProperty("name").GetString()}: {TerminalCopy.Unwrap(row.GetProperty("text").GetString()!, row.GetProperty("columns").GetInt32())}");
+        }
+    }
+
     private static TerminalEventKind KindIn(JsonElement terminalEvent) =>
         Enum.Parse<TerminalEventKind>(terminalEvent.GetProperty("kind").GetString()!, ignoreCase: true);
 

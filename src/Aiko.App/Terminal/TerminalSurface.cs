@@ -98,13 +98,16 @@ sealed class TerminalSurface : Grid
 
     public void FocusTerminal() => _control.Focus();
 
-    /// What the mouse selected in the terminal, or null.
+    /// What the mouse selected in the terminal, ready for the clipboard, or null. The rows Claude
+    /// Code wrapped by the width are joined again (D-371).
     public string? SelectedText
     {
         get
         {
             var text = _control.GetSelectedText();
-            return string.IsNullOrEmpty(text) ? null : text;
+            return string.IsNullOrEmpty(text)
+                ? null
+                : TerminalCopy.Unwrap(text, _control.Columns).Replace("\n", Environment.NewLine, StringComparison.Ordinal);
         }
     }
 

@@ -30,7 +30,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   Ctrl+G opens an editor for a long text: fix it with the mouse and Ctrl+Z, and Enter puts it into
   the line of Claude Code. Ctrl+V with a screenshot or a dropped file puts it there as a picture or a
   path. Ctrl+Shift+Space shows your words as you speak and puts them into the line when you stop.
-  Ctrl+C copies what you selected in the terminal. A command line has an editor under it: Enter runs
+  Ctrl+C copies what you selected in the terminal, its paragraphs whole: the lines Claude Code
+  broke by the width of the window are joined again. A command line has an editor under it: Enter runs
   the command, the arrows bring back your commands and Tab completes a path.
 - **Find any conversation.** Ctrl+Shift+K opens a palette of your sessions and of the conversations
   you started outside Aiko, in another terminal or in VS Code. It finds them by name and by your first

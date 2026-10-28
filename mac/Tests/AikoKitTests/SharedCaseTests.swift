@@ -703,6 +703,14 @@ struct SharedCaseTests {
     }
 
     @Test
+    func everyCopyOutOfATerminalReadsTheSame() {
+        for row in SpecCases.json("terminal-copy")["rows"]?.arrayValue ?? [] {
+            let copied = TerminalCopy.unwrap(row["text"]?.stringValue ?? "", columns: Int(row["columns"]?.int64Value ?? 0))
+            #expect(copied == row["copied"]?.stringValue, "\(row["name"]?.stringValue ?? "")")
+        }
+    }
+
+    @Test
     func everyListMatchesAndPicksFoldersTheSame() {
         let cases = SpecCases.json("text-match")
 
