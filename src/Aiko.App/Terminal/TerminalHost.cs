@@ -13,7 +13,7 @@ namespace Aiko.App;
 [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763")]
 sealed class TerminalHost
 {
-    private readonly EnvironmentSettings _settings;
+    private EnvironmentSettings _settings;
     private readonly VoiceDictation _voice;
     private readonly Func<IConversationProcess> _newProcess;
     private readonly Func<string, LimitSnapshot?> _limitsOf;
@@ -131,6 +131,45 @@ sealed class TerminalHost
         _window.Show();
         _window.Activate();
         InViewChanged?.Invoke(_window.InView);
+    }
+
+    /// The settings changed while the window is open: a renamed environment takes its sessions and
+    /// its tab with it, and a new one gets a tab. With no environment left the window closes.
+    public void Follow(EnvironmentSettings settings)
+    {
+        var names = settings.Environments.Select(environment => environment.Name).ToList();
+        if (names.Count == 0)
+        {
+            Close();
+            return;
+        }
+
+        // The settings change for many other reasons: nothing of the terminal moves then.
+        var before = _settings;
+        if (settings.ToJson() == before.ToJson())
+        {
+            return;
+        }
+
+        _sessions = _sessions.Follow(before, settings);
+        _settings = settings;
+
+        var renamedTab = before.Environments.FirstOrDefault(environment => environment.Name == _model.Environment) is { } shown
+            ? settings.Environments.FirstOrDefault(environment =>
+                environment.ConfigDirectories.SequenceEqual(shown.ConfigDirectories, StringComparer.OrdinalIgnoreCase))?.Name
+            : null;
+        _model = names.Contains(_model.Environment) ? _model
+            : renamedTab is not null ? _model with { Environment = renamedTab }
+            : TerminalWindowModel.Opened(_sessions, names);
+        // A draft of a renamed environment is drawn again under the new name; another one stays
+        // as the person left it.
+        if (_form is { } draft && !names.Contains(draft.Environment))
+        {
+            _form = _model.FormOpen ? FormFor(draft.Folder, null, null, draft.Mode) : null;
+        }
+
+        Save();
+        Draw();
     }
 
     /// Aiko quits: the window closes without asking, as the processes end with Aiko anyway.

@@ -68,6 +68,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   is not opened in VS Code.
 - The working row no longer blinks after every step and shows the time of a long turn; a session
   switch no longer shows words of another session in a streaming answer.
+- Your own settings of Claude Code, such as CLAUDE_CODE_GIT_BASH_PATH, now reach terminal sessions.
+- Renaming an environment keeps its terminal sessions, also with the terminal open.
+- The terminal opens maximized again after it was closed while minimized, "@" picked in the middle
+  of a word replaces the whole word, and a MultiEdit step shows its file and its changed lines.
 - With fewer animations asked for in Windows, the terminal no longer runs a bar while it makes the
   conversation shorter.
 - Voice input no longer puts the list of hint words into your text when the recognizer gives it back

@@ -1,5 +1,5 @@
 {
-  "comment": "How the terminal starts Claude Code for one conversation (D-297, D-304): the arguments in order, and what changes in the environment. A variable with a null value is removed. The first environment runs with CLAUDE_CONFIG_DIR removed, never pointed at .claude (D-156). The paths are Windows ones, as in shim-launch.",
+  "comment": "How the terminal starts Claude Code for one conversation (D-297, D-304): the arguments in order, and what changes in the environment. A variable with a null value is removed. The first environment runs with CLAUDE_CONFIG_DIR removed, never pointed at .claude (D-156). The paths are Windows ones, as in shim-launch. Only what a Claude Code session leaves for its children is removed (CLAUDECODE, CLAUDE_PID, CLAUDE_EFFORT, the entry point, the session, messaging and exec path of Claude Code, and AIKO_*); the person's own settings, such as CLAUDE_CODE_GIT_BASH_PATH, stay.",
   "platform": "windows",
   "userProfile": "C:\\Users\\someone",
   "cases": [
@@ -11,11 +11,35 @@
       "started": false,
       "mode": "manual",
       "model": null,
-      "inherited": ["PATH", "USERPROFILE"],
-      "arguments": ["-p", "--input-format", "stream-json", "--output-format", "stream-json", "--verbose", "--include-partial-messages", "--replay-user-messages", "--permission-prompt-tool", "stdio", "--session-id", "5f0c2a8e-1b7d-4c1e-9f3a-2d6b8e4a7c10", "--permission-mode", "default"],
+      "inherited": [
+        "PATH",
+        "USERPROFILE"
+      ],
+      "arguments": [
+        "-p",
+        "--input-format",
+        "stream-json",
+        "--output-format",
+        "stream-json",
+        "--verbose",
+        "--include-partial-messages",
+        "--replay-user-messages",
+        "--permission-prompt-tool",
+        "stdio",
+        "--session-id",
+        "5f0c2a8e-1b7d-4c1e-9f3a-2d6b8e4a7c10",
+        "--permission-mode",
+        "default"
+      ],
       "variables": [
-        { "name": "AIKO_ENVIRONMENT", "value": "Aiko" },
-        { "name": "AIKO_LAUNCH", "value": "terminal" }
+        {
+          "name": "AIKO_ENVIRONMENT",
+          "value": "Aiko"
+        },
+        {
+          "name": "AIKO_LAUNCH",
+          "value": "terminal"
+        }
       ]
     },
     {
@@ -27,11 +51,37 @@
       "mode": "plan",
       "model": "opus",
       "inherited": [],
-      "arguments": ["-p", "--input-format", "stream-json", "--output-format", "stream-json", "--verbose", "--include-partial-messages", "--replay-user-messages", "--permission-prompt-tool", "stdio", "--resume", "s-2", "--permission-mode", "plan", "--model", "opus"],
+      "arguments": [
+        "-p",
+        "--input-format",
+        "stream-json",
+        "--output-format",
+        "stream-json",
+        "--verbose",
+        "--include-partial-messages",
+        "--replay-user-messages",
+        "--permission-prompt-tool",
+        "stdio",
+        "--resume",
+        "s-2",
+        "--permission-mode",
+        "plan",
+        "--model",
+        "opus"
+      ],
       "variables": [
-        { "name": "CLAUDE_CONFIG_DIR", "value": "C:\\Users\\someone\\.claude-work" },
-        { "name": "AIKO_ENVIRONMENT", "value": "Work · Kodland" },
-        { "name": "AIKO_LAUNCH", "value": "terminal" }
+        {
+          "name": "CLAUDE_CONFIG_DIR",
+          "value": "C:\\Users\\someone\\.claude-work"
+        },
+        {
+          "name": "AIKO_ENVIRONMENT",
+          "value": "Work · Kodland"
+        },
+        {
+          "name": "AIKO_LAUNCH",
+          "value": "terminal"
+        }
       ]
     },
     {
@@ -42,17 +92,70 @@
       "started": false,
       "mode": "acceptEdits",
       "model": "  claude-sonnet-5-5  ",
-      "inherited": ["Path", "CLAUDECODE", "claude_config_dir", "CLAUDE_CODE_ENTRYPOINT", "Claude_Code_SSE_PORT", "AIKO_ENVIRONMENT", "aiko_launch", "ANTHROPIC_API_KEY", "CLAUDE", "CLAUDECODEX", "AIKO"],
-      "arguments": ["-p", "--input-format", "stream-json", "--output-format", "stream-json", "--verbose", "--include-partial-messages", "--replay-user-messages", "--permission-prompt-tool", "stdio", "--session-id", "s-3", "--permission-mode", "acceptEdits", "--model", "claude-sonnet-5-5"],
+      "inherited": [
+        "Path",
+        "CLAUDECODE",
+        "claude_config_dir",
+        "CLAUDE_CODE_ENTRYPOINT",
+        "Claude_Code_SSE_PORT",
+        "AIKO_ENVIRONMENT",
+        "aiko_launch",
+        "ANTHROPIC_API_KEY",
+        "CLAUDE",
+        "CLAUDECODEX",
+        "AIKO"
+      ],
+      "arguments": [
+        "-p",
+        "--input-format",
+        "stream-json",
+        "--output-format",
+        "stream-json",
+        "--verbose",
+        "--include-partial-messages",
+        "--replay-user-messages",
+        "--permission-prompt-tool",
+        "stdio",
+        "--session-id",
+        "s-3",
+        "--permission-mode",
+        "acceptEdits",
+        "--model",
+        "claude-sonnet-5-5"
+      ],
       "variables": [
-        { "name": "CLAUDECODE", "value": null },
-        { "name": "claude_config_dir", "value": null },
-        { "name": "CLAUDE_CODE_ENTRYPOINT", "value": null },
-        { "name": "Claude_Code_SSE_PORT", "value": null },
-        { "name": "AIKO_ENVIRONMENT", "value": null },
-        { "name": "aiko_launch", "value": null },
-        { "name": "AIKO_ENVIRONMENT", "value": "Aiko" },
-        { "name": "AIKO_LAUNCH", "value": "terminal" }
+        {
+          "name": "CLAUDECODE",
+          "value": null
+        },
+        {
+          "name": "claude_config_dir",
+          "value": null
+        },
+        {
+          "name": "CLAUDE_CODE_ENTRYPOINT",
+          "value": null
+        },
+        {
+          "name": "Claude_Code_SSE_PORT",
+          "value": null
+        },
+        {
+          "name": "AIKO_ENVIRONMENT",
+          "value": null
+        },
+        {
+          "name": "aiko_launch",
+          "value": null
+        },
+        {
+          "name": "AIKO_ENVIRONMENT",
+          "value": "Aiko"
+        },
+        {
+          "name": "AIKO_LAUNCH",
+          "value": "terminal"
+        }
       ]
     },
     {
@@ -63,13 +166,42 @@
       "started": true,
       "mode": "auto",
       "model": "   ",
-      "inherited": ["CLAUDE_CONFIG_DIR"],
-      "arguments": ["-p", "--input-format", "stream-json", "--output-format", "stream-json", "--verbose", "--include-partial-messages", "--replay-user-messages", "--permission-prompt-tool", "stdio", "--resume", "s-4", "--permission-mode", "auto"],
+      "inherited": [
+        "CLAUDE_CONFIG_DIR"
+      ],
+      "arguments": [
+        "-p",
+        "--input-format",
+        "stream-json",
+        "--output-format",
+        "stream-json",
+        "--verbose",
+        "--include-partial-messages",
+        "--replay-user-messages",
+        "--permission-prompt-tool",
+        "stdio",
+        "--resume",
+        "s-4",
+        "--permission-mode",
+        "auto"
+      ],
       "variables": [
-        { "name": "CLAUDE_CONFIG_DIR", "value": null },
-        { "name": "CLAUDE_CONFIG_DIR", "value": "D:\\Claude Accounts\\.claude-team" },
-        { "name": "AIKO_ENVIRONMENT", "value": "Team" },
-        { "name": "AIKO_LAUNCH", "value": "terminal" }
+        {
+          "name": "CLAUDE_CONFIG_DIR",
+          "value": null
+        },
+        {
+          "name": "CLAUDE_CONFIG_DIR",
+          "value": "D:\\Claude Accounts\\.claude-team"
+        },
+        {
+          "name": "AIKO_ENVIRONMENT",
+          "value": "Team"
+        },
+        {
+          "name": "AIKO_LAUNCH",
+          "value": "terminal"
+        }
       ]
     },
     {
@@ -82,11 +214,116 @@
       "model": null,
       "agentTodos": true,
       "inherited": [],
-      "arguments": ["-p", "--input-format", "stream-json", "--output-format", "stream-json", "--verbose", "--include-partial-messages", "--replay-user-messages", "--permission-prompt-tool", "stdio", "--session-id", "s-3", "--permission-mode", "default"],
+      "arguments": [
+        "-p",
+        "--input-format",
+        "stream-json",
+        "--output-format",
+        "stream-json",
+        "--verbose",
+        "--include-partial-messages",
+        "--replay-user-messages",
+        "--permission-prompt-tool",
+        "stdio",
+        "--session-id",
+        "s-3",
+        "--permission-mode",
+        "default"
+      ],
       "variables": [
-        { "name": "AIKO_ENVIRONMENT", "value": "Aiko" },
-        { "name": "AIKO_LAUNCH", "value": "terminal" },
-        { "name": "CLAUDE_CODE_ENABLE_TODO_TOOLS", "value": "1" }
+        {
+          "name": "AIKO_ENVIRONMENT",
+          "value": "Aiko"
+        },
+        {
+          "name": "AIKO_LAUNCH",
+          "value": "terminal"
+        },
+        {
+          "name": "CLAUDE_CODE_ENABLE_TODO_TOOLS",
+          "value": "1"
+        }
+      ]
+    },
+    {
+      "name": "the person's own settings of Claude Code stay; what a session left goes",
+      "configDirectory": "C:\\Users\\someone\\.claude",
+      "environment": "Aiko",
+      "sessionId": "5f0c2a8e-1b7d-4c1e-9f3a-2d6b8e4a7c10",
+      "started": false,
+      "mode": "manual",
+      "model": null,
+      "inherited": [
+        "PATH",
+        "CLAUDE_CODE_GIT_BASH_PATH",
+        "CLAUDE_CODE_USE_BEDROCK",
+        "CLAUDE_CODE_MAX_OUTPUT_TOKENS",
+        "CLAUDE_CODE_SESSION_ID",
+        "CLAUDE_CODE_SESSION_ATTENDED",
+        "CLAUDE_CODE_MESSAGING_SOCKET",
+        "CLAUDE_CODE_MESSAGING_TOKEN",
+        "CLAUDE_CODE_CHILD_SESSION",
+        "CLAUDE_CODE_EXECPATH",
+        "CLAUDE_PID",
+        "CLAUDE_EFFORT"
+      ],
+      "arguments": [
+        "-p",
+        "--input-format",
+        "stream-json",
+        "--output-format",
+        "stream-json",
+        "--verbose",
+        "--include-partial-messages",
+        "--replay-user-messages",
+        "--permission-prompt-tool",
+        "stdio",
+        "--session-id",
+        "5f0c2a8e-1b7d-4c1e-9f3a-2d6b8e4a7c10",
+        "--permission-mode",
+        "default"
+      ],
+      "variables": [
+        {
+          "name": "CLAUDE_CODE_SESSION_ID",
+          "value": null
+        },
+        {
+          "name": "CLAUDE_CODE_SESSION_ATTENDED",
+          "value": null
+        },
+        {
+          "name": "CLAUDE_CODE_MESSAGING_SOCKET",
+          "value": null
+        },
+        {
+          "name": "CLAUDE_CODE_MESSAGING_TOKEN",
+          "value": null
+        },
+        {
+          "name": "CLAUDE_CODE_CHILD_SESSION",
+          "value": null
+        },
+        {
+          "name": "CLAUDE_CODE_EXECPATH",
+          "value": null
+        },
+        {
+          "name": "CLAUDE_PID",
+          "value": null
+        },
+        {
+          "name": "CLAUDE_EFFORT",
+          "value": null
+        },
+        {
+          "name": "AIKO_ENVIRONMENT",
+          "value": "Aiko"
+        },
+        {
+          "name": "AIKO_LAUNCH",
+          "value": "terminal"
+        }
       ]
     }
   ],
@@ -94,20 +331,52 @@
     {
       "name": "the list of commands in the first environment: no session, no hooks",
       "configDirectory": "C:\\Users\\someone\\.claude",
-      "inherited": ["PATH", "CLAUDECODE"],
-      "arguments": ["-p", "--input-format", "stream-json", "--output-format", "stream-json", "--verbose", "--settings", "{\"disableAllHooks\":true}"],
+      "inherited": [
+        "PATH",
+        "CLAUDECODE"
+      ],
+      "arguments": [
+        "-p",
+        "--input-format",
+        "stream-json",
+        "--output-format",
+        "stream-json",
+        "--verbose",
+        "--settings",
+        "{\"disableAllHooks\":true}"
+      ],
       "variables": [
-        { "name": "CLAUDECODE", "value": null }
+        {
+          "name": "CLAUDECODE",
+          "value": null
+        }
       ]
     },
     {
       "name": "the list of commands in a second environment",
       "configDirectory": "D:\\Claude Accounts\\.claude-team",
-      "inherited": ["AIKO_ENVIRONMENT"],
-      "arguments": ["-p", "--input-format", "stream-json", "--output-format", "stream-json", "--verbose", "--settings", "{\"disableAllHooks\":true}"],
+      "inherited": [
+        "AIKO_ENVIRONMENT"
+      ],
+      "arguments": [
+        "-p",
+        "--input-format",
+        "stream-json",
+        "--output-format",
+        "stream-json",
+        "--verbose",
+        "--settings",
+        "{\"disableAllHooks\":true}"
+      ],
       "variables": [
-        { "name": "AIKO_ENVIRONMENT", "value": null },
-        { "name": "CLAUDE_CONFIG_DIR", "value": "D:\\Claude Accounts\\.claude-team" }
+        {
+          "name": "AIKO_ENVIRONMENT",
+          "value": null
+        },
+        {
+          "name": "CLAUDE_CONFIG_DIR",
+          "value": "D:\\Claude Accounts\\.claude-team"
+        }
       ]
     }
   ]

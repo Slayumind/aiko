@@ -117,6 +117,32 @@ public sealed record TerminalSessions(IReadOnlyList<TerminalSession> Sessions, s
 
     public TerminalSessions Used(string id, long now) => With(id, session => session with { LastUsed = now });
 
+    /// A renamed environment takes its sessions with it: they are known by its name.
+    public TerminalSessions RenameEnvironment(string from, string to) =>
+        from == to ? this : this with
+        {
+            Sessions = [.. Sessions.Select(session => session.Environment == from ? session with { Environment = to } : session)],
+        };
+
+    /// The sessions after the settings changed under an open window. An environment keeps its
+    /// folder of Claude Code when it is renamed, so the folder tells which old name is which new one.
+    public TerminalSessions Follow(EnvironmentSettings before, EnvironmentSettings after)
+    {
+        var next = this;
+        foreach (var old in before.Environments)
+        {
+            var renamed = after.Environments.FirstOrDefault(environment =>
+                environment.Name != old.Name
+                && environment.ConfigDirectories.SequenceEqual(old.ConfigDirectories, StringComparer.OrdinalIgnoreCase));
+            if (renamed is not null && after.Environments.All(environment => environment.Name != old.Name))
+            {
+                next = next.RenameEnvironment(old.Name, renamed.Name);
+            }
+        }
+
+        return next;
+    }
+
     /// The person went into this session.
     public TerminalSessions Opened(string id) =>
         Find(id) is { Closed: false } ? this with { LastId = id } : this;

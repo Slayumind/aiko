@@ -1221,6 +1221,7 @@ struct SharedCaseTests {
                     model: step["model"]?.stringValue, mode: mode(step["mode"]) ?? .manual,
                     now: step["now"]?.int64Value ?? 0)
             case "rename": sessions = sessions.rename(word("id"), word("name"))
+            case "renameEnvironment": sessions = sessions.renameEnvironment(word("from"), word("to"))
             case "setMode": sessions = sessions.setMode(word("id"), mode(step["mode"]) ?? .manual)
             case "setModel": sessions = sessions.setModel(word("id"), step["model"]?.stringValue)
             case "started": sessions = sessions.markStarted(word("id"))

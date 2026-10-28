@@ -1,29 +1,135 @@
 {
-  "comment": "The files that \"@\" offers (AIKO-330, D-342). queries: the \"@\" word the caret stands in: \"@\" at the start or after a space, and no space between it and the caret; from is where \"@\" stands, null when there is no such word. matches: at most 10 files for what was typed, best first: the typed letters in the file name, then a name that starts with them, then a shallow folder; a long path costs a little; ties by length, then by the lower-case path. chosen: the field after a file is picked, with the caret after the space.",
+  "comment": "The files that \"@\" offers (AIKO-330, D-342). queries: the \"@\" word the caret stands in: \"@\" at the start or after a space, and no space between it and the caret; from is where \"@\" stands, null when there is no such word. matches: at most 10 files for what was typed, best first: the typed letters in the file name, then a name that starts with them, then a shallow folder; a long path costs a little; ties by length, then by the lower-case path. chosen: the field after a file is picked, with the caret after the space. A caret inside the @ word replaces the whole word, not only the part before the caret.",
   "paths": [
-    "README.md", "CHANGELOG.md", "src/Aiko.App/Terminal/TalkInput.cs", "src/Aiko.App/Terminal/TalkPanel.cs",
-    "src/Aiko.Core/Terminal/SlashMenu.cs", "mac/Sources/AikoKit/Terminal/SlashMenu.swift",
-    "tests/Aiko.Core.Tests/SlashMenuTests.cs", "docs/talk.md", "tools/strings.json", "docs/reference/talk-notes.md"
+    "README.md",
+    "CHANGELOG.md",
+    "src/Aiko.App/Terminal/TalkInput.cs",
+    "src/Aiko.App/Terminal/TalkPanel.cs",
+    "src/Aiko.Core/Terminal/SlashMenu.cs",
+    "mac/Sources/AikoKit/Terminal/SlashMenu.swift",
+    "tests/Aiko.Core.Tests/SlashMenuTests.cs",
+    "docs/talk.md",
+    "tools/strings.json",
+    "docs/reference/talk-notes.md"
   ],
   "queries": [
-    { "text": "@", "caret": 1, "from": 0, "query": "" },
-    { "text": "@tal", "caret": 4, "from": 0, "query": "tal" },
-    { "text": "read @tal", "caret": 9, "from": 5, "query": "tal" },
-    { "text": "read @tal now", "caret": 9, "from": 5, "query": "tal" },
-    { "text": "read @tal now", "caret": 13, "from": null, "query": null },
-    { "text": "mail@example", "caret": 12, "from": null, "query": null },
-    { "text": "read @", "caret": 6, "from": 5, "query": "" },
-    { "text": "", "caret": 0, "from": null, "query": null }
+    {
+      "text": "@",
+      "caret": 1,
+      "from": 0,
+      "query": ""
+    },
+    {
+      "text": "@tal",
+      "caret": 4,
+      "from": 0,
+      "query": "tal"
+    },
+    {
+      "text": "read @tal",
+      "caret": 9,
+      "from": 5,
+      "query": "tal"
+    },
+    {
+      "text": "read @tal now",
+      "caret": 9,
+      "from": 5,
+      "query": "tal"
+    },
+    {
+      "text": "read @tal now",
+      "caret": 13,
+      "from": null,
+      "query": null
+    },
+    {
+      "text": "mail@example",
+      "caret": 12,
+      "from": null,
+      "query": null
+    },
+    {
+      "text": "read @",
+      "caret": 6,
+      "from": 5,
+      "query": ""
+    },
+    {
+      "text": "",
+      "caret": 0,
+      "from": null,
+      "query": null
+    }
   ],
   "matches": [
-    { "query": "talk", "files": ["docs/talk.md", "docs/reference/talk-notes.md", "src/Aiko.App/Terminal/TalkInput.cs", "src/Aiko.App/Terminal/TalkPanel.cs"] },
-    { "query": "SLASH", "files": ["tests/Aiko.Core.Tests/SlashMenuTests.cs", "src/Aiko.Core/Terminal/SlashMenu.cs", "mac/Sources/AikoKit/Terminal/SlashMenu.swift"] },
-    { "query": "", "files": ["README.md", "CHANGELOG.md", "docs/talk.md", "tools/strings.json", "docs/reference/talk-notes.md", "tests/Aiko.Core.Tests/SlashMenuTests.cs", "src/Aiko.App/Terminal/TalkInput.cs", "src/Aiko.App/Terminal/TalkPanel.cs", "src/Aiko.Core/Terminal/SlashMenu.cs", "mac/Sources/AikoKit/Terminal/SlashMenu.swift"] },
-    { "query": "md", "files": ["README.md", "CHANGELOG.md", "docs/talk.md", "docs/reference/talk-notes.md"] },
-    { "query": "zzz", "files": [] }
+    {
+      "query": "talk",
+      "files": [
+        "docs/talk.md",
+        "docs/reference/talk-notes.md",
+        "src/Aiko.App/Terminal/TalkInput.cs",
+        "src/Aiko.App/Terminal/TalkPanel.cs"
+      ]
+    },
+    {
+      "query": "SLASH",
+      "files": [
+        "tests/Aiko.Core.Tests/SlashMenuTests.cs",
+        "src/Aiko.Core/Terminal/SlashMenu.cs",
+        "mac/Sources/AikoKit/Terminal/SlashMenu.swift"
+      ]
+    },
+    {
+      "query": "",
+      "files": [
+        "README.md",
+        "CHANGELOG.md",
+        "docs/talk.md",
+        "tools/strings.json",
+        "docs/reference/talk-notes.md",
+        "tests/Aiko.Core.Tests/SlashMenuTests.cs",
+        "src/Aiko.App/Terminal/TalkInput.cs",
+        "src/Aiko.App/Terminal/TalkPanel.cs",
+        "src/Aiko.Core/Terminal/SlashMenu.cs",
+        "mac/Sources/AikoKit/Terminal/SlashMenu.swift"
+      ]
+    },
+    {
+      "query": "md",
+      "files": [
+        "README.md",
+        "CHANGELOG.md",
+        "docs/talk.md",
+        "docs/reference/talk-notes.md"
+      ]
+    },
+    {
+      "query": "zzz",
+      "files": []
+    }
   ],
   "chosen": [
-    { "text": "read @tal now", "caret": 9, "path": "docs/talk.md", "result": "read @docs/talk.md now", "resultCaret": 19 },
-    { "text": "@", "caret": 1, "path": "README.md", "result": "@README.md ", "resultCaret": 11 }
+    {
+      "text": "read @tal now",
+      "caret": 9,
+      "path": "docs/talk.md",
+      "result": "read @docs/talk.md now",
+      "resultCaret": 19
+    },
+    {
+      "text": "@",
+      "caret": 1,
+      "path": "README.md",
+      "result": "@README.md ",
+      "resultCaret": 11
+    },
+    {
+      "text": "read @tal now",
+      "caret": 8,
+      "path": "docs/talk.md",
+      "result": "read @docs/talk.md now",
+      "resultCaret": 19
+    }
   ]
 }

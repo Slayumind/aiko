@@ -43,6 +43,15 @@ public sealed record StepLine(StepKind Kind, string Label, string Subject, int A
             case "Edit":
                 var (added, removed) = Changed(Text(input, "old_string"), Text(input, "new_string"));
                 return Line(StepKind.Edit, FileName(Text(input, "file_path"))) with { Added = added, Removed = removed };
+            case "MultiEdit":
+                var edits = input.ValueKind == JsonValueKind.Object && input.TryGetProperty("edits", out var list) && list.ValueKind == JsonValueKind.Array
+                    ? list.EnumerateArray().Select(edit => Changed(Text(edit, "old_string"), Text(edit, "new_string"))).ToList()
+                    : [];
+                return Line(StepKind.Edit, FileName(Text(input, "file_path"))) with
+                {
+                    Added = edits.Sum(edit => edit.Added),
+                    Removed = edits.Sum(edit => edit.Removed),
+                };
             case "NotebookEdit":
                 return Line(StepKind.Edit, FileName(Text(input, "notebook_path")));
             case "Bash" or "PowerShell":

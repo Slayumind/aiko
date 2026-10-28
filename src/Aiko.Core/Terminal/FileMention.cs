@@ -47,7 +47,15 @@ public static class FileMention
     public static (string Text, int Caret) Chosen(string text, MentionQuery query, int caret, string path)
     {
         var word = "@" + path + " ";
-        var rest = text[caret..];
+
+        // The whole "@" word goes, also the part of it after the caret.
+        var end = caret;
+        while (end < text.Length && !char.IsWhiteSpace(text[end]))
+        {
+            end++;
+        }
+
+        var rest = text[end..];
         if (rest.StartsWith(' '))
         {
             rest = rest[1..];

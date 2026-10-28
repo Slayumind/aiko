@@ -1333,6 +1333,7 @@ public class SharedCaseTests
                     Word("id"), Word("environment"), Word("folder"), Word("name"),
                     step.GetProperty("model").GetString(), Mode(step.GetProperty("mode"))!.Value, step.GetProperty("now").GetInt64()),
                 "rename" => sessions.Rename(Word("id"), Word("name")),
+                "renameEnvironment" => sessions.RenameEnvironment(Word("from"), Word("to")),
                 "setMode" => sessions.SetMode(Word("id"), Mode(step.GetProperty("mode"))!.Value),
                 "setModel" => sessions.SetModel(Word("id"), step.GetProperty("model").GetString()),
                 "started" => sessions.MarkStarted(Word("id")),

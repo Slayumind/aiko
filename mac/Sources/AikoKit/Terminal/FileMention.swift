@@ -47,7 +47,12 @@ public enum FileMention {
     public static func chosen(_ text: String, query: MentionQuery, caret: Int, path: String) -> (text: String, caret: Int) {
         let units = Array(text.utf16)
         let word = Array(("@" + path + " ").utf16)
-        var rest = Array(units[caret...])
+        // The whole "@" word goes, also the part of it after the caret.
+        var end = caret
+        while end < units.count && units[end] != 32 && units[end] != 10 && units[end] != 9 && units[end] != 13 {
+            end += 1
+        }
+        var rest = Array(units[end...])
         if rest.first == 32 { rest.removeFirst() }
         let result = Array(units[..<query.from]) + word + rest
         return (String(decoding: result, as: UTF16.self), query.from + word.count)

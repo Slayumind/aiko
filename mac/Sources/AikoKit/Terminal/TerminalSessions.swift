@@ -4,7 +4,8 @@ import Foundation
 /// Claude Code it is and where it runs. Not a word of the conversation is here.
 public struct TerminalSession: Sendable, Equatable {
     public let id: String
-    public let environment: String
+    /// Changes only when its environment is renamed.
+    public internal(set) var environment: String
     public let folder: String
     public var name: String
 
@@ -145,6 +146,34 @@ public struct TerminalSessions: Sendable, Equatable {
 
     public func used(_ id: String, now: Int64) -> TerminalSessions {
         with(id) { $0.lastUsed = now }
+    }
+
+    /// A renamed environment takes its sessions with it: they are known by its name.
+    public func renameEnvironment(_ from: String, _ to: String) -> TerminalSessions {
+        guard from != to else { return self }
+        var copy = self
+        copy.sessions = sessions.map { session in
+            var renamed = session
+            if renamed.environment == from { renamed.environment = to }
+            return renamed
+        }
+        return copy
+    }
+
+    /// The sessions after the settings changed under an open window. An environment keeps its
+    /// folder of Claude Code when it is renamed, so the folder tells which old name is which new one.
+    public func follow(_ before: EnvironmentSettings, _ after: EnvironmentSettings) -> TerminalSessions {
+        var next = self
+        for old in before.environments {
+            let sameFolder = { (environment: AikoEnvironment) in
+                environment.configDirectories.map { $0.lowercased() } == old.configDirectories.map { $0.lowercased() }
+            }
+            if let renamed = after.environments.first(where: { $0.name != old.name && sameFolder($0) }),
+               !after.environments.contains(where: { $0.name == old.name }) {
+                next = next.renameEnvironment(old.name, renamed.name)
+            }
+        }
+        return next
     }
 
     /// The person went into this session.
