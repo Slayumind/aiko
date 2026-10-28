@@ -65,6 +65,8 @@ sealed class TalkPanel : UserControl
     private ScrollViewer? _scroll;
     private string? _shownSession;
 
+    internal string? ShownSession => _shownSession;
+
     /// The card Enter and Esc of the field answer, or null (D-323).
     private FeedItem.Card? _keyCard;
 
@@ -73,6 +75,10 @@ sealed class TalkPanel : UserControl
     /// to be guessed from the scroll itself, and the guess lost to the feed's own changes of offset:
     /// a reader at the bottom could not scroll up while an answer was written (check of 2026-10-15).
     private bool _follow = true;
+
+    /// Whether the shown session worked at the last draw: a new turn starts the clock of the
+    /// working row.
+    private bool _wasBusy;
     private readonly FeedGlide _glide = new();
 
     public TalkPanel()
@@ -199,8 +205,17 @@ sealed class TalkPanel : UserControl
         // Another session opens at its end.
         var newSession = view.Session != _shownSession;
         _shownSession = view.Session;
+        if (view.Busy && (!_wasBusy || newSession))
+        {
+            WorkingRow.TurnStarted = DateTime.UtcNow;
+        }
+
+        _wasBusy = view.Busy;
         if (newSession)
         {
+            // Item ids are counted per conversation: a row of another session must not be
+            // taken for the one with the same id here.
+            _slots.Clear();
             _follow = true;
         }
 
@@ -781,7 +796,7 @@ sealed class FeedRow : ContentControl
     /// click opens (D-342). The words are grey: they are not the answer.
     private UIElement ThoughtRow(FeedEntry.Thought thought)
     {
-        var key = "thought:" + thought.Id;
+        var key = $"thought:{FindPanel()?.ShownSession}:{thought.Id}";
         var open = thought.Open || FindPanel()?.IsOpen(key) == true;
 
         var row = new Grid();

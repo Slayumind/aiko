@@ -491,11 +491,15 @@ sealed class TerminalHost
         }
 
         var home = System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile);
-        _histories[id] = TerminalStore.History(
+        var history = TerminalStore.History(
             environment.ConfigDirectories.FirstOrDefault() ?? ClaudeConfigFolder.Resolve(null, home),
             session.Folder,
             session.Id,
             session.Mode);
+
+        // The past and the live conversation both count their items from 1, and the feed shows
+        // them one after the other: the past ones get ids below zero, so no two items share one.
+        _histories[id] = history with { Items = [.. history.Items.Select(item => item with { Id = -item.Id })] };
     }
 
     private TalkView? Talk(TerminalSession? session)
