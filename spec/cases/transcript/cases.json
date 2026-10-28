@@ -1,5 +1,5 @@
 {
-  "comment": "The file Claude Code keeps of a conversation, read into the feed (D-303). Each line of a case is one line of the file. Only the lines user, assistant and the mark of a shortened conversation are read, and only their message: the folder, the branch, the text of the persona in a hook line and the last prompt are never looked at. A line that is not understood is skipped. The feed that comes out is one of a conversation that is over: no step runs, nothing waits, nothing is unread.",
+  "comment": "The file Claude Code keeps of a conversation, read into the feed (D-303). Each line of a case is one line of the file. Only the lines user, assistant and the mark of a shortened conversation are read, and only their message: the folder, the branch, the text of the persona in a hook line and the last prompt are never looked at. A line that is not understood is skipped. The feed that comes out is one of a conversation that is over: no step runs, nothing waits, nothing is unread. A message sent during the work is written by Claude Code as an attachment of the kind queued_command when it is taken; one from the person comes back as a message, notices of tasks and messages of other sessions do not.",
   "transcripts": [
     {
       "name": "an empty file",
@@ -1415,6 +1415,136 @@
             "state": "done",
             "output": "On branch main",
             "exitCode": 0
+          }
+        ]
+      }
+    },
+    {
+      "name": "a command of \"!\" that failed comes back with its exit code",
+      "lines": [
+        {
+          "type": "user",
+          "message": {
+            "role": "user",
+            "content": [
+              {
+                "type": "text",
+                "text": "<bash-input>ls nowhere</bash-input>\n<bash-stdout>ls: cannot access 'nowhere'</bash-stdout><bash-stderr>Exit code 2</bash-stderr>"
+              }
+            ]
+          }
+        }
+      ],
+      "state": {
+        "activity": "idle",
+        "mode": "plan",
+        "busy": false,
+        "nextId": 2,
+        "items": [
+          {
+            "shell": "ls nowhere",
+            "state": "done",
+            "output": "ls: cannot access 'nowhere'",
+            "exitCode": 2
+          }
+        ]
+      }
+    },
+    {
+      "name": "a message sent during the work comes back from its attachment; notices of tasks do not",
+      "lines": [
+        {
+          "type": "user",
+          "message": {
+            "role": "user",
+            "content": "fix a.txt"
+          }
+        },
+        {
+          "type": "assistant",
+          "message": {
+            "role": "assistant",
+            "content": [
+              {
+                "type": "text",
+                "text": "On it."
+              }
+            ]
+          }
+        },
+        {
+          "type": "attachment",
+          "attachment": {
+            "type": "queued_command",
+            "commandMode": "prompt",
+            "prompt": "and b.txt too",
+            "origin": {
+              "kind": "human"
+            },
+            "humanTurn": true
+          }
+        },
+        {
+          "type": "attachment",
+          "attachment": {
+            "type": "queued_command",
+            "commandMode": "prompt",
+            "prompt": [
+              {
+                "type": "text",
+                "text": "also c.txt"
+              }
+            ]
+          }
+        },
+        {
+          "type": "attachment",
+          "attachment": {
+            "type": "queued_command",
+            "commandMode": "task-notification",
+            "prompt": "<task-notification>done</task-notification>",
+            "origin": {
+              "kind": "task-notification"
+            }
+          }
+        },
+        {
+          "type": "attachment",
+          "attachment": {
+            "type": "queued_command",
+            "commandMode": "prompt",
+            "prompt": "<peer>hi</peer>",
+            "origin": {
+              "kind": "peer"
+            },
+            "isMeta": true
+          }
+        }
+      ],
+      "state": {
+        "activity": "idle",
+        "mode": "plan",
+        "busy": false,
+        "nextId": 5,
+        "items": [
+          {
+            "owner": "fix a.txt",
+            "images": 0,
+            "queued": false
+          },
+          {
+            "answer": "On it.",
+            "streaming": false
+          },
+          {
+            "owner": "and b.txt too",
+            "images": 0,
+            "queued": false
+          },
+          {
+            "owner": "also c.txt",
+            "images": 0,
+            "queued": false
           }
         ]
       }

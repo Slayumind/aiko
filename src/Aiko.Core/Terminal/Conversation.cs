@@ -94,6 +94,10 @@ public abstract record FeedItem(int Id)
         string Progress) : FeedItem(Id)
     {
         public IReadOnlyList<QuestionAnswer> Answers { get; init; } = [];
+
+        /// The person said no to the questions. Their refusal comes back from Claude Code as the
+        /// result of the step; a step cut off by a crash or a failed turn has no result.
+        public bool Declined => Line.Label == QuestionAnswers.Tool && State == StepState.Failed && Result.Length > 0;
     }
 
     public sealed record Card(int Id, RequestCard Request, RequestState State) : FeedItem(Id);
@@ -208,9 +212,17 @@ public sealed record Conversation(
         }),
         StreamEvent.TextDelta { ParentToolUseId: null } delta => Quiet(Begun().Streamed(delta.Text)),
         StreamEvent.Assistant { ParentToolUseId: null } assistant => Quiet(Begun().Said(assistant)),
+        // What Claude Code wrote itself, such as the answer to a change of model, is never a
+        // message of the person that waited.
+        StreamEvent.User { ParentToolUseId: null, IsReplay: true, IsSynthetic: true } own => Quiet(Returned(own)),
         StreamEvent.User { ParentToolUseId: null, IsReplay: true } replay => Quiet(Taken(replay)),
         StreamEvent.User { ParentToolUseId: null } user => Quiet(Returned(user)),
         StreamEvent.Request request => Quiet(Add(id => new FeedItem.Card(id, RequestCard.From(request), RequestState.Open))),
+
+        // A card Claude Code no longer waits for closes, so nothing held behind it waits forever.
+        StreamEvent.Withdrawn withdrawn => Quiet(Changed<FeedItem.Card>(
+            card => card.State == RequestState.Open && card.Request.RequestId == withdrawn.RequestId,
+            card => card with { State = RequestState.Closed })),
         StreamEvent.Reply reply => Quiet(this with { Mode = reply.Mode ?? Mode }),
         StreamEvent.Status status => Quiet(this with { Mode = status.Mode ?? Mode, Compacting = status.Activity == "compacting" }),
         StreamEvent.Compacted compacted => Quiet(Add(id => new FeedItem.Notice(id, NoticeKind.Compacted, "", CompactSize.Of(compacted))) with
@@ -311,14 +323,17 @@ public sealed record Conversation(
 
     private Outcome Ended(StreamEvent.Result result)
     {
-        var next = Settled(result.IsError ? StepState.Failed : StepState.Done) with
+        // A stopped turn with nothing in the background stopped its subagents too: their steps
+        // end with it, and Claude Code may not say so for each of them.
+        var stopped = result.TerminalReason.StartsWith("aborted", StringComparison.Ordinal);
+        var settling = stopped && Tasks == 0 ? this with { Agents = [] } : this;
+        var next = settling.Settled(result.IsError ? StepState.Failed : StepState.Done) with
         {
             ContextWindow = ContextGauge.WindowFor(Model, result.ContextWindows, ContextWindow),
             Todos = AgentTodos.AllDone(Todos) ? [] : Todos,
         };
 
         // When Claude Code already said in this turn what went wrong, the feed has that notice.
-        var stopped = result.TerminalReason.StartsWith("aborted", StringComparison.Ordinal);
         if (result.IsError && stopped)
         {
             next = next.Add(id => new FeedItem.Notice(id, NoticeKind.Interrupted, ""));

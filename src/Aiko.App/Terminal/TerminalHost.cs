@@ -246,15 +246,7 @@ sealed class TerminalHost
             return;
         }
 
-        var path = SessionName.FolderPath(dialog.FolderName);
-        var folders = _form.Folders.ToList();
-        var at = folders.FindIndex(folder => folder.Path == path);
-        if (at < 0)
-        {
-            folders.Insert(0, new FolderChoice(path, SessionName.FolderName(path), FolderSource.Recent));
-            at = 0;
-        }
-
+        var (folders, at) = NewSessionChoices.Picked(_form.Folders, dialog.FolderName);
         _form = FormFor(at, _form.Model, folders);
         Draw();
     }
@@ -267,7 +259,7 @@ sealed class TerminalHost
         }
 
         var folders = known ?? NewSessionChoices.Folders(_sessions, environment, TerminalStore.FoldersInside);
-        var chosen = folders.Count == 0 ? -1 : Math.Clamp(folder ?? 0, 0, folders.Count - 1);
+        var chosen = NewSessionChoices.ChosenFolder(folder, folders.Count);
         var path = chosen >= 0 ? folders[chosen].Path : null;
         var offer = OfferOf(environment.Name, path);
         var models = NewSessionChoices.Offered(offer.Models);
@@ -395,11 +387,11 @@ sealed class TerminalHost
             .Where(one => one.Value.IsRunning)
             .Select(one => new RunningTalk(one.Key, one.Value.State.IsBusy, _sessions.Find(one.Key)?.LastUsed ?? 0))
             .ToList();
-        if (ProcessCap.ToStop(running, id) is { } idle && _talks.Remove(idle, out var stopped))
+        // Only the process goes: the conversation stays, with its mark of an answer not read yet,
+        // and the next message resumes it in a new process.
+        if (ProcessCap.ToStop(running, id) is { } idle && _talks.TryGetValue(idle, out var stopped))
         {
-            // Its next process starts from the file again, which then holds this run too.
             stopped.Close();
-            _histories.Remove(idle);
         }
 
         _sessions = _sessions.Used(id, DateTimeOffset.UtcNow.ToUnixTimeSeconds()).MarkStarted(id);

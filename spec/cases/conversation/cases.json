@@ -1,5 +1,5 @@
 {
-  "comment": "A conversation as a row of steps and what it has become after them (D-294, D-304, D-305). A step is a line of Claude Code, or something the person does. The answer is the state, the feed and every line written to Claude Code on the way. A message sent during a turn, or while a card waits, goes to Claude Code at once and stays grey until Claude Code says it back (--replay-user-messages): then it was taken into the turn (D-341). While a grey message waits, the session stays at work. A turn that ended does not free the session while a subagent still runs. What a subagent says inside its own work stays out of the feed; its requests do not. glance is the conversation as the list of sessions sees it: what it does and the parts of the one line about it. A command of \"!\" that runs keeps the session at work; a message sent meanwhile waits and goes to Claude with its output, and Esc stops the command without a word to Claude. When Claude Code dies, the grey messages it was given stop waiting.",
+  "comment": "A conversation as a row of steps and what it has become after them (D-294, D-304, D-305). A step is a line of Claude Code, or something the person does. The answer is the state, the feed and every line written to Claude Code on the way. A message sent during a turn, or while a card waits, goes to Claude Code at once and stays grey until Claude Code says it back (--replay-user-messages): then it was taken into the turn (D-341). While a grey message waits, the session stays at work. A turn that ended does not free the session while a subagent still runs. What a subagent says inside its own work stays out of the feed; its requests do not. glance is the conversation as the list of sessions sees it: what it does and the parts of the one line about it. A command of \"!\" that runs keeps the session at work; a message sent meanwhile waits and goes to Claude with its output, and Esc stops the command without a word to Claude. When Claude Code dies, the grey messages it was given stop waiting. A request Claude Code takes back (control_cancel_request) closes its card. A stopped turn with nothing in the background ends its subagents with it.",
   "scenarios": [
     {
       "name": "nothing happened yet",
@@ -592,8 +592,7 @@
             "card": "permission",
             "state": "open",
             "requestId": "req-1",
-            "second": "editsInSession",
-            "subagent": false
+            "second": "editsInSession"
           }
         ]
       },
@@ -730,8 +729,7 @@
             "card": "permission",
             "state": "allowed",
             "requestId": "req-1",
-            "second": "editsInSession",
-            "subagent": false
+            "second": "editsInSession"
           },
           {
             "answer": "Done.",
@@ -845,8 +843,7 @@
             "card": "permission",
             "state": "allowed",
             "requestId": "req-1",
-            "second": "editsInSession",
-            "subagent": false
+            "second": "editsInSession"
           }
         ]
       },
@@ -967,8 +964,7 @@
             "card": "permission",
             "state": "denied",
             "requestId": "req-1",
-            "second": "none",
-            "subagent": false
+            "second": "none"
           }
         ]
       },
@@ -1085,8 +1081,7 @@
             "card": "question",
             "state": "open",
             "requestId": "req-1",
-            "second": "none",
-            "subagent": false
+            "second": "none"
           }
         ]
       },
@@ -1212,8 +1207,7 @@
             "card": "question",
             "state": "answered",
             "requestId": "req-1",
-            "second": "none",
-            "subagent": false
+            "second": "none"
           }
         ]
       },
@@ -1304,8 +1298,7 @@
             "card": "plan",
             "state": "open",
             "requestId": "req-1",
-            "second": "none",
-            "subagent": false
+            "second": "none"
           }
         ]
       },
@@ -1409,8 +1402,7 @@
             "card": "plan",
             "state": "allowed",
             "requestId": "req-1",
-            "second": "none",
-            "subagent": false
+            "second": "none"
           }
         ]
       },
@@ -1647,8 +1639,7 @@
             "card": "permission",
             "state": "open",
             "requestId": "req-1",
-            "second": "none",
-            "subagent": false
+            "second": "none"
           },
           {
             "owner": "and one more thing",
@@ -1784,8 +1775,7 @@
             "card": "permission",
             "state": "closed",
             "requestId": "req-1",
-            "second": "none",
-            "subagent": false
+            "second": "none"
           },
           {
             "notice": "interrupted",
@@ -2481,8 +2471,7 @@
             "card": "permission",
             "state": "open",
             "requestId": "req-1",
-            "second": "none",
-            "subagent": true
+            "second": "none"
           }
         ]
       },
@@ -2650,8 +2639,7 @@
             "card": "permission",
             "state": "allowed",
             "requestId": "req-1",
-            "second": "none",
-            "subagent": true
+            "second": "none"
           },
           {
             "answer": "The agent created sub.txt.",
@@ -4863,6 +4851,529 @@
       ],
       "glance": {
         "activity": "failed",
+        "line": "none",
+        "kind": "other",
+        "label": "",
+        "text": ""
+      }
+    },
+    {
+      "name": "the answer to a change of model that Claude Code says back on its own names the model",
+      "steps": [
+        {
+          "do": "send",
+          "text": "go"
+        },
+        {
+          "line": {
+            "type": "system",
+            "subtype": "init",
+            "session_id": "s-1",
+            "model": "claude-opus-5-5",
+            "permissionMode": "default",
+            "claude_code_version": "2.1.312"
+          }
+        },
+        {
+          "line": {
+            "type": "result",
+            "subtype": "success",
+            "is_error": false,
+            "terminal_reason": "completed",
+            "result": "ok"
+          }
+        },
+        {
+          "line": {
+            "type": "user",
+            "message": {
+              "role": "user",
+              "content": "<local-command-stdout>Set model to `sonnet (claude-sonnet-5-5)`</local-command-stdout>"
+            },
+            "isReplay": true,
+            "isSynthetic": true
+          }
+        }
+      ],
+      "state": {
+        "activity": "done",
+        "mode": "manual",
+        "model": "claude-sonnet-5-5",
+        "session": "s-1",
+        "tasks": 0,
+        "unread": true,
+        "compacting": false,
+        "limits": 0,
+        "items": [
+          {
+            "owner": "go",
+            "images": 0,
+            "queued": false
+          },
+          {
+            "notice": "output",
+            "text": "ok"
+          }
+        ]
+      },
+      "written": [
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"go\"}]}}"
+      ],
+      "glance": {
+        "activity": "done",
+        "line": "none",
+        "kind": "other",
+        "label": "",
+        "text": ""
+      }
+    },
+    {
+      "name": "questions cut off by a crash are not a refusal",
+      "steps": [
+        {
+          "do": "send",
+          "text": "ask me"
+        },
+        {
+          "line": {
+            "type": "system",
+            "subtype": "init",
+            "session_id": "s-1",
+            "model": "claude-opus-5-5",
+            "permissionMode": "default",
+            "claude_code_version": "2.1.312"
+          }
+        },
+        {
+          "line": {
+            "type": "assistant",
+            "message": {
+              "content": [
+                {
+                  "type": "tool_use",
+                  "id": "toolu_q",
+                  "name": "AskUserQuestion",
+                  "input": {
+                    "questions": [
+                      {
+                        "question": "Which way?",
+                        "header": "Way",
+                        "multiSelect": false,
+                        "options": [
+                          {
+                            "label": "Left",
+                            "description": ""
+                          },
+                          {
+                            "label": "Right",
+                            "description": ""
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "parent_tool_use_id": null
+          }
+        },
+        {
+          "do": "exit"
+        }
+      ],
+      "state": {
+        "activity": "failed",
+        "mode": "manual",
+        "model": "claude-opus-5-5",
+        "session": "s-1",
+        "tasks": 0,
+        "unread": false,
+        "compacting": false,
+        "limits": 0,
+        "items": [
+          {
+            "owner": "ask me",
+            "images": 0,
+            "queued": false
+          },
+          {
+            "step": {
+              "kind": "other",
+              "label": "AskUserQuestion",
+              "subject": "",
+              "added": 0,
+              "removed": 0,
+              "hidden": true
+            },
+            "state": "failed",
+            "result": "",
+            "images": 0,
+            "progress": ""
+          },
+          {
+            "notice": "failed",
+            "text": ""
+          }
+        ]
+      },
+      "written": [
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"ask me\"}]}}"
+      ],
+      "glance": {
+        "activity": "failed",
+        "line": "none",
+        "kind": "other",
+        "label": "",
+        "text": ""
+      }
+    },
+    {
+      "name": "questions the person said no to are a refusal",
+      "steps": [
+        {
+          "do": "send",
+          "text": "ask me"
+        },
+        {
+          "line": {
+            "type": "system",
+            "subtype": "init",
+            "session_id": "s-1",
+            "model": "claude-opus-5-5",
+            "permissionMode": "default",
+            "claude_code_version": "2.1.312"
+          }
+        },
+        {
+          "line": {
+            "type": "assistant",
+            "message": {
+              "content": [
+                {
+                  "type": "tool_use",
+                  "id": "toolu_q",
+                  "name": "AskUserQuestion",
+                  "input": {
+                    "questions": [
+                      {
+                        "question": "Which way?",
+                        "header": "Way",
+                        "multiSelect": false,
+                        "options": [
+                          {
+                            "label": "Left",
+                            "description": ""
+                          },
+                          {
+                            "label": "Right",
+                            "description": ""
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "parent_tool_use_id": null
+          }
+        },
+        {
+          "line": {
+            "type": "control_request",
+            "request_id": "req-q",
+            "request": {
+              "subtype": "can_use_tool",
+              "tool_name": "AskUserQuestion",
+              "input": {
+                "questions": [
+                  {
+                    "question": "Which way?",
+                    "header": "Way",
+                    "multiSelect": false,
+                    "options": [
+                      {
+                        "label": "Left",
+                        "description": ""
+                      },
+                      {
+                        "label": "Right",
+                        "description": ""
+                      }
+                    ]
+                  }
+                ]
+              },
+              "tool_use_id": "toolu_q"
+            }
+          }
+        },
+        {
+          "do": "choose",
+          "requestId": "req-q",
+          "choice": "deny",
+          "message": ""
+        },
+        {
+          "line": {
+            "type": "user",
+            "message": {
+              "content": [
+                {
+                  "type": "tool_result",
+                  "tool_use_id": "toolu_q",
+                  "is_error": true,
+                  "content": "The user said no."
+                }
+              ]
+            },
+            "parent_tool_use_id": null
+          }
+        }
+      ],
+      "state": {
+        "activity": "working",
+        "mode": "manual",
+        "model": "claude-opus-5-5",
+        "session": "s-1",
+        "tasks": 0,
+        "unread": false,
+        "compacting": false,
+        "limits": 0,
+        "items": [
+          {
+            "owner": "ask me",
+            "images": 0,
+            "queued": false
+          },
+          {
+            "step": {
+              "kind": "other",
+              "label": "AskUserQuestion",
+              "subject": "",
+              "added": 0,
+              "removed": 0,
+              "hidden": true
+            },
+            "state": "failed",
+            "result": "The user said no.",
+            "images": 0,
+            "progress": "",
+            "declined": true
+          },
+          {
+            "card": "question",
+            "state": "denied",
+            "requestId": "req-q",
+            "second": "none"
+          }
+        ]
+      },
+      "written": [
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"ask me\"}]}}",
+        "{\"type\":\"control_response\",\"response\":{\"subtype\":\"success\",\"request_id\":\"req-q\",\"response\":{\"behavior\":\"deny\",\"message\":\"The user said no.\"}}}"
+      ],
+      "glance": {
+        "activity": "working",
+        "line": "none",
+        "kind": "other",
+        "label": "",
+        "text": ""
+      }
+    },
+    {
+      "name": "a request Claude Code takes back closes its card, and the session no longer waits",
+      "steps": [
+        {
+          "do": "send",
+          "text": "write it"
+        },
+        {
+          "line": {
+            "type": "assistant",
+            "message": {
+              "content": [
+                {
+                  "type": "tool_use",
+                  "id": "toolu_1",
+                  "name": "Write",
+                  "input": {
+                    "file_path": "a.txt",
+                    "content": "ok"
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "line": {
+            "type": "control_request",
+            "request_id": "req-1",
+            "request": {
+              "subtype": "can_use_tool",
+              "tool_name": "Write",
+              "input": {
+                "file_path": "a.txt",
+                "content": "ok"
+              },
+              "tool_use_id": "toolu_1"
+            }
+          }
+        },
+        {
+          "line": {
+            "type": "control_cancel_request",
+            "request_id": "req-1"
+          }
+        }
+      ],
+      "state": {
+        "activity": "working",
+        "mode": "manual",
+        "model": "",
+        "session": "",
+        "tasks": 0,
+        "unread": false,
+        "compacting": false,
+        "limits": 0,
+        "items": [
+          {
+            "owner": "write it",
+            "images": 0,
+            "queued": false
+          },
+          {
+            "step": {
+              "kind": "edit",
+              "label": "",
+              "subject": "a.txt",
+              "added": 1,
+              "removed": 0,
+              "hidden": false
+            },
+            "state": "running",
+            "result": "",
+            "images": 0,
+            "progress": ""
+          },
+          {
+            "card": "permission",
+            "state": "closed",
+            "requestId": "req-1",
+            "second": "none"
+          }
+        ]
+      },
+      "written": [
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"write it\"}]}}"
+      ],
+      "glance": {
+        "activity": "working",
+        "line": "step",
+        "kind": "edit",
+        "label": "",
+        "text": "a.txt"
+      }
+    },
+    {
+      "name": "a stopped turn ends its subagent at work",
+      "steps": [
+        {
+          "do": "send",
+          "text": "go"
+        },
+        {
+          "line": {
+            "type": "system",
+            "subtype": "init",
+            "session_id": "s-1",
+            "model": "claude-opus-5-5",
+            "permissionMode": "default",
+            "claude_code_version": "2.1.312"
+          }
+        },
+        {
+          "line": {
+            "type": "assistant",
+            "message": {
+              "content": [
+                {
+                  "type": "tool_use",
+                  "id": "toolu_a",
+                  "name": "Agent",
+                  "input": {
+                    "description": "Check the Swift twin",
+                    "prompt": "p"
+                  }
+                }
+              ]
+            },
+            "parent_tool_use_id": null
+          }
+        },
+        {
+          "line": {
+            "type": "system",
+            "subtype": "task_started",
+            "tool_use_id": "toolu_a"
+          }
+        },
+        {
+          "do": "interrupt"
+        },
+        {
+          "line": {
+            "type": "result",
+            "subtype": "error_during_execution",
+            "is_error": true,
+            "terminal_reason": "aborted_streaming",
+            "result": ""
+          }
+        }
+      ],
+      "state": {
+        "activity": "done",
+        "mode": "manual",
+        "model": "claude-opus-5-5",
+        "session": "s-1",
+        "tasks": 0,
+        "unread": true,
+        "compacting": false,
+        "limits": 0,
+        "items": [
+          {
+            "owner": "go",
+            "images": 0,
+            "queued": false
+          },
+          {
+            "step": {
+              "kind": "agent",
+              "label": "",
+              "subject": "Check the Swift twin",
+              "added": 0,
+              "removed": 0,
+              "hidden": false
+            },
+            "state": "failed",
+            "result": "",
+            "images": 0,
+            "progress": ""
+          },
+          {
+            "notice": "interrupted",
+            "text": ""
+          }
+        ]
+      },
+      "written": [
+        "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"go\"}]}}",
+        "{\"type\":\"control_request\",\"request_id\":\"int-3\",\"request\":{\"subtype\":\"interrupt\"}}"
+      ],
+      "glance": {
+        "activity": "done",
         "line": "none",
         "kind": "other",
         "label": "",

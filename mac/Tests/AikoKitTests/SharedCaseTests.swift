@@ -567,7 +567,13 @@ struct SharedCaseTests {
 
         for row in cases["chosen"]?.arrayValue ?? [] {
             guard let command = commands.first(where: { $0.name == row["name"]?.stringValue }) else { continue }
-            #expect(SlashMenu.chosen(command) == row["text"]?.stringValue)
+            if let field = row["field"]?.stringValue {
+                let picked = SlashMenu.into(field, command)
+                #expect(picked.text == row["text"]?.stringValue)
+                #expect(picked.caret == Int(row["caret"]?.int64Value ?? -1))
+            } else {
+                #expect(SlashMenu.chosen(command) == row["text"]?.stringValue)
+            }
         }
     }
 
@@ -588,6 +594,7 @@ struct SharedCaseTests {
             let read = ShellCommand.read(row["text"]?.stringValue ?? "")
             #expect(read?.command == row["command"]?.stringValue)
             #expect(read?.output == row["output"]?.stringValue)
+            #expect((read?.exitCode ?? 0) == Int(row["exitCode"]?.int64Value ?? 0))
         }
         for row in cases["outputs"]?.arrayValue ?? [] {
             #expect(ShellCommand.output(row["text"]?.stringValue ?? "") == row["output"]?.stringValue)
@@ -686,6 +693,18 @@ struct SharedCaseTests {
             #expect(FileMention.matches(paths, query: row["query"]?.stringValue ?? "") == Self.strings(row["files"]))
         }
 
+        for row in cases["lit"]?.arrayValue ?? [] {
+            let lit = FileMention.lit(row["path"]?.stringValue ?? "", query: row["query"]?.stringValue ?? "")
+            #expect(lit.start == Int(row["start"]?.int64Value ?? -2))
+            #expect(lit.length == Int(row["length"]?.int64Value ?? -2))
+        }
+        for row in cases["dropped"]?.arrayValue ?? [] {
+            let dropped = FileMention.dropped(
+                row["field"]?.stringValue ?? "", caret: Int(row["caret"]?.int64Value ?? 0),
+                paths: (row["paths"]?.arrayValue ?? []).compactMap(\.stringValue))
+            #expect(dropped.text == row["result"]?.stringValue)
+            #expect(dropped.caret == Int(row["resultCaret"]?.int64Value ?? -1))
+        }
         for row in cases["chosen"]?.arrayValue ?? [] {
             let text = row["text"]?.stringValue ?? ""
             let caret = Int(row["caret"]?.int64Value ?? 0)
@@ -949,7 +968,7 @@ struct SharedCaseTests {
     private static func describedCard(_ card: RequestCard) -> JsonNode {
         node([
             ("kind", .string(String(describing: card.kind))), ("second", .string(String(describing: card.second))),
-            ("rule", .string(card.ruleText)), ("subagent", .bool(card.fromSubagent)),
+            ("rule", .string(card.ruleText)),
             ("step", describedStep(card.step)),
             ("questions", .array(card.questions.map { question in
                 node([
@@ -1024,12 +1043,11 @@ struct SharedCaseTests {
                 ("step", describedStep(step.line)), ("state", .string(String(describing: step.state))),
                 ("result", .string(step.result)), ("images", number(step.images.count)),
                 ("progress", .string(step.progress)),
-            ] + answered(step.answers))
+            ] + answered(step.answers) + (step.declined ? [("declined", .bool(true))] : []))
         case .card(let request, let state):
             return node([
                 ("card", .string(String(describing: request.kind))), ("state", .string(String(describing: state))),
                 ("requestId", .string(request.requestId)), ("second", .string(String(describing: request.second))),
-                ("subagent", .bool(request.fromSubagent)),
             ])
         case .notice(let kind, let words, let size):
             var pairs: [(String, JsonNode)] = [("notice", .string(String(describing: kind))), ("text", .string(words))]
@@ -1184,6 +1202,24 @@ struct SharedCaseTests {
     }
 
     @Test
+    func everyFolderPickedForADraftLandsTheSame() {
+        let cases = SpecCases.json("new-session")
+        for row in cases["picked"]?.arrayValue ?? [] {
+            let folders = (row["folders"]?.arrayValue ?? []).compactMap(\.stringValue).map {
+                FolderChoice(path: $0, name: SessionName.folderName($0), source: .bound)
+            }
+            let landed = NewSessionChoices.picked(folders, row["picked"]?.stringValue ?? "")
+            let name = row["name"]?.stringValue ?? ""
+            #expect(landed.folders.map(\.path) == (row["after"]?.arrayValue ?? []).compactMap(\.stringValue), "\(name)")
+            #expect(landed.chosen == Int(row["chosen"]?.int64Value ?? -2), "\(name): chosen")
+        }
+        for row in cases["chosenFolder"]?.arrayValue ?? [] {
+            let asked = row["asked"]?.int64Value.map { Int($0) }
+            #expect(NewSessionChoices.chosenFolder(asked, count: Int(row["count"]?.int64Value ?? 0)) == Int(row["chosen"]?.int64Value ?? -2))
+        }
+    }
+
+    @Test
     func everyFormOfANewSessionOffersTheSame() {
         let cases = SpecCases.json("new-session")
         let settings = EnvironmentSettings((cases["environments"]?.arrayValue ?? []).map(Self.environmentIn))
@@ -1228,7 +1264,6 @@ struct SharedCaseTests {
             case "used": sessions = sessions.used(word("id"), now: step["now"]?.int64Value ?? 0)
             case "opened": sessions = sessions.opened(word("id"))
             case "close": sessions = sessions.close(word("id"))
-            case "move": sessions = sessions.move(word("id"), before: step["before"]?.stringValue)
             case "placed":
                 sessions = sessions.placed(WindowPlace(
                     left: step["left"]?.doubleValue ?? 0, top: step["top"]?.doubleValue ?? 0,
@@ -1628,10 +1663,10 @@ struct SharedCaseTests {
     /// A stream event as the case files write it down, with the keys in the order of the files.
     private static func described(_ event: StreamEvent) -> JsonNode {
         switch event {
-        case .ready(let sessionId, let model, let mode, let version):
+        case .ready(let sessionId, let model, let mode):
             return node([
                 ("kind", .string("ready")), ("sessionId", .string(sessionId)), ("model", .string(model)),
-                ("mode", modeName(mode)), ("version", .string(version)),
+                ("mode", modeName(mode)),
             ])
         case .assistant(let parent, let blocks, let error, let contextTokens):
             // The size of the context is named only where the line has one, so older cases stay.
@@ -1655,6 +1690,8 @@ struct SharedCaseTests {
             ])
         case .textDelta(let parent, let words):
             return node([("kind", .string("textDelta")), ("parent", text(parent)), ("text", .string(words))])
+        case .withdrawn(let requestId):
+            return node([("kind", .string("withdrawn")), ("requestId", .string(requestId))])
         case .request(let request):
             return node([
                 ("kind", .string("request")), ("requestId", .string(request.requestId)),
@@ -1713,8 +1750,6 @@ struct SharedCaseTests {
                 ("kind", .string("result")), ("isError", .bool(isError)), ("subtype", .string(subtype)),
                 ("terminalReason", .string(terminalReason)), ("text", .string(words)),
             ] + (windows.isEmpty ? [] : [("contextWindows", node(windows.map { ($0.model, number($0.window)) }))]))
-        case .unreadable:
-            return node([("kind", .string("unreadable"))])
         case .ignored:
             return node([("kind", .string("ignored"))])
         }

@@ -164,32 +164,6 @@ public sealed record TerminalSessions(IReadOnlyList<TerminalSession> Sessions, s
         return LastId == id ? next with { LastId = neighbour?.Id } : next;
     }
 
-    /// Moves a session inside its group: before another session of the same folder, or to the
-    /// end of the group when beforeId is null. A place in another group changes nothing. The
-    /// group keeps the places it has in the file, so no other group moves.
-    public TerminalSessions Move(string id, string? beforeId)
-    {
-        if (Find(id) is not { Closed: false } moving || beforeId == id)
-        {
-            return this;
-        }
-
-        var group = Open(moving.Environment).Where(session => session.Folder == moving.Folder).ToList();
-        var order = group.Where(session => session.Id != id).ToList();
-        var at = beforeId is null ? order.Count : order.FindIndex(session => session.Id == beforeId);
-        if (at < 0)
-        {
-            return this;
-        }
-        order.Insert(at, moving);
-
-        var next = 0;
-        return this with
-        {
-            Sessions = [.. Sessions.Select(session => group.Contains(session) ? order[next++] : session)],
-        };
-    }
-
     /// The window was closed at this place. It is kept in whole units; a place that is not a
     /// place at all changes nothing.
     public TerminalSessions Placed(WindowPlace place) =>

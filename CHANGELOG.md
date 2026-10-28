@@ -72,6 +72,17 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - Renaming an environment keeps its terminal sessions, also with the terminal open.
 - The terminal opens maximized again after it was closed while minimized, "@" picked in the middle
   of a word replaces the whole word, and a MultiEdit step shows its file and its changed lines.
+- Messages you sent while Claude worked come back when a session is opened again, and a failed
+  command of "!" keeps its exit code there.
+- A request Claude Code takes back closes its card; Esc during a subagent ends its step; questions
+  cut off by a crash are no longer shown as declined.
+- A finished answer nobody read keeps its mark when Aiko stops an idle session.
+- A table inside a list item or a quote is drawn and copied; copying text that is still being
+  written takes the right words.
+- A file link opens in the folder of the session and only when the file is there; "@" shows files
+  made during the session; "Always in this project" shows its rule on hover.
+- The microphone no longer stays open after a quick second press, and voice input asks for the model
+  when the model of silence is missing.
 - With fewer animations asked for in Windows, the terminal no longer runs a bar while it makes the
   conversation shorter.
 - Voice input no longer puts the list of hint words into your text when the recognizer gives it back

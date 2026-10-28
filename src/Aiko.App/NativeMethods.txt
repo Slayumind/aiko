@@ -55,7 +55,6 @@ waveInUnprepareHeader
 waveInAddBuffer
 waveInStart
 waveInReset
-waveInGetNumDevs
 WAVEFORMATEX
 WAVEHDR
 WAVE_MAPPER

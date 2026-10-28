@@ -1,12 +1,21 @@
 {
-  "comment": "Echoes: a recogniser that does not catch the sound may give back the hint itself, also in the middle of speech. A sentence of three or more parts, all of them items of the hint, is an echo; so is a sentence of four or more items of the hint and one other part, because the recogniser may spell one item its own way (kodland as кодland, 2026-10-23). An echo sentence is cut out, the speech around it stays. What the recogniser is told before it listens (D-313): the folder of the session, its branch, words of the terminal in the language Whisper hears (none without a language), the names of files from the conversation, then the keys of Aiko's memory when the memory is on. A path gives only its last part. The same name twice goes once, whatever its case. The hint stops before the item that would make it longer than the limit. The language is the one chosen for speech on the Terminal page; System follows the language of the computer, and anything but Russian is English (D-314, D-326).",
+  "comment": "Echoes: a recogniser that does not catch the sound may give back the hint itself, also in the middle of speech. A sentence of three or more parts, all of them items of the hint, is an echo; so is a sentence of four or more items of the hint and one other part, because the recogniser may spell one item its own way (kodland as кодland, 2026-10-23). An echo sentence is cut out, the speech around it stays. What the recogniser is told before it listens (D-313): the folder of the session, its branch, words of the terminal in the language Whisper hears (none without a language), the names of files from the conversation, then the keys of Aiko's memory when the memory is on. A path gives only its last part. The same name twice goes once, whatever its case. The hint stops before the item that would make it longer than the limit. The language is the one chosen for speech on the Terminal page; System follows the language of the computer, and anything but Russian is English (D-314, D-326). files: the files of a conversation for the hint, from its steps after a message of the person.",
   "hints": [
     {
       "name": "everything",
       "folder": "C:\\Users\\me\\Desktop\\personal projects\\aiko",
       "branch": "in-progress",
-      "files": ["src\\Aiko.App\\Terminal\\TalkInput.cs", "docs/DECISIONS.md"],
-      "keys": ["Code Crawler", "Ember", "Media Editor", "Swift", "C#"],
+      "files": [
+        "src\\Aiko.App\\Terminal\\TalkInput.cs",
+        "docs/DECISIONS.md"
+      ],
+      "keys": [
+        "Code Crawler",
+        "Ember",
+        "Media Editor",
+        "Swift",
+        "C#"
+      ],
       "max": 400,
       "hint": "aiko, in-progress, TalkInput.cs, DECISIONS.md, Code Crawler, Ember, Media Editor, Swift, C#."
     },
@@ -23,8 +32,15 @@
       "name": "no branch, a name twice",
       "folder": "C:\\work\\Ember",
       "branch": null,
-      "files": ["ember", "Ember.cs", "  "],
-      "keys": ["EMBER", "Unity"],
+      "files": [
+        "ember",
+        "Ember.cs",
+        "  "
+      ],
+      "keys": [
+        "EMBER",
+        "Unity"
+      ],
       "max": 400,
       "hint": "Ember, Ember.cs, Unity."
     },
@@ -32,8 +48,12 @@
       "name": "the limit drops whole items from the end",
       "folder": "C:\\work\\aiko",
       "branch": "feature/voice-core",
-      "files": ["VoiceInput.cs"],
-      "keys": ["Swift"],
+      "files": [
+        "VoiceInput.cs"
+      ],
+      "keys": [
+        "Swift"
+      ],
       "max": 40,
       "hint": "aiko, feature/voice-core, VoiceInput.cs."
     },
@@ -50,7 +70,9 @@
       "name": "words of the terminal in Russian come right after the branch",
       "folder": "C:\\work\\aiko",
       "branch": "main",
-      "files": ["src/TalkInput.cs"],
+      "files": [
+        "src/TalkInput.cs"
+      ],
       "keys": null,
       "language": "ru",
       "max": 400,
@@ -61,7 +83,9 @@
       "folder": "/work/aiko",
       "branch": null,
       "files": [],
-      "keys": ["Ember"],
+      "keys": [
+        "Ember"
+      ],
       "language": "en",
       "max": 400,
       "hint": "aiko, Enter, Esc, input field, session, rendered, Ember."
@@ -78,45 +102,228 @@
     }
   ],
   "echoes": [
-    { "name": "the hint itself, as OpenAI gave it on 2026-10-15", "hint": "aiko, main, local-install.ps1, TerminalPanel.cs, TalkPanel.cs, Сербия, Черногория, Max, API credits.", "phrase": "Aiko, main, local-install.ps1, TerminalPanel.cs, TalkPanel.cs, Сербия, Черногория, Max, API credits.", "echo": true },
-    { "name": "a part of the hint", "hint": "aiko, main, local-install.ps1, TerminalPanel.cs, Max.", "phrase": "main, local-install.ps1, TerminalPanel.cs", "echo": true },
-    { "name": "a phrase that names hint words", "hint": "aiko, main, local-install.ps1, TerminalPanel.cs, Max.", "phrase": "Открой TerminalPanel.cs и запусти local-install.ps1 на main.", "echo": false },
-    { "name": "a list the person said, one item is new", "hint": "aiko, main, TalkInput.cs, Max.", "phrase": "TalkInput.cs, TalkPanel.cs, AnswerView.cs", "echo": false },
-    { "name": "two items are not an echo", "hint": "aiko, main, Max.", "phrase": "aiko, main", "echo": false },
-    { "name": "no hint", "hint": "", "phrase": "aiko, main, Max", "echo": false },
-    { "name": "the hint with one item spelled another way, as OpenAI gave it on 2026-10-23", "hint": "kodland, Enter, Esc, поле ввода, сессия, отрисовано, Сербия, Черногория, Max, API credits, Kidsmed, KM, Мультиплатформа.", "phrase": "кодland, Enter, Esc, поле ввода, сессия, отрисовано, Сербия, Черногория, Max, API credits, Kidsmed, KM, Мультиплатформа.", "echo": true },
-    { "name": "four items of the hint and one more", "hint": "aiko, main, TalkInput.cs, TalkPanel.cs, Max.", "phrase": "aiko, main, TalkInput.cs, TalkPanel.cs, AnswerView.cs", "echo": true },
-    { "name": "three items of the hint and one more stay", "hint": "aiko, main, TalkInput.cs, Max.", "phrase": "main, TalkInput.cs, Max, AnswerView.cs", "echo": false },
-    { "name": "four items of the hint and two more stay", "hint": "aiko, main, TalkInput.cs, TalkPanel.cs, Max.", "phrase": "aiko, main, TalkInput.cs, TalkPanel.cs, AnswerView.cs, Log.cs", "echo": false }
+    {
+      "name": "the hint itself, as OpenAI gave it on 2026-10-15",
+      "hint": "aiko, main, local-install.ps1, TerminalPanel.cs, TalkPanel.cs, Сербия, Черногория, Max, API credits.",
+      "phrase": "Aiko, main, local-install.ps1, TerminalPanel.cs, TalkPanel.cs, Сербия, Черногория, Max, API credits.",
+      "echo": true
+    },
+    {
+      "name": "a part of the hint",
+      "hint": "aiko, main, local-install.ps1, TerminalPanel.cs, Max.",
+      "phrase": "main, local-install.ps1, TerminalPanel.cs",
+      "echo": true
+    },
+    {
+      "name": "a phrase that names hint words",
+      "hint": "aiko, main, local-install.ps1, TerminalPanel.cs, Max.",
+      "phrase": "Открой TerminalPanel.cs и запусти local-install.ps1 на main.",
+      "echo": false
+    },
+    {
+      "name": "a list the person said, one item is new",
+      "hint": "aiko, main, TalkInput.cs, Max.",
+      "phrase": "TalkInput.cs, TalkPanel.cs, AnswerView.cs",
+      "echo": false
+    },
+    {
+      "name": "two items are not an echo",
+      "hint": "aiko, main, Max.",
+      "phrase": "aiko, main",
+      "echo": false
+    },
+    {
+      "name": "no hint",
+      "hint": "",
+      "phrase": "aiko, main, Max",
+      "echo": false
+    },
+    {
+      "name": "the hint with one item spelled another way, as OpenAI gave it on 2026-10-23",
+      "hint": "kodland, Enter, Esc, поле ввода, сессия, отрисовано, Сербия, Черногория, Max, API credits, Kidsmed, KM, Мультиплатформа.",
+      "phrase": "кодland, Enter, Esc, поле ввода, сессия, отрисовано, Сербия, Черногория, Max, API credits, Kidsmed, KM, Мультиплатформа.",
+      "echo": true
+    },
+    {
+      "name": "four items of the hint and one more",
+      "hint": "aiko, main, TalkInput.cs, TalkPanel.cs, Max.",
+      "phrase": "aiko, main, TalkInput.cs, TalkPanel.cs, AnswerView.cs",
+      "echo": true
+    },
+    {
+      "name": "three items of the hint and one more stay",
+      "hint": "aiko, main, TalkInput.cs, Max.",
+      "phrase": "main, TalkInput.cs, Max, AnswerView.cs",
+      "echo": false
+    },
+    {
+      "name": "four items of the hint and two more stay",
+      "hint": "aiko, main, TalkInput.cs, TalkPanel.cs, Max.",
+      "phrase": "aiko, main, TalkInput.cs, TalkPanel.cs, AnswerView.cs, Log.cs",
+      "echo": false
+    }
   ],
   "unechoed": [
-    { "name": "the echo is cut out of the speech around it", "hint": "kodland, Enter, Esc, поле ввода, сессия, Сербия, Черногория, Max.", "phrase": "Собери вопросы команды. кодland, Enter, Esc, поле ввода, сессия, Сербия, Черногория, Max. Потом обсудим.", "text": "Собери вопросы команды. Потом обсудим.", "dropped": 1, "inHint": 7 },
-    { "name": "the hint twice in one phrase", "hint": "aiko, main, Сербия, Черногория, Max.", "phrase": "aiko, main, Сербия, Черногория, Max. aiko, main, Сербия, Черногория, Max.", "text": "", "dropped": 2, "inHint": 5 },
-    { "name": "speech that names hint words stays whole", "hint": "aiko, main, TerminalPanel.cs, Max.", "phrase": "Открой TerminalPanel.cs на main. Проверь, что aiko собирается.", "text": "Открой TerminalPanel.cs на main. Проверь, что aiko собирается.", "dropped": 0, "inHint": null },
-    { "name": "a file name keeps its dot", "hint": "aiko, main, Max.", "phrase": "Открой DECISIONS.md и прочитай.", "text": "Открой DECISIONS.md и прочитай.", "dropped": 0, "inHint": null }
+    {
+      "name": "the echo is cut out of the speech around it",
+      "hint": "kodland, Enter, Esc, поле ввода, сессия, Сербия, Черногория, Max.",
+      "phrase": "Собери вопросы команды. кодland, Enter, Esc, поле ввода, сессия, Сербия, Черногория, Max. Потом обсудим.",
+      "text": "Собери вопросы команды. Потом обсудим.",
+      "dropped": 1,
+      "inHint": 7
+    },
+    {
+      "name": "the hint twice in one phrase",
+      "hint": "aiko, main, Сербия, Черногория, Max.",
+      "phrase": "aiko, main, Сербия, Черногория, Max. aiko, main, Сербия, Черногория, Max.",
+      "text": "",
+      "dropped": 2,
+      "inHint": 5
+    },
+    {
+      "name": "speech that names hint words stays whole",
+      "hint": "aiko, main, TerminalPanel.cs, Max.",
+      "phrase": "Открой TerminalPanel.cs на main. Проверь, что aiko собирается.",
+      "text": "Открой TerminalPanel.cs на main. Проверь, что aiko собирается.",
+      "dropped": 0,
+      "inHint": null
+    },
+    {
+      "name": "a file name keeps its dot",
+      "hint": "aiko, main, Max.",
+      "phrase": "Открой DECISIONS.md и прочитай.",
+      "text": "Открой DECISIONS.md и прочитай.",
+      "dropped": 0,
+      "inHint": null
+    }
   ],
   "branches": [
-    { "head": "ref: refs/heads/in-progress\n", "branch": "in-progress" },
-    { "head": "ref: refs/heads/feature/voice-core", "branch": "feature/voice-core" },
-    { "head": "55f09c6d1e2b3a4f5e6d7c8b9a0f1e2d3c4b5a69\n", "branch": null },
-    { "head": "ref: refs/heads/", "branch": null },
-    { "head": "ref: refs/tags/v0.4.1", "branch": null },
-    { "head": "", "branch": null },
-    { "head": null, "branch": null }
+    {
+      "head": "ref: refs/heads/in-progress\n",
+      "branch": "in-progress"
+    },
+    {
+      "head": "ref: refs/heads/feature/voice-core",
+      "branch": "feature/voice-core"
+    },
+    {
+      "head": "55f09c6d1e2b3a4f5e6d7c8b9a0f1e2d3c4b5a69\n",
+      "branch": null
+    },
+    {
+      "head": "ref: refs/heads/",
+      "branch": null
+    },
+    {
+      "head": "ref: refs/tags/v0.4.1",
+      "branch": null
+    },
+    {
+      "head": "",
+      "branch": null
+    },
+    {
+      "head": null,
+      "branch": null
+    }
   ],
   "gitFolders": [
-    { "file": "gitdir: C:/work/aiko/.git/worktrees/voice\n", "folder": "C:/work/aiko/.git/worktrees/voice" },
-    { "file": "gitdir:   /Users/me/aiko/.git/worktrees/voice", "folder": "/Users/me/aiko/.git/worktrees/voice" },
-    { "file": "gitdir:", "folder": null },
-    { "file": "something else", "folder": null },
-    { "file": null, "folder": null }
+    {
+      "file": "gitdir: C:/work/aiko/.git/worktrees/voice\n",
+      "folder": "C:/work/aiko/.git/worktrees/voice"
+    },
+    {
+      "file": "gitdir:   /Users/me/aiko/.git/worktrees/voice",
+      "folder": "/Users/me/aiko/.git/worktrees/voice"
+    },
+    {
+      "file": "gitdir:",
+      "folder": null
+    },
+    {
+      "file": "something else",
+      "folder": null
+    },
+    {
+      "file": null,
+      "folder": null
+    }
   ],
   "languages": [
-    { "setting": "Russian", "system": "en-US", "language": "ru" },
-    { "setting": "English", "system": "ru-RU", "language": "en" },
-    { "setting": "System", "system": "ru-RU", "language": "ru" },
-    { "setting": "System", "system": "ru", "language": "ru" },
-    { "setting": "System", "system": "sr-Latn-RS", "language": "en" },
-    { "setting": "System", "system": "en-GB", "language": "en" }
+    {
+      "setting": "Russian",
+      "system": "en-US",
+      "language": "ru"
+    },
+    {
+      "setting": "English",
+      "system": "ru-RU",
+      "language": "en"
+    },
+    {
+      "setting": "System",
+      "system": "ru-RU",
+      "language": "ru"
+    },
+    {
+      "setting": "System",
+      "system": "ru",
+      "language": "ru"
+    },
+    {
+      "setting": "System",
+      "system": "sr-Latn-RS",
+      "language": "en"
+    },
+    {
+      "setting": "System",
+      "system": "en-GB",
+      "language": "en"
+    }
+  ],
+  "files": [
+    {
+      "name": "read or changed, newest first, once each; searches, commands and attached pictures are not files",
+      "steps": [
+        {
+          "kind": "read",
+          "subject": "TalkInput.cs"
+        },
+        {
+          "kind": "search",
+          "subject": "VoiceLine"
+        },
+        {
+          "kind": "edit",
+          "subject": "VoiceInput.cs"
+        },
+        {
+          "kind": "run",
+          "subject": "dotnet test"
+        },
+        {
+          "kind": "read",
+          "subject": "image.png",
+          "hidden": true
+        },
+        {
+          "kind": "read",
+          "subject": "talkinput.cs"
+        },
+        {
+          "kind": "edit",
+          "subject": ""
+        }
+      ],
+      "files": [
+        "talkinput.cs",
+        "VoiceInput.cs"
+      ]
+    },
+    {
+      "name": "a conversation without steps names no files",
+      "steps": [],
+      "files": []
+    }
   ]
 }

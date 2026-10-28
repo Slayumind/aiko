@@ -80,8 +80,10 @@ sealed class VoiceDictation
     {
         var ready = VoiceModel.Readiness(_settings.VoiceEngine, ModelDownload.ModelBytes, VoiceKey.Stored);
 
-        // A model on disk is no use without the engine that reads it.
-        return ready == VoiceReadiness.Ready && _settings.VoiceEngine == VoiceEngine.Local && !WhisperNative.Ready
+        // A model on disk is no use without the engine that reads it, nor without the model of
+        // silence that comes with the engine: the recognizer will not open without both.
+        return ready == VoiceReadiness.Ready && _settings.VoiceEngine == VoiceEngine.Local
+            && (!WhisperNative.Ready || !File.Exists(LocalRecognizer.VadModel))
             ? VoiceReadiness.NeedsModel
             : ready;
     }
@@ -212,6 +214,15 @@ sealed class VoiceDictation
         }
     });
 
+    /// The recording could not go on. A later one may already run: only its own end counts.
+    private void Gone(Recording from) => _window.BeginInvoke(() =>
+    {
+        if (from == _recording)
+        {
+            Cue(VoiceCue.Cancel);
+        }
+    });
+
     private void Failed(Recording from) => _window.BeginInvoke(() =>
     {
         if (from == _recording)
@@ -280,7 +291,7 @@ sealed class VoiceDictation
             if (recognizer is null)
             {
                 Log.Write("voice input: the speech model did not load");
-                owner._window.BeginInvoke(() => owner.Cue(VoiceCue.Cancel));
+                owner.Gone(this);
                 return;
             }
 

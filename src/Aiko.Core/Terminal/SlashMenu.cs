@@ -72,6 +72,16 @@ public static class SlashMenu
     /// arguments.
     public static string Chosen(SlashCommand command) => "/" + command.Name + " ";
 
+    /// The field after a command is chosen: the command takes the place of the "/" word, what was
+    /// typed after that word stays, and the caret stands after the command.
+    public static (string Text, int Caret) Into(string field, SlashCommand command)
+    {
+        var end = field.IndexOfAny([' ', '\t', '\r', '\n']);
+        var rest = end < 0 ? "" : field[end..].TrimStart(' ', '\t');
+        var chosen = Chosen(command);
+        return (chosen + rest, chosen.Length);
+    }
+
     private static bool IsHidden(string name) => name.StartsWith("__", StringComparison.Ordinal) || TerminalOnly.Contains(name);
 
     private static (SlashMatch Match, int Order)? Rank(SlashCommand command, string query)

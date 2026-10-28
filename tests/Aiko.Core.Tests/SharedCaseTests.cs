@@ -536,6 +536,21 @@ public class SharedCaseTests
             Assert.Equal(Strings(row.GetProperty("files")), FileMention.Matches(paths, row.GetProperty("query").GetString()!));
         }
 
+        foreach (var row in cases.GetProperty("lit").EnumerateArray())
+        {
+            var (start, length) = FileMention.Lit(row.GetProperty("path").GetString()!, row.GetProperty("query").GetString()!);
+            Assert.Equal((row.GetProperty("start").GetInt32(), row.GetProperty("length").GetInt32()), (start, length));
+        }
+
+        foreach (var row in cases.GetProperty("dropped").EnumerateArray())
+        {
+            var (dropped, at) = FileMention.Dropped(
+                row.GetProperty("field").GetString()!, row.GetProperty("caret").GetInt32(),
+                [.. row.GetProperty("paths").EnumerateArray().Select(path => path.GetString()!)]);
+            Assert.Equal(row.GetProperty("result").GetString(), dropped);
+            Assert.Equal(row.GetProperty("resultCaret").GetInt32(), at);
+        }
+
         foreach (var row in cases.GetProperty("chosen").EnumerateArray())
         {
             var text = row.GetProperty("text").GetString()!;
@@ -569,6 +584,7 @@ public class SharedCaseTests
             var read = ShellCommand.Read(row.GetProperty("text").GetString()!);
             Assert.Equal(Text(row.GetProperty("command")), read?.Command);
             Assert.Equal(Text(row.GetProperty("output")), read?.Output);
+            Assert.Equal(row.TryGetProperty("exitCode", out var code) ? code.GetInt32() : 0, read?.ExitCode ?? 0);
         }
 
         foreach (var row in cases.GetProperty("outputs").EnumerateArray())
@@ -669,7 +685,16 @@ public class SharedCaseTests
         foreach (var row in cases.GetProperty("chosen").EnumerateArray())
         {
             var command = commands.Single(one => one.Name == row.GetProperty("name").GetString());
-            Assert.Equal(row.GetProperty("text").GetString(), SlashMenu.Chosen(command));
+            if (row.TryGetProperty("field", out var field))
+            {
+                var (text, caret) = SlashMenu.Into(field.GetString()!, command);
+                Assert.Equal(row.GetProperty("text").GetString(), text);
+                Assert.Equal(row.GetProperty("caret").GetInt32(), caret);
+            }
+            else
+            {
+                Assert.Equal(row.GetProperty("text").GetString(), SlashMenu.Chosen(command));
+            }
         }
     }
 
@@ -867,6 +892,16 @@ public class SharedCaseTests
         }
     }
 
+    private static JsonObject WithDeclined(JsonObject step, bool declined)
+    {
+        if (declined)
+        {
+            step["declined"] = true;
+        }
+
+        return step;
+    }
+
     [Fact]
     public void Every_conversation_ends_in_the_same_state()
     {
@@ -989,7 +1024,6 @@ public class SharedCaseTests
         ["kind"] = Camel(card.Kind),
         ["second"] = Camel(card.Second),
         ["rule"] = card.RuleText,
-        ["subagent"] = card.FromSubagent,
         ["step"] = Described(card.Step),
         ["questions"] = new JsonArray([.. card.Questions.Select(question => new JsonObject
         {
@@ -1116,21 +1150,20 @@ public class SharedCaseTests
             ["queued"] = message.Queued,
         },
         FeedItem.Answer answer => new JsonObject { ["answer"] = answer.Text, ["streaming"] = answer.Streaming },
-        FeedItem.Step step => WithAnswers(new JsonObject
+        FeedItem.Step step => WithDeclined(WithAnswers(new JsonObject
         {
             ["step"] = Described(step.Line),
             ["state"] = Camel(step.State),
             ["result"] = step.Result,
             ["images"] = step.Images.Count,
             ["progress"] = step.Progress,
-        }, step.Answers),
+        }, step.Answers), step.Declined),
         FeedItem.Card card => new JsonObject
         {
             ["card"] = Camel(card.Request.Kind),
             ["state"] = Camel(card.State),
             ["requestId"] = card.Request.RequestId,
             ["second"] = Camel(card.Request.Second),
-            ["subagent"] = card.Request.FromSubagent,
         },
         FeedItem.Notice { Size: { } size } notice => new JsonObject
         {
@@ -1293,6 +1326,27 @@ public class SharedCaseTests
     }
 
     [Fact]
+    public void Every_folder_picked_for_a_draft_lands_the_same()
+    {
+        var cases = SpecCases.Json("new-session");
+        foreach (var row in cases.GetProperty("picked").EnumerateArray())
+        {
+            List<FolderChoice> folders = [.. row.GetProperty("folders").EnumerateArray().Select(path =>
+                new FolderChoice(path.GetString()!, SessionName.FolderName(path.GetString()!), FolderSource.Bound))];
+            var (after, chosen) = NewSessionChoices.Picked(folders, row.GetProperty("picked").GetString()!);
+            var name = row.GetProperty("name").GetString();
+            Assert.True(Strings(row.GetProperty("after")).SequenceEqual(after.Select(folder => folder.Path)), $"{name}: {string.Join(", ", after.Select(folder => folder.Path))}");
+            Assert.True(row.GetProperty("chosen").GetInt32() == chosen, $"{name}: chosen {chosen}");
+        }
+
+        foreach (var row in cases.GetProperty("chosenFolder").EnumerateArray())
+        {
+            int? asked = row.GetProperty("asked").ValueKind == JsonValueKind.Null ? null : row.GetProperty("asked").GetInt32();
+            Assert.Equal(row.GetProperty("chosen").GetInt32(), NewSessionChoices.ChosenFolder(asked, row.GetProperty("count").GetInt32()));
+        }
+    }
+
+    [Fact]
     public void Every_form_of_a_new_session_offers_the_same()
     {
         var cases = SpecCases.Json("new-session");
@@ -1340,7 +1394,6 @@ public class SharedCaseTests
                 "used" => sessions.Used(Word("id"), step.GetProperty("now").GetInt64()),
                 "opened" => sessions.Opened(Word("id")),
                 "close" => sessions.Close(Word("id")),
-                "move" => sessions.Move(Word("id"), step.GetProperty("before").GetString()),
                 "placed" => sessions.Placed(new WindowPlace(
                     step.GetProperty("left").GetDouble(), step.GetProperty("top").GetDouble(),
                     step.GetProperty("width").GetDouble(), step.GetProperty("height").GetDouble(),
@@ -1552,7 +1605,6 @@ public class SharedCaseTests
             ["sessionId"] = ready.SessionId,
             ["model"] = ready.Model,
             ["mode"] = ModeName(ready.Mode),
-            ["version"] = ready.Version,
         },
         StreamEvent.Assistant assistant => WithContextTokens(new JsonObject
         {
@@ -1576,6 +1628,7 @@ public class SharedCaseTests
             ["parent"] = delta.ParentToolUseId,
             ["text"] = delta.Text,
         },
+        StreamEvent.Withdrawn withdrawn => new JsonObject { ["kind"] = "withdrawn", ["requestId"] = withdrawn.RequestId },
         StreamEvent.Request request => new JsonObject
         {
             ["kind"] = "request",
@@ -1644,7 +1697,6 @@ public class SharedCaseTests
             ["terminalReason"] = result.TerminalReason,
             ["text"] = result.Text,
         }, result.ContextWindows),
-        StreamEvent.Unreadable => new JsonObject { ["kind"] = "unreadable" },
         _ => new JsonObject { ["kind"] = "ignored" },
     };
 

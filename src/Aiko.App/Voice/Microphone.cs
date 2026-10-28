@@ -39,8 +39,6 @@ sealed unsafe class Microphone : IDisposable
     /// Raised on the reading thread when the device stops giving sound: unplugged mid-sentence.
     public event Action? Lost;
 
-    public static bool Present => PInvoke.waveInGetNumDevs() > 0;
-
     /// How loud the last tenth of a second was, from 0 to 1.
     public double Level => Volatile.Read(ref _level);
 
@@ -104,10 +102,13 @@ sealed unsafe class Microphone : IDisposable
             return;
         }
 
+        // The reader ends first, so it cannot give a buffer back to the device after the reset:
+        // a buffer queued then stayed with the driver, its header was freed under it and the
+        // device did not close.
         _stopping = true;
-        PInvoke.waveInReset(_device);
         _filled.Set();
         _reader?.Join();
+        PInvoke.waveInReset(_device);
         Close();
     }
 

@@ -2,63 +2,41 @@ using Aiko.Core.Terminal;
 
 namespace Aiko.Core.Tests;
 
+/// The panel Tasks, read from spec/cases/task-panel, the same table the Swift tests read.
 public class TaskPanelTests
 {
-    private const string Started = """{"type":"system","subtype":"init","session_id":"s-1","model":"claude-opus-5-5"}""";
-
-    private static Conversation Played(params string[] lines)
+    [Fact]
+    public void Every_panel_shows_the_same_tasks()
     {
-        var state = Conversation.Empty().Send("go", []).State;
-        foreach (var line in lines)
+        foreach (var row in SpecCases.Json("task-panel").GetProperty("panels").EnumerateArray())
         {
-            state = state.On(StreamEvent.FromLine(line)).State;
+            var name = row.GetProperty("name").GetString();
+            var state = Conversation.Empty().Send("go", []).State;
+            foreach (var line in row.GetProperty("lines").EnumerateArray())
+            {
+                state = state.On(StreamEvent.FromLine(line.GetRawText())).State;
+            }
+
+            var panel = TaskPanel.Of(state);
+            Assert.True(row.GetProperty("empty").GetBoolean() == panel.IsEmpty, $"{name}: empty");
+            Assert.True(row.GetProperty("done").GetInt32() == panel.Done, $"{name}: done {panel.Done}");
+            Assert.True(
+                row.GetProperty("todos").EnumerateArray()
+                    .Select(todo => (todo.GetProperty("text").GetString(), todo.GetProperty("doing").GetString(), todo.GetProperty("state").GetString()))
+                    .SequenceEqual(panel.Todos.Select(todo => ((string?)todo.Text, (string?)todo.Doing, (string?)State(todo.State)))),
+                $"{name}: todos");
+            Assert.True(
+                row.GetProperty("agents").EnumerateArray()
+                    .Select(agent => new AgentAtWork(agent.GetProperty("task").GetString()!, agent.GetProperty("doing").GetString()!))
+                    .SequenceEqual(panel.Agents),
+                $"{name}: agents");
         }
-        return state;
     }
 
-    [Fact]
-    public void A_conversation_without_a_list_or_a_subagent_has_no_panel()
+    private static string State(TodoState state) => state switch
     {
-        Assert.True(TaskPanel.Of(Played(Started)).IsEmpty);
-    }
-
-    [Fact]
-    public void A_subagent_at_work_shows_its_task_and_what_it_does_now()
-    {
-        var state = Played(
-            Started,
-            """{"type":"assistant","message":{"content":[{"type":"tool_use","id":"toolu_1","name":"Agent","input":{"description":"Check the Swift twin","prompt":"p"}}]},"parent_tool_use_id":null}""",
-            """{"type":"system","subtype":"task_started","tool_use_id":"toolu_1"}""",
-            """{"type":"system","subtype":"task_progress","tool_use_id":"toolu_1","description":"Reading TalkInput.swift"}""");
-
-        var panel = TaskPanel.Of(state);
-
-        Assert.Equal([new AgentAtWork("Check the Swift twin", "Reading TalkInput.swift")], panel.Agents);
-        Assert.Empty(panel.Todos);
-    }
-
-    [Fact]
-    public void A_subagent_that_is_over_leaves_the_panel()
-    {
-        var state = Played(
-            Started,
-            """{"type":"assistant","message":{"content":[{"type":"tool_use","id":"toolu_1","name":"Agent","input":{"description":"Check","prompt":"p"}}]},"parent_tool_use_id":null}""",
-            """{"type":"system","subtype":"task_started","tool_use_id":"toolu_1"}""",
-            """{"type":"system","subtype":"task_notification","tool_use_id":"toolu_1","status":"completed"}""");
-
-        Assert.True(TaskPanel.Of(state).IsEmpty);
-    }
-
-    [Fact]
-    public void The_panel_counts_the_lines_that_are_done()
-    {
-        var state = Played(
-            Started,
-            """{"type":"assistant","message":{"content":[{"type":"tool_use","id":"toolu_1","name":"TodoWrite","input":{"todos":[{"content":"a","status":"completed"},{"content":"b","status":"in_progress"},{"content":"c","status":"pending"}]}}]},"parent_tool_use_id":null}""");
-
-        var panel = TaskPanel.Of(state);
-
-        Assert.Equal(1, panel.Done);
-        Assert.Equal(3, panel.Todos.Count);
-    }
+        TodoState.Done => "done",
+        TodoState.Now => "now",
+        _ => "pending",
+    };
 }

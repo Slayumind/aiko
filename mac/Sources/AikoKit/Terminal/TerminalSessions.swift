@@ -204,39 +204,6 @@ public struct TerminalSessions: Sendable, Equatable {
         return next
     }
 
-    /// Moves a session inside its group: before another session of the same folder, or to the
-    /// end of the group when beforeId is nil. A place in another group changes nothing. The
-    /// group keeps the places it has in the file, so no other group moves.
-    public func move(_ id: String, before beforeId: String?) -> TerminalSessions {
-        guard let moving = find(id), !moving.closed, beforeId != id else {
-            return self
-        }
-
-        let group = open(moving.environment).filter { $0.folder == moving.folder }
-        var order = group.filter { $0.id != id }
-        let at: Int
-        if let beforeId {
-            guard let found = order.firstIndex(where: { $0.id == beforeId }) else {
-                return self
-            }
-            at = found
-        } else {
-            at = order.count
-        }
-        order.insert(moving, at: at)
-
-        var placed = 0
-        var next = self
-        next.sessions = sessions.map { session in
-            guard group.contains(where: { $0.id == session.id }) else {
-                return session
-            }
-            placed += 1
-            return order[placed - 1]
-        }
-        return next
-    }
-
     /// The window was closed at this place. It is kept in whole units; a place that is not a
     /// place at all changes nothing.
     public func placed(_ place: WindowPlace) -> TerminalSessions {

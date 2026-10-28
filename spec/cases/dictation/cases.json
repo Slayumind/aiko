@@ -1,9 +1,24 @@
 {
-  "comment": "Phrases: text from OpenAI comes phrase by phrase (D-317); the phrases that are done are confirmed and the one being read is the tail. The text of one recording while it is spoken (D-315). Every pass reads all the sound so far. Words two passes in a row agree on are confirmed and never change; case, punctuation and ё against е do not count as a difference. The rest is the grey tail. The final pass confirms everything, keeping the words already confirmed. Newly confirmed words take the spelling of the newer pass. Words are matched against the confirmed ones by their letters, so a pass that splits a word in another place does not repeat it. Sounds whisper writes in brackets are dropped. The first run is taken from the live spike (spike-voice-2026-10.md).",
+  "comment": "Phrases: text from OpenAI comes phrase by phrase (D-317); the phrases that are done are confirmed and the one being read is the tail. The text of one recording while it is spoken (D-315). Every pass reads all the sound so far. Words two passes in a row agree on are confirmed and never change; case, punctuation and ё against е do not count as a difference. The rest is the grey tail. The final pass confirms everything, keeping the words already confirmed. Newly confirmed words take the spelling of the newer pass. Words are matched against the confirmed ones by their letters, so a pass that splits a word in another place does not repeat it. Sounds whisper writes in brackets are dropped. The first run is taken from the live spike (spike-voice-2026-10.md). placed: the words of a recording go where the caret stood, with a space between them and a word on either side.",
   "phrases": [
-    { "done": "", "reading": "Сделай ветку", "confirmed": "", "tail": "Сделай ветку" },
-    { "done": "Сделай ветку feature/voice-input.", "reading": "Прогони", "confirmed": "Сделай ветку feature/voice-input.", "tail": "Прогони" },
-    { "done": "Возьми карточку Aiko-311.  [Музыка]", "reading": "", "confirmed": "Возьми карточку Aiko-311.", "tail": "" }
+    {
+      "done": "",
+      "reading": "Сделай ветку",
+      "confirmed": "",
+      "tail": "Сделай ветку"
+    },
+    {
+      "done": "Сделай ветку feature/voice-input.",
+      "reading": "Прогони",
+      "confirmed": "Сделай ветку feature/voice-input.",
+      "tail": "Прогони"
+    },
+    {
+      "done": "Возьми карточку Aiko-311.  [Музыка]",
+      "reading": "",
+      "confirmed": "Возьми карточку Aiko-311.",
+      "tail": ""
+    }
   ],
   "runs": [
     {
@@ -16,52 +31,108 @@
       ],
       "final": "Сделай ветку Feature Voice Input, add in progress и пригони .NET Test.",
       "steps": [
-        { "confirmed": "", "tail": "Делай." },
-        { "confirmed": "", "tail": "Сделай ветку Feature Voicing." },
-        { "confirmed": "Сделай ветку Feature", "tail": "Voice Input, add in progress и пригони.net." },
-        { "confirmed": "Сделай ветку Feature Voice Input, add in progress и пригони.net", "tail": "test." }
+        {
+          "confirmed": "",
+          "tail": "Делай."
+        },
+        {
+          "confirmed": "",
+          "tail": "Сделай ветку Feature Voicing."
+        },
+        {
+          "confirmed": "Сделай ветку Feature",
+          "tail": "Voice Input, add in progress и пригони.net."
+        },
+        {
+          "confirmed": "Сделай ветку Feature Voice Input, add in progress и пригони.net",
+          "tail": "test."
+        }
       ],
       "text": "Сделай ветку Feature Voice Input, add in progress и пригони.net Test."
     },
     {
       "name": "a confirmed word stays when a later pass changes it",
-      "passes": ["Делай ветку фичу.", "Делай ветку Feature 8.", "Делы ветку Feature Voice Input."],
+      "passes": [
+        "Делай ветку фичу.",
+        "Делай ветку Feature 8.",
+        "Делы ветку Feature Voice Input."
+      ],
       "final": null,
       "steps": [
-        { "confirmed": "", "tail": "Делай ветку фичу." },
-        { "confirmed": "Делай ветку", "tail": "Feature 8." },
-        { "confirmed": "Делай ветку", "tail": "Feature Voice Input." }
+        {
+          "confirmed": "",
+          "tail": "Делай ветку фичу."
+        },
+        {
+          "confirmed": "Делай ветку",
+          "tail": "Feature 8."
+        },
+        {
+          "confirmed": "Делай ветку",
+          "tail": "Feature Voice Input."
+        }
       ],
       "text": "Делай ветку Feature Voice Input."
     },
     {
       "name": "case, commas and ё do not break agreement",
-      "passes": ["возьми каждую её", "Возьми, каждую ее карточку"],
+      "passes": [
+        "возьми каждую её",
+        "Возьми, каждую ее карточку"
+      ],
       "final": null,
       "steps": [
-        { "confirmed": "", "tail": "возьми каждую её" },
-        { "confirmed": "Возьми, каждую ее", "tail": "карточку" }
+        {
+          "confirmed": "",
+          "tail": "возьми каждую её"
+        },
+        {
+          "confirmed": "Возьми, каждую ее",
+          "tail": "карточку"
+        }
       ],
       "text": "Возьми, каждую ее карточку"
     },
     {
       "name": "silence heard as music is no text",
-      "passes": ["[Музыка]", "[Музыка] Ну вот (смех) хорошо", "Ну вот хорошо"],
+      "passes": [
+        "[Музыка]",
+        "[Музыка] Ну вот (смех) хорошо",
+        "Ну вот хорошо"
+      ],
       "final": "Ну вот, хорошо.",
       "steps": [
-        { "confirmed": "", "tail": "" },
-        { "confirmed": "", "tail": "Ну вот хорошо" },
-        { "confirmed": "Ну вот хорошо", "tail": "" }
+        {
+          "confirmed": "",
+          "tail": ""
+        },
+        {
+          "confirmed": "",
+          "tail": "Ну вот хорошо"
+        },
+        {
+          "confirmed": "Ну вот хорошо",
+          "tail": ""
+        }
       ],
       "text": "Ну вот хорошо"
     },
     {
       "name": "the final pass is shorter than the confirmed words",
-      "passes": ["one two three", "one two three four"],
+      "passes": [
+        "one two three",
+        "one two three four"
+      ],
       "final": "one two",
       "steps": [
-        { "confirmed": "", "tail": "one two three" },
-        { "confirmed": "one two three", "tail": "four" }
+        {
+          "confirmed": "",
+          "tail": "one two three"
+        },
+        {
+          "confirmed": "one two three",
+          "tail": "four"
+        }
       ],
       "text": "one two three"
     },
@@ -71,6 +142,48 @@
       "final": "",
       "steps": [],
       "text": ""
+    }
+  ],
+  "placed": [
+    {
+      "name": "into an empty field",
+      "field": "",
+      "caret": 0,
+      "words": "fix the tests",
+      "text": "fix the tests",
+      "resultCaret": 13
+    },
+    {
+      "name": "after a word, a space comes first",
+      "field": "please",
+      "caret": 6,
+      "words": "fix it",
+      "text": "please fix it",
+      "resultCaret": 13
+    },
+    {
+      "name": "after a space, no second one",
+      "field": "please ",
+      "caret": 7,
+      "words": "fix it",
+      "text": "please fix it",
+      "resultCaret": 13
+    },
+    {
+      "name": "before a word, a space comes after",
+      "field": "now",
+      "caret": 0,
+      "words": "fix it",
+      "text": "fix it now",
+      "resultCaret": 6
+    },
+    {
+      "name": "in the middle of two words",
+      "field": "fix tests",
+      "caret": 4,
+      "words": "the failing",
+      "text": "fix the failing tests",
+      "resultCaret": 15
     }
   ]
 }

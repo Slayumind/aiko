@@ -67,6 +67,27 @@ public sealed partial record DictationText
     /// the one still being read is the tail.
     public static DictationText Phrases(string done, string reading) => new([.. Words(done)], [.. Words(reading)], []);
 
+    /// The field around the caret when a recording starts: the words go between the two parts,
+    /// with a space after a word before them.
+    public static (string Before, string After) Around(string field, int caret)
+    {
+        var before = field[..caret];
+        if (before.Length > 0 && !char.IsWhiteSpace(before[^1]))
+        {
+            before += " ";
+        }
+
+        return (before, field[caret..]);
+    }
+
+    /// The field after the recording: the words in their place, a space before a word after them,
+    /// and the caret right after the words.
+    public static (string Text, int Caret) Placed(string before, string words, string after)
+    {
+        var gap = after.Length > 0 && !char.IsWhiteSpace(after[0]) ? " " : "";
+        return (before + words + gap + after, before.Length + words.Length);
+    }
+
     /// The words of a pass. Whisper writes sounds it heard in brackets, "[Музыка]" or "(смех)";
     /// those are not words anybody said.
     public static IReadOnlyList<string> Words(string? text) =>

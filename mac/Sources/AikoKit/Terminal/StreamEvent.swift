@@ -105,7 +105,7 @@ public struct ModelWindow: Sendable, Equatable {
 
 public enum StreamEvent: Sendable, Equatable {
     /// Claude Code is ready for a turn. It comes before every turn, not once.
-    case ready(sessionId: String, model: String, mode: PermissionMode?, version: String)
+    case ready(sessionId: String, model: String, mode: PermissionMode?)
 
     /// A message of Claude, whole. The error is set when Claude Code answered in its place:
     /// "authentication_failed" means the environment is not signed in. The context tokens are those
@@ -119,6 +119,9 @@ public enum StreamEvent: Sendable, Equatable {
     case textDelta(parentToolUseId: String?, text: String)
 
     case request(ToolRequest)
+
+    /// Claude Code takes back a request it asked: it stopped waiting for the answer.
+    case withdrawn(requestId: String)
 
     /// The answer to a request the terminal sent: an interrupt or a change of mode.
     case reply(requestId: String, ok: Bool, mode: PermissionMode?)
@@ -156,9 +159,6 @@ public enum StreamEvent: Sendable, Equatable {
     /// A line the terminal has no use for.
     case ignored
 
-    /// Not a JSON object.
-    case unreadable
-
     /// Never throws: one broken line must not end a conversation.
     public static func fromLine(_ line: String?) -> StreamEvent {
         var text = (line ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
@@ -170,7 +170,7 @@ public enum StreamEvent: Sendable, Equatable {
         }
 
         guard let root = JsonNode.parse(text)?.objectValue else {
-            return .unreadable
+            return .ignored
         }
         return read(root)
     }
@@ -182,6 +182,9 @@ public enum StreamEvent: Sendable, Equatable {
         case "user": return readUser(root)
         case "stream_event": return readDelta(root)
         case "control_request": return readRequest(root)
+        case "control_cancel_request":
+            guard let id = root["request_id"]?.stringValue, !id.isEmpty else { return .ignored }
+            return .withdrawn(requestId: id)
         case "control_response": return readReply(root)
         case "rate_limit_event": return readRateLimit(root)
         case "result":
@@ -204,8 +207,7 @@ public enum StreamEvent: Sendable, Equatable {
             return .ready(
                 sessionId: session,
                 model: root["model"]?.stringValue ?? "",
-                mode: PermissionModes.fromStream(root["permissionMode"]?.stringValue),
-                version: root["claude_code_version"]?.stringValue ?? "")
+                mode: PermissionModes.fromStream(root["permissionMode"]?.stringValue))
         case "status":
             return .status(
                 activity: root["status"]?.stringValue,

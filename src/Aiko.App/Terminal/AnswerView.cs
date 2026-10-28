@@ -119,18 +119,32 @@ static class AnswerView
     {
         if (point.Parent is Run { Tag: { } tag } run && leaves.TryGetValue(tag, out var leaf))
         {
-            return new TextPlace(leaf, run.ContentStart.GetOffsetToPosition(point));
+            return new TextPlace(leaf, Before(run, tag) + run.ContentStart.GetOffsetToPosition(point));
         }
 
         for (var next = point.GetNextContextPosition(inward); next is not null; next = next.GetNextContextPosition(inward))
         {
             if (next.Parent is Run { Tag: { } found } text && leaves.TryGetValue(found, out var at))
             {
-                return new TextPlace(at, inward == LogicalDirection.Forward ? 0 : text.Text.Length);
+                var before = Before(text, found);
+                return new TextPlace(at, before + (inward == LogicalDirection.Forward ? 0 : text.Text.Length));
             }
         }
 
         return null;
+    }
+
+    /// While an answer is written, the words of one leaf are runs of their own with its tag. A
+    /// place in one of them is counted from the start of the leaf, not of the word.
+    private static int Before(Run run, object tag)
+    {
+        var before = 0;
+        for (var previous = run.PreviousInline; previous is Run { Tag: { } same } word && ReferenceEquals(same, tag); previous = word.PreviousInline)
+        {
+            before += word.Text.Length;
+        }
+
+        return before;
     }
 
     private static Block Block(MarkdownBlock block) => block switch
@@ -145,11 +159,53 @@ static class AnswerView
             Background = Tokens.Brush("Hairline"),
             Margin = new Thickness(0, 6, 0, 14),
         }),
-        // Code and tables are pieces of their own; inside a list or a quote they stay text.
+        // Code and tables are pieces of their own; inside a list or a quote they stay in the text.
         MarkdownBlock.Code code => CodeAsText(code),
-        MarkdownBlock.Table => new Paragraph(),
+        MarkdownBlock.Table table => TableInText(table),
         _ => new Paragraph(),
     };
+
+    /// A table inside a list or a quote: rows of cells with hairlines, the header in medium.
+    private static Table TableInText(MarkdownBlock.Table table)
+    {
+        var grid = new Table { CellSpacing = 0, Margin = new Thickness(0, 2, 0, 10) };
+        foreach (var _ in table.Columns)
+        {
+            grid.Columns.Add(new TableColumn());
+        }
+
+        var group = new TableRowGroup();
+        grid.RowGroups.Add(group);
+        TableRow Row(IEnumerable<IReadOnlyList<MarkdownInline>> cells, bool header)
+        {
+            var row = new TableRow();
+            foreach (var cell in cells)
+            {
+                var words = Paragraph(cell, new Thickness(0));
+                if (header)
+                {
+                    words.FontWeight = FontWeights.Medium;
+                }
+
+                row.Cells.Add(new TableCell(words)
+                {
+                    Padding = new Thickness(0, 3, 12, 3),
+                    BorderBrush = Tokens.Brush("Hairline"),
+                    BorderThickness = new Thickness(0, 0, 0, 1),
+                });
+            }
+
+            return row;
+        }
+
+        group.Rows.Add(Row(table.Header, header: true));
+        foreach (var cells in table.Rows)
+        {
+            group.Rows.Add(Row(cells, header: false));
+        }
+
+        return grid;
+    }
 
     private static Paragraph Paragraph(IReadOnlyList<MarkdownInline> inlines, Thickness margin)
     {
@@ -335,6 +391,10 @@ static class AnswerView
         return hyperlink;
     }
 
+    /// The folder of the conversation in view: a link to "src/Form.cs" means a file there, not
+    /// next to Aiko. The feed shows one conversation at a time, and sets it when it does.
+    internal static string Folder { get; set; } = "";
+
     private static void Open(LinkTarget target)
     {
         try
@@ -345,7 +405,14 @@ static class AnswerView
                     Process.Start(new ProcessStartInfo(web.Url) { UseShellExecute = true });
                     break;
                 case LinkTarget.File file:
-                    var place = file.Link.Line is { } line ? $"{file.Link.Path}:{line}" : file.Link.Path;
+                    // Words that only look like a file, such as "string.Empty", open nothing.
+                    var path = System.IO.Path.IsPathRooted(file.Link.Path) || Folder.Length == 0 ? file.Link.Path : System.IO.Path.Combine(Folder, file.Link.Path);
+                    if (!System.IO.File.Exists(path))
+                    {
+                        break;
+                    }
+
+                    var place = file.Link.Line is { } line ? $"{path}:{line}" : path;
                     Process.Start(new ProcessStartInfo("code", ["-g", place]) { UseShellExecute = true, WindowStyle = ProcessWindowStyle.Hidden });
                     break;
             }

@@ -1,0 +1,97 @@
+{
+  "comment": "Up and Down through the messages sent from the field (D-341). Up on the first line of the field shows the message before; Down shows the next one, and past the newest the field gets back what was being typed. Down does nothing while no message is shown, and Up on the oldest stays there. A step is up or down; after it the field, and whether the arrow was the walk's (taken). With nothing sent the arrows are not the walk's.",
+  "walks": [
+    {
+      "name": "up shows the newest, then older ones",
+      "sent": [
+        "one",
+        "two",
+        "three"
+      ],
+      "field": "half typed",
+      "steps": [
+        {
+          "key": "up",
+          "field": "three",
+          "taken": true
+        },
+        {
+          "key": "up",
+          "field": "two",
+          "taken": true
+        },
+        {
+          "key": "up",
+          "field": "one",
+          "taken": true
+        },
+        {
+          "key": "up",
+          "field": "one",
+          "taken": true
+        }
+      ]
+    },
+    {
+      "name": "down past the newest gives back what was typed",
+      "sent": [
+        "one",
+        "two"
+      ],
+      "field": "half typed",
+      "steps": [
+        {
+          "key": "up",
+          "field": "two",
+          "taken": true
+        },
+        {
+          "key": "up",
+          "field": "one",
+          "taken": true
+        },
+        {
+          "key": "down",
+          "field": "two",
+          "taken": true
+        },
+        {
+          "key": "down",
+          "field": "half typed",
+          "taken": true
+        },
+        {
+          "key": "down",
+          "field": "half typed",
+          "taken": false
+        }
+      ]
+    },
+    {
+      "name": "down while typing is not the walk's",
+      "sent": [
+        "one"
+      ],
+      "field": "typing",
+      "steps": [
+        {
+          "key": "down",
+          "field": "typing",
+          "taken": false
+        }
+      ]
+    },
+    {
+      "name": "nothing sent: the arrows move the caret",
+      "sent": [],
+      "field": "typing",
+      "steps": [
+        {
+          "key": "up",
+          "field": "typing",
+          "taken": false
+        }
+      ]
+    }
+  ]
+}

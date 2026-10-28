@@ -142,6 +142,22 @@ public enum NewSessionChoices {
         return headers
     }
 
+    /// The folder a draft stands on: the one asked for, kept inside the list, or none in an empty list.
+    public static func chosenFolder(_ asked: Int?, count: Int) -> Int {
+        count == 0 ? -1 : min(max(asked ?? 0, 0), count - 1)
+    }
+
+    /// The folders after one is picked with the dialog: a folder of the list is chosen where it
+    /// is; another one comes first, among the recent ones. Its path is written as the list writes
+    /// paths, so the same folder picked again is found.
+    public static func picked(_ folders: [FolderChoice], _ picked: String) -> (folders: [FolderChoice], chosen: Int) {
+        let path = SessionName.folderPath(picked)
+        if let at = folders.firstIndex(where: { $0.path.lowercased() == path.lowercased() }) {
+            return (folders, at)
+        }
+        return ([FolderChoice(path: path, name: SessionName.folderName(path), source: .recent)] + folders, 0)
+    }
+
     /// The model the form starts with: the one of the session of the environment that was used
     /// last and has a model of the list. With no such session it is the first of the list.
     /// offered are the short names offered; without them, the list above.

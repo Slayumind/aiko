@@ -214,6 +214,7 @@ sealed class TalkPanel : UserControl
             // Item ids are counted per conversation: a row of another session must not be
             // taken for the one with the same id here.
             _slots.Clear();
+            FeedRow.ForgetInk();
             _follow = true;
         }
 
@@ -258,6 +259,7 @@ sealed class TalkPanel : UserControl
         _tasks.Show(view.Tasks, atOnce: newSession);
         _input.SetCommands(view.Commands);
         _input.SetFolder(view.Folder);
+        AnswerView.Folder = view.Folder;
 
         if (newSession && _slots.Count > 0)
         {
@@ -536,6 +538,12 @@ sealed class WorkingMark
 /// One row of the feed, built from its item whenever the item changes.
 sealed class FeedRow : ContentControl
 {
+    /// The streaming answers of the shown session a row was already built for: built again, it
+    /// starts dry. Forgotten when another session comes into view.
+    private static readonly HashSet<int> InkShown = [];
+
+    public static void ForgetInk() => InkShown.Clear();
+
     /// The running piece of the compacting bar, as a share of the bar, and one run in seconds.
     private const double CompactingPiece = 0.25;
     private const double CompactingSeconds = 1.6;
@@ -577,10 +585,10 @@ sealed class FeedRow : ContentControl
             WorkingMark { IsCompacting: true } => Compacting(),
             WorkingMark => Working(),
             FeedItem.OwnerMessage message => Message(message),
-            FeedItem.Answer { Streaming: true } answer => new InkAnswer(answer.Id, answer.Text),
+            FeedItem.Answer { Streaming: true } answer => new InkAnswer(answer.Id, answer.Text, dry: !InkShown.Add(answer.Id)),
             FeedItem.Answer answer => AnswerView.WithCopy(answer.Text),
             FeedItem.Step { Answers.Count: > 0 } step => Answered(step.Answers),
-            FeedItem.Step { Line.Label: QuestionAnswers.Tool, State: StepState.Failed } => Declined(),
+            FeedItem.Step { Declined: true } => Declined(),
             FeedItem.Step { Line.Hidden: false } step => StepRow(step),
             FeedEntry.Run run => RunRow(run),
             FeedEntry.Thought thought => ThoughtRow(thought),
@@ -1131,7 +1139,14 @@ sealed class FeedRow : ContentControl
         };
         if (second is not null)
         {
-            row.Children.Add(Spaced(TerminalPanel.Flat(second, () => Choose(request, new CardChoice.Second()), ghost: false)));
+            // "Always in this project" says on hover what it lets through from now on (D-306).
+            var always = TerminalPanel.Flat(second, () => Choose(request, new CardChoice.Second()), ghost: false);
+            if (request.Second == SecondChoice.AlwaysAllow && request.RuleText.Length > 0)
+            {
+                always.ToolTip = request.RuleText;
+            }
+
+            row.Children.Add(Spaced(always));
         }
 
         row.Children.Add(Spaced(TerminalPanel.Flat(Strings.TerminalDeny, () => Choose(request, new CardChoice.Deny("")), ghost: true)));
