@@ -127,13 +127,17 @@ public struct QuestionFlow: Sendable, Equatable {
         return chosen.flow.forward()
     }
 
-    /// The person's own words in the open question. Words pick Other; no words leave it as it was.
+    /// The person's own words in the open question. Words pick Other, and erased words untick it,
+    /// so the rows ticked beside it still answer the question.
     public func write(_ words: String) -> QuestionFlow {
         var flow = with { $0.own[at] = words }
-        if words.trimmingCharacters(in: .whitespaces).isEmpty || isPicked(ownRow) {
+        if words.trimmingCharacters(in: .whitespaces).isEmpty {
+            flow.picked[at] = picked[at].filter { $0 != ownRow }
             return flow
         }
-        flow.picked[at] = open.multiSelect ? picked[at] + [ownRow] : [ownRow]
+        if !isPicked(ownRow) {
+            flow.picked[at] = open.multiSelect ? picked[at] + [ownRow] : [ownRow]
+        }
         return flow
     }
 
@@ -183,9 +187,11 @@ public struct QuestionFlow: Sendable, Equatable {
     private func choose(_ row: Int) -> QuestionStep {
         guard row >= 0 && row <= ownRow else { return QuestionStep(self) }
 
+        // Other always opens its words and never goes on by itself: after Back the words can be
+        // changed. Words already there pick it again.
         var focused = with { $0.focus = row }
-        if row == ownRow && own[at].trimmingCharacters(in: .whitespaces).isEmpty {
-            return QuestionStep(focused, .writeOwn)
+        if row == ownRow {
+            return QuestionStep(focused.write(own[at]), .writeOwn)
         }
         focused.picked[at] = open.multiSelect
             ? (isPicked(row) ? picked[at].filter { $0 != row } : picked[at] + [row])

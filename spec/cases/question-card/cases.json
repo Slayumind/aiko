@@ -1,5 +1,5 @@
 {
-  "comment": "The card of questions while the person answers it (D-330, AIKO-327). One question at a time. Rows are the options, then the person's own words (Other). With one answer a click, a digit or Enter takes the row and goes on to the next question; with several answers a click, a digit or Space ticks the row and Enter goes on. Other without words asks for them (writeOwn); words pick Other. Next and Answer wait until the open question has an answer; Answer on the last question goes back to the first one without an answer. Esc says no. The preview is the one of the focused option, or of the picked one when the keyboard is on Other. The arrows move over the grid of the card: up and down by the number of columns (two, or one in a narrow window), left and right one row in reading order; down from the line before the last goes to the last row. Actions: key (up, down, left, right, space, enter, escape, with columns for the arrows), number (from 1), click (row from 0), write, confirm, back, forward, show (question from 0). After the actions: the open question, the focused row, the outcome of the last action, the marks of the strip and the answers.",
+  "comment": "The card of questions while the person answers it (D-330, AIKO-327). One question at a time. Rows are the options, then the person's own words (Other). With one answer a click, a digit or Enter takes the row and goes on to the next question; with several answers a click, a digit or Space ticks the row and Enter goes on. Other asks for its words (writeOwn) on a click, a digit, Space or Enter, and never goes on by itself, so words can be changed after Back; words pick Other, and erased words untick it. Next and Answer wait until the open question has an answer; Answer on the last question goes back to the first one without an answer. Esc says no. The preview is the one of the focused option, or of the picked one when the keyboard is on Other. The arrows move over the grid of the card: up and down by the number of columns (two, or one in a narrow window), left and right one row in reading order; down from the line before the last goes to the last row. Actions: key (up, down, left, right, space, enter, escape, with columns for the arrows), number (from 1), click (row from 0), write, confirm, back, forward, show (question from 0). After the actions: the open question, the focused row, the outcome of the last action, the marks of the strip and the answers.",
   "questions": {
     "one": [
       {
@@ -573,6 +573,105 @@
         }
       ],
       "focus": 2
+    },
+    {
+      "name": "back on own words, a click on other opens them and stays",
+      "questions": "two",
+      "actions": [
+        {
+          "click": 2
+        },
+        {
+          "write": "uphill"
+        },
+        {
+          "confirm": true
+        },
+        {
+          "back": true
+        },
+        {
+          "click": 2
+        }
+      ],
+      "at": 0,
+      "focus": 2,
+      "outcome": "writeOwn",
+      "answers": [
+        [
+          "uphill"
+        ],
+        []
+      ]
+    },
+    {
+      "name": "space on other with words opens them",
+      "questions": "one",
+      "actions": [
+        {
+          "click": 2
+        },
+        {
+          "write": "uphill"
+        },
+        {
+          "key": "space"
+        }
+      ],
+      "at": 0,
+      "focus": 2,
+      "outcome": "writeOwn",
+      "answers": [
+        [
+          "uphill"
+        ]
+      ]
+    },
+    {
+      "name": "a click on ticked other opens its words and keeps the tick",
+      "questions": "many",
+      "actions": [
+        {
+          "click": 3
+        },
+        {
+          "write": "Types"
+        },
+        {
+          "click": 3
+        }
+      ],
+      "focus": 3,
+      "outcome": "writeOwn",
+      "answers": [
+        [
+          "Types"
+        ]
+      ]
+    },
+    {
+      "name": "erased own words untick other and the ticked rows still answer",
+      "questions": "many",
+      "actions": [
+        {
+          "click": 0
+        },
+        {
+          "write": "Types"
+        },
+        {
+          "write": ""
+        },
+        {
+          "forward": true
+        }
+      ],
+      "outcome": "answer",
+      "answers": [
+        [
+          "Unit"
+        ]
+      ]
     }
   ]
 }

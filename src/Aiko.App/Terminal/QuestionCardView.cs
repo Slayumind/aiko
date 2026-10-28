@@ -25,6 +25,7 @@ sealed class QuestionCardView : Border
     private readonly StackPanel _column = new();
     private readonly StrongBox<QuestionFlow> _flow;
     private TextBox? _own;
+    private FrameworkElement? _next;
     private bool _narrow;
 
     public QuestionCardView(RequestCard request, Action<CardChoice> choose)
@@ -132,6 +133,8 @@ sealed class QuestionCardView : Border
         Draw();
         if (step.Outcome == QuestionOutcome.WriteOwn && _own is not null)
         {
+            // Words already there are to be changed, so the caret goes after them.
+            _own.CaretIndex = _own.Text.Length;
             Keyboard.Focus(_own);
         }
         else if (!IsKeyboardFocusWithin || ReferenceEquals(Keyboard.FocusedElement, _own))
@@ -399,6 +402,10 @@ sealed class QuestionCardView : Border
         {
             _flow.Value = Flow.Write(field.Text);
             hint.Visibility = field.Text.Length == 0 ? Visibility.Visible : Visibility.Collapsed;
+
+            // The words answer the question as they are typed; drawing the card again would take
+            // the field away from under the caret, so only Next follows them.
+            ShowNext();
         };
         field.PreviewKeyDown += (_, e) =>
         {
@@ -473,11 +480,23 @@ sealed class QuestionCardView : Border
             () => Apply(Flow.Forward()),
             ghost: false,
             main: true);
-        next.IsEnabled = flow.IsAnswered(flow.At);
-        next.Opacity = next.IsEnabled ? 1 : 0.5;
+        _next = next;
+        ShowNext();
         row.Children.Add(next);
         row.Children.Add(KeyName("Enter"));
         return row;
+    }
+
+    /// Next (or Answer) can be pressed once the open question has its answer.
+    private void ShowNext()
+    {
+        if (_next is null)
+        {
+            return;
+        }
+
+        _next.IsEnabled = Flow.IsAnswered(Flow.At);
+        _next.Opacity = _next.IsEnabled ? 1 : 0.5;
     }
 
     private static TextBlock KeyName(string name)
