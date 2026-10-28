@@ -66,7 +66,10 @@ struct VoiceCaseTests {
 
             var text = DictationText.empty
             for (index, pass) in passes.enumerated() where index < steps.count {
+                // What was confirmed stays as it was: the next pass only adds after it.
+                let before = text.confirmedText
                 text = text.pass(pass)
+                #expect(text.confirmedText.hasPrefix(before), "\(name), pass \(index + 1) changed confirmed words")
                 #expect(text.confirmedText == steps[index]["confirmed"]?.stringValue, "\(name), pass \(index + 1)")
                 #expect(text.tailText == steps[index]["tail"]?.stringValue, "\(name), pass \(index + 1)")
             }

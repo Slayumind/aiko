@@ -75,7 +75,10 @@ public class VoiceCaseTests
 
             for (var i = 0; i < passes.Count; i++)
             {
+                // What was confirmed stays as it was: the next pass only adds after it.
+                var before = text.ConfirmedText;
                 text = text.Pass(passes[i].GetString()!);
+                Assert.True(text.ConfirmedText.StartsWith(before, StringComparison.Ordinal), $"{name}, pass {i + 1} changed confirmed words");
                 Assert.True(steps[i].GetProperty("confirmed").GetString() == text.ConfirmedText, $"{name}, pass {i + 1}: {text.ConfirmedText}");
                 Assert.True(steps[i].GetProperty("tail").GetString() == text.TailText, $"{name}, pass {i + 1}: {text.TailText}");
             }
