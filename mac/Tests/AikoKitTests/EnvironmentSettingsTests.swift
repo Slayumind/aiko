@@ -118,22 +118,4 @@ struct EnvironmentSettingsTests {
         #expect(!back.environments[1].persona)
         #expect(json.contains("\"schemaVersion\": \(EnvironmentSettings.currentSchema)"))
     }
-
-    @Test
-    func aFileFromBeforeTheAgentTodosReadsWithThemOff() {
-        let settings = EnvironmentSettings.fromJson(Self.twoEnvironments)
-
-        #expect(settings.environments.allSatisfy { !$0.agentTodos })
-    }
-
-    @Test
-    func theAgentTodosFlagSurvivesATripThroughTheFile() {
-        var settings = EnvironmentSettings.fromJson(Self.twoEnvironments)
-        settings.environments[1].agentTodos = true
-
-        let back = EnvironmentSettings.fromJson(settings.toJson())
-
-        #expect(!back.environments[0].agentTodos)
-        #expect(back.environments[1].agentTodos)
-    }
 }

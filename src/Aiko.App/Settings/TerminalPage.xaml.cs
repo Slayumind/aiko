@@ -6,7 +6,7 @@ using Aiko.Core.Terminal;
 
 namespace Aiko.App;
 
-/// The settings of the terminal: voice input, who recognises it, the model and the key (D-313, D-315).
+/// The settings of the terminal: the to-do list of the agent (D-344), voice input, who recognises it, the model and the key (D-313, D-315).
 public partial class TerminalPage : UserControl
 {
     private static readonly long TotalMegabytes = VoiceModel.Megabytes(VoiceModel.Bytes);
@@ -45,6 +45,7 @@ public partial class TerminalPage : UserControl
     private void Fill()
     {
         _filling = true;
+        TodosOn.IsChecked = _settings.AgentTodos;
         VoiceOn.IsChecked = _settings.VoiceInput;
         var engine = TryEngine ?? _settings.VoiceEngine;
         Local.IsChecked = engine == VoiceEngine.Local;
@@ -69,6 +70,9 @@ public partial class TerminalPage : UserControl
         SettingsStore.Save(settings);
         Saved?.Invoke();
     }
+
+    private void OnTodosChanged(object sender, RoutedEventArgs e) =>
+        Save(_settings with { AgentTodos = TodosOn.IsChecked == true });
 
     private void OnSpeechChanged(object sender, RoutedEventArgs e) =>
         Save(_settings with
