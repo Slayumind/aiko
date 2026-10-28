@@ -169,29 +169,30 @@ struct VoiceCaseTests {
         }
     }
 
-    /// The files of a conversation for the hint: read or changed, newest first, once each. A
-    /// search, a command and a picture the person attached are not files the person names.
+    /// The files of a conversation for the hint, from spec/cases/voice-hint.
     @Test
     func theHintTakesTheFilesAConversationReadOrChanged() {
-        func step(_ id: Int, _ kind: StepKind, _ subject: String, hidden: Bool = false) -> FeedItem {
-            FeedItem(id: id, content: .step(FeedStep(
-                toolUseId: "t\(id)", line: StepLine(kind: kind, label: "", subject: subject, added: 0, removed: 0, hidden: hidden),
-                state: .done, result: "", images: [], progress: "")))
+        for row in SpecCases.json("voice-hint")["files"]?.arrayValue ?? [] {
+            var items = [FeedItem(id: 1, content: .ownerMessage(text: "Look at the field.", queued: false, attachments: []))]
+            for step in row["steps"]?.arrayValue ?? [] {
+                let id = items.count + 1
+                let kind: StepKind = switch step["kind"]?.stringValue {
+                case "read": .read
+                case "search": .search
+                case "edit": .edit
+                case "run": .run
+                default: .other
+                }
+                let line = StepLine(
+                    kind: kind, label: "", subject: step["subject"]?.stringValue ?? "", added: 0, removed: 0,
+                    hidden: step["hidden"]?.boolValue ?? false)
+                items.append(FeedItem(id: id, content: .step(FeedStep(
+                    toolUseId: "t\(id)", line: line, state: .done, result: "", images: [], progress: ""))))
+            }
+
+            let files = (row["files"]?.arrayValue ?? []).compactMap(\.stringValue)
+            #expect(VoiceHint.files(items) == files, "\(row["name"]?.stringValue ?? "")")
         }
-
-        let items = [
-            FeedItem(id: 1, content: .ownerMessage(text: "Look at the field.", queued: false, attachments: [])),
-            step(2, .read, "TalkInput.cs"),
-            step(3, .search, "VoiceLine"),
-            step(4, .edit, "VoiceInput.cs"),
-            step(5, .run, "dotnet test"),
-            step(6, .read, "image.png", hidden: true),
-            step(7, .read, "talkinput.cs"),
-            step(8, .edit, ""),
-        ]
-
-        #expect(VoiceHint.files(items) == ["talkinput.cs", "VoiceInput.cs"])
-        #expect(VoiceHint.files([]).isEmpty)
     }
 
     private static func state(_ node: JsonNode?) -> VoiceState? {

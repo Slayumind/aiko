@@ -197,28 +197,26 @@ public class VoiceCaseTests
         }
     }
 
-    /// The files of a conversation for the hint: read or changed, newest first, once each. A
-    /// search, a command and a picture the person attached are not files the person names.
+    /// The files of a conversation for the hint, from spec/cases/voice-hint.
     [Fact]
     public void The_hint_takes_the_files_a_conversation_read_or_changed()
     {
-        static FeedItem.Step Step(int id, StepKind kind, string subject, bool hidden = false) =>
-            new(id, $"t{id}", new StepLine(kind, "", subject, 0, 0, hidden), StepState.Done, "", [], "");
+        foreach (var row in SpecCases.Json("voice-hint").GetProperty("files").EnumerateArray())
+        {
+            List<FeedItem> items = [new FeedItem.OwnerMessage(1, "Look at the field.", false, [])];
+            foreach (var step in row.GetProperty("steps").EnumerateArray())
+            {
+                var id = items.Count + 1;
+                var line = new StepLine(
+                    Enum.Parse<StepKind>(step.GetProperty("kind").GetString()!, ignoreCase: true), "", step.GetProperty("subject").GetString()!, 0, 0,
+                    step.TryGetProperty("hidden", out var hidden) && hidden.GetBoolean());
+                items.Add(new FeedItem.Step(id, $"t{id}", line, StepState.Done, "", [], ""));
+            }
 
-        List<FeedItem> items =
-        [
-            new FeedItem.OwnerMessage(1, "Look at the field.", false, []),
-            Step(2, StepKind.Read, "TalkInput.cs"),
-            Step(3, StepKind.Search, "VoiceLine"),
-            Step(4, StepKind.Edit, "VoiceInput.cs"),
-            Step(5, StepKind.Run, "dotnet test"),
-            Step(6, StepKind.Read, "image.png", hidden: true),
-            Step(7, StepKind.Read, "talkinput.cs"),
-            Step(8, StepKind.Edit, ""),
-        ];
-
-        Assert.Equal(["talkinput.cs", "VoiceInput.cs"], VoiceHint.Files(items));
-        Assert.Empty(VoiceHint.Files([]));
+            Assert.True(
+                row.GetProperty("files").EnumerateArray().Select(file => file.GetString()!).SequenceEqual(VoiceHint.Files(items)),
+                row.GetProperty("name").GetString());
+        }
     }
 
     private static VoiceState State(JsonElement pair) => new(
