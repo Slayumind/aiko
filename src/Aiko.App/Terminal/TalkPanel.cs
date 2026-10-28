@@ -242,7 +242,7 @@ sealed class TalkPanel : UserControl
         _input.ShowFolder(view.Folder, view.Draft);
         _input.Show(view.Session, view.Busy, _keyCard is not null, view.Mode, view.Model, view.Environment);
         _input.ShowContext(view.ContextPercent);
-        _tasks.Show(view.Tasks, view.ContextPercent, atOnce: newSession);
+        _tasks.Show(view.Tasks, atOnce: newSession);
         _input.SetCommands(view.Commands);
         _input.SetFolder(view.Folder);
 

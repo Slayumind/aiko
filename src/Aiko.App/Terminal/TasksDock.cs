@@ -7,7 +7,7 @@ using Aiko.Core.Terminal;
 namespace Aiko.App;
 
 /// The panel "Tasks" above the field (D-342, direction 3 of the prototype): the to-do list of the
-/// agent, the subagents at work and how full the context is. It opens and closes by its height;
+/// agent and the subagents at work. It opens and closes by its height;
 /// with nothing to show it is not there at all.
 sealed class TasksDock : Border
 {
@@ -15,7 +15,6 @@ sealed class TasksDock : Border
 
     private readonly StackPanel _inside = new();
     private TaskPanel _shown = TaskPanel.Empty;
-    private int? _percent;
     private bool _open;
     private bool _atOnce;
 
@@ -33,9 +32,9 @@ sealed class TasksDock : Border
     }
 
     /// AtOnce: another session came into view, and its panel stands as it is, with no motion.
-    public void Show(TaskPanel panel, int? percent, bool atOnce)
+    public void Show(TaskPanel panel, bool atOnce)
     {
-        if (Same(panel, _shown) && percent == _percent)
+        if (Same(panel, _shown))
         {
             return;
         }
@@ -43,7 +42,6 @@ sealed class TasksDock : Border
         _atOnce = atOnce;
 
         _shown = panel;
-        _percent = percent;
 
         if (panel.IsEmpty)
         {
@@ -51,24 +49,18 @@ sealed class TasksDock : Border
             return;
         }
 
-        Draw(panel, percent);
+        Draw(panel);
         Open();
     }
 
-    private void Draw(TaskPanel panel, int? percent)
+    private void Draw(TaskPanel panel)
     {
         _inside.Children.Clear();
 
-        var head = new DockPanel { Margin = new Thickness(0, 0, 0, 6) };
-        if (percent is { } used)
-        {
-            var share = TerminalPanel.Mono(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.TerminalContextShare, used), "Muted");
-            DockPanel.SetDock(share, Dock.Right);
-            head.Children.Add(share);
-        }
-        head.Children.Add(TerminalPanel.Mono(
+        var head = TerminalPanel.Mono(
             panel.Todos.Count > 0 ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.TerminalTasksCount, panel.Done, panel.Todos.Count) : Strings.TerminalTasks,
-            "Muted"));
+            "Muted");
+        head.Margin = new Thickness(0, 0, 0, 6);
         _inside.Children.Add(head);
 
         foreach (var todo in panel.Todos)

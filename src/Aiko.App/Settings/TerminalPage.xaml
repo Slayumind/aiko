@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:Aiko.App">
 
-  <!-- Voice input of the terminal (D-313, D-315). The size of the model is on the page before
+  <!-- The to-do list of the agent (D-344) and voice input of the terminal (D-313, D-315). The size of the model is on the page before
        anything downloads, and the line about OpenAI stands next to the choice, not in the help. -->
   <UserControl.Resources>
     <ResourceDictionary>
@@ -17,7 +17,16 @@
     <TextBlock Text="{x:Static local:Strings.NavTerminal}" FontFamily="{StaticResource Sans}" FontSize="16"
                FontWeight="Medium" Foreground="{StaticResource Ink}" />
 
-    <CheckBox x:Name="VoiceOn" Style="{StaticResource Tick}" Margin="0,18,0,0"
+    <!-- Claude Code leaves the to-do tools out for newer models; this brings them back (D-344). -->
+    <CheckBox x:Name="TodosOn" Style="{StaticResource Tick}" Margin="0,18,0,0"
+              Checked="OnTodosChanged" Unchecked="OnTodosChanged">
+      <StackPanel>
+        <TextBlock Text="{x:Static local:Strings.AgentTodos}" FontWeight="Medium" />
+        <TextBlock Text="{x:Static local:Strings.AgentTodosWhat}" Style="{StaticResource RowHint}" TextWrapping="Wrap" Margin="0,4,0,0" />
+      </StackPanel>
+    </CheckBox>
+
+    <CheckBox x:Name="VoiceOn" Style="{StaticResource Tick}" Margin="0,22,0,0"
               Checked="OnVoiceChanged" Unchecked="OnVoiceChanged">
       <StackPanel>
         <TextBlock Text="{x:Static local:Strings.VoiceToggle}" FontWeight="Medium" />

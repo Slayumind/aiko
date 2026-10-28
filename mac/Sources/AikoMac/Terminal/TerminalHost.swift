@@ -304,7 +304,7 @@ final class TerminalHost {
                 mode: session.mode,
                 model: session.model,
                 inheritedVariables: Array(ProcessInfo.processInfo.environment.keys),
-                agentTodos: environment.agentTodos),
+                agentTodos: Store.settings().agentTodos),
             newProcess: newProcess,
             post: { work in DispatchQueue.main.async(execute: work) },
             log: AppTerminalLog())

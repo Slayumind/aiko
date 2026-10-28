@@ -90,15 +90,6 @@
           they flip it, not after, so the whole explanation sits right under it.
         -->
         <TextBlock x:Name="DirectWhat" Style="{StaticResource RowHint}" Margin="0,6,0,0" />
-
-        <!-- Claude Code leaves the to-do tools out for newer models; this brings them back (D-344). -->
-        <CheckBox x:Name="TodosBox" Style="{StaticResource Tick}" Margin="0,22,0,0"
-                  Checked="OnTodosChanged" Unchecked="OnTodosChanged">
-          <StackPanel>
-            <TextBlock Text="{x:Static local:Strings.AgentTodos}" FontWeight="Medium" />
-            <TextBlock Text="{x:Static local:Strings.AgentTodosWhat}" Style="{StaticResource RowHint}" TextWrapping="Wrap" Margin="0,4,0,0" />
-          </StackPanel>
-        </CheckBox>
       </StackPanel>
 
       <StackPanel Grid.Column="2">

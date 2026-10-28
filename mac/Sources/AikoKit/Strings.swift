@@ -527,8 +527,8 @@ public enum Strings {
         "TerminalTasks": ("Tasks", "Задачи"),
         "TerminalTasksCount": ("Tasks · {0} of {1}", "Задачи · {0} из {1}"),
         "TerminalAgent": ("agent", "агент"),
-        "TerminalContextShare": ("{0} %", "{0} %"),
-        "TerminalContextTip": ("Context: {0} % used", "Контекст занят на {0} %"),
+        "TerminalContextShare": ("context {0}%", "контекст {0}%"),
+        "TerminalContextTip": ("How much of this session's memory is used. /compact frees it.", "Сколько занято в памяти этой сессии. Освобождает /compact."),
         "AgentTodos": ("Agent to-do list", "Список дел агента"),
         "AgentTodosWhat": ("Claude keeps a to-do list, and the terminal shows it above the field. Newer models don't need it, and it takes a little context. Open sessions pick this up after Aiko restarts.", "Claude ведёт список дел, терминал показывает его над полем. Новым моделям он не нужен и занимает немного контекста. Открытые сессии увидят изменение после перезапуска Aiko."),
     ]
@@ -1994,10 +1994,10 @@ public enum Strings {
     /// agent
     public static var terminalAgent: String { Strings.get("TerminalAgent") }
 
-    /// {0} %
+    /// context {0}%
     public static var terminalContextShare: String { Strings.get("TerminalContextShare") }
 
-    /// Context: {0} % used
+    /// How much of this session's memory is used. /compact frees it.
     public static var terminalContextTip: String { Strings.get("TerminalContextTip") }
 
     /// Agent to-do list

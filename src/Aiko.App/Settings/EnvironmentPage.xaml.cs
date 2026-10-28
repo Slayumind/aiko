@@ -82,7 +82,6 @@ public partial class EnvironmentPage : UserControl
         SignInButton.Content = signedIn ? Strings.SignInAgain : Strings.SignIn;
 
         DirectToggle.IsChecked = environment.DirectMode;
-        TodosBox.IsChecked = environment.AgentTodos;
         DirectWhat.Text = account.Plan is ClaudePlan.Team or ClaudePlan.Enterprise
             ? Strings.DirectModeWhat + " " + Strings.DirectModeAsk
             : Strings.DirectModeWhat;
@@ -165,17 +164,6 @@ public partial class EnvironmentPage : UserControl
 
         var on = DirectToggle.IsChecked == true;
         _editor.Commit(EnvironmentEdits.SetDirectMode(_editor.Current, environment.Name, on), $"direct mode {(on ? "on" : "off")}");
-    }
-
-    private void OnTodosChanged(object sender, RoutedEventArgs e)
-    {
-        if (_filling || Current is not { } environment)
-        {
-            return;
-        }
-
-        var on = TodosBox.IsChecked == true;
-        _editor.Commit(EnvironmentEdits.SetAgentTodos(_editor.Current, environment.Name, on), $"agent todos {(on ? "on" : "off")}");
     }
 
     // ---- name and command: applied on Enter or when the field is left (D-179) ----

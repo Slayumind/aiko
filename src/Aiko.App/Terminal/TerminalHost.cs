@@ -391,7 +391,7 @@ sealed class TerminalHost
                 session.Model,
                 [.. System.Environment.GetEnvironmentVariables().Keys.Cast<string>()])
             {
-                AgentTodos = environment.AgentTodos,
+                AgentTodos = SettingsStore.Load().AgentTodos,
             },
             _newProcess,
             work => _window.Dispatcher.BeginInvoke(work),

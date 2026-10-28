@@ -1493,10 +1493,10 @@
     <value>агент</value>
   </data>
   <data name="TerminalContextShare" xml:space="preserve">
-    <value>{0} %</value>
+    <value>контекст {0}%</value>
   </data>
   <data name="TerminalContextTip" xml:space="preserve">
-    <value>Контекст занят на {0} %</value>
+    <value>Сколько занято в памяти этой сессии. Освобождает /compact.</value>
   </data>
   <data name="AgentTodos" xml:space="preserve">
     <value>Список дел агента</value>

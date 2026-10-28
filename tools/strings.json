@@ -3411,15 +3411,15 @@
   [
     "TerminalContextShare",
     [
-      "{0} %",
-      "{0} %"
+      "context {0}%",
+      "контекст {0}%"
     ]
   ],
   [
     "TerminalContextTip",
     [
-      "Context: {0} % used",
-      "Контекст занят на {0} %"
+      "How much of this session's memory is used. /compact frees it.",
+      "Сколько занято в памяти этой сессии. Освобождает /compact."
     ]
   ],
   [

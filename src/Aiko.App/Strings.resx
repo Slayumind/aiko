@@ -1493,10 +1493,10 @@
     <value>agent</value>
   </data>
   <data name="TerminalContextShare" xml:space="preserve">
-    <value>{0} %</value>
+    <value>context {0}%</value>
   </data>
   <data name="TerminalContextTip" xml:space="preserve">
-    <value>Context: {0} % used</value>
+    <value>How much of this session's memory is used. /compact frees it.</value>
   </data>
   <data name="AgentTodos" xml:space="preserve">
     <value>Agent to-do list</value>

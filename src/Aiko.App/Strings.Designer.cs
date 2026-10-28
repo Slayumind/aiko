@@ -1482,10 +1482,10 @@ public static class Strings
     /// agent
     public static string TerminalAgent => Get("TerminalAgent");
 
-    /// {0} %
+    /// context {0}%
     public static string TerminalContextShare => Get("TerminalContextShare");
 
-    /// Context: {0} % used
+    /// How much of this session's memory is used. /compact frees it.
     public static string TerminalContextTip => Get("TerminalContextTip");
 
     /// Agent to-do list
