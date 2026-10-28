@@ -1,5 +1,5 @@
 {
-  "comment": "How full the context of a conversation is (ContextGauge). The percent is the tokens of the last message of Claude in the window of its model, rounded, and unknown until both are known. The ring is quiet up to 75 %, orange up to 90 %, red above (D-342, the numbers of the approved prototype). The window is the one of the model in use; Claude Code may add a suffix to the name of the model.",
+  "comment": "How full the context of a conversation is (ContextGauge). The percent is the tokens of the last message of Claude in the window of its model, rounded, and unknown until both are known. The word under the field is quiet up to 75 %, orange up to 90 %, red above (D-342, D-345). The window is the one of the model in use; Claude Code may add a suffix to the name of the model.",
   "percent": [
     {
       "tokens": 48714,

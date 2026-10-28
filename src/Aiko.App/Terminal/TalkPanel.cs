@@ -32,7 +32,7 @@ sealed record TalkView(
     /// line under the field. The session is made when the first message goes.
     public FormView? Draft { get; init; }
 
-    /// The panel "Tasks" above the field, and how full the context is: null until it is known.
+    /// The panel "Tasks" above the field (D-342).
     public TaskPanel Tasks { get; init; } = TaskPanel.Empty;
 
     public int? ContextPercent { get; init; }
@@ -45,8 +45,6 @@ sealed record TalkView(
 /// draws a TalkView and reports what the person did; the host decides the rest.
 sealed class TalkPanel : UserControl
 {
-    /// The rows of the feed: the items of the core, and the line "working" after them while a turn
-    /// goes on (D-308).
     /// The widest the conversation gets, and the space on its sides.
     private const double ColumnWidth = 860;
     private const double Gutter = 24;

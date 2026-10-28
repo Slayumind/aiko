@@ -484,6 +484,15 @@ sealed class TalkInput : UserControl
 
             // Each session keeps its own draft while the window lives (LobeChat, Zed).
             _drafts[_session] = _text.Text;
+
+            // The first message of a session is sent from its draft, and the draft becomes the
+            // session: what was sent goes with it, so Up shows it there and not in the next draft.
+            if (_session.StartsWith("draft:", StringComparison.Ordinal) && !_sent.ContainsKey(session)
+                && _sent.Remove(_session, out var sentFromDraft))
+            {
+                _sent[session] = sentFromDraft;
+            }
+
             _session = session;
             _text.Text = _drafts.GetValueOrDefault(session, "");
             _text.CaretIndex = _text.Text.Length;
@@ -500,7 +509,7 @@ sealed class TalkInput : UserControl
         _where.Text = " · " + environment;
     }
 
-    /// How full the context is; no ring until it is known.
+    /// How full the context is; no word until it is known.
     public void ShowContext(int? percent) => _context.Show(percent);
 
     /// Raised when a folder of the list under the field is picked, and when "Choose a folder"

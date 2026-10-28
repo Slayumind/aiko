@@ -56,6 +56,18 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - In the card of questions, your own answer can be changed after Back: a click on it opens the
   words with the caret at their end, and the card no longer jumps to the next question. Next works
   as soon as you type your own answer, and erasing it leaves the other ticked answers in place.
+- A command of "!" that runs keeps its session at work: closing the session asks first, Esc stops
+  the command, and a message sent meanwhile goes to Claude with the output. Before, a session closed
+  during the command started Claude Code by itself when the command ended.
+- A session no longer stays at work forever when Claude Code stops with messages in its queue.
+- A line of Claude Code with an emoji cut in half no longer closes Aiko.
+- A new session in an environment with no folders asks for a folder instead of losing the first
+  message, and the terminal with no environment opens the first run checklist instead of closing Aiko.
+- "@" shows file names outside English as they are and follows .gitignore in large repositories.
+- A code block no longer breaks while an answer is written, and a file link that starts with a dash
+  is not opened in VS Code.
+- The working row no longer blinks after every step and shows the time of a long turn; a session
+  switch no longer shows words of another session in a streaming answer.
 - With fewer animations asked for in Windows, the terminal no longer runs a bar while it makes the
   conversation shorter.
 - Voice input no longer puts the list of hint words into your text when the recognizer gives it back

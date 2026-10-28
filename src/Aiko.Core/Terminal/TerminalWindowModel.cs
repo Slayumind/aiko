@@ -6,7 +6,8 @@ public enum MainView
     /// The environment has no session in the list: one sentence and a button.
     NoSessions,
 
-    /// The form of a new session, in the place of the conversation (D-300).
+    /// A new session before its first message: an empty feed with the folder, the model and the
+    /// mode in the line under the field (D-342).
     Form,
 
     Talk,
