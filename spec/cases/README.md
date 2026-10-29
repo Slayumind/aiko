@@ -29,6 +29,7 @@ stamp, not a table (D-255).
 | `launch-plan/` | the arguments and the environment of the Claude Code a conversation starts (`ClaudeLaunchPlan`) |
 | `permission-mode/` | the names of the four permission modes and their order (`PermissionModes`) |
 | `limit-badge/` | which limit the title bar of the terminal names (`LimitBadge`) |
+| `header-strip/` | the order and the numbers of the open header of the terminal window (`HeaderStrip`) |
 | `model-name/` | the name of a model in the line under the input (`ModelName`) |
 | `slash-menu/` | the menu of commands that "/" opens in the field: when it opens, what it shows, in which order (`SlashMenu`) |
 | `file-mention/` | the files that "@" offers in the field: where the word starts, which files, in which order, what the field becomes (`FileMention`) |

@@ -807,6 +807,44 @@ struct SharedCaseTests {
     }
 
     @Test
+    func everyOpenHeaderPutsTheActiveEnvironmentFirstTheSameWay() {
+        let now = Date(timeIntervalSince1970: 1_793_275_200)
+        func number(_ node: JsonNode?) -> Int? { node?.doubleValue.map { Int($0) } }
+
+        for row in SpecCases.json("header-strip")["headers"]?.arrayValue ?? [] {
+            let inputs = (row["environments"]?.arrayValue ?? []).map { environment -> HeaderInput in
+                let name = environment["name"]?.stringValue ?? ""
+                let limits = environment["windows"]?.arrayValue.map { windows in
+                    LimitSnapshot(
+                        environment: name,
+                        source: .statusLine,
+                        receivedAt: now,
+                        windows: windows.map {
+                            LimitWindow(
+                                kind: $0["kind"]?.stringValue == "sevenDay" ? .sevenDay : .fiveHour,
+                                percent: Int($0["percent"]?.doubleValue ?? 0),
+                                resetsAt: now.addingTimeInterval($0["resetsInSeconds"]?.doubleValue ?? 0))
+                        })
+                }
+                return HeaderInput(environment: name, limits: limits, waiting: Int(environment["waiting"]?.doubleValue ?? 0))
+            }
+
+            let expected = (row["columns"]?.arrayValue ?? []).map {
+                HeaderColumn(
+                    environment: $0["name"]?.stringValue ?? "",
+                    active: $0["active"]?.boolValue ?? false,
+                    fiveHour: number($0["fiveHour"]),
+                    sevenDay: number($0["sevenDay"]),
+                    waiting: Int($0["waiting"]?.doubleValue ?? 0))
+            }
+
+            #expect(
+                HeaderStrip.columns(inputs, row["active"]?.stringValue ?? "", now) == expected,
+                "\(row["name"]?.stringValue ?? "")")
+        }
+    }
+
+    @Test
     func everyLeftoverOfABridgeIsFoundTheSameWay() {
         let now = Date(timeIntervalSince1970: 1_792_152_000)
         for row in SpecCases.json("snapshot-leftovers")["files"]?.arrayValue ?? [] {

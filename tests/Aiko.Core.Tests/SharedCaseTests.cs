@@ -838,6 +838,43 @@ public class SharedCaseTests
     }
 
     [Fact]
+    public void Every_open_header_puts_the_active_environment_first_the_same_way()
+    {
+        var now = new DateTimeOffset(2026, 10, 29, 12, 0, 0, TimeSpan.Zero);
+        static int? Number(JsonElement value) => value.ValueKind == JsonValueKind.Null ? null : value.GetInt32();
+
+        foreach (var row in SpecCases.Json("header-strip").GetProperty("headers").EnumerateArray())
+        {
+            var inputs = row.GetProperty("environments").EnumerateArray().Select(environment =>
+            {
+                var windows = environment.GetProperty("windows");
+                var limits = windows.ValueKind == JsonValueKind.Null
+                    ? null
+                    : new LimitSnapshot(
+                        environment.GetProperty("name").GetString()!,
+                        LimitSource.StatusLine,
+                        now,
+                        [.. windows.EnumerateArray().Select(window => new LimitWindow(
+                            Enum.Parse<LimitKind>(window.GetProperty("kind").GetString()!, ignoreCase: true),
+                            window.GetProperty("percent").GetInt32(),
+                            now.AddSeconds(window.GetProperty("resetsInSeconds").GetInt32())))]);
+                return new HeaderInput(environment.GetProperty("name").GetString()!, limits, environment.GetProperty("waiting").GetInt32());
+            }).ToList();
+
+            var expected = row.GetProperty("columns").EnumerateArray().Select(column => new HeaderColumn(
+                column.GetProperty("name").GetString()!,
+                column.GetProperty("active").GetBoolean(),
+                Number(column.GetProperty("fiveHour")),
+                Number(column.GetProperty("sevenDay")),
+                column.GetProperty("waiting").GetInt32())).ToList();
+
+            Assert.True(
+                expected.SequenceEqual(HeaderStrip.Columns(inputs, row.GetProperty("active").GetString()!, now)),
+                row.GetProperty("name").GetString());
+        }
+    }
+
+    [Fact]
     public void Every_leftover_of_a_bridge_is_found_the_same_way()
     {
         var now = new DateTimeOffset(2026, 10, 16, 12, 0, 0, TimeSpan.Zero);
