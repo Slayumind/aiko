@@ -286,17 +286,21 @@ sealed class TerminalPanel : UserControl
         }
         else if (_chevronTurn.Angle != turn)
         {
-            _chevronTurn.BeginAnimation(RotateTransform.AngleProperty, Motion.To(turn, Motion.Settle, Motion.Standard));
+            // In step with the header that opens or folds.
+            _chevronTurn.BeginAnimation(RotateTransform.AngleProperty, Motion.To(turn, view.Header.Open ? Grow : Close, Motion.Standard));
         }
         ShowStrip(view);
     }
 
     /// The header opens in place and the terminal moves down: nothing covers a real terminal.
     ///
-    /// The terminal is a window of its own inside this one. Moving it on every frame of a motion
-    /// makes it lag behind the software drawing of WPF and jerk. So the header takes its full height
-    /// at once and the terminal moves and resizes once; only the cards move. Opening: the place is
-    /// there at once and the cards fade in. Closing: the cards fade out, then the place goes.
+    /// The terminal is a window of its own inside this one: moved on every frame, it lags behind the
+    /// software drawing of WPF and jerks. So while the header moves, the terminal is a picture of
+    /// itself (TerminalSurface.ShowStill), and the body under the header keeps one height.
+    ///
+    /// Opening: the body slides down under the bottom edge of the window while the header grows,
+    /// then takes its new height once. Closing: the body takes its final height first, then the
+    /// header folds and the body slides up. The real terminal comes back when the header stands.
     private void ShowStrip(TerminalView view)
     {
         if (!view.Header.Open)
@@ -314,15 +318,21 @@ sealed class TerminalPanel : UserControl
                 return;
             }
 
+            ShowStills(true);
+            HoldBody(_strip.ActualHeight);
+            _header.FadeOut(Fold);
             _pills.Hide(false, Close, after: PillsBack);
-            _header.FadeOut(Fold, () =>
+            var shrink = new System.Windows.Media.Animation.DoubleAnimation(_strip.ActualHeight, 0, Close) { EasingFunction = Motion.Standard };
+            shrink.Completed += (_, _) =>
             {
                 // Opened again while it was closing: the new header stays.
                 if (_stripFor is null)
                 {
                     HideStrip();
+                    ShowLiveAfterLayout();
                 }
-            });
+            };
+            _strip.BeginAnimation(HeightProperty, shrink);
             return;
         }
 
@@ -331,25 +341,55 @@ sealed class TerminalPanel : UserControl
         _stripFor = view.Environment;
         var motion = first ? HeaderMotion.Open : moved ? HeaderMotion.Switch : HeaderMotion.None;
 
-        // A window that opens with the header already open shows it at once.
-        var appear = first && Motion.IsOn && IsLoaded && ActualWidth > 0;
-        _header.Show(view.Header, first && !appear ? HeaderMotion.None : motion);
+        // A window that opens with the header already open shows it at once: it has no width yet
+        // to measure the header against, and nothing to grow from.
+        var grow = first && Motion.IsOn && IsLoaded && ActualWidth > 0;
+        var from = _strip.Visibility == Visibility.Visible ? _strip.ActualHeight : 0;
+        _header.Show(view.Header, first && !grow ? HeaderMotion.None : motion);
         _strip.Visibility = Visibility.Visible;
-        if (first)
-        {
-            StopStrip();
-            ReleaseBody();
-        }
-        else if (motion == HeaderMotion.Switch && Motion.IsOn && IsLoaded)
+        if (motion == HeaderMotion.Switch && Motion.IsOn && IsLoaded)
         {
             HoldForSwitch();
         }
 
         // Pills are the closed header and cards the open one (D-376): the pills give way.
         _pills.Hide(true, Grow);
+
+        if (!grow)
+        {
+            if (first)
+            {
+                StopStrip();
+                ReleaseBody();
+            }
+
+            return;
+        }
+
+        // From where it is to its own height: measured once, then left to size itself.
+        ShowStills(true);
+        StopStrip();
+        _strip.Measure(new Size(ActualWidth, double.PositiveInfinity));
+        var height = _strip.DesiredSize.Height;
+        HoldBody(0);
+        _strip.Height = from;
+        var growing = new System.Windows.Media.Animation.DoubleAnimation(from, height, Grow) { EasingFunction = Motion.Standard };
+        growing.Completed += (_, _) =>
+        {
+            // Closed again while it was growing: the fold has taken over.
+            if (_stripFor is null)
+            {
+                return;
+            }
+
+            StopStrip();
+            ReleaseBody();
+            ShowLiveAfterLayout();
+        };
+        _strip.BeginAnimation(HeightProperty, growing);
     }
 
-    /// The header is gone, and the terminal takes its place in one step.
+    /// The header is gone, and the terminal takes its place.
     private void HideStrip()
     {
         StopStrip();
@@ -357,6 +397,32 @@ sealed class TerminalPanel : UserControl
         _header.Clear();
         ReleaseBody();
     }
+
+    /// The open terminal as a picture while the header moves, or live again.
+    private void ShowStills(bool still)
+    {
+        foreach (var terminal in _terminals.Children.OfType<TerminalSurface>())
+        {
+            if (still)
+            {
+                terminal.ShowStill();
+            }
+            else
+            {
+                terminal.ShowLive();
+            }
+        }
+    }
+
+    /// The real terminal comes back after the layout has put it in its new place and size, so it
+    /// does not flash for a frame where the picture was.
+    private void ShowLiveAfterLayout() => Dispatcher.BeginInvoke(() =>
+    {
+        if (!_strip.HasAnimatedProperties)
+        {
+            ShowStills(false);
+        }
+    }, System.Windows.Threading.DispatcherPriority.Loaded);
 
     /// Two environments with a different number of limit rows: the header moves to its new height
     /// with the swap, and the body is held as when the header opens (taller) or closes (lower), so

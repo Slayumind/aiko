@@ -52,6 +52,8 @@ sealed class HeaderStripView
     private static readonly Duration ContentOut = new(TimeSpan.FromMilliseconds(140));
     private static readonly TimeSpan ContentInAt = TimeSpan.FromMilliseconds(220);
     private static readonly Duration ContentIn = new(TimeSpan.FromMilliseconds(160));
+    private static readonly TimeSpan BarsAfterOpen = TimeSpan.FromMilliseconds(120);
+    private static readonly Duration BarGrow = new(TimeSpan.FromMilliseconds(480));
 
     private readonly Action<string> _pick;
     private readonly HeaderCards _row = new();
@@ -86,8 +88,12 @@ sealed class HeaderStripView
                 _row.Children.Add(card.Root);
             }
 
-            var content = column.Column.Active ? Full(column) : Quiet(column);
-            if (motion == HeaderMotion.Switch && animate && card.Active != column.Column.Active)
+            var swaps = motion == HeaderMotion.Switch && animate && card.Active != column.Column.Active;
+
+            // The bars of the active card grow to their values when the card comes in.
+            TimeSpan? grow = !animate ? null : motion == HeaderMotion.Open ? BarsAfterOpen : swaps ? ContentInAt : null;
+            var content = column.Column.Active ? Full(column, grow) : Quiet(column);
+            if (swaps)
             {
                 card.CrossFade(content, column.Column.Active);
             }
@@ -127,13 +133,9 @@ sealed class HeaderStripView
         remove => _row.Settled -= value;
     }
 
-    /// The header closes: both cards go out together, then done runs.
-    public void FadeOut(Duration duration, Action done)
-    {
-        var fade = new DoubleAnimation(0, duration) { EasingFunction = Motion.Standard };
-        fade.Completed += (_, _) => done();
-        Root.BeginAnimation(UIElement.OpacityProperty, fade);
-    }
+    /// The header closes: both cards go out together.
+    public void FadeOut(Duration duration) =>
+        Root.BeginAnimation(UIElement.OpacityProperty, new DoubleAnimation(0, duration) { EasingFunction = Motion.Exit });
 
     /// The header closed: the next open starts from new cards.
     public void Clear()
@@ -188,8 +190,9 @@ sealed class HeaderStripView
 
     // ---- the contents of a card ----
 
-    /// The active card: the head, one line per limit, and the profile.
-    private static FrameworkElement Full(HeaderColumnView column)
+    /// The active card: the head, one line per limit, and the profile. grow is when its bars start
+    /// to grow from zero, or null when they stand at their values.
+    private static FrameworkElement Full(HeaderColumnView column, TimeSpan? grow)
     {
         var stack = new StackPanel();
         // The names, resets and tone words of the rows share their widths, so the bars line up.
@@ -214,7 +217,7 @@ sealed class HeaderStripView
 
         foreach (var row in block.Rows)
         {
-            rows.Children.Add(Row(row));
+            rows.Children.Add(Row(row, grow));
         }
 
         stack.Children.Add(rows);
@@ -285,7 +288,7 @@ sealed class HeaderStripView
     }
 
     /// "Session · 5 hours ━━━━━━──── 42%  1h 6m  running low": one line of 24 px per limit.
-    private static FrameworkElement Row(LimitRow row)
+    private static FrameworkElement Row(LimitRow row, TimeSpan? grow)
     {
         var grid = new Grid { Height = RowHeight };
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto, SharedSizeGroup = "LimitName" });
@@ -301,7 +304,7 @@ sealed class HeaderStripView
         name.Margin = new Thickness(0, 0, 12, 0);
         grid.Children.Add(name);
 
-        var track = Track(row.Fill, row.Rest, 4, row.Tone, 1);
+        var track = Track(row.Fill, row.Rest, 4, row.Tone, 1, grow);
         track.Margin = new Thickness(0, 0, 8, 0);
         Grid.SetColumn(track, 1);
         grid.Children.Add(track);
@@ -356,8 +359,9 @@ sealed class HeaderStripView
     }
 
     /// A bar: a grey track and the used part in two star columns, so the fill follows the
-    /// percentage without any measuring in code.
-    private static FrameworkElement Track(GridLength fill, GridLength rest, double height, Brush tone, double toneOpacity)
+    /// percentage without any measuring in code. grow, when set, is when the used part starts to
+    /// grow from the left edge to its value; a scale, so the layout stays still.
+    private static FrameworkElement Track(GridLength fill, GridLength rest, double height, Brush tone, double toneOpacity, TimeSpan? grow = null)
     {
         var track = new Grid { Height = height, VerticalAlignment = VerticalAlignment.Center };
         track.ColumnDefinitions.Add(new ColumnDefinition { Width = fill });
@@ -365,7 +369,16 @@ sealed class HeaderStripView
         var back = new Border { CornerRadius = new CornerRadius(height / 2), Background = Tokens.Brush("Raised") };
         Grid.SetColumnSpan(back, 2);
         track.Children.Add(back);
-        track.Children.Add(new Border { CornerRadius = new CornerRadius(height / 2), Background = tone, Opacity = toneOpacity });
+        var used = new Border { CornerRadius = new CornerRadius(height / 2), Background = tone, Opacity = toneOpacity };
+        if (grow is { } after && Motion.IsOn)
+        {
+            var scale = new ScaleTransform(0, 1);
+            used.RenderTransformOrigin = new Point(0, 0.5);
+            used.RenderTransform = scale;
+            scale.BeginAnimation(ScaleTransform.ScaleXProperty, new DoubleAnimation(0, 1, BarGrow) { BeginTime = after, EasingFunction = Motion.Standard });
+        }
+
+        track.Children.Add(used);
         return track;
     }
 
@@ -427,6 +440,7 @@ sealed class HeaderStripView
         private readonly SolidColorBrush _hover = new(Colors.Transparent);
         private readonly CardBody _body = new() { Margin = new Thickness(CardPadding), ClipToBounds = true };
         private readonly TranslateTransform _rise = new();
+        private readonly ScaleTransform _press = new();
 
         /// The contents shown now, and the ones that go out during a switch. The old ones lie on a
         /// canvas, which gives them no say in the height of the card: the card takes the height of
@@ -449,8 +463,21 @@ sealed class HeaderStripView
                 BorderBrush = Tokens.Brush("Hairline"),
                 BorderThickness = new Thickness(1),
                 Child = face,
-                RenderTransform = _rise,
+                RenderTransformOrigin = new Point(0.5, 0.5),
+                RenderTransform = new TransformGroup { Children = { _press, _rise } },
             };
+
+            // A quiet card sinks a little under the pressed button, as every button of Aiko does
+            // (Motion.Press): the click is felt before the cards start to change places.
+            Root.PreviewMouseLeftButtonDown += (_, _) =>
+            {
+                if (!Active)
+                {
+                    Press(Motion.PressedScale, Motion.Press, Motion.Standard);
+                }
+            };
+            Root.PreviewMouseLeftButtonUp += (_, _) => Press(1, Motion.Settle, Motion.Spring);
+            Root.MouseLeave += (_, _) => Press(1, Motion.Settle, Motion.Spring);
 
             // A quiet card is a button: a soft fill under the pointer, and a click makes its
             // environment the active one. The active card is not.
@@ -498,7 +525,7 @@ sealed class HeaderStripView
             _leaving.Children.Add(old);
             old.HorizontalAlignment = HorizontalAlignment.Left;
             old.Width = oldWidth > 0 ? oldWidth : double.NaN;
-            old.BeginAnimation(UIElement.OpacityProperty, new DoubleAnimation(0, ContentOut) { EasingFunction = Motion.Standard });
+            old.BeginAnimation(UIElement.OpacityProperty, new DoubleAnimation(0, ContentOut) { EasingFunction = Motion.Exit });
 
             _current = new Border
             {
@@ -536,6 +563,13 @@ sealed class HeaderStripView
             Root.Opacity = 0;
             Root.BeginAnimation(UIElement.OpacityProperty, new DoubleAnimation(0, 1, Appear) { BeginTime = after, EasingFunction = Motion.Standard });
             _rise.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(Motion.AppearShift, 0, Appear) { BeginTime = after, EasingFunction = Motion.Standard });
+        }
+
+        private void Press(double scale, Duration duration, IEasingFunction easing)
+        {
+            var animation = Motion.To(scale, duration, easing);
+            _press.BeginAnimation(ScaleTransform.ScaleXProperty, animation);
+            _press.BeginAnimation(ScaleTransform.ScaleYProperty, animation);
         }
 
         private void Role(bool active)

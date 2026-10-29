@@ -110,7 +110,9 @@ sealed class TerminalPills
         // measure 0, and they would come back in one jump at the end.
         _row.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
         var full = _row.DesiredSize.Width;
-        var folding = new DoubleAnimation(hidden ? 0 : full, fold) { BeginTime = after, EasingFunction = Motion.Standard };
+        // Going away they speed up at the end, coming back they slow down into place.
+        var easing = hidden ? Motion.Exit : Motion.Standard;
+        var folding = new DoubleAnimation(hidden ? 0 : full, fold) { BeginTime = after, EasingFunction = easing };
         if (!hidden)
         {
             // Back to its own width once open, so new numbers can widen it again.
@@ -130,8 +132,8 @@ sealed class TerminalPills
         }
 
         Root.BeginAnimation(FrameworkElement.WidthProperty, folding);
-        Root.BeginAnimation(UIElement.OpacityProperty, new DoubleAnimation(hidden ? 0 : 1, Fade) { BeginTime = after, EasingFunction = Motion.Standard });
-        _rootShift.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(hidden ? 0 : 4, hidden ? -4 : 0, Fade) { BeginTime = after, EasingFunction = Motion.Standard });
+        Root.BeginAnimation(UIElement.OpacityProperty, new DoubleAnimation(hidden ? 0 : 1, Fade) { BeginTime = after, EasingFunction = easing });
+        _rootShift.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(hidden ? 0 : 4, hidden ? -4 : 0, Fade) { BeginTime = after, EasingFunction = easing });
     }
 
     /// The name goes from the colour it had to the one its pill gives it now (Muted and Ink), on a

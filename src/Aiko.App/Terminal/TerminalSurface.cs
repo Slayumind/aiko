@@ -120,6 +120,66 @@ sealed class TerminalSurface : Grid
     /// Ends the program and everything it started.
     public void Close() => _console.Dispose();
 
+    /// The picture that stands in for the control while the window moves it, or null.
+    private Image? _still;
+    private bool _focusedBeforeStill;
+
+    /// The terminal becomes a picture of itself. The control is a window of its own: moved on every
+    /// frame of a motion, it lags behind the drawing of WPF and jerks. A picture moves with WPF. The
+    /// control stays in the layout at its size, so the pseudo console gets no resize.
+    public void ShowStill()
+    {
+        if (_still is not null || !IsVisible || _control.ActualWidth <= 0 || _control.ActualHeight <= 0)
+        {
+            return;
+        }
+
+        var dpi = VisualTreeHelper.GetDpi(this);
+        var corner = _control.PointToScreen(new Point());
+        var area = new Int32Rect(
+            (int)Math.Round(corner.X),
+            (int)Math.Round(corner.Y),
+            (int)Math.Round(_control.ActualWidth * dpi.DpiScaleX),
+            (int)Math.Round(_control.ActualHeight * dpi.DpiScaleY));
+        if (ScreenPicture.Of(area) is not { } picture)
+        {
+            return;
+        }
+
+        _still = new Image
+        {
+            Source = picture,
+            Stretch = Stretch.Fill,
+            Width = area.Width / dpi.DpiScaleX,
+            Height = area.Height / dpi.DpiScaleY,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Top,
+            Margin = _control.Margin,
+            IsHitTestVisible = false,
+        };
+        RenderOptions.SetBitmapScalingMode(_still, BitmapScalingMode.NearestNeighbor);
+        _focusedBeforeStill = IsKeyboardFocusWithin;
+        Children.Add(_still);
+        _control.Visibility = Visibility.Hidden;
+    }
+
+    /// The real terminal again, in its new place.
+    public void ShowLive()
+    {
+        if (_still is null)
+        {
+            return;
+        }
+
+        _control.Visibility = Visibility.Visible;
+        Children.Remove(_still);
+        _still = null;
+        if (_focusedBeforeStill)
+        {
+            FocusTerminal();
+        }
+    }
+
     /// Files dropped on the terminal reach the window: its window is not WPF's, so WPF never sees
     /// the drop (D-370).
     private void AcceptDrops()
