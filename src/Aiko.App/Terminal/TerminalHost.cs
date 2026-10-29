@@ -17,6 +17,7 @@ sealed class TerminalHost
 {
     private EnvironmentSettings _settings;
     private readonly Func<string, LimitSnapshot?> _limitsOf;
+    private readonly Func<CardModel> _cardOf;
     private readonly TerminalPanel _panel = new();
     private readonly TerminalWindow _window;
     private readonly Dictionary<string, TerminalSurface> _terminals = [];
@@ -48,12 +49,14 @@ sealed class TerminalHost
     /// Aiko asked to quit while programs run: what to do once the person agrees.
     private Action? _quitAfter;
 
-    /// limitsOf gives the latest limits of an environment by its name.
-    public TerminalHost(EnvironmentSettings settings, TerminalSessions sessions, Func<string, LimitSnapshot?> limitsOf)
+    /// limitsOf gives the latest limits of an environment by its name; cardOf the words of the
+    /// card of limits, which the open header shows for the active environment (D-376).
+    public TerminalHost(EnvironmentSettings settings, TerminalSessions sessions, Func<string, LimitSnapshot?> limitsOf, Func<CardModel> cardOf)
     {
         _settings = settings;
         _sessions = sessions;
         _limitsOf = limitsOf;
+        _cardOf = cardOf;
         _model = TerminalWindowModel.Opened(sessions, [.. settings.Environments.Select(environment => environment.Name)]);
 
         _window = new TerminalWindow(_panel, WindowPlace.Fit(sessions.Window, WorkAreas.All()));
@@ -125,6 +128,19 @@ sealed class TerminalHost
         WireEditor();
         _panel.ResumeAsked += Resume;
         _panel.AskAnswered += Answer;
+        _panel.HeaderToggled += () => Remember(settings => settings with { HeaderOpen = !settings.HeaderOpen });
+        _panel.ListToggled += () => Remember(settings => settings with { SessionListHidden = !settings.SessionListHidden });
+        _panel.SettingsAsked += () => SettingsAsked?.Invoke();
+    }
+
+    /// The gear in the title bar.
+    public event Action? SettingsAsked;
+
+    /// A choice the person made in the window, kept across starts, and the window drawn with it.
+    private void Remember(Func<AppSettings, AppSettings> change)
+    {
+        SettingsStore.Save(change(SettingsStore.Load()));
+        Draw();
     }
 
     public event Action? Closed;
@@ -291,6 +307,14 @@ sealed class TerminalHost
                 return true;
             case System.Windows.Input.Key.K when shift:
                 OpenSessionPalette();
+                return true;
+            case System.Windows.Input.Key.B when shift:
+                // Ctrl+B belongs to Claude Code (a command to the background) and to bash (D-376).
+                if (_panel.ToggleListFromKeys())
+                {
+                    Remember(settings => settings with { SessionListHidden = !settings.SessionListHidden });
+                }
+
                 return true;
             case System.Windows.Input.Key.Tab:
                 GoRound(shift ? -1 : 1);
@@ -867,12 +891,10 @@ sealed class TerminalHost
                 ? new AskView(string.Format(Strings.TerminalCloseTitle, closing.Name), Strings.TerminalCloseBody, Strings.TerminalStopAndClose, Strings.TerminalKeepOpen)
                 : null;
 
+        var now = DateTimeOffset.Now;
         return new TerminalView(
-            [.. _settings.Environments.Select(environment => new TabView(
-                environment.Name,
-                environment.Name == _model.Environment,
-                SessionRows.Waiting(_sessions, environment.Name, Live)))],
-            Badge(DateTimeOffset.Now),
+            [.. _settings.Environments.Select(environment => Tab(environment.Name, now))],
+            Header(now),
             SessionRows.For(_sessions, _model.Environment, Live),
             _model.Environment,
             session?.Id,
@@ -886,10 +908,46 @@ sealed class TerminalHost
         };
     }
 
-    private BadgeView? Badge(DateTimeOffset now) =>
-        _limitsOf(_model.Environment) is { } snapshot && LimitBadge.For(snapshot, now) is { } badge
-            ? new BadgeView(badge.Percent, badge.Tone, badge.Kind)
-            : null;
+    private TabView Tab(string environment, DateTimeOffset now)
+    {
+        var badge = _limitsOf(environment) is { } snapshot ? LimitBadge.For(snapshot, now) : null;
+        return new TabView(
+            environment,
+            environment == _model.Environment,
+            SessionRows.Waiting(_sessions, environment, Live),
+            badge?.Percent,
+            badge?.Tone ?? LimitTone.Unknown);
+    }
+
+    /// The open header (D-373, D-376). The card is read only when the header is open: it is the
+    /// same model the card of limits draws.
+    private HeaderView Header(DateTimeOffset now)
+    {
+        var app = SettingsStore.Load();
+        if (!app.HeaderOpen)
+        {
+            return new HeaderView(false, app.SessionListHidden, []);
+        }
+
+        var blocks = _cardOf().Blocks;
+        var columns = HeaderStrip.Columns(
+            [.. _settings.Environments.Select(environment => new HeaderInput(
+                environment.Name,
+                _limitsOf(environment.Name),
+                SessionRows.Waiting(_sessions, environment.Name, Live)))],
+            _model.Environment,
+            now);
+
+        return new HeaderView(true, app.SessionListHidden, [.. columns.Select(column =>
+        {
+            var environment = _settings.Environments.First(item => item.Name == column.Environment);
+            return new HeaderColumnView(
+                column,
+                column.Active ? blocks.FirstOrDefault(block => block.Name == column.Environment) : null,
+                System.IO.Path.GetFileName(environment.ConfigDirectories[0].TrimEnd('\\', '/')),
+                environment.DirectMode);
+        })]);
+    }
 
 
     private void Save() => SettingsStore.SaveTerminal(_sessions);

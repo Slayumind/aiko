@@ -1294,6 +1294,24 @@
   <data name="TerminalRestore" xml:space="preserve">
     <value>Restore</value>
   </data>
+  <data name="TerminalSessionList" xml:space="preserve">
+    <value>Session list · Ctrl+Shift+B</value>
+  </data>
+  <data name="TerminalShowLimits" xml:space="preserve">
+    <value>Show the limits of the environments</value>
+  </data>
+  <data name="TerminalHideLimits" xml:space="preserve">
+    <value>Hide the limits</value>
+  </data>
+  <data name="TerminalQuietLimits" xml:space="preserve">
+    <value>5 h {0} · wk {1}</value>
+  </data>
+  <data name="TerminalDirectOn" xml:space="preserve">
+    <value>direct mode on</value>
+  </data>
+  <data name="TerminalDirectOff" xml:space="preserve">
+    <value>direct mode off</value>
+  </data>
   <data name="TerminalCloseWindow" xml:space="preserve">
     <value>Close</value>
   </data>

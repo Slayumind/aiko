@@ -1284,6 +1284,24 @@ public static class Strings
     /// Restore
     public static string TerminalRestore => Get("TerminalRestore");
 
+    /// Session list · Ctrl+Shift+B
+    public static string TerminalSessionList => Get("TerminalSessionList");
+
+    /// Show the limits of the environments
+    public static string TerminalShowLimits => Get("TerminalShowLimits");
+
+    /// Hide the limits
+    public static string TerminalHideLimits => Get("TerminalHideLimits");
+
+    /// 5 h {0} · wk {1}
+    public static string TerminalQuietLimits => Get("TerminalQuietLimits");
+
+    /// direct mode on
+    public static string TerminalDirectOn => Get("TerminalDirectOn");
+
+    /// direct mode off
+    public static string TerminalDirectOff => Get("TerminalDirectOff");
+
     /// Close
     public static string TerminalCloseWindow => Get("TerminalCloseWindow");
 

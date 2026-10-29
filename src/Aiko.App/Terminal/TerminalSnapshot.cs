@@ -9,7 +9,8 @@ namespace Aiko.App;
 [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763")]
 static class TerminalSnapshot
 {
-    /// --snapshot-terminal out.png [palette | folders | loader]
+    /// --snapshot-terminal out.png [palette | folders | loader | header | header-work | narrow |
+    /// narrow-header | nolist]
     public static void Write(string path, string? part)
     {
         if (part == "loader")
@@ -36,12 +37,14 @@ static class TerminalSnapshot
             return;
         }
 
-        var panel = new TerminalPanel { Width = 1000, Height = 620 };
+        var narrow = part?.StartsWith("narrow", StringComparison.Ordinal) == true;
+        var panel = new TerminalPanel { Width = narrow ? 600 : 1000, Height = 620 };
         var now = DateTimeOffset.Now;
         var seconds = now.ToUnixTimeSeconds();
+        var active = part == "header-work" ? "Work · Kodland" : "Aiko";
         panel.Show(new TerminalView(
-            [new TabView("Aiko", true, 1), new TabView("Work · Kodland", false, 0)],
-            new BadgeView(42, LimitTone.Normal, LimitKind.FiveHour),
+            [new TabView("Aiko", active == "Aiko", 0, 42, LimitTone.Normal), new TabView("Work · Kodland", active != "Aiko", 1, 82, LimitTone.Caution)],
+            Header(part, active, now),
             [
                 new RowGroup("C:\\work\\aiko", "aiko",
                 [
@@ -56,7 +59,7 @@ static class TerminalSnapshot
                     new SessionRow("c2", "Installer build", RowState.Stopped, "", seconds),
                 ]),
             ],
-            "Aiko",
+            active,
             "a1",
             "Fix the scroll of the feed",
             MainView.Terminal,
@@ -65,6 +68,45 @@ static class TerminalSnapshot
             now));
         panel.ShowGroupHoverForSnapshot();
         Snapshot.Write(panel, path);
+    }
+
+    /// The header of the snapshot: open for "header", "header-work" and "narrow-header", the list
+    /// hidden for "nolist". The limits are made up, the words are the card's own.
+    private static HeaderView Header(string? part, string active, DateTimeOffset now)
+    {
+        var open = part is "header" or "header-work" or "narrow-header";
+        if (!open)
+        {
+            return new HeaderView(false, part == "nolist", []);
+        }
+
+        LimitSnapshot Limits(string name, int fiveHour, TimeSpan fiveHourLeft, int week, TimeSpan weekLeft) =>
+            new(name, LimitSource.StatusLine, now,
+            [
+                new LimitWindow(LimitKind.FiveHour, fiveHour, now + fiveHourLeft),
+                new LimitWindow(LimitKind.SevenDay, week, now + weekLeft),
+            ]);
+
+        var limits = new Dictionary<string, LimitSnapshot>
+        {
+            ["Aiko"] = Limits("Aiko", 42, TimeSpan.FromMinutes(143), 18, TimeSpan.FromHours(84)),
+            ["Work · Kodland"] = Limits("Work · Kodland", 82, TimeSpan.FromMinutes(66), 40, TimeSpan.FromHours(98)),
+        };
+        var card = CardModel.From(
+            [.. limits.Values.Select(snapshot => CardState.From(snapshot, now))],
+            now,
+            accounts: new Dictionary<string, CardAccount> { ["Aiko"] = new("Max 5x", true), ["Work · Kodland"] = new("Team", true) });
+        var folders = new Dictionary<string, string> { ["Aiko"] = ".claude", ["Work · Kodland"] = ".claude-work" };
+
+        var columns = HeaderStrip.Columns(
+            [new HeaderInput("Aiko", limits["Aiko"], 0), new HeaderInput("Work · Kodland", limits["Work · Kodland"], 1)],
+            active,
+            now);
+        return new HeaderView(true, false, [.. columns.Select(column => new HeaderColumnView(
+            column,
+            column.Active ? card.Blocks.First(block => block.Name == column.Environment) : null,
+            folders[column.Environment],
+            false))]);
     }
 
     /// editor (empty), editor-text, editor-compose, editor-shell, editor-voice.

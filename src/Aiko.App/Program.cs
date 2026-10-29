@@ -287,7 +287,8 @@ static class Program
 
             var terminalApp = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
             var numbers = new ShellNumbers(new SnapshotWatcher());
-            var terminal = new TerminalHost(environments, SettingsStore.LoadTerminal(), numbers.SnapshotFor);
+            numbers.ReadAccounts();
+            var terminal = new TerminalHost(environments, SettingsStore.LoadTerminal(), numbers.SnapshotFor, () => numbers.CardFor(numbers.Cards(), DateTimeOffset.Now));
             terminal.Closed += terminalApp.Shutdown;
             terminal.Show();
             terminalApp.Run();

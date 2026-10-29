@@ -379,8 +379,11 @@ sealed class AikoShell : IDisposable
             return;
         }
 
-        var terminal = new TerminalHost(environments, SettingsStore.LoadTerminal(), _numbers.SnapshotFor);
+        // The open header shows the plan of each environment, as the card does.
+        _numbers.ReadAccounts();
+        var terminal = new TerminalHost(environments, SettingsStore.LoadTerminal(), _numbers.SnapshotFor, _cards.Model);
         terminal.Closed += () => _terminal = null;
+        terminal.SettingsAsked += () => OpenSettings();
         terminal.InViewChanged += _island.FollowTerminal;
         terminal.VoiceSettingsAsked += () => OpenSettings(page: SettingsPanel.TerminalPageKey);
         _terminal = terminal;

@@ -1294,6 +1294,24 @@
   <data name="TerminalRestore" xml:space="preserve">
     <value>Восстановить</value>
   </data>
+  <data name="TerminalSessionList" xml:space="preserve">
+    <value>Список сессий · Ctrl+Shift+B</value>
+  </data>
+  <data name="TerminalShowLimits" xml:space="preserve">
+    <value>Показать лимиты сред</value>
+  </data>
+  <data name="TerminalHideLimits" xml:space="preserve">
+    <value>Скрыть лимиты</value>
+  </data>
+  <data name="TerminalQuietLimits" xml:space="preserve">
+    <value>5 ч {0} · нед. {1}</value>
+  </data>
+  <data name="TerminalDirectOn" xml:space="preserve">
+    <value>прямой режим вкл</value>
+  </data>
+  <data name="TerminalDirectOff" xml:space="preserve">
+    <value>прямой режим выкл</value>
+  </data>
   <data name="TerminalCloseWindow" xml:space="preserve">
     <value>Закрыть</value>
   </data>

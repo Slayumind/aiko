@@ -24,7 +24,9 @@ sealed class TerminalPanel : UserControl
     private readonly Grid _bar = new() { Height = BarHeight, Background = Brushes.Transparent };
     private readonly StackPanel _tabs = new() { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
     private readonly StackPanel _right = new() { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
-    private readonly ColumnDefinition _listColumn = new() { Width = new GridLength(ListWidth) };
+    private readonly ColumnDefinition _listColumn = new() { Width = GridLength.Auto };
+    private readonly RotateTransform _chevronTurn = new();
+    private double _listTarget = double.NaN;
     private readonly DockPanel _list = new();
     private readonly StackPanel _rows = new();
     private readonly Grid _main = new();
@@ -32,7 +34,16 @@ sealed class TerminalPanel : UserControl
 
     /// A palette is a window of its own: nothing drawn in this one can cover a real terminal.
     private readonly Popup _palettePopup = new() { StaysOpen = false, AllowsTransparency = true, Placement = PlacementMode.Relative };
-    private readonly Button _listButton;
+    private readonly Button _listToggle;
+    private readonly Button _chevron;
+    private readonly Button _gear;
+
+    /// The open header under the title bar (D-373, D-376). It is drawn again only when it opens or
+    /// the active environment changes: the numbers in it change too often to start its motion each
+    /// time.
+    private readonly Border _strip = new() { ClipToBounds = true, Visibility = Visibility.Collapsed };
+    private string? _stripFor;
+    private bool _listHidden;
     private readonly Path _maximizeIcon = Line("");
     private readonly Button _maximize;
 
@@ -80,10 +91,13 @@ sealed class TerminalPanel : UserControl
         // same thin one by its type.
         Resources[typeof(System.Windows.Controls.Primitives.ScrollBar)] = Resources["ThinScrollBar"];
 
-        _listButton = Flat("", () => _listPopup.IsOpen = !_listPopup.IsOpen, ghost: false);
-        _listButton.Margin = new Thickness(10, 0, 0, 0);
-        _listButton.Visibility = Visibility.Collapsed;
-        _listPopup.PlacementTarget = _listButton;
+        // The list icon: in a wide window it hides the column of sessions, in a narrow one it opens
+        // the list over the terminal (D-376).
+        _listToggle = BarButton(ListIcon(), Strings.TerminalSessionList, ToggleList);
+        _listToggle.Margin = new Thickness(6, 0, 2, 0);
+        _listPopup.PlacementTarget = _listToggle;
+        _chevron = BarButton(Line("M0,0 L4,4 L8,0"), Strings.TerminalShowLimits, () => HeaderToggled?.Invoke());
+        _gear = BarButton(GearIcon(), Strings.Settings, () => SettingsAsked?.Invoke());
         // The list under the button, left edges together, as every drop-down of Aiko (DropDown).
         _listPopup.Placement = PlacementMode.Custom;
         _listPopup.CustomPopupPlacementCallback = (_, target, _) => [new CustomPopupPlacement(new Point(0, target.Height), PopupPrimaryAxis.Horizontal)];
@@ -102,9 +116,9 @@ sealed class TerminalPanel : UserControl
         ShowMaximized(false);
 
         var left = new StackPanel { Orientation = Orientation.Horizontal };
-        left.Children.Add(_listButton);
+        left.Children.Add(_listToggle);
         left.Children.Add(_tabs);
-        _tabs.Margin = new Thickness(10, 0, 0, 0);
+        left.Children.Add(_chevron);
         _bar.Children.Add(left);
         _bar.Children.Add(_right);
         _bar.Children.Add(new Border { Height = 1, VerticalAlignment = VerticalAlignment.Bottom, Background = Tokens.Brush("Hairline") });
@@ -122,6 +136,8 @@ sealed class TerminalPanel : UserControl
         var all = new DockPanel();
         DockPanel.SetDock(_bar, Dock.Top);
         all.Children.Add(_bar);
+        DockPanel.SetDock(_strip, Dock.Top);
+        all.Children.Add(_strip);
         all.Children.Add(body);
         Content = all;
 
@@ -187,6 +203,15 @@ sealed class TerminalPanel : UserControl
     public event Action? ResumeAsked;
     public event Action<bool>? AskAnswered;
     public event Action? MinimizeAsked;
+
+    /// The chevron or a ring: open or close the header (D-373).
+    public event Action? HeaderToggled;
+
+    /// The list icon or Ctrl+B in a wide window: hide or show the column of sessions (D-376).
+    public event Action? ListToggled;
+
+    /// The gear in the title bar.
+    public event Action? SettingsAsked;
     public event Action? MaximizeAsked;
     public event Action? CloseAsked;
 
@@ -217,82 +242,205 @@ sealed class TerminalPanel : UserControl
         }
 
         _right.Children.Clear();
-        if (view.Badge is { } badge)
-        {
-            _right.Children.Add(Badge(badge));
-        }
-
+        _right.Children.Add(_gear);
         foreach (var button in Buttons)
         {
             _right.Children.Add(button);
         }
 
-        _listButton.Visibility = _narrow ? Visibility.Visible : Visibility.Collapsed;
-        _listButton.Content = WithChevron(view.SessionName ?? Strings.TerminalSessions);
+        _listHidden = view.Header.ListHidden;
+        _chevron.ToolTip = view.Header.Open ? Strings.TerminalHideLimits : Strings.TerminalShowLimits;
+        _chevron.RenderTransformOrigin = new Point(0.5, 0.5);
+        _chevron.RenderTransform = _chevronTurn;
+        var turn = view.Header.Open ? 180 : 0;
+        if (_chevronTurn.Angle != turn)
+        {
+            _chevronTurn.BeginAnimation(RotateTransform.AngleProperty, Motion.To(turn, Motion.Or0(Motion.Settle), Motion.Standard));
+        }
+        ShowStrip(view);
     }
 
+    /// The header opens in place and the terminal moves down: nothing covers a real terminal.
+    private void ShowStrip(TerminalView view)
+    {
+        if (!view.Header.Open)
+        {
+            if (_stripFor is null)
+            {
+                return;
+            }
+
+            _stripFor = null;
+            if (!Motion.IsOn)
+            {
+                _strip.Child = null;
+                _strip.Visibility = Visibility.Collapsed;
+                return;
+            }
+
+            var shrink = new System.Windows.Media.Animation.DoubleAnimation(_strip.ActualHeight, 0, Motion.Expand) { EasingFunction = Motion.Standard };
+            shrink.Completed += (_, _) =>
+            {
+                // Opened again while it was closing: the new header stays.
+                if (_stripFor is not null)
+                {
+                    return;
+                }
+
+                _strip.BeginAnimation(HeightProperty, null);
+                _strip.Height = double.NaN;
+                _strip.Child = null;
+                _strip.Visibility = Visibility.Collapsed;
+            };
+            _strip.BeginAnimation(HeightProperty, shrink);
+            return;
+        }
+
+        var first = _stripFor is null;
+        var moved = _stripFor != view.Environment;
+        _stripFor = view.Environment;
+        _strip.Child = new Border
+        {
+            BorderBrush = Tokens.Brush("Hairline"),
+            BorderThickness = new Thickness(0, 0, 0, 1),
+            Child = HeaderStripView.Build(view.Header, appear: moved),
+        };
+        _strip.Visibility = Visibility.Visible;
+
+        if (first && Motion.IsOn)
+        {
+            // From nothing to its own height: measured once, then left to size itself.
+            _strip.Measure(new Size(ActualWidth > 0 ? ActualWidth : Width, double.PositiveInfinity));
+            var height = _strip.DesiredSize.Height;
+            var grow = new System.Windows.Media.Animation.DoubleAnimation(0, height, Motion.Settle) { EasingFunction = Motion.Standard };
+            grow.Completed += (_, _) =>
+            {
+                _strip.BeginAnimation(HeightProperty, null);
+                _strip.Height = double.NaN;
+            };
+            _strip.BeginAnimation(HeightProperty, grow);
+        }
+    }
+
+    /// Ctrl+Shift+B. True when the wide window should remember a hidden or shown column; a narrow
+    /// window only opens or closes its list.
+    public bool ToggleListFromKeys()
+    {
+        if (_narrow)
+        {
+            _listPopup.IsOpen = !_listPopup.IsOpen;
+            return false;
+        }
+
+        return true;
+    }
+
+    /// The column of sessions grows or shrinks to its new width; the terminal follows its edge.
+    private void SlideList(double width)
+    {
+        // The window is drawn again on every event: only a new width starts the slide.
+        if (width == _listTarget && !double.IsNaN(_list.Width))
+        {
+            return;
+        }
+
+        _listTarget = width;
+        _list.ClipToBounds = true;
+        var from = double.IsNaN(_list.Width) ? width : _list.ActualWidth;
+        if (from == width || !Motion.IsOn || !IsLoaded)
+        {
+            _list.BeginAnimation(WidthProperty, null);
+            _list.Width = width;
+            return;
+        }
+
+        var slide = new System.Windows.Media.Animation.DoubleAnimation(from, width, Motion.Settle) { EasingFunction = Motion.Standard };
+        slide.Completed += (_, _) =>
+        {
+            _list.BeginAnimation(WidthProperty, null);
+            _list.Width = width;
+        };
+        _list.BeginAnimation(WidthProperty, slide);
+    }
+
+    private void ToggleList()
+    {
+        if (_narrow)
+        {
+            _listPopup.IsOpen = !_listPopup.IsOpen;
+            return;
+        }
+
+        ListToggled?.Invoke();
+    }
+
+
+    /// The pill of an environment (D-376): the ring and percentage of its limit, its name, and how
+    /// many of its sessions wait. In a narrow window a pill that is not chosen keeps only its ring
+    /// and the waiting mark; the name and the number move to the tooltip.
     private UIElement Tab(TabView tab)
     {
+        var small = _narrow && !tab.Selected;
+        var percent = tab.Percent is { } known ? known.ToString(CultureInfo.CurrentCulture) + "%" : null;
         var row = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
-        row.Children.Add(Text(tab.Name, "TextNumber", tab.Selected ? "Ink" : "Muted", tab.Selected ? FontWeights.Medium : FontWeights.Normal));
+
+        var ring = HeaderStripView.Ring(tab.Percent, tab.Tone, 14, 2);
+        ring.Cursor = Cursors.Hand;
+        ring.ToolTip = Strings.TerminalShowLimits;
+        ring.MouseLeftButtonUp += (_, e) =>
+        {
+            e.Handled = true;
+            HeaderToggled?.Invoke();
+        };
+        WindowChromeHit(ring);
+        row.Children.Add(ring);
+
+        if (!small)
+        {
+            var name = Text(tab.Name, "TextNumber", tab.Selected ? "Ink" : "Muted", tab.Selected ? FontWeights.Medium : FontWeights.Normal);
+            name.Margin = new Thickness(6, 0, 0, 0);
+            row.Children.Add(name);
+            if (percent is not null)
+            {
+                var number = Mono(percent, "Muted");
+                number.Margin = new Thickness(6, 0, 0, 0);
+                row.Children.Add(number);
+            }
+        }
+
         if (tab.Waiting > 0)
         {
             var pause = Pause();
-            pause.Margin = new Thickness(8, 0, 5, 0);
+            pause.Margin = new Thickness(small ? 6 : 8, 0, 4, 0);
             row.Children.Add(pause);
-            row.Children.Add(Mono(_narrow ? tab.Waiting.ToString(CultureInfo.CurrentCulture) : WaitingWords(tab.Waiting), "Caution"));
+            row.Children.Add(Mono(tab.Waiting.ToString(CultureInfo.CurrentCulture), "Caution"));
         }
 
         var back = new Border
         {
             Height = 28,
-            Padding = new Thickness(12, 0, 12, 0),
+            Padding = new Thickness(small ? 8 : 10, 0, small ? 8 : 12, 0),
             Margin = new Thickness(0, 0, 4, 0),
             CornerRadius = new CornerRadius(14),
             Background = tab.Selected ? Tokens.Brush("Raised") : Brushes.Transparent,
             Cursor = Cursors.Hand,
             Child = row,
+            ToolTip = small ? (percent is null ? tab.Name : tab.Name + " · " + percent) : null,
         };
         back.MouseLeftButtonUp += (_, _) => TabPicked?.Invoke(tab.Name);
         WindowChromeHit(back);
         return back;
     }
 
-    private static string WaitingWords(int count) =>
-        string.Format(
-            CultureInfo.CurrentCulture,
-            count % 10 == 1 && count % 100 != 11 ? Strings.TerminalTabWaitingOne : Strings.TerminalTabWaitingMany,
-            count);
+    /// The list icon: a frame with a column on its left.
+    private static FrameworkElement ListIcon() => Line("M1.5,1.5 L12.5,1.5 L12.5,11.5 L1.5,11.5 Z M5,1.5 L5,11.5");
 
-    private static UIElement Badge(BadgeView badge)
-    {
-        var tone = Tokens.ToneBrush(badge.Tone);
-        var ring = new Grid { Width = 14, Height = 14, Margin = new Thickness(0, 0, 6, 0), VerticalAlignment = VerticalAlignment.Center };
-        ring.Children.Add(new Ellipse { Stroke = Tokens.Brush("Raised"), StrokeThickness = 2 });
-        ring.Children.Add(new Path { Stroke = tone, StrokeThickness = 2, Data = Arc(7, 6, badge.Percent / 100.0) });
-
-        var row = new StackPanel
-        {
-            Orientation = Orientation.Horizontal,
-            VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Thickness(0, 0, 14, 0),
-            ToolTip = badge.Kind == LimitKind.FiveHour ? Strings.TerminalLimitFiveHour : Strings.TerminalLimitWeek,
-        };
-        row.Children.Add(ring);
-        row.Children.Add(Mono(badge.Percent.ToString(CultureInfo.CurrentCulture) + "%", "Muted"));
-        return row;
-    }
-
-    /// A part of a circle from the top, clockwise.
-    private static Geometry Arc(double centre, double radius, double part)
-    {
-        part = Math.Clamp(part, 0, 0.999);
-        var angle = part * 2 * Math.PI;
-        var end = new Point(centre + radius * Math.Sin(angle), centre - radius * Math.Cos(angle));
-        var figure = new PathFigure { StartPoint = new Point(centre, centre - radius) };
-        figure.Segments.Add(new ArcSegment(end, new Size(radius, radius), 0, part > 0.5, SweepDirection.Clockwise, true));
-        return new PathGeometry([figure]);
-    }
+    /// The gear: a small circle in a ring of teeth, drawn with the thin line of the other icons.
+    private static FrameworkElement GearIcon() => Line(
+        "M7,4.6 A2.4,2.4 0 1 1 6.99,4.6 Z " +
+        "M7,0.8 L7,2.4 M7,11.6 L7,13.2 M0.8,7 L2.4,7 M11.6,7 L13.2,7 " +
+        "M2.6,2.6 L3.7,3.7 M10.3,10.3 L11.4,11.4 M2.6,11.4 L3.7,10.3 M10.3,3.7 L11.4,2.6 " +
+        "M7,2.4 A4.6,4.6 0 1 1 6.99,2.4 Z");
 
     // ---- the list of sessions ----
 
@@ -340,7 +488,7 @@ sealed class TerminalPanel : UserControl
 
         if (_narrow)
         {
-            _listColumn.Width = new GridLength(0);
+            SlideList(0);
             _listPopup.Child = new Border
             {
                 Width = ListWidth + 20,
@@ -356,7 +504,11 @@ sealed class TerminalPanel : UserControl
         }
         else
         {
-            _listColumn.Width = new GridLength(ListWidth);
+            _listPopup.IsOpen = false;
+            SlideList(_listHidden ? 0 : ListWidth);
+            // The list keeps its width while its column slides, so it is cut, not squeezed.
+            holder.Width = ListWidth;
+            holder.HorizontalAlignment = HorizontalAlignment.Left;
             _list.Children.Add(holder);
         }
     }
@@ -831,19 +983,6 @@ sealed class TerminalPanel : UserControl
         StrokeThickness = 1,
         VerticalAlignment = VerticalAlignment.Center,
     };
-
-    private static UIElement WithChevron(string text)
-    {
-        var row = new StackPanel { Orientation = Orientation.Horizontal };
-        var name = Text(text, "TextNumber", "Ink", FontWeights.Normal);
-        name.MaxWidth = 160;
-        name.TextTrimming = TextTrimming.CharacterEllipsis;
-        row.Children.Add(name);
-        var chevron = Line("M0,0 L4,4 L8,0");
-        chevron.Margin = new Thickness(8, 1, 0, 0);
-        row.Children.Add(chevron);
-        return row;
-    }
 
     private Button BarButton(UIElement icon, string tip, Action click)
     {
