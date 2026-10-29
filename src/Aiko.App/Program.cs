@@ -232,6 +232,13 @@ static class Program
             return;
         }
 
+        // Throws in an empty app three times and checks that it lives on and closes its windows.
+        if (args is ["--try-crash-guard", ..])
+        {
+            Environment.Exit(CrashGuardCheck.Run());
+            return;
+        }
+
         // Drags the island with the real mouse to the left edge and checks where it lands.
         if (args is ["--try-island", ..])
         {
@@ -465,6 +472,7 @@ static class Program
 
         var application = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
         AikoShell? shell = null;
+        CrashGuard.Watch(application, () => shell?.CloseWindows());
 
         application.Startup += (_, _) =>
         {
