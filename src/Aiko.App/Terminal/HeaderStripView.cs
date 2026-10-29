@@ -43,6 +43,9 @@ sealed class HeaderStripView
     private const double CardPadding = 12;
     private const double RowHeight = 24;
 
+    /// Session, week, and the week of the heavy model when the server sends it.
+    private const int MostRows = 3;
+
     // The timings of the owner's choice (polish of the header, round 1).
     private static readonly Duration Appear = new(TimeSpan.FromMilliseconds(200));
     private static readonly TimeSpan QuietLater = TimeSpan.FromMilliseconds(60);
@@ -124,9 +127,13 @@ sealed class HeaderStripView
         remove => _row.Settled -= value;
     }
 
-    /// The header closes: both cards go out together.
-    public void FadeOut(Duration duration) =>
-        Root.BeginAnimation(UIElement.OpacityProperty, new DoubleAnimation(0, duration) { EasingFunction = Motion.Standard });
+    /// The header closes: both cards go out together, then done runs.
+    public void FadeOut(Duration duration, Action done)
+    {
+        var fade = new DoubleAnimation(0, duration) { EasingFunction = Motion.Standard };
+        fade.Completed += (_, _) => done();
+        Root.BeginAnimation(UIElement.OpacityProperty, fade);
+    }
 
     /// The header closed: the next open starts from new cards.
     public void Clear()
@@ -194,15 +201,17 @@ sealed class HeaderStripView
             return stack;
         }
 
+        // Room for the most limit rows an environment has, so every environment gives the header
+        // the same height: a switch never moves the terminal under it.
+        var rows = new StackPanel { Margin = new Thickness(0, 4, 0, 0), MinHeight = MostRows * RowHeight };
         if (block.Rows.Count == 0)
         {
             var note = TerminalPanel.Text(block.Note, "TextSmall", "Muted", FontWeights.Normal);
             note.TextWrapping = TextWrapping.Wrap;
-            note.Margin = new Thickness(0, 8, 0, 0);
-            stack.Children.Add(note);
+            note.Margin = new Thickness(0, 4, 0, 0);
+            rows.Children.Add(note);
         }
 
-        var rows = new StackPanel { Margin = new Thickness(0, 4, 0, 0) };
         foreach (var row in block.Rows)
         {
             rows.Children.Add(Row(row));

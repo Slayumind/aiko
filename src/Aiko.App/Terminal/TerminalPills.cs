@@ -86,9 +86,8 @@ sealed class TerminalPills
         Root.Dispatcher.BeginInvoke(() => Place(selected, moved), DispatcherPriority.Loaded);
     }
 
-    /// The header opened (hidden) or closed. The pills fade and fold their width, so the chevron
-    /// beside them glides to the list icon and back instead of jumping. fold is the time of the
-    /// header that opens or closes, so both move together.
+    /// The header opened (hidden) or closed. The pills fade and fold their width. fold is the time
+    /// of the header that opens or closes, so both move together.
     public void Hide(bool hidden, Duration fold, TimeSpan after = default)
     {
         if (hidden == _hidden)

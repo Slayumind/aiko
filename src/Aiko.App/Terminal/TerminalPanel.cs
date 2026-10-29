@@ -128,9 +128,10 @@ sealed class TerminalPanel : UserControl
         ShowMaximized(false);
 
         var left = new StackPanel { Orientation = Orientation.Horizontal };
+        // The chevron stands before the pills, so it keeps its place when they fold away.
         left.Children.Add(_listToggle);
-        left.Children.Add(_pills.Root);
         left.Children.Add(_chevron);
+        left.Children.Add(_pills.Root);
         _bar.Children.Add(left);
         _bar.Children.Add(_right);
         _bar.Children.Add(new Border { Height = 1, VerticalAlignment = VerticalAlignment.Bottom, Background = Tokens.Brush("Hairline") });
@@ -292,9 +293,10 @@ sealed class TerminalPanel : UserControl
 
     /// The header opens in place and the terminal moves down: nothing covers a real terminal.
     ///
-    /// Opening: the body keeps its height and slides down under the bottom edge of the window while
-    /// the header grows, then it takes its new height once. Closing: the body takes its final height
-    /// first, then the header folds and the body slides up.
+    /// The terminal is a window of its own inside this one. Moving it on every frame of a motion
+    /// makes it lag behind the software drawing of WPF and jerk. So the header takes its full height
+    /// at once and the terminal moves and resizes once; only the cards move. Opening: the place is
+    /// there at once and the cards fade in. Closing: the cards fade out, then the place goes.
     private void ShowStrip(TerminalView view)
     {
         if (!view.Header.Open)
@@ -307,32 +309,20 @@ sealed class TerminalPanel : UserControl
             _stripFor = null;
             if (!Motion.IsOn || !IsLoaded)
             {
-                StopStrip();
-                _strip.Visibility = Visibility.Collapsed;
-                _header.Clear();
-                ReleaseBody();
+                HideStrip();
                 _pills.Hide(false, Close);
                 return;
             }
 
-            HoldBody(_strip.ActualHeight);
-            _header.FadeOut(Fold);
             _pills.Hide(false, Close, after: PillsBack);
-            var shrink = new System.Windows.Media.Animation.DoubleAnimation(_strip.ActualHeight, 0, Close) { EasingFunction = Motion.Standard };
-            shrink.Completed += (_, _) =>
+            _header.FadeOut(Fold, () =>
             {
                 // Opened again while it was closing: the new header stays.
-                if (_stripFor is not null)
+                if (_stripFor is null)
                 {
-                    return;
+                    HideStrip();
                 }
-
-                StopStrip();
-                _strip.Visibility = Visibility.Collapsed;
-                _header.Clear();
-                ReleaseBody();
-            };
-            _strip.BeginAnimation(HeightProperty, shrink);
+            });
             return;
         }
 
@@ -341,50 +331,31 @@ sealed class TerminalPanel : UserControl
         _stripFor = view.Environment;
         var motion = first ? HeaderMotion.Open : moved ? HeaderMotion.Switch : HeaderMotion.None;
 
-        // A window that opens with the header already open shows it at once: it has no width yet
-        // to measure the header against, and nothing to grow from.
-        var grow = first && Motion.IsOn && IsLoaded && ActualWidth > 0;
-        var from = _strip.Visibility == Visibility.Visible ? _strip.ActualHeight : 0;
-        _header.Show(view.Header, first && !grow ? HeaderMotion.None : motion);
+        // A window that opens with the header already open shows it at once.
+        var appear = first && Motion.IsOn && IsLoaded && ActualWidth > 0;
+        _header.Show(view.Header, first && !appear ? HeaderMotion.None : motion);
         _strip.Visibility = Visibility.Visible;
-        if (motion == HeaderMotion.Switch && Motion.IsOn && IsLoaded)
+        if (first)
+        {
+            StopStrip();
+            ReleaseBody();
+        }
+        else if (motion == HeaderMotion.Switch && Motion.IsOn && IsLoaded)
         {
             HoldForSwitch();
         }
 
         // Pills are the closed header and cards the open one (D-376): the pills give way.
         _pills.Hide(true, Grow);
+    }
 
-        if (!grow)
-        {
-            if (first)
-            {
-                StopStrip();
-                ReleaseBody();
-            }
-
-            return;
-        }
-
-        // From where it is to its own height: measured once, then left to size itself.
+    /// The header is gone, and the terminal takes its place in one step.
+    private void HideStrip()
+    {
         StopStrip();
-        _strip.Measure(new Size(ActualWidth, double.PositiveInfinity));
-        var height = _strip.DesiredSize.Height;
-        HoldBody(0);
-        _strip.Height = from;
-        var growing = new System.Windows.Media.Animation.DoubleAnimation(from, height, Grow) { EasingFunction = Motion.Standard };
-        growing.Completed += (_, _) =>
-        {
-            // Closed again while it was growing: the fold has taken over.
-            if (_stripFor is null)
-            {
-                return;
-            }
-
-            StopStrip();
-            ReleaseBody();
-        };
-        _strip.BeginAnimation(HeightProperty, growing);
+        _strip.Visibility = Visibility.Collapsed;
+        _header.Clear();
+        ReleaseBody();
     }
 
     /// Two environments with a different number of limit rows: the header moves to its new height
