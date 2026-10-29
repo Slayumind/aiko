@@ -86,6 +86,12 @@ public sealed record AppSettings
     /// What a start with Windows opens: only the tray, or the terminal window too (D-350).
     public bool OpenTerminalAtStartup { get; init; }
 
+    /// The header of the terminal window stays open until it is closed, across starts (D-373).
+    public bool HeaderOpen { get; init; }
+
+    /// The list of sessions was hidden with its icon or Ctrl+B (D-376).
+    public bool SessionListHidden { get; init; }
+
     /// A settings file we cannot read is not a reason to stop: Aiko starts with the defaults.
     /// Putting the unreadable file aside before that happens is the store's job, so that the next
     /// save does not quietly write over choices somebody may still want back.

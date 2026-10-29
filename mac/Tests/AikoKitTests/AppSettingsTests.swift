@@ -73,6 +73,8 @@ struct AppSettingsTests {
         settings.voiceLanguage = .english
         settings.terminalShown = true
         settings.openTerminalAtStartup = true
+        settings.headerOpen = true
+        settings.sessionListHidden = true
 
         #expect(AppSettings.fromJson(settings.toJson()) == settings)
     }
@@ -148,6 +150,8 @@ struct AppSettingsTests {
 
         #expect(!settings.terminalShown)
         #expect(!settings.openTerminalAtStartup)
+        #expect(!settings.headerOpen)
+        #expect(!settings.sessionListHidden)
         #expect(AppSettings.default.toJson().contains(#""openTerminalAtStartup": false"#))
     }
 }

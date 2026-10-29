@@ -76,6 +76,12 @@ public struct AppSettings: Sendable, Equatable {
     /// What a start with the system opens: only the menu bar, or the terminal window too (D-350).
     public var openTerminalAtStartup = false
 
+    /// The header of the terminal window stays open until it is closed, across starts (D-373).
+    public var headerOpen = false
+
+    /// The list of sessions was hidden with its icon or Cmd+B (D-376).
+    public var sessionListHidden = false
+
 
     public init() {}
 
@@ -122,6 +128,8 @@ public struct AppSettings: Sendable, Equatable {
         if let value = root["voiceInput"]?.boolValue { settings.voiceInput = value }
         if let value = root["terminalShown"]?.boolValue { settings.terminalShown = value }
         if let value = root["openTerminalAtStartup"]?.boolValue { settings.openTerminalAtStartup = value }
+        if let value = root["headerOpen"]?.boolValue { settings.headerOpen = value }
+        if let value = root["sessionListHidden"]?.boolValue { settings.sessionListHidden = value }
 
         if let object = root["island"]?.objectValue {
             guard let text = object["edge"]?.stringValue, let edge = screenEdge(text) else { return .default }
@@ -156,6 +164,8 @@ public struct AppSettings: Sendable, Equatable {
             ("voiceLanguage", .string(voiceLanguage.rawValue)),
             ("terminalShown", .bool(terminalShown)),
             ("openTerminalAtStartup", .bool(openTerminalAtStartup)),
+            ("headerOpen", .bool(headerOpen)),
+            ("sessionListHidden", .bool(sessionListHidden)),
         ])
 
         return JsonNode.object(root).toJsonString(indented: true) + "\n"

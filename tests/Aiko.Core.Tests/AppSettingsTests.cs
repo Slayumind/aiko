@@ -84,6 +84,8 @@ public class AppSettingsTests
             VoiceLanguage = AikoLanguage.English,
             TerminalShown = true,
             OpenTerminalAtStartup = true,
+            HeaderOpen = true,
+            SessionListHidden = true,
         };
 
         var back = AppSettings.FromJson(settings.ToJson());
@@ -171,6 +173,8 @@ public class AppSettingsTests
 
         Assert.False(settings.TerminalShown);
         Assert.False(settings.OpenTerminalAtStartup);
+        Assert.False(settings.HeaderOpen);
+        Assert.False(settings.SessionListHidden);
         Assert.Contains("\"openTerminalAtStartup\": false", AppSettings.Default.ToJson());
     }
 }
