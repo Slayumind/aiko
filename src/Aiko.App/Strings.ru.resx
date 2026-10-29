@@ -1303,8 +1303,11 @@
   <data name="TerminalHideLimits" xml:space="preserve">
     <value>Скрыть лимиты</value>
   </data>
-  <data name="TerminalQuietLimits" xml:space="preserve">
-    <value>5 ч {0} · нед. {1}</value>
+  <data name="CardShortSession" xml:space="preserve">
+    <value>5 ч</value>
+  </data>
+  <data name="CardShortWeek" xml:space="preserve">
+    <value>нед</value>
   </data>
   <data name="TerminalDirectOn" xml:space="preserve">
     <value>прямой режим вкл</value>

@@ -2968,10 +2968,17 @@
     ]
   ],
   [
-    "TerminalQuietLimits",
+    "CardShortSession",
     [
-      "5 h {0} · wk {1}",
-      "5 ч {0} · нед. {1}"
+      "5 h",
+      "5 ч"
+    ]
+  ],
+  [
+    "CardShortWeek",
+    [
+      "wk",
+      "нед"
     ]
   ],
   [

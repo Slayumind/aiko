@@ -42,11 +42,19 @@ sealed class TerminalPanel : UserControl
     /// the active environment changes: the numbers in it change too often to start its motion each
     /// time.
     private readonly Border _strip = new() { ClipToBounds = true, Visibility = Visibility.Collapsed };
+    private readonly HeaderStripView _header;
     private string? _stripFor;
 
-    /// How long the cards take to go out, and the header to fold, when it closes.
+    /// Everything under the title bar and the header: the list and the terminal. While the header
+    /// opens or closes it keeps one height, so the terminal changes its size once and not on
+    /// every frame (each size is a resize of the pseudo console and a full redraw of Claude Code).
+    private readonly Grid _body = new();
+
+    /// How long the header takes to grow, the cards to go out, and the header to fold.
+    private static readonly Duration Grow = new(TimeSpan.FromMilliseconds(240));
     private static readonly Duration Fold = new(TimeSpan.FromMilliseconds(120));
     private static readonly Duration Close = new(TimeSpan.FromMilliseconds(220));
+    private static readonly TimeSpan PillsBack = TimeSpan.FromMilliseconds(100);
     private bool _listHidden;
     private readonly Path _maximizeIcon = Line("");
     private readonly Button _maximize;
@@ -127,22 +135,38 @@ sealed class TerminalPanel : UserControl
         _bar.Children.Add(_right);
         _bar.Children.Add(new Border { Height = 1, VerticalAlignment = VerticalAlignment.Bottom, Background = Tokens.Brush("Hairline") });
 
-        var body = new Grid();
-        body.ColumnDefinitions.Add(_listColumn);
-        body.ColumnDefinitions.Add(new ColumnDefinition());
+        _header = new HeaderStripView(environment => TabPicked?.Invoke(environment));
+        _header.Settled += () =>
+        {
+            // The header has its new height after a switch. While it still grows or folds, the
+            // end of that motion lets the body go.
+            if (_stripFor is not null && !_strip.HasAnimatedProperties)
+            {
+                ReleaseBody();
+            }
+        };
+        _strip.Child = new Border
+        {
+            BorderBrush = Tokens.Brush("Hairline"),
+            BorderThickness = new Thickness(0, 0, 0, 1),
+            Child = _header.Root,
+        };
+
+        _body.ColumnDefinitions.Add(_listColumn);
+        _body.ColumnDefinitions.Add(new ColumnDefinition());
         var listSide = new Grid();
         listSide.Children.Add(_list);
         listSide.Children.Add(new Border { Width = 1, HorizontalAlignment = HorizontalAlignment.Right, Background = Tokens.Brush("Hairline") });
-        body.Children.Add(listSide);
+        _body.Children.Add(listSide);
         Grid.SetColumn(_main, 1);
-        body.Children.Add(_main);
+        _body.Children.Add(_main);
 
         var all = new DockPanel();
         DockPanel.SetDock(_bar, Dock.Top);
         all.Children.Add(_bar);
         DockPanel.SetDock(_strip, Dock.Top);
         all.Children.Add(_strip);
-        all.Children.Add(body);
+        all.Children.Add(_body);
         Content = all;
 
         _resume = Flat(Strings.TerminalResume, () => ResumeAsked?.Invoke(), ghost: false, main: true);
@@ -267,6 +291,10 @@ sealed class TerminalPanel : UserControl
     }
 
     /// The header opens in place and the terminal moves down: nothing covers a real terminal.
+    ///
+    /// Opening: the body keeps its height and slides down under the bottom edge of the window while
+    /// the header grows, then it takes its new height once. Closing: the body takes its final height
+    /// first, then the header folds and the body slides up.
     private void ShowStrip(TerminalView view)
     {
         if (!view.Header.Open)
@@ -277,17 +305,19 @@ sealed class TerminalPanel : UserControl
             }
 
             _stripFor = null;
-            if (!Motion.IsOn)
+            if (!Motion.IsOn || !IsLoaded)
             {
-                _strip.Child = null;
+                StopStrip();
                 _strip.Visibility = Visibility.Collapsed;
-                _pills.Hide(false);
+                _header.Clear();
+                ReleaseBody();
+                _pills.Hide(false, Close);
                 return;
             }
 
-            // The cards go out first, then the header folds, and the pills come back as it closes.
-            _strip.Child?.BeginAnimation(OpacityProperty, new System.Windows.Media.Animation.DoubleAnimation(0, Fold) { EasingFunction = Motion.Standard });
-            _pills.Hide(false, after: TimeSpan.FromMilliseconds(100));
+            HoldBody(_strip.ActualHeight);
+            _header.FadeOut(Fold);
+            _pills.Hide(false, Close, after: PillsBack);
             var shrink = new System.Windows.Media.Animation.DoubleAnimation(_strip.ActualHeight, 0, Close) { EasingFunction = Motion.Standard };
             shrink.Completed += (_, _) =>
             {
@@ -297,10 +327,10 @@ sealed class TerminalPanel : UserControl
                     return;
                 }
 
-                _strip.BeginAnimation(HeightProperty, null);
-                _strip.Height = double.NaN;
-                _strip.Child = null;
+                StopStrip();
                 _strip.Visibility = Visibility.Collapsed;
+                _header.Clear();
+                ReleaseBody();
             };
             _strip.BeginAnimation(HeightProperty, shrink);
             return;
@@ -310,32 +340,93 @@ sealed class TerminalPanel : UserControl
         var moved = _stripFor != view.Environment;
         _stripFor = view.Environment;
         var motion = first ? HeaderMotion.Open : moved ? HeaderMotion.Switch : HeaderMotion.None;
-        _strip.Child = new Border
-        {
-            BorderBrush = Tokens.Brush("Hairline"),
-            BorderThickness = new Thickness(0, 0, 0, 1),
-            Child = HeaderStripView.Build(view.Header, motion, environment => TabPicked?.Invoke(environment)),
-        };
-        _strip.Visibility = Visibility.Visible;
-
-        // Pills are the closed header and cards the open one (D-376): the pills give way.
-        _pills.Hide(true);
 
         // A window that opens with the header already open shows it at once: it has no width yet
         // to measure the header against, and nothing to grow from.
-        if (first && Motion.IsOn && ActualWidth > 0)
+        var grow = first && Motion.IsOn && IsLoaded && ActualWidth > 0;
+        var from = _strip.Visibility == Visibility.Visible ? _strip.ActualHeight : 0;
+        _header.Show(view.Header, first && !grow ? HeaderMotion.None : motion);
+        _strip.Visibility = Visibility.Visible;
+        if (motion == HeaderMotion.Switch && Motion.IsOn && IsLoaded)
         {
-            // From nothing to its own height: measured once, then left to size itself.
-            _strip.Measure(new Size(ActualWidth, double.PositiveInfinity));
-            var height = _strip.DesiredSize.Height;
-            var grow = new System.Windows.Media.Animation.DoubleAnimation(0, height, Motion.Settle) { EasingFunction = Motion.Standard };
-            grow.Completed += (_, _) =>
-            {
-                _strip.BeginAnimation(HeightProperty, null);
-                _strip.Height = double.NaN;
-            };
-            _strip.BeginAnimation(HeightProperty, grow);
+            HoldForSwitch();
         }
+
+        // Pills are the closed header and cards the open one (D-376): the pills give way.
+        _pills.Hide(true, Grow);
+
+        if (!grow)
+        {
+            if (first)
+            {
+                StopStrip();
+                ReleaseBody();
+            }
+
+            return;
+        }
+
+        // From where it is to its own height: measured once, then left to size itself.
+        StopStrip();
+        _strip.Measure(new Size(ActualWidth, double.PositiveInfinity));
+        var height = _strip.DesiredSize.Height;
+        HoldBody(0);
+        _strip.Height = from;
+        var growing = new System.Windows.Media.Animation.DoubleAnimation(from, height, Grow) { EasingFunction = Motion.Standard };
+        growing.Completed += (_, _) =>
+        {
+            // Closed again while it was growing: the fold has taken over.
+            if (_stripFor is null)
+            {
+                return;
+            }
+
+            StopStrip();
+            ReleaseBody();
+        };
+        _strip.BeginAnimation(HeightProperty, growing);
+    }
+
+    /// Two environments with a different number of limit rows: the header moves to its new height
+    /// with the swap, and the body is held as when the header opens (taller) or closes (lower), so
+    /// the terminal changes its size once.
+    private void HoldForSwitch()
+    {
+        _strip.Measure(new Size(ActualWidth, double.PositiveInfinity));
+        var change = _header.SwitchHeightChange;
+        if (Math.Abs(change) >= 0.5)
+        {
+            HoldBody(change < 0 ? -change : 0);
+        }
+    }
+
+    /// The header sizes itself again.
+    private void StopStrip()
+    {
+        _strip.BeginAnimation(HeightProperty, null);
+        _strip.Height = double.NaN;
+    }
+
+    /// The body keeps its height plus extra while the header moves. Its top follows the header and
+    /// its bottom goes under the edge of the window, where Windows cuts the terminal off. When it is
+    /// held already it keeps that height: the one the terminal has now.
+    private void HoldBody(double extra)
+    {
+        if (!double.IsNaN(_body.Height) || _body.ActualHeight <= 0)
+        {
+            return;
+        }
+
+        _body.VerticalAlignment = VerticalAlignment.Top;
+        _body.Height = _body.ActualHeight + extra;
+    }
+
+    /// The body fills the rest of the window again: on opening, this is the one resize of the
+    /// terminal.
+    private void ReleaseBody()
+    {
+        _body.Height = double.NaN;
+        _body.VerticalAlignment = VerticalAlignment.Stretch;
     }
 
     /// Ctrl+Shift+B. True when the wide window should remember a hidden or shown column; a narrow
@@ -394,8 +485,9 @@ sealed class TerminalPanel : UserControl
     /// The pill of an environment (D-376): the ring and percentage of its limit, its name, and how
     /// many of its sessions wait. In a narrow window a pill that is not chosen keeps only its ring
     /// and the waiting mark; the name and the number move to the tooltip.
-    private FrameworkElement Tab(TabView tab)
+    private Pill Tab(TabView tab)
     {
+        TextBlock? label = null;
         var small = _narrow && !tab.Selected;
         var percent = tab.Percent is { } known ? known.ToString(CultureInfo.CurrentCulture) + "%" : null;
         var row = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
@@ -413,9 +505,12 @@ sealed class TerminalPanel : UserControl
 
         if (!small)
         {
-            var name = Text(tab.Name, "TextNumber", tab.Selected ? "Ink" : "Muted", tab.Selected ? FontWeights.Medium : FontWeights.Normal);
+            // One weight for every pill: the chosen one differs by colour and its background only,
+            // so a pill keeps its width when it is chosen and the background lands on it.
+            var name = Text(tab.Name, "TextNumber", tab.Selected ? "Ink" : "Muted", FontWeights.Medium);
             name.Margin = new Thickness(6, 0, 0, 0);
             row.Children.Add(name);
+            label = name;
             if (percent is not null)
             {
                 var number = Mono(percent, "Muted");
@@ -445,7 +540,7 @@ sealed class TerminalPanel : UserControl
         };
         back.MouseLeftButtonUp += (_, _) => TabPicked?.Invoke(tab.Name);
         WindowChromeHit(back);
-        return back;
+        return new Pill(back, label, tab.Name);
     }
 
     /// The list icon: a frame with a column on its left.

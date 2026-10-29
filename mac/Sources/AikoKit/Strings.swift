@@ -464,7 +464,8 @@ public enum Strings {
         "TerminalSessionList": ("Session list · Ctrl+Shift+B", "Список сессий · Ctrl+Shift+B"),
         "TerminalShowLimits": ("Show the limits of the environments", "Показать лимиты сред"),
         "TerminalHideLimits": ("Hide the limits", "Скрыть лимиты"),
-        "TerminalQuietLimits": ("5 h {0} · wk {1}", "5 ч {0} · нед. {1}"),
+        "CardShortSession": ("5 h", "5 ч"),
+        "CardShortWeek": ("wk", "нед"),
         "TerminalDirectOn": ("direct mode on", "прямой режим вкл"),
         "TerminalDirectOff": ("direct mode off", "прямой режим выкл"),
         "TerminalCloseWindow": ("Close", "Закрыть"),
@@ -1783,8 +1784,11 @@ public enum Strings {
     /// Hide the limits
     public static var terminalHideLimits: String { Strings.get("TerminalHideLimits") }
 
-    /// 5 h {0} · wk {1}
-    public static var terminalQuietLimits: String { Strings.get("TerminalQuietLimits") }
+    /// 5 h
+    public static var cardShortSession: String { Strings.get("CardShortSession") }
+
+    /// wk
+    public static var cardShortWeek: String { Strings.get("CardShortWeek") }
 
     /// direct mode on
     public static var terminalDirectOn: String { Strings.get("TerminalDirectOn") }

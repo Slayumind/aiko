@@ -8,8 +8,8 @@ using Aiko.Core;
 
 namespace Aiko.App;
 
-/// How the open header comes in: with its lines one after another when it opens, sideways when the
-/// active environment changes, or at once when only its numbers changed.
+/// How the open header comes in: its cards appear when it opens, they change places when the
+/// active environment changes, or only their numbers change.
 enum HeaderMotion
 {
     None,
@@ -17,69 +17,124 @@ enum HeaderMotion
     Switch,
 }
 
-/// The open header of the terminal window (D-373, D-376): the active environment on the left with
-/// the words of the card of limits, the others as narrow quiet columns. When the header is open its
-/// cards are the way between environments: a click on a quiet one makes it active. It only draws a
-/// HeaderView.
+/// The open header of the terminal window (D-373, D-376): one card per environment, the active one
+/// on the left and in full, the others as narrow quiet cards. When the header is open its cards are
+/// the way between environments: a click on a quiet one makes it active.
+///
+/// The card of an environment is kept while the header is open, so on a switch the same card moves
+/// to its new place and changes its size, and only its contents cross-fade. It draws a HeaderView.
 [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763")]
-static class HeaderStripView
+sealed class HeaderStripView
 {
-    /// How far a card comes from when the environments change places.
-    private const double SwitchShift = 40;
-
-    /// The quiet column of another environment.
+    /// The quiet card of another environment.
     public const double QuietWidth = 168;
 
-    /// The bars of the active environment stop here: a bar across a wide window reads as noise.
-    private const double BarsMaxWidth = 460;
+    /// The active card, and the least it shrinks to in a narrow window.
+    public const double ActiveWidth = 480;
+    public const double ActiveMinWidth = 300;
 
-    /// Each line of the header comes a little after the one above it, like ink in a book.
-    private static readonly TimeSpan Step = TimeSpan.FromMilliseconds(30);
+    /// Under this width the active card names its limit windows short ("5 h", "wk", "Fable"), so
+    /// the bars keep a length that can be read.
+    public const double CompactBelow = 440;
 
-    public static FrameworkElement Build(HeaderView header, HeaderMotion motion, Action<string> pick)
+    /// Between two cards, and around the row of cards.
+    public const double Gap = 12;
+    private static readonly Thickness StripPadding = new(12, 10, 12, 10);
+    private const double CardPadding = 12;
+    private const double RowHeight = 24;
+
+    // The timings of the owner's choice (polish of the header, round 1).
+    private static readonly Duration Appear = new(TimeSpan.FromMilliseconds(200));
+    private static readonly TimeSpan QuietLater = TimeSpan.FromMilliseconds(60);
+    private static readonly Duration ContentOut = new(TimeSpan.FromMilliseconds(100));
+    private static readonly TimeSpan ContentInAt = TimeSpan.FromMilliseconds(160);
+    private static readonly Duration ContentIn = new(TimeSpan.FromMilliseconds(120));
+
+    private readonly Action<string> _pick;
+    private readonly HeaderCards _row = new();
+    private readonly Dictionary<string, Card> _cards = [];
+
+    public HeaderStripView(Action<string> pick)
     {
-        var grid = new Grid();
-        var line = 0;
-        foreach (var column in header.Columns)
+        _pick = pick;
+        Root = new Border { Padding = StripPadding, Child = _row };
+    }
+
+    /// The row of cards with the padding of the strip around it.
+    public FrameworkElement Root { get; }
+
+    public void Show(HeaderView header, HeaderMotion motion)
+    {
+        if (motion == HeaderMotion.Open)
         {
-            var at = grid.ColumnDefinitions.Count;
-            grid.ColumnDefinitions.Add(new ColumnDefinition
-            {
-                Width = column.Column.Active ? new GridLength(1, GridUnitType.Star) : new GridLength(QuietWidth),
-            });
-
-            var lines = column.Column.Active ? Full(column) : Quiet(column);
-            var stack = new StackPanel { Margin = column.Column.Active ? new Thickness(16, 12, 16, 14) : new Thickness(14, 12, 14, 14) };
-            Grid.SetIsSharedSizeScope(stack, true);
-            // The new active card comes from the right, where it stood; the one it replaced goes the
-            // other way into the quiet column.
-            var from = motion == HeaderMotion.Switch ? (column.Column.Active ? SwitchShift : -SwitchShift) : 0;
-            foreach (var element in lines)
-            {
-                stack.Children.Add(element);
-                if (motion != HeaderMotion.None)
-                {
-                    Ink(element, Step * line++, from, motion == HeaderMotion.Open ? 3 : 0);
-                }
-            }
-
-            var cell = new Border
-            {
-                Child = stack,
-                Background = Brushes.Transparent,
-                BorderBrush = Tokens.Brush("Hairline"),
-                BorderThickness = new Thickness(at == 0 ? 0 : 1, 0, 0, 0),
-            };
-            if (!column.Column.Active)
-            {
-                Pickable(cell, column.Column.Environment, pick);
-            }
-
-            Grid.SetColumn(cell, at);
-            grid.Children.Add(cell);
+            // Opened again while it was closing: the fade out stops here.
+            Root.BeginAnimation(UIElement.OpacityProperty, null);
+            Root.Opacity = 1;
         }
 
-        return grid;
+        var animate = Motion.IsOn && motion != HeaderMotion.None;
+        var order = new List<Card>();
+        foreach (var column in header.Columns)
+        {
+            if (!_cards.TryGetValue(column.Column.Environment, out var card))
+            {
+                card = new Card(column.Column.Environment, _pick);
+                _cards[column.Column.Environment] = card;
+                _row.Children.Add(card.Root);
+            }
+
+            var content = column.Column.Active ? Full(column) : Quiet(column);
+            if (motion == HeaderMotion.Switch && animate && card.Active != column.Column.Active)
+            {
+                card.CrossFade(content, column.Column.Active);
+            }
+            else
+            {
+                card.Put(content, column.Column.Active);
+            }
+
+            order.Add(card);
+        }
+
+        foreach (var gone in _cards.Where(pair => !order.Contains(pair.Value)).ToList())
+        {
+            _row.Children.Remove(gone.Value.Root);
+            _cards.Remove(gone.Key);
+        }
+
+        _row.Place([.. order.Select(card => (UIElement)card.Root)], order.FindIndex(card => card.Active), animate && motion == HeaderMotion.Switch);
+
+        if (animate && motion == HeaderMotion.Open)
+        {
+            for (var at = 0; at < order.Count; at++)
+            {
+                order[at].Rise(at == 0 ? TimeSpan.Zero : QuietLater);
+            }
+        }
+    }
+
+    /// How much taller the header gets during the switch now running; negative when it gets
+    /// lower. Known after a measure.
+    public double SwitchHeightChange => _row.HeightChange;
+
+    /// A switch has ended: the cards are in place and the header has its new height.
+    public event Action? Settled
+    {
+        add => _row.Settled += value;
+        remove => _row.Settled -= value;
+    }
+
+    /// The header closes: both cards go out together.
+    public void FadeOut(Duration duration) =>
+        Root.BeginAnimation(UIElement.OpacityProperty, new DoubleAnimation(0, duration) { EasingFunction = Motion.Standard });
+
+    /// The header closed: the next open starts from new cards.
+    public void Clear()
+    {
+        _row.Children.Clear();
+        _cards.Clear();
+        Root.BeginAnimation(UIElement.OpacityProperty, null);
+        Root.Opacity = 1;
     }
 
     /// The ring of a limit: a full grey track and the used part from the top, clockwise.
@@ -113,93 +168,132 @@ static class HeaderStripView
         return new PathGeometry([figure]);
     }
 
-    private static IEnumerable<FrameworkElement> Full(HeaderColumnView column)
+    public static string WaitingWords(int count) =>
+        string.Format(
+            CultureInfo.CurrentCulture,
+            count % 10 == 1 && count % 100 != 11 ? Strings.TerminalTabWaitingOne : Strings.TerminalTabWaitingMany,
+            count);
+
+    /// The width of the active card: as wide as it wants when there is room, narrower in a narrow
+    /// window, never under the minimum.
+    public static double ActiveWidthFor(double room, int quietCards) =>
+        Math.Clamp(room - quietCards * (QuietWidth + Gap), ActiveMinWidth, ActiveWidth);
+
+    // ---- the contents of a card ----
+
+    /// The active card: the head, one line per limit, and the profile.
+    private static FrameworkElement Full(HeaderColumnView column)
     {
-        yield return Head(column, quiet: false);
+        var stack = new StackPanel();
+        // The names, resets and tone words of the rows share their widths, so the bars line up.
+        Grid.SetIsSharedSizeScope(stack, true);
+        stack.Children.Add(Head(column, column.Block));
 
         if (column.Block is not { } block)
         {
-            yield break;
+            return stack;
         }
 
         if (block.Rows.Count == 0)
         {
-            var note = TerminalPanel.Text(block.Note, "TextNumber", "Muted", FontWeights.Normal);
+            var note = TerminalPanel.Text(block.Note, "TextSmall", "Muted", FontWeights.Normal);
             note.TextWrapping = TextWrapping.Wrap;
-            note.Margin = new Thickness(0, 6, 0, 0);
-            yield return note;
+            note.Margin = new Thickness(0, 8, 0, 0);
+            stack.Children.Add(note);
         }
 
+        var rows = new StackPanel { Margin = new Thickness(0, 4, 0, 0) };
         foreach (var row in block.Rows)
         {
-            yield return Bar(row);
-            yield return Under(row);
+            rows.Children.Add(Row(row));
         }
 
-        yield return Profile(column, block);
+        stack.Children.Add(rows);
+        stack.Children.Add(Profile(column, block));
+        return stack;
     }
 
-    private static IEnumerable<FrameworkElement> Quiet(HeaderColumnView column)
+    /// The quiet card: a dim head, two small bars, and the one bright thing, "N waiting".
+    private static FrameworkElement Quiet(HeaderColumnView column)
     {
-        yield return Head(column, quiet: true);
+        var stack = new StackPanel();
+        Grid.SetIsSharedSizeScope(stack, true);
+        stack.Children.Add(Head(column, null));
 
-        var numbers = TerminalPanel.Mono(
-            string.Format(CultureInfo.CurrentCulture, Strings.TerminalQuietLimits, Percent(column.Column.FiveHour), Percent(column.Column.SevenDay)),
-            "Muted");
-        numbers.Opacity = 0.55;
-        numbers.Margin = new Thickness(0, 6, 0, 0);
-        yield return numbers;
+        var rows = new StackPanel { Margin = new Thickness(0, 8, 0, 0) };
+        rows.Children.Add(MiniRow(Strings.CardShortSession, column.Column.FiveHour));
+        rows.Children.Add(MiniRow(Strings.CardShortWeek, column.Column.SevenDay));
+        stack.Children.Add(rows);
 
         if (column.Column.Waiting > 0)
         {
-            // The one bright thing in a quiet column: a session there waits for the person.
-            var waiting = TerminalPanel.Mono(WaitingWords(column.Column.Waiting), "Caution");
-            waiting.Margin = new Thickness(0, 4, 0, 0);
-            yield return waiting;
+            var waiting = TerminalPanel.Text(WaitingWords(column.Column.Waiting), "TextSmall", "Caution", FontWeights.Normal);
+            waiting.Margin = new Thickness(0, 8, 0, 0);
+            stack.Children.Add(waiting);
         }
+
+        return stack;
     }
 
-    private static FrameworkElement Head(HeaderColumnView column, bool quiet)
+    /// Ring, name, "N waiting", and at the right end "working now" when the environment works.
+    private static FrameworkElement Head(HeaderColumnView column, EnvironmentBlock? block)
     {
-        var head = new StackPanel { Orientation = Orientation.Horizontal };
+        var quiet = block is null;
+        var head = new DockPanel { Height = 20, LastChildFill = true };
+
+        if (block is { HaloVisibility: Visibility.Visible })
+        {
+            var state = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(12, 0, 0, 0) };
+            var dot = new Grid { Width = 12, Height = 12, Margin = new Thickness(0, 0, 4, 0), VerticalAlignment = VerticalAlignment.Center };
+            dot.Children.Add(new Ellipse { Width = 12, Height = 12, Fill = Tokens.Brush("Positive"), Opacity = 0.18 });
+            dot.Children.Add(new Ellipse { Width = 6, Height = 6, Fill = block.StateFill, Stroke = block.StateRing, StrokeThickness = 1.5 });
+            state.Children.Add(dot);
+            var words = TerminalPanel.Text(block.State, "TextTiny", "Ink", FontWeights.Normal);
+            words.Foreground = block.StateText;
+            state.Children.Add(words);
+            DockPanel.SetDock(state, Dock.Right);
+            head.Children.Add(state);
+        }
+
+        var left = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
         var ring = Ring(column.Column.FiveHour, quiet ? LimitTone.Unknown : ToneOf(column), 14, 2, quiet ? 0.6 : 1);
         ring.Margin = new Thickness(0, 0, 8, 0);
-        head.Children.Add(ring);
+        left.Children.Add(ring);
 
         var name = TerminalPanel.Text(column.Column.Environment, "TextNumber", quiet ? "Muted" : "Ink", quiet ? FontWeights.Normal : FontWeights.Medium);
         name.TextTrimming = TextTrimming.CharacterEllipsis;
-        head.Children.Add(name);
+        left.Children.Add(name);
 
         if (!quiet && column.Column.Waiting > 0)
         {
-            var waiting = TerminalPanel.Mono(WaitingWords(column.Column.Waiting), "Caution");
+            var waiting = TerminalPanel.Text(WaitingWords(column.Column.Waiting), "TextSmall", "Caution", FontWeights.Normal);
             waiting.Margin = new Thickness(8, 0, 0, 0);
-            head.Children.Add(waiting);
+            left.Children.Add(waiting);
         }
 
+        head.Children.Add(left);
         return head;
     }
 
-    /// "5 hours ━━━━━━──── 42%": the name, the bar and the number, no wider than BarsMaxWidth.
-    private static FrameworkElement Bar(LimitRow row)
+    /// "Session · 5 hours ━━━━━━──── 42%  1h 6m  running low": one line of 24 px per limit.
+    private static FrameworkElement Row(LimitRow row)
     {
-        var grid = new Grid();
-        // The names of the windows share one width, so both bars start at the same place.
+        var grid = new Grid { Height = RowHeight };
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto, SharedSizeGroup = "LimitName" });
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(44) });
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(40) });
+        // The countdown and the tone word have places of their own in every state, so the bar keeps
+        // its length when the time gets shorter or a limit starts to run low. Only a word longer
+        // than the place ("almost gone" in some languages) widens it.
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto, MinWidth = CountdownReserve(), SharedSizeGroup = "LimitReset" });
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto, MinWidth = ToneReserve(), SharedSizeGroup = "LimitTone" });
 
-        var name = TerminalPanel.Text(row.Name, "TextSmall", "Muted", FontWeights.Normal);
+        var name = new LimitWindowName(row.Name, row.ShortName);
         name.Margin = new Thickness(0, 0, 12, 0);
         grid.Children.Add(name);
 
-        var track = new Grid { Height = 4, VerticalAlignment = VerticalAlignment.Center };
-        track.ColumnDefinitions.Add(new ColumnDefinition { Width = row.Fill });
-        track.ColumnDefinitions.Add(new ColumnDefinition { Width = row.Rest });
-        var back = new Border { CornerRadius = new CornerRadius(2), Background = Tokens.Brush("Raised") };
-        Grid.SetColumnSpan(back, 2);
-        track.Children.Add(back);
-        track.Children.Add(new Border { CornerRadius = new CornerRadius(2), Background = row.Tone });
+        var track = Track(row.Fill, row.Rest, 4, row.Tone, 1);
+        track.Margin = new Thickness(0, 0, 8, 0);
         Grid.SetColumn(track, 1);
         grid.Children.Add(track);
 
@@ -208,29 +302,62 @@ static class HeaderStripView
         Grid.SetColumn(percent, 2);
         grid.Children.Add(percent);
 
-        // A star column with a ceiling keeps the bar on the left and lets it shrink in a narrow window.
-        var room = new Grid { Margin = new Thickness(0, 8, 0, 0) };
-        room.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star), MaxWidth = BarsMaxWidth });
-        room.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-        room.Children.Add(grid);
-        return room;
-    }
+        var resets = TerminalPanel.Mono(row.Countdown, "Muted");
+        resets.Margin = new Thickness(12, 0, 0, 0);
+        Grid.SetColumn(resets, 3);
+        grid.Children.Add(resets);
 
-    /// The reset time under a bar, and the word of its tone or pace beside it.
-    private static FrameworkElement Under(LimitRow row)
-    {
-        var line = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 3, 0, 0) };
-        line.Children.Add(TerminalPanel.Mono(row.Resets, "Muted"));
-        // Only the word of a tone ("running low"); a guess about the pace is the card's detail.
+        // Only the word of a tone ("running low"), in its colour; a guess about the pace is the
+        // card's detail.
         if (row.Pace.Length > 0 && !ReferenceEquals(row.PaceTone, Tokens.Brush("Muted")))
         {
-            var pace = TerminalPanel.Mono(row.Pace, "Muted");
-            pace.Foreground = row.PaceTone;
-            pace.Margin = new Thickness(12, 0, 0, 0);
-            line.Children.Add(pace);
+            var tone = TerminalPanel.Text(row.Pace, "TextSmall", "Muted", FontWeights.Normal);
+            tone.Foreground = row.PaceTone;
+            tone.Margin = new Thickness(8, 0, 0, 0);
+            Grid.SetColumn(tone, 4);
+            grid.Children.Add(tone);
         }
 
-        return line;
+        return grid;
+    }
+
+    /// "5 h ━━── 82%" in a quiet card: a thin dim bar, nothing coloured.
+    private static FrameworkElement MiniRow(string label, int? percent)
+    {
+        var grid = new Grid { Height = 16 };
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto, SharedSizeGroup = "QuietName" });
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(32) });
+
+        var name = TerminalPanel.Mono(label, "Muted");
+        name.Margin = new Thickness(0, 0, 8, 0);
+        grid.Children.Add(name);
+
+        var used = Math.Clamp(percent ?? 0, 0, 100);
+        var track = Track(new GridLength(used, GridUnitType.Star), new GridLength(100 - used, GridUnitType.Star), 2, Tokens.Brush("Muted"), 0.5);
+        track.Margin = new Thickness(0, 0, 4, 0);
+        Grid.SetColumn(track, 1);
+        grid.Children.Add(track);
+
+        var number = TerminalPanel.Mono(Percent(percent), "Muted");
+        number.HorizontalAlignment = HorizontalAlignment.Right;
+        Grid.SetColumn(number, 2);
+        grid.Children.Add(number);
+        return grid;
+    }
+
+    /// A bar: a grey track and the used part in two star columns, so the fill follows the
+    /// percentage without any measuring in code.
+    private static FrameworkElement Track(GridLength fill, GridLength rest, double height, Brush tone, double toneOpacity)
+    {
+        var track = new Grid { Height = height, VerticalAlignment = VerticalAlignment.Center };
+        track.ColumnDefinitions.Add(new ColumnDefinition { Width = fill });
+        track.ColumnDefinitions.Add(new ColumnDefinition { Width = rest });
+        var back = new Border { CornerRadius = new CornerRadius(height / 2), Background = Tokens.Brush("Raised") };
+        Grid.SetColumnSpan(back, 2);
+        track.Children.Add(back);
+        track.Children.Add(new Border { CornerRadius = new CornerRadius(height / 2), Background = tone, Opacity = toneOpacity });
+        return track;
     }
 
     /// "Max 5x · .claude · direct mode off": who this environment is, on one line.
@@ -246,51 +373,400 @@ static class HeaderStripView
         parts.Add(column.Direct ? Strings.TerminalDirectOn : Strings.TerminalDirectOff);
 
         var line = TerminalPanel.Text(string.Join("  ·  ", parts), "TextSmall", "Muted", FontWeights.Normal);
-        line.Margin = new Thickness(0, 10, 0, 0);
+        line.Margin = new Thickness(0, 8, 0, 0);
         line.TextTrimming = TextTrimming.CharacterEllipsis;
         return line;
     }
+
+    /// The place of the tone word: the word of "running low" in the current language, and the gap
+    /// before it.
+    private static double ToneReserve() =>
+        Math.Ceiling(TextWidth(Strings.CardToneCaution, Tokens.Get<FontFamily>("Sans"), Tokens.Get<double>("TextSmall"))) + 8;
+
+    /// The place of the countdown: the longest time it can show, and the gap before it.
+    private static double CountdownReserve()
+    {
+        var family = Tokens.Get<FontFamily>("Mono");
+        var size = Tokens.Get<double>("TextTiny");
+        var longest = new[]
+        {
+            string.Format(CultureInfo.CurrentCulture, Strings.SpanDaysHours, 6, 23),
+            string.Format(CultureInfo.CurrentCulture, Strings.SpanHoursMinutes, 23, 59),
+        }.Max(time => TextWidth(time, family, size));
+        return Math.Ceiling(longest) + 12;
+    }
+
+    private static double TextWidth(string text, FontFamily family, double size) =>
+        new FormattedText(
+            text,
+            CultureInfo.CurrentCulture,
+            FlowDirection.LeftToRight,
+            new Typeface(family, FontStyles.Normal, FontWeights.Normal, FontStretches.Normal),
+            size,
+            Brushes.Black,
+            1.0).WidthIncludingTrailingWhitespace;
 
     private static LimitTone ToneOf(HeaderColumnView column) =>
         column.Column.FiveHour is { } percent ? CardState.ToneFor(percent, DataFreshness.Live) : LimitTone.Unknown;
 
     private static string Percent(int? value) => value is { } known ? known.ToString(CultureInfo.CurrentCulture) + "%" : "—";
 
-    public static string WaitingWords(int count) =>
-        string.Format(
-            CultureInfo.CurrentCulture,
-            count % 10 == 1 && count % 100 != 11 ? Strings.TerminalTabWaitingOne : Strings.TerminalTabWaitingMany,
-            count);
-
-    /// A quiet card is a button: a soft fill under the pointer, and a click makes its environment
-    /// the active one.
-    private static void Pickable(Border cell, string environment, Action<string> pick)
+    /// One card of the header. It stays the same object while the header is open, whatever its
+    /// role: on a switch it changes its contents, not itself.
+    private sealed class Card
     {
-        var hover = new SolidColorBrush(Colors.Transparent);
-        var fill = ((SolidColorBrush)Tokens.Brush("HoverLayer")).Color;
-        cell.Background = hover;
-        cell.Cursor = System.Windows.Input.Cursors.Hand;
-        cell.ToolTip = environment;
-        cell.MouseEnter += (_, _) => hover.BeginAnimation(SolidColorBrush.ColorProperty, Motion.To(fill, Motion.Or0(Motion.Hover)));
-        cell.MouseLeave += (_, _) => hover.BeginAnimation(SolidColorBrush.ColorProperty, Motion.To(Colors.Transparent, Motion.Or0(Motion.Hover)));
-        cell.MouseLeftButtonUp += (_, _) => pick(environment);
-    }
+        private readonly SolidColorBrush _hover = new(Colors.Transparent);
+        private readonly CardBody _body = new() { Margin = new Thickness(CardPadding), ClipToBounds = true };
+        private readonly TranslateTransform _rise = new();
 
-    /// A line comes in from a soft start, a little after the one above: up from below when the
-    /// header opens, sideways when the environments change places.
-    private static void Ink(UIElement element, TimeSpan after, double fromX, double fromY)
-    {
-        if (!Motion.IsOn)
+        /// The contents shown now, and the ones that go out during a switch. The old ones lie on a
+        /// canvas, which gives them no say in the height of the card: the card takes the height of
+        /// its new contents, and the row can move to it.
+        private Border _current = new();
+        private readonly Canvas _leaving = new();
+
+        public Card(string environment, Action<string> pick)
         {
-            return;
+            _body.Children.Add(_current);
+            _body.Children.Add(_leaving);
+            var face = new Grid();
+            face.Children.Add(new Border { CornerRadius = new CornerRadius(13), Background = _hover });
+            face.Children.Add(_body);
+
+            Root = new Border
+            {
+                CornerRadius = new CornerRadius(14),
+                Background = Tokens.Brush("Surface"),
+                BorderBrush = Tokens.Brush("Hairline"),
+                BorderThickness = new Thickness(1),
+                Child = face,
+                RenderTransform = _rise,
+            };
+
+            // A quiet card is a button: a soft fill under the pointer, and a click makes its
+            // environment the active one. The active card is not.
+            var fill = ((SolidColorBrush)Tokens.Brush("HoverLayer")).Color;
+            Root.MouseEnter += (_, _) =>
+            {
+                if (!Active)
+                {
+                    _hover.BeginAnimation(SolidColorBrush.ColorProperty, Motion.To(fill, Motion.Hover));
+                }
+            };
+            Root.MouseLeave += (_, _) => _hover.BeginAnimation(SolidColorBrush.ColorProperty, Motion.To(Colors.Transparent, Motion.Hover));
+            Root.MouseLeftButtonUp += (_, _) =>
+            {
+                if (!Active)
+                {
+                    pick(environment);
+                }
+            };
+            Environment = environment;
         }
 
-        var target = element.Opacity;
-        var shift = new TranslateTransform(fromX, fromY);
-        element.RenderTransform = shift;
-        element.Opacity = 0;
-        element.BeginAnimation(UIElement.OpacityProperty, new DoubleAnimation(0, target, Motion.Settle) { BeginTime = after, EasingFunction = Motion.Standard });
-        shift.BeginAnimation(TranslateTransform.XProperty, new DoubleAnimation(fromX, 0, Motion.Settle) { BeginTime = after, EasingFunction = Motion.Standard });
-        shift.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(fromY, 0, Motion.Settle) { BeginTime = after, EasingFunction = Motion.Standard });
+        public Border Root { get; }
+
+        public string Environment { get; }
+
+        public bool Active { get; private set; } = true;
+
+        /// New contents at once: the numbers changed, or nothing moves.
+        public void Put(FrameworkElement content, bool active)
+        {
+            Role(active);
+            _current.Child = content;
+        }
+
+        /// The card changes its role: the old contents fade out in the first 100 ms, the new ones
+        /// fade in from 160 ms to 280 ms, while the card itself moves and changes its width. Each
+        /// layer keeps the width of its own role, so no line reflows while the card resizes.
+        public void CrossFade(FrameworkElement content, bool active)
+        {
+            _leaving.Children.Clear();
+            var oldWidth = _body.ActualWidth;
+            var old = _current;
+            _body.Children.Remove(old);
+            _leaving.Children.Add(old);
+            old.HorizontalAlignment = HorizontalAlignment.Left;
+            old.Width = oldWidth > 0 ? oldWidth : double.NaN;
+            old.BeginAnimation(UIElement.OpacityProperty, new DoubleAnimation(0, ContentOut) { EasingFunction = Motion.Standard });
+
+            _current = new Border
+            {
+                Child = content,
+                Opacity = 0,
+                HorizontalAlignment = HorizontalAlignment.Left,
+                Width = InnerWidth(active),
+            };
+            _body.Children.Insert(0, _current);
+
+            var fadeIn = new DoubleAnimation(0, 1, ContentIn) { BeginTime = ContentInAt, EasingFunction = Motion.Standard };
+            var layer = _current;
+            fadeIn.Completed += (_, _) =>
+            {
+                // A newer switch has already taken over.
+                if (!ReferenceEquals(layer, _current))
+                {
+                    return;
+                }
+
+                _leaving.Children.Clear();
+
+                _current.BeginAnimation(UIElement.OpacityProperty, null);
+                _current.Opacity = 1;
+                _current.Width = double.NaN;
+                _current.HorizontalAlignment = HorizontalAlignment.Stretch;
+            };
+            _current.BeginAnimation(UIElement.OpacityProperty, fadeIn);
+            Role(active);
+        }
+
+        /// Fades in and rises 4 px when the header opens.
+        public void Rise(TimeSpan after)
+        {
+            Root.Opacity = 0;
+            Root.BeginAnimation(UIElement.OpacityProperty, new DoubleAnimation(0, 1, Appear) { BeginTime = after, EasingFunction = Motion.Standard });
+            _rise.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(Motion.AppearShift, 0, Appear) { BeginTime = after, EasingFunction = Motion.Standard });
+        }
+
+        private void Role(bool active)
+        {
+            Active = active;
+            Root.Cursor = active ? null : System.Windows.Input.Cursors.Hand;
+            Root.ToolTip = active ? null : Environment;
+            Panel.SetZIndex(Root, active ? 1 : 0);
+            if (active)
+            {
+                _hover.BeginAnimation(SolidColorBrush.ColorProperty, null);
+                _hover.Color = Colors.Transparent;
+            }
+        }
+
+        /// The width of the contents in a card of this role, inside its border and padding. The
+        /// active width is the one the row gave the active card last.
+        private double InnerWidth(bool active)
+        {
+            var row = Root.Parent as HeaderCards;
+            var width = active ? row?.ActiveCardWidth ?? ActiveWidth : QuietWidth;
+            return Math.Max(0, width - 2 - 2 * CardPadding);
+        }
     }
+}
+
+/// The inside of a card. It asks for no more height than the row gives it and cuts off what does
+/// not fit, so while the row moves to a new height the card keeps its own edge and corners instead
+/// of hanging out of the row.
+[System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763")]
+sealed class CardBody : Panel
+{
+    protected override Size MeasureOverride(Size available)
+    {
+        var size = new Size();
+        foreach (UIElement child in InternalChildren)
+        {
+            child.Measure(new Size(available.Width, double.PositiveInfinity));
+            size.Width = Math.Max(size.Width, child.DesiredSize.Width);
+            size.Height = Math.Max(size.Height, child.DesiredSize.Height);
+        }
+
+        size.Height = Math.Min(size.Height, available.Height);
+        size.Width = Math.Min(size.Width, available.Width);
+        return size;
+    }
+
+    protected override Size ArrangeOverride(Size final)
+    {
+        foreach (UIElement child in InternalChildren)
+        {
+            child.Arrange(new Rect(0, 0, final.Width, Math.Max(final.Height, child.DesiredSize.Height)));
+        }
+
+        return final;
+    }
+}
+
+/// The row of cards of the open header. It places the cards side by side from the left: the active
+/// one first, as wide as the room allows between its minimum and its full width, the quiet ones
+/// after it. On a switch it moves each card from where it stood to its new slot and changes its
+/// width at the same time, so the cards really change places.
+[System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763")]
+sealed class HeaderCards : Panel
+{
+    private static readonly Duration Swap = new(TimeSpan.FromMilliseconds(280));
+
+    /// 0 at the start of a switch, 1 at its end. Each frame of it places the cards again.
+    private static readonly DependencyProperty ProgressProperty = DependencyProperty.Register(
+        nameof(Progress), typeof(double), typeof(HeaderCards), new FrameworkPropertyMetadata(1.0, FrameworkPropertyMetadataOptions.AffectsMeasure));
+
+    private double Progress
+    {
+        get => (double)GetValue(ProgressProperty);
+        set => SetValue(ProgressProperty, value);
+    }
+
+    private IReadOnlyList<UIElement> _order = [];
+    private int _active;
+
+    /// Where each card stood when the switch started: its left edge and its width.
+    private Dictionary<UIElement, (double X, double Width)> _from = [];
+    private readonly Dictionary<UIElement, (double X, double Width)> _now = [];
+
+    /// The width the last layout gave the active card.
+    public double ActiveCardWidth { get; private set; } = HeaderStripView.ActiveWidth;
+
+    /// True on the cards when the active card is too narrow for the long names of the limit
+    /// windows. It passes down to every name inside a card.
+    public static readonly DependencyProperty CompactProperty = DependencyProperty.RegisterAttached(
+        "Compact", typeof(bool), typeof(HeaderCards), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.Inherits));
+
+    /// The height of the row when the switch started, and the height it had last.
+    private double? _fromHeight;
+    private double _lastHeight;
+
+    /// The height the row goes to: the tallest card with its new contents.
+    public double TargetHeight { get; private set; }
+
+    /// How much taller the row gets during the switch now running; negative when it gets lower.
+    public double HeightChange => _fromHeight is { } from ? TargetHeight - from : 0;
+
+    /// The switch has ended: the cards are in their places and the row has its height.
+    public event Action? Settled;
+
+    /// The cards in their order on the row. slide moves them there from where they are now.
+    public void Place(IReadOnlyList<UIElement> order, int active, bool slide)
+    {
+        if (slide)
+        {
+            _from = new Dictionary<UIElement, (double X, double Width)>(_now);
+            _fromHeight = _lastHeight;
+            var swap = new DoubleAnimation(0, 1, Swap) { EasingFunction = Motion.Standard };
+            swap.Completed += (_, _) =>
+            {
+                if (Progress >= 1)
+                {
+                    _fromHeight = null;
+                    Settled?.Invoke();
+                }
+            };
+            BeginAnimation(ProgressProperty, swap);
+        }
+
+        _order = order;
+        _active = Math.Max(0, active);
+        InvalidateMeasure();
+    }
+
+    protected override Size MeasureOverride(Size available)
+    {
+        var slots = Slots(available.Width);
+        var compact = ActiveCardWidth < HeaderStripView.CompactBelow;
+        var height = 0.0;
+        foreach (UIElement child in InternalChildren)
+        {
+            child.SetValue(CompactProperty, compact);
+            var width = slots.TryGetValue(child, out var slot) ? slot.Width : 0;
+            child.Measure(new Size(width, double.PositiveInfinity));
+            height = Math.Max(height, child.DesiredSize.Height);
+        }
+
+        // The cards take their new height at once; the row goes there in step with the swap.
+        TargetHeight = height;
+        var progress = Progress;
+        if (progress < 1 && _fromHeight is { } from)
+        {
+            height = from + (height - from) * progress;
+        }
+
+        _lastHeight = height;
+
+        // Measured again within the height of this moment: a card that will be taller is cut off
+        // inside its padding, not at its border.
+        if (progress < 1)
+        {
+            foreach (UIElement child in InternalChildren)
+            {
+                var width = slots.TryGetValue(child, out var slot) ? slot.Width : 0;
+                child.Measure(new Size(width, height));
+            }
+        }
+
+        var right = slots.Count == 0 ? 0 : slots.Values.Max(slot => slot.X + slot.Width);
+        return new Size(double.IsInfinity(available.Width) ? right : Math.Min(right, available.Width), height);
+    }
+
+    protected override Size ArrangeOverride(Size final)
+    {
+        var slots = Slots(final.Width);
+        _now.Clear();
+        foreach (UIElement child in InternalChildren)
+        {
+            if (slots.TryGetValue(child, out var slot))
+            {
+                child.Arrange(new Rect(slot.X, 0, slot.Width, final.Height));
+                _now[child] = slot;
+            }
+            else
+            {
+                child.Arrange(new Rect());
+            }
+        }
+
+        return final;
+    }
+
+    /// The slot of each card at this moment of a switch: between where it stood and where it goes.
+    private Dictionary<UIElement, (double X, double Width)> Slots(double room)
+    {
+        var quiet = Math.Max(0, _order.Count - 1);
+        var activeWidth = double.IsInfinity(room) ? HeaderStripView.ActiveWidth : HeaderStripView.ActiveWidthFor(room, quiet);
+        ActiveCardWidth = activeWidth;
+
+        var progress = Progress;
+        var slots = new Dictionary<UIElement, (double X, double Width)>();
+        var x = 0.0;
+        for (var at = 0; at < _order.Count; at++)
+        {
+            var width = at == _active ? activeWidth : HeaderStripView.QuietWidth;
+            var target = (X: x, Width: width);
+            if (progress < 1 && _from.TryGetValue(_order[at], out var start))
+            {
+                target = (start.X + (target.X - start.X) * progress, start.Width + (target.Width - start.Width) * progress);
+            }
+
+            slots[_order[at]] = target;
+            x += width + HeaderStripView.Gap;
+        }
+
+        return slots;
+    }
+}
+
+/// The name of a limit window in a row of the active card: the long name, or the short one when
+/// the card is narrow (HeaderCards.Compact). The card decides it in its layout, so the name follows
+/// any width of the window and not only the switch between wide and narrow.
+[System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763")]
+sealed class LimitWindowName : TextBlock
+{
+    private readonly string _long;
+    private readonly string _short;
+
+    public LimitWindowName(string longName, string shortName)
+    {
+        _long = longName;
+        _short = shortName;
+        Text = longName;
+        FontFamily = Tokens.Get<FontFamily>("Sans");
+        FontSize = Tokens.Get<double>("TextSmall");
+        Foreground = Tokens.Brush("Muted");
+        VerticalAlignment = VerticalAlignment.Center;
+    }
+
+    static LimitWindowName() =>
+        HeaderCards.CompactProperty.OverrideMetadata(
+            typeof(LimitWindowName),
+            new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.Inherits, (target, e) =>
+            {
+                var name = (LimitWindowName)target;
+                name.Text = (bool)e.NewValue ? name._short : name._long;
+            }));
 }

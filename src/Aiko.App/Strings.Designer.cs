@@ -1293,8 +1293,11 @@ public static class Strings
     /// Hide the limits
     public static string TerminalHideLimits => Get("TerminalHideLimits");
 
-    /// 5 h {0} · wk {1}
-    public static string TerminalQuietLimits => Get("TerminalQuietLimits");
+    /// 5 h
+    public static string CardShortSession => Get("CardShortSession");
+
+    /// wk
+    public static string CardShortWeek => Get("CardShortWeek");
 
     /// direct mode on
     public static string TerminalDirectOn => Get("TerminalDirectOn");

@@ -146,11 +146,19 @@ sealed class TerminalSurface : Grid
         }
     }
 
+    /// The size last passed to the pseudo console.
+    private (int Rows, int Columns) _sent;
+
+    /// Only a new count of rows or columns reaches the pseudo console. A layout that moves the
+    /// terminal by a part of a pixel, as the header does when it opens, would otherwise make Claude
+    /// Code draw its whole screen again for nothing.
     private void SyncSize()
     {
-        if (_control.Rows > 0 && _control.Columns > 0)
+        var size = (_control.Rows, _control.Columns);
+        if (size.Rows > 0 && size.Columns > 0 && size != _sent)
         {
-            _console.Resize((uint)_control.Rows, (uint)_control.Columns);
+            _sent = size;
+            _console.Resize((uint)size.Rows, (uint)size.Columns);
         }
     }
 

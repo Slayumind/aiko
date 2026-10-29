@@ -80,8 +80,10 @@ static class TerminalSnapshot
             return new HeaderView(false, part == "nolist", []);
         }
 
-        LimitSnapshot Limits(string name, int fiveHour, TimeSpan fiveHourLeft, int week, TimeSpan weekLeft) =>
-            new(name, LimitSource.StatusLine, now,
+        // Aiko spoke just now, so it shows "working now", and it carries the weekly limit of the heavy
+        // model; Work went quiet a few minutes back and has only the two usual windows.
+        LimitSnapshot Limits(string name, DateTimeOffset received, int fiveHour, TimeSpan fiveHourLeft, int week, TimeSpan weekLeft) =>
+            new(name, LimitSource.StatusLine, received,
             [
                 new LimitWindow(LimitKind.FiveHour, fiveHour, now + fiveHourLeft),
                 new LimitWindow(LimitKind.SevenDay, week, now + weekLeft),
@@ -89,8 +91,9 @@ static class TerminalSnapshot
 
         var limits = new Dictionary<string, LimitSnapshot>
         {
-            ["Aiko"] = Limits("Aiko", 42, TimeSpan.FromMinutes(143), 18, TimeSpan.FromHours(84)),
-            ["Work · Kodland"] = Limits("Work · Kodland", 82, TimeSpan.FromMinutes(66), 40, TimeSpan.FromHours(98)),
+            ["Aiko"] = Limits("Aiko", now, 42, TimeSpan.FromMinutes(143), 18, TimeSpan.FromHours(84))
+                with { Model = new ModelLimit("Fable", 61, now.AddDays(5)) },
+            ["Work · Kodland"] = Limits("Work · Kodland", now.AddMinutes(-4), 82, TimeSpan.FromMinutes(66), 40, TimeSpan.FromHours(98)),
         };
         var card = CardModel.From(
             [.. limits.Values.Select(snapshot => CardState.From(snapshot, now))],

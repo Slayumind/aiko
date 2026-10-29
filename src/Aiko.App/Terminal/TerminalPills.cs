@@ -15,6 +15,13 @@ sealed class TerminalPills
     private const double PillHeight = 28;
     private static readonly Duration Fade = new(TimeSpan.FromMilliseconds(160));
 
+    /// The background slides to the chosen pill, and the names change their colour, in this time.
+    private static readonly Duration Slide = new(TimeSpan.FromMilliseconds(180));
+
+    /// The names whose colour is still on its way, by environment. The pills are drawn again on
+    /// every event; a new name takes the brush that is already moving, so the fade does not jump.
+    private readonly Dictionary<string, SolidColorBrush> _fading = [];
+
     private readonly StackPanel _row = new() { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
     private readonly TranslateTransform _backShift = new();
     private readonly Border _back;
@@ -49,16 +56,30 @@ sealed class TerminalPills
     public Grid Root { get; } = new() { VerticalAlignment = VerticalAlignment.Center };
 
     /// The pills, in the order of the environments. chosen is the name of the selected one; when it
-    /// changes, the background slides there.
-    public void Show(IReadOnlyList<FrameworkElement> pills, int selected, string chosen)
+    /// changes, the background slides there and the two names trade their colours.
+    public void Show(IReadOnlyList<Pill> pills, int selected, string chosen)
     {
-        var moved = _chosen is not null && _chosen != chosen;
+        var before = _chosen;
+        var moved = before is not null && before != chosen;
         _chosen = chosen;
         _selected = selected;
         _row.Children.Clear();
         foreach (var pill in pills)
         {
-            _row.Children.Add(pill);
+            _row.Children.Add(pill.Element);
+            if (pill.Label is not { } label)
+            {
+                continue;
+            }
+
+            if (moved && Motion.IsOn && (pill.Environment == chosen || pill.Environment == before))
+            {
+                Recolour(pill.Environment, label, pill.Environment == chosen ? "Muted" : "Ink");
+            }
+            else if (_fading.TryGetValue(pill.Environment, out var brush))
+            {
+                label.Foreground = brush;
+            }
         }
 
         // The pills have their sizes only after layout.
@@ -66,8 +87,9 @@ sealed class TerminalPills
     }
 
     /// The header opened (hidden) or closed. The pills fade and fold their width, so the chevron
-    /// beside them glides to the list icon and back instead of jumping.
-    public void Hide(bool hidden, TimeSpan after = default)
+    /// beside them glides to the list icon and back instead of jumping. fold is the time of the
+    /// header that opens or closes, so both move together.
+    public void Hide(bool hidden, Duration fold, TimeSpan after = default)
     {
         if (hidden == _hidden)
         {
@@ -86,11 +108,11 @@ sealed class TerminalPills
         }
 
         var full = _row.DesiredSize.Width;
-        var fold = new DoubleAnimation(hidden ? 0 : full, Motion.Settle) { BeginTime = after, EasingFunction = Motion.Standard };
+        var folding = new DoubleAnimation(hidden ? 0 : full, fold) { BeginTime = after, EasingFunction = Motion.Standard };
         if (!hidden)
         {
             // Back to its own width once open, so new numbers can widen it again.
-            fold.Completed += (_, _) =>
+            folding.Completed += (_, _) =>
             {
                 if (!_hidden)
                 {
@@ -105,9 +127,28 @@ sealed class TerminalPills
             Root.Width = Root.ActualWidth;
         }
 
-        Root.BeginAnimation(FrameworkElement.WidthProperty, fold);
+        Root.BeginAnimation(FrameworkElement.WidthProperty, folding);
         Root.BeginAnimation(UIElement.OpacityProperty, new DoubleAnimation(hidden ? 0 : 1, Fade) { BeginTime = after, EasingFunction = Motion.Standard });
         _rootShift.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(hidden ? 0 : 4, hidden ? -4 : 0, Fade) { BeginTime = after, EasingFunction = Motion.Standard });
+    }
+
+    /// The name goes from the colour it had to the one its pill gives it now (Muted and Ink), on a
+    /// brush of its own: the brushes of the palette are frozen and cannot change.
+    private void Recolour(string environment, TextBlock label, string from)
+    {
+        var to = ((SolidColorBrush)label.Foreground).Color;
+        var brush = new SolidColorBrush(((SolidColorBrush)Tokens.Brush(from)).Color);
+        label.Foreground = brush;
+        _fading[environment] = brush;
+        var fade = new ColorAnimation(to, Slide) { EasingFunction = Motion.Standard };
+        fade.Completed += (_, _) =>
+        {
+            if (_fading.TryGetValue(environment, out var current) && ReferenceEquals(current, brush))
+            {
+                _fading.Remove(environment);
+            }
+        };
+        brush.BeginAnimation(SolidColorBrush.ColorProperty, fade);
     }
 
     private void Place(int selected, bool slide)
@@ -136,9 +177,13 @@ sealed class TerminalPills
         }
 
         _sliding = true;
-        var move = Motion.To(x, Motion.Settle, Motion.Standard);
+        var move = Motion.To(x, Slide, Motion.Standard);
         move.Completed += (_, _) => _sliding = false;
         _backShift.BeginAnimation(TranslateTransform.XProperty, move);
-        _back.BeginAnimation(FrameworkElement.WidthProperty, Motion.To(width, Motion.Settle, Motion.Standard));
+        _back.BeginAnimation(FrameworkElement.WidthProperty, Motion.To(width, Slide, Motion.Standard));
     }
 }
+
+/// One pill for TerminalPills: the element, the name in it (null when a narrow window shows only
+/// the ring), and its environment.
+sealed record Pill(FrameworkElement Element, TextBlock? Label, string Environment);
