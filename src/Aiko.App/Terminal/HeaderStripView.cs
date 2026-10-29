@@ -47,11 +47,11 @@ sealed class HeaderStripView
     private const int MostRows = 3;
 
     // The timings of the owner's choice (polish of the header, round 1).
-    private static readonly Duration Appear = new(TimeSpan.FromMilliseconds(200));
-    private static readonly TimeSpan QuietLater = TimeSpan.FromMilliseconds(60);
-    private static readonly Duration ContentOut = new(TimeSpan.FromMilliseconds(100));
-    private static readonly TimeSpan ContentInAt = TimeSpan.FromMilliseconds(160);
-    private static readonly Duration ContentIn = new(TimeSpan.FromMilliseconds(120));
+    private static readonly Duration Appear = new(TimeSpan.FromMilliseconds(320));
+    private static readonly TimeSpan QuietLater = TimeSpan.FromMilliseconds(80);
+    private static readonly Duration ContentOut = new(TimeSpan.FromMilliseconds(140));
+    private static readonly TimeSpan ContentInAt = TimeSpan.FromMilliseconds(220);
+    private static readonly Duration ContentIn = new(TimeSpan.FromMilliseconds(160));
 
     private readonly Action<string> _pick;
     private readonly HeaderCards _row = new();
@@ -486,8 +486,8 @@ sealed class HeaderStripView
             _current.Child = content;
         }
 
-        /// The card changes its role: the old contents fade out in the first 100 ms, the new ones
-        /// fade in from 160 ms to 280 ms, while the card itself moves and changes its width. Each
+        /// The card changes its role: the old contents fade out in the first 140 ms, the new ones
+        /// fade in from 220 ms to 380 ms, while the card itself moves and changes its width. Each
         /// layer keeps the width of its own role, so no line reflows while the card resizes.
         public void CrossFade(FrameworkElement content, bool active)
         {
@@ -601,7 +601,7 @@ sealed class CardBody : Panel
 [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763")]
 sealed class HeaderCards : Panel
 {
-    private static readonly Duration Swap = new(TimeSpan.FromMilliseconds(280));
+    private static readonly Duration Swap = new(TimeSpan.FromMilliseconds(380));
 
     /// 0 at the start of a switch, 1 at its end. Each frame of it places the cards again.
     private static readonly DependencyProperty ProgressProperty = DependencyProperty.Register(

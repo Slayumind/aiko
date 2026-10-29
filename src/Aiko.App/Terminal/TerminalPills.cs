@@ -13,10 +13,10 @@ namespace Aiko.App;
 sealed class TerminalPills
 {
     private const double PillHeight = 28;
-    private static readonly Duration Fade = new(TimeSpan.FromMilliseconds(160));
+    private static readonly Duration Fade = new(TimeSpan.FromMilliseconds(240));
 
     /// The background slides to the chosen pill, and the names change their colour, in this time.
-    private static readonly Duration Slide = new(TimeSpan.FromMilliseconds(180));
+    private static readonly Duration Slide = new(TimeSpan.FromMilliseconds(240));
 
     /// The names whose colour is still on its way, by environment. The pills are drawn again on
     /// every event; a new name takes the brush that is already moving, so the fade does not jump.
@@ -106,6 +106,9 @@ sealed class TerminalPills
             return;
         }
 
+        // Measured without the folded width around them: inside a width of 0 the pills would
+        // measure 0, and they would come back in one jump at the end.
+        _row.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
         var full = _row.DesiredSize.Width;
         var folding = new DoubleAnimation(hidden ? 0 : full, fold) { BeginTime = after, EasingFunction = Motion.Standard };
         if (!hidden)

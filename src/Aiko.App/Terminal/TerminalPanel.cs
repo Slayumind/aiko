@@ -51,10 +51,10 @@ sealed class TerminalPanel : UserControl
     private readonly Grid _body = new();
 
     /// How long the header takes to grow, the cards to go out, and the header to fold.
-    private static readonly Duration Grow = new(TimeSpan.FromMilliseconds(240));
-    private static readonly Duration Fold = new(TimeSpan.FromMilliseconds(120));
-    private static readonly Duration Close = new(TimeSpan.FromMilliseconds(220));
-    private static readonly TimeSpan PillsBack = TimeSpan.FromMilliseconds(100);
+    private static readonly Duration Grow = new(TimeSpan.FromMilliseconds(320));
+    private static readonly Duration Fold = new(TimeSpan.FromMilliseconds(200));
+    private static readonly Duration Close = new(TimeSpan.FromMilliseconds(300));
+    private static readonly TimeSpan PillsBack = TimeSpan.FromMilliseconds(160);
     private bool _listHidden;
     private readonly Path _maximizeIcon = Line("");
     private readonly Button _maximize;
