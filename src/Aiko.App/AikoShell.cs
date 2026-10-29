@@ -206,6 +206,14 @@ sealed class AikoShell : IDisposable
 
     public void CancelMenuForCheck() => _tray.PostForCheck(Windows.Win32.PInvoke.WM_CANCELMODE, 0);
 
+    /// After an error that repeats (CrashGuard): the terminal and the settings close, the tray and
+    /// the island stay. The sessions of the terminal live on without its window (D-351).
+    public void CloseWindows()
+    {
+        _settings?.Close();
+        _terminal?.Close();
+    }
+
     public void Dispose()
     {
         _watcher.Updated -= OnSnapshotsChanged;
@@ -379,8 +387,11 @@ sealed class AikoShell : IDisposable
             return;
         }
 
-        var terminal = new TerminalHost(environments, SettingsStore.LoadTerminal(), _numbers.SnapshotFor);
+        // The open header shows the plan of each environment, as the card does.
+        _numbers.ReadAccounts();
+        var terminal = new TerminalHost(environments, SettingsStore.LoadTerminal(), _numbers.SnapshotFor, _cards.Model);
         terminal.Closed += () => _terminal = null;
+        terminal.SettingsAsked += () => OpenSettings();
         terminal.InViewChanged += _island.FollowTerminal;
         terminal.VoiceSettingsAsked += () => OpenSettings(page: SettingsPanel.TerminalPageKey);
         _terminal = terminal;

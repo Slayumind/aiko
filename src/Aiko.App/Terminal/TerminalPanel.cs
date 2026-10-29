@@ -22,9 +22,11 @@ sealed class TerminalPanel : UserControl
     private const double ListWidth = 252;
 
     private readonly Grid _bar = new() { Height = BarHeight, Background = Brushes.Transparent };
-    private readonly StackPanel _tabs = new() { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
+    private readonly TerminalPills _pills = new();
     private readonly StackPanel _right = new() { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
-    private readonly ColumnDefinition _listColumn = new() { Width = new GridLength(ListWidth) };
+    private readonly ColumnDefinition _listColumn = new() { Width = GridLength.Auto };
+    private readonly RotateTransform _chevronTurn = new();
+    private double _listTarget = double.NaN;
     private readonly DockPanel _list = new();
     private readonly StackPanel _rows = new();
     private readonly Grid _main = new();
@@ -32,7 +34,28 @@ sealed class TerminalPanel : UserControl
 
     /// A palette is a window of its own: nothing drawn in this one can cover a real terminal.
     private readonly Popup _palettePopup = new() { StaysOpen = false, AllowsTransparency = true, Placement = PlacementMode.Relative };
-    private readonly Button _listButton;
+    private readonly Button _listToggle;
+    private readonly Button _chevron;
+    private readonly Button _gear;
+
+    /// The open header under the title bar (D-373, D-376). It is drawn again only when it opens or
+    /// the active environment changes: the numbers in it change too often to start its motion each
+    /// time.
+    private readonly Border _strip = new() { ClipToBounds = true, Visibility = Visibility.Collapsed };
+    private readonly HeaderStripView _header;
+    private string? _stripFor;
+
+    /// Everything under the title bar and the header: the list and the terminal. While the header
+    /// opens or closes it keeps one height, so the terminal changes its size once and not on
+    /// every frame (each size is a resize of the pseudo console and a full redraw of Claude Code).
+    private readonly Grid _body = new();
+
+    /// How long the header takes to grow, the cards to go out, and the header to fold.
+    private static readonly Duration Grow = new(TimeSpan.FromMilliseconds(320));
+    private static readonly Duration Fold = new(TimeSpan.FromMilliseconds(200));
+    private static readonly Duration Close = new(TimeSpan.FromMilliseconds(300));
+    private static readonly TimeSpan PillsBack = TimeSpan.FromMilliseconds(160);
+    private bool _listHidden;
     private readonly Path _maximizeIcon = Line("");
     private readonly Button _maximize;
 
@@ -80,10 +103,13 @@ sealed class TerminalPanel : UserControl
         // same thin one by its type.
         Resources[typeof(System.Windows.Controls.Primitives.ScrollBar)] = Resources["ThinScrollBar"];
 
-        _listButton = Flat("", () => _listPopup.IsOpen = !_listPopup.IsOpen, ghost: false);
-        _listButton.Margin = new Thickness(10, 0, 0, 0);
-        _listButton.Visibility = Visibility.Collapsed;
-        _listPopup.PlacementTarget = _listButton;
+        // The list icon: in a wide window it hides the column of sessions, in a narrow one it opens
+        // the list over the terminal (D-376).
+        _listToggle = BarButton(ListIcon(), Strings.TerminalSessionList, ToggleList);
+        _listToggle.Margin = new Thickness(6, 0, 2, 0);
+        _listPopup.PlacementTarget = _listToggle;
+        _chevron = BarButton(Line("M0,0 L4,4 L8,0"), Strings.TerminalShowLimits, () => HeaderToggled?.Invoke());
+        _gear = BarButton(GearIcon(), Strings.Settings, () => SettingsAsked?.Invoke());
         // The list under the button, left edges together, as every drop-down of Aiko (DropDown).
         _listPopup.Placement = PlacementMode.Custom;
         _listPopup.CustomPopupPlacementCallback = (_, target, _) => [new CustomPopupPlacement(new Point(0, target.Height), PopupPrimaryAxis.Horizontal)];
@@ -102,27 +128,46 @@ sealed class TerminalPanel : UserControl
         ShowMaximized(false);
 
         var left = new StackPanel { Orientation = Orientation.Horizontal };
-        left.Children.Add(_listButton);
-        left.Children.Add(_tabs);
-        _tabs.Margin = new Thickness(10, 0, 0, 0);
+        // The chevron stands before the pills, so it keeps its place when they fold away.
+        left.Children.Add(_listToggle);
+        left.Children.Add(_chevron);
+        left.Children.Add(_pills.Root);
         _bar.Children.Add(left);
         _bar.Children.Add(_right);
         _bar.Children.Add(new Border { Height = 1, VerticalAlignment = VerticalAlignment.Bottom, Background = Tokens.Brush("Hairline") });
 
-        var body = new Grid();
-        body.ColumnDefinitions.Add(_listColumn);
-        body.ColumnDefinitions.Add(new ColumnDefinition());
+        _header = new HeaderStripView(environment => TabPicked?.Invoke(environment));
+        _header.Settled += () =>
+        {
+            // The header has its new height after a switch. While it still grows or folds, the
+            // end of that motion lets the body go.
+            if (_stripFor is not null && !_strip.HasAnimatedProperties)
+            {
+                ReleaseBody();
+            }
+        };
+        _strip.Child = new Border
+        {
+            BorderBrush = Tokens.Brush("Hairline"),
+            BorderThickness = new Thickness(0, 0, 0, 1),
+            Child = _header.Root,
+        };
+
+        _body.ColumnDefinitions.Add(_listColumn);
+        _body.ColumnDefinitions.Add(new ColumnDefinition());
         var listSide = new Grid();
         listSide.Children.Add(_list);
         listSide.Children.Add(new Border { Width = 1, HorizontalAlignment = HorizontalAlignment.Right, Background = Tokens.Brush("Hairline") });
-        body.Children.Add(listSide);
+        _body.Children.Add(listSide);
         Grid.SetColumn(_main, 1);
-        body.Children.Add(_main);
+        _body.Children.Add(_main);
 
         var all = new DockPanel();
         DockPanel.SetDock(_bar, Dock.Top);
         all.Children.Add(_bar);
-        all.Children.Add(body);
+        DockPanel.SetDock(_strip, Dock.Top);
+        all.Children.Add(_strip);
+        all.Children.Add(_body);
         Content = all;
 
         _resume = Flat(Strings.TerminalResume, () => ResumeAsked?.Invoke(), ghost: false, main: true);
@@ -187,6 +232,15 @@ sealed class TerminalPanel : UserControl
     public event Action? ResumeAsked;
     public event Action<bool>? AskAnswered;
     public event Action? MinimizeAsked;
+
+    /// The chevron or a ring: open or close the header (D-373).
+    public event Action? HeaderToggled;
+
+    /// The list icon or Ctrl+B in a wide window: hide or show the column of sessions (D-376).
+    public event Action? ListToggled;
+
+    /// The gear in the title bar.
+    public event Action? SettingsAsked;
     public event Action? MaximizeAsked;
     public event Action? CloseAsked;
 
@@ -210,89 +264,335 @@ sealed class TerminalPanel : UserControl
 
     private void ShowBar(TerminalView view)
     {
-        _tabs.Children.Clear();
-        foreach (var tab in view.Tabs)
-        {
-            _tabs.Children.Add(Tab(tab));
-        }
+        var selected = view.Tabs.ToList().FindIndex(tab => tab.Selected);
+        _pills.Show([.. view.Tabs.Select(Tab)], selected, view.Environment);
 
         _right.Children.Clear();
-        if (view.Badge is { } badge)
-        {
-            _right.Children.Add(Badge(badge));
-        }
-
+        _right.Children.Add(_gear);
         foreach (var button in Buttons)
         {
             _right.Children.Add(button);
         }
 
-        _listButton.Visibility = _narrow ? Visibility.Visible : Visibility.Collapsed;
-        _listButton.Content = WithChevron(view.SessionName ?? Strings.TerminalSessions);
+        _listHidden = view.Header.ListHidden;
+        _chevron.ToolTip = view.Header.Open ? Strings.TerminalHideLimits : Strings.TerminalShowLimits;
+        _chevron.RenderTransformOrigin = new Point(0.5, 0.5);
+        _chevron.RenderTransform = _chevronTurn;
+        var turn = view.Header.Open ? 180 : 0;
+        if (!Motion.IsOn)
+        {
+            _chevronTurn.BeginAnimation(RotateTransform.AngleProperty, null);
+            _chevronTurn.Angle = turn;
+        }
+        else if (_chevronTurn.Angle != turn)
+        {
+            // In step with the header that opens or folds.
+            _chevronTurn.BeginAnimation(RotateTransform.AngleProperty, Motion.To(turn, view.Header.Open ? Grow : Close, Motion.Standard));
+        }
+        ShowStrip(view);
     }
 
-    private UIElement Tab(TabView tab)
+    /// The header opens in place and the terminal moves down: nothing covers a real terminal.
+    ///
+    /// The terminal is a window of its own inside this one: moved on every frame, it lags behind the
+    /// software drawing of WPF and jerks. So while the header moves, the terminal is a picture of
+    /// itself (TerminalSurface.ShowStill), and the body under the header keeps one height.
+    ///
+    /// Opening: the body slides down under the bottom edge of the window while the header grows,
+    /// then takes its new height once. Closing: the body takes its final height first, then the
+    /// header folds and the body slides up. The real terminal comes back when the header stands.
+    private void ShowStrip(TerminalView view)
     {
+        if (!view.Header.Open)
+        {
+            if (_stripFor is null)
+            {
+                return;
+            }
+
+            _stripFor = null;
+            if (!Motion.IsOn || !IsLoaded)
+            {
+                HideStrip();
+                _pills.Hide(false, Close);
+                return;
+            }
+
+            ShowStills(true);
+            HoldBody(_strip.ActualHeight);
+            _header.FadeOut(Fold);
+            _pills.Hide(false, Close, after: PillsBack);
+            var shrink = new System.Windows.Media.Animation.DoubleAnimation(_strip.ActualHeight, 0, Close) { EasingFunction = Motion.Standard };
+            shrink.Completed += (_, _) =>
+            {
+                // Opened again while it was closing: the new header stays.
+                if (_stripFor is null)
+                {
+                    HideStrip();
+                    ShowLiveAfterLayout();
+                }
+            };
+            _strip.BeginAnimation(HeightProperty, shrink);
+            return;
+        }
+
+        var first = _stripFor is null;
+        var moved = _stripFor != view.Environment;
+        _stripFor = view.Environment;
+        var motion = first ? HeaderMotion.Open : moved ? HeaderMotion.Switch : HeaderMotion.None;
+
+        // A window that opens with the header already open shows it at once: it has no width yet
+        // to measure the header against, and nothing to grow from.
+        var grow = first && Motion.IsOn && IsLoaded && ActualWidth > 0;
+        var from = _strip.Visibility == Visibility.Visible ? _strip.ActualHeight : 0;
+        _header.Show(view.Header, first && !grow ? HeaderMotion.None : motion);
+        _strip.Visibility = Visibility.Visible;
+        if (motion == HeaderMotion.Switch && Motion.IsOn && IsLoaded)
+        {
+            HoldForSwitch();
+        }
+
+        // Pills are the closed header and cards the open one (D-376): the pills give way.
+        _pills.Hide(true, Grow);
+
+        if (!grow)
+        {
+            if (first)
+            {
+                StopStrip();
+                ReleaseBody();
+            }
+
+            return;
+        }
+
+        // From where it is to its own height: measured once, then left to size itself.
+        ShowStills(true);
+        StopStrip();
+        _strip.Measure(new Size(ActualWidth, double.PositiveInfinity));
+        var height = _strip.DesiredSize.Height;
+        HoldBody(0);
+        _strip.Height = from;
+        var growing = new System.Windows.Media.Animation.DoubleAnimation(from, height, Grow) { EasingFunction = Motion.Standard };
+        growing.Completed += (_, _) =>
+        {
+            // Closed again while it was growing: the fold has taken over.
+            if (_stripFor is null)
+            {
+                return;
+            }
+
+            StopStrip();
+            ReleaseBody();
+            ShowLiveAfterLayout();
+        };
+        _strip.BeginAnimation(HeightProperty, growing);
+    }
+
+    /// The header is gone, and the terminal takes its place.
+    private void HideStrip()
+    {
+        StopStrip();
+        _strip.Visibility = Visibility.Collapsed;
+        _header.Clear();
+        ReleaseBody();
+    }
+
+    /// The open terminal as a picture while the header moves, or live again.
+    private void ShowStills(bool still)
+    {
+        foreach (var terminal in _terminals.Children.OfType<TerminalSurface>())
+        {
+            if (still)
+            {
+                terminal.ShowStill();
+            }
+            else
+            {
+                terminal.ShowLive();
+            }
+        }
+    }
+
+    /// The real terminal comes back after the layout has put it in its new place and size, so it
+    /// does not flash for a frame where the picture was.
+    private void ShowLiveAfterLayout() => Dispatcher.BeginInvoke(() =>
+    {
+        if (!_strip.HasAnimatedProperties)
+        {
+            ShowStills(false);
+        }
+    }, System.Windows.Threading.DispatcherPriority.Loaded);
+
+    /// Two environments with a different number of limit rows: the header moves to its new height
+    /// with the swap, and the body is held as when the header opens (taller) or closes (lower), so
+    /// the terminal changes its size once.
+    private void HoldForSwitch()
+    {
+        _strip.Measure(new Size(ActualWidth, double.PositiveInfinity));
+        var change = _header.SwitchHeightChange;
+        if (Math.Abs(change) >= 0.5)
+        {
+            HoldBody(change < 0 ? -change : 0);
+        }
+    }
+
+    /// The header sizes itself again.
+    private void StopStrip()
+    {
+        _strip.BeginAnimation(HeightProperty, null);
+        _strip.Height = double.NaN;
+    }
+
+    /// The body keeps its height plus extra while the header moves. Its top follows the header and
+    /// its bottom goes under the edge of the window, where Windows cuts the terminal off. When it is
+    /// held already it keeps that height: the one the terminal has now.
+    private void HoldBody(double extra)
+    {
+        if (!double.IsNaN(_body.Height) || _body.ActualHeight <= 0)
+        {
+            return;
+        }
+
+        _body.VerticalAlignment = VerticalAlignment.Top;
+        _body.Height = _body.ActualHeight + extra;
+    }
+
+    /// The body fills the rest of the window again: on opening, this is the one resize of the
+    /// terminal.
+    private void ReleaseBody()
+    {
+        _body.Height = double.NaN;
+        _body.VerticalAlignment = VerticalAlignment.Stretch;
+    }
+
+    /// Ctrl+Shift+B. True when the wide window should remember a hidden or shown column; a narrow
+    /// window only opens or closes its list.
+    public bool ToggleListFromKeys()
+    {
+        if (_narrow)
+        {
+            _listPopup.IsOpen = !_listPopup.IsOpen;
+            return false;
+        }
+
+        return true;
+    }
+
+    /// The column of sessions grows or shrinks to its new width; the terminal follows its edge.
+    private void SlideList(double width)
+    {
+        // The window is drawn again on every event: only a new width starts the slide.
+        if (width == _listTarget && !double.IsNaN(_list.Width))
+        {
+            return;
+        }
+
+        _listTarget = width;
+        _list.ClipToBounds = true;
+        var from = double.IsNaN(_list.Width) ? width : _list.ActualWidth;
+        if (from == width || !Motion.IsOn || !IsLoaded)
+        {
+            _list.BeginAnimation(WidthProperty, null);
+            _list.Width = width;
+            return;
+        }
+
+        var slide = new System.Windows.Media.Animation.DoubleAnimation(from, width, Motion.Settle) { EasingFunction = Motion.Standard };
+        slide.Completed += (_, _) =>
+        {
+            _list.BeginAnimation(WidthProperty, null);
+            _list.Width = width;
+        };
+        _list.BeginAnimation(WidthProperty, slide);
+    }
+
+    private void ToggleList()
+    {
+        if (_narrow)
+        {
+            _listPopup.IsOpen = !_listPopup.IsOpen;
+            return;
+        }
+
+        ListToggled?.Invoke();
+    }
+
+
+    /// The pill of an environment (D-376): the ring and percentage of its limit, its name, and how
+    /// many of its sessions wait. In a narrow window a pill that is not chosen keeps only its ring
+    /// and the waiting mark; the name and the number move to the tooltip.
+    private Pill Tab(TabView tab)
+    {
+        TextBlock? label = null;
+        var small = _narrow && !tab.Selected;
+        var percent = tab.Percent is { } known ? known.ToString(CultureInfo.CurrentCulture) + "%" : null;
         var row = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
-        row.Children.Add(Text(tab.Name, "TextNumber", tab.Selected ? "Ink" : "Muted", tab.Selected ? FontWeights.Medium : FontWeights.Normal));
+
+        var ring = HeaderStripView.Ring(tab.Percent, tab.Tone, 14, 2);
+        ring.Cursor = Cursors.Hand;
+        ring.ToolTip = Strings.TerminalShowLimits;
+        ring.MouseLeftButtonUp += (_, e) =>
+        {
+            e.Handled = true;
+            HeaderToggled?.Invoke();
+        };
+        WindowChromeHit(ring);
+        row.Children.Add(ring);
+
+        if (!small)
+        {
+            // One weight for every pill: the chosen one differs by colour and its background only,
+            // so a pill keeps its width when it is chosen and the background lands on it.
+            var name = Text(tab.Name, "TextNumber", tab.Selected ? "Ink" : "Muted", FontWeights.Medium);
+            name.Margin = new Thickness(6, 0, 0, 0);
+            row.Children.Add(name);
+            label = name;
+            if (percent is not null)
+            {
+                var number = Mono(percent, "Muted");
+                number.Margin = new Thickness(6, 0, 0, 0);
+                row.Children.Add(number);
+            }
+        }
+
         if (tab.Waiting > 0)
         {
             var pause = Pause();
-            pause.Margin = new Thickness(8, 0, 5, 0);
+            pause.Margin = new Thickness(small ? 6 : 8, 0, 4, 0);
             row.Children.Add(pause);
-            row.Children.Add(Mono(_narrow ? tab.Waiting.ToString(CultureInfo.CurrentCulture) : WaitingWords(tab.Waiting), "Caution"));
+            row.Children.Add(Mono(tab.Waiting.ToString(CultureInfo.CurrentCulture), "Caution"));
         }
 
         var back = new Border
         {
             Height = 28,
-            Padding = new Thickness(12, 0, 12, 0),
+            Padding = new Thickness(small ? 8 : 10, 0, small ? 8 : 12, 0),
             Margin = new Thickness(0, 0, 4, 0),
             CornerRadius = new CornerRadius(14),
-            Background = tab.Selected ? Tokens.Brush("Raised") : Brushes.Transparent,
+            Background = Brushes.Transparent,
             Cursor = Cursors.Hand,
             Child = row,
+            ToolTip = small ? (percent is null ? tab.Name : tab.Name + " · " + percent) : null,
         };
         back.MouseLeftButtonUp += (_, _) => TabPicked?.Invoke(tab.Name);
         WindowChromeHit(back);
-        return back;
+        return new Pill(back, label, tab.Name);
     }
 
-    private static string WaitingWords(int count) =>
-        string.Format(
-            CultureInfo.CurrentCulture,
-            count % 10 == 1 && count % 100 != 11 ? Strings.TerminalTabWaitingOne : Strings.TerminalTabWaitingMany,
-            count);
+    /// The list icon: a frame with a column on its left.
+    private static FrameworkElement ListIcon() => Line("M1.5,1.5 L12.5,1.5 L12.5,11.5 L1.5,11.5 Z M5,1.5 L5,11.5");
 
-    private static UIElement Badge(BadgeView badge)
+    /// The gear of the project's icon set, the same one the card of limits uses.
+    private static FrameworkElement GearIcon() => new Path
     {
-        var tone = Tokens.ToneBrush(badge.Tone);
-        var ring = new Grid { Width = 14, Height = 14, Margin = new Thickness(0, 0, 6, 0), VerticalAlignment = VerticalAlignment.Center };
-        ring.Children.Add(new Ellipse { Stroke = Tokens.Brush("Raised"), StrokeThickness = 2 });
-        ring.Children.Add(new Path { Stroke = tone, StrokeThickness = 2, Data = Arc(7, 6, badge.Percent / 100.0) });
-
-        var row = new StackPanel
-        {
-            Orientation = Orientation.Horizontal,
-            VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Thickness(0, 0, 14, 0),
-            ToolTip = badge.Kind == LimitKind.FiveHour ? Strings.TerminalLimitFiveHour : Strings.TerminalLimitWeek,
-        };
-        row.Children.Add(ring);
-        row.Children.Add(Mono(badge.Percent.ToString(CultureInfo.CurrentCulture) + "%", "Muted"));
-        return row;
-    }
-
-    /// A part of a circle from the top, clockwise.
-    private static Geometry Arc(double centre, double radius, double part)
-    {
-        part = Math.Clamp(part, 0, 0.999);
-        var angle = part * 2 * Math.PI;
-        var end = new Point(centre + radius * Math.Sin(angle), centre - radius * Math.Cos(angle));
-        var figure = new PathFigure { StartPoint = new Point(centre, centre - radius) };
-        figure.Segments.Add(new ArcSegment(end, new Size(radius, radius), 0, part > 0.5, SweepDirection.Clockwise, true));
-        return new PathGeometry([figure]);
-    }
+        Data = Tokens.Get<Geometry>("GearPath"),
+        Fill = Tokens.Brush("Muted"),
+        Stretch = Stretch.Uniform,
+        Width = 14,
+        Height = 14,
+        VerticalAlignment = VerticalAlignment.Center,
+    };
 
     // ---- the list of sessions ----
 
@@ -326,7 +626,7 @@ sealed class TerminalPanel : UserControl
         // The list lives in the window or, in a narrow one, under the button with the session name.
         _list.Children.Clear();
         _listPopup.Child = null;
-        var holder = new DockPanel { Background = Tokens.Brush("Background") };
+        var holder = new DockPanel { Background = _narrow ? Brushes.Transparent : Tokens.Brush("Background") };
         DockPanel.SetDock(create, Dock.Bottom);
         holder.Children.Add(create);
         holder.Children.Add(new ScrollViewer
@@ -340,7 +640,7 @@ sealed class TerminalPanel : UserControl
 
         if (_narrow)
         {
-            _listColumn.Width = new GridLength(0);
+            SlideList(0);
             _listPopup.Child = new Border
             {
                 Width = ListWidth + 20,
@@ -356,7 +656,11 @@ sealed class TerminalPanel : UserControl
         }
         else
         {
-            _listColumn.Width = new GridLength(ListWidth);
+            _listPopup.IsOpen = false;
+            SlideList(_listHidden ? 0 : ListWidth);
+            // The list keeps its width while its column slides, so it is cut, not squeezed.
+            holder.Width = ListWidth;
+            holder.HorizontalAlignment = HorizontalAlignment.Left;
             _list.Children.Add(holder);
         }
     }
@@ -831,19 +1135,6 @@ sealed class TerminalPanel : UserControl
         StrokeThickness = 1,
         VerticalAlignment = VerticalAlignment.Center,
     };
-
-    private static UIElement WithChevron(string text)
-    {
-        var row = new StackPanel { Orientation = Orientation.Horizontal };
-        var name = Text(text, "TextNumber", "Ink", FontWeights.Normal);
-        name.MaxWidth = 160;
-        name.TextTrimming = TextTrimming.CharacterEllipsis;
-        row.Children.Add(name);
-        var chevron = Line("M0,0 L4,4 L8,0");
-        chevron.Margin = new Thickness(8, 1, 0, 0);
-        row.Children.Add(chevron);
-        return row;
-    }
 
     private Button BarButton(UIElement icon, string tip, Action click)
     {

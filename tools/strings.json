@@ -2947,6 +2947,55 @@
     ]
   ],
   [
+    "TerminalSessionList",
+    [
+      "Session list · Ctrl+Shift+B",
+      "Список сессий · Ctrl+Shift+B"
+    ]
+  ],
+  [
+    "TerminalShowLimits",
+    [
+      "Show the limits of the environments",
+      "Показать лимиты сред"
+    ]
+  ],
+  [
+    "TerminalHideLimits",
+    [
+      "Hide the limits",
+      "Скрыть лимиты"
+    ]
+  ],
+  [
+    "CardShortSession",
+    [
+      "5 h",
+      "5 ч"
+    ]
+  ],
+  [
+    "CardShortWeek",
+    [
+      "wk",
+      "нед"
+    ]
+  ],
+  [
+    "TerminalDirectOn",
+    [
+      "direct mode on",
+      "прямой режим вкл"
+    ]
+  ],
+  [
+    "TerminalDirectOff",
+    [
+      "direct mode off",
+      "прямой режим выкл"
+    ]
+  ],
+  [
     "TerminalCloseWindow",
     [
       "Close",

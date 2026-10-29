@@ -19,6 +19,14 @@ static class CardText
     /// just as easily as forty two percent spent, and the two are opposite news.
     public static string Percent(int percent) => string.Format(Strings.CardPercent, percent);
 
+    /// The short name of a window, for a narrow place: "5 h", "wk", or the name of the model alone.
+    public static string ShortWindowName(LimitKind kind, string? modelName = null) => kind switch
+    {
+        LimitKind.FiveHour => Strings.CardShortSession,
+        LimitKind.SevenDay => Strings.CardShortWeek,
+        _ => modelName ?? WindowName(kind),
+    };
+
     /// A word beside the colour.
     ///
     /// The design system says a status is a mark, a word and a colour, never a colour on its own,
@@ -33,6 +41,11 @@ static class CardText
 
     public static string Resets(ResetCountdown countdown) =>
         countdown.IsReset ? Strings.CardJustReset : string.Format(Strings.CardResets, Left(countdown));
+
+    /// The time left on its own, "1h 6m", for a place where the column already says it is the
+    /// time to a reset (the open header of the terminal window).
+    public static string Countdown(ResetCountdown countdown) =>
+        countdown.IsReset ? Strings.CardJustReset : Left(countdown);
 
     private static string Left(ResetCountdown countdown) => countdown.Unit switch
     {

@@ -40,9 +40,15 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   next and the previous one. Every other key goes to the program in the terminal.
 - **The terminal window opens once by itself** after Aiko is set up. A start with Windows opens only
   the tray, unless you turn on "Open the terminal window too" in the settings.
+- **Limits of every environment above the terminal.** The title bar shows each environment as a
+  pill with its ring and percent. The arrow next to it opens a card per environment: a bar, a percent
+  and a reset time for each limit, the plan and the folder. A click on a pill or on a small card
+  switches the environment, and Ctrl+Shift+B hides the list of sessions. The gear opens the settings.
 
 ### Fixed
 
+- A mistake in one window no longer closes Aiko. The error goes to the log, and the tray, the
+  island and the sessions keep running.
 - Your own settings of Claude Code, such as CLAUDE_CODE_GIT_BASH_PATH, reach terminal sessions.
 - Renaming an environment keeps its terminal sessions, also with the terminal open.
 - The bridge no longer leaves temporary files in the folder of limit snapshots when Windows refuses

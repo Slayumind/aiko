@@ -108,8 +108,14 @@ public sealed record CardAccount(string Plan, bool SignedIn);
 public sealed class LimitRow
 {
     public required string Name { get; init; }
+    /// The name for a narrow place: "5 h", "wk", or the model name alone.
+    public required string ShortName { get; init; }
+
     public required string Percent { get; init; }
     public required string Resets { get; init; }
+
+    /// The same time without the words around it: "1h 6m" for "resets in 1h 6m".
+    public required string Countdown { get; init; }
     public required string Pace { get; init; }
     public required Brush Tone { get; init; }
 
@@ -125,8 +131,10 @@ public sealed class LimitRow
     public static LimitRow From(CardRow row) => new()
     {
         Name = CardText.WindowName(row.Kind, row.ModelName),
+        ShortName = CardText.ShortWindowName(row.Kind, row.ModelName),
         Percent = CardText.Percent(row.Percent),
         Resets = CardText.Resets(row.Countdown),
+        Countdown = CardText.Countdown(row.Countdown),
 
         // One slot, two things that could go in it. The tone is a fact and the pace is a guess,
         // so when a limit is running low the fact wins. The guess still shows in the ordinary

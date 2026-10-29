@@ -3,11 +3,17 @@ using Aiko.Core.Terminal;
 
 namespace Aiko.App;
 
-/// The tab of one environment in the title bar.
-sealed record TabView(string Name, bool Selected, int Waiting);
+/// The pill of one environment in the title bar (D-376): its ring and percentage are the limit that
+/// is closer to its end (D-355), null when nothing is known yet.
+sealed record TabView(string Name, bool Selected, int Waiting, int? Percent, LimitTone Tone);
 
-/// The one percentage in the title bar (D-296).
-sealed record BadgeView(int Percent, LimitTone Tone, LimitKind Kind);
+/// One column of the open header. The active one carries the words of the card (Block) and the
+/// profile line; a quiet one only shows its two numbers.
+sealed record HeaderColumnView(HeaderColumn Column, EnvironmentBlock? Block, string Folder, bool Direct);
+
+/// The header under the title bar (D-373, D-376): open or closed, and its columns, the active
+/// environment first. ListHidden is the session list hidden with its icon or Ctrl+B.
+sealed record HeaderView(bool Open, bool ListHidden, IReadOnlyList<HeaderColumnView> Columns);
 
 /// A question in place of the terminal: stop something that still runs? Stop and Keep are the words
 /// of its two buttons.
@@ -18,7 +24,7 @@ sealed record AskView(string Title, string Body, string Stop, string Keep);
 /// the chosen session (D-349), started when the session was first opened.
 sealed record TerminalView(
     IReadOnlyList<TabView> Tabs,
-    BadgeView? Badge,
+    HeaderView Header,
     IReadOnlyList<RowGroup> Groups,
     string Environment,
     string? SessionId,

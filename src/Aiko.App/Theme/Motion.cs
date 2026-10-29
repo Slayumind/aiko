@@ -34,6 +34,10 @@ static class Motion
 
     public static IEasingFunction Spring { get; } = Freeze(new BezierEase(CubicBezier.Spring));
 
+    /// For what goes away: slow at the start and fast at the end. With Standard a fade loses most of
+    /// its colour in the first third and reads as a jump.
+    public static IEasingFunction Exit { get; } = Freeze(new BezierEase(new CubicBezier(0.4, 0, 1, 1)));
+
     public static Duration Or0(Duration duration) => IsOn ? duration : new Duration(TimeSpan.Zero);
 
     public static DoubleAnimation To(double value, Duration duration, IEasingFunction easing) =>
