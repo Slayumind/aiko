@@ -321,10 +321,12 @@ sealed class TerminalPanel : UserControl
         // Pills are the closed header and cards the open one (D-376): the pills give way.
         _pills.Hide(true);
 
-        if (first && Motion.IsOn)
+        // A window that opens with the header already open shows it at once: it has no width yet
+        // to measure the header against, and nothing to grow from.
+        if (first && Motion.IsOn && ActualWidth > 0)
         {
             // From nothing to its own height: measured once, then left to size itself.
-            _strip.Measure(new Size(ActualWidth > 0 ? ActualWidth : Width, double.PositiveInfinity));
+            _strip.Measure(new Size(ActualWidth, double.PositiveInfinity));
             var height = _strip.DesiredSize.Height;
             var grow = new System.Windows.Media.Animation.DoubleAnimation(0, height, Motion.Settle) { EasingFunction = Motion.Standard };
             grow.Completed += (_, _) =>
