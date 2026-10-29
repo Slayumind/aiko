@@ -22,7 +22,7 @@ sealed class TerminalPanel : UserControl
     private const double ListWidth = 252;
 
     private readonly Grid _bar = new() { Height = BarHeight, Background = Brushes.Transparent };
-    private readonly StackPanel _tabs = new() { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
+    private readonly TerminalPills _pills = new();
     private readonly StackPanel _right = new() { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
     private readonly ColumnDefinition _listColumn = new() { Width = GridLength.Auto };
     private readonly RotateTransform _chevronTurn = new();
@@ -43,6 +43,10 @@ sealed class TerminalPanel : UserControl
     /// time.
     private readonly Border _strip = new() { ClipToBounds = true, Visibility = Visibility.Collapsed };
     private string? _stripFor;
+
+    /// How long the cards take to go out, and the header to fold, when it closes.
+    private static readonly Duration Fold = new(TimeSpan.FromMilliseconds(120));
+    private static readonly Duration Close = new(TimeSpan.FromMilliseconds(220));
     private bool _listHidden;
     private readonly Path _maximizeIcon = Line("");
     private readonly Button _maximize;
@@ -117,7 +121,7 @@ sealed class TerminalPanel : UserControl
 
         var left = new StackPanel { Orientation = Orientation.Horizontal };
         left.Children.Add(_listToggle);
-        left.Children.Add(_tabs);
+        left.Children.Add(_pills.Root);
         left.Children.Add(_chevron);
         _bar.Children.Add(left);
         _bar.Children.Add(_right);
@@ -235,11 +239,8 @@ sealed class TerminalPanel : UserControl
 
     private void ShowBar(TerminalView view)
     {
-        _tabs.Children.Clear();
-        foreach (var tab in view.Tabs)
-        {
-            _tabs.Children.Add(Tab(tab));
-        }
+        var selected = view.Tabs.ToList().FindIndex(tab => tab.Selected);
+        _pills.Show([.. view.Tabs.Select(Tab)], selected, view.Environment);
 
         _right.Children.Clear();
         _right.Children.Add(_gear);
@@ -253,9 +254,14 @@ sealed class TerminalPanel : UserControl
         _chevron.RenderTransformOrigin = new Point(0.5, 0.5);
         _chevron.RenderTransform = _chevronTurn;
         var turn = view.Header.Open ? 180 : 0;
-        if (_chevronTurn.Angle != turn)
+        if (!Motion.IsOn)
         {
-            _chevronTurn.BeginAnimation(RotateTransform.AngleProperty, Motion.To(turn, Motion.Or0(Motion.Settle), Motion.Standard));
+            _chevronTurn.BeginAnimation(RotateTransform.AngleProperty, null);
+            _chevronTurn.Angle = turn;
+        }
+        else if (_chevronTurn.Angle != turn)
+        {
+            _chevronTurn.BeginAnimation(RotateTransform.AngleProperty, Motion.To(turn, Motion.Settle, Motion.Standard));
         }
         ShowStrip(view);
     }
@@ -275,10 +281,14 @@ sealed class TerminalPanel : UserControl
             {
                 _strip.Child = null;
                 _strip.Visibility = Visibility.Collapsed;
+                _pills.Hide(false);
                 return;
             }
 
-            var shrink = new System.Windows.Media.Animation.DoubleAnimation(_strip.ActualHeight, 0, Motion.Expand) { EasingFunction = Motion.Standard };
+            // The cards go out first, then the header folds, and the pills come back as it closes.
+            _strip.Child?.BeginAnimation(OpacityProperty, new System.Windows.Media.Animation.DoubleAnimation(0, Fold) { EasingFunction = Motion.Standard });
+            _pills.Hide(false, after: TimeSpan.FromMilliseconds(100));
+            var shrink = new System.Windows.Media.Animation.DoubleAnimation(_strip.ActualHeight, 0, Close) { EasingFunction = Motion.Standard };
             shrink.Completed += (_, _) =>
             {
                 // Opened again while it was closing: the new header stays.
@@ -299,13 +309,17 @@ sealed class TerminalPanel : UserControl
         var first = _stripFor is null;
         var moved = _stripFor != view.Environment;
         _stripFor = view.Environment;
+        var motion = first ? HeaderMotion.Open : moved ? HeaderMotion.Switch : HeaderMotion.None;
         _strip.Child = new Border
         {
             BorderBrush = Tokens.Brush("Hairline"),
             BorderThickness = new Thickness(0, 0, 0, 1),
-            Child = HeaderStripView.Build(view.Header, appear: moved),
+            Child = HeaderStripView.Build(view.Header, motion, environment => TabPicked?.Invoke(environment)),
         };
         _strip.Visibility = Visibility.Visible;
+
+        // Pills are the closed header and cards the open one (D-376): the pills give way.
+        _pills.Hide(true);
 
         if (first && Motion.IsOn)
         {
@@ -378,7 +392,7 @@ sealed class TerminalPanel : UserControl
     /// The pill of an environment (D-376): the ring and percentage of its limit, its name, and how
     /// many of its sessions wait. In a narrow window a pill that is not chosen keeps only its ring
     /// and the waiting mark; the name and the number move to the tooltip.
-    private UIElement Tab(TabView tab)
+    private FrameworkElement Tab(TabView tab)
     {
         var small = _narrow && !tab.Selected;
         var percent = tab.Percent is { } known ? known.ToString(CultureInfo.CurrentCulture) + "%" : null;
@@ -422,7 +436,7 @@ sealed class TerminalPanel : UserControl
             Padding = new Thickness(small ? 8 : 10, 0, small ? 8 : 12, 0),
             Margin = new Thickness(0, 0, 4, 0),
             CornerRadius = new CornerRadius(14),
-            Background = tab.Selected ? Tokens.Brush("Raised") : Brushes.Transparent,
+            Background = Brushes.Transparent,
             Cursor = Cursors.Hand,
             Child = row,
             ToolTip = small ? (percent is null ? tab.Name : tab.Name + " · " + percent) : null,
@@ -435,12 +449,16 @@ sealed class TerminalPanel : UserControl
     /// The list icon: a frame with a column on its left.
     private static FrameworkElement ListIcon() => Line("M1.5,1.5 L12.5,1.5 L12.5,11.5 L1.5,11.5 Z M5,1.5 L5,11.5");
 
-    /// The gear: a small circle in a ring of teeth, drawn with the thin line of the other icons.
-    private static FrameworkElement GearIcon() => Line(
-        "M7,4.6 A2.4,2.4 0 1 1 6.99,4.6 Z " +
-        "M7,0.8 L7,2.4 M7,11.6 L7,13.2 M0.8,7 L2.4,7 M11.6,7 L13.2,7 " +
-        "M2.6,2.6 L3.7,3.7 M10.3,10.3 L11.4,11.4 M2.6,11.4 L3.7,10.3 M10.3,3.7 L11.4,2.6 " +
-        "M7,2.4 A4.6,4.6 0 1 1 6.99,2.4 Z");
+    /// The gear of the project's icon set, the same one the card of limits uses.
+    private static FrameworkElement GearIcon() => new Path
+    {
+        Data = Tokens.Get<Geometry>("GearPath"),
+        Fill = Tokens.Brush("Muted"),
+        Stretch = Stretch.Uniform,
+        Width = 14,
+        Height = 14,
+        VerticalAlignment = VerticalAlignment.Center,
+    };
 
     // ---- the list of sessions ----
 
@@ -474,7 +492,7 @@ sealed class TerminalPanel : UserControl
         // The list lives in the window or, in a narrow one, under the button with the session name.
         _list.Children.Clear();
         _listPopup.Child = null;
-        var holder = new DockPanel { Background = Tokens.Brush("Background") };
+        var holder = new DockPanel { Background = _narrow ? Brushes.Transparent : Tokens.Brush("Background") };
         DockPanel.SetDock(create, Dock.Bottom);
         holder.Children.Add(create);
         holder.Children.Add(new ScrollViewer

@@ -8,11 +8,25 @@ using Aiko.Core;
 
 namespace Aiko.App;
 
+/// How the open header comes in: with its lines one after another when it opens, sideways when the
+/// active environment changes, or at once when only its numbers changed.
+enum HeaderMotion
+{
+    None,
+    Open,
+    Switch,
+}
+
 /// The open header of the terminal window (D-373, D-376): the active environment on the left with
-/// the words of the card of limits, the others as narrow quiet columns. It only draws a HeaderView.
+/// the words of the card of limits, the others as narrow quiet columns. When the header is open its
+/// cards are the way between environments: a click on a quiet one makes it active. It only draws a
+/// HeaderView.
 [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763")]
 static class HeaderStripView
 {
+    /// How far a card comes from when the environments change places.
+    private const double SwitchShift = 40;
+
     /// The quiet column of another environment.
     public const double QuietWidth = 168;
 
@@ -22,7 +36,7 @@ static class HeaderStripView
     /// Each line of the header comes a little after the one above it, like ink in a book.
     private static readonly TimeSpan Step = TimeSpan.FromMilliseconds(30);
 
-    public static FrameworkElement Build(HeaderView header, bool appear)
+    public static FrameworkElement Build(HeaderView header, HeaderMotion motion, Action<string> pick)
     {
         var grid = new Grid();
         var line = 0;
@@ -37,21 +51,30 @@ static class HeaderStripView
             var lines = column.Column.Active ? Full(column) : Quiet(column);
             var stack = new StackPanel { Margin = column.Column.Active ? new Thickness(16, 12, 16, 14) : new Thickness(14, 12, 14, 14) };
             Grid.SetIsSharedSizeScope(stack, true);
+            // The new active card comes from the right, where it stood; the one it replaced goes the
+            // other way into the quiet column.
+            var from = motion == HeaderMotion.Switch ? (column.Column.Active ? SwitchShift : -SwitchShift) : 0;
             foreach (var element in lines)
             {
                 stack.Children.Add(element);
-                if (appear)
+                if (motion != HeaderMotion.None)
                 {
-                    Ink(element, Step * line++);
+                    Ink(element, Step * line++, from, motion == HeaderMotion.Open ? 3 : 0);
                 }
             }
 
             var cell = new Border
             {
                 Child = stack,
+                Background = Brushes.Transparent,
                 BorderBrush = Tokens.Brush("Hairline"),
                 BorderThickness = new Thickness(at == 0 ? 0 : 1, 0, 0, 0),
             };
+            if (!column.Column.Active)
+            {
+                Pickable(cell, column.Column.Environment, pick);
+            }
+
             Grid.SetColumn(cell, at);
             grid.Children.Add(cell);
         }
@@ -239,8 +262,23 @@ static class HeaderStripView
             count % 10 == 1 && count % 100 != 11 ? Strings.TerminalTabWaitingOne : Strings.TerminalTabWaitingMany,
             count);
 
-    /// A line comes in from a soft start: up 3 px and from nothing, a little after the one above.
-    private static void Ink(UIElement element, TimeSpan after)
+    /// A quiet card is a button: a soft fill under the pointer, and a click makes its environment
+    /// the active one.
+    private static void Pickable(Border cell, string environment, Action<string> pick)
+    {
+        var hover = new SolidColorBrush(Colors.Transparent);
+        var fill = ((SolidColorBrush)Tokens.Brush("HoverLayer")).Color;
+        cell.Background = hover;
+        cell.Cursor = System.Windows.Input.Cursors.Hand;
+        cell.ToolTip = environment;
+        cell.MouseEnter += (_, _) => hover.BeginAnimation(SolidColorBrush.ColorProperty, Motion.To(fill, Motion.Or0(Motion.Hover)));
+        cell.MouseLeave += (_, _) => hover.BeginAnimation(SolidColorBrush.ColorProperty, Motion.To(Colors.Transparent, Motion.Or0(Motion.Hover)));
+        cell.MouseLeftButtonUp += (_, _) => pick(environment);
+    }
+
+    /// A line comes in from a soft start, a little after the one above: up from below when the
+    /// header opens, sideways when the environments change places.
+    private static void Ink(UIElement element, TimeSpan after, double fromX, double fromY)
     {
         if (!Motion.IsOn)
         {
@@ -248,10 +286,11 @@ static class HeaderStripView
         }
 
         var target = element.Opacity;
-        var shift = new TranslateTransform(0, 3);
+        var shift = new TranslateTransform(fromX, fromY);
         element.RenderTransform = shift;
         element.Opacity = 0;
         element.BeginAnimation(UIElement.OpacityProperty, new DoubleAnimation(0, target, Motion.Settle) { BeginTime = after, EasingFunction = Motion.Standard });
-        shift.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(3, 0, Motion.Settle) { BeginTime = after, EasingFunction = Motion.Standard });
+        shift.BeginAnimation(TranslateTransform.XProperty, new DoubleAnimation(fromX, 0, Motion.Settle) { BeginTime = after, EasingFunction = Motion.Standard });
+        shift.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(fromY, 0, Motion.Settle) { BeginTime = after, EasingFunction = Motion.Standard });
     }
 }
