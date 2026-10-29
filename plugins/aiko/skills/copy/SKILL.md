@@ -1,6 +1,6 @@
 ---
 name: copy
-description: Write and edit text that reads as written by a person, in Russian and English. Covers UI strings and i18n messages (buttons, errors, empty states, dialogs, toasts), artifacts and reports, README and docs, release notes, announcements, bad news, commit and PR text, task cards and briefs in a tracker, and translations between the two languages. Use when writing or reviewing user-facing copy, when a text sounds generic, corporate, translated or AI-written, when cards or tickets need to be short and clear, or when the user asks «сделай живее», «человечнее», «звучит как ИИ», "make it sound human".
+description: Write and edit text that reads as written by a person, in Russian and English. Covers UI strings and i18n messages (buttons, errors, empty states, dialogs, toasts), artifacts and reports, README and docs, release notes, announcements, bad news, commit and PR text, task cards and briefs in a tracker, messages to colleagues in Slack or a work chat, and translations between the two languages. Use when writing or reviewing user-facing copy, when a text sounds generic, corporate, translated or AI-written, when cards or tickets need to be short and clear, or when the user asks «сделай живее», «человечнее», «звучит как ИИ», "make it sound human".
 ---
 
 # aiko copy
@@ -37,6 +37,7 @@ Names of products, features and tools keep their original spelling inside any la
 | Release notes, changelog, announcement, bad news, apology | `references/voice.md` |
 | Long text: artifact, report, README, docs, post | `references/tells-en.md` or `references/tells-ru.md` |
 | Task cards, tickets, release goals, a brief for an agent | `references/tasks.md` |
+| A message to colleagues in Slack or a work chat, sent in the user's name | `references/work-chat.md` |
 | A translation, or a text first written in the other language | tells for the target language, the part on calques |
 | Commit message, PR, short chat reply | nothing more; sections 3–5 are enough |
 

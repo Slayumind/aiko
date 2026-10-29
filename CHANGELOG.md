@@ -44,6 +44,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   pill with its ring and percent. The arrow next to it opens a card per environment: a bar, a percent
   and a reset time for each limit, the plan and the folder. A click on a pill or on a small card
   switches the environment, and Ctrl+Shift+B hides the list of sessions. The gear opens the settings.
+- **The copy skill helps with messages to colleagues.** A new part of the skill covers Slack and work
+  chats: answer the question that was asked, say why when you give something else, quote a
+  colleague instead of retelling, keep a dispute short and check every number before it goes out.
 
 ### Fixed
 
