@@ -1366,6 +1366,15 @@
   <data name="NavVoiceOff" xml:space="preserve">
     <value>голос выключен</value>
   </data>
+  <data name="ZoomLabel" xml:space="preserve">
+    <value>Масштаб окна</value>
+  </data>
+  <data name="ZoomWhat" xml:space="preserve">
+    <value>Текст, значки и терминал меняются вместе. В окне терминала — C⁠t⁠r⁠l⁠+⁠= и C⁠t⁠r⁠l⁠+⁠-, а C⁠t⁠r⁠l⁠+⁠0 возвращает 115 %.</value>
+  </data>
+  <data name="ZoomStep" xml:space="preserve">
+    <value>{0} %</value>
+  </data>
   <data name="VoiceToggle" xml:space="preserve">
     <value>Голосовой ввод</value>
   </data>

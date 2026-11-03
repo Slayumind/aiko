@@ -92,6 +92,10 @@ public sealed record AppSettings
     /// The list of sessions was hidden with its icon or Ctrl+B (D-376).
     public bool SessionListHidden { get; init; }
 
+    /// The zoom of the terminal window in percent, one of WindowZoom.Steps (D-384). Read it through
+    /// WindowZoom.Read: a hand-edited file may hold anything.
+    public int WindowZoom { get; init; } = Terminal.WindowZoom.Default;
+
     /// A settings file we cannot read is not a reason to stop: Aiko starts with the defaults.
     /// Putting the unreadable file aside before that happens is the store's job, so that the next
     /// save does not quietly write over choices somebody may still want back.

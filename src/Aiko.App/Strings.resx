@@ -1366,6 +1366,15 @@
   <data name="NavVoiceOff" xml:space="preserve">
     <value>voice input off</value>
   </data>
+  <data name="ZoomLabel" xml:space="preserve">
+    <value>Window zoom</value>
+  </data>
+  <data name="ZoomWhat" xml:space="preserve">
+    <value>Text, icons and the terminal change size together. In the terminal window: C⁠t⁠r⁠l⁠+⁠= and C⁠t⁠r⁠l⁠+⁠-, and C⁠t⁠r⁠l⁠+⁠0 brings back 115%.</value>
+  </data>
+  <data name="ZoomStep" xml:space="preserve">
+    <value>{0}%</value>
+  </data>
   <data name="VoiceToggle" xml:space="preserve">
     <value>Voice input</value>
   </data>

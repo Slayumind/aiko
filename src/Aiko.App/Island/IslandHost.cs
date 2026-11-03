@@ -132,7 +132,7 @@ sealed class IslandHost(Dispatcher dispatcher)
             return;
         }
 
-        SettingsStore.Save(SettingsStore.Load() with { Island = position });
+        SettingsStore.Change(settings => settings with { Island = position });
         Log.Write($"island moved to {position.Edge} at {position.Along:0.00}");
     }
 }

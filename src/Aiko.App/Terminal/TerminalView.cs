@@ -9,7 +9,7 @@ sealed record TabView(string Name, bool Selected, int Waiting, int? Percent, Lim
 
 /// One column of the open header. The active one carries the words of the card (Block) and the
 /// profile line; a quiet one only shows its two numbers.
-sealed record HeaderColumnView(HeaderColumn Column, EnvironmentBlock? Block, string Folder, bool Direct);
+sealed record HeaderColumnView(HeaderColumn Column, EnvironmentBlock? Block, bool Direct);
 
 /// The header under the title bar (D-373, D-376): open or closed, and its columns, the active
 /// environment first. ListHidden is the session list hidden with its icon or Ctrl+B.

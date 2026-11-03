@@ -51,6 +51,9 @@ sealed class WindowKeys : IDisposable
     /// Tab in a terminal, with Shift or without: true when it went to the program.
     public Func<bool, bool>? TerminalTab { get; set; }
 
+    /// An arrow went to the window of a terminal past WPF: the virtual key. For the check door.
+    internal event Action<int>? ArrowSent;
+
     private const int VirtualTab = 0x09;
 
     private const int DropFiles = 0x0233;
@@ -110,17 +113,32 @@ sealed class WindowKeys : IDisposable
         if (code >= 0 && wParam == Remove)
         {
             var message = Marshal.PtrToStructure<MSG>(lParam);
-            if (message.message == KeyDown && (int)message.wParam == VirtualTab && !Held(VirtualControl) && !Held(VirtualAlt)
-                && message.hwnd != _window && IsChild(_window, message.hwnd)
-                && (TerminalTab?.Invoke(Held(VirtualShift)) ?? false))
+            var inTerminal = message.message == KeyDown && !Held(VirtualControl) && !Held(VirtualAlt)
+                && message.hwnd != _window && IsChild(_window, message.hwnd);
+            if (inTerminal && (int)message.wParam == VirtualTab && (TerminalTab?.Invoke(Held(VirtualShift)) ?? false))
             {
                 message.message = NoMessage;
                 Marshal.StructureToPtr(message, lParam, false);
+            }
+            else if (inTerminal && IsArrow((int)message.wParam))
+            {
+                // The arrows have the same trouble: the navigation of WPF moves the focus over the
+                // buttons of the window with them. The terminal's window gets the press straight
+                // away, and its control turns it into what the program expects, in its cursor mode.
+                SendMessage(message.hwnd, KeyDown, message.wParam, message.lParam);
+                message.message = NoMessage;
+                Marshal.StructureToPtr(message, lParam, false);
+                ArrowSent?.Invoke((int)message.wParam);
             }
         }
 
         return CallNextHookEx(_hook, code, wParam, lParam);
     }
+
+    private static bool IsArrow(int virtualKey) => virtualKey is >= 0x25 and <= 0x28;
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr SendMessage(IntPtr window, int message, IntPtr wParam, IntPtr lParam);
 
     [DllImport("user32.dll", SetLastError = true)]
     private static extern IntPtr SetWindowsHookEx(int hook, HookProc proc, IntPtr module, uint thread);

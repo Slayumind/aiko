@@ -5,7 +5,7 @@ using System.Windows.Interop;
 
 namespace Aiko.App;
 
-/// --try-tab: whether Tab in a terminal reaches the program before WPF takes it (D-370). A window
+/// --try-tab: whether Tab and the arrows in a terminal reach it before WPF takes them (D-370). A window
 /// off the screen holds a real terminal with cmd.exe; a press of Tab and of Shift+Tab is put into the
 /// queue of the window of the terminal, as the keyboard would put it, and the check sees whether the
 /// hook of WindowKeys sent it to the program and emptied the message. Nothing reaches other windows
@@ -15,6 +15,8 @@ static class TerminalTabCheck
 {
     private const int KeyDown = 0x0100;
     private const int Tab = 0x09;
+    private const int Left = 0x25;
+    private const int Down = 0x28;
 
     public static int Run(string reportPath)
     {
@@ -60,6 +62,15 @@ static class TerminalTabCheck
             PostMessage(child, KeyDown, Tab, IntPtr.Zero);
             await Task.Delay(500);
             Check("Tab put into the window of the terminal goes to the program", sent.Count == 1 && !sent[0]);
+
+            // An arrow goes to the terminal's own window past the navigation of WPF, which would move
+            // the focus over the buttons of the window with it.
+            var arrows = new List<int>();
+            keys.ArrowSent += key => arrows.Add(key);
+            PostMessage(child, KeyDown, Left, IntPtr.Zero);
+            PostMessage(child, KeyDown, Down, IntPtr.Zero);
+            await Task.Delay(500);
+            Check("Left and Down put into the window of the terminal go to it past WPF", arrows is [Left, Down]);
 
             terminal.Close();
             window.Close();

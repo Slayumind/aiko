@@ -22,10 +22,13 @@ sealed class TerminalSurface : Grid
     /// renderer of the control cannot see fonts that are not installed.
     private const string Font = "Cascadia Mono";
 
-    /// In points, not in the units of WPF: the control turns points into pixels by the screen's DPI.
-    /// 10 points are about 13.3 units, next to TextNumber (13), so the text of the terminal and the
-    /// text of the window are one size. 13 points were about 17 units and looked larger than the rest.
-    private const short FontSize = 10;
+    /// In points, not in the units of WPF: the control turns points into pixels by the screen's DPI
+    /// and knows nothing of the zoom of the window. So the size comes from WindowZoom.TerminalPoints,
+    /// next to the text of the window at every step (D-383, D-384). Set by the host for all terminals.
+    public static short FontPoints { get; set; } = (short)WindowZoom.TerminalPoints(WindowZoom.Default);
+
+    /// The font this terminal was given, to give it again only when it changed.
+    private short _points;
 
     private readonly TerminalControl _control = new();
     private readonly PseudoConsole _console;
@@ -72,7 +75,8 @@ sealed class TerminalSurface : Grid
 
         Loaded += (_, _) =>
         {
-            _control.SetTheme(Theme, Font, FontSize, Color.FromRgb(0x0A, 0x0A, 0x0A));
+            // Given again on every load: the control may come back without it.
+            UseFont(always: true);
             // The surface is loaded again each time the person comes back to the session.
             if (!_connected)
             {
@@ -107,6 +111,20 @@ sealed class TerminalSurface : Grid
     public void Type(string text) => _console.WriteInput(text);
 
     public void FocusTerminal() => _control.Focus();
+
+    /// Gives the control the font of FontPoints, when it is loaded and the size changed. The columns
+    /// change with the font, so the pseudo console hears the new size.
+    public void UseFont(bool always = false)
+    {
+        if (!IsLoaded || (!always && _points == FontPoints))
+        {
+            return;
+        }
+
+        _points = FontPoints;
+        _control.SetTheme(Theme, Font, _points, Color.FromRgb(0x0A, 0x0A, 0x0A));
+        Dispatcher.BeginInvoke(SyncSize, DispatcherPriority.Background);
+    }
 
     /// What the mouse selected in the terminal, ready for the clipboard, or null. The rows Claude
     /// Code wrapped by the width are joined again (D-371).

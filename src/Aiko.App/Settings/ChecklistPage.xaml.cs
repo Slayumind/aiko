@@ -782,7 +782,7 @@ public partial class ChecklistPage : UserControl
         var runAtStartup = RunAtStartup.IsChecked == true;
         Startup.Set(runAtStartup);
 
-        SettingsStore.Save(SettingsStore.Load() with
+        SettingsStore.Change(settings => settings with
         {
             Place = PlaceIsland.IsChecked == true ? AikoPlace.Island : AikoPlace.Tray,
             RunAtStartup = runAtStartup,

@@ -52,26 +52,48 @@ public partial class TerminalPage : UserControl
         SpeechSystem.IsChecked = _settings.VoiceLanguage == AikoLanguage.System;
         SpeechRussian.IsChecked = _settings.VoiceLanguage == AikoLanguage.Russian;
         SpeechEnglish.IsChecked = _settings.VoiceLanguage == AikoLanguage.English;
+        FillZoom();
         _filling = false;
 
         ShowModel();
         ShowKey();
     }
 
-    private void Save(AppSettings settings)
+    /// One dot per step of WindowZoom, in the order of the steps.
+    private void FillZoom()
+    {
+        ZoomSteps.Children.Clear();
+        var chosen = WindowZoom.Read(_settings.WindowZoom);
+        foreach (var step in WindowZoom.Steps)
+        {
+            var dot = new RadioButton
+            {
+                Style = (Style)FindResource("Dot"),
+                GroupName = "WindowZoom",
+                Content = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.ZoomStep, step),
+                IsChecked = step == chosen,
+                Margin = new Thickness(ZoomSteps.Children.Count == 0 ? 0 : 20, 0, 0, 0),
+            };
+            dot.Checked += (_, _) => Save(settings => settings with { WindowZoom = step });
+            ZoomSteps.Children.Add(dot);
+        }
+    }
+
+    /// The change goes to what the file holds now, not to the copy the page read when it opened:
+    /// the terminal window may have changed its zoom or its header since.
+    private void Save(Func<AppSettings, AppSettings> change)
     {
         if (_filling)
         {
             return;
         }
 
-        _settings = settings;
-        SettingsStore.Save(settings);
+        _settings = SettingsStore.Change(change);
         Saved?.Invoke();
     }
 
     private void OnSpeechChanged(object sender, RoutedEventArgs e) =>
-        Save(_settings with
+        Save(settings => settings with
         {
             VoiceLanguage = SpeechRussian.IsChecked == true ? AikoLanguage.Russian
                 : SpeechEnglish.IsChecked == true ? AikoLanguage.English
@@ -82,7 +104,7 @@ public partial class TerminalPage : UserControl
     /// voice is turned on (D-313), and the size was on the page before the tick.
     private void OnVoiceChanged(object sender, RoutedEventArgs e)
     {
-        Save(_settings with { VoiceInput = VoiceOn.IsChecked == true });
+        Save(settings => settings with { VoiceInput = VoiceOn.IsChecked == true });
         if (!_filling && _settings.VoiceInput && _settings.VoiceEngine == VoiceEngine.Local)
         {
             StartDownload();
@@ -91,7 +113,7 @@ public partial class TerminalPage : UserControl
 
     private void OnEngineChanged(object sender, RoutedEventArgs e)
     {
-        Save(_settings with { VoiceEngine = Cloud.IsChecked == true ? VoiceEngine.OpenAI : VoiceEngine.Local });
+        Save(settings => settings with { VoiceEngine = Cloud.IsChecked == true ? VoiceEngine.OpenAI : VoiceEngine.Local });
         if (!_filling && _settings.VoiceInput && _settings.VoiceEngine == VoiceEngine.Local)
         {
             StartDownload();

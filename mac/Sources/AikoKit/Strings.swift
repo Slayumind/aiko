@@ -485,6 +485,9 @@ public enum Strings {
         "NavTerminal": ("Terminal", "Терминал"),
         "NavVoiceOn": ("voice input on", "голос включён"),
         "NavVoiceOff": ("voice input off", "голос выключен"),
+        "ZoomLabel": ("Window zoom", "Масштаб окна"),
+        "ZoomWhat": ("Text, icons and the terminal change size together. In the terminal window: C⁠t⁠r⁠l⁠+⁠= and C⁠t⁠r⁠l⁠+⁠-, and C⁠t⁠r⁠l⁠+⁠0 brings back 115%.", "Текст, значки и терминал меняются вместе. В окне терминала — C⁠t⁠r⁠l⁠+⁠= и C⁠t⁠r⁠l⁠+⁠-, а C⁠t⁠r⁠l⁠+⁠0 возвращает 115 %."),
+        "ZoomStep": ("{0}%", "{0} %"),
         "VoiceToggle": ("Voice input", "Голосовой ввод"),
         "VoiceToggleWhat": ("Ctrl+Shift+Space or the microphone button in the editor.", "Ctrl+Shift+Space или кнопка микрофона в редакторе."),
         "VoiceLanguageLabel": ("Speech language", "Язык речи"),
@@ -1846,6 +1849,15 @@ public enum Strings {
 
     /// voice input off
     public static var navVoiceOff: String { Strings.get("NavVoiceOff") }
+
+    /// Window zoom
+    public static var zoomLabel: String { Strings.get("ZoomLabel") }
+
+    /// Text, icons and the terminal change size together. In the terminal window: C⁠t⁠r⁠l⁠+⁠= an...
+    public static var zoomWhat: String { Strings.get("ZoomWhat") }
+
+    /// {0}%
+    public static var zoomStep: String { Strings.get("ZoomStep") }
 
     /// Voice input
     public static var voiceToggle: String { Strings.get("VoiceToggle") }

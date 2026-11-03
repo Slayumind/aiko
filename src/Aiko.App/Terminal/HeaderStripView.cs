@@ -393,7 +393,8 @@ sealed class HeaderStripView
         return track;
     }
 
-    /// "Max 5x · .claude · direct mode off": who this environment is, on one line.
+    /// "Max 5x · Aiko · direct mode off": who this environment is, on one line, with its name in Aiko
+    /// as the owner chose it in the settings, not the name of its folder.
     private static FrameworkElement Profile(HeaderColumnView column, EnvironmentBlock block)
     {
         var parts = new List<string>();
@@ -402,7 +403,7 @@ sealed class HeaderStripView
             parts.Add(block.Plan);
         }
 
-        parts.Add(column.Folder);
+        parts.Add(column.Column.Environment);
         parts.Add(column.Direct ? Strings.TerminalDirectOn : Strings.TerminalDirectOff);
 
         var line = TerminalPanel.Text(string.Join("  ·  ", parts), "TextSmall", "Muted", FontWeights.Normal);

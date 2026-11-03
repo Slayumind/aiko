@@ -46,20 +46,21 @@ public partial class PrivacyPage : UserControl
         ResetId.IsEnabled = on;
     }
 
-    private void Save(AppSettings settings)
+    /// The change goes to what the file holds now, not to the copy the page read when it opened:
+    /// the terminal window may have changed its zoom or its header since.
+    private void Save(Func<AppSettings, AppSettings> change)
     {
         if (_filling)
         {
             return;
         }
 
-        _settings = settings;
-        SettingsStore.Save(settings);
+        _settings = SettingsStore.Change(change);
         Saved?.Invoke();
     }
 
     private void OnUpdatesChanged(object sender, RoutedEventArgs e) =>
-        Save(_settings with { CheckUpdates = CheckUpdates.IsChecked == true });
+        Save(settings => settings with { CheckUpdates = CheckUpdates.IsChecked == true });
 
     /// Answering here counts as answering the wizard's question: somebody who found the switch
     /// themselves should not be asked about it again.
@@ -67,7 +68,7 @@ public partial class PrivacyPage : UserControl
     {
         ShowLedger();
         ResetLine.Visibility = Visibility.Collapsed;
-        Save(_settings with { SendStats = SendStats.IsChecked == true, PrivacyAsked = true });
+        Save(settings => settings with { SendStats = SendStats.IsChecked == true, PrivacyAsked = true });
     }
 
     private void OnResetId(object sender, RoutedEventArgs e)
