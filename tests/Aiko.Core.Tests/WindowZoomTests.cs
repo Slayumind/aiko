@@ -11,7 +11,8 @@ public class WindowZoomTests
         var cases = SpecCases.Json("window-zoom");
 
         Assert.Equal([.. cases.GetProperty("steps").EnumerateArray().Select(step => step.GetInt32())], WindowZoom.Steps);
-        Assert.Equal(cases.GetProperty("default").GetInt32(), WindowZoom.Default);
+        // A value that is no step reads as the default, so the default shows through Read.
+        Assert.Equal(cases.GetProperty("default").GetInt32(), WindowZoom.Read(0));
     }
 
     [Fact]
@@ -46,8 +47,8 @@ public class WindowZoomTests
     [Fact]
     public void A_new_settings_file_has_the_default_zoom()
     {
-        Assert.Equal(WindowZoom.Default, AppSettings.Default.WindowZoom);
-        Assert.Equal(WindowZoom.Default, AppSettings.FromJson("{}").WindowZoom);
+        Assert.Equal(115, AppSettings.Default.WindowZoom);
+        Assert.Equal(115, AppSettings.FromJson("{}").WindowZoom);
     }
 
     [Fact]

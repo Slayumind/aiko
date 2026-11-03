@@ -160,15 +160,13 @@ sealed class TerminalHost
     /// A step of the zoom from the keys, kept in the settings.
     private void Zoom(Func<int, int> step)
     {
-        var settings = SettingsStore.Load();
-        var zoom = step(WindowZoom.Read(settings.WindowZoom));
-        SettingsStore.Save(settings with { WindowZoom = zoom });
-        UseZoom(zoom);
+        var settings = SettingsStore.Change(now => now with { WindowZoom = step(WindowZoom.Read(now.WindowZoom)) });
+        UseZoom(settings.WindowZoom);
     }
 
     private void Remember(Func<AppSettings, AppSettings> change)
     {
-        SettingsStore.Save(change(SettingsStore.Load()));
+        SettingsStore.Change(change);
         Draw();
     }
 
@@ -983,7 +981,6 @@ sealed class TerminalHost
             return new HeaderColumnView(
                 column,
                 column.Active ? blocks.FirstOrDefault(block => block.Name == column.Environment) : null,
-                System.IO.Path.GetFileName(environment.ConfigDirectories[0].TrimEnd('\\', '/')),
                 environment.DirectMode);
         })]);
     }

@@ -130,7 +130,7 @@ sealed class AikoShell : IDisposable
             return false;
         }
 
-        SettingsStore.Save(app with { TerminalShown = true });
+        SettingsStore.Change(settings => settings with { TerminalShown = true });
         OpenTerminal();
         return true;
     }
@@ -144,8 +144,7 @@ sealed class AikoShell : IDisposable
         {
             OpenSettings(page: SettingsPanel.ChecklistPageKey);
             _settings?.OpenChecklist(ChecklistItem.MeetAiko);
-            app = app with { MeetAikoShown = true };
-            SettingsStore.Save(app);
+            SettingsStore.Change(settings => settings with { MeetAikoShown = true });
         }
 
         // Once, for someone who set Aiko up before the count had its own switch. Not asking
@@ -161,7 +160,7 @@ sealed class AikoShell : IDisposable
         else if (WizardChecklist.OpensMemoryOnStart(app, SettingsStore.LoadEnvironments()))
         {
             OpenSettings(page: SettingsPanel.PersonalityPageKey);
-            SettingsStore.Save(app with { MemoryShown = true });
+            SettingsStore.Change(settings => settings with { MemoryShown = true });
         }
     }
 

@@ -74,25 +74,26 @@ public partial class TerminalPage : UserControl
                 IsChecked = step == chosen,
                 Margin = new Thickness(ZoomSteps.Children.Count == 0 ? 0 : 20, 0, 0, 0),
             };
-            dot.Checked += (_, _) => Save(SettingsStore.Load() with { WindowZoom = step });
+            dot.Checked += (_, _) => Save(settings => settings with { WindowZoom = step });
             ZoomSteps.Children.Add(dot);
         }
     }
 
-    private void Save(AppSettings settings)
+    /// The change goes to what the file holds now, not to the copy the page read when it opened:
+    /// the terminal window may have changed its zoom or its header since.
+    private void Save(Func<AppSettings, AppSettings> change)
     {
         if (_filling)
         {
             return;
         }
 
-        _settings = settings;
-        SettingsStore.Save(settings);
+        _settings = SettingsStore.Change(change);
         Saved?.Invoke();
     }
 
     private void OnSpeechChanged(object sender, RoutedEventArgs e) =>
-        Save(_settings with
+        Save(settings => settings with
         {
             VoiceLanguage = SpeechRussian.IsChecked == true ? AikoLanguage.Russian
                 : SpeechEnglish.IsChecked == true ? AikoLanguage.English
@@ -103,7 +104,7 @@ public partial class TerminalPage : UserControl
     /// voice is turned on (D-313), and the size was on the page before the tick.
     private void OnVoiceChanged(object sender, RoutedEventArgs e)
     {
-        Save(_settings with { VoiceInput = VoiceOn.IsChecked == true });
+        Save(settings => settings with { VoiceInput = VoiceOn.IsChecked == true });
         if (!_filling && _settings.VoiceInput && _settings.VoiceEngine == VoiceEngine.Local)
         {
             StartDownload();
@@ -112,7 +113,7 @@ public partial class TerminalPage : UserControl
 
     private void OnEngineChanged(object sender, RoutedEventArgs e)
     {
-        Save(_settings with { VoiceEngine = Cloud.IsChecked == true ? VoiceEngine.OpenAI : VoiceEngine.Local });
+        Save(settings => settings with { VoiceEngine = Cloud.IsChecked == true ? VoiceEngine.OpenAI : VoiceEngine.Local });
         if (!_filling && _settings.VoiceInput && _settings.VoiceEngine == VoiceEngine.Local)
         {
             StartDownload();

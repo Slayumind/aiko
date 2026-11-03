@@ -162,7 +162,7 @@ public partial class PersonalityPage : UserControl
             var app = SettingsStore.Load();
             if (!app.MemoryShown)
             {
-                SettingsStore.Save(app with { MemoryShown = true });
+                SettingsStore.Change(settings => settings with { MemoryShown = true });
             }
         }
     }

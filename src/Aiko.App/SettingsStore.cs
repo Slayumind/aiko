@@ -19,6 +19,16 @@ static class SettingsStore
 
     public static void Save(AppSettings settings) => Write(SettingsFile, settings.ToJson());
 
+    /// One change to the settings, made to what the file holds now, and the result. A copy read
+    /// earlier may be old: the terminal window, the island and the settings window each change their
+    /// own fields, and a save of an old copy would put back what another one changed.
+    public static AppSettings Change(Func<AppSettings, AppSettings> change)
+    {
+        var settings = change(Load());
+        Save(settings);
+        return settings;
+    }
+
     public static EnvironmentSettings LoadEnvironments() =>
         EnvironmentSettings.FromJson(Read(EnvironmentsFile));
 

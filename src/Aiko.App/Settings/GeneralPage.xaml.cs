@@ -82,15 +82,16 @@ public partial class GeneralPage : UserControl
         _filling = false;
     }
 
-    private void Save(AppSettings settings)
+    /// The change goes to what the file holds now, not to the copy the page read when it opened:
+    /// the terminal window may have changed its zoom or its header since.
+    private void Save(Func<AppSettings, AppSettings> change)
     {
         if (_filling)
         {
             return;
         }
 
-        _settings = settings;
-        SettingsStore.Save(settings);
+        _settings = SettingsStore.Change(change);
         Saved?.Invoke();
     }
 
@@ -98,11 +99,11 @@ public partial class GeneralPage : UserControl
     {
         // A setting that changes nothing should not look as if it does.
         IslandOnly.IsOpen = PlaceIsland.IsChecked == true;
-        Save(_settings with { Place = PlaceIsland.IsChecked == true ? AikoPlace.Island : AikoPlace.Tray });
+        Save(settings => settings with { Place = PlaceIsland.IsChecked == true ? AikoPlace.Island : AikoPlace.Tray });
     }
 
     private void OnHideChanged(object sender, RoutedEventArgs e) =>
-        Save(_settings with { HideIslandInFullScreen = HideInFullScreen.IsChecked == true });
+        Save(settings => settings with { HideIslandInFullScreen = HideInFullScreen.IsChecked == true });
 
     /// Startup is a key in the registry, not a line in our file, so this one writes to Windows.
     private void OnStartupChanged(object sender, RoutedEventArgs e)
@@ -115,7 +116,7 @@ public partial class GeneralPage : UserControl
         var wanted = RunAtStartup.IsChecked == true;
         Startup.Set(wanted);
         StartupOnly.IsOpen = wanted;
-        Save(_settings with { RunAtStartup = wanted });
+        Save(settings => settings with { RunAtStartup = wanted });
     }
 
     private void OnTerminalAtStartupChanged(object sender, RoutedEventArgs e)
@@ -125,7 +126,7 @@ public partial class GeneralPage : UserControl
             return;
         }
 
-        Save(_settings with { OpenTerminalAtStartup = TerminalAtStartup.IsChecked == true });
+        Save(settings => settings with { OpenTerminalAtStartup = TerminalAtStartup.IsChecked == true });
     }
 
     private void OnLanguagePicked(int index)
@@ -136,7 +137,7 @@ public partial class GeneralPage : UserControl
             return;
         }
 
-        Save(_settings with { Language = language });
+        Save(settings => settings with { Language = language });
         LanguageChoice.Apply(language);
 
         // Every word on screen was picked when its control was made, so the window has to be built
