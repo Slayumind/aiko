@@ -21,7 +21,11 @@ sealed class TerminalSurface : Grid
     /// Cascadia Mono ships with Windows 11. Geist Mono is only a resource of Aiko, and the
     /// renderer of the control cannot see fonts that are not installed.
     private const string Font = "Cascadia Mono";
-    private const short FontSize = 13;
+
+    /// In points, not in the units of WPF: the control turns points into pixels by the screen's DPI.
+    /// 10 points are about 13.3 units, next to TextNumber (13), so the text of the terminal and the
+    /// text of the window are one size. 13 points were about 17 units and looked larger than the rest.
+    private const short FontSize = 10;
 
     private readonly TerminalControl _control = new();
     private readonly PseudoConsole _console;

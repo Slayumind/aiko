@@ -520,25 +520,28 @@ sealed class TerminalPanel : UserControl
 
 
     /// The pill of an environment (D-376): the ring and percentage of its limit, its name, and how
-    /// many of its sessions wait. In a narrow window a pill that is not chosen keeps only its ring
-    /// and the waiting mark; the name and the number move to the tooltip.
+    /// many of its sessions wait. While a session waits, the waiting mark takes the place of the
+    /// ring and the percentage, and the limit moves to the tooltip. In a narrow window a pill that
+    /// is not chosen keeps only its first mark; the name and the number move to the tooltip.
     private Pill Tab(TabView tab)
     {
         TextBlock? label = null;
         var small = _narrow && !tab.Selected;
+        var waiting = tab.Waiting > 0;
         var percent = tab.Percent is { } known ? known.ToString(CultureInfo.CurrentCulture) + "%" : null;
         var row = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
 
-        var ring = HeaderStripView.Ring(tab.Percent, tab.Tone, 14, 2);
-        ring.Cursor = Cursors.Hand;
-        ring.ToolTip = Strings.TerminalShowLimits;
-        ring.MouseLeftButtonUp += (_, e) =>
+        // The mark on the left opens the header, the same for the ring and for the waiting mark.
+        var mark = waiting ? WaitingMark() : HeaderStripView.Ring(tab.Percent, tab.Tone, 14, 2);
+        mark.Cursor = Cursors.Hand;
+        mark.ToolTip = Strings.TerminalShowLimits;
+        mark.MouseLeftButtonUp += (_, e) =>
         {
             e.Handled = true;
             HeaderToggled?.Invoke();
         };
-        WindowChromeHit(ring);
-        row.Children.Add(ring);
+        WindowChromeHit(mark);
+        row.Children.Add(mark);
 
         if (!small)
         {
@@ -548,7 +551,7 @@ sealed class TerminalPanel : UserControl
             name.Margin = new Thickness(6, 0, 0, 0);
             row.Children.Add(name);
             label = name;
-            if (percent is not null)
+            if (percent is not null && !waiting)
             {
                 var number = Mono(percent, "Muted");
                 number.Margin = new Thickness(6, 0, 0, 0);
@@ -556,12 +559,17 @@ sealed class TerminalPanel : UserControl
             }
         }
 
-        if (tab.Waiting > 0)
+        if (waiting)
         {
-            var pause = Pause();
-            pause.Margin = new Thickness(small ? 6 : 8, 0, 4, 0);
-            row.Children.Add(pause);
-            row.Children.Add(Mono(tab.Waiting.ToString(CultureInfo.CurrentCulture), "Caution"));
+            var count = Mono(tab.Waiting.ToString(CultureInfo.CurrentCulture), "Caution");
+            count.Margin = new Thickness(small ? 4 : 6, 0, 0, 0);
+            row.Children.Add(count);
+        }
+
+        string? tip = null;
+        if (small || waiting)
+        {
+            tip = percent is null ? tab.Name : tab.Name + " · " + percent;
         }
 
         var back = new Border
@@ -573,7 +581,7 @@ sealed class TerminalPanel : UserControl
             Background = Brushes.Transparent,
             Cursor = Cursors.Hand,
             Child = row,
-            ToolTip = small ? (percent is null ? tab.Name : tab.Name + " · " + percent) : null,
+            ToolTip = tip,
         };
         back.MouseLeftButtonUp += (_, _) => TabPicked?.Invoke(tab.Name);
         WindowChromeHit(back);
@@ -1124,6 +1132,15 @@ sealed class TerminalPanel : UserControl
     private static FrameworkElement Pause()
     {
         return Line("M0.5,0.5 L0.5,9.5 M4.5,0.5 L4.5,9.5", "Caution");
+    }
+
+    /// The waiting mark in the box of a pill's ring, so the name does not move when one turns
+    /// into the other.
+    private static FrameworkElement WaitingMark()
+    {
+        var pause = Pause();
+        pause.HorizontalAlignment = HorizontalAlignment.Center;
+        return new Grid { Width = 14, Height = 14, Background = Brushes.Transparent, VerticalAlignment = VerticalAlignment.Center, Children = { pause } };
     }
 
     internal static FrameworkElement Dot(bool filled) => new Ellipse

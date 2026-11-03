@@ -81,7 +81,7 @@ sealed class TerminalEditor : UserControl, IDictationField
         Background = Tokens.Brush("Background");
 
         _text.FontFamily = Tokens.Get<FontFamily>("Mono");
-        _text.FontSize = 12.5;
+        _text.FontSize = Tokens.Get<double>("TextNumber");
         _text.Foreground = Tokens.Brush("Ink");
         _text.CaretBrush = Tokens.Brush("Ink");
         _text.Background = Brushes.Transparent;
