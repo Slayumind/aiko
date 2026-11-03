@@ -34,6 +34,9 @@ sealed class TerminalHost
     private readonly Dictionary<string, long> _seenAt = [];
     private readonly Dictionary<string, long> _answeredAt = [];
 
+    /// What each terminal did at the last drawing, to see what changed since (D-377).
+    private readonly Dictionary<string, TerminalActivity> _activities = [];
+
     private WindowKeys? _keys;
     private VoiceDictation _voice = null!;
 
@@ -847,6 +850,7 @@ sealed class TerminalHost
         _lastEvents.Remove(id);
         _seenAt.Remove(id);
         _answeredAt.Remove(id);
+        _activities.Remove(id);
     }
 
     // ---- the view ----
@@ -916,6 +920,68 @@ sealed class TerminalHost
         }
 
         _panel.Show(View());
+        Notice();
+    }
+
+    /// A session brought a notice: what it says, how it goes, and the session to open on a click.
+    public event Action<NoticeLine, NoticeWay, string>? Noticed;
+
+    /// What changed in the sessions since the last drawing, as notices (D-377). Everything that
+    /// changes a session draws the window, so this is the one place to look.
+    private void Notice()
+    {
+        var changes = new List<(string Id, NoticeKind Kind)>();
+        foreach (var id in _terminals.Keys)
+        {
+            if (Live(id)?.Activity is not { } now)
+            {
+                continue;
+            }
+
+            TerminalActivity? before = _activities.TryGetValue(id, out var was) ? was : null;
+            _activities[id] = now;
+            if (Notices.ForSession(before, now) is { } kind)
+            {
+                changes.Add((id, kind));
+            }
+        }
+
+        if (changes.Count == 0)
+        {
+            return;
+        }
+
+        var choice = NoticeChoice.From(SettingsStore.Load());
+        var inFront = _window.InView && _window.IsActive;
+        var open = _model.Session(_sessions)?.Id;
+        foreach (var (id, kind) in changes)
+        {
+            var way = Notices.Route(kind, choice, inFront, id == open);
+            if (way != NoticeWay.None && _sessions.Find(id) is { } session)
+            {
+                var word = kind switch
+                {
+                    NoticeKind.Waiting => Strings.NoticeWaiting,
+                    NoticeKind.Done => Strings.NoticeDone,
+                    _ => Strings.NoticeStopped,
+                };
+                Noticed?.Invoke(new NoticeLine(kind, session.Name, word), way, id);
+            }
+        }
+    }
+
+    /// A notice was clicked: the window comes forward on its session.
+    public void OpenSession(string id)
+    {
+        Activate();
+        if (_sessions.Find(id) is not { } session)
+        {
+            return;
+        }
+
+        _sessions = _sessions.Opened(id);
+        Save();
+        Change(_model.ToEnvironment(session.Environment, _sessions).ToSession(id, _sessions));
     }
 
     private TerminalView View()

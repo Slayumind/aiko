@@ -1133,7 +1133,7 @@ sealed class TerminalPanel : UserControl
 
     /// The sign of "waits for you": two thin bars, drawn as thin as the lines of the slayumind icons
     /// (one in twenty-four), so they read as a quiet mark and not as a pause button (D-299, D-332).
-    private static FrameworkElement Pause()
+    internal static FrameworkElement Pause()
     {
         return Line("M0.5,0.5 L0.5,9.5 M4.5,0.5 L4.5,9.5", "Caution");
     }

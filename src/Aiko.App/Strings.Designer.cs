@@ -1356,6 +1356,45 @@ public static class Strings
     /// voice input off
     public static string NavVoiceOff => Get("NavVoiceOff");
 
+    /// waits for you
+    public static string NoticeWaiting => Get("NoticeWaiting");
+
+    /// done
+    public static string NoticeDone => Get("NoticeDone");
+
+    /// stopped
+    public static string NoticeStopped => Get("NoticeStopped");
+
+    /// {0}% in 5 hours
+    public static string NoticeLimitFiveHour => Get("NoticeLimitFiveHour");
+
+    /// {0}% this week
+    public static string NoticeLimitWeek => Get("NoticeLimitWeek");
+
+    /// {0}% of {1} this week
+    public static string NoticeLimitModel => Get("NoticeLimitModel");
+
+    /// Notifications
+    public static string NotifyLabel => Get("NotifyLabel");
+
+    /// When the terminal window is not in front, a line comes up next to Aiko for 6 seconds. A c...
+    public static string NotifyWhat => Get("NotifyWhat");
+
+    /// A session waits for an answer
+    public static string NotifyWaiting => Get("NotifyWaiting");
+
+    /// A session is done
+    public static string NotifyDone => Get("NotifyDone");
+
+    /// A session stopped by itself
+    public static string NotifyStopped => Get("NotifyStopped");
+
+    /// A limit went over 90%
+    public static string NotifyLimit => Get("NotifyLimit");
+
+    /// A sound when a session waits
+    public static string NotifySound => Get("NotifySound");
+
     /// Window zoom
     public static string ZoomLabel => Get("ZoomLabel");
 

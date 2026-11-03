@@ -30,6 +30,7 @@ stamp, not a table (D-255).
 | `permission-mode/` | the names of the four permission modes and their order (`PermissionModes`) |
 | `limit-badge/` | which limit the title bar of the terminal names (`LimitBadge`) |
 | `header-strip/` | the order and the numbers of the open header of the terminal window (`HeaderStrip`) |
+| `notices/` | which change of a session or a limit brings a notice, and whether it is the window, the sound or nothing (`Notices`); Windows only until the terminal comes to the Mac |
 | `window-zoom/` | the steps of the zoom of the terminal window and the font of the terminal at each (`WindowZoom`); Windows only until the terminal comes to the Mac |
 | `model-name/` | the name of a model in the line under the input (`ModelName`) |
 | `slash-menu/` | the menu of commands that "/" opens in the field: when it opens, what it shows, in which order (`SlashMenu`) |

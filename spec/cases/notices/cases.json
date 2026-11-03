@@ -1,0 +1,52 @@
+{
+  "comment": "When a session or a limit brings a notice, and how it reaches the person (D-375, D-377). A session brings one when it starts to wait, ends a turn it was working on, or stops by itself; null is a terminal seen for the first time. A notice goes to the own window when the terminal window is not in front; in front, the open session brings nothing and another one that waits brings only the sound. Only waiting has a sound. A limit brings one when a window of it crosses 90 percent upwards, never on the first number.",
+  "sessions": [
+    { "before": "Working", "now": "Waiting", "notice": "Waiting" },
+    { "before": "Idle", "now": "Waiting", "notice": "Waiting" },
+    { "before": "Done", "now": "Waiting", "notice": "Waiting" },
+    { "before": null, "now": "Waiting", "notice": "Waiting" },
+    { "before": "Waiting", "now": "Waiting", "notice": null },
+    { "before": "Working", "now": "Done", "notice": "Done" },
+    { "before": "Waiting", "now": "Done", "notice": "Done" },
+    { "before": "Idle", "now": "Done", "notice": null },
+    { "before": null, "now": "Done", "notice": null },
+    { "before": "Done", "now": "Done", "notice": null },
+    { "before": "Working", "now": "Exited", "notice": "Stopped" },
+    { "before": "Idle", "now": "Exited", "notice": "Stopped" },
+    { "before": null, "now": "Exited", "notice": null },
+    { "before": "Exited", "now": "Exited", "notice": null },
+    { "before": "Waiting", "now": "Working", "notice": null },
+    { "before": "Done", "now": "Idle", "notice": null },
+    { "before": null, "now": "Working", "notice": null }
+  ],
+  "routes": [
+    { "kind": "Waiting", "inFront": false, "open": false, "way": "WindowWithSound" },
+    { "kind": "Waiting", "inFront": false, "open": true, "way": "WindowWithSound" },
+    { "kind": "Waiting", "inFront": true, "open": false, "way": "Sound" },
+    { "kind": "Waiting", "inFront": true, "open": true, "way": "None" },
+    { "kind": "Done", "inFront": false, "open": false, "way": "Window" },
+    { "kind": "Done", "inFront": true, "open": false, "way": "None" },
+    { "kind": "Done", "inFront": true, "open": true, "way": "None" },
+    { "kind": "Stopped", "inFront": false, "open": true, "way": "Window" },
+    { "kind": "Stopped", "inFront": true, "open": false, "way": "None" },
+    { "kind": "Limit", "inFront": false, "open": false, "way": "Window" },
+    { "kind": "Limit", "inFront": true, "open": false, "way": "Window" },
+    { "kind": "Waiting", "inFront": false, "open": false, "off": ["Sound"], "way": "Window" },
+    { "kind": "Waiting", "inFront": true, "open": false, "off": ["Sound"], "way": "None" },
+    { "kind": "Waiting", "inFront": false, "open": false, "off": ["Waiting"], "way": "None" },
+    { "kind": "Done", "inFront": false, "open": false, "off": ["Done"], "way": "None" },
+    { "kind": "Stopped", "inFront": false, "open": false, "off": ["Stopped"], "way": "None" },
+    { "kind": "Limit", "inFront": false, "open": false, "off": ["Limit"], "way": "None" },
+    { "kind": "Done", "inFront": false, "open": false, "off": ["Waiting", "Sound"], "way": "Window" }
+  ],
+  "limits": [
+    { "before": 85, "now": 91, "crossed": true },
+    { "before": 89, "now": 90, "crossed": true },
+    { "before": 70, "now": 100, "crossed": true },
+    { "before": 90, "now": 95, "crossed": false },
+    { "before": 91, "now": 40, "crossed": false },
+    { "before": 40, "now": 89, "crossed": false },
+    { "before": null, "now": 95, "crossed": false },
+    { "before": 85, "now": null, "crossed": false }
+  ]
+}

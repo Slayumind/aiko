@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
 using Aiko.Core;
+using Aiko.Core.Terminal;
 using Velopack;
 
 namespace Aiko.App;
@@ -402,6 +403,19 @@ static class Program
         if (args is ["--snapshot-terminal", var terminalPath, ..])
         {
             TerminalSnapshot.Write(terminalPath, args.Length > 2 ? args[2] : null);
+            return;
+        }
+
+        // The four notices on made up sessions, one under another: --snapshot-notice out.png
+        if (args is ["--snapshot-notice", var noticePath, ..])
+        {
+            var lines = new System.Windows.Controls.StackPanel { Background = Tokens.Brush("Background") };
+            lines.Children.Add(NoticeWindow.LineFor(new NoticeLine(NoticeKind.Waiting, "Голос в редактор", Strings.NoticeWaiting)));
+            lines.Children.Add(NoticeWindow.LineFor(new NoticeLine(NoticeKind.Done, "Fix the scroll of the feed", Strings.NoticeDone)));
+            lines.Children.Add(NoticeWindow.LineFor(new NoticeLine(NoticeKind.Stopped, "Installer build", Strings.NoticeStopped)));
+            lines.Children.Add(NoticeWindow.LineFor(new NoticeLine(NoticeKind.Limit, "Work · Kodland",
+                string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.NoticeLimitFiveHour, 91), 91, LimitTone.Caution)));
+            Snapshot.Write(lines, noticePath);
             return;
         }
 

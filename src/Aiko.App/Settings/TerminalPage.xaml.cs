@@ -53,11 +53,26 @@ public partial class TerminalPage : UserControl
         SpeechRussian.IsChecked = _settings.VoiceLanguage == AikoLanguage.Russian;
         SpeechEnglish.IsChecked = _settings.VoiceLanguage == AikoLanguage.English;
         FillZoom();
+        NotifyWaiting.IsChecked = _settings.NotifyWaiting;
+        NotifyDone.IsChecked = _settings.NotifyDone;
+        NotifyStopped.IsChecked = _settings.NotifyStopped;
+        NotifyLimit.IsChecked = _settings.NotifyLimit;
+        NotifySound.IsChecked = _settings.NotifySound;
         _filling = false;
 
         ShowModel();
         ShowKey();
     }
+
+    private void OnNotifyChanged(object sender, RoutedEventArgs e) =>
+        Save(settings => settings with
+        {
+            NotifyWaiting = NotifyWaiting.IsChecked == true,
+            NotifyDone = NotifyDone.IsChecked == true,
+            NotifyStopped = NotifyStopped.IsChecked == true,
+            NotifyLimit = NotifyLimit.IsChecked == true,
+            NotifySound = NotifySound.IsChecked == true,
+        });
 
     /// One dot per step of WindowZoom, in the order of the steps.
     private void FillZoom()
