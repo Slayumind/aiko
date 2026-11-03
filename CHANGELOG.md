@@ -13,8 +13,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   with the terminal button on the card. Each session is a real terminal: Claude Code as it is, with
   its own input, menus and permission prompts, or a command line (Git Bash or PowerShell) in the
   folder of the session. Sessions are grouped by environment and folder, and the window opens where you
-  closed it. The text of the terminal has the same size as the text of the window. The Mac follows
-  before the release.
+  closed it. The text of the terminal has the same size as the text of the window, and Ctrl+= and
+  Ctrl+- zoom them together: 100, 115 or 130%, also in the settings. The Mac follows before the
+  release.
 - **Sessions keep running.** Closing the window hides it while Claude Code or a command line still
   runs in it, so the agents go on working. Quitting Aiko asks first when something still runs. After a
   restart of Aiko a session of Claude Code continues its conversation, and a command line opens again

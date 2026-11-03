@@ -1356,6 +1356,15 @@ public static class Strings
     /// voice input off
     public static string NavVoiceOff => Get("NavVoiceOff");
 
+    /// Window zoom
+    public static string ZoomLabel => Get("ZoomLabel");
+
+    /// Text, icons and the terminal change size together. In the terminal window: C⁠t⁠r⁠l⁠+⁠= an...
+    public static string ZoomWhat => Get("ZoomWhat");
+
+    /// {0}%
+    public static string ZoomStep => Get("ZoomStep");
+
     /// Voice input
     public static string VoiceToggle => Get("VoiceToggle");
 

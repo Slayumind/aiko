@@ -22,6 +22,25 @@ sealed class TerminalWindow : Window
     private readonly Border _root = new();
     private readonly TerminalPanel _panel;
 
+    private readonly WindowChrome _chrome = new()
+    {
+        CaptionHeight = TerminalPanel.BarHeight,
+        ResizeBorderThickness = new Thickness(6),
+        GlassFrameThickness = new Thickness(0),
+        CornerRadius = new CornerRadius(0),
+        UseAeroCaptionButtons = false,
+    };
+
+    /// The zoom of the window (D-384): the whole panel grows with one scale, so the text, the icons
+    /// and the gaps keep their sizes to each other. Popups that open from it grow with it. The title
+    /// bar that drags the window grows too.
+    public void UseZoom(int zoom)
+    {
+        var scale = Aiko.Core.Terminal.WindowZoom.Scale(zoom);
+        _panel.LayoutTransform = scale == 1 ? System.Windows.Media.Transform.Identity : new System.Windows.Media.ScaleTransform(scale, scale);
+        _chrome.CaptionHeight = TerminalPanel.BarHeight * scale;
+    }
+
     public TerminalWindow(TerminalPanel panel, WindowPlace place)
     {
         _panel = panel;
@@ -36,14 +55,7 @@ sealed class TerminalWindow : Window
         Height = place.Height;
         UseLayoutRounding = true;
 
-        WindowChrome.SetWindowChrome(this, new WindowChrome
-        {
-            CaptionHeight = TerminalPanel.BarHeight,
-            ResizeBorderThickness = new Thickness(6),
-            GlassFrameThickness = new Thickness(0),
-            CornerRadius = new CornerRadius(0),
-            UseAeroCaptionButtons = false,
-        });
+        WindowChrome.SetWindowChrome(this, _chrome);
 
         _root.Child = panel;
         Content = _root;

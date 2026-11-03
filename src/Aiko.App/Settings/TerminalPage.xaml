@@ -17,6 +17,11 @@
     <TextBlock Text="{x:Static local:Strings.NavTerminal}" FontFamily="{StaticResource Sans}" FontSize="16"
                FontWeight="Medium" Foreground="{StaticResource Ink}" />
 
+    <!-- The zoom of the terminal window (D-384). The keys are in the hint: they are faster than the page. -->
+    <TextBlock Text="{x:Static local:Strings.ZoomLabel}" Style="{StaticResource SectionLabel}" Margin="0,18,0,4" />
+    <TextBlock Text="{x:Static local:Strings.ZoomWhat}" Style="{StaticResource RowHint}" TextWrapping="Wrap" Margin="0,0,0,8" />
+    <StackPanel x:Name="ZoomSteps" Orientation="Horizontal" />
+
     <CheckBox x:Name="VoiceOn" Style="{StaticResource Tick}" Margin="0,18,0,0"
               Checked="OnVoiceChanged" Unchecked="OnVoiceChanged">
       <StackPanel>

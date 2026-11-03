@@ -52,10 +52,31 @@ public partial class TerminalPage : UserControl
         SpeechSystem.IsChecked = _settings.VoiceLanguage == AikoLanguage.System;
         SpeechRussian.IsChecked = _settings.VoiceLanguage == AikoLanguage.Russian;
         SpeechEnglish.IsChecked = _settings.VoiceLanguage == AikoLanguage.English;
+        FillZoom();
         _filling = false;
 
         ShowModel();
         ShowKey();
+    }
+
+    /// One dot per step of WindowZoom, in the order of the steps.
+    private void FillZoom()
+    {
+        ZoomSteps.Children.Clear();
+        var chosen = WindowZoom.Read(_settings.WindowZoom);
+        foreach (var step in WindowZoom.Steps)
+        {
+            var dot = new RadioButton
+            {
+                Style = (Style)FindResource("Dot"),
+                GroupName = "WindowZoom",
+                Content = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.ZoomStep, step),
+                IsChecked = step == chosen,
+                Margin = new Thickness(ZoomSteps.Children.Count == 0 ? 0 : 20, 0, 0, 0),
+            };
+            dot.Checked += (_, _) => Save(SettingsStore.Load() with { WindowZoom = step });
+            ZoomSteps.Children.Add(dot);
+        }
     }
 
     private void Save(AppSettings settings)

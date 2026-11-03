@@ -3115,6 +3115,27 @@
     ]
   ],
   [
+    "ZoomLabel",
+    [
+      "Window zoom",
+      "Масштаб окна"
+    ]
+  ],
+  [
+    "ZoomWhat",
+    [
+      "Text, icons and the terminal change size together. In the terminal window: C⁠t⁠r⁠l⁠+⁠= and C⁠t⁠r⁠l⁠+⁠-, and C⁠t⁠r⁠l⁠+⁠0 brings back 115%.",
+      "Текст, значки и терминал меняются вместе. В окне терминала — C⁠t⁠r⁠l⁠+⁠= и C⁠t⁠r⁠l⁠+⁠-, а C⁠t⁠r⁠l⁠+⁠0 возвращает 115 %."
+    ]
+  ],
+  [
+    "ZoomStep",
+    [
+      "{0}%",
+      "{0} %"
+    ]
+  ],
+  [
     "VoiceToggle",
     [
       "Voice input",
