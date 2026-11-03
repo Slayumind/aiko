@@ -149,7 +149,7 @@ sealed class NoticeWindow : Window
         return new Border
         {
             Height = LineHeight,
-            Padding = new Thickness(7, 0, 14, 0),
+            Padding = new Thickness(12, 0, 14, 0),
             Margin = new Thickness(Air),
             CornerRadius = new CornerRadius(12),
             Background = Tokens.Brush("Surface"),
@@ -162,7 +162,8 @@ sealed class NoticeWindow : Window
         };
     }
 
-    /// The mark of the state in a dark circle of 22 units (D-377).
+    /// The mark of the state on its own, a little larger than in the list so it stands next to text
+    /// of 13 units, with no circle under it (the owner's pick after D-377).
     private static FrameworkElement Sign(NoticeLine notice)
     {
         FrameworkElement mark = notice.Kind switch
@@ -174,10 +175,7 @@ sealed class NoticeWindow : Window
         };
         mark.HorizontalAlignment = HorizontalAlignment.Center;
         mark.VerticalAlignment = VerticalAlignment.Center;
-
-        var sign = new Grid { Width = 22, Height = 22, VerticalAlignment = VerticalAlignment.Center };
-        sign.Children.Add(new Ellipse { Fill = Tokens.Brush("Background") });
-        sign.Children.Add(mark);
-        return sign;
+        mark.LayoutTransform = new ScaleTransform(1.25, 1.25);
+        return new Grid { Width = 18, Height = 18, VerticalAlignment = VerticalAlignment.Center, Children = { mark } };
     }
 }
