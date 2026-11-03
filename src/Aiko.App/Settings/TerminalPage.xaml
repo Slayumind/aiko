@@ -22,6 +22,20 @@
     <TextBlock Text="{x:Static local:Strings.ZoomWhat}" Style="{StaticResource RowHint}" TextWrapping="Wrap" Margin="0,0,0,8" />
     <StackPanel x:Name="ZoomSteps" Orientation="Horizontal" />
 
+    <!-- The notices of sessions and limits (D-375, D-377): one tick per kind, all on, and the sound of waiting. -->
+    <TextBlock Text="{x:Static local:Strings.NotifyLabel}" Style="{StaticResource SectionLabel}" Margin="0,22,0,4" />
+    <TextBlock Text="{x:Static local:Strings.NotifyWhat}" Style="{StaticResource RowHint}" TextWrapping="Wrap" Margin="0,0,0,8" />
+    <CheckBox x:Name="NotifyWaiting" Style="{StaticResource Tick}" Content="{x:Static local:Strings.NotifyWaiting}"
+              Checked="OnNotifyChanged" Unchecked="OnNotifyChanged" />
+    <CheckBox x:Name="NotifyDone" Style="{StaticResource Tick}" Content="{x:Static local:Strings.NotifyDone}" Margin="0,8,0,0"
+              Checked="OnNotifyChanged" Unchecked="OnNotifyChanged" />
+    <CheckBox x:Name="NotifyStopped" Style="{StaticResource Tick}" Content="{x:Static local:Strings.NotifyStopped}" Margin="0,8,0,0"
+              Checked="OnNotifyChanged" Unchecked="OnNotifyChanged" />
+    <CheckBox x:Name="NotifyLimit" Style="{StaticResource Tick}" Content="{x:Static local:Strings.NotifyLimit}" Margin="0,8,0,0"
+              Checked="OnNotifyChanged" Unchecked="OnNotifyChanged" />
+    <CheckBox x:Name="NotifySound" Style="{StaticResource Tick}" Content="{x:Static local:Strings.NotifySound}" Margin="0,8,0,0"
+              Checked="OnNotifyChanged" Unchecked="OnNotifyChanged" />
+
     <CheckBox x:Name="VoiceOn" Style="{StaticResource Tick}" Margin="0,18,0,0"
               Checked="OnVoiceChanged" Unchecked="OnVoiceChanged">
       <StackPanel>

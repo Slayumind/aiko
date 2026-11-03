@@ -96,6 +96,18 @@ public sealed record AppSettings
     /// WindowZoom.Read: a hand-edited file may hold anything.
     public int WindowZoom { get; init; } = Terminal.WindowZoom.Default;
 
+    /// The notices of the terminal, one tick per kind and one for the sound, all on (D-375).
+    public bool NotifyWaiting { get; init; } = true;
+
+    public bool NotifyDone { get; init; } = true;
+
+    public bool NotifyStopped { get; init; } = true;
+
+    public bool NotifyLimit { get; init; } = true;
+
+    /// The sound of "waits for you"; the other notices are silent (D-377).
+    public bool NotifySound { get; init; } = true;
+
     /// A settings file we cannot read is not a reason to stop: Aiko starts with the defaults.
     /// Putting the unreadable file aside before that happens is the store's job, so that the next
     /// save does not quietly write over choices somebody may still want back.

@@ -3115,6 +3115,97 @@
     ]
   ],
   [
+    "NoticeWaiting",
+    [
+      "waits for you",
+      "ждёт ответа"
+    ]
+  ],
+  [
+    "NoticeDone",
+    [
+      "done",
+      "готово"
+    ]
+  ],
+  [
+    "NoticeStopped",
+    [
+      "stopped",
+      "остановилась"
+    ]
+  ],
+  [
+    "NoticeLimitFiveHour",
+    [
+      "{0}% in 5 hours",
+      "{0} % за 5 часов"
+    ]
+  ],
+  [
+    "NoticeLimitWeek",
+    [
+      "{0}% this week",
+      "{0} % за неделю"
+    ]
+  ],
+  [
+    "NoticeLimitModel",
+    [
+      "{0}% of {1} this week",
+      "{0} % {1} за неделю"
+    ]
+  ],
+  [
+    "NotifyLabel",
+    [
+      "Notifications",
+      "Уведомления"
+    ]
+  ],
+  [
+    "NotifyWhat",
+    [
+      "When the terminal window is not in front, a line comes up next to Aiko for 6 seconds. A click on it opens the session.",
+      "Когда окно терминала не впереди, рядом с Aiko на 6 секунд появляется строка. Щелчок по ней открывает сессию."
+    ]
+  ],
+  [
+    "NotifyWaiting",
+    [
+      "A session waits for an answer",
+      "Сессия ждёт ответа"
+    ]
+  ],
+  [
+    "NotifyDone",
+    [
+      "A session is done",
+      "Сессия закончила"
+    ]
+  ],
+  [
+    "NotifyStopped",
+    [
+      "A session stopped by itself",
+      "Сессия остановилась сама"
+    ]
+  ],
+  [
+    "NotifyLimit",
+    [
+      "A limit went over 90%",
+      "Лимит перешёл за 90 %"
+    ]
+  ],
+  [
+    "NotifySound",
+    [
+      "A sound when a session waits",
+      "Звук, когда сессия ждёт"
+    ]
+  ],
+  [
     "ZoomLabel",
     [
       "Window zoom",
