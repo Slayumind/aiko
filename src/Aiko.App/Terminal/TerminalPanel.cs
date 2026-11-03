@@ -547,22 +547,26 @@ sealed class TerminalPanel : UserControl
         {
             // One weight for every pill: the chosen one differs by colour and its background only,
             // so a pill keeps its width when it is chosen and the background lands on it.
+            // The name and its numbers are runs of one text, so they stand on one baseline: two
+            // texts of 13 and 11 units, each centred, put the smaller one a pixel higher.
             var name = Text(tab.Name, "TextNumber", tab.Selected ? "Ink" : "Muted", FontWeights.Medium);
             name.Margin = new Thickness(6, 0, 0, 0);
+            if (waiting)
+            {
+                AddNumber(name, tab.Waiting.ToString(CultureInfo.CurrentCulture), "Caution");
+            }
+            else if (percent is not null)
+            {
+                AddNumber(name, percent, "Muted");
+            }
+
             row.Children.Add(name);
             label = name;
-            if (percent is not null && !waiting)
-            {
-                var number = Mono(percent, "Muted");
-                number.Margin = new Thickness(6, 0, 0, 0);
-                row.Children.Add(number);
-            }
         }
-
-        if (waiting)
+        else if (waiting)
         {
             var count = Mono(tab.Waiting.ToString(CultureInfo.CurrentCulture), "Caution");
-            count.Margin = new Thickness(small ? 4 : 6, 0, 0, 0);
+            count.Margin = new Thickness(4, 0, 0, 0);
             row.Children.Add(count);
         }
 
@@ -1132,6 +1136,22 @@ sealed class TerminalPanel : UserControl
     private static FrameworkElement Pause()
     {
         return Line("M0.5,0.5 L0.5,9.5 M4.5,0.5 L4.5,9.5", "Caution");
+    }
+
+    /// A number after the name of a pill, in the small mono type of Mono and on the name's baseline.
+    /// The space before it is a mono space of the same size, about six units, as the gap was.
+    private static void AddNumber(TextBlock name, string number, string tone)
+    {
+        var family = Tokens.Get<FontFamily>("Mono");
+        var size = Tokens.Get<double>("TextTiny");
+        name.Inlines.Add(new System.Windows.Documents.Run(" ") { FontFamily = family, FontSize = size });
+        name.Inlines.Add(new System.Windows.Documents.Run(number)
+        {
+            FontFamily = family,
+            FontSize = size,
+            FontWeight = FontWeights.Normal,
+            Foreground = Tokens.Brush(tone),
+        });
     }
 
     /// The waiting mark in the box of a pill's ring, so the name does not move when one turns
