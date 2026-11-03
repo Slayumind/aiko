@@ -167,9 +167,9 @@ sealed class NoticeWindow : Window
     {
         FrameworkElement mark = notice.Kind switch
         {
-            NoticeKind.Waiting => TerminalPanel.Pause(),
+            NoticeKind.Waiting => Marks.Pause(),
             NoticeKind.Done => SiteIcons.Draw(SiteIcons.Check, 12, "Positive"),
-            NoticeKind.Stopped => TerminalPanel.Line("M0,0 L8,8 M8,0 L0,8", "Destructive"),
+            NoticeKind.Stopped => Marks.Line("M0,0 L8,8 M8,0 L0,8", "Destructive"),
             _ => HeaderStripView.Ring(notice.Percent, notice.Tone, 12, 1.5),
         };
         mark.HorizontalAlignment = HorizontalAlignment.Center;

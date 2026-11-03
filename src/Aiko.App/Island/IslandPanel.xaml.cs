@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using Aiko.Core;
+using Aiko.Core.Terminal;
 
 namespace Aiko.App;
 
@@ -53,6 +54,9 @@ public partial class IslandPanel : UserControl
         // column, so the island takes as little of the edge as it can.
         var horizontal = IslandPlacement.IsHorizontal(edge);
         Rings.Orientation = horizontal ? Orientation.Horizontal : Orientation.Vertical;
+        Strip.Orientation = Rings.Orientation;
+        _horizontal = horizontal;
+        DrawSessions();
 
         // Docked, the side against the screen has no corners and no line: it reads as part of the edge.
         Body.CornerRadius = !docked ? new CornerRadius(14) : edge switch
@@ -150,6 +154,78 @@ public partial class IslandPanel : UserControl
         label.SetOpen(_unfolded, animate: false);
         _labels.Add(label);
         return label;
+    }
+
+    private IslandSessions _sessions = IslandSessions.None;
+    private bool _horizontal = true;
+    private FrameworkElement? _waitingMark;
+
+    /// The sessions after the rings (D-364). The window around the panel follows the size.
+    public void ShowSessions(IslandSessions sessions)
+    {
+        _sessions = sessions;
+        DrawSessions();
+        MarkForMeasure();
+    }
+
+    /// The waiting session when the point, given by the mouse, is over the mark of "waits"; else null.
+    public string? WaitingUnder(System.Windows.Input.MouseEventArgs e)
+    {
+        if (_waitingMark is not { IsVisible: true } mark || _sessions.FirstWaiting is not { } id)
+        {
+            return null;
+        }
+
+        var at = e.GetPosition(mark);
+        return at.X >= -4 && at.Y >= -4 && at.X <= mark.ActualWidth + 4 && at.Y <= mark.ActualHeight + 4 ? id : null;
+    }
+
+    /// "Waits" with an orange pause and "work" with a grey dot, each in a field of 12 with its number
+    /// 4 units after it; 12 units after the rings, in a row along a top or bottom edge and in a
+    /// column 6 apart along a side. With nothing working or waiting the island is as it was.
+    private void DrawSessions()
+    {
+        Sessions.Children.Clear();
+        _waitingMark = null;
+        Sessions.Orientation = _horizontal ? Orientation.Horizontal : Orientation.Vertical;
+        Sessions.Margin = _sessions.IsEmpty ? new Thickness(0) : _horizontal ? new Thickness(12, 0, 0, 0) : new Thickness(0, 12, 0, 0);
+        if (_sessions.Waiting > 0)
+        {
+            _waitingMark = SessionMark(Marks.Pause(), _sessions.Waiting);
+            _waitingMark.Cursor = System.Windows.Input.Cursors.Hand;
+            Sessions.Children.Add(_waitingMark);
+        }
+
+        if (_sessions.Working > 0)
+        {
+            var dot = new System.Windows.Shapes.Ellipse { Width = 8, Height = 8, Fill = Tokens.Brush("Muted") };
+            var mark = SessionMark(dot, _sessions.Working);
+            if (Sessions.Children.Count > 0)
+            {
+                mark.Margin = _horizontal ? new Thickness(10, 0, 0, 0) : new Thickness(0, 6, 0, 0);
+            }
+
+            Sessions.Children.Add(mark);
+        }
+    }
+
+    private static FrameworkElement SessionMark(FrameworkElement sign, int count)
+    {
+        sign.HorizontalAlignment = HorizontalAlignment.Center;
+        sign.VerticalAlignment = VerticalAlignment.Center;
+        var row = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Center, Background = System.Windows.Media.Brushes.Transparent };
+        row.Children.Add(new Grid { Width = 12, Height = 12, Children = { sign } });
+        row.Children.Add(new TextBlock
+        {
+            Text = count.ToString(System.Globalization.CultureInfo.CurrentCulture),
+            FontFamily = Tokens.Get<System.Windows.Media.FontFamily>("Mono"),
+            FontSize = Tokens.Get<double>("TextTiny"),
+            Foreground = Tokens.Brush("Ink"),
+            MinWidth = 7,
+            Margin = new Thickness(4, 0, 0, 0),
+            VerticalAlignment = VerticalAlignment.Center,
+        });
+        return row;
     }
 
     private static Thickness Gap(bool horizontal, bool first) => (horizontal, first) switch

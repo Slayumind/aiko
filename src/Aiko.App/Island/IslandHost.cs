@@ -38,10 +38,12 @@ sealed class IslandHost(Dispatcher dispatcher)
             var window = new IslandWindow();
             window.CardRequested += pinned => CardRequested?.Invoke(pinned);
             window.Moved += SavePosition;
+            window.SessionRequested += id => SessionRequested?.Invoke(id);
             _window = window;
         }
 
         _window.Show(cards, position);
+        _window.ShowSessions(_sessions);
 
         // Only watched while the island is on screen: the tray icon has nothing to hide from.
         if (_fullScreen is null)
@@ -64,6 +66,18 @@ sealed class IslandHost(Dispatcher dispatcher)
     }
 
     public void Update(IReadOnlyList<CardState> cards) => _window?.Update(cards);
+
+    private Aiko.Core.Terminal.IslandSessions _sessions = Aiko.Core.Terminal.IslandSessions.None;
+
+    /// How many sessions work and wait (D-364), kept for an island that opens later.
+    public void ShowSessions(Aiko.Core.Terminal.IslandSessions sessions)
+    {
+        _sessions = sessions;
+        _window?.ShowSessions(sessions);
+    }
+
+    /// A click on the mark of "waits": the session to open.
+    public event Action<string>? SessionRequested;
 
     /// Hides or shows the island for what is in front right now. Called again when the setting
     /// that asks for the hiding changes.

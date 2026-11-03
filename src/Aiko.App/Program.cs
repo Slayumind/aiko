@@ -434,6 +434,12 @@ static class Program
                 panel.Unfold(true, animate: false);
             }
 
+            // --snapshot-island out.png Left sessions: two sessions work and one waits (D-364).
+            if (args is [.., "sessions"])
+            {
+                panel.ShowSessions(new IslandSessions(Working: 2, Waiting: 1, FirstWaiting: "a2"));
+            }
+
             if (args is [.., "face"])
             {
                 panel.SetFace(TrayFaceMotion.At(FacePhase.FaceIn, 1), FaceDrawing.For(FaceStyle.Chibi, AikoFace.Done, FaceGround.Dark, 18));

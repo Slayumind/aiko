@@ -57,6 +57,7 @@ sealed class AikoShell : IDisposable
         _cards.TerminalRequested += OpenTerminal;
         _tray.MouseMoved += _cards.StartHover;
         _island.CardRequested += _cards.Open;
+        _island.SessionRequested += id => _terminal?.OpenSession(id);
     }
 
     /// With changingNothing the start skips everything that writes or asks the network: the repair
@@ -456,11 +457,16 @@ sealed class AikoShell : IDisposable
         // The open header shows the plan of each environment, as the card does.
         _numbers.ReadAccounts();
         var terminal = new TerminalHost(environments, SettingsStore.LoadTerminal(), _numbers.SnapshotFor, _cards.Model);
-        terminal.Closed += () => _terminal = null;
+        terminal.Closed += () =>
+        {
+            _terminal = null;
+            _island.ShowSessions(IslandSessions.None);
+        };
         terminal.SettingsAsked += () => OpenSettings();
         terminal.InViewChanged += _island.FollowTerminal;
         terminal.VoiceSettingsAsked += () => OpenSettings(page: SettingsPanel.TerminalPageKey);
         terminal.Noticed += (notice, way, id) => Notify(notice, way, () => _terminal?.OpenSession(id));
+        terminal.SessionsChanged += _island.ShowSessions;
         _terminal = terminal;
         terminal.Show();
 
