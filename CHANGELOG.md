@@ -13,7 +13,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   with the terminal button on the card. Each session is a real terminal: Claude Code as it is, with
   its own input, menus and permission prompts, or a command line (Git Bash or PowerShell) in the
   folder of the session. Sessions are grouped by environment and folder, and the window opens where you
-  closed it. The Mac follows before the release.
+  closed it. The text of the terminal has the same size as the text of the window. The Mac follows
+  before the release.
 - **Sessions keep running.** Closing the window hides it while Claude Code or a command line still
   runs in it, so the agents go on working. Quitting Aiko asks first when something still runs. After a
   restart of Aiko a session of Claude Code continues its conversation, and a command line opens again
@@ -41,7 +42,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - **The terminal window opens once by itself** after Aiko is set up. A start with Windows opens only
   the tray, unless you turn on "Open the terminal window too" in the settings.
 - **Limits of every environment above the terminal.** The title bar shows each environment as a
-  pill with its ring and percent. The arrow next to it opens a card per environment: a bar, a percent
+  pill with its ring and percent. When a session of the environment waits for you, an orange pause
+  mark and the number of waiting sessions take the place of the ring. The arrow next to it opens a card per environment: a bar, a percent
   and a reset time for each limit, the plan and the folder. A click on a pill or on a small card
   switches the environment, and Ctrl+Shift+B hides the list of sessions. The gear opens the settings.
 - **The copy skill helps with messages to colleagues.** A new part of the skill covers Slack and work

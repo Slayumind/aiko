@@ -146,11 +146,22 @@ sealed class HeaderStripView
         Root.Opacity = 1;
     }
 
+    /// The track of a ring: the grey of the tray icon's ring. It is see-through, so it reads on the
+    /// window, on a card and on the background of the chosen pill alike.
+    private static readonly Brush RingTrack = TrackBrush();
+
+    private static Brush TrackBrush()
+    {
+        var brush = new SolidColorBrush(RingDrawing.TrackColor);
+        brush.Freeze();
+        return brush;
+    }
+
     /// The ring of a limit: a full grey track and the used part from the top, clockwise.
     public static FrameworkElement Ring(int? percent, LimitTone tone, double size, double thickness, double opacity = 1)
     {
         var ring = new Grid { Width = size, Height = size, VerticalAlignment = VerticalAlignment.Center, Opacity = opacity };
-        ring.Children.Add(new Ellipse { Stroke = Tokens.Brush("Raised"), StrokeThickness = thickness });
+        ring.Children.Add(new Ellipse { Stroke = RingTrack, StrokeThickness = thickness });
         if (percent is { } used && used > 0)
         {
             ring.Children.Add(new Path
