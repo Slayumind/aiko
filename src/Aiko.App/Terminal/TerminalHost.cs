@@ -150,10 +150,10 @@ sealed class TerminalHost
     {
         var zoom = WindowZoom.Read(stored);
         _window.UseZoom(zoom);
-        TerminalSurface.FontPoints = (short)WindowZoom.TerminalPoints(zoom);
+        TerminalSurface.Zoom = zoom;
         foreach (var terminal in _terminals.Values)
         {
-            terminal.UseFont();
+            terminal.UseZoom();
         }
     }
 

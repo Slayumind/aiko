@@ -22,10 +22,11 @@ sealed class TerminalSurface : Grid
     /// renderer of the control cannot see fonts that are not installed.
     private const string Font = "Cascadia Mono";
 
-    /// In points, not in the units of WPF: the control turns points into pixels by the screen's DPI
-    /// and knows nothing of the zoom of the window. So the size comes from WindowZoom.TerminalPoints,
-    /// next to the text of the window at every step (D-383, D-384). Set by the host for all terminals.
-    public static short FontPoints { get; set; } = (short)WindowZoom.TerminalPoints(WindowZoom.Default);
+    /// The zoom of the window in percent (D-384), set by the host for all terminals. The control knows
+    /// nothing of it: it takes its font in points, turned into pixels by the screen's DPI, and counts
+    /// its rows and columns from its own size in units of WPF. So the font comes from
+    /// WindowZoom.TerminalPoints (D-383), and the surface undoes the scale of the window for itself.
+    public static int Zoom { get; set; } = WindowZoom.Default;
 
     /// The font this terminal was given, to give it again only when it changed.
     private short _points;
@@ -70,13 +71,13 @@ sealed class TerminalSurface : Grid
         KeyboardNavigation.SetTabNavigation(this, KeyboardNavigationMode.None);
         KeyboardNavigation.SetDirectionalNavigation(this, KeyboardNavigationMode.None);
         KeyboardNavigation.SetControlTabNavigation(this, KeyboardNavigationMode.None);
-        _control.Margin = new Thickness(TextInset, TextInset - 4, 0, 0);
+        UseZoom();
         Children.Add(_control);
 
         Loaded += (_, _) =>
         {
             // Given again on every load: the control may come back without it.
-            UseFont(always: true);
+            UseZoom(always: true);
             // The surface is loaded again each time the person comes back to the session.
             if (!_connected)
             {
@@ -112,16 +113,24 @@ sealed class TerminalSurface : Grid
 
     public void FocusTerminal() => _control.Focus();
 
-    /// Gives the control the font of FontPoints, when it is loaded and the size changed. The columns
-    /// change with the font, so the pseudo console hears the new size.
-    public void UseFont(bool always = false)
+    /// Follows Zoom. The window grows the panel with one scale; the surface takes the opposite scale,
+    /// so the control lays out at its true size on the screen and counts as many columns as fit.
+    /// Without it, at 130 % the control counted columns for a width 1.3 times smaller and Claude
+    /// Code filled three quarters of the terminal. The gap to the text keeps the zoom.
+    public void UseZoom(bool always = false)
     {
-        if (!IsLoaded || (!always && _points == FontPoints))
+        var scale = WindowZoom.Scale(Zoom);
+        LayoutTransform = scale == 1 ? Transform.Identity : new ScaleTransform(1 / scale, 1 / scale);
+        _control.Margin = new Thickness(TextInset * scale, (TextInset - 4) * scale, 0, 0);
+
+        var points = (short)WindowZoom.TerminalPoints(Zoom);
+        if (!IsLoaded || (!always && _points == points))
         {
             return;
         }
 
-        _points = FontPoints;
+        // The columns change with the font, so the pseudo console hears the new size.
+        _points = points;
         _control.SetTheme(Theme, Font, _points, Color.FromRgb(0x0A, 0x0A, 0x0A));
         Dispatcher.BeginInvoke(SyncSize, DispatcherPriority.Background);
     }
