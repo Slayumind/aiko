@@ -41,14 +41,34 @@ sealed class TerminalPanel : UserControl
     /// The open header under the title bar (D-373, D-376). It is drawn again only when it opens or
     /// the active environment changes: the numbers in it change too often to start its motion each
     /// time.
-    private readonly Border _strip = new() { ClipToBounds = true, Visibility = Visibility.Collapsed };
+    private readonly Border _strip = new() { ClipToBounds = true, Visibility = Visibility.Collapsed, Background = Tokens.Brush("Background") };
+
+    /// The body is moved back by the height of the moving header, so the terminal stands still
+    /// under it while the header grows or folds over it (D-390).
+    private readonly TranslateTransform _bodyShift = new();
+
+    /// The list of sessions is drawn by WPF and does not need to stand still like the terminal: it
+    /// takes back the shift of the body and moves with the edge of the header on every frame.
+    /// Standing still, it jumped at the end of opening and at the start of folding.
+    private readonly TranslateTransform _listShift = new();
     private readonly HeaderStripView _header;
     private string? _stripFor;
 
     /// Everything under the title bar and the header: the list and the terminal. While the header
     /// opens or closes it keeps one height, so the terminal changes its size once and not on
     /// every frame (each size is a resize of the pseudo console and a full redraw of Claude Code).
-    private readonly Grid _body = new();
+    private readonly Grid _body = new HeldGrid();
+
+    /// A grid that is drawn whole when it is taller than its place. WPF cuts an element held taller
+    /// than its place to the size of that place, and the cut moves with the element: when the header
+    /// opened, the body was held at its old height and moved up under the header, so its bottom part
+    /// was cut away, and a black band as tall as the header stood at the bottom of the terminal until
+    /// the header stood. The window itself still cuts what goes past its edge.
+    private sealed class HeldGrid : Grid
+    {
+        protected override Geometry? GetLayoutClip(Size layoutSlotSize) =>
+            ClipToBounds ? base.GetLayoutClip(layoutSlotSize) : null;
+    }
 
     /// How long the header takes to grow, the cards to go out, and the header to fold.
     private static readonly Duration Grow = new(TimeSpan.FromMilliseconds(320));
@@ -90,6 +110,7 @@ sealed class TerminalPanel : UserControl
         Background = Tokens.Brush("Background");
         FontFamily = Tokens.Get<FontFamily>("Sans");
         Focusable = false;
+        PreviewMouseDown += EndRenameOnPressAway;
 
         // Every scroll bar of the window is the thin one of the settings: the list, the feed and
         // the field.
@@ -168,6 +189,11 @@ sealed class TerminalPanel : UserControl
         DockPanel.SetDock(_strip, Dock.Top);
         all.Children.Add(_strip);
         all.Children.Add(_body);
+        // The moving header is drawn over the body that stands still under it.
+        Panel.SetZIndex(_strip, 1);
+        Panel.SetZIndex(_bar, 2);
+        _body.RenderTransform = _bodyShift;
+        listSide.RenderTransform = _listShift;
         Content = all;
 
         _resume = Flat(Strings.TerminalResume, () => ResumeAsked?.Invoke(), ghost: false, main: true);
@@ -298,9 +324,10 @@ sealed class TerminalPanel : UserControl
     /// software drawing of WPF and jerks. So while the header moves, the terminal is a picture of
     /// itself (TerminalSurface.ShowStill), and the body under the header keeps one height.
     ///
-    /// Opening: the body slides down under the bottom edge of the window while the header grows,
-    /// then takes its new height once. Closing: the body takes its final height first, then the
-    /// header folds and the body slides up. The real terminal comes back when the header stands.
+    /// The body stands still while the header moves over it (FollowStrip). Opening: the header grows
+    /// over the top of the picture, then the body takes its place and height under it once. Closing:
+    /// the body is in its final place and height from the start, and the folding header uncovers it.
+    /// The real terminal comes back when the header stands.
     private void ShowStrip(TerminalView view)
     {
         if (!view.Header.Open)
@@ -320,6 +347,7 @@ sealed class TerminalPanel : UserControl
 
             ShowStills(true);
             HoldBody(_strip.ActualHeight);
+            FollowStrip();
             _header.FadeOut(Fold);
             _pills.Hide(false, Close, after: PillsBack);
             var shrink = new System.Windows.Media.Animation.DoubleAnimation(_strip.ActualHeight, 0, Close) { EasingFunction = Motion.Standard };
@@ -387,6 +415,7 @@ sealed class TerminalPanel : UserControl
             ShowLiveAfterLayout();
         };
         _strip.BeginAnimation(HeightProperty, growing);
+        FollowStrip();
     }
 
     /// The header is gone, and the terminal takes its place.
@@ -442,11 +471,41 @@ sealed class TerminalPanel : UserControl
     {
         _strip.BeginAnimation(HeightProperty, null);
         _strip.Height = double.NaN;
+        ShiftBody(0);
     }
 
-    /// The body keeps its height plus extra while the header moves. Its top follows the header and
-    /// its bottom goes under the edge of the window, where Windows cuts the terminal off. When it is
-    /// held already it keeps that height: the one the terminal has now.
+    /// The body moves back by this much, and the list of sessions comes forward by as much.
+    private void ShiftBody(double back)
+    {
+        _bodyShift.Y = -back;
+        _listShift.Y = back;
+    }
+
+    /// While the header grows or folds, the body is moved back by its height on every frame, so the
+    /// picture of the terminal does not move: the header passes over it. Opening, the terminal takes
+    /// its place under the header once, when the header stands; folding, it is in its place from the
+    /// start and the header uncovers it (D-390).
+    private void FollowStrip()
+    {
+        void OnFrame(object? sender, EventArgs e)
+        {
+            if (!_strip.HasAnimatedProperties)
+            {
+                CompositionTarget.Rendering -= OnFrame;
+                ShiftBody(0);
+                return;
+            }
+
+            ShiftBody(double.IsNaN(_strip.Height) ? _strip.ActualHeight : _strip.Height);
+        }
+
+        CompositionTarget.Rendering -= OnFrame;
+        CompositionTarget.Rendering += OnFrame;
+    }
+
+    /// The body keeps its height plus extra while the header moves, so it reaches the bottom of the
+    /// window while it is moved back under the header. When it is held already it keeps that
+    /// height: the one the terminal has now.
     private void HoldBody(double extra)
     {
         if (!double.IsNaN(_body.Height) || _body.ActualHeight <= 0)
@@ -611,13 +670,20 @@ sealed class TerminalPanel : UserControl
     private void ShowList(TerminalView view)
     {
         // While a name is being changed the list stands still: a new list would take the field
-        // away from under the keys.
+        // away from under the keys. Another environment ends the change first: its list must come.
         if (_renaming is not null)
         {
-            return;
+            if (view.Environment == _renamingIn)
+            {
+                return;
+            }
+
+            _finishRename?.Invoke(true);
         }
 
         _rows.Children.Clear();
+        _renameStarts.Clear();
+        _rowNames.Clear();
         foreach (var group in view.Groups)
         {
             _rows.Children.Add(GroupHeader(group));
@@ -706,15 +772,58 @@ sealed class TerminalPanel : UserControl
         var name = Mono(group.Name, "Muted");
         name.TextTrimming = TextTrimming.CharacterEllipsis;
         header.Children.Add(name);
-        header.MouseEnter += (_, _) => Fade(buttons, 1);
-        header.MouseLeave += (_, _) =>
+        KeepLit(header, buttons, "group:" + group.Folder, () => !buttons.IsKeyboardFocusWithin);
+        return header;
+    }
+
+    /// What the mouse was over in the list when it was drawn last, by a key of its own.
+    private string? _lit;
+
+    /// The list is drawn anew on every change of a session, so the row under the mouse is a new
+    /// element each time. Starting dark, its hover came in again and the row blinked. So the area
+    /// remembers that the mouse is over it, and its new copy starts lit; if the mouse left in the
+    /// meantime, the light fades. mayFade says whether the light may go when the mouse leaves.
+    private void KeepLit(FrameworkElement area, UIElement light, string key, Func<bool>? mayFade = null)
+    {
+        if (_lit == key)
         {
-            if (!buttons.IsKeyboardFocusWithin)
+            light.Opacity = 1;
+            Dispatcher.BeginInvoke(() =>
             {
-                Fade(buttons, 0);
+                if (!area.IsMouseOver && (mayFade?.Invoke() ?? true))
+                {
+                    Fade(light, 0);
+                    if (_lit == key)
+                    {
+                        _lit = null;
+                    }
+                }
+            }, System.Windows.Threading.DispatcherPriority.Input);
+        }
+
+        area.MouseEnter += (_, _) =>
+        {
+            _lit = key;
+            Fade(light, 1);
+        };
+        area.MouseLeave += (_, _) =>
+        {
+            // An area taken out of a list that is drawn anew is not left by the mouse.
+            if (VisualTreeHelper.GetParent(area) is null)
+            {
+                return;
+            }
+
+            if (_lit == key)
+            {
+                _lit = null;
+            }
+
+            if (mayFade?.Invoke() ?? true)
+            {
+                Fade(light, 0);
             }
         };
-        return header;
     }
 
     private static void Fade(UIElement element, double to) =>
@@ -749,6 +858,8 @@ sealed class TerminalPanel : UserControl
         var name = Text(row.Name, "TextName", "Ink", FontWeights.Normal);
         name.TextTrimming = TextTrimming.CharacterEllipsis;
         top.Children.Add(name);
+        _renameStarts.Add(() => Rename(row, top, name));
+        _rowNames.Add(row.Name);
 
         // A double click on the name changes it in place (LibreChat, Open WebUI).
         name.MouseLeftButtonDown += (_, e) =>
@@ -788,8 +899,7 @@ sealed class TerminalPanel : UserControl
             Child = face,
             ContextMenu = RowMenu(row.Id, () => Rename(row, top, name)),
         };
-        back.MouseEnter += (_, _) => hover.BeginAnimation(OpacityProperty, Motion.To(1, Motion.Or0(Motion.Hover), Motion.Standard));
-        back.MouseLeave += (_, _) => hover.BeginAnimation(OpacityProperty, Motion.To(0, Motion.Or0(Motion.Hover), Motion.Standard));
+        KeepLit(back, hover, "row:" + row.Id);
         back.MouseLeftButtonUp += (_, _) =>
         {
             _listPopup.IsOpen = false;
@@ -820,7 +930,13 @@ sealed class TerminalPanel : UserControl
         top.Children.Remove(name);
         top.Children.Add(field);
         _renaming = row.Id;
+        _renamingIn = _view?.Environment;
+        _renameField = field;
 
+        // The list stands still until the change ends, so every way it can end is caught: Enter,
+        // Esc, the field losing the keys, the field leaving the window, a click away from it (a pill
+        // or a row takes no keys, so the field would keep them), another environment, and a field
+        // that never got the keys at all. Missing one froze the list for good.
         var done = false;
         void Finish(bool keep)
         {
@@ -831,6 +947,9 @@ sealed class TerminalPanel : UserControl
 
             done = true;
             _renaming = null;
+            _renamingIn = null;
+            _renameField = null;
+            _finishRename = null;
             if (keep && field.Text.Trim() != row.Name)
             {
                 RowRenamed?.Invoke(row.Id, field.Text);
@@ -850,12 +969,78 @@ sealed class TerminalPanel : UserControl
             }
         };
         field.LostKeyboardFocus += (_, _) => Finish(keep: true);
+        field.Unloaded += (_, _) => Finish(keep: true);
+        _finishRename = Finish;
         Dispatcher.BeginInvoke(() =>
         {
-            field.Focus();
+            if (done)
+            {
+                return;
+            }
+
+            if (!field.Focus())
+            {
+                Finish(keep: false);
+                return;
+            }
+
             field.SelectAll();
         }, System.Windows.Threading.DispatcherPriority.Input);
     }
+
+    /// The environment, the field and the way to end a change of a name while one goes on.
+    private string? _renamingIn;
+    private TextBox? _renameField;
+    private Action<bool>? _finishRename;
+
+    /// A press anywhere but the field ends a change of a name and keeps the new one.
+    private void EndRenameOnPressAway(object sender, MouseButtonEventArgs e)
+    {
+        if (_renameField is not { } field || e.OriginalSource is not DependencyObject source)
+        {
+            return;
+        }
+
+        for (DependencyObject? at = source; at is not null; at = at is Visual or System.Windows.Media.Media3D.Visual3D ? VisualTreeHelper.GetParent(at) : LogicalTreeHelper.GetParent(at))
+        {
+            if (ReferenceEquals(at, field))
+            {
+                return;
+            }
+        }
+
+        _finishRename?.Invoke(true);
+    }
+
+    /// For --try-rename: starts a change of the name of the first row, as a double click would.
+    internal bool StartRenameForCheck()
+    {
+        if (_renameStarts.Count == 0)
+        {
+            return false;
+        }
+
+        _renameStarts[0]();
+        return true;
+    }
+
+    /// For --try-rename: the names in the list now, in order.
+    internal IReadOnlyList<string> RowNamesForCheck => [.. _rowNames];
+
+    /// How each row of the list starts a change of its name, and its name, in the order of the list.
+    private readonly List<Action> _renameStarts = [];
+    private readonly List<string> _rowNames = [];
+
+    internal bool RenamingForCheck => _renaming is not null;
+
+    /// For --try-rename: the first row of the list, and how lit its hover is now.
+    internal FrameworkElement? FirstRowForCheck => _rows.Children.OfType<Border>().FirstOrDefault();
+
+    internal double FirstRowLightForCheck =>
+        FirstRowForCheck is Border { Child: Grid { Children: [Border light, ..] } } ? light.Opacity : -1;
+
+    /// For --try-rename: the field of a change of a name has the keys, so leaving it ends the change.
+    internal bool RenameFieldFocusedForCheck => _renameField?.IsKeyboardFocused == true;
 
     private static UIElement Mark(RowState state)
     {

@@ -327,6 +327,13 @@ static class Program
 
         // A program in a pseudo console, closed while it still prints: Aiko must outlive it. Opens
         // no window and starts no Claude Code.
+        // Whether a change of a session name can freeze the list: --try-rename <report>
+        if (args is ["--try-rename", var renameReport, ..])
+        {
+            Environment.Exit(TerminalRenameCheck.Run(renameReport));
+            return;
+        }
+
         // Whether Tab in a terminal reaches the program before WPF: --try-tab <report>
         if (args is ["--try-tab", var tabReport, ..])
         {

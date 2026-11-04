@@ -51,6 +51,8 @@ sealed class TerminalSurface : Grid
         _console.Typed += () => Dispatcher.BeginInvoke(() => Typed?.Invoke());
         _console.TerminalOutput += (_, e) =>
         {
+            Interlocked.Exchange(ref _outputAt, Clock.ElapsedMilliseconds);
+            _outputAfterResize = true;
             if (_titles.Read(e.Data) is { } title)
             {
                 Dispatcher.BeginInvoke(() => TitleChanged?.Invoke(title));
@@ -157,9 +159,26 @@ sealed class TerminalSurface : Grid
 
     /// The terminal becomes a picture of itself. The control is a window of its own: moved on every
     /// frame of a motion, it lags behind the drawing of WPF and jerks. A picture moves with WPF. The
-    /// control stays in the layout at its size, so the pseudo console gets no resize.
+    /// control stays in the layout at its size, so the pseudo console gets no resize. The control
+    /// hides only after the picture is drawn: hidden at once, it left one empty frame and the
+    /// terminal blinked.
     public void ShowStill()
     {
+        // A new motion while the terminal waits for its redraw: the picture stays for this one too.
+        if (_waiting is not null)
+        {
+            _waiting.Stop();
+            _waiting = null;
+            return;
+        }
+
+        // The real terminal is back and the old picture waits to go: it goes now, a new one is taken.
+        if (_still is not null && _control.Visibility == Visibility.Visible)
+        {
+            Children.Remove(_still);
+            _still = null;
+        }
+
         if (_still is not null || !IsVisible || _control.ActualWidth <= 0 || _control.ActualHeight <= 0)
         {
             return;
@@ -177,38 +196,144 @@ sealed class TerminalSurface : Grid
             return;
         }
 
-        _still = new Image
+        var still = new Image
         {
             Source = picture,
             Stretch = Stretch.Fill,
             Width = area.Width / dpi.DpiScaleX,
             Height = area.Height / dpi.DpiScaleY,
+            // Held at the bottom of the terminal, where Claude Code keeps its input line. The area
+            // grows when the header folds: held at its top, the picture jumped up by the height of
+            // the header. It shrinks when the header opens: held at its top, the picture lost the
+            // input line. Held at the bottom, it stands still and loses or gains only its oldest
+            // rows, as the program does when it redraws for the new number of rows.
             HorizontalAlignment = HorizontalAlignment.Left,
-            VerticalAlignment = VerticalAlignment.Top,
-            Margin = _control.Margin,
+            VerticalAlignment = VerticalAlignment.Bottom,
+            Margin = new Thickness(_control.Margin.Left, 0, 0, 0),
             IsHitTestVisible = false,
         };
-        RenderOptions.SetBitmapScalingMode(_still, BitmapScalingMode.NearestNeighbor);
+        RenderOptions.SetBitmapScalingMode(still, BitmapScalingMode.NearestNeighbor);
+        _still = still;
+        _stillArea = new Size(_control.ActualWidth, _control.ActualHeight);
+        _stillAt = Clock.ElapsedMilliseconds;
         _focusedBeforeStill = IsKeyboardFocusWithin;
-        Children.Add(_still);
-        _control.Visibility = Visibility.Hidden;
+        Children.Add(still);
+        AfterFrames(2, () =>
+        {
+            if (ReferenceEquals(_still, still))
+            {
+                _control.Visibility = Visibility.Hidden;
+            }
+        });
     }
 
-    /// The real terminal again, in its new place.
+    /// The real terminal again, in its new place. The picture goes two frames later, once the
+    /// control has drawn itself: taken away at once, it left the terminal blank for a frame.
     public void ShowLive()
     {
-        if (_still is null)
+        if (_still is null || _waiting is not null)
+        {
+            return;
+        }
+
+        // The area changed since the picture: the program gets the new size now and redraws for it
+        // behind the picture. Shown before that, the terminal showed the old screen in the new size
+        // and the program redrew it in front of the person: the jerk at the end of opening. A hidden
+        // control does not count its rows again (the trace: 732 units high, still 47 rows), so the
+        // surface asks it to.
+        ResizeNow();
+
+        // A smaller area cuts the picture at its top, and the cut part must not cover the header.
+        if (_control.ActualHeight < _stillArea.Height)
+        {
+            ClipToBounds = true;
+        }
+        if (_control.ActualWidth == _stillArea.Width && _control.ActualHeight == _stillArea.Height)
+        {
+            Reveal();
+            return;
+        }
+
+        var started = Clock.ElapsedMilliseconds;
+        _waiting = new DispatcherTimer(DispatcherPriority.Render, Dispatcher) { Interval = TimeSpan.FromMilliseconds(10) };
+        _waiting.Tick += (_, _) =>
+        {
+            var now = Clock.ElapsedMilliseconds;
+            var resized = _sentAt > _stillAt;
+            var quiet = now - Interlocked.Read(ref _outputAt);
+            var redrawn = resized && (_outputAfterResize ? quiet >= RedrawQuiet : now - _sentAt >= NoRedraw);
+            if (redrawn || now - started >= MostWait)
+            {
+                _waiting.Stop();
+                _waiting = null;
+                Reveal();
+            }
+        };
+        _waiting.Start();
+    }
+
+    /// The wait for the redraw after a resize: quiet for this long after output, this long without
+    /// any output, and never longer than the last.
+    private const long RedrawQuiet = 30;
+    private const long NoRedraw = 80;
+    private const long MostWait = 250;
+
+    private DispatcherTimer? _waiting;
+
+    /// The size of the area when the picture was taken, and the times in milliseconds of one clock:
+    /// the picture, the last size sent, and the last output.
+    private Size _stillArea;
+    private static readonly System.Diagnostics.Stopwatch Clock = System.Diagnostics.Stopwatch.StartNew();
+    private long _stillAt;
+    private long _sentAt = -1;
+    private long _outputAt;
+    private volatile bool _outputAfterResize;
+
+    /// The real terminal comes over the picture, and the picture goes two frames later.
+    private void Reveal()
+    {
+        if (_still is not { } still)
         {
             return;
         }
 
         _control.Visibility = Visibility.Visible;
-        Children.Remove(_still);
-        _still = null;
+
+        // Shown again, the control may count its rows without a change of its size, and then no
+        // event tells the pseudo console: Claude Code stayed with 47 rows in an area of 36.
+        AfterFrames(3, ResizeNow);
         if (_focusedBeforeStill)
         {
             FocusTerminal();
         }
+
+        AfterFrames(2, () =>
+        {
+            if (ReferenceEquals(_still, still) && _control.Visibility == Visibility.Visible)
+            {
+                Children.Remove(still);
+                _still = null;
+                ClipToBounds = false;
+            }
+        });
+    }
+
+    /// Runs after this many frames have been drawn.
+    private static void AfterFrames(int frames, Action then)
+    {
+        var left = frames;
+        void OnFrame(object? sender, EventArgs e)
+        {
+            if (--left > 0)
+            {
+                return;
+            }
+
+            CompositionTarget.Rendering -= OnFrame;
+            then();
+        }
+
+        CompositionTarget.Rendering += OnFrame;
     }
 
     /// Files dropped on the terminal reach the window: its window is not WPF's, so WPF never sees
@@ -243,12 +368,28 @@ sealed class TerminalSurface : Grid
     /// Only a new count of rows or columns reaches the pseudo console. A layout that moves the
     /// terminal by a part of a pixel, as the header does when it opens, would otherwise make Claude
     /// Code draw its whole screen again for nothing.
-    private void SyncSize()
+    /// The control counts its rows and columns for its size now, and the pseudo console gets them.
+    private void ResizeNow()
     {
-        var size = (_control.Rows, _control.Columns);
+        if (_control.ActualWidth <= 0 || _control.ActualHeight <= 0)
+        {
+            return;
+        }
+
+        var (rows, columns) = _control.TriggerResize(new Size(_control.ActualWidth, _control.ActualHeight));
+        Send(rows, columns);
+    }
+
+    private void SyncSize() => Send(_control.Rows, _control.Columns);
+
+    private void Send(int rows, int columns)
+    {
+        var size = (Rows: rows, Columns: columns);
         if (size.Rows > 0 && size.Columns > 0 && size != _sent)
         {
             _sent = size;
+            _sentAt = Clock.ElapsedMilliseconds;
+            _outputAfterResize = false;
             _console.Resize((uint)size.Rows, (uint)size.Columns);
         }
     }
