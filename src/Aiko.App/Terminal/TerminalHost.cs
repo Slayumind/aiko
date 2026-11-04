@@ -923,6 +923,11 @@ sealed class TerminalHost
         Notice();
     }
 
+    /// How many sessions work and wait, for the island (D-364). Raised when it changes.
+    public event Action<IslandSessions>? SessionsChanged;
+
+    private IslandSessions _island = IslandSessions.None;
+
     /// A session brought a notice: what it says, how it goes, and the session to open on a click.
     public event Action<NoticeLine, NoticeWay, string>? Noticed;
 
@@ -930,6 +935,16 @@ sealed class TerminalHost
     /// changes a session draws the window, so this is the one place to look.
     private void Notice()
     {
+        var island = IslandSessions.Of(_terminals.Keys
+            .Select(id => (id, Live(id)?.Activity))
+            .Where(pair => pair.Activity is not null)
+            .Select(pair => (pair.id, pair.Activity!.Value)));
+        if (island != _island)
+        {
+            _island = island;
+            SessionsChanged?.Invoke(island);
+        }
+
         var changes = new List<(string Id, NoticeKind Kind)>();
         foreach (var id in _terminals.Keys)
         {

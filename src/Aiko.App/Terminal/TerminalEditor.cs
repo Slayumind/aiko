@@ -772,7 +772,7 @@ sealed class TerminalEditor : UserControl, IDictationField
         for (var at = 0; at < _draft.Pictures.Count; at++)
         {
             var index = at;
-            var cross = TerminalPanel.Line("M0,0 L6,6 M6,0 L0,6");
+            var cross = Marks.Line("M0,0 L6,6 M6,0 L0,6");
             cross.Margin = new Thickness(8, 0, 0, 0);
             cross.Cursor = Cursors.Hand;
             cross.MouseLeftButtonUp += (_, e) =>

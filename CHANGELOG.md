@@ -52,6 +52,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   up next to the Aiko icon: a session waits for an answer, is done or stopped, or a limit went over
   90%. A click opens the session. Only "waits" has a sound, and nothing comes up while Windows is in
   "Do not disturb". Each kind and the sound can be turned off in the settings of the terminal.
+- **The island counts the sessions.** While the terminal window is closed, the island shows after
+  its rings how many sessions wait and how many work. A click on the waiting mark opens that session.
 - **Limits of every environment above the terminal.** The title bar shows each environment as a
   pill with its ring and percent. When a session of the environment waits for you, an orange pause
   mark and the number of waiting sessions take the place of the ring. The arrow next to it opens a card per environment: a bar, a percent

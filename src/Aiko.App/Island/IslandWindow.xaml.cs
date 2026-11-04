@@ -145,6 +145,22 @@ public partial class IslandWindow : Window
     /// Raised after a drag, with the edge the island ended up on.
     public event Action<IslandPosition>? Moved;
 
+    /// A click on the mark of "waits" (D-355): the id of the waiting session to open.
+    public event Action<string>? SessionRequested;
+
+    /// The marks of the sessions after the rings (D-364). New counts change the size, never the place.
+    public void ShowSessions(Aiko.Core.Terminal.IslandSessions sessions)
+    {
+        Panel.ShowSessions(sessions);
+        if (_dragging || !IsVisible)
+        {
+            return;
+        }
+
+        Fit();
+        PlaceAt(_position, log: false);
+    }
+
     public void Show(IReadOnlyList<CardState> cards, IslandPosition position)
     {
         _position = position;
@@ -286,10 +302,18 @@ public partial class IslandWindow : Window
         var wasDragging = _dragging;
         EndDrag();
 
-        // A press that moved nothing is a click, and it opens the card.
+        // A press that moved nothing is a click: on the mark of "waits" it opens that session,
+        // anywhere else the card.
         if (!wasDragging)
         {
-            CardRequested?.Invoke(true);
+            if (Panel.WaitingUnder(e) is { } waiting)
+            {
+                SessionRequested?.Invoke(waiting);
+            }
+            else
+            {
+                CardRequested?.Invoke(true);
+            }
         }
     }
 

@@ -56,7 +56,7 @@ sealed class TerminalPanel : UserControl
     private static readonly Duration Close = new(TimeSpan.FromMilliseconds(300));
     private static readonly TimeSpan PillsBack = TimeSpan.FromMilliseconds(160);
     private bool _listHidden;
-    private readonly Path _maximizeIcon = Line("");
+    private readonly Path _maximizeIcon = Marks.Line("");
     private readonly Button _maximize;
 
     private TerminalView? _view;
@@ -108,7 +108,7 @@ sealed class TerminalPanel : UserControl
         _listToggle = BarButton(ListIcon(), Strings.TerminalSessionList, ToggleList);
         _listToggle.Margin = new Thickness(6, 0, 2, 0);
         _listPopup.PlacementTarget = _listToggle;
-        _chevron = BarButton(Line("M0,0 L4,4 L8,0"), Strings.TerminalShowLimits, () => HeaderToggled?.Invoke());
+        _chevron = BarButton(Marks.Line("M0,0 L4,4 L8,0"), Strings.TerminalShowLimits, () => HeaderToggled?.Invoke());
         _gear = BarButton(GearIcon(), Strings.Settings, () => SettingsAsked?.Invoke());
         // The list under the button, left edges together, as every drop-down of Aiko (DropDown).
         _listPopup.Placement = PlacementMode.Custom;
@@ -122,8 +122,8 @@ sealed class TerminalPanel : UserControl
         };
 
         _maximize = BarButton(_maximizeIcon, Strings.TerminalMaximize, () => MaximizeAsked?.Invoke());
-        var minimize = BarButton(Line("M0,5 L10,5"), Strings.TerminalMinimize, () => MinimizeAsked?.Invoke());
-        var close = BarButton(Line("M0,0 L10,10 M10,0 L0,10"), Strings.TerminalCloseWindow, () => CloseAsked?.Invoke());
+        var minimize = BarButton(Marks.Line("M0,5 L10,5"), Strings.TerminalMinimize, () => MinimizeAsked?.Invoke());
+        var close = BarButton(Marks.Line("M0,0 L10,10 M10,0 L0,10"), Strings.TerminalCloseWindow, () => CloseAsked?.Invoke());
         Buttons = [minimize, _maximize, close];
         ShowMaximized(false);
 
@@ -593,7 +593,7 @@ sealed class TerminalPanel : UserControl
     }
 
     /// The list icon: a frame with a column on its left.
-    private static FrameworkElement ListIcon() => Line("M1.5,1.5 L12.5,1.5 L12.5,11.5 L1.5,11.5 Z M5,1.5 L5,11.5");
+    private static FrameworkElement ListIcon() => Marks.Line("M1.5,1.5 L12.5,1.5 L12.5,11.5 L1.5,11.5 Z M5,1.5 L5,11.5");
 
     /// The gear of the project's icon set, the same one the card of limits uses.
     private static FrameworkElement GearIcon() => new Path
@@ -688,7 +688,7 @@ sealed class TerminalPanel : UserControl
             ("M0,1 L4,5 L0,9 M6,9 L11,9", Strings.TerminalGroupNewShell, SessionKind.Shell),
         })
         {
-            var button = Icon(Line(icon));
+            var button = Icon(Marks.Line(icon));
             button.ToolTip = tip;
             var face = (FrameworkElement)button.Content;
             face.Width = 22;
@@ -741,7 +741,7 @@ sealed class TerminalPanel : UserControl
         // What runs in the session (the mockup of D-362): the mark of Claude Code or "$".
         UIElement kind = row.Kind == SessionKind.Shell
             ? Mono("$", "Muted")
-            : Line("M6,1 L6,11 M1,6 L11,6 M2.5,2.5 L9.5,9.5 M9.5,2.5 L2.5,9.5");
+            : Marks.Line("M6,1 L6,11 M1,6 L11,6 M2.5,2.5 L9.5,9.5 M9.5,2.5 L2.5,9.5");
         var kindBox = new Border { Width = 14, Margin = new Thickness(0, 0, 8, 0), Child = kind };
         ((FrameworkElement)kind).HorizontalAlignment = HorizontalAlignment.Center;
         DockPanel.SetDock(kindBox, Dock.Left);
@@ -862,10 +862,10 @@ sealed class TerminalPanel : UserControl
         var (icon, word, tone) = state switch
         {
             RowState.Working => ((UIElement)Dot(filled: true), Strings.TerminalWorking, "Muted"),
-            RowState.Waiting => (Pause(), Strings.TerminalWaiting, "Caution"),
+            RowState.Waiting => (Marks.Pause(), Strings.TerminalWaiting, "Caution"),
             RowState.Done => (SiteIcons.Draw(SiteIcons.Check, 10, "Positive"), Strings.TerminalDone, "Positive"),
             RowState.Asleep => (Dot(filled: false), Strings.TerminalAsleep, "Muted"),
-            RowState.Stopped => (Line("M0,0 L8,8 M8,0 L0,8", "Destructive"), Strings.TerminalStopped, "Destructive"),
+            RowState.Stopped => (Marks.Line("M0,0 L8,8 M8,0 L0,8", "Destructive"), Strings.TerminalStopped, "Destructive"),
             _ => (new Border(), "", "Muted"),
         };
 
@@ -1041,7 +1041,7 @@ sealed class TerminalPanel : UserControl
         buttons.Children.Add(stop);
         buttons.Children.Add(keep);
 
-        var cross = BarButton(Line("M0,0 L8,8 M8,0 L0,8"), ask.Keep, () => AskAnswered?.Invoke(false));
+        var cross = BarButton(Marks.Line("M0,0 L8,8 M8,0 L0,8"), ask.Keep, () => AskAnswered?.Invoke(false));
         cross.HorizontalAlignment = HorizontalAlignment.Right;
         cross.VerticalAlignment = VerticalAlignment.Top;
         cross.Margin = new Thickness(0, -6, -8, 0);
@@ -1116,27 +1116,7 @@ sealed class TerminalPanel : UserControl
         VerticalAlignment = VerticalAlignment.Center,
     };
 
-    /// The width of the lines of the terminal's icons: as thin as the lines of the slayumind icon
-    /// set, one unit in twenty-four, at the sizes the terminal draws them (D-332).
-    internal const double LineWidth = 0.75;
 
-    internal static Path Line(string data, string tone = "Muted") => new()
-    {
-        Data = Geometry.Parse(data),
-        Stroke = Tokens.Brush(tone),
-        StrokeThickness = LineWidth,
-        StrokeStartLineCap = PenLineCap.Round,
-        StrokeEndLineCap = PenLineCap.Round,
-        StrokeLineJoin = PenLineJoin.Round,
-        VerticalAlignment = VerticalAlignment.Center,
-    };
-
-    /// The sign of "waits for you": two thin bars, drawn as thin as the lines of the slayumind icons
-    /// (one in twenty-four), so they read as a quiet mark and not as a pause button (D-299, D-332).
-    internal static FrameworkElement Pause()
-    {
-        return Line("M0.5,0.5 L0.5,9.5 M4.5,0.5 L4.5,9.5", "Caution");
-    }
 
     /// A number after the name of a pill, in the small mono type of Mono and on the name's baseline.
     /// The space before it is a mono space of the same size, about six units, as the gap was.
@@ -1158,7 +1138,7 @@ sealed class TerminalPanel : UserControl
     /// into the other.
     private static FrameworkElement WaitingMark()
     {
-        var pause = Pause();
+        var pause = Marks.Pause();
         pause.HorizontalAlignment = HorizontalAlignment.Center;
         return new Grid { Width = 14, Height = 14, Background = Brushes.Transparent, VerticalAlignment = VerticalAlignment.Center, Children = { pause } };
     }
@@ -1212,7 +1192,7 @@ sealed class TerminalPanel : UserControl
 
         if (plus)
         {
-            var sign = Line("M5,0 L5,10 M0,5 L10,5", ink);
+            var sign = Marks.Line("M5,0 L5,10 M0,5 L10,5", ink);
             sign.Margin = new Thickness(0, 0, 8, 0);
             DockPanel.SetDock(sign, Dock.Left);
             row.Children.Add(sign);

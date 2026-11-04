@@ -34,7 +34,7 @@ sealed class PaletteView : Border
     {
         _find = find;
 
-        var lens = TerminalPanel.Line("M8,8 m-5.5,0 a5.5,5.5 0 1,0 11,0 a5.5,5.5 0 1,0 -11,0 M12,12 L16,16");
+        var lens = Marks.Line("M8,8 m-5.5,0 a5.5,5.5 0 1,0 11,0 a5.5,5.5 0 1,0 -11,0 M12,12 L16,16");
         lens.Margin = new Thickness(0, 0, 10, 0);
         DockPanel.SetDock(lens, Dock.Left);
 
