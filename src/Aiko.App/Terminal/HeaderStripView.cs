@@ -468,9 +468,9 @@ sealed class HeaderStripView
             face.Children.Add(new Border { CornerRadius = new CornerRadius(13), Background = _hover });
             face.Children.Add(_body);
 
-            // The active card lies on the header with no box: filled and framed, the cards looked
-            // cramped over the grey body (D-392). A quiet card keeps a thin frame and no fill, so
-            // it still reads as a button that switches the environment.
+            // The cards are the segments of one switch, as the segmented buttons of Aiko are: the
+            // active one lies on a soft fill, a quiet one has none and lights up under the pointer.
+            // Framed and filled both, the cards looked cramped over the grey body (D-392).
             Root = new Border
             {
                 CornerRadius = new CornerRadius(14),
@@ -593,7 +593,7 @@ sealed class HeaderStripView
             Root.Cursor = active ? null : System.Windows.Input.Cursors.Hand;
             Root.ToolTip = active ? null : Environment;
             Panel.SetZIndex(Root, active ? 1 : 0);
-            Root.BorderBrush = active ? Brushes.Transparent : Tokens.Brush("InputLine");
+            Root.Background = active ? Tokens.Brush("Surface") : Brushes.Transparent;
             if (active)
             {
                 _hover.BeginAnimation(SolidColorBrush.ColorProperty, null);
