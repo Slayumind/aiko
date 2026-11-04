@@ -21,7 +21,8 @@ sealed class TerminalPanel : UserControl
     public const double BarHeight = 44;
     private const double ListWidth = 252;
 
-    private readonly Grid _bar = new() { Height = BarHeight, Background = Brushes.Transparent };
+    /// The title bar stays black over the grey body of the window (D-392).
+    private readonly Grid _bar = new() { Height = BarHeight, Background = Tokens.Brush("Background") };
     private readonly TerminalPills _pills = new();
     private readonly StackPanel _right = new() { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
     private readonly ColumnDefinition _listColumn = new() { Width = GridLength.Auto };
@@ -107,7 +108,7 @@ sealed class TerminalPanel : UserControl
 
     public TerminalPanel()
     {
-        Background = Tokens.Brush("Background");
+        Background = Tokens.Brush("Surface");
         FontFamily = Tokens.Get<FontFamily>("Sans");
         Focusable = false;
         PreviewMouseDown += EndRenameOnPressAway;
@@ -704,7 +705,7 @@ sealed class TerminalPanel : UserControl
         // The list lives in the window or, in a narrow one, under the button with the session name.
         _list.Children.Clear();
         _listPopup.Child = null;
-        var holder = new DockPanel { Background = _narrow ? Brushes.Transparent : Tokens.Brush("Background") };
+        var holder = new DockPanel { Background = _narrow ? Brushes.Transparent : Tokens.Brush("Surface") };
         DockPanel.SetDock(create, Dock.Bottom);
         holder.Children.Add(create);
         holder.Children.Add(new ScrollViewer
@@ -727,7 +728,7 @@ sealed class TerminalPanel : UserControl
                 CornerRadius = new CornerRadius(12),
                 BorderBrush = Tokens.Brush("InputLine"),
                 BorderThickness = new Thickness(1),
-                Background = Tokens.Brush("Background"),
+                Background = Tokens.Brush("Surface"),
                 Effect = Tokens.Get<System.Windows.Media.Effects.Effect>("CardShadow"),
                 Child = holder,
             };
@@ -892,7 +893,7 @@ sealed class TerminalPanel : UserControl
         {
             CornerRadius = new CornerRadius(10),
             Margin = new Thickness(0, 1, 0, 1),
-            Background = selected ? Tokens.Brush("Surface") : Brushes.Transparent,
+            Background = selected ? Tokens.Brush("Raised") : Brushes.Transparent,
             BorderBrush = selected ? Tokens.Brush("InputLine") : Brushes.Transparent,
             BorderThickness = new Thickness(1),
             Cursor = Cursors.Hand,

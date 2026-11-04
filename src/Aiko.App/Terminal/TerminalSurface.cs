@@ -67,7 +67,7 @@ sealed class TerminalSurface : Grid
 
         // A little air between the text and the edges of the window; the background around the
         // control is the background of the terminal, so the two read as one.
-        Background = new SolidColorBrush(Color.FromRgb(0x0A, 0x0A, 0x0A));
+        Background = new SolidColorBrush(Color.FromRgb(0x17, 0x17, 0x17));
 
         // Tab and the arrows are the program's, not ways to move the focus of the window (D-370).
         KeyboardNavigation.SetTabNavigation(this, KeyboardNavigationMode.None);
@@ -133,7 +133,7 @@ sealed class TerminalSurface : Grid
 
         // The columns change with the font, so the pseudo console hears the new size.
         _points = points;
-        _control.SetTheme(Theme, Font, _points, Color.FromRgb(0x0A, 0x0A, 0x0A));
+        _control.SetTheme(Theme, Font, _points, Color.FromRgb(0x17, 0x17, 0x17));
         Dispatcher.BeginInvoke(SyncSize, DispatcherPriority.Background);
     }
 
@@ -399,13 +399,13 @@ sealed class TerminalSurface : Grid
     /// added: halfway between them.
     private static readonly TerminalTheme Theme = new()
     {
-        DefaultBackground = Rgb(0x0A0A0A),
+        DefaultBackground = Rgb(0x171717),
         DefaultForeground = Rgb(0xFAFAFA),
         DefaultSelectionBackground = Rgb(0x404040),
         CursorStyle = CursorStyle.BlinkingBar,
         ColorTable =
         [
-            Rgb(0x0A0A0A), Rgb(0xFF6467), Rgb(0x00BC7D), Rgb(0xFE9A00), Rgb(0x11A9F6), Rgb(0xD477CD), Rgb(0x00D3F2), Rgb(0xA1A1A1),
+            Rgb(0x171717), Rgb(0xFF6467), Rgb(0x00BC7D), Rgb(0xFE9A00), Rgb(0x11A9F6), Rgb(0xD477CD), Rgb(0x00D3F2), Rgb(0xA1A1A1),
             Rgb(0x737373), Rgb(0xFF8270), Rgb(0xAFE773), Rgb(0xFE9A00), Rgb(0x11A9F6), Rgb(0xF7BCF0), Rgb(0x24DCC3), Rgb(0xFAFAFA),
         ],
     };
