@@ -52,6 +52,8 @@ sealed class TerminalSurface : Grid
         _console.TerminalOutput += (_, e) =>
         {
             MotionTrace.Output(e.Data.Length);
+            Interlocked.Exchange(ref _outputAt, Clock.ElapsedMilliseconds);
+            _outputAfterResize = true;
             if (_titles.Read(e.Data) is { } title)
             {
                 Dispatcher.BeginInvoke(() => TitleChanged?.Invoke(title));
@@ -163,6 +165,14 @@ sealed class TerminalSurface : Grid
     /// terminal blinked.
     public void ShowStill()
     {
+        // A new motion while the terminal waits for its redraw: the picture stays for this one too.
+        if (_waiting is not null)
+        {
+            _waiting.Stop();
+            _waiting = null;
+            return;
+        }
+
         // The real terminal is back and the old picture waits to go: it goes now, a new one is taken.
         if (_still is not null && _control.Visibility == Visibility.Visible)
         {
@@ -200,6 +210,8 @@ sealed class TerminalSurface : Grid
         };
         RenderOptions.SetBitmapScalingMode(still, BitmapScalingMode.NearestNeighbor);
         _still = still;
+        _stillArea = new Size(_control.ActualWidth, _control.ActualHeight);
+        _stillAt = Clock.ElapsedMilliseconds;
         _focusedBeforeStill = IsKeyboardFocusWithin;
         Children.Add(still);
         AfterFrames(2, () =>
@@ -214,6 +226,60 @@ sealed class TerminalSurface : Grid
     /// The real terminal again, in its new place. The picture goes two frames later, once the
     /// control has drawn itself: taken away at once, it left the terminal blank for a frame.
     public void ShowLive()
+    {
+        if (_still is null || _waiting is not null)
+        {
+            return;
+        }
+
+        // The area changed since the picture: the program gets the new size now and redraws for it
+        // behind the picture. Shown before that, the terminal showed the old screen in the new size
+        // and the program redrew it in front of the person: the jerk at the end of opening.
+        SyncSize();
+        if (_control.ActualWidth == _stillArea.Width && _control.ActualHeight == _stillArea.Height)
+        {
+            Reveal();
+            return;
+        }
+
+        var started = Clock.ElapsedMilliseconds;
+        _waiting = new DispatcherTimer(DispatcherPriority.Render, Dispatcher) { Interval = TimeSpan.FromMilliseconds(10) };
+        _waiting.Tick += (_, _) =>
+        {
+            SyncSize();
+            var now = Clock.ElapsedMilliseconds;
+            var resized = _sentAt > _stillAt;
+            var quiet = now - Interlocked.Read(ref _outputAt);
+            var redrawn = resized && (_outputAfterResize ? quiet >= RedrawQuiet : now - _sentAt >= NoRedraw);
+            if (redrawn || now - started >= MostWait)
+            {
+                _waiting.Stop();
+                _waiting = null;
+                Reveal();
+            }
+        };
+        _waiting.Start();
+    }
+
+    /// The wait for the redraw after a resize: quiet for this long after output, this long without
+    /// any output, and never longer than the last.
+    private const long RedrawQuiet = 30;
+    private const long NoRedraw = 80;
+    private const long MostWait = 250;
+
+    private DispatcherTimer? _waiting;
+
+    /// The size of the area when the picture was taken, and the times in milliseconds of one clock:
+    /// the picture, the last size sent, and the last output.
+    private Size _stillArea;
+    private static readonly System.Diagnostics.Stopwatch Clock = System.Diagnostics.Stopwatch.StartNew();
+    private long _stillAt;
+    private long _sentAt = -1;
+    private long _outputAt;
+    private volatile bool _outputAfterResize;
+
+    /// The real terminal comes over the picture, and the picture goes two frames later.
+    private void Reveal()
     {
         if (_still is not { } still)
         {
@@ -294,6 +360,8 @@ sealed class TerminalSurface : Grid
         if (size.Rows > 0 && size.Columns > 0 && size != _sent)
         {
             _sent = size;
+            _sentAt = Clock.ElapsedMilliseconds;
+            _outputAfterResize = false;
             _console.Resize((uint)size.Rows, (uint)size.Columns);
             MotionTrace.Mark(MotionStep.ResizeSent, size.Rows, size.Columns);
         }
