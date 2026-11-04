@@ -45,7 +45,7 @@ sealed class TerminalWindow : Window
     {
         _panel = panel;
         Title = Strings.TerminalTitle;
-        Background = Tokens.Brush("Background");
+        Background = Tokens.Brush("Surface");
         MinWidth = WindowPlace.MinWidth;
         MinHeight = WindowPlace.MinHeight;
         WindowStartupLocation = WindowStartupLocation.Manual;

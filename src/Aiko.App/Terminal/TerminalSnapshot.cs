@@ -19,7 +19,7 @@ static class TerminalSnapshot
             {
                 Width = 480,
                 Height = 240,
-                Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x0A, 0x0A, 0x0A)),
+                Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x17, 0x17, 0x17)),
                 Child = new TerminalLoader(),
             }, path);
             return;
@@ -142,7 +142,7 @@ static class TerminalSnapshot
 
         return new System.Windows.Controls.Border
         {
-            Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x0A, 0x0A, 0x0A)),
+            Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x17, 0x17, 0x17)),
             Child = editor,
         };
     }
