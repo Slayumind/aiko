@@ -21,7 +21,7 @@ sealed class TerminalPanel : UserControl
     public const double BarHeight = 44;
     private const double ListWidth = 252;
 
-    /// The title bar stays black over the grey body of the window.
+    /// The title bar stays black over the grey body of the window (D-392).
     private readonly Grid _bar = new() { Height = BarHeight, Background = Tokens.Brush("Background") };
     private readonly TerminalPills _pills = new();
     private readonly StackPanel _right = new() { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
