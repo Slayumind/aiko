@@ -239,6 +239,16 @@ sealed class TerminalSurface : Grid
         // control does not count its rows again (the trace: 732 units high, still 47 rows), so the
         // surface asks it to.
         ResizeNow();
+
+        // A smaller area cuts the picture. Held at its top, it lost its bottom, where Claude Code has
+        // its input line, and the line came back only with the real terminal: a blink. Held at its
+        // bottom, it loses its oldest rows, as the program does when it redraws for fewer rows.
+        if (_control.ActualHeight < _stillArea.Height && _still is { } picture)
+        {
+            picture.VerticalAlignment = VerticalAlignment.Bottom;
+            picture.Margin = new Thickness(_control.Margin.Left, 0, 0, 0);
+            ClipToBounds = true;
+        }
         if (_control.ActualWidth == _stillArea.Width && _control.ActualHeight == _stillArea.Height)
         {
             Reveal();
@@ -310,6 +320,7 @@ sealed class TerminalSurface : Grid
             {
                 Children.Remove(still);
                 _still = null;
+                ClipToBounds = false;
                 MotionTrace.Mark(MotionStep.PictureRemoved);
             }
         });
