@@ -203,9 +203,14 @@ sealed class TerminalSurface : Grid
             Stretch = Stretch.Fill,
             Width = area.Width / dpi.DpiScaleX,
             Height = area.Height / dpi.DpiScaleY,
+            // Held at the bottom of the terminal, where Claude Code keeps its input line. The area
+            // grows when the header folds: held at its top, the picture jumped up by the height of
+            // the header. It shrinks when the header opens: held at its top, the picture lost the
+            // input line. Held at the bottom, it stands still and loses or gains only its oldest
+            // rows, as the program does when it redraws for the new number of rows.
             HorizontalAlignment = HorizontalAlignment.Left,
-            VerticalAlignment = VerticalAlignment.Top,
-            Margin = _control.Margin,
+            VerticalAlignment = VerticalAlignment.Bottom,
+            Margin = new Thickness(_control.Margin.Left, 0, 0, 0),
             IsHitTestVisible = false,
         };
         RenderOptions.SetBitmapScalingMode(still, BitmapScalingMode.NearestNeighbor);
@@ -240,13 +245,9 @@ sealed class TerminalSurface : Grid
         // surface asks it to.
         ResizeNow();
 
-        // A smaller area cuts the picture. Held at its top, it lost its bottom, where Claude Code has
-        // its input line, and the line came back only with the real terminal: a blink. Held at its
-        // bottom, it loses its oldest rows, as the program does when it redraws for fewer rows.
-        if (_control.ActualHeight < _stillArea.Height && _still is { } picture)
+        // A smaller area cuts the picture at its top, and the cut part must not cover the header.
+        if (_control.ActualHeight < _stillArea.Height)
         {
-            picture.VerticalAlignment = VerticalAlignment.Bottom;
-            picture.Margin = new Thickness(_control.Margin.Left, 0, 0, 0);
             ClipToBounds = true;
         }
         if (_control.ActualWidth == _stillArea.Width && _control.ActualHeight == _stillArea.Height)
