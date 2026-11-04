@@ -221,7 +221,7 @@ sealed class TerminalSurface : Grid
         }
 
         _control.Visibility = Visibility.Visible;
-        MotionTrace.Mark("live shown");
+        MotionTrace.Mark(MotionStep.LiveShown);
         if (_focusedBeforeStill)
         {
             FocusTerminal();
@@ -233,7 +233,7 @@ sealed class TerminalSurface : Grid
             {
                 Children.Remove(still);
                 _still = null;
-                MotionTrace.Mark("picture removed");
+                MotionTrace.Mark(MotionStep.PictureRemoved);
             }
         });
     }
@@ -295,7 +295,7 @@ sealed class TerminalSurface : Grid
         {
             _sent = size;
             _console.Resize((uint)size.Rows, (uint)size.Columns);
-            MotionTrace.Resized(size.Rows, size.Columns);
+            MotionTrace.Mark(MotionStep.ResizeSent, size.Rows, size.Columns);
         }
     }
 
