@@ -151,16 +151,50 @@ sealed class TerminalSurface : Grid
     /// Ends the program and everything it started.
     public void Close() => _console.Dispose();
 
-    /// The picture that stands in for the control while the window moves it, or null.
-    private Image? _still;
+    /// The picture that stands in for the control while the window moves it, or null: the sharp
+    /// picture, its blurred copy over it and a dark veil over both.
+    private Grid? _still;
+    private Image? _blurred;
+    private Border? _veil;
     private bool _focusedBeforeStill;
+
+    /// The blur and the veil come in at the start of a motion and go before the real terminal
+    /// returns, so the swap happens on a sharp picture and cannot be seen.
+    private static readonly Duration HazeTime = new(TimeSpan.FromMilliseconds(140));
+    private const double VeilAt = 0.35;
+
+    /// The blurred copy is the picture made this many times smaller and stretched back: a blur that
+    /// costs one small bitmap, not a blur effect drawn on every frame of the software renderer.
+    private const double BlurDown = 10;
 
     /// The terminal becomes a picture of itself. The control is a window of its own: moved on every
     /// frame of a motion, it lags behind the drawing of WPF and jerks. A picture moves with WPF. The
-    /// control stays in the layout at its size, so the pseudo console gets no resize.
+    /// control stays in the layout at its size, so the pseudo console gets no resize. The control
+    /// hides only after the picture is drawn: hidden at once, it left one empty frame.
     public void ShowStill()
     {
-        if (_still is not null || !IsVisible || _control.ActualWidth <= 0 || _control.ActualHeight <= 0)
+        // The real terminal is back and the old picture waits to go: it goes now, a new one is taken.
+        if (_still is not null && !_clearing && _control.Visibility == Visibility.Visible)
+        {
+            Children.Remove(_still);
+            _still = null;
+            _blurred = null;
+            _veil = null;
+        }
+
+        // A motion that starts while the haze clears takes the haze back: the picture still stands.
+        if (_still is not null)
+        {
+            if (_clearing)
+            {
+                _clearing = false;
+                Haze(in_: true);
+            }
+
+            return;
+        }
+
+        if (!IsVisible || _control.ActualWidth <= 0 || _control.ActualHeight <= 0)
         {
             return;
         }
@@ -177,38 +211,133 @@ sealed class TerminalSurface : Grid
             return;
         }
 
-        _still = new Image
+        var width = area.Width / dpi.DpiScaleX;
+        var height = area.Height / dpi.DpiScaleY;
+        var sharp = new Image { Source = picture, Stretch = Stretch.Fill };
+        RenderOptions.SetBitmapScalingMode(sharp, BitmapScalingMode.NearestNeighbor);
+        var small = new System.Windows.Media.Imaging.TransformedBitmap(picture, new ScaleTransform(1 / BlurDown, 1 / BlurDown));
+        small.Freeze();
+        _blurred = new Image { Source = small, Stretch = Stretch.Fill, Opacity = 0 };
+        RenderOptions.SetBitmapScalingMode(_blurred, BitmapScalingMode.HighQuality);
+        _veil = new Border { Background = Background, Opacity = 0 };
+        _still = new Grid
         {
-            Source = picture,
-            Stretch = Stretch.Fill,
-            Width = area.Width / dpi.DpiScaleX,
-            Height = area.Height / dpi.DpiScaleY,
+            Width = width,
+            Height = height,
             HorizontalAlignment = HorizontalAlignment.Left,
             VerticalAlignment = VerticalAlignment.Top,
             Margin = _control.Margin,
             IsHitTestVisible = false,
+            Children = { sharp, _blurred, _veil },
         };
-        RenderOptions.SetBitmapScalingMode(_still, BitmapScalingMode.NearestNeighbor);
         _focusedBeforeStill = IsKeyboardFocusWithin;
         Children.Add(_still);
-        _control.Visibility = Visibility.Hidden;
+
+        AfterFrames(2, () =>
+        {
+            if (_still is null || _clearing)
+            {
+                return;
+            }
+
+            _control.Visibility = Visibility.Hidden;
+            if (Motion.IsOn)
+            {
+                Haze(in_: true);
+            }
+        });
     }
 
-    /// The real terminal again, in its new place.
+    /// True while the haze clears before the real terminal returns.
+    private bool _clearing;
+
+    /// The blur and the veil come in, or go; going, it returns the real terminal at the end.
+    private void Haze(bool in_, Action? then = null)
+    {
+        if (_blurred is null || _veil is null)
+        {
+            then?.Invoke();
+            return;
+        }
+
+        var easing = in_ ? Motion.Standard : Motion.Exit;
+        var blur = new System.Windows.Media.Animation.DoubleAnimation(in_ ? 1 : 0, HazeTime) { EasingFunction = easing };
+        if (then is not null)
+        {
+            blur.Completed += (_, _) => then();
+        }
+
+        _blurred.BeginAnimation(OpacityProperty, blur);
+        _veil.BeginAnimation(OpacityProperty, new System.Windows.Media.Animation.DoubleAnimation(in_ ? VeilAt : 0, HazeTime) { EasingFunction = easing });
+    }
+
+    /// The real terminal again, in its new place: the blur and the veil go first, the control comes
+    /// back over the sharp picture, and the picture goes once the control has drawn itself.
     public void ShowLive()
     {
-        if (_still is null)
+        if (_still is not { } still)
         {
             return;
         }
 
-        _control.Visibility = Visibility.Visible;
-        Children.Remove(_still);
-        _still = null;
-        if (_focusedBeforeStill)
+        void Return()
         {
-            FocusTerminal();
+            // A new motion took the haze back while it cleared: the picture stays.
+            if (!_clearing)
+            {
+                return;
+            }
+
+            _clearing = false;
+            _control.Visibility = Visibility.Visible;
+            if (_focusedBeforeStill)
+            {
+                FocusTerminal();
+            }
+
+            AfterFrames(2, () =>
+            {
+                if (_control.Visibility != Visibility.Visible)
+                {
+                    return;
+                }
+
+                Children.Remove(still);
+                if (ReferenceEquals(_still, still))
+                {
+                    _still = null;
+                    _blurred = null;
+                    _veil = null;
+                }
+            });
         }
+
+        _clearing = true;
+        if (!Motion.IsOn)
+        {
+            Return();
+            return;
+        }
+
+        Haze(in_: false, then: Return);
+    }
+
+    /// Runs after this many frames have been drawn.
+    private static void AfterFrames(int frames, Action then)
+    {
+        var left = frames;
+        void OnFrame(object? sender, EventArgs e)
+        {
+            if (--left > 0)
+            {
+                return;
+            }
+
+            CompositionTarget.Rendering -= OnFrame;
+            then();
+        }
+
+        CompositionTarget.Rendering += OnFrame;
     }
 
     /// Files dropped on the terminal reach the window: its window is not WPF's, so WPF never sees
