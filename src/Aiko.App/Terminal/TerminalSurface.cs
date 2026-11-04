@@ -235,8 +235,10 @@ sealed class TerminalSurface : Grid
 
         // The area changed since the picture: the program gets the new size now and redraws for it
         // behind the picture. Shown before that, the terminal showed the old screen in the new size
-        // and the program redrew it in front of the person: the jerk at the end of opening.
-        SyncSize();
+        // and the program redrew it in front of the person: the jerk at the end of opening. A hidden
+        // control does not count its rows again (the trace: 732 units high, still 47 rows), so the
+        // surface asks it to.
+        ResizeNow();
         if (_control.ActualWidth == _stillArea.Width && _control.ActualHeight == _stillArea.Height)
         {
             Reveal();
@@ -247,7 +249,6 @@ sealed class TerminalSurface : Grid
         _waiting = new DispatcherTimer(DispatcherPriority.Render, Dispatcher) { Interval = TimeSpan.FromMilliseconds(10) };
         _waiting.Tick += (_, _) =>
         {
-            SyncSize();
             var now = Clock.ElapsedMilliseconds;
             var resized = _sentAt > _stillAt;
             var quiet = now - Interlocked.Read(ref _outputAt);
@@ -289,6 +290,10 @@ sealed class TerminalSurface : Grid
 
         _control.Visibility = Visibility.Visible;
         MotionTrace.Mark(MotionStep.LiveShown, (int)_control.ActualHeight, _control.Rows);
+
+        // Shown again, the control may count its rows without a change of its size, and then no
+        // event tells the pseudo console: Claude Code stayed with 47 rows in an area of 36.
+        AfterFrames(3, ResizeNow);
         Dispatcher.BeginInvoke(async () =>
         {
             await Task.Delay(100);
@@ -360,9 +365,23 @@ sealed class TerminalSurface : Grid
     /// Only a new count of rows or columns reaches the pseudo console. A layout that moves the
     /// terminal by a part of a pixel, as the header does when it opens, would otherwise make Claude
     /// Code draw its whole screen again for nothing.
-    private void SyncSize()
+    /// The control counts its rows and columns for its size now, and the pseudo console gets them.
+    private void ResizeNow()
     {
-        var size = (_control.Rows, _control.Columns);
+        if (_control.ActualWidth <= 0 || _control.ActualHeight <= 0)
+        {
+            return;
+        }
+
+        var (rows, columns) = _control.TriggerResize(new Size(_control.ActualWidth, _control.ActualHeight));
+        Send(rows, columns);
+    }
+
+    private void SyncSize() => Send(_control.Rows, _control.Columns);
+
+    private void Send(int rows, int columns)
+    {
+        var size = (Rows: rows, Columns: columns);
         if (size.Rows > 0 && size.Columns > 0 && size != _sent)
         {
             _sent = size;
