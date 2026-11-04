@@ -11,6 +11,8 @@ enum MotionStep
     ResizeSent,
     Output,
     LiveShown,
+    Still,
+    Sizes,
     PictureRemoved,
 }
 

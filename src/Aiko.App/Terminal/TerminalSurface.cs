@@ -211,6 +211,7 @@ sealed class TerminalSurface : Grid
         RenderOptions.SetBitmapScalingMode(still, BitmapScalingMode.NearestNeighbor);
         _still = still;
         _stillArea = new Size(_control.ActualWidth, _control.ActualHeight);
+        MotionTrace.Mark(MotionStep.Still, (int)_control.ActualHeight, _control.Rows);
         _stillAt = Clock.ElapsedMilliseconds;
         _focusedBeforeStill = IsKeyboardFocusWithin;
         Children.Add(still);
@@ -287,7 +288,12 @@ sealed class TerminalSurface : Grid
         }
 
         _control.Visibility = Visibility.Visible;
-        MotionTrace.Mark(MotionStep.LiveShown);
+        MotionTrace.Mark(MotionStep.LiveShown, (int)_control.ActualHeight, _control.Rows);
+        Dispatcher.BeginInvoke(async () =>
+        {
+            await Task.Delay(100);
+            MotionTrace.Mark(MotionStep.Sizes, (int)_control.ActualHeight, _control.Rows);
+        });
         if (_focusedBeforeStill)
         {
             FocusTerminal();
