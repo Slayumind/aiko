@@ -468,12 +468,15 @@ sealed class HeaderStripView
             face.Children.Add(new Border { CornerRadius = new CornerRadius(13), Background = _hover });
             face.Children.Add(_body);
 
-            // No box around a card: on the black header a filled and framed card looked cramped
-            // over the grey body (D-392). The quiet card still shows its fill under the pointer.
+            // The active card lies on the header with no box: filled and framed, the cards looked
+            // cramped over the grey body (D-392). A quiet card keeps a thin frame and no fill, so
+            // it still reads as a button that switches the environment.
             Root = new Border
             {
                 CornerRadius = new CornerRadius(14),
                 Background = Brushes.Transparent,
+                BorderBrush = Brushes.Transparent,
+                BorderThickness = new Thickness(1),
                 Child = face,
                 RenderTransformOrigin = new Point(0.5, 0.5),
                 RenderTransform = new TransformGroup { Children = { _press, _rise } },
@@ -590,6 +593,7 @@ sealed class HeaderStripView
             Root.Cursor = active ? null : System.Windows.Input.Cursors.Hand;
             Root.ToolTip = active ? null : Environment;
             Panel.SetZIndex(Root, active ? 1 : 0);
+            Root.BorderBrush = active ? Brushes.Transparent : Tokens.Brush("InputLine");
             if (active)
             {
                 _hover.BeginAnimation(SolidColorBrush.ColorProperty, null);
