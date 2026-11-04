@@ -99,6 +99,9 @@ sealed class TerminalHost
 
             // The settings window may have changed the zoom.
             UseZoom(now.WindowZoom);
+
+            // Back in front, the open session is seen: its "done" goes, as the person looks at it.
+            Draw();
         };
         _window.Closing += (_, e) =>
         {
@@ -902,8 +905,8 @@ sealed class TerminalHost
 
     private void Draw()
     {
-        // The open session in a window in view is seen: a turn that ends there is no news.
-        if (_window.InView && _model.Session(_sessions) is { } open)
+        // The open session in a window in front is seen: a turn that ends there is no news.
+        if (TerminalPulse.Sees(_window.InView, _window.IsActive) && _model.Session(_sessions) is { } open)
         {
             _seenAt[open.Id] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         }
@@ -967,7 +970,7 @@ sealed class TerminalHost
         }
 
         var choice = NoticeChoice.From(SettingsStore.Load());
-        var inFront = _window.InView && _window.IsActive;
+        var inFront = TerminalPulse.Sees(_window.InView, _window.IsActive);
         var open = _model.Session(_sessions)?.Id;
         foreach (var (id, kind) in changes)
         {

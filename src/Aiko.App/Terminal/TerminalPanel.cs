@@ -90,6 +90,7 @@ sealed class TerminalPanel : UserControl
         Background = Tokens.Brush("Background");
         FontFamily = Tokens.Get<FontFamily>("Sans");
         Focusable = false;
+        PreviewMouseDown += EndRenameOnPressAway;
 
         // Every scroll bar of the window is the thin one of the settings: the list, the feed and
         // the field.
@@ -611,13 +612,20 @@ sealed class TerminalPanel : UserControl
     private void ShowList(TerminalView view)
     {
         // While a name is being changed the list stands still: a new list would take the field
-        // away from under the keys.
+        // away from under the keys. Another environment ends the change first: its list must come.
         if (_renaming is not null)
         {
-            return;
+            if (view.Environment == _renamingIn)
+            {
+                return;
+            }
+
+            _finishRename?.Invoke(true);
         }
 
         _rows.Children.Clear();
+        _renameStarts.Clear();
+        _rowNames.Clear();
         foreach (var group in view.Groups)
         {
             _rows.Children.Add(GroupHeader(group));
@@ -706,15 +714,58 @@ sealed class TerminalPanel : UserControl
         var name = Mono(group.Name, "Muted");
         name.TextTrimming = TextTrimming.CharacterEllipsis;
         header.Children.Add(name);
-        header.MouseEnter += (_, _) => Fade(buttons, 1);
-        header.MouseLeave += (_, _) =>
+        KeepLit(header, buttons, "group:" + group.Folder, () => !buttons.IsKeyboardFocusWithin);
+        return header;
+    }
+
+    /// What the mouse was over in the list when it was drawn last, by a key of its own.
+    private string? _lit;
+
+    /// The list is drawn anew on every change of a session, so the row under the mouse is a new
+    /// element each time. Starting dark, its hover came in again and the row blinked. So the area
+    /// remembers that the mouse is over it, and its new copy starts lit; if the mouse left in the
+    /// meantime, the light fades. mayFade says whether the light may go when the mouse leaves.
+    private void KeepLit(FrameworkElement area, UIElement light, string key, Func<bool>? mayFade = null)
+    {
+        if (_lit == key)
         {
-            if (!buttons.IsKeyboardFocusWithin)
+            light.Opacity = 1;
+            Dispatcher.BeginInvoke(() =>
             {
-                Fade(buttons, 0);
+                if (!area.IsMouseOver && (mayFade?.Invoke() ?? true))
+                {
+                    Fade(light, 0);
+                    if (_lit == key)
+                    {
+                        _lit = null;
+                    }
+                }
+            }, System.Windows.Threading.DispatcherPriority.Input);
+        }
+
+        area.MouseEnter += (_, _) =>
+        {
+            _lit = key;
+            Fade(light, 1);
+        };
+        area.MouseLeave += (_, _) =>
+        {
+            // An area taken out of a list that is drawn anew is not left by the mouse.
+            if (VisualTreeHelper.GetParent(area) is null)
+            {
+                return;
+            }
+
+            if (_lit == key)
+            {
+                _lit = null;
+            }
+
+            if (mayFade?.Invoke() ?? true)
+            {
+                Fade(light, 0);
             }
         };
-        return header;
     }
 
     private static void Fade(UIElement element, double to) =>
@@ -749,6 +800,8 @@ sealed class TerminalPanel : UserControl
         var name = Text(row.Name, "TextName", "Ink", FontWeights.Normal);
         name.TextTrimming = TextTrimming.CharacterEllipsis;
         top.Children.Add(name);
+        _renameStarts.Add(() => Rename(row, top, name));
+        _rowNames.Add(row.Name);
 
         // A double click on the name changes it in place (LibreChat, Open WebUI).
         name.MouseLeftButtonDown += (_, e) =>
@@ -788,8 +841,7 @@ sealed class TerminalPanel : UserControl
             Child = face,
             ContextMenu = RowMenu(row.Id, () => Rename(row, top, name)),
         };
-        back.MouseEnter += (_, _) => hover.BeginAnimation(OpacityProperty, Motion.To(1, Motion.Or0(Motion.Hover), Motion.Standard));
-        back.MouseLeave += (_, _) => hover.BeginAnimation(OpacityProperty, Motion.To(0, Motion.Or0(Motion.Hover), Motion.Standard));
+        KeepLit(back, hover, "row:" + row.Id);
         back.MouseLeftButtonUp += (_, _) =>
         {
             _listPopup.IsOpen = false;
@@ -820,7 +872,13 @@ sealed class TerminalPanel : UserControl
         top.Children.Remove(name);
         top.Children.Add(field);
         _renaming = row.Id;
+        _renamingIn = _view?.Environment;
+        _renameField = field;
 
+        // The list stands still until the change ends, so every way it can end is caught: Enter,
+        // Esc, the field losing the keys, the field leaving the window, a click away from it (a pill
+        // or a row takes no keys, so the field would keep them), another environment, and a field
+        // that never got the keys at all. Missing one froze the list for good.
         var done = false;
         void Finish(bool keep)
         {
@@ -831,6 +889,9 @@ sealed class TerminalPanel : UserControl
 
             done = true;
             _renaming = null;
+            _renamingIn = null;
+            _renameField = null;
+            _finishRename = null;
             if (keep && field.Text.Trim() != row.Name)
             {
                 RowRenamed?.Invoke(row.Id, field.Text);
@@ -850,12 +911,78 @@ sealed class TerminalPanel : UserControl
             }
         };
         field.LostKeyboardFocus += (_, _) => Finish(keep: true);
+        field.Unloaded += (_, _) => Finish(keep: true);
+        _finishRename = Finish;
         Dispatcher.BeginInvoke(() =>
         {
-            field.Focus();
+            if (done)
+            {
+                return;
+            }
+
+            if (!field.Focus())
+            {
+                Finish(keep: false);
+                return;
+            }
+
             field.SelectAll();
         }, System.Windows.Threading.DispatcherPriority.Input);
     }
+
+    /// The environment, the field and the way to end a change of a name while one goes on.
+    private string? _renamingIn;
+    private TextBox? _renameField;
+    private Action<bool>? _finishRename;
+
+    /// A press anywhere but the field ends a change of a name and keeps the new one.
+    private void EndRenameOnPressAway(object sender, MouseButtonEventArgs e)
+    {
+        if (_renameField is not { } field || e.OriginalSource is not DependencyObject source)
+        {
+            return;
+        }
+
+        for (DependencyObject? at = source; at is not null; at = at is Visual or System.Windows.Media.Media3D.Visual3D ? VisualTreeHelper.GetParent(at) : LogicalTreeHelper.GetParent(at))
+        {
+            if (ReferenceEquals(at, field))
+            {
+                return;
+            }
+        }
+
+        _finishRename?.Invoke(true);
+    }
+
+    /// For --try-rename: starts a change of the name of the first row, as a double click would.
+    internal bool StartRenameForCheck()
+    {
+        if (_renameStarts.Count == 0)
+        {
+            return false;
+        }
+
+        _renameStarts[0]();
+        return true;
+    }
+
+    /// For --try-rename: the names in the list now, in order.
+    internal IReadOnlyList<string> RowNamesForCheck => [.. _rowNames];
+
+    /// How each row of the list starts a change of its name, and its name, in the order of the list.
+    private readonly List<Action> _renameStarts = [];
+    private readonly List<string> _rowNames = [];
+
+    internal bool RenamingForCheck => _renaming is not null;
+
+    /// For --try-rename: the first row of the list, and how lit its hover is now.
+    internal FrameworkElement? FirstRowForCheck => _rows.Children.OfType<Border>().FirstOrDefault();
+
+    internal double FirstRowLightForCheck =>
+        FirstRowForCheck is Border { Child: Grid { Children: [Border light, ..] } } ? light.Opacity : -1;
+
+    /// For --try-rename: the field of a change of a name has the keys, so leaving it ends the change.
+    internal bool RenameFieldFocusedForCheck => _renameField?.IsKeyboardFocused == true;
 
     private static UIElement Mark(RowState state)
     {
