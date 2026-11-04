@@ -46,6 +46,11 @@ sealed class TerminalPanel : UserControl
     /// The body is moved back by the height of the moving header, so the terminal stands still
     /// under it while the header grows or folds over it (D-390).
     private readonly TranslateTransform _bodyShift = new();
+
+    /// The list of sessions is drawn by WPF and does not need to stand still like the terminal: it
+    /// takes back the shift of the body and moves with the edge of the header on every frame.
+    /// Standing still, it jumped at the end of opening and at the start of folding.
+    private readonly TranslateTransform _listShift = new();
     private readonly HeaderStripView _header;
     private string? _stripFor;
 
@@ -188,6 +193,7 @@ sealed class TerminalPanel : UserControl
         Panel.SetZIndex(_strip, 1);
         Panel.SetZIndex(_bar, 2);
         _body.RenderTransform = _bodyShift;
+        listSide.RenderTransform = _listShift;
         Content = all;
 
         _resume = Flat(Strings.TerminalResume, () => ResumeAsked?.Invoke(), ghost: false, main: true);
@@ -469,7 +475,14 @@ sealed class TerminalPanel : UserControl
     {
         _strip.BeginAnimation(HeightProperty, null);
         _strip.Height = double.NaN;
-        _bodyShift.Y = 0;
+        ShiftBody(0);
+    }
+
+    /// The body moves back by this much, and the list of sessions comes forward by as much.
+    private void ShiftBody(double back)
+    {
+        _bodyShift.Y = -back;
+        _listShift.Y = back;
     }
 
     /// While the header grows or folds, the body is moved back by its height on every frame, so the
@@ -483,11 +496,11 @@ sealed class TerminalPanel : UserControl
             if (!_strip.HasAnimatedProperties)
             {
                 CompositionTarget.Rendering -= OnFrame;
-                _bodyShift.Y = 0;
+                ShiftBody(0);
                 return;
             }
 
-            _bodyShift.Y = -(double.IsNaN(_strip.Height) ? _strip.ActualHeight : _strip.Height);
+            ShiftBody(double.IsNaN(_strip.Height) ? _strip.ActualHeight : _strip.Height);
         }
 
         CompositionTarget.Rendering -= OnFrame;
