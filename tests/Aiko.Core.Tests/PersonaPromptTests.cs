@@ -48,6 +48,21 @@ public class PersonaPromptTests
         Assert.Contains("not one long silent place", prompt);
     }
 
+    /// On an errand Aiko talks to a colleague as herself (the envoy skill). The exception is narrow:
+    /// it names who she is, and the rest of the silent places still hold.
+    [Theory]
+    [MemberData(nameof(AllTemperaments))]
+    public void An_errand_to_a_colleague_is_the_only_exception_and_it_is_narrow(Temperament temperament)
+    {
+        var prompt = PersonaPrompt.Compose(temperament);
+        var guardrails = prompt[prompt.IndexOf("# Where you stay silent", StringComparison.Ordinal)..];
+
+        Assert.Contains("One exception: an errand", guardrails);
+        Assert.Contains("the envoy skill", guardrails);
+        Assert.Contains("the user's AI agent, writing from the user's account", guardrails);
+        Assert.Contains("The rest of this list still holds inside an errand", guardrails);
+    }
+
     [Fact]
     public void Each_temperament_has_its_own_block()
     {

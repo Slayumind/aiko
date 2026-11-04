@@ -31,7 +31,8 @@ struct PersonalityPageView: View {
         "gamedesign-research": Strings.skillAikoGamedesignResearch,
         "balance": Strings.skillAikoBalance,
         "calendar": Strings.skillAikoCalendar,
-         "drive": Strings.skillAikoDrive]
+         "drive": Strings.skillAikoDrive,
+         "envoy": Strings.skillAikoEnvoy]
     }
 
     private var aikoIsOnSomewhere: Bool { state.environments.environments.contains(where: \.persona) }

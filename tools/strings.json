@@ -2443,6 +2443,13 @@
     ]
   ],
   [
+    "SkillAikoEnvoy",
+    [
+      "Takes your errand to a colleague in a work chat and helps them as Aiko. Brings anything outside the task back to you.",
+      "Идёт с твоим поручением к коллеге в рабочий чат и помогает сама, как Айко. Всё, что за рамками задачи, несёт тебе."
+    ]
+  ],
+  [
     "ItemMeetAiko",
     [
       "Meet Aiko",

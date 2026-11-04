@@ -26,6 +26,7 @@ public partial class PersonalityPage : UserControl
         ["balance"] = Strings.SkillAikoBalance,
         ["calendar"] = Strings.SkillAikoCalendar,
         ["drive"] = Strings.SkillAikoDrive,
+        ["envoy"] = Strings.SkillAikoEnvoy,
     };
 
     private readonly EnvironmentsEditor _editor;

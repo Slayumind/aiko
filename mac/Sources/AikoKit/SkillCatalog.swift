@@ -24,7 +24,7 @@ public enum SkillCatalog {
     public static let pluginName = "aiko"
 
     public static let groups: [SkillGroup] = [
-        SkillGroup(domain: .projects, skills: ["copy", "docs-hygiene", "release-gate", "calendar", "drive"]),
+        SkillGroup(domain: .projects, skills: ["copy", "docs-hygiene", "release-gate", "calendar", "drive", "envoy"]),
         SkillGroup(
             domain: .games,
             skills: ["gamedesign-research", "balance", "playtest", "polishing", "blender-to-unity", "texturing", "glb-for-web", "palette"]),

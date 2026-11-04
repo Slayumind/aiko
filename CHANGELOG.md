@@ -9,6 +9,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Added
 
+- **The envoy skill.** Send Aiko to help a colleague in Slack or another work chat. You give her a short
+  task and limits once, and she talks to the colleague herself, as Aiko, from your account: she asks
+  questions in one batch, checks the thread for answers and does the work with the tools of the session.
+  Anything outside the task, such as access, money or a promise in your name, comes back to you first.
+  On such an errand the personality speaks in its own voice to the colleague; files and results stay
+  neutral.
 - **Terminal window with real terminals, on Windows.** Open it from the menu of the Aiko icon or
   with the terminal button on the card. Each session is a real terminal: Claude Code as it is, with
   its own input, menus and permission prompts, or a command line (Git Bash or PowerShell) in the
