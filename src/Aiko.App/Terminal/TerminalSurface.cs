@@ -51,7 +51,6 @@ sealed class TerminalSurface : Grid
         _console.Typed += () => Dispatcher.BeginInvoke(() => Typed?.Invoke());
         _console.TerminalOutput += (_, e) =>
         {
-            MotionTrace.Output(e.Data.Length);
             Interlocked.Exchange(ref _outputAt, Clock.ElapsedMilliseconds);
             _outputAfterResize = true;
             if (_titles.Read(e.Data) is { } title)
@@ -216,7 +215,6 @@ sealed class TerminalSurface : Grid
         RenderOptions.SetBitmapScalingMode(still, BitmapScalingMode.NearestNeighbor);
         _still = still;
         _stillArea = new Size(_control.ActualWidth, _control.ActualHeight);
-        MotionTrace.Mark(MotionStep.Still, (int)_control.ActualHeight, _control.Rows);
         _stillAt = Clock.ElapsedMilliseconds;
         _focusedBeforeStill = IsKeyboardFocusWithin;
         Children.Add(still);
@@ -300,16 +298,10 @@ sealed class TerminalSurface : Grid
         }
 
         _control.Visibility = Visibility.Visible;
-        MotionTrace.Mark(MotionStep.LiveShown, (int)_control.ActualHeight, _control.Rows);
 
         // Shown again, the control may count its rows without a change of its size, and then no
         // event tells the pseudo console: Claude Code stayed with 47 rows in an area of 36.
         AfterFrames(3, ResizeNow);
-        Dispatcher.BeginInvoke(async () =>
-        {
-            await Task.Delay(100);
-            MotionTrace.Mark(MotionStep.Sizes, (int)_control.ActualHeight, _control.Rows);
-        });
         if (_focusedBeforeStill)
         {
             FocusTerminal();
@@ -322,7 +314,6 @@ sealed class TerminalSurface : Grid
                 Children.Remove(still);
                 _still = null;
                 ClipToBounds = false;
-                MotionTrace.Mark(MotionStep.PictureRemoved);
             }
         });
     }
@@ -400,7 +391,6 @@ sealed class TerminalSurface : Grid
             _sentAt = Clock.ElapsedMilliseconds;
             _outputAfterResize = false;
             _console.Resize((uint)size.Rows, (uint)size.Columns);
-            MotionTrace.Mark(MotionStep.ResizeSent, size.Rows, size.Columns);
         }
     }
 
