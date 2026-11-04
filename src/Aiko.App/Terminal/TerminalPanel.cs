@@ -52,7 +52,18 @@ sealed class TerminalPanel : UserControl
     /// Everything under the title bar and the header: the list and the terminal. While the header
     /// opens or closes it keeps one height, so the terminal changes its size once and not on
     /// every frame (each size is a resize of the pseudo console and a full redraw of Claude Code).
-    private readonly Grid _body = new();
+    private readonly Grid _body = new HeldGrid();
+
+    /// A grid that is drawn whole when it is taller than its place. WPF cuts an element held taller
+    /// than its place to the size of that place, and the cut moves with the element: when the header
+    /// opened, the body was held at its old height and moved up under the header, so its bottom part
+    /// was cut away, and a black band as tall as the header stood at the bottom of the terminal until
+    /// the header stood. The window itself still cuts what goes past its edge.
+    private sealed class HeldGrid : Grid
+    {
+        protected override Geometry? GetLayoutClip(Size layoutSlotSize) =>
+            ClipToBounds ? base.GetLayoutClip(layoutSlotSize) : null;
+    }
 
     /// How long the header takes to grow, the cards to go out, and the header to fold.
     private static readonly Duration Grow = new(TimeSpan.FromMilliseconds(320));
