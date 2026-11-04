@@ -1078,6 +1078,9 @@
   <data name="SkillAikoDrive" xml:space="preserve">
     <value>Берёт документы с Google Drive в работу и кладёт файлы проекта на Drive.</value>
   </data>
+  <data name="SkillAikoEnvoy" xml:space="preserve">
+    <value>Идёт с твоим поручением к коллеге в рабочий чат и помогает сама, как Айко. Всё, что за рамками задачи, несёт тебе.</value>
+  </data>
   <data name="ItemMeetAiko" xml:space="preserve">
     <value>Познакомься с Aiko</value>
   </data>

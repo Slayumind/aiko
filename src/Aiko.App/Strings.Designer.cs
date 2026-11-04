@@ -1068,6 +1068,9 @@ public static class Strings
     /// Reads documents from Google Drive and puts project files onto Drive.
     public static string SkillAikoDrive => Get("SkillAikoDrive");
 
+    /// Takes your errand to a colleague in a work chat and helps them as Aiko. Brings anything o...
+    public static string SkillAikoEnvoy => Get("SkillAikoEnvoy");
+
     /// Meet Aiko
     public static string ItemMeetAiko => Get("ItemMeetAiko");
 

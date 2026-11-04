@@ -1078,6 +1078,9 @@
   <data name="SkillAikoDrive" xml:space="preserve">
     <value>Reads documents from Google Drive and puts project files onto Drive.</value>
   </data>
+  <data name="SkillAikoEnvoy" xml:space="preserve">
+    <value>Takes your errand to a colleague in a work chat and helps them as Aiko. Brings anything outside the task back to you.</value>
+  </data>
   <data name="ItemMeetAiko" xml:space="preserve">
     <value>Meet Aiko</value>
   </data>

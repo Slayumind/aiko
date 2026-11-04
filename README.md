@@ -53,7 +53,7 @@ sample answer for each level. She stays quiet where it matters: code, commits, f
 error explanations, security warnings, dangerous actions and bad news are written in a plain neutral
 voice. The switch works in new sessions; open sessions finish the way they started.
 
-With the personality come thirteen skills, with one switch for all of them. They live in one plugin
+With the personality come fourteen skills, with one switch for all of them. They live in one plugin
 called `aiko`, so you call a skill by its full name:
 
 **Project management**
@@ -65,6 +65,7 @@ called `aiko`, so you call a skill by its full name:
 | `/aiko:release-gate` | a check before a release: GO or NO-GO, irreversible changes, rollout and rollback |
 | `/aiko:calendar` | a day planned around Google Calendar, free time found, events added after your yes |
 | `/aiko:drive` | documents from Google Drive read into the work, project files put onto Drive |
+| `/aiko:envoy` | an errand to a colleague in a work chat: Aiko talks to them herself and brings back what is outside the task |
 
 **Game development**
 
@@ -80,7 +81,7 @@ called `aiko`, so you call a skill by its full name:
 | `/aiko:palette` | colours checked against a palette and fixed with the smallest change, in OKLCH |
 
 The `calendar` and `drive` skills need the Google Calendar and Google Drive connectors, turned on in
-Claude's connector settings.
+Claude's connector settings. The `envoy` skill needs a connector to your work chat, such as Slack.
 
 Aiko installs all of this as Claude Code plugins from a marketplace on your own computer, so nothing is
 downloaded. Your own plugins, output style and settings stay as they are. If you set your own output
