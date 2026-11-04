@@ -51,6 +51,7 @@ sealed class TerminalSurface : Grid
         _console.Typed += () => Dispatcher.BeginInvoke(() => Typed?.Invoke());
         _console.TerminalOutput += (_, e) =>
         {
+            MotionTrace.Output(e.Data.Length);
             if (_titles.Read(e.Data) is { } title)
             {
                 Dispatcher.BeginInvoke(() => TitleChanged?.Invoke(title));
@@ -220,6 +221,7 @@ sealed class TerminalSurface : Grid
         }
 
         _control.Visibility = Visibility.Visible;
+        MotionTrace.Mark("live shown");
         if (_focusedBeforeStill)
         {
             FocusTerminal();
@@ -231,6 +233,7 @@ sealed class TerminalSurface : Grid
             {
                 Children.Remove(still);
                 _still = null;
+                MotionTrace.Mark("picture removed");
             }
         });
     }
@@ -292,6 +295,7 @@ sealed class TerminalSurface : Grid
         {
             _sent = size;
             _console.Resize((uint)size.Rows, (uint)size.Columns);
+            MotionTrace.Resized(size.Rows, size.Columns);
         }
     }
 

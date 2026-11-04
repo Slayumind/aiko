@@ -328,6 +328,7 @@ sealed class TerminalPanel : UserControl
                 return;
             }
 
+            MotionTrace.Start("fold");
             ShowStills(true);
             HoldBody(_strip.ActualHeight);
             FollowStrip();
@@ -339,6 +340,7 @@ sealed class TerminalPanel : UserControl
                 // Opened again while it was closing: the new header stays.
                 if (_stripFor is null)
                 {
+                    MotionTrace.Mark("header stands");
                     HideStrip();
                     ShowLiveAfterLayout();
                 }
@@ -378,6 +380,7 @@ sealed class TerminalPanel : UserControl
         }
 
         // From where it is to its own height: measured once, then left to size itself.
+        MotionTrace.Start("open");
         ShowStills(true);
         StopStrip();
         _strip.Measure(new Size(ActualWidth, double.PositiveInfinity));
@@ -393,6 +396,7 @@ sealed class TerminalPanel : UserControl
                 return;
             }
 
+            MotionTrace.Mark("header stands");
             StopStrip();
             ReleaseBody();
             ShowLiveAfterLayout();
