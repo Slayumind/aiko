@@ -41,7 +41,11 @@ sealed class TerminalPanel : UserControl
     /// The open header under the title bar (D-373, D-376). It is drawn again only when it opens or
     /// the active environment changes: the numbers in it change too often to start its motion each
     /// time.
-    private readonly Border _strip = new() { ClipToBounds = true, Visibility = Visibility.Collapsed };
+    private readonly Border _strip = new() { ClipToBounds = true, Visibility = Visibility.Collapsed, Background = Tokens.Brush("Background") };
+
+    /// The body is moved back by the height of the moving header, so the terminal stands still
+    /// under it while the header grows or folds over it (D-390).
+    private readonly TranslateTransform _bodyShift = new();
     private readonly HeaderStripView _header;
     private string? _stripFor;
 
@@ -169,6 +173,10 @@ sealed class TerminalPanel : UserControl
         DockPanel.SetDock(_strip, Dock.Top);
         all.Children.Add(_strip);
         all.Children.Add(_body);
+        // The moving header is drawn over the body that stands still under it.
+        Panel.SetZIndex(_strip, 1);
+        Panel.SetZIndex(_bar, 2);
+        _body.RenderTransform = _bodyShift;
         Content = all;
 
         _resume = Flat(Strings.TerminalResume, () => ResumeAsked?.Invoke(), ghost: false, main: true);
@@ -299,9 +307,10 @@ sealed class TerminalPanel : UserControl
     /// software drawing of WPF and jerks. So while the header moves, the terminal is a picture of
     /// itself (TerminalSurface.ShowStill), and the body under the header keeps one height.
     ///
-    /// Opening: the body slides down under the bottom edge of the window while the header grows,
-    /// then takes its new height once. Closing: the body takes its final height first, then the
-    /// header folds and the body slides up. The real terminal comes back when the header stands.
+    /// The body stands still while the header moves over it (FollowStrip). Opening: the header grows
+    /// over the top of the picture, then the body takes its place and height under it once. Closing:
+    /// the body is in its final place and height from the start, and the folding header uncovers it.
+    /// The real terminal comes back when the header stands.
     private void ShowStrip(TerminalView view)
     {
         if (!view.Header.Open)
@@ -321,6 +330,7 @@ sealed class TerminalPanel : UserControl
 
             ShowStills(true);
             HoldBody(_strip.ActualHeight);
+            FollowStrip();
             _header.FadeOut(Fold);
             _pills.Hide(false, Close, after: PillsBack);
             var shrink = new System.Windows.Media.Animation.DoubleAnimation(_strip.ActualHeight, 0, Close) { EasingFunction = Motion.Standard };
@@ -388,6 +398,7 @@ sealed class TerminalPanel : UserControl
             ShowLiveAfterLayout();
         };
         _strip.BeginAnimation(HeightProperty, growing);
+        FollowStrip();
     }
 
     /// The header is gone, and the terminal takes its place.
@@ -443,11 +454,34 @@ sealed class TerminalPanel : UserControl
     {
         _strip.BeginAnimation(HeightProperty, null);
         _strip.Height = double.NaN;
+        _bodyShift.Y = 0;
     }
 
-    /// The body keeps its height plus extra while the header moves. Its top follows the header and
-    /// its bottom goes under the edge of the window, where Windows cuts the terminal off. When it is
-    /// held already it keeps that height: the one the terminal has now.
+    /// While the header grows or folds, the body is moved back by its height on every frame, so the
+    /// picture of the terminal does not move: the header passes over it. Opening, the terminal takes
+    /// its place under the header once, when the header stands; folding, it is in its place from the
+    /// start and the header uncovers it (D-390).
+    private void FollowStrip()
+    {
+        void OnFrame(object? sender, EventArgs e)
+        {
+            if (!_strip.HasAnimatedProperties)
+            {
+                CompositionTarget.Rendering -= OnFrame;
+                _bodyShift.Y = 0;
+                return;
+            }
+
+            _bodyShift.Y = -(double.IsNaN(_strip.Height) ? _strip.ActualHeight : _strip.Height);
+        }
+
+        CompositionTarget.Rendering -= OnFrame;
+        CompositionTarget.Rendering += OnFrame;
+    }
+
+    /// The body keeps its height plus extra while the header moves, so it reaches the bottom of the
+    /// window while it is moved back under the header. When it is held already it keeps that
+    /// height: the one the terminal has now.
     private void HoldBody(double extra)
     {
         if (!double.IsNaN(_body.Height) || _body.ActualHeight <= 0)
