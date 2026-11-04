@@ -468,12 +468,12 @@ sealed class HeaderStripView
             face.Children.Add(new Border { CornerRadius = new CornerRadius(13), Background = _hover });
             face.Children.Add(_body);
 
+            // No box around a card: on the black header a filled and framed card looked cramped
+            // over the grey body (D-392). The quiet card still shows its fill under the pointer.
             Root = new Border
             {
                 CornerRadius = new CornerRadius(14),
-                Background = Tokens.Brush("Surface"),
-                BorderBrush = Tokens.Brush("Hairline"),
-                BorderThickness = new Thickness(1),
+                Background = Brushes.Transparent,
                 Child = face,
                 RenderTransformOrigin = new Point(0.5, 0.5),
                 RenderTransform = new TransformGroup { Children = { _press, _rise } },
