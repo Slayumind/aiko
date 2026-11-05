@@ -21,7 +21,7 @@ public enum NoticeWay
 {
     None,
 
-    /// Only the sound: the terminal window is in front, and the list already shows the mark.
+    /// Only the sound: the terminal window is in focus, and the list already shows the mark.
     Sound,
 
     /// The own one-line window of Aiko (D-377).
@@ -71,10 +71,10 @@ public static class Notices
         };
     }
 
-    /// inFront: the terminal window is on screen and has the keyboard. open: the notice is about the
-    /// session open in it. A limit is not about a session and shows in front too: nothing else in the
+    /// inFocus: the terminal window is on screen and has the keyboard. open: the notice is about the
+    /// session open in it. A limit is not about a session and shows in focus too: nothing else in the
     /// window says it crossed the line.
-    public static NoticeWay Route(NoticeKind kind, NoticeChoice choice, bool inFront, bool open)
+    public static NoticeWay Route(NoticeKind kind, NoticeChoice choice, bool inFocus, bool open)
     {
         if (!choice.Wants(kind))
         {
@@ -87,7 +87,7 @@ public static class Notices
             return NoticeWay.Window;
         }
 
-        if (inFront)
+        if (inFocus)
         {
             return !open && sound ? NoticeWay.Sound : NoticeWay.None;
         }

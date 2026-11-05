@@ -1383,7 +1383,7 @@ public static class Strings
     /// Notifications
     public static string NotifyLabel => Get("NotifyLabel");
 
-    /// When the terminal window is not in front, a line comes up next to Aiko for 6 seconds. A c...
+    /// When the terminal window is not in focus, a line comes up next to Aiko for 6 seconds. A c...
     public static string NotifyWhat => Get("NotifyWhat");
 
     /// The agent has a question

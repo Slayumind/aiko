@@ -48,7 +48,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   next and the previous one. Every other key goes to the program in the terminal.
 - **The terminal window opens once by itself** after Aiko is set up. A start with Windows opens only
   the tray, unless you turn on "Open the terminal window too" in the settings.
-- **Notices when a session needs you.** When the terminal window is not in front, a short line comes
+- **Notices when a session needs you.** When the terminal window is not in focus, a short line comes
   up next to the Aiko icon: a session waits for an answer, is done or stopped, or a limit went over
   90%. A click opens the session. Only "waits" has a sound, and nothing comes up while Windows is in
   "Do not disturb". Each kind and the sound can be turned off in the settings of the terminal.

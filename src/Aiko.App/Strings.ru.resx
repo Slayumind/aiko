@@ -1394,7 +1394,7 @@
     <value>Уведомления</value>
   </data>
   <data name="NotifyWhat" xml:space="preserve">
-    <value>Когда окно терминала не впереди, рядом с Aiko на 6 секунд появляется строка. Щелчок по ней открывает сессию.</value>
+    <value>Когда окно терминала не в фокусе, рядом с Aiko на 6 секунд появляется строка. Щелчок по ней открывает сессию.</value>
   </data>
   <data name="NotifyWaiting" xml:space="preserve">
     <value>У агента вопрос</value>

@@ -99,10 +99,10 @@ sealed class TerminalHost
             var now = SettingsStore.Load();
             _voice.Use(now);
 
-            // The settings may have changed since the window was last in front.
+            // The settings may have changed since the window was last in focus.
             UseZoom(now.WindowZoom);
 
-            // Back in front, the open session is seen: its "done" goes, as the person looks at it.
+            // Back in focus, the open session is seen: its "done" goes, as the person looks at it.
             Draw();
         };
         _window.Closing += (_, e) =>
@@ -1030,7 +1030,7 @@ sealed class TerminalHost
 
     private void Draw()
     {
-        // The open session in a window in front is seen: a turn that ends there is no news.
+        // The open session in a window in focus is seen: a turn that ends there is no news.
         if (TerminalPulse.Sees(_window.InView, _window.IsActive) && _model.Session(_sessions) is { } open)
         {
             _seenAt[open.Id] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
@@ -1095,11 +1095,11 @@ sealed class TerminalHost
         }
 
         var choice = NoticeChoice.From(SettingsStore.Load());
-        var inFront = TerminalPulse.Sees(_window.InView, _window.IsActive);
+        var inFocus = TerminalPulse.Sees(_window.InView, _window.IsActive);
         var open = _model.Session(_sessions)?.Id;
         foreach (var (id, kind) in changes)
         {
-            var way = Notices.Route(kind, choice, inFront, id == open);
+            var way = Notices.Route(kind, choice, inFocus, id == open);
             if (way != NoticeWay.None && _sessions.Find(id) is { } session)
             {
                 var word = kind switch

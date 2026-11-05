@@ -494,7 +494,7 @@ public enum Strings {
         "NoticeLimitWeek": ("{0}% this week", "{0} % за неделю"),
         "NoticeLimitModel": ("{0}% of {1} this week", "{0} % {1} за неделю"),
         "NotifyLabel": ("Notifications", "Уведомления"),
-        "NotifyWhat": ("When the terminal window is not in front, a line comes up next to Aiko for 6 seconds. A click on it opens the session.", "Когда окно терминала не впереди, рядом с Aiko на 6 секунд появляется строка. Щелчок по ней открывает сессию."),
+        "NotifyWhat": ("When the terminal window is not in focus, a line comes up next to Aiko for 6 seconds. A click on it opens the session.", "Когда окно терминала не в фокусе, рядом с Aiko на 6 секунд появляется строка. Щелчок по ней открывает сессию."),
         "NotifyWaiting": ("The agent has a question", "У агента вопрос"),
         "NotifyDone": ("The agent finished the work", "Агент закончила работу"),
         "NotifyStopped": ("The agent stopped on her own", "Агент остановилась сама"),
@@ -1892,7 +1892,7 @@ public enum Strings {
     /// Notifications
     public static var notifyLabel: String { Strings.get("NotifyLabel") }
 
-    /// When the terminal window is not in front, a line comes up next to Aiko for 6 seconds. A c...
+    /// When the terminal window is not in focus, a line comes up next to Aiko for 6 seconds. A c...
     public static var notifyWhat: String { Strings.get("NotifyWhat") }
 
     /// The agent has a question

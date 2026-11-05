@@ -334,7 +334,7 @@ sealed class AikoShell : IDisposable
                     snapshots.FirstOrDefault(snapshot => snapshot.Environment == crossing.Environment)?.Model?.ModelName ?? ""),
             };
             var line = new NoticeLine(NoticeKind.Limit, crossing.Environment, word, crossing.Percent, LimitTone.Caution);
-            Notify(line, Notices.Route(NoticeKind.Limit, choice, inFront: false, open: false), OpenTerminal);
+            Notify(line, Notices.Route(NoticeKind.Limit, choice, inFocus: false, open: false), OpenTerminal);
         }
     }
 

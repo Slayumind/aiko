@@ -1394,7 +1394,7 @@
     <value>Notifications</value>
   </data>
   <data name="NotifyWhat" xml:space="preserve">
-    <value>When the terminal window is not in front, a line comes up next to Aiko for 6 seconds. A click on it opens the session.</value>
+    <value>When the terminal window is not in focus, a line comes up next to Aiko for 6 seconds. A click on it opens the session.</value>
   </data>
   <data name="NotifyWaiting" xml:space="preserve">
     <value>The agent has a question</value>

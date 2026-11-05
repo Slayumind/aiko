@@ -3180,8 +3180,8 @@
   [
     "NotifyWhat",
     [
-      "When the terminal window is not in front, a line comes up next to Aiko for 6 seconds. A click on it opens the session.",
-      "Когда окно терминала не впереди, рядом с Aiko на 6 секунд появляется строка. Щелчок по ней открывает сессию."
+      "When the terminal window is not in focus, a line comes up next to Aiko for 6 seconds. A click on it opens the session.",
+      "Когда окно терминала не в фокусе, рядом с Aiko на 6 секунд появляется строка. Щелчок по ней открывает сессию."
     ]
   ],
   [
