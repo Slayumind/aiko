@@ -3187,22 +3187,22 @@
   [
     "NotifyWaiting",
     [
-      "A session waits for an answer",
-      "Сессия ждёт ответа"
+      "The agent has a question",
+      "У агента вопрос"
     ]
   ],
   [
     "NotifyDone",
     [
-      "A session is done",
-      "Сессия закончила"
+      "The agent finished the work",
+      "Агент закончила работу"
     ]
   ],
   [
     "NotifyStopped",
     [
-      "A session stopped by itself",
-      "Сессия остановилась сама"
+      "The agent stopped on her own",
+      "Агент остановилась сама"
     ]
   ],
   [
@@ -3215,8 +3215,8 @@
   [
     "NotifySound",
     [
-      "A sound when a session waits",
-      "Звук, когда сессия ждёт"
+      "A sound when the agent has a question",
+      "Звук, когда у агента вопрос"
     ]
   ],
   [

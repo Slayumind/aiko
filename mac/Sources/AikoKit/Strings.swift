@@ -495,11 +495,11 @@ public enum Strings {
         "NoticeLimitModel": ("{0}% of {1} this week", "{0} % {1} за неделю"),
         "NotifyLabel": ("Notifications", "Уведомления"),
         "NotifyWhat": ("When the terminal window is not in front, a line comes up next to Aiko for 6 seconds. A click on it opens the session.", "Когда окно терминала не впереди, рядом с Aiko на 6 секунд появляется строка. Щелчок по ней открывает сессию."),
-        "NotifyWaiting": ("A session waits for an answer", "Сессия ждёт ответа"),
-        "NotifyDone": ("A session is done", "Сессия закончила"),
-        "NotifyStopped": ("A session stopped by itself", "Сессия остановилась сама"),
+        "NotifyWaiting": ("The agent has a question", "У агента вопрос"),
+        "NotifyDone": ("The agent finished the work", "Агент закончила работу"),
+        "NotifyStopped": ("The agent stopped on her own", "Агент остановилась сама"),
         "NotifyLimit": ("A limit went over 90%", "Лимит перешёл за 90 %"),
-        "NotifySound": ("A sound when a session waits", "Звук, когда сессия ждёт"),
+        "NotifySound": ("A sound when the agent has a question", "Звук, когда у агента вопрос"),
         "ZoomLabel": ("Window zoom", "Масштаб окна"),
         "ZoomWhat": ("Text, icons and the terminal change size together. In the terminal window: C⁠t⁠r⁠l⁠+⁠= and C⁠t⁠r⁠l⁠+⁠-, and C⁠t⁠r⁠l⁠+⁠0 brings back 115%.", "Текст, значки и терминал меняются вместе. В окне терминала — C⁠t⁠r⁠l⁠+⁠= и C⁠t⁠r⁠l⁠+⁠-, а C⁠t⁠r⁠l⁠+⁠0 возвращает 115 %."),
         "ZoomStep": ("{0}%", "{0} %"),
@@ -1895,19 +1895,19 @@ public enum Strings {
     /// When the terminal window is not in front, a line comes up next to Aiko for 6 seconds. A c...
     public static var notifyWhat: String { Strings.get("NotifyWhat") }
 
-    /// A session waits for an answer
+    /// The agent has a question
     public static var notifyWaiting: String { Strings.get("NotifyWaiting") }
 
-    /// A session is done
+    /// The agent finished the work
     public static var notifyDone: String { Strings.get("NotifyDone") }
 
-    /// A session stopped by itself
+    /// The agent stopped on her own
     public static var notifyStopped: String { Strings.get("NotifyStopped") }
 
     /// A limit went over 90%
     public static var notifyLimit: String { Strings.get("NotifyLimit") }
 
-    /// A sound when a session waits
+    /// A sound when the agent has a question
     public static var notifySound: String { Strings.get("NotifySound") }
 
     /// Window zoom

@@ -1397,19 +1397,19 @@
     <value>Когда окно терминала не впереди, рядом с Aiko на 6 секунд появляется строка. Щелчок по ней открывает сессию.</value>
   </data>
   <data name="NotifyWaiting" xml:space="preserve">
-    <value>Сессия ждёт ответа</value>
+    <value>У агента вопрос</value>
   </data>
   <data name="NotifyDone" xml:space="preserve">
-    <value>Сессия закончила</value>
+    <value>Агент закончила работу</value>
   </data>
   <data name="NotifyStopped" xml:space="preserve">
-    <value>Сессия остановилась сама</value>
+    <value>Агент остановилась сама</value>
   </data>
   <data name="NotifyLimit" xml:space="preserve">
     <value>Лимит перешёл за 90 %</value>
   </data>
   <data name="NotifySound" xml:space="preserve">
-    <value>Звук, когда сессия ждёт</value>
+    <value>Звук, когда у агента вопрос</value>
   </data>
   <data name="ZoomLabel" xml:space="preserve">
     <value>Масштаб окна</value>

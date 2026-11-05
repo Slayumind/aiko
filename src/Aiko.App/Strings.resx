@@ -1397,19 +1397,19 @@
     <value>When the terminal window is not in front, a line comes up next to Aiko for 6 seconds. A click on it opens the session.</value>
   </data>
   <data name="NotifyWaiting" xml:space="preserve">
-    <value>A session waits for an answer</value>
+    <value>The agent has a question</value>
   </data>
   <data name="NotifyDone" xml:space="preserve">
-    <value>A session is done</value>
+    <value>The agent finished the work</value>
   </data>
   <data name="NotifyStopped" xml:space="preserve">
-    <value>A session stopped by itself</value>
+    <value>The agent stopped on her own</value>
   </data>
   <data name="NotifyLimit" xml:space="preserve">
     <value>A limit went over 90%</value>
   </data>
   <data name="NotifySound" xml:space="preserve">
-    <value>A sound when a session waits</value>
+    <value>A sound when the agent has a question</value>
   </data>
   <data name="ZoomLabel" xml:space="preserve">
     <value>Window zoom</value>

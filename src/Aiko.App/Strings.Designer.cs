@@ -1386,19 +1386,19 @@ public static class Strings
     /// When the terminal window is not in front, a line comes up next to Aiko for 6 seconds. A c...
     public static string NotifyWhat => Get("NotifyWhat");
 
-    /// A session waits for an answer
+    /// The agent has a question
     public static string NotifyWaiting => Get("NotifyWaiting");
 
-    /// A session is done
+    /// The agent finished the work
     public static string NotifyDone => Get("NotifyDone");
 
-    /// A session stopped by itself
+    /// The agent stopped on her own
     public static string NotifyStopped => Get("NotifyStopped");
 
     /// A limit went over 90%
     public static string NotifyLimit => Get("NotifyLimit");
 
-    /// A sound when a session waits
+    /// A sound when the agent has a question
     public static string NotifySound => Get("NotifySound");
 
     /// Window zoom
