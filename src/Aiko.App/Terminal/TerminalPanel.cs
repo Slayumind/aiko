@@ -632,7 +632,7 @@ sealed class TerminalPanel : UserControl
         var row = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
 
         // The mark on the left opens the header, the same for the ring and for the waiting mark.
-        var mark = waiting ? WaitingMark() : HeaderStripView.Ring(tab.Percent, tab.Tone, 14, 2);
+        var mark = waiting ? WaitingMark() : Marks.Ring(tab.Percent, tab.Tone, 14, 2);
         mark.Cursor = Cursors.Hand;
         mark.ToolTip = Strings.TerminalShowLimits;
         mark.MouseLeftButtonUp += (_, e) =>
