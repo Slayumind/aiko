@@ -14,7 +14,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   questions in one batch, checks the thread for answers and does the work with the tools of the session.
   Anything outside the task, such as access, money or a promise in your name, comes back to you first.
   On such an errand the personality speaks in its own voice to the colleague; files and results stay
-  neutral.
+  neutral. Each of her messages starts with her face and name and goes in a quote block, so nobody
+  takes it for yours. In Slack she uses Aiko's chibi emoji when the workspace has them.
 - **Terminal window with real terminals, on Windows.** Open it from the menu of the Aiko icon or
   with the terminal button on the card. Each session is a real terminal: Claude Code as it is, with
   its own input, menus and permission prompts, or a command line (Git Bash or PowerShell) in the
