@@ -468,11 +468,14 @@ sealed class HeaderStripView
             face.Children.Add(new Border { CornerRadius = new CornerRadius(13), Background = _hover });
             face.Children.Add(_body);
 
+            // The cards are the segments of one switch, as the segmented buttons of Aiko are: the
+            // active one lies on a soft fill, a quiet one has none and lights up under the pointer.
+            // Framed and filled both, the cards looked cramped over the grey body (D-392, D-393).
             Root = new Border
             {
                 CornerRadius = new CornerRadius(14),
-                Background = Tokens.Brush("Surface"),
-                BorderBrush = Tokens.Brush("Hairline"),
+                Background = Brushes.Transparent,
+                BorderBrush = Brushes.Transparent,
                 BorderThickness = new Thickness(1),
                 Child = face,
                 RenderTransformOrigin = new Point(0.5, 0.5),
@@ -590,6 +593,7 @@ sealed class HeaderStripView
             Root.Cursor = active ? null : System.Windows.Input.Cursors.Hand;
             Root.ToolTip = active ? null : Environment;
             Panel.SetZIndex(Root, active ? 1 : 0);
+            Root.Background = active ? Tokens.Brush("Surface") : Brushes.Transparent;
             if (active)
             {
                 _hover.BeginAnimation(SolidColorBrush.ColorProperty, null);
