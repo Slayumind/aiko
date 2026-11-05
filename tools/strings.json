@@ -1358,6 +1358,20 @@
     ]
   ],
   [
+    "DefaultForRest",
+    [
+      "Every other folder opens here",
+      "Все остальные папки — сюда"
+    ]
+  ],
+  [
+    "FolderMovedFrom",
+    [
+      "Moved here from {0}",
+      "Перенесена сюда из {0}"
+    ]
+  ],
+  [
     "EditInFolders",
     [
       "Change in project folders",
@@ -2933,20 +2947,6 @@
     ]
   ],
   [
-    "TerminalLimitFiveHour",
-    [
-      "5-hour limit",
-      "Лимит на 5 часов"
-    ]
-  ],
-  [
-    "TerminalLimitWeek",
-    [
-      "Weekly limit",
-      "Лимит на неделю"
-    ]
-  ],
-  [
     "TerminalMinimize",
     [
       "Minimize",
@@ -3021,13 +3021,6 @@
     [
       "Close",
       "Закрыть"
-    ]
-  ],
-  [
-    "TerminalSessions",
-    [
-      "Sessions",
-      "Сессии"
     ]
   ],
   [

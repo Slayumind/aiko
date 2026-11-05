@@ -613,6 +613,12 @@
   <data name="RestToo" xml:space="preserve">
     <value>And every other folder: this is the default environment.</value>
   </data>
+  <data name="DefaultForRest" xml:space="preserve">
+    <value>Every other folder opens here</value>
+  </data>
+  <data name="FolderMovedFrom" xml:space="preserve">
+    <value>Moved here from {0}</value>
+  </data>
   <data name="EditInFolders" xml:space="preserve">
     <value>Change in project folders</value>
   </data>
@@ -1288,12 +1294,6 @@
   <data name="TerminalKeepOpen" xml:space="preserve">
     <value>Keep open</value>
   </data>
-  <data name="TerminalLimitFiveHour" xml:space="preserve">
-    <value>5-hour limit</value>
-  </data>
-  <data name="TerminalLimitWeek" xml:space="preserve">
-    <value>Weekly limit</value>
-  </data>
   <data name="TerminalMinimize" xml:space="preserve">
     <value>Minimize</value>
   </data>
@@ -1326,9 +1326,6 @@
   </data>
   <data name="TerminalCloseWindow" xml:space="preserve">
     <value>Close</value>
-  </data>
-  <data name="TerminalSessions" xml:space="preserve">
-    <value>Sessions</value>
   </data>
   <data name="VoiceButtonTip" xml:space="preserve">
     <value>Voice input · Ctrl+Shift+Space</value>

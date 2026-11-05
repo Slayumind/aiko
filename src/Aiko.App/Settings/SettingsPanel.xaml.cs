@@ -9,7 +9,6 @@ namespace Aiko.App;
 
 public partial class SettingsPanel : UserControl
 {
-    public const string FoldersPageKey = "folders";
     public const string GeneralPageKey = "general";
     public const string PersonalityPageKey = "personality";
     public const string PrivacyPageKey = "privacy";
@@ -32,7 +31,7 @@ public partial class SettingsPanel : UserControl
     {
     }
 
-    /// The page to open: "general", "folders", "personality", "setup" or "env:" and an account folder. Null opens the
+    /// The page to open: "general", "personality", "terminal", "privacy", "setup" or "env:" and an account folder. Null opens the
     /// first environment, or the checklist when nothing is set up yet. In the window the panel stands
     /// on the place of the list and the terminal (D-374) instead of in a window of its own.
     public SettingsPanel(string? page, bool inWindow = false)
@@ -250,8 +249,6 @@ public partial class SettingsPanel : UserControl
 
         Nav.Children.Add(new Border { Height = 1, Background = Tokens.Brush("Hairline"), Margin = new Thickness(10, 8, 10, 8) });
 
-        var bound = EnvironmentEdits.Bindings(settings).Count;
-        Nav.Children.Add(NavItem(FoldersPageKey, Strings.ItemFolders, bound > 0 ? string.Format(Strings.NavBound, bound) : null));
         if (settings.HasEnvironments)
         {
             var talking = settings.Environments.Count(e => e.Persona);
@@ -399,13 +396,6 @@ public partial class SettingsPanel : UserControl
             return general;
         }
 
-        if (key == FoldersPageKey)
-        {
-            var folders = new FoldersPage(_editor);
-            folders.ChecklistRequested += item => OpenChecklist(item);
-            return folders;
-        }
-
         if (key == PersonalityPageKey)
         {
             if (!_editor.Current.HasEnvironments)
@@ -444,7 +434,7 @@ public partial class SettingsPanel : UserControl
         }
 
         var environment = new EnvironmentPage(_editor, folder);
-        environment.FoldersRequested += () => Navigate(FoldersPageKey);
+        environment.ChecklistRequested += item => OpenChecklist(item);
         environment.Removed += ShowNoteOnFirstEnvironment;
         return environment;
     }
@@ -501,9 +491,6 @@ public partial class SettingsPanel : UserControl
         {
             case EnvironmentPage environment:
                 environment.Leave();
-                break;
-            case FoldersPage folders:
-                folders.Leave();
                 break;
             case PersonalityPage personality:
                 personality.Leave();

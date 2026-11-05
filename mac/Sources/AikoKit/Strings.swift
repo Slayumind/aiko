@@ -234,6 +234,8 @@ public enum Strings {
         "SectionBoundFolders": ("BOUND FOLDERS", "ПРИВЯЗАННЫЕ ПАПКИ"),
         "NoneBound": ("No folders.", "Ни одной папки."),
         "RestToo": ("And every other folder: this is the default environment.", "И все остальные папки: это среда по умолчанию."),
+        "DefaultForRest": ("Every other folder opens here", "Все остальные папки — сюда"),
+        "FolderMovedFrom": ("Moved here from {0}", "Перенесена сюда из {0}"),
         "EditInFolders": ("Change in project folders", "Изменить в папках проектов"),
         "RemoveEnvironment": ("Remove environment", "Удалить среду"),
         "RemoveEnvironmentLine": ("Aiko's line and plugins leave this folder's settings.json, and so do the command {0} and the bindings to {1}.", "Из settings.json этой папки уйдут строка и плагины Aiko, а с ними команда {0} и привязки к {1}."),
@@ -459,8 +461,6 @@ public enum Strings {
         "TerminalDontQuit": ("Don’t quit", "Не выходить"),
         "TerminalStopAndClose": ("Stop and close", "Остановить и закрыть"),
         "TerminalKeepOpen": ("Keep open", "Не закрывать"),
-        "TerminalLimitFiveHour": ("5-hour limit", "Лимит на 5 часов"),
-        "TerminalLimitWeek": ("Weekly limit", "Лимит на неделю"),
         "TerminalMinimize": ("Minimize", "Свернуть"),
         "TerminalMaximize": ("Maximize", "Развернуть"),
         "TerminalRestore": ("Restore", "Восстановить"),
@@ -472,7 +472,6 @@ public enum Strings {
         "TerminalDirectOn": ("direct mode on", "прямой режим вкл"),
         "TerminalDirectOff": ("direct mode off", "прямой режим выкл"),
         "TerminalCloseWindow": ("Close", "Закрыть"),
-        "TerminalSessions": ("Sessions", "Сессии"),
         "VoiceButtonTip": ("Voice input · Ctrl+Shift+Space", "Голосовой ввод · Ctrl+Shift+Space"),
         "VoiceStopTip": ("Finish recording · Ctrl+Shift+Space", "Закончить запись · Ctrl+Shift+Space"),
         "VoiceWarming": ("starting the mic", "микрофон включается"),
@@ -1112,6 +1111,12 @@ public enum Strings {
 
     /// And every other folder: this is the default environment.
     public static var restToo: String { Strings.get("RestToo") }
+
+    /// Every other folder opens here
+    public static var defaultForRest: String { Strings.get("DefaultForRest") }
+
+    /// Moved here from {0}
+    public static var folderMovedFrom: String { Strings.get("FolderMovedFrom") }
 
     /// Change in project folders
     public static var editInFolders: String { Strings.get("EditInFolders") }
@@ -1788,12 +1793,6 @@ public enum Strings {
     /// Keep open
     public static var terminalKeepOpen: String { Strings.get("TerminalKeepOpen") }
 
-    /// 5-hour limit
-    public static var terminalLimitFiveHour: String { Strings.get("TerminalLimitFiveHour") }
-
-    /// Weekly limit
-    public static var terminalLimitWeek: String { Strings.get("TerminalLimitWeek") }
-
     /// Minimize
     public static var terminalMinimize: String { Strings.get("TerminalMinimize") }
 
@@ -1826,9 +1825,6 @@ public enum Strings {
 
     /// Close
     public static var terminalCloseWindow: String { Strings.get("TerminalCloseWindow") }
-
-    /// Sessions
-    public static var terminalSessions: String { Strings.get("TerminalSessions") }
 
     /// Voice input · Ctrl+Shift+Space
     public static var voiceButtonTip: String { Strings.get("VoiceButtonTip") }

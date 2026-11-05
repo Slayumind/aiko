@@ -603,6 +603,12 @@ public static class Strings
     /// And every other folder: this is the default environment.
     public static string RestToo => Get("RestToo");
 
+    /// Every other folder opens here
+    public static string DefaultForRest => Get("DefaultForRest");
+
+    /// Moved here from {0}
+    public static string FolderMovedFrom => Get("FolderMovedFrom");
+
     /// Change in project folders
     public static string EditInFolders => Get("EditInFolders");
 
@@ -1278,12 +1284,6 @@ public static class Strings
     /// Keep open
     public static string TerminalKeepOpen => Get("TerminalKeepOpen");
 
-    /// 5-hour limit
-    public static string TerminalLimitFiveHour => Get("TerminalLimitFiveHour");
-
-    /// Weekly limit
-    public static string TerminalLimitWeek => Get("TerminalLimitWeek");
-
     /// Minimize
     public static string TerminalMinimize => Get("TerminalMinimize");
 
@@ -1316,9 +1316,6 @@ public static class Strings
 
     /// Close
     public static string TerminalCloseWindow => Get("TerminalCloseWindow");
-
-    /// Sessions
-    public static string TerminalSessions => Get("TerminalSessions");
 
     /// Voice input · Ctrl+Shift+Space
     public static string VoiceButtonTip => Get("VoiceButtonTip");

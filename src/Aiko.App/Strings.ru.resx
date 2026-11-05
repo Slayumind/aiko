@@ -613,6 +613,12 @@
   <data name="RestToo" xml:space="preserve">
     <value>И все остальные папки: это среда по умолчанию.</value>
   </data>
+  <data name="DefaultForRest" xml:space="preserve">
+    <value>Все остальные папки — сюда</value>
+  </data>
+  <data name="FolderMovedFrom" xml:space="preserve">
+    <value>Перенесена сюда из {0}</value>
+  </data>
   <data name="EditInFolders" xml:space="preserve">
     <value>Изменить в папках проектов</value>
   </data>
@@ -1288,12 +1294,6 @@
   <data name="TerminalKeepOpen" xml:space="preserve">
     <value>Не закрывать</value>
   </data>
-  <data name="TerminalLimitFiveHour" xml:space="preserve">
-    <value>Лимит на 5 часов</value>
-  </data>
-  <data name="TerminalLimitWeek" xml:space="preserve">
-    <value>Лимит на неделю</value>
-  </data>
   <data name="TerminalMinimize" xml:space="preserve">
     <value>Свернуть</value>
   </data>
@@ -1326,9 +1326,6 @@
   </data>
   <data name="TerminalCloseWindow" xml:space="preserve">
     <value>Закрыть</value>
-  </data>
-  <data name="TerminalSessions" xml:space="preserve">
-    <value>Сессии</value>
   </data>
   <data name="VoiceButtonTip" xml:space="preserve">
     <value>Голосовой ввод · Ctrl+Shift+Space</value>
