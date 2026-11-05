@@ -161,9 +161,19 @@ sealed class TerminalPanel : UserControl
         left.Children.Add(_listToggle);
         left.Children.Add(_chevron);
         left.Children.Add(_pills.Root);
+        // Two columns: the buttons on the right keep their room, and the pills on the left get what
+        // is left. In one cell they slid under the gear in a narrow window.
+        _bar.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        _bar.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        left.ClipToBounds = true;
         _bar.Children.Add(left);
+        Grid.SetColumn(_right, 1);
         _bar.Children.Add(_right);
-        _bar.Children.Add(new Border { Height = 1, VerticalAlignment = VerticalAlignment.Bottom, Background = Tokens.Brush("Hairline") });
+        var hairline = new Border { Height = 1, VerticalAlignment = VerticalAlignment.Bottom, Background = Tokens.Brush("Hairline") };
+        Grid.SetColumnSpan(hairline, 2);
+        _bar.Children.Add(hairline);
+        _pills.Refit = FitPills;
+        _bar.SizeChanged += (_, _) => FitPills();
 
         _header = new HeaderStripView(environment => TabPicked?.Invoke(environment));
         _header.Settled += () =>
@@ -328,6 +338,14 @@ sealed class TerminalPanel : UserControl
     }
 
     // ---- the title bar ----
+
+    /// The room of the pills: the left column without the two buttons before them.
+    private void FitPills()
+    {
+        var before = _listToggle.ActualWidth + _listToggle.Margin.Left + _listToggle.Margin.Right
+            + _chevron.ActualWidth + _chevron.Margin.Left + _chevron.Margin.Right;
+        _pills.Fit(_bar.ActualWidth - _right.ActualWidth - before);
+    }
 
     private void ShowBar(TerminalView view)
     {
@@ -1073,6 +1091,10 @@ sealed class TerminalPanel : UserControl
     private readonly List<string> _rowNames = [];
 
     internal bool RenamingForCheck => _renaming is not null;
+
+    /// The pills end before the gear: for --try-rename, which also looks at the title bar.
+    internal bool PillsClearOfButtonsForCheck =>
+        _pills.Root.TranslatePoint(new Point(_pills.Root.ActualWidth, 0), _bar).X <= _right.TranslatePoint(new Point(0, 0), _bar).X + 0.5;
 
     /// For --try-rename: the first row of the list, and how lit its hover is now.
     internal FrameworkElement? FirstRowForCheck => _rows.Children.OfType<Border>().FirstOrDefault();
