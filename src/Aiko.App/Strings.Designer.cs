@@ -99,6 +99,9 @@ public static class Strings
     /// Settings
     public static string Settings => Get("Settings");
 
+    /// Back to the session
+    public static string SettingsBack => Get("SettingsBack");
+
     /// Close
     public static string Close => Get("Close");
 

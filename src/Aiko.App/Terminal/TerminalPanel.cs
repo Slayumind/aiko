@@ -39,6 +39,12 @@ sealed class TerminalPanel : UserControl
     private readonly Button _chevron;
     private readonly Button _gear;
 
+    /// The gear stays lit while the settings are open, as a pressed segment.
+    private readonly Border _gearLit = new() { CornerRadius = new CornerRadius(6), Background = Tokens.Brush("Raised"), Visibility = Visibility.Collapsed };
+
+    /// The settings, while they are open, on the place of the list and the terminal.
+    private readonly ContentControl _settingsHost = new() { Visibility = Visibility.Collapsed, Focusable = false, HorizontalContentAlignment = HorizontalAlignment.Stretch, VerticalContentAlignment = VerticalAlignment.Stretch };
+
     /// The open header under the title bar (D-373, D-376). It is drawn again only when it opens or
     /// the active environment changes: the numbers in it change too often to start its motion each
     /// time.
@@ -132,6 +138,7 @@ sealed class TerminalPanel : UserControl
         _listPopup.PlacementTarget = _listToggle;
         _chevron = BarButton(Marks.Line("M0,0 L4,4 L8,0"), Strings.TerminalShowLimits, () => HeaderToggled?.Invoke());
         _gear = BarButton(GearIcon(), Strings.Settings, () => SettingsAsked?.Invoke());
+        ((Grid)_gear.Content).Children.Insert(0, _gearLit);
         // The list under the button, left edges together, as every drop-down of Aiko (DropDown).
         _listPopup.Placement = PlacementMode.Custom;
         _listPopup.CustomPopupPlacementCallback = (_, target, _) => [new CustomPopupPlacement(new Point(0, target.Height), PopupPrimaryAxis.Horizontal)];
@@ -189,7 +196,11 @@ sealed class TerminalPanel : UserControl
         all.Children.Add(_bar);
         DockPanel.SetDock(_strip, Dock.Top);
         all.Children.Add(_strip);
-        all.Children.Add(_body);
+        // The settings stand on the place of the list and the terminal; the title bar stays (D-374).
+        var area = new Grid();
+        area.Children.Add(_body);
+        area.Children.Add(_settingsHost);
+        all.Children.Add(area);
         // The moving header is drawn over the body that stands still under it.
         Panel.SetZIndex(_strip, 1);
         Panel.SetZIndex(_bar, 2);
@@ -268,6 +279,35 @@ sealed class TerminalPanel : UserControl
 
     /// The gear in the title bar.
     public event Action? SettingsAsked;
+
+    public bool SettingsShown => _settingsHost.Content is not null;
+
+    /// The settings come on the place of the list and the terminal, or go, and the session is there
+    /// again as it was. The terminal is a window of its own and cannot lie under anything, so it is
+    /// hidden while the settings are open.
+    public void ShowSettings(FrameworkElement? settings)
+    {
+        _settingsHost.Content = settings;
+        var shown = settings is not null;
+        _settingsHost.Visibility = shown ? Visibility.Visible : Visibility.Collapsed;
+        _body.Visibility = shown ? Visibility.Hidden : Visibility.Visible;
+        _gearLit.Visibility = shown ? Visibility.Visible : Visibility.Collapsed;
+        if (shown && Motion.IsOn)
+        {
+            _settingsHost.BeginAnimation(OpacityProperty, new System.Windows.Media.Animation.DoubleAnimation(0, 1, Motion.Expand) { EasingFunction = Motion.Standard });
+        }
+
+        if (!shown)
+        {
+            Dispatcher.BeginInvoke(() =>
+            {
+                foreach (var terminal in _terminals.Children.OfType<TerminalSurface>())
+                {
+                    terminal.Refit();
+                }
+            }, System.Windows.Threading.DispatcherPriority.Loaded);
+        }
+    }
     public event Action? MaximizeAsked;
     public event Action? CloseAsked;
 

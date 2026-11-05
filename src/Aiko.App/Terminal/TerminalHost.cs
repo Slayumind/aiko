@@ -53,9 +53,11 @@ sealed class TerminalHost
     private Action? _quitAfter;
 
     /// limitsOf gives the latest limits of an environment by its name; cardOf the words of the
-    /// card of limits, which the open header shows for the active environment (D-376).
-    public TerminalHost(EnvironmentSettings settings, TerminalSessions sessions, Func<string, LimitSnapshot?> limitsOf, Func<CardModel> cardOf)
+    /// card of limits, which the open header shows for the active environment (D-376). A check
+    /// keeps nothing: terminal.json is not written.
+    public TerminalHost(EnvironmentSettings settings, TerminalSessions sessions, Func<string, LimitSnapshot?> limitsOf, Func<CardModel> cardOf, bool keepsNothing = false)
     {
+        _keepsNothing = keepsNothing;
         _settings = settings;
         _sessions = sessions;
         _limitsOf = limitsOf;
@@ -97,7 +99,7 @@ sealed class TerminalHost
             var now = SettingsStore.Load();
             _voice.Use(now);
 
-            // The settings window may have changed the zoom.
+            // The settings may have changed since the window was last in front.
             UseZoom(now.WindowZoom);
 
             // Back in front, the open session is seen: its "done" goes, as the person looks at it.
@@ -144,11 +146,112 @@ sealed class TerminalHost
         _panel.AskAnswered += Answer;
         _panel.HeaderToggled += () => Remember(settings => settings with { HeaderOpen = !settings.HeaderOpen });
         _panel.ListToggled += () => Remember(settings => settings with { SessionListHidden = !settings.SessionListHidden });
-        _panel.SettingsAsked += () => SettingsAsked?.Invoke();
+        _panel.SettingsAsked += () =>
+        {
+            if (SettingsOpen)
+            {
+                CloseSettings();
+            }
+            else
+            {
+                OpenSettings();
+            }
+        };
+
+        // Esc from anywhere in the settings, a text field included: what was typed is applied on the
+        // way out, the same as leaving the field.
+        _window.KeyDown += (_, e) =>
+        {
+            if (e.Key == System.Windows.Input.Key.Escape && !e.Handled && SettingsOpen)
+            {
+                e.Handled = true;
+                CloseSettings();
+            }
+        };
     }
 
-    /// The gear in the title bar.
-    public event Action? SettingsAsked;
+    // ---- the settings in the window (D-374) ----
+
+    private SettingsPanel? _settingsPanel;
+
+    public bool SettingsOpen => _settingsPanel is not null;
+
+    /// Raised after every change in the settings, so the tray, the island and direct mode follow it
+    /// at once (D-179).
+    public event Action? SettingsChanged;
+
+    /// The settings went back to the session.
+    public event Action? SettingsClosed;
+
+    /// "Quit Aiko" on the General page: the shell decides, as programs may still run.
+    public event Action? QuitAsked;
+
+    /// The settings come on the place of the list and the terminal, at a page when one is asked for.
+    /// Open already, they move to that page.
+    public void OpenSettings(string? page = null, bool checkUpdates = false)
+    {
+        if (_settingsPanel is { } open)
+        {
+            if (page is not null && page != open.CurrentPage)
+            {
+                open.Open(page);
+            }
+        }
+        else
+        {
+            _settingsPanel = NewSettings(page);
+            _panel.ShowSettings(_settingsPanel);
+        }
+
+        if (checkUpdates)
+        {
+            _settingsPanel.StartUpdateCheck();
+        }
+
+        Show();
+        _window.Focus();
+    }
+
+    /// Back to the same session, as it was.
+    public void CloseSettings()
+    {
+        if (_settingsPanel is not { } settings)
+        {
+            return;
+        }
+
+        settings.Leave();
+        _settingsPanel = null;
+        _panel.ShowSettings(null);
+        Draw();
+        _window.Dispatcher.BeginInvoke(FocusOpenTerminal, System.Windows.Threading.DispatcherPriority.Input);
+        SettingsClosed?.Invoke();
+    }
+
+    private SettingsPanel NewSettings(string? page)
+    {
+        var settings = new SettingsPanel(page, inWindow: true);
+        settings.CloseRequested += CloseSettings;
+        settings.QuitRequested += () => QuitAsked?.Invoke();
+        settings.SettingsChanged += () =>
+        {
+            // The zoom and voice input of this window are set on the Terminal page.
+            var now = SettingsStore.Load();
+            UseZoom(now.WindowZoom);
+            _voice.Use(now);
+            SettingsChanged?.Invoke();
+        };
+
+        // A new language: the settings are made again in it, at the same page.
+        settings.ReopenRequested += () =>
+        {
+            var at = settings.CurrentPage;
+            settings.Leave();
+            _settingsPanel = NewSettings(at);
+            _panel.ShowSettings(_settingsPanel);
+        };
+        return settings;
+    }
 
     /// A choice the person made in the window, kept across starts, and the window drawn with it.
     /// The zoom of the window and the font of every terminal in it (D-384).
@@ -181,8 +284,6 @@ sealed class TerminalHost
     /// The window came on screen, or left it by being minimized, hidden or closed.
     public event Action<bool>? InViewChanged;
 
-    /// The line above the editor asks for the settings of voice input.
-    public event Action? VoiceSettingsAsked;
 
     internal TerminalPanel Panel => _panel;
 
@@ -317,6 +418,30 @@ sealed class TerminalHost
     /// Ctrl and the key, with Shift or without (D-353). False leaves the key to the program.
     private bool KeyPressed(System.Windows.Input.Key key, bool shift, bool inTerminal)
     {
+        // Ctrl+, opens the settings and closes them (D-374), as in VS Code and Warp.
+        if (key == System.Windows.Input.Key.OemComma && !shift)
+        {
+            if (SettingsOpen)
+            {
+                CloseSettings();
+            }
+            else
+            {
+                OpenSettings();
+            }
+
+            return true;
+        }
+
+        // While the settings are open the keys of the sessions wait: the fields of a page take
+        // Ctrl+C and Ctrl+V themselves, and nothing changes behind the settings.
+        if (SettingsOpen && key is not (System.Windows.Input.Key.OemPlus or System.Windows.Input.Key.Add
+            or System.Windows.Input.Key.OemMinus or System.Windows.Input.Key.Subtract
+            or System.Windows.Input.Key.D0 or System.Windows.Input.Key.NumPad0))
+        {
+            return false;
+        }
+
         switch (key)
         {
             case System.Windows.Input.Key.G when !shift && _model.Session(_sessions)?.Kind == SessionKind.Claude:
@@ -503,7 +628,7 @@ sealed class TerminalHost
         };
         editor.TerminalSelection = () => OpenTerminal()?.SelectedText;
         _voice = new VoiceDictation(editor, VoiceContextNow);
-        _voice.SettingsAsked += () => VoiceSettingsAsked?.Invoke();
+        _voice.SettingsAsked += () => OpenSettings(SettingsPanel.TerminalPageKey);
     }
 
     /// The writes of one message, one after another with a breath between them: Claude Code takes
@@ -1070,7 +1195,15 @@ sealed class TerminalHost
     }
 
 
-    private void Save() => SettingsStore.SaveTerminal(_sessions);
+    private void Save()
+    {
+        if (!_keepsNothing)
+        {
+            SettingsStore.SaveTerminal(_sessions);
+        }
+    }
+
+    private readonly bool _keepsNothing;
 
     /// The shell of a session and the name its row starts with.
     private sealed record ShellProgram(string CommandLine, string Name);

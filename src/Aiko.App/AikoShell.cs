@@ -185,7 +185,21 @@ sealed class AikoShell : IDisposable
 
     public IslandWindow? IslandForCheck => _island.Window;
 
-    public SettingsWindow? SettingsForCheck => _settings;
+    /// The settings are open: in the terminal window, or in a window of their own before the first
+    /// environment.
+    public bool SettingsShownForCheck => _terminal is { SettingsOpen: true } || _settings is { IsVisible: true };
+
+    /// A window of the settings apart from the terminal window, which only the first run has.
+    public bool SettingsWindowForCheck => _settings is not null;
+
+    /// The settings go back to the session, and the terminal window closes: while it is open the
+    /// island stays away (D-310), and the next steps of the check need it.
+    public void CloseSettingsForCheck()
+    {
+        _settings?.Close();
+        _terminal?.CloseSettings();
+        _terminal?.Close();
+    }
 
     public Rect? IconRectForCheck => _tray.Rect;
 
@@ -436,62 +450,78 @@ sealed class AikoShell : IDisposable
         _application.Shutdown();
     }
 
-    /// One terminal window, as with the settings. Closing it hides it while a program runs in it
-    /// (D-351); the sessions come back from terminal.json the next time Aiko starts.
-    private void OpenTerminal()
+    /// One terminal window. Closing it hides it while a program runs in it (D-351); the sessions
+    /// come back from terminal.json the next time Aiko starts. Null while there is no environment
+    /// yet: then the first run checklist opens instead.
+    private void OpenTerminal() => OpenedTerminal();
+
+    private TerminalHost? OpenedTerminal()
     {
         if (_terminal is not null)
         {
             _terminal.Activate();
-            return;
+            return _terminal;
         }
 
         // A terminal has tabs of environments; with none yet, the first run checklist makes one.
         var environments = SettingsStore.LoadEnvironments();
         if (environments.Environments.Count == 0)
         {
-            OpenSettings(page: SettingsPanel.ChecklistPageKey);
-            return;
+            OpenFirstRun();
+            return null;
         }
 
-        // The open header shows the plan of each environment, as the card does.
+        // The open header shows the plan of each environment, as the card does. A check opens the
+        // window on no sessions, so no program starts and terminal.json stays as it is.
         _numbers.ReadAccounts();
-        var terminal = new TerminalHost(environments, SettingsStore.LoadTerminal(), _numbers.SnapshotFor, _cards.Model);
+        var sessions = _changingNothing ? TerminalSessions.Empty : SettingsStore.LoadTerminal();
+        var terminal = new TerminalHost(environments, sessions, _numbers.SnapshotFor, _cards.Model, keepsNothing: _changingNothing);
         terminal.Closed += () =>
         {
             _terminal = null;
             _island.ShowSessions(IslandSessions.None);
         };
-        terminal.SettingsAsked += () => OpenSettings();
         terminal.InViewChanged += _island.FollowTerminal;
-        terminal.VoiceSettingsAsked += () => OpenSettings(page: SettingsPanel.TerminalPageKey);
         terminal.Noticed += (notice, way, id) => Notify(notice, way, () => _terminal?.OpenSession(id));
         terminal.SessionsChanged += _island.ShowSessions;
+
+        // Changes apply at once (D-179): the tray or the island, direct mode and our access follow
+        // each one while the settings are still open.
+        terminal.SettingsChanged += FollowSettings;
+        terminal.SettingsClosed += FollowSettings;
+        terminal.QuitAsked += Quit;
         _terminal = terminal;
         terminal.Show();
 
         Log.Write("terminal opened");
+        return terminal;
     }
 
-    /// One settings window at a time: asking twice brings the open one forward instead of
-    /// stacking a second copy on top of it.
+    /// The settings open in the terminal window, on the place of the list and the terminal
+    /// (D-374). Asked again, the open settings move to the page asked for.
     private void OpenSettings(bool checkUpdates = false, string? page = null)
+    {
+        if (OpenedTerminal() is not { } terminal)
+        {
+            return;
+        }
+
+        terminal.OpenSettings(page, checkUpdates);
+        Log.Write("settings opened");
+    }
+
+    /// Before the first environment there is no terminal window to stand in: the first run
+    /// checklist keeps a window of its own until it moves into the terminal window as well.
+    private void OpenFirstRun()
     {
         if (_settings is not null)
         {
             _settings.Activate();
-            if (checkUpdates)
-            {
-                _settings.CheckUpdatesNow();
-            }
             return;
         }
 
-        var window = new SettingsWindow(page);
+        var window = new SettingsWindow(SettingsPanel.ChecklistPageKey);
         window.QuitRequested += Quit;
-
-        // Changes apply at once (D-179): the tray or the island, direct mode and our access follow
-        // each one while the window is still open.
         window.SettingsChanged += FollowSettings;
         window.Closed += (_, _) =>
         {
@@ -510,11 +540,7 @@ sealed class AikoShell : IDisposable
         };
         _settings = window;
         window.Show();
-        if (checkUpdates)
-        {
-            window.CheckUpdatesNow();
-        }
 
-        Log.Write("settings opened");
+        Log.Write("first run opened");
     }
 }

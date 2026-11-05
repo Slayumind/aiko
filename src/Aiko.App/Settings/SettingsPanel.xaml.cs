@@ -33,13 +33,23 @@ public partial class SettingsPanel : UserControl
     }
 
     /// The page to open: "general", "folders", "personality", "setup" or "env:" and an account folder. Null opens the
-    /// first environment, or the checklist when nothing is set up yet.
-    public SettingsPanel(string? page)
+    /// first environment, or the checklist when nothing is set up yet. In the window the panel stands
+    /// on the place of the list and the terminal (D-374) instead of in a window of its own.
+    public SettingsPanel(string? page, bool inWindow = false)
     {
         InitializeComponent();
 
-        // A small screen still shows the header; the page scrolls inside.
-        Body.Height = Math.Clamp(SystemParameters.WorkArea.Height - 160, 420, 600);
+        _inWindow = inWindow;
+        if (inWindow)
+        {
+            FitInWindow();
+        }
+        else
+        {
+            // A small screen still shows the header; the page scrolls inside.
+            Body.Height = Math.Clamp(SystemParameters.WorkArea.Height - 160, 420, 600);
+        }
+
         VersionLine.Text = $"Aiko {AppVersion.WithCommit()}";
 
         _editor.Changed += OnEnvironmentsChanged;
@@ -49,6 +59,7 @@ public partial class SettingsPanel : UserControl
         BuildNav();
     }
 
+    /// In its own window: the cross. In the terminal window: "Back to the session" and Esc.
     public event Action? CloseRequested;
     public event Action? QuitRequested;
 
@@ -94,6 +105,9 @@ public partial class SettingsPanel : UserControl
         Navigate(ChecklistPageKey);
     }
 
+    /// Another page asked for while the panel is open, from the tray menu or the editor.
+    public void Open(string page) => Navigate(page);
+
     public void StartUpdateCheck()
     {
         if (_page != GeneralPageKey)
@@ -113,12 +127,101 @@ public partial class SettingsPanel : UserControl
             : settings.Environments.Where(e => e != first).Prepend(first);
     }
 
+    // ---- the frame ----
+
+    /// The width of the page column in the window: the pages were made for a window 720 wide, and a
+    /// column wider than this makes lines too long to read (D-391).
+    private const double PageWidth = 640;
+
+    private readonly bool _inWindow;
+
+    /// No card, no title and no cross: the terminal window has its own title bar, and the panel
+    /// fills the place under it. The page keeps a readable column on the left.
+    private void FitInWindow()
+    {
+        Frame.Margin = new Thickness(0);
+        Card.Width = double.NaN;
+        Card.CornerRadius = new CornerRadius(0);
+        Card.BorderThickness = new Thickness(0);
+        Card.Effect = null;
+        HeaderRow.Visibility = Visibility.Collapsed;
+        Body.Height = double.NaN;
+        NavColumn.Width = new GridLength(216);
+
+        PageScroll.Content = null;
+        var column = new Grid();
+        column.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star), MaxWidth = PageWidth });
+        column.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        column.Children.Add(PageHost);
+        PageScroll.Content = column;
+    }
+
+    /// The way back to the session, on top of the menu, with the key that does the same. A row of
+    /// the menu rather than a button: a button centres what is in it, and the key has to stand at
+    /// the right edge.
+    private Border BackItem()
+    {
+        var line = new DockPanel();
+        var key = new TextBlock { Text = "Esc", Style = (Style)FindResource("RowNote"), VerticalAlignment = VerticalAlignment.Center };
+        DockPanel.SetDock(key, Dock.Right);
+        line.Children.Add(key);
+        line.Children.Add(new Path
+        {
+            Data = Geometry.Parse("M 5,0 L 0,5 L 5,10"),
+            Stroke = Tokens.Brush("Muted"),
+            StrokeThickness = 1.5,
+            StrokeStartLineCap = PenLineCap.Round,
+            StrokeEndLineCap = PenLineCap.Round,
+            StrokeLineJoin = PenLineJoin.Round,
+            Width = 6,
+            Height = 10,
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(0, 0, 10, 0),
+        });
+        var words = new TextBlock
+        {
+            Text = Strings.SettingsBack,
+            Style = (Style)FindResource("RowHint"),
+            TextWrapping = TextWrapping.NoWrap,
+            TextTrimming = TextTrimming.CharacterEllipsis,
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+        line.Children.Add(words);
+
+        var back = new Border
+        {
+            Background = Brushes.Transparent,
+            CornerRadius = new CornerRadius(8),
+            Padding = new Thickness(10, 7, 10, 7),
+            Margin = new Thickness(0, 0, 0, 8),
+            Cursor = System.Windows.Input.Cursors.Hand,
+            ToolTip = Strings.SettingsBack + " · Esc",
+            Child = line,
+        };
+        back.MouseEnter += (_, _) =>
+        {
+            back.Background = Tokens.Brush("HoverLayer");
+            words.Foreground = Tokens.Brush("Ink");
+        };
+        back.MouseLeave += (_, _) =>
+        {
+            back.Background = Brushes.Transparent;
+            words.ClearValue(TextBlock.ForegroundProperty);
+        };
+        back.MouseLeftButtonUp += (_, _) => CloseRequested?.Invoke();
+        return back;
+    }
+
     // ---- the menu ----
 
     private void BuildNav()
     {
         _buildingNav = true;
         Nav.Children.Clear();
+        if (_inWindow)
+        {
+            Nav.Children.Add(BackItem());
+        }
 
         var settings = _editor.Current;
         Nav.Children.Add(new TextBlock

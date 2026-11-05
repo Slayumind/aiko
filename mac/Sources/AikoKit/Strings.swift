@@ -66,6 +66,7 @@ public enum Strings {
         "MenuTerminal": ("Open terminal", "Открыть терминал"),
         "MenuRefresh": ("Refresh limits", "Обновить лимиты"),
         "Settings": ("Settings", "Настройки"),
+        "SettingsBack": ("Back to the session", "К сессии"),
         "Close": ("Close", "Закрыть"),
         "QuitAiko": ("Quit Aiko", "Выйти из Aiko"),
         "CheckForUpdates": ("Check for updates", "Проверить обновления"),
@@ -606,6 +607,9 @@ public enum Strings {
 
     /// Settings
     public static var settings: String { Strings.get("Settings") }
+
+    /// Back to the session
+    public static var settingsBack: String { Strings.get("SettingsBack") }
 
     /// Close
     public static var close: String { Strings.get("Close") }
