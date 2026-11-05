@@ -73,6 +73,7 @@ public enum Strings {
         "CheckUpdatesToggle": ("Check for updates", "Проверять обновления"),
         "SectionEnvironments": ("ENVIRONMENTS", "СРЕДЫ"),
         "SectionWhereToShow": ("WHERE TO SHOW", "ГДЕ ПОКАЗЫВАТЬ"),
+        "SectionWhenClosed": ("WHEN THE WINDOW IS CLOSED", "КОГДА ОКНО ЗАКРЫТО"),
         "SectionStartupAndUpdates": ("STARTUP AND UPDATES", "ЗАПУСК И ОБНОВЛЕНИЯ"),
         "SectionLanguage": ("LANGUAGE", "ЯЗЫК"),
         "DirectMode": ("Direct mode", "Прямой режим"),
@@ -628,6 +629,9 @@ public enum Strings {
 
     /// WHERE TO SHOW
     public static var sectionWhereToShow: String { Strings.get("SectionWhereToShow") }
+
+    /// WHEN THE WINDOW IS CLOSED
+    public static var sectionWhenClosed: String { Strings.get("SectionWhenClosed") }
 
     /// STARTUP AND UPDATES
     public static var sectionStartupAndUpdates: String { Strings.get("SectionStartupAndUpdates") }

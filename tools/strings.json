@@ -231,6 +231,13 @@
     ]
   ],
   [
+    "SectionWhenClosed",
+    [
+      "WHEN THE WINDOW IS CLOSED",
+      "КОГДА ОКНО ЗАКРЫТО"
+    ]
+  ],
+  [
     "SectionStartupAndUpdates",
     [
       "STARTUP AND UPDATES",

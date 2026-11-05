@@ -120,6 +120,9 @@ public static class Strings
     /// WHERE TO SHOW
     public static string SectionWhereToShow => Get("SectionWhereToShow");
 
+    /// WHEN THE WINDOW IS CLOSED
+    public static string SectionWhenClosed => Get("SectionWhenClosed");
+
     /// STARTUP AND UPDATES
     public static string SectionStartupAndUpdates => Get("SectionStartupAndUpdates");
 

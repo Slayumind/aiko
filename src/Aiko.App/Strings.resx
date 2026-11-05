@@ -130,6 +130,9 @@
   <data name="SectionWhereToShow" xml:space="preserve">
     <value>WHERE TO SHOW</value>
   </data>
+  <data name="SectionWhenClosed" xml:space="preserve">
+    <value>WHEN THE WINDOW IS CLOSED</value>
+  </data>
   <data name="SectionStartupAndUpdates" xml:space="preserve">
     <value>STARTUP AND UPDATES</value>
   </data>

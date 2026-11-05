@@ -130,6 +130,9 @@
   <data name="SectionWhereToShow" xml:space="preserve">
     <value>ГДЕ ПОКАЗЫВАТЬ</value>
   </data>
+  <data name="SectionWhenClosed" xml:space="preserve">
+    <value>КОГДА ОКНО ЗАКРЫТО</value>
+  </data>
   <data name="SectionStartupAndUpdates" xml:space="preserve">
     <value>ЗАПУСК И ОБНОВЛЕНИЯ</value>
   </data>

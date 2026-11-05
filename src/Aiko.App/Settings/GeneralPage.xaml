@@ -16,7 +16,9 @@
     <TextBlock Text="{x:Static local:Strings.NavGeneral}" FontFamily="{StaticResource Sans}" FontSize="16"
                FontWeight="Medium" Foreground="{StaticResource Ink}" />
 
-    <TextBlock Text="{x:Static local:Strings.SectionWhereToShow}" Style="{StaticResource SectionLabel}" Margin="0,18,0,8" />
+    <!-- The terminal window is the main window: the tray and the island are how Aiko waits while it is
+         closed (D-372, D-394). -->
+    <TextBlock Text="{x:Static local:Strings.SectionWhenClosed}" Style="{StaticResource SectionLabel}" Margin="0,18,0,8" />
     <Grid MaxWidth="360" HorizontalAlignment="Left">
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="170" />
