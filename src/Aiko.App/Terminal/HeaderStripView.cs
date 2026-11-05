@@ -470,7 +470,7 @@ sealed class HeaderStripView
 
             // The cards are the segments of one switch, as the segmented buttons of Aiko are: the
             // active one lies on a soft fill, a quiet one has none and lights up under the pointer.
-            // Framed and filled both, the cards looked cramped over the grey body (D-392).
+            // Framed and filled both, the cards looked cramped over the grey body (D-392, D-393).
             Root = new Border
             {
                 CornerRadius = new CornerRadius(14),
