@@ -86,6 +86,7 @@ sealed class AikoShell : IDisposable
         {
             var updates = new UpdateWatch(_application.Dispatcher);
             updates.Found += _tray.Update;
+            updates.Found += () => _terminal?.ShowUpdate(updates.NewerVersion is not null);
             _updates = updates;
         }
 
@@ -490,6 +491,7 @@ sealed class AikoShell : IDisposable
         terminal.SettingsChanged += FollowSettings;
         terminal.SettingsClosed += FollowSettings;
         terminal.QuitAsked += Quit;
+        terminal.ShowUpdate(_updates?.NewerVersion is not null);
         _terminal = terminal;
         terminal.Show();
 

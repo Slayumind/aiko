@@ -176,6 +176,9 @@ sealed class TerminalHost
 
     public bool SettingsOpen => _settingsPanel is not null;
 
+    /// A newer version is out, or not any more: the dot on the gear follows (D-391).
+    public void ShowUpdate(bool newer) => _panel.ShowUpdateDot(newer);
+
     /// Raised after every change in the settings, so the tray, the island and direct mode follow it
     /// at once (D-179).
     public event Action? SettingsChanged;

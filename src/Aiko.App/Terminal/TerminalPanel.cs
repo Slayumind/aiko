@@ -42,6 +42,21 @@ sealed class TerminalPanel : UserControl
     /// The gear stays lit while the settings are open, as a pressed segment.
     private readonly Border _gearLit = new() { CornerRadius = new CornerRadius(6), Background = Tokens.Brush("Raised"), Visibility = Visibility.Collapsed };
 
+    /// A quiet dot on the gear while a newer version is out (D-391); the General page says which.
+    private readonly System.Windows.Shapes.Ellipse _gearDot = new()
+    {
+        Width = 6,
+        Height = 6,
+        Fill = Tokens.Brush("Positive"),
+        HorizontalAlignment = HorizontalAlignment.Right,
+        VerticalAlignment = VerticalAlignment.Top,
+        Margin = new Thickness(0, 6, 11, 0),
+        IsHitTestVisible = false,
+        Visibility = Visibility.Collapsed,
+    };
+
+    public void ShowUpdateDot(bool newer) => _gearDot.Visibility = newer ? Visibility.Visible : Visibility.Collapsed;
+
     /// The settings, while they are open, on the place of the list and the terminal.
     private readonly ContentControl _settingsHost = new() { Visibility = Visibility.Collapsed, Focusable = false, HorizontalContentAlignment = HorizontalAlignment.Stretch, VerticalContentAlignment = VerticalAlignment.Stretch };
 
@@ -139,6 +154,7 @@ sealed class TerminalPanel : UserControl
         _chevron = BarButton(Marks.Line("M0,0 L4,4 L8,0"), Strings.TerminalShowLimits, () => HeaderToggled?.Invoke());
         _gear = BarButton(GearIcon(), Strings.Settings, () => SettingsAsked?.Invoke());
         ((Grid)_gear.Content).Children.Insert(0, _gearLit);
+        ((Grid)_gear.Content).Children.Add(_gearDot);
         // The list under the button, left edges together, as every drop-down of Aiko (DropDown).
         _listPopup.Placement = PlacementMode.Custom;
         _listPopup.CustomPopupPlacementCallback = (_, target, _) => [new CustomPopupPlacement(new Point(0, target.Height), PopupPrimaryAxis.Horizontal)];

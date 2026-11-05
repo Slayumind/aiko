@@ -117,6 +117,9 @@
                  VerticalAlignment="Center" Margin="10,0" Visibility="Collapsed" />
     </Grid>
 
+    <!-- What the newer version brings (D-397). -->
+    <StackPanel x:Name="NewsList" Margin="0,6,0,0" Visibility="Collapsed" />
+
     <TextBlock Text="{x:Static local:Strings.SectionLanguage}" Style="{StaticResource SectionLabel}" Margin="0,22,0,8" />
     <local:DropDown x:Name="LanguageChoiceDrop" Width="220" HorizontalAlignment="Left" />
 

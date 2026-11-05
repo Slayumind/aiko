@@ -3,75 +3,52 @@
 All notable changes to Aiko are listed here.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and Aiko uses
-[semantic versioning](https://semver.org/spec/v2.0.0.html).
+[semantic versioning](https://semver.org/spec/v2.0.0.html). The same notes in Russian are in
+[CHANGELOG.ru.md](CHANGELOG.ru.md), under the same headings.
 
 ## [Unreleased]
 
 ### Added
 
-- **The envoy skill.** Send Aiko to help a colleague in Slack or another work chat. You give her a short
-  task and limits once, and she talks to the colleague herself, as Aiko, from your account: she asks
-  questions in one batch, checks the thread for answers and does the work with the tools of the session.
-  Anything outside the task, such as access, money or a promise in your name, comes back to you first.
-  On such an errand the personality speaks in its own voice to the colleague; files and results stay
-  neutral. Each of her messages starts with her face and name and goes in a quote block, so nobody
-  takes it for yours. In Slack she uses Aiko's chibi emoji when the workspace has them.
-- **Terminal window with real terminals, on Windows.** Open it from the menu of the Aiko icon or
-  with the terminal button on the card. Each session is a real terminal: Claude Code as it is, with
-  its own input, menus and permission prompts, or a command line (Git Bash or PowerShell) in the
-  folder of the session. Sessions are grouped by environment and folder, and the window opens where you
-  closed it. The text of the terminal has the same size as the text of the window, and Ctrl+= and
-  Ctrl+- zoom them together: 100, 115 or 130%, also in the settings. The Mac follows before the
-  release.
-- **Sessions keep running.** Closing the window hides it while Claude Code or a command line still
-  runs in it, so the agents go on working. Quitting Aiko asks first when something still runs. After a
-  restart of Aiko a session of Claude Code continues its conversation, and a command line opens again
-  in the same folder. When Claude Code ends by itself, its row says so and Enter continues it.
-- **The list shows what each session does.** A mark says whether Claude Code works, waits for you
-  or is done, and a second line says what it did last: "reading office.mjs", "waits for permission:
-  npm test". A session takes the name Claude Code gives the conversation, until you rename it.
-  While a session starts, a loader stands in place of an empty terminal, and the text keeps a
-  little space from the edge.
-- **A new session in two clicks.** Point at a folder in the list: "+" starts Claude Code there and
-  ">_" a command line. "New session" opens a quick pick of the folders you used, latest first; Enter
-  starts Claude Code, Ctrl+Enter a command line, and the last line opens any other folder.
-- **One place to type.** In a session of Claude Code you type in its own line, with its menus.
-  Ctrl+G opens an editor for a long text: fix it with the mouse and Ctrl+Z, and Enter puts it into
-  the line of Claude Code. Ctrl+V with a screenshot or a dropped file puts it there as a picture or a
-  path. Ctrl+Shift+Space shows your words as you speak and puts them into the line when you stop.
-  Ctrl+C copies what you selected in the terminal, its paragraphs whole: the lines Claude Code
-  broke by the width of the window are joined again. A command line has an editor under it: Enter runs
-  the command, the arrows bring back your commands and Tab completes a path.
-- **Find any conversation.** Ctrl+Shift+K opens a palette of your sessions and of the conversations
-  you started outside Aiko, in another terminal or in VS Code. It finds them by name and by your first
-  message; the one you choose continues in Aiko.
-- **Keys of the window.** Ctrl+Shift+T opens a new session, Ctrl+Tab and Ctrl+Shift+Tab go to the
-  next and the previous one. Every other key goes to the program in the terminal.
-- **The terminal window opens once by itself** after Aiko is set up. A start with Windows opens only
-  the tray, unless you turn on "Open the terminal window too" in the settings.
-- **Notices when a session needs you.** When the terminal window is not in focus, a short line comes
-  up next to the Aiko icon: a session waits for an answer, is done or stopped, or a limit went over
-  90%. A click opens the session. Only "waits" has a sound, and nothing comes up while Windows is in
-  "Do not disturb". Each kind and the sound can be turned off in the settings of the terminal.
-- **The island counts the sessions.** While the terminal window is closed, the island shows after
-  its rings how many sessions wait and how many work. A click on the waiting mark opens that session.
-- **Limits of every environment above the terminal.** The title bar shows each environment as a
-  pill with its ring and percent. When a session of the environment waits for you, an orange pause
-  mark and the number of waiting sessions take the place of the ring. The arrow next to it opens a card per environment: a bar, a percent
-  and a reset time for each limit, the plan and the folder. A click on a pill or on a small card
-  switches the environment, and Ctrl+Shift+B hides the list of sessions. The gear opens the settings.
-- **The copy skill helps with messages to colleagues.** A new part of the skill covers Slack and work
-  chats: answer the question that was asked, say why when you give something else, quote a
-  colleague instead of retelling, keep a dispute short and check every number before it goes out.
+- **Real terminals in the Aiko window, on Windows.** Claude Code runs as it is, with its own input,
+  menus and permission prompts, and a command line (Git Bash or PowerShell) opens in the folder of
+  its session. Sessions are grouped by environment and folder. Ctrl+= and Ctrl+- zoom the text of the
+  window and the terminal together: 100, 115 or 130%. The Mac follows before the release.
+- **Sessions keep running.** Close the window, and Claude Code goes on working. After a restart of
+  Aiko a conversation continues where it was, and a command line opens in the same folder. Quitting
+  Aiko asks first when something still runs.
+- **The list says what each agent does.** A mark shows whether she works, has a question or is done,
+  and a second line says what she did last: "reading office.mjs", "waits for permission: npm test".
+  Point at a folder and press "+" for Claude Code or ">_" for a command line; Ctrl+Shift+T opens a
+  quick pick of your folders.
+- **One place to type.** Type in the line of Claude Code, with its menus. Ctrl+G opens an editor for a
+  long text, Ctrl+V puts a screenshot in as a picture and a file as its path, and
+  Ctrl+Shift+Space writes down what you say. Ctrl+C copies a selection with its paragraphs whole.
+- **Any conversation, one key away.** Ctrl+Shift+K finds a session or a conversation you started
+  in another terminal or in VS Code, by its name or your first message, and continues it here.
+  Ctrl+Tab goes to the next session.
+- **Aiko tells you when an agent needs you.** With the window out of focus, a short line comes up
+  next to Aiko: the agent has a question, finished the work or stopped, or a limit went over 90%. A
+  click opens that session, and only a question comes with a sound. With the window closed, the island
+  counts how many agents wait and how many work.
+- **Limits and settings in the window.** Each environment is a pill in the title bar with its ring and
+  percent; the arrow opens the limits of all of them in place. The gear and Ctrl+, open the settings
+  in the window, and Esc takes you back to the same session. The project folders of an environment
+  are now on its own page.
+- **The envoy skill.** Send Aiko to help a colleague in Slack or another work chat. You give her the
+  task and the limits once; she asks the questions, checks the thread and does the work, and brings
+  back anything outside the task. Her messages start with her face and name, so nobody takes them for
+  yours. The copy skill now helps with messages to colleagues too.
 
 ### Fixed
 
-- A mistake in one window no longer closes Aiko. The error goes to the log, and the tray, the
-  island and the sessions keep running.
-- Your own settings of Claude Code, such as CLAUDE_CODE_GIT_BASH_PATH, reach terminal sessions.
-- Renaming an environment keeps its terminal sessions, also with the terminal open.
-- The bridge no longer leaves temporary files in the folder of limit snapshots when Windows refuses
-  to replace a file Aiko is reading, and Aiko removes the old ones when it starts.
+- A mistake in one window no longer closes Aiko: the tray, the island and the sessions keep running.
+- Your own settings of Claude Code, such as CLAUDE_CODE_GIT_BASH_PATH, reach the sessions in the
+  terminal.
+- Renaming an environment keeps its sessions, also with the window open.
+- The bridge no longer leaves temporary files next to the limit snapshots, and Aiko clears the old
+  ones when it starts.
+
 ## [0.4.1] - 2026-10-12
 
 A faster start on Windows. Nothing else changes for you.

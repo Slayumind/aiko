@@ -71,8 +71,10 @@ Nothing, unless you turn on one of these.
   limits of that account, at most once every three minutes. The request carries that account's
   access token and an honest user agent, `Aiko/<version>`. Aiko never sends the token anywhere else.
 - **Update checks** (off by default): Aiko asks `slayumind.org` for the latest version once a day
-  and whenever you press the button. The files of an update come from GitHub, and only after you
-  press **Download and install**. See **Updates** below.
+  and whenever you press the button. When a newer one is out, Aiko also asks `api.github.com` for
+  the notes of that release, to list what it brings; that request carries nothing about you. The
+  files of an update come from GitHub, and only after you press **Download and install**. See
+  **Updates** below.
 - **Counting** (off by default, its own switch): the same request also says that one copy ran today.
   One request, two switches. With counting off, the identifier and the flags below are not in the
   address at all, and the site writes nothing. With update checks off and counting on, Aiko still

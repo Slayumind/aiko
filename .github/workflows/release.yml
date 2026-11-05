@@ -340,7 +340,7 @@ jobs:
 
     steps:
       - name: Check out
-        # For CHANGELOG.md and update-public-key.pem. No build happens here.
+        # For CHANGELOG.md, CHANGELOG.ru.md and update-public-key.pem. No build happens here.
         uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
 
       - name: Read the version from the tag
@@ -453,11 +453,24 @@ jobs:
             echo "CHANGELOG.md has no section for $VERSION. Write it before tagging."
             exit 1
           fi
-          awk -v want="## [$VERSION]" '
-            index($0, want) == 1 { found = 1; next }
-            found && /^## / { exit }
-            found { print }
-          ' CHANGELOG.md > release-notes.md
+          section() {
+            awk -v want="## [$VERSION]" '
+              index($0, want) == 1 { found = 1; next }
+              found && /^## / { exit }
+              found { print }
+            ' "$1"
+          }
+          # Both languages in one release (D-397): Aiko shows the part of its own language, and
+          # the Russian part starts after the mark. A version without Russian notes stops here too.
+          if ! grep -qF "## [$VERSION]" CHANGELOG.ru.md; then
+            echo "CHANGELOG.ru.md has no section for $VERSION. Write it before tagging."
+            exit 1
+          fi
+          {
+            section CHANGELOG.md
+            printf '\n<!-- ru -->\n\n'
+            section CHANGELOG.ru.md
+          } > release-notes.md
           cat release-notes.md
 
       - name: Publish the release
