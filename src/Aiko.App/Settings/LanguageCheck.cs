@@ -4,8 +4,8 @@ using System.Windows.Input;
 
 namespace Aiko.App;
 
-/// --try-language: picks English on the General page of the real settings window with the real
-/// mouse, then puts the settings back. The owner could open the language list but a click on an
+/// --try-language: picks English on the General page of the real settings with the real mouse, in
+/// a window of the size of the terminal window, then puts the settings back. The owner could open the language list but a click on an
 /// item changed nothing; --try-dropdown passes because it shows the list in a bare window.
 static class LanguageCheck
 {
@@ -13,8 +13,9 @@ static class LanguageCheck
     {
         var original = SettingsStore.Load();
         var application = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
-        var window = new SettingsWindow(SettingsPanel.GeneralPageKey) { Topmost = true };
-        var page = (GeneralPage)window.Panel.PageHost.Content;
+        var panel = new SettingsPanel(SettingsPanel.GeneralPageKey);
+        var window = SettingsCheck.Window(panel);
+        var page = (GeneralPage)panel.PageHost.Content;
         var drop = page.LanguageChoiceDrop;
 
         var picked = -1;

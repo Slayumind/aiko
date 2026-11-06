@@ -70,7 +70,7 @@ static class TerminalSnapshot
         panel.ShowGroupHoverForSnapshot();
         if (part?.StartsWith("settings", StringComparison.Ordinal) == true)
         {
-            panel.ShowSettings(new SettingsPanel(part.Length > 9 ? part[9..] : null, inWindow: true));
+            panel.ShowSettings(new SettingsPanel(part.Length > 9 ? part[9..] : null));
         }
 
         Snapshot.Write(panel, path);

@@ -341,7 +341,15 @@ sealed class TerminalPanel : UserControl
     {
         // The way back is the same button as "New session" under the list, and the menu of the
         // settings is as wide as the list, so the edge between them does not move.
-        if (settings is SettingsPanel panel)
+        // The first run has no session to go back to and nothing to switch: its title bar keeps only
+        // the window buttons (D-394).
+        if (settings is SettingsPanel { IsFirstRun: true })
+        {
+            _gear.Visibility = Visibility.Collapsed;
+            _listToggle.Visibility = Visibility.Collapsed;
+            _chevron.Visibility = Visibility.Collapsed;
+        }
+        else if (settings is SettingsPanel panel)
         {
             var key = Mono("Esc", "Muted");
             key.Margin = new Thickness(12, 0, 0, 0);

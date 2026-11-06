@@ -270,6 +270,12 @@ public static class Strings
     /// Finish
     public static string Finish => Get("Finish");
 
+    /// Back
+    public static string StepBack => Get("StepBack");
+
+    /// Next
+    public static string StepNext => Get("StepNext");
+
     /// Claude Code sends its limits to a status line. Aiko adds one line to the settings file of...
     public static string WizardAccessExplain => Get("WizardAccessExplain");
 

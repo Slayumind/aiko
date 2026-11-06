@@ -4,9 +4,9 @@
              xmlns:local="clr-namespace:Aiko.App">
 
   <!--
-    The environment checklist (D-165) as a page of the settings window (D-177): every item on one
-    page, the next one opens by itself on a fresh machine, and any item can be opened again to change
-    its answer. Which item is ready, blocked or done is decided in Aiko.Core.WizardChecklist.
+    The environment checklist (D-165) as a page of the settings (D-177): every item on one page, the
+    next one opens by itself on a fresh machine, and any item can be opened again to change its
+    answer. On the first run in the terminal window it goes one item at a time (D-391). Which item is ready, blocked or done is decided in Aiko.Core.WizardChecklist.
   -->
   <UserControl.Resources>
     <ResourceDictionary>
@@ -331,9 +331,18 @@
       </StackPanel>
     </local:RevealPanel>
 
-    <Border Height="1" Background="{StaticResource Hairline}" Margin="0,16,0,12" />
+    <Border x:Name="FooterLine" Height="1" Background="{StaticResource Hairline}" Margin="0,16,0,12" />
 
-    <Button x:Name="FinishButton" Content="{x:Static local:Strings.Finish}" Style="{StaticResource SmallButton}"
-            HorizontalAlignment="Right" Click="OnFinish" />
+    <!-- In the window the checklist goes one item at a time (D-391): the dots of the steps, a way
+         back, a way on, and Finish once every item has an answer. -->
+    <DockPanel>
+      <Button x:Name="FinishButton" DockPanel.Dock="Right" Content="{x:Static local:Strings.Finish}" Style="{StaticResource SmallButton}"
+              HorizontalAlignment="Right" Click="OnFinish" />
+      <Button x:Name="NextButton" DockPanel.Dock="Right" Content="{x:Static local:Strings.StepNext}" Style="{StaticResource SmallButton}"
+              Margin="0,0,8,0" Visibility="Collapsed" Click="OnStepNext" />
+      <Button x:Name="BackButton" DockPanel.Dock="Right" Content="{x:Static local:Strings.StepBack}" Style="{StaticResource GhostButton}"
+              Margin="0,0,8,0" Visibility="Collapsed" Click="OnStepBack" />
+      <StackPanel x:Name="StepDots" Orientation="Horizontal" VerticalAlignment="Center" Visibility="Collapsed" />
+    </DockPanel>
   </StackPanel>
 </UserControl>

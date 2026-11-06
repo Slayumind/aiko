@@ -24,7 +24,7 @@ sealed class AikoShell : IDisposable
 
     /// The face for two seconds after an event (D-211). Drawn by the icon and the island later.
     private TrayMoodPlayer? _mood;
-    private SettingsWindow? _settings;
+    private FirstRunHost? _firstRun;
     private TerminalHost? _terminal;
 
     /// The notices of sessions and limits next to Aiko (D-377), and the limits they follow.
@@ -150,8 +150,7 @@ sealed class AikoShell : IDisposable
         var app = SettingsStore.Load();
         if (WizardChecklist.OpensMeetAikoOnStart(app, SettingsStore.LoadEnvironments()))
         {
-            OpenSettings(page: SettingsPanel.ChecklistPageKey);
-            _settings?.OpenChecklist(ChecklistItem.MeetAiko);
+            OpenedTerminal()?.OpenChecklist(ChecklistItem.MeetAiko);
             SettingsStore.Change(settings => settings with { MeetAikoShown = true });
         }
 
@@ -159,8 +158,7 @@ sealed class AikoShell : IDisposable
         // would leave them sending nothing and never learning the question existed.
         else if (WizardChecklist.OpensPrivacyOnStart(app, SettingsStore.LoadEnvironments()))
         {
-            OpenSettings(page: SettingsPanel.ChecklistPageKey);
-            _settings?.OpenChecklist(ChecklistItem.Privacy);
+            OpenedTerminal()?.OpenChecklist(ChecklistItem.Privacy);
         }
 
         // Once, for someone who turned Aiko on before she had a memory. The page says what the
@@ -196,16 +194,16 @@ sealed class AikoShell : IDisposable
 
     /// The settings are open: in the terminal window, or in a window of their own before the first
     /// environment.
-    public bool SettingsShownForCheck => _terminal is { SettingsOpen: true } || _settings is { IsVisible: true };
+    public bool SettingsShownForCheck => _terminal is { SettingsOpen: true } || _firstRun is { IsVisible: true };
 
-    /// A window of the settings apart from the terminal window, which only the first run has.
-    public bool SettingsWindowForCheck => _settings is not null;
+    /// The first run, which stands in the terminal window before the first environment.
+    public bool FirstRunForCheck => _firstRun is not null;
 
     /// The settings go back to the session, and the terminal window closes: while it is open the
     /// island stays away (D-310), and the next steps of the check need it.
     public void CloseSettingsForCheck()
     {
-        _settings?.Close();
+        _firstRun?.Close();
         _terminal?.CloseSettings();
         _terminal?.Close();
     }
@@ -230,7 +228,7 @@ sealed class AikoShell : IDisposable
     /// the island stay. The sessions of the terminal live on without its window (D-351).
     public void CloseWindows()
     {
-        _settings?.Close();
+        _firstRun?.Close();
         _terminal?.Close();
     }
 
@@ -242,7 +240,7 @@ sealed class AikoShell : IDisposable
         _direct?.Dispose();
         _updates?.Dispose();
 
-        _settings?.Close();
+        _firstRun?.Close();
         _terminal?.Close();
         _island.Close();
 
@@ -461,6 +459,12 @@ sealed class AikoShell : IDisposable
         {
             _terminal = null;
             _island.ShowSessions(IslandSessions.None);
+
+            // "Start over" took every environment away: the window closed, and the first run comes.
+            if (!SettingsStore.LoadEnvironments().HasEnvironments)
+            {
+                OpenFirstRun();
+            }
         };
         terminal.InViewChanged += _island.FollowTerminal;
         terminal.Noticed += (notice, way, id) => Notify(notice, way, () => _terminal?.OpenSession(id));
@@ -492,36 +496,35 @@ sealed class AikoShell : IDisposable
         Log.Write("settings opened");
     }
 
-    /// Before the first environment there is no terminal window to stand in: the first run
-    /// checklist keeps a window of its own until it moves into the terminal window as well.
+    /// Before the first environment there is no terminal yet: the first run opens in the terminal
+    /// window with the checklist alone (D-394), and Finish hands the window to the terminal.
     private void OpenFirstRun()
     {
-        if (_settings is not null)
+        if (_firstRun is not null)
         {
-            _settings.Activate();
+            _firstRun.Activate();
             return;
         }
 
-        var window = new SettingsWindow(SettingsPanel.ChecklistPageKey);
-        window.QuitRequested += Quit;
-        window.SettingsChanged += FollowSettings;
-        window.Closed += (_, _) =>
+        var firstRun = new FirstRunHost();
+        firstRun.QuitAsked += Quit;
+        firstRun.SettingsChanged += FollowSettings;
+        firstRun.Finished += () =>
         {
-            var again = window.ReopenPage;
-            _settings = null;
+            firstRun.Close();
             FollowSettings();
-
-            if (again is not null)
+            if (!_changingNothing && !ShowTerminalOnce())
             {
-                OpenSettings(page: again);
-            }
-            else if (!_changingNothing)
-            {
-                ShowTerminalOnce();
+                OpenTerminal();
             }
         };
-        _settings = window;
-        window.Show();
+        firstRun.Closed += () =>
+        {
+            _firstRun = null;
+            FollowSettings();
+        };
+        _firstRun = firstRun;
+        firstRun.Show();
 
         Log.Write("first run opened");
     }

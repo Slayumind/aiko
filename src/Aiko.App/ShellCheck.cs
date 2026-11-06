@@ -55,12 +55,12 @@ static class ShellCheck
         var home = SettingsStore.Load().Place;
         var environments = SettingsStore.LoadEnvironments().Environments.Count;
 
-        // ---- the settings: in the terminal window, never in a window of their own, and gone when
-        // closed. Before the first environment the first run keeps its own window. ----
+        // ---- the settings: in the terminal window, and gone when closed. Before the first
+        // environment the first run stands there instead. ----
         shell.OpenSettingsForCheck();
         await Task.Delay(600);
         shell.OpenSettingsForCheck();
-        var oneWindow = shell.SettingsShownForCheck && shell.SettingsWindowForCheck == (environments == 0);
+        var oneWindow = shell.SettingsShownForCheck && shell.FirstRunForCheck == (environments == 0);
         shell.CloseSettingsForCheck();
         var settingsGone = await Until(() => !shell.SettingsShownForCheck);
 

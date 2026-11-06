@@ -581,6 +581,20 @@
     ]
   ],
   [
+    "StepBack",
+    [
+      "Back",
+      "Назад"
+    ]
+  ],
+  [
+    "StepNext",
+    [
+      "Next",
+      "Дальше"
+    ]
+  ],
+  [
     "WizardAccessExplain",
     [
       "Claude Code sends its limits to a status line. Aiko adds one line to the settings file of each environment. If you already have a status line, Aiko runs it and shows what it prints.",

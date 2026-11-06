@@ -4,7 +4,7 @@ using System.Windows.Input;
 
 namespace Aiko.App;
 
-/// --try-settings: opens the settings window and uses it with the real mouse and keyboard, the way
+/// --try-settings: opens the settings in a window and uses them with the real mouse and keyboard, the way
 /// the live run that found the bugs did. It adds the first bound folder on the page of the other
 /// environment, which moves it there, renames environment 2 with Enter, and finishes the checklist
 /// again, which must change nothing.
@@ -25,8 +25,8 @@ static class SettingsCheck
         // shows above its owner depends on the owner.
         var first = Core.EnvironmentEdits.Bindings(original)[0];
         var otherFolder = original.Environments.First(e => e.Name != first.Environment).ConfigDirectories[0];
-        var window = new SettingsWindow("env:" + otherFolder);
-        var panel = window.Panel;
+        var panel = new SettingsPanel("env:" + otherFolder);
+        var window = Window(panel);
 
         // On top, so every click and key of the check lands in this window and nowhere else.
         window.Topmost = true;
@@ -70,7 +70,7 @@ static class SettingsCheck
         var other = names.First(n => n != first.Environment);
 
         // A click on the header brings the window to the front, as a person's first click would.
-        Click(panel.HeaderRow.PointToScreen(new Point(300, 20)));
+        Click(panel.PointToScreen(new Point(600, 12)));
         await Task.Delay(300);
 
         // The folder dialog is the system's own and cannot be clicked through: the page is given
@@ -134,6 +134,18 @@ static class SettingsCheck
         Log.Write($"--try-settings: folder moved={moved}, renamed with the command kept={kept}, suggestion shown right={suggested}, checklist kept everything={unchanged}, note shown={noteShown}");
         return moved && kept && suggested && unchanged && noteShown;
     }
+
+    /// The settings as they stand in the terminal window, in a window of that size: the checks
+    /// use the real pages with the real mouse.
+    internal static Window Window(SettingsPanel panel) => new()
+    {
+        Width = 1040,
+        Height = 640,
+        WindowStartupLocation = WindowStartupLocation.CenterScreen,
+        Background = Tokens.Brush("Surface"),
+        Topmost = true,
+        Content = panel,
+    };
 
     /// Everything a person would notice about the environments, in one line to compare.
     private static string Describe(Core.EnvironmentSettings settings, string home) =>

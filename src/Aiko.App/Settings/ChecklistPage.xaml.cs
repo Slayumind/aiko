@@ -39,15 +39,21 @@ public partial class ChecklistPage : UserControl
     private ChecklistItem? _opened;
 
     /// The item to open first: the second environment when the person asked to add one, and any item
-    /// for a snapshot. Null opens the next item that needs an answer.
-    public ChecklistPage(ChecklistItem? openFirst)
+    /// for a snapshot. Null opens the next item that needs an answer. steps: one item at a time, as
+    /// the first run in the terminal window shows it (D-391).
+    public ChecklistPage(ChecklistItem? openFirst, bool steps = false)
     {
         InitializeComponent();
+        _steps = steps;
 
         _rows = [InstallRow, FirstRow, SecondRow, FoldersRow, AccessRow, CommandsRow, MeetRow, PrivacyRow, PlaceRow];
         foreach (var row in _rows)
         {
             row.HeaderClicked += OnRowClicked;
+            if (steps)
+            {
+                row.ShowAsStep();
+            }
         }
 
         InstallCommand.Text = InstallCommandText;
@@ -176,7 +182,86 @@ public partial class ChecklistPage : UserControl
         FillAccessPreview();
         FillCommandFields();
         FillProjectFolders();
+        ShowSteps();
     }
+
+    // ---- one step at a time ----
+
+    private readonly bool _steps;
+
+    /// Only the open item is on the page, with the dots of every item under it: done ones muted,
+    /// the open one a wider bar, the rest dim. With every answer given, the page says what comes
+    /// next and Finish is the one step left.
+    private void ShowSteps()
+    {
+        if (!_steps)
+        {
+            return;
+        }
+
+        foreach (var child in Checklist.Children.OfType<FrameworkElement>())
+        {
+            child.Visibility = child is ChecklistRow row && row.Item == _opened ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        FooterLine.Visibility = Visibility.Collapsed;
+        StepDots.Visibility = Visibility.Visible;
+        StepDots.Children.Clear();
+        foreach (var row in _rows)
+        {
+            var open = row.Item == _opened;
+            var dot = new Border
+            {
+                Width = open ? 18 : 6,
+                Height = 6,
+                CornerRadius = new CornerRadius(3),
+                Margin = new Thickness(0, 0, 6, 0),
+                Background = Tokens.Brush(open ? "Ink" : row.State is ItemState.Done ? "Muted" : "Raised"),
+                ToolTip = row.Title,
+                Cursor = row.State is ItemState.Locked ? null : System.Windows.Input.Cursors.Hand,
+            };
+            var item = row.Item;
+            dot.MouseLeftButtonUp += (_, _) =>
+            {
+                if (row.State is not ItemState.Locked)
+                {
+                    Open(item);
+                }
+            };
+            StepDots.Children.Add(dot);
+        }
+
+        var at = _rows.FindIndex(row => row.Item == _opened);
+        BackButton.Visibility = Step(at, -1) is null ? Visibility.Collapsed : Visibility.Visible;
+        NextButton.Visibility = _opened is null ? Visibility.Collapsed : Visibility.Visible;
+
+        // Finish is the last step, so it shows once every item has an answer.
+        FinishButton.Visibility = FinishButton.IsEnabled ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    /// The next or the previous item that can be opened, from the one at this index; from the
+    /// page with every answer, back goes to the last item.
+    private ChecklistItem? Step(int at, int way)
+    {
+        var from = at < 0 ? (way < 0 ? _rows.Count : -1) : at;
+        for (var next = from + way; next >= 0 && next < _rows.Count; next += way)
+        {
+            if (_rows[next].State is not ItemState.Locked)
+            {
+                return _rows[next].Item;
+            }
+        }
+
+        return null;
+    }
+
+    /// On past the last item: to the first one still without an answer, or to the page that has
+    /// them all.
+    private void OnStepNext(object sender, RoutedEventArgs e) =>
+        Open(Step(_rows.FindIndex(row => row.Item == _opened), 1) ?? WizardChecklist.NextToOpen(Facts()));
+
+    private void OnStepBack(object sender, RoutedEventArgs e) =>
+        Open(Step(_rows.FindIndex(row => row.Item == _opened), -1));
 
     private string StatusOf(ChecklistItem item, ItemState state)
     {
@@ -213,7 +298,14 @@ public partial class ChecklistPage : UserControl
         };
     }
 
-    private void OnRowClicked(ChecklistRow row) => Open(row.IsOpen ? null : row.Item);
+    private void OnRowClicked(ChecklistRow row)
+    {
+        // One step at a time has no headers to fold: the dots and the buttons move between steps.
+        if (!_steps)
+        {
+            Open(row.IsOpen ? null : row.Item);
+        }
+    }
 
     /// One item open at a time, so the window stays the size of what is being done.
     private void Open(ChecklistItem? item)
@@ -228,6 +320,8 @@ public partial class ChecklistPage : UserControl
         {
             _foldersVisited = true;
         }
+
+        ShowSteps();
 
         if (item == ChecklistItem.Install && !_claudeInstalled)
         {

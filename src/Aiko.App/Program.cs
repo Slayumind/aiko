@@ -445,15 +445,18 @@ static class Program
 
         if (args is ["--snapshot-wizard", var wizardPath, ..])
         {
-            // The item to open, by name or number: --snapshot-wizard out.png Commands
+            // The first run as the terminal window shows it, one step at a time, at the item asked
+            // for by name: --snapshot-wizard out.png Commands
             ChecklistItem? item = args.Length > 2 && Enum.TryParse<ChecklistItem>(args[2], true, out var asked) ? asked : null;
-            var checklist = new SettingsPanel(SettingsPanel.ChecklistPageKey);
+            var checklist = new SettingsPanel(SettingsPanel.ChecklistPageKey, firstRun: true);
             if (item is { } open)
             {
                 checklist.OpenChecklist(open);
             }
 
-            Snapshot.Write(checklist, wizardPath);
+            var window = new TerminalPanel { Width = 1040, Height = 640 };
+            window.ShowSettings(checklist);
+            Snapshot.Write(window, wizardPath);
             return;
         }
 
@@ -475,10 +478,13 @@ static class Program
                 "env2" => new SettingsPanel().EnvironmentPage(1),
                 _ => page,
             });
-            if (args is [.., "tall"])
+            // The place the settings have in a terminal window of 1040 by 640.
+            panel.Width = 1040;
+            if (args is not [.., "tall"])
             {
-                panel.GrowToPage();
+                panel.Height = 640 - 44;
             }
+
             Snapshot.Write(panel, settingsPath);
             return;
         }
