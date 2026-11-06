@@ -1029,6 +1029,9 @@ public static class Strings
     /// GAME DEVELOPMENT
     public static string SkillDomainGames => Get("SkillDomainGames");
 
+    /// Web screens that look designed, not generated: an audit, the product's own look, motion a...
+    public static string SkillAikoInterface => Get("SkillAikoInterface");
+
     /// Texts that sound like a person wrote them: UI, README, release notes. Russian and English.
     public static string SkillAikoCopy => Get("SkillAikoCopy");
 

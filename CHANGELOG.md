@@ -9,6 +9,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Added
 
+- **A fourteenth skill, `/aiko:interface`.** It designs, checks and animates web screens so they
+  look made by a designer: it reads the screen first, finds the signs of AI-looking UI, keeps the look
+  of the product, and adds motion that shows what changed. A character or a video tile can show
+  feelings without text, like the reactions in Mac video calls: a thinking bubble, a laugh, a thumb
+  up, an idea, stars and hearts. A small tool measures the motion frame by frame.
 - **Terminal window with real terminals, on Windows.** Open it from the menu of the Aiko icon or
   with the terminal button on the card. Each session is a real terminal: Claude Code as it is, with
   its own input, menus and permission prompts, or a command line (Git Bash or PowerShell) in the

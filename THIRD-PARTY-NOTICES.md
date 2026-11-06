@@ -55,6 +55,16 @@ format (`ggml-silero-v5.1.2.bin`).
 - Licence: MIT, Copyright (c) 2020-present Silero Team
 - Source: https://github.com/snakers4/silero-vad, converted by https://huggingface.co/ggml-org/whisper-vad
 
+## frontend-design and unslop (in the interface skill)
+
+The `interface` skill retells and extends ideas from two skills: Anthropic's `frontend-design`
+(how to choose a direction and avoid template defaults) and Damir Sokolovsky's `unslop` (the list of
+signs of AI-looking interfaces). The text is written anew; no files are copied.
+
+- frontend-design: Licence Apache-2.0, Copyright (c) Anthropic PBC.
+  Source: https://github.com/anthropics/claude-plugins-official
+- unslop: Licence CC BY 4.0, by Damir Sokolovsky (@heydamir). Source: https://github.com/heydamir/unslop
+
 ## Not included
 
 Aiko is inspired by [notchi](https://github.com/sk-ruban/notchi), which is under GPL-3.0. Aiko
