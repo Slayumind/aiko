@@ -75,7 +75,21 @@ product. Errors and money get only small, calm answers.
 Sizes are parts of the frame or of the origin element, so one engine works in a big view, a small
 tile and next to a button. Keep particles away from labels in the corners.
 
-## 7. Rules of use
+## 7. The engine
+
+- Load `reactions.css` and `reactions.js` with a plain `<script src>`; it gives
+  `window.AikoReactions` (an `import "./reactions.js"` puts the same object on `globalThis`). It is
+  not an ES module on purpose: the demo then opens straight from disk.
+- `playReaction(layer, kind, options)` plays `think`, `laugh`, `yes`, `idea`, `stars` or `love` and
+  returns `{ stop() }`; `think` stays until `stop()` or `maxMs`. `mountLayer(host)` makes the layer.
+- `from`: an element or a `{ x, y }` point. Bubbles stand beside a small element, a little higher,
+  like a typing bubble in a chat; bursts start at its centre. Without `from` the reaction uses the
+  face anchor of a video tile (`anchor`, default x 0.5, y 0.24).
+- Add `rx-light` to a layer over a light page: the glass gets a little tint so white glyphs read.
+- Other options: `glyph`, `laughWord`, `side`, `hold`, `delay`, `size`. `throttle(ms)` and the word
+  patterns `LAUGH_WORDS`, `LOVE_WORDS` (ru, es, en) come with it.
+
+## 8. Rules of use
 
 - A reaction never replaces the information: the result, the error or the saved state is still on
   the screen in words or in the UI.

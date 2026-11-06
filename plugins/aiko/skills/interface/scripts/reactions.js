@@ -103,8 +103,10 @@
       return { size: s, hx, hy: y, tx, ty, dx: hx - tx - s / 2, dy: y - ty - s / 2 };
     }
     const s = size ?? Math.round(clamp(Math.min(width, height) * 0.12, 44, 96));
-    const tx = clamp(x + side * s * 0.55 - s / 2, 0, Math.max(0, width - s));
-    const ty = clamp(y - s * 1.4, 0, Math.max(0, height - s));
+    // Beside the element and a little higher, like a typing bubble in a chat, so it does not
+    // cover the row above it.
+    const tx = clamp(x + side * s * 1.1 - s / 2, 0, Math.max(0, width - s));
+    const ty = clamp(y - s * 0.55, 0, Math.max(0, height - s));
     return { size: s, hx: x, hy: y, tx, ty, dx: x - tx - s / 2, dy: y - ty - s / 2 };
   }
 

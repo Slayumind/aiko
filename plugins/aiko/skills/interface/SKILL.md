@@ -100,7 +100,8 @@ A screenshot proves that something was drawn, not that it works.
   visible focus ring. Targets: 44 px on touch, 48 px for children.
 - Motion with numbers: `node scripts/motion-probe.mjs <url> --watch "<selector>" --click "<selector>"`
   records opacity and transform at set times after the element appears, saves the frames and writes
-  `sheet.html`. With `--reduced` the first values must already be final.
+  `sheet.html`. With `--reduced` the first values must already be final. It needs Playwright for
+  Node in the project you run it from; it says so when it is missing and installs nothing.
 - The project's own checks (types, lint, tests) after the change.
 - Logic, data and strings are proved by tests and reading the code, not by screenshots.
 

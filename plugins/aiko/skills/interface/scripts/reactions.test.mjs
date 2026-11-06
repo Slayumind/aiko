@@ -52,10 +52,11 @@ test("bubbleLayout over a face floats near the top, on the chosen side", () => {
   assert.equal(right.ty + right.size / 2 + right.dy, right.hy);
 });
 
-test("bubbleLayout from an element floats just above it and stays inside the layer", () => {
+test("bubbleLayout from an element floats beside it, a little higher, and stays inside the layer", () => {
   const g = R.bubbleLayout({ width: 1440, height: 900, x: 700, y: 500, face: false });
   assert.equal(g.size, 96);
-  assert.ok(g.ty + g.size <= 500, "above the top edge");
+  assert.ok(g.tx >= 700 + 96 * 0.5, "to the side of the element");
+  assert.ok(g.ty >= 500 - 96 * 0.6 && g.ty < 500, "a little above the top edge, not over the row above");
   const edge = R.bubbleLayout({ width: 1440, height: 900, x: 1430, y: 20, face: false });
   assert.ok(edge.tx >= 0 && edge.tx + edge.size <= 1440);
   assert.equal(edge.ty, 0);
