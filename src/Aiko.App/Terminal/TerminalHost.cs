@@ -132,6 +132,12 @@ sealed class TerminalHost
         _panel.TabPicked += name => Change(_model.ToEnvironment(name, _sessions));
         _panel.RowPicked += Pick;
         _panel.RowClosed += AskToClose;
+        _panel.RowMoved += (id, before) =>
+        {
+            _sessions = _sessions.Moved(id, before);
+            Save();
+            Draw();
+        };
         _panel.RowRenamed += (id, name) =>
         {
             _sessions = _sessions.Rename(id, name);

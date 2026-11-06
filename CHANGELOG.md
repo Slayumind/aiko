@@ -20,7 +20,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - **The list says what each agent does.** A mark shows whether she works, has a question or is done,
   and a second line says what she did last: "reading office.mjs", "waits for permission: npm test".
   Point at a folder and press "+" for Claude Code or ">_" for a command line; Ctrl+Shift+T opens a
-  quick pick of your folders.
+  quick pick of your folders. Drag a session to put it in another place in its folder.
 - **One place to type.** Type in the line of Claude Code, with its menus. Ctrl+G opens an editor for a
   long text, Ctrl+V puts a screenshot in as a picture and a file as its path, and
   Ctrl+Shift+Space writes down what you say. Ctrl+C copies a selection with its paragraphs whole.
