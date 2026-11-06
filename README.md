@@ -61,7 +61,7 @@ called `aiko`, so you call a skill by its full name:
 | Skill | What it is for |
 |---|---|
 | `/aiko:copy` | UI text, READMEs and release notes that read as written by a person, in Russian and English |
-| `/aiko:interface` | web screens that look designed: an audit for AI-looking UI, motion that shows what changed, a visible answer to every event |
+| `/aiko:interface` | any web interface that looks designed for its product: the product's own look, an audit, every state at real widths, motion and reactions |
 | `/aiko:docs-hygiene` | a state file built from measured facts, a decision log, duplicates and contradictions found |
 | `/aiko:release-gate` | a check before a release: GO or NO-GO, irreversible changes, rollout and rollback |
 | `/aiko:calendar` | a day planned around Google Calendar, free time found, events added after your yes |

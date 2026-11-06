@@ -1040,7 +1040,7 @@
     <value>GAME DEVELOPMENT</value>
   </data>
   <data name="SkillAikoInterface" xml:space="preserve">
-    <value>Web screens that look designed, not generated: an audit, the product's own look, motion and a visible answer to every event.</value>
+    <value>Any web interface that looks designed, not generated: the product's own look, an audit, every state, motion and reactions.</value>
   </data>
   <data name="SkillAikoCopy" xml:space="preserve">
     <value>Texts that sound like a person wrote them: UI, README, release notes. Russian and English.</value>

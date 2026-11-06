@@ -9,12 +9,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Added
 
-- **A fourteenth skill, `/aiko:interface`.** It designs, checks and animates web screens so they
-  look made by a designer: it reads the screen first, finds the signs of AI-looking UI, keeps the look
-  of the product, and adds motion that shows what changed. Every event gets a visible answer where
-  it happened: a tick on a saved field, stars from the button that finished a task, hearts from a
-  like, a thinking or laughing bubble over an avatar or a video, like the reactions in Mac video
-  calls. A small tool measures the motion frame by frame.
+- **A fourteenth skill, `/aiko:interface`.** It builds and polishes any web interface so it looks
+  made for its product: a page, an app screen, a dashboard, a form or an embed. It starts from the
+  product's own look, finds the signs of AI-looking UI, fixes the screen in passes from spacing to
+  motion, and checks every state at desktop and phone widths. Events get a visible answer where they
+  happen, from a tick on a saved field to glass reactions like in Mac video calls, and a small tool
+  measures the motion frame by frame.
 - **Terminal window with real terminals, on Windows.** Open it from the menu of the Aiko icon or
   with the terminal button on the card. Each session is a real terminal: Claude Code as it is, with
   its own input, menus and permission prompts, or a command line (Git Bash or PowerShell) in the

@@ -1,121 +1,114 @@
 ---
 name: interface
-description: Design, audit and animate web interfaces that look made by a designer, not generated - read the screen first, find the signs of AI-looking UI, keep the look of the product it lives in, then add motion that explains what changed and a reaction to every event at the place it happened (a tick on a saved field, stars from a button, hearts from a like, glass bubbles over an avatar or a video like in Mac video calls). Proves motion with measured frames instead of a feeling. Use when building or reshaping a page, a screen or a component, when a UI "looks like AI made it", when screens change with a cut and should move, when an action, a result, a status or a character needs a visible answer, or when the user asks for animations, transitions, micro-interactions or "make it feel alive".
+description: Build, reshape, audit and polish any web interface so it looks made by a designer for this product, not generated - pages, app screens, dashboards, forms, components, embeds and artifacts. Reads the screen first, keeps the product's own look, sets a direction only for a new product, fixes in passes (spacing, colour, icons, copy, type, layout, states, details, motion), checks every state at real widths, and gives events a visible answer, from a tick on a saved field to glass reactions like in Mac video calls. Use when making a new page or screen, changing an existing one, when a UI "looks like AI made it", feels flat, messy or inconsistent, when screens change with a cut, or when the user asks for design, layout, polish, animations or "make it feel alive".
 ---
 
 # aiko interface
 
-The goal: the person sees a product, not a template. Clear first, then alive.
+The goal: the person sees this product, not a template. Clear first, then alive.
 
 Built on Anthropic's `frontend-design` skill (Apache 2.0) and Damir Sokolovsky's `unslop`
-(CC BY 4.0, https://github.com/heydamir/unslop), adapted and extended with what worked in Aiko's
-own projects. Keep this credit in any copy.
+(CC BY 4.0, https://github.com/heydamir/unslop), retold and extended with what worked in Aiko's own
+projects. Keep this credit in any copy.
+
+| Read | When |
+|---|---|
+| [references/craft.md](references/craft.md) | any change: the passes with their rules |
+| [references/tokens.md](references/tokens.md) | a product with no system, or values that drift |
+| [references/signs.md](references/signs.md) | the audit of an existing screen |
+| [references/motion.md](references/motion.md) | screens change, panels open, text updates |
+| [references/reactions.md](references/reactions.md) | events need a visible answer; a character or an avatar |
 
 ## 1. The product's look wins
 
-Before you choose anything, find what the screen must match:
+Find what the screen must match before you choose anything:
 
-- a design file of the project (`DESIGN.md`, tokens, a Figma link in the docs);
-- the neighbouring screens: a new screen inside a product uses its fonts, colours, radius and
-  buttons. An embed keeps the look of the platform it lives in. Fun for children goes into the
-  experience (stars, motion, reactions), not into a separate visual style;
-- the user's taste, when the project has no system. Aiko's defaults: light and quiet, few borders
-  and no boxes inside boxes, icon buttons with a tooltip in dense panels, toggles and number fields
-  over sliders, floating panels with a close cross instead of modal dialogs, emoji only where they
-  carry meaning.
+- the design file of the project (`DESIGN.md`, tokens, a Figma link in the docs);
+- the neighbouring screens: a new screen uses their fonts, colours, radius, buttons and words. An
+  embed keeps the look of the platform it lives in. Fun for children goes into the experience
+  (motion and reactions), not into a separate visual style;
+- the user's taste when there is no system. Aiko's defaults: light and quiet, few borders and no
+  boxes inside boxes, icon buttons with a tooltip in dense panels, toggles and number fields over
+  sliders, floating panels with a close cross instead of modal dialogs, emoji only where they carry
+  meaning.
 
-A new product with no system gets a direction (section 3). An existing product gets an audit and
-fixes inside its own look. Never redesign a screen that only needed fixes.
+An existing product gets an audit and fixes inside its own look. A new product gets a direction
+(section 3). Never redesign a screen that only needed fixes, and never invent a second style inside
+one product.
 
 ## 2. Process
 
-1. **Look at the screen.** Run it and take a screenshot at the real size, so you judge what people
-   see, not only the code. Put screenshots and mockups in a `previews/` folder of the project that is
-   in `.gitignore`, never in a temp folder: the user opens that folder to see your work.
-2. **Audit.** Go through [references/signs.md](references/signs.md) and write every sign you find,
-   one line each, with where it lives. Add the classes the user already named in this project.
-3. **Decide the size of the change.** No signs: say so and suggest two or three small fixes with
-   exact values. A few signs: fix them in the product's look. A generated-looking screen with no
-   system behind it: set a direction first (section 3) and show it before you edit.
-4. **Fix in passes, whole screen per pass:** spacing → colour → icons → copy → type → layout →
-   details → visuals → motion. Copy goes through `aiko:copy`. Motion comes last, because it must fit
-   a screen that already works without it.
-5. **Check with numbers and frames** (section 6), then show the user everything at once. A comment
-   from the user is a class: fix every case of it on every screen, and say how you searched.
+1. **Look.** Run the screen and take screenshots at the real sizes: 1440, 1024 and 375 wide. Judge
+   what people see, not only the code. Keep screenshots and mockups in a `previews/` folder of the
+   project that is in `.gitignore`, never in a temp folder: the user opens that folder.
+2. **List the states.** Empty, loading, partial, full, error, success, disabled, long text, a second
+   language. A screen is its states, not its first view.
+3. **Audit** with [references/signs.md](references/signs.md): one line per sign, with where it lives.
+   Add the classes the user already named in this project.
+4. **Size the change.** No signs: say so and offer two or three small fixes with exact values. Some
+   signs: fix them in the product's look. A generated-looking screen with no system behind it: set a
+   direction (section 3) and show it before editing, since a late change of direction redoes
+   everything.
+5. **Fix in passes**, the whole screen per pass, in the order of
+   [references/craft.md](references/craft.md): spacing, colour, icons, copy, type, layout, states,
+   details, visuals, motion. Copy goes through `aiko:copy`; colours that must fit a palette go
+   through `aiko:palette`.
+6. **Prove it** (section 6), then show the user everything at once. A comment from the user is a
+   class: fix every case of it on every screen, say how you searched, and turn the class into a
+   check where you can.
 
 ## 3. Direction for a new product
 
-Ground it in the subject: who uses it, what they do, the materials and words of that world. Then
-write a short plan before any code:
+Ground it in the subject: who uses it, what they do there, the materials and words of that world.
+Write a short plan before any code:
 
-- colour: 4-6 named hex values, one accent used once or twice per screen;
-- type: one or two families with a clear scale; sizes and weights from the scale only;
+- colour: 4-6 named hex values; neutral surfaces, one accent used once or twice per screen;
+- type: one family, or two clearly different ones, with a scale;
 - layout: one sentence and an ASCII sketch; say what aligns to what;
 - principles: what makes this screen this product and not any other.
 
-Review the plan against the defaults generated pages fall into, and change any part that you would
-also write for a different brief: a cream background with a serif and a terracotta accent; near-black
-with one acid accent; newspaper rules and zero radius; identical rounded cards with the same grey
-shadow; ALL-CAPS labels over every heading; "A · B · C" meta lines; an arrow after every link.
-Spend boldness in one place and keep the rest quiet.
+Then review the plan against the defaults generated pages fall into, and change any part you would
+also write for a different brief: cream with a serif and a terracotta accent; near-black with one
+acid accent; newspaper rules and zero radius; identical rounded cards with one grey shadow; ALL-CAPS
+labels over every heading; "A · B · C" meta lines; an arrow after every link; numbered markers on
+content that is not a sequence. Spend boldness in one place; keep the rest quiet. The hero opens
+with the most characteristic thing of the subject, not with a big number and a gradient.
 
 ## 4. Motion
 
-Motion is the strongest part of this skill. Full recipes: [references/motion.md](references/motion.md).
-
-- **Tokens.** One easing curve and three lengths for the whole product: fast for feedback (150 ms),
-  middle for state changes (260 ms), longer for things that enter (420 ms).
-- **Only transform, opacity and colours move.** Never width, height, top, left, margins or large
-  blurs: they stutter on weak laptops, often next to a video call.
-- **Motion answers a change.** A new step fades and rises 8 px with a small stagger. Text that
-  changes its subject shows itself like ink (opacity with a light blur). A new line of code slides
-  in. A highlight moves softly between items. A press scales down a little.
-- **Replay on change, not on every render.** Give the entering element a `key` built from what it
-  shows, so the entrance plays when the content changes and never when a clock ticks.
-- **Loops only for live states:** a speaking wave, a loader, a pointer to the next action. Nothing
-  breathes or floats for decoration.
-- **Reduced motion** turns entrances and loops off and keeps colour changes short.
+Motion shows what changed. One easing curve and three lengths for the product (150 ms feedback,
+260 ms state change, 420 ms entrance); only transform, opacity and colours move; an entrance replays
+when the content changes, not on every render; loops only for live states; reduced motion turns it
+off. Recipes: [references/motion.md](references/motion.md).
 
 ## 5. Reactions
 
-Every event that matters gets an answer at the place where it happened, seen rather than read: a
-tick on a saved field, stars from the button that finished a task, hearts from a like, a thinking
-bubble over an avatar or a video tile, a laugh over a character. Text has to be seen and read; a
-reaction is caught out of the corner of the eye. Full guide:
-[references/reactions.md](references/reactions.md). Engine: `scripts/reactions.js` and
-`scripts/reactions.css`, no framework, any element can be the origin. `scripts/demo.html` plays them.
-
-1. **Event map first.** List the events of the screen, where each happens and how important it is.
-   No event, no reaction; a reaction with no signal is a mockup, mark it so.
-2. **Strength follows importance.** Small (on the element, under 300 ms) for every action; medium
-   (a burst or a bubble from the element) for a result the person worked for; status (dots, a
-   thinking bubble) while a state lasts; big (the whole screen) once per session at most. Errors
-   and money get only small, calm answers.
-3. **Look and motion.** Clear glass with a coloured rim and a light spot; a glyph with a soft shadow;
-   rounded stars and hearts; depth for particles; a spring on entry, a pop into droplets on exit.
-   Sizes are parts of the frame or the origin, so one engine fits a big view, a tile and a button.
-4. **Rules.** A reaction never replaces the information. One of a kind every few seconds. Faces keep
-   the eyes and the mouth free.
+Every event that matters gets an answer where it happened, seen rather than read: a tick on a saved
+field, stars from the button that finished a task, hearts from a like, a thinking bubble over an
+avatar, a laugh over a character, like the reactions in Mac video calls. Start from an event map,
+match strength to importance (small, medium, status, big), and never let a reaction replace the
+information. Guide: [references/reactions.md](references/reactions.md). Engine with no framework:
+`scripts/reactions.js` and `scripts/reactions.css`; `scripts/demo.html` plays every reaction.
 
 ## 6. Prove it
 
-A screenshot proves that something was drawn, not that it moved. Measure:
+A screenshot proves that something was drawn, not that it works.
 
-- `node scripts/motion-probe.mjs <url> --watch "<selector>" --click "<selector>"` records opacity and
-  transform of the element and its children at set times after it appears, saves a frame at each time
-  and writes `sheet.html` with the frames side by side. Run it again with `--reduced`: the first
-  values must already be final.
-- For a reaction, capture the frame in the middle of the animation, in the big view and the small
-  tile, on the lightest and the darkest background the product has.
-- Check the classes the user named (an element covered, text off the tokens) on every screen in every
-  state, and turn each into a test or a measurement where you can.
-- Run the project's own checks (types, lint, tests) after the change.
+- Every state from step 2 at 1440, 1024 and 375 wide, in each language of the product. No
+  horizontal scroll at 375, no text cut at the bottom of a panel, nothing covered by something else.
+- Contrast: body text 4.5:1, large text and icons 3:1. Keyboard: every control reachable, a
+  visible focus ring. Targets: 44 px on touch, 48 px for children.
+- Motion with numbers: `node scripts/motion-probe.mjs <url> --watch "<selector>" --click "<selector>"`
+  records opacity and transform at set times after the element appears, saves the frames and writes
+  `sheet.html`. With `--reduced` the first values must already be final.
+- The project's own checks (types, lint, tests) after the change.
+- Logic, data and strings are proved by tests and reading the code, not by screenshots.
 
 ## 7. Do not
 
-- Do not invent a new style inside an existing product.
+- Do not redesign what needed fixes, and do not add a style the product does not have.
+- No hue-to-hue gradients, glows, gradient text, glass panels or emoji as decoration. Glass is for
+  reactions, not for cards.
 - Do not animate everything: one orchestrated moment beats scattered effects.
-- No purple-to-blue gradients, glows, glass cards with coloured shadows or emoji in buttons as
-  decoration; glass is for reactions over video, not for panels.
-- Do not ship a reaction, a loop or a sound the user has not seen in motion.
-- Do not judge motion from a still frame; measure it.
+- Do not ship a state, a reaction or a loop the user has not seen.
+- Do not judge motion from a still frame, or a layout from one width.

@@ -58,8 +58,9 @@ format (`ggml-silero-v5.1.2.bin`).
 ## frontend-design and unslop (in the interface skill)
 
 The `interface` skill retells and extends ideas from two skills: Anthropic's `frontend-design`
-(how to choose a direction and avoid template defaults) and Damir Sokolovsky's `unslop` (the list of
-signs of AI-looking interfaces). The text is written anew; no files are copied.
+(how to choose a direction and avoid template defaults) and Damir Sokolovsky's `unslop` (the signs
+of AI-looking interfaces, the order of the passes and the starting values). The text is written anew;
+no files are copied. The starting values in `references/tokens.md` are adapted from unslop.
 
 - frontend-design: Licence Apache-2.0, Copyright (c) Anthropic PBC.
   Source: https://github.com/anthropics/claude-plugins-official
