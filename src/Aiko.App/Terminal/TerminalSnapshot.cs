@@ -89,10 +89,10 @@ static class TerminalSnapshot
                 new LimitWindow(LimitKind.SevenDay, week, now + weekLeft),
             ]);
 
+        var aiko = Limits("Aiko", now, 42, TimeSpan.FromMinutes(143), 18, TimeSpan.FromHours(84));
         var limits = new Dictionary<string, LimitSnapshot>
         {
-            ["Aiko"] = Limits("Aiko", now, 42, TimeSpan.FromMinutes(143), 18, TimeSpan.FromHours(84))
-                with { Model = new ModelLimit("Fable", 61, now.AddDays(5)) },
+            ["Aiko"] = aiko with { Model = new ModelLimit("Fable", 61, now.AddDays(5)) },
             ["Work · Kodland"] = Limits("Work · Kodland", now.AddMinutes(-4), 82, TimeSpan.FromMinutes(66), 40, TimeSpan.FromHours(98)),
         };
         var card = CardModel.From(
