@@ -313,6 +313,18 @@ sealed class TerminalPanel : UserControl
     /// hidden while the settings are open.
     public void ShowSettings(FrameworkElement? settings)
     {
+        // The way back is the same button as "New session" under the list, and the menu of the
+        // settings is as wide as the list, so the edge between them does not move.
+        if (settings is SettingsPanel panel)
+        {
+            var key = Mono("Esc", "Muted");
+            key.Margin = new Thickness(12, 0, 0, 0);
+            var back = Flat(Strings.SettingsBack, panel.Back, ghost: false, aside: key, mark: "M4,0 L0,5 L4,10");
+            back.HorizontalAlignment = HorizontalAlignment.Stretch;
+            back.HorizontalContentAlignment = HorizontalAlignment.Stretch;
+            panel.PlaceInWindow(back, ListWidth);
+        }
+
         _settingsHost.Content = settings;
         var shown = settings is not null;
         _settingsHost.Visibility = shown ? Visibility.Visible : Visibility.Collapsed;
@@ -1444,7 +1456,7 @@ sealed class TerminalPanel : UserControl
     /// One button for the whole window: the filled one is the main action, the outlined one the
     /// second, the ghost one the quiet third (DESIGN, one fill per control).
     /// aside stands at the right end of the button, such as the key of its action.
-    internal static Button Flat(string text, Action click, bool ghost, bool main = false, bool danger = false, bool plus = false, UIElement? aside = null)
+    internal static Button Flat(string text, Action click, bool ghost, bool main = false, bool danger = false, bool plus = false, UIElement? aside = null, string? mark = null)
     {
         var row = new DockPanel();
         var ink = main ? "Background" : danger ? "Destructive" : ghost ? "Muted" : "Ink";
@@ -1454,9 +1466,9 @@ sealed class TerminalPanel : UserControl
             row.Children.Add(aside);
         }
 
-        if (plus)
+        if (plus || mark is not null)
         {
-            var sign = Marks.Line("M5,0 L5,10 M0,5 L10,5", ink);
+            var sign = Marks.Line(mark ?? "M5,0 L5,10 M0,5 L10,5", ink);
             sign.Margin = new Thickness(0, 0, 8, 0);
             DockPanel.SetDock(sign, Dock.Left);
             row.Children.Add(sign);

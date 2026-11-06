@@ -145,7 +145,6 @@ public partial class SettingsPanel : UserControl
         Card.Effect = null;
         HeaderRow.Visibility = Visibility.Collapsed;
         Body.Height = double.NaN;
-        NavColumn.Width = new GridLength(216);
 
         PageScroll.Content = null;
         var column = new Grid();
@@ -155,61 +154,21 @@ public partial class SettingsPanel : UserControl
         PageScroll.Content = column;
     }
 
-    /// The way back to the session, on top of the menu, with the key that does the same. A row of
-    /// the menu rather than a button: a button centres what is in it, and the key has to stand at
-    /// the right edge.
-    private Border BackItem()
+    /// The way back to the session on top of the menu, and the width of the menu, both from the
+    /// terminal window: its button is the one under the list of sessions, and the menu is as wide
+    /// as that list (D-374).
+    public void PlaceInWindow(FrameworkElement back, double menuWidth)
     {
-        var line = new DockPanel();
-        var key = new TextBlock { Text = "Esc", Style = (Style)FindResource("RowNote"), VerticalAlignment = VerticalAlignment.Center };
-        DockPanel.SetDock(key, Dock.Right);
-        line.Children.Add(key);
-        line.Children.Add(new Path
-        {
-            Data = Geometry.Parse("M 5,0 L 0,5 L 5,10"),
-            Stroke = Tokens.Brush("Muted"),
-            StrokeThickness = 1.5,
-            StrokeStartLineCap = PenLineCap.Round,
-            StrokeEndLineCap = PenLineCap.Round,
-            StrokeLineJoin = PenLineJoin.Round,
-            Width = 6,
-            Height = 10,
-            VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Thickness(0, 0, 10, 0),
-        });
-        var words = new TextBlock
-        {
-            Text = Strings.SettingsBack,
-            Style = (Style)FindResource("RowHint"),
-            TextWrapping = TextWrapping.NoWrap,
-            TextTrimming = TextTrimming.CharacterEllipsis,
-            VerticalAlignment = VerticalAlignment.Center,
-        };
-        line.Children.Add(words);
-
-        var back = new Border
-        {
-            Background = Brushes.Transparent,
-            CornerRadius = new CornerRadius(8),
-            Padding = new Thickness(10, 7, 10, 7),
-            Margin = new Thickness(0, 0, 0, 8),
-            Cursor = System.Windows.Input.Cursors.Hand,
-            ToolTip = Strings.SettingsBack + " · Esc",
-            Child = line,
-        };
-        back.MouseEnter += (_, _) =>
-        {
-            back.Background = Tokens.Brush("HoverLayer");
-            words.Foreground = Tokens.Brush("Ink");
-        };
-        back.MouseLeave += (_, _) =>
-        {
-            back.Background = Brushes.Transparent;
-            words.ClearValue(TextBlock.ForegroundProperty);
-        };
-        back.MouseLeftButtonUp += (_, _) => CloseRequested?.Invoke();
-        return back;
+        back.Margin = new Thickness(0, 0, 0, 10);
+        _back = back;
+        NavColumn.Width = new GridLength(menuWidth);
+        BuildNav();
     }
+
+    /// "Back to the session" and Esc.
+    public void Back() => CloseRequested?.Invoke();
+
+    private FrameworkElement? _back;
 
     // ---- the menu ----
 
@@ -217,9 +176,9 @@ public partial class SettingsPanel : UserControl
     {
         _buildingNav = true;
         Nav.Children.Clear();
-        if (_inWindow)
+        if (_back is not null)
         {
-            Nav.Children.Add(BackItem());
+            Nav.Children.Add(_back);
         }
 
         var settings = _editor.Current;
