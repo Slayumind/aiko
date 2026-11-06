@@ -54,9 +54,6 @@ public partial class SettingsWindow : Window
     /// The page to open again when the window closed only to come back in another language.
     public string? ReopenPage { get; private set; }
 
-    /// Opened from the tray menu item that asks for an update check.
-    public void CheckUpdatesNow() => _panel.StartUpdateCheck();
-
     public void OpenChecklist(ChecklistItem? item = null) => _panel.OpenChecklist(item);
 
     private void OnDragHandlePressed(object sender, MouseButtonEventArgs e)

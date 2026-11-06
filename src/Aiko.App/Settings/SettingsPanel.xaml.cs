@@ -107,17 +107,6 @@ public partial class SettingsPanel : UserControl
     /// Another page asked for while the panel is open, from the tray menu or the editor.
     public void Open(string page) => Navigate(page);
 
-    public void StartUpdateCheck()
-    {
-        if (_page != GeneralPageKey)
-        {
-            ShowPage(GeneralPageKey, animate: false);
-            BuildNav();
-        }
-
-        (PageHost.Content as GeneralPage)?.StartUpdateCheck();
-    }
-
     internal static IEnumerable<AikoEnvironment> Ordered(EnvironmentSettings settings)
     {
         var first = settings.First(Home);

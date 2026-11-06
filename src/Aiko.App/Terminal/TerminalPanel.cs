@@ -191,7 +191,7 @@ sealed class TerminalPanel : UserControl
         _pills.Refit = FitPills;
         _bar.SizeChanged += (_, _) => FitPills();
 
-        _header = new HeaderStripView(environment => TabPicked?.Invoke(environment));
+        _header = new HeaderStripView(environment => TabPicked?.Invoke(environment), environment => SignInAsked?.Invoke(environment));
         _header.Settled += () =>
         {
             // The header has its new height after a switch. While it still grows or folds, the
@@ -305,6 +305,9 @@ sealed class TerminalPanel : UserControl
 
     /// The gear in the title bar.
     public event Action? SettingsAsked;
+
+    /// "Sign in" on the card of an environment whose account is not connected.
+    public event Action<string>? SignInAsked;
 
     public bool SettingsShown => _settingsHost.Content is not null;
 

@@ -146,6 +146,7 @@ sealed class TerminalHost
         _panel.AskAnswered += Answer;
         _panel.HeaderToggled += () => Remember(settings => settings with { HeaderOpen = !settings.HeaderOpen });
         _panel.ListToggled += () => Remember(settings => settings with { SessionListHidden = !settings.SessionListHidden });
+        _panel.SignInAsked += SignIn;
         _panel.SettingsAsked += () =>
         {
             if (SettingsOpen)
@@ -170,6 +171,16 @@ sealed class TerminalHost
         };
     }
 
+    /// Claude Code in a window of its own for this environment, where the sign in happens, as the
+    /// card of limits did before (D-399).
+    private void SignIn(string environment)
+    {
+        if (_settings.Environments.FirstOrDefault(e => e.Name == environment) is { } found)
+        {
+            ClaudeLauncher.Open(found.ConfigDirectories[0], System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile));
+        }
+    }
+
     // ---- the settings in the window (D-374) ----
 
     private SettingsPanel? _settingsPanel;
@@ -191,7 +202,7 @@ sealed class TerminalHost
 
     /// The settings come on the place of the list and the terminal, at a page when one is asked for.
     /// Open already, they move to that page.
-    public void OpenSettings(string? page = null, bool checkUpdates = false)
+    public void OpenSettings(string? page = null)
     {
         if (_settingsPanel is { } open)
         {
@@ -204,11 +215,6 @@ sealed class TerminalHost
         {
             _settingsPanel = NewSettings(page);
             _panel.ShowSettings(_settingsPanel);
-        }
-
-        if (checkUpdates)
-        {
-            _settingsPanel.StartUpdateCheck();
         }
 
         Show();

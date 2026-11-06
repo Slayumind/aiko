@@ -31,10 +31,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   next to Aiko: the agent has a question, finished the work or stopped, or a limit went over 90%. A
   click opens that session, and only a question comes with a sound. With the window closed, the island
   counts how many agents wait and how many work.
-- **Limits and settings in the window.** Each environment is a pill in the title bar with its ring and
-  percent; the arrow opens the limits of all of them in place. The gear and Ctrl+, open the settings
-  in the window, and Esc takes you back to the same session. The project folders of an environment
-  are now on its own page.
+- **Everything in one window.** A click on the tray icon or the island opens it, and the menu of the
+  icon keeps Open, Settings and Quit. Each environment is a pill in the title bar with its ring and
+  percent; the arrow opens the limits of all of them in place, says how fresh they are and offers
+  Sign in when an account needs it. The gear and Ctrl+, open the settings right there, and Esc takes
+  you back to the same session; the project folders are on the page of their environment. The card
+  of limits is gone.
 - **The envoy skill.** Send Aiko to help a colleague in Slack or another work chat. You give her the
   task and the limits once; she asks the questions, checks the thread and does the work, and brings
   back anything outside the task. Her messages start with her face and name, so nobody takes them for

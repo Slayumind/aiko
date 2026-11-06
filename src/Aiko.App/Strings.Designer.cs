@@ -90,8 +90,8 @@ public static class Strings
     /// Show {0} in the ring
     public static string MenuShowInRing => Get("MenuShowInRing");
 
-    /// Open terminal
-    public static string MenuTerminal => Get("MenuTerminal");
+    /// Open
+    public static string MenuOpen => Get("MenuOpen");
 
     /// Refresh limits
     public static string MenuRefresh => Get("MenuRefresh");
