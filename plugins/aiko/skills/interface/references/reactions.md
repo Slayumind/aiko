@@ -1,57 +1,87 @@
-# Reactions over a video or a character
+# Reactions: how an interface answers
 
-Feelings and actions of a character shown without text, like the reactions in Mac video calls.
-The engine is `scripts/reactions.js` with `scripts/reactions.css`; `scripts/demo.html` plays each one.
+Every event that matters to the person gets an answer at the place where it happened: a press, a
+saved form, a solved task, a message, a character that thinks or laughs. The answer is seen, not
+read. Glass bubbles, hearts and stars work like the reactions in Mac video calls and the effects in
+messengers. The engine is `scripts/reactions.js` with `scripts/reactions.css`; any element can be the
+origin. `scripts/demo.html` plays each reaction on a video-like frame and on a plain button.
 
-## 1. Start from signals
+## 1. Make the event map first
 
-List what the page already knows, then match a reaction to each. A reaction with no signal is a
-mockup: mark it so on the demo page and in the report.
+Write every event of the screen in a table before you draw anything. A reaction with no event behind
+it is a mockup: mark it so on the demo page and in the report.
 
-| Signal the page can have | Reaction |
-|---|---|
-| the user stopped speaking, the character has not started | think, until speech starts |
-| the character's line has "ha-ha", "jaja", "haha" | laugh |
-| a task or a step is accepted | yes |
-| a perfect result (no hints, three stars) | stars instead of yes |
-| the character calls a tool that changes the user's work | idea |
-| the user says thanks or that they like it | love |
+| Event | Where it happens | Strength | Reaction |
+|---|---|---|---|
+| a press, a toggle | the control | small | press scale, colour change |
+| a value saved | the field or the row | small | a tick draws itself, then fades |
+| a number grows | the counter | small | the number counts up |
+| a wrong value | the field | small | one soft shake and the error text; nothing playful |
+| a task done | the button that finished it | medium | thumb up or stars from the button |
+| a like, a thanks | the like button or the message | medium | hearts rise from it |
+| someone is typing or thinking | the avatar or the video tile | status | a bubble with dots until it ends |
+| a character laughs, has an idea | the character | medium | laugh bubbles, a bulb bubble |
+| the end of a big goal | the whole screen | big | one burst for the session: confetti or stars |
 
-Words come from the live transcript of the call. Test the word patterns in every language of the
-product, including words that must not match ("Хаос", "Have a look").
+Signals come from the product: the response of a request, a tool call, a live transcript, a state
+change. Words from a transcript need tests in every language of the product, including words that
+must not match ("Хаос", "Have a look").
 
-## 2. Look
+## 2. Strength follows importance
 
-- **Clear glass.** A mostly transparent ball with a coloured rim (pink at the bottom right, blue at
-  the top left), a white light spot at the top left and a small reflection at the bottom right. The
-  face and the background show through. A dense, dark ball looks like a button, not a bubble.
-- **A readable glyph.** White glyph or word with a tight dark shadow and a soft wide one, so it
-  reads on a light window. No text longer than one short word.
-- **Depth.** Flying items get a random depth: near ones bigger, sharp, slower; far ones smaller,
-  blurred 1-2 px, a little transparent.
-- **Rounded shapes.** Stars and hearts with rounded corners and a light spot, never sharp default
-  glyphs.
+- **Small** answers every action: under 300 ms, on the element itself, no particles.
+- **Medium** marks a result the person worked for: particles or a bubble from the element, about
+  1.5-2.5 s.
+- **Status** lasts as long as the state: a thinking bubble, typing dots, a speaking wave.
+- **Big** is rare: the end of a lesson, a first publish, a level. At most one per session or flow.
 
-## 3. Motion
+Too many medium and big reactions turn into noise; count them on a typical path through the
+product. Errors and money get only small, calm answers.
 
-- Bubbles rise from the head with two small bubbles between, with a spring (overshoot, then
-  settle), float a little and pop into 8-10 droplets.
-- Flying items start small, grow with the spring, rise with a slow sway and a slight turn, fade in
-  the last third.
-- Stars burst from the centre outwards and fall a little, like a small firework.
-- The thinking bubble appears after a pause of about 0.6 s, so a quick answer does not make it
-  blink, and it leaves by itself after about 12 s with no answer.
+## 3. Places
 
-## 4. Place and size
+- **On the element:** the control or the field changes itself. No extra layer.
+- **From the element:** particles start at the element's rectangle (top edge for rising things,
+  centre for bursts) and stay inside the nearest frame or panel.
+- **Over a person or a character** (a video tile, an avatar, a mascot): bubbles rise from the head
+  at the side; laugh bubbles fly at the sides of the face; hearts start at the chest. Keep the eyes
+  and the mouth free.
+- **The whole screen:** only for a big moment, behind nothing the person must press.
 
-- Sizes are parts of the frame, so one engine works in a big lesson view and a small tile.
-- Keep the eyes and the mouth free: bubbles go above the head at the side, laugh bubbles at the sides
-  of the face, hearts start at the chest.
-- Keep away from labels in the corners of the frame.
+## 4. Look
 
-## 5. Rules of use
+- **Clear glass** for bubbles: mostly transparent, a coloured rim (pink at the bottom right, blue at
+  the top left), a white light spot at the top left, a small reflection at the bottom right. What is
+  behind shows through. A dense, dark ball looks like a button.
+- **A readable glyph** inside: white, a tight dark shadow and a soft wide one, so it reads on a light
+  background. One short word at most.
+- **Depth** for particles: near ones bigger, sharp and slower; far ones smaller, blurred 1-2 px,
+  a little transparent.
+- **Rounded shapes**: stars and hearts with round corners and a light spot, never sharp default glyphs.
+- On a light page with no video, the same glass needs a little more tint on the rim; check it on the
+  lightest background of the product.
 
+## 5. Motion
+
+- A spring on entry: overshoot, then settle.
+- Bubbles float a little and pop into 8-10 droplets.
+- Rising particles start small, grow, sway slowly with a slight turn and fade in the last third.
+- Bursts go out from the origin and fall a little, like a small firework.
+- A status bubble appears after a pause of about 0.6 s, so a quick answer does not make it blink, and
+  leaves by itself after a time limit.
+
+## 6. Size
+
+Sizes are parts of the frame or of the origin element, so one engine works in a big view, a small
+tile and next to a button. Keep particles away from labels in the corners.
+
+## 7. Rules of use
+
+- A reaction never replaces the information: the result, the error or the saved state is still on
+  the screen in words or in the UI.
 - One reaction of a kind every few seconds: two "ha-ha" in one line are one laugh.
-- A reaction never replaces the information: a solved task still shows its result on the screen.
-- With reduced motion, reactions appear and leave without travel.
-- Show them to the user in motion on a demo page before they go into the product.
+- A status that matters for a screen reader gets `role="status"` and a short label; decoration is
+  `aria-hidden`.
+- With reduced motion, reactions appear and leave without travel; status bubbles stay still.
+- No sound unless the product already has sound and the person turned it on.
+- Show reactions to the user in motion on a demo page before they go into the product.

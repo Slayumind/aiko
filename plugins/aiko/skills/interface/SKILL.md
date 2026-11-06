@@ -1,6 +1,6 @@
 ---
 name: interface
-description: Design, audit and animate web interfaces that look made by a designer, not generated - read the screen first, find the signs of AI-looking UI, keep the look of the product it lives in, then add motion that explains what changed and reactions like the ones in Mac video calls (glass bubbles, hearts, stars, a laugh). Proves motion with measured frames instead of a feeling. Use when building or reshaping a page, a screen or a component, when a UI "looks like AI made it", when screens change with a cut and should move, when a character, a tutor or a video tile needs to show feelings, or when the user asks for animations, transitions, micro-interactions or "make it feel alive".
+description: Design, audit and animate web interfaces that look made by a designer, not generated - read the screen first, find the signs of AI-looking UI, keep the look of the product it lives in, then add motion that explains what changed and a reaction to every event at the place it happened (a tick on a saved field, stars from a button, hearts from a like, glass bubbles over an avatar or a video like in Mac video calls). Proves motion with measured frames instead of a feeling. Use when building or reshaping a page, a screen or a component, when a UI "looks like AI made it", when screens change with a cut and should move, when an action, a result, a status or a character needs a visible answer, or when the user asks for animations, transitions, micro-interactions or "make it feel alive".
 ---
 
 # aiko interface
@@ -78,26 +78,24 @@ Motion is the strongest part of this skill. Full recipes: [references/motion.md]
 
 ## 5. Reactions
 
-A character, a tutor or a video tile shows what it feels and does without text, like the reactions
-in Mac video calls. Text has to be seen and read; a glass bubble is seen out of the corner of the eye.
-Full guide: [references/reactions.md](references/reactions.md). Engine: `scripts/reactions.js` and
-`scripts/reactions.css`, no framework. Open `scripts/demo.html` to see all of them.
+Every event that matters gets an answer at the place where it happened, seen rather than read: a
+tick on a saved field, stars from the button that finished a task, hearts from a like, a thinking
+bubble over an avatar or a video tile, a laugh over a character. Text has to be seen and read; a
+reaction is caught out of the corner of the eye. Full guide:
+[references/reactions.md](references/reactions.md). Engine: `scripts/reactions.js` and
+`scripts/reactions.css`, no framework, any element can be the origin. `scripts/demo.html` plays them.
 
-| Reaction | Looks like | Typical signal |
-|---|---|---|
-| think | clear glass bubble with three dots rises from the head, pops when speech starts | the user stopped speaking, the answer has not started |
-| laugh | small glass bubbles with "ha" fly out at the sides of the face | "ha-ha", "jaja" in the character's line |
-| yes | glass bubble with a thumb up | a task is accepted |
-| idea | glass bubble with a light bulb | the character changes something on request |
-| stars | rounded golden stars burst from the centre | a task solved with no hints |
-| love | glossy hearts of different depth rise from below | the user says thanks or that they like it |
-
-Rules that made them look right: clear glass with a coloured rim and a light spot, so the face shows
-through; a soft shadow on the glyph so it reads on a light window; a spring on entry (overshoot, then
-settle); a pop into droplets on exit; near items bigger and sharp, far items smaller and a little
-blurred; sizes in parts of the frame, so one engine works in a big view and a small tile; bubbles
-never cover the eyes or the mouth; one reaction of a kind every few seconds. Every reaction needs a
-signal the page already has; a reaction with no signal is a mockup, mark it so.
+1. **Event map first.** List the events of the screen, where each happens and how important it is.
+   No event, no reaction; a reaction with no signal is a mockup, mark it so.
+2. **Strength follows importance.** Small (on the element, under 300 ms) for every action; medium
+   (a burst or a bubble from the element) for a result the person worked for; status (dots, a
+   thinking bubble) while a state lasts; big (the whole screen) once per session at most. Errors
+   and money get only small, calm answers.
+3. **Look and motion.** Clear glass with a coloured rim and a light spot; a glyph with a soft shadow;
+   rounded stars and hearts; depth for particles; a spring on entry, a pop into droplets on exit.
+   Sizes are parts of the frame or the origin, so one engine fits a big view, a tile and a button.
+4. **Rules.** A reaction never replaces the information. One of a kind every few seconds. Faces keep
+   the eyes and the mouth free.
 
 ## 6. Prove it
 

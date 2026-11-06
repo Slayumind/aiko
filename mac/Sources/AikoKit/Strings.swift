@@ -376,7 +376,7 @@ public enum Strings {
         "SectionSkills": ("SKILLS · {0}", "НАВЫКИ · {0}"),
         "SkillDomainProjects": ("PROJECT MANAGEMENT", "УПРАВЛЕНИЕ ПРОЕКТАМИ"),
         "SkillDomainGames": ("GAME DEVELOPMENT", "РАЗРАБОТКА ИГР"),
-        "SkillAikoInterface": ("Web screens that look designed, not generated: an audit, the product's own look, motion and reactions like in Mac video calls.", "Веб-экраны, которые выглядят сделанными дизайнером: аудит, свой вид продукта, анимации и реакции как в звонках на Mac."),
+        "SkillAikoInterface": ("Web screens that look designed, not generated: an audit, the product's own look, motion and a visible answer to every event.", "Веб-экраны, которые выглядят сделанными дизайнером: аудит, свой вид продукта, анимации и видимый ответ на каждое событие."),
         "SkillAikoCopy": ("Texts that sound like a person wrote them: UI, README, release notes. Russian and English.", "Тексты, которые звучат как написанные человеком: интерфейс, README, заметки к релизу. На русском и английском."),
         "SkillAikoReleaseGate": ("Checks a release before it ships: what can't be undone, how to roll back, GO or NO-GO.", "Проверяет релиз до выката: что необратимо, как откатить, GO или NO-GO."),
         "SkillAikoDocsHygiene": ("Keeps project docs honest: each fact in one place, a log of decisions, contradictions found.", "Держит документы проекта в порядке: факт в одном месте, журнал решений, найденные противоречия."),
