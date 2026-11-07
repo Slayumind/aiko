@@ -117,8 +117,9 @@ sealed class VoiceDictation
 
         if (_state.Phase == VoicePhase.Idle && before != VoicePhase.Idle)
         {
-            // Esc, a lost mic, or the end: the recording is over either way.
-            var dropped = cue != VoiceCue.Finished;
+            // Esc, a lost mic, a refusal of OpenAI or the end: the recording is over either way. Only
+            // Esc and a lost mic drop the words; a refusal keeps what came back before it (D-405).
+            var dropped = !VoiceInput.KeepsText(cue);
             _recording?.Drop();
             _recording = null;
             _input.EndDictation(dropped ? null : _text.Text);
@@ -223,11 +224,12 @@ sealed class VoiceDictation
         }
     });
 
-    private void Failed(Recording from) => _window.BeginInvoke(() =>
+    /// OpenAI refused: why, as a cue (D-405). The phrases it already sent back stay.
+    private void Failed(Recording from, VoiceCue why) => _window.BeginInvoke(() =>
     {
         if (from == _recording)
         {
-            Cue(VoiceCue.CloudFailed);
+            Cue(why);
         }
     });
 
@@ -327,10 +329,11 @@ sealed class VoiceDictation
         /// phrase by phrase (D-317).
         private async Task WorkWithOpenAI()
         {
-            await using var cloud = await CloudRecognizer.Open(hint, _dropped.Token).ConfigureAwait(false);
+            int? refused = null;
+            await using var cloud = await CloudRecognizer.Open(hint, _dropped.Token, refused: status => refused = status).ConfigureAwait(false);
             if (cloud is null)
             {
-                owner.Failed(this);
+                owner.Failed(this, VoiceInput.CloudCue(null, refused));
                 return;
             }
 
@@ -369,7 +372,7 @@ sealed class VoiceDictation
             var text = cloud.Problem is null ? await cloud.Finish().ConfigureAwait(false) : null;
             if (text is null)
             {
-                owner.Failed(this);
+                owner.Failed(this, VoiceInput.CloudCue(cloud.Problem, null));
             }
             else
             {

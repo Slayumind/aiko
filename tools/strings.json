@@ -3428,5 +3428,19 @@
       "OpenAI did not take the recording. Check the key and the connection.",
       "OpenAI не принял запись. Проверь ключ и соединение."
     ]
+  ],
+  [
+    "VoiceCloudNoMoney",
+    [
+      "The OpenAI account is out of money. Top it up, or switch to recognition on this computer.",
+      "На счёте OpenAI кончились деньги. Пополни его или включи распознавание на компьютере."
+    ]
+  ],
+  [
+    "VoiceCloudBusy",
+    [
+      "OpenAI got too many requests and asks to wait. Try again in a minute.",
+      "OpenAI получил слишком много запросов и просит подождать. Попробуй через минуту."
+    ]
   ]
 ]

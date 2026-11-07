@@ -49,6 +49,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - Your own settings of Claude Code, such as CLAUDE_CODE_GIT_BASH_PATH, reach the sessions in the
   terminal.
 - Renaming an environment keeps its sessions, also with the window open.
+- If OpenAI refuses voice input halfway, the words it already wrote stay in the field. When the
+  account of the key is out of money, Aiko says so instead of asking you to check the key.
 - The bridge no longer leaves temporary files next to the limit snapshots, and Aiko clears the old
   ones when it starts.
 

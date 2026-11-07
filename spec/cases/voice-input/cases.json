@@ -1,5 +1,5 @@
 {
-  "comment": "Voice input in the field (D-313, D-315). Two presses: press, speak, press. Listening is shown from the first sound, not from the press (D-314). A press with no model or no key shows a line above the field and starts nothing. Esc drops the recording. When OpenAI fails, the recording is dropped and a line above the field says so (D-317). The button is red from the press to the second press; the wave of the sound under the field moves only while listening (D-319).",
+  "comment": "Voice input in the field (D-313, D-315). Two presses: press, speak, press. Listening is shown from the first sound, not from the press (D-314). A press with no model or no key shows a line above the field and starts nothing. Esc drops the recording. When OpenAI fails, the recording ends, the phrases it already sent back stay in the field, and a line above the field says why: no money on the key, too many requests, or any other refusal (D-317, D-405). The button is red from the press to the second press; the wave of the sound under the field moves only while listening (D-319).",
   "next": [
     { "name": "voice turned off ignores a press", "from": ["Off", "None"], "cue": "Press", "ready": "Ready", "to": ["Off", "None"] },
     { "name": "a press opens the mic", "from": ["Idle", "None"], "cue": "Press", "ready": "Ready", "to": ["Warming", "None"] },
@@ -23,7 +23,29 @@
     { "name": "OpenAI failed while listening", "from": ["Listening", "None"], "cue": "CloudFailed", "ready": "Ready", "to": ["Idle", "CloudFailed"] },
     { "name": "OpenAI failed on the last phrase", "from": ["Finishing", "None"], "cue": "CloudFailed", "ready": "Ready", "to": ["Idle", "CloudFailed"] },
     { "name": "a late failure after the end changes nothing", "from": ["Idle", "None"], "cue": "CloudFailed", "ready": "Ready", "to": ["Idle", "None"] },
-    { "name": "a press that works clears the failure", "from": ["Idle", "CloudFailed"], "cue": "Press", "ready": "Ready", "to": ["Warming", "None"] }
+    { "name": "a press that works clears the failure", "from": ["Idle", "CloudFailed"], "cue": "Press", "ready": "Ready", "to": ["Warming", "None"] },
+    { "name": "no money on the key while listening", "from": ["Listening", "None"], "cue": "CloudNoMoney", "ready": "Ready", "to": ["Idle", "CloudNoMoney"] },
+    { "name": "no money on the key at the start", "from": ["Warming", "None"], "cue": "CloudNoMoney", "ready": "Ready", "to": ["Idle", "CloudNoMoney"] },
+    { "name": "too many requests on the last phrase", "from": ["Finishing", "None"], "cue": "CloudBusy", "ready": "Ready", "to": ["Idle", "CloudBusy"] },
+    { "name": "a late refusal after the end changes nothing", "from": ["Idle", "None"], "cue": "CloudNoMoney", "ready": "Ready", "to": ["Idle", "None"] },
+    { "name": "a press that works clears the line about money", "from": ["Idle", "CloudNoMoney"], "cue": "Press", "ready": "Ready", "to": ["Warming", "None"] }
+  ],
+  "cloudCue": [
+    { "name": "the error event says the account is empty", "code": "insufficient_quota", "status": null, "cue": "CloudNoMoney" },
+    { "name": "the error event asks to slow down", "code": "rate_limit_exceeded", "status": null, "cue": "CloudBusy" },
+    { "name": "the connection is refused with 429 and no code", "code": null, "status": 429, "cue": "CloudNoMoney" },
+    { "name": "the connection is refused with 401", "code": null, "status": 401, "cue": "CloudFailed" },
+    { "name": "another error code", "code": "invalid_api_key", "status": null, "cue": "CloudFailed" },
+    { "name": "the connection broke", "code": "WebSocketException", "status": null, "cue": "CloudFailed" },
+    { "name": "nothing is known", "code": null, "status": null, "cue": "CloudFailed" }
+  ],
+  "keepsText": [
+    { "cue": "Finished", "keeps": true },
+    { "cue": "CloudFailed", "keeps": true },
+    { "cue": "CloudNoMoney", "keeps": true },
+    { "cue": "CloudBusy", "keeps": true },
+    { "cue": "Cancel", "keeps": false },
+    { "cue": "NoMicrophone", "keeps": false }
   ],
   "lines": [
     { "phase": "Off", "seconds": 0, "engine": "Local", "word": "None", "time": null, "where": null, "cancel": false, "button": "Hidden", "wave": false },

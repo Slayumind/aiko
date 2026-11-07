@@ -44,6 +44,31 @@ struct VoiceCaseTests {
     }
 
     @Test
+    func aRefusalOfOpenAIReadsAsTheTableSays() {
+        for row in SpecCases.json("voice-input")["cloudCue"]?.arrayValue ?? [] {
+            guard let cue = row["cue"]?.stringValue.flatMap(VoiceCue.init(rawValue:)) else {
+                Issue.record("unreadable row in voice-input")
+                continue
+            }
+
+            let status = row["status"]?.int64Value.map { Int($0) }
+            #expect(VoiceInput.cloudCue(code: row["code"]?.stringValue, status: status) == cue, "\(row["name"]?.stringValue ?? "")")
+        }
+    }
+
+    @Test
+    func onlyEscAndALostMicDropTheWords() {
+        for row in SpecCases.json("voice-input")["keepsText"]?.arrayValue ?? [] {
+            guard let cue = row["cue"]?.stringValue.flatMap(VoiceCue.init(rawValue:)) else {
+                Issue.record("unreadable row in voice-input")
+                continue
+            }
+
+            #expect(VoiceInput.keepsText(cue) == (row["keeps"]?.boolValue ?? false), "\(cue)")
+        }
+    }
+
+    @Test
     func theClockCountsMinutesAndSeconds() {
         for row in SpecCases.json("voice-input")["clock"]?.arrayValue ?? [] {
             #expect(VoiceInput.clock(row["seconds"]?.doubleValue ?? 0) == row["text"]?.stringValue)
