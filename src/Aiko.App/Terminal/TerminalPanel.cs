@@ -962,22 +962,7 @@ sealed class TerminalPanel : UserControl
 
     private UIElement Row(SessionRow row, string folder, bool selected, DateTimeOffset now)
     {
-        var top = new DockPanel();
-        var mark = Mark(row.State);
-        DockPanel.SetDock(mark, Dock.Right);
-        top.Children.Add(mark);
-
-        // What runs in the session (the mockup of D-362): the mark of Claude Code or "$".
-        UIElement kind = row.Kind == SessionKind.Shell
-            ? Mono("$", "Muted")
-            : Marks.Line("M6,1 L6,11 M1,6 L11,6 M2.5,2.5 L9.5,9.5 M9.5,2.5 L2.5,9.5");
-        var kindBox = new Border { Width = 14, Margin = new Thickness(0, 0, 8, 0), Child = kind };
-        ((FrameworkElement)kind).HorizontalAlignment = HorizontalAlignment.Center;
-        DockPanel.SetDock(kindBox, Dock.Left);
-        top.Children.Add(kindBox);
-        var name = Text(row.Name, "TextName", "Ink", FontWeights.Normal);
-        name.TextTrimming = TextTrimming.CharacterEllipsis;
-        top.Children.Add(name);
+        var (lines, top, name) = RowLines(row, now, whole: false);
         _renameStarts.Add(() => Rename(row, top, name));
         _rowNames.Add(row.Name);
 
@@ -990,18 +975,6 @@ sealed class TerminalPanel : UserControl
                 Rename(row, top, name);
             }
         };
-
-        var lines = new StackPanel();
-        lines.Children.Add(top);
-        var second = SecondLine(row, now);
-        if (second.Length > 0)
-        {
-            var line = Text(second, "TextSmall", "Muted", FontWeights.Normal);
-            line.TextTrimming = TextTrimming.CharacterEllipsis;
-            // Under the name, past the mark of the kind.
-            line.Margin = new Thickness(22, 3, 0, 0);
-            lines.Children.Add(line);
-        }
 
         var hover = new Border { CornerRadius = new CornerRadius(10), Background = Tokens.Brush("HoverLayer"), Opacity = 0 };
         var face = new Grid();
@@ -1020,7 +993,7 @@ sealed class TerminalPanel : UserControl
             ContextMenu = RowMenu(row.Id, () => Rename(row, top, name)),
         };
         KeepLit(back, hover, "row:" + row.Id);
-        _drag.Watch(back, row.Id, folder);
+        _drag.Watch(back, row.Id, folder, () => RowLines(row, now, whole: true).Lines);
         back.MouseLeftButtonUp += (_, _) =>
         {
             // The click that lets a dragged row go opens nothing.
@@ -1033,6 +1006,47 @@ sealed class TerminalPanel : UserControl
             RowPicked?.Invoke(row.Id);
         };
         return back;
+    }
+
+    /// What a row says: the kind, the name and the state on top, the time or the deed under them.
+    /// whole: for the card that is dragged, with the name in full instead of cut to the list.
+    private static (StackPanel Lines, DockPanel Top, TextBlock Name) RowLines(SessionRow row, DateTimeOffset now, bool whole)
+    {
+        var top = new DockPanel();
+        var mark = Mark(row.State);
+        DockPanel.SetDock(mark, Dock.Right);
+        top.Children.Add(mark);
+
+        // What runs in the session (the mockup of D-362): the mark of Claude Code or "$".
+        UIElement kind = row.Kind == SessionKind.Shell
+            ? Mono("$", "Muted")
+            : Marks.Line("M6,1 L6,11 M1,6 L11,6 M2.5,2.5 L9.5,9.5 M9.5,2.5 L2.5,9.5");
+        var kindBox = new Border { Width = 14, Margin = new Thickness(0, 0, 8, 0), Child = kind };
+        ((FrameworkElement)kind).HorizontalAlignment = HorizontalAlignment.Center;
+        DockPanel.SetDock(kindBox, Dock.Left);
+        top.Children.Add(kindBox);
+        var name = Text(row.Name, "TextName", "Ink", FontWeights.Normal);
+        name.TextTrimming = TextTrimming.CharacterEllipsis;
+        if (whole)
+        {
+            name.Margin = new Thickness(0, 0, 12, 0);
+        }
+
+        top.Children.Add(name);
+
+        var lines = new StackPanel();
+        lines.Children.Add(top);
+        var second = SecondLine(row, now);
+        if (second.Length > 0)
+        {
+            var line = Text(second, "TextSmall", "Muted", FontWeights.Normal);
+            line.TextTrimming = TextTrimming.CharacterEllipsis;
+            // Under the name, past the mark of the kind.
+            line.Margin = new Thickness(22, 3, 0, 0);
+            lines.Children.Add(line);
+        }
+
+        return (lines, top, name);
     }
 
     private ContextMenu RowMenu(string id, Action rename)
