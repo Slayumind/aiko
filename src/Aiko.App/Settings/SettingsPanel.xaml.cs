@@ -145,6 +145,9 @@ public partial class SettingsPanel : UserControl
 
     // ---- the menu ----
 
+    /// The room between the groups of the menu.
+    private const double GroupGap = 20;
+
     private void BuildNav()
     {
         _buildingNav = true;
@@ -153,13 +156,10 @@ public partial class SettingsPanel : UserControl
         // The order of D-374: General, the environments, Terminal, Personality, Privacy.
         Nav.Children.Add(NavItem(GeneralPageKey, Strings.NavGeneral, null));
 
+        // The three groups are told apart by room alone, with no label or line (D-404).
+        Nav.Children.Add(new Border { Height = GroupGap });
+
         var settings = _editor.Current;
-        Nav.Children.Add(new TextBlock
-        {
-            Text = Strings.SectionEnvironments,
-            Style = (Style)FindResource("SectionLabel"),
-            Margin = new Thickness(10, 4, 0, 6),
-        });
 
         foreach (var environment in Ordered(settings))
         {
@@ -178,7 +178,7 @@ public partial class SettingsPanel : UserControl
             Nav.Children.Add(AddSecondSlot());
         }
 
-        Nav.Children.Add(new Border { Height = 1, Background = Tokens.Brush("Hairline"), Margin = new Thickness(10, 8, 10, 8) });
+        Nav.Children.Add(new Border { Height = GroupGap });
 
         var app = SettingsStore.Load();
         Nav.Children.Add(NavItem(TerminalPageKey, Strings.NavTerminal, app.VoiceInput ? Strings.NavVoiceOn : Strings.NavVoiceOff));
