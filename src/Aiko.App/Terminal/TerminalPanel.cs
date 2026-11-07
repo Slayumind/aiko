@@ -32,7 +32,6 @@ sealed class TerminalPanel : UserControl
     private readonly StackPanel _rows = new();
 
     /// The rows with a layer over them for the line of a drag (D-400).
-    private readonly Grid _rowsArea = new();
     private readonly RowDrag _drag;
     private readonly Grid _main = new();
     private readonly Popup _listPopup = new() { StaysOpen = false, AllowsTransparency = true, Placement = PlacementMode.Bottom };
@@ -133,10 +132,7 @@ sealed class TerminalPanel : UserControl
 
     public TerminalPanel()
     {
-        var dragLayer = new Canvas();
-        _rowsArea.Children.Add(_rows);
-        _rowsArea.Children.Add(dragLayer);
-        _drag = new RowDrag(_rows, dragLayer);
+        _drag = new RowDrag(_rows);
         _drag.Moved += (id, before) => RowMoved?.Invoke(id, before);
 
         // The list held still while a row was dragged; the latest view comes now.
@@ -339,10 +335,10 @@ sealed class TerminalPanel : UserControl
     /// hidden while the settings are open.
     public void ShowSettings(FrameworkElement? settings)
     {
-        // The way back is the same button as "New session" under the list, and the menu of the
-        // settings is as wide as the list, so the edge between them does not move.
-        // The first run has no session to go back to and nothing to switch: its title bar keeps only
-        // the window buttons (D-394).
+        // The way back is in the title bar: a pill, the lit gear, or Esc, which the tip of the gear
+        // names. The menu of the settings is as wide as the list, so the edge between them does
+        // not move. The first run has no session to go back to and nothing to switch: its title bar
+        // keeps only the window buttons (D-394).
         if (settings is SettingsPanel { IsFirstRun: true })
         {
             _gear.Visibility = Visibility.Collapsed;
@@ -351,12 +347,7 @@ sealed class TerminalPanel : UserControl
         }
         else if (settings is SettingsPanel panel)
         {
-            var key = Mono("Esc", "Muted");
-            key.Margin = new Thickness(12, 0, 0, 0);
-            var back = Flat(Strings.SettingsBack, panel.Back, ghost: false, aside: key, mark: "M4,0 L0,5 L4,10");
-            back.HorizontalAlignment = HorizontalAlignment.Stretch;
-            back.HorizontalContentAlignment = HorizontalAlignment.Stretch;
-            panel.PlaceInWindow(back, ListWidth);
+            panel.FitMenu(ListWidth);
         }
 
         _settingsHost.Content = settings;
@@ -364,6 +355,7 @@ sealed class TerminalPanel : UserControl
         _settingsHost.Visibility = shown ? Visibility.Visible : Visibility.Collapsed;
         _body.Visibility = shown ? Visibility.Hidden : Visibility.Visible;
         _gearLit.Visibility = shown ? Visibility.Visible : Visibility.Collapsed;
+        _gear.ToolTip = shown ? Strings.SettingsCloseTip : Strings.Settings;
         if (shown && Motion.IsOn)
         {
             _settingsHost.BeginAnimation(OpacityProperty, new System.Windows.Media.Animation.DoubleAnimation(0, 1, Motion.Expand) { EasingFunction = Motion.Standard });
@@ -841,7 +833,7 @@ sealed class TerminalPanel : UserControl
             HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
             Focusable = false,
             Padding = new Thickness(8, 4, 8, 0),
-            Content = _rowsArea,
+            Content = _rows,
         });
 
         if (_narrow)

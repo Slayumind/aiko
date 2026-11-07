@@ -34,8 +34,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - **Everything in one window.** A click on the tray icon or the island opens it, and the menu of the
   icon keeps Open, Settings and Quit. Each environment is a pill in the title bar with its ring and
   percent; the arrow opens the limits of all of them in place, says how fresh they are and offers
-  Sign in when an account needs it. The gear and Ctrl+, open the settings right there, and Esc takes
-  you back to the same session; the project folders are on the page of their environment. The first
+  Sign in when an account needs it. The gear and Ctrl+, open the settings right there; Esc or a pill takes
+  you back to the sessions; the project folders are on the page of their environment. The first
   run happens in the same window, one step at a time. The card of limits and the settings window are
   gone.
 - **The envoy skill.** Send Aiko to help a colleague in Slack or another work chat. You give her the

@@ -66,7 +66,7 @@ public enum Strings {
         "MenuOpen": ("Open", "Открыть"),
         "MenuRefresh": ("Refresh limits", "Обновить лимиты"),
         "Settings": ("Settings", "Настройки"),
-        "SettingsBack": ("Back to the session", "К сессии"),
+        "SettingsCloseTip": ("Close settings · Esc", "Закрыть настройки · Esc"),
         "Close": ("Close", "Закрыть"),
         "QuitAiko": ("Quit Aiko", "Выйти из Aiko"),
         "CheckForUpdates": ("Check for updates", "Проверить обновления"),
@@ -610,8 +610,8 @@ public enum Strings {
     /// Settings
     public static var settings: String { Strings.get("Settings") }
 
-    /// Back to the session
-    public static var settingsBack: String { Strings.get("SettingsBack") }
+    /// Close settings · Esc
+    public static var settingsCloseTip: String { Strings.get("SettingsCloseTip") }
 
     /// Close
     public static var close: String { Strings.get("Close") }

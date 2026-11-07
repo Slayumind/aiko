@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -16,6 +17,10 @@ namespace Aiko.App;
 /// The list is drawn anew on every change of a session, which would take the dragged row away in
 /// the middle of the drag, so the panel holds its new view until the drag ends. The rows are drawn
 /// in the new order then, where the slide has already put them, so nothing jumps.
+///
+/// The copy flies in a popup of its own, over the whole window: the terminal is a window of its
+/// own inside ours, and nothing drawn in our window can cover it. The popup lives only while a row
+/// is dragged.
 [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763")]
 sealed class RowDrag
 {
@@ -27,8 +32,18 @@ sealed class RowDrag
     private static readonly Duration Slide = new(TimeSpan.FromMilliseconds(250));
     private static readonly Duration Landing = new(TimeSpan.FromMilliseconds(180));
 
+    /// Room around the copy inside its popup, for the tilt and the shadow.
+    private const double Room = 16;
+
     private readonly Panel _rows;
-    private readonly Canvas _layer;
+    private readonly Popup _layer = new()
+    {
+        AllowsTransparency = true,
+        Placement = PlacementMode.Relative,
+        StaysOpen = true,
+        IsHitTestVisible = false,
+        Focusable = false,
+    };
     private readonly List<(FrameworkElement Row, string Id, string Folder)> _known = [];
     private (FrameworkElement Row, string Id, string Folder, Point From)? _press;
 
@@ -41,12 +56,11 @@ sealed class RowDrag
     private bool _landing;
     private Point _grab;
 
-    /// rows: the panel of the list. layer: a canvas laid over it, for the copy that is dragged.
-    public RowDrag(Panel rows, Canvas layer)
+    /// rows: the panel of the list.
+    public RowDrag(Panel rows)
     {
         _rows = rows;
-        _layer = layer;
-        _layer.IsHitTestVisible = false;
+        _layer.PlacementTarget = rows;
 
         _rows.MouseMove += OnMove;
         _rows.MouseLeftButtonUp += OnUp;
@@ -109,9 +123,9 @@ sealed class RowDrag
 
         _copy = Copy(press.Row);
         _grab = new Point(press.From.X, press.From.Y - _folder[_from].Top);
-        Canvas.SetLeft(_copy, 0);
-        Canvas.SetTop(_copy, _folder[_from].Top);
-        _layer.Children.Add(_copy);
+        _layer.Child = new Border { Padding = new Thickness(Room), Background = Brushes.Transparent, Child = _copy };
+        MoveCopy(0, _folder[_from].Top);
+        _layer.IsOpen = true;
         press.Row.Opacity = PaleOpacity;
 
         Dragging = true;
@@ -152,8 +166,7 @@ sealed class RowDrag
         }
 
         var pointer = e.GetPosition(_rows);
-        Canvas.SetLeft(_copy, pointer.X - _grab.X);
-        Canvas.SetTop(_copy, pointer.Y - _grab.Y);
+        MoveCopy(pointer.X - _grab.X, pointer.Y - _grab.Y);
 
         // The place is where the middle of the copy is: past every row whose middle is above it.
         var middle = pointer.Y - _grab.Y + (_folder[_from].Height / 2);
@@ -260,7 +273,8 @@ sealed class RowDrag
         {
             Dragging = false;
             _landing = false;
-            _layer.Children.Remove(copy);
+            _layer.IsOpen = false;
+            _layer.Child = null;
             _copy = null;
             row.Row.ClearValue(UIElement.OpacityProperty);
             if (drop && _to != _from)
@@ -281,11 +295,11 @@ sealed class RowDrag
         }
 
         // Where the pale place will stand once its slide ends: the new top of the row.
-        var landing = drop ? row.Top + PlaceShift() : row.Top;
+        var landing = (drop ? row.Top + PlaceShift() : row.Top) - Room;
         var glide = new DoubleAnimation(landing, Landing) { EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut } };
         glide.Completed += (_, _) => Done();
-        copy.BeginAnimation(Canvas.TopProperty, glide);
-        copy.BeginAnimation(Canvas.LeftProperty, new DoubleAnimation(0, Landing) { EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut } });
+        _layer.BeginAnimation(Popup.VerticalOffsetProperty, glide);
+        _layer.BeginAnimation(Popup.HorizontalOffsetProperty, new DoubleAnimation(-Room, Landing) { EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut } });
         if (copy.RenderTransform is RotateTransform tilt)
         {
             tilt.BeginAnimation(RotateTransform.AngleProperty, new DoubleAnimation(0, Landing));
@@ -309,6 +323,15 @@ sealed class RowDrag
         }
 
         return shift;
+    }
+
+    /// The copy at this place of the list: the popup is wider by its room on every side.
+    private void MoveCopy(double left, double top)
+    {
+        _layer.BeginAnimation(Popup.HorizontalOffsetProperty, null);
+        _layer.BeginAnimation(Popup.VerticalOffsetProperty, null);
+        _layer.HorizontalOffset = left - Room;
+        _layer.VerticalOffset = top - Room;
     }
 
     private double Top(FrameworkElement row) => row.TranslatePoint(new Point(0, 0), _rows).Y - row.Margin.Top;

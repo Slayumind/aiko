@@ -109,8 +109,8 @@
   <data name="Settings" xml:space="preserve">
     <value>Settings</value>
   </data>
-  <data name="SettingsBack" xml:space="preserve">
-    <value>Back to the session</value>
+  <data name="SettingsCloseTip" xml:space="preserve">
+    <value>Close settings · Esc</value>
   </data>
   <data name="Close" xml:space="preserve">
     <value>Close</value>

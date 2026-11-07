@@ -129,7 +129,12 @@ sealed class TerminalHost
             Closed?.Invoke();
         };
 
-        _panel.TabPicked += name => Change(_model.ToEnvironment(name, _sessions));
+        // A pill is also the way back from the settings: to the sessions of that environment.
+        _panel.TabPicked += name =>
+        {
+            CloseSettings();
+            Change(_model.ToEnvironment(name, _sessions));
+        };
         _panel.RowPicked += Pick;
         _panel.RowClosed += AskToClose;
         _panel.RowMoved += (id, before) =>
@@ -253,7 +258,6 @@ sealed class TerminalHost
     private SettingsPanel NewSettings(string? page)
     {
         var settings = new SettingsPanel(page);
-        settings.CloseRequested += CloseSettings;
         settings.QuitRequested += () => QuitAsked?.Invoke();
         settings.SettingsChanged += () =>
         {

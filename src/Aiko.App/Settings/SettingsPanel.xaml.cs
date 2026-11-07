@@ -50,8 +50,6 @@ public partial class SettingsPanel : UserControl
         BuildNav();
     }
 
-    /// "Back to the session" and Esc.
-    public event Action? CloseRequested;
     public event Action? QuitRequested;
 
     /// Raised when the window has to come back in another language.
@@ -141,21 +139,9 @@ public partial class SettingsPanel : UserControl
         PageScroll.Content = column;
     }
 
-    /// The way back to the session on top of the menu, and the width of the menu, both from the
-    /// terminal window: its button is the one under the list of sessions, and the menu is as wide
-    /// as that list (D-374).
-    public void PlaceInWindow(FrameworkElement back, double menuWidth)
-    {
-        back.Margin = new Thickness(0, 0, 0, 10);
-        _back = back;
-        NavColumn.Width = new GridLength(menuWidth);
-        BuildNav();
-    }
-
-    /// "Back to the session" and Esc.
-    public void Back() => CloseRequested?.Invoke();
-
-    private FrameworkElement? _back;
+    /// The menu is as wide as the list of sessions in the terminal window, so the edge between
+    /// them does not move (D-374). The way back is in the title bar: a pill, the gear or Esc.
+    public void FitMenu(double menuWidth) => NavColumn.Width = new GridLength(menuWidth);
 
     // ---- the menu ----
 
@@ -163,10 +149,6 @@ public partial class SettingsPanel : UserControl
     {
         _buildingNav = true;
         Nav.Children.Clear();
-        if (_back is not null)
-        {
-            Nav.Children.Add(_back);
-        }
 
         // The order of D-374: General, the environments, Terminal, Personality, Privacy.
         Nav.Children.Add(NavItem(GeneralPageKey, Strings.NavGeneral, null));
