@@ -1502,9 +1502,9 @@
     <value>OpenAI did not take the recording. Check the key and the connection.</value>
   </data>
   <data name="VoiceCloudNoMoney" xml:space="preserve">
-    <value>The OpenAI account is out of money. Top it up, or switch to recognition on this computer.</value>
+    <value>The OpenAI account is out of money.</value>
   </data>
   <data name="VoiceCloudBusy" xml:space="preserve">
-    <value>OpenAI got too many requests and asks to wait. Try again in a minute.</value>
+    <value>OpenAI asks to wait a minute.</value>
   </data>
 </root>

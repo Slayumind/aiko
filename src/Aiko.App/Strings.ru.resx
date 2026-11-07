@@ -1502,9 +1502,9 @@
     <value>OpenAI не принял запись. Проверь ключ и соединение.</value>
   </data>
   <data name="VoiceCloudNoMoney" xml:space="preserve">
-    <value>На счёте OpenAI кончились деньги. Пополни его или включи распознавание на компьютере.</value>
+    <value>На счёте OpenAI кончились деньги.</value>
   </data>
   <data name="VoiceCloudBusy" xml:space="preserve">
-    <value>OpenAI получил слишком много запросов и просит подождать. Попробуй через минуту.</value>
+    <value>OpenAI просит подождать минуту.</value>
   </data>
 </root>

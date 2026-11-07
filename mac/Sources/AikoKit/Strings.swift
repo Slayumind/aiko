@@ -530,8 +530,8 @@ public enum Strings {
         "VoiceKeyNotSaved": ("Windows did not save the key.", "Windows не сохранила ключ."),
         "VoiceKeyWhere": ("Kept in Windows Credential Manager. Removing Aiko erases it.", "Хранится в Диспетчере учётных данных Windows. Удаление Aiko его сотрёт."),
         "VoiceCloudFailed": ("OpenAI did not take the recording. Check the key and the connection.", "OpenAI не принял запись. Проверь ключ и соединение."),
-        "VoiceCloudNoMoney": ("The OpenAI account is out of money. Top it up, or switch to recognition on this computer.", "На счёте OpenAI кончились деньги. Пополни его или включи распознавание на компьютере."),
-        "VoiceCloudBusy": ("OpenAI got too many requests and asks to wait. Try again in a minute.", "OpenAI получил слишком много запросов и просит подождать. Попробуй через минуту."),
+        "VoiceCloudNoMoney": ("The OpenAI account is out of money.", "На счёте OpenAI кончились деньги."),
+        "VoiceCloudBusy": ("OpenAI asks to wait a minute.", "OpenAI просит подождать минуту."),
     ]
 
     /// Session · 5 hours
@@ -2004,9 +2004,9 @@ public enum Strings {
     /// OpenAI did not take the recording. Check the key and the connection.
     public static var voiceCloudFailed: String { Strings.get("VoiceCloudFailed") }
 
-    /// The OpenAI account is out of money. Top it up, or switch to recognition on this computer.
+    /// The OpenAI account is out of money.
     public static var voiceCloudNoMoney: String { Strings.get("VoiceCloudNoMoney") }
 
-    /// OpenAI got too many requests and asks to wait. Try again in a minute.
+    /// OpenAI asks to wait a minute.
     public static var voiceCloudBusy: String { Strings.get("VoiceCloudBusy") }
 }
