@@ -63,6 +63,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - **The copy skill helps with messages to colleagues.** A new part of the skill covers Slack and work
   chats: answer the question that was asked, say why when you give something else, quote a
   colleague instead of retelling, keep a dispute short and check every number before it goes out.
+- **Game skills learned from the research on game AI.** The playtest skill now lets a ladder of
+  agents play, from one that does nothing to a strong search, and measures whether more skill wins
+  more, with guards against the holes such a measure has. The balance skill picks a number such as
+  enemy speed this way: `balance.py depth` reads the runs and names the deepest variant that passes
+  the guards. Game research writes each system as a short rules sheet, counts which rules never fire
+  in a stand, and compares games by the same set of features.
 
 ### Fixed
 

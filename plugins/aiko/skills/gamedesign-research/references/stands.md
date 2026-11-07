@@ -2,17 +2,16 @@
 
 A stand lets the user change the rules of one game's system and watch what happens, step by step.
 
-## Before code: a rules spec per game
+## Before code: a rules sheet per game
 
-For every system the user picked, write a short spec from sources (a research subagent per game
-works well):
+For every system the user picked, write a rules sheet from sources (`rules-sheet.md`; a research
+subagent per game works well). On top of the sheet's sections, note:
 
 - **One step, numbered.** What is read, in which order, what is chosen, what happens when nothing
-  fits.
+  fits. This is the sheet's "Phases and order" written out.
 - **Vocabulary.** Conditions, targets, actions, their costs and effects, with the game's own names.
 - **Presets** the game ships with.
 - **Port decisions.** What the shared sandbox forces you to change, and why.
-- **Sources** for every rule, and "guessed" next to anything that is not in them.
 
 Show the specs to the user before building if any guess changes how the system feels.
 
@@ -49,7 +48,8 @@ Every logic file uses the same wrapper so it runs in both places:
 
 1. `sim-core.js` and one `rules-<game>.js`.
 2. `node test-run.js <game>` — read the printed steps. Fix the rules until the log matches the
-   spec and the sources.
+   sheet and the sources. Then run the sheet's checks: every entity in a rule, every rule fires in
+   some experiment, the end can be reached.
 3. The UI for that game, then the other games.
 4. Screenshot the page, click through every editor, check phone width.
 
@@ -60,6 +60,8 @@ Every logic file uses the same wrapper so it runs in both places:
 - The trace for the selected actor lists every rule checked: fired ✓, failed ✗ with the reason,
   skipped ⊘, not reached —, and follow-ups ↳.
 - Death, success or end states are marked on the scrubber.
+- A small table under the player counts how often each rule fired in this run. Rules at zero are
+  shown, not hidden: a dead rule is a finding about the game or about the port.
 
 ## Editors
 

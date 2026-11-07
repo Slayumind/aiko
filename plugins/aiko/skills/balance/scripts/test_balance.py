@@ -116,6 +116,73 @@ class BudgetTests(unittest.TestCase):
         self.assertEqual(21, report["classes"][0]["total"])
 
 
+def runs(variant, agent, wins, losses, ticks="", rules=""):
+    """Rows of a runs table: `wins` won games and `losses` lost ones."""
+    rows = [{"variant": variant, "agent": agent, "result": "win", "ticks": ticks, "rules": rules}] * wins
+    return rows + [{"variant": variant, "agent": agent, "result": "loss", "ticks": ticks, "rules": rules}] * losses
+
+
+LADDER = ["random", "greedy", "search"]
+
+
+class DepthTests(unittest.TestCase):
+    def test_depth_is_the_smallest_gap_between_neighbours(self):
+        rows = runs("deep", "random", 10, 90) + runs("deep", "greedy", 40, 60) + runs("deep", "search", 80, 20)
+        report = balance.depth(rows, LADDER, min_runs=30)
+        self.assertAlmostEqual(0.30, report[0]["depth"])
+        self.assertEqual([], report[0]["guards"])
+
+    def test_one_big_gap_is_not_depth(self):
+        # Random and greedy play alike; only search wins. Strong against random alone would say 70%.
+        rows = runs("flat", "random", 10, 90) + runs("flat", "greedy", 11, 89) + runs("flat", "search", 80, 20)
+        report = balance.depth(rows, LADDER)
+        self.assertAlmostEqual(0.01, report[0]["depth"])
+        self.assertTrue(any("not apart beyond the noise" in g for g in report[0]["guards"]))
+
+    def test_a_weaker_agent_that_wins_more_turns_the_ladder_upside_down(self):
+        rows = runs("odd", "random", 50, 50) + runs("odd", "greedy", 20, 80) + runs("odd", "search", 90, 10)
+        report = balance.depth(rows, LADDER)
+        self.assertLess(report[0]["depth"], 0)
+        self.assertTrue(any("random beats greedy" in g for g in report[0]["guards"]))
+
+    def test_the_floor_must_never_win(self):
+        rows = (runs("v", "random", 10, 90) + runs("v", "greedy", 40, 60) + runs("v", "search", 80, 20)
+                + runs("v", "nothing", 5, 95))
+        report = balance.depth(rows, LADDER, floor="nothing")
+        self.assertIn("nothing wins 5% of its games", report[0]["guards"])
+
+    def test_a_game_nobody_loses_or_nobody_wins_is_caught(self):
+        won = runs("easy", "random", 40, 0) + runs("easy", "greedy", 40, 0) + runs("easy", "search", 40, 0)
+        lost = runs("hard", "random", 0, 40) + runs("hard", "greedy", 0, 40) + runs("hard", "search", 0, 40)
+        guards = {v["variant"]: v["guards"] for v in balance.depth(won + lost, LADDER)}
+        self.assertIn("nobody on the ladder ever loses", guards["easy"])
+        self.assertIn("nobody on the ladder ever wins", guards["hard"])
+
+    def test_quick_wins_few_rules_and_few_runs_are_named(self):
+        rows = (runs("v", "random", 1, 9, ticks="30", rules="0.4") + runs("v", "greedy", 5, 5, ticks="300")
+                + runs("v", "search", 9, 1, ticks="300"))
+        guards = balance.depth(rows, LADDER, min_runs=30, min_ticks=50, min_rules=0.8)[0]["guards"]
+        self.assertTrue(any("under 30 runs" in g for g in guards))
+        self.assertIn("1 win(s) in under 50 ticks", guards)
+        self.assertIn("at most 40% of the rules fire", guards)
+
+    def test_variants_that_pass_come_first_deepest_first(self):
+        rows = (runs("shallow", "random", 10, 90) + runs("shallow", "greedy", 40, 60) + runs("shallow", "search", 60, 40)
+                + runs("deep", "random", 10, 90) + runs("deep", "greedy", 40, 60) + runs("deep", "search", 80, 20)
+                + runs("broken", "random", 90, 10) + runs("broken", "greedy", 40, 60) + runs("broken", "search", 80, 20))
+        self.assertEqual(["deep", "shallow", "broken"], [v["variant"] for v in balance.depth(rows, LADDER)])
+
+    def test_bad_ladders_and_results_are_refused(self):
+        with self.assertRaises(ValueError):
+            balance.depth(runs("v", "random", 1, 1), ["random"])
+        with self.assertRaises(ValueError):
+            balance.depth(runs("v", "random", 1, 1), LADDER, floor="random")
+        with self.assertRaises(ValueError):
+            balance.depth(runs("v", "stranger", 1, 1), LADDER)
+        with self.assertRaises(ValueError):
+            balance.depth([{"agent": "random", "result": "maybe"}], LADDER)
+
+
 class CommandLineTests(unittest.TestCase):
     def run_main(self, *args):
         out = io.StringIO()
@@ -144,6 +211,19 @@ class CommandLineTests(unittest.TestCase):
             self.assertEqual(0, code)
             self.assertIn("B: 50%, too weak for its cost", out)
             self.assertIn("Dead item: B.", out)
+
+    def test_depth_reads_runs_and_names_the_deepest_variant(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = os.path.join(folder, "runs.csv")
+            with open(path, "w", encoding="utf-8") as handle:
+                handle.write("variant,agent,result\n")
+                for variant, agent, wins, losses in [("a", "random", 1, 39), ("a", "search", 31, 9),
+                                                     ("b", "random", 10, 30), ("b", "search", 15, 25)]:
+                    handle.write(f"{variant},{agent},win\n" * wins + f"{variant},{agent},loss\n" * losses)
+            code, out = self.run_main("depth", path, "--ladder", "random,search")
+            self.assertEqual(0, code)
+            self.assertIn("Deepest variant that passes every guard: a, depth 75%.", out)
+            self.assertIn("b: random and search are not apart beyond the noise", out)
 
     def test_bad_arguments_exit_with_2(self):
         self.assertEqual(2, self.run_main("curve", "--growth", "1.3")[0])
