@@ -168,6 +168,9 @@ public partial class SettingsPanel : UserControl
             Nav.Children.Add(_back);
         }
 
+        // The order of D-374: General, the environments, Terminal, Personality, Privacy.
+        Nav.Children.Add(NavItem(GeneralPageKey, Strings.NavGeneral, null));
+
         var settings = _editor.Current;
         Nav.Children.Add(new TextBlock
         {
@@ -195,19 +198,17 @@ public partial class SettingsPanel : UserControl
 
         Nav.Children.Add(new Border { Height = 1, Background = Tokens.Brush("Hairline"), Margin = new Thickness(10, 8, 10, 8) });
 
+        var app = SettingsStore.Load();
+        Nav.Children.Add(NavItem(TerminalPageKey, Strings.NavTerminal, app.VoiceInput ? Strings.NavVoiceOn : Strings.NavVoiceOff));
+
         if (settings.HasEnvironments)
         {
             var talking = settings.Environments.Count(e => e.Persona);
             Nav.Children.Add(NavItem(PersonalityPageKey, Strings.NavPersonality, talking > 0 ? string.Format(Strings.NavPersonaOn, talking) : Strings.NavPersonaOff));
         }
 
-        var app = SettingsStore.Load();
-        Nav.Children.Add(NavItem(TerminalPageKey, Strings.NavTerminal, app.VoiceInput ? Strings.NavVoiceOn : Strings.NavVoiceOff));
-
         var stats = app.SendStats;
         Nav.Children.Add(NavItem(PrivacyPageKey, Strings.NavPrivacy, stats ? Strings.NavPrivacyStatsOn : Strings.NavPrivacyStatsOff));
-
-        Nav.Children.Add(NavItem(GeneralPageKey, Strings.NavGeneral, null));
 
         _buildingNav = false;
     }
