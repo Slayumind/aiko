@@ -124,7 +124,13 @@ sealed class RowDrag
 
         _copy = Copy(press.Row, press.Card());
         _grab = new Point(press.From.X, press.From.Y - _folder[_from].Top);
-        _layer.Child = new Border { Padding = new Thickness(Room), Background = Brushes.Transparent, Child = _copy };
+        _layer.Child = new Border
+        {
+            Padding = new Thickness(Room),
+            Background = Brushes.Transparent,
+            LayoutTransform = PopupZoom.Of(_rows),
+            Child = _copy,
+        };
         MoveCopy(0, _folder[_from].Top);
         _layer.IsOpen = true;
         press.Row.Opacity = PaleOpacity;

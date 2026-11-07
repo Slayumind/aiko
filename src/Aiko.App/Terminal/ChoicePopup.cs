@@ -69,6 +69,7 @@ sealed class ChoicePopup
 
         _popup.HorizontalOffset = left;
         Light(0);
+        PopupZoom.Fit(_popup);
         _popup.IsOpen = _lines.Count > 0;
     }
 

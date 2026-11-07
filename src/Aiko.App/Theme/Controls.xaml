@@ -527,8 +527,15 @@
     shadow inside the popup. Both styles have no key, so they reach every menu of a window that
     merges this file, the menu of a text field too.
   -->
+  <!-- A tip takes the zoom of the window it opens over (PopupZoom); its look stays the system's. -->
+  <Style TargetType="ToolTip" BasedOn="{StaticResource {x:Type ToolTip}}">
+    <Setter Property="LayoutTransform" Value="{Binding PlacementTarget, RelativeSource={RelativeSource Self}, Converter={x:Static local:PopupZoom.Converter}}" />
+  </Style>
+
   <Style TargetType="ContextMenu">
     <Setter Property="OverridesDefaultStyle" Value="True" />
+    <!-- The zoom of the window the menu opens over (PopupZoom). -->
+    <Setter Property="LayoutTransform" Value="{Binding PlacementTarget, RelativeSource={RelativeSource Self}, Converter={x:Static local:PopupZoom.Converter}}" />
     <Setter Property="HasDropShadow" Value="False" />
     <Setter Property="Template">
       <Setter.Value>

@@ -644,6 +644,7 @@ sealed class TerminalPanel : UserControl
     {
         if (_narrow)
         {
+            PopupZoom.Fit(_listPopup);
             _listPopup.IsOpen = !_listPopup.IsOpen;
             return false;
         }
@@ -683,6 +684,7 @@ sealed class TerminalPanel : UserControl
     {
         if (_narrow)
         {
+            PopupZoom.Fit(_listPopup);
             _listPopup.IsOpen = !_listPopup.IsOpen;
             return;
         }
@@ -839,8 +841,10 @@ sealed class TerminalPanel : UserControl
         if (_narrow)
         {
             SlideList(0);
+            // Drawn anew while open too, so it takes the zoom here and not only on opening.
             _listPopup.Child = new Border
             {
+                LayoutTransform = PopupZoom.Of(_listToggle),
                 Width = ListWidth + 20,
                 MaxHeight = 480,
                 Margin = new Thickness(0, 4, 12, 12),
@@ -1247,6 +1251,7 @@ sealed class TerminalPanel : UserControl
         palette.Width = Math.Max(240, Math.Min(PaletteView.CardWidth, ActualWidth - 32));
         _palettePopup.HorizontalOffset = Math.Max(0, (ActualWidth - palette.Width) / 2 - palette.Margin.Left);
         _palettePopup.VerticalOffset = BarHeight + 8;
+        PopupZoom.Fit(_palettePopup);
         _palettePopup.IsOpen = true;
         Motion.PopIn(palette, above: false);
         palette.FocusField();
