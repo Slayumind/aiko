@@ -414,6 +414,8 @@ public enum Strings {
         "TerminalNewSessionKey": ("Ctrl+Shift+T", "Ctrl+Shift+T"),
         "TerminalGroupNewSession": ("New session of Claude Code in this folder", "Новая сессия Claude Code в этой папке"),
         "TerminalGroupNewShell": ("Command line in this folder", "Командная строка в этой папке"),
+        "TerminalGroupOpenFolder": ("Open the folder", "Открыть папку"),
+        "TerminalFolderGone": ("This folder is no longer on the disk", "Этой папки больше нет на диске"),
         "TerminalPickFolderHint": ("Folder for the new session", "Папка для новой сессии"),
         "TerminalPickFolderKeys": ("↑ ↓ choose · Enter Claude Code · Ctrl+Enter command line · Esc close", "↑ ↓ выбрать · Enter Claude Code · Ctrl+Enter командная строка · Esc закрыть"),
         "TerminalPickOtherFolder": ("Another folder…", "Другая папка…"),
@@ -1650,6 +1652,12 @@ public enum Strings {
 
     /// Command line in this folder
     public static var terminalGroupNewShell: String { Strings.get("TerminalGroupNewShell") }
+
+    /// Open the folder
+    public static var terminalGroupOpenFolder: String { Strings.get("TerminalGroupOpenFolder") }
+
+    /// This folder is no longer on the disk
+    public static var terminalFolderGone: String { Strings.get("TerminalFolderGone") }
 
     /// Folder for the new session
     public static var terminalPickFolderHint: String { Strings.get("TerminalPickFolderHint") }

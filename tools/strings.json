@@ -2618,6 +2618,20 @@
     ]
   ],
   [
+    "TerminalGroupOpenFolder",
+    [
+      "Open the folder",
+      "Открыть папку"
+    ]
+  ],
+  [
+    "TerminalFolderGone",
+    [
+      "This folder is no longer on the disk",
+      "Этой папки больше нет на диске"
+    ]
+  ],
+  [
     "TerminalPickFolderHint",
     [
       "Folder for the new session",

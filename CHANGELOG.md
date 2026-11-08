@@ -33,8 +33,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   While a session starts, a loader stands in place of an empty terminal, and the text keeps a
   little space from the edge.
 - **A new session in two clicks.** Point at a folder in the list: "+" starts Claude Code there and
-  ">_" a command line. "New session" opens a quick pick of the folders you used, latest first; Enter
-  starts Claude Code, Ctrl+Enter a command line, and the last line opens any other folder.
+  ">_" a command line, and the folder mark opens the folder in Explorer. "New session" opens a quick
+  pick of the folders you used, latest first; Enter starts Claude Code, Ctrl+Enter a command line,
+  and the last line opens any other folder.
 - **One place to type.** In a session of Claude Code you type in its own line, with its menus.
   Ctrl+G opens an editor for a long text: fix it with the mouse and Ctrl+Z, and Enter puts it into
   the line of Claude Code. Ctrl+V with a screenshot or a dropped file puts it there as a picture or a

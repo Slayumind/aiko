@@ -138,6 +138,7 @@ sealed class TerminalHost
         };
         _panel.CreateAsked += PickFolderQuickly;
         _panel.GroupCreateAsked += StartIn;
+        _panel.FolderOpenAsked = OpenInExplorer;
         _panel.PaletteClosed += FocusOpenTerminal;
         WireEditor();
         _panel.ResumeAsked += Resume;
@@ -604,6 +605,30 @@ sealed class TerminalHost
             .Opened(id);
         Save();
         Change(_model.ToSession(id, _sessions));
+    }
+
+    /// The folder of a project in Explorer (D-408). False when the folder is gone from the disk:
+    /// Explorer would open some other folder in its place.
+    private static bool OpenInExplorer(string folder)
+    {
+        if (!Directory.Exists(folder))
+        {
+            return false;
+        }
+
+        try
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("explorer.exe", $"\"{folder.TrimEnd('\\')}\"")
+            {
+                UseShellExecute = true,
+            });
+        }
+        catch (System.ComponentModel.Win32Exception)
+        {
+            // Explorer did not start; the folder is there, so there is nothing to say about it.
+        }
+
+        return true;
     }
 
     private string? PickFolder(string? start)

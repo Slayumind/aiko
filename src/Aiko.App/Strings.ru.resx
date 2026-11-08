@@ -1153,6 +1153,12 @@
   <data name="TerminalGroupNewShell" xml:space="preserve">
     <value>Командная строка в этой папке</value>
   </data>
+  <data name="TerminalGroupOpenFolder" xml:space="preserve">
+    <value>Открыть папку</value>
+  </data>
+  <data name="TerminalFolderGone" xml:space="preserve">
+    <value>Этой папки больше нет на диске</value>
+  </data>
   <data name="TerminalPickFolderHint" xml:space="preserve">
     <value>Папка для новой сессии</value>
   </data>
