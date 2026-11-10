@@ -56,6 +56,20 @@ highlighted as questions; each domain owner names their top three asks before th
 conflict between domains goes to the person with the veto. The resource gives each ask a size: S, M
 or L.
 
+## Marking asks done at the review
+
+At the meeting the group goes through the queue and says what is finished. The owner marks such an
+ask done on the page; the mark and its date go to the same store as the order and the priorities.
+
+- A done ask leaves the working groups and goes to a folded "Done" group at the end, with the date.
+  Counts of statuses and priorities skip it. The owner can take the mark back.
+- The page is a view, the sources hold the truth. At the next sync, list the asks marked done whose
+  source is still open. A row in the shared backlog is set to Done after the owner's yes; a task in
+  another team's tracker is not touched, it goes into the report as a line.
+- Once the source says Done, the ask drops out of the queue at the next rebuild.
+- A done mark does not tick acceptance criteria. A criterion is a result for people and is checked
+  on its own.
+
 ## Where it lives
 
 As its own part of the roadmap page. The agent ships the items and the starting order with the page
