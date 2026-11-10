@@ -89,9 +89,15 @@ all texts.
 
 ## 5. The roadmap page
 
-Whatever the tool, the page has five jobs: it describes the process; the domains and their owners;
-where each domain's current state lives; the milestones as the overview and order of the work; and
-the queue to the scarce resource. What good and bad roadmap UX looks like, and the checks before
+Whatever the tool, the page has six jobs: it describes the process; the domains and their owners;
+where each domain's current state lives; what changes for each role this month and next; the
+milestones as the overview and order of the work; and the queue to the scarce resource.
+
+"What changes" is the part most readers come for. It is built from the release criteria, one role
+per criterion, never written by hand. The same rule holds for the whole page: keep the facts people
+decide as data, compute every view from them, solve display by classes of things, not by cases,
+and keep one stylesheet so the same thing looks the same everywhere. A weekly sync changes data,
+never the page's markup. What good and bad roadmap UX looks like, and the checks before
 publishing: `references/roadmap-page.md`.
 
 ## 6. Keep every place in sync
