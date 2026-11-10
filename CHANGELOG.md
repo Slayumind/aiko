@@ -13,8 +13,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   each domain owner already has, cuts the work into domains with owners and borders, and writes every
   release as one short card: why, what changes for each role, pains, unblocks and acceptance criteria.
   Releases sit in month windows: this month is a promise, next month a forecast, later an intent. The
-  asks to a team that every domain needs, such as IT, go into one queue with priority marks. It works
-  with any tools: a wiki, a tracker, a sheet or a web page.
+  asks to a team that every domain needs, such as IT, go into one queue with priority marks. The
+  roadmap page starts with what changes for each role this month and next, grouped by release. It is
+  built from data, so a weekly update changes no page markup. It works with any tools: a wiki, a
+  tracker, a sheet or a web page.
 - **The envoy skill.** Send Aiko to help a colleague in Slack or another work chat. You give her a short
   task and limits once, and she talks to the colleague herself, as Aiko, from your account: she asks
   questions in one batch, checks the thread for answers and does the work with the tools of the session.
