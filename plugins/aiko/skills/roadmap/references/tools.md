@@ -48,9 +48,13 @@ met so far, and the traps that cost time. Add a section when a team uses a new t
   the list has focus, wait until it loses focus.
 - **Local edits win until saved.** An older state arriving between an edit and its save must not
   undo the edit: ignore incoming state while a save is pending.
+- **Stored state may arrive frozen.** Copy every object and list the page later changes (marks,
+  sizes, order) before keeping it as the page's state. Writing into a frozen object throws in
+  strict code, and the edit is lost with no message; it shows only once the store holds data.
 - **Test with a store that behaves like the real one.** A fake that answers once and at once hides
-  both bugs above. Use one that re-sends its state every 150 ms and saves with a delay, then pick
-  two values in a row.
+  the bugs above. Use one that re-sends its state every 150 ms, saves with a delay and hands out
+  frozen data, start it with real saved state, then pick two values in a row. After publishing,
+  set one value on the live page and read it back from the store.
 - **Keep the agent's data apart from the owner's choices.** Items and the starting order ship with
   the page; the owner's order, marks and sizes live in the store. A rebuild of the items never
   touches the store.
