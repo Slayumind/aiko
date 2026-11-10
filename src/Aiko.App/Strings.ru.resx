@@ -1081,6 +1081,9 @@
   <data name="SkillAikoEnvoy" xml:space="preserve">
     <value>Идёт с твоим поручением к коллеге в рабочий чат и помогает сама, как Айко. Всё, что за рамками задачи, несёт тебе.</value>
   </data>
+  <data name="SkillAikoRoadmap" xml:space="preserve">
+    <value>Собирает общий роадмап нескольких команд: домены и владельцы, релизы по окнам месяцев и одна очередь к команде, которая нужна всем.</value>
+  </data>
   <data name="ItemMeetAiko" xml:space="preserve">
     <value>Познакомься с Aiko</value>
   </data>

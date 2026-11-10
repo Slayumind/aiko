@@ -1071,6 +1071,9 @@ public static class Strings
     /// Takes your errand to a colleague in a work chat and helps them as Aiko. Brings anything o...
     public static string SkillAikoEnvoy => Get("SkillAikoEnvoy");
 
+    /// Builds a shared roadmap for several teams: domains and owners, releases in month windows ...
+    public static string SkillAikoRoadmap => Get("SkillAikoRoadmap");
+
     /// Meet Aiko
     public static string ItemMeetAiko => Get("ItemMeetAiko");
 

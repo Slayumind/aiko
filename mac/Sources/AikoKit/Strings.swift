@@ -390,6 +390,7 @@ public enum Strings {
         "SkillAikoCalendar": ("Plans your day in Google Calendar and finds free time. Adds events only after your yes.", "Планирует день по Google Calendar и ищет свободное время. События добавляет только после твоего «да»."),
         "SkillAikoDrive": ("Reads documents from Google Drive and puts project files onto Drive.", "Берёт документы с Google Drive в работу и кладёт файлы проекта на Drive."),
         "SkillAikoEnvoy": ("Takes your errand to a colleague in a work chat and helps them as Aiko. Brings anything outside the task back to you.", "Идёт с твоим поручением к коллеге в рабочий чат и помогает сама, как Айко. Всё, что за рамками задачи, несёт тебе."),
+        "SkillAikoRoadmap": ("Builds a shared roadmap for several teams: domains and owners, releases in month windows and one queue to the team everyone needs.", "Собирает общий роадмап нескольких команд: домены и владельцы, релизы по окнам месяцев и одна очередь к команде, которая нужна всем."),
         "ItemMeetAiko": ("Meet Aiko", "Познакомься с Aiko"),
         "MeetAikoLead": ("Aiko can talk in your Claude Code sessions in her own voice. She brings her skills and a small memory about you. In code and commits she stays quiet.", "Aiko может отвечать в твоих сессиях Claude Code своим голосом. С ней приходят её навыки и небольшая память о тебе. В коде и коммитах она молчит."),
         "MeetAikoSettings": ("The temperament, the mood, the skills and the memory are on the Personality page. It works in new sessions.", "Темперамент, настроение, навыки и память — на странице «Личность». Действует в новых сессиях."),
@@ -1578,6 +1579,9 @@ public enum Strings {
 
     /// Takes your errand to a colleague in a work chat and helps them as Aiko. Brings anything o...
     public static var skillAikoEnvoy: String { Strings.get("SkillAikoEnvoy") }
+
+    /// Builds a shared roadmap for several teams: domains and owners, releases in month windows ...
+    public static var skillAikoRoadmap: String { Strings.get("SkillAikoRoadmap") }
 
     /// Meet Aiko
     public static var itemMeetAiko: String { Strings.get("ItemMeetAiko") }

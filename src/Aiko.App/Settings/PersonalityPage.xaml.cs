@@ -27,6 +27,7 @@ public partial class PersonalityPage : UserControl
         ["calendar"] = Strings.SkillAikoCalendar,
         ["drive"] = Strings.SkillAikoDrive,
         ["envoy"] = Strings.SkillAikoEnvoy,
+        ["roadmap"] = Strings.SkillAikoRoadmap,
     };
 
     private readonly EnvironmentsEditor _editor;
