@@ -53,7 +53,7 @@ sample answer for each level. She stays quiet where it matters: code, commits, f
 error explanations, security warnings, dangerous actions and bad news are written in a plain neutral
 voice. The switch works in new sessions; open sessions finish the way they started.
 
-With the personality come fourteen skills, with one switch for all of them. They live in one plugin
+With the personality come fifteen skills, with one switch for all of them. They live in one plugin
 called `aiko`, so you call a skill by its full name:
 
 **Project management**
@@ -66,6 +66,7 @@ called `aiko`, so you call a skill by its full name:
 | `/aiko:calendar` | a day planned around Google Calendar, free time found, events added after your yes |
 | `/aiko:drive` | documents from Google Drive read into the work, project files put onto Drive |
 | `/aiko:envoy` | an errand to a colleague in a work chat: Aiko talks to them herself and brings back what is outside the task |
+| `/aiko:roadmap` | a shared roadmap for several teams: domains and owners, releases in month windows, one queue to the team everyone needs |
 
 **Game development**
 

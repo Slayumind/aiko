@@ -1081,6 +1081,9 @@
   <data name="SkillAikoEnvoy" xml:space="preserve">
     <value>Takes your errand to a colleague in a work chat and helps them as Aiko. Brings anything outside the task back to you.</value>
   </data>
+  <data name="SkillAikoRoadmap" xml:space="preserve">
+    <value>Builds a shared roadmap for several teams: domains and owners, releases in month windows and one queue to the team everyone needs.</value>
+  </data>
   <data name="ItemMeetAiko" xml:space="preserve">
     <value>Meet Aiko</value>
   </data>
