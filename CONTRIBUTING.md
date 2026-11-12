@@ -34,11 +34,11 @@ Three projects and one test project:
 To look at a window without running the whole app:
 
 ```
-dotnet run --project src/Aiko.App -- --snapshot card.png
+dotnet run --project src/Aiko.App -- --snapshot-terminal window.png header
 ```
 
 There are also `--snapshot-icon`, `--snapshot-island`,
-`--snapshot-settings <file> general|folders|env1|env2 [tall]` and `--snapshot-wizard <file> [item]`,
+`--snapshot-settings <file> general|personality|terminal|privacy|env1|env2 [tall]` and `--snapshot-wizard <file> [item]`,
 which draws the checklist page with one item open, for example `Commands`.
 
 ## How a change should look
@@ -68,7 +68,7 @@ Three rules for Russian, all learned on real windows:
 
 - **Rephrase, don't translate.** Write the sentence the way a Russian speaker would say it.
 - **Leave room.** Russian text is about a fifth longer. Once it made two labels in one grid cell
-  overlap. Look at the window before you call it done: `--snapshot`, `--snapshot-settings`,
+  overlap. Look at the window before you call it done: `--snapshot-terminal`, `--snapshot-settings`,
   `--snapshot-wizard`.
 - **Never build a sentence from pieces.** Russian words change their endings, and joined pieces
   stop matching.

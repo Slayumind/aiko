@@ -208,10 +208,6 @@ public partial class GeneralPage : UserControl
         }
     }
 
-    /// The tray menu has a "Check for updates" item. It opens this page and asks straight away, so
-    /// the answer appears where the button already is.
-    public async void StartUpdateCheck() => await CheckAsync();
-
     /// The one button of the line does whatever is the next step from where the line stands.
     private async void OnUpdateButton(object sender, RoutedEventArgs e)
     {

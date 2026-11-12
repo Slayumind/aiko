@@ -7,16 +7,17 @@ using Windows.Win32;
 namespace Aiko.App;
 
 /// --try-shell: starts the real shell and walks it through what a person does with it: the settings
-/// in the terminal window, the tray icon and its menu, the card pinned and unpinned, a face, the island and back.
+/// in the terminal window, the tray icon, its click and its menu, a face, the island and its click,
+/// and back.
 /// The shell runs with changingNothing, so no settings file is written and nothing is asked of the
 /// network.
 ///
-/// One step moves the real mouse: it rests on the icon for two seconds, the way a person opens the
-/// card, and then goes back where it was. The keys for the menu are posted to Aiko's own window
-/// and reach no other program.
+/// The mouse is not moved: the clicks are the ones the icon and the island raise. The keys for the
+/// menu are posted to Aiko's own window and reach no other program. The terminal window opens on
+/// no sessions, so no program starts.
 ///
 /// What it cannot see is what only the real taskbar decides: whether the icon sits under the
-/// overflow arrow, where a mouse cannot rest on it.
+/// overflow arrow.
 [SupportedOSPlatform("windows10.0.17763")]
 static class ShellCheck
 {
@@ -68,28 +69,11 @@ static class ShellCheck
         await Task.Delay(300);
         var icon = shell.IconRectForCheck is not null && shell.IslandForCheck is null;
 
-        // ---- a click pins the card with a block per environment; a second click closes it ----
-        shell.OpenCardForCheck(pinned: true);
-        await Task.Delay(500);
-        var pinned = shell.CardForCheck is { IsVisible: true, IsPinned: true } && shell.BlocksOnCardForCheck == environments;
-        shell.OpenCardForCheck(pinned: true);
-        var unpinned = await Until(() => shell.CardForCheck is null);
-
-        // ---- the wait runs out with the mouse somewhere else: no card ----
-        shell.StartHoverForCheck();
-        await Task.Delay(1900);
-        var quietHover = Checked(shell.CardForCheck is null, shell);
-        await CloseCard(shell);
-
-        // ---- a card that is not pinned goes when the mouse is not on it ----
-        shell.OpenCardForCheck(pinned: false);
-        await Task.Delay(300);
-        var opened = shell.CardForCheck is not null;
-        var left = Checked(await Until(() => shell.CardForCheck is null, 4000), shell);
-        await CloseCard(shell);
-
-        // ---- the mouse rests on the icon: the card opens, and leaves when the mouse does ----
-        var restingMouse = await RestOnTheIcon(shell);
+        // ---- a click on the icon opens the terminal window (D-372); before the first environment,
+        // the first run ----
+        shell.ClickIconForCheck();
+        var clickOpens = await Until(() => environments == 0 ? shell.SettingsShownForCheck : shell.TerminalShownForCheck);
+        await CloseWindows(shell);
 
         // ---- the menu of the icon: "Settings" is picked with the keyboard and opens the window ----
         var menu = await PickSettingsInTheMenu(shell);
@@ -100,16 +84,15 @@ static class ShellCheck
         shell.ShowFaceForCheck(null);
         var faceWent = await Until(() => !shell.FaceOnIconForCheck, 3000);
 
-        // ---- the island: the icon goes, the card opens from the island, a face does not break it ----
+        // ---- the island: the icon goes, and a click on it opens the window, a face does not break it ----
         shell.ShowPlaceForCheck(AikoPlace.Island);
         await Task.Delay(500);
         var island = shell.IslandForCheck is not null && shell.IconRectForCheck is null;
         shell.ShowFaceForCheck(AikoFace.Done);
-        shell.OpenCardForCheck(pinned: true);
-        await Task.Delay(500);
-        var cardFromIsland = shell.CardForCheck is { IsVisible: true, IsPinned: true };
+        shell.ClickIslandForCheck();
+        var islandOpens = await Until(() => environments == 0 ? shell.SettingsShownForCheck : shell.TerminalShownForCheck);
         shell.ShowFaceForCheck(null);
-        await CloseCard(shell);
+        await CloseWindows(shell);
 
         // ---- and back to where the person keeps Aiko ----
         shell.ShowPlaceForCheck(home);
@@ -117,35 +100,11 @@ static class ShellCheck
         var back = (home == AikoPlace.Island) == (shell.IslandForCheck is not null);
 
         Log.Write($"--try-shell: settings in the terminal window={oneWindow}, gone when closed={settingsGone}, icon={icon}, "
-            + $"card pinned={pinned}, second click closes={unpinned}, hover with the mouse away opens nothing={quietHover}, "
-            + $"unpinned card opened={opened} and left={left}, a resting mouse opens the card={restingMouse}, "
-            + $"the menu opens settings={menu}, face came={faceCame} and went={faceWent}, "
-            + $"island={island}, card from the island={cardFromIsland}, back home={back}");
+            + $"a click on the icon opens the window={clickOpens}, the menu opens settings={menu}, "
+            + $"face came={faceCame} and went={faceWent}, island={island}, a click on the island opens the window={islandOpens}, "
+            + $"back home={back}");
 
-        return oneWindow && settingsGone && icon && pinned && unpinned && quietHover != "False" && opened && left != "False"
-            && restingMouse != "False" && menu && faceCame && faceWent && island && cardFromIsland && back;
-    }
-
-    /// The answer is "not checked" when somebody moved the mouse during the two seconds it had to
-    /// rest: the machine has a person at it, and that is not a failure of the shell.
-    private static async Task<string> RestOnTheIcon(AikoShell shell)
-    {
-        if (shell.IconRectForCheck is not { } icon || !PInvoke.GetCursorPos(out var was))
-        {
-            return "False";
-        }
-
-        var rest = new Point(icon.Left + (icon.Width / 2), icon.Top + (icon.Height / 2));
-        MouseInput.MoveTo(rest);
-        shell.StartHoverForCheck();
-        var opened = await Until(() => shell.CardForCheck is { IsPinned: false }, 2500);
-        var stayed = PInvoke.GetCursorPos(out var now) && now.X == (int)rest.X && now.Y == (int)rest.Y;
-
-        MouseInput.MoveTo(new Point(was.X, was.Y));
-        var left = await Until(() => shell.CardForCheck is null, 4000) || shell.MouseAtHomeForCheck;
-        await CloseCard(shell);
-
-        return opened && left ? "True" : stayed ? "False" : "not checked, the mouse was moved";
+        return oneWindow && settingsGone && icon && clickOpens && menu && faceCame && faceWent && island && islandOpens && back;
     }
 
     /// The menu waits inside Windows until something is picked, so the keys are sent from a timer
@@ -190,18 +149,11 @@ static class ShellCheck
         return opened && await Until(() => !shell.SettingsShownForCheck);
     }
 
-    /// A step that depends on the mouse being away. When the pointer happens to rest on the icon,
-    /// the island or the card, the step says so in place of failing: the mouse is not ours to move.
-    private static string Checked(bool passed, AikoShell shell) =>
-        passed ? "True" : shell.MouseAtHomeForCheck ? "not checked, the mouse is there" : "False";
-
-    private static async Task CloseCard(AikoShell shell)
+    /// The settings and the terminal window go, so the next step starts from the tray or the island.
+    private static async Task CloseWindows(AikoShell shell)
     {
-        if (shell.CardForCheck is { } card)
-        {
-            card.FadeAndClose();
-            await Until(() => shell.CardForCheck is null);
-        }
+        shell.CloseSettingsForCheck();
+        await Until(() => !shell.SettingsShownForCheck && !shell.TerminalShownForCheck);
     }
 
     private static async Task<bool> Until(Func<bool> met, int milliseconds = 2000)

@@ -988,6 +988,7 @@ public class SharedCaseTests
                 "used" => sessions.Used(Word("id"), step.GetProperty("now").GetInt64()),
                 "opened" => sessions.Opened(Word("id")),
                 "close" => sessions.Close(Word("id")),
+                "moved" => sessions.Moved(Word("id"), step.TryGetProperty("before", out var before) ? before.GetString() : null),
                 "placed" => sessions.Placed(new WindowPlace(
                     step.GetProperty("left").GetDouble(), step.GetProperty("top").GetDouble(),
                     step.GetProperty("width").GetDouble(), step.GetProperty("height").GetDouble(),

@@ -947,6 +947,7 @@ struct SharedCaseTests {
             case "used": sessions = sessions.used(word("id"), now: step["now"]?.int64Value ?? 0)
             case "opened": sessions = sessions.opened(word("id"))
             case "close": sessions = sessions.close(word("id"))
+            case "moved": sessions = sessions.moved(word("id"), before: step["before"]?.stringValue)
             case "placed":
                 sessions = sessions.placed(WindowPlace(
                     left: step["left"]?.doubleValue ?? 0, top: step["top"]?.doubleValue ?? 0,

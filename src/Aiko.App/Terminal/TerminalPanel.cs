@@ -30,6 +30,10 @@ sealed class TerminalPanel : UserControl
     private double _listTarget = double.NaN;
     private readonly DockPanel _list = new();
     private readonly StackPanel _rows = new();
+
+    /// The rows with a layer over them for the line of a drag (D-400).
+    private readonly Grid _rowsArea = new();
+    private readonly RowDrag _drag;
     private readonly Grid _main = new();
     private readonly Popup _listPopup = new() { StaysOpen = false, AllowsTransparency = true, Placement = PlacementMode.Bottom };
 
@@ -129,6 +133,21 @@ sealed class TerminalPanel : UserControl
 
     public TerminalPanel()
     {
+        var dragLayer = new Canvas();
+        _rowsArea.Children.Add(_rows);
+        _rowsArea.Children.Add(dragLayer);
+        _drag = new RowDrag(_rows, dragLayer);
+        _drag.Moved += (id, before) => RowMoved?.Invoke(id, before);
+
+        // The list held still while a row was dragged; the latest view comes now.
+        _drag.Ended += () =>
+        {
+            if (_view is { } view)
+            {
+                ShowList(view);
+            }
+        };
+
         Background = Tokens.Brush("Surface");
         FontFamily = Tokens.Get<FontFamily>("Sans");
         Focusable = false;
@@ -191,7 +210,7 @@ sealed class TerminalPanel : UserControl
         _pills.Refit = FitPills;
         _bar.SizeChanged += (_, _) => FitPills();
 
-        _header = new HeaderStripView(environment => TabPicked?.Invoke(environment));
+        _header = new HeaderStripView(environment => TabPicked?.Invoke(environment), environment => SignInAsked?.Invoke(environment));
         _header.Settled += () =>
         {
             // The header has its new height after a switch. While it still grows or folds, the
@@ -279,6 +298,10 @@ sealed class TerminalPanel : UserControl
 
     public event Action<string>? TabPicked;
     public event Action<string>? RowPicked;
+
+    /// A session was dragged in its folder: its id, and the session it now stands before, or null
+    /// for the end of the folder (D-400).
+    public event Action<string, string?>? RowMoved;
     public event Action<string>? RowClosed;
 
     /// The id of a session and the new name typed for it.
@@ -305,6 +328,9 @@ sealed class TerminalPanel : UserControl
 
     /// The gear in the title bar.
     public event Action? SettingsAsked;
+
+    /// "Sign in" on the card of an environment whose account is not connected.
+    public event Action<string>? SignInAsked;
 
     public bool SettingsShown => _settingsHost.Content is not null;
 
@@ -741,7 +767,7 @@ sealed class TerminalPanel : UserControl
     /// The list icon: a frame with a column on its left.
     private static FrameworkElement ListIcon() => Marks.Line("M1.5,1.5 L12.5,1.5 L12.5,11.5 L1.5,11.5 Z M5,1.5 L5,11.5");
 
-    /// The gear of the project's icon set, the same one the card of limits uses.
+    /// The gear of the project's icon set.
     private static FrameworkElement GearIcon() => new Path
     {
         Data = Tokens.Get<Geometry>("GearPath"),
@@ -768,7 +794,14 @@ sealed class TerminalPanel : UserControl
             _finishRename?.Invoke(true);
         }
 
+        // A row being dragged stands still too: the list comes when it is let go.
+        if (_drag.Dragging)
+        {
+            return;
+        }
+
         _rows.Children.Clear();
+        _drag.Clear();
         _renameStarts.Clear();
         _rowNames.Clear();
         foreach (var group in view.Groups)
@@ -776,7 +809,7 @@ sealed class TerminalPanel : UserControl
             _rows.Children.Add(GroupHeader(group));
             foreach (var row in group.Rows)
             {
-                _rows.Children.Add(Row(row, row.Id == view.SessionId && view.Main == MainView.Terminal, view.Now));
+                _rows.Children.Add(Row(row, group.Folder, row.Id == view.SessionId && view.Main == MainView.Terminal, view.Now));
             }
         }
 
@@ -800,7 +833,7 @@ sealed class TerminalPanel : UserControl
             HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
             Focusable = false,
             Padding = new Thickness(8, 4, 8, 0),
-            Content = _rows,
+            Content = _rowsArea,
         });
 
         if (_narrow)
@@ -927,7 +960,7 @@ sealed class TerminalPanel : UserControl
         }
     }
 
-    private UIElement Row(SessionRow row, bool selected, DateTimeOffset now)
+    private UIElement Row(SessionRow row, string folder, bool selected, DateTimeOffset now)
     {
         var top = new DockPanel();
         var mark = Mark(row.State);
@@ -987,8 +1020,15 @@ sealed class TerminalPanel : UserControl
             ContextMenu = RowMenu(row.Id, () => Rename(row, top, name)),
         };
         KeepLit(back, hover, "row:" + row.Id);
+        _drag.Watch(back, row.Id, folder);
         back.MouseLeftButtonUp += (_, _) =>
         {
+            // The click that lets a dragged row go opens nothing.
+            if (_drag.Swallows)
+            {
+                return;
+            }
+
             _listPopup.IsOpen = false;
             RowPicked?.Invoke(row.Id);
         };

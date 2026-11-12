@@ -52,9 +52,6 @@ sealed class TrayIcon : IDisposable
     /// A left click on the icon.
     public event Action? Clicked;
 
-    /// The mouse is over the icon. It arrives many times a second.
-    public event Action? MouseMoved;
-
     /// A right click, with the point Windows sent for the menu.
     public event Action<IntPtr>? MenuRequested;
 
@@ -163,19 +160,6 @@ sealed class TrayIcon : IDisposable
             return PInvoke.Shell_NotifyIconGetRect(in id, out var rect).Succeeded
                 ? new Rect(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top)
                 : null;
-        }
-    }
-
-    public bool CursorOver
-    {
-        get
-        {
-            if (Rect is not { } rect || !PInvoke.GetCursorPos(out var point))
-            {
-                return false;
-            }
-
-            return rect.Contains(point.X, point.Y);
         }
     }
 
@@ -296,9 +280,6 @@ sealed class TrayIcon : IDisposable
         {
             case NinSelect:
                 Clicked?.Invoke();
-                break;
-            case PInvoke.WM_MOUSEMOVE:
-                MouseMoved?.Invoke();
                 break;
             case PInvoke.WM_CONTEXTMENU:
                 MenuRequested?.Invoke(anchor);

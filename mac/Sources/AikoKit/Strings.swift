@@ -63,7 +63,7 @@ public enum Strings {
         "TrayLastSeen": ("as of {0}", "данные на {0}"),
         "TrayUpdateOut": ("Aiko {0} is out", "вышла Aiko {0}"),
         "MenuShowInRing": ("Show {0} in the ring", "Показать в кольце: {0}"),
-        "MenuTerminal": ("Open terminal", "Открыть терминал"),
+        "MenuOpen": ("Open", "Открыть"),
         "MenuRefresh": ("Refresh limits", "Обновить лимиты"),
         "Settings": ("Settings", "Настройки"),
         "SettingsBack": ("Back to the session", "К сессии"),
@@ -600,8 +600,8 @@ public enum Strings {
     /// Show {0} in the ring
     public static var menuShowInRing: String { Strings.get("MenuShowInRing") }
 
-    /// Open terminal
-    public static var menuTerminal: String { Strings.get("MenuTerminal") }
+    /// Open
+    public static var menuOpen: String { Strings.get("MenuOpen") }
 
     /// Refresh limits
     public static var menuRefresh: String { Strings.get("MenuRefresh") }

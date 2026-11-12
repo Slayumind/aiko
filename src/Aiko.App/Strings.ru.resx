@@ -100,8 +100,8 @@
   <data name="MenuShowInRing" xml:space="preserve">
     <value>Показать в кольце: {0}</value>
   </data>
-  <data name="MenuTerminal" xml:space="preserve">
-    <value>Открыть терминал</value>
+  <data name="MenuOpen" xml:space="preserve">
+    <value>Открыть</value>
   </data>
   <data name="MenuRefresh" xml:space="preserve">
     <value>Обновить лимиты</value>

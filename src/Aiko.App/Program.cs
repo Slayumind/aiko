@@ -74,20 +74,6 @@ static class Program
             return;
         }
 
-        // The same for the card: draw it on test numbers and stop.
-        if (args is ["--snapshot", var cardPath, ..])
-        {
-            CardSnapshot.Write(cardPath);
-            return;
-        }
-
-        // Not test numbers but the real ones, to see what Aiko shows on this machine right now.
-        if (args is ["--snapshot-live", var livePath, ..])
-        {
-            CardSnapshot.WriteLive(livePath);
-            return;
-        }
-
         // Adds the status line to one folder and says in the log what happened. For the question
         // "why can Aiko not write to my settings file", and for trying the change on a copy.
         if (args is ["--try-access", var folder, ..])

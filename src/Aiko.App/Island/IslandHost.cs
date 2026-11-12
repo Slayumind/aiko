@@ -15,8 +15,11 @@ sealed class IslandHost(Dispatcher dispatcher)
     private bool _fullScreenInFront;
     private bool _underTerminal;
 
-    /// The island asks for the card: true for a click, which pins it.
-    public event Action<bool>? CardRequested;
+    /// A click on the island, away from the mark of "waits".
+    public event Action? Clicked;
+
+    /// For --try-shell: the click a person makes.
+    public void ClickForCheck() => Clicked?.Invoke();
 
     /// Set by a check, which drags the island about. The settings of the person are not its to change.
     public bool ChangingNothing { get; set; }
@@ -25,9 +28,7 @@ sealed class IslandHost(Dispatcher dispatcher)
 
     public IslandWindow? Window => _window;
 
-    public bool CursorOver => _window is { IsVisible: true } window && Pointer.IsOver(window);
-
-    /// Where the island is, for a card that opens right under it. Null while it is not shown.
+    /// Where the island is, for a notice that comes up next to it. Null while it is not shown.
     public Rect? Bounds =>
         _window is { } window ? new Rect(window.Left, window.Top, window.ActualWidth, window.ActualHeight) : null;
 
@@ -36,7 +37,7 @@ sealed class IslandHost(Dispatcher dispatcher)
         if (_window is null)
         {
             var window = new IslandWindow();
-            window.CardRequested += pinned => CardRequested?.Invoke(pinned);
+            window.Clicked += () => Clicked?.Invoke();
             window.Moved += SavePosition;
             window.SessionRequested += id => SessionRequested?.Invoke(id);
             _window = window;
