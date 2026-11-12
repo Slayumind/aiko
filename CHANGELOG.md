@@ -74,6 +74,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Fixed
 
+- A session that stopped before your first message, or stayed empty until Aiko restarted, now
+  starts again. Before, Enter or the restart only said "No conversation found".
 - A mistake in one window no longer closes Aiko. The error goes to the log, and the tray, the
   island and the sessions keep running.
 - Your own settings of Claude Code, such as CLAUDE_CODE_GIT_BASH_PATH, reach terminal sessions.
