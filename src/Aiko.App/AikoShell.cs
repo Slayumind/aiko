@@ -269,6 +269,34 @@ sealed class AikoShell : IDisposable
         else
         {
             _island.Close();
+            ShowTrayUnlessOnTaskbar();
+        }
+    }
+
+    /// The window has a button on the taskbar, shown or minimized (D-410). The button draws what the
+    /// tray icon and the island draw, so both step aside until the window is closed.
+    private bool _windowOnTaskbar;
+
+    private void FollowTerminal(bool onTaskbar)
+    {
+        _windowOnTaskbar = onTaskbar;
+        _island.FollowTerminal(onTaskbar);
+        if ((_placeForCheck ?? SettingsStore.Load().Place) == AikoPlace.Tray)
+        {
+            ShowTrayUnlessOnTaskbar();
+        }
+    }
+
+    /// Windows keeps an icon the person moved out of the overflow in its place when it comes back
+    /// (RESEARCH, spike tray-return), so taking it away costs nothing.
+    private void ShowTrayUnlessOnTaskbar()
+    {
+        if (_windowOnTaskbar)
+        {
+            _tray.Remove();
+        }
+        else if (!_tray.IsShown)
+        {
             _tray.Add();
         }
     }
@@ -427,7 +455,7 @@ sealed class AikoShell : IDisposable
                 OpenFirstRun();
             }
         };
-        terminal.OnTaskbarChanged += _island.FollowTerminal;
+        terminal.OnTaskbarChanged += FollowTerminal;
         terminal.WaitingStarted += PlayWaiting;
         terminal.SessionsChanged += ShowSessions;
         // Changes apply at once (D-179): the tray or the island, direct mode and our access follow

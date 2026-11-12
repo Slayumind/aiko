@@ -31,8 +31,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   on the taskbar show how many agents wait for you, in orange. If none wait, they show how many
   stopped, in red, and a green dot says one has finished. The number stays until you open that
   session, and only a question comes with a sound. The button draws the same ring as the tray, and a
-  limit over 90% turns it red. While the window is open or minimized there is no island; with the
-  window closed, the island counts the agents that wait, have finished, stopped and work.
+  limit over 90% turns it red. While the window is open or minimized, the button stands in for the
+  tray icon and the island; close the window and they come back, the island with the agents that
+  wait, have finished, stopped and work.
 - **Everything in one window.** A click on the tray icon or the island opens it, and the menu of the
   icon keeps Open, Settings and Quit. Each environment is a pill in the title bar with its ring and
   percent; the arrow opens the limits of all of them in place, says how fresh they are and offers
