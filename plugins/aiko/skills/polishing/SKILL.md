@@ -14,12 +14,11 @@ This skill is the method. A project skill adds its own numbers, paths and checks
 
 ## 1. Ask for the budget first
 
-Before reading a single comment, ask three things and wait for the answer:
+Before reading a single comment, ask three things in the user's language and wait for the answer:
 
-- **Сколько обсуждаем** — how many clarifying questions. A number, not "as many as needed".
-- **Сколько итераций** — how many critique rounds the subagent gets after its first pass.
-- **Сами комментарии** — where they are: threads on a published artifact, a message in the chat,
-  or both.
+- **Questions** — how many clarifying questions. A number, not "as many as needed".
+- **Rounds** — how many critique rounds the subagent gets after its first pass.
+- **Comments** — where they are: threads on a published artifact, a message in the chat, or both.
 
 One short message, three questions. Do not start work "while we clarify": a comment read in the wrong
 order turns into a guess.
@@ -123,17 +122,20 @@ the size the owner will see it, and run whatever audit the project has.
 
 The report after publishing is three parts and no more:
 
-1. **Что изменилось** — in the owner's terms, their comments answered in their order.
-2. **Что стало слабее** — every trade the round made, with numbers.
-3. **Что решать тебе** — the open questions, unchanged from the artifact so the two do not drift.
+1. **What changed** — in the owner's terms, their comments answered in their order.
+2. **What got weaker** — every trade the round made, with numbers.
+3. **What is yours to decide** — the open questions, unchanged from the artifact so the two do not
+   drift.
 
 Then stop. A polishing round ends when the owner looks again, not when you run out of ideas.
 
-## Заготовка первого сообщения
+## The first message
+
+In the user's language. In English:
 
 ```
-Прежде чем начать, три вопроса:
-1. Сколько обсуждаем — сколько уточняющих вопросов задать?
-2. Сколько итераций — сколько кругов правок даём субагенту?
-3. Где комментарии — в артефакте, в чате или там и там?
+Three questions before I start:
+1. Questions: how many clarifying questions should I ask?
+2. Rounds: how many rounds of fixes does the subagent get?
+3. Comments: in the artifact, in the chat, or both?
 ```
