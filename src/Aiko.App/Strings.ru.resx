@@ -1504,4 +1504,10 @@
   <data name="VoiceCloudFailed" xml:space="preserve">
     <value>OpenAI не принял запись. Проверь ключ и соединение.</value>
   </data>
+  <data name="VoiceCloudNoMoney" xml:space="preserve">
+    <value>На счёте OpenAI кончились деньги.</value>
+  </data>
+  <data name="VoiceCloudBusy" xml:space="preserve">
+    <value>OpenAI просит подождать минуту.</value>
+  </data>
 </root>

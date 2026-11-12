@@ -859,6 +859,8 @@ sealed class TerminalEditor : UserControl, IDictationField
             VoiceNotice.NeedsModel => (Strings.VoiceNeedsModel, Strings.VoiceOpenSettings),
             VoiceNotice.NeedsKey => (Strings.VoiceNeedsKey, Strings.VoiceOpenSettings),
             VoiceNotice.CloudFailed => (Strings.VoiceCloudFailed, Strings.VoiceOpenSettings),
+            VoiceNotice.CloudNoMoney => (Strings.VoiceCloudNoMoney, Strings.VoiceOpenSettings),
+            VoiceNotice.CloudBusy => (Strings.VoiceCloudBusy, ""),
             _ => ("", ""),
         };
     }

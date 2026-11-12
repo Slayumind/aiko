@@ -1493,4 +1493,10 @@ public static class Strings
 
     /// OpenAI did not take the recording. Check the key and the connection.
     public static string VoiceCloudFailed => Get("VoiceCloudFailed");
+
+    /// The OpenAI account is out of money.
+    public static string VoiceCloudNoMoney => Get("VoiceCloudNoMoney");
+
+    /// OpenAI asks to wait a minute.
+    public static string VoiceCloudBusy => Get("VoiceCloudBusy");
 }
