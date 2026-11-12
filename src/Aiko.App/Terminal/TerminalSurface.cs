@@ -105,6 +105,8 @@ sealed class TerminalSurface : Grid
 
         UseZoom();
 
+        IsVisibleChanged += (_, _) => Uncover();
+
         Loaded += (_, _) =>
         {
             // Given again on every load: the control may come back without it.
@@ -462,15 +464,48 @@ sealed class TerminalSurface : Grid
         }
     }
 
+    /// The window of the control is shown only after the surface drew its own ground where it
+    /// stands. Windows does not draw the window of Aiko again under a child window, so whatever was
+    /// there when the child came stays under it: the dots of the loader, or nothing at all. When the
+    /// control misses a frame, as it does while Claude Code draws its whole screen again, that shows
+    /// through for a moment (a flicker with the loader in it). With the ground drawn first, the moment
+    /// shows the same dark ground as the terminal.
+    /// shown runs once the control is on screen. Loaded comes after the frame is drawn and before the
+    /// input, so a focus asked for by the window right after finds the control there.
+    private void Uncover(Action? shown = null)
+    {
+        if (!IsVisible || !TerminalWanted)
+        {
+            return;
+        }
+
+        _control.Visibility = Visibility.Hidden;
+        Dispatcher.BeginInvoke(() =>
+        {
+            if (IsVisible && TerminalWanted)
+            {
+                _control.Visibility = Visibility.Visible;
+                shown?.Invoke();
+            }
+        }, DispatcherPriority.Loaded);
+    }
+
+    /// The control has the screen: always for Claude Code, and for a command line only while a program
+    /// takes the whole screen.
+    private bool TerminalWanted => _shell is null || _shell.FullScreen;
+
     private void ShowFullScreen(bool on)
     {
-        _control.Visibility = on ? Visibility.Visible : Visibility.Hidden;
         _blocks!.Visibility = on ? Visibility.Collapsed : Visibility.Visible;
         if (on)
         {
             // A hidden control did not count its rows again; the program needs the real size.
             ResizeNow();
-            _control.Focus();
+            Uncover(() => _control.Focus());
+        }
+        else
+        {
+            _control.Visibility = Visibility.Hidden;
         }
 
         FullScreenChanged?.Invoke(on);
