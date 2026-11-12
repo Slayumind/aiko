@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Threading;
 using Aiko.Core;
+using Aiko.Core.Terminal;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.Graphics.Gdi;
@@ -35,6 +36,7 @@ sealed class TrayIcon : IDisposable
     /// The rows the icon last drew. Frames of a face transition reuse them instead of reading the
     /// settings and the snapshots sixteen times in half a second.
     private (CardRow? Ring, CardRow? Dot) _lastRows;
+    private SessionBadge _badge = SessionBadge.None;
     private HwndSource? _source;
     private HICON _icon;
     private uint _iconDpi;
@@ -121,6 +123,18 @@ sealed class TrayIcon : IDisposable
         }
     }
 
+    /// The sign of the sessions in the corner of the icon (D-409). Only a change draws again.
+    public void ShowBadge(SessionBadge badge)
+    {
+        if (badge == _badge)
+        {
+            return;
+        }
+
+        _badge = badge;
+        Redraw();
+    }
+
     /// A face comes onto the icon or goes (D-211). Nothing happens while the icon is not shown.
     public void ShowFace(AikoFace? face, FaceStyle style)
     {
@@ -178,7 +192,7 @@ sealed class TrayIcon : IDisposable
         _source?.Dispose();
     }
 
-    /// One frame of a face transition: only the picture changes, not the tooltip.
+    /// One frame of a face transition or a new sign: only the picture changes, not the tooltip.
     private void Redraw()
     {
         if (!IsShown)
@@ -220,7 +234,7 @@ sealed class TrayIcon : IDisposable
             _lastRows = _rows();
         }
 
-        _icon = RingIcon.Render(_iconSize, _lastRows.Ring, _lastRows.Dot, _faceAnimator.Frame, _faceAnimator.Face);
+        _icon = RingIcon.Render(_iconSize, _lastRows.Ring, _lastRows.Dot, _faceAnimator.Frame, _faceAnimator.Face, _badge);
         return old;
     }
 

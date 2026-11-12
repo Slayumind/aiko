@@ -156,12 +156,12 @@ public partial class IslandPanel : UserControl
         return label;
     }
 
-    private IslandSessions _sessions = IslandSessions.None;
+    private SessionCounts _sessions = SessionCounts.None;
     private bool _horizontal = true;
     private FrameworkElement? _waitingMark;
 
-    /// The sessions after the rings (D-364). The window around the panel follows the size.
-    public void ShowSessions(IslandSessions sessions)
+    /// The sessions after the rings (D-364, D-409). The window around the panel follows the size.
+    public void ShowSessions(SessionCounts sessions)
     {
         _sessions = sessions;
         DrawSessions();
@@ -180,9 +180,10 @@ public partial class IslandPanel : UserControl
         return at.X >= -4 && at.Y >= -4 && at.X <= mark.ActualWidth + 4 && at.Y <= mark.ActualHeight + 4 ? id : null;
     }
 
-    /// "Waits" with an orange pause and "work" with a grey dot, each in a field of 12 with its number
-    /// 4 units after it; 12 units after the rings, in a row along a top or bottom edge and in a
-    /// column 6 apart along a side. With nothing working or waiting the island is as it was.
+    /// "Waits" with an orange pause, "done" with a green tick, "stopped" with a red cross and "work"
+    /// with a grey dot, as in the list of sessions; each in a field of 12 with its number 4 units after
+    /// it; 12 units after the rings, in a row along a top or bottom edge and in a column 6 apart along
+    /// a side. With no session to count the island is as it was.
     private void DrawSessions()
     {
         Sessions.Children.Clear();
@@ -191,22 +192,36 @@ public partial class IslandPanel : UserControl
         Sessions.Margin = _sessions.IsEmpty ? new Thickness(0) : _horizontal ? new Thickness(12, 0, 0, 0) : new Thickness(0, 12, 0, 0);
         if (_sessions.Waiting > 0)
         {
-            _waitingMark = SessionMark(Marks.Pause(), _sessions.Waiting);
+            _waitingMark = AddMark(Marks.Pause(), _sessions.Waiting);
             _waitingMark.Cursor = System.Windows.Input.Cursors.Hand;
-            Sessions.Children.Add(_waitingMark);
+        }
+
+        if (_sessions.Done > 0)
+        {
+            AddMark(SiteIcons.Draw(SiteIcons.Check, 10, "Positive"), _sessions.Done);
+        }
+
+        if (_sessions.Stopped > 0)
+        {
+            AddMark(Marks.Line("M0,0 L8,8 M8,0 L0,8", "Destructive"), _sessions.Stopped);
         }
 
         if (_sessions.Working > 0)
         {
-            var dot = new System.Windows.Shapes.Ellipse { Width = 8, Height = 8, Fill = Tokens.Brush("Muted") };
-            var mark = SessionMark(dot, _sessions.Working);
-            if (Sessions.Children.Count > 0)
-            {
-                mark.Margin = _horizontal ? new Thickness(10, 0, 0, 0) : new Thickness(0, 6, 0, 0);
-            }
-
-            Sessions.Children.Add(mark);
+            AddMark(new System.Windows.Shapes.Ellipse { Width = 8, Height = 8, Fill = Tokens.Brush("Muted") }, _sessions.Working);
         }
+    }
+
+    private FrameworkElement AddMark(FrameworkElement sign, int count)
+    {
+        var mark = SessionMark(sign, count);
+        if (Sessions.Children.Count > 0)
+        {
+            mark.Margin = _horizontal ? new Thickness(10, 0, 0, 0) : new Thickness(0, 6, 0, 0);
+        }
+
+        Sessions.Children.Add(mark);
+        return mark;
     }
 
     private static FrameworkElement SessionMark(FrameworkElement sign, int count)

@@ -68,10 +68,10 @@ sealed class IslandHost(Dispatcher dispatcher)
 
     public void Update(IReadOnlyList<CardState> cards) => _window?.Update(cards);
 
-    private Aiko.Core.Terminal.IslandSessions _sessions = Aiko.Core.Terminal.IslandSessions.None;
+    private Aiko.Core.Terminal.SessionCounts _sessions = Aiko.Core.Terminal.SessionCounts.None;
 
     /// How many sessions work and wait (D-364), kept for an island that opens later.
-    public void ShowSessions(Aiko.Core.Terminal.IslandSessions sessions)
+    public void ShowSessions(Aiko.Core.Terminal.SessionCounts sessions)
     {
         _sessions = sessions;
         _window?.ShowSessions(sessions);
@@ -84,11 +84,12 @@ sealed class IslandHost(Dispatcher dispatcher)
     /// that asks for the hiding changes.
     public void FollowFullScreen() => OnFullScreenChanged(FullScreenWatch.IsFullScreenInFront());
 
-    /// The window of the terminal is on screen (D-310): its title shows the limit, so the island
-    /// steps aside. A minimized or closed terminal brings it back.
-    public void FollowTerminal(bool inView)
+    /// The window of the terminal has a button on the taskbar (D-409): the button shows the ring and
+    /// the sign of the sessions, so the island steps aside, also while the window is minimized. Only
+    /// a closed or hidden window brings it back.
+    public void FollowTerminal(bool onTaskbar)
     {
-        _underTerminal = inView;
+        _underTerminal = onTaskbar;
         Apply();
     }
 

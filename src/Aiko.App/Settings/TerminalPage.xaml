@@ -24,14 +24,10 @@
       <StackPanel x:Name="ZoomSteps" Orientation="Horizontal" />
     </Border>
 
-    <!-- The notices (D-375, D-377): a switch per kind with the mark the notice itself shows, and the
-         sound in a frame of its own under them, as it belongs to the questions only (D-395, D-396). -->
+    <!-- The notices are counts and need no switch (D-409); only the sound of a question has one (D-375). -->
     <TextBlock Text="{x:Static local:Strings.NotifyLabel}" Style="{StaticResource SectionLabel}" Margin="0,22,0,4" />
     <TextBlock Text="{x:Static local:Strings.NotifyWhat}" Style="{StaticResource RowHint}" TextWrapping="Wrap" Margin="0,0,0,8" />
     <Border Style="{StaticResource Rows}">
-      <StackPanel x:Name="NoticeRows" />
-    </Border>
-    <Border Style="{StaticResource Rows}" Margin="0,8,0,0">
       <StackPanel x:Name="SoundRow" />
     </Border>
 

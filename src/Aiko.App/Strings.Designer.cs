@@ -1377,41 +1377,11 @@ public static class Strings
     /// voice input off
     public static string NavVoiceOff => Get("NavVoiceOff");
 
-    /// waits for you
-    public static string NoticeWaiting => Get("NoticeWaiting");
-
-    /// done
-    public static string NoticeDone => Get("NoticeDone");
-
-    /// stopped
-    public static string NoticeStopped => Get("NoticeStopped");
-
-    /// {0}% in 5 hours
-    public static string NoticeLimitFiveHour => Get("NoticeLimitFiveHour");
-
-    /// {0}% this week
-    public static string NoticeLimitWeek => Get("NoticeLimitWeek");
-
-    /// {0}% of {1} this week
-    public static string NoticeLimitModel => Get("NoticeLimitModel");
-
     /// Notifications
     public static string NotifyLabel => Get("NotifyLabel");
 
-    /// When the terminal window is not in focus, a line comes up next to Aiko for 6 seconds. A c...
+    /// The tray icon, the taskbar button and the island show how many agents wait, have finished...
     public static string NotifyWhat => Get("NotifyWhat");
-
-    /// The agent has a question
-    public static string NotifyWaiting => Get("NotifyWaiting");
-
-    /// The agent finished the work
-    public static string NotifyDone => Get("NotifyDone");
-
-    /// The agent stopped on her own
-    public static string NotifyStopped => Get("NotifyStopped");
-
-    /// A limit went over 90%
-    public static string NotifyLimit => Get("NotifyLimit");
 
     /// A sound when the agent has a question
     public static string NotifySound => Get("NotifySound");

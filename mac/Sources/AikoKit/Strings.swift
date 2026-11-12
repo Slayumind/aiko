@@ -492,18 +492,8 @@ public enum Strings {
         "NavTerminal": ("Terminal", "Терминал"),
         "NavVoiceOn": ("voice input on", "голос включён"),
         "NavVoiceOff": ("voice input off", "голос выключен"),
-        "NoticeWaiting": ("waits for you", "ждёт ответа"),
-        "NoticeDone": ("done", "готово"),
-        "NoticeStopped": ("stopped", "остановилась"),
-        "NoticeLimitFiveHour": ("{0}% in 5 hours", "{0} % за 5 часов"),
-        "NoticeLimitWeek": ("{0}% this week", "{0} % за неделю"),
-        "NoticeLimitModel": ("{0}% of {1} this week", "{0} % {1} за неделю"),
         "NotifyLabel": ("Notifications", "Уведомления"),
-        "NotifyWhat": ("When the terminal window is not in focus, a line comes up next to Aiko for 6 seconds. A click on it opens the session.", "Когда окно терминала не в фокусе, рядом с Aiko на 6 секунд появляется строка. Щелчок по ней открывает сессию."),
-        "NotifyWaiting": ("The agent has a question", "У агента вопрос"),
-        "NotifyDone": ("The agent finished the work", "Агент закончила работу"),
-        "NotifyStopped": ("The agent stopped on her own", "Агент остановилась сама"),
-        "NotifyLimit": ("A limit went over 90%", "Лимит перешёл за 90 %"),
+        "NotifyWhat": ("The tray icon, the taskbar button and the island show how many agents wait, have finished or stopped. A number goes when you open that session.", "Значок в трее, кнопка в панели задач и остров показывают, сколько агентов ждут, закончили или остановились. Число уходит, когда ты открываешь эту сессию."),
         "NotifySound": ("A sound when the agent has a question", "Звук, когда у агента вопрос"),
         "ZoomLabel": ("Window zoom", "Масштаб окна"),
         "ZoomWhat": ("Text, icons and the terminal change size together. In the terminal window: C⁠t⁠r⁠l⁠+⁠= and C⁠t⁠r⁠l⁠+⁠-, and C⁠t⁠r⁠l⁠+⁠0 brings back 115%.", "Текст, значки и терминал меняются вместе. В окне терминала — C⁠t⁠r⁠l⁠+⁠= и C⁠t⁠r⁠l⁠+⁠-, а C⁠t⁠r⁠l⁠+⁠0 возвращает 115 %."),
@@ -1893,41 +1883,11 @@ public enum Strings {
     /// voice input off
     public static var navVoiceOff: String { Strings.get("NavVoiceOff") }
 
-    /// waits for you
-    public static var noticeWaiting: String { Strings.get("NoticeWaiting") }
-
-    /// done
-    public static var noticeDone: String { Strings.get("NoticeDone") }
-
-    /// stopped
-    public static var noticeStopped: String { Strings.get("NoticeStopped") }
-
-    /// {0}% in 5 hours
-    public static var noticeLimitFiveHour: String { Strings.get("NoticeLimitFiveHour") }
-
-    /// {0}% this week
-    public static var noticeLimitWeek: String { Strings.get("NoticeLimitWeek") }
-
-    /// {0}% of {1} this week
-    public static var noticeLimitModel: String { Strings.get("NoticeLimitModel") }
-
     /// Notifications
     public static var notifyLabel: String { Strings.get("NotifyLabel") }
 
-    /// When the terminal window is not in focus, a line comes up next to Aiko for 6 seconds. A c...
+    /// The tray icon, the taskbar button and the island show how many agents wait, have finished...
     public static var notifyWhat: String { Strings.get("NotifyWhat") }
-
-    /// The agent has a question
-    public static var notifyWaiting: String { Strings.get("NotifyWaiting") }
-
-    /// The agent finished the work
-    public static var notifyDone: String { Strings.get("NotifyDone") }
-
-    /// The agent stopped on her own
-    public static var notifyStopped: String { Strings.get("NotifyStopped") }
-
-    /// A limit went over 90%
-    public static var notifyLimit: String { Strings.get("NotifyLimit") }
 
     /// A sound when the agent has a question
     public static var notifySound: String { Strings.get("NotifySound") }

@@ -55,13 +55,8 @@ public partial class TerminalPage : UserControl
         SpeechRussian.IsChecked = _settings.VoiceLanguage == AikoLanguage.Russian;
         SpeechEnglish.IsChecked = _settings.VoiceLanguage == AikoLanguage.English;
         FillZoom();
-        _waiting.IsChecked = _settings.NotifyWaiting;
-        _done.IsChecked = _settings.NotifyDone;
-        _stopped.IsChecked = _settings.NotifyStopped;
-        _limit.IsChecked = _settings.NotifyLimit;
         _sound.IsChecked = _settings.NotifySound;
         _filling = false;
-        ShowSound();
 
         ShowModel();
         ShowKey();
@@ -69,27 +64,12 @@ public partial class TerminalPage : UserControl
 
     // ---- the notices ----
 
-    private readonly ToggleButton _waiting = new();
-    private readonly ToggleButton _done = new();
-    private readonly ToggleButton _stopped = new();
-    private readonly ToggleButton _limit = new();
     private readonly ToggleButton _sound = new();
-    private FrameworkElement? _soundLine;
 
-    /// A row per kind, with the mark the notice itself shows (D-396). The ring of a limit is drawn
-    /// as it looks over 90 percent.
-    private void BuildNotices()
-    {
-        NoticeRows.Children.Add(NoticeRow(Marks.Notice(NoticeKind.Waiting, null, LimitTone.Normal), Strings.NotifyWaiting, _waiting, first: true));
-        NoticeRows.Children.Add(NoticeRow(Marks.Notice(NoticeKind.Done, null, LimitTone.Normal), Strings.NotifyDone, _done, first: false));
-        NoticeRows.Children.Add(NoticeRow(Marks.Notice(NoticeKind.Stopped, null, LimitTone.Normal), Strings.NotifyStopped, _stopped, first: false));
-        NoticeRows.Children.Add(NoticeRow(Marks.Notice(NoticeKind.Limit, 91, LimitTone.Caution), Strings.NotifyLimit, _limit, first: false));
-        var sound = NoticeRow(Marks.Fit(Marks.Sound()), Strings.NotifySound, _sound, first: true);
-        SoundRow.Children.Add(sound);
-        _soundLine = sound;
-    }
+    /// The one switch of the notices: the sound of a question, with its mark (D-396, D-409).
+    private void BuildNotices() => SoundRow.Children.Add(NoticeRow(Marks.Fit(Marks.Sound()), Strings.NotifySound, _sound));
 
-    private Border NoticeRow(FrameworkElement mark, string text, ToggleButton toggle, bool first)
+    private Border NoticeRow(FrameworkElement mark, string text, ToggleButton toggle)
     {
         toggle.Style = (Style)FindResource("Switch");
         toggle.VerticalAlignment = VerticalAlignment.Center;
@@ -107,37 +87,12 @@ public partial class TerminalPage : UserControl
         grid.Children.Add(mark);
         grid.Children.Add(words);
         grid.Children.Add(toggle);
-        return new Border
-        {
-            BorderBrush = Tokens.Brush("Hairline"),
-            BorderThickness = new Thickness(0, first ? 0 : 1, 0, 0),
-            Child = grid,
-        };
+        return new Border { Child = grid };
     }
 
     private void OnNotifyChanged(object sender, RoutedEventArgs e)
     {
-        ShowSound();
-        Save(settings => settings with
-        {
-            NotifyWaiting = _waiting.IsChecked == true,
-            NotifyDone = _done.IsChecked == true,
-            NotifyStopped = _stopped.IsChecked == true,
-            NotifyLimit = _limit.IsChecked == true,
-            NotifySound = _sound.IsChecked == true,
-        });
-    }
-
-    /// The sound belongs to the questions: with them off it has nothing to sound for, so it goes
-    /// quiet and keeps its own choice for when they come back.
-    private void ShowSound()
-    {
-        var questions = _waiting.IsChecked == true;
-        _sound.IsEnabled = questions;
-        if (_soundLine is not null)
-        {
-            _soundLine.Opacity = questions ? 1 : 0.45;
-        }
+        Save(settings => settings with { NotifySound = _sound.IsChecked == true });
     }
 
     /// One segment per step of WindowZoom, in the order of the steps.

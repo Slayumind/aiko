@@ -77,21 +77,6 @@ static class Marks
         return new PathGeometry([figure]);
     }
 
-    /// The mark of the state on its own, a little larger than in the list so it stands next to text
-    /// of 13 units, with no circle under it (the owner's pick after D-377). The settings show the
-    /// same marks next to each kind of notice.
-    public static FrameworkElement Notice(NoticeKind kind, int? percent, LimitTone tone)
-    {
-        FrameworkElement mark = kind switch
-        {
-            NoticeKind.Waiting => Marks.Pause(),
-            NoticeKind.Done => SiteIcons.Draw(SiteIcons.Check, 12, "Positive"),
-            NoticeKind.Stopped => Marks.Line("M0,0 L8,8 M8,0 L0,8", "Destructive"),
-            _ => Ring(percent, tone, 12, 1.5),
-        };
-        return Fit(mark);
-    }
-
     /// A mark in the square of the notice marks.
     public static FrameworkElement Fit(FrameworkElement mark)
     {
