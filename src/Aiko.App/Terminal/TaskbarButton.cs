@@ -8,10 +8,11 @@ using Aiko.Core.Terminal;
 
 namespace Aiko.App;
 
-/// The button of the terminal window on the taskbar (D-409). It repeats the tray icon: the ring of
-/// the environment chosen in the tray menu, the dot of the other one, and a face at the same
-/// moments. The sign of the sessions sits in its corner as an overlay. It draws only when
-/// something changes; the face plays the same short transition as on the tray.
+/// The button of the terminal window on the taskbar (D-409, D-414). It shows the rings of the tray
+/// icon: the ring of the environment chosen in the tray menu and the dot of the other one. The sign
+/// of the sessions sits in its corner as an overlay. It has no face: every new icon makes Windows
+/// build the framed window again, and the terminal in it missed a frame each time, a flicker on
+/// every face. A new icon goes only when the picture changed.
 [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763")]
 sealed class TaskbarButton
 {
@@ -23,33 +24,29 @@ sealed class TaskbarButton
 
     private readonly Window _window;
     private readonly Func<(CardRow? Ring, CardRow? Dot)> _rows;
-    private readonly TrayFaceAnimator _faces;
-    private (CardRow? Ring, CardRow? Dot) _lastRows;
     private SessionBadge _badge = SessionBadge.None;
+    private byte[] _picture = [];
 
     public TaskbarButton(Window window, Func<(CardRow? Ring, CardRow? Dot)> rows)
     {
         _window = window;
         _rows = rows;
         _window.TaskbarItemInfo ??= new TaskbarItemInfo();
-        _faces = new TrayFaceAnimator(window.Dispatcher);
-        _faces.Changed += () => Draw(sameRows: true);
     }
 
-    /// New numbers or another environment in the tray menu.
-    public void Update() => Draw(sameRows: false);
-
-    /// A face comes or goes, at the same moments as on the tray icon (D-211).
-    public void ShowFace(AikoFace? face, FaceStyle style)
+    /// New numbers or another environment in the tray menu: the rings are drawn again, and the icon
+    /// changes only when the picture did.
+    public void Update()
     {
-        if (face is { } shown)
+        var (ring, dot) = _rows();
+        var picture = RingIcon.RenderPng(Pixels(Size), ring, dot);
+        if (picture.AsSpan().SequenceEqual(_picture))
         {
-            _faces.Show(FaceDrawing.For(style, shown, TaskbarTheme.Ground(), Pixels(Size)));
+            return;
         }
-        else
-        {
-            _faces.Hide();
-        }
+
+        _picture = picture;
+        _window.Icon = Decode(picture);
     }
 
     /// The sign of the sessions. Only a change touches the taskbar.
@@ -62,17 +59,6 @@ sealed class TaskbarButton
 
         _badge = badge;
         _window.TaskbarItemInfo.Overlay = BadgeDrawing.Render(Pixels(OverlaySize), badge);
-    }
-
-    private void Draw(bool sameRows)
-    {
-        if (!sameRows)
-        {
-            _lastRows = _rows();
-        }
-
-        var size = Pixels(Size);
-        _window.Icon = Decode(RingIcon.RenderPng(size, _lastRows.Ring, _lastRows.Dot, _faces.Frame, _faces.Face));
     }
 
     /// Real pixels on the screen of the window, so the picture is not scaled up and blurred.

@@ -312,18 +312,17 @@ sealed class AikoShell : IDisposable
             _terminal?.LimitsChanged();
         });
 
-    /// A face comes or goes (D-211), on the tray icon or on the island, wherever Aiko lives, and on
-    /// the taskbar button of the open window (D-409).
+    /// A face comes or goes (D-211), on the tray icon or on the island, wherever Aiko lives. The
+    /// taskbar button takes none (D-414).
     private void OnFaceChanged(AikoFace? face)
     {
         var style = SettingsStore.LoadPersona().Face;
 
         _island.ShowFace(face, style);
         _tray.ShowFace(face, style);
-        _terminal?.Button.ShowFace(face, style);
     }
 
-    /// The tray icon and the taskbar button draw the same picture (D-409).
+    /// The tray icon and the taskbar button draw the same rings (D-409).
     private void RedrawIcons()
     {
         _tray.Update();
