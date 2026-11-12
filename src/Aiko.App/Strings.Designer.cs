@@ -1164,6 +1164,12 @@ public static class Strings
     /// Command line in this folder
     public static string TerminalGroupNewShell => Get("TerminalGroupNewShell");
 
+    /// Open the folder
+    public static string TerminalGroupOpenFolder => Get("TerminalGroupOpenFolder");
+
+    /// This folder is no longer on the disk
+    public static string TerminalFolderGone => Get("TerminalFolderGone");
+
     /// Folder for the new session
     public static string TerminalPickFolderHint => Get("TerminalPickFolderHint");
 

@@ -310,6 +310,9 @@ sealed class TerminalPanel : UserControl
     /// A new session in the folder of a group, with no question: Claude Code or a command line.
     public event Action<string, SessionKind>? GroupCreateAsked;
 
+    /// Opens the folder of a group in Explorer; false when the folder is gone from the disk.
+    public Func<string, bool>? FolderOpenAsked { get; set; }
+
     /// The palette closed: by Esc, by a click beside it, or by a choice.
     public event Action? PaletteClosed;
 
@@ -863,15 +866,16 @@ sealed class TerminalPanel : UserControl
         }
     }
 
-    /// The folder of a group, and on hover two quiet buttons: a session of Claude Code and a command
-    /// line in this folder, with no question (D-350).
+    /// The folder of a group, and on hover three quiet buttons: a session of Claude Code and a
+    /// command line in this folder, with no question (D-350), and the folder in Explorer (D-408).
     private UIElement GroupHeader(RowGroup group)
     {
         var buttons = new StackPanel { Orientation = Orientation.Horizontal, Opacity = 0 };
-        foreach (var (icon, tip, kind) in new (string, string, SessionKind)[]
+        foreach (var (icon, tip, click) in new (string, string, Action<Button>)[]
         {
-            ("M5,0 L5,10 M0,5 L10,5", Strings.TerminalGroupNewSession, SessionKind.Claude),
-            ("M0,1 L4,5 L0,9 M6,9 L11,9", Strings.TerminalGroupNewShell, SessionKind.Shell),
+            ("M5,0 L5,10 M0,5 L10,5", Strings.TerminalGroupNewSession, _ => GroupCreateAsked?.Invoke(group.Folder, SessionKind.Claude)),
+            ("M0,1 L4,5 L0,9 M6,9 L11,9", Strings.TerminalGroupNewShell, _ => GroupCreateAsked?.Invoke(group.Folder, SessionKind.Shell)),
+            ("M0.5,1.5 L4,1.5 L5.5,3 L11.5,3 L11.5,9.5 L0.5,9.5 Z", Strings.TerminalGroupOpenFolder, button => OpenFolder(button, group.Folder)),
         })
         {
             var button = Icon(Marks.Line(icon));
@@ -879,7 +883,7 @@ sealed class TerminalPanel : UserControl
             var face = (FrameworkElement)button.Content;
             face.Width = 22;
             face.Height = 22;
-            button.Click += (_, _) => GroupCreateAsked?.Invoke(group.Folder, kind);
+            button.Click += (_, _) => click(button);
             // The keyboard reaches them too: a button in focus is shown.
             button.GotKeyboardFocus += (_, _) => Fade(buttons, 1);
             button.LostKeyboardFocus += (_, _) => Fade(buttons, 0);
@@ -894,6 +898,25 @@ sealed class TerminalPanel : UserControl
         header.Children.Add(name);
         KeepLit(header, buttons, "group:" + group.Folder, () => !buttons.IsKeyboardFocusWithin);
         return header;
+    }
+
+    /// Opens the folder of a group in Explorer. When the folder is gone from the disk, nothing
+    /// opens: the button says so in its tooltip until the mouse leaves it.
+    private void OpenFolder(Button button, string folder)
+    {
+        if (FolderOpenAsked?.Invoke(folder) != false)
+        {
+            return;
+        }
+
+        var gone = new ToolTip { Content = Strings.TerminalFolderGone, PlacementTarget = button };
+        button.ToolTip = gone;
+        gone.IsOpen = true;
+        button.MouseLeave += (_, _) =>
+        {
+            gone.IsOpen = false;
+            button.ToolTip = Strings.TerminalGroupOpenFolder;
+        };
     }
 
     /// What the mouse was over in the list when it was drawn last, by a key of its own.

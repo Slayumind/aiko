@@ -1174,6 +1174,12 @@
   <data name="TerminalGroupNewShell" xml:space="preserve">
     <value>Command line in this folder</value>
   </data>
+  <data name="TerminalGroupOpenFolder" xml:space="preserve">
+    <value>Open the folder</value>
+  </data>
+  <data name="TerminalFolderGone" xml:space="preserve">
+    <value>This folder is no longer on the disk</value>
+  </data>
   <data name="TerminalPickFolderHint" xml:space="preserve">
     <value>Folder for the new session</value>
   </data>
