@@ -450,7 +450,8 @@ struct SharedCaseTests {
                 environmentName: row["environment"]?.stringValue ?? "",
                 sessionId: row["sessionId"]?.stringValue ?? "",
                 started: row["started"]?.boolValue ?? false,
-                hooksFile: row["hooksFile"]?.stringValue ?? "", picturesFolder: row["picturesFolder"]?.stringValue ?? "")
+                hooksFile: row["hooksFile"]?.stringValue ?? "", picturesFolder: row["picturesFolder"]?.stringValue ?? "",
+                onDisk: row["onDisk"]?.boolValue ?? true)
 
             let plan = ClaudeLaunchPlan.forRequest(platform, request, inheritedVariables: Self.strings(row["inherited"]))
             let name = row["name"]?.stringValue ?? ""

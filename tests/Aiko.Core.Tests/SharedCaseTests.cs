@@ -437,7 +437,8 @@ public class SharedCaseTests
                 row.GetProperty("sessionId").GetString()!,
                 row.GetProperty("started").GetBoolean(),
                 row.TryGetProperty("hooksFile", out var hooks) ? hooks.GetString()! : "",
-                row.TryGetProperty("picturesFolder", out var pictures) ? pictures.GetString()! : "");
+                row.TryGetProperty("picturesFolder", out var pictures) ? pictures.GetString()! : "",
+                !row.TryGetProperty("onDisk", out var onDisk) || onDisk.GetBoolean());
 
             var plan = ClaudeLaunchPlan.For(request, Strings(row.GetProperty("inherited")));
 

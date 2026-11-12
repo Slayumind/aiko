@@ -917,6 +917,23 @@ sealed class TerminalHost
         return terminal;
     }
 
+    /// Whether Claude Code saved the conversation, in any project folder of the environment: the
+    /// folder of the session may have moved since, and a long name gets a tail of Claude Code's own.
+    private static bool ConversationOnDisk(string config, string id)
+    {
+        var projects = Path.Combine(config, "projects");
+        try
+        {
+            return Directory.Exists(projects)
+                && Directory.EnumerateDirectories(projects).Any(folder => File.Exists(Path.Combine(folder, id + ".jsonl")));
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            // Unsure: resuming is what a started session did before.
+            return true;
+        }
+    }
+
     private PtyLaunch? Launch(TerminalSession session)
     {
         if (_settings.Environments.FirstOrDefault(one => one.Name == session.Environment) is not { } environment)
@@ -944,7 +961,7 @@ sealed class TerminalHost
         var claudePlan = ClaudeLaunchPlan.For(
             new LaunchRequest(
                 config, home, environment.Name, session.Id, session.Started, TerminalEvents.HooksFile(),
-                ThisComputer.Folders.PicturesFolder(session.Id)),
+                ThisComputer.Folders.PicturesFolder(session.Id), session.Started && ConversationOnDisk(config, session.Id)),
             inherited);
         return new PtyLaunch(CommandLine(claude, claudePlan.Arguments), folder, Variables(claudePlan));
     }

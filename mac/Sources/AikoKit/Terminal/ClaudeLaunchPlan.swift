@@ -2,7 +2,9 @@ import Foundation
 
 /// What the terminal needs to know to start Claude Code for one session. hooksFile holds the
 /// settings with the hook of the terminal (TerminalHooks); empty when it could not be written.
-/// picturesFolder is where the editor keeps the pictures of the session; empty for none.
+/// picturesFolder is where the editor keeps the pictures of the session; empty for none. onDisk:
+/// the file of the conversation is there. Claude Code writes it only after the first message, so a
+/// session that started and stopped before one has nothing to resume.
 public struct LaunchRequest: Sendable, Equatable {
     public let configDirectory: String
     public let userProfile: String
@@ -11,10 +13,11 @@ public struct LaunchRequest: Sendable, Equatable {
     public let started: Bool
     public let hooksFile: String
     public let picturesFolder: String
+    public let onDisk: Bool
 
     public init(
         configDirectory: String, userProfile: String, environmentName: String, sessionId: String, started: Bool,
-        hooksFile: String = "", picturesFolder: String = ""
+        hooksFile: String = "", picturesFolder: String = "", onDisk: Bool = true
     ) {
         self.configDirectory = configDirectory
         self.userProfile = userProfile
@@ -23,6 +26,7 @@ public struct LaunchRequest: Sendable, Equatable {
         self.started = started
         self.hooksFile = hooksFile
         self.picturesFolder = picturesFolder
+        self.onDisk = onDisk
     }
 }
 
@@ -45,8 +49,9 @@ public struct ClaudeLaunchPlan: Sendable, Equatable {
         _ platform: PlatformConventions, _ request: LaunchRequest, inheritedVariables: [String]
     ) -> ClaudeLaunchPlan {
         // A conversation gets its id from Aiko before the first turn, so the id is known even when
-        // Claude Code never answers. After that the same id brings the conversation back.
-        var arguments = [request.started ? "--resume" : "--session-id", request.sessionId]
+        // Claude Code never answers. After that the same id brings the conversation back, once
+        // Claude Code has saved it.
+        var arguments = [request.started && request.onDisk ? "--resume" : "--session-id", request.sessionId]
 
         // The hook of the terminal tells the row what the session does, in every environment, with
         // the personality or without it.
