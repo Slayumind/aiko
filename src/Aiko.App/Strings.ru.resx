@@ -109,6 +109,9 @@
   <data name="Settings" xml:space="preserve">
     <value>Настройки</value>
   </data>
+  <data name="SettingsBack" xml:space="preserve">
+    <value>К сессии</value>
+  </data>
   <data name="Close" xml:space="preserve">
     <value>Закрыть</value>
   </data>
@@ -126,6 +129,9 @@
   </data>
   <data name="SectionWhereToShow" xml:space="preserve">
     <value>ГДЕ ПОКАЗЫВАТЬ</value>
+  </data>
+  <data name="SectionWhenClosed" xml:space="preserve">
+    <value>КОГДА ОКНО ЗАКРЫТО</value>
   </data>
   <data name="SectionStartupAndUpdates" xml:space="preserve">
     <value>ЗАПУСК И ОБНОВЛЕНИЯ</value>
@@ -606,6 +612,12 @@
   </data>
   <data name="RestToo" xml:space="preserve">
     <value>И все остальные папки: это среда по умолчанию.</value>
+  </data>
+  <data name="DefaultForRest" xml:space="preserve">
+    <value>Все остальные папки — сюда</value>
+  </data>
+  <data name="FolderMovedFrom" xml:space="preserve">
+    <value>Перенесена сюда из {0}</value>
   </data>
   <data name="EditInFolders" xml:space="preserve">
     <value>Изменить в папках проектов</value>
@@ -1285,12 +1297,6 @@
   <data name="TerminalKeepOpen" xml:space="preserve">
     <value>Не закрывать</value>
   </data>
-  <data name="TerminalLimitFiveHour" xml:space="preserve">
-    <value>Лимит на 5 часов</value>
-  </data>
-  <data name="TerminalLimitWeek" xml:space="preserve">
-    <value>Лимит на неделю</value>
-  </data>
   <data name="TerminalMinimize" xml:space="preserve">
     <value>Свернуть</value>
   </data>
@@ -1323,9 +1329,6 @@
   </data>
   <data name="TerminalCloseWindow" xml:space="preserve">
     <value>Закрыть</value>
-  </data>
-  <data name="TerminalSessions" xml:space="preserve">
-    <value>Сессии</value>
   </data>
   <data name="VoiceButtonTip" xml:space="preserve">
     <value>Голосовой ввод · Ctrl+Shift+Space</value>
@@ -1394,22 +1397,22 @@
     <value>Уведомления</value>
   </data>
   <data name="NotifyWhat" xml:space="preserve">
-    <value>Когда окно терминала не впереди, рядом с Aiko на 6 секунд появляется строка. Щелчок по ней открывает сессию.</value>
+    <value>Когда окно терминала не в фокусе, рядом с Aiko на 6 секунд появляется строка. Щелчок по ней открывает сессию.</value>
   </data>
   <data name="NotifyWaiting" xml:space="preserve">
-    <value>Сессия ждёт ответа</value>
+    <value>У агента вопрос</value>
   </data>
   <data name="NotifyDone" xml:space="preserve">
-    <value>Сессия закончила</value>
+    <value>Агент закончила работу</value>
   </data>
   <data name="NotifyStopped" xml:space="preserve">
-    <value>Сессия остановилась сама</value>
+    <value>Агент остановилась сама</value>
   </data>
   <data name="NotifyLimit" xml:space="preserve">
     <value>Лимит перешёл за 90 %</value>
   </data>
   <data name="NotifySound" xml:space="preserve">
-    <value>Звук, когда сессия ждёт</value>
+    <value>Звук, когда у агента вопрос</value>
   </data>
   <data name="ZoomLabel" xml:space="preserve">
     <value>Масштаб окна</value>

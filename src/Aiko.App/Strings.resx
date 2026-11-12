@@ -109,6 +109,9 @@
   <data name="Settings" xml:space="preserve">
     <value>Settings</value>
   </data>
+  <data name="SettingsBack" xml:space="preserve">
+    <value>Back to the session</value>
+  </data>
   <data name="Close" xml:space="preserve">
     <value>Close</value>
   </data>
@@ -126,6 +129,9 @@
   </data>
   <data name="SectionWhereToShow" xml:space="preserve">
     <value>WHERE TO SHOW</value>
+  </data>
+  <data name="SectionWhenClosed" xml:space="preserve">
+    <value>WHEN THE WINDOW IS CLOSED</value>
   </data>
   <data name="SectionStartupAndUpdates" xml:space="preserve">
     <value>STARTUP AND UPDATES</value>
@@ -606,6 +612,12 @@
   </data>
   <data name="RestToo" xml:space="preserve">
     <value>And every other folder: this is the default environment.</value>
+  </data>
+  <data name="DefaultForRest" xml:space="preserve">
+    <value>Every other folder opens here</value>
+  </data>
+  <data name="FolderMovedFrom" xml:space="preserve">
+    <value>Moved here from {0}</value>
   </data>
   <data name="EditInFolders" xml:space="preserve">
     <value>Change in project folders</value>
@@ -1285,12 +1297,6 @@
   <data name="TerminalKeepOpen" xml:space="preserve">
     <value>Keep open</value>
   </data>
-  <data name="TerminalLimitFiveHour" xml:space="preserve">
-    <value>5-hour limit</value>
-  </data>
-  <data name="TerminalLimitWeek" xml:space="preserve">
-    <value>Weekly limit</value>
-  </data>
   <data name="TerminalMinimize" xml:space="preserve">
     <value>Minimize</value>
   </data>
@@ -1323,9 +1329,6 @@
   </data>
   <data name="TerminalCloseWindow" xml:space="preserve">
     <value>Close</value>
-  </data>
-  <data name="TerminalSessions" xml:space="preserve">
-    <value>Sessions</value>
   </data>
   <data name="VoiceButtonTip" xml:space="preserve">
     <value>Voice input · Ctrl+Shift+Space</value>
@@ -1394,22 +1397,22 @@
     <value>Notifications</value>
   </data>
   <data name="NotifyWhat" xml:space="preserve">
-    <value>When the terminal window is not in front, a line comes up next to Aiko for 6 seconds. A click on it opens the session.</value>
+    <value>When the terminal window is not in focus, a line comes up next to Aiko for 6 seconds. A click on it opens the session.</value>
   </data>
   <data name="NotifyWaiting" xml:space="preserve">
-    <value>A session waits for an answer</value>
+    <value>The agent has a question</value>
   </data>
   <data name="NotifyDone" xml:space="preserve">
-    <value>A session is done</value>
+    <value>The agent finished the work</value>
   </data>
   <data name="NotifyStopped" xml:space="preserve">
-    <value>A session stopped by itself</value>
+    <value>The agent stopped on her own</value>
   </data>
   <data name="NotifyLimit" xml:space="preserve">
     <value>A limit went over 90%</value>
   </data>
   <data name="NotifySound" xml:space="preserve">
-    <value>A sound when a session waits</value>
+    <value>A sound when the agent has a question</value>
   </data>
   <data name="ZoomLabel" xml:space="preserve">
     <value>Window zoom</value>

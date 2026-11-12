@@ -99,6 +99,9 @@ public static class Strings
     /// Settings
     public static string Settings => Get("Settings");
 
+    /// Back to the session
+    public static string SettingsBack => Get("SettingsBack");
+
     /// Close
     public static string Close => Get("Close");
 
@@ -116,6 +119,9 @@ public static class Strings
 
     /// WHERE TO SHOW
     public static string SectionWhereToShow => Get("SectionWhereToShow");
+
+    /// WHEN THE WINDOW IS CLOSED
+    public static string SectionWhenClosed => Get("SectionWhenClosed");
 
     /// STARTUP AND UPDATES
     public static string SectionStartupAndUpdates => Get("SectionStartupAndUpdates");
@@ -596,6 +602,12 @@ public static class Strings
 
     /// And every other folder: this is the default environment.
     public static string RestToo => Get("RestToo");
+
+    /// Every other folder opens here
+    public static string DefaultForRest => Get("DefaultForRest");
+
+    /// Moved here from {0}
+    public static string FolderMovedFrom => Get("FolderMovedFrom");
 
     /// Change in project folders
     public static string EditInFolders => Get("EditInFolders");
@@ -1275,12 +1287,6 @@ public static class Strings
     /// Keep open
     public static string TerminalKeepOpen => Get("TerminalKeepOpen");
 
-    /// 5-hour limit
-    public static string TerminalLimitFiveHour => Get("TerminalLimitFiveHour");
-
-    /// Weekly limit
-    public static string TerminalLimitWeek => Get("TerminalLimitWeek");
-
     /// Minimize
     public static string TerminalMinimize => Get("TerminalMinimize");
 
@@ -1313,9 +1319,6 @@ public static class Strings
 
     /// Close
     public static string TerminalCloseWindow => Get("TerminalCloseWindow");
-
-    /// Sessions
-    public static string TerminalSessions => Get("TerminalSessions");
 
     /// Voice input · Ctrl+Shift+Space
     public static string VoiceButtonTip => Get("VoiceButtonTip");
@@ -1383,22 +1386,22 @@ public static class Strings
     /// Notifications
     public static string NotifyLabel => Get("NotifyLabel");
 
-    /// When the terminal window is not in front, a line comes up next to Aiko for 6 seconds. A c...
+    /// When the terminal window is not in focus, a line comes up next to Aiko for 6 seconds. A c...
     public static string NotifyWhat => Get("NotifyWhat");
 
-    /// A session waits for an answer
+    /// The agent has a question
     public static string NotifyWaiting => Get("NotifyWaiting");
 
-    /// A session is done
+    /// The agent finished the work
     public static string NotifyDone => Get("NotifyDone");
 
-    /// A session stopped by itself
+    /// The agent stopped on her own
     public static string NotifyStopped => Get("NotifyStopped");
 
     /// A limit went over 90%
     public static string NotifyLimit => Get("NotifyLimit");
 
-    /// A sound when a session waits
+    /// A sound when the agent has a question
     public static string NotifySound => Get("NotifySound");
 
     /// Window zoom

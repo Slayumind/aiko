@@ -16,8 +16,8 @@
     </ResourceDictionary>
   </UserControl.Resources>
 
-  <Grid Margin="20">
-    <Border Width="720"
+  <Grid x:Name="Frame" Margin="20">
+    <Border x:Name="Card" Width="720"
             Background="{StaticResource Surface}"
             CornerRadius="{StaticResource CardRadius}"
             BorderBrush="{StaticResource Hairline}" BorderThickness="1"
@@ -37,7 +37,7 @@
 
         <Grid x:Name="Body" Height="600">
           <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="188" />
+            <ColumnDefinition x:Name="NavColumn" Width="188" />
             <ColumnDefinition Width="*" />
           </Grid.ColumnDefinitions>
 

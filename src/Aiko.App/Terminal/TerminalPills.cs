@@ -52,8 +52,12 @@ sealed class TerminalPills
     }
 
     private int _selected = -1;
+    private IReadOnlyList<Pill> _shown = [];
 
     public Grid Root { get; } = new() { VerticalAlignment = VerticalAlignment.Center };
+
+    /// Asked after the pills are drawn anew, so the panel can say how much room they have.
+    public Action? Refit { get; set; }
 
     /// The pills, in the order of the environments. chosen is the name of the selected one; when it
     /// changes, the background slides there and the two names trade their colours.
@@ -63,6 +67,7 @@ sealed class TerminalPills
         var moved = before is not null && before != chosen;
         _chosen = chosen;
         _selected = selected;
+        _shown = pills;
         _row.Children.Clear();
         foreach (var pill in pills)
         {
@@ -83,7 +88,11 @@ sealed class TerminalPills
         }
 
         // The pills have their sizes only after layout.
-        Root.Dispatcher.BeginInvoke(() => Place(selected, moved), DispatcherPriority.Loaded);
+        Root.Dispatcher.BeginInvoke(() =>
+        {
+            Refit?.Invoke();
+            Place(selected, moved);
+        }, DispatcherPriority.Loaded);
     }
 
     /// The header opened (hidden) or closed. The pills fade and fold their width. fold is the time
@@ -153,6 +162,57 @@ sealed class TerminalPills
             }
         };
         brush.BeginAnimation(SolidColorBrush.ColorProperty, fade);
+    }
+
+    /// The pills that fit in this width, the chosen one always among them. A narrow window, a large
+    /// zoom or a long name can leave too little room: the pills of the other environments go from
+    /// the end, and come back when there is room again. They stay one click away in the open header.
+    /// When even the chosen one is too wide alone, its name ends with an ellipsis.
+    public void Fit(double room)
+    {
+        if (room <= 0 || _row.Children.Count == 0)
+        {
+            return;
+        }
+
+        var label = _selected >= 0 && _selected < _shown.Count ? _shown[_selected].Label : null;
+        if (label is not null)
+        {
+            label.MaxWidth = double.PositiveInfinity;
+            label.TextTrimming = TextTrimming.CharacterEllipsis;
+
+            // A pill keeps the size it measured while the name was cut: the parts between the
+            // name and the pill have to measure again to see the whole name.
+            for (DependencyObject? part = label; part is UIElement element && !ReferenceEquals(part, _row); part = VisualTreeHelper.GetParent(part))
+            {
+                element.InvalidateMeasure();
+            }
+        }
+
+        var widths = new double[_row.Children.Count];
+        for (var at = 0; at < widths.Length; at++)
+        {
+            var pill = _row.Children[at];
+            pill.Visibility = Visibility.Visible;
+            pill.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+            widths[at] = pill.DesiredSize.Width;
+        }
+
+        var used = widths.Sum();
+        for (var at = widths.Length - 1; at >= 0 && used > room; at--)
+        {
+            if (at != _selected)
+            {
+                _row.Children[at].Visibility = Visibility.Collapsed;
+                used -= widths[at];
+            }
+        }
+
+        if (used > room && label is not null)
+        {
+            label.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+            label.MaxWidth = Math.Max(0, label.DesiredSize.Width - (used - room));
+        }
     }
 
     private void Place(int selected, bool slide)

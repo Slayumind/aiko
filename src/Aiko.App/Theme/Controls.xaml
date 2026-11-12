@@ -122,6 +122,13 @@
     </Setter>
   </Style>
 
+  <!-- Rows of settings in one frame, with a hairline between them: "Where Aiko is on", the notices. -->
+  <Style x:Key="Rows" TargetType="Border">
+    <Setter Property="CornerRadius" Value="10" />
+    <Setter Property="BorderBrush" Value="{StaticResource Hairline}" />
+    <Setter Property="BorderThickness" Value="1" />
+  </Style>
+
   <Style x:Key="SegmentBar" TargetType="Border">
     <Setter Property="Background" Value="{StaticResource Raised}" />
     <Setter Property="CornerRadius" Value="10" />

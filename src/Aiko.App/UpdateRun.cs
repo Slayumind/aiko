@@ -18,6 +18,10 @@ static class UpdateRun
     /// The General page shows it, so "up to date" comes with "as of when".
     public static DateTime? LastAnswered { get; private set; }
 
+    /// The last answer of the site in this run of the app. The General page opens with a newer
+    /// version already known from the daily check, instead of asking again.
+    public static UpdateInfo? LastInfo { get; private set; }
+
     public static async Task<UpdateInfo> AskAsync(CancellationToken cancel)
     {
         using var client = new UpdateClient();
@@ -26,6 +30,7 @@ static class UpdateRun
         if (answer.Answered)
         {
             LastAnswered = DateTime.Now;
+            LastInfo = answer.Info;
         }
 
         if (answer.Answered && (answer.Week is not null || answer.Month is not null))

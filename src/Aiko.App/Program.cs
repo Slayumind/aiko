@@ -473,7 +473,7 @@ static class Program
 
         if (args is ["--snapshot-settings", var settingsPath, ..])
         {
-            // The page to draw: --snapshot-settings out.png general | folders | personality | terminal |
+            // The page to draw: --snapshot-settings out.png general | personality | terminal | privacy |
             // terminal-openai | env1 | env2 [tall]
             // "tall" draws the whole page, not only the part that fits the window.
             var page = args.Length > 2 ? args[2] : null;

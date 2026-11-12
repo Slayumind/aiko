@@ -5,8 +5,9 @@ using System.Windows.Input;
 namespace Aiko.App;
 
 /// --try-settings: opens the settings window and uses it with the real mouse and keyboard, the way
-/// the live run that found the bugs did. It picks the other environment for the first bound folder,
-/// renames environment 2 with Enter, and finishes the checklist again, which must change nothing.
+/// the live run that found the bugs did. It adds the first bound folder on the page of the other
+/// environment, which moves it there, renames environment 2 with Enter, and finishes the checklist
+/// again, which must change nothing.
 /// The environments file is put back afterwards.
 static class SettingsCheck
 {
@@ -22,7 +23,9 @@ static class SettingsCheck
         var application = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
         // The real window, not a stand-in: a drop-down list is a window of its own, and whether it
         // shows above its owner depends on the owner.
-        var window = new SettingsWindow(SettingsPanel.FoldersPageKey);
+        var first = Core.EnvironmentEdits.Bindings(original)[0];
+        var otherFolder = original.Environments.First(e => e.Name != first.Environment).ConfigDirectories[0];
+        var window = new SettingsWindow("env:" + otherFolder);
         var panel = window.Panel;
 
         // On top, so every click and key of the check lands in this window and nowhere else.
@@ -61,7 +64,7 @@ static class SettingsCheck
 
     private static async Task<bool> Walk(SettingsPanel panel, Core.EnvironmentSettings original)
     {
-        // ---- a folder moves to the other environment ----
+        // ---- a folder added on the page of the other environment moves there, and says so ----
         var first = Core.EnvironmentEdits.Bindings(original)[0];
         var names = original.Environments.Select(e => e.Name).ToList();
         var other = names.First(n => n != first.Environment);
@@ -70,28 +73,16 @@ static class SettingsCheck
         Click(panel.HeaderRow.PointToScreen(new Point(300, 20)));
         await Task.Delay(300);
 
-        var folders = (FoldersPage)panel.PageHost.Content;
-        var row = (Border)folders.Rows.Children[0];
-        var choice = ((Grid)row.Child).Children.OfType<DropDown>().Single();
-
-        // The keyboard, not the mouse: over a topmost window the list opens underneath it, and a
-        // click meant for the list would land on the page. The mouse part is --try-dropdown.
-        var picked = -1;
-        choice.Picked += index => picked = index;
-        choice.Focus();
-        Press(Key.Down);
-        await Task.Delay(300);
-        var steps = names.IndexOf(other) - choice.SelectedIndex;
-        for (var i = 0; i < Math.Abs(steps); i++)
-        {
-            Press(steps > 0 ? Key.Down : Key.Up);
-        }
-
-        Press(Key.Enter);
+        // The folder dialog is the system's own and cannot be clicked through: the page is given
+        // the folder the dialog would return.
+        var target = (EnvironmentPage)panel.PageHost.Content;
+        target.AddFolder(first.Folder);
         await Task.Delay(500);
 
-        var moved = picked == names.IndexOf(other) && Core.EnvironmentEdits.Bindings(SettingsStore.LoadEnvironments())
+        var moved = Core.EnvironmentEdits.Bindings(SettingsStore.LoadEnvironments())
             .Any(b => Core.RealClaude.SameFolder(b.Folder, first.Folder) && b.Environment == other);
+        var saidSo = target.BoundList.Children.OfType<Border>().Any(row => row.Child is StackPanel { Children.Count: 2 });
+        moved &= saidSo;
 
         // ---- environment 2 is renamed with Enter, and its command stays ----
         SettingsStore.SaveEnvironments(original);

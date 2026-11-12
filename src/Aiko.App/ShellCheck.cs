@@ -7,7 +7,7 @@ using Windows.Win32;
 namespace Aiko.App;
 
 /// --try-shell: starts the real shell and walks it through what a person does with it: the settings
-/// window, the tray icon and its menu, the card pinned and unpinned, a face, the island and back.
+/// in the terminal window, the tray icon and its menu, the card pinned and unpinned, a face, the island and back.
 /// The shell runs with changingNothing, so no settings file is written and nothing is asked of the
 /// network.
 ///
@@ -54,14 +54,14 @@ static class ShellCheck
         var home = SettingsStore.Load().Place;
         var environments = SettingsStore.LoadEnvironments().Environments.Count;
 
-        // ---- the settings window: one at a time, and gone when closed ----
+        // ---- the settings: in the terminal window, never in a window of their own, and gone when
+        // closed. Before the first environment the first run keeps its own window. ----
         shell.OpenSettingsForCheck();
         await Task.Delay(600);
-        var settings = shell.SettingsForCheck;
         shell.OpenSettingsForCheck();
-        var oneWindow = settings is { IsVisible: true } && ReferenceEquals(settings, shell.SettingsForCheck);
-        settings?.Close();
-        var settingsGone = await Until(() => shell.SettingsForCheck is null);
+        var oneWindow = shell.SettingsShownForCheck && shell.SettingsWindowForCheck == (environments == 0);
+        shell.CloseSettingsForCheck();
+        var settingsGone = await Until(() => !shell.SettingsShownForCheck);
 
         // ---- the tray: an icon Windows can find, and no island ----
         shell.ShowPlaceForCheck(AikoPlace.Tray);
@@ -116,7 +116,7 @@ static class ShellCheck
         await Task.Delay(300);
         var back = (home == AikoPlace.Island) == (shell.IslandForCheck is not null);
 
-        Log.Write($"--try-shell: one settings window={oneWindow}, gone when closed={settingsGone}, icon={icon}, "
+        Log.Write($"--try-shell: settings in the terminal window={oneWindow}, gone when closed={settingsGone}, icon={icon}, "
             + $"card pinned={pinned}, second click closes={unpinned}, hover with the mouse away opens nothing={quietHover}, "
             + $"unpinned card opened={opened} and left={left}, a resting mouse opens the card={restingMouse}, "
             + $"the menu opens settings={menu}, face came={faceCame} and went={faceWent}, "
@@ -185,9 +185,9 @@ static class ShellCheck
         keys.Stop();
         giveUp.Stop();
 
-        var opened = await Until(() => shell.SettingsForCheck is { IsVisible: true });
-        shell.SettingsForCheck?.Close();
-        return opened && await Until(() => shell.SettingsForCheck is null);
+        var opened = await Until(() => shell.SettingsShownForCheck);
+        shell.CloseSettingsForCheck();
+        return opened && await Until(() => !shell.SettingsShownForCheck);
     }
 
     /// A step that depends on the mouse being away. When the pointer happens to rest on the icon,

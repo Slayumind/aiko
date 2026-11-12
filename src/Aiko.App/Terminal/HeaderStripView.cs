@@ -146,48 +146,6 @@ sealed class HeaderStripView
         Root.Opacity = 1;
     }
 
-    /// The track of a ring: the grey of the tray icon's ring. It is see-through, so it reads on the
-    /// window, on a card and on the background of the chosen pill alike.
-    private static readonly Brush RingTrack = TrackBrush();
-
-    private static Brush TrackBrush()
-    {
-        var brush = new SolidColorBrush(RingDrawing.TrackColor);
-        brush.Freeze();
-        return brush;
-    }
-
-    /// The ring of a limit: a full grey track and the used part from the top, clockwise.
-    public static FrameworkElement Ring(int? percent, LimitTone tone, double size, double thickness, double opacity = 1)
-    {
-        var ring = new Grid { Width = size, Height = size, VerticalAlignment = VerticalAlignment.Center, Opacity = opacity };
-        ring.Children.Add(new Ellipse { Stroke = RingTrack, StrokeThickness = thickness });
-        if (percent is { } used && used > 0)
-        {
-            ring.Children.Add(new Path
-            {
-                Stroke = Tokens.ToneBrush(tone),
-                StrokeThickness = thickness,
-                StrokeStartLineCap = PenLineCap.Round,
-                StrokeEndLineCap = PenLineCap.Round,
-                Data = Arc(size / 2, (size - thickness) / 2, used / 100.0),
-            });
-        }
-
-        return ring;
-    }
-
-    /// A part of a circle from the top, clockwise.
-    public static Geometry Arc(double centre, double radius, double part)
-    {
-        part = Math.Clamp(part, 0, 0.999);
-        var angle = part * 2 * Math.PI;
-        var end = new Point(centre + radius * Math.Sin(angle), centre - radius * Math.Cos(angle));
-        var figure = new PathFigure { StartPoint = new Point(centre, centre - radius) };
-        figure.Segments.Add(new ArcSegment(end, new Size(radius, radius), 0, part > 0.5, SweepDirection.Clockwise, true));
-        return new PathGeometry([figure]);
-    }
-
     public static string WaitingWords(int count) =>
         string.Format(
             CultureInfo.CurrentCulture,
@@ -279,7 +237,7 @@ sealed class HeaderStripView
         }
 
         var left = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
-        var ring = Ring(column.Column.FiveHour, quiet ? LimitTone.Unknown : ToneOf(column), 14, 2, quiet ? 0.6 : 1);
+        var ring = Marks.Ring(column.Column.FiveHour, quiet ? LimitTone.Unknown : ToneOf(column), 14, 2, quiet ? 0.6 : 1);
         ring.Margin = new Thickness(0, 0, 8, 0);
         left.Children.Add(ring);
 

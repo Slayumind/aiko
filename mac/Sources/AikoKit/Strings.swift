@@ -66,12 +66,14 @@ public enum Strings {
         "MenuTerminal": ("Open terminal", "Открыть терминал"),
         "MenuRefresh": ("Refresh limits", "Обновить лимиты"),
         "Settings": ("Settings", "Настройки"),
+        "SettingsBack": ("Back to the session", "К сессии"),
         "Close": ("Close", "Закрыть"),
         "QuitAiko": ("Quit Aiko", "Выйти из Aiko"),
         "CheckForUpdates": ("Check for updates", "Проверить обновления"),
         "CheckUpdatesToggle": ("Check for updates", "Проверять обновления"),
         "SectionEnvironments": ("ENVIRONMENTS", "СРЕДЫ"),
         "SectionWhereToShow": ("WHERE TO SHOW", "ГДЕ ПОКАЗЫВАТЬ"),
+        "SectionWhenClosed": ("WHEN THE WINDOW IS CLOSED", "КОГДА ОКНО ЗАКРЫТО"),
         "SectionStartupAndUpdates": ("STARTUP AND UPDATES", "ЗАПУСК И ОБНОВЛЕНИЯ"),
         "SectionLanguage": ("LANGUAGE", "ЯЗЫК"),
         "DirectMode": ("Direct mode", "Прямой режим"),
@@ -232,6 +234,8 @@ public enum Strings {
         "SectionBoundFolders": ("BOUND FOLDERS", "ПРИВЯЗАННЫЕ ПАПКИ"),
         "NoneBound": ("No folders.", "Ни одной папки."),
         "RestToo": ("And every other folder: this is the default environment.", "И все остальные папки: это среда по умолчанию."),
+        "DefaultForRest": ("Every other folder opens here", "Все остальные папки — сюда"),
+        "FolderMovedFrom": ("Moved here from {0}", "Перенесена сюда из {0}"),
         "EditInFolders": ("Change in project folders", "Изменить в папках проектов"),
         "RemoveEnvironment": ("Remove environment", "Удалить среду"),
         "RemoveEnvironmentLine": ("Aiko's line and plugins leave this folder's settings.json, and so do the command {0} and the bindings to {1}.", "Из settings.json этой папки уйдут строка и плагины Aiko, а с ними команда {0} и привязки к {1}."),
@@ -458,8 +462,6 @@ public enum Strings {
         "TerminalDontQuit": ("Don’t quit", "Не выходить"),
         "TerminalStopAndClose": ("Stop and close", "Остановить и закрыть"),
         "TerminalKeepOpen": ("Keep open", "Не закрывать"),
-        "TerminalLimitFiveHour": ("5-hour limit", "Лимит на 5 часов"),
-        "TerminalLimitWeek": ("Weekly limit", "Лимит на неделю"),
         "TerminalMinimize": ("Minimize", "Свернуть"),
         "TerminalMaximize": ("Maximize", "Развернуть"),
         "TerminalRestore": ("Restore", "Восстановить"),
@@ -471,7 +473,6 @@ public enum Strings {
         "TerminalDirectOn": ("direct mode on", "прямой режим вкл"),
         "TerminalDirectOff": ("direct mode off", "прямой режим выкл"),
         "TerminalCloseWindow": ("Close", "Закрыть"),
-        "TerminalSessions": ("Sessions", "Сессии"),
         "VoiceButtonTip": ("Voice input · Ctrl+Shift+Space", "Голосовой ввод · Ctrl+Shift+Space"),
         "VoiceStopTip": ("Finish recording · Ctrl+Shift+Space", "Закончить запись · Ctrl+Shift+Space"),
         "VoiceWarming": ("starting the mic", "микрофон включается"),
@@ -494,12 +495,12 @@ public enum Strings {
         "NoticeLimitWeek": ("{0}% this week", "{0} % за неделю"),
         "NoticeLimitModel": ("{0}% of {1} this week", "{0} % {1} за неделю"),
         "NotifyLabel": ("Notifications", "Уведомления"),
-        "NotifyWhat": ("When the terminal window is not in front, a line comes up next to Aiko for 6 seconds. A click on it opens the session.", "Когда окно терминала не впереди, рядом с Aiko на 6 секунд появляется строка. Щелчок по ней открывает сессию."),
-        "NotifyWaiting": ("A session waits for an answer", "Сессия ждёт ответа"),
-        "NotifyDone": ("A session is done", "Сессия закончила"),
-        "NotifyStopped": ("A session stopped by itself", "Сессия остановилась сама"),
+        "NotifyWhat": ("When the terminal window is not in focus, a line comes up next to Aiko for 6 seconds. A click on it opens the session.", "Когда окно терминала не в фокусе, рядом с Aiko на 6 секунд появляется строка. Щелчок по ней открывает сессию."),
+        "NotifyWaiting": ("The agent has a question", "У агента вопрос"),
+        "NotifyDone": ("The agent finished the work", "Агент закончила работу"),
+        "NotifyStopped": ("The agent stopped on her own", "Агент остановилась сама"),
         "NotifyLimit": ("A limit went over 90%", "Лимит перешёл за 90 %"),
-        "NotifySound": ("A sound when a session waits", "Звук, когда сессия ждёт"),
+        "NotifySound": ("A sound when the agent has a question", "Звук, когда у агента вопрос"),
         "ZoomLabel": ("Window zoom", "Масштаб окна"),
         "ZoomWhat": ("Text, icons and the terminal change size together. In the terminal window: C⁠t⁠r⁠l⁠+⁠= and C⁠t⁠r⁠l⁠+⁠-, and C⁠t⁠r⁠l⁠+⁠0 brings back 115%.", "Текст, значки и терминал меняются вместе. В окне терминала — C⁠t⁠r⁠l⁠+⁠= и C⁠t⁠r⁠l⁠+⁠-, а C⁠t⁠r⁠l⁠+⁠0 возвращает 115 %."),
         "ZoomStep": ("{0}%", "{0} %"),
@@ -608,6 +609,9 @@ public enum Strings {
     /// Settings
     public static var settings: String { Strings.get("Settings") }
 
+    /// Back to the session
+    public static var settingsBack: String { Strings.get("SettingsBack") }
+
     /// Close
     public static var close: String { Strings.get("Close") }
 
@@ -625,6 +629,9 @@ public enum Strings {
 
     /// WHERE TO SHOW
     public static var sectionWhereToShow: String { Strings.get("SectionWhereToShow") }
+
+    /// WHEN THE WINDOW IS CLOSED
+    public static var sectionWhenClosed: String { Strings.get("SectionWhenClosed") }
 
     /// STARTUP AND UPDATES
     public static var sectionStartupAndUpdates: String { Strings.get("SectionStartupAndUpdates") }
@@ -1105,6 +1112,12 @@ public enum Strings {
 
     /// And every other folder: this is the default environment.
     public static var restToo: String { Strings.get("RestToo") }
+
+    /// Every other folder opens here
+    public static var defaultForRest: String { Strings.get("DefaultForRest") }
+
+    /// Moved here from {0}
+    public static var folderMovedFrom: String { Strings.get("FolderMovedFrom") }
 
     /// Change in project folders
     public static var editInFolders: String { Strings.get("EditInFolders") }
@@ -1784,12 +1797,6 @@ public enum Strings {
     /// Keep open
     public static var terminalKeepOpen: String { Strings.get("TerminalKeepOpen") }
 
-    /// 5-hour limit
-    public static var terminalLimitFiveHour: String { Strings.get("TerminalLimitFiveHour") }
-
-    /// Weekly limit
-    public static var terminalLimitWeek: String { Strings.get("TerminalLimitWeek") }
-
     /// Minimize
     public static var terminalMinimize: String { Strings.get("TerminalMinimize") }
 
@@ -1822,9 +1829,6 @@ public enum Strings {
 
     /// Close
     public static var terminalCloseWindow: String { Strings.get("TerminalCloseWindow") }
-
-    /// Sessions
-    public static var terminalSessions: String { Strings.get("TerminalSessions") }
 
     /// Voice input · Ctrl+Shift+Space
     public static var voiceButtonTip: String { Strings.get("VoiceButtonTip") }
@@ -1892,22 +1896,22 @@ public enum Strings {
     /// Notifications
     public static var notifyLabel: String { Strings.get("NotifyLabel") }
 
-    /// When the terminal window is not in front, a line comes up next to Aiko for 6 seconds. A c...
+    /// When the terminal window is not in focus, a line comes up next to Aiko for 6 seconds. A c...
     public static var notifyWhat: String { Strings.get("NotifyWhat") }
 
-    /// A session waits for an answer
+    /// The agent has a question
     public static var notifyWaiting: String { Strings.get("NotifyWaiting") }
 
-    /// A session is done
+    /// The agent finished the work
     public static var notifyDone: String { Strings.get("NotifyDone") }
 
-    /// A session stopped by itself
+    /// The agent stopped on her own
     public static var notifyStopped: String { Strings.get("NotifyStopped") }
 
     /// A limit went over 90%
     public static var notifyLimit: String { Strings.get("NotifyLimit") }
 
-    /// A sound when a session waits
+    /// A sound when the agent has a question
     public static var notifySound: String { Strings.get("NotifySound") }
 
     /// Window zoom

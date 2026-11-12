@@ -161,20 +161,6 @@ sealed class NoticeWindow : Window
         };
     }
 
-    /// The mark of the state on its own, a little larger than in the list so it stands next to text
-    /// of 13 units, with no circle under it (the owner's pick after D-377).
-    private static FrameworkElement Sign(NoticeLine notice)
-    {
-        FrameworkElement mark = notice.Kind switch
-        {
-            NoticeKind.Waiting => Marks.Pause(),
-            NoticeKind.Done => SiteIcons.Draw(SiteIcons.Check, 12, "Positive"),
-            NoticeKind.Stopped => Marks.Line("M0,0 L8,8 M8,0 L0,8", "Destructive"),
-            _ => HeaderStripView.Ring(notice.Percent, notice.Tone, 12, 1.5),
-        };
-        mark.HorizontalAlignment = HorizontalAlignment.Center;
-        mark.VerticalAlignment = VerticalAlignment.Center;
-        mark.LayoutTransform = new ScaleTransform(1.25, 1.25);
-        return new Grid { Width = 18, Height = 18, VerticalAlignment = VerticalAlignment.Center, Children = { mark } };
-    }
+    private static FrameworkElement Sign(NoticeLine notice) => Marks.Notice(notice.Kind, notice.Percent, notice.Tone);
+
 }

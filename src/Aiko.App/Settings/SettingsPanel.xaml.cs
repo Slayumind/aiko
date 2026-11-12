@@ -9,7 +9,6 @@ namespace Aiko.App;
 
 public partial class SettingsPanel : UserControl
 {
-    public const string FoldersPageKey = "folders";
     public const string GeneralPageKey = "general";
     public const string PersonalityPageKey = "personality";
     public const string PrivacyPageKey = "privacy";
@@ -32,14 +31,24 @@ public partial class SettingsPanel : UserControl
     {
     }
 
-    /// The page to open: "general", "folders", "personality", "setup" or "env:" and an account folder. Null opens the
-    /// first environment, or the checklist when nothing is set up yet.
-    public SettingsPanel(string? page)
+    /// The page to open: "general", "personality", "terminal", "privacy", "setup" or "env:" and an account folder. Null opens the
+    /// first environment, or the checklist when nothing is set up yet. In the window the panel stands
+    /// on the place of the list and the terminal (D-374) instead of in a window of its own.
+    public SettingsPanel(string? page, bool inWindow = false)
     {
         InitializeComponent();
 
-        // A small screen still shows the header; the page scrolls inside.
-        Body.Height = Math.Clamp(SystemParameters.WorkArea.Height - 160, 420, 600);
+        _inWindow = inWindow;
+        if (inWindow)
+        {
+            FitInWindow();
+        }
+        else
+        {
+            // A small screen still shows the header; the page scrolls inside.
+            Body.Height = Math.Clamp(SystemParameters.WorkArea.Height - 160, 420, 600);
+        }
+
         VersionLine.Text = $"Aiko {AppVersion.WithCommit()}";
 
         _editor.Changed += OnEnvironmentsChanged;
@@ -49,6 +58,7 @@ public partial class SettingsPanel : UserControl
         BuildNav();
     }
 
+    /// In its own window: the cross. In the terminal window: "Back to the session" and Esc.
     public event Action? CloseRequested;
     public event Action? QuitRequested;
 
@@ -94,6 +104,9 @@ public partial class SettingsPanel : UserControl
         Navigate(ChecklistPageKey);
     }
 
+    /// Another page asked for while the panel is open, from the tray menu or the editor.
+    public void Open(string page) => Navigate(page);
+
     public void StartUpdateCheck()
     {
         if (_page != GeneralPageKey)
@@ -113,12 +126,60 @@ public partial class SettingsPanel : UserControl
             : settings.Environments.Where(e => e != first).Prepend(first);
     }
 
+    // ---- the frame ----
+
+    /// The width of the page column in the window: the pages were made for a window 720 wide, and a
+    /// column wider than this makes lines too long to read (D-391).
+    private const double PageWidth = 640;
+
+    private readonly bool _inWindow;
+
+    /// No card, no title and no cross: the terminal window has its own title bar, and the panel
+    /// fills the place under it. The page keeps a readable column on the left.
+    private void FitInWindow()
+    {
+        Frame.Margin = new Thickness(0);
+        Card.Width = double.NaN;
+        Card.CornerRadius = new CornerRadius(0);
+        Card.BorderThickness = new Thickness(0);
+        Card.Effect = null;
+        HeaderRow.Visibility = Visibility.Collapsed;
+        Body.Height = double.NaN;
+
+        PageScroll.Content = null;
+        var column = new Grid();
+        column.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star), MaxWidth = PageWidth });
+        column.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        column.Children.Add(PageHost);
+        PageScroll.Content = column;
+    }
+
+    /// The way back to the session on top of the menu, and the width of the menu, both from the
+    /// terminal window: its button is the one under the list of sessions, and the menu is as wide
+    /// as that list (D-374).
+    public void PlaceInWindow(FrameworkElement back, double menuWidth)
+    {
+        back.Margin = new Thickness(0, 0, 0, 10);
+        _back = back;
+        NavColumn.Width = new GridLength(menuWidth);
+        BuildNav();
+    }
+
+    /// "Back to the session" and Esc.
+    public void Back() => CloseRequested?.Invoke();
+
+    private FrameworkElement? _back;
+
     // ---- the menu ----
 
     private void BuildNav()
     {
         _buildingNav = true;
         Nav.Children.Clear();
+        if (_back is not null)
+        {
+            Nav.Children.Add(_back);
+        }
 
         var settings = _editor.Current;
         Nav.Children.Add(new TextBlock
@@ -147,8 +208,6 @@ public partial class SettingsPanel : UserControl
 
         Nav.Children.Add(new Border { Height = 1, Background = Tokens.Brush("Hairline"), Margin = new Thickness(10, 8, 10, 8) });
 
-        var bound = EnvironmentEdits.Bindings(settings).Count;
-        Nav.Children.Add(NavItem(FoldersPageKey, Strings.ItemFolders, bound > 0 ? string.Format(Strings.NavBound, bound) : null));
         if (settings.HasEnvironments)
         {
             var talking = settings.Environments.Count(e => e.Persona);
@@ -296,13 +355,6 @@ public partial class SettingsPanel : UserControl
             return general;
         }
 
-        if (key == FoldersPageKey)
-        {
-            var folders = new FoldersPage(_editor);
-            folders.ChecklistRequested += item => OpenChecklist(item);
-            return folders;
-        }
-
         if (key == PersonalityPageKey)
         {
             if (!_editor.Current.HasEnvironments)
@@ -341,7 +393,7 @@ public partial class SettingsPanel : UserControl
         }
 
         var environment = new EnvironmentPage(_editor, folder);
-        environment.FoldersRequested += () => Navigate(FoldersPageKey);
+        environment.ChecklistRequested += item => OpenChecklist(item);
         environment.Removed += ShowNoteOnFirstEnvironment;
         return environment;
     }
@@ -398,9 +450,6 @@ public partial class SettingsPanel : UserControl
         {
             case EnvironmentPage environment:
                 environment.Leave();
-                break;
-            case FoldersPage folders:
-                folders.Leave();
                 break;
             case PersonalityPage personality:
                 personality.Leave();

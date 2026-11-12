@@ -43,7 +43,7 @@ public class NoticesTests
 
             Assert.Equal(
                 Enum.Parse<NoticeWay>(row.GetProperty("way").GetString()!),
-                Notices.Route(kind, choice, row.GetProperty("inFront").GetBoolean(), row.GetProperty("open").GetBoolean()));
+                Notices.Route(kind, choice, row.GetProperty("inFocus").GetBoolean(), row.GetProperty("open").GetBoolean()));
         }
     }
 

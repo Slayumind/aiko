@@ -39,6 +39,27 @@ sealed class TerminalPanel : UserControl
     private readonly Button _chevron;
     private readonly Button _gear;
 
+    /// The gear stays lit while the settings are open, as a pressed segment.
+    private readonly Border _gearLit = new() { CornerRadius = new CornerRadius(6), Background = Tokens.Brush("Raised"), Visibility = Visibility.Collapsed };
+
+    /// A quiet dot on the gear while a newer version is out (D-391); the General page says which.
+    private readonly System.Windows.Shapes.Ellipse _gearDot = new()
+    {
+        Width = 6,
+        Height = 6,
+        Fill = Tokens.Brush("Positive"),
+        HorizontalAlignment = HorizontalAlignment.Right,
+        VerticalAlignment = VerticalAlignment.Top,
+        Margin = new Thickness(0, 6, 11, 0),
+        IsHitTestVisible = false,
+        Visibility = Visibility.Collapsed,
+    };
+
+    public void ShowUpdateDot(bool newer) => _gearDot.Visibility = newer ? Visibility.Visible : Visibility.Collapsed;
+
+    /// The settings, while they are open, on the place of the list and the terminal.
+    private readonly ContentControl _settingsHost = new() { Visibility = Visibility.Collapsed, Focusable = false, HorizontalContentAlignment = HorizontalAlignment.Stretch, VerticalContentAlignment = VerticalAlignment.Stretch };
+
     /// The open header under the title bar (D-373, D-376). It is drawn again only when it opens or
     /// the active environment changes: the numbers in it change too often to start its motion each
     /// time.
@@ -132,6 +153,8 @@ sealed class TerminalPanel : UserControl
         _listPopup.PlacementTarget = _listToggle;
         _chevron = BarButton(Marks.Line("M0,0 L4,4 L8,0"), Strings.TerminalShowLimits, () => HeaderToggled?.Invoke());
         _gear = BarButton(GearIcon(), Strings.Settings, () => SettingsAsked?.Invoke());
+        ((Grid)_gear.Content).Children.Insert(0, _gearLit);
+        ((Grid)_gear.Content).Children.Add(_gearDot);
         // The list under the button, left edges together, as every drop-down of Aiko (DropDown).
         _listPopup.Placement = PlacementMode.Custom;
         _listPopup.CustomPopupPlacementCallback = (_, target, _) => [new CustomPopupPlacement(new Point(0, target.Height), PopupPrimaryAxis.Horizontal)];
@@ -154,9 +177,19 @@ sealed class TerminalPanel : UserControl
         left.Children.Add(_listToggle);
         left.Children.Add(_chevron);
         left.Children.Add(_pills.Root);
+        // Two columns: the buttons on the right keep their room, and the pills on the left get what
+        // is left. In one cell they slid under the gear in a narrow window.
+        _bar.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        _bar.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        left.ClipToBounds = true;
         _bar.Children.Add(left);
+        Grid.SetColumn(_right, 1);
         _bar.Children.Add(_right);
-        _bar.Children.Add(new Border { Height = 1, VerticalAlignment = VerticalAlignment.Bottom, Background = Tokens.Brush("Hairline") });
+        var hairline = new Border { Height = 1, VerticalAlignment = VerticalAlignment.Bottom, Background = Tokens.Brush("Hairline") };
+        Grid.SetColumnSpan(hairline, 2);
+        _bar.Children.Add(hairline);
+        _pills.Refit = FitPills;
+        _bar.SizeChanged += (_, _) => FitPills();
 
         _header = new HeaderStripView(environment => TabPicked?.Invoke(environment));
         _header.Settled += () =>
@@ -189,7 +222,11 @@ sealed class TerminalPanel : UserControl
         all.Children.Add(_bar);
         DockPanel.SetDock(_strip, Dock.Top);
         all.Children.Add(_strip);
-        all.Children.Add(_body);
+        // The settings stand on the place of the list and the terminal; the title bar stays (D-374).
+        var area = new Grid();
+        area.Children.Add(_body);
+        area.Children.Add(_settingsHost);
+        all.Children.Add(area);
         // The moving header is drawn over the body that stands still under it.
         Panel.SetZIndex(_strip, 1);
         Panel.SetZIndex(_bar, 2);
@@ -268,6 +305,47 @@ sealed class TerminalPanel : UserControl
 
     /// The gear in the title bar.
     public event Action? SettingsAsked;
+
+    public bool SettingsShown => _settingsHost.Content is not null;
+
+    /// The settings come on the place of the list and the terminal, or go, and the session is there
+    /// again as it was. The terminal is a window of its own and cannot lie under anything, so it is
+    /// hidden while the settings are open.
+    public void ShowSettings(FrameworkElement? settings)
+    {
+        // The way back is the same button as "New session" under the list, and the menu of the
+        // settings is as wide as the list, so the edge between them does not move.
+        if (settings is SettingsPanel panel)
+        {
+            var key = Mono("Esc", "Muted");
+            key.Margin = new Thickness(12, 0, 0, 0);
+            var back = Flat(Strings.SettingsBack, panel.Back, ghost: false, aside: key, mark: "M4,0 L0,5 L4,10");
+            back.HorizontalAlignment = HorizontalAlignment.Stretch;
+            back.HorizontalContentAlignment = HorizontalAlignment.Stretch;
+            panel.PlaceInWindow(back, ListWidth);
+        }
+
+        _settingsHost.Content = settings;
+        var shown = settings is not null;
+        _settingsHost.Visibility = shown ? Visibility.Visible : Visibility.Collapsed;
+        _body.Visibility = shown ? Visibility.Hidden : Visibility.Visible;
+        _gearLit.Visibility = shown ? Visibility.Visible : Visibility.Collapsed;
+        if (shown && Motion.IsOn)
+        {
+            _settingsHost.BeginAnimation(OpacityProperty, new System.Windows.Media.Animation.DoubleAnimation(0, 1, Motion.Expand) { EasingFunction = Motion.Standard });
+        }
+
+        if (!shown)
+        {
+            Dispatcher.BeginInvoke(() =>
+            {
+                foreach (var terminal in _terminals.Children.OfType<TerminalSurface>())
+                {
+                    terminal.Refit();
+                }
+            }, System.Windows.Threading.DispatcherPriority.Loaded);
+        }
+    }
     public event Action? MaximizeAsked;
     public event Action? CloseAsked;
 
@@ -288,6 +366,14 @@ sealed class TerminalPanel : UserControl
     }
 
     // ---- the title bar ----
+
+    /// The room of the pills: the left column without the two buttons before them.
+    private void FitPills()
+    {
+        var before = _listToggle.ActualWidth + _listToggle.Margin.Left + _listToggle.Margin.Right
+            + _chevron.ActualWidth + _chevron.Margin.Left + _chevron.Margin.Right;
+        _pills.Fit(_bar.ActualWidth - _right.ActualWidth - before);
+    }
 
     private void ShowBar(TerminalView view)
     {
@@ -592,7 +678,7 @@ sealed class TerminalPanel : UserControl
         var row = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
 
         // The mark on the left opens the header, the same for the ring and for the waiting mark.
-        var mark = waiting ? WaitingMark() : HeaderStripView.Ring(tab.Percent, tab.Tone, 14, 2);
+        var mark = waiting ? WaitingMark() : Marks.Ring(tab.Percent, tab.Tone, 14, 2);
         mark.Cursor = Cursors.Hand;
         mark.ToolTip = Strings.TerminalShowLimits;
         mark.MouseLeftButtonUp += (_, e) =>
@@ -1034,6 +1120,10 @@ sealed class TerminalPanel : UserControl
 
     internal bool RenamingForCheck => _renaming is not null;
 
+    /// The pills end before the gear: for --try-rename, which also looks at the title bar.
+    internal bool PillsClearOfButtonsForCheck =>
+        _pills.Root.TranslatePoint(new Point(_pills.Root.ActualWidth, 0), _bar).X <= _right.TranslatePoint(new Point(0, 0), _bar).X + 0.5;
+
     /// For --try-rename: the first row of the list, and how lit its hover is now.
     internal FrameworkElement? FirstRowForCheck => _rows.Children.OfType<Border>().FirstOrDefault();
 
@@ -1366,7 +1456,7 @@ sealed class TerminalPanel : UserControl
     /// One button for the whole window: the filled one is the main action, the outlined one the
     /// second, the ghost one the quiet third (DESIGN, one fill per control).
     /// aside stands at the right end of the button, such as the key of its action.
-    internal static Button Flat(string text, Action click, bool ghost, bool main = false, bool danger = false, bool plus = false, UIElement? aside = null)
+    internal static Button Flat(string text, Action click, bool ghost, bool main = false, bool danger = false, bool plus = false, UIElement? aside = null, string? mark = null)
     {
         var row = new DockPanel();
         var ink = main ? "Background" : danger ? "Destructive" : ghost ? "Muted" : "Ink";
@@ -1376,9 +1466,9 @@ sealed class TerminalPanel : UserControl
             row.Children.Add(aside);
         }
 
-        if (plus)
+        if (plus || mark is not null)
         {
-            var sign = Marks.Line("M5,0 L5,10 M0,5 L10,5", ink);
+            var sign = Marks.Line(mark ?? "M5,0 L5,10 M0,5 L10,5", ink);
             sign.Margin = new Thickness(0, 0, 8, 0);
             DockPanel.SetDock(sign, Dock.Left);
             row.Children.Add(sign);

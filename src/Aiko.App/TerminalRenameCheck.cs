@@ -6,7 +6,8 @@ using Aiko.Core.Terminal;
 
 namespace Aiko.App;
 
-/// --try-rename: a change of a session name never freezes the list (D-389). A window off the screen
+/// --try-rename: a change of a session name never freezes the list (D-389), and the title bar keeps
+/// its pills clear of the gear in a narrow window. A window off the screen
 /// holds the list on made up sessions; the check starts a change of a name the ways a person can
 /// and sees the list follow afterwards. No program runs and nothing is read or written.
 [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763")]
@@ -64,6 +65,14 @@ static class TerminalRenameCheck
             panel.FirstRowForCheck!.RaiseEvent(new MouseEventArgs(Mouse.PrimaryDevice, 0) { RoutedEvent = Mouse.MouseEnterEvent });
             panel.Show(View("Aiko"));
             Check("a row drawn anew under the mouse starts lit", panel.FirstRowLightForCheck == 1);
+
+            // A narrow window with a long name: the pills of the other environments give way, and
+            // nothing slides under the gear.
+            panel.Width = 360;
+            window.Width = 360;
+            panel.Show(View("Work"));
+            await Task.Delay(300);
+            Check("the pills stay clear of the gear in a narrow window", panel.PillsClearOfButtonsForCheck);
 
             window.Close();
             File.WriteAllLines(reportPath, report);
