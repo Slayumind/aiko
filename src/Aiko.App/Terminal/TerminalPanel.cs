@@ -166,7 +166,9 @@ sealed class TerminalPanel : UserControl
         _listToggle = BarButton(ListIcon(), Strings.TerminalSessionList, ToggleList);
         _listToggle.Margin = new Thickness(6, 0, 2, 0);
         _listPopup.PlacementTarget = _listToggle;
-        _chevron = BarButton(Marks.Line("M0,0 L4,4 L8,0"), Strings.TerminalShowLimits, () => HeaderToggled?.Invoke());
+        // The chevron is a small mark: its button is as narrow as it is tall, so the hover shows
+        // where a click lands and does not reach towards the pills.
+        _chevron = BarButton(Marks.Line("M0,0 L4,4 L8,0"), Strings.TerminalShowLimits, () => HeaderToggled?.Invoke(), ChevronWidth);
         _gear = BarButton(GearIcon(), Strings.Settings, () => SettingsAsked?.Invoke());
         ((Grid)_gear.Content).Children.Insert(0, _gearLit);
         ((Grid)_gear.Content).Children.Add(_gearDot);
@@ -705,16 +707,10 @@ sealed class TerminalPanel : UserControl
         var percent = tab.Percent is { } known ? known.ToString(CultureInfo.CurrentCulture) + "%" : null;
         var row = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
 
-        // The mark on the left opens the header, the same for the ring and for the waiting mark.
+        // The mark is a part of the pill: a click on it picks the environment, as anywhere on the
+        // pill. Only the chevron opens the header (D-407): the ring stood right after the chevron,
+        // and a click on the first pill opened the header instead.
         var mark = waiting ? WaitingMark() : Marks.Ring(tab.Percent, tab.Tone, 14, 2);
-        mark.Cursor = Cursors.Hand;
-        mark.ToolTip = Strings.TerminalShowLimits;
-        mark.MouseLeftButtonUp += (_, e) =>
-        {
-            e.Handled = true;
-            HeaderToggled?.Invoke();
-        };
-        WindowChromeHit(mark);
         row.Children.Add(mark);
 
         if (!small)
@@ -1488,10 +1484,12 @@ sealed class TerminalPanel : UserControl
         VerticalAlignment = VerticalAlignment.Center,
     };
 
-    private Button BarButton(UIElement icon, string tip, Action click)
+    private const double ChevronWidth = 28;
+
+    private Button BarButton(UIElement icon, string tip, Action click, double width = 40)
     {
         var hover = new Border { CornerRadius = new CornerRadius(6), Background = Tokens.Brush("Raised"), Opacity = 0 };
-        var face = new Grid { Width = 40, Height = 28 };
+        var face = new Grid { Width = width, Height = 28 };
         face.Children.Add(hover);
         face.Children.Add(new Border { Child = icon, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center });
 
