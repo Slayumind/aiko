@@ -509,6 +509,9 @@ sealed class TerminalHost
             case System.Windows.Input.Key.K when shift:
                 OpenSessionPalette();
                 return true;
+            case System.Windows.Input.Key.F when shift:
+                // The search in the output of a command line (D-358); Claude Code keeps its own keys.
+                return OpenTerminal()?.OpenFind() == true;
             case System.Windows.Input.Key.B when shift:
                 // Ctrl+B belongs to Claude Code (a command to the background) and to bash (D-376).
                 if (_panel.ToggleListFromKeys())
@@ -643,6 +646,7 @@ sealed class TerminalHost
     private void WireEditor()
     {
         var editor = _panel.Editor;
+        editor.SuggestionAsked += Suggest;
         editor.Passed += sequence => OpenTerminal()?.Type(sequence);
         editor.Inserted += writes =>
         {
@@ -881,8 +885,26 @@ sealed class TerminalHost
             return null;
         }
 
-        var terminal = new TerminalSurface(launch);
+        var terminal = new TerminalSurface(launch, blocks: session.Kind == SessionKind.Shell);
         terminal.Exited += code => Ended(session.Id, code);
+        if (terminal.Blocks is { } blocks)
+        {
+            blocks.Folder = session.Folder;
+            blocks.ExplainAsked += (block, output) => Ask(
+                session,
+                ShellAsk.Explain(ShellLaunch.Find().Name, block.Command, block.ExitCode ?? 1, output, Language()),
+                answer => blocks.ShowExplanation(block.StartedAt, answer));
+            terminal.FindClosed += () => _panel.Editor.FocusText();
+        }
+
+        terminal.FullScreenChanged += on =>
+        {
+            // vim and less read the keys themselves; back in the blocks, the editor has them again.
+            if (!on && _model.Session(_sessions)?.Id == session.Id)
+            {
+                _panel.Editor.FocusText();
+            }
+        };
         terminal.DrawnFirst += () =>
         {
             // The loader gives way to the terminal; the keys stay with the editor.
@@ -1274,31 +1296,42 @@ sealed class TerminalHost
 
     private readonly bool _keepsNothing;
 
-    /// The shell of a session and the name its row starts with.
-    private sealed record ShellProgram(string CommandLine, string Name);
+    private static ShellLaunch Shell() => ShellLaunch.Find();
 
-    /// Git Bash when it is there, as Claude Code itself prefers it (RESEARCH); otherwise PowerShell 7,
-    /// otherwise Windows PowerShell.
-    private static ShellProgram Shell()
+    /// Words in a command line asked for a command: Claude Code proposes one under the field.
+    private void Suggest(string words)
     {
-        var gitBash = System.Environment.GetEnvironmentVariable("CLAUDE_CODE_GIT_BASH_PATH") is { Length: > 0 } set && File.Exists(set)
-            ? set
-            : new[]
-            {
-                Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Git", "bin", "bash.exe"),
-                Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData), "Programs", "Git", "bin", "bash.exe"),
-            }.FirstOrDefault(File.Exists);
+        if (_model.Session(_sessions) is not { Kind: SessionKind.Shell } session)
+        {
+            return;
+        }
 
-        return gitBash is not null ? new ShellProgram($"\"{gitBash}\" --login -i", "bash")
-            : FindOnPath("pwsh.exe") is { } pwsh ? new ShellProgram($"\"{pwsh}\" -NoLogo", "pwsh")
-            : new ShellProgram("powershell.exe -NoLogo", "powershell");
+        Ask(
+            session,
+            ShellAsk.Suggest(Shell().Name, session.Folder, words),
+            answer => _panel.Editor.ShowSuggestion(words, answer is null ? null : ShellAsk.CommandIn(answer)));
     }
 
-    private static string? FindOnPath(string file) =>
-        (System.Environment.GetEnvironmentVariable("PATH") ?? "")
-            .Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries)
-            .Select(folder => Path.Combine(folder.Trim(), file))
-            .FirstOrDefault(File.Exists);
+    /// One question to Claude Code with claude -p, in the limits of the session's environment (D-360).
+    /// The answer comes back on the window's thread; null when Claude Code is not there or did not answer.
+    private void Ask(TerminalSession session, string question, Action<string?> answered)
+    {
+        var environment = _settings.Environments.FirstOrDefault(one => one.Name == session.Environment);
+        var home = System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile);
+        var config = environment?.ConfigDirectories.FirstOrDefault() ?? ClaudeConfigFolder.Resolve(null, home);
+        if (ClaudeLauncher.FindClaude() is not { } claude)
+        {
+            answered(null);
+            return;
+        }
+
+        Task.Run(() => new ClaudeCli(claude).Ask(config, question, TimeSpan.FromSeconds(60)))
+            .ContinueWith(task => _window.Dispatcher.BeginInvoke(() => answered(task.IsCompletedSuccessfully ? task.Result : null)), TaskScheduler.Default);
+    }
+
+    /// The language Claude Code answers in: the language of Aiko.
+    private static string Language() =>
+        System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "ru" ? "Russian" : "English";
 
     private static string CommandLine(string program, IReadOnlyList<string> arguments) =>
         string.Join(' ', [$"\"{program}\"", .. arguments.Select(argument => argument.Contains(' ') ? $"\"{argument}\"" : argument)]);

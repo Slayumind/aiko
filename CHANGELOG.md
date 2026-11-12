@@ -28,6 +28,13 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - **Any conversation, one key away.** Ctrl+Shift+K finds a session or a conversation you started
   in another terminal or in VS Code, by its name or your first message, and continues it here.
   Ctrl+Tab goes to the next session.
+- **Command lines as blocks.** In a session of Git Bash or PowerShell each command is a block: a grey
+  rule when it passed, a red one with the exit code when it failed, an orange one while it runs, and
+  its time. A long output folds to its first lines. Point at a block for Copy, Fold and, after a
+  failure, Explain: Claude Code says under the block why it failed. Write what you need in words, in
+  Russian or after "#", and a command comes up under the field; Tab takes it, Enter is yours.
+  Ctrl+Shift+F finds text in the output, Ctrl+click opens an address or a file. vim, less and other
+  full-screen programs run in the terminal itself.
 - **Aiko tells you when an agent needs you.** No pop-ups: the tray icon and the button of the window
   on the taskbar show how many agents wait for you, in orange. If none wait, they show how many
   stopped, in red, and a green dot says one has finished. The number stays until you open that

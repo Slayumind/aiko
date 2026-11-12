@@ -13,6 +13,10 @@ static class TerminalLog
     public static void StartFailed(string environment, bool shell, int error) =>
         Log.Write($"terminal: {(shell ? "a shell" : "Claude Code")} did not start for {environment}, error {error}");
 
+    /// A Ctrl+click on an address or a file in a command line found no program to open it.
+    public static void LinkNotOpened() =>
+        Log.Write("terminal: a link in the output of a command line did not open");
+
     public static void Exited(string environment, bool shell, int exitCode) =>
         Log.Write($"terminal: {(shell ? "a shell" : "Claude Code")} for {environment} exited with {exitCode}");
 }

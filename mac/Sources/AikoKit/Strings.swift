@@ -456,6 +456,24 @@ public enum Strings {
         "TerminalDone": ("done", "готово"),
         "TerminalAsleep": ("asleep", "спит"),
         "TerminalStopped": ("stopped", "остановилась"),
+        "ShellMoreOne": ("… {0} more line", "… ещё {0} строка"),
+        "ShellMoreFew": ("… {0} more lines", "… ещё {0} строки"),
+        "ShellMoreMany": ("… {0} more lines", "… ещё {0} строк"),
+        "ShellRunning": ("running", "идёт"),
+        "ShellExitCode": ("code {0}", "код {0}"),
+        "ShellSeconds": ("{0} s", "{0} с"),
+        "ShellCopy": ("Copy", "Копировать"),
+        "ShellCopied": ("Copied", "Скопировано"),
+        "ShellFold": ("Fold", "Свернуть"),
+        "ShellUnfold": ("Unfold", "Развернуть"),
+        "ShellExplain": ("Explain", "Объяснить"),
+        "ShellExplaining": ("Asking Claude Code…", "Спрашиваю Claude Code…"),
+        "ShellExplainFailed": ("Claude Code did not answer. Press Explain again in a minute.", "Claude Code не ответил. Нажми «Объяснить» ещё раз через минуту."),
+        "ShellSuggestion": ("{0}   **Tab** take", "{0}   **Tab** взять"),
+        "ShellSuggesting": ("Looking for a command…", "Ищу команду…"),
+        "ShellFind": ("Find in the output", "Найти в выводе"),
+        "ShellFindCount": ("{0} of {1}", "{0} из {1}"),
+        "ShellFindNone": ("Nothing found", "Не нашлось"),
         "TerminalTabWaitingOne": ("{0} waiting", "{0} ждёт"),
         "TerminalTabWaitingMany": ("{0} waiting", "{0} ждут"),
         "TerminalYesterday": ("Yesterday, {0}", "Вчера, {0}"),
@@ -1775,6 +1793,60 @@ public enum Strings {
 
     /// stopped
     public static var terminalStopped: String { Strings.get("TerminalStopped") }
+
+    /// … {0} more line
+    public static var shellMoreOne: String { Strings.get("ShellMoreOne") }
+
+    /// … {0} more lines
+    public static var shellMoreFew: String { Strings.get("ShellMoreFew") }
+
+    /// … {0} more lines
+    public static var shellMoreMany: String { Strings.get("ShellMoreMany") }
+
+    /// running
+    public static var shellRunning: String { Strings.get("ShellRunning") }
+
+    /// code {0}
+    public static var shellExitCode: String { Strings.get("ShellExitCode") }
+
+    /// {0} s
+    public static var shellSeconds: String { Strings.get("ShellSeconds") }
+
+    /// Copy
+    public static var shellCopy: String { Strings.get("ShellCopy") }
+
+    /// Copied
+    public static var shellCopied: String { Strings.get("ShellCopied") }
+
+    /// Fold
+    public static var shellFold: String { Strings.get("ShellFold") }
+
+    /// Unfold
+    public static var shellUnfold: String { Strings.get("ShellUnfold") }
+
+    /// Explain
+    public static var shellExplain: String { Strings.get("ShellExplain") }
+
+    /// Asking Claude Code…
+    public static var shellExplaining: String { Strings.get("ShellExplaining") }
+
+    /// Claude Code did not answer. Press Explain again in a minute.
+    public static var shellExplainFailed: String { Strings.get("ShellExplainFailed") }
+
+    /// {0}   **Tab** take
+    public static var shellSuggestion: String { Strings.get("ShellSuggestion") }
+
+    /// Looking for a command…
+    public static var shellSuggesting: String { Strings.get("ShellSuggesting") }
+
+    /// Find in the output
+    public static var shellFind: String { Strings.get("ShellFind") }
+
+    /// {0} of {1}
+    public static var shellFindCount: String { Strings.get("ShellFindCount") }
+
+    /// Nothing found
+    public static var shellFindNone: String { Strings.get("ShellFindNone") }
 
     /// {0} waiting
     public static var terminalTabWaitingOne: String { Strings.get("TerminalTabWaitingOne") }

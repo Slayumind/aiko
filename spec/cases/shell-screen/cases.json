@@ -1,0 +1,346 @@
+{
+  "comment": "The screen of a command line (D-412): what ConPTY sends is laid out as a terminal would, and the marks of shell integration (OSC 133: A prompt, B command, C output, D end with the exit code) cut it into one block per command. 'recordings' are real streams of Git Bash, PowerShell 7 and Windows PowerShell with Aiko's marks, recorded by --try-shell-blocks in a 120 by 30 terminal, the user and computer names replaced by ones of the same length; 'first' null means the first line is in the language of Windows. Windows only until the terminal comes to the Mac.",
+  "recordings": {
+    "bash": [
+      {
+        "command": "git status",
+        "exitCode": 0,
+        "lines": 12,
+        "first": "On branch master"
+      },
+      {
+        "command": "ls nothing-here",
+        "exitCode": 2,
+        "lines": 1,
+        "first": "ls: cannot access 'nothing-here': No such file or directory"
+      },
+      {
+        "command": "for i in 1 2 3 4 5; do printf '\\rprogress %d/5' $i; sleep 0.1; done; echo",
+        "exitCode": 0,
+        "lines": 1,
+        "first": "progress 5/5"
+      },
+      {
+        "command": "seq 1 10000",
+        "exitCode": 0,
+        "lines": 10000,
+        "first": "1"
+      },
+      {
+        "command": "less note.txt",
+        "exitCode": 0,
+        "lines": 0,
+        "first": ""
+      },
+      {
+        "command": "npm init -y > /dev/null && npm install left-pad --no-audit --no-fund",
+        "exitCode": 0,
+        "lines": 1,
+        "first": "up to date in 2s"
+      },
+      {
+        "command": "dotnet test \"C:/Users/guest/Desktop/personal projects/aiko/Aiko/tests/Aiko.Core.Tests\" --no-build",
+        "exitCode": 0,
+        "lines": 9,
+        "first": null
+      },
+      {
+        "command": "exit",
+        "exitCode": null,
+        "lines": 1,
+        "first": "exit"
+      }
+    ],
+    "pwsh": [
+      {
+        "command": "git status",
+        "exitCode": 0,
+        "lines": 12,
+        "first": "On branch master"
+      },
+      {
+        "command": "Get-Item nothing-here",
+        "exitCode": 1,
+        "lines": 2,
+        "first": null
+      },
+      {
+        "command": "1..5 | ForEach-Object { Write-Host -NoNewline \"`rprogress $_/5\"; Start-Sleep -Milliseconds 100 }; Write-Host ''",
+        "exitCode": 0,
+        "lines": 1,
+        "first": "progress 5/5"
+      },
+      {
+        "command": "1..10000",
+        "exitCode": 0,
+        "lines": 10000,
+        "first": "1"
+      },
+      {
+        "command": "exit",
+        "exitCode": null,
+        "lines": 0,
+        "first": ""
+      }
+    ],
+    "powershell": [
+      {
+        "command": "git status",
+        "exitCode": 0,
+        "lines": 12,
+        "first": "On branch master"
+      },
+      {
+        "command": "Get-Item nothing-here",
+        "exitCode": 1,
+        "lines": 8,
+        "first": null
+      },
+      {
+        "command": "1..5 | ForEach-Object { Write-Host -NoNewline \"`rprogress $_/5\"; Start-Sleep -Milliseconds 100 }; Write-Host ''",
+        "exitCode": 0,
+        "lines": 1,
+        "first": "progress 5/5"
+      },
+      {
+        "command": "1..10000",
+        "exitCode": 0,
+        "lines": 10000,
+        "first": "1"
+      },
+      {
+        "command": "exit",
+        "exitCode": null,
+        "lines": 0,
+        "first": ""
+      }
+    ]
+  },
+  "screens": [
+    {
+      "name": "a carriage return writes over the line",
+      "columns": 20,
+      "stream": "abc\rX",
+      "lines": [
+        "Xbc"
+      ]
+    },
+    {
+      "name": "erase to the end of the line",
+      "columns": 20,
+      "stream": "abcdef\r\u001b[3C\u001b[K",
+      "lines": [
+        "abc"
+      ]
+    },
+    {
+      "name": "a line longer than the width wraps and joins back",
+      "columns": 5,
+      "stream": "abcdefg",
+      "lines": [
+        "abcde",
+        "fg"
+      ],
+      "wrapped": [
+        true,
+        false
+      ],
+      "text": "abcdefg"
+    },
+    {
+      "name": "a cursor move puts text in place",
+      "columns": 20,
+      "stream": "first\r\n\u001b[2;3Hx",
+      "lines": [
+        "first",
+        "  x"
+      ]
+    },
+    {
+      "name": "a wide character takes two cells",
+      "columns": 20,
+      "stream": "日本x",
+      "lines": [
+        "日本x"
+      ]
+    },
+    {
+      "name": "a backspace steps back",
+      "columns": 20,
+      "stream": "ab\bc",
+      "lines": [
+        "ac"
+      ]
+    },
+    {
+      "name": "the second screen of a full-screen program is not kept",
+      "columns": 20,
+      "stream": "a\u001b[?1049hzzz\r\nyyy\u001b[?1049lb",
+      "lines": [
+        "ab"
+      ],
+      "fullScreen": false
+    },
+    {
+      "name": "a full-screen program that still runs",
+      "columns": 20,
+      "stream": "a\u001b[?1049hzzz",
+      "lines": [
+        "a"
+      ],
+      "fullScreen": true
+    },
+    {
+      "name": "a sequence split between chunks",
+      "columns": 20,
+      "chunks": [
+        "red \u001b[3",
+        "1mX\u001b[0m"
+      ],
+      "lines": [
+        "red X"
+      ]
+    }
+  ],
+  "runs": [
+    {
+      "stream": "\u001b[31mred\u001b[0m plain",
+      "runs": [
+        {
+          "text": "red",
+          "foreground": 1,
+          "bold": false
+        },
+        {
+          "text": " plain",
+          "foreground": -1,
+          "bold": false
+        }
+      ]
+    },
+    {
+      "stream": "\u001b[1;92mok",
+      "runs": [
+        {
+          "text": "ok",
+          "foreground": 10,
+          "bold": true
+        }
+      ]
+    },
+    {
+      "stream": "\u001b[38;5;208mx\u001b[38;2;1;2;3my",
+      "runs": [
+        {
+          "text": "x",
+          "foreground": 208,
+          "bold": false
+        },
+        {
+          "text": "y",
+          "foreground": 16843267,
+          "bold": false
+        }
+      ]
+    }
+  ],
+  "blocks": [
+    {
+      "name": "one command with its output",
+      "stream": "\u001b]133;A\u0007$ \u001b]133;B\u0007echo hi\r\n\u001b]133;C\u0007hi\r\n\u001b]133;D;0\u0007\u001b]133;A\u0007$ \u001b]133;B\u0007",
+      "blocks": [
+        {
+          "command": "echo hi",
+          "exitCode": 0,
+          "lines": [
+            "hi"
+          ],
+          "timed": true
+        }
+      ]
+    },
+    {
+      "name": "a failed command keeps its code",
+      "stream": "\u001b]133;A\u0007$ \u001b]133;B\u0007false\r\n\u001b]133;C\u0007\u001b]133;D;1\u0007\u001b]133;A\u0007$ \u001b]133;B\u0007",
+      "blocks": [
+        {
+          "command": "false",
+          "exitCode": 1,
+          "lines": []
+        }
+      ]
+    },
+    {
+      "name": "only Enter is no block",
+      "stream": "\u001b]133;A\u0007$ \u001b]133;B\u0007\r\n\u001b]133;D;0\u0007\u001b]133;A\u0007$ \u001b]133;B\u0007",
+      "blocks": []
+    },
+    {
+      "name": "a command that still runs",
+      "stream": "\u001b]133;A\u0007$ \u001b]133;B\u0007npm run dev\r\n\u001b]133;C\u0007ready\r\n",
+      "blocks": [
+        {
+          "command": "npm run dev",
+          "exitCode": null,
+          "lines": [
+            "ready"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "output without a newline at the end",
+      "stream": "\u001b]133;A\u0007$ \u001b]133;B\u0007printf x\r\n\u001b]133;C\u0007x\u001b]133;D;0\u0007\u001b]133;A\u0007$ \u001b]133;B\u0007",
+      "blocks": [
+        {
+          "command": "printf x",
+          "exitCode": 0,
+          "lines": [
+            "x$"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "blank lines at the end belong to no block",
+      "stream": "\u001b]133;A\u0007$ \u001b]133;B\u0007echo hi\r\n\u001b]133;C\u0007hi\r\n\r\n\r\n\u001b]133;D;0\u0007\u001b]133;A\u0007$ \u001b]133;B\u0007",
+      "blocks": [
+        {
+          "command": "echo hi",
+          "exitCode": 0,
+          "lines": [
+            "hi"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "a shell with no C mark: the output starts on the next line",
+      "stream": "\u001b]133;A\u0007PS> \u001b]133;B\u0007dir\r\nfile\r\n\u001b]133;D;0\u0007\u001b]133;A\u0007PS> \u001b]133;B\u0007",
+      "blocks": [
+        {
+          "command": "dir",
+          "exitCode": 0,
+          "lines": [
+            "file"
+          ],
+          "timed": false
+        }
+      ]
+    },
+    {
+      "name": "a syntax error: bash sends no C, the command has a code and no time",
+      "stream": "\u001b]133;A\u0007$ \u001b]133;B\u0007ls x)\r\nbash: syntax error near unexpected token `)'\r\n\u001b]133;D;2\u0007\u001b]133;A\u0007$ \u001b]133;B\u0007",
+      "blocks": [
+        {
+          "command": "ls x)",
+          "exitCode": 2,
+          "timed": false,
+          "lines": [
+            "bash: syntax error near unexpected token `)'"
+          ]
+        }
+      ]
+    }
+  ]
+}

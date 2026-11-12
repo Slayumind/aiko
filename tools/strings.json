@@ -2912,6 +2912,132 @@
     ]
   ],
   [
+    "ShellMoreOne",
+    [
+      "… {0} more line",
+      "… ещё {0} строка"
+    ]
+  ],
+  [
+    "ShellMoreFew",
+    [
+      "… {0} more lines",
+      "… ещё {0} строки"
+    ]
+  ],
+  [
+    "ShellMoreMany",
+    [
+      "… {0} more lines",
+      "… ещё {0} строк"
+    ]
+  ],
+  [
+    "ShellRunning",
+    [
+      "running",
+      "идёт"
+    ]
+  ],
+  [
+    "ShellExitCode",
+    [
+      "code {0}",
+      "код {0}"
+    ]
+  ],
+  [
+    "ShellSeconds",
+    [
+      "{0} s",
+      "{0} с"
+    ]
+  ],
+  [
+    "ShellCopy",
+    [
+      "Copy",
+      "Копировать"
+    ]
+  ],
+  [
+    "ShellCopied",
+    [
+      "Copied",
+      "Скопировано"
+    ]
+  ],
+  [
+    "ShellFold",
+    [
+      "Fold",
+      "Свернуть"
+    ]
+  ],
+  [
+    "ShellUnfold",
+    [
+      "Unfold",
+      "Развернуть"
+    ]
+  ],
+  [
+    "ShellExplain",
+    [
+      "Explain",
+      "Объяснить"
+    ]
+  ],
+  [
+    "ShellExplaining",
+    [
+      "Asking Claude Code…",
+      "Спрашиваю Claude Code…"
+    ]
+  ],
+  [
+    "ShellExplainFailed",
+    [
+      "Claude Code did not answer. Press Explain again in a minute.",
+      "Claude Code не ответил. Нажми «Объяснить» ещё раз через минуту."
+    ]
+  ],
+  [
+    "ShellSuggestion",
+    [
+      "{0}   **Tab** take",
+      "{0}   **Tab** взять"
+    ]
+  ],
+  [
+    "ShellSuggesting",
+    [
+      "Looking for a command…",
+      "Ищу команду…"
+    ]
+  ],
+  [
+    "ShellFind",
+    [
+      "Find in the output",
+      "Найти в выводе"
+    ]
+  ],
+  [
+    "ShellFindCount",
+    [
+      "{0} of {1}",
+      "{0} из {1}"
+    ]
+  ],
+  [
+    "ShellFindNone",
+    [
+      "Nothing found",
+      "Не нашлось"
+    ]
+  ],
+  [
     "TerminalTabWaitingOne",
     [
       "{0} waiting",

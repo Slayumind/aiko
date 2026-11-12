@@ -44,7 +44,17 @@ sealed class TerminalSurface : Grid
     /// Set on the thread of the output, once.
     private volatile bool _drawn;
 
-    public TerminalSurface(PtyLaunch launch)
+    /// The screen of a command line and its blocks (D-412); null for Claude Code. The screen is fed
+    /// on the thread of the output and read on the window's thread, each time under the gate.
+    private readonly ShellScreen? _shell;
+    private readonly ShellBlocksView? _blocks;
+    private readonly ShellFindBar? _find;
+    private readonly object _shellGate = new();
+    private int _refreshQueued;
+
+    /// blocks: the output is shown as blocks of commands, and the terminal itself only while a
+    /// program takes the whole screen.
+    public TerminalSurface(PtyLaunch launch, bool blocks = false)
     {
         _console = new PseudoConsole(launch);
         _console.Exited += code => Dispatcher.BeginInvoke(() => Exited?.Invoke(code));
@@ -56,6 +66,11 @@ sealed class TerminalSurface : Grid
             if (_titles.Read(e.Data) is { } title)
             {
                 Dispatcher.BeginInvoke(() => TitleChanged?.Invoke(title));
+            }
+
+            if (_shell is not null)
+            {
+                FeedShell(e.Data);
             }
 
             if (!_drawn && TerminalScreen.HasText(e.Data))
@@ -73,8 +88,22 @@ sealed class TerminalSurface : Grid
         KeyboardNavigation.SetTabNavigation(this, KeyboardNavigationMode.None);
         KeyboardNavigation.SetDirectionalNavigation(this, KeyboardNavigationMode.None);
         KeyboardNavigation.SetControlTabNavigation(this, KeyboardNavigationMode.None);
-        UseZoom();
         Children.Add(_control);
+        if (blocks)
+        {
+            _shell = new ShellScreen(120, 30);
+            _blocks = new ShellBlocksView(_shell, _shellGate);
+            _shell.FullScreenChanged += on => Dispatcher.BeginInvoke(() => ShowFullScreen(on));
+
+            // Hidden, not collapsed: the control keeps its size, so the pseudo console keeps its rows.
+            _control.Visibility = Visibility.Hidden;
+            Children.Add(_blocks);
+            _find = new ShellFindBar(_blocks);
+            _find.Closed += () => FindClosed?.Invoke();
+            Children.Add(_find);
+        }
+
+        UseZoom();
 
         Loaded += (_, _) =>
         {
@@ -96,6 +125,10 @@ sealed class TerminalSurface : Grid
     /// The program ended, with its exit code. Raised on the window's thread.
     public event Action<int>? Exited;
 
+    /// A program took the whole screen, or gave it back: the keys go to the terminal while it has it.
+    /// Raised on the window's thread.
+    public event Action<bool>? FullScreenChanged;
+
     /// The program set the title of the terminal (OSC 0 or 2). Raised on the window's thread.
     public event Action<string>? TitleChanged;
 
@@ -107,6 +140,29 @@ sealed class TerminalSurface : Grid
     public event Action? DrawnFirst;
 
     public bool Drawn => _drawn;
+
+    /// The blocks of a command line, null for Claude Code.
+    internal ShellBlocksView? Blocks => _blocks;
+
+    internal ShellFindBar? FindForCheck => _find;
+
+    /// The search in the output closed: the editor takes the keys again.
+    public event Action? FindClosed;
+
+    /// Ctrl+Shift+F: the search in the output of a command line. False for Claude Code, whose
+    /// screen is its own.
+    public bool OpenFind()
+    {
+        if (_find is null || _shell is null || _blocks!.Visibility != Visibility.Visible)
+        {
+            return false;
+        }
+
+        _find.Open();
+        return true;
+    }
+
+    internal bool TerminalVisibleForCheck => _control.Visibility == Visibility.Visible;
 
     public bool IsRunning => _console.IsRunning;
 
@@ -138,6 +194,7 @@ sealed class TerminalSurface : Grid
         // The columns change with the font, so the pseudo console hears the new size.
         _points = points;
         _control.SetTheme(Theme, Font, _points, Color.FromRgb(0x17, 0x17, 0x17));
+        _blocks?.UseFont(points, scale);
         Dispatcher.BeginInvoke(SyncSize, DispatcherPriority.Background);
     }
 
@@ -386,6 +443,39 @@ sealed class TerminalSurface : Grid
 
     private void SyncSize() => Send(_control.Rows, _control.Columns);
 
+    /// On the thread of the output: the screen takes the piece, and one redraw is asked for however
+    /// many pieces come before the window gets to it.
+    private void FeedShell(string data)
+    {
+        lock (_shellGate)
+        {
+            _shell!.Feed(data, Clock.ElapsedMilliseconds);
+        }
+
+        if (Interlocked.Exchange(ref _refreshQueued, 1) == 0)
+        {
+            Dispatcher.BeginInvoke(() =>
+            {
+                Interlocked.Exchange(ref _refreshQueued, 0);
+                _blocks!.Refresh();
+            }, DispatcherPriority.Render);
+        }
+    }
+
+    private void ShowFullScreen(bool on)
+    {
+        _control.Visibility = on ? Visibility.Visible : Visibility.Hidden;
+        _blocks!.Visibility = on ? Visibility.Collapsed : Visibility.Visible;
+        if (on)
+        {
+            // A hidden control did not count its rows again; the program needs the real size.
+            ResizeNow();
+            _control.Focus();
+        }
+
+        FullScreenChanged?.Invoke(on);
+    }
+
     private void Send(int rows, int columns)
     {
         var size = (Rows: rows, Columns: columns);
@@ -395,6 +485,13 @@ sealed class TerminalSurface : Grid
             _sentAt = Clock.ElapsedMilliseconds;
             _outputAfterResize = false;
             _console.Resize((uint)size.Rows, (uint)size.Columns);
+            if (_shell is not null)
+            {
+                lock (_shellGate)
+                {
+                    _shell.Resize(size.Columns, size.Rows);
+                }
+            }
         }
     }
 
