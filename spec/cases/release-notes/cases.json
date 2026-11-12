@@ -1,0 +1,36 @@
+{
+  "comment": "What a new version brings, as the General page lists it (D-397). The notes of a release hold the English part, a line <!-- ru -->, and the Russian part. A point starts with its title in bold; the list takes the titles, without the full stop, in order, at most 8. Notes without a Russian part give the English titles in Russian too. A JSON answer of GitHub carries the notes in its body.",
+  "most": 8,
+  "titles": [
+    {
+      "name": "both languages",
+      "notes": "### Added\n\n- **Settings in the window.** Ctrl+, opens them.\n- **Notices name the agent.** Text.\n\n<!-- ru -->\n\n### Добавлено\n\n- **Настройки в окне.** Ctrl+, открывает их.\n- **Уведомления говорят об агенте.** Текст.\n",
+      "english": ["Settings in the window", "Notices name the agent"],
+      "russian": ["Настройки в окне", "Уведомления говорят об агенте"]
+    },
+    {
+      "name": "english only",
+      "notes": "### Fixed\n\n- **The terminal no longer jerks.** When the header opens.\n- A line without a bold title is not a point.\n",
+      "english": ["The terminal no longer jerks"],
+      "russian": ["The terminal no longer jerks"]
+    },
+    {
+      "name": "no points",
+      "notes": "Nothing to list here.",
+      "english": [],
+      "russian": []
+    },
+    {
+      "name": "more than the list holds",
+      "notes": "- **One.**\n- **Two.**\n- **Three.**\n- **Four.**\n- **Five.**\n- **Six.**\n- **Seven.**\n- **Eight.**\n- **Nine.**\n",
+      "english": ["One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight"],
+      "russian": ["One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight"]
+    }
+  ],
+  "json": [
+    { "answer": "{\"tag_name\":\"v0.5.0\",\"body\":\"- **Settings in the window.** Text.\\n<!-- ru -->\\n- **Настройки в окне.** Текст.\"}", "russian": true, "titles": ["Настройки в окне"] },
+    { "answer": "{\"tag_name\":\"v0.5.0\",\"body\":null}", "russian": false, "titles": [] },
+    { "answer": "not json", "russian": false, "titles": [] },
+    { "answer": "", "russian": true, "titles": [] }
+  ]
+}

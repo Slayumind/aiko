@@ -199,6 +199,36 @@ public sealed record TerminalSessions(IReadOnlyList<TerminalSession> Sessions, s
     public TerminalSessions Placed(WindowPlace place) =>
         Whole(place) is { } whole ? this with { Window = whole } : this;
 
+    /// The person dragged a session to another place in its folder: it now stands just before the
+    /// session "before", or last in the folder when "before" is null (D-400). Only the sessions of
+    /// that folder trade places, in the places they had in the list, so the order of the folders
+    /// and of everything else stays. A session of another folder or environment changes nothing.
+    public TerminalSessions Moved(string id, string? before)
+    {
+        if (Find(id) is not { } moving || before == id)
+        {
+            return this;
+        }
+
+        bool Together(TerminalSession session) => session.Environment == moving.Environment && session.Folder == moving.Folder;
+        if (before is not null && (Find(before) is not { } anchor || !Together(anchor)))
+        {
+            return this;
+        }
+
+        var places = Sessions.Select((session, at) => (session, at)).Where(pair => Together(pair.session)).Select(pair => pair.at).ToList();
+        var order = places.Select(at => Sessions[at]).Where(session => session.Id != id).ToList();
+        order.Insert(before is null ? order.Count : order.FindIndex(session => session.Id == before), moving);
+
+        var next = Sessions.ToList();
+        for (var at = 0; at < places.Count; at++)
+        {
+            next[places[at]] = order[at];
+        }
+
+        return this with { Sessions = next };
+    }
+
     private TerminalSessions With(string id, Func<TerminalSession, TerminalSession> change) =>
         this with { Sessions = [.. Sessions.Select(session => session.Id == id ? change(session) : session)] };
 

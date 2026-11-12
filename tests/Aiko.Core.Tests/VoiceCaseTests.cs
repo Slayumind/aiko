@@ -45,6 +45,29 @@ public class VoiceCaseTests
     }
 
     [Fact]
+    public void A_refusal_of_OpenAI_reads_as_the_table_says()
+    {
+        foreach (var row in SpecCases.Json("voice-input").GetProperty("cloudCue").EnumerateArray())
+        {
+            var status = row.GetProperty("status");
+            var cue = VoiceInput.CloudCue(
+                row.GetProperty("code").GetString(),
+                status.ValueKind == JsonValueKind.Null ? null : status.GetInt32());
+            Assert.True(Enum.Parse<VoiceCue>(row.GetProperty("cue").GetString()!) == cue, row.GetProperty("name").GetString());
+        }
+    }
+
+    [Fact]
+    public void Only_Esc_and_a_lost_mic_drop_the_words()
+    {
+        foreach (var row in SpecCases.Json("voice-input").GetProperty("keepsText").EnumerateArray())
+        {
+            var cue = row.GetProperty("cue").GetString()!;
+            Assert.True(row.GetProperty("keeps").GetBoolean() == VoiceInput.KeepsText(Enum.Parse<VoiceCue>(cue)), cue);
+        }
+    }
+
+    [Fact]
     public void The_clock_counts_minutes_and_seconds()
     {
         foreach (var row in SpecCases.Json("voice-input").GetProperty("clock").EnumerateArray())

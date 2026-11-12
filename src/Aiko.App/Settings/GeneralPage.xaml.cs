@@ -37,7 +37,7 @@ public partial class GeneralPage : UserControl
     {
         InitializeComponent();
         Fill();
-        ShowUpdate(UpdateInstall.ReadyVersion is null ? UpdateStage.NotAsked : UpdateStage.Ready);
+        ShowUpdate(UpdateInstall.ReadyVersion is not null ? UpdateStage.Ready : KnownNewer() ? UpdateStage.Available : UpdateStage.NotAsked);
         TryUpdateStage();
         LanguageChoiceDrop.Picked += OnLanguagePicked;
         Unloaded += (_, _) => _closing.Cancel();
@@ -208,10 +208,6 @@ public partial class GeneralPage : UserControl
         }
     }
 
-    /// The tray menu has a "Check for updates" item. It opens this page and asks straight away, so
-    /// the answer appears where the button already is.
-    public async void StartUpdateCheck() => await CheckAsync();
-
     /// The one button of the line does whatever is the next step from where the line stands.
     private async void OnUpdateButton(object sender, RoutedEventArgs e)
     {
@@ -232,6 +228,20 @@ public partial class GeneralPage : UserControl
                 OnOpenDownload(sender, e);
                 break;
         }
+    }
+
+    /// A newer version the daily check found in this run: the page says so at once (D-397). Only
+    /// with update checks on, as the switch promises that Aiko does not go looking otherwise.
+    private bool KnownNewer()
+    {
+        if (!_settings.CheckUpdates || UpdateRun.LastInfo is not { } info || info.CompareWith(AppVersion.Current()) != UpdateState.Available)
+        {
+            return false;
+        }
+
+        _newerVersion = info.Latest;
+        _downloadUrl = info.DownloadUrl ?? ReleasesPage;
+        return true;
     }
 
     private async Task CheckAsync()
@@ -305,6 +315,46 @@ public partial class GeneralPage : UserControl
         },
     };
 
+    private string? _newsFor;
+
+    /// What the newer version brings, under its line: the titles of the notes of its release, in
+    /// the language of Aiko (D-397). Nothing while there is no newer version or no notes.
+    private async void ShowNews(string? version)
+    {
+        if (string.IsNullOrEmpty(version))
+        {
+            _newsFor = null;
+            NewsList.Children.Clear();
+            NewsList.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        if (version == _newsFor)
+        {
+            return;
+        }
+
+        _newsFor = version;
+        var titles = await ReleaseNotesRun.ForAsync(version, _closing.Token);
+        if (_closing.IsCancellationRequested || version != _newsFor)
+        {
+            return;
+        }
+
+        NewsList.Children.Clear();
+        foreach (var title in titles)
+        {
+            NewsList.Children.Add(new System.Windows.Controls.Primitives.BulletDecorator
+            {
+                Bullet = new System.Windows.Shapes.Ellipse { Width = 4, Height = 4, Fill = Tokens.Brush("Muted"), Margin = new Thickness(2, 0, 8, 0) },
+                Child = new TextBlock { Text = title, Style = (Style)FindResource("RowHint"), TextWrapping = TextWrapping.Wrap },
+                Margin = new Thickness(0, 4, 0, 0),
+            });
+        }
+
+        NewsList.Visibility = titles.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+    }
+
     /// Draws the line for a stage: what it says, the small print under it, and the one action.
     private void ShowUpdate(UpdateStage stage)
     {
@@ -328,6 +378,7 @@ public partial class GeneralPage : UserControl
             _ => (current, string.Empty),
         };
         UpdateDetail.Visibility = UpdateDetail.Text.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
+        ShowNews(stage is UpdateStage.Available or UpdateStage.Downloading or UpdateStage.Ready ? newer : null);
 
         var action = UpdateBlock.ActionFor(stage);
         UpdateButton.Content = action switch

@@ -32,8 +32,14 @@ public enum VoiceNotice
     NeedsModel,
     NeedsKey,
 
-    /// OpenAI did not take the recording: a wrong key, no money on it, no connection (D-317).
+    /// OpenAI did not take the recording: a wrong key, no connection, any other refusal (D-317).
     CloudFailed,
+
+    /// OpenAI refused because the account of the key has no money left (D-405).
+    CloudNoMoney,
+
+    /// OpenAI asked to slow down: too many requests in a short time (D-405).
+    CloudBusy,
 }
 
 /// What happened: a press of Ctrl+Space or the button, Esc, or news from the mic and the engine.
@@ -45,6 +51,8 @@ public enum VoiceCue
     Finished,
     NoMicrophone,
     CloudFailed,
+    CloudNoMoney,
+    CloudBusy,
 }
 
 /// Whether the chosen engine can work: the model is on disk, or the key is stored.
@@ -120,9 +128,29 @@ public static class VoiceInput
             (_, VoiceCue.NoMicrophone) => state with { Notice = VoiceNotice.NoMicrophone },
             (VoicePhase.Warming or VoicePhase.Listening or VoicePhase.Finishing, VoiceCue.CloudFailed) =>
                 new VoiceState(VoicePhase.Idle, VoiceNotice.CloudFailed),
+            (VoicePhase.Warming or VoicePhase.Listening or VoicePhase.Finishing, VoiceCue.CloudNoMoney) =>
+                new VoiceState(VoicePhase.Idle, VoiceNotice.CloudNoMoney),
+            (VoicePhase.Warming or VoicePhase.Listening or VoicePhase.Finishing, VoiceCue.CloudBusy) =>
+                new VoiceState(VoicePhase.Idle, VoiceNotice.CloudBusy),
             _ => state,
         };
     }
+
+    /// Why OpenAI refused, from the code of its error event or the HTTP status of a refused
+    /// connection (D-405). 429 on connecting comes without a code: for one person dictating, an
+    /// empty account is far more likely than the limit of requests, so it reads as no money.
+    public static VoiceCue CloudCue(string? code, int? status) => (code, status) switch
+    {
+        ("insufficient_quota", _) => VoiceCue.CloudNoMoney,
+        ("rate_limit_exceeded", _) => VoiceCue.CloudBusy,
+        (null, 429) => VoiceCue.CloudNoMoney,
+        _ => VoiceCue.CloudFailed,
+    };
+
+    /// Whether the end of a recording keeps the words recognised so far. A refusal of OpenAI in the
+    /// middle keeps the phrases it already sent back; only Esc and a lost mic drop them (D-405).
+    public static bool KeepsText(VoiceCue cue) =>
+        cue is VoiceCue.Finished or VoiceCue.CloudFailed or VoiceCue.CloudNoMoney or VoiceCue.CloudBusy;
 
     public static VoiceLine Line(VoiceState state, TimeSpan listened, VoiceEngine engine) => state.Phase switch
     {

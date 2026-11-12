@@ -5,8 +5,8 @@ namespace Aiko.Core.Terminal;
 public static class Notices
 {
     /// before is null for a terminal seen for the first time. sound: the setting of the sound.
-    /// inFront: the terminal window is on screen and has the keyboard. open: the change is in the
+    /// inFocus: the terminal window is on screen and has the keyboard. open: the change is in the
     /// session open in it, which the person already sees.
-    public static bool Sounds(TerminalActivity? before, TerminalActivity now, bool sound, bool inFront, bool open) =>
-        sound && now == TerminalActivity.Waiting && before != TerminalActivity.Waiting && !(inFront && open);
+    public static bool Sounds(TerminalActivity? before, TerminalActivity now, bool sound, bool inFocus, bool open) =>
+        sound && now == TerminalActivity.Waiting && before != TerminalActivity.Waiting && !(inFocus && open);
 }

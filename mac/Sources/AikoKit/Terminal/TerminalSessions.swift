@@ -277,6 +277,36 @@ public struct TerminalSessions: Sendable, Equatable {
             width: place.width.rounded(), height: place.height.rounded(), maximized: place.maximized)
     }
 
+    /// The person dragged a session to another place in its folder: it now stands just before the
+    /// session "before", or last in the folder when "before" is nil (D-400). Only the sessions of
+    /// that folder trade places, in the places they had in the list, so the order of the folders
+    /// and of everything else stays. A session of another folder or environment changes nothing.
+    public func moved(_ id: String, before: String?) -> TerminalSessions {
+        guard let moving = find(id), before != id else {
+            return self
+        }
+
+        func together(_ session: TerminalSession) -> Bool {
+            session.environment == moving.environment && session.folder == moving.folder
+        }
+        if let before {
+            guard let anchor = find(before), together(anchor) else {
+                return self
+            }
+        }
+
+        let places = sessions.indices.filter { together(sessions[$0]) }
+        var order = places.map { sessions[$0] }.filter { $0.id != id }
+        let at = before.flatMap { name in order.firstIndex { $0.id == name } } ?? order.count
+        order.insert(moving, at: at)
+
+        var next = self
+        for (index, place) in places.enumerated() {
+            next.sessions[place] = order[index]
+        }
+        return next
+    }
+
     private func with(_ id: String, _ change: (inout TerminalSession) -> Void) -> TerminalSessions {
         var next = self
         for index in next.sessions.indices where next.sessions[index].id == id {

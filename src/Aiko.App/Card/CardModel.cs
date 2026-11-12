@@ -66,6 +66,13 @@ public sealed class EnvironmentBlock
     public required Brush StateText { get; init; }
     public required Visibility HaloVisibility { get; init; }
 
+    /// The account is known and not signed in: the open header offers "Sign in".
+    public required bool NeedsSignIn { get; init; }
+
+    /// "Updated at 12:04", or "Last data at 9:30" when the numbers are old: the open header says
+    /// how fresh its numbers are.
+    public required string Updated { get; init; }
+
     /// "Open Claude Code", or "Sign in" when the account is not connected. Both open Claude Code
     /// for this environment; signing in happens there.
     public required string OpenLabel { get; init; }
@@ -89,6 +96,8 @@ public sealed class EnvironmentBlock
             StateVisibility = account is null ? Visibility.Collapsed : Visibility.Visible,
             OpenLabel = signedIn ? Strings.OpenClaudeCode : Strings.SignIn,
             OpenVisibility = account is null ? Visibility.Collapsed : Visibility.Visible,
+            NeedsSignIn = account is { SignedIn: false },
+            Updated = CardText.Updated(card.Freshness, card.UpdatedAt),
             Rows = rows,
             // Somebody who said "not now" in the wizard is told that, not told to open a
             // terminal they have already opened. The advice has to match their situation.

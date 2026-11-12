@@ -1,16 +1,16 @@
 {
-  "comment": "Notices are counts (D-409). A session plays the sound of \"waits\" when it starts to wait, unless the sound is off or it is the session open in the terminal window in front; null before is a terminal seen for the first time. The tray icon and the taskbar button show one sign: the number of waiting sessions, else the number of stopped ones, else a dot for a finished turn; more than 9 is \"9+\". A stop counts until the person sees the session after it.",
+  "comment": "Notices are counts (D-409). A session plays the sound of \"waits\" when it starts to wait, unless the sound is off or it is the session open in the terminal window in focus; null before is a terminal seen for the first time. The tray icon and the taskbar button show one sign: the number of waiting sessions, else the number of stopped ones, else a dot for a finished turn; more than 9 is \"9+\". A stop counts until the person sees the session after it.",
   "sounds": [
-    {"before": "Working", "now": "Waiting", "inFront": false, "open": false, "sounds": true},
-    {"before": "Idle", "now": "Waiting", "inFront": false, "open": true, "sounds": true},
-    {"before": "Done", "now": "Waiting", "inFront": true, "open": false, "sounds": true},
-    {"before": null, "now": "Waiting", "inFront": false, "open": false, "sounds": true},
-    {"before": "Working", "now": "Waiting", "inFront": true, "open": true, "sounds": false},
-    {"before": "Working", "now": "Waiting", "inFront": false, "open": false, "soundOff": true, "sounds": false},
-    {"before": "Waiting", "now": "Waiting", "inFront": false, "open": false, "sounds": false},
-    {"before": "Working", "now": "Done", "inFront": false, "open": false, "sounds": false},
-    {"before": "Working", "now": "Exited", "inFront": false, "open": false, "sounds": false},
-    {"before": "Waiting", "now": "Working", "inFront": false, "open": false, "sounds": false}
+    {"before": "Working", "now": "Waiting", "inFocus": false, "open": false, "sounds": true},
+    {"before": "Idle", "now": "Waiting", "inFocus": false, "open": true, "sounds": true},
+    {"before": "Done", "now": "Waiting", "inFocus": true, "open": false, "sounds": true},
+    {"before": null, "now": "Waiting", "inFocus": false, "open": false, "sounds": true},
+    {"before": "Working", "now": "Waiting", "inFocus": true, "open": true, "sounds": false},
+    {"before": "Working", "now": "Waiting", "inFocus": false, "open": false, "soundOff": true, "sounds": false},
+    {"before": "Waiting", "now": "Waiting", "inFocus": false, "open": false, "sounds": false},
+    {"before": "Working", "now": "Done", "inFocus": false, "open": false, "sounds": false},
+    {"before": "Working", "now": "Exited", "inFocus": false, "open": false, "sounds": false},
+    {"before": "Waiting", "now": "Working", "inFocus": false, "open": false, "sounds": false}
   ],
   "counts": [
     {"activities": ["Working", "Waiting", "Working", "Done", "Idle", "Exited"], "working": 2, "waiting": 1, "done": 1, "stopped": 1, "firstWaiting": 1, "badge": "Waiting", "text": "1"},

@@ -10,7 +10,8 @@ namespace Aiko.App;
 static class TerminalSnapshot
 {
     /// --snapshot-terminal out.png [palette | folders | loader | header | header-work | narrow |
-    /// narrow-header | nolist]
+    /// narrow-header | nolist | settings | settings-personality | settings-terminal | settings-privacy |
+    /// settings-general]. The settings read the real settings of this computer, as the window does.
     public static void Write(string path, string? part)
     {
         if (part == "loader")
@@ -67,6 +68,11 @@ static class TerminalSnapshot
             null,
             now));
         panel.ShowGroupHoverForSnapshot();
+        if (part?.StartsWith("settings", StringComparison.Ordinal) == true)
+        {
+            panel.ShowSettings(new SettingsPanel(part.Length > 9 ? part[9..] : null));
+        }
+
         Snapshot.Write(panel, path);
     }
 

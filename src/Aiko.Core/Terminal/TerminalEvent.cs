@@ -240,10 +240,10 @@ public static class TerminalHooks
 /// for ever. Typing into the session is what ends it: that is how the person answers.
 public static class TerminalPulse
 {
-    /// Whether the person sees the open session: the window is on screen and in front, with the
+    /// Whether the person sees the open session: the window is on screen and in focus, with the
     /// keyboard. A window left open under a browser is on screen, yet nobody looks at it; counted as
     /// seen, it turned every "done" there into nothing (D-389).
-    public static bool Sees(bool inView, bool inFront) => inView && inFront;
+    public static bool Sees(bool inView, bool inFocus) => inView && inFocus;
 
     public static TerminalActivity Of(ClaudeTitle? title, TerminalEvent? last, long seenAt, long answeredAt)
     {

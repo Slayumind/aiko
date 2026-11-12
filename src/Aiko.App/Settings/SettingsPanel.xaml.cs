@@ -9,7 +9,6 @@ namespace Aiko.App;
 
 public partial class SettingsPanel : UserControl
 {
-    public const string FoldersPageKey = "folders";
     public const string GeneralPageKey = "general";
     public const string PersonalityPageKey = "personality";
     public const string PrivacyPageKey = "privacy";
@@ -32,14 +31,16 @@ public partial class SettingsPanel : UserControl
     {
     }
 
-    /// The page to open: "general", "folders", "personality", "setup" or "env:" and an account folder. Null opens the
-    /// first environment, or the checklist when nothing is set up yet.
-    public SettingsPanel(string? page)
+    /// The page to open: "general", "personality", "terminal", "privacy", "setup" or "env:" and an account folder. Null opens the
+    /// first environment, or the checklist when nothing is set up yet. In the window the panel stands
+    /// on the place of the list and the terminal (D-374) instead of in a window of its own.
+    public SettingsPanel(string? page, bool firstRun = false)
     {
         InitializeComponent();
 
-        // A small screen still shows the header; the page scrolls inside.
-        Body.Height = Math.Clamp(SystemParameters.WorkArea.Height - 160, 420, 600);
+        _firstRun = firstRun;
+        FitInWindow();
+
         VersionLine.Text = $"Aiko {AppVersion.WithCommit()}";
 
         _editor.Changed += OnEnvironmentsChanged;
@@ -49,7 +50,6 @@ public partial class SettingsPanel : UserControl
         BuildNav();
     }
 
-    public event Action? CloseRequested;
     public event Action? QuitRequested;
 
     /// Raised when the window has to come back in another language.
@@ -58,12 +58,7 @@ public partial class SettingsPanel : UserControl
     /// Raised after any change, so the tray, the island and direct mode follow it at once.
     public event Action? SettingsChanged;
 
-    public FrameworkElement DragHandle => HeaderRow;
-
     public string CurrentPage => _page;
-
-    /// For a snapshot of a page taller than the window: the window grows to the page instead.
-    public void GrowToPage() => Body.Height = double.NaN;
 
     /// The key of the n-th environment's page: environment 1 is always the one in .claude.
     public string? EnvironmentPage(int index) =>
@@ -94,16 +89,8 @@ public partial class SettingsPanel : UserControl
         Navigate(ChecklistPageKey);
     }
 
-    public void StartUpdateCheck()
-    {
-        if (_page != GeneralPageKey)
-        {
-            ShowPage(GeneralPageKey, animate: false);
-            BuildNav();
-        }
-
-        (PageHost.Content as GeneralPage)?.StartUpdateCheck();
-    }
+    /// Another page asked for while the panel is open, from the tray menu or the editor.
+    public void Open(string page) => Navigate(page);
 
     internal static IEnumerable<AikoEnvironment> Ordered(EnvironmentSettings settings)
     {
@@ -113,20 +100,66 @@ public partial class SettingsPanel : UserControl
             : settings.Environments.Where(e => e != first).Prepend(first);
     }
 
+    // ---- the frame ----
+
+    /// The width of the page column in the window: the pages were made for a window 720 wide, and a
+    /// column wider than this makes lines too long to read (D-391).
+    private const double PageWidth = 640;
+
+    /// The first run in the terminal window (D-394): the checklist alone, one step at a time in a
+    /// column in the middle, with no menu. Finish hands the window over to the terminal.
+    private readonly bool _firstRun;
+
+    /// The first run is done: the environments are written, and the terminal can take the window.
+    public event Action? FirstRunFinished;
+
+    public bool IsFirstRun => _firstRun;
+
+    /// The panel fills the place under the title bar of the terminal window. The page keeps a
+    /// readable column on the left; the first run has one column in the middle and no menu.
+    private void FitInWindow()
+    {
+        if (_firstRun)
+        {
+            NavColumn.Width = new GridLength(0);
+            Nav.Visibility = Visibility.Collapsed;
+            NavLine.Visibility = Visibility.Collapsed;
+            VersionLine.Visibility = Visibility.Collapsed;
+            PageHost.Width = 520;
+            PageHost.HorizontalAlignment = HorizontalAlignment.Center;
+            PageHost.Margin = new Thickness(20, 48, 20, 32);
+            return;
+        }
+
+        PageScroll.Content = null;
+        var column = new Grid();
+        column.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star), MaxWidth = PageWidth });
+        column.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        column.Children.Add(PageHost);
+        PageScroll.Content = column;
+    }
+
+    /// The menu is as wide as the list of sessions in the terminal window, so the edge between
+    /// them does not move (D-374). The way back is in the title bar: a pill, the gear or Esc.
+    public void FitMenu(double menuWidth) => NavColumn.Width = new GridLength(menuWidth);
+
     // ---- the menu ----
+
+    /// The room between the groups of the menu.
+    private const double GroupGap = 20;
 
     private void BuildNav()
     {
         _buildingNav = true;
         Nav.Children.Clear();
 
+        // The order of D-374: General, the environments, Terminal, Personality, Privacy.
+        Nav.Children.Add(NavItem(GeneralPageKey, Strings.NavGeneral, null));
+
+        // The three groups are told apart by room alone, with no label or line (D-404).
+        Nav.Children.Add(new Border { Height = GroupGap });
+
         var settings = _editor.Current;
-        Nav.Children.Add(new TextBlock
-        {
-            Text = Strings.SectionEnvironments,
-            Style = (Style)FindResource("SectionLabel"),
-            Margin = new Thickness(10, 4, 0, 6),
-        });
 
         foreach (var environment in Ordered(settings))
         {
@@ -145,23 +178,19 @@ public partial class SettingsPanel : UserControl
             Nav.Children.Add(AddSecondSlot());
         }
 
-        Nav.Children.Add(new Border { Height = 1, Background = Tokens.Brush("Hairline"), Margin = new Thickness(10, 8, 10, 8) });
+        Nav.Children.Add(new Border { Height = GroupGap });
 
-        var bound = EnvironmentEdits.Bindings(settings).Count;
-        Nav.Children.Add(NavItem(FoldersPageKey, Strings.ItemFolders, bound > 0 ? string.Format(Strings.NavBound, bound) : null));
+        var app = SettingsStore.Load();
+        Nav.Children.Add(NavItem(TerminalPageKey, Strings.NavTerminal, app.VoiceInput ? Strings.NavVoiceOn : Strings.NavVoiceOff));
+
         if (settings.HasEnvironments)
         {
             var talking = settings.Environments.Count(e => e.Persona);
             Nav.Children.Add(NavItem(PersonalityPageKey, Strings.NavPersonality, talking > 0 ? string.Format(Strings.NavPersonaOn, talking) : Strings.NavPersonaOff));
         }
 
-        var app = SettingsStore.Load();
-        Nav.Children.Add(NavItem(TerminalPageKey, Strings.NavTerminal, app.VoiceInput ? Strings.NavVoiceOn : Strings.NavVoiceOff));
-
         var stats = app.SendStats;
         Nav.Children.Add(NavItem(PrivacyPageKey, Strings.NavPrivacy, stats ? Strings.NavPrivacyStatsOn : Strings.NavPrivacyStatsOff));
-
-        Nav.Children.Add(NavItem(GeneralPageKey, Strings.NavGeneral, null));
 
         _buildingNav = false;
     }
@@ -296,13 +325,6 @@ public partial class SettingsPanel : UserControl
             return general;
         }
 
-        if (key == FoldersPageKey)
-        {
-            var folders = new FoldersPage(_editor);
-            folders.ChecklistRequested += item => OpenChecklist(item);
-            return folders;
-        }
-
         if (key == PersonalityPageKey)
         {
             if (!_editor.Current.HasEnvironments)
@@ -341,18 +363,24 @@ public partial class SettingsPanel : UserControl
         }
 
         var environment = new EnvironmentPage(_editor, folder);
-        environment.FoldersRequested += () => Navigate(FoldersPageKey);
+        environment.ChecklistRequested += item => OpenChecklist(item);
         environment.Removed += ShowNoteOnFirstEnvironment;
         return environment;
     }
 
     private ChecklistPage NewChecklist(ChecklistItem? item)
     {
-        var checklist = new ChecklistPage(item);
+        var checklist = new ChecklistPage(item, steps: _firstRun);
         checklist.Finished += note =>
         {
             _checklist = null;
             _editor.Reload();
+            if (_firstRun)
+            {
+                FirstRunFinished?.Invoke();
+                return;
+            }
+
             ShowNoteOnFirstEnvironment(note);
         };
         return checklist;
@@ -399,9 +427,6 @@ public partial class SettingsPanel : UserControl
             case EnvironmentPage environment:
                 environment.Leave();
                 break;
-            case FoldersPage folders:
-                folders.Leave();
-                break;
             case PersonalityPage personality:
                 personality.Leave();
                 break;
@@ -421,5 +446,4 @@ public partial class SettingsPanel : UserControl
         SettingsChanged?.Invoke();
     }
 
-    private void OnClose(object sender, RoutedEventArgs e) => CloseRequested?.Invoke();
 }

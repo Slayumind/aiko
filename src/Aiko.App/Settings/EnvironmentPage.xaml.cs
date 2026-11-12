@@ -29,7 +29,12 @@ public partial class EnvironmentPage : UserControl
         Fill();
     }
 
-    public event Action? FoldersRequested;
+    /// Opens the checklist at the item that sets up what this page is missing.
+    public event Action<ChecklistItem>? ChecklistRequested;
+
+    /// A folder that came here from another environment, and the name of that one: the row says so
+    /// until the page is left.
+    private (string Folder, string From)? _moved;
 
     /// Raised after the environment is gone, with the words to show on the page that comes next.
     public event Action<string>? Removed;
@@ -98,9 +103,13 @@ public partial class EnvironmentPage : UserControl
         }
 
         ShowCommandNote(CommandProblem.None);
-        FillBound(environment);
-        RestToo.Visibility = isDefault && two ? Visibility.Visible : Visibility.Collapsed;
-        EditFolders.Visibility = two ? Visibility.Visible : Visibility.Collapsed;
+        FillBound(environment, two);
+        NeedCommandsPanel.IsOpen = two && !CommandFolder.IsSetUp;
+        AddFolderButton.Visibility = two ? Visibility.Visible : Visibility.Collapsed;
+        DefaultRow.Visibility = two ? Visibility.Visible : Visibility.Collapsed;
+        DefaultToggle.IsChecked = isDefault;
+        OneEnvironmentNote.Text = string.Format(Strings.FoldersOneEnvironment, environment.Name);
+        OneEnvironmentNote.Visibility = two ? Visibility.Collapsed : Visibility.Visible;
 
         var removable = EnvironmentEdits.CanRemove(settings, environment.Name, Home);
         KeepClaudeNote.Visibility = removable ? Visibility.Collapsed : Visibility.Visible;
@@ -110,27 +119,121 @@ public partial class EnvironmentPage : UserControl
         _filling = false;
     }
 
-    private void FillBound(AikoEnvironment environment)
+    private void FillBound(AikoEnvironment environment, bool two)
     {
         BoundList.Children.Clear();
+        if (!two)
+        {
+            return;
+        }
+
         foreach (var folder in environment.ProjectFolders.OrderBy(f => f, StringComparer.OrdinalIgnoreCase))
         {
-            BoundList.Children.Add(new Border
-            {
-                CornerRadius = new CornerRadius(8),
-                Background = Tokens.Brush("HoverLayer"),
-                Padding = new Thickness(10, 6, 10, 6),
-                Margin = new Thickness(0, 0, 0, 4),
-                ToolTip = folder,
-                Child = new TextBlock { Text = folder, Style = (Style)FindResource("RowNote"), Foreground = Tokens.Brush("Ink") },
-            });
+            BoundList.Children.Add(FolderRow(folder));
         }
 
         if (environment.ProjectFolders.Count == 0)
         {
-            BoundList.Children.Add(new TextBlock { Text = Strings.NoneBound, Style = (Style)FindResource("RowHint") });
+            BoundList.Children.Add(new TextBlock { Text = Strings.NoneBound, Style = (Style)FindResource("RowHint"), Margin = new Thickness(0, 0, 0, 6) });
         }
     }
+
+    /// One bound folder: its path and a cross that unbinds it; under a folder that just came from
+    /// another environment, a line that says from which.
+    private Border FolderRow(string folder)
+    {
+        var path = new TextBlock
+        {
+            Text = folder,
+            Style = (Style)FindResource("RowNote"),
+            Foreground = Tokens.Brush("Ink"),
+            TextTrimming = TextTrimming.CharacterEllipsis,
+            VerticalAlignment = VerticalAlignment.Center,
+            ToolTip = folder,
+        };
+
+        var remove = new Button
+        {
+            Style = (Style)FindResource("IconButton"),
+            ToolTip = Strings.RemoveBinding,
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(8, 0, 0, 0),
+            Content = new System.Windows.Shapes.Path
+            {
+                Data = Geometry.Parse("M 0,0 L 8,8 M 8,0 L 0,8"),
+                Stroke = Tokens.Brush("Muted"),
+                StrokeThickness = 1.5,
+                StrokeStartLineCap = PenLineCap.Round,
+                StrokeEndLineCap = PenLineCap.Round,
+                Width = 8,
+                Height = 8,
+            },
+        };
+        remove.Click += (_, _) => _editor.Commit(EnvironmentEdits.Unbind(_editor.Current, folder), "unbound a folder");
+
+        var line = new DockPanel();
+        DockPanel.SetDock(remove, Dock.Right);
+        line.Children.Add(remove);
+        line.Children.Add(path);
+
+        var inside = new StackPanel();
+        inside.Children.Add(line);
+        if (_moved is { } moved && RealClaude.SameFolder(moved.Folder, folder))
+        {
+            inside.Children.Add(new TextBlock { Text = string.Format(Strings.FolderMovedFrom, moved.From), Style = (Style)FindResource("RowHint"), Margin = new Thickness(0, 2, 0, 0) });
+        }
+
+        return new Border
+        {
+            CornerRadius = new CornerRadius(8),
+            Background = Tokens.Brush("HoverLayer"),
+            Padding = new Thickness(10, 4, 4, 4),
+            Margin = new Thickness(0, 0, 0, 4),
+            Child = inside,
+        };
+    }
+
+    private void OnAddFolder(object sender, RoutedEventArgs e)
+    {
+        var dialog = new Microsoft.Win32.OpenFolderDialog { Title = Strings.PickProject };
+        if (dialog.ShowDialog() == true)
+        {
+            AddFolder(dialog.FolderName);
+        }
+    }
+
+    /// Binds the folder here. A folder of another environment moves here, and its row says from
+    /// where (D-398). For --try-settings, which cannot click through the folder dialog.
+    internal void AddFolder(string folder)
+    {
+        if (Current is not { } environment || environment.ProjectFolders.Any(f => RealClaude.SameFolder(f, folder)))
+        {
+            return;
+        }
+
+        var from = EnvironmentEdits.Bindings(_editor.Current).FirstOrDefault(b => RealClaude.SameFolder(b.Folder, folder))?.Environment;
+        _moved = from is null ? null : (folder, from);
+        _editor.Commit(EnvironmentEdits.Bind(_editor.Current, folder, environment.Name), from is null ? "bound a folder" : "moved a folder to another environment");
+    }
+
+    /// On: every folder that is not bound runs here. Off: it runs in the other environment.
+    private void OnDefaultChanged(object sender, RoutedEventArgs e)
+    {
+        if (_filling || Current is not { } environment)
+        {
+            return;
+        }
+
+        var target = DefaultToggle.IsChecked == true
+            ? environment.Name
+            : _editor.Current.Environments.FirstOrDefault(x => x.Name != environment.Name)?.Name;
+        if (target is not null)
+        {
+            _editor.Commit(EnvironmentEdits.SetDefault(_editor.Current, target), "changed the default environment");
+        }
+    }
+
+    private void OnSetUpCommands(object sender, RoutedEventArgs e) => ChecklistRequested?.Invoke(ChecklistItem.Commands);
 
     /// The folder the way people read it: ~\.claude-work rather than the whole path.
     private static string ShortPath(string folder) =>
@@ -288,7 +391,6 @@ public partial class EnvironmentPage : UserControl
         CommandNote.Foreground = Tokens.Brush(problem == CommandProblem.None ? "Muted" : "Caution");
     }
 
-    private void OnEditFolders(object sender, RoutedEventArgs e) => FoldersRequested?.Invoke();
 
     // ---- removing: a second click, and the Recycle Bin only when ticked ----
 

@@ -96,16 +96,8 @@ public sealed record AppSettings
     /// WindowZoom.Read: a hand-edited file may hold anything.
     public int WindowZoom { get; init; } = Terminal.WindowZoom.Default;
 
-    /// The notices of the terminal, one tick per kind and one for the sound, all on (D-375).
-    public bool NotifyWaiting { get; init; } = true;
-
-    public bool NotifyDone { get; init; } = true;
-
-    public bool NotifyStopped { get; init; } = true;
-
-    public bool NotifyLimit { get; init; } = true;
-
-    /// The sound of "waits for you"; the counts are silent (D-409).
+    /// The sound of "waits for you", on by default (D-375). The counts are always shown and make no
+    /// sound, so they have no setting (D-409).
     public bool NotifySound { get; init; } = true;
 
     /// A settings file we cannot read is not a reason to stop: Aiko starts with the defaults.

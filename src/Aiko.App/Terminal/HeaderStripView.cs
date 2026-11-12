@@ -56,12 +56,16 @@ sealed class HeaderStripView
     private static readonly Duration BarGrow = new(TimeSpan.FromMilliseconds(480));
 
     private readonly Action<string> _pick;
+    private readonly Action<string> _signIn;
     private readonly HeaderCards _row = new();
     private readonly Dictionary<string, Card> _cards = [];
 
-    public HeaderStripView(Action<string> pick)
+    /// pick: a quiet card was clicked. signIn: "Sign in" was clicked on the card of an environment
+    /// whose account is not connected.
+    public HeaderStripView(Action<string> pick, Action<string> signIn)
     {
         _pick = pick;
+        _signIn = signIn;
         Root = new Border { Padding = StripPadding, Child = _row };
     }
 
@@ -92,7 +96,7 @@ sealed class HeaderStripView
 
             // The bars of the active card grow to their values when the card comes in.
             TimeSpan? grow = !animate ? null : motion == HeaderMotion.Open ? BarsAfterOpen : swaps ? ContentInAt : null;
-            var content = column.Column.Active ? Full(column, grow) : Quiet(column);
+            var content = column.Column.Active ? Full(column, grow, _signIn) : Quiet(column);
             if (swaps)
             {
                 card.CrossFade(content, column.Column.Active);
@@ -146,48 +150,6 @@ sealed class HeaderStripView
         Root.Opacity = 1;
     }
 
-    /// The track of a ring: the grey of the tray icon's ring. It is see-through, so it reads on the
-    /// window, on a card and on the background of the chosen pill alike.
-    private static readonly Brush RingTrack = TrackBrush();
-
-    private static Brush TrackBrush()
-    {
-        var brush = new SolidColorBrush(RingDrawing.TrackColor);
-        brush.Freeze();
-        return brush;
-    }
-
-    /// The ring of a limit: a full grey track and the used part from the top, clockwise.
-    public static FrameworkElement Ring(int? percent, LimitTone tone, double size, double thickness, double opacity = 1)
-    {
-        var ring = new Grid { Width = size, Height = size, VerticalAlignment = VerticalAlignment.Center, Opacity = opacity };
-        ring.Children.Add(new Ellipse { Stroke = RingTrack, StrokeThickness = thickness });
-        if (percent is { } used && used > 0)
-        {
-            ring.Children.Add(new Path
-            {
-                Stroke = Tokens.ToneBrush(tone),
-                StrokeThickness = thickness,
-                StrokeStartLineCap = PenLineCap.Round,
-                StrokeEndLineCap = PenLineCap.Round,
-                Data = Arc(size / 2, (size - thickness) / 2, used / 100.0),
-            });
-        }
-
-        return ring;
-    }
-
-    /// A part of a circle from the top, clockwise.
-    public static Geometry Arc(double centre, double radius, double part)
-    {
-        part = Math.Clamp(part, 0, 0.999);
-        var angle = part * 2 * Math.PI;
-        var end = new Point(centre + radius * Math.Sin(angle), centre - radius * Math.Cos(angle));
-        var figure = new PathFigure { StartPoint = new Point(centre, centre - radius) };
-        figure.Segments.Add(new ArcSegment(end, new Size(radius, radius), 0, part > 0.5, SweepDirection.Clockwise, true));
-        return new PathGeometry([figure]);
-    }
-
     public static string WaitingWords(int count) =>
         string.Format(
             CultureInfo.CurrentCulture,
@@ -203,12 +165,12 @@ sealed class HeaderStripView
 
     /// The active card: the head, one line per limit, and the profile. grow is when its bars start
     /// to grow from zero, or null when they stand at their values.
-    private static FrameworkElement Full(HeaderColumnView column, TimeSpan? grow)
+    private static FrameworkElement Full(HeaderColumnView column, TimeSpan? grow, Action<string> signIn)
     {
         var stack = new StackPanel();
         // The names, resets and tone words of the rows share their widths, so the bars line up.
         Grid.SetIsSharedSizeScope(stack, true);
-        stack.Children.Add(Head(column, column.Block));
+        stack.Children.Add(Head(column, column.Block, signIn));
 
         if (column.Block is not { } block)
         {
@@ -241,7 +203,7 @@ sealed class HeaderStripView
     {
         var stack = new StackPanel();
         Grid.SetIsSharedSizeScope(stack, true);
-        stack.Children.Add(Head(column, null));
+        stack.Children.Add(Head(column, null, null));
 
         var rows = new StackPanel { Margin = new Thickness(0, 8, 0, 0) };
         rows.Children.Add(MiniRow(Strings.CardShortSession, column.Column.FiveHour));
@@ -259,10 +221,29 @@ sealed class HeaderStripView
     }
 
     /// Ring, name, "N waiting", and at the right end "working now" when the environment works.
-    private static FrameworkElement Head(HeaderColumnView column, EnvironmentBlock? block)
+    private static FrameworkElement Head(HeaderColumnView column, EnvironmentBlock? block, Action<string>? signIn)
     {
         var quiet = block is null;
         var head = new DockPanel { Height = 20, LastChildFill = true };
+
+        // An account that is not connected says so at the right end, and the words open the sign
+        // in, as "Sign in again" in the settings of the environment does.
+        if (block is { NeedsSignIn: true } && signIn is not null)
+        {
+            var link = TerminalPanel.Text(Strings.SignIn, "TextTiny", "Ink", FontWeights.Normal);
+            link.TextDecorations = TextDecorations.Underline;
+            link.Cursor = System.Windows.Input.Cursors.Hand;
+            link.ToolTip = Strings.StateSignInNeeded;
+            link.VerticalAlignment = VerticalAlignment.Center;
+            link.Margin = new Thickness(12, 0, 0, 0);
+            link.MouseLeftButtonUp += (_, e) =>
+            {
+                e.Handled = true;
+                signIn(column.Column.Environment);
+            };
+            DockPanel.SetDock(link, Dock.Right);
+            head.Children.Add(link);
+        }
 
         if (block is { HaloVisibility: Visibility.Visible })
         {
@@ -279,7 +260,7 @@ sealed class HeaderStripView
         }
 
         var left = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
-        var ring = Ring(column.Column.FiveHour, quiet ? LimitTone.Unknown : ToneOf(column), 14, 2, quiet ? 0.6 : 1);
+        var ring = Marks.Ring(column.Column.FiveHour, quiet ? LimitTone.Unknown : ToneOf(column), 14, 2, quiet ? 0.6 : 1);
         ring.Margin = new Thickness(0, 0, 8, 0);
         left.Children.Add(ring);
 
@@ -393,7 +374,7 @@ sealed class HeaderStripView
         return track;
     }
 
-    /// "Max 5x · Aiko · direct mode off": who this environment is, on one line, with its name in Aiko
+    /// "Max 5x · Aiko · direct mode off · updated at 12:04": who this environment is, on one line, with its name in Aiko
     /// as the owner chose it in the settings, not the name of its folder.
     private static FrameworkElement Profile(HeaderColumnView column, EnvironmentBlock block)
     {
@@ -405,6 +386,12 @@ sealed class HeaderStripView
 
         parts.Add(column.Column.Environment);
         parts.Add(column.Direct ? Strings.TerminalDirectOn : Strings.TerminalDirectOff);
+
+        // How fresh the numbers are: the card of limits said so at its top (D-399).
+        if (block.Rows.Count > 0)
+        {
+            parts.Add(block.Updated);
+        }
 
         var line = TerminalPanel.Text(string.Join("  ·  ", parts), "TextSmall", "Muted", FontWeights.Normal);
         line.Margin = new Thickness(0, 8, 0, 0);

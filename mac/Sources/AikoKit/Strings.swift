@@ -63,15 +63,17 @@ public enum Strings {
         "TrayLastSeen": ("as of {0}", "данные на {0}"),
         "TrayUpdateOut": ("Aiko {0} is out", "вышла Aiko {0}"),
         "MenuShowInRing": ("Show {0} in the ring", "Показать в кольце: {0}"),
-        "MenuTerminal": ("Open terminal", "Открыть терминал"),
+        "MenuOpen": ("Open", "Открыть"),
         "MenuRefresh": ("Refresh limits", "Обновить лимиты"),
         "Settings": ("Settings", "Настройки"),
+        "SettingsCloseTip": ("Close settings · Esc", "Закрыть настройки · Esc"),
         "Close": ("Close", "Закрыть"),
         "QuitAiko": ("Quit Aiko", "Выйти из Aiko"),
         "CheckForUpdates": ("Check for updates", "Проверить обновления"),
         "CheckUpdatesToggle": ("Check for updates", "Проверять обновления"),
         "SectionEnvironments": ("ENVIRONMENTS", "СРЕДЫ"),
         "SectionWhereToShow": ("WHERE TO SHOW", "ГДЕ ПОКАЗЫВАТЬ"),
+        "SectionWhenClosed": ("WHEN THE WINDOW IS CLOSED", "КОГДА ОКНО ЗАКРЫТО"),
         "SectionStartupAndUpdates": ("STARTUP AND UPDATES", "ЗАПУСК И ОБНОВЛЕНИЯ"),
         "SectionLanguage": ("LANGUAGE", "ЯЗЫК"),
         "DirectMode": ("Direct mode", "Прямой режим"),
@@ -121,6 +123,8 @@ public enum Strings {
         "WizardStepWhere": ("Where to show Aiko", "Где показывать Aiko"),
         "NotNow": ("Not now", "Не сейчас"),
         "Finish": ("Finish", "Готово"),
+        "StepBack": ("Back", "Назад"),
+        "StepNext": ("Next", "Дальше"),
         "WizardAccessExplain": ("Claude Code sends its limits to a status line. Aiko adds one line to the settings file of each environment. If you already have a status line, Aiko runs it and shows what it prints.", "Claude Code отдаёт лимиты строке состояния. Aiko добавит одну строку в файл настроек каждой среды. Если у тебя уже есть своя строка состояния, Aiko запустит её и покажет её вывод."),
         "WizardTheLine": ("THE LINE AIKO ADDS", "СТРОКА, КОТОРУЮ ДОБАВИТ AIKO"),
         "WizardTheFiles": ("FILES AIKO CHANGES", "ФАЙЛЫ, КОТОРЫЕ ИЗМЕНЯТСЯ"),
@@ -232,6 +236,8 @@ public enum Strings {
         "SectionBoundFolders": ("BOUND FOLDERS", "ПРИВЯЗАННЫЕ ПАПКИ"),
         "NoneBound": ("No folders.", "Ни одной папки."),
         "RestToo": ("And every other folder: this is the default environment.", "И все остальные папки: это среда по умолчанию."),
+        "DefaultForRest": ("Every other folder opens here", "Все остальные папки — сюда"),
+        "FolderMovedFrom": ("Moved here from {0}", "Перенесена сюда из {0}"),
         "EditInFolders": ("Change in project folders", "Изменить в папках проектов"),
         "RemoveEnvironment": ("Remove environment", "Удалить среду"),
         "RemoveEnvironmentLine": ("Aiko's line and plugins leave this folder's settings.json, and so do the command {0} and the bindings to {1}.", "Из settings.json этой папки уйдут строка и плагины Aiko, а с ними команда {0} и привязки к {1}."),
@@ -458,8 +464,6 @@ public enum Strings {
         "TerminalDontQuit": ("Don’t quit", "Не выходить"),
         "TerminalStopAndClose": ("Stop and close", "Остановить и закрыть"),
         "TerminalKeepOpen": ("Keep open", "Не закрывать"),
-        "TerminalLimitFiveHour": ("5-hour limit", "Лимит на 5 часов"),
-        "TerminalLimitWeek": ("Weekly limit", "Лимит на неделю"),
         "TerminalMinimize": ("Minimize", "Свернуть"),
         "TerminalMaximize": ("Maximize", "Развернуть"),
         "TerminalRestore": ("Restore", "Восстановить"),
@@ -471,7 +475,6 @@ public enum Strings {
         "TerminalDirectOn": ("direct mode on", "прямой режим вкл"),
         "TerminalDirectOff": ("direct mode off", "прямой режим выкл"),
         "TerminalCloseWindow": ("Close", "Закрыть"),
-        "TerminalSessions": ("Sessions", "Сессии"),
         "VoiceButtonTip": ("Voice input · Ctrl+Shift+Space", "Голосовой ввод · Ctrl+Shift+Space"),
         "VoiceStopTip": ("Finish recording · Ctrl+Shift+Space", "Закончить запись · Ctrl+Shift+Space"),
         "VoiceWarming": ("starting the mic", "микрофон включается"),
@@ -488,12 +491,8 @@ public enum Strings {
         "NavVoiceOn": ("voice input on", "голос включён"),
         "NavVoiceOff": ("voice input off", "голос выключен"),
         "NotifyLabel": ("Notifications", "Уведомления"),
-        "NotifyWhat": ("When the terminal window is not in front, a line comes up next to Aiko for 6 seconds. A click on it opens the session.", "Когда окно терминала не впереди, рядом с Aiko на 6 секунд появляется строка. Щелчок по ней открывает сессию."),
-        "NotifyWaiting": ("A session waits for an answer", "Сессия ждёт ответа"),
-        "NotifyDone": ("A session is done", "Сессия закончила"),
-        "NotifyStopped": ("A session stopped by itself", "Сессия остановилась сама"),
-        "NotifyLimit": ("A limit went over 90%", "Лимит перешёл за 90 %"),
-        "NotifySound": ("A sound when a session waits", "Звук, когда сессия ждёт"),
+        "NotifyWhat": ("The tray icon, the taskbar button and the island show how many agents wait, have finished or stopped. A number goes when you open that session.", "Значок в трее, кнопка в панели задач и остров показывают, сколько агентов ждут, закончили или остановились. Число уходит, когда ты открываешь эту сессию."),
+        "NotifySound": ("A sound when the agent has a question", "Звук, когда у агента вопрос"),
         "ZoomLabel": ("Window zoom", "Масштаб окна"),
         "ZoomWhat": ("Text, icons and the terminal change size together. In the terminal window: C⁠t⁠r⁠l⁠+⁠= and C⁠t⁠r⁠l⁠+⁠-, and C⁠t⁠r⁠l⁠+⁠0 brings back 115%.", "Текст, значки и терминал меняются вместе. В окне терминала — C⁠t⁠r⁠l⁠+⁠= и C⁠t⁠r⁠l⁠+⁠-, а C⁠t⁠r⁠l⁠+⁠0 возвращает 115 %."),
         "ZoomStep": ("{0}%", "{0} %"),
@@ -522,6 +521,8 @@ public enum Strings {
         "VoiceKeyNotSaved": ("Windows did not save the key.", "Windows не сохранила ключ."),
         "VoiceKeyWhere": ("Kept in Windows Credential Manager. Removing Aiko erases it.", "Хранится в Диспетчере учётных данных Windows. Удаление Aiko его сотрёт."),
         "VoiceCloudFailed": ("OpenAI did not take the recording. Check the key and the connection.", "OpenAI не принял запись. Проверь ключ и соединение."),
+        "VoiceCloudNoMoney": ("The OpenAI account is out of money.", "На счёте OpenAI кончились деньги."),
+        "VoiceCloudBusy": ("OpenAI asks to wait a minute.", "OpenAI просит подождать минуту."),
     ]
 
     /// Session · 5 hours
@@ -593,14 +594,17 @@ public enum Strings {
     /// Show {0} in the ring
     public static var menuShowInRing: String { Strings.get("MenuShowInRing") }
 
-    /// Open terminal
-    public static var menuTerminal: String { Strings.get("MenuTerminal") }
+    /// Open
+    public static var menuOpen: String { Strings.get("MenuOpen") }
 
     /// Refresh limits
     public static var menuRefresh: String { Strings.get("MenuRefresh") }
 
     /// Settings
     public static var settings: String { Strings.get("Settings") }
+
+    /// Close settings · Esc
+    public static var settingsCloseTip: String { Strings.get("SettingsCloseTip") }
 
     /// Close
     public static var close: String { Strings.get("Close") }
@@ -619,6 +623,9 @@ public enum Strings {
 
     /// WHERE TO SHOW
     public static var sectionWhereToShow: String { Strings.get("SectionWhereToShow") }
+
+    /// WHEN THE WINDOW IS CLOSED
+    public static var sectionWhenClosed: String { Strings.get("SectionWhenClosed") }
 
     /// STARTUP AND UPDATES
     public static var sectionStartupAndUpdates: String { Strings.get("SectionStartupAndUpdates") }
@@ -766,6 +773,12 @@ public enum Strings {
 
     /// Finish
     public static var finish: String { Strings.get("Finish") }
+
+    /// Back
+    public static var stepBack: String { Strings.get("StepBack") }
+
+    /// Next
+    public static var stepNext: String { Strings.get("StepNext") }
 
     /// Claude Code sends its limits to a status line. Aiko adds one line to the settings file of...
     public static var wizardAccessExplain: String { Strings.get("WizardAccessExplain") }
@@ -1099,6 +1112,12 @@ public enum Strings {
 
     /// And every other folder: this is the default environment.
     public static var restToo: String { Strings.get("RestToo") }
+
+    /// Every other folder opens here
+    public static var defaultForRest: String { Strings.get("DefaultForRest") }
+
+    /// Moved here from {0}
+    public static var folderMovedFrom: String { Strings.get("FolderMovedFrom") }
 
     /// Change in project folders
     public static var editInFolders: String { Strings.get("EditInFolders") }
@@ -1778,12 +1797,6 @@ public enum Strings {
     /// Keep open
     public static var terminalKeepOpen: String { Strings.get("TerminalKeepOpen") }
 
-    /// 5-hour limit
-    public static var terminalLimitFiveHour: String { Strings.get("TerminalLimitFiveHour") }
-
-    /// Weekly limit
-    public static var terminalLimitWeek: String { Strings.get("TerminalLimitWeek") }
-
     /// Minimize
     public static var terminalMinimize: String { Strings.get("TerminalMinimize") }
 
@@ -1816,9 +1829,6 @@ public enum Strings {
 
     /// Close
     public static var terminalCloseWindow: String { Strings.get("TerminalCloseWindow") }
-
-    /// Sessions
-    public static var terminalSessions: String { Strings.get("TerminalSessions") }
 
     /// Voice input · Ctrl+Shift+Space
     public static var voiceButtonTip: String { Strings.get("VoiceButtonTip") }
@@ -1868,22 +1878,10 @@ public enum Strings {
     /// Notifications
     public static var notifyLabel: String { Strings.get("NotifyLabel") }
 
-    /// When the terminal window is not in front, a line comes up next to Aiko for 6 seconds. A c...
+    /// The tray icon, the taskbar button and the island show how many agents wait, have finished...
     public static var notifyWhat: String { Strings.get("NotifyWhat") }
 
-    /// A session waits for an answer
-    public static var notifyWaiting: String { Strings.get("NotifyWaiting") }
-
-    /// A session is done
-    public static var notifyDone: String { Strings.get("NotifyDone") }
-
-    /// A session stopped by itself
-    public static var notifyStopped: String { Strings.get("NotifyStopped") }
-
-    /// A limit went over 90%
-    public static var notifyLimit: String { Strings.get("NotifyLimit") }
-
-    /// A sound when a session waits
+    /// A sound when the agent has a question
     public static var notifySound: String { Strings.get("NotifySound") }
 
     /// Window zoom
@@ -1969,4 +1967,10 @@ public enum Strings {
 
     /// OpenAI did not take the recording. Check the key and the connection.
     public static var voiceCloudFailed: String { Strings.get("VoiceCloudFailed") }
+
+    /// The OpenAI account is out of money.
+    public static var voiceCloudNoMoney: String { Strings.get("VoiceCloudNoMoney") }
+
+    /// OpenAI asks to wait a minute.
+    public static var voiceCloudBusy: String { Strings.get("VoiceCloudBusy") }
 }

@@ -20,7 +20,7 @@ public class NoticesTests
 
             Assert.Equal(
                 row.GetProperty("sounds").GetBoolean(),
-                Notices.Sounds(before, now, sound, row.GetProperty("inFront").GetBoolean(), row.GetProperty("open").GetBoolean()));
+                Notices.Sounds(before, now, sound, row.GetProperty("inFocus").GetBoolean(), row.GetProperty("open").GetBoolean()));
         }
     }
 

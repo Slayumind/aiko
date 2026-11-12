@@ -30,6 +30,9 @@ sealed class TerminalPanel : UserControl
     private double _listTarget = double.NaN;
     private readonly DockPanel _list = new();
     private readonly StackPanel _rows = new();
+
+    /// The rows with a layer over them for the line of a drag (D-400).
+    private readonly RowDrag _drag;
     private readonly Grid _main = new();
     private readonly Popup _listPopup = new() { StaysOpen = false, AllowsTransparency = true, Placement = PlacementMode.Bottom };
 
@@ -38,6 +41,27 @@ sealed class TerminalPanel : UserControl
     private readonly Button _listToggle;
     private readonly Button _chevron;
     private readonly Button _gear;
+
+    /// The gear stays lit while the settings are open, as a pressed segment.
+    private readonly Border _gearLit = new() { CornerRadius = new CornerRadius(6), Background = Tokens.Brush("Raised"), Visibility = Visibility.Collapsed };
+
+    /// A quiet dot on the gear while a newer version is out (D-391); the General page says which.
+    private readonly System.Windows.Shapes.Ellipse _gearDot = new()
+    {
+        Width = 6,
+        Height = 6,
+        Fill = Tokens.Brush("Positive"),
+        HorizontalAlignment = HorizontalAlignment.Right,
+        VerticalAlignment = VerticalAlignment.Top,
+        Margin = new Thickness(0, 6, 11, 0),
+        IsHitTestVisible = false,
+        Visibility = Visibility.Collapsed,
+    };
+
+    public void ShowUpdateDot(bool newer) => _gearDot.Visibility = newer ? Visibility.Visible : Visibility.Collapsed;
+
+    /// The settings, while they are open, on the place of the list and the terminal.
+    private readonly ContentControl _settingsHost = new() { Visibility = Visibility.Collapsed, Focusable = false, HorizontalContentAlignment = HorizontalAlignment.Stretch, VerticalContentAlignment = VerticalAlignment.Stretch };
 
     /// The open header under the title bar (D-373, D-376). It is drawn again only when it opens or
     /// the active environment changes: the numbers in it change too often to start its motion each
@@ -108,6 +132,18 @@ sealed class TerminalPanel : UserControl
 
     public TerminalPanel()
     {
+        _drag = new RowDrag(_rows);
+        _drag.Moved += (id, before) => RowMoved?.Invoke(id, before);
+
+        // The list held still while a row was dragged; the latest view comes now.
+        _drag.Ended += () =>
+        {
+            if (_view is { } view)
+            {
+                ShowList(view);
+            }
+        };
+
         Background = Tokens.Brush("Surface");
         FontFamily = Tokens.Get<FontFamily>("Sans");
         Focusable = false;
@@ -132,6 +168,8 @@ sealed class TerminalPanel : UserControl
         _listPopup.PlacementTarget = _listToggle;
         _chevron = BarButton(Marks.Line("M0,0 L4,4 L8,0"), Strings.TerminalShowLimits, () => HeaderToggled?.Invoke());
         _gear = BarButton(GearIcon(), Strings.Settings, () => SettingsAsked?.Invoke());
+        ((Grid)_gear.Content).Children.Insert(0, _gearLit);
+        ((Grid)_gear.Content).Children.Add(_gearDot);
         // The list under the button, left edges together, as every drop-down of Aiko (DropDown).
         _listPopup.Placement = PlacementMode.Custom;
         _listPopup.CustomPopupPlacementCallback = (_, target, _) => [new CustomPopupPlacement(new Point(0, target.Height), PopupPrimaryAxis.Horizontal)];
@@ -154,11 +192,21 @@ sealed class TerminalPanel : UserControl
         left.Children.Add(_listToggle);
         left.Children.Add(_chevron);
         left.Children.Add(_pills.Root);
+        // Two columns: the buttons on the right keep their room, and the pills on the left get what
+        // is left. In one cell they slid under the gear in a narrow window.
+        _bar.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        _bar.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        left.ClipToBounds = true;
         _bar.Children.Add(left);
+        Grid.SetColumn(_right, 1);
         _bar.Children.Add(_right);
-        _bar.Children.Add(new Border { Height = 1, VerticalAlignment = VerticalAlignment.Bottom, Background = Tokens.Brush("Hairline") });
+        var hairline = new Border { Height = 1, VerticalAlignment = VerticalAlignment.Bottom, Background = Tokens.Brush("Hairline") };
+        Grid.SetColumnSpan(hairline, 2);
+        _bar.Children.Add(hairline);
+        _pills.Refit = FitPills;
+        _bar.SizeChanged += (_, _) => FitPills();
 
-        _header = new HeaderStripView(environment => TabPicked?.Invoke(environment));
+        _header = new HeaderStripView(environment => TabPicked?.Invoke(environment), environment => SignInAsked?.Invoke(environment));
         _header.Settled += () =>
         {
             // The header has its new height after a switch. While it still grows or folds, the
@@ -189,7 +237,11 @@ sealed class TerminalPanel : UserControl
         all.Children.Add(_bar);
         DockPanel.SetDock(_strip, Dock.Top);
         all.Children.Add(_strip);
-        all.Children.Add(_body);
+        // The settings stand on the place of the list and the terminal; the title bar stays (D-374).
+        var area = new Grid();
+        area.Children.Add(_body);
+        area.Children.Add(_settingsHost);
+        all.Children.Add(area);
         // The moving header is drawn over the body that stands still under it.
         Panel.SetZIndex(_strip, 1);
         Panel.SetZIndex(_bar, 2);
@@ -242,6 +294,10 @@ sealed class TerminalPanel : UserControl
 
     public event Action<string>? TabPicked;
     public event Action<string>? RowPicked;
+
+    /// A session was dragged in its folder: its id, and the session it now stands before, or null
+    /// for the end of the folder (D-400).
+    public event Action<string, string?>? RowMoved;
     public event Action<string>? RowClosed;
 
     /// The id of a session and the new name typed for it.
@@ -268,6 +324,54 @@ sealed class TerminalPanel : UserControl
 
     /// The gear in the title bar.
     public event Action? SettingsAsked;
+
+    /// "Sign in" on the card of an environment whose account is not connected.
+    public event Action<string>? SignInAsked;
+
+    public bool SettingsShown => _settingsHost.Content is not null;
+
+    /// The settings come on the place of the list and the terminal, or go, and the session is there
+    /// again as it was. The terminal is a window of its own and cannot lie under anything, so it is
+    /// hidden while the settings are open.
+    public void ShowSettings(FrameworkElement? settings)
+    {
+        // The way back is in the title bar: a pill, the lit gear, or Esc, which the tip of the gear
+        // names. The menu of the settings is as wide as the list, so the edge between them does
+        // not move. The first run has no session to go back to and nothing to switch: its title bar
+        // keeps only the window buttons (D-394).
+        if (settings is SettingsPanel { IsFirstRun: true })
+        {
+            _gear.Visibility = Visibility.Collapsed;
+            _listToggle.Visibility = Visibility.Collapsed;
+            _chevron.Visibility = Visibility.Collapsed;
+        }
+        else if (settings is SettingsPanel panel)
+        {
+            panel.FitMenu(ListWidth);
+        }
+
+        _settingsHost.Content = settings;
+        var shown = settings is not null;
+        _settingsHost.Visibility = shown ? Visibility.Visible : Visibility.Collapsed;
+        _body.Visibility = shown ? Visibility.Hidden : Visibility.Visible;
+        _gearLit.Visibility = shown ? Visibility.Visible : Visibility.Collapsed;
+        _gear.ToolTip = shown ? Strings.SettingsCloseTip : Strings.Settings;
+        if (shown && Motion.IsOn)
+        {
+            _settingsHost.BeginAnimation(OpacityProperty, new System.Windows.Media.Animation.DoubleAnimation(0, 1, Motion.Expand) { EasingFunction = Motion.Standard });
+        }
+
+        if (!shown)
+        {
+            Dispatcher.BeginInvoke(() =>
+            {
+                foreach (var terminal in _terminals.Children.OfType<TerminalSurface>())
+                {
+                    terminal.Refit();
+                }
+            }, System.Windows.Threading.DispatcherPriority.Loaded);
+        }
+    }
     public event Action? MaximizeAsked;
     public event Action? CloseAsked;
 
@@ -288,6 +392,14 @@ sealed class TerminalPanel : UserControl
     }
 
     // ---- the title bar ----
+
+    /// The room of the pills: the left column without the two buttons before them.
+    private void FitPills()
+    {
+        var before = _listToggle.ActualWidth + _listToggle.Margin.Left + _listToggle.Margin.Right
+            + _chevron.ActualWidth + _chevron.Margin.Left + _chevron.Margin.Right;
+        _pills.Fit(_bar.ActualWidth - _right.ActualWidth - before);
+    }
 
     private void ShowBar(TerminalView view)
     {
@@ -532,6 +644,7 @@ sealed class TerminalPanel : UserControl
     {
         if (_narrow)
         {
+            PopupZoom.Fit(_listPopup);
             _listPopup.IsOpen = !_listPopup.IsOpen;
             return false;
         }
@@ -571,6 +684,7 @@ sealed class TerminalPanel : UserControl
     {
         if (_narrow)
         {
+            PopupZoom.Fit(_listPopup);
             _listPopup.IsOpen = !_listPopup.IsOpen;
             return;
         }
@@ -592,7 +706,7 @@ sealed class TerminalPanel : UserControl
         var row = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
 
         // The mark on the left opens the header, the same for the ring and for the waiting mark.
-        var mark = waiting ? WaitingMark() : HeaderStripView.Ring(tab.Percent, tab.Tone, 14, 2);
+        var mark = waiting ? WaitingMark() : Marks.Ring(tab.Percent, tab.Tone, 14, 2);
         mark.Cursor = Cursors.Hand;
         mark.ToolTip = Strings.TerminalShowLimits;
         mark.MouseLeftButtonUp += (_, e) =>
@@ -655,7 +769,7 @@ sealed class TerminalPanel : UserControl
     /// The list icon: a frame with a column on its left.
     private static FrameworkElement ListIcon() => Marks.Line("M1.5,1.5 L12.5,1.5 L12.5,11.5 L1.5,11.5 Z M5,1.5 L5,11.5");
 
-    /// The gear of the project's icon set, the same one the card of limits uses.
+    /// The gear of the project's icon set.
     private static FrameworkElement GearIcon() => new Path
     {
         Data = Tokens.Get<Geometry>("GearPath"),
@@ -682,7 +796,14 @@ sealed class TerminalPanel : UserControl
             _finishRename?.Invoke(true);
         }
 
+        // A row being dragged stands still too: the list comes when it is let go.
+        if (_drag.Dragging)
+        {
+            return;
+        }
+
         _rows.Children.Clear();
+        _drag.Clear();
         _renameStarts.Clear();
         _rowNames.Clear();
         foreach (var group in view.Groups)
@@ -690,7 +811,7 @@ sealed class TerminalPanel : UserControl
             _rows.Children.Add(GroupHeader(group));
             foreach (var row in group.Rows)
             {
-                _rows.Children.Add(Row(row, row.Id == view.SessionId && view.Main == MainView.Terminal, view.Now));
+                _rows.Children.Add(Row(row, group.Folder, row.Id == view.SessionId && view.Main == MainView.Terminal, view.Now));
             }
         }
 
@@ -720,8 +841,10 @@ sealed class TerminalPanel : UserControl
         if (_narrow)
         {
             SlideList(0);
+            // Drawn anew while open too, so it takes the zoom here and not only on opening.
             _listPopup.Child = new Border
             {
+                LayoutTransform = PopupZoom.Of(_listToggle),
                 Width = ListWidth + 20,
                 MaxHeight = 480,
                 Margin = new Thickness(0, 4, 12, 12),
@@ -841,24 +964,9 @@ sealed class TerminalPanel : UserControl
         }
     }
 
-    private UIElement Row(SessionRow row, bool selected, DateTimeOffset now)
+    private UIElement Row(SessionRow row, string folder, bool selected, DateTimeOffset now)
     {
-        var top = new DockPanel();
-        var mark = Mark(row.State);
-        DockPanel.SetDock(mark, Dock.Right);
-        top.Children.Add(mark);
-
-        // What runs in the session (the mockup of D-362): the mark of Claude Code or "$".
-        UIElement kind = row.Kind == SessionKind.Shell
-            ? Mono("$", "Muted")
-            : Marks.Line("M6,1 L6,11 M1,6 L11,6 M2.5,2.5 L9.5,9.5 M9.5,2.5 L2.5,9.5");
-        var kindBox = new Border { Width = 14, Margin = new Thickness(0, 0, 8, 0), Child = kind };
-        ((FrameworkElement)kind).HorizontalAlignment = HorizontalAlignment.Center;
-        DockPanel.SetDock(kindBox, Dock.Left);
-        top.Children.Add(kindBox);
-        var name = Text(row.Name, "TextName", "Ink", FontWeights.Normal);
-        name.TextTrimming = TextTrimming.CharacterEllipsis;
-        top.Children.Add(name);
+        var (lines, top, name) = RowLines(row, now, whole: false);
         _renameStarts.Add(() => Rename(row, top, name));
         _rowNames.Add(row.Name);
 
@@ -871,18 +979,6 @@ sealed class TerminalPanel : UserControl
                 Rename(row, top, name);
             }
         };
-
-        var lines = new StackPanel();
-        lines.Children.Add(top);
-        var second = SecondLine(row, now);
-        if (second.Length > 0)
-        {
-            var line = Text(second, "TextSmall", "Muted", FontWeights.Normal);
-            line.TextTrimming = TextTrimming.CharacterEllipsis;
-            // Under the name, past the mark of the kind.
-            line.Margin = new Thickness(22, 3, 0, 0);
-            lines.Children.Add(line);
-        }
 
         var hover = new Border { CornerRadius = new CornerRadius(10), Background = Tokens.Brush("HoverLayer"), Opacity = 0 };
         var face = new Grid();
@@ -901,12 +997,60 @@ sealed class TerminalPanel : UserControl
             ContextMenu = RowMenu(row.Id, () => Rename(row, top, name)),
         };
         KeepLit(back, hover, "row:" + row.Id);
+        _drag.Watch(back, row.Id, folder, () => RowLines(row, now, whole: true).Lines);
         back.MouseLeftButtonUp += (_, _) =>
         {
+            // The click that lets a dragged row go opens nothing.
+            if (_drag.Swallows)
+            {
+                return;
+            }
+
             _listPopup.IsOpen = false;
             RowPicked?.Invoke(row.Id);
         };
         return back;
+    }
+
+    /// What a row says: the kind, the name and the state on top, the time or the deed under them.
+    /// whole: for the card that is dragged, with the name in full instead of cut to the list.
+    private static (StackPanel Lines, DockPanel Top, TextBlock Name) RowLines(SessionRow row, DateTimeOffset now, bool whole)
+    {
+        var top = new DockPanel();
+        var mark = Mark(row.State);
+        DockPanel.SetDock(mark, Dock.Right);
+        top.Children.Add(mark);
+
+        // What runs in the session (the mockup of D-362): the mark of Claude Code or "$".
+        UIElement kind = row.Kind == SessionKind.Shell
+            ? Mono("$", "Muted")
+            : Marks.Line("M6,1 L6,11 M1,6 L11,6 M2.5,2.5 L9.5,9.5 M9.5,2.5 L2.5,9.5");
+        var kindBox = new Border { Width = 14, Margin = new Thickness(0, 0, 8, 0), Child = kind };
+        ((FrameworkElement)kind).HorizontalAlignment = HorizontalAlignment.Center;
+        DockPanel.SetDock(kindBox, Dock.Left);
+        top.Children.Add(kindBox);
+        var name = Text(row.Name, "TextName", "Ink", FontWeights.Normal);
+        name.TextTrimming = TextTrimming.CharacterEllipsis;
+        if (whole)
+        {
+            name.Margin = new Thickness(0, 0, 12, 0);
+        }
+
+        top.Children.Add(name);
+
+        var lines = new StackPanel();
+        lines.Children.Add(top);
+        var second = SecondLine(row, now);
+        if (second.Length > 0)
+        {
+            var line = Text(second, "TextSmall", "Muted", FontWeights.Normal);
+            line.TextTrimming = TextTrimming.CharacterEllipsis;
+            // Under the name, past the mark of the kind.
+            line.Margin = new Thickness(22, 3, 0, 0);
+            lines.Children.Add(line);
+        }
+
+        return (lines, top, name);
     }
 
     private ContextMenu RowMenu(string id, Action rename)
@@ -1034,6 +1178,10 @@ sealed class TerminalPanel : UserControl
 
     internal bool RenamingForCheck => _renaming is not null;
 
+    /// The pills end before the gear: for --try-rename, which also looks at the title bar.
+    internal bool PillsClearOfButtonsForCheck =>
+        _pills.Root.TranslatePoint(new Point(_pills.Root.ActualWidth, 0), _bar).X <= _right.TranslatePoint(new Point(0, 0), _bar).X + 0.5;
+
     /// For --try-rename: the first row of the list, and how lit its hover is now.
     internal FrameworkElement? FirstRowForCheck => _rows.Children.OfType<Border>().FirstOrDefault();
 
@@ -1103,6 +1251,7 @@ sealed class TerminalPanel : UserControl
         palette.Width = Math.Max(240, Math.Min(PaletteView.CardWidth, ActualWidth - 32));
         _palettePopup.HorizontalOffset = Math.Max(0, (ActualWidth - palette.Width) / 2 - palette.Margin.Left);
         _palettePopup.VerticalOffset = BarHeight + 8;
+        PopupZoom.Fit(_palettePopup);
         _palettePopup.IsOpen = true;
         Motion.PopIn(palette, above: false);
         palette.FocusField();
@@ -1366,7 +1515,7 @@ sealed class TerminalPanel : UserControl
     /// One button for the whole window: the filled one is the main action, the outlined one the
     /// second, the ghost one the quiet third (DESIGN, one fill per control).
     /// aside stands at the right end of the button, such as the key of its action.
-    internal static Button Flat(string text, Action click, bool ghost, bool main = false, bool danger = false, bool plus = false, UIElement? aside = null)
+    internal static Button Flat(string text, Action click, bool ghost, bool main = false, bool danger = false, bool plus = false, UIElement? aside = null, string? mark = null)
     {
         var row = new DockPanel();
         var ink = main ? "Background" : danger ? "Destructive" : ghost ? "Muted" : "Ink";
@@ -1376,9 +1525,9 @@ sealed class TerminalPanel : UserControl
             row.Children.Add(aside);
         }
 
-        if (plus)
+        if (plus || mark is not null)
         {
-            var sign = Marks.Line("M5,0 L5,10 M0,5 L10,5", ink);
+            var sign = Marks.Line(mark ?? "M5,0 L5,10 M0,5 L10,5", ink);
             sign.Margin = new Thickness(0, 0, 8, 0);
             DockPanel.SetDock(sign, Dock.Left);
             row.Children.Add(sign);

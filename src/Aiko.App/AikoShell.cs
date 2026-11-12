@@ -10,7 +10,7 @@ namespace Aiko.App;
 /// numbers and the user swaps between the two places at will, so one class decides who is told
 /// what and when.
 ///
-/// The parts do the work: TrayIcon and TrayMenu, IslandHost, CardHost, ShellNumbers for what the
+/// The parts do the work: TrayIcon and TrayMenu, IslandHost, ShellNumbers for what the
 /// numbers are, StartupChores for what is put right at every start. This class only connects them.
 /// The Windows version below is what TrayIcon needs; the reason is written there.
 [SupportedOSPlatform("windows10.0.17763")]
@@ -21,11 +21,10 @@ sealed class AikoShell : IDisposable
     private readonly ShellNumbers _numbers;
     private readonly TrayIcon _tray;
     private readonly IslandHost _island;
-    private readonly CardHost _cards;
 
     /// The face for two seconds after an event (D-211). Drawn by the icon and the island later.
     private TrayMoodPlayer? _mood;
-    private SettingsWindow? _settings;
+    private FirstRunHost? _firstRun;
     private TerminalHost? _terminal;
 
     private DirectPoller? _direct;
@@ -49,12 +48,14 @@ sealed class AikoShell : IDisposable
         _tray.Clicked += OnIconClicked;
         _tray.MenuRequested += OnMenuRequested;
         _island = new IslandHost(application.Dispatcher);
-        _cards = new CardHost(application.Dispatcher, _numbers, _tray, _island);
-        _cards.SettingsRequested += () => OpenSettings();
-        _cards.TerminalRequested += OpenTerminal;
-        _tray.MouseMoved += _cards.StartHover;
-        _island.CardRequested += _cards.Open;
-        _island.SessionRequested += id => _terminal?.OpenSession(id);
+        // The terminal window is the main window; the tray and the island are how it waits while it
+        // is closed (D-372). A click on either opens it, a click on "waits" opens that session.
+        _island.Clicked += OpenTerminal;
+        _island.SessionRequested += id =>
+        {
+            OpenTerminal();
+            _terminal?.OpenSession(id);
+        };
     }
 
     /// With changingNothing the start skips everything that writes or asks the network: the repair
@@ -83,6 +84,7 @@ sealed class AikoShell : IDisposable
         {
             var updates = new UpdateWatch(_application.Dispatcher);
             updates.Found += _tray.Update;
+            updates.Found += () => _terminal?.ShowUpdate(updates.NewerVersion is not null);
             _updates = updates;
         }
 
@@ -145,8 +147,7 @@ sealed class AikoShell : IDisposable
         var app = SettingsStore.Load();
         if (WizardChecklist.OpensMeetAikoOnStart(app, SettingsStore.LoadEnvironments()))
         {
-            OpenSettings(page: SettingsPanel.ChecklistPageKey);
-            _settings?.OpenChecklist(ChecklistItem.MeetAiko);
+            OpenedTerminal()?.OpenChecklist(ChecklistItem.MeetAiko);
             SettingsStore.Change(settings => settings with { MeetAikoShown = true });
         }
 
@@ -154,8 +155,7 @@ sealed class AikoShell : IDisposable
         // would leave them sending nothing and never learning the question existed.
         else if (WizardChecklist.OpensPrivacyOnStart(app, SettingsStore.LoadEnvironments()))
         {
-            OpenSettings(page: SettingsPanel.ChecklistPageKey);
-            _settings?.OpenChecklist(ChecklistItem.Privacy);
+            OpenedTerminal()?.OpenChecklist(ChecklistItem.Privacy);
         }
 
         // Once, for someone who turned Aiko on before she had a memory. The page says what the
@@ -176,30 +176,43 @@ sealed class AikoShell : IDisposable
         ApplyPlace();
     }
 
-    public void OpenCardForCheck(bool pinned) => _cards.Open(pinned);
+    /// A left click on the tray icon, as a person makes it.
+    public void ClickIconForCheck() => OnIconClicked();
 
-    public CardWindow? CardForCheck => _cards.Window;
+    /// A click on the island, away from the mark of "waits".
+    public void ClickIslandForCheck() => _island.ClickForCheck();
+
+    /// The terminal window is open.
+    public bool TerminalShownForCheck => _terminal is not null;
+
+    public void CloseTerminalForCheck() => _terminal?.Close();
 
     public IslandWindow? IslandForCheck => _island.Window;
 
-    public SettingsWindow? SettingsForCheck => _settings;
+    /// The settings are open: in the terminal window, or in a window of their own before the first
+    /// environment.
+    public bool SettingsShownForCheck => _terminal is { SettingsOpen: true } || _firstRun is { IsVisible: true };
+
+    /// The first run, which stands in the terminal window before the first environment.
+    public bool FirstRunForCheck => _firstRun is not null;
+
+    /// The settings go back to the session, and the terminal window closes: while it is open the
+    /// island stays away (D-310), and the next steps of the check need it.
+    public void CloseSettingsForCheck()
+    {
+        _firstRun?.Close();
+        _terminal?.CloseSettings();
+        _terminal?.Close();
+    }
 
     public Rect? IconRectForCheck => _tray.Rect;
 
     public bool FaceOnIconForCheck => _tray.HasFace;
 
-    /// Whether the pointer is over the icon, the island or the card: the places an open card stays for.
-    public bool MouseAtHomeForCheck => _cards.PointerAtHome;
-
-    public int BlocksOnCardForCheck => _cards.Model().Blocks.Count;
-
     /// One face, without waiting for a session to do anything.
     public void ShowFaceForCheck(AikoFace? face) => OnFaceChanged(face);
 
     public void OpenSettingsForCheck() => OpenSettings();
-
-    /// The wait before the card, as a mouse over the icon starts it.
-    public void StartHoverForCheck() => _cards.StartHover();
 
     /// The menu as a right click opens it. The call returns when the menu closes.
     public void OpenMenuForCheck() => OnMenuRequested(IntPtr.Zero);
@@ -212,7 +225,7 @@ sealed class AikoShell : IDisposable
     /// the island stay. The sessions of the terminal live on without its window (D-351).
     public void CloseWindows()
     {
-        _settings?.Close();
+        _firstRun?.Close();
         _terminal?.Close();
     }
 
@@ -224,8 +237,7 @@ sealed class AikoShell : IDisposable
         _direct?.Dispose();
         _updates?.Dispose();
 
-        _cards.Dispose();
-        _settings?.Close();
+        _firstRun?.Close();
         _terminal?.Close();
         _island.Close();
 
@@ -269,7 +281,6 @@ sealed class AikoShell : IDisposable
             var cards = _numbers.Cards();
             RedrawIcons();
             _island.Update(cards);
-            _cards.Refresh();
             _terminal?.LimitsChanged();
         });
 
@@ -308,19 +319,12 @@ sealed class AikoShell : IDisposable
         }
     }
 
-    /// A left click on a tray icon opens the thing. Swapping the ring instead left the click with
-    /// no visible answer beyond two colours trading places, which reads as a glitch, and hid the
-    /// card behind a gesture nobody is told about.
-    private void OnIconClicked()
-    {
-        _cards.CancelHover();
-        _cards.Open(pinned: true);
-    }
+    /// A left click on the tray icon opens the terminal window or brings it forward (D-372). The
+    /// limits are in the tooltip of the icon and in the header of the window.
+    private void OnIconClicked() => OpenTerminal();
 
     private void OnMenuRequested(IntPtr anchor)
     {
-        _cards.CancelHover();
-
         switch (TrayMenu.Show(_tray.Window, anchor, ShellNumbers.OtherEnvironment()))
         {
             case TrayCommand.SwapRing:
@@ -331,21 +335,11 @@ sealed class AikoShell : IDisposable
                 }
 
                 break;
-            case TrayCommand.Terminal:
+            case TrayCommand.Open:
                 OpenTerminal();
                 break;
             case TrayCommand.Settings:
                 OpenSettings();
-                break;
-            case TrayCommand.Refresh:
-                RedrawIcons();
-                _island.Update(_numbers.Cards());
-                _cards.Refresh();
-                break;
-            case TrayCommand.Updates:
-                // The menu had this item from the start and nothing was listening for it: the item
-                // was drawn, clicked and ignored.
-                OpenSettings(checkUpdates: true);
                 break;
             case TrayCommand.Exit:
                 Quit();
@@ -372,7 +366,6 @@ sealed class AikoShell : IDisposable
         _numbers.NoteWhereWeHaveNoAccess();
         FollowMoods();
         RedrawIcons();
-        _cards.Refresh();
     }
 
     private void FollowMoods()
@@ -398,85 +391,101 @@ sealed class AikoShell : IDisposable
         _application.Shutdown();
     }
 
-    /// One terminal window, as with the settings. Closing it hides it while a program runs in it
-    /// (D-351); the sessions come back from terminal.json the next time Aiko starts.
-    private void OpenTerminal()
+    /// One terminal window. Closing it hides it while a program runs in it (D-351); the sessions
+    /// come back from terminal.json the next time Aiko starts. Null while there is no environment
+    /// yet: then the first run checklist opens instead.
+    private void OpenTerminal() => OpenedTerminal();
+
+    private TerminalHost? OpenedTerminal()
     {
         if (_terminal is not null)
         {
             _terminal.Activate();
-            return;
+            return _terminal;
         }
 
         // A terminal has tabs of environments; with none yet, the first run checklist makes one.
         var environments = SettingsStore.LoadEnvironments();
         if (environments.Environments.Count == 0)
         {
-            OpenSettings(page: SettingsPanel.ChecklistPageKey);
-            return;
+            OpenFirstRun();
+            return null;
         }
 
-        // The open header shows the plan of each environment, as the card does.
+        // The open header shows the plan of each environment, as the card does. A check opens the
+        // window on no sessions, so no program starts and terminal.json stays as it is.
         _numbers.ReadAccounts();
-        var terminal = new TerminalHost(environments, SettingsStore.LoadTerminal(), _numbers.SnapshotFor, _cards.Model, _numbers.IconRows);
+        var sessions = _changingNothing ? TerminalSessions.Empty : SettingsStore.LoadTerminal();
+        var terminal = new TerminalHost(environments, sessions, _numbers.SnapshotFor, () => _numbers.CardFor(_numbers.Cards(), DateTimeOffset.Now), _numbers.IconRows, keepsNothing: _changingNothing);
         terminal.Closed += () =>
         {
             _terminal = null;
             ShowSessions(SessionCounts.None);
+            // "Start over" took every environment away: the window closed, and the first run comes.
+            if (!SettingsStore.LoadEnvironments().HasEnvironments)
+            {
+                OpenFirstRun();
+            }
         };
-        terminal.SettingsAsked += () => OpenSettings();
         terminal.OnTaskbarChanged += _island.FollowTerminal;
-        terminal.VoiceSettingsAsked += () => OpenSettings(page: SettingsPanel.TerminalPageKey);
         terminal.WaitingStarted += PlayWaiting;
         terminal.SessionsChanged += ShowSessions;
+        // Changes apply at once (D-179): the tray or the island, direct mode and our access follow
+        // each one while the settings are still open.
+        terminal.SettingsChanged += FollowSettings;
+        terminal.SettingsClosed += FollowSettings;
+        terminal.QuitAsked += Quit;
+        terminal.ShowUpdate(_updates?.NewerVersion is not null);
         _terminal = terminal;
         terminal.Show();
 
         Log.Write("terminal opened");
+        return terminal;
     }
 
-    /// One settings window at a time: asking twice brings the open one forward instead of
-    /// stacking a second copy on top of it.
-    private void OpenSettings(bool checkUpdates = false, string? page = null)
+    /// The settings open in the terminal window, on the place of the list and the terminal
+    /// (D-374). Asked again, the open settings move to the page asked for.
+    private void OpenSettings(string? page = null)
     {
-        if (_settings is not null)
+        if (OpenedTerminal() is not { } terminal)
         {
-            _settings.Activate();
-            if (checkUpdates)
-            {
-                _settings.CheckUpdatesNow();
-            }
             return;
         }
 
-        var window = new SettingsWindow(page);
-        window.QuitRequested += Quit;
+        terminal.OpenSettings(page);
+        Log.Write("settings opened");
+    }
 
-        // Changes apply at once (D-179): the tray or the island, direct mode and our access follow
-        // each one while the window is still open.
-        window.SettingsChanged += FollowSettings;
-        window.Closed += (_, _) =>
+    /// Before the first environment there is no terminal yet: the first run opens in the terminal
+    /// window with the checklist alone (D-394), and Finish hands the window to the terminal.
+    private void OpenFirstRun()
+    {
+        if (_firstRun is not null)
         {
-            var again = window.ReopenPage;
-            _settings = null;
-            FollowSettings();
-
-            if (again is not null)
-            {
-                OpenSettings(page: again);
-            }
-            else if (!_changingNothing)
-            {
-                ShowTerminalOnce();
-            }
-        };
-        _settings = window;
-        window.Show();
-        if (checkUpdates)
-        {
-            window.CheckUpdatesNow();
+            _firstRun.Activate();
+            return;
         }
 
-        Log.Write("settings opened");
+        var firstRun = new FirstRunHost();
+        firstRun.QuitAsked += Quit;
+        firstRun.SettingsChanged += FollowSettings;
+        firstRun.Finished += () =>
+        {
+            firstRun.Close();
+            FollowSettings();
+            if (!_changingNothing && !ShowTerminalOnce())
+            {
+                OpenTerminal();
+            }
+        };
+        firstRun.Closed += () =>
+        {
+            _firstRun = null;
+            FollowSettings();
+        };
+        _firstRun = firstRun;
+        firstRun.Show();
+
+        Log.Write("first run opened");
     }
 }

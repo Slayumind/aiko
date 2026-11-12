@@ -1,12 +1,13 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using Aiko.Core;
 using Aiko.Core.Terminal;
 
 namespace Aiko.App;
 
-/// The settings of the terminal: the to-do list of the agent (D-344), voice input, who recognises it, the model and the key (D-313, D-315).
+/// The settings of the terminal: the zoom, the notices, voice input, who recognises it, the model and the key (D-313, D-315, D-396).
 public partial class TerminalPage : UserControl
 {
     private static readonly long TotalMegabytes = VoiceModel.Megabytes(VoiceModel.Bytes);
@@ -23,6 +24,7 @@ public partial class TerminalPage : UserControl
     public TerminalPage()
     {
         InitializeComponent();
+        BuildNotices();
         Fill();
         Track.SizeChanged += (_, _) => ShowModel();
 
@@ -53,44 +55,62 @@ public partial class TerminalPage : UserControl
         SpeechRussian.IsChecked = _settings.VoiceLanguage == AikoLanguage.Russian;
         SpeechEnglish.IsChecked = _settings.VoiceLanguage == AikoLanguage.English;
         FillZoom();
-        NotifyWaiting.IsChecked = _settings.NotifyWaiting;
-        NotifyDone.IsChecked = _settings.NotifyDone;
-        NotifyStopped.IsChecked = _settings.NotifyStopped;
-        NotifyLimit.IsChecked = _settings.NotifyLimit;
-        NotifySound.IsChecked = _settings.NotifySound;
+        _sound.IsChecked = _settings.NotifySound;
         _filling = false;
 
         ShowModel();
         ShowKey();
     }
 
-    private void OnNotifyChanged(object sender, RoutedEventArgs e) =>
-        Save(settings => settings with
-        {
-            NotifyWaiting = NotifyWaiting.IsChecked == true,
-            NotifyDone = NotifyDone.IsChecked == true,
-            NotifyStopped = NotifyStopped.IsChecked == true,
-            NotifyLimit = NotifyLimit.IsChecked == true,
-            NotifySound = NotifySound.IsChecked == true,
-        });
+    // ---- the notices ----
 
-    /// One dot per step of WindowZoom, in the order of the steps.
+    private readonly ToggleButton _sound = new();
+
+    /// The one switch of the notices: the sound of a question, with its mark (D-396, D-409).
+    private void BuildNotices() => SoundRow.Children.Add(NoticeRow(Marks.Fit(Marks.Sound()), Strings.NotifySound, _sound));
+
+    private Border NoticeRow(FrameworkElement mark, string text, ToggleButton toggle)
+    {
+        toggle.Style = (Style)FindResource("Switch");
+        toggle.VerticalAlignment = VerticalAlignment.Center;
+        toggle.Checked += OnNotifyChanged;
+        toggle.Unchecked += OnNotifyChanged;
+
+        mark.Margin = new Thickness(0, 0, 10, 0);
+        var words = new TextBlock { Text = text, Style = (Style)FindResource("RowName"), TextWrapping = TextWrapping.Wrap, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 12, 0) };
+        var grid = new Grid { Margin = new Thickness(12, 10, 12, 10) };
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        Grid.SetColumn(words, 1);
+        Grid.SetColumn(toggle, 2);
+        grid.Children.Add(mark);
+        grid.Children.Add(words);
+        grid.Children.Add(toggle);
+        return new Border { Child = grid };
+    }
+
+    private void OnNotifyChanged(object sender, RoutedEventArgs e)
+    {
+        Save(settings => settings with { NotifySound = _sound.IsChecked == true });
+    }
+
+    /// One segment per step of WindowZoom, in the order of the steps.
     private void FillZoom()
     {
         ZoomSteps.Children.Clear();
         var chosen = WindowZoom.Read(_settings.WindowZoom);
         foreach (var step in WindowZoom.Steps)
         {
-            var dot = new RadioButton
+            var segment = new RadioButton
             {
-                Style = (Style)FindResource("Dot"),
+                Style = (Style)FindResource("Segment"),
                 GroupName = "WindowZoom",
                 Content = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.ZoomStep, step),
                 IsChecked = step == chosen,
-                Margin = new Thickness(ZoomSteps.Children.Count == 0 ? 0 : 20, 0, 0, 0),
             };
-            dot.Checked += (_, _) => Save(settings => settings with { WindowZoom = step });
-            ZoomSteps.Children.Add(dot);
+            segment.Checked += (_, _) => Save(settings => settings with { WindowZoom = step });
+            ZoomSteps.Children.Add(segment);
         }
     }
 

@@ -17,12 +17,6 @@
       <!-- Her own words in the sample, a little apart from the work in the middle. -->
       <SolidColorBrush x:Key="VoiceInk" Color="#FFCFE9DF" />
 
-      <Style x:Key="Rows" TargetType="Border">
-        <Setter Property="CornerRadius" Value="10" />
-        <Setter Property="BorderBrush" Value="{StaticResource Hairline}" />
-        <Setter Property="BorderThickness" Value="1" />
-      </Style>
-
       <Style x:Key="ChatText" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource Sans}" />
         <Setter Property="FontSize" Value="{StaticResource TextNumber}" />

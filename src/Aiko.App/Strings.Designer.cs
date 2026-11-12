@@ -90,14 +90,17 @@ public static class Strings
     /// Show {0} in the ring
     public static string MenuShowInRing => Get("MenuShowInRing");
 
-    /// Open terminal
-    public static string MenuTerminal => Get("MenuTerminal");
+    /// Open
+    public static string MenuOpen => Get("MenuOpen");
 
     /// Refresh limits
     public static string MenuRefresh => Get("MenuRefresh");
 
     /// Settings
     public static string Settings => Get("Settings");
+
+    /// Close settings · Esc
+    public static string SettingsCloseTip => Get("SettingsCloseTip");
 
     /// Close
     public static string Close => Get("Close");
@@ -116,6 +119,9 @@ public static class Strings
 
     /// WHERE TO SHOW
     public static string SectionWhereToShow => Get("SectionWhereToShow");
+
+    /// WHEN THE WINDOW IS CLOSED
+    public static string SectionWhenClosed => Get("SectionWhenClosed");
 
     /// STARTUP AND UPDATES
     public static string SectionStartupAndUpdates => Get("SectionStartupAndUpdates");
@@ -263,6 +269,12 @@ public static class Strings
 
     /// Finish
     public static string Finish => Get("Finish");
+
+    /// Back
+    public static string StepBack => Get("StepBack");
+
+    /// Next
+    public static string StepNext => Get("StepNext");
 
     /// Claude Code sends its limits to a status line. Aiko adds one line to the settings file of...
     public static string WizardAccessExplain => Get("WizardAccessExplain");
@@ -596,6 +608,12 @@ public static class Strings
 
     /// And every other folder: this is the default environment.
     public static string RestToo => Get("RestToo");
+
+    /// Every other folder opens here
+    public static string DefaultForRest => Get("DefaultForRest");
+
+    /// Moved here from {0}
+    public static string FolderMovedFrom => Get("FolderMovedFrom");
 
     /// Change in project folders
     public static string EditInFolders => Get("EditInFolders");
@@ -1275,12 +1293,6 @@ public static class Strings
     /// Keep open
     public static string TerminalKeepOpen => Get("TerminalKeepOpen");
 
-    /// 5-hour limit
-    public static string TerminalLimitFiveHour => Get("TerminalLimitFiveHour");
-
-    /// Weekly limit
-    public static string TerminalLimitWeek => Get("TerminalLimitWeek");
-
     /// Minimize
     public static string TerminalMinimize => Get("TerminalMinimize");
 
@@ -1313,9 +1325,6 @@ public static class Strings
 
     /// Close
     public static string TerminalCloseWindow => Get("TerminalCloseWindow");
-
-    /// Sessions
-    public static string TerminalSessions => Get("TerminalSessions");
 
     /// Voice input · Ctrl+Shift+Space
     public static string VoiceButtonTip => Get("VoiceButtonTip");
@@ -1365,22 +1374,10 @@ public static class Strings
     /// Notifications
     public static string NotifyLabel => Get("NotifyLabel");
 
-    /// When the terminal window is not in front, a line comes up next to Aiko for 6 seconds. A c...
+    /// The tray icon, the taskbar button and the island show how many agents wait, have finished...
     public static string NotifyWhat => Get("NotifyWhat");
 
-    /// A session waits for an answer
-    public static string NotifyWaiting => Get("NotifyWaiting");
-
-    /// A session is done
-    public static string NotifyDone => Get("NotifyDone");
-
-    /// A session stopped by itself
-    public static string NotifyStopped => Get("NotifyStopped");
-
-    /// A limit went over 90%
-    public static string NotifyLimit => Get("NotifyLimit");
-
-    /// A sound when a session waits
+    /// A sound when the agent has a question
     public static string NotifySound => Get("NotifySound");
 
     /// Window zoom
@@ -1466,4 +1463,10 @@ public static class Strings
 
     /// OpenAI did not take the recording. Check the key and the connection.
     public static string VoiceCloudFailed => Get("VoiceCloudFailed");
+
+    /// The OpenAI account is out of money.
+    public static string VoiceCloudNoMoney => Get("VoiceCloudNoMoney");
+
+    /// OpenAI asks to wait a minute.
+    public static string VoiceCloudBusy => Get("VoiceCloudBusy");
 }

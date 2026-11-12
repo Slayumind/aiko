@@ -115,6 +115,10 @@ sealed class TerminalSurface : Grid
 
     public void FocusTerminal() => _control.Focus();
 
+    /// Back on screen after the settings: a hidden control does not count its rows again when the
+    /// window changes size, so the pseudo console is told the size it has now.
+    public void Refit() => ResizeNow();
+
     /// Follows Zoom. The window grows the panel with one scale; the surface takes the opposite scale,
     /// so the control lays out at its true size on the screen and counts as many columns as fit.
     /// Without it, at 130 % the control counted columns for a width 1.3 times smaller and Claude

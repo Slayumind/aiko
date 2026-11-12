@@ -54,9 +54,6 @@ sealed class TrayIcon : IDisposable
     /// A left click on the icon.
     public event Action? Clicked;
 
-    /// The mouse is over the icon. It arrives many times a second.
-    public event Action? MouseMoved;
-
     /// A right click, with the point Windows sent for the menu.
     public event Action<IntPtr>? MenuRequested;
 
@@ -180,19 +177,6 @@ sealed class TrayIcon : IDisposable
         }
     }
 
-    public bool CursorOver
-    {
-        get
-        {
-            if (Rect is not { } rect || !PInvoke.GetCursorPos(out var point))
-            {
-                return false;
-            }
-
-            return rect.Contains(point.X, point.Y);
-        }
-    }
-
     /// A message for the hidden window, from a check. A key sent this way reaches the open menu
     /// of the icon and never another program.
     public void PostForCheck(uint message, nuint wParam) => PInvoke.PostMessage(Window, message, wParam, 0);
@@ -310,9 +294,6 @@ sealed class TrayIcon : IDisposable
         {
             case NinSelect:
                 Clicked?.Invoke();
-                break;
-            case PInvoke.WM_MOUSEMOVE:
-                MouseMoved?.Invoke();
                 break;
             case PInvoke.WM_CONTEXTMENU:
                 MenuRequested?.Invoke(anchor);

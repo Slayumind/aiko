@@ -1,4 +1,5 @@
 using System.IO;
+using System.Net.Http;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
@@ -56,13 +57,14 @@ sealed class CloudRecognizer : IAsyncDisposable
         }
     }
 
-    /// Null when no key is stored or the socket did not open. key is for checks only; the app
-    /// always reads the stored one.
+    /// Null when no key is stored or the socket did not open; refused hears the HTTP status when
+    /// OpenAI answered the handshake with an error. key is for checks only; the app always reads
+    /// the stored one.
     ///
     /// No language is named. With a language and a hint, gpt-4o-transcribe translated an English
     /// sentence into Russian, or answered with the hint itself (2026-10-15); without a language it
     /// keeps each sentence in the language it was said.
-    public static async Task<CloudRecognizer?> Open(string hint, CancellationToken cancel, string? key = null)
+    public static async Task<CloudRecognizer?> Open(string hint, CancellationToken cancel, string? key = null, Action<int>? refused = null)
     {
         if ((key ?? VoiceKey.Load()) is not { } bearer)
         {
@@ -73,6 +75,12 @@ sealed class CloudRecognizer : IAsyncDisposable
         try
         {
             socket = await AikoHttp.Socket(Address, bearer, cancel).ConfigureAwait(false);
+        }
+        catch (HttpRequestException exception) when (exception.StatusCode is { } status)
+        {
+            Log.Write($"voice input: OpenAI refused the connection: {(int)status}");
+            refused?.Invoke((int)status);
+            return null;
         }
         catch (Exception exception) when (exception is WebSocketException or InvalidOperationException or OperationCanceledException)
         {

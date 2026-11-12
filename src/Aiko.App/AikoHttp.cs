@@ -42,6 +42,7 @@ static class AikoHttp
     public static async Task<ClientWebSocket> Socket(Uri address, string bearer, CancellationToken cancel)
     {
         var socket = new ClientWebSocket();
+        socket.Options.CollectHttpResponseDetails = true;
         socket.Options.SetRequestHeader("Authorization", "Bearer " + bearer);
         socket.Options.SetRequestHeader("User-Agent", $"Aiko/{UpdateClient.CurrentVersion()}");
         using var invoker = new HttpMessageInvoker(new OnlyAllowedHosts(new SocketsHttpHandler { AllowAutoRedirect = false }));
@@ -49,6 +50,13 @@ static class AikoHttp
         {
             await socket.ConnectAsync(address, invoker, cancel).ConfigureAwait(false);
             return socket;
+        }
+        catch (WebSocketException refused) when (socket.HttpStatusCode != 0)
+        {
+            // The server answered the handshake with an error, say 429: its status says why.
+            var status = socket.HttpStatusCode;
+            socket.Dispose();
+            throw new HttpRequestException($"the socket was refused with {(int)status}", refused, status);
         }
         catch
         {

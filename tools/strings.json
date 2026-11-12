@@ -161,10 +161,10 @@
     ]
   ],
   [
-    "MenuTerminal",
+    "MenuOpen",
     [
-      "Open terminal",
-      "Открыть терминал"
+      "Open",
+      "Открыть"
     ]
   ],
   [
@@ -179,6 +179,13 @@
     [
       "Settings",
       "Настройки"
+    ]
+  ],
+  [
+    "SettingsCloseTip",
+    [
+      "Close settings · Esc",
+      "Закрыть настройки · Esc"
     ]
   ],
   [
@@ -221,6 +228,13 @@
     [
       "WHERE TO SHOW",
       "ГДЕ ПОКАЗЫВАТЬ"
+    ]
+  ],
+  [
+    "SectionWhenClosed",
+    [
+      "WHEN THE WINDOW IS CLOSED",
+      "КОГДА ОКНО ЗАКРЫТО"
     ]
   ],
   [
@@ -564,6 +578,20 @@
     [
       "Finish",
       "Готово"
+    ]
+  ],
+  [
+    "StepBack",
+    [
+      "Back",
+      "Назад"
+    ]
+  ],
+  [
+    "StepNext",
+    [
+      "Next",
+      "Дальше"
     ]
   ],
   [
@@ -1341,6 +1369,20 @@
     [
       "And every other folder: this is the default environment.",
       "И все остальные папки: это среда по умолчанию."
+    ]
+  ],
+  [
+    "DefaultForRest",
+    [
+      "Every other folder opens here",
+      "Все остальные папки — сюда"
+    ]
+  ],
+  [
+    "FolderMovedFrom",
+    [
+      "Moved here from {0}",
+      "Перенесена сюда из {0}"
     ]
   ],
   [
@@ -2926,20 +2968,6 @@
     ]
   ],
   [
-    "TerminalLimitFiveHour",
-    [
-      "5-hour limit",
-      "Лимит на 5 часов"
-    ]
-  ],
-  [
-    "TerminalLimitWeek",
-    [
-      "Weekly limit",
-      "Лимит на неделю"
-    ]
-  ],
-  [
     "TerminalMinimize",
     [
       "Minimize",
@@ -3014,13 +3042,6 @@
     [
       "Close",
       "Закрыть"
-    ]
-  ],
-  [
-    "TerminalSessions",
-    [
-      "Sessions",
-      "Сессии"
     ]
   ],
   [
@@ -3138,43 +3159,15 @@
   [
     "NotifyWhat",
     [
-      "When the terminal window is not in front, a line comes up next to Aiko for 6 seconds. A click on it opens the session.",
-      "Когда окно терминала не впереди, рядом с Aiko на 6 секунд появляется строка. Щелчок по ней открывает сессию."
-    ]
-  ],
-  [
-    "NotifyWaiting",
-    [
-      "A session waits for an answer",
-      "Сессия ждёт ответа"
-    ]
-  ],
-  [
-    "NotifyDone",
-    [
-      "A session is done",
-      "Сессия закончила"
-    ]
-  ],
-  [
-    "NotifyStopped",
-    [
-      "A session stopped by itself",
-      "Сессия остановилась сама"
-    ]
-  ],
-  [
-    "NotifyLimit",
-    [
-      "A limit went over 90%",
-      "Лимит перешёл за 90 %"
+      "The tray icon, the taskbar button and the island show how many agents wait, have finished or stopped. A number goes when you open that session.",
+      "Значок в трее, кнопка в панели задач и остров показывают, сколько агентов ждут, закончили или остановились. Число уходит, когда ты открываешь эту сессию."
     ]
   ],
   [
     "NotifySound",
     [
-      "A sound when a session waits",
-      "Звук, когда сессия ждёт"
+      "A sound when the agent has a question",
+      "Звук, когда у агента вопрос"
     ]
   ],
   [
@@ -3371,6 +3364,20 @@
     [
       "OpenAI did not take the recording. Check the key and the connection.",
       "OpenAI не принял запись. Проверь ключ и соединение."
+    ]
+  ],
+  [
+    "VoiceCloudNoMoney",
+    [
+      "The OpenAI account is out of money.",
+      "На счёте OpenAI кончились деньги."
+    ]
+  ],
+  [
+    "VoiceCloudBusy",
+    [
+      "OpenAI asks to wait a minute.",
+      "OpenAI просит подождать минуту."
     ]
   ]
 ]

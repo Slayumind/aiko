@@ -100,14 +100,17 @@
   <data name="MenuShowInRing" xml:space="preserve">
     <value>Show {0} in the ring</value>
   </data>
-  <data name="MenuTerminal" xml:space="preserve">
-    <value>Open terminal</value>
+  <data name="MenuOpen" xml:space="preserve">
+    <value>Open</value>
   </data>
   <data name="MenuRefresh" xml:space="preserve">
     <value>Refresh limits</value>
   </data>
   <data name="Settings" xml:space="preserve">
     <value>Settings</value>
+  </data>
+  <data name="SettingsCloseTip" xml:space="preserve">
+    <value>Close settings · Esc</value>
   </data>
   <data name="Close" xml:space="preserve">
     <value>Close</value>
@@ -126,6 +129,9 @@
   </data>
   <data name="SectionWhereToShow" xml:space="preserve">
     <value>WHERE TO SHOW</value>
+  </data>
+  <data name="SectionWhenClosed" xml:space="preserve">
+    <value>WHEN THE WINDOW IS CLOSED</value>
   </data>
   <data name="SectionStartupAndUpdates" xml:space="preserve">
     <value>STARTUP AND UPDATES</value>
@@ -273,6 +279,12 @@
   </data>
   <data name="Finish" xml:space="preserve">
     <value>Finish</value>
+  </data>
+  <data name="StepBack" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="StepNext" xml:space="preserve">
+    <value>Next</value>
   </data>
   <data name="WizardAccessExplain" xml:space="preserve">
     <value>Claude Code sends its limits to a status line. Aiko adds one line to the settings file of each environment. If you already have a status line, Aiko runs it and shows what it prints.</value>
@@ -606,6 +618,12 @@
   </data>
   <data name="RestToo" xml:space="preserve">
     <value>And every other folder: this is the default environment.</value>
+  </data>
+  <data name="DefaultForRest" xml:space="preserve">
+    <value>Every other folder opens here</value>
+  </data>
+  <data name="FolderMovedFrom" xml:space="preserve">
+    <value>Moved here from {0}</value>
   </data>
   <data name="EditInFolders" xml:space="preserve">
     <value>Change in project folders</value>
@@ -1285,12 +1303,6 @@
   <data name="TerminalKeepOpen" xml:space="preserve">
     <value>Keep open</value>
   </data>
-  <data name="TerminalLimitFiveHour" xml:space="preserve">
-    <value>5-hour limit</value>
-  </data>
-  <data name="TerminalLimitWeek" xml:space="preserve">
-    <value>Weekly limit</value>
-  </data>
   <data name="TerminalMinimize" xml:space="preserve">
     <value>Minimize</value>
   </data>
@@ -1323,9 +1335,6 @@
   </data>
   <data name="TerminalCloseWindow" xml:space="preserve">
     <value>Close</value>
-  </data>
-  <data name="TerminalSessions" xml:space="preserve">
-    <value>Sessions</value>
   </data>
   <data name="VoiceButtonTip" xml:space="preserve">
     <value>Voice input · Ctrl+Shift+Space</value>
@@ -1376,22 +1385,10 @@
     <value>Notifications</value>
   </data>
   <data name="NotifyWhat" xml:space="preserve">
-    <value>When the terminal window is not in front, a line comes up next to Aiko for 6 seconds. A click on it opens the session.</value>
-  </data>
-  <data name="NotifyWaiting" xml:space="preserve">
-    <value>A session waits for an answer</value>
-  </data>
-  <data name="NotifyDone" xml:space="preserve">
-    <value>A session is done</value>
-  </data>
-  <data name="NotifyStopped" xml:space="preserve">
-    <value>A session stopped by itself</value>
-  </data>
-  <data name="NotifyLimit" xml:space="preserve">
-    <value>A limit went over 90%</value>
+    <value>The tray icon, the taskbar button and the island show how many agents wait, have finished or stopped. A number goes when you open that session.</value>
   </data>
   <data name="NotifySound" xml:space="preserve">
-    <value>A sound when a session waits</value>
+    <value>A sound when the agent has a question</value>
   </data>
   <data name="ZoomLabel" xml:space="preserve">
     <value>Window zoom</value>
@@ -1476,5 +1473,11 @@
   </data>
   <data name="VoiceCloudFailed" xml:space="preserve">
     <value>OpenAI did not take the recording. Check the key and the connection.</value>
+  </data>
+  <data name="VoiceCloudNoMoney" xml:space="preserve">
+    <value>The OpenAI account is out of money.</value>
+  </data>
+  <data name="VoiceCloudBusy" xml:space="preserve">
+    <value>OpenAI asks to wait a minute.</value>
   </data>
 </root>

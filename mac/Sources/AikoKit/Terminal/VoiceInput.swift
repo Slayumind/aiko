@@ -29,8 +29,14 @@ public enum VoiceNotice: String, Sendable, Equatable {
     case needsModel = "NeedsModel"
     case needsKey = "NeedsKey"
 
-    /// OpenAI did not take the recording: a wrong key, no money on it, no connection (D-317).
+    /// OpenAI did not take the recording: a wrong key, no connection, any other refusal (D-317).
     case cloudFailed = "CloudFailed"
+
+    /// OpenAI refused because the account of the key has no money left (D-405).
+    case cloudNoMoney = "CloudNoMoney"
+
+    /// OpenAI asked to slow down: too many requests in a short time (D-405).
+    case cloudBusy = "CloudBusy"
 }
 
 /// What happened: a press of Ctrl+Space or the button, Esc, or news from the mic and the engine.
@@ -41,6 +47,8 @@ public enum VoiceCue: String, Sendable, Equatable {
     case finished = "Finished"
     case noMicrophone = "NoMicrophone"
     case cloudFailed = "CloudFailed"
+    case cloudNoMoney = "CloudNoMoney"
+    case cloudBusy = "CloudBusy"
 }
 
 /// Whether the chosen engine can work: the model is on disk, or the key is stored.
@@ -129,8 +137,33 @@ public enum VoiceInput {
             return VoiceState(state.phase, .noMicrophone)
         case (.warming, .cloudFailed), (.listening, .cloudFailed), (.finishing, .cloudFailed):
             return VoiceState(.idle, .cloudFailed)
+        case (.warming, .cloudNoMoney), (.listening, .cloudNoMoney), (.finishing, .cloudNoMoney):
+            return VoiceState(.idle, .cloudNoMoney)
+        case (.warming, .cloudBusy), (.listening, .cloudBusy), (.finishing, .cloudBusy):
+            return VoiceState(.idle, .cloudBusy)
         default:
             return state
+        }
+    }
+
+    /// Why OpenAI refused, from the code of its error event or the HTTP status of a refused
+    /// connection (D-405). 429 on connecting comes without a code: for one person dictating, an
+    /// empty account is far more likely than the limit of requests, so it reads as no money.
+    public static func cloudCue(code: String?, status: Int?) -> VoiceCue {
+        switch (code, status) {
+        case ("insufficient_quota", _): return .cloudNoMoney
+        case ("rate_limit_exceeded", _): return .cloudBusy
+        case (nil, 429): return .cloudNoMoney
+        default: return .cloudFailed
+        }
+    }
+
+    /// Whether the end of a recording keeps the words recognised so far. A refusal of OpenAI in the
+    /// middle keeps the phrases it already sent back; only Esc and a lost mic drop them (D-405).
+    public static func keepsText(_ cue: VoiceCue) -> Bool {
+        switch cue {
+        case .finished, .cloudFailed, .cloudNoMoney, .cloudBusy: return true
+        default: return false
         }
     }
 

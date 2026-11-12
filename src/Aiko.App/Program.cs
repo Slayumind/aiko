@@ -80,20 +80,6 @@ static class Program
             return;
         }
 
-        // The same for the card: draw it on test numbers and stop.
-        if (args is ["--snapshot", var cardPath, ..])
-        {
-            CardSnapshot.Write(cardPath);
-            return;
-        }
-
-        // Not test numbers but the real ones, to see what Aiko shows on this machine right now.
-        if (args is ["--snapshot-live", var livePath, ..])
-        {
-            CardSnapshot.WriteLive(livePath);
-            return;
-        }
-
         // Adds the status line to one folder and says in the log what happened. For the question
         // "why can Aiko not write to my settings file", and for trying the change on a copy.
         if (args is ["--try-access", var folder, ..])
@@ -453,21 +439,24 @@ static class Program
 
         if (args is ["--snapshot-wizard", var wizardPath, ..])
         {
-            // The item to open, by name or number: --snapshot-wizard out.png Commands
+            // The first run as the terminal window shows it, one step at a time, at the item asked
+            // for by name: --snapshot-wizard out.png Commands
             ChecklistItem? item = args.Length > 2 && Enum.TryParse<ChecklistItem>(args[2], true, out var asked) ? asked : null;
-            var checklist = new SettingsPanel(SettingsPanel.ChecklistPageKey);
+            var checklist = new SettingsPanel(SettingsPanel.ChecklistPageKey, firstRun: true);
             if (item is { } open)
             {
                 checklist.OpenChecklist(open);
             }
 
-            Snapshot.Write(checklist, wizardPath);
+            var window = new TerminalPanel { Width = 1040, Height = 640 };
+            window.ShowSettings(checklist);
+            Snapshot.Write(window, wizardPath);
             return;
         }
 
         if (args is ["--snapshot-settings", var settingsPath, ..])
         {
-            // The page to draw: --snapshot-settings out.png general | folders | personality | terminal |
+            // The page to draw: --snapshot-settings out.png general | personality | terminal | privacy |
             // terminal-openai | env1 | env2 [tall]
             // "tall" draws the whole page, not only the part that fits the window.
             var page = args.Length > 2 ? args[2] : null;
@@ -483,10 +472,13 @@ static class Program
                 "env2" => new SettingsPanel().EnvironmentPage(1),
                 _ => page,
             });
-            if (args is [.., "tall"])
+            // The place the settings have in a terminal window of 1040 by 640.
+            panel.Width = 1040;
+            if (args is not [.., "tall"])
             {
-                panel.GrowToPage();
+                panel.Height = 640 - 44;
             }
+
             Snapshot.Write(panel, settingsPath);
             return;
         }
