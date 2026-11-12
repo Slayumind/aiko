@@ -58,6 +58,12 @@ sealed class TerminalEditor : UserControl, IDictationField
     private readonly ChoicePopup _choices;
 
     private EditorSession? _session;
+
+    /// A command Claude Code proposed for the words in a command line (D-358), and the words it
+    /// answers; null while there is none. The timer waits for a pause in the typing and stops.
+    private string? _suggestion;
+    private string? _suggestFor;
+    private readonly System.Windows.Threading.DispatcherTimer _suggestPause = new() { Interval = TimeSpan.FromMilliseconds(700) };
     private Draft _draft = new();
 
     // A session of Claude Code: the editor opened with Ctrl+G, or a recording that shows its words in
@@ -96,6 +102,7 @@ sealed class TerminalEditor : UserControl, IDictationField
         _text.PreviewKeyDown += OnKey;
         _text.PreviewTextInput += OnTextInput;
         _text.TextChanged += (_, _) => TextChanged();
+        _suggestPause.Tick += (_, _) => AskForSuggestion();
         _text.SelectionChanged += (_, _) => Offer();
         _text.LostKeyboardFocus += (_, _) => _choices!.Close();
         _text.GotKeyboardFocus += (_, _) => _top.Background = Tokens.Brush("InputLine");
@@ -222,6 +229,23 @@ sealed class TerminalEditor : UserControl, IDictationField
     /// A message: the writes in their order (EditorSend).
     public event Action<IReadOnlyList<string>>? Sent;
 
+    /// Words in a command line that ask for a command, after a pause in the typing.
+    public event Action<string>? SuggestionAsked;
+
+    /// The command Claude Code proposed for these words; null when it gave none. It shows only while
+    /// the words in the field are still the same.
+    public void ShowSuggestion(string words, string? command)
+    {
+        if (_text.Text != words)
+        {
+            return;
+        }
+
+        _suggestFor = null;
+        _suggestion = command;
+        ShowHint();
+    }
+
     public event Action? VoicePressed;
     public event Action? VoiceCancelled;
     public event Action? VoiceSettingsAsked;
@@ -338,6 +362,15 @@ sealed class TerminalEditor : UserControl, IDictationField
         var control = modifiers.HasFlag(ModifierKeys.Control);
         var shift = modifiers.HasFlag(ModifierKeys.Shift);
         var alt = modifiers.HasFlag(ModifierKeys.Alt);
+
+        // Tab takes the proposed command into the field; it never runs by itself (D-363).
+        if (key == Key.Tab && !control && !shift && !alt && _suggestion is { } proposed)
+        {
+            _suggestion = null;
+            _text.Text = proposed;
+            _text.CaretIndex = proposed.Length;
+            return true;
+        }
 
         if (_choices.IsOpen && OnChoiceKey(key))
         {
@@ -528,8 +561,35 @@ sealed class TerminalEditor : UserControl, IDictationField
 
         _placeholder.Visibility = _text.Text.Length == 0 && !_dictating ? Visibility.Visible : Visibility.Collapsed;
         _offersPaths = false;
+        WaitForSuggestion();
         ShowHint();
         Offer();
+    }
+
+    /// New words in a command line drop the old proposal; words that ask for a command wait for a
+    /// pause in the typing before the question goes out.
+    private void WaitForSuggestion()
+    {
+        _suggestion = null;
+        _suggestFor = null;
+        _suggestPause.Stop();
+        if (_session?.Kind == SessionKind.Shell && ShellAsk.IsRequest(_text.Text))
+        {
+            _suggestPause.Start();
+        }
+    }
+
+    private void AskForSuggestion()
+    {
+        _suggestPause.Stop();
+        if (_session?.Kind != SessionKind.Shell || !ShellAsk.IsRequest(_text.Text))
+        {
+            return;
+        }
+
+        _suggestFor = _text.Text;
+        ShowHint();
+        SuggestionAsked?.Invoke(_text.Text);
     }
 
     /// "@" in a session of Claude Code offers the files of its folder (FileMention).
@@ -641,7 +701,9 @@ sealed class TerminalEditor : UserControl, IDictationField
     {
         var state = State();
         var shell = state.Kind == SessionKind.Shell;
-        var words = state.Composing ? Strings.TerminalEditorHintCompose
+        var words = shell && _suggestion is { } proposed ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.ShellSuggestion, proposed.Replace("**", "* *"))
+            : shell && _suggestFor == _text.Text && _suggestFor is not null ? Strings.ShellSuggesting
+            : state.Composing ? Strings.TerminalEditorHintCompose
             : state.Passing && state.Empty ? Strings.TerminalEditorHintPassing
             : state.Empty ? (shell ? Strings.TerminalEditorHintShellEmpty : Strings.TerminalEditorHintEmpty)
             : shell ? Strings.TerminalEditorHintShellText

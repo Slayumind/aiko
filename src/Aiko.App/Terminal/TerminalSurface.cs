@@ -48,6 +48,7 @@ sealed class TerminalSurface : Grid
     /// on the thread of the output and read on the window's thread, each time under the gate.
     private readonly ShellScreen? _shell;
     private readonly ShellBlocksView? _blocks;
+    private readonly ShellFindBar? _find;
     private readonly object _shellGate = new();
     private int _refreshQueued;
 
@@ -97,6 +98,9 @@ sealed class TerminalSurface : Grid
             // Hidden, not collapsed: the control keeps its size, so the pseudo console keeps its rows.
             _control.Visibility = Visibility.Hidden;
             Children.Add(_blocks);
+            _find = new ShellFindBar(_blocks);
+            _find.Closed += () => FindClosed?.Invoke();
+            Children.Add(_find);
         }
 
         UseZoom();
@@ -137,7 +141,26 @@ sealed class TerminalSurface : Grid
 
     public bool Drawn => _drawn;
 
-    internal ShellBlocksView? BlocksForCheck => _blocks;
+    /// The blocks of a command line, null for Claude Code.
+    internal ShellBlocksView? Blocks => _blocks;
+
+    internal ShellFindBar? FindForCheck => _find;
+
+    /// The search in the output closed: the editor takes the keys again.
+    public event Action? FindClosed;
+
+    /// Ctrl+Shift+F: the search in the output of a command line. False for Claude Code, whose
+    /// screen is its own.
+    public bool OpenFind()
+    {
+        if (_find is null || _shell is null || _blocks!.Visibility != Visibility.Visible)
+        {
+            return false;
+        }
+
+        _find.Open();
+        return true;
+    }
 
     internal bool TerminalVisibleForCheck => _control.Visibility == Visibility.Visible;
 
@@ -171,7 +194,7 @@ sealed class TerminalSurface : Grid
         // The columns change with the font, so the pseudo console hears the new size.
         _points = points;
         _control.SetTheme(Theme, Font, _points, Color.FromRgb(0x17, 0x17, 0x17));
-        _blocks?.UseFont(points);
+        _blocks?.UseFont(points, scale);
         Dispatcher.BeginInvoke(SyncSize, DispatcherPriority.Background);
     }
 

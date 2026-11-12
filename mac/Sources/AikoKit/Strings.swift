@@ -462,6 +462,18 @@ public enum Strings {
         "ShellRunning": ("running", "идёт"),
         "ShellExitCode": ("code {0}", "код {0}"),
         "ShellSeconds": ("{0} s", "{0} с"),
+        "ShellCopy": ("Copy", "Копировать"),
+        "ShellCopied": ("Copied", "Скопировано"),
+        "ShellFold": ("Fold", "Свернуть"),
+        "ShellUnfold": ("Unfold", "Развернуть"),
+        "ShellExplain": ("Explain", "Объяснить"),
+        "ShellExplaining": ("Asking Claude Code…", "Спрашиваю Claude Code…"),
+        "ShellExplainFailed": ("Claude Code did not answer. Press Explain again in a minute.", "Claude Code не ответил. Нажми «Объяснить» ещё раз через минуту."),
+        "ShellSuggestion": ("{0}   **Tab** take", "{0}   **Tab** взять"),
+        "ShellSuggesting": ("Looking for a command…", "Ищу команду…"),
+        "ShellFind": ("Find in the output", "Найти в выводе"),
+        "ShellFindCount": ("{0} of {1}", "{0} из {1}"),
+        "ShellFindNone": ("Nothing found", "Не нашлось"),
         "TerminalTabWaitingOne": ("{0} waiting", "{0} ждёт"),
         "TerminalTabWaitingMany": ("{0} waiting", "{0} ждут"),
         "TerminalYesterday": ("Yesterday, {0}", "Вчера, {0}"),
@@ -1799,6 +1811,42 @@ public enum Strings {
 
     /// {0} s
     public static var shellSeconds: String { Strings.get("ShellSeconds") }
+
+    /// Copy
+    public static var shellCopy: String { Strings.get("ShellCopy") }
+
+    /// Copied
+    public static var shellCopied: String { Strings.get("ShellCopied") }
+
+    /// Fold
+    public static var shellFold: String { Strings.get("ShellFold") }
+
+    /// Unfold
+    public static var shellUnfold: String { Strings.get("ShellUnfold") }
+
+    /// Explain
+    public static var shellExplain: String { Strings.get("ShellExplain") }
+
+    /// Asking Claude Code…
+    public static var shellExplaining: String { Strings.get("ShellExplaining") }
+
+    /// Claude Code did not answer. Press Explain again in a minute.
+    public static var shellExplainFailed: String { Strings.get("ShellExplainFailed") }
+
+    /// {0}   **Tab** take
+    public static var shellSuggestion: String { Strings.get("ShellSuggestion") }
+
+    /// Looking for a command…
+    public static var shellSuggesting: String { Strings.get("ShellSuggesting") }
+
+    /// Find in the output
+    public static var shellFind: String { Strings.get("ShellFind") }
+
+    /// {0} of {1}
+    public static var shellFindCount: String { Strings.get("ShellFindCount") }
+
+    /// Nothing found
+    public static var shellFindNone: String { Strings.get("ShellFindNone") }
 
     /// {0} waiting
     public static var terminalTabWaitingOne: String { Strings.get("TerminalTabWaitingOne") }

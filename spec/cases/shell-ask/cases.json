@@ -1,0 +1,35 @@
+{
+  "comment": "What a command line asks Claude Code and how it reads the answer (D-358, D-360). A line in the editor asks for a command when it has Russian letters or starts with '#'. The command in an answer is its first line that is not a code fence, without backticks or a prompt in front. An explanation is broken into lines of a width in characters; a word longer than the width is cut. A Ctrl+click finds an http(s) address or a file with an optional line under the column, without the punctuation after it. Windows only until the terminal comes to the Mac.",
+  "requests": [
+    { "text": "процессы на порту 3000", "request": true },
+    { "text": "# find files over 100 MB", "request": true },
+    { "text": "git status", "request": false },
+    { "text": "ls -la", "request": false },
+    { "text": "echo привет", "request": true },
+    { "text": "  ", "request": false },
+    { "text": "ab", "request": false }
+  ],
+  "commands": [
+    { "answer": "Get-NetTCPConnection -LocalPort 3000", "command": "Get-NetTCPConnection -LocalPort 3000" },
+    { "answer": "```powershell\nGet-NetTCPConnection -LocalPort 3000\n```", "command": "Get-NetTCPConnection -LocalPort 3000" },
+    { "answer": "`netstat -ano | findstr :3000`", "command": "netstat -ano | findstr :3000" },
+    { "answer": "$ find . -size +100M", "command": "find . -size +100M" },
+    { "answer": "\n\n  du -sh *  \nThis shows sizes.", "command": "du -sh *" },
+    { "answer": "```\n```", "command": null }
+  ],
+  "wraps": [
+    { "text": "one two three four", "width": 10, "lines": ["one two", "three four"] },
+    { "text": "first line\nsecond", "width": 20, "lines": ["first line", "second"] },
+    { "text": "abcdefghijklmnopqrstuvwxyz", "width": 10, "lines": ["abcdefghij", "klmnopqrst", "uvwxyz"] }
+  ],
+  "links": [
+    { "line": "see https://example.com/page.", "column": 6, "link": "https://example.com/page" },
+    { "line": "error in src/Form.cs:42: missing", "column": 12, "link": "src/Form.cs:42" },
+    { "line": "at C:\\work\\a.txt now", "column": 5, "link": "C:\\work\\a.txt" },
+    { "line": "(see notes.md)", "column": 6, "link": "notes.md" },
+    { "line": "plain words here", "column": 2, "link": null },
+    { "line": "version 0.4.1", "column": 10, "link": null },
+    { "line": "a b", "column": 1, "link": null },
+    { "line": "short", "column": 40, "link": null }
+  ]
+}

@@ -1287,6 +1287,42 @@ public static class Strings
     /// {0} s
     public static string ShellSeconds => Get("ShellSeconds");
 
+    /// Copy
+    public static string ShellCopy => Get("ShellCopy");
+
+    /// Copied
+    public static string ShellCopied => Get("ShellCopied");
+
+    /// Fold
+    public static string ShellFold => Get("ShellFold");
+
+    /// Unfold
+    public static string ShellUnfold => Get("ShellUnfold");
+
+    /// Explain
+    public static string ShellExplain => Get("ShellExplain");
+
+    /// Asking Claude Code…
+    public static string ShellExplaining => Get("ShellExplaining");
+
+    /// Claude Code did not answer. Press Explain again in a minute.
+    public static string ShellExplainFailed => Get("ShellExplainFailed");
+
+    /// {0}   **Tab** take
+    public static string ShellSuggestion => Get("ShellSuggestion");
+
+    /// Looking for a command…
+    public static string ShellSuggesting => Get("ShellSuggesting");
+
+    /// Find in the output
+    public static string ShellFind => Get("ShellFind");
+
+    /// {0} of {1}
+    public static string ShellFindCount => Get("ShellFindCount");
+
+    /// Nothing found
+    public static string ShellFindNone => Get("ShellFindNone");
+
     /// {0} waiting
     public static string TerminalTabWaitingOne => Get("TerminalTabWaitingOne");
 

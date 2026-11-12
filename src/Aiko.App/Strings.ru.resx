@@ -1297,6 +1297,42 @@
   <data name="ShellSeconds" xml:space="preserve">
     <value>{0} с</value>
   </data>
+  <data name="ShellCopy" xml:space="preserve">
+    <value>Копировать</value>
+  </data>
+  <data name="ShellCopied" xml:space="preserve">
+    <value>Скопировано</value>
+  </data>
+  <data name="ShellFold" xml:space="preserve">
+    <value>Свернуть</value>
+  </data>
+  <data name="ShellUnfold" xml:space="preserve">
+    <value>Развернуть</value>
+  </data>
+  <data name="ShellExplain" xml:space="preserve">
+    <value>Объяснить</value>
+  </data>
+  <data name="ShellExplaining" xml:space="preserve">
+    <value>Спрашиваю Claude Code…</value>
+  </data>
+  <data name="ShellExplainFailed" xml:space="preserve">
+    <value>Claude Code не ответил. Нажми «Объяснить» ещё раз через минуту.</value>
+  </data>
+  <data name="ShellSuggestion" xml:space="preserve">
+    <value>{0}   **Tab** взять</value>
+  </data>
+  <data name="ShellSuggesting" xml:space="preserve">
+    <value>Ищу команду…</value>
+  </data>
+  <data name="ShellFind" xml:space="preserve">
+    <value>Найти в выводе</value>
+  </data>
+  <data name="ShellFindCount" xml:space="preserve">
+    <value>{0} из {1}</value>
+  </data>
+  <data name="ShellFindNone" xml:space="preserve">
+    <value>Не нашлось</value>
+  </data>
   <data name="TerminalTabWaitingOne" xml:space="preserve">
     <value>{0} ждёт</value>
   </data>

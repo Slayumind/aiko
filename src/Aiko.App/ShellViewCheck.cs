@@ -64,15 +64,51 @@ static class ShellViewCheck
             terminal.Type("seq 1 10000\r");
             await Task.Delay(4000);
 
-            var view = terminal.BlocksForCheck!;
+            var view = terminal.Blocks!;
             Check("the blocks are shown and the terminal is hidden", view.IsVisible && !terminal.TerminalVisibleForCheck);
             Check("three blocks: git status, ls and seq", view.BlockCountForCheck == 3, $"{view.BlockCountForCheck}");
+
+            // The buttons of the failed ls: Copy puts its output on the clipboard, Fold hides it.
+            // The person's clipboard is kept and put back after.
+            IDataObject? kept = null;
+            var copied = "";
+            try
+            {
+                kept = Clipboard.GetDataObject();
+                view.HoverForCheck(1);
+                view.PressForCheck(1, Strings.ShellCopy);
+                copied = Clipboard.GetText();
+                if (kept is not null)
+                {
+                    Clipboard.SetDataObject(kept, copy: true);
+                }
+            }
+            catch (System.Runtime.InteropServices.COMException)
+            {
+            }
+
+            Check("Copy puts the output of the block on the clipboard", copied.Contains("nothing-here", StringComparison.Ordinal), copied);
+            var before = view.RowsForCheck;
+            view.PressForCheck(2, Strings.ShellFold);
+            Check("Fold hides the output of the block", view.RowsForCheck < before - 10, $"{before} → {view.RowsForCheck}");
+            view.PressForCheck(2, Strings.ShellFold);
+            Check("Fold again shows it", view.RowsForCheck == before, $"{view.RowsForCheck}");
+
+            // The search finds a number of seq and opens its folded output to show it.
+            terminal.FindForCheck!.SearchForCheck("5000");
+            await Task.Delay(200);
+            Check("the search finds 5000 in the output of seq", view.MatchesForCheck == 1, terminal.FindForCheck.CountForCheck);
+            terminal.FindForCheck.SearchForCheck("");
 
             if (picturePath is not null)
             {
                 view.ScrollForCheck(-1e9);
-                view.ScrollForCheck(view.RowsForCheck * 20);
+                view.HoverForCheck(1);
+                terminal.FindForCheck.SearchForCheck("nothing");
+                await Task.Delay(200);
+                view.ScrollForCheck(-1e9);
                 Save(window, picturePath);
+                terminal.FindForCheck.SearchForCheck("");
             }
 
             view.UnfoldForCheck();

@@ -1297,6 +1297,42 @@
   <data name="ShellSeconds" xml:space="preserve">
     <value>{0} s</value>
   </data>
+  <data name="ShellCopy" xml:space="preserve">
+    <value>Copy</value>
+  </data>
+  <data name="ShellCopied" xml:space="preserve">
+    <value>Copied</value>
+  </data>
+  <data name="ShellFold" xml:space="preserve">
+    <value>Fold</value>
+  </data>
+  <data name="ShellUnfold" xml:space="preserve">
+    <value>Unfold</value>
+  </data>
+  <data name="ShellExplain" xml:space="preserve">
+    <value>Explain</value>
+  </data>
+  <data name="ShellExplaining" xml:space="preserve">
+    <value>Asking Claude Code…</value>
+  </data>
+  <data name="ShellExplainFailed" xml:space="preserve">
+    <value>Claude Code did not answer. Press Explain again in a minute.</value>
+  </data>
+  <data name="ShellSuggestion" xml:space="preserve">
+    <value>{0}   **Tab** take</value>
+  </data>
+  <data name="ShellSuggesting" xml:space="preserve">
+    <value>Looking for a command…</value>
+  </data>
+  <data name="ShellFind" xml:space="preserve">
+    <value>Find in the output</value>
+  </data>
+  <data name="ShellFindCount" xml:space="preserve">
+    <value>{0} of {1}</value>
+  </data>
+  <data name="ShellFindNone" xml:space="preserve">
+    <value>Nothing found</value>
+  </data>
   <data name="TerminalTabWaitingOne" xml:space="preserve">
     <value>{0} waiting</value>
   </data>

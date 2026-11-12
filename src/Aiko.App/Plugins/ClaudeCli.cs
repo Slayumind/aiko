@@ -13,38 +13,43 @@ sealed class ClaudeCli(string claudeExe) : IClaudeCli
 {
     private static readonly string Home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
+    /// The small fast model answers the questions of a command line (D-360): an explanation or a
+    /// command, in the limits of the environment.
+    private const string QuestionModel = "haiku";
+
+    /// One question with claude -p; the answer, or null when it failed or took longer than timeout.
+    public string? Ask(string configDirectory, string question, TimeSpan timeout)
+    {
+        var start = Start(configDirectory, ["-p", question, "--model", QuestionModel]);
+        try
+        {
+            using var process = Process.Start(start);
+            if (process is null)
+            {
+                return null;
+            }
+
+            process.StandardInput.Close();
+            var output = process.StandardOutput.ReadToEndAsync();
+            var errors = process.StandardError.ReadToEndAsync();
+            if (!process.WaitForExit(timeout))
+            {
+                process.Kill(entireProcessTree: true);
+                return null;
+            }
+
+            Task.WaitAll([output, errors], TimeSpan.FromSeconds(5));
+            return process.ExitCode == 0 && output.IsCompletedSuccessfully && output.Result.Trim().Length > 0 ? output.Result.Trim() : null;
+        }
+        catch (Exception e) when (e is System.ComponentModel.Win32Exception or InvalidOperationException or IOException)
+        {
+            return null;
+        }
+    }
+
     public CliResult Run(string configDirectory, IReadOnlyList<string> arguments, TimeSpan timeout)
     {
-        var start = new ProcessStartInfo(claudeExe)
-        {
-            UseShellExecute = false,
-            CreateNoWindow = true,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            RedirectStandardInput = true,
-            WorkingDirectory = Path.GetTempPath(),
-        };
-
-        foreach (var argument in arguments)
-        {
-            start.ArgumentList.Add(argument);
-        }
-
-        foreach (var name in start.Environment.Keys.ToList())
-        {
-            if (name is "CLAUDECODE" or "CLAUDE_CONFIG_DIR"
-                || name.StartsWith("CLAUDE_CODE_", StringComparison.OrdinalIgnoreCase)
-                || name.StartsWith("AIKO_", StringComparison.OrdinalIgnoreCase))
-            {
-                start.Environment.Remove(name);
-            }
-        }
-
-        // Environment 1 runs without the variable, like a plain claude and the VS Code panel (D-156).
-        if (!ClaudeConfigFolder.IsDefault(configDirectory, Home))
-        {
-            start.Environment["CLAUDE_CONFIG_DIR"] = configDirectory;
-        }
+        var start = Start(configDirectory, arguments);
 
         try
         {
@@ -73,5 +78,42 @@ sealed class ClaudeCli(string claudeExe) : IClaudeCli
         {
             return new CliResult(-1, TimedOut: false);
         }
+    }
+
+    private ProcessStartInfo Start(string configDirectory, IReadOnlyList<string> arguments)
+    {
+        var start = new ProcessStartInfo(claudeExe)
+        {
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            RedirectStandardInput = true,
+            StandardOutputEncoding = System.Text.Encoding.UTF8,
+            WorkingDirectory = Path.GetTempPath(),
+        };
+
+        foreach (var argument in arguments)
+        {
+            start.ArgumentList.Add(argument);
+        }
+
+        foreach (var name in start.Environment.Keys.ToList())
+        {
+            if (name is "CLAUDECODE" or "CLAUDE_CONFIG_DIR"
+                || name.StartsWith("CLAUDE_CODE_", StringComparison.OrdinalIgnoreCase)
+                || name.StartsWith("AIKO_", StringComparison.OrdinalIgnoreCase))
+            {
+                start.Environment.Remove(name);
+            }
+        }
+
+        // Environment 1 runs without the variable, like a plain claude and the VS Code panel (D-156).
+        if (!ClaudeConfigFolder.IsDefault(configDirectory, Home))
+        {
+            start.Environment["CLAUDE_CONFIG_DIR"] = configDirectory;
+        }
+
+        return start;
     }
 }
