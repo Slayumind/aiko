@@ -27,10 +27,11 @@ Find what the screen must match before you choose anything:
 - the neighbouring screens: a new screen uses their fonts, colours, radius, buttons and words. An
   embed keeps the look of the platform it lives in. Fun for children goes into the experience
   (motion and reactions), not into a separate visual style;
-- the user's taste when there is no system. Aiko's defaults: light and quiet, few borders and no
-  boxes inside boxes, icon buttons with a tooltip in dense panels, toggles and number fields over
-  sliders, floating panels with a close cross instead of modal dialogs, emoji only where they carry
-  meaning.
+- the user's taste when there is no system. For the user's own projects, Aiko's defaults: light
+  and quiet, few borders and no boxes inside boxes, icon buttons with a tooltip in dense panels,
+  toggles and number fields over sliders, floating panels with a close cross instead of modal
+  dialogs, emoji only where they carry meaning. A work or client product with its own brand and no
+  written system: ask for its look before you choose.
 
 An existing product gets an audit and fixes inside its own look. A new product gets a direction
 (section 3). Never redesign a screen that only needed fixes, and never invent a second style inside

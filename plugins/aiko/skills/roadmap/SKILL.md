@@ -72,7 +72,8 @@ do not fit your voice, headings included.
 
 Write each release with the same parts:
 
-1. **Name** in the style `Product: Title & Title`.
+1. **Name**: short, one style for every release of the roadmap, for example `Product: Title & Title`.
+   Keep the style the team already uses.
 2. **Why**: the real reason, in the owner's words. Ask when you do not know it; do not invent it.
 3. **What the release shows**: only for a discovery release.
 4. **What changes**: per role, one line each.
