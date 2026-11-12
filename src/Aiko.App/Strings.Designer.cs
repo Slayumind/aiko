@@ -1269,6 +1269,24 @@ public static class Strings
     /// stopped
     public static string TerminalStopped => Get("TerminalStopped");
 
+    /// … {0} more line
+    public static string ShellMoreOne => Get("ShellMoreOne");
+
+    /// … {0} more lines
+    public static string ShellMoreFew => Get("ShellMoreFew");
+
+    /// … {0} more lines
+    public static string ShellMoreMany => Get("ShellMoreMany");
+
+    /// running
+    public static string ShellRunning => Get("ShellRunning");
+
+    /// code {0}
+    public static string ShellExitCode => Get("ShellExitCode");
+
+    /// {0} s
+    public static string ShellSeconds => Get("ShellSeconds");
+
     /// {0} waiting
     public static string TerminalTabWaitingOne => Get("TerminalTabWaitingOne");
 

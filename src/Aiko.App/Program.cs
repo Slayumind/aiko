@@ -398,10 +398,17 @@ static class Program
             return;
         }
 
-        // Every shell with Aiko's marks in a real ConPTY: --try-shell-blocks out-folder (D-412)
-        if (args is ["--try-shell-blocks", var blocksFolder])
+        // The checkpoint of shell blocks in a window: --try-shell-view report.txt [picture.png] (D-412)
+        if (args is ["--try-shell-view", var viewReport, ..])
         {
-            Environment.Exit(ShellBlocksCheck.Run(blocksFolder));
+            Environment.Exit(ShellViewCheck.Run(viewReport, args.Length > 2 ? args[2] : null));
+            return;
+        }
+
+        // Every shell with Aiko's marks in a real ConPTY: --try-shell-blocks out-folder [test-project] (D-412)
+        if (args is ["--try-shell-blocks", var blocksFolder, ..])
+        {
+            Environment.Exit(ShellBlocksCheck.Run(blocksFolder, args.Length > 2 ? args[2] : null));
             return;
         }
 

@@ -2912,6 +2912,48 @@
     ]
   ],
   [
+    "ShellMoreOne",
+    [
+      "… {0} more line",
+      "… ещё {0} строка"
+    ]
+  ],
+  [
+    "ShellMoreFew",
+    [
+      "… {0} more lines",
+      "… ещё {0} строки"
+    ]
+  ],
+  [
+    "ShellMoreMany",
+    [
+      "… {0} more lines",
+      "… ещё {0} строк"
+    ]
+  ],
+  [
+    "ShellRunning",
+    [
+      "running",
+      "идёт"
+    ]
+  ],
+  [
+    "ShellExitCode",
+    [
+      "code {0}",
+      "код {0}"
+    ]
+  ],
+  [
+    "ShellSeconds",
+    [
+      "{0} s",
+      "{0} с"
+    ]
+  ],
+  [
     "TerminalTabWaitingOne",
     [
       "{0} waiting",

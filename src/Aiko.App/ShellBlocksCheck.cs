@@ -17,7 +17,8 @@ static class ShellBlocksCheck
     private const int Columns = 120;
     private const int Rows = 30;
 
-    public static int Run(string outFolder)
+    /// tests: a built test project for dotnet test, whose live progress jumps the cursor; null skips it.
+    public static int Run(string outFolder, string? tests = null)
     {
         Directory.CreateDirectory(outFolder);
         var work = Path.Combine(Path.GetTempPath(), "aiko-shell-blocks");
@@ -28,7 +29,7 @@ static class ShellBlocksCheck
         var ok = true;
         if (ShellLaunch.GitBash() is { } bash)
         {
-            ok &= Record(outFolder, work, ShellLaunch.Bash(bash),
+            List<(string, bool)> commands =
             [
                 ("git status", false),
                 ("ls nothing-here", false),
@@ -36,7 +37,13 @@ static class ShellBlocksCheck
                 ("seq 1 10000", false),
                 ("less note.txt", true),
                 ("npm init -y > /dev/null && npm install left-pad --no-audit --no-fund", false),
-            ]);
+            ];
+            if (tests is not null)
+            {
+                commands.Add(($"dotnet test \"{tests.Replace('\\', '/')}\" --no-build", false));
+            }
+
+            ok &= Record(outFolder, work, ShellLaunch.Bash(bash), [.. commands]);
         }
 
         foreach (var (program, name) in new[] { (ShellLaunch.FindOnPath("pwsh.exe"), "pwsh"), ((string?)"powershell.exe", "powershell") })

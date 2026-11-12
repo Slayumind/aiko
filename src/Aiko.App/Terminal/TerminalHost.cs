@@ -881,8 +881,16 @@ sealed class TerminalHost
             return null;
         }
 
-        var terminal = new TerminalSurface(launch);
+        var terminal = new TerminalSurface(launch, blocks: session.Kind == SessionKind.Shell);
         terminal.Exited += code => Ended(session.Id, code);
+        terminal.FullScreenChanged += on =>
+        {
+            // vim and less read the keys themselves; back in the blocks, the editor has them again.
+            if (!on && _model.Session(_sessions)?.Id == session.Id)
+            {
+                _panel.Editor.FocusText();
+            }
+        };
         terminal.DrawnFirst += () =>
         {
             // The loader gives way to the terminal; the keys stay with the editor.

@@ -456,6 +456,12 @@ public enum Strings {
         "TerminalDone": ("done", "готово"),
         "TerminalAsleep": ("asleep", "спит"),
         "TerminalStopped": ("stopped", "остановилась"),
+        "ShellMoreOne": ("… {0} more line", "… ещё {0} строка"),
+        "ShellMoreFew": ("… {0} more lines", "… ещё {0} строки"),
+        "ShellMoreMany": ("… {0} more lines", "… ещё {0} строк"),
+        "ShellRunning": ("running", "идёт"),
+        "ShellExitCode": ("code {0}", "код {0}"),
+        "ShellSeconds": ("{0} s", "{0} с"),
         "TerminalTabWaitingOne": ("{0} waiting", "{0} ждёт"),
         "TerminalTabWaitingMany": ("{0} waiting", "{0} ждут"),
         "TerminalYesterday": ("Yesterday, {0}", "Вчера, {0}"),
@@ -1775,6 +1781,24 @@ public enum Strings {
 
     /// stopped
     public static var terminalStopped: String { Strings.get("TerminalStopped") }
+
+    /// … {0} more line
+    public static var shellMoreOne: String { Strings.get("ShellMoreOne") }
+
+    /// … {0} more lines
+    public static var shellMoreFew: String { Strings.get("ShellMoreFew") }
+
+    /// … {0} more lines
+    public static var shellMoreMany: String { Strings.get("ShellMoreMany") }
+
+    /// running
+    public static var shellRunning: String { Strings.get("ShellRunning") }
+
+    /// code {0}
+    public static var shellExitCode: String { Strings.get("ShellExitCode") }
+
+    /// {0} s
+    public static var shellSeconds: String { Strings.get("ShellSeconds") }
 
     /// {0} waiting
     public static var terminalTabWaitingOne: String { Strings.get("TerminalTabWaitingOne") }

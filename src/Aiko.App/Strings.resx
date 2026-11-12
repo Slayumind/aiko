@@ -1279,6 +1279,24 @@
   <data name="TerminalStopped" xml:space="preserve">
     <value>stopped</value>
   </data>
+  <data name="ShellMoreOne" xml:space="preserve">
+    <value>… {0} more line</value>
+  </data>
+  <data name="ShellMoreFew" xml:space="preserve">
+    <value>… {0} more lines</value>
+  </data>
+  <data name="ShellMoreMany" xml:space="preserve">
+    <value>… {0} more lines</value>
+  </data>
+  <data name="ShellRunning" xml:space="preserve">
+    <value>running</value>
+  </data>
+  <data name="ShellExitCode" xml:space="preserve">
+    <value>code {0}</value>
+  </data>
+  <data name="ShellSeconds" xml:space="preserve">
+    <value>{0} s</value>
+  </data>
   <data name="TerminalTabWaitingOne" xml:space="preserve">
     <value>{0} waiting</value>
   </data>
