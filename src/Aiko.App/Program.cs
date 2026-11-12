@@ -398,6 +398,13 @@ static class Program
             return;
         }
 
+        // Every shell with Aiko's marks in a real ConPTY: --try-shell-blocks out-folder (D-412)
+        if (args is ["--try-shell-blocks", var blocksFolder])
+        {
+            Environment.Exit(ShellBlocksCheck.Run(blocksFolder));
+            return;
+        }
+
         // The terminal window on made up sessions: --snapshot-terminal out.png [palette | folders | loader]
         if (args is ["--snapshot-terminal", var terminalPath, ..])
         {

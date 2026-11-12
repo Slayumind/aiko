@@ -1274,31 +1274,7 @@ sealed class TerminalHost
 
     private readonly bool _keepsNothing;
 
-    /// The shell of a session and the name its row starts with.
-    private sealed record ShellProgram(string CommandLine, string Name);
-
-    /// Git Bash when it is there, as Claude Code itself prefers it (RESEARCH); otherwise PowerShell 7,
-    /// otherwise Windows PowerShell.
-    private static ShellProgram Shell()
-    {
-        var gitBash = System.Environment.GetEnvironmentVariable("CLAUDE_CODE_GIT_BASH_PATH") is { Length: > 0 } set && File.Exists(set)
-            ? set
-            : new[]
-            {
-                Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Git", "bin", "bash.exe"),
-                Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData), "Programs", "Git", "bin", "bash.exe"),
-            }.FirstOrDefault(File.Exists);
-
-        return gitBash is not null ? new ShellProgram($"\"{gitBash}\" --login -i", "bash")
-            : FindOnPath("pwsh.exe") is { } pwsh ? new ShellProgram($"\"{pwsh}\" -NoLogo", "pwsh")
-            : new ShellProgram("powershell.exe -NoLogo", "powershell");
-    }
-
-    private static string? FindOnPath(string file) =>
-        (System.Environment.GetEnvironmentVariable("PATH") ?? "")
-            .Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries)
-            .Select(folder => Path.Combine(folder.Trim(), file))
-            .FirstOrDefault(File.Exists);
+    private static ShellLaunch Shell() => ShellLaunch.Find();
 
     private static string CommandLine(string program, IReadOnlyList<string> arguments) =>
         string.Join(' ', [$"\"{program}\"", .. arguments.Select(argument => argument.Contains(' ') ? $"\"{argument}\"" : argument)]);
