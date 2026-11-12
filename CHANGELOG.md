@@ -42,6 +42,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   you back to the sessions; the project folders are on the page of their environment. The first
   run happens in the same window, one step at a time. The card of limits and the settings window are
   gone.
+- **The interface skill.** `/aiko:interface` builds and polishes a web interface so it looks made for
+  its product: a page, an app screen, a dashboard, a form or an embed. It starts from the product's
+  own look, finds the signs of AI-looking UI, fixes the screen in passes from spacing to motion and
+  checks every state at desktop and phone widths. Events get a visible answer where they happen, from
+  a tick on a saved field to glass reactions like in Mac video calls, and a small tool measures the
+  motion frame by frame.
 - **The roadmap skill.** Aiko builds and keeps a shared roadmap for several teams. She collects what
   each domain owner already has, cuts the work into domains with owners and borders, and writes every
   release as one short card: why, what changes for each role, pains, unblocks and acceptance criteria.

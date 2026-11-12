@@ -14,6 +14,7 @@ public partial class PersonalityPage : UserControl
     private static readonly Dictionary<string, string> SkillAbout = new()
     {
         ["copy"] = Strings.SkillAikoCopy,
+        ["interface"] = Strings.SkillAikoInterface,
         ["release-gate"] = Strings.SkillAikoReleaseGate,
         ["docs-hygiene"] = Strings.SkillAikoDocsHygiene,
         ["playtest"] = Strings.SkillAikoPlaytest,

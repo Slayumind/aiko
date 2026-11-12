@@ -1057,6 +1057,9 @@
   <data name="SkillDomainGames" xml:space="preserve">
     <value>РАЗРАБОТКА ИГР</value>
   </data>
+  <data name="SkillAikoInterface" xml:space="preserve">
+    <value>Любой веб-интерфейс, который выглядит сделанным дизайнером: свой вид продукта, аудит, все состояния, анимации и реакции.</value>
+  </data>
   <data name="SkillAikoCopy" xml:space="preserve">
     <value>Тексты, которые звучат как написанные человеком: интерфейс, README, заметки к релизу. На русском и английском.</value>
   </data>

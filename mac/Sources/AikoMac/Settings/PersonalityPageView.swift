@@ -20,6 +20,7 @@ struct PersonalityPageView: View {
     private static var about: [String: String] {
         [
         "copy": Strings.skillAikoCopy,
+        "interface": Strings.skillAikoInterface,
         "release-gate": Strings.skillAikoReleaseGate,
         "docs-hygiene": Strings.skillAikoDocsHygiene,
         "playtest": Strings.skillAikoPlaytest,

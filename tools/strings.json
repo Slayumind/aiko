@@ -2394,6 +2394,13 @@
     ]
   ],
   [
+    "SkillAikoInterface",
+    [
+      "Any web interface that looks designed, not generated: the product's own look, an audit, every state, motion and reactions.",
+      "Любой веб-интерфейс, который выглядит сделанным дизайнером: свой вид продукта, аудит, все состояния, анимации и реакции."
+    ]
+  ],
+  [
     "SkillAikoCopy",
     [
       "Texts that sound like a person wrote them: UI, README, release notes. Russian and English.",
