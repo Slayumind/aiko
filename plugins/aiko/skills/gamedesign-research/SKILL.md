@@ -25,6 +25,9 @@ Ask before you search. Keep it to one message:
   design docs and the code around the mechanic first, and say what you found. Without a project,
   the review is pure research and skips the "for your project" parts.
 - **Platforms and input** that matter (gamepad, touch, mouse).
+- **Features to compare.** 6-12 short features every game in the review gets: yes or no, a number,
+  or one word. Propose them from the mechanic and let the user change the list. See "Features" in
+  `references/research-brief.md`.
 - **Language of the page:** the user's language unless they say otherwise.
 
 ### 2. Find the games
@@ -66,9 +69,12 @@ Read `references/page-structure.md`. In short:
 
 1. **Starting point:** what the user's project already decided (skip without a project).
 2. **Taxonomy:** families of solutions with example games, then patterns that repeat everywhere.
+   Use the shared names for decision traps and economy patterns where they fit
+   (`references/research-brief.md`, "Shared names").
 3. **References in three tiers.** Tier 1: full cards with screenshots; tier 2: a paragraph each;
    tier 3: one table row each.
-4. **Comparison** of design choices across the strongest systems.
+4. **Comparison** of design choices across the strongest systems, and the features of every game
+   in one table.
 5. **Open questions** for the user's project, or for anyone designing this mechanic.
 
 Publish as an artifact with the images and scripts as separate files when the environment has
@@ -84,8 +90,8 @@ user to pick 2-4.
 A stand is a small working copy of one game's system: the user edits the rules and watches what
 happens, step by step. Read `references/stands.md` before writing any stand code.
 
-- **Rules come from sources.** Write the rules for each game as a spec with links first: what one
-  step computes, the vocabulary (conditions, actions, costs), and what happens when nothing fits.
+- **Rules come from sources.** Write the rules for each game as a rules sheet with links first
+  (`references/rules-sheet.md`): entities, rules in sentence order, resources, phases, the end.
   Mark what you had to guess.
 - **One shared sandbox** for all stands, so the difference between games is the rules, not the
   scene.
@@ -93,6 +99,8 @@ happens, step by step. Read `references/stands.md` before writing any stand code
 - **Deterministic**: no random numbers unless the game's system is about randomness; then use a
   seeded generator and show the seed.
 - **Every step explains itself**: which rule fired, which ones did not and why.
+- **Count what fired.** The stand counts how often each rule fired over a run. A rule that never
+  fires in any experiment is dead: say so in the hand-off.
 - Each stand gets a "try this" note with 2-3 experiments that show what makes the system special.
 
 Add the stands as new sections of the same artifact, then extend the comparison with what the
@@ -101,4 +109,6 @@ stands showed.
 ## Hand-off
 
 Say in plain words: how many games made it into each tier, what was dropped, which facts stay
-unverified, which images could not be found, and what you would test next.
+unverified, which images could not be found, which rules never fired in a stand, and what you would
+test next. To measure how a chosen system plays in the user's own game, hand over to
+`aiko:playtest`.
