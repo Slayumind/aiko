@@ -28,9 +28,6 @@ sealed class AikoShell : IDisposable
     private SettingsWindow? _settings;
     private TerminalHost? _terminal;
 
-    /// The notices of sessions and limits next to Aiko (D-377), and the limits they follow.
-    private NoticeStack? _notices;
-    private readonly LimitWatch _limits = new();
     private DirectPoller? _direct;
     private UpdateWatch? _updates;
 
@@ -269,81 +266,46 @@ sealed class AikoShell : IDisposable
         {
             var snapshots = EnvironmentSnapshots.Combine(SettingsStore.LoadEnvironments(), _watcher.ByFile);
             _mood?.OnLimits(snapshots);
-            NotifyLimits(snapshots);
             var cards = _numbers.Cards();
-            _tray.Update();
+            RedrawIcons();
             _island.Update(cards);
             _cards.Refresh();
             _terminal?.LimitsChanged();
         });
 
-    /// A notice next to Aiko, the sound of a waiting session, or both (D-377). A check changes
-    /// nothing on the screen of the person, so it shows none.
-    private void Notify(NoticeLine notice, NoticeWay way, Action open)
-    {
-        if (_changingNothing)
-        {
-            return;
-        }
-
-        if (way is NoticeWay.Window or NoticeWay.WindowWithSound)
-        {
-            _notices ??= new NoticeStack(NoticeAnchor);
-            _notices.Show(notice, open);
-        }
-
-        if (way is NoticeWay.Sound or NoticeWay.WindowWithSound)
-        {
-            NoticeSound.Play();
-        }
-    }
-
-    /// A window of a limit went over 90 percent (D-375): one notice per crossing.
-    private void NotifyLimits(IReadOnlyList<LimitSnapshot> snapshots)
-    {
-        var now = DateTimeOffset.Now;
-        var crossings = _limits.Next(snapshots, now);
-        if (crossings.Count == 0)
-        {
-            return;
-        }
-
-        var choice = NoticeChoice.From(SettingsStore.Load());
-        foreach (var crossing in crossings)
-        {
-            var percent = crossing.Percent.ToString(System.Globalization.CultureInfo.CurrentCulture);
-            var word = crossing.Kind switch
-            {
-                LimitKind.FiveHour => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.NoticeLimitFiveHour, percent),
-                LimitKind.SevenDay => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.NoticeLimitWeek, percent),
-                _ => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.NoticeLimitModel, percent,
-                    snapshots.FirstOrDefault(snapshot => snapshot.Environment == crossing.Environment)?.Model?.ModelName ?? ""),
-            };
-            var line = new NoticeLine(NoticeKind.Limit, crossing.Environment, word, crossing.Percent, LimitTone.Caution);
-            Notify(line, Notices.Route(NoticeKind.Limit, choice, inFront: false, open: false), OpenTerminal);
-        }
-    }
-
-    /// Where the notices stand: next to the tray icon, or next to the island. The icon is known in
-    /// real pixels and the island in units of WPF.
-    private Rect? NoticeAnchor()
-    {
-        if (_tray.Rect is { } icon)
-        {
-            var dpi = System.Windows.Media.VisualTreeHelper.GetDpi(_application.MainWindow ?? new Window());
-            return new Rect(icon.X / dpi.DpiScaleX, icon.Y / dpi.DpiScaleY, icon.Width / dpi.DpiScaleX, icon.Height / dpi.DpiScaleY);
-        }
-
-        return _island.Bounds;
-    }
-
-    /// A face comes or goes (D-211), on the tray icon or on the island, wherever Aiko lives.
+    /// A face comes or goes (D-211), on the tray icon or on the island, wherever Aiko lives, and on
+    /// the taskbar button of the open window (D-409).
     private void OnFaceChanged(AikoFace? face)
     {
         var style = SettingsStore.LoadPersona().Face;
 
         _island.ShowFace(face, style);
         _tray.ShowFace(face, style);
+        _terminal?.Button.ShowFace(face, style);
+    }
+
+    /// The tray icon and the taskbar button draw the same picture (D-409).
+    private void RedrawIcons()
+    {
+        _tray.Update();
+        _terminal?.Button.Update();
+    }
+
+    /// The counts of the sessions on the island and the tray (D-409).
+    private void ShowSessions(SessionCounts counts)
+    {
+        _island.ShowSessions(counts);
+        _tray.ShowBadge(counts.Badge);
+    }
+
+    /// The sound of a session that starts to wait. A check changes nothing for the person, so it
+    /// plays none.
+    private void PlayWaiting()
+    {
+        if (!_changingNothing)
+        {
+            NoticeSound.Play();
+        }
     }
 
     /// A left click on a tray icon opens the thing. Swapping the ring instead left the click with
@@ -365,7 +327,7 @@ sealed class AikoShell : IDisposable
                 // The swap is saved, and a check saves nothing.
                 if (!_changingNothing && ShellNumbers.SwapRing())
                 {
-                    _tray.Update();
+                    RedrawIcons();
                 }
 
                 break;
@@ -376,7 +338,7 @@ sealed class AikoShell : IDisposable
                 OpenSettings();
                 break;
             case TrayCommand.Refresh:
-                _tray.Update();
+                RedrawIcons();
                 _island.Update(_numbers.Cards());
                 _cards.Refresh();
                 break;
@@ -409,7 +371,7 @@ sealed class AikoShell : IDisposable
         _terminal?.Follow(SettingsStore.LoadEnvironments());
         _numbers.NoteWhereWeHaveNoAccess();
         FollowMoods();
-        _tray.Update();
+        RedrawIcons();
         _cards.Refresh();
     }
 
@@ -456,17 +418,17 @@ sealed class AikoShell : IDisposable
 
         // The open header shows the plan of each environment, as the card does.
         _numbers.ReadAccounts();
-        var terminal = new TerminalHost(environments, SettingsStore.LoadTerminal(), _numbers.SnapshotFor, _cards.Model);
+        var terminal = new TerminalHost(environments, SettingsStore.LoadTerminal(), _numbers.SnapshotFor, _cards.Model, _numbers.IconRows);
         terminal.Closed += () =>
         {
             _terminal = null;
-            _island.ShowSessions(IslandSessions.None);
+            ShowSessions(SessionCounts.None);
         };
         terminal.SettingsAsked += () => OpenSettings();
-        terminal.InViewChanged += _island.FollowTerminal;
+        terminal.OnTaskbarChanged += _island.FollowTerminal;
         terminal.VoiceSettingsAsked += () => OpenSettings(page: SettingsPanel.TerminalPageKey);
-        terminal.Noticed += (notice, way, id) => Notify(notice, way, () => _terminal?.OpenSession(id));
-        terminal.SessionsChanged += _island.ShowSessions;
+        terminal.WaitingStarted += PlayWaiting;
+        terminal.SessionsChanged += ShowSessions;
         _terminal = terminal;
         terminal.Show();
 

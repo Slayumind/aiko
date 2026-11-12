@@ -1372,24 +1372,6 @@
   <data name="NavVoiceOff" xml:space="preserve">
     <value>голос выключен</value>
   </data>
-  <data name="NoticeWaiting" xml:space="preserve">
-    <value>ждёт ответа</value>
-  </data>
-  <data name="NoticeDone" xml:space="preserve">
-    <value>готово</value>
-  </data>
-  <data name="NoticeStopped" xml:space="preserve">
-    <value>остановилась</value>
-  </data>
-  <data name="NoticeLimitFiveHour" xml:space="preserve">
-    <value>{0} % за 5 часов</value>
-  </data>
-  <data name="NoticeLimitWeek" xml:space="preserve">
-    <value>{0} % за неделю</value>
-  </data>
-  <data name="NoticeLimitModel" xml:space="preserve">
-    <value>{0} % {1} за неделю</value>
-  </data>
   <data name="NotifyLabel" xml:space="preserve">
     <value>Уведомления</value>
   </data>

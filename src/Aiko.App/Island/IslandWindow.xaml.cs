@@ -149,7 +149,7 @@ public partial class IslandWindow : Window
     public event Action<string>? SessionRequested;
 
     /// The marks of the sessions after the rings (D-364). New counts change the size, never the place.
-    public void ShowSessions(Aiko.Core.Terminal.IslandSessions sessions)
+    public void ShowSessions(Aiko.Core.Terminal.SessionCounts sessions)
     {
         Panel.ShowSessions(sessions);
         if (_dragging || !IsVisible)

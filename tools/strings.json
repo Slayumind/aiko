@@ -3129,48 +3129,6 @@
     ]
   ],
   [
-    "NoticeWaiting",
-    [
-      "waits for you",
-      "ждёт ответа"
-    ]
-  ],
-  [
-    "NoticeDone",
-    [
-      "done",
-      "готово"
-    ]
-  ],
-  [
-    "NoticeStopped",
-    [
-      "stopped",
-      "остановилась"
-    ]
-  ],
-  [
-    "NoticeLimitFiveHour",
-    [
-      "{0}% in 5 hours",
-      "{0} % за 5 часов"
-    ]
-  ],
-  [
-    "NoticeLimitWeek",
-    [
-      "{0}% this week",
-      "{0} % за неделю"
-    ]
-  ],
-  [
-    "NoticeLimitModel",
-    [
-      "{0}% of {1} this week",
-      "{0} % {1} за неделю"
-    ]
-  ],
-  [
     "NotifyLabel",
     [
       "Notifications",

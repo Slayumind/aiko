@@ -57,12 +57,16 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   next and the previous one. Every other key goes to the program in the terminal.
 - **The terminal window opens once by itself** after Aiko is set up. A start with Windows opens only
   the tray, unless you turn on "Open the terminal window too" in the settings.
-- **Notices when a session needs you.** When the terminal window is not in front, a short line comes
-  up next to the Aiko icon: a session waits for an answer, is done or stopped, or a limit went over
-  90%. A click opens the session. Only "waits" has a sound, and nothing comes up while Windows is in
-  "Do not disturb". Each kind and the sound can be turned off in the settings of the terminal.
-- **The island counts the sessions.** While the terminal window is closed, the island shows after
-  its rings how many sessions wait and how many work. A click on the waiting mark opens that session.
+- **Counts instead of pop-ups.** When a session waits for an answer, finishes or stops, Aiko changes
+  a number and opens no window. The tray icon and the taskbar button of the terminal window show how
+  many sessions wait, in orange. If none wait, they show how many stopped, in red, and if none
+  stopped, a green dot for a finished turn. A number stays until you open the session. Only "waits"
+  has a sound, and it is quiet while Windows is in "Do not disturb". A limit over 90% turns its ring
+  red.
+- **The taskbar button shows your limits.** It draws the same ring as the tray icon, with Aiko's
+  face at the same moments. While the window has a taskbar button, even minimized, the island is
+  hidden. When the window is closed, the island shows after its rings how many sessions wait, are
+  done, stopped and work. A click on the waiting mark opens that session.
 - **Limits of every environment above the terminal.** The title bar shows each environment as a
   pill with its ring and percent. When a session of the environment waits for you, an orange pause
   mark and the number of waiting sessions take the place of the ring. The arrow next to it opens a card per environment: a bar, a percent

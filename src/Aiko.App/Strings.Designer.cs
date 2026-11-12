@@ -1362,24 +1362,6 @@ public static class Strings
     /// voice input off
     public static string NavVoiceOff => Get("NavVoiceOff");
 
-    /// waits for you
-    public static string NoticeWaiting => Get("NoticeWaiting");
-
-    /// done
-    public static string NoticeDone => Get("NoticeDone");
-
-    /// stopped
-    public static string NoticeStopped => Get("NoticeStopped");
-
-    /// {0}% in 5 hours
-    public static string NoticeLimitFiveHour => Get("NoticeLimitFiveHour");
-
-    /// {0}% this week
-    public static string NoticeLimitWeek => Get("NoticeLimitWeek");
-
-    /// {0}% of {1} this week
-    public static string NoticeLimitModel => Get("NoticeLimitModel");
-
     /// Notifications
     public static string NotifyLabel => Get("NotifyLabel");
 

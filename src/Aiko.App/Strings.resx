@@ -1372,24 +1372,6 @@
   <data name="NavVoiceOff" xml:space="preserve">
     <value>voice input off</value>
   </data>
-  <data name="NoticeWaiting" xml:space="preserve">
-    <value>waits for you</value>
-  </data>
-  <data name="NoticeDone" xml:space="preserve">
-    <value>done</value>
-  </data>
-  <data name="NoticeStopped" xml:space="preserve">
-    <value>stopped</value>
-  </data>
-  <data name="NoticeLimitFiveHour" xml:space="preserve">
-    <value>{0}% in 5 hours</value>
-  </data>
-  <data name="NoticeLimitWeek" xml:space="preserve">
-    <value>{0}% this week</value>
-  </data>
-  <data name="NoticeLimitModel" xml:space="preserve">
-    <value>{0}% of {1} this week</value>
-  </data>
   <data name="NotifyLabel" xml:space="preserve">
     <value>Notifications</value>
   </data>

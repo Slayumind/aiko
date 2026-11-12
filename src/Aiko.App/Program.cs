@@ -61,6 +61,12 @@ static class Program
             return;
         }
 
+        if (args is ["--snapshot-icon", var badgeIconPath, "badges", ..])
+        {
+            IconSheet.WriteBadges(badgeIconPath);
+            return;
+        }
+
         if (args is ["--snapshot-icon", var iconPath, ..])
         {
             IconSheet.Write(iconPath);
@@ -296,7 +302,7 @@ static class Program
             var terminalApp = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
             var numbers = new ShellNumbers(new SnapshotWatcher());
             numbers.ReadAccounts();
-            var terminal = new TerminalHost(environments, SettingsStore.LoadTerminal(), numbers.SnapshotFor, () => numbers.CardFor(numbers.Cards(), DateTimeOffset.Now));
+            var terminal = new TerminalHost(environments, SettingsStore.LoadTerminal(), numbers.SnapshotFor, () => numbers.CardFor(numbers.Cards(), DateTimeOffset.Now), numbers.IconRows);
             terminal.Closed += terminalApp.Shutdown;
             terminal.Show();
             terminalApp.Run();
@@ -413,19 +419,6 @@ static class Program
             return;
         }
 
-        // The four notices on made up sessions, one under another: --snapshot-notice out.png
-        if (args is ["--snapshot-notice", var noticePath, ..])
-        {
-            var lines = new System.Windows.Controls.StackPanel { Background = Tokens.Brush("Background") };
-            lines.Children.Add(NoticeWindow.LineFor(new NoticeLine(NoticeKind.Waiting, "Голос в редактор", Strings.NoticeWaiting)));
-            lines.Children.Add(NoticeWindow.LineFor(new NoticeLine(NoticeKind.Done, "Fix the scroll of the feed", Strings.NoticeDone)));
-            lines.Children.Add(NoticeWindow.LineFor(new NoticeLine(NoticeKind.Stopped, "Installer build", Strings.NoticeStopped)));
-            lines.Children.Add(NoticeWindow.LineFor(new NoticeLine(NoticeKind.Limit, "Work · Kodland",
-                string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.NoticeLimitFiveHour, 91), 91, LimitTone.Caution)));
-            Snapshot.Write(lines, noticePath);
-            return;
-        }
-
         if (args is ["--snapshot-island", var islandPath, ..])
         {
             var edge = args.Length > 2 && Enum.TryParse<ScreenEdge>(args[2], true, out var asked)
@@ -441,10 +434,11 @@ static class Program
                 panel.Unfold(true, animate: false);
             }
 
-            // --snapshot-island out.png Left sessions: two sessions work and one waits (D-364).
+            // --snapshot-island out.png Left sessions: one session waits, one is done, one stopped
+            // and two work (D-364, D-409).
             if (args is [.., "sessions"])
             {
-                panel.ShowSessions(new IslandSessions(Working: 2, Waiting: 1, FirstWaiting: "a2"));
+                panel.ShowSessions(new SessionCounts(Working: 2, Waiting: 1, Done: 1, Stopped: 1, FirstWaiting: "a2"));
             }
 
             if (args is [.., "face"])

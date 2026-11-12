@@ -1,12 +1,13 @@
 using System.IO;
 using System.Media;
+using System.Runtime.InteropServices;
 using System.Windows;
 
 namespace Aiko.App;
 
 /// The sound of a session that waits for the person (D-375): Aiko's own, so it is not taken for
 /// mail or a chat. The file is quiet itself; the player has no volume. It plays only while the
-/// system takes notices.
+/// system takes notices: not while "Do not disturb", a presentation or a full-screen app is on.
 [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763")]
 static class NoticeSound
 {
@@ -14,7 +15,7 @@ static class NoticeSound
 
     public static void Play()
     {
-        if (!NoticeStack.SystemAcceptsNotices())
+        if (!SystemAcceptsNotices())
         {
             return;
         }
@@ -40,4 +41,13 @@ static class NoticeSound
         stream.CopyTo(copy);
         return copy.ToArray();
     }
+
+    /// Whether the system takes notices now (SHQueryUserNotificationState).
+    private static bool SystemAcceptsNotices() =>
+        SHQueryUserNotificationState(out var state) != 0 || state == AcceptsNotifications;
+
+    private const int AcceptsNotifications = 5;
+
+    [DllImport("shell32.dll")]
+    private static extern int SHQueryUserNotificationState(out int state);
 }

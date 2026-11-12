@@ -105,7 +105,7 @@ public sealed record AppSettings
 
     public bool NotifyLimit { get; init; } = true;
 
-    /// The sound of "waits for you"; the other notices are silent (D-377).
+    /// The sound of "waits for you"; the counts are silent (D-409).
     public bool NotifySound { get; init; } = true;
 
     /// A settings file we cannot read is not a reason to stop: Aiko starts with the defaults.

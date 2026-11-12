@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Aiko.Core;
+using Aiko.Core.Terminal;
 using Windows.Win32;
 using Windows.Win32.UI.WindowsAndMessaging;
 
@@ -16,9 +17,9 @@ static class RingIcon
 
     /// ring: the environment the icon shows. dot: the other one, or null with a single
     /// environment. Both null means Claude Code has not reported yet.
-    public static HICON Render(int size, CardRow? ring, CardRow? dot, IconFrame? frame = null, ImageSource? face = null)
+    public static HICON Render(int size, CardRow? ring, CardRow? dot, IconFrame? frame = null, ImageSource? face = null, SessionBadge? badge = null)
     {
-        var png = RenderPng(size, ring, dot, frame, face);
+        var png = RenderPng(size, ring, dot, frame, face, badge);
         unsafe
         {
             fixed (byte* bytes = png)
@@ -30,7 +31,8 @@ static class RingIcon
     }
 
     /// frame: where the icon is between the rings and a face (D-211). Without one, only the rings.
-    internal static byte[] RenderPng(int size, CardRow? ring, CardRow? dot, IconFrame? frame = null, ImageSource? face = null)
+    /// badge: the sign of the sessions in the corner (D-409), over the rings and the face.
+    internal static byte[] RenderPng(int size, CardRow? ring, CardRow? dot, IconFrame? frame = null, ImageSource? face = null, SessionBadge? badge = null)
     {
         // Drawing happens in a 16 unit grid and is scaled to the real size, so 16, 24 and 32 px
         // icons keep the same proportions.
@@ -57,6 +59,11 @@ static class RingIcon
                 context.DrawImage(face, new Rect(0, 0, size, size));
                 context.Pop();
                 context.Pop();
+            }
+
+            if (badge is { } sign)
+            {
+                BadgeDrawing.DrawInCorner(context, size, sign);
             }
         }
 

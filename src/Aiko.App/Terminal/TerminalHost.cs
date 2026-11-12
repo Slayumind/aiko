@@ -24,7 +24,7 @@ sealed class TerminalHost
 
     /// Sessions of Claude Code whose program ended by itself (D-351): the row says "stopped" and
     /// Enter starts it again with --resume.
-    private readonly HashSet<string> _exited = [];
+    private readonly Dictionary<string, long> _exited = [];
 
     // What each running session of Claude Code does (D-352): its title, its last hook event, and
     // when the person last looked at it and typed into it, in milliseconds.
@@ -34,7 +34,7 @@ sealed class TerminalHost
     private readonly Dictionary<string, long> _seenAt = [];
     private readonly Dictionary<string, long> _answeredAt = [];
 
-    /// What each terminal did at the last drawing, to see what changed since (D-377).
+    /// What each terminal did at the last drawing, to see what changed since (D-409).
     private readonly Dictionary<string, TerminalActivity> _activities = [];
 
     private WindowKeys? _keys;
@@ -54,7 +54,7 @@ sealed class TerminalHost
 
     /// limitsOf gives the latest limits of an environment by its name; cardOf the words of the
     /// card of limits, which the open header shows for the active environment (D-376).
-    public TerminalHost(EnvironmentSettings settings, TerminalSessions sessions, Func<string, LimitSnapshot?> limitsOf, Func<CardModel> cardOf)
+    public TerminalHost(EnvironmentSettings settings, TerminalSessions sessions, Func<string, LimitSnapshot?> limitsOf, Func<CardModel> cardOf, Func<(CardRow? Ring, CardRow? Dot)> iconRows)
     {
         _settings = settings;
         _sessions = sessions;
@@ -63,6 +63,8 @@ sealed class TerminalHost
         _model = TerminalWindowModel.Opened(sessions, [.. settings.Environments.Select(environment => environment.Name)]);
 
         _window = new TerminalWindow(_panel, WindowPlace.Fit(sessions.Window, WorkAreas.All()));
+        Button = new TaskbarButton(_window, iconRows);
+        Button.Update();
         _window.MayClose = MayCloseWindow;
         _events = new TerminalEvents(_window.Dispatcher);
         _events.Changed += EventCame;
@@ -111,11 +113,10 @@ sealed class TerminalHost
                 Save();
             }
         };
-        _window.StateChanged += (_, _) => InViewChanged?.Invoke(_window.InView);
-        _window.IsVisibleChanged += (_, _) => InViewChanged?.Invoke(_window.InView);
+        _window.IsVisibleChanged += (_, _) => OnTaskbarChanged?.Invoke(_window.IsVisible);
         _window.Closed += (_, _) =>
         {
-            InViewChanged?.Invoke(false);
+            OnTaskbarChanged?.Invoke(false);
             foreach (var terminal in _terminals.Values)
             {
                 terminal.Close();
@@ -178,8 +179,12 @@ sealed class TerminalHost
 
     public event Action? Closed;
 
-    /// The window came on screen, or left it by being minimized, hidden or closed.
-    public event Action<bool>? InViewChanged;
+    /// The window got its button on the taskbar, shown or minimized, or lost it by being hidden or
+    /// closed (D-409).
+    public event Action<bool>? OnTaskbarChanged;
+
+    /// The button of the window on the taskbar: the picture of the tray and the sign of the sessions.
+    public TaskbarButton Button { get; }
 
     /// The line above the editor asks for the settings of voice input.
     public event Action? VoiceSettingsAsked;
@@ -194,7 +199,7 @@ sealed class TerminalHost
         Draw();
         _window.Show();
         _window.Activate();
-        InViewChanged?.Invoke(_window.InView);
+        OnTaskbarChanged?.Invoke(_window.IsVisible);
     }
 
     /// The settings changed while the window is open: a renamed environment takes its sessions and
@@ -783,7 +788,7 @@ sealed class TerminalHost
             return;
         }
 
-        _exited.Add(id);
+        _exited[id] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         Draw();
     }
 
@@ -862,7 +867,7 @@ sealed class TerminalHost
 
     private LiveTerminal? Live(string id)
     {
-        if (_exited.Contains(id))
+        if (_exited.ContainsKey(id))
         {
             return new LiveTerminal(TerminalActivity.Exited, "");
         }
@@ -926,29 +931,35 @@ sealed class TerminalHost
         Notice();
     }
 
-    /// How many sessions work and wait, for the island (D-364). Raised when it changes.
-    public event Action<IslandSessions>? SessionsChanged;
+    /// How many sessions wait, ended a turn, stopped and work (D-364, D-409): for the island and the
+    /// tray. Raised when it changes; the taskbar button takes its sign here.
+    public event Action<SessionCounts>? SessionsChanged;
 
-    private IslandSessions _island = IslandSessions.None;
+    private SessionCounts _counts = SessionCounts.None;
 
-    /// A session brought a notice: what it says, how it goes, and the session to open on a click.
-    public event Action<NoticeLine, NoticeWay, string>? Noticed;
+    /// A session started to wait and the sound is due (D-375). The shell plays it.
+    public event Action? WaitingStarted;
 
-    /// What changed in the sessions since the last drawing, as notices (D-377). Everything that
-    /// changes a session draws the window, so this is the one place to look.
+    /// What changed in the sessions since the last drawing: the counts, and the sound of a session
+    /// that starts to wait (D-409). Everything that changes a session draws the window, so this is
+    /// the one place to look.
     private void Notice()
     {
-        var island = IslandSessions.Of(_terminals.Keys
-            .Select(id => (id, Live(id)?.Activity))
+        var counts = SessionCounts.Of(_terminals.Keys
+            .Select(id => (id, Activity: Counted(id)))
             .Where(pair => pair.Activity is not null)
             .Select(pair => (pair.id, pair.Activity!.Value)));
-        if (island != _island)
+        if (counts != _counts)
         {
-            _island = island;
-            SessionsChanged?.Invoke(island);
+            _counts = counts;
+            Button.ShowBadge(counts.Badge);
+            SessionsChanged?.Invoke(counts);
         }
 
-        var changes = new List<(string Id, NoticeKind Kind)>();
+        var sounds = false;
+        var sound = SettingsStore.Load().NotifySound;
+        var inFront = TerminalPulse.Sees(_window.InView, _window.IsActive);
+        var open = _model.Session(_sessions)?.Id;
         foreach (var id in _terminals.Keys)
         {
             if (Live(id)?.Activity is not { } now)
@@ -958,37 +969,26 @@ sealed class TerminalHost
 
             TerminalActivity? before = _activities.TryGetValue(id, out var was) ? was : null;
             _activities[id] = now;
-            if (Notices.ForSession(before, now) is { } kind)
-            {
-                changes.Add((id, kind));
-            }
+            sounds |= Notices.Sounds(before, now, sound, inFront, id == open);
         }
 
-        if (changes.Count == 0)
+        if (sounds)
         {
-            return;
-        }
-
-        var choice = NoticeChoice.From(SettingsStore.Load());
-        var inFront = TerminalPulse.Sees(_window.InView, _window.IsActive);
-        var open = _model.Session(_sessions)?.Id;
-        foreach (var (id, kind) in changes)
-        {
-            var way = Notices.Route(kind, choice, inFront, id == open);
-            if (way != NoticeWay.None && _sessions.Find(id) is { } session)
-            {
-                var word = kind switch
-                {
-                    NoticeKind.Waiting => Strings.NoticeWaiting,
-                    NoticeKind.Done => Strings.NoticeDone,
-                    _ => Strings.NoticeStopped,
-                };
-                Noticed?.Invoke(new NoticeLine(kind, session.Name, word), way, id);
-            }
+            WaitingStarted?.Invoke();
         }
     }
 
-    /// A notice was clicked: the window comes forward on its session.
+    /// What a session counts as: a stop the person has seen since is no longer news.
+    private TerminalActivity? Counted(string id)
+    {
+        var activity = Live(id)?.Activity;
+        return activity == TerminalActivity.Exited
+            && !SessionCounts.StoppedIsNews(_exited.GetValueOrDefault(id), _seenAt.GetValueOrDefault(id))
+            ? TerminalActivity.Idle
+            : activity;
+    }
+
+    /// A click on the mark of "waits" on the island: the window comes forward on its session.
     public void OpenSession(string id)
     {
         Activate();
@@ -1025,7 +1025,7 @@ sealed class TerminalHost
             session is null ? null : TerminalOf(session),
             DateTimeOffset.Now)
         {
-            Stopped = session is not null && _exited.Contains(session.Id),
+            Stopped = session is not null && _exited.ContainsKey(session.Id),
         };
     }
 
