@@ -21,30 +21,62 @@ static class BadgeDrawing
     /// app does not.
     private static readonly Typeface Face = new(new FontFamily("Segoe UI"), FontStyles.Normal, FontWeights.Bold, FontStretches.Normal);
 
-    /// The sign in the lower right corner of an icon of size pixels, drawn in the 16 unit grid of
-    /// the tray icon.
+    /// The sign in the upper right corner of an icon of size pixels, where messengers put it and
+    /// where Windows 11 draws the overlay of the taskbar button; in the 16 unit grid of the tray
+    /// icon. Draw it after CutUnder has cleared the place for it.
     public static void DrawInCorner(DrawingContext context, double size, SessionBadge badge)
     {
-        if (badge.Kind == BadgeKind.None)
+        if (Shape(size, badge) is not { } shape)
         {
             return;
         }
 
+        var ground = new SolidColorBrush(badge.Kind switch
+        {
+            BadgeKind.Waiting => RingDrawing.Caution,
+            BadgeKind.Stopped => RingDrawing.Critical,
+            _ => RingDrawing.Normal,
+        });
+        context.DrawGeometry(ground, null, shape);
+        if (badge.Kind != BadgeKind.Done)
+        {
+            var text = Number(badge, 7.5 * size / 16.0);
+            var box = shape.Bounds;
+            context.DrawText(text, new Point(box.Left + ((box.Width - text.WidthIncludingTrailingWhitespace) / 2), box.Top + ((box.Height - text.Height) / 2)));
+        }
+    }
+
+    /// Everything of the icon but the sign and a gap of one unit around it: the rings and the face
+    /// are drawn inside it, so the sign never melts into the arc under it, on any taskbar. Null
+    /// when there is no sign.
+    public static Geometry? CutUnder(double size, SessionBadge badge)
+    {
+        if (Shape(size, badge) is not { } shape)
+        {
+            return null;
+        }
+
+        var gap = new Pen(Brushes.Black, 2 * size / 16.0);
+        return Geometry.Combine(new RectangleGeometry(new Rect(0, 0, size, size)), shape.GetWidenedPathGeometry(gap), GeometryCombineMode.Exclude, null);
+    }
+
+    /// The outline of the sign in the corner: a dot for a finished turn, else a pill around the
+    /// number.
+    private static Geometry? Shape(double size, SessionBadge badge)
+    {
         var scale = size / 16.0;
-        if (badge.Kind == BadgeKind.Done)
+        switch (badge.Kind)
         {
-            var radius = 2.6 * scale;
-            var centre = new Point(size - radius - (0.6 * scale), size - radius - (0.6 * scale));
-            context.DrawEllipse(new SolidColorBrush(RingDrawing.Normal), new Pen(new SolidColorBrush(Edge), 0.8 * scale), centre, radius, radius);
-            return;
+            case BadgeKind.None:
+                return null;
+            case BadgeKind.Done:
+                var radius = 2.8 * scale;
+                return new EllipseGeometry(new Point(size - radius - (0.2 * scale), radius + (0.2 * scale)), radius, radius);
+            default:
+                var height = 9 * scale;
+                var width = Math.Max(height, Number(badge, 7.5 * scale).WidthIncludingTrailingWhitespace + (3 * scale));
+                return new RectangleGeometry(new Rect(size - width, 0, width, height), height / 2, height / 2);
         }
-
-        var height = 9 * scale;
-        var text = Number(badge, 7.5 * scale);
-        var width = Math.Max(height, text.WidthIncludingTrailingWhitespace + (3 * scale));
-        var box = new Rect(size - width, size - height, width, height);
-        DrawPill(context, box, badge, 0.8 * scale);
-        context.DrawText(text, new Point(box.Left + ((box.Width - text.WidthIncludingTrailingWhitespace) / 2), box.Top + ((box.Height - text.Height) / 2)));
     }
 
     /// The sign alone, filling a square of size pixels: the overlay of the taskbar button. Null for

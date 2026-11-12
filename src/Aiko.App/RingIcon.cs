@@ -42,6 +42,11 @@ static class RingIcon
         using (var context = visual.RenderOpen())
         {
             var centre = new Point(8 * scale, 8 * scale);
+            var cut = badge is { } shown ? BadgeDrawing.CutUnder(size, shown) : null;
+            if (cut is not null)
+            {
+                context.PushClip(cut);
+            }
 
             if (now.RingOpacity > 0)
             {
@@ -61,9 +66,10 @@ static class RingIcon
                 context.Pop();
             }
 
-            if (badge is { } sign)
+            if (cut is not null)
             {
-                BadgeDrawing.DrawInCorner(context, size, sign);
+                context.Pop();
+                BadgeDrawing.DrawInCorner(context, size, badge!);
             }
         }
 

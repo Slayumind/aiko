@@ -176,7 +176,7 @@ static class IconSheet
                 Place(context, RingIcon.RenderPng(size, ring, dot, TrayFaceMotion.At(FacePhase.FaceIn, 1), face, badges[0]), size, badges.Length * Cell, row * Cell, Cell);
             }
 
-            // The taskbar button: a 32 pixel picture shown at 24, the 16 pixel overlay on its lower
+            // The taskbar button: a 32 pixel picture shown at 24, the 16 pixel overlay on its upper
             // right corner, three times larger here.
             for (var i = 0; i < 2; i++)
             {
@@ -191,7 +191,7 @@ static class IconSheet
                     context.DrawImage(Decode(RingIcon.RenderPng(32, ring, dot)), new Rect(left, y, button, button));
                     if (BadgeDrawing.Render(16, badges[column]) is { } overlay)
                     {
-                        context.DrawImage(overlay, new Rect(left + button - 30, y + button - 30, 48, 48));
+                        context.DrawImage(overlay, new Rect(left + button - 30, y - 18, 48, 48));
                     }
                 }
             }
