@@ -17,6 +17,7 @@ sealed class ShellBlocksView : FrameworkElement
     /// An output longer than this folds to FoldShows lines and a line "… N more".
     private const int FoldAbove = 40;
     private const int FoldShows = 20;
+    /// The same air on every side of the blocks: left, right and above the first one.
     private const double Inset = 12;
     private const double RuleWidth = 2;
     private const double BlockGap = 10;
@@ -121,7 +122,7 @@ sealed class ShellBlocksView : FrameworkElement
 
     protected override void OnMouseLeftButtonUp(MouseButtonEventArgs e)
     {
-        var index = (int)((e.GetPosition(this).Y + _offset) / LineHeight);
+        var index = (int)Math.Floor((e.GetPosition(this).Y + _offset - Inset) / LineHeight);
         if (index >= 0 && index < _rows.Count && _rows[index].Kind == RowKind.More)
         {
             _unfolded.Add(_rows[index].Started);
@@ -140,7 +141,7 @@ sealed class ShellBlocksView : FrameworkElement
         }
 
         var height = LineHeight;
-        var first = Math.Max(0, (int)(_offset / height));
+        var first = Math.Max(0, (int)((_offset - Inset) / height));
         var last = Math.Min(_rows.Count, first + (int)(ActualHeight / height) + 2);
         var dpi = VisualTreeHelper.GetDpi(this).PixelsPerDip;
         lock (_gate)
@@ -148,7 +149,7 @@ sealed class ShellBlocksView : FrameworkElement
             for (var i = first; i < last; i++)
             {
                 var row = _rows[i];
-                var top = (i * height) - _offset;
+                var top = Inset + (i * height) - _offset;
                 if (row.Kind != RowKind.Gap)
                 {
                     context.DrawRectangle(RuleOf(row.Block), null, new Rect(Inset, top, RuleWidth, height));
@@ -174,7 +175,7 @@ sealed class ShellBlocksView : FrameworkElement
     private void DrawCommand(DrawingContext context, ShellBlock block, double x, double top, double dpi)
     {
         var meta = block.Running ? Strings.ShellRunning
-            : block.Failed ? $"{string.Format(CultureInfo.CurrentCulture, Strings.ShellExitCode, block.ExitCode)} · {Seconds(block)}"
+            : block.Failed ? string.Join(" · ", new[] { string.Format(CultureInfo.CurrentCulture, Strings.ShellExitCode, block.ExitCode), Seconds(block) }.Where(part => part.Length > 0))
             : Seconds(block);
         var metaText = Formatted(meta, block.Running ? Caution : block.Failed ? Destructive : Muted, _face, _fontSize * 0.85, dpi);
         var metaX = Math.Max(x, ActualWidth - Inset - metaText.Width);
@@ -225,13 +226,18 @@ sealed class ShellBlocksView : FrameworkElement
         return rows;
     }
 
-    private double MaxOffset() => Math.Max(0, (_rows.Count * LineHeight) - ActualHeight + BlockGap);
+    private double MaxOffset() => Math.Max(0, Inset + (_rows.Count * LineHeight) - ActualHeight + BlockGap);
 
     private static Brush RuleOf(ShellBlock block) => block.Running ? Caution : block.Failed ? Destructive : Raised;
 
     /// Under a minute in seconds with a tenth, as in the mockup ("0,2 с"); longer as minutes and seconds.
     private static string Seconds(ShellBlock block)
     {
+        if (!block.Timed)
+        {
+            return "";
+        }
+
         var milliseconds = (block.EndedAt ?? block.StartedAt) - block.StartedAt;
         return milliseconds < 60_000
             ? string.Format(CultureInfo.CurrentCulture, Strings.ShellSeconds, (milliseconds / 1000.0).ToString("0.0", CultureInfo.CurrentCulture))

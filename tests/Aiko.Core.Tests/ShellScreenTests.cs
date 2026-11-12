@@ -103,6 +103,11 @@ public class ShellScreenTests
             {
                 Assert.Equal(expected[i].GetProperty("command").GetString(), blocks[i].Command);
                 Assert.Equal(Number(expected[i].GetProperty("exitCode")), blocks[i].ExitCode);
+                if (expected[i].TryGetProperty("timed", out var timed))
+                {
+                    Assert.Equal(timed.GetBoolean(), blocks[i].Timed);
+                }
+
                 Assert.Equal(
                     expected[i].GetProperty("lines").EnumerateArray().Select(line => line.GetString()!).ToList(),
                     Enumerable.Range(blocks[i].FirstLine, blocks[i].LineCount).Select(screen.LineText).ToList());

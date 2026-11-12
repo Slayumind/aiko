@@ -2,7 +2,9 @@ namespace Aiko.Core.Terminal;
 
 /// One command of a command line and what it printed (D-363, D-412). FirstLine and EndLine are rows
 /// of the screen, EndLine not included; ExitCode is null while it runs. Times are in milliseconds.
-public sealed record ShellBlock(string Command, int FirstLine, int EndLine, int? ExitCode, long StartedAt, long? EndedAt)
+/// Timed is false when the shell never said the command started, as bash after a syntax error: then
+/// nobody knows how long it took.
+public sealed record ShellBlock(string Command, int FirstLine, int EndLine, int? ExitCode, long StartedAt, long? EndedAt, bool Timed = true)
 {
     public bool Running => EndedAt is null;
 
@@ -101,13 +103,16 @@ public static class ShellBlocks
             last--;
         }
 
-        var startedAt = output?.At ?? typed.At;
+        // Without C the command never started (bash sends none for a syntax error), so it took no
+        // time; the moment of B would count the typing as well.
+        var startedAt = output?.At ?? end.At;
         blocks.Add(new ShellBlock(
             command,
             first,
             last,
             running ? null : end.Code ?? 0,
             startedAt,
-            running ? null : end.At));
+            running ? null : end.At,
+            output is not null));
     }
 }

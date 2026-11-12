@@ -254,7 +254,8 @@
           "exitCode": 0,
           "lines": [
             "hi"
-          ]
+          ],
+          "timed": true
         }
       ]
     },
@@ -322,6 +323,21 @@
           "exitCode": 0,
           "lines": [
             "file"
+          ],
+          "timed": false
+        }
+      ]
+    },
+    {
+      "name": "a syntax error: bash sends no C, the command has a code and no time",
+      "stream": "\u001b]133;A\u0007$ \u001b]133;B\u0007ls x)\r\nbash: syntax error near unexpected token `)'\r\n\u001b]133;D;2\u0007\u001b]133;A\u0007$ \u001b]133;B\u0007",
+      "blocks": [
+        {
+          "command": "ls x)",
+          "exitCode": 2,
+          "timed": false,
+          "lines": [
+            "bash: syntax error near unexpected token `)'"
           ]
         }
       ]
