@@ -99,8 +99,8 @@ public static class Strings
     /// Settings
     public static string Settings => Get("Settings");
 
-    /// Back to the session
-    public static string SettingsBack => Get("SettingsBack");
+    /// Close settings · Esc
+    public static string SettingsCloseTip => Get("SettingsCloseTip");
 
     /// Close
     public static string Close => Get("Close");
@@ -269,6 +269,12 @@ public static class Strings
 
     /// Finish
     public static string Finish => Get("Finish");
+
+    /// Back
+    public static string StepBack => Get("StepBack");
+
+    /// Next
+    public static string StepNext => Get("StepNext");
 
     /// Claude Code sends its limits to a status line. Aiko adds one line to the settings file of...
     public static string WizardAccessExplain => Get("WizardAccessExplain");

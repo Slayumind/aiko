@@ -66,7 +66,7 @@ public enum Strings {
         "MenuOpen": ("Open", "Открыть"),
         "MenuRefresh": ("Refresh limits", "Обновить лимиты"),
         "Settings": ("Settings", "Настройки"),
-        "SettingsBack": ("Back to the session", "К сессии"),
+        "SettingsCloseTip": ("Close settings · Esc", "Закрыть настройки · Esc"),
         "Close": ("Close", "Закрыть"),
         "QuitAiko": ("Quit Aiko", "Выйти из Aiko"),
         "CheckForUpdates": ("Check for updates", "Проверить обновления"),
@@ -123,6 +123,8 @@ public enum Strings {
         "WizardStepWhere": ("Where to show Aiko", "Где показывать Aiko"),
         "NotNow": ("Not now", "Не сейчас"),
         "Finish": ("Finish", "Готово"),
+        "StepBack": ("Back", "Назад"),
+        "StepNext": ("Next", "Дальше"),
         "WizardAccessExplain": ("Claude Code sends its limits to a status line. Aiko adds one line to the settings file of each environment. If you already have a status line, Aiko runs it and shows what it prints.", "Claude Code отдаёт лимиты строке состояния. Aiko добавит одну строку в файл настроек каждой среды. Если у тебя уже есть своя строка состояния, Aiko запустит её и покажет её вывод."),
         "WizardTheLine": ("THE LINE AIKO ADDS", "СТРОКА, КОТОРУЮ ДОБАВИТ AIKO"),
         "WizardTheFiles": ("FILES AIKO CHANGES", "ФАЙЛЫ, КОТОРЫЕ ИЗМЕНЯТСЯ"),
@@ -609,8 +611,8 @@ public enum Strings {
     /// Settings
     public static var settings: String { Strings.get("Settings") }
 
-    /// Back to the session
-    public static var settingsBack: String { Strings.get("SettingsBack") }
+    /// Close settings · Esc
+    public static var settingsCloseTip: String { Strings.get("SettingsCloseTip") }
 
     /// Close
     public static var close: String { Strings.get("Close") }
@@ -779,6 +781,12 @@ public enum Strings {
 
     /// Finish
     public static var finish: String { Strings.get("Finish") }
+
+    /// Back
+    public static var stepBack: String { Strings.get("StepBack") }
+
+    /// Next
+    public static var stepNext: String { Strings.get("StepNext") }
 
     /// Claude Code sends its limits to a status line. Aiko adds one line to the settings file of...
     public static var wizardAccessExplain: String { Strings.get("WizardAccessExplain") }

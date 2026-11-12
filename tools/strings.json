@@ -182,10 +182,10 @@
     ]
   ],
   [
-    "SettingsBack",
+    "SettingsCloseTip",
     [
-      "Back to the session",
-      "К сессии"
+      "Close settings · Esc",
+      "Закрыть настройки · Esc"
     ]
   ],
   [
@@ -578,6 +578,20 @@
     [
       "Finish",
       "Готово"
+    ]
+  ],
+  [
+    "StepBack",
+    [
+      "Back",
+      "Назад"
+    ]
+  ],
+  [
+    "StepNext",
+    [
+      "Next",
+      "Дальше"
     ]
   ],
   [

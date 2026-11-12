@@ -34,20 +34,12 @@ public partial class SettingsPanel : UserControl
     /// The page to open: "general", "personality", "terminal", "privacy", "setup" or "env:" and an account folder. Null opens the
     /// first environment, or the checklist when nothing is set up yet. In the window the panel stands
     /// on the place of the list and the terminal (D-374) instead of in a window of its own.
-    public SettingsPanel(string? page, bool inWindow = false)
+    public SettingsPanel(string? page, bool firstRun = false)
     {
         InitializeComponent();
 
-        _inWindow = inWindow;
-        if (inWindow)
-        {
-            FitInWindow();
-        }
-        else
-        {
-            // A small screen still shows the header; the page scrolls inside.
-            Body.Height = Math.Clamp(SystemParameters.WorkArea.Height - 160, 420, 600);
-        }
+        _firstRun = firstRun;
+        FitInWindow();
 
         VersionLine.Text = $"Aiko {AppVersion.WithCommit()}";
 
@@ -58,8 +50,6 @@ public partial class SettingsPanel : UserControl
         BuildNav();
     }
 
-    /// In its own window: the cross. In the terminal window: "Back to the session" and Esc.
-    public event Action? CloseRequested;
     public event Action? QuitRequested;
 
     /// Raised when the window has to come back in another language.
@@ -68,12 +58,7 @@ public partial class SettingsPanel : UserControl
     /// Raised after any change, so the tray, the island and direct mode follow it at once.
     public event Action? SettingsChanged;
 
-    public FrameworkElement DragHandle => HeaderRow;
-
     public string CurrentPage => _page;
-
-    /// For a snapshot of a page taller than the window: the window grows to the page instead.
-    public void GrowToPage() => Body.Height = double.NaN;
 
     /// The key of the n-th environment's page: environment 1 is always the one in .claude.
     public string? EnvironmentPage(int index) =>
@@ -121,19 +106,30 @@ public partial class SettingsPanel : UserControl
     /// column wider than this makes lines too long to read (D-391).
     private const double PageWidth = 640;
 
-    private readonly bool _inWindow;
+    /// The first run in the terminal window (D-394): the checklist alone, one step at a time in a
+    /// column in the middle, with no menu. Finish hands the window over to the terminal.
+    private readonly bool _firstRun;
 
-    /// No card, no title and no cross: the terminal window has its own title bar, and the panel
-    /// fills the place under it. The page keeps a readable column on the left.
+    /// The first run is done: the environments are written, and the terminal can take the window.
+    public event Action? FirstRunFinished;
+
+    public bool IsFirstRun => _firstRun;
+
+    /// The panel fills the place under the title bar of the terminal window. The page keeps a
+    /// readable column on the left; the first run has one column in the middle and no menu.
     private void FitInWindow()
     {
-        Frame.Margin = new Thickness(0);
-        Card.Width = double.NaN;
-        Card.CornerRadius = new CornerRadius(0);
-        Card.BorderThickness = new Thickness(0);
-        Card.Effect = null;
-        HeaderRow.Visibility = Visibility.Collapsed;
-        Body.Height = double.NaN;
+        if (_firstRun)
+        {
+            NavColumn.Width = new GridLength(0);
+            Nav.Visibility = Visibility.Collapsed;
+            NavLine.Visibility = Visibility.Collapsed;
+            VersionLine.Visibility = Visibility.Collapsed;
+            PageHost.Width = 520;
+            PageHost.HorizontalAlignment = HorizontalAlignment.Center;
+            PageHost.Margin = new Thickness(20, 48, 20, 32);
+            return;
+        }
 
         PageScroll.Content = null;
         var column = new Grid();
@@ -143,40 +139,27 @@ public partial class SettingsPanel : UserControl
         PageScroll.Content = column;
     }
 
-    /// The way back to the session on top of the menu, and the width of the menu, both from the
-    /// terminal window: its button is the one under the list of sessions, and the menu is as wide
-    /// as that list (D-374).
-    public void PlaceInWindow(FrameworkElement back, double menuWidth)
-    {
-        back.Margin = new Thickness(0, 0, 0, 10);
-        _back = back;
-        NavColumn.Width = new GridLength(menuWidth);
-        BuildNav();
-    }
-
-    /// "Back to the session" and Esc.
-    public void Back() => CloseRequested?.Invoke();
-
-    private FrameworkElement? _back;
+    /// The menu is as wide as the list of sessions in the terminal window, so the edge between
+    /// them does not move (D-374). The way back is in the title bar: a pill, the gear or Esc.
+    public void FitMenu(double menuWidth) => NavColumn.Width = new GridLength(menuWidth);
 
     // ---- the menu ----
+
+    /// The room between the groups of the menu.
+    private const double GroupGap = 20;
 
     private void BuildNav()
     {
         _buildingNav = true;
         Nav.Children.Clear();
-        if (_back is not null)
-        {
-            Nav.Children.Add(_back);
-        }
+
+        // The order of D-374: General, the environments, Terminal, Personality, Privacy.
+        Nav.Children.Add(NavItem(GeneralPageKey, Strings.NavGeneral, null));
+
+        // The three groups are told apart by room alone, with no label or line (D-404).
+        Nav.Children.Add(new Border { Height = GroupGap });
 
         var settings = _editor.Current;
-        Nav.Children.Add(new TextBlock
-        {
-            Text = Strings.SectionEnvironments,
-            Style = (Style)FindResource("SectionLabel"),
-            Margin = new Thickness(10, 4, 0, 6),
-        });
 
         foreach (var environment in Ordered(settings))
         {
@@ -195,7 +178,10 @@ public partial class SettingsPanel : UserControl
             Nav.Children.Add(AddSecondSlot());
         }
 
-        Nav.Children.Add(new Border { Height = 1, Background = Tokens.Brush("Hairline"), Margin = new Thickness(10, 8, 10, 8) });
+        Nav.Children.Add(new Border { Height = GroupGap });
+
+        var app = SettingsStore.Load();
+        Nav.Children.Add(NavItem(TerminalPageKey, Strings.NavTerminal, app.VoiceInput ? Strings.NavVoiceOn : Strings.NavVoiceOff));
 
         if (settings.HasEnvironments)
         {
@@ -203,13 +189,8 @@ public partial class SettingsPanel : UserControl
             Nav.Children.Add(NavItem(PersonalityPageKey, Strings.NavPersonality, talking > 0 ? string.Format(Strings.NavPersonaOn, talking) : Strings.NavPersonaOff));
         }
 
-        var app = SettingsStore.Load();
-        Nav.Children.Add(NavItem(TerminalPageKey, Strings.NavTerminal, app.VoiceInput ? Strings.NavVoiceOn : Strings.NavVoiceOff));
-
         var stats = app.SendStats;
         Nav.Children.Add(NavItem(PrivacyPageKey, Strings.NavPrivacy, stats ? Strings.NavPrivacyStatsOn : Strings.NavPrivacyStatsOff));
-
-        Nav.Children.Add(NavItem(GeneralPageKey, Strings.NavGeneral, null));
 
         _buildingNav = false;
     }
@@ -389,11 +370,17 @@ public partial class SettingsPanel : UserControl
 
     private ChecklistPage NewChecklist(ChecklistItem? item)
     {
-        var checklist = new ChecklistPage(item);
+        var checklist = new ChecklistPage(item, steps: _firstRun);
         checklist.Finished += note =>
         {
             _checklist = null;
             _editor.Reload();
+            if (_firstRun)
+            {
+                FirstRunFinished?.Invoke();
+                return;
+            }
+
             ShowNoteOnFirstEnvironment(note);
         };
         return checklist;
@@ -459,5 +446,4 @@ public partial class SettingsPanel : UserControl
         SettingsChanged?.Invoke();
     }
 
-    private void OnClose(object sender, RoutedEventArgs e) => CloseRequested?.Invoke();
 }

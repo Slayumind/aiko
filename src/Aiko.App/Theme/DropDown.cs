@@ -247,6 +247,7 @@ sealed class DropDown : UserControl
             window.PreviewMouseLeftButtonUp += Released;
         }
 
+        PopupZoom.Fit(_popup);
         _popup.IsOpen = true;
 
         Motion.PopIn(_listFrame, above: false);

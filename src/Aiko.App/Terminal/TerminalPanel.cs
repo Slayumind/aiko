@@ -32,7 +32,6 @@ sealed class TerminalPanel : UserControl
     private readonly StackPanel _rows = new();
 
     /// The rows with a layer over them for the line of a drag (D-400).
-    private readonly Grid _rowsArea = new();
     private readonly RowDrag _drag;
     private readonly Grid _main = new();
     private readonly Popup _listPopup = new() { StaysOpen = false, AllowsTransparency = true, Placement = PlacementMode.Bottom };
@@ -133,10 +132,7 @@ sealed class TerminalPanel : UserControl
 
     public TerminalPanel()
     {
-        var dragLayer = new Canvas();
-        _rowsArea.Children.Add(_rows);
-        _rowsArea.Children.Add(dragLayer);
-        _drag = new RowDrag(_rows, dragLayer);
+        _drag = new RowDrag(_rows);
         _drag.Moved += (id, before) => RowMoved?.Invoke(id, before);
 
         // The list held still while a row was dragged; the latest view comes now.
@@ -339,16 +335,19 @@ sealed class TerminalPanel : UserControl
     /// hidden while the settings are open.
     public void ShowSettings(FrameworkElement? settings)
     {
-        // The way back is the same button as "New session" under the list, and the menu of the
-        // settings is as wide as the list, so the edge between them does not move.
-        if (settings is SettingsPanel panel)
+        // The way back is in the title bar: a pill, the lit gear, or Esc, which the tip of the gear
+        // names. The menu of the settings is as wide as the list, so the edge between them does
+        // not move. The first run has no session to go back to and nothing to switch: its title bar
+        // keeps only the window buttons (D-394).
+        if (settings is SettingsPanel { IsFirstRun: true })
         {
-            var key = Mono("Esc", "Muted");
-            key.Margin = new Thickness(12, 0, 0, 0);
-            var back = Flat(Strings.SettingsBack, panel.Back, ghost: false, aside: key, mark: "M4,0 L0,5 L4,10");
-            back.HorizontalAlignment = HorizontalAlignment.Stretch;
-            back.HorizontalContentAlignment = HorizontalAlignment.Stretch;
-            panel.PlaceInWindow(back, ListWidth);
+            _gear.Visibility = Visibility.Collapsed;
+            _listToggle.Visibility = Visibility.Collapsed;
+            _chevron.Visibility = Visibility.Collapsed;
+        }
+        else if (settings is SettingsPanel panel)
+        {
+            panel.FitMenu(ListWidth);
         }
 
         _settingsHost.Content = settings;
@@ -356,6 +355,7 @@ sealed class TerminalPanel : UserControl
         _settingsHost.Visibility = shown ? Visibility.Visible : Visibility.Collapsed;
         _body.Visibility = shown ? Visibility.Hidden : Visibility.Visible;
         _gearLit.Visibility = shown ? Visibility.Visible : Visibility.Collapsed;
+        _gear.ToolTip = shown ? Strings.SettingsCloseTip : Strings.Settings;
         if (shown && Motion.IsOn)
         {
             _settingsHost.BeginAnimation(OpacityProperty, new System.Windows.Media.Animation.DoubleAnimation(0, 1, Motion.Expand) { EasingFunction = Motion.Standard });
@@ -644,6 +644,7 @@ sealed class TerminalPanel : UserControl
     {
         if (_narrow)
         {
+            PopupZoom.Fit(_listPopup);
             _listPopup.IsOpen = !_listPopup.IsOpen;
             return false;
         }
@@ -683,6 +684,7 @@ sealed class TerminalPanel : UserControl
     {
         if (_narrow)
         {
+            PopupZoom.Fit(_listPopup);
             _listPopup.IsOpen = !_listPopup.IsOpen;
             return;
         }
@@ -833,14 +835,16 @@ sealed class TerminalPanel : UserControl
             HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
             Focusable = false,
             Padding = new Thickness(8, 4, 8, 0),
-            Content = _rowsArea,
+            Content = _rows,
         });
 
         if (_narrow)
         {
             SlideList(0);
+            // Drawn anew while open too, so it takes the zoom here and not only on opening.
             _listPopup.Child = new Border
             {
+                LayoutTransform = PopupZoom.Of(_listToggle),
                 Width = ListWidth + 20,
                 MaxHeight = 480,
                 Margin = new Thickness(0, 4, 12, 12),
@@ -962,22 +966,7 @@ sealed class TerminalPanel : UserControl
 
     private UIElement Row(SessionRow row, string folder, bool selected, DateTimeOffset now)
     {
-        var top = new DockPanel();
-        var mark = Mark(row.State);
-        DockPanel.SetDock(mark, Dock.Right);
-        top.Children.Add(mark);
-
-        // What runs in the session (the mockup of D-362): the mark of Claude Code or "$".
-        UIElement kind = row.Kind == SessionKind.Shell
-            ? Mono("$", "Muted")
-            : Marks.Line("M6,1 L6,11 M1,6 L11,6 M2.5,2.5 L9.5,9.5 M9.5,2.5 L2.5,9.5");
-        var kindBox = new Border { Width = 14, Margin = new Thickness(0, 0, 8, 0), Child = kind };
-        ((FrameworkElement)kind).HorizontalAlignment = HorizontalAlignment.Center;
-        DockPanel.SetDock(kindBox, Dock.Left);
-        top.Children.Add(kindBox);
-        var name = Text(row.Name, "TextName", "Ink", FontWeights.Normal);
-        name.TextTrimming = TextTrimming.CharacterEllipsis;
-        top.Children.Add(name);
+        var (lines, top, name) = RowLines(row, now, whole: false);
         _renameStarts.Add(() => Rename(row, top, name));
         _rowNames.Add(row.Name);
 
@@ -990,18 +979,6 @@ sealed class TerminalPanel : UserControl
                 Rename(row, top, name);
             }
         };
-
-        var lines = new StackPanel();
-        lines.Children.Add(top);
-        var second = SecondLine(row, now);
-        if (second.Length > 0)
-        {
-            var line = Text(second, "TextSmall", "Muted", FontWeights.Normal);
-            line.TextTrimming = TextTrimming.CharacterEllipsis;
-            // Under the name, past the mark of the kind.
-            line.Margin = new Thickness(22, 3, 0, 0);
-            lines.Children.Add(line);
-        }
 
         var hover = new Border { CornerRadius = new CornerRadius(10), Background = Tokens.Brush("HoverLayer"), Opacity = 0 };
         var face = new Grid();
@@ -1020,7 +997,7 @@ sealed class TerminalPanel : UserControl
             ContextMenu = RowMenu(row.Id, () => Rename(row, top, name)),
         };
         KeepLit(back, hover, "row:" + row.Id);
-        _drag.Watch(back, row.Id, folder);
+        _drag.Watch(back, row.Id, folder, () => RowLines(row, now, whole: true).Lines);
         back.MouseLeftButtonUp += (_, _) =>
         {
             // The click that lets a dragged row go opens nothing.
@@ -1033,6 +1010,47 @@ sealed class TerminalPanel : UserControl
             RowPicked?.Invoke(row.Id);
         };
         return back;
+    }
+
+    /// What a row says: the kind, the name and the state on top, the time or the deed under them.
+    /// whole: for the card that is dragged, with the name in full instead of cut to the list.
+    private static (StackPanel Lines, DockPanel Top, TextBlock Name) RowLines(SessionRow row, DateTimeOffset now, bool whole)
+    {
+        var top = new DockPanel();
+        var mark = Mark(row.State);
+        DockPanel.SetDock(mark, Dock.Right);
+        top.Children.Add(mark);
+
+        // What runs in the session (the mockup of D-362): the mark of Claude Code or "$".
+        UIElement kind = row.Kind == SessionKind.Shell
+            ? Mono("$", "Muted")
+            : Marks.Line("M6,1 L6,11 M1,6 L11,6 M2.5,2.5 L9.5,9.5 M9.5,2.5 L2.5,9.5");
+        var kindBox = new Border { Width = 14, Margin = new Thickness(0, 0, 8, 0), Child = kind };
+        ((FrameworkElement)kind).HorizontalAlignment = HorizontalAlignment.Center;
+        DockPanel.SetDock(kindBox, Dock.Left);
+        top.Children.Add(kindBox);
+        var name = Text(row.Name, "TextName", "Ink", FontWeights.Normal);
+        name.TextTrimming = TextTrimming.CharacterEllipsis;
+        if (whole)
+        {
+            name.Margin = new Thickness(0, 0, 12, 0);
+        }
+
+        top.Children.Add(name);
+
+        var lines = new StackPanel();
+        lines.Children.Add(top);
+        var second = SecondLine(row, now);
+        if (second.Length > 0)
+        {
+            var line = Text(second, "TextSmall", "Muted", FontWeights.Normal);
+            line.TextTrimming = TextTrimming.CharacterEllipsis;
+            // Under the name, past the mark of the kind.
+            line.Margin = new Thickness(22, 3, 0, 0);
+            lines.Children.Add(line);
+        }
+
+        return (lines, top, name);
     }
 
     private ContextMenu RowMenu(string id, Action rename)
@@ -1233,6 +1251,7 @@ sealed class TerminalPanel : UserControl
         palette.Width = Math.Max(240, Math.Min(PaletteView.CardWidth, ActualWidth - 32));
         _palettePopup.HorizontalOffset = Math.Max(0, (ActualWidth - palette.Width) / 2 - palette.Margin.Left);
         _palettePopup.VerticalOffset = BarHeight + 8;
+        PopupZoom.Fit(_palettePopup);
         _palettePopup.IsOpen = true;
         Motion.PopIn(palette, above: false);
         palette.FocusField();

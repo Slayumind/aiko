@@ -109,8 +109,8 @@
   <data name="Settings" xml:space="preserve">
     <value>Настройки</value>
   </data>
-  <data name="SettingsBack" xml:space="preserve">
-    <value>К сессии</value>
+  <data name="SettingsCloseTip" xml:space="preserve">
+    <value>Закрыть настройки · Esc</value>
   </data>
   <data name="Close" xml:space="preserve">
     <value>Закрыть</value>
@@ -279,6 +279,12 @@
   </data>
   <data name="Finish" xml:space="preserve">
     <value>Готово</value>
+  </data>
+  <data name="StepBack" xml:space="preserve">
+    <value>Назад</value>
+  </data>
+  <data name="StepNext" xml:space="preserve">
+    <value>Дальше</value>
   </data>
   <data name="WizardAccessExplain" xml:space="preserve">
     <value>Claude Code отдаёт лимиты строке состояния. Aiko добавит одну строку в файл настроек каждой среды. Если у тебя уже есть своя строка состояния, Aiko запустит её и покажет её вывод.</value>

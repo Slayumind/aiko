@@ -129,7 +129,12 @@ sealed class TerminalHost
             Closed?.Invoke();
         };
 
-        _panel.TabPicked += name => Change(_model.ToEnvironment(name, _sessions));
+        // A pill is also the way back from the settings: to the sessions of that environment.
+        _panel.TabPicked += name =>
+        {
+            CloseSettings();
+            Change(_model.ToEnvironment(name, _sessions));
+        };
         _panel.RowPicked += Pick;
         _panel.RowClosed += AskToClose;
         _panel.RowMoved += (id, before) =>
@@ -227,6 +232,13 @@ sealed class TerminalHost
         _window.Focus();
     }
 
+    /// The checklist of the settings at one item, for the pages that open once at the start.
+    public void OpenChecklist(ChecklistItem item)
+    {
+        OpenSettings(SettingsPanel.ChecklistPageKey);
+        _settingsPanel?.OpenChecklist(item);
+    }
+
     /// Back to the same session, as it was.
     public void CloseSettings()
     {
@@ -245,8 +257,7 @@ sealed class TerminalHost
 
     private SettingsPanel NewSettings(string? page)
     {
-        var settings = new SettingsPanel(page, inWindow: true);
-        settings.CloseRequested += CloseSettings;
+        var settings = new SettingsPanel(page);
         settings.QuitRequested += () => QuitAsked?.Invoke();
         settings.SettingsChanged += () =>
         {

@@ -109,8 +109,8 @@
   <data name="Settings" xml:space="preserve">
     <value>Settings</value>
   </data>
-  <data name="SettingsBack" xml:space="preserve">
-    <value>Back to the session</value>
+  <data name="SettingsCloseTip" xml:space="preserve">
+    <value>Close settings · Esc</value>
   </data>
   <data name="Close" xml:space="preserve">
     <value>Close</value>
@@ -279,6 +279,12 @@
   </data>
   <data name="Finish" xml:space="preserve">
     <value>Finish</value>
+  </data>
+  <data name="StepBack" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="StepNext" xml:space="preserve">
+    <value>Next</value>
   </data>
   <data name="WizardAccessExplain" xml:space="preserve">
     <value>Claude Code sends its limits to a status line. Aiko adds one line to the settings file of each environment. If you already have a status line, Aiko runs it and shows what it prints.</value>
