@@ -57,6 +57,10 @@ sealed class TerminalWindow : Window
 
         WindowChrome.SetWindowChrome(this, _chrome);
 
+        // Added after the hook of WindowChrome, so it comes first (HwndSource calls the newest first).
+        // A window closed before its first frame has no source any more, and needs no hook.
+        ContentRendered += (_, _) => (PresentationSource.FromVisual(this) as System.Windows.Interop.HwndSource)?.AddHook(TakeIcon);
+
         _root.Child = panel;
         Content = _root;
 
@@ -112,4 +116,25 @@ sealed class TerminalWindow : Window
         _root.Padding = new Thickness(maximized ? MaximizedInset : 0);
         _panel.ShowMaximized(maximized);
     }
+
+    private const int SetIcon = 0x0080;
+
+    /// WindowChrome takes WS_VISIBLE off the window while Windows stores a new icon, so that Windows
+    /// draws no old caption over the custom one. The terminal is a window of its own inside this one:
+    /// hidden for that moment, it missed a frame, and the chat flickered on every new icon (RESEARCH,
+    /// D-416). This gives the icon to Windows with the window left visible. A check on a window with
+    /// this frame and a terminal showed no flicker and no old caption.
+    private static IntPtr TakeIcon(IntPtr window, int message, IntPtr wParam, IntPtr lParam, ref bool handled)
+    {
+        if (message != SetIcon)
+        {
+            return IntPtr.Zero;
+        }
+
+        handled = true;
+        return DefWindowProc(window, (uint)message, wParam, lParam);
+    }
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern IntPtr DefWindowProc(IntPtr window, uint message, IntPtr wParam, IntPtr lParam);
 }
