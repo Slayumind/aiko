@@ -131,16 +131,25 @@ public enum Strings {
         "WizardBackupNote": ("Aiko keeps a copy of each file next to it. Removing Aiko puts everything back.", "Aiko сохранит копию каждого файла рядом с ним. Удалишь Aiko — всё вернётся как было."),
         "WizardBridgeNotFound": ("Aiko can't find its bridge program.", "Aiko не нашла свою программу-посредник."),
         "WizardUpdatesWhat": ("Once a day, Aiko asks slayumind.org for the latest version and says that one copy of Aiko ran today. The ID it sends changes every day.", "Раз в сутки Aiko спрашивает у slayumind.org свежую версию и сообщает, что одна копия сегодня работала. ID меняется каждый день."),
-        "WizardDoneTray": ("Aiko is down by the clock. Rest the mouse on it for the card, click to keep it open.", "Aiko внизу, рядом с часами. Наведи мышь — покажется карточка, кликни — останется открытой."),
+        "WizardUpdatesVersion": ("Once a day, Aiko asks slayumind.org for the latest version.", "Раз в сутки Aiko спрашивает у slayumind.org свежую версию."),
+        "WizardUpdatesCount": ("With statistics on, the same request says that one copy of Aiko ran today.", "С включённой статистикой вместе с вопросом уходит, что одна копия сегодня работала."),
+        "WizardDoneTray": ("Close the window and Aiko stays by the clock while the sessions keep working. A click on the icon brings the window back.", "Закроешь окно — Aiko останется у часов, а сессии продолжат работу. Щелчок по значку вернёт окно."),
         "WizardDoneMenuBar": ("Aiko is up by the clock. Rest the mouse on it for the card, click to keep it open.", "Aiko наверху, рядом с часами. Наведи мышь — покажется карточка, кликни — останется открытой."),
         "WizardDoneIsland": ("Aiko is at the top of your screen. Drag it anywhere and it sticks to the nearest edge.", "Aiko вверху экрана. Перетащи куда угодно — она прилипнет к ближайшему краю."),
-        "WizardDoneOverflow": ("Windows 11 hides new app icons under the arrow next to the clock. Open the arrow and drag Aiko onto the taskbar: under the arrow, the card can't open.", "Windows 11 прячет значки новых приложений под стрелку рядом с часами. Открой её и перетащи Aiko на панель задач: под стрелкой карточка не открывается."),
+        "WizardDoneOverflow": ("Windows 11 hides the icons of new apps under the arrow by the clock. Drag Aiko onto the taskbar to keep the limit rings in sight.", "Windows 11 прячет значки новых приложений под стрелку у часов. Перетащи Aiko на панель задач, чтобы кольца лимитов было видно всегда."),
+        "WizardDoneWindowIsland": ("Close the window and Aiko becomes an island at the top of the screen while the sessions keep working. Drag it to any edge.", "Закроешь окно — Aiko встанет островом вверху экрана, а сессии продолжат работу. Перетащи её к любому краю."),
+        "WizardSummaryTitle": ("On Finish, Aiko", "По «Готово» Aiko"),
+        "WizardSummaryAccess": ("adds the limits line to Claude Code in {0}", "добавит строку лимитов в Claude Code: {0}"),
+        "WizardSummaryCommands": ("puts the commands {0} into PATH", "положит команды {0} в PATH"),
+        "WizardSummaryFolders": ("binds project folders to {1} ({0})", "привяжет папки проектов к среде «{1}» ({0})"),
+        "WizardSummaryPersona": ("turns the personality on in {0}", "включит личность в среде «{0}»"),
         "WizardDoneMenuBarRoom": ("A full menu bar hides the icons furthest from the clock. Close a menu bar app if Aiko doesn't fit.", "В переполненной строке меню macOS прячет значки, которые дальше от часов. Если Aiko не помещается, закрой лишнее приложение."),
         "WizardDoneFirstNumbers": ("The first numbers arrive after your next answer from Claude Code. Until then, the ring is dashed.", "Первые цифры придут после следующего ответа Claude Code. До этого кольцо пунктирное."),
-        "WizardDoneNoAccess": ("Aiko can't see your limits yet. You can turn on access at any time on the General page.", "Aiko пока не видит лимиты. Доступ можно включить в любой момент на странице «Общие»."),
+        "WizardDoneNoAccess": ("Aiko can't see your limits yet. You can turn on access at any time on the General page.", "Aiko пока не видит лимиты. Доступ можно включить в любой момент на странице «Общее»."),
         "SettingsWriteFailed": ("Aiko couldn't write the Claude Code settings file. Try again.", "Aiko не смогла записать файл настроек Claude Code. Попробуй ещё раз."),
         "SettingsBridgeUnknown": ("Aiko can't find its bridge program.", "Aiko не нашла свою программу-посредник."),
-        "ChecklistTitle": ("Set up environments", "Настройка сред"),
+        "ChecklistTitle": ("Set up Aiko", "Настройка Aiko"),
+        "WizardWelcome": ("Aiko is a window for your Claude Code sessions. An environment is one Claude account with its own project folders.", "Aiko — окно для твоих сессий Claude Code. Среда — это один аккаунт Claude со своими папками проектов."),
         "ChecklistCount": ("{0} of {1} done", "готово {0} из {1}"),
         "GroupFirst": ("ENVIRONMENT 1", "СРЕДА 1"),
         "GroupSecond": ("ENVIRONMENT 2", "СРЕДА 2"),
@@ -169,6 +178,12 @@ public enum Strings {
         "Later": ("Later", "Позже"),
         "InstallFound": ("Claude Code is already on this computer.", "Claude Code уже есть на этом компьютере."),
         "InstallLead": ("Claude Code isn't on this computer yet. Aiko shows its limits, so install it first.", "Claude Code на этом компьютере пока нет. Aiko показывает его лимиты, поэтому сначала установи его."),
+        "InstallLeadSessions": ("Claude Code is not on this computer yet. The sessions in Aiko are Claude Code, so it comes first.", "Claude Code на этом компьютере пока нет. Сессии в Aiko — это он, поэтому начнём с него."),
+        "InstallRun": ("Install Claude Code", "Установить Claude Code"),
+        "InstallCopy": ("Copy the command", "Скопировать команду"),
+        "InstallHowButton": ("The button opens PowerShell with the command {0}. Aiko notices when the install is over.", "Кнопка откроет PowerShell с командой {0}. Aiko заметит, когда установка закончится."),
+        "InstallFailedLead": ("Didn't work? ", "Не вышло — "),
+        "InstallFailedLink": ("the Claude Code install page", "страница установки Claude Code"),
         "InstallHow": ("Open PowerShell, paste the command and press Enter. Aiko notices when it's done.", "Открой PowerShell, вставь команду и нажми Enter. Aiko заметит, когда установка закончится."),
         "InstallHowMac": ("Open Terminal, paste the command and press Enter. Aiko notices when it's done.", "Открой Терминал, вставь команду и нажми Enter. Aiko заметит, когда установка закончится."),
         "WaitInstall": ("Waiting for Claude Code…", "Ждём Claude Code…"),
@@ -333,6 +348,7 @@ public enum Strings {
         "TemperamentQuiet": ("Quiet", "Тихий"),
         "TemperamentNormal": ("Normal", "Обычный"),
         "TemperamentBright": ("Bright", "Яркий"),
+        "TemperamentMusou": ("無双 · max", "無双 · максимум"),
         "TemperamentQuietAbout": ("Almost no character: one warm line at the end of an answer.", "Почти без характера: одна тёплая фраза в конце ответа."),
         "TemperamentNormalAbout": ("A short interjection at the start, a quick verdict at the end. Japanese words now and then.", "Короткое междометие в начале, оценка в конце. Японские слова — изредка."),
         "TemperamentBrightAbout": ("An interjection in every answer, game metaphors, Japanese words more often.", "Междометие в каждом ответе, игровые метафоры, японские слова чаще."),
@@ -819,7 +835,13 @@ public enum Strings {
     /// Once a day, Aiko asks slayumind.org for the latest version and says that one copy of Aiko...
     public static var wizardUpdatesWhat: String { Strings.get("WizardUpdatesWhat") }
 
-    /// Aiko is down by the clock. Rest the mouse on it for the card, click to keep it open.
+    /// Once a day, Aiko asks slayumind.org for the latest version.
+    public static var wizardUpdatesVersion: String { Strings.get("WizardUpdatesVersion") }
+
+    /// With statistics on, the same request says that one copy of Aiko ran today.
+    public static var wizardUpdatesCount: String { Strings.get("WizardUpdatesCount") }
+
+    /// Close the window and Aiko stays by the clock while the sessions keep working. A click on ...
     public static var wizardDoneTray: String { Strings.get("WizardDoneTray") }
 
     /// Aiko is up by the clock. Rest the mouse on it for the card, click to keep it open.
@@ -828,8 +850,26 @@ public enum Strings {
     /// Aiko is at the top of your screen. Drag it anywhere and it sticks to the nearest edge.
     public static var wizardDoneIsland: String { Strings.get("WizardDoneIsland") }
 
-    /// Windows 11 hides new app icons under the arrow next to the clock. Open the arrow and drag...
+    /// Windows 11 hides the icons of new apps under the arrow by the clock. Drag Aiko onto the t...
     public static var wizardDoneOverflow: String { Strings.get("WizardDoneOverflow") }
+
+    /// Close the window and Aiko becomes an island at the top of the screen while the sessions k...
+    public static var wizardDoneWindowIsland: String { Strings.get("WizardDoneWindowIsland") }
+
+    /// On Finish, Aiko
+    public static var wizardSummaryTitle: String { Strings.get("WizardSummaryTitle") }
+
+    /// adds the limits line to Claude Code in {0}
+    public static var wizardSummaryAccess: String { Strings.get("WizardSummaryAccess") }
+
+    /// puts the commands {0} into PATH
+    public static var wizardSummaryCommands: String { Strings.get("WizardSummaryCommands") }
+
+    /// binds project folders to {1} ({0})
+    public static var wizardSummaryFolders: String { Strings.get("WizardSummaryFolders") }
+
+    /// turns the personality on in {0}
+    public static var wizardSummaryPersona: String { Strings.get("WizardSummaryPersona") }
 
     /// A full menu bar hides the icons furthest from the clock. Close a menu bar app if Aiko doe...
     public static var wizardDoneMenuBarRoom: String { Strings.get("WizardDoneMenuBarRoom") }
@@ -846,8 +886,11 @@ public enum Strings {
     /// Aiko can't find its bridge program.
     public static var settingsBridgeUnknown: String { Strings.get("SettingsBridgeUnknown") }
 
-    /// Set up environments
+    /// Set up Aiko
     public static var checklistTitle: String { Strings.get("ChecklistTitle") }
+
+    /// Aiko is a window for your Claude Code sessions. An environment is one Claude account with...
+    public static var wizardWelcome: String { Strings.get("WizardWelcome") }
 
     /// {0} of {1} done
     public static var checklistCount: String { Strings.get("ChecklistCount") }
@@ -932,6 +975,24 @@ public enum Strings {
 
     /// Claude Code isn't on this computer yet. Aiko shows its limits, so install it first.
     public static var installLead: String { Strings.get("InstallLead") }
+
+    /// Claude Code is not on this computer yet. The sessions in Aiko are Claude Code, so it come...
+    public static var installLeadSessions: String { Strings.get("InstallLeadSessions") }
+
+    /// Install Claude Code
+    public static var installRun: String { Strings.get("InstallRun") }
+
+    /// Copy the command
+    public static var installCopy: String { Strings.get("InstallCopy") }
+
+    /// The button opens PowerShell with the command {0}. Aiko notices when the install is over.
+    public static var installHowButton: String { Strings.get("InstallHowButton") }
+
+    /// Didn't work? 
+    public static var installFailedLead: String { Strings.get("InstallFailedLead") }
+
+    /// the Claude Code install page
+    public static var installFailedLink: String { Strings.get("InstallFailedLink") }
 
     /// Open PowerShell, paste the command and press Enter. Aiko notices when it's done.
     public static var installHow: String { Strings.get("InstallHow") }
@@ -1424,6 +1485,9 @@ public enum Strings {
 
     /// Bright
     public static var temperamentBright: String { Strings.get("TemperamentBright") }
+
+    /// 無双 · max
+    public static var temperamentMusou: String { Strings.get("TemperamentMusou") }
 
     /// Almost no character: one warm line at the end of an answer.
     public static var temperamentQuietAbout: String { Strings.get("TemperamentQuietAbout") }

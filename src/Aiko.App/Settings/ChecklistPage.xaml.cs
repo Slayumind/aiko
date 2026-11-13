@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -14,6 +15,9 @@ namespace Aiko.App;
 public partial class ChecklistPage : UserControl
 {
     private const string InstallCommandText = "irm https://claude.ai/install.ps1 | iex";
+
+    /// The official page on installing Claude Code, for when the command did not work.
+    private const string InstallPage = "https://code.claude.com/docs/en/setup";
 
     private static readonly string Home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
     private static readonly string FirstFolder = Path.Combine(Home, ClaudeConfigFolder.DefaultFolderName);
@@ -34,6 +38,10 @@ public partial class ChecklistPage : UserControl
     private bool _foldersVisited;
     private bool? _personaWanted;
     private bool? _statsWanted;
+    private bool _placeSeen;
+
+    /// "Meet Aiko" was answered with environment 2 rather than environment 1.
+    private bool _personaSecond;
 
     private Waiter? _waiter;
     private ChecklistItem? _opened;
@@ -46,7 +54,8 @@ public partial class ChecklistPage : UserControl
         InitializeComponent();
         _steps = steps;
 
-        _rows = [InstallRow, FirstRow, SecondRow, FoldersRow, AccessRow, CommandsRow, MeetRow, PrivacyRow, PlaceRow];
+        // The order of WizardChecklist.Order: the dots, Next and the next open item agree (D-421).
+        _rows = [InstallRow, FirstRow, SecondRow, AccessRow, CommandsRow, FoldersRow, MeetRow, PrivacyRow, PlaceRow];
         foreach (var row in _rows)
         {
             row.HeaderClicked += OnRowClicked;
@@ -56,7 +65,7 @@ public partial class ChecklistPage : UserControl
             }
         }
 
-        InstallCommand.Text = InstallCommandText;
+        InstallHow.Text = string.Format(Strings.InstallHowButton, InstallCommandText);
         MeetFace.Source = FaceDrawing.For(SettingsStore.LoadPersona().Face, AikoFace.Fresh, FaceGround.Dark, MeetFace.Width);
         NewName.Text = "";
         DefaultChoice.Picked += _ => Refresh();
@@ -112,6 +121,7 @@ public partial class ChecklistPage : UserControl
         BoundFolders = _projectFolders.Count,
         PersonaWanted = _personaWanted,
         StatsWanted = _statsWanted,
+        PlaceSeen = _placeSeen,
     };
 
     /// Going through the wizard again starts from what is set up now, not from nothing.
@@ -121,6 +131,8 @@ public partial class ChecklistPage : UserControl
 
         // What is already in place counts as answered, so adding a second environment asks only
         // about the second environment.
+        // Somebody who finished the checklist before has seen where Aiko lives.
+        _placeSeen = _existing.HasEnvironments;
         if (_existing.HasEnvironments)
         {
             _accessGranted = _existing.Environments.SelectMany(e => e.ConfigDirectories).All(ClaudeSettingsFile.HasOurLine) ? true : null;
@@ -174,10 +186,19 @@ public partial class ChecklistPage : UserControl
         Counter.Text = string.Format(Strings.ChecklistCount, done, total);
         FinishButton.IsEnabled = WizardChecklist.CanFinish(facts);
         DoneView.IsOpen = FinishButton.IsEnabled;
-        DoneWhere.Text = PlaceIsland.IsChecked == true ? Strings.WizardDoneIsland : Strings.WizardDoneTray;
+        DoneWhere.Text = PlaceIsland.IsChecked == true ? Strings.WizardDoneWindowIsland : Strings.WizardDoneTray;
         DoneOverflow.Visibility = PlaceIsland.IsChecked == true ? Visibility.Collapsed : Visibility.Visible;
 
         MeetTurnOn.Content = string.Format(Strings.MeetAikoTurnOn, FirstNameText());
+        MeetTurnOnSecond.Content = string.Format(Strings.MeetAikoTurnOn, SecondNameText());
+        MeetTurnOnSecond.Visibility = facts.SecondSignedIn ? Visibility.Visible : Visibility.Collapsed;
+
+        // The count rides on the same request only with statistics on, so only then is it said.
+        UpdatesWhat.Text = _statsWanted == true
+            ? Strings.WizardUpdatesVersion + " " + Strings.WizardUpdatesCount
+            : Strings.WizardUpdatesVersion;
+
+        FillSummary();
 
         FillAccessPreview();
         FillCommandFields();
@@ -233,7 +254,11 @@ public partial class ChecklistPage : UserControl
 
         var at = _rows.FindIndex(row => row.Item == _opened);
         BackButton.Visibility = Step(at, -1) is null ? Visibility.Collapsed : Visibility.Visible;
-        NextButton.Visibility = _opened is null ? Visibility.Collapsed : Visibility.Visible;
+        // Every step after the install needs Claude Code, so Next waits for it instead of leading
+        // to the last step and back (D-421).
+        NextButton.Visibility = _opened is null || (_opened == ChecklistItem.Install && !_claudeInstalled)
+            ? Visibility.Collapsed
+            : Visibility.Visible;
 
         // Finish is the last step, so it shows once every item has an answer.
         FinishButton.Visibility = FinishButton.IsEnabled ? Visibility.Visible : Visibility.Collapsed;
@@ -321,6 +346,12 @@ public partial class ChecklistPage : UserControl
             _foldersVisited = true;
         }
 
+        if (item == ChecklistItem.Place && !_placeSeen)
+        {
+            _placeSeen = true;
+            Refresh();
+        }
+
         ShowSteps();
 
         if (item == ChecklistItem.Install && !_claudeInstalled)
@@ -348,6 +379,23 @@ public partial class ChecklistPage : UserControl
     }
 
     // ---- install ----
+
+    /// A PowerShell window of its own with the command, so the person sees it run and what it says.
+    private void OnRunInstall(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo("powershell.exe", $"-NoExit -NoProfile -Command \"{InstallCommandText}\"") { UseShellExecute = true });
+            Log.Write("checklist: opened PowerShell to install Claude Code");
+        }
+        catch (System.ComponentModel.Win32Exception)
+        {
+            Log.Write("checklist: PowerShell did not open");
+        }
+    }
+
+    private void OnInstallPage(object sender, RoutedEventArgs e) =>
+        Process.Start(new ProcessStartInfo(InstallPage) { UseShellExecute = true });
 
     private void OnCopyInstall(object sender, RoutedEventArgs e)
     {
@@ -743,6 +791,13 @@ public partial class ChecklistPage : UserControl
         MoveOn();
     }
 
+    private void OnMeetTurnOnSecond(object sender, RoutedEventArgs e)
+    {
+        _personaWanted = true;
+        _personaSecond = true;
+        MoveOn();
+    }
+
     private void OnMeetLater(object sender, RoutedEventArgs e)
     {
         _personaWanted = false;
@@ -834,9 +889,10 @@ public partial class ChecklistPage : UserControl
             new(name, [folder])
             {
                 DirectMode = _existing.Environments.FirstOrDefault(e => e.Holds(folder))?.DirectMode ?? false,
-                // "Meet Aiko" turns it on in environment 1. "Later" never turns off what is on.
+                // "Meet Aiko" turns it on in the environment it was asked for. "Later" never turns off
+                // what is on.
                 Persona = (_existing.Environments.FirstOrDefault(e => e.Holds(folder))?.Persona ?? false)
-                    || (index == 0 && _personaWanted == true),
+                    || (_personaWanted == true && index == PersonaIndex),
                 CustomCommand = _commandFields.TryGetValue(index, out var field) ? field.Custom : null,
                 ProjectFolders = projects,
             };
@@ -890,6 +946,51 @@ public partial class ChecklistPage : UserControl
             // "Meet Aiko" says what the memory does, so whoever finishes the checklist has read it.
             MemoryShown = true,
         });
+    }
+
+    /// The environment "Meet Aiko" turns the persona on in: 0 or 1.
+    private int PersonaIndex => _personaSecond ? 1 : 0;
+
+    /// What Finish is about to change outside Aiko, one line each, from the answers given (D-421).
+    private void FillSummary()
+    {
+        var lines = new List<string>();
+        var names = _secondFolder is null ? FirstNameText() : $"{FirstNameText()}, {SecondNameText()}";
+        if (_accessGranted == true)
+        {
+            lines.Add(string.Format(Strings.WizardSummaryAccess, names));
+        }
+
+        if (_commandsWanted == true && CommandsInUse() is { Count: > 0 } commands)
+        {
+            lines.Add(string.Format(Strings.WizardSummaryCommands, string.Join(", ", commands)));
+        }
+
+        if (_secondFolder is not null && _projectFolders.Count > 0)
+        {
+            lines.Add(string.Format(Strings.WizardSummaryFolders, _projectFolders.Count, SecondNameText()));
+        }
+
+        // A persona that is already on somewhere is not news.
+        if (_personaWanted == true && !_existing.Environments.Any(e => e.Persona))
+        {
+            lines.Add(string.Format(Strings.WizardSummaryPersona, _personaSecond ? SecondNameText() : FirstNameText()));
+        }
+
+        SummaryLines.Children.Clear();
+        for (var at = 0; at < lines.Count; at++)
+        {
+            SummaryLines.Children.Add(new TextBlock
+            {
+                Text = "· " + lines[at] + (at == lines.Count - 1 ? "." : ";"),
+                Style = (Style)FindResource("RowNote"),
+                TextWrapping = TextWrapping.Wrap,
+                TextTrimming = TextTrimming.None,
+                Margin = new Thickness(0, 0, 0, 2),
+            });
+        }
+
+        Summary.Visibility = lines.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private StackPanel TwoLines(string first, string second)

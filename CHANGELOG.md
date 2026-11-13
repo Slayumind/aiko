@@ -72,6 +72,13 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   same way, with `balance.py depth`. Game research writes each system as a short rules sheet and
   finds rules that never fire.
 
+### Changed
+
+- **The first run on a new computer.** A button installs Claude Code in a PowerShell window, and Next
+  waits until it is there. The steps go in one order, the counter starts at zero, and the last step
+  lists what Finish changes. The privacy step names what is never sent, and the update check
+  mentions the count only when statistics are on.
+
 ### Fixed
 
 - The log keeps only the name of a file or folder, not its full path. A system error used to write

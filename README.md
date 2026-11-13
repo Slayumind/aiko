@@ -8,14 +8,18 @@ Aiko is a persona that sits above your agents and models. She remembers you acro
 accounts, gives every session the same skills, and shows how much of your Claude Code limits is left.
 The model is a resource: when a better one comes out, Aiko gets better too.
 
-The goal is one window for agent sessions, your projects and your limits. Today Aiko lives in the
-Windows tray and the macOS menu bar; the window with sessions is in progress.
+The goal is one window for agent sessions, your projects and your limits.
 
-Rest the mouse on the Aiko icon and a card shows every
-environment you set up: the five-hour window, the week, and the weekly limit of the heavy model. For
-each one you see when it resets and how long it lasts at your current pace.
+On Windows that window is here. Real Claude Code sessions and command lines run in it, grouped by
+account and project folder, with the limits of each account in the header. Close the window and the
+sessions keep working. Aiko stays by the clock or as an island at the top of the screen, and shows
+the limits and the sessions that wait for you.
 
-![The Aiko card](assets/card.png)
+On macOS Aiko lives in the menu bar for now, and the window comes next. Rest the mouse on the icon and
+a card shows every environment you set up: the five-hour window, the week, and the weekly limit of
+the heavy model. For each one you see when it resets and how long it lasts at your current pace.
+
+![The Aiko card on macOS](assets/card.png)
 
 Free and open source. Not affiliated with Anthropic.
 
@@ -156,7 +160,7 @@ Free code signing provided by [SignPath.io](https://about.signpath.io), certific
 signed and who approves each release.
 
 Windows 11 hides new app icons under the arrow next to the clock. Open the arrow and drag Aiko onto
-the taskbar: under the arrow, the card can't open.
+the taskbar to keep the limit rings in sight.
 
 ## Remove
 

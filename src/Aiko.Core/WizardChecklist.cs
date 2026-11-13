@@ -47,6 +47,10 @@ public sealed record WizardFacts
     /// True: send the daily count. False: don't. Null: the question has not been answered, and
     /// "don't" is what happens until it is.
     public bool? StatsWanted { get; init; }
+
+    /// The person has seen where Aiko lives. The place has an answer from the start (the tray), so
+    /// it is never missing, but it counts as done only once it was shown (D-421).
+    public bool PlaceSeen { get; init; }
 }
 
 /// Which checklist item is ready, blocked or done, and which one opens next.
@@ -57,8 +61,9 @@ public static class WizardChecklist
 {
     public static readonly IReadOnlyList<ChecklistItem> Order = Enum.GetValues<ChecklistItem>();
 
-    /// Project folders can be left empty, and where Aiko shows already has an answer: the tray.
-    public static bool IsOptional(ChecklistItem item) => item is ChecklistItem.ProjectFolders or ChecklistItem.MeetAiko;
+    /// Project folders can be left empty, the persona can wait, and where Aiko shows already has an
+    /// answer: the tray.
+    public static bool IsOptional(ChecklistItem item) => item is ChecklistItem.ProjectFolders or ChecklistItem.MeetAiko or ChecklistItem.Place;
 
     public static ItemState StateOf(ChecklistItem item, WizardFacts facts) => item switch
     {
@@ -89,7 +94,7 @@ public static class WizardChecklist
         // the personality, which the item above has just offered.
         ChecklistItem.Privacy => Answered(facts.FirstSignedIn, facts.StatsWanted),
 
-        ChecklistItem.Place => ItemState.Done,
+        ChecklistItem.Place => facts.PlaceSeen ? ItemState.Done : ItemState.Open,
 
         _ => ItemState.Locked,
     };
