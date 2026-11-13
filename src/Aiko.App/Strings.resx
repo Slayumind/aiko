@@ -1310,7 +1310,37 @@
     <value>Claude Code did not start</value>
   </data>
   <data name="TerminalNotStartedBody" xml:space="preserve">
-    <value>Aiko did not find it on this computer. Install Claude Code, then open the session again.</value>
+    <value>Aiko did not find claude on this computer.</value>
+  </data>
+  <data name="TerminalShellNotStartedTitle" xml:space="preserve">
+    <value>The command line did not start</value>
+  </data>
+  <data name="TerminalStartFailedBody" xml:space="preserve">
+    <value>Windows returned error {0}. The log has the details.</value>
+  </data>
+  <data name="TerminalStartAgain" xml:space="preserve">
+    <value>Start again</value>
+  </data>
+  <data name="TerminalHowToInstall" xml:space="preserve">
+    <value>How to install</value>
+  </data>
+  <data name="TerminalFolderGoneTitle" xml:space="preserve">
+    <value>The folder {0} is no longer on the disk</value>
+  </data>
+  <data name="TerminalFolderGoneBody" xml:space="preserve">
+    <value>The conversation is saved, but there is nowhere to start it.</value>
+  </data>
+  <data name="TerminalFolderGoneShell" xml:space="preserve">
+    <value>There is nowhere to open the command line.</value>
+  </data>
+  <data name="TerminalRemoveFromList" xml:space="preserve">
+    <value>Remove from the list</value>
+  </data>
+  <data name="TerminalCloseHint" xml:space="preserve">
+    <value>Close the window and the sessions keep working, while Aiko stays by the clock.</value>
+  </data>
+  <data name="TerminalCloseHintDone" xml:space="preserve">
+    <value>Got it</value>
   </data>
   <data name="TerminalWorking" xml:space="preserve">
     <value>working</value>
@@ -1425,6 +1455,15 @@
   </data>
   <data name="TerminalSessionList" xml:space="preserve">
     <value>Session list · Ctrl+Shift+B</value>
+  </data>
+  <data name="TerminalFindConversation" xml:space="preserve">
+    <value>Find a conversation · Ctrl+Shift+K</value>
+  </data>
+  <data name="TerminalKeysClaude" xml:space="preserve">
+    <value>Ctrl+G editor · Ctrl+Shift+Space voice · Ctrl+Shift+K find a conversation</value>
+  </data>
+  <data name="TerminalKeysShell" xml:space="preserve">
+    <value># ask for a command · Ctrl+Shift+F find in the output · Ctrl+Shift+K find a conversation</value>
   </data>
   <data name="TerminalShowLimits" xml:space="preserve">
     <value>Show the limits of the environments</value>

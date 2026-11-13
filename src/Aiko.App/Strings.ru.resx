@@ -1310,7 +1310,37 @@
     <value>Claude Code не запустился</value>
   </data>
   <data name="TerminalNotStartedBody" xml:space="preserve">
-    <value>Aiko не нашла его на этом компьютере. Установи Claude Code и открой сессию снова.</value>
+    <value>Aiko не нашла claude на этом компьютере.</value>
+  </data>
+  <data name="TerminalShellNotStartedTitle" xml:space="preserve">
+    <value>Командная строка не запустилась</value>
+  </data>
+  <data name="TerminalStartFailedBody" xml:space="preserve">
+    <value>Windows вернула ошибку {0}. Подробности — в журнале.</value>
+  </data>
+  <data name="TerminalStartAgain" xml:space="preserve">
+    <value>Запустить ещё раз</value>
+  </data>
+  <data name="TerminalHowToInstall" xml:space="preserve">
+    <value>Как установить</value>
+  </data>
+  <data name="TerminalFolderGoneTitle" xml:space="preserve">
+    <value>Папки {0} больше нет на диске</value>
+  </data>
+  <data name="TerminalFolderGoneBody" xml:space="preserve">
+    <value>Разговор сохранён, но запустить его негде.</value>
+  </data>
+  <data name="TerminalFolderGoneShell" xml:space="preserve">
+    <value>Командную строку негде открыть.</value>
+  </data>
+  <data name="TerminalRemoveFromList" xml:space="preserve">
+    <value>Убрать из списка</value>
+  </data>
+  <data name="TerminalCloseHint" xml:space="preserve">
+    <value>Закроешь окно — сессии продолжат работу, а Aiko останется у часов.</value>
+  </data>
+  <data name="TerminalCloseHintDone" xml:space="preserve">
+    <value>Понятно</value>
   </data>
   <data name="TerminalWorking" xml:space="preserve">
     <value>работает</value>
@@ -1425,6 +1455,15 @@
   </data>
   <data name="TerminalSessionList" xml:space="preserve">
     <value>Список сессий · Ctrl+Shift+B</value>
+  </data>
+  <data name="TerminalFindConversation" xml:space="preserve">
+    <value>Найти разговор · Ctrl+Shift+K</value>
+  </data>
+  <data name="TerminalKeysClaude" xml:space="preserve">
+    <value>Ctrl+G редактор · Ctrl+Shift+Space голос · Ctrl+Shift+K найти разговор</value>
+  </data>
+  <data name="TerminalKeysShell" xml:space="preserve">
+    <value># подсказка команды · Ctrl+Shift+F найти в выводе · Ctrl+Shift+K найти разговор</value>
   </data>
   <data name="TerminalShowLimits" xml:space="preserve">
     <value>Показать лимиты сред</value>

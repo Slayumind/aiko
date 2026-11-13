@@ -42,6 +42,10 @@ sealed class TerminalPanel : UserControl
     private readonly Button _chevron;
     private readonly Button _gear;
 
+    /// The magnifier left of the gear: the palette of conversations, which only a shortcut opened
+    /// before (D-421).
+    private readonly Button _search;
+
     /// The gear stays lit while the settings are open, as a pressed segment.
     private readonly Border _gearLit = new() { CornerRadius = new CornerRadius(6), Background = Tokens.Brush("Raised"), Visibility = Visibility.Collapsed };
 
@@ -124,6 +128,18 @@ sealed class TerminalPanel : UserControl
     /// The editor under the terminal (D-354): the keyboard is always here.
     public TerminalEditor Editor { get; } = new();
 
+    /// The keys of the chosen session, one quiet line under it (D-421): the editor, voice and the
+    /// palette for Claude Code; the request, the search in the output and the palette for a command
+    /// line. Nothing else in the window names them.
+    private readonly TextBlock _keys = new()
+    {
+        FontFamily = Tokens.Get<FontFamily>("Mono"),
+        FontSize = Tokens.Get<double>("TextTiny"),
+        Foreground = Tokens.Brush("Muted"),
+        TextTrimming = TextTrimming.CharacterEllipsis,
+        Margin = new Thickness(16, 4, 16, 6),
+    };
+
     /// Whether the open session has room for the editor: a terminal that runs.
     private bool _editorRoom;
 
@@ -169,6 +185,7 @@ sealed class TerminalPanel : UserControl
         // The chevron is a small mark: its button is as narrow as it is tall, so the hover shows
         // where a click lands and does not reach towards the pills.
         _chevron = BarButton(Marks.Line("M0,0 L4,4 L8,0"), Strings.TerminalShowLimits, () => HeaderToggled?.Invoke(), ChevronWidth);
+        _search = BarButton(Marks.Line("M4.5,0.5 A4,4 0 1 1 4.49,0.5 Z M7.6,7.6 L11,11"), Strings.TerminalFindConversation, () => PaletteAsked?.Invoke());
         _gear = BarButton(GearIcon(), Strings.Settings, () => SettingsAsked?.Invoke());
         ((Grid)_gear.Content).Children.Insert(0, _gearLit);
         ((Grid)_gear.Content).Children.Add(_gearDot);
@@ -262,6 +279,8 @@ sealed class TerminalPanel : UserControl
         _loader.Visibility = Visibility.Collapsed;
         _terminals.Children.Add(_loader);
         var terminalSide = new DockPanel();
+        DockPanel.SetDock(_keys, Dock.Bottom);
+        terminalSide.Children.Add(_keys);
         DockPanel.SetDock(_stopped, Dock.Bottom);
         terminalSide.Children.Add(_stopped);
         DockPanel.SetDock(Editor, Dock.Bottom);
@@ -329,6 +348,18 @@ sealed class TerminalPanel : UserControl
 
     /// The gear in the title bar.
     public event Action? SettingsAsked;
+
+    /// The magnifier in the title bar.
+    public event Action? PaletteAsked;
+
+    /// The cross of the line about closing the window.
+    public event Action? CloseHintDone;
+
+    /// "Start again" on a session whose terminal did not start.
+    public event Action? RetryAsked;
+
+    /// "How to install" when Claude Code is not on the computer.
+    public event Action? InstallPageAsked;
 
     /// "Sign in" on the card of an environment whose account is not connected.
     public event Action<string>? SignInAsked;
@@ -412,6 +443,7 @@ sealed class TerminalPanel : UserControl
         _pills.Show([.. view.Tabs.Select(Tab)], selected, view.Environment);
 
         _right.Children.Clear();
+        _right.Children.Add(_search);
         _right.Children.Add(_gear);
         foreach (var button in Buttons)
         {
@@ -820,7 +852,13 @@ sealed class TerminalPanel : UserControl
         var newSession = Flat(Strings.TerminalNewSession, () => CreateAsked?.Invoke(), ghost: false, plus: true, aside: key);
         newSession.HorizontalAlignment = HorizontalAlignment.Stretch;
         newSession.HorizontalContentAlignment = HorizontalAlignment.Stretch;
-        var create = new Border { Margin = new Thickness(8), Child = newSession };
+        var create = new StackPanel { Margin = new Thickness(8) };
+        if (view.CloseHint)
+        {
+            create.Children.Add(CloseHint());
+        }
+
+        create.Children.Add(newSession);
 
         // The list lives in the window or, in a narrow one, under the button with the session name.
         _list.Children.Clear();
@@ -1307,10 +1345,12 @@ sealed class TerminalPanel : UserControl
         // A program that ended takes no text: the bar to continue it stands in place of the editor.
         _editorRoom = terminal is not null && !view.Stopped;
         ShowEditor();
+        var kind = view.Groups.SelectMany(group => group.Rows).FirstOrDefault(row => row.Id == view.SessionId)?.Kind;
+        _keys.Text = kind == SessionKind.Shell ? Strings.TerminalKeysShell : Strings.TerminalKeysClaude;
 
         UIElement content = terminal is not null ? _terminalSide
             : view.Ask is { } ask ? Ask(ask)
-            : view.Main == MainView.Terminal ? Message(Strings.TerminalNotStartedTitle, Strings.TerminalNotStartedBody, null)
+            : view.Main == MainView.Terminal ? NotStarted(view)
             : Message(
                 string.Format(CultureInfo.CurrentCulture, Strings.TerminalNoSessionsTitle, view.Environment),
                 Strings.TerminalNoSessionsBody,
@@ -1359,6 +1399,62 @@ sealed class TerminalPanel : UserControl
     }
 
     private string? _shownTerminal;
+
+    /// One line over the button, until its cross is pressed or the window is closed once (D-421).
+    private Border CloseHint()
+    {
+        var words = Text(Strings.TerminalCloseHint, "TextNumber", "Ink", FontWeights.Normal);
+        words.TextWrapping = TextWrapping.Wrap;
+        var cross = BarButton(Marks.Line("M0,0 L8,8 M8,0 L0,8"), Strings.TerminalCloseHintDone, () => CloseHintDone?.Invoke(), 24);
+        cross.VerticalAlignment = VerticalAlignment.Top;
+        cross.Margin = new Thickness(6, -4, -6, 0);
+        var line = new DockPanel();
+        DockPanel.SetDock(cross, Dock.Right);
+        line.Children.Add(cross);
+        line.Children.Add(words);
+        return new Border
+        {
+            Child = line,
+            Padding = new Thickness(10, 8, 10, 8),
+            Margin = new Thickness(0, 0, 0, 8),
+            CornerRadius = new CornerRadius(8),
+            BorderBrush = Tokens.Brush("InputLine"),
+            BorderThickness = new Thickness(1),
+        };
+    }
+
+    /// A session without its terminal says why and what to do about it (D-421).
+    private UIElement NotStarted(TerminalView view)
+    {
+        var again = Flat(Strings.TerminalStartAgain, () => RetryAsked?.Invoke(), ghost: false, main: true);
+        return view.Problem switch
+        {
+            StartProblem.FolderGone => Message(
+                string.Format(CultureInfo.CurrentCulture, Strings.TerminalFolderGoneTitle, ShellAsk.FolderName(FolderOf(view))),
+                view.Shell ? Strings.TerminalFolderGoneShell : Strings.TerminalFolderGoneBody,
+                Flat(Strings.TerminalRemoveFromList, () => RowClosed?.Invoke(view.SessionId!), ghost: false)),
+            StartProblem.Failed => Message(
+                view.Shell ? Strings.TerminalShellNotStartedTitle : Strings.TerminalNotStartedTitle,
+                string.Format(CultureInfo.CurrentCulture, Strings.TerminalStartFailedBody, view.ProblemCode),
+                again),
+            _ => Message(
+                Strings.TerminalNotStartedTitle,
+                Strings.TerminalNotStartedBody,
+                TwoButtons(again, Flat(Strings.TerminalHowToInstall, () => InstallPageAsked?.Invoke(), ghost: false))),
+        };
+    }
+
+    private static string FolderOf(TerminalView view) =>
+        view.Groups.FirstOrDefault(group => group.Rows.Any(row => row.Id == view.SessionId))?.Folder ?? "";
+
+    private static StackPanel TwoButtons(Button first, Button second)
+    {
+        second.Margin = new Thickness(8, 0, 0, 0);
+        var row = new StackPanel { Orientation = Orientation.Horizontal };
+        row.Children.Add(first);
+        row.Children.Add(second);
+        return row;
+    }
     private static UIElement Message(string? title, string body, UIElement? button)
     {
         var column = new StackPanel { MaxWidth = 520, VerticalAlignment = VerticalAlignment.Center, HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(40, 0, 40, 0) };

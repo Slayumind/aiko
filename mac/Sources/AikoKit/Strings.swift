@@ -466,7 +466,17 @@ public enum Strings {
         "TerminalNoSessionsBody": ("A session is one conversation with Claude Code in one folder.", "Сессия — это один разговор с Claude Code в одной папке."),
         "TerminalStarting": ("Starting…", "Запускается…"),
         "TerminalNotStartedTitle": ("Claude Code did not start", "Claude Code не запустился"),
-        "TerminalNotStartedBody": ("Aiko did not find it on this computer. Install Claude Code, then open the session again.", "Aiko не нашла его на этом компьютере. Установи Claude Code и открой сессию снова."),
+        "TerminalNotStartedBody": ("Aiko did not find claude on this computer.", "Aiko не нашла claude на этом компьютере."),
+        "TerminalShellNotStartedTitle": ("The command line did not start", "Командная строка не запустилась"),
+        "TerminalStartFailedBody": ("Windows returned error {0}. The log has the details.", "Windows вернула ошибку {0}. Подробности — в журнале."),
+        "TerminalStartAgain": ("Start again", "Запустить ещё раз"),
+        "TerminalHowToInstall": ("How to install", "Как установить"),
+        "TerminalFolderGoneTitle": ("The folder {0} is no longer on the disk", "Папки {0} больше нет на диске"),
+        "TerminalFolderGoneBody": ("The conversation is saved, but there is nowhere to start it.", "Разговор сохранён, но запустить его негде."),
+        "TerminalFolderGoneShell": ("There is nowhere to open the command line.", "Командную строку негде открыть."),
+        "TerminalRemoveFromList": ("Remove from the list", "Убрать из списка"),
+        "TerminalCloseHint": ("Close the window and the sessions keep working, while Aiko stays by the clock.", "Закроешь окно — сессии продолжат работу, а Aiko останется у часов."),
+        "TerminalCloseHintDone": ("Got it", "Понятно"),
         "TerminalWorking": ("working", "работает"),
         "TerminalWaiting": ("waiting", "ждёт"),
         "TerminalDone": ("done", "готово"),
@@ -505,6 +515,9 @@ public enum Strings {
         "TerminalMaximize": ("Maximize", "Развернуть"),
         "TerminalRestore": ("Restore", "Восстановить"),
         "TerminalSessionList": ("Session list · Ctrl+Shift+B", "Список сессий · Ctrl+Shift+B"),
+        "TerminalFindConversation": ("Find a conversation · Ctrl+Shift+K", "Найти разговор · Ctrl+Shift+K"),
+        "TerminalKeysClaude": ("Ctrl+G editor · Ctrl+Shift+Space voice · Ctrl+Shift+K find a conversation", "Ctrl+G редактор · Ctrl+Shift+Space голос · Ctrl+Shift+K найти разговор"),
+        "TerminalKeysShell": ("# ask for a command · Ctrl+Shift+F find in the output · Ctrl+Shift+K find a conversation", "# подсказка команды · Ctrl+Shift+F найти в выводе · Ctrl+Shift+K найти разговор"),
         "TerminalShowLimits": ("Show the limits of the environments", "Показать лимиты сред"),
         "TerminalHideLimits": ("Hide the limits", "Скрыть лимиты"),
         "CardShortSession": ("5 h", "5 ч"),
@@ -1840,8 +1853,38 @@ public enum Strings {
     /// Claude Code did not start
     public static var terminalNotStartedTitle: String { Strings.get("TerminalNotStartedTitle") }
 
-    /// Aiko did not find it on this computer. Install Claude Code, then open the session again.
+    /// Aiko did not find claude on this computer.
     public static var terminalNotStartedBody: String { Strings.get("TerminalNotStartedBody") }
+
+    /// The command line did not start
+    public static var terminalShellNotStartedTitle: String { Strings.get("TerminalShellNotStartedTitle") }
+
+    /// Windows returned error {0}. The log has the details.
+    public static var terminalStartFailedBody: String { Strings.get("TerminalStartFailedBody") }
+
+    /// Start again
+    public static var terminalStartAgain: String { Strings.get("TerminalStartAgain") }
+
+    /// How to install
+    public static var terminalHowToInstall: String { Strings.get("TerminalHowToInstall") }
+
+    /// The folder {0} is no longer on the disk
+    public static var terminalFolderGoneTitle: String { Strings.get("TerminalFolderGoneTitle") }
+
+    /// The conversation is saved, but there is nowhere to start it.
+    public static var terminalFolderGoneBody: String { Strings.get("TerminalFolderGoneBody") }
+
+    /// There is nowhere to open the command line.
+    public static var terminalFolderGoneShell: String { Strings.get("TerminalFolderGoneShell") }
+
+    /// Remove from the list
+    public static var terminalRemoveFromList: String { Strings.get("TerminalRemoveFromList") }
+
+    /// Close the window and the sessions keep working, while Aiko stays by the clock.
+    public static var terminalCloseHint: String { Strings.get("TerminalCloseHint") }
+
+    /// Got it
+    public static var terminalCloseHintDone: String { Strings.get("TerminalCloseHintDone") }
 
     /// working
     public static var terminalWorking: String { Strings.get("TerminalWorking") }
@@ -1956,6 +1999,15 @@ public enum Strings {
 
     /// Session list · Ctrl+Shift+B
     public static var terminalSessionList: String { Strings.get("TerminalSessionList") }
+
+    /// Find a conversation · Ctrl+Shift+K
+    public static var terminalFindConversation: String { Strings.get("TerminalFindConversation") }
+
+    /// Ctrl+G editor · Ctrl+Shift+Space voice · Ctrl+Shift+K find a conversation
+    public static var terminalKeysClaude: String { Strings.get("TerminalKeysClaude") }
+
+    /// # ask for a command · Ctrl+Shift+F find in the output · Ctrl+Shift+K find a conversation
+    public static var terminalKeysShell: String { Strings.get("TerminalKeysShell") }
 
     /// Show the limits of the environments
     public static var terminalShowLimits: String { Strings.get("TerminalShowLimits") }

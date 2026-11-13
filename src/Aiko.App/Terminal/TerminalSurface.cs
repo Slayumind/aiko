@@ -115,7 +115,16 @@ sealed class TerminalSurface : Grid
             if (!_connected)
             {
                 _connected = true;
-                _control.Connection = _console;
+                try
+                {
+                    _control.Connection = _console;
+                }
+                catch (System.ComponentModel.Win32Exception error)
+                {
+                    // The window says the session did not start, and the log keeps the code.
+                    StartFailed?.Invoke(error.NativeErrorCode);
+                    return;
+                }
             }
 
             Dispatcher.BeginInvoke(SyncSize, DispatcherPriority.Background);
@@ -126,6 +135,9 @@ sealed class TerminalSurface : Grid
 
     /// The program ended, with its exit code. Raised on the window's thread.
     public event Action<int>? Exited;
+
+    /// Windows refused to start the program, with its error code (D-421).
+    public event Action<int>? StartFailed;
 
     /// A program took the whole screen, or gave it back: the keys go to the terminal while it has it.
     /// Raised on the window's thread.

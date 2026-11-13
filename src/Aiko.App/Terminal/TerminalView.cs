@@ -36,4 +36,16 @@ sealed record TerminalView(
 {
     /// Claude Code of the chosen session ended by itself: Enter starts it again (D-351).
     public bool Stopped { get; init; }
+
+    /// Why the chosen session has no terminal, null when it has one or has not been tried (D-421).
+    public StartProblem? Problem { get; init; }
+
+    /// The error Windows gave for StartProblem.Failed.
+    public int ProblemCode { get; init; }
+
+    /// The chosen session is a command line, not Claude Code.
+    public bool Shell { get; init; }
+
+    /// Once, while a session runs: closing the window keeps the sessions running (D-421).
+    public bool CloseHint { get; init; }
 }

@@ -1299,8 +1299,38 @@ public static class Strings
     /// Claude Code did not start
     public static string TerminalNotStartedTitle => Get("TerminalNotStartedTitle");
 
-    /// Aiko did not find it on this computer. Install Claude Code, then open the session again.
+    /// Aiko did not find claude on this computer.
     public static string TerminalNotStartedBody => Get("TerminalNotStartedBody");
+
+    /// The command line did not start
+    public static string TerminalShellNotStartedTitle => Get("TerminalShellNotStartedTitle");
+
+    /// Windows returned error {0}. The log has the details.
+    public static string TerminalStartFailedBody => Get("TerminalStartFailedBody");
+
+    /// Start again
+    public static string TerminalStartAgain => Get("TerminalStartAgain");
+
+    /// How to install
+    public static string TerminalHowToInstall => Get("TerminalHowToInstall");
+
+    /// The folder {0} is no longer on the disk
+    public static string TerminalFolderGoneTitle => Get("TerminalFolderGoneTitle");
+
+    /// The conversation is saved, but there is nowhere to start it.
+    public static string TerminalFolderGoneBody => Get("TerminalFolderGoneBody");
+
+    /// There is nowhere to open the command line.
+    public static string TerminalFolderGoneShell => Get("TerminalFolderGoneShell");
+
+    /// Remove from the list
+    public static string TerminalRemoveFromList => Get("TerminalRemoveFromList");
+
+    /// Close the window and the sessions keep working, while Aiko stays by the clock.
+    public static string TerminalCloseHint => Get("TerminalCloseHint");
+
+    /// Got it
+    public static string TerminalCloseHintDone => Get("TerminalCloseHintDone");
 
     /// working
     public static string TerminalWorking => Get("TerminalWorking");
@@ -1415,6 +1445,15 @@ public static class Strings
 
     /// Session list · Ctrl+Shift+B
     public static string TerminalSessionList => Get("TerminalSessionList");
+
+    /// Find a conversation · Ctrl+Shift+K
+    public static string TerminalFindConversation => Get("TerminalFindConversation");
+
+    /// Ctrl+G editor · Ctrl+Shift+Space voice · Ctrl+Shift+K find a conversation
+    public static string TerminalKeysClaude => Get("TerminalKeysClaude");
+
+    /// # ask for a command · Ctrl+Shift+F find in the output · Ctrl+Shift+K find a conversation
+    public static string TerminalKeysShell => Get("TerminalKeysShell");
 
     /// Show the limits of the environments
     public static string TerminalShowLimits => Get("TerminalShowLimits");
