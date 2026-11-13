@@ -57,13 +57,29 @@ sealed class TrayFaceAnimator
             return;
         }
 
+        // A frame with neither the rings nor the face, at the joint of two steps, would be an icon
+        // with no pixel at all. Windows draws such an icon as a black square, on the taskbar button
+        // between the face and the rings. It is left out, and the frame before it stays that long.
+        var frames = new List<(IconFrame Frame, TimeSpan Wait)>();
         foreach (var phase in phases)
         {
             var wait = TrayFaceMotion.Duration(phase) / TrayFaceMotion.FramesPerStep;
             foreach (var frame in TrayFaceMotion.Frames(phase))
             {
-                _frames.Enqueue((frame, wait));
+                if (IsBlank(frame) && frames.Count > 0)
+                {
+                    frames[^1] = (frames[^1].Frame, frames[^1].Wait + wait);
+                }
+                else if (!IsBlank(frame))
+                {
+                    frames.Add((frame, wait));
+                }
             }
+        }
+
+        foreach (var frame in frames)
+        {
+            _frames.Enqueue(frame);
         }
 
         Step();
@@ -89,6 +105,9 @@ sealed class TrayFaceAnimator
         _timer.Start();
         Changed?.Invoke();
     }
+
+    /// Nothing to draw: the rings are gone and the face is not there yet, or has gone.
+    internal static bool IsBlank(IconFrame frame) => frame.RingOpacity <= 0 && frame.FaceOpacity <= 0;
 
     private void Finish()
     {

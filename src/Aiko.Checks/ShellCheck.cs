@@ -97,8 +97,8 @@ static class ShellCheck
             Press(Strings.SettingsCloseTip);
             gear &= await Until(() => !shell.SettingsShownForCheck);
 
-            // ---- the icon of the taskbar button while a face comes: every icon the window was
-            // given in the move is still alive, so Explorer never draws one that is gone ----
+            // ---- the icon of the taskbar button while a face comes and goes: no picture without a
+            // pixel, and every icon the window was given in the move still alive ----
             (iconsSeen, iconsAlive) = await ButtonIcons(shell);
         }
 
@@ -136,7 +136,9 @@ static class ShellCheck
         return tips && oneWindow && settingsGone && icon && clickOpens && gear && search && iconsAlive && menu && faceCame && faceWent && island && islandOpens && back;
     }
 
-    /// The icons of the taskbar button during a face, read from the window every 30 ms.
+    /// The icons of the taskbar button during a face. Every picture the button gave Windows has a pixel
+    /// that is not see-through: Windows draws an icon without one as a black square. Every icon the
+    /// window holds, read every 30 ms, is still alive: Explorer reads it a little later.
     private static async Task<(int Seen, bool Alive)> ButtonIcons(AikoShell shell)
     {
         var window = Application.Current.Windows.OfType<TerminalWindow>().FirstOrDefault();
@@ -147,6 +149,8 @@ static class ShellCheck
 
         var handle = new System.Windows.Interop.WindowInteropHelper(window).Handle;
         var seen = new HashSet<IntPtr>();
+        var pictures = new List<byte[]>();
+        shell.WatchButtonForCheck(pictures.Add);
         shell.ShowFaceForCheck(AikoFace.Done);
         for (var i = 0; i < 25; i++)
         {
@@ -155,8 +159,17 @@ static class ShellCheck
         }
 
         shell.ShowFaceForCheck(null);
+        for (var i = 0; i < 25; i++)
+        {
+            seen.Add(GetIcon(handle, 0x007F, 1, IntPtr.Zero));
+            await Task.Delay(30);
+        }
+
+        shell.WatchButtonForCheck(null);
         seen.Remove(IntPtr.Zero);
-        return (seen.Count, seen.All(Alive));
+        var blank = pictures.Count(picture => !HasInk(picture));
+        Log.Write($"--try-shell: the button gave {pictures.Count} pictures, {blank} of them with no pixel");
+        return (seen.Count, pictures.Count > 0 && blank == 0 && seen.All(Alive));
     }
 
     /// GetIconInfo answers for a live icon only, and makes copies of its two pictures to free.
@@ -170,6 +183,24 @@ static class ShellCheck
         DeleteObject(info.Mask);
         DeleteObject(info.Color);
         return true;
+    }
+
+    private static bool HasInk(byte[] png)
+    {
+        using var stream = new System.IO.MemoryStream(png);
+        var frame = System.Windows.Media.Imaging.BitmapFrame.Create(stream, System.Windows.Media.Imaging.BitmapCreateOptions.None, System.Windows.Media.Imaging.BitmapCacheOption.OnLoad);
+        var bgra = new System.Windows.Media.Imaging.FormatConvertedBitmap(frame, System.Windows.Media.PixelFormats.Bgra32, null, 0);
+        var pixels = new byte[bgra.PixelWidth * bgra.PixelHeight * 4];
+        bgra.CopyPixels(pixels, bgra.PixelWidth * 4, 0);
+        for (var i = 3; i < pixels.Length; i += 4)
+        {
+            if (pixels[i] > 0)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     [System.Runtime.InteropServices.DllImport("user32.dll", EntryPoint = "SendMessageW")]
