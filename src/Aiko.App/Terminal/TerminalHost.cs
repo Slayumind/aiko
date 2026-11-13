@@ -366,7 +366,7 @@ sealed partial class TerminalHost
                 _ = WriteInTurn(terminal, writes);
             }
         };
-        editor.TerminalSelection = () => OpenTerminal()?.SelectedText;
+        editor.TerminalSelection = () => OpenTerminal()?.TakeSelectedText();
         _voice = new VoiceDictation(editor, VoiceContextNow);
         _voice.SettingsAsked += () => OpenSettings(SettingsPanel.TerminalPageKey);
     }

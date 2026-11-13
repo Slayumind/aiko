@@ -213,16 +213,14 @@ sealed class TerminalSurface : Grid
     }
 
     /// What the mouse selected in the terminal, ready for the clipboard, or null. The rows Claude
-    /// Code wrapped by the width are joined again (D-371).
-    public string? SelectedText
+    /// Code wrapped by the width are joined again (D-371). Taking it clears the selection in the
+    /// control, so it is taken only to copy, and once.
+    public string? TakeSelectedText()
     {
-        get
-        {
-            var text = _control.GetSelectedText();
-            return string.IsNullOrEmpty(text)
-                ? null
-                : TerminalCopy.Unwrap(text, _control.Columns).Replace("\n", Environment.NewLine, StringComparison.Ordinal);
-        }
+        var text = _control.GetSelectedText();
+        return string.IsNullOrEmpty(text)
+            ? null
+            : TerminalCopy.Unwrap(text, _control.Columns).Replace("\n", Environment.NewLine, StringComparison.Ordinal);
     }
 
     /// Ends the program and everything it started.
