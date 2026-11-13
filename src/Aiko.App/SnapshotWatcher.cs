@@ -3,11 +3,10 @@ using Aiko.Core;
 
 namespace Aiko.App;
 
-/// Watches the folder the bridge writes into. No timers: the file system says when something
-/// changed, and in between Aiko sleeps.
+/// The limits the bridge writes, one file per Claude Code config folder.
 sealed class SnapshotWatcher : IDisposable
 {
-    private readonly FileSystemWatcher _watcher;
+    private readonly JsonFolderWatcher _watcher;
     private readonly Dictionary<string, LimitSnapshot> _snapshots = new(StringComparer.OrdinalIgnoreCase);
 
     public SnapshotWatcher()
@@ -16,19 +15,18 @@ sealed class SnapshotWatcher : IDisposable
         Directory.CreateDirectory(Folder);
         RemoveLeftovers();
 
-        foreach (var file in Directory.EnumerateFiles(Folder, "*.json"))
+        _watcher = new JsonFolderWatcher(Folder);
+        foreach (var (name, text) in _watcher.AtStart)
         {
-            Read(file);
+            Keep(name, text);
         }
 
-        _watcher = new FileSystemWatcher(Folder, "*.json")
+        _watcher.Written += (name, text) =>
         {
-            NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.Size,
-            EnableRaisingEvents = true,
+            Keep(name, text);
+            Updated?.Invoke();
         };
-        _watcher.Changed += OnChanged;
-        _watcher.Created += OnChanged;
-        _watcher.Renamed += OnChanged;
+        _watcher.Start();
     }
 
     public string Folder { get; }
@@ -66,47 +64,15 @@ sealed class SnapshotWatcher : IDisposable
         }
     }
 
-    private void OnChanged(object sender, FileSystemEventArgs e)
+    private void Keep(string file, string text)
     {
-        if (Read(e.FullPath))
+        var name = Path.GetFileNameWithoutExtension(file);
+        var snapshot = SnapshotFile.FromJson(text, name);
+        lock (_snapshots)
         {
-            Updated?.Invoke();
+            _snapshots[name] = snapshot;
         }
     }
 
-    /// The bridge moves a temporary file over this one, so a read can land mid-swap. A failed
-    /// read is not an error: the next event brings the same file again.
-    private bool Read(string path)
-    {
-        for (var attempt = 0; attempt < 3; attempt++)
-        {
-            try
-            {
-                var name = Path.GetFileNameWithoutExtension(path);
-                var snapshot = SnapshotFile.FromJson(File.ReadAllText(path), name);
-                lock (_snapshots)
-                {
-                    _snapshots[name] = snapshot;
-                }
-                return true;
-            }
-            catch (IOException)
-            {
-                Thread.Sleep(30);
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return false;
-            }
-        }
-        return false;
-    }
-
-    public void Dispose()
-    {
-        _watcher.Changed -= OnChanged;
-        _watcher.Created -= OnChanged;
-        _watcher.Renamed -= OnChanged;
-        _watcher.Dispose();
-    }
+    public void Dispose() => _watcher.Dispose();
 }

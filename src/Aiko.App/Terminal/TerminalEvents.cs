@@ -6,26 +6,21 @@ using Aiko.Core.Terminal;
 namespace Aiko.App;
 
 /// The last hook events of the sessions of the terminal (D-352, D-360): the files the bridge
-/// writes, one per session. Like ActivityWatcher, no timers: the file system says when a session
-/// did something.
+/// writes, one per session. No timers: the file system says when a session did something.
 sealed class TerminalEvents : IDisposable
 {
     private readonly string _folder = ThisComputer.Folders.TerminalEventsFolder;
     private readonly Dispatcher _dispatcher;
-    private readonly FileSystemWatcher _watcher;
+    private readonly JsonFolderWatcher _watcher;
 
+    /// The files already there belong to sessions of an earlier run, so only what is written from
+    /// now on is raised.
     public TerminalEvents(Dispatcher dispatcher)
     {
         _dispatcher = dispatcher;
-        Directory.CreateDirectory(_folder);
-        _watcher = new FileSystemWatcher(_folder, "*.json")
-        {
-            NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.Size,
-            EnableRaisingEvents = true,
-        };
-        _watcher.Changed += OnChanged;
-        _watcher.Created += OnChanged;
-        _watcher.Renamed += OnChanged;
+        _watcher = new JsonFolderWatcher(_folder);
+        _watcher.Written += OnWritten;
+        _watcher.Start();
     }
 
     /// A session did something: its id and the event. Raised on the window's thread.
@@ -79,27 +74,14 @@ sealed class TerminalEvents : IDisposable
 
     public void Dispose() => _watcher.Dispose();
 
-    private void OnChanged(object sender, FileSystemEventArgs e)
+    private void OnWritten(string name, string text)
     {
-        var id = Path.GetFileNameWithoutExtension(e.Name ?? "");
-        if (TerminalEvent.FileName(id) is null || Read(e.FullPath) is not { } read)
+        var id = Path.GetFileNameWithoutExtension(name);
+        if (TerminalEvent.FileName(id) is null || TerminalEvent.FromJson(text) is not { } read)
         {
             return;
         }
 
         _dispatcher.BeginInvoke(() => Changed?.Invoke(id, read));
-    }
-
-    /// Null for a file that is gone or still being replaced; the next event of the watcher reads it again.
-    private static TerminalEvent? Read(string path)
-    {
-        try
-        {
-            return File.Exists(path) ? TerminalEvent.FromJson(File.ReadAllText(path)) : null;
-        }
-        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
-        {
-            return null;
-        }
     }
 }
