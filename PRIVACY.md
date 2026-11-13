@@ -57,7 +57,9 @@ the update check.
   rule goes away when you turn the personality off there or remove Aiko.
 - **The terminal window.** Its sessions are real terminals on your computer: Claude Code or a shell,
   run as you would run them yourself. Aiko shows what they print and passes your keys to them. It
-  doesn't store, log or send anything that appears in a terminal. The list of sessions is kept in
+  doesn't store, log or send anything that appears in a terminal on its own. Two things in a shell
+  session ask Claude Code, and only when you start them: see **Explain and suggest** below. The list
+  of sessions is kept in
   `terminal.json` next to Aiko's settings: for each session its name, folder, environment and the
   ID of its Claude Code conversation, never the conversation itself.
 - **If the personality was on before Aiko had a memory**, the memory starts with the update. Aiko
@@ -65,7 +67,7 @@ the update check.
 
 ## What Aiko sends
 
-Nothing, unless you turn on one of these.
+Nothing, unless you turn on or start one of these.
 
 - **Direct mode** (off by default, set per environment): Aiko asks `api.anthropic.com` for the
   limits of that account, at most once every three minutes. The request carries that account's
@@ -82,6 +84,16 @@ Nothing, unless you turn on one of these.
   the answer.
 - **Voice input** (off by default, Windows for now): see **Voice input** below. On this computer it
   sends no sound anywhere; with your own OpenAI key the sound of each recording goes to OpenAI.
+- **Explain and suggest** in a shell session (Windows for now). Each one runs only when you start it:
+  - **Explain** under a failed command sends the command, its exit code and the end of its output,
+    up to 6,000 characters.
+  - A line that starts with `#`, such as `# find big files`, asks for a command. It sends that line,
+    the name of the shell and the name of the session's folder, not the path to it. A line without
+    `#` is never sent, in any language.
+
+  Aiko doesn't send these itself. It runs `claude -p` in the session's environment, so the question
+  goes to Anthropic like any other message to Claude Code, and it uses that account's limits. Aiko
+  keeps neither the question nor the answer.
 
 The `calendar` and `drive` skills don't change this. They are instructions for Claude: Claude reads
 and writes your Google Calendar and Drive through the connectors you set up in Claude, and the Aiko
@@ -95,7 +107,7 @@ measures, and this is how.
 **What is sent**, together with the question about the latest version:
 
 - `v`: the version of Aiko you run;
-- `os`: the version of Windows;
+- `os`: the version of Windows or macOS;
 - `day`: an ID that **changes every day**;
 - `w`: a single 1, when this is the first run of this week;
 - `m`: a single 1, when this is the first run of this month;
@@ -105,7 +117,8 @@ measures, and this is how.
 the memory holds, which projects you work on, or how long Aiko has been running. The settings page
 lists these six lines and says what each one is for.
 
-**How the ID works.** Aiko makes a random value once and keeps it in `%APPDATA%\Aiko\install-id`.
+**How the ID works.** Aiko makes a random value once and keeps it in `install-id` in its settings
+folder: `%APPDATA%\Aiko` on Windows, `~/Library/Application Support/Aiko` on macOS.
 That value never leaves your computer. Aiko sends a hash of the value and today's date, cut to
 sixteen characters. Tomorrow's hash has no link to today's, so two days of requests can't be joined
 into one person. The site counts copies per day, and it never follows one copy over time. **Reset
@@ -113,7 +126,7 @@ ID** on the privacy page throws the value away, and so does deleting the file.
 
 **How a week and a month are counted.** They can't be worked out from the daily ID, because two
 days of it don't join up. So Aiko answers the question itself: it remembers on your computer which
-week and which month it has already reported, in `%APPDATA%\Aiko\reported.json`, and sets `w` or
+week and which month it has already reported, in `reported.json` next to `install-id`, and sets `w` or
 `m` once per period. The site adds those up. That file never leaves your computer either, and the
 weeks and months are calendar ones.
 

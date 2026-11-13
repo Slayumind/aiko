@@ -1,0 +1,14 @@
+{
+  "comment": "A line for the log without full paths (D-420): a path keeps only its last part. A path in quotes may have spaces; a path without quotes ends at the first space. Windows only until the Mac log comes under the same rule.",
+  "rows": [
+    { "line": "System.IO.DirectoryNotFoundException: Could not find a part of the path 'C:\\Users\\me\\personal projects\\aiko\\a.txt'.", "clean": "System.IO.DirectoryNotFoundException: Could not find a part of the path 'a.txt'." },
+    { "line": "Access to the path \"C:\\Users\\me\\AppData\\Local\\Aiko\\pictures\\4f1180c2\" is denied.", "clean": "Access to the path \"4f1180c2\" is denied." },
+    { "line": "   at Aiko.App.Log.Write(String message) in D:\\a\\aiko\\src\\Aiko.App\\Log.cs:line 35", "clean": "   at Aiko.App.Log.Write(String message) in Log.cs:line 35" },
+    { "line": "could not open \\\\server\\share\\folder\\b.json", "clean": "could not open b.json" },
+    { "line": "could not read '/Users/me/Library/Application Support/Aiko/settings.json'", "clean": "could not read 'settings.json'" },
+    { "line": "folder C:\\work\\", "clean": "folder work" },
+    { "line": "terminal: Claude Code did not start for .claude-personal, error 2", "clean": "terminal: Claude Code did not start for .claude-personal, error 2" },
+    { "line": "update check: 0.4.1 is out", "clean": "update check: 0.4.1 is out" },
+    { "line": "ratio 3/4 at 12:30", "clean": "ratio 3/4 at 12:30" }
+  ]
+}

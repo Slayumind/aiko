@@ -1,0 +1,11 @@
+{
+  "comment": "The query of the daily version check (PRIVACY.md, Counting; D-420). Counting off, or no identifier of the day: the version only. Counting on: the version, the system, the identifier of the day, the persona as 0 or 1, and w=1 and m=1 on the first check of a week and of a month. Values are escaped as RFC 3986 data: letters, digits and - . _ ~ stay. The Swift twin comes with the terminal on the Mac: today the Mac escapes the dot of the version as %2E.",
+  "rows": [
+    { "version": "0.4.1", "system": "10.0.26300.0", "day": null, "persona": true, "week": true, "month": true, "query": "?v=0.4.1" },
+    { "version": "0.4.1", "system": "10.0.26300.0", "day": "", "persona": true, "week": true, "month": true, "query": "?v=0.4.1" },
+    { "version": "0.4.1", "system": "10.0.26300.0", "day": "a1b2c3", "persona": false, "week": false, "month": false, "query": "?v=0.4.1&os=10.0.26300.0&day=a1b2c3&p=0" },
+    { "version": "0.4.1", "system": "10.0.26300.0", "day": "a1b2c3", "persona": true, "week": true, "month": false, "query": "?v=0.4.1&os=10.0.26300.0&day=a1b2c3&p=1&w=1" },
+    { "version": "0.4.1", "system": "10.0.26300.0", "day": "a1b2c3", "persona": true, "week": true, "month": true, "query": "?v=0.4.1&os=10.0.26300.0&day=a1b2c3&p=1&w=1&m=1" },
+    { "version": "0.4.1", "system": "macOS 15.1", "day": "a1b2c3", "persona": false, "week": false, "month": true, "query": "?v=0.4.1&os=macOS%2015.1&day=a1b2c3&p=0&m=1" }
+  ]
+}

@@ -108,11 +108,12 @@ sealed class OnlyAllowedHosts(HttpMessageHandler inner) : DelegatingHandler(inne
             or HttpStatusCode.TemporaryRedirect or HttpStatusCode.PermanentRedirect;
 
     /// Aiko only ever asks for things, so the next request is the same GET at the new address.
-    /// Headers that name the caller travel on; nothing carries a body.
+    /// Headers that name the caller travel on, a token only to the same host (RedirectHeaders);
+    /// nothing carries a body.
     private static HttpRequestMessage Follow(HttpRequestMessage previous, Uri next)
     {
         var request = new HttpRequestMessage(HttpMethod.Get, next);
-        foreach (var header in previous.Headers)
+        foreach (var header in previous.Headers.Where(header => RedirectHeaders.Keeps(header.Key, previous.RequestUri!, next)))
         {
             request.Headers.TryAddWithoutValidation(header.Key, header.Value);
         }

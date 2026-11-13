@@ -8,21 +8,25 @@ public static class ShellAsk
     /// The most of an output that goes into a question: its end, where the error usually is.
     public const int MostOutput = 6000;
 
-    /// Words that ask for a command rather than run one: Russian letters (the request is in words),
-    /// or a line that starts with "#", the way Warp asks in English.
+    /// Words that ask for a command rather than run one: only a line that starts with "#", the way Warp
+    /// asks (D-420). Russian letters alone are not a request: a path or a commit message has them too,
+    /// and a request sends the line to Claude Code and spends the limits.
     public static bool IsRequest(string text)
     {
         var trimmed = text.Trim();
-        if (trimmed.Length < 3)
-        {
-            return false;
-        }
-
-        return trimmed.StartsWith('#') || trimmed.Any(c => c is >= 'а' and <= 'я' or >= 'А' and <= 'Я' or 'ё' or 'Ё');
+        return trimmed.StartsWith('#') && RequestText(trimmed).Length >= 2;
     }
 
     /// The request without the "#" that marked it.
     public static string RequestText(string text) => text.Trim().TrimStart('#').Trim();
+
+    /// The last part of a folder path, with either kind of slash: "C:\Users\me\aiko" is "aiko".
+    public static string FolderName(string folder)
+    {
+        var trimmed = folder.TrimEnd('\\', '/');
+        var cut = trimmed.LastIndexOfAny(['\\', '/']);
+        return cut < 0 ? trimmed : trimmed[(cut + 1)..];
+    }
 
     public static string Explain(string shell, string command, int exitCode, string output, string language)
     {
@@ -39,9 +43,11 @@ public static class ShellAsk
             """;
     }
 
+    /// folder: the folder of the session. Only its name goes into the question, not the path above it
+    /// (D-420): the path names the person and their other folders.
     public static string Suggest(string shell, string folder, string request) =>
         $"""
-        Write one command for {Name(shell)} on Windows, in the folder {folder}, that does this: {RequestText(request)}
+        Write one command for {Name(shell)} on Windows, in the current folder ({FolderName(folder)}), that does this: {RequestText(request)}
         Answer with the command only: one line, no explanation, no Markdown, no code block.
         """;
 
