@@ -65,7 +65,7 @@ static class Program
         // change would leave half a window in the other language.
         LanguageChoice.Apply(SettingsStore.Load().Language);
 
-        var application = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
+        var application = Tips.Install(new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown });
         AikoShell? shell = null;
         CrashGuard.Watch(application, () => shell?.CloseWindows());
 

@@ -24,7 +24,7 @@ static class TerminalRenameCheck
             report.Add($"{(ok ? "PASS" : "FAIL")} {what}");
         }
 
-        var application = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
+        var application = Tips.Install(new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown });
         application.Startup += async (_, _) =>
         {
             var panel = new TerminalPanel { Width = 1000, Height = 600 };

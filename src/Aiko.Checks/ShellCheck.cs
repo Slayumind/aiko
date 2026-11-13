@@ -24,7 +24,7 @@ static class ShellCheck
 {
     public static int Run()
     {
-        var application = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
+        var application = Tips.Install(new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown });
         var shell = new AikoShell(application);
         var result = 1;
 
@@ -54,6 +54,9 @@ static class ShellCheck
     private static async Task<bool> Walk(AikoShell shell)
     {
         var home = SettingsStore.Load().Place;
+
+        // Every tip of every window takes the style of the application (Theme/ToolTip.xaml).
+        var tips = Application.Current.TryFindResource(typeof(System.Windows.Controls.ToolTip)) is Style { Setters.Count: > 0 };
         var environments = SettingsStore.LoadEnvironments().Environments.Count;
 
         // ---- the settings: in the terminal window, and gone when closed. Before the first
@@ -74,6 +77,26 @@ static class ShellCheck
         // the first run ----
         shell.ClickIconForCheck();
         var clickOpens = await Until(() => environments == 0 ? shell.SettingsShownForCheck : shell.TerminalShownForCheck);
+
+        // ---- the buttons of the title bar, pressed as a mouse presses them: the magnifier opens one
+        // palette, the gear opens the settings and closes them ----
+        var gear = true;
+        var search = true;
+        if (environments > 0)
+        {
+            var before = shell.PaletteForCheck.Opened;
+            Press(Strings.TerminalFindConversation);
+            search = await Until(() => shell.PaletteForCheck.Open);
+            await Task.Delay(300);
+            search &= shell.PaletteForCheck.Opened == before + 1;
+            shell.ClosePaletteForCheck();
+
+            Press(Strings.Settings);
+            gear = await Until(() => shell.SettingsShownForCheck);
+            Press(Strings.SettingsCloseTip);
+            gear &= await Until(() => !shell.SettingsShownForCheck);
+        }
+
         await CloseWindows(shell);
 
         // ---- the menu of the icon: "Settings" is picked with the keyboard and opens the window ----
@@ -100,12 +123,45 @@ static class ShellCheck
         await Task.Delay(300);
         var back = (home == AikoPlace.Island) == (shell.IslandForCheck is not null);
 
-        Log.Write($"--try-shell: settings in the terminal window={oneWindow}, gone when closed={settingsGone}, icon={icon}, "
-            + $"a click on the icon opens the window={clickOpens}, the menu opens settings={menu}, "
+        Log.Write($"--try-shell: tips={tips}, settings in the terminal window={oneWindow}, gone when closed={settingsGone}, icon={icon}, "
+            + $"a click on the icon opens the window={clickOpens}, the gear={gear}, the magnifier={search}, the menu opens settings={menu}, "
             + $"face came={faceCame} and went={faceWent}, island={island}, a click on the island opens the window={islandOpens}, "
             + $"back home={back}");
 
-        return oneWindow && settingsGone && icon && clickOpens && menu && faceCame && faceWent && island && islandOpens && back;
+        return tips && oneWindow && settingsGone && icon && clickOpens && gear && search && menu && faceCame && faceWent && island && islandOpens && back;
+    }
+
+    /// Presses the button of the terminal window whose tip says this, through its automation peer:
+    /// the same Click a mouse brings.
+    private static void Press(string tip)
+    {
+        var window = Application.Current.Windows.OfType<TerminalWindow>().FirstOrDefault();
+        if (window is null || Find(window, tip) is not { } button)
+        {
+            Log.Write($"--try-shell: no button with the tip {tip}");
+            return;
+        }
+
+        ((System.Windows.Automation.Provider.IInvokeProvider)new System.Windows.Automation.Peers.ButtonAutomationPeer(button).GetPattern(System.Windows.Automation.Peers.PatternInterface.Invoke)).Invoke();
+    }
+
+    private static System.Windows.Controls.Button? Find(DependencyObject parent, string tip)
+    {
+        for (var i = 0; i < System.Windows.Media.VisualTreeHelper.GetChildrenCount(parent); i++)
+        {
+            var child = System.Windows.Media.VisualTreeHelper.GetChild(parent, i);
+            if (child is System.Windows.Controls.Button { ToolTip: string text } button && text == tip && button.IsVisible)
+            {
+                return button;
+            }
+
+            if (Find(child, tip) is { } found)
+            {
+                return found;
+            }
+        }
+
+        return null;
     }
 
     /// The menu waits inside Windows until something is picked, so the keys are sent from a timer

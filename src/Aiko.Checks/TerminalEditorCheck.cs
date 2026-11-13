@@ -34,7 +34,7 @@ static class TerminalEditorCheck
             report.Add($"{(ok ? "PASS" : "FAIL")} {what}{(seen.Length > 0 ? " — " + seen : "")}");
         }
 
-        var application = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
+        var application = Tips.Install(new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown });
         application.Startup += async (_, _) =>
         {
             try

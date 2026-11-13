@@ -185,6 +185,11 @@ sealed class AikoShell : IDisposable
     /// The terminal window is open.
     public bool TerminalShownForCheck => _terminal is not null;
 
+    /// The palette of sessions is open, and how many times it opened since the window was made.
+    public (bool Open, int Opened) PaletteForCheck => _terminal?.PaletteForCheck ?? (false, 0);
+
+    public void ClosePaletteForCheck() => _terminal?.ClosePaletteForCheck();
+
     public IslandWindow? IslandForCheck => _island.Window;
 
     /// The settings are open: in the terminal window, or in a window of their own before the first

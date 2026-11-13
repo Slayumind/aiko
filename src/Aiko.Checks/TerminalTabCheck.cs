@@ -29,7 +29,7 @@ static class TerminalTabCheck
             report.Add($"{(ok ? "PASS" : "FAIL")} {what}");
         }
 
-        var application = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
+        var application = Tips.Install(new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown });
         application.Startup += async (_, _) =>
         {
             var terminal = new TerminalSurface(new PtyLaunch("cmd.exe /k", Path.GetTempPath(), new Dictionary<string, string?>()));

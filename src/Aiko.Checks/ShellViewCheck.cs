@@ -38,7 +38,7 @@ static class ShellViewCheck
         Directory.CreateDirectory(work);
         File.WriteAllText(Path.Combine(work, "note.txt"), "lantern\n");
 
-        var application = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
+        var application = Tips.Install(new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown });
         application.Startup += async (_, _) =>
         {
             var terminal = new TerminalSurface(new PtyLaunch(ShellLaunch.Bash(bash).CommandLine, work, new Dictionary<string, string?>()), blocks: true);
