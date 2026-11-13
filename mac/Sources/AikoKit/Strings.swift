@@ -475,7 +475,6 @@ public enum Strings {
         "TerminalFolderGoneBody": ("The conversation is saved, but there is nowhere to start it.", "Разговор сохранён, но запустить его негде."),
         "TerminalFolderGoneShell": ("There is nowhere to open the command line.", "Командную строку негде открыть."),
         "TerminalRemoveFromList": ("Remove from the list", "Убрать из списка"),
-        "TerminalCloseHint": ("Close the window and the sessions keep working, while Aiko stays by the clock.", "Закроешь окно — сессии продолжат работу, а Aiko останется у часов."),
         "TerminalWorking": ("working", "работает"),
         "TerminalWaiting": ("waiting", "ждёт"),
         "TerminalDone": ("done", "готово"),
@@ -1878,9 +1877,6 @@ public enum Strings {
 
     /// Remove from the list
     public static var terminalRemoveFromList: String { Strings.get("TerminalRemoveFromList") }
-
-    /// Close the window and the sessions keep working, while Aiko stays by the clock.
-    public static var terminalCloseHint: String { Strings.get("TerminalCloseHint") }
 
     /// working
     public static var terminalWorking: String { Strings.get("TerminalWorking") }

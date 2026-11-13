@@ -53,13 +53,7 @@ sealed partial class TerminalPanel
         var newSession = Flat(Strings.TerminalNewSession, () => CreateAsked?.Invoke(), ghost: false, plus: true, aside: key);
         newSession.HorizontalAlignment = HorizontalAlignment.Stretch;
         newSession.HorizontalContentAlignment = HorizontalAlignment.Stretch;
-        var create = new StackPanel { Margin = new Thickness(8) };
-        if (view.CloseHint)
-        {
-            create.Children.Add(CloseHint());
-        }
-
-        create.Children.Add(newSession);
+        var create = new Border { Margin = new Thickness(8), Child = newSession };
 
         // The list lives in the window or, in a narrow one, under the button with the session name.
         _list.Children.Clear();

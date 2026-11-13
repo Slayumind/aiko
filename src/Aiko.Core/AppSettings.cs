@@ -59,9 +59,6 @@ public sealed record AppSettings
     /// line in its settings.json. Somebody who turned her on before that must be told once.
     public bool MemoryShown { get; init; }
 
-    /// Whether the window has said once that closing it keeps the sessions running (D-421).
-    public bool CloseHintShown { get; init; }
-
     public AikoLanguage Language { get; init; } = AikoLanguage.System;
 
     /// Games, video and presentations take the whole screen, and the island would sit on top.

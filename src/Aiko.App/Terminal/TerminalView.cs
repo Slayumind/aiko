@@ -45,7 +45,4 @@ sealed record TerminalView(
 
     /// The chosen session is a command line, not Claude Code.
     public bool Shell { get; init; }
-
-    /// Once, while a session runs: closing the window keeps the sessions running (D-421).
-    public bool CloseHint { get; init; }
 }

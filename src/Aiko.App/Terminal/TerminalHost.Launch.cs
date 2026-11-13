@@ -100,19 +100,6 @@ sealed partial class TerminalHost
     /// The official page on installing Claude Code.
     private const string ClaudeInstallPage = "https://code.claude.com/docs/en/setup";
 
-    /// The line about closing the window is done with, by its cross or by the first close.
-    private void CloseHintDone()
-    {
-        if (_closeHintShown)
-        {
-            return;
-        }
-
-        _closeHintShown = true;
-        SettingsStore.Change(settings => settings with { CloseHintShown = true });
-        Draw();
-    }
-
     /// "Start again": the session tries once more, with Claude Code found or the folder back.
     private void RetryStart()
     {

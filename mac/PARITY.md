@@ -73,7 +73,7 @@ a row cannot change in one core and stay as it was in the other. See `spec/cases
 | AikoMarketplace.cs | AikoMarketplace.swift | — | — | its cases sit in PluginPlanTests and SkillPluginTests |
 | Strings.cs | Strings.swift | — | 3 | both are made by `tools/strings.py` from `tools/strings.json`, so a text is written once. The app, the checks and the XAML of Windows read the core table too (D-422) |
 | CardText.cs, CardModel.cs, TrayText.cs | CardText.swift, CardModel.swift, TrayText.swift | 8 | 41 | CardWordsTests on both sides: the words of the limits, the blocks of every environment and the tooltip of the icon (D-422). Rows in `spec/cases/card-words`, read in both languages. Windows has four more fields for the open header of the terminal window: `ShortName`, `Countdown`, `NeedsSignIn` and the `Updated` of a block |
-| AppSettings.cs | AppSettings.swift | 18 | 18 | `CloseHintShown`, the line about closing the window that is shown once (D-421), is in both |
+| AppSettings.cs | AppSettings.swift | 17 | 17 | |
 | WizardChecklist.cs | WizardChecklist.swift | 15 | 15 | `PlaceSeen`: the step "Place" is open until the person has seen it, and it is optional (D-421) |
 | CredentialFile.cs | CredentialFile.swift | 10 | 10 | `TryParse` with an out parameter is `parse`, which answers nil |
 | MemoryFact.cs, MemoryFile.cs | MemoryFact.swift, MemoryFile.swift | 65 | 65 | an entry Aiko cannot use goes back into the file as it was written, which Swift reads with `JsonRawText`; the file is the same in both cores apart from the line ends |

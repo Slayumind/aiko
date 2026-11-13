@@ -343,9 +343,6 @@ sealed partial class TerminalPanel : UserControl
     /// The magnifier in the title bar.
     public event Action? PaletteAsked;
 
-    /// The cross of the line about closing the window.
-    public event Action? CloseHintDone;
-
     /// "Start again" on a session whose terminal did not start.
     public event Action? RetryAsked;
 
