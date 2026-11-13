@@ -3,8 +3,9 @@ using System.IO;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Aiko.App;
 
-namespace Aiko.App;
+namespace Aiko.Checks;
 
 /// --try-shell-view report.txt [picture.png]: the checkpoint of shell blocks (D-412) in a real window off
 /// the screen. Git Bash with Aiko's marks prints ten thousand lines, the view scrolls over them two

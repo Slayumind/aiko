@@ -1,8 +1,9 @@
 using System.Windows;
 using System.Windows.Media;
+using Aiko.App;
 using Aiko.Core;
 
-namespace Aiko.App;
+namespace Aiko.Checks;
 
 /// --try-island: drags the island with the real mouse from the top of the screen to the left edge,
 /// the way a person would, and checks where it lands. The island is a window of its own above

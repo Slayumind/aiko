@@ -7,10 +7,11 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Aiko.App;
 using Aiko.Core;
 using Aiko.Core.Terminal;
 
-namespace Aiko.App;
+namespace Aiko.Checks;
 
 /// --try-editor: the editor under the terminal with real programs (D-369). A Claude Code on Haiku and
 /// a Git Bash run in pseudo consoles; the editor stands in a window off the screen that never takes

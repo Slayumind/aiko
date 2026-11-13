@@ -34,7 +34,7 @@ static class NoticeSound
 
     private static byte[] Read()
     {
-        var resource = Application.GetResourceStream(new Uri("pack://application:,,,/Assets/Sounds/waiting.wav", UriKind.Absolute))
+        var resource = Application.GetResourceStream(new Uri("pack://application:,,,/Aiko.App;component/Assets/Sounds/waiting.wav", UriKind.Absolute))
             ?? throw new IOException("the sound is not in the app");
         using var stream = resource.Stream;
         using var copy = new MemoryStream();

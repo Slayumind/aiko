@@ -76,8 +76,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 - The log keeps only the name of a file or folder, not its full path. A system error used to write
   the whole path there, though the privacy notes say the log has no working folders.
-- Aiko runs as one copy. Starting it again, from the Start menu or a pinned button, opens the
-  window of the Aiko that already runs. Before, every start added one more Aiko to the tray.
+- Aiko runs as one copy. Starting it again, from the Start menu, a pinned button or with a folder
+  dropped on it, opens the window of the Aiko that already runs. Before, every start added one more Aiko to the tray.
 - A session that stopped before your first message, or stayed empty until Aiko restarted, now
   starts again. Before, Enter or the restart only said "No conversation found".
 - A mistake in one window no longer closes Aiko: the tray, the island and the sessions keep running.

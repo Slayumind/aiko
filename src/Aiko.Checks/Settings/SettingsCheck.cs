@@ -1,8 +1,9 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Aiko.App;
 
-namespace Aiko.App;
+namespace Aiko.Checks;
 
 /// --try-settings: opens the settings in a window and uses them with the real mouse and keyboard, the way
 /// the live run that found the bugs did. It adds the first bound folder on the page of the other

@@ -2,10 +2,11 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using Aiko.App;
 using Aiko.Core;
 using Aiko.Core.Terminal;
 
-namespace Aiko.App;
+namespace Aiko.Checks;
 
 /// --try-terminal-hooks: a real Claude Code (on Haiku) in a pseudo console with the hook of the
 /// terminal, the way the window starts it (D-366). It reads a file, asks to write one, is

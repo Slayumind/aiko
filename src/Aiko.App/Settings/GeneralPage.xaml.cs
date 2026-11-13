@@ -190,11 +190,9 @@ public partial class GeneralPage : UserControl
         _ => "the one Windows uses",
     };
 
-    /// A door for snapshots: AIKO_TRY_UPDATE=UpToDate, Available, Downloading, Ready, CheckFailed,
-    /// DownloadFailed or CannotInstall draws the update line at that stage, with a made-up version.
     private void TryUpdateStage()
     {
-        if (!Enum.TryParse<UpdateStage>(Environment.GetEnvironmentVariable("AIKO_TRY_UPDATE"), out var stage))
+        if (SettingsScene.Update is not { } stage)
         {
             return;
         }
@@ -330,6 +328,12 @@ public partial class GeneralPage : UserControl
         }
 
         if (version == _newsFor)
+        {
+            return;
+        }
+
+        // A snapshot draws no notes: it asks no one, and it has no loop of the window to come back to.
+        if (SettingsScene.Update is not null)
         {
             return;
         }

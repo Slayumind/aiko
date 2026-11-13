@@ -2,9 +2,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Text.Json;
+using Aiko.App;
 using Aiko.Core.Terminal;
 
-namespace Aiko.App;
+namespace Aiko.Checks;
 
 /// --try-shell-blocks out-folder: every shell of this machine starts with Aiko's marks in a real
 /// ConPTY and runs the same commands: a success, a failure, a line redrawn with \r, ten thousand lines

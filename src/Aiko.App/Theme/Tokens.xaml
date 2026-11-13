@@ -35,8 +35,8 @@
   <!-- Hover lightens whatever is under it by this much, as a layer that fades in. -->
   <SolidColorBrush x:Key="HoverLayer" Color="#12FFFFFF" />
 
-  <FontFamily x:Key="Sans">pack://application:,,,/Assets/Fonts/#Geist</FontFamily>
-  <FontFamily x:Key="Mono">pack://application:,,,/Assets/Fonts/#Geist Mono</FontFamily>
+  <FontFamily x:Key="Sans">pack://application:,,,/Aiko.App;component/Assets/Fonts/#Geist</FontFamily>
+  <FontFamily x:Key="Mono">pack://application:,,,/Aiko.App;component/Assets/Fonts/#Geist Mono</FontFamily>
 
   <sys:Double x:Key="TextTiny">11</sys:Double>
   <sys:Double x:Key="TextSmall">12</sys:Double>

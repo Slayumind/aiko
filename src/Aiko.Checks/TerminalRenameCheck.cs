@@ -1,10 +1,11 @@
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
+using Aiko.App;
 using Aiko.Core;
 using Aiko.Core.Terminal;
 
-namespace Aiko.App;
+namespace Aiko.Checks;
 
 /// --try-rename: a change of a session name never freezes the list (D-389), and the title bar keeps
 /// its pills clear of the gear in a narrow window. A window off the screen

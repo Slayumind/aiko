@@ -3,8 +3,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Aiko.App;
 
-namespace Aiko.App;
+namespace Aiko.Checks;
 
 /// Draws a piece of Aiko into a file. Every surface floats above the desktop, so nothing here is
 /// ever seen in a window of its own: this is how it gets looked at after a change.

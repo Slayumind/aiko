@@ -153,7 +153,7 @@ sealed class TerminalPanel : UserControl
         // the field.
         Resources.MergedDictionaries.Add(new ResourceDictionary
         {
-            Source = new Uri("pack://application:,,,/Theme/Controls.xaml", UriKind.Absolute),
+            Source = new Uri("pack://application:,,,/Aiko.App;component/Theme/Controls.xaml", UriKind.Absolute),
         });
         Resources[typeof(ScrollViewer)] = Resources["QuietScroll"];
 
