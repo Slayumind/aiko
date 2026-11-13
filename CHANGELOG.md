@@ -74,6 +74,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Fixed
 
+- Aiko runs as one copy. Starting it again, from the Start menu or a pinned button, opens the
+  window of the Aiko that already runs. Before, every start added one more Aiko to the tray.
 - A session that stopped before your first message, or stayed empty until Aiko restarted, now
   starts again. Before, Enter or the restart only said "No conversation found".
 - A mistake in one window no longer closes Aiko: the tray, the island and the sessions keep running.

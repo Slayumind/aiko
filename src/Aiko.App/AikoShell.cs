@@ -351,6 +351,10 @@ sealed class AikoShell : IDisposable
     /// limits are in the tooltip of the icon and in the header of the window.
     private void OnIconClicked() => OpenTerminal();
 
+    /// Another start of Aiko by the person, from the Start menu or a pin on the taskbar (D-419): the
+    /// same as a click on the tray icon.
+    public void OpenAskedByAnotherStart() => OpenTerminal();
+
     private void OnMenuRequested(IntPtr anchor)
     {
         switch (TrayMenu.Show(_tray.Window, anchor, ShellNumbers.OtherEnvironment()))
