@@ -13,13 +13,17 @@ sealed partial class TerminalHost
     /// (TerminalKeys); here it is done. False leaves the key to the program.
     private bool KeyPressed(System.Windows.Input.Key key, bool shift, bool inTerminal)
     {
+        // Taking the selection clears it in the control, so it is taken once, only for C, and the
+        // same text is copied. Taken for every key, Ctrl alone wiped it before C came.
+        var name = KeyName(key);
+        var selected = name == "C" && (inTerminal || shift) && !SettingsOpen ? OpenTerminal()?.TakeSelectedText() : null;
         var state = new TerminalKeyState(
             SettingsOpen,
             _model.Session(_sessions)?.Kind == SessionKind.Claude,
             inTerminal,
-            inTerminal && OpenTerminal()?.SelectedText is { Length: > 0 });
+            inTerminal && selected is not null);
 
-        switch (TerminalKeys.For(KeyName(key), shift, state))
+        switch (TerminalKeys.For(name, shift, state))
         {
             case TerminalKeyAction.ToggleSettings:
                 if (SettingsOpen)
@@ -43,7 +47,7 @@ sealed partial class TerminalHost
 
                 return true;
             case TerminalKeyAction.Copy:
-                if (OpenTerminal()?.SelectedText is { Length: > 0 } selected)
+                if (selected is not null)
                 {
                     CopyText(selected);
                 }
