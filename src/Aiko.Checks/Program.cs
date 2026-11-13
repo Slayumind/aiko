@@ -42,6 +42,13 @@ static class Program
             Motion.TurnOff();
         }
 
+        // The icon sheets draw the rings in the colours of the tokens, which WPF reads from the resources
+        // of the app only once an Application exists. They open no window, so nothing else makes one.
+        if (args is ["--snapshot-icon", ..])
+        {
+            _ = Tips.Install(new Application());
+        }
+
         // Draw the icon into a file and stop. Windows hides new tray icons in the overflow area,
         // so this is the only way to look at the drawing itself.
         if (args is ["--snapshot-icon", var faceIconPath, "faces", ..])
