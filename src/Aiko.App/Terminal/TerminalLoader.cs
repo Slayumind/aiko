@@ -30,7 +30,7 @@ sealed class TerminalLoader : StackPanel
         }
 
         Children.Add(dots);
-        var word = TerminalPanel.Text(Strings.TerminalStarting, "TextNumber", "Muted", FontWeights.Normal);
+        var word = Widgets.Text(Strings.TerminalStarting, "TextNumber", "Muted", FontWeights.Normal);
         word.HorizontalAlignment = HorizontalAlignment.Center;
         word.Margin = new Thickness(0, 12, 0, 0);
         Children.Add(word);

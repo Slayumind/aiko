@@ -182,7 +182,7 @@ sealed class HeaderStripView
         var rows = new StackPanel { Margin = new Thickness(0, 4, 0, 0), MinHeight = MostRows * RowHeight };
         if (block.Rows.Count == 0)
         {
-            var note = TerminalPanel.Text(block.Note, "TextSmall", "Muted", FontWeights.Normal);
+            var note = Widgets.Text(block.Note, "TextSmall", "Muted", FontWeights.Normal);
             note.TextWrapping = TextWrapping.Wrap;
             note.Margin = new Thickness(0, 4, 0, 0);
             rows.Children.Add(note);
@@ -212,7 +212,7 @@ sealed class HeaderStripView
 
         if (column.Column.Waiting > 0)
         {
-            var waiting = TerminalPanel.Text(WaitingWords(column.Column.Waiting), "TextSmall", "Caution", FontWeights.Normal);
+            var waiting = Widgets.Text(WaitingWords(column.Column.Waiting), "TextSmall", "Caution", FontWeights.Normal);
             waiting.Margin = new Thickness(0, 8, 0, 0);
             stack.Children.Add(waiting);
         }
@@ -230,7 +230,7 @@ sealed class HeaderStripView
         // in, as "Sign in again" in the settings of the environment does.
         if (block is { NeedsSignIn: true } && signIn is not null)
         {
-            var link = TerminalPanel.Text(Strings.SignIn, "TextTiny", "Ink", FontWeights.Normal);
+            var link = Widgets.Text(Strings.SignIn, "TextTiny", "Ink", FontWeights.Normal);
             link.TextDecorations = TextDecorations.Underline;
             link.Cursor = System.Windows.Input.Cursors.Hand;
             link.ToolTip = Strings.StateSignInNeeded;
@@ -252,7 +252,7 @@ sealed class HeaderStripView
             dot.Children.Add(new Ellipse { Width = 12, Height = 12, Fill = Tokens.Brush("Positive"), Opacity = 0.18 });
             dot.Children.Add(new Ellipse { Width = 6, Height = 6, Fill = block.StateDot == StateDot.Filled ? Tokens.Brush("Positive") : Brushes.Transparent, Stroke = block.StateDot == StateDot.Filled ? Brushes.Transparent : Tokens.Brush("Muted"), StrokeThickness = 1.5 });
             state.Children.Add(dot);
-            var words = TerminalPanel.Text(block.State, "TextTiny", "Ink", FontWeights.Normal);
+            var words = Widgets.Text(block.State, "TextTiny", "Ink", FontWeights.Normal);
             words.Foreground = Tokens.Brush(block.StateIsBright ? "Ink" : "Muted");
             state.Children.Add(words);
             DockPanel.SetDock(state, Dock.Right);
@@ -264,13 +264,13 @@ sealed class HeaderStripView
         ring.Margin = new Thickness(0, 0, 8, 0);
         left.Children.Add(ring);
 
-        var name = TerminalPanel.Text(column.Column.Environment, "TextNumber", quiet ? "Muted" : "Ink", quiet ? FontWeights.Normal : FontWeights.Medium);
+        var name = Widgets.Text(column.Column.Environment, "TextNumber", quiet ? "Muted" : "Ink", quiet ? FontWeights.Normal : FontWeights.Medium);
         name.TextTrimming = TextTrimming.CharacterEllipsis;
         left.Children.Add(name);
 
         if (!quiet && column.Column.Waiting > 0)
         {
-            var waiting = TerminalPanel.Text(WaitingWords(column.Column.Waiting), "TextSmall", "Caution", FontWeights.Normal);
+            var waiting = Widgets.Text(WaitingWords(column.Column.Waiting), "TextSmall", "Caution", FontWeights.Normal);
             waiting.Margin = new Thickness(8, 0, 0, 0);
             left.Children.Add(waiting);
         }
@@ -301,12 +301,12 @@ sealed class HeaderStripView
         Grid.SetColumn(track, 1);
         grid.Children.Add(track);
 
-        var percent = TerminalPanel.Mono(row.Percent, "Ink");
+        var percent = Widgets.Mono(row.Percent, "Ink");
         percent.HorizontalAlignment = HorizontalAlignment.Right;
         Grid.SetColumn(percent, 2);
         grid.Children.Add(percent);
 
-        var resets = TerminalPanel.Mono(row.Countdown, "Muted");
+        var resets = Widgets.Mono(row.Countdown, "Muted");
         resets.Margin = new Thickness(12, 0, 0, 0);
         Grid.SetColumn(resets, 3);
         grid.Children.Add(resets);
@@ -315,7 +315,7 @@ sealed class HeaderStripView
         // card's detail.
         if (row.Pace.Length > 0 && row.PaceTakesTone)
         {
-            var tone = TerminalPanel.Text(row.Pace, "TextSmall", "Muted", FontWeights.Normal);
+            var tone = Widgets.Text(row.Pace, "TextSmall", "Muted", FontWeights.Normal);
             tone.Foreground = Tokens.ToneBrush(row.Tone);
             tone.Margin = new Thickness(8, 0, 0, 0);
             Grid.SetColumn(tone, 4);
@@ -333,7 +333,7 @@ sealed class HeaderStripView
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(32) });
 
-        var name = TerminalPanel.Mono(label, "Muted");
+        var name = Widgets.Mono(label, "Muted");
         name.Margin = new Thickness(0, 0, 8, 0);
         grid.Children.Add(name);
 
@@ -343,7 +343,7 @@ sealed class HeaderStripView
         Grid.SetColumn(track, 1);
         grid.Children.Add(track);
 
-        var number = TerminalPanel.Mono(Percent(percent), "Muted");
+        var number = Widgets.Mono(Percent(percent), "Muted");
         number.HorizontalAlignment = HorizontalAlignment.Right;
         Grid.SetColumn(number, 2);
         grid.Children.Add(number);
@@ -393,7 +393,7 @@ sealed class HeaderStripView
             parts.Add(block.Updated);
         }
 
-        var line = TerminalPanel.Text(string.Join("  ·  ", parts), "TextSmall", "Muted", FontWeights.Normal);
+        var line = Widgets.Text(string.Join("  ·  ", parts), "TextSmall", "Muted", FontWeights.Normal);
         line.Margin = new Thickness(0, 8, 0, 0);
         line.TextTrimming = TextTrimming.CharacterEllipsis;
         return line;

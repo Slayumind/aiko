@@ -45,7 +45,7 @@ sealed class PaletteView : Border
         _field.Background = Brushes.Transparent;
         _field.BorderThickness = new Thickness(0);
         _field.VerticalContentAlignment = VerticalAlignment.Center;
-        var placeholder = TerminalPanel.Text(hint, "TextName", "Muted", FontWeights.Normal);
+        var placeholder = Widgets.Text(hint, "TextName", "Muted", FontWeights.Normal);
         placeholder.IsHitTestVisible = false;
         placeholder.Margin = new Thickness(2, 0, 0, 0);
         var typed = new Grid();
@@ -66,7 +66,7 @@ sealed class PaletteView : Border
             Content = _rows,
         };
 
-        var keyLine = TerminalPanel.Mono(keys, "Muted");
+        var keyLine = Widgets.Mono(keys, "Muted");
         keyLine.Margin = new Thickness(14, 8, 14, 9);
         // Russian keys are longer than the card: they go on, never cut at its edge.
         keyLine.TextWrapping = TextWrapping.Wrap;
@@ -151,7 +151,7 @@ sealed class PaletteView : Border
         {
             if (group.Title.Length > 0)
             {
-                var header = TerminalPanel.Mono(group.Title, "Muted");
+                var header = Widgets.Mono(group.Title, "Muted");
                 header.Margin = new Thickness(8, 8, 8, 4);
                 _rows.Children.Add(header);
             }
@@ -173,7 +173,7 @@ sealed class PaletteView : Border
         var top = new DockPanel();
         if (row.Meta.Length > 0)
         {
-            var meta = TerminalPanel.Text(row.Meta, "TextSmall", "Muted", FontWeights.Normal);
+            var meta = Widgets.Text(row.Meta, "TextSmall", "Muted", FontWeights.Normal);
             meta.Margin = new Thickness(12, 0, 0, 0);
             DockPanel.SetDock(meta, Dock.Right);
             top.Children.Add(meta);
@@ -215,7 +215,7 @@ sealed class PaletteView : Border
 
     private static TextBlock Line(IReadOnlyList<TextPart> parts, string size, string tone)
     {
-        var line = TerminalPanel.Text("", size, tone, FontWeights.Normal);
+        var line = Widgets.Text("", size, tone, FontWeights.Normal);
         line.TextTrimming = TextTrimming.CharacterEllipsis;
         foreach (var part in parts)
         {

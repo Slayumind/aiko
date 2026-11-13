@@ -55,7 +55,7 @@ sealed class ChoicePopup
         foreach (var (text, start, length) in choices.Take(MostRows))
         {
             var index = _lines.Count;
-            var line = TerminalPanel.Text("", "TextNumber", "Muted", FontWeights.Normal);
+            var line = Widgets.Text("", "TextNumber", "Muted", FontWeights.Normal);
             line.FontFamily = Tokens.Get<FontFamily>("Mono");
             line.TextTrimming = TextTrimming.CharacterEllipsis;
             line.Inlines.Add(new Run(text[..start]));
