@@ -1,5 +1,5 @@
 {
-  "comment": "Echoes: a recogniser that does not catch the sound may give back the hint itself, also in the middle of speech. A sentence of three or more parts, all of them items of the hint, is an echo; so is a sentence of four or more items of the hint and one other part, because the recogniser may spell one item its own way (kodland as кодland, 2026-10-23). An echo sentence is cut out, the speech around it stays. What the recogniser is told before it listens (D-313): the folder of the session, its branch, words of the terminal in the language Whisper hears (none without a language), the names of files from the conversation, then the keys of Aiko's memory when the memory is on. A path gives only its last part. The same name twice goes once, whatever its case. The hint stops before the item that would make it longer than the limit. The language is the one chosen for speech on the Terminal page; System follows the language of the computer, and anything but Russian is English (D-314, D-326). files: the files of a conversation for the hint, from its steps after a message of the person.",
+  "comment": "Echoes: a recogniser that does not catch the sound may give back the hint itself, also in the middle of speech. A sentence of three or more parts, all of them items of the hint, is an echo; so is a sentence of four or more items of the hint and one other part, because the recogniser may spell one item its own way (kodland as кодland, 2026-10-23). An echo sentence is cut out, the speech around it stays. What the recogniser is told before it listens (D-313): the folder of the session, its branch, words of the terminal in the language Whisper hears (none without a language), the names of files from the conversation. Nothing of Aiko's memory goes (D-424). A path gives only its last part. The same name twice goes once, whatever its case. The hint stops before the item that would make it longer than the limit. The language is the one chosen for speech on the Terminal page; System follows the language of the computer, and anything but Russian is English (D-314, D-326). files: the files of a conversation for the hint, from its steps after a message of the person.",
   "hints": [
     {
       "name": "everything",
@@ -9,22 +9,14 @@
         "src\\Aiko.App\\Terminal\\TalkInput.cs",
         "docs/DECISIONS.md"
       ],
-      "keys": [
-        "Code Crawler",
-        "Ember",
-        "Media Editor",
-        "Swift",
-        "C#"
-      ],
       "max": 400,
-      "hint": "aiko, in-progress, TalkInput.cs, DECISIONS.md, Code Crawler, Ember, Media Editor, Swift, C#."
+      "hint": "aiko, in-progress, TalkInput.cs, DECISIONS.md."
     },
     {
-      "name": "memory is off",
+      "name": "a folder and a branch",
       "folder": "/Users/me/aiko/",
       "branch": "main",
       "files": [],
-      "keys": null,
       "max": 400,
       "hint": "aiko, main."
     },
@@ -37,22 +29,16 @@
         "Ember.cs",
         "  "
       ],
-      "keys": [
-        "EMBER",
-        "Unity"
-      ],
       "max": 400,
-      "hint": "Ember, Ember.cs, Unity."
+      "hint": "Ember, Ember.cs."
     },
     {
       "name": "the limit drops whole items from the end",
       "folder": "C:\\work\\aiko",
       "branch": "feature/voice-core",
       "files": [
-        "VoiceInput.cs"
-      ],
-      "keys": [
-        "Swift"
+        "VoiceInput.cs",
+        "TerminalPanel.cs"
       ],
       "max": 40,
       "hint": "aiko, feature/voice-core, VoiceInput.cs."
@@ -62,7 +48,6 @@
       "folder": null,
       "branch": null,
       "files": [],
-      "keys": null,
       "max": 400,
       "hint": ""
     },
@@ -73,7 +58,6 @@
       "files": [
         "src/TalkInput.cs"
       ],
-      "keys": null,
       "language": "ru",
       "max": 400,
       "hint": "aiko, main, Enter, Esc, поле ввода, сессия, отрисовано, TalkInput.cs."
@@ -83,19 +67,15 @@
       "folder": "/work/aiko",
       "branch": null,
       "files": [],
-      "keys": [
-        "Ember"
-      ],
       "language": "en",
       "max": 400,
-      "hint": "aiko, Enter, Esc, input field, session, rendered, Ember."
+      "hint": "aiko, Enter, Esc, input field, session, rendered."
     },
     {
       "name": "a language without words of the terminal adds none",
       "folder": "/work/aiko",
       "branch": null,
       "files": [],
-      "keys": null,
       "language": "de",
       "max": 400,
       "hint": "aiko."

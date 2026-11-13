@@ -120,14 +120,13 @@ struct VoiceCaseTests {
     }
 
     @Test
-    func theHintNamesTheFolderBranchFilesAndKeys() {
+    func theHintNamesTheFolderBranchAndFiles() {
         let cases = SpecCases.json("voice-hint")
         for row in cases["hints"]?.arrayValue ?? [] {
             let hint = VoiceHint.build(
                 folder: row["folder"]?.stringValue,
                 branch: row["branch"]?.stringValue,
                 files: (row["files"]?.arrayValue ?? []).compactMap(\.stringValue),
-                memoryKeys: row["keys"]?.arrayValue?.compactMap(\.stringValue),
                 language: row["language"]?.stringValue,
                 maxLength: Int(row["max"]?.int64Value ?? 0))
 

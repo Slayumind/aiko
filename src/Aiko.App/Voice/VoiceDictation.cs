@@ -8,7 +8,7 @@ using Aiko.Core.Terminal;
 namespace Aiko.App;
 
 /// What the hint of a recording is made of: the session it starts in (D-313).
-sealed record VoiceContext(string Folder, IReadOnlyList<string> Files, bool MemoryOn);
+sealed record VoiceContext(string Folder, IReadOnlyList<string> Files);
 
 /// Voice input of the terminal window: the press, the mic, the recogniser and the field.
 ///
@@ -135,7 +135,7 @@ sealed class VoiceDictation
         var language = VoiceHint.Language(_settings.VoiceLanguage, CultureInfo.InstalledUICulture.Name);
         var hint = context is null
             ? ""
-            : VoiceHint.Build(context.Folder, BranchOf(context.Folder), context.Files, context.MemoryOn ? MemoryKeys() : null, language);
+            : VoiceHint.Build(context.Folder, BranchOf(context.Folder), context.Files, language);
 
         _text = DictationText.Empty;
         _input.BeginDictation();
@@ -247,8 +247,6 @@ sealed class VoiceDictation
             return null;
         }
     }
-
-    private static IEnumerable<string> MemoryKeys() => MemoryStore.Load().Facts.SelectMany(f => f.Keys);
 
     /// One recording: the open mic and the worker that reads it. Dropped or finished, it is done;
     /// the next press makes a new one, so a late answer of an old one is easy to tell apart.
