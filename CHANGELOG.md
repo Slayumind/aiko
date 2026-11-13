@@ -31,8 +31,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - **Command lines as blocks.** In a session of Git Bash or PowerShell each command is a block: a grey
   rule when it passed, a red one with the exit code when it failed, an orange one while it runs, and
   its time. A long output folds to its first lines. Point at a block for Copy, Fold and, after a
-  failure, Explain: Claude Code says under the block why it failed. Write what you need in words, in
-  Russian or after "#", and a command comes up under the field; Tab takes it, Enter is yours.
+  failure, Explain: Claude Code says under the block why it failed. Start a line with "#" and say what you
+  need, in any language, and a command comes up under the field; Tab takes it, Enter is yours.
   Ctrl+Shift+F finds text in the output, Ctrl+click opens an address or a file. vim, less and other
   full-screen programs run in the terminal itself.
 - **Aiko tells you when an agent needs you.** No pop-ups: the tray icon and the button of the window
@@ -74,6 +74,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Fixed
 
+- The log keeps only the name of a file or folder, not its full path. A system error used to write
+  the whole path there, though the privacy notes say the log has no working folders.
 - Aiko runs as one copy. Starting it again, from the Start menu or a pinned button, opens the
   window of the Aiko that already runs. Before, every start added one more Aiko to the tray.
 - A session that stopped before your first message, or stayed empty until Aiko restarted, now

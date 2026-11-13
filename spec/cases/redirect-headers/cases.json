@@ -1,0 +1,14 @@
+{
+  "comment": "Which headers of a request go on after a redirect (D-420). A header with a secret (Authorization, Proxy-Authorization, Cookie) goes on only to the same scheme, host and port; the rest always go on. Windows only: the Mac has no direct mode and sends no token.",
+  "rows": [
+    { "header": "Authorization", "from": "https://api.anthropic.com/api/oauth/usage", "to": "https://api.anthropic.com/v2/usage", "keeps": true },
+    { "header": "Authorization", "from": "https://api.anthropic.com/api/oauth/usage", "to": "https://github.com/x", "keeps": false },
+    { "header": "authorization", "from": "https://api.anthropic.com/a", "to": "https://slayumind.org/a", "keeps": false },
+    { "header": "Authorization", "from": "https://api.anthropic.com/a", "to": "http://api.anthropic.com/a", "keeps": false },
+    { "header": "Authorization", "from": "https://api.anthropic.com/a", "to": "https://api.anthropic.com:8443/a", "keeps": false },
+    { "header": "Cookie", "from": "https://slayumind.org/a", "to": "https://github.com/a", "keeps": false },
+    { "header": "Proxy-Authorization", "from": "https://slayumind.org/a", "to": "https://github.com/a", "keeps": false },
+    { "header": "User-Agent", "from": "https://api.anthropic.com/a", "to": "https://github.com/a", "keeps": true },
+    { "header": "anthropic-beta", "from": "https://api.anthropic.com/a", "to": "https://github.com/a", "keeps": true }
+  ]
+}

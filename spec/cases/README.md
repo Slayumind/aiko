@@ -35,6 +35,9 @@ stamp, not a table (D-255).
 | `notices/` | which change of a session plays the sound, and the counts and the one sign of the tray and the taskbar button (`Notices`, `SessionCounts`); Windows only until the terminal comes to the Mac |
 | `taskbar-button/` | what the middle and the corner of the taskbar button of the terminal window show, and which app id the window takes so that Windows draws it (`ButtonLook`, `TaskbarIdentity`); Windows only, the Mac has no taskbar button |
 | `window-zoom/` | the steps of the zoom of the terminal window and the font of the terminal at each (`WindowZoom`); Windows only until the terminal comes to the Mac |
+| `count-query/` | the query of the daily version check: the version only with counting off, six fields with it on (`CountQuery`); the Swift twin comes with the terminal on the Mac |
+| `redirect-headers/` | which headers go on after a redirect: a token stays with its host (`RedirectHeaders`); Windows only, the Mac sends no token |
+| `log-paths/` | a line for the log without full paths (`LogText`); Windows only until the Mac log comes under the same rule |
 | `model-name/` | the name of a model in the line under the input (`ModelName`) |
 | `slash-menu/` | the menu of commands that "/" opens in the field: when it opens, what it shows, in which order (`SlashMenu`) |
 | `file-mention/` | the files that "@" offers in the field: where the word starts, which files, in which order, what the field becomes (`FileMention`) |

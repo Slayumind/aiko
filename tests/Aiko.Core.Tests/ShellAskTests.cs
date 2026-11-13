@@ -63,9 +63,20 @@ public class ShellAskTests
     [Fact]
     public void A_suggestion_asks_without_the_mark_of_a_request()
     {
-        var question = ShellAsk.Suggest("pwsh", @"C:\work", "# find big files");
+        var question = ShellAsk.Suggest("pwsh", @"C:\Users\me\work", "# find big files");
 
         Assert.Contains("that does this: find big files", question);
         Assert.Contains("PowerShell 7", question);
+        Assert.Contains("(work)", question);
+        Assert.DoesNotContain("Users", question);
+    }
+
+    [Fact]
+    public void A_folder_goes_by_its_name()
+    {
+        foreach (var row in SpecCases.Json("shell-ask").GetProperty("folderNames").EnumerateArray())
+        {
+            Assert.Equal(row.GetProperty("name").GetString(), ShellAsk.FolderName(row.GetProperty("folder").GetString()!));
+        }
     }
 }

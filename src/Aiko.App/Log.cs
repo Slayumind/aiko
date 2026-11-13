@@ -1,11 +1,14 @@
 using System.IO;
+using Aiko.Core;
 
 namespace Aiko.App;
 
 /// A short log of what Aiko did. It feeds the "copy diagnostics" button in settings, and it
 /// answers days when the tray stays quiet and nothing on screen says why.
 ///
-/// Only our own events go in here. Never a token, never anything Claude Code handed us.
+/// Only our own events go in here. Never a token, never anything Claude Code handed us. Every line
+/// loses its full paths on the way in (LogText, D-420): the message of a system error often names
+/// the file it failed on, and PRIVACY.md promises no working folders in the log.
 static class Log
 {
     private const long MaxBytes = 256 * 1024;
@@ -34,7 +37,7 @@ static class Log
 
                 System.IO.File.AppendAllText(
                     File,
-                    $"{DateTimeOffset.Now:HH:mm:ss.fff}  {message}{Environment.NewLine}");
+                    $"{DateTimeOffset.Now:HH:mm:ss.fff}  {LogText.WithoutPaths(message)}{Environment.NewLine}");
             }
         }
         catch (IOException)
