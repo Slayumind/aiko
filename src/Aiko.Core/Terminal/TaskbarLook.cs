@@ -51,8 +51,9 @@ public sealed record TaskbarPin(string? AppId, string? Target);
 /// Which app id the terminal window takes (D-418). Windows 11 draws a taskbar button from the
 /// Start menu shortcut of the program when the window has its id, and from the window only when
 /// the window has an id no shortcut has. So the window takes an id of its own, unless Aiko is
-/// pinned the old way, by its shortcut: then it keeps the id of the shortcut and stands on that
-/// pin, and there is one button, not two.
+/// pinned by its Start menu shortcut: then it takes the id of the shortcut and stands on that pin,
+/// and there is one button, not two. The id is always set, so the window can move from one to the
+/// other while it is open.
 public static class TaskbarIdentity
 {
     /// The id of the terminal window. A pin made from its button carries this id.
@@ -61,9 +62,8 @@ public static class TaskbarIdentity
     /// The id Velopack gives the Start menu shortcut of Aiko.
     public static string Shortcut => $"velopack.{AikoFolders.InstallFolderName}";
 
-    /// program: the full path of the running Aiko. AppId null: the window keeps the id Windows
-    /// gives the program.
-    public static (string? AppId, bool Pinned) Choose(IEnumerable<TaskbarPin> pins, string program)
+    /// program: the full path of the running Aiko.
+    public static (string AppId, bool Pinned) Choose(IEnumerable<TaskbarPin> pins, string program)
     {
         var all = pins.ToList();
         if (all.Any(pin => Same(pin.AppId, Own)))
@@ -73,7 +73,7 @@ public static class TaskbarIdentity
 
         if (all.Any(pin => Same(pin.AppId, Shortcut) || (pin.AppId is null && Same(pin.Target, program))))
         {
-            return (null, true);
+            return (Shortcut, true);
         }
 
         return (Own, false);

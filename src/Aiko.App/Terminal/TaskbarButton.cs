@@ -39,6 +39,7 @@ sealed class TaskbarButton
     private SessionBadge _badge = SessionBadge.None;
     private ImageSource? _cornerFace;
     private bool _pinned;
+    private string? _appId;
     private byte[] _picture = [];
 
     public TaskbarButton(Window window, Func<(CardRow? Ring, CardRow? Dot)> rows)
@@ -47,6 +48,11 @@ sealed class TaskbarButton
         _rows = rows;
         _window.TaskbarItemInfo ??= new TaskbarItemInfo();
         _window.SourceInitialized += (_, _) => TakeAppId();
+
+        // To pin or unpin Aiko the person goes to the Start menu or the taskbar and comes back, so the
+        // pins are read again each time the window becomes active, and the window moves to the right
+        // button while it is open.
+        _window.Activated += (_, _) => TakeAppId();
         _faces = new TrayFaceAnimator(window.Dispatcher);
         _faces.Changed += () => Draw(sameRows: true);
     }
@@ -83,7 +89,8 @@ sealed class TaskbarButton
         DrawCorner();
     }
 
-    /// Before the window is shown: an id of its own, unless Aiko is pinned by its shortcut.
+    /// An id of its own, unless Aiko is pinned by its shortcut. Only a change touches the window:
+    /// Windows moves its button to the pin of the new id.
     private void TakeAppId()
     {
         var program = Environment.ProcessPath;
@@ -93,11 +100,26 @@ sealed class TaskbarButton
         }
 
         var (appId, pinned) = TaskbarIdentity.Choose(TaskbarPins.Read(), program);
-        _pinned = pinned;
-        if (appId is not null)
+        if (appId == _appId && pinned == _pinned)
         {
+            return;
+        }
+
+        var wasPinned = _pinned;
+        _pinned = pinned;
+        if (appId != _appId)
+        {
+            _appId = appId;
             TaskbarPins.Give(new WindowInteropHelper(_window).Handle, appId, program, AppName);
         }
+
+        if (pinned && !wasPinned)
+        {
+            // The face leaves the middle of a button that now shows the pin.
+            _faces.Hide();
+        }
+
+        DrawCorner();
     }
 
     private ButtonLook Look() => ButtonLook.For(_pinned, _cornerFace is not null, _badge.Kind);

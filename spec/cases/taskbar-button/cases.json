@@ -1,5 +1,5 @@
 {
-  "comment": "The taskbar button of the terminal window (D-418). Not pinned: the rings, a face in their place, the sign of the sessions in the corner. Pinned: Windows draws the pin, and a face takes the corner for its two seconds instead of the sign. The window takes an id of its own, unless Aiko is pinned by its Start menu shortcut: then it keeps the id of the shortcut and stands on that pin. A pin made from the button of the window carries the own id.",
+  "comment": "The taskbar button of the terminal window (D-418). Not pinned: the rings, a face in their place, the sign of the sessions in the corner. Pinned: Windows draws the pin, and a face takes the corner for its two seconds instead of the sign. The window takes an id of its own, unless Aiko is pinned by its Start menu shortcut: then it takes the id of the shortcut and stands on that pin. A pin made from the button of the window carries the own id.",
   "program": "C:\\Users\\someone\\AppData\\Local\\Slayumind.Aiko\\current\\Aiko.App.exe",
   "looks": [
     {"pinned": false, "face": false, "badge": "None", "centre": "Rings", "corner": "None"},
@@ -16,8 +16,8 @@
     {"name": "nothing pinned", "pins": [], "appId": "Slayumind.Aiko.Terminal", "pinned": false},
     {"name": "other programs only", "pins": [{"appId": "Chrome", "target": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"}], "appId": "Slayumind.Aiko.Terminal", "pinned": false},
     {"name": "pinned from the button of the window", "pins": [{"appId": "Slayumind.Aiko.Terminal", "target": null}], "appId": "Slayumind.Aiko.Terminal", "pinned": true},
-    {"name": "pinned from the Start menu", "pins": [{"appId": "velopack.Slayumind.Aiko", "target": "C:\\Users\\someone\\AppData\\Local\\Slayumind.Aiko\\current\\Aiko.App.exe"}], "appId": null, "pinned": true},
-    {"name": "pinned shortcut without an id, to the same program", "pins": [{"appId": null, "target": "c:\\users\\someone\\appdata\\local\\slayumind.aiko\\current\\aiko.app.exe"}], "appId": null, "pinned": true},
+    {"name": "pinned from the Start menu", "pins": [{"appId": "velopack.Slayumind.Aiko", "target": "C:\\Users\\someone\\AppData\\Local\\Slayumind.Aiko\\current\\Aiko.App.exe"}], "appId": "velopack.Slayumind.Aiko", "pinned": true},
+    {"name": "pinned shortcut without an id, to the same program", "pins": [{"appId": null, "target": "c:\\users\\someone\\appdata\\local\\slayumind.aiko\\current\\aiko.app.exe"}], "appId": "velopack.Slayumind.Aiko", "pinned": true},
     {"name": "another program with the same file name", "pins": [{"appId": "Other.App", "target": "C:\\Users\\someone\\AppData\\Local\\Slayumind.Aiko\\current\\Aiko.App.exe"}], "appId": "Slayumind.Aiko.Terminal", "pinned": false},
     {"name": "both pins: the own one wins", "pins": [{"appId": "velopack.Slayumind.Aiko", "target": null}, {"appId": "Slayumind.Aiko.Terminal", "target": null}], "appId": "Slayumind.Aiko.Terminal", "pinned": true}
   ]
