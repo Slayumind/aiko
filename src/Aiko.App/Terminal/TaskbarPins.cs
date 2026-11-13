@@ -14,7 +14,6 @@ static class TaskbarPins
     private static readonly Guid PropertyStoreId = new("886D8EEB-8CF2-4446-8D02-CDBA1DBDCF99");
 
     private const uint RelaunchCommand = 2;
-    private const uint RelaunchIcon = 3;
     private const uint RelaunchName = 4;
     private const uint Id = 5;
     private const uint LinkTarget = 2;
@@ -55,8 +54,10 @@ static class TaskbarPins
         return pins;
     }
 
-    /// Gives the window the app id, with what a pin made from its button starts: the program, its
-    /// name and its icon. Windows reads the three when the id is set, so they go first.
+    /// Gives the window the app id, with what a pin made from its button starts: the program and its
+    /// name. Windows reads them when the id is set, so they go first. No icon of the pin: with one,
+    /// Windows draws the button from it and not from the window (2026-11-13); without, the pin takes
+    /// the icon of the program.
     public static void Give(IntPtr window, string appId, string program, string name)
     {
         var iid = PropertyStoreId;
@@ -68,7 +69,6 @@ static class TaskbarPins
         try
         {
             Put(store, RelaunchCommand, $"\"{program}\"");
-            Put(store, RelaunchIcon, $"{program},0");
             Put(store, RelaunchName, name);
             Put(store, Id, appId);
             store.Commit();
