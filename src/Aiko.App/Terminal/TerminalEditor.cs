@@ -449,8 +449,6 @@ sealed class TerminalEditor : UserControl, IDictationField
         }
     }
 
-    internal void DropForCheck(IReadOnlyList<string> paths) => Take(paths);
-
     /// Files dropped on the terminal of a command line, or while the editor is open.
     public void DropFiles(IReadOnlyList<string> paths)
     {

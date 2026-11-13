@@ -40,13 +40,6 @@ sealed class ShellBlocksView : FrameworkElement
     private static readonly Pen Edge = new(Brush(0x2A, 0x2A, 0x2C), 1);
     private static readonly Pen EdgeMain = new(Brush(0x3B, 0x3B, 0x3D), 1);
 
-    /// The sixteen colours of the terminal's theme (TerminalSurface), so a block looks like the terminal.
-    private static readonly uint[] Palette =
-    [
-        0x171717, 0xFF6467, 0x00BC7D, 0xFE9A00, 0x11A9F6, 0xD477CD, 0x00D3F2, 0xA1A1A1,
-        0x737373, 0xFF8270, 0xAFE773, 0xFE9A00, 0x11A9F6, 0xF7BCF0, 0x24DCC3, 0xFAFAFA,
-    ];
-
     private readonly ShellScreen _screen;
     private readonly object _gate;
     private readonly HashSet<long> _unfolded = [];
@@ -590,7 +583,7 @@ sealed class ShellBlocksView : FrameworkElement
         if (!_colors.TryGetValue(color, out var brush))
         {
             var rgb = color >= CellStyle.TrueColor ? (uint)(color & 0xFFFFFF)
-                : color < 16 ? Palette[color]
+                : color < 16 ? TerminalColors.Ansi[color]
                 : Cube(color);
             brush = Brush((byte)(rgb >> 16), (byte)(rgb >> 8), (byte)rgb);
             _colors[color] = brush;
@@ -628,8 +621,6 @@ sealed class ShellBlocksView : FrameworkElement
     internal int RowsForCheck => _rows.Count;
 
     internal int BlockCountForCheck => _rows.Count(row => row.Kind == RowKind.Command);
-
-    internal int NoteRowsForCheck => _rows.Count(row => row.Kind == RowKind.Note);
 
     internal int MatchesForCheck => _matches.Count;
 

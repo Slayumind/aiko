@@ -89,23 +89,6 @@ sealed class DropDown : UserControl
 
     public bool IsOpen => _popup.IsOpen;
 
-    /// The quiet look for a line of small text, as under the field of the terminal: no fill and no
-    /// frame, the text in the mono face, the list as usual.
-    public void MakeQuiet()
-    {
-        _button.Background = Brushes.Transparent;
-        _button.BorderThickness = new Thickness(0);
-        _button.Height = 20;
-        _button.CornerRadius = new CornerRadius(5);
-        _chosen.FontFamily = Tokens.Get<FontFamily>("Mono");
-        _chosen.FontSize = 11.5;
-        _chosen.Foreground = Brush("Muted");
-        if (_button.Child is Grid { Children: [_, Border inner] })
-        {
-            inner.Padding = new Thickness(4, 0, 4, 0);
-        }
-    }
-
     private void Build()
     {
         var chevron = new Path

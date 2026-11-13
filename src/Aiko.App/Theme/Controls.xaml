@@ -320,7 +320,7 @@
 
   <Style x:Key="DangerButton" TargetType="Button" BasedOn="{StaticResource SmallButton}">
     <Setter Property="Foreground" Value="{StaticResource Destructive}" />
-    <Setter Property="Background" Value="#29FF6467" />
+    <Setter Property="Background" Value="{StaticResource DangerTint}" />
     <Setter Property="BorderBrush" Value="#17FF6467" />
   </Style>
 
@@ -328,35 +328,6 @@
     <Setter Property="Foreground" Value="{StaticResource Destructive}" />
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="BorderBrush" Value="#1FFF6467" />
-  </Style>
-
-  <!-- Goes somewhere else in the same window. Underlined, so it does not read as a label. -->
-  <Style x:Key="LinkButton" TargetType="Button">
-    <Setter Property="Cursor" Value="Hand" />
-    <Setter Property="HorizontalAlignment" Value="Left" />
-    <Setter Property="Foreground" Value="{StaticResource Ink}" />
-    <Setter Property="Template">
-      <Setter.Value>
-        <ControlTemplate TargetType="Button">
-          <TextBlock x:Name="Words" Text="{Binding Content, RelativeSource={RelativeSource TemplatedParent}}"
-                     FontFamily="{StaticResource Sans}" FontSize="{StaticResource TextSmall}"
-                     Foreground="{TemplateBinding Foreground}" Background="Transparent">
-            <TextBlock.TextDecorations>
-              <TextDecoration Location="Underline" PenOffset="2">
-                <TextDecoration.Pen>
-                  <Pen Brush="#4DFFFFFF" Thickness="1" />
-                </TextDecoration.Pen>
-              </TextDecoration>
-            </TextBlock.TextDecorations>
-          </TextBlock>
-          <ControlTemplate.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
-              <Setter TargetName="Words" Property="TextDecorations" Value="Underline" />
-            </Trigger>
-          </ControlTemplate.Triggers>
-        </ControlTemplate>
-      </Setter.Value>
-    </Setter>
   </Style>
 
   <!-- The close cross in a window header. -->

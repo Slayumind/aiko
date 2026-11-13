@@ -150,7 +150,7 @@ static void RecordActivity(string input)
     }
 
     Directory.CreateDirectory(folder);
-    ReplaceFile(path, new ActivityRecord(environment, hook.Activity, now).ToJson());
+    AtomicFile.Replace(path, new ActivityRecord(environment, hook.Activity, now).ToJson());
 }
 
 /// The last event of a session of the terminal, for its row. The session is named by the variable
@@ -172,7 +172,7 @@ static void RecordTerminalEvent(string input)
     }
 
     Directory.CreateDirectory(folder);
-    ReplaceFile(path, terminalEvent.ToJson());
+    AtomicFile.Replace(path, terminalEvent.ToJson());
 }
 
 /// The memory hooks of the persona plugin. The rules and the facts go to the model at the start of
@@ -194,12 +194,12 @@ static void AnswerMemoryHook(MemoryBridgeMode mode, string input)
     }
 
     MemoryBridgeStep step;
-    using (TakeMemoryLock())
+    using (MemoryDisk.TakeLock(ThisComputer.Folders.MemoryFile))
     {
         step = MemoryBridge.OnPrompt(input, ReadIfThere(path), today);
         if (step.MemoryJson is { } json)
         {
-            WriteMemory(json, step.BadFile);
+            MemoryDisk.Write(ThisComputer.Folders.MemoryFile, json, step.BadFile);
         }
     }
 
@@ -238,12 +238,12 @@ static string? AnswerServerLine(string line, string version)
 {
     try
     {
-        using var gate = TakeMemoryLock();
+        using var gate = MemoryDisk.TakeLock(ThisComputer.Folders.MemoryFile);
         var path = ThisComputer.Folders.MemoryFile;
         var step = MemoryBridge.OnServerLine(line, ReadIfThere(path), DateOnly.FromDateTime(DateTime.Now), version);
         if (step.MemoryJson is { } json)
         {
-            WriteMemory(json, step.BadFile);
+            MemoryDisk.Write(ThisComputer.Folders.MemoryFile, json, step.BadFile);
         }
 
         return step.Output;
@@ -252,38 +252,6 @@ static string? AnswerServerLine(string line, string version)
     {
         return MemoryBridge.WriteFailedReply(line);
     }
-}
-
-/// One writer at a time. Hooks of several sessions, the memory server and the app all read the
-/// file, change it and write it back; without a gate the slower one would undo the other's change.
-static FileStream TakeMemoryLock()
-{
-    var path = ThisComputer.Folders.MemoryFile + ".lock";
-    Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-    for (var attempt = 0; ; attempt++)
-    {
-        try
-        {
-            return new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
-        }
-        catch (IOException) when (attempt < 80)
-        {
-            Thread.Sleep(25);
-        }
-    }
-}
-
-/// A file that was not a memory is kept as ".bad" before the new one takes its place, so a slip
-/// in a hand edit never costs the person their facts.
-static void WriteMemory(string json, bool keepBadFile)
-{
-    var path = ThisComputer.Folders.MemoryFile;
-    if (keepBadFile && File.Exists(path))
-    {
-        File.Move(path, path + ".bad", overwrite: true);
-    }
-
-    ReplaceFile(path, json);
 }
 
 /// Writes the plugin folder for the environment this run belongs to and prints its path.
@@ -378,44 +346,7 @@ static string SnapshotPath(string environment)
     return ThisComputer.Folders.SnapshotFile(environment);
 }
 
-static void WriteSnapshot(string environment, string json) => ReplaceFile(SnapshotPath(environment), json);
-
-/// Write to a temporary file and move it over the old one, so the tray never sees half a file.
-/// While the tray reads the old file, Windows refuses to replace it, so the move is tried again
-/// for a short while. A temporary file that could not take the place is removed, not left in the
-/// folder (AIKO-267).
-static void ReplaceFile(string path, string text)
-{
-    const int Attempts = 10;
-    var temporary = path + "." + Environment.ProcessId + ".tmp";
-    try
-    {
-        File.WriteAllText(temporary, text, new UTF8Encoding(false));
-        for (var attempt = 1; ; attempt++)
-        {
-            try
-            {
-                File.Move(temporary, path, overwrite: true);
-                return;
-            }
-            catch (Exception e) when (e is IOException or UnauthorizedAccessException && attempt < Attempts)
-            {
-                Thread.Sleep(20);
-            }
-        }
-    }
-    finally
-    {
-        try
-        {
-            File.Delete(temporary);
-        }
-        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
-        {
-            // Aiko removes it when it starts.
-        }
-    }
-}
+static void WriteSnapshot(string environment, string json) => AtomicFile.Replace(SnapshotPath(environment), json);
 
 static string? ReadWrappedCommand(string? configDirectory)
 {
@@ -495,21 +426,4 @@ static string RunWrapped(string command, string input)
     }
 
     return output.GetAwaiter().GetResult();
-}
-
-/// What the core needs to know about this Windows computer. The core describes the rules; the
-/// bridge only fills them in from Windows.
-static class ThisComputer
-{
-    public static readonly PlatformConventions Platform = PlatformConventions.Windows;
-
-    public static readonly AikoFolders Folders = AikoFolders.Windows(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
-
-    public static readonly WindowsSystemFolders SystemFolders = new(
-        Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
-        Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        Environment.GetFolderPath(Environment.SpecialFolder.Windows));
 }

@@ -307,9 +307,6 @@ sealed class TerminalPanel : UserControl
         };
     }
 
-    /// The part of the title bar the window is dragged by.
-    public FrameworkElement Bar => _bar;
-
     /// The buttons of the window, for the hit test of the window.
     public IReadOnlyList<Button> Buttons { get; }
 
@@ -363,8 +360,6 @@ sealed class TerminalPanel : UserControl
 
     /// "Sign in" on the card of an environment whose account is not connected.
     public event Action<string>? SignInAsked;
-
-    public bool SettingsShown => _settingsHost.Content is not null;
 
     /// The settings come on the place of the list and the terminal, or go, and the session is there
     /// again as it was. The terminal is a window of its own and cannot lie under anything, so it is
@@ -1527,7 +1522,7 @@ sealed class TerminalPanel : UserControl
         };
 
         // What is under the panel is still there, only quieter.
-        var cover = new Grid { Background = new SolidColorBrush(Color.FromArgb(0x99, 0x0A, 0x0A, 0x0A)) };
+        var cover = new Grid { Background = Tokens.Brush("Scrim") };
         cover.Children.Add(card);
         return cover;
     }
@@ -1657,7 +1652,7 @@ sealed class TerminalPanel : UserControl
         face.Children.Add(new Border
         {
             CornerRadius = new CornerRadius(8),
-            Background = main ? Tokens.Brush("Ink") : danger ? new SolidColorBrush(Color.FromArgb(0x29, 0xFF, 0x64, 0x67)) : Brushes.Transparent,
+            Background = main ? Tokens.Brush("Ink") : danger ? Tokens.Brush("DangerTint") : Brushes.Transparent,
             BorderBrush = main || danger || ghost ? Brushes.Transparent : Tokens.Brush("InputLine"),
             BorderThickness = new Thickness(1),
         });

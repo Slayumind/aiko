@@ -160,7 +160,7 @@
               Margin="0,0,-10,0" Click="OnRestartAsked" />
     </Grid>
     <local:RevealPanel x:Name="RestartConfirm">
-      <Border CornerRadius="10" Background="#0FFF6467" BorderBrush="#38FF6467" BorderThickness="1" Padding="12">
+      <Border CornerRadius="10" Background="{StaticResource DangerZone}" BorderBrush="{StaticResource DangerZoneLine}" BorderThickness="1" Padding="12">
         <StackPanel>
           <TextBlock x:Name="RestartLine" Style="{StaticResource RowHint}" Foreground="{StaticResource Ink}" />
           <CheckBox x:Name="RestartBin" Style="{StaticResource Tick}" Margin="0,12,0,0">
@@ -188,7 +188,7 @@
               Margin="0,0,-10,0" Click="OnDeleteAsked" />
     </Grid>
     <local:RevealPanel x:Name="DeleteConfirm">
-      <Border CornerRadius="10" Background="#0FFF6467" BorderBrush="#38FF6467" BorderThickness="1" Padding="12"
+      <Border CornerRadius="10" Background="{StaticResource DangerZone}" BorderBrush="{StaticResource DangerZoneLine}" BorderThickness="1" Padding="12"
               Margin="0,14,0,0">
         <StackPanel>
           <TextBlock x:Name="DeleteLine" Style="{StaticResource RowHint}" Foreground="{StaticResource Ink}" />
