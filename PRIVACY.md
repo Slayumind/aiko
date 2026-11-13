@@ -178,9 +178,8 @@ on, on the **Terminal** page in settings, and you choose who listens.
   choice.
 
 What goes with the sound, as a hint to the recogniser: the name of the session's folder, its git
-branch, the names of files from the conversation and, if the personality is on in that
-environment, the keys of Aiko's memory (the short names, never the facts). On this computer the
-hint stays on the computer; with OpenAI it goes with the sound.
+branch and the names of files from the conversation. Nothing from Aiko's memory goes with it. On
+this computer the hint stays on the computer; with OpenAI it goes with the sound.
 
 **The key.** Aiko keeps your OpenAI key in Windows Credential Manager, as "Aiko: OpenAI key for
 voice input". Windows encrypts it for your account on this computer. Aiko never writes the key to

@@ -130,17 +130,15 @@ public class VoiceCaseTests
     }
 
     [Fact]
-    public void The_hint_names_the_folder_branch_files_and_keys()
+    public void The_hint_names_the_folder_branch_and_files()
     {
         var cases = SpecCases.Json("voice-hint");
         foreach (var row in cases.GetProperty("hints").EnumerateArray())
         {
-            var keys = row.GetProperty("keys");
             var hint = VoiceHint.Build(
                 row.GetProperty("folder").GetString(),
                 row.GetProperty("branch").GetString(),
                 row.GetProperty("files").EnumerateArray().Select(f => f.GetString()!),
-                keys.ValueKind == JsonValueKind.Null ? null : keys.EnumerateArray().Select(k => k.GetString()!),
                 row.TryGetProperty("language", out var language) ? language.GetString() : null,
                 row.GetProperty("max").GetInt32());
 

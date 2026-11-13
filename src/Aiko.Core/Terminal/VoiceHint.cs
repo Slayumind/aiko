@@ -22,10 +22,10 @@ public sealed record EchoCut(int Parts, int InHint);
 /// their parts are items of the hint, so the log can show a near miss.
 public sealed record Unechoed(string Text, IReadOnlyList<EchoCut> Dropped, int LookAlikes);
 
-/// What the recogniser is told before it listens (D-313): the folder of the session, its branch,
-/// the names of files from the conversation and the keys of Aiko's memory. These are the names a
-/// person spells their own way, the words recognition gets wrong first. The facts of the memory
-/// never go, only their keys.
+/// What the recogniser is told before it listens (D-313): the folder of the session, its branch and
+/// the names of files from the conversation. These are the names a person spells their own way, the
+/// words recognition gets wrong first. Nothing of Aiko's memory goes (D-424): a key of it came back
+/// alone in the middle of speech, a name from home in a session at work.
 public static class VoiceHint
 {
     /// Whisper reads about 220 tokens of a prompt; OpenAI reads a similar amount. 400 characters
@@ -40,13 +40,12 @@ public static class VoiceHint
         ["en"] = ["Enter", "Esc", "input field", "session", "rendered"],
     };
 
-    /// files are paths or names; only the name is kept. memoryKeys is null when the memory is off.
-    /// language is "ru" or "en", or null for no words of the terminal.
+    /// files are paths or names; only the name is kept. language is "ru" or "en", or null for no
+    /// words of the terminal.
     public static string Build(
         string? folder,
         string? branch,
         IEnumerable<string> files,
-        IEnumerable<string>? memoryKeys,
         string? language = null,
         int maxLength = MaxLength)
     {
@@ -72,11 +71,6 @@ public static class VoiceHint
         foreach (var file in files)
         {
             Add(LastPart(file));
-        }
-
-        foreach (var key in memoryKeys ?? [])
-        {
-            Add(key);
         }
 
         var hint = "";

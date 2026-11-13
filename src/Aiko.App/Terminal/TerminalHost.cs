@@ -379,10 +379,7 @@ sealed partial class TerminalHost
 
     private VoiceContext? VoiceContextNow() =>
         _model.Session(_sessions) is { } session
-            ? new VoiceContext(
-                session.Folder,
-                [],
-                _settings.Environments.FirstOrDefault(one => one.Name == session.Environment)?.Persona == true)
+            ? new VoiceContext(session.Folder, [])
             : null;
 
     /// The pictures pasted for a session go with it.

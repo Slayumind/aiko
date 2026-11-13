@@ -36,10 +36,10 @@ public struct Unechoed: Sendable, Equatable {
     public let lookAlikes: Int
 }
 
-/// What the recogniser is told before it listens (D-313): the folder of the session, its branch,
-/// the names of files from the conversation and the keys of Aiko's memory. These are the names a
-/// person spells their own way, the words recognition gets wrong first. The facts of the memory
-/// never go, only their keys.
+/// What the recogniser is told before it listens (D-313): the folder of the session, its branch and
+/// the names of files from the conversation. These are the names a person spells their own way, the
+/// words recognition gets wrong first. Nothing of Aiko's memory goes (D-424): a key of it came back
+/// alone in the middle of speech, a name from home in a session at work.
 public enum VoiceHint {
     /// Whisper reads about 220 tokens of a prompt; OpenAI reads a similar amount. 400 characters
     /// stays inside both for Russian and English.
@@ -52,13 +52,12 @@ public enum VoiceHint {
         "en": ["Enter", "Esc", "input field", "session", "rendered"],
     ]
 
-    /// files are paths or names; only the name is kept. memoryKeys is nil when the memory is off.
-    /// language is "ru" or "en", or nil for no words of the terminal.
+    /// files are paths or names; only the name is kept. language is "ru" or "en", or nil for no
+    /// words of the terminal.
     public static func build(
         folder: String?,
         branch: String?,
         files: [String],
-        memoryKeys: [String]?,
         language: String? = nil,
         maxLength: Int = maxLength
     ) -> String {
@@ -75,7 +74,6 @@ public enum VoiceHint {
         add(branch)
         (language.flatMap { terminalWords[$0] } ?? []).forEach { add($0) }
         files.forEach { add(lastPart($0)) }
-        (memoryKeys ?? []).forEach { add($0) }
 
         var hint = ""
         for item in items {
