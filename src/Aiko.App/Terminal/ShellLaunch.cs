@@ -9,6 +9,15 @@ sealed record ShellLaunch(string CommandLine, string Name)
 {
     private static string Scripts => Path.Combine(AppContext.BaseDirectory, "Assets", "Shell");
 
+    /// The name a person knows the shell by, for the name of a new session (D-421). Name stays the
+    /// short one the code tells shells apart by.
+    public string Title => Name switch
+    {
+        "bash" => "Git Bash",
+        "pwsh" => "PowerShell",
+        _ => "Windows PowerShell",
+    };
+
     public static ShellLaunch Find()
     {
         if (GitBash() is { } bash)

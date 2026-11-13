@@ -40,7 +40,7 @@ public enum Strings {
     }
 
     public static let table: [String: (english: String, russian: String)] = [
-        "CardSession": ("Session · 5 hours", "Сессия · 5 часов"),
+        "CardSession": ("5 hours", "5 часов"),
         "CardWeek": ("Week", "Неделя"),
         "CardModelWeek": ("{0} · week", "{0} · неделя"),
         "CardPercent": ("{0}%", "{0}%"),
@@ -323,7 +323,7 @@ public enum Strings {
         "NeverSentWhat": ("Your name, email, project folders, limits, token, session texts and what the memory holds. The site doesn't read or store the IP address.", "Имя, почта, папки проектов, лимиты, токен, тексты сессий и содержимое памяти. IP-адрес сайт не читает и не хранит."),
         "StatsKeptFor": ("The records are deleted after 90 days.", "Записи удаляются через 90 дней."),
         "ResetInstallId": ("Reset ID", "Сбросить ID"),
-        "ResetInstallIdWhat": ("Aiko makes a new value. The days before it cannot be linked to the new one.", "Aiko придумает новое значение. Прежние дни с новым ID уже не связать."),
+        "ResetInstallIdWhat": ("The ID of each day is made from a value kept on this computer. Resetting changes that value too, so past days can't be linked to the days ahead.", "ID каждого дня считается из значения, которое хранится на этом компьютере. Сброс меняет и его: прошлые дни с будущими уже не связать."),
         "ResetInstallIdDone": ("The ID is new.", "ID теперь новый."),
         "OpenPrivacyDoc": ("Open PRIVACY.md", "Открыть PRIVACY.md"),
         "WizardStats": ("Anonymous statistics", "Анонимная статистика"),
@@ -524,20 +524,20 @@ public enum Strings {
         "VoiceNeedsModel": ("Voice input needs a speech model, 465 MB.", "Для голосового ввода нужна модель распознавания, 465 МБ."),
         "VoiceNeedsKey": ("Recognition through OpenAI needs your key.", "Для распознавания через OpenAI нужен твой ключ."),
         "VoiceOpenSettings": ("Open settings", "Открыть настройки"),
-        "NavTerminal": ("Terminal", "Терминал"),
-        "NavVoiceOn": ("voice input on", "голос включён"),
-        "NavVoiceOff": ("voice input off", "голос выключен"),
-        "NotifyLabel": ("Notifications", "Уведомления"),
+        "NavTerminal": ("Window", "Окно"),
+        "NavVoiceOn": ("notifications, voice on", "уведомления, голос включён"),
+        "NavVoiceOff": ("notifications, voice off", "уведомления, голос выключен"),
+        "NotifyLabel": ("NOTIFICATIONS", "УВЕДОМЛЕНИЯ"),
         "NotifyWhat": ("The tray icon, the taskbar button and the island show how many agents wait, have finished or stopped. A number goes when you open that session.", "Значок в трее, кнопка в панели задач и остров показывают, сколько агентов ждут, закончили или остановились. Число уходит, когда ты открываешь эту сессию."),
         "NotifySound": ("A sound when the agent has a question", "Звук, когда у агента вопрос"),
-        "ZoomLabel": ("Window zoom", "Масштаб окна"),
+        "ZoomLabel": ("WINDOW ZOOM", "МАСШТАБ ОКНА"),
         "ZoomWhat": ("Text, icons and the terminal change size together. In the terminal window: C⁠t⁠r⁠l⁠+⁠= and C⁠t⁠r⁠l⁠+⁠-, and C⁠t⁠r⁠l⁠+⁠0 brings back 115%.", "Текст, значки и терминал меняются вместе. В окне терминала — C⁠t⁠r⁠l⁠+⁠= и C⁠t⁠r⁠l⁠+⁠-, а C⁠t⁠r⁠l⁠+⁠0 возвращает 115 %."),
         "ZoomStep": ("{0}%", "{0} %"),
         "VoiceToggle": ("Voice input", "Голосовой ввод"),
         "VoiceToggleWhat": ("Ctrl+Shift+Space or the microphone button in the editor.", "Ctrl+Shift+Space или кнопка микрофона в редакторе."),
-        "VoiceLanguageLabel": ("Speech language", "Язык речи"),
+        "VoiceLanguageLabel": ("SPEECH LANGUAGE", "ЯЗЫК РЕЧИ"),
         "VoiceLanguageWhat": ("Whisper on your computer listens for this language. OpenAI hears the language by itself.", "Whisper на компьютере слушает этот язык. OpenAI узнаёт язык сам."),
-        "VoiceEngineLabel": ("Recognition", "Распознавание"),
+        "VoiceEngineLabel": ("RECOGNITION", "РАСПОЗНАВАНИЕ"),
         "VoiceLocalTitle": ("On this computer", "На компьютере"),
         "VoiceLocalWhat": ("Whisper small. Free, and the sound stays on this computer.", "Whisper small. Бесплатно, звук не уходит с компьютера."),
         "VoiceModelWillDownload": ("The speech model, {0} MB, downloads when you turn this on.", "Модель распознавания, {0} МБ, скачается при включении."),
@@ -562,7 +562,7 @@ public enum Strings {
         "VoiceCloudBusy": ("OpenAI asks to wait a minute.", "OpenAI просит подождать минуту."),
     ]
 
-    /// Session · 5 hours
+    /// 5 hours
     public static var cardSession: String { Strings.get("CardSession") }
 
     /// Week
@@ -1411,7 +1411,7 @@ public enum Strings {
     /// Reset ID
     public static var resetInstallId: String { Strings.get("ResetInstallId") }
 
-    /// Aiko makes a new value. The days before it cannot be linked to the new one.
+    /// The ID of each day is made from a value kept on this computer. Resetting changes that val...
     public static var resetInstallIdWhat: String { Strings.get("ResetInstallIdWhat") }
 
     /// The ID is new.
@@ -2014,16 +2014,16 @@ public enum Strings {
     /// Open settings
     public static var voiceOpenSettings: String { Strings.get("VoiceOpenSettings") }
 
-    /// Terminal
+    /// Window
     public static var navTerminal: String { Strings.get("NavTerminal") }
 
-    /// voice input on
+    /// notifications, voice on
     public static var navVoiceOn: String { Strings.get("NavVoiceOn") }
 
-    /// voice input off
+    /// notifications, voice off
     public static var navVoiceOff: String { Strings.get("NavVoiceOff") }
 
-    /// Notifications
+    /// NOTIFICATIONS
     public static var notifyLabel: String { Strings.get("NotifyLabel") }
 
     /// The tray icon, the taskbar button and the island show how many agents wait, have finished...
@@ -2032,7 +2032,7 @@ public enum Strings {
     /// A sound when the agent has a question
     public static var notifySound: String { Strings.get("NotifySound") }
 
-    /// Window zoom
+    /// WINDOW ZOOM
     public static var zoomLabel: String { Strings.get("ZoomLabel") }
 
     /// Text, icons and the terminal change size together. In the terminal window: C⁠t⁠r⁠l⁠+⁠= an...
@@ -2047,13 +2047,13 @@ public enum Strings {
     /// Ctrl+Shift+Space or the microphone button in the editor.
     public static var voiceToggleWhat: String { Strings.get("VoiceToggleWhat") }
 
-    /// Speech language
+    /// SPEECH LANGUAGE
     public static var voiceLanguageLabel: String { Strings.get("VoiceLanguageLabel") }
 
     /// Whisper on your computer listens for this language. OpenAI hears the language by itself.
     public static var voiceLanguageWhat: String { Strings.get("VoiceLanguageWhat") }
 
-    /// Recognition
+    /// RECOGNITION
     public static var voiceEngineLabel: String { Strings.get("VoiceEngineLabel") }
 
     /// On this computer

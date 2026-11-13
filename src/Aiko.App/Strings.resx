@@ -32,7 +32,7 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="CardSession" xml:space="preserve">
-    <value>Session · 5 hours</value>
+    <value>5 hours</value>
   </data>
   <data name="CardWeek" xml:space="preserve">
     <value>Week</value>
@@ -881,7 +881,7 @@
     <value>Reset ID</value>
   </data>
   <data name="ResetInstallIdWhat" xml:space="preserve">
-    <value>Aiko makes a new value. The days before it cannot be linked to the new one.</value>
+    <value>The ID of each day is made from a value kept on this computer. Resetting changes that value too, so past days can't be linked to the days ahead.</value>
   </data>
   <data name="ResetInstallIdDone" xml:space="preserve">
     <value>The ID is new.</value>
@@ -1484,16 +1484,16 @@
     <value>Open settings</value>
   </data>
   <data name="NavTerminal" xml:space="preserve">
-    <value>Terminal</value>
+    <value>Window</value>
   </data>
   <data name="NavVoiceOn" xml:space="preserve">
-    <value>voice input on</value>
+    <value>notifications, voice on</value>
   </data>
   <data name="NavVoiceOff" xml:space="preserve">
-    <value>voice input off</value>
+    <value>notifications, voice off</value>
   </data>
   <data name="NotifyLabel" xml:space="preserve">
-    <value>Notifications</value>
+    <value>NOTIFICATIONS</value>
   </data>
   <data name="NotifyWhat" xml:space="preserve">
     <value>The tray icon, the taskbar button and the island show how many agents wait, have finished or stopped. A number goes when you open that session.</value>
@@ -1502,7 +1502,7 @@
     <value>A sound when the agent has a question</value>
   </data>
   <data name="ZoomLabel" xml:space="preserve">
-    <value>Window zoom</value>
+    <value>WINDOW ZOOM</value>
   </data>
   <data name="ZoomWhat" xml:space="preserve">
     <value>Text, icons and the terminal change size together. In the terminal window: C⁠t⁠r⁠l⁠+⁠= and C⁠t⁠r⁠l⁠+⁠-, and C⁠t⁠r⁠l⁠+⁠0 brings back 115%.</value>
@@ -1517,13 +1517,13 @@
     <value>Ctrl+Shift+Space or the microphone button in the editor.</value>
   </data>
   <data name="VoiceLanguageLabel" xml:space="preserve">
-    <value>Speech language</value>
+    <value>SPEECH LANGUAGE</value>
   </data>
   <data name="VoiceLanguageWhat" xml:space="preserve">
     <value>Whisper on your computer listens for this language. OpenAI hears the language by itself.</value>
   </data>
   <data name="VoiceEngineLabel" xml:space="preserve">
-    <value>Recognition</value>
+    <value>RECOGNITION</value>
   </data>
   <data name="VoiceLocalTitle" xml:space="preserve">
     <value>On this computer</value>

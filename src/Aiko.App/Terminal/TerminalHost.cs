@@ -760,7 +760,7 @@ sealed class TerminalHost
         }
 
         var id = Guid.NewGuid().ToString();
-        var name = kind == SessionKind.Shell ? Shell().Name : "";
+        var name = kind == SessionKind.Shell ? Shell().Title : "";
         _sessions = _sessions
             .Add(id, environment.Name, folder, name, DateTimeOffset.UtcNow.ToUnixTimeSeconds(), kind)
             .Opened(id);

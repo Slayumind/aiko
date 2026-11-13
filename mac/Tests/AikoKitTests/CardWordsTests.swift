@@ -30,7 +30,7 @@ struct CardWordsTests {
 
     @Test
     func everyWindowHasItsOwnName() {
-        #expect(CardText.windowName(.fiveHour) == "Session · 5 hours")
+        #expect(CardText.windowName(.fiveHour) == "5 hours")
         #expect(CardText.windowName(.sevenDay) == "Week")
         #expect(CardText.windowName(.modelWeek, "Fable") == "Fable · week")
     }
@@ -240,7 +240,7 @@ struct CardWordsTests {
             countdown: ResetCountdown(isReset: false, days: 0, hours: 2, minutes: 0, unit: .hoursAndMinutes),
             pace: PaceEstimate(verdict: .lastsPastReset, timeLeft: 7200)))
 
-        #expect(row.name == "Session · 5 hours")
+        #expect(row.name == "5 hours")
         #expect(row.percent == "42%")
         #expect(row.resets == "resets in 2h 0m")
         #expect(row.pace == "lasts until reset")
@@ -278,7 +278,7 @@ struct CardWordsTests {
 
         #expect(model.updated == "обновлено в 12:00")
         #expect(model.blocks[0].state == "сейчас работает")
-        #expect(model.blocks[0].rows[0].name == "Сессия · 5 часов")
+        #expect(model.blocks[0].rows[0].name == "5 часов")
         #expect(model.blocks[0].rows[0].percent == "42%")
     }
 
