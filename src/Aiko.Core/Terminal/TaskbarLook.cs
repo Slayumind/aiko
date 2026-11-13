@@ -79,6 +79,12 @@ public static class TaskbarIdentity
         return (Own, false);
     }
 
+    /// Whether the list of pins Windows keeps in the registry (Taskband, Favorites) has a pin made
+    /// from the button of the window. Such a pin has no shortcut in the folder of pins; the list
+    /// names it by the own id, in UTF-16, and drops it when it is unpinned (2026-11-13).
+    public static bool ListsOwnPin(ReadOnlySpan<byte> favorites) =>
+        favorites.IndexOf(System.Text.Encoding.Unicode.GetBytes(Own)) >= 0;
+
     private static bool Same(string? one, string other) =>
         one is not null && string.Equals(one, other, StringComparison.OrdinalIgnoreCase);
 }

@@ -4,8 +4,9 @@ using Aiko.Core.Terminal;
 
 namespace Aiko.App;
 
-/// The pins of the taskbar and the app id of a window (D-418). Windows keeps each pin as a shortcut
-/// in a folder of the user; the app id and the program of a shortcut are read from its properties.
+/// The pins of the taskbar and the app id of a window (D-418). Windows keeps a pin made from the
+/// Start menu as a shortcut in a folder of the user, and a pin made from the button of a window only
+/// in its list in the registry.
 [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763")]
 static class TaskbarPins
 {
@@ -27,12 +28,17 @@ static class TaskbarPins
     /// Every pin the folder has. A shortcut that cannot be read is left out: it is not Aiko's.
     public static IReadOnlyList<TaskbarPin> Read()
     {
-        if (!Directory.Exists(Folder))
+        var pins = new List<TaskbarPin>();
+        if (TaskbarIdentity.ListsOwnPin(Favorites()))
         {
-            return [];
+            pins.Add(new TaskbarPin(TaskbarIdentity.Own, null));
         }
 
-        var pins = new List<TaskbarPin>();
+        if (!Directory.Exists(Folder))
+        {
+            return pins;
+        }
+
         foreach (var file in Directory.EnumerateFiles(Folder, "*.lnk"))
         {
             var iid = PropertyStoreId;
@@ -52,6 +58,21 @@ static class TaskbarPins
         }
 
         return pins;
+    }
+
+    /// The list of pins Windows keeps in the registry. A pin made from the button of a window lives
+    /// only there, with no shortcut in the folder.
+    private static byte[] Favorites()
+    {
+        try
+        {
+            using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Explorer\Taskband");
+            return key?.GetValue("Favorites") as byte[] ?? [];
+        }
+        catch (Exception e) when (e is System.Security.SecurityException or UnauthorizedAccessException or IOException)
+        {
+            return [];
+        }
     }
 
     /// Gives the window the app id, with what a pin made from its button starts: the program and its

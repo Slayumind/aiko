@@ -49,6 +49,18 @@ public class TaskbarLookTests
         Assert.Equal("velopack.Slayumind.Aiko", TaskbarIdentity.Shortcut);
     }
 
+    [Fact]
+    public void A_pin_made_from_the_button_is_found_in_the_list_of_pins()
+    {
+        byte[] head = [0x00, 0x14, 0x1F, 0x80];
+        var named = head.Concat(System.Text.Encoding.Unicode.GetBytes(@"x\Slayumind.Aiko.Terminal")).Concat(head).ToArray();
+
+        Assert.True(TaskbarIdentity.ListsOwnPin(named));
+        Assert.False(TaskbarIdentity.ListsOwnPin(head.Concat(System.Text.Encoding.Unicode.GetBytes("velopack.Slayumind.Aiko")).ToArray()));
+        Assert.False(TaskbarIdentity.ListsOwnPin(head.Concat(System.Text.Encoding.ASCII.GetBytes("Slayumind.Aiko.Terminal")).ToArray()));
+        Assert.False(TaskbarIdentity.ListsOwnPin([]));
+    }
+
     private static string? Text(JsonElement value) =>
         value.ValueKind == JsonValueKind.Null ? null : value.GetString();
 }
