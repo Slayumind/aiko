@@ -45,6 +45,7 @@ stamp, not a table (D-255).
 | `terminal-copy/` | text copied out of a terminal: rows wrapped by the width joined again, the shared indent gone (`TerminalCopy`) |
 | `editor/` | what a key does in the editor under the terminal, what a send writes, the history of a command line and Tab for a path (`EditorKeys`) |
 | `release-notes/` | the titles of the notes of a newer release, read from GitHub (`ReleaseNotes`); Windows only until the terminal comes to the Mac |
+| `terminal-keys/` | what Ctrl and a key do in the terminal window, with Shift or without, and when the key is left to the program (`TerminalKeys`); Windows only until the terminal comes to the Mac |
 | `terminal-sessions/` | the list of sessions as the file `terminal.json`: adding, closing, moving, and what a broken file reads as (`TerminalSessions`) |
 | `session-name/` | the name of a session with an empty name field, and how a name and a folder are kept (`SessionName`) |
 | `terminal-window/` | the rows of the list of sessions, the process to stop before a fifth one starts, where the window opens and what is chosen in it (`SessionRows`, `ProcessCap`, `WindowPlace`, `TerminalWindowModel`) |

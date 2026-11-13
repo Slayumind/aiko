@@ -68,22 +68,18 @@ static ShimPlan PlanFor(string self)
     }
 }
 
+/// The core decides what changes; here it is done.
 static void Apply(ShimPlan plan, ProcessStartInfo start)
 {
-    switch (plan.Variable)
+    foreach (var (name, value) in plan.VariableChanges)
     {
-        case ConfigVariable.Set:
-            start.Environment["CLAUDE_CONFIG_DIR"] = plan.ConfigDirectory;
-            break;
-        case ConfigVariable.Clear:
-            start.Environment.Remove("CLAUDE_CONFIG_DIR");
-            break;
-    }
-
-    // The session start hook compares these with the folder binding and says so when they differ.
-    if (plan.Environment is { } environment)
-    {
-        start.Environment["AIKO_ENVIRONMENT"] = environment.Name;
-        start.Environment["AIKO_LAUNCH"] = plan.Explicit ? "command" : "binding";
+        if (value is null)
+        {
+            start.Environment.Remove(name);
+        }
+        else
+        {
+            start.Environment[name] = value;
+        }
     }
 }

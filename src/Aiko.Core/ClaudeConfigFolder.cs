@@ -10,6 +10,9 @@ namespace Aiko.Core;
 /// the first live run, before anybody outside had a copy.
 public static class ClaudeConfigFolder
 {
+    /// The variable Claude Code reads its config folder from.
+    public const string VariableName = "CLAUDE_CONFIG_DIR";
+
     public const string DefaultFolderName = ".claude";
 
     public const string AccountFileName = ".claude.json";

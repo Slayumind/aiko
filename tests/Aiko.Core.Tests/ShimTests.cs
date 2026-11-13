@@ -11,6 +11,41 @@ public class ShimTests
         new AikoEnvironment("Personal", [Home + @"\.claude-personal"]) { ProjectFolders = [@"D:\personal"] },
     ]);
 
+    // ---- what changes in the environment of Claude Code ----
+
+    [Fact]
+    public void A_bound_folder_sets_its_config_folder_and_says_it_came_from_the_binding()
+    {
+        var changes = ShimLaunch.Decide(@"C:\aiko\bin\claude.exe", @"D:\personal\app", Settings, Home).VariableChanges;
+
+        Assert.Equal(
+            [("CLAUDE_CONFIG_DIR", Home + @"\.claude-personal"), ("AIKO_ENVIRONMENT", "Personal"), ("AIKO_LAUNCH", "binding")],
+            changes);
+    }
+
+    [Fact]
+    public void Environment_1_takes_the_variable_out_instead_of_setting_it()
+    {
+        var changes = ShimLaunch.Decide("claude", @"C:\temp", Settings, Home).VariableChanges;
+
+        Assert.Equal(("CLAUDE_CONFIG_DIR", (string?)null), changes[0]);
+    }
+
+    [Fact]
+    public void A_command_says_it_was_an_explicit_choice()
+    {
+        var changes = ShimLaunch.Decide("aiko-work.exe", @"D:\personal\app", Settings, Home).VariableChanges;
+
+        Assert.Contains(("AIKO_LAUNCH", (string?)"command"), changes);
+        Assert.Contains(("AIKO_ENVIRONMENT", (string?)"Work"), changes);
+    }
+
+    [Fact]
+    public void A_start_Aiko_knows_nothing_about_changes_nothing()
+    {
+        Assert.Empty(ShimPlan.PassThrough.VariableChanges);
+    }
+
     // ---- which environment ----
 
     [Fact]

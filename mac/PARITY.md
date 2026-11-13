@@ -5,9 +5,8 @@ case has a Swift case with the same name and the same numbers. Test counts below
 methods: one `[Theory]` with five `[InlineData]` rows counts as five, and so does the Swift
 `@Test(arguments:)` that mirrors it. `dotnet test` prints cases; `swift test` prints methods, not
 cases. The cases the Swift side does not have are named at the bottom; the ones it has and Windows
-does not belong to the two small programs, whose decisions sit inline in `Program.cs` on Windows,
-and to the island and the settings window, which sit in `Aiko.App` on Windows where no test can
-reach them.
+does not belong to the island and the settings window, which sit in `Aiko.App` on Windows where no
+test can reach them.
 
 `ParityMapTests` in `Aiko.Core.Tests` keeps this map true to the disk: every file it names must
 exist, and every file of the two cores must be named here. It does the same for the table in
@@ -66,7 +65,8 @@ a row cannot change in one core and stay as it was in the other. See `spec/cases
 | EnvironmentScan.cs | EnvironmentScan.swift | 12 | 12 | |
 | ClaudeConfigFolder.cs | ClaudeConfigFolder.swift | 7 | 7 | |
 | ClaudeInstall.cs | ClaudeInstall.swift | 7 | 7 | |
-| ShimLaunch.cs, RealClaude.cs, UserPathList.cs | ShimLaunch.swift, RealClaude.swift, UserPathList.swift | 18 | 16 | the other 6 C# cases are about PowerShellProfile; 4 Swift cases of their own cover what the shim sets in the environment of Claude Code, which Aiko.Shim does inline |
+| ShimLaunch.cs, RealClaude.cs, UserPathList.cs | ShimLaunch.swift, RealClaude.swift, UserPathList.swift | 22 | 16 | the other 6 C# cases are about PowerShellProfile; what the shim sets in the environment of Claude Code is `VariableChanges` on both sides, with 4 cases each |
+| BridgeWork.cs | BridgeWork.swift | 31 | 35 | what one run of the bridge does: which job it was started for, the snapshot to write, the activity file of a session and the reminder at session start. `Aiko.Bridge/Program.cs` only reads stdin and the disk and does what the answers say. Windows has one more job, the hook of its terminal (`terminal-event`); the persona plugin folder stays in `PersonaPluginOutput` on Windows |
 | BridgeCommand.cs | BridgeCommand.swift | 29 | 29 | BridgeCommandTests (11) and BridgeRecognitionTests (18) |
 | CommandLinks.cs | CommandLinks.swift | 3 | 3 | |
 | AikoMarketplace.cs | AikoMarketplace.swift | — | — | its cases sit in PluginPlanTests and SkillPluginTests |
@@ -95,6 +95,7 @@ a row cannot change in one core and stay as it was in the other. See `spec/cases
 | Terminal/TranscriptPath.cs | Terminal/TranscriptPath.swift | — | — | where Claude Code keeps the file of a conversation; a table in `spec/cases/transcript-path` |
 | Terminal/WindowZoom.cs, Notices.cs, SessionCounts.cs, ReleaseNotes.cs | not yet | — | — | the zoom of the window (D-384), which notice a session or a limit brings (D-375, D-389), the counts on the island, the tray and the taskbar button (D-364, D-418) and the titles of the notes of a newer release (D-397). Tables in `spec/cases/` (`window-zoom`, `notices`, `release-notes`) wait for their Swift twins with the terminal on the Mac (AIKO-351) |
 | Terminal/ShellAsk.cs, ShellLink.cs | not yet | 7 | — | what a command line asks Claude Code: only a line that starts with `#`, with the folder by its name and not its path (D-420), and how the answer is read; the address or the file under a Ctrl+click (D-358). A table in `spec/cases/shell-ask` |
+| Terminal/TerminalKeys.cs | not yet | 1 | — | what Ctrl and a key do in the terminal window (D-353, D-370, D-374): the app names the key and does the action. A table in `spec/cases/terminal-keys` |
 | Terminal/ShellScreen.cs, ShellBlocks.cs, VtParser.cs | not yet | 6 | — | how the output of a command line is laid out and cut into one block per command by the marks of shell integration (D-363, D-412). A table in `spec/cases/shell-screen`, from real recordings of three shells |
 | CountForm.cs | not yet | 12 | — | which form of a word goes with a number: Russian has three, English two. The terminal uses it; the Swift twin comes with the terminal on the Mac |
 | EnvironmentInitial.cs | not yet | 6 | — | the letter of an environment beside its ring on the open island (D-421). The Mac island gets it with the terminal on the Mac |
@@ -124,7 +125,6 @@ Helpers with no file of their own in the C# core:
 
 | Swift file | Why it exists |
 |---|---|
-| BridgeWork.swift | what one run of the bridge does: which job it was started for, the snapshot to write, the activity file of a session, the reminder at session start, the persona plugin folder. On Windows the same choices sit inline in `Aiko.Bridge/Program.cs`, where no test can reach them (35 cases in BridgeWorkTests) |
 | JsonNode.swift | System.Text.Json keeps the order of keys and the text of numbers when it writes a file back; `JSONSerialization` keeps neither, and Aiko rewrites files that belong to Claude Code |
 | CivilTime.swift | `DateOnly`, ISO weeks and the round-trip ("O") time format |
 | MemoryText.swift | the memory's questions about a text, answered the way .NET answers them: what `Trim` and `Split` call white space, what `\w` is for one UTF-16 unit, and which two units `RegexOptions.IgnoreCase` takes for the same letter. Foundation has other lists for all three, and the limits and word edges of the memory must agree to the unit (74 cases in MemoryTextTests, shared with JsonRawText) |
