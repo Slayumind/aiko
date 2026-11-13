@@ -5,8 +5,21 @@ namespace Aiko.Core;
 
 /// One environment: a name the user chose and the Claude Code config folders inside it.
 /// In 0.1 each environment has one folder, but the core keeps a list from the start.
+/// An agent an environment works with. Claude Code is the only one for now; each environment keeps
+/// its own list, because work and personal may use different ones (D-420).
+public enum AgentProvider
+{
+    Claude,
+}
+
 public sealed record AikoEnvironment(string Name, IReadOnlyList<string> ConfigDirectories)
 {
+    public static readonly IReadOnlyList<AgentProvider> DefaultProviders = [AgentProvider.Claude];
+
+    /// The agents of this environment. A file without the list means Claude alone, as every file
+    /// written before the list existed.
+    public IReadOnlyList<AgentProvider> Providers { get; init; } = DefaultProviders;
+
     public bool DirectMode { get; init; }
 
     /// Whether Aiko is on in this environment: her character, her skills and her memory. They
@@ -119,6 +132,7 @@ public sealed record EnvironmentSettings(IReadOnlyList<AikoEnvironment> Environm
                     Persona = e.Persona,
                     CustomCommand = string.IsNullOrWhiteSpace(e.Command) ? null : e.Command,
                     ProjectFolders = e.ProjectFolders?.Where(p => !string.IsNullOrWhiteSpace(p)).ToList() ?? [],
+                    Providers = ProvidersFrom(e.Providers),
                 })
                 .ToList();
 
@@ -152,10 +166,23 @@ public sealed record EnvironmentSettings(IReadOnlyList<AikoEnvironment> Environm
                         Persona = e.Persona,
                         Command = e.CustomCommand,
                         ProjectFolders = e.ProjectFolders.Count > 0 ? e.ProjectFolders : null,
+                        Providers = e.Providers.SequenceEqual(AikoEnvironment.DefaultProviders) ? null : [.. e.Providers.Select(p => p.ToString().ToLowerInvariant())],
                     })
                     .ToList(),
             },
             EnvironmentsJson.Default.SettingsFile) + Environment.NewLine;
+
+    /// Names the file gives, read without regard to case; a name Aiko does not know is left out,
+    /// and a list left empty means Claude.
+    private static IReadOnlyList<AgentProvider> ProvidersFrom(IReadOnlyList<string>? names)
+    {
+        var known = (names ?? [])
+            .Select(name => Enum.TryParse<AgentProvider>(name, ignoreCase: true, out var provider) ? provider : (AgentProvider?)null)
+            .OfType<AgentProvider>()
+            .Distinct()
+            .ToList();
+        return known.Count > 0 ? known : AikoEnvironment.DefaultProviders;
+    }
 
     internal sealed class SettingsFile
     {
@@ -173,6 +200,7 @@ public sealed record EnvironmentSettings(IReadOnlyList<AikoEnvironment> Environm
         public bool Persona { get; set; }
         public string? Command { get; set; }
         public IReadOnlyList<string>? ProjectFolders { get; set; }
+        public IReadOnlyList<string>? Providers { get; set; }
     }
 }
 

@@ -30,7 +30,9 @@ public readonly record struct CardRow(
     PaceEstimate Pace,
     /// Only for the weekly limit of a heavy model, and only because the server names it. The card
     /// used to say "Fable" whatever came back, which would be wrong the day that changes.
-    string? ModelName = null);
+    string? ModelName = null,
+    /// The name a provider gave the window; null for the windows of Claude, named by their kind.
+    string? Label = null);
 
 /// What the card and the icon show for one environment. Everything that decides what to show
 /// lives here, so the Windows layer only draws and a macOS layer later can reuse it.
@@ -43,10 +45,6 @@ public sealed record CardState(
     public const int CautionFrom = 75;
     public const int CriticalFrom = 90;
 
-    /// The windows Claude Code reports, and how long each one lasts. Needed for the pace estimate:
-    /// the share of the window already spent is compared with the share of the limit already used.
-    public static readonly TimeSpan FiveHourWindow = TimeSpan.FromHours(5);
-    public static readonly TimeSpan SevenDayWindow = TimeSpan.FromDays(7);
 
     /// How long after the last word from the status line a session counts as working. Claude Code
     /// runs the status line as the conversation changes, so an idle or closed session goes quiet;
@@ -111,8 +109,8 @@ public sealed record CardState(
         }
 
         var rows = new List<CardRow>(3);
-        AddRow(rows, snapshot, now, freshness, LimitKind.FiveHour, FiveHourWindow);
-        AddRow(rows, snapshot, now, freshness, LimitKind.SevenDay, SevenDayWindow);
+        AddRow(rows, snapshot, now, freshness, LimitKind.FiveHour);
+        AddRow(rows, snapshot, now, freshness, LimitKind.SevenDay);
 
         if (snapshot.Model is { } model)
         {
@@ -139,21 +137,25 @@ public sealed record CardState(
         LimitSnapshot snapshot,
         DateTimeOffset now,
         DataFreshness freshness,
-        LimitKind kind,
-        TimeSpan windowLength)
+        LimitKind kind)
     {
         if (snapshot.StatusAt(now, kind) is not { } status)
         {
             return;
         }
 
+        // How long the window lasts is needed for the pace: the share of the window already gone
+        // is compared with the share of the limit already used.
+        var window = snapshot.Windows.FirstOrDefault(w => w.Kind == kind);
+        var length = window.Length ?? LimitKinds.DefaultLength(kind);
         rows.Add(new CardRow(
             kind,
             status.Percent,
             ToneFor(status.Percent, freshness),
             status.IsReset,
             status.Countdown,
-            EstimatePace(status, windowLength, now, snapshot.WindowResetsAt(kind))));
+            length is { } known ? EstimatePace(status, known, now, snapshot.WindowResetsAt(kind)) : new PaceEstimate(PaceVerdict.Unknown, TimeSpan.Zero),
+            Label: window.Label));
     }
 
     /// How much of the window has to be gone, and how much of the limit spent, before a guess is

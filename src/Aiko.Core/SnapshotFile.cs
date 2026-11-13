@@ -25,7 +25,7 @@ public static class SnapshotFile
                 Source = snapshot.Source,
                 ReceivedAt = snapshot.ReceivedAt,
                 Windows = snapshot.Windows
-                    .Select(w => new WindowFile { Kind = w.Kind, Percent = w.Percent, ResetsAt = w.ResetsAt })
+                    .Select(w => new WindowFile { Kind = w.Kind, Percent = w.Percent, ResetsAt = w.ResetsAt, LengthSeconds = (long?)w.Length?.TotalSeconds, Label = w.Label })
                     .ToList(),
                 Model = snapshot.Model is { } model
                     ? new ModelFile { Name = model.ModelName, Percent = model.Percent, ResetsAt = model.ResetsAt }
@@ -51,7 +51,7 @@ public static class SnapshotFile
             }
 
             var windows = file.Windows
-                .Select(w => new LimitWindow(w.Kind, w.Percent, w.ResetsAt))
+                .Select(w => new LimitWindow(w.Kind, w.Percent, w.ResetsAt, w.LengthSeconds is > 0 and var seconds ? TimeSpan.FromSeconds(seconds) : null, string.IsNullOrWhiteSpace(w.Label) ? null : w.Label))
                 .ToList();
 
             return new LimitSnapshot(
@@ -83,6 +83,13 @@ public static class SnapshotFile
         public LimitKind Kind { get; set; }
         public int Percent { get; set; }
         public DateTimeOffset ResetsAt { get; set; }
+
+        /// Only from a provider whose windows are not the ones of Claude.
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public long? LengthSeconds { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? Label { get; set; }
     }
 
     private sealed class ModelFile

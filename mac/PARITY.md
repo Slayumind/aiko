@@ -62,6 +62,7 @@ a row cannot change in one core and stay as it was in the other. See `spec/cases
 | EnvironmentSnapshots.cs | EnvironmentSnapshots.swift | 6 | 6 | |
 | EnvironmentSettings.cs, LaunchCommand.cs, ProjectBinding.cs | EnvironmentSettings.swift, LaunchCommand.swift, ProjectBinding.swift | 26 | 26 | EnvironmentSettingsTests (13) and EnvironmentModelTests (13); the command of an environment is in `spec/cases/launch-command/` |
 | EnvironmentEdits.cs | EnvironmentEdits.swift | 24 | 24 | |
+| StatusLineReport.cs, CardState.cs, SnapshotFile.cs, EnvironmentSettings.cs: the seam for another agent | the same Swift files | 5 | 5 | ProviderTests (D-420): `AgentProvider` and the providers of an environment, written only when they are not Claude alone; `LimitWindow.Length` and `Label`, with `LimitKinds.DefaultLength` for the windows of Claude. The Swift side was written without a Mac at hand and is checked by CI |
 | EnvironmentScan.cs | EnvironmentScan.swift | 12 | 12 | |
 | ClaudeConfigFolder.cs | ClaudeConfigFolder.swift | 7 | 7 | |
 | ClaudeInstall.cs | ClaudeInstall.swift | 7 | 7 | |

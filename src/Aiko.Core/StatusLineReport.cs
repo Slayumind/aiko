@@ -19,7 +19,23 @@ public static class Percentage
         Math.Clamp((int)Math.Round(value, MidpointRounding.AwayFromZero), 0, 100);
 }
 
-public readonly record struct LimitWindow(LimitKind Kind, int Percent, DateTimeOffset ResetsAt);
+/// One limit window. Length and Label are for a provider whose windows are not the ones of Claude:
+/// how long the window lasts, for the pace, and what it is called. Claude leaves both out, and the
+/// lengths and words it is known for are used (LimitKinds).
+public readonly record struct LimitWindow(LimitKind Kind, int Percent, DateTimeOffset ResetsAt, TimeSpan? Length = null, string? Label = null);
+
+/// What Aiko knows about the windows of Claude when the window itself says nothing.
+public static class LimitKinds
+{
+    /// How long a window lasts. The model week is reported without its length, so no honest
+    /// estimate of the pace can be made for it.
+    public static TimeSpan? DefaultLength(LimitKind kind) => kind switch
+    {
+        LimitKind.FiveHour => TimeSpan.FromHours(5),
+        LimitKind.SevenDay => TimeSpan.FromDays(7),
+        _ => null,
+    };
+}
 
 /// What Claude Code reports to the status line: the five hour and the seven day window.
 /// The model limit (Fable) is not here — it only comes from the usage API in direct mode.
