@@ -82,6 +82,7 @@ static class ShellCheck
         // palette, the gear opens the settings and closes them ----
         var gear = true;
         var search = true;
+        var (iconsSeen, iconsAlive) = (0, true);
         if (environments > 0)
         {
             var before = shell.PaletteForCheck.Opened;
@@ -95,6 +96,10 @@ static class ShellCheck
             gear = await Until(() => shell.SettingsShownForCheck);
             Press(Strings.SettingsCloseTip);
             gear &= await Until(() => !shell.SettingsShownForCheck);
+
+            // ---- the icon of the taskbar button while a face comes: every icon the window was
+            // given in the move is still alive, so Explorer never draws one that is gone ----
+            (iconsSeen, iconsAlive) = await ButtonIcons(shell);
         }
 
         await CloseWindows(shell);
@@ -124,11 +129,66 @@ static class ShellCheck
         var back = (home == AikoPlace.Island) == (shell.IslandForCheck is not null);
 
         Log.Write($"--try-shell: tips={tips}, settings in the terminal window={oneWindow}, gone when closed={settingsGone}, icon={icon}, "
-            + $"a click on the icon opens the window={clickOpens}, the gear={gear}, the magnifier={search}, the menu opens settings={menu}, "
+            + $"a click on the icon opens the window={clickOpens}, the gear={gear}, the magnifier={search}, button icons={iconsSeen} alive={iconsAlive}, the menu opens settings={menu}, "
             + $"face came={faceCame} and went={faceWent}, island={island}, a click on the island opens the window={islandOpens}, "
             + $"back home={back}");
 
-        return tips && oneWindow && settingsGone && icon && clickOpens && gear && search && menu && faceCame && faceWent && island && islandOpens && back;
+        return tips && oneWindow && settingsGone && icon && clickOpens && gear && search && iconsAlive && menu && faceCame && faceWent && island && islandOpens && back;
+    }
+
+    /// The icons of the taskbar button during a face, read from the window every 30 ms.
+    private static async Task<(int Seen, bool Alive)> ButtonIcons(AikoShell shell)
+    {
+        var window = Application.Current.Windows.OfType<TerminalWindow>().FirstOrDefault();
+        if (window is null)
+        {
+            return (0, false);
+        }
+
+        var handle = new System.Windows.Interop.WindowInteropHelper(window).Handle;
+        var seen = new HashSet<IntPtr>();
+        shell.ShowFaceForCheck(AikoFace.Done);
+        for (var i = 0; i < 25; i++)
+        {
+            seen.Add(GetIcon(handle, 0x007F, 1, IntPtr.Zero));
+            await Task.Delay(30);
+        }
+
+        shell.ShowFaceForCheck(null);
+        seen.Remove(IntPtr.Zero);
+        return (seen.Count, seen.All(Alive));
+    }
+
+    /// GetIconInfo answers for a live icon only, and makes copies of its two pictures to free.
+    private static bool Alive(IntPtr icon)
+    {
+        if (!GetIconInfo(icon, out var info))
+        {
+            return false;
+        }
+
+        DeleteObject(info.Mask);
+        DeleteObject(info.Color);
+        return true;
+    }
+
+    [System.Runtime.InteropServices.DllImport("user32.dll", EntryPoint = "SendMessageW")]
+    private static extern IntPtr GetIcon(IntPtr window, int message, nint wParam, IntPtr lParam);
+
+    [System.Runtime.InteropServices.DllImport("gdi32.dll")]
+    private static extern bool DeleteObject(IntPtr picture);
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern bool GetIconInfo(IntPtr icon, out IconInfo info);
+
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    private struct IconInfo
+    {
+        public bool IsIcon;
+        public int X;
+        public int Y;
+        public IntPtr Mask;
+        public IntPtr Color;
     }
 
     /// Presses the button of the terminal window whose tip says this, through its automation peer:

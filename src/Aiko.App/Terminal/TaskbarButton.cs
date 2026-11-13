@@ -6,6 +6,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shell;
 using Aiko.Core;
 using Aiko.Core.Terminal;
+using Windows.Win32.UI.WindowsAndMessaging;
 
 namespace Aiko.App;
 
@@ -20,6 +21,11 @@ namespace Aiko.App;
 /// WindowChrome, which would hide the window and the terminal in it for a frame
 /// (TerminalWindow.TakeIcon, D-416), so the icon may change as often as the face needs. It changes
 /// only when the picture did.
+///
+/// The icons are made here and kept for a few seconds after a newer one replaced them. WPF, given
+/// the picture as Window.Icon, destroyed the old icon the moment it set the new one; Explorer reads
+/// the icon of a button a little later, and under load it read one that was already gone and drew a
+/// black square during the move between the rings and a face.
 [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763")]
 sealed class TaskbarButton
 {
@@ -42,6 +48,12 @@ sealed class TaskbarButton
     private string? _appId;
     private byte[] _picture = [];
 
+    /// The icons given to the window, oldest first, with the time each was given.
+    private readonly Queue<(HICON Big, HICON Small, long Given)> _given = new();
+
+    /// How long an icon lives after a newer one took its place.
+    private static readonly TimeSpan KeepReplaced = TimeSpan.FromSeconds(3);
+
     public TaskbarButton(Window window, Func<(CardRow? Ring, CardRow? Dot)> rows)
     {
         _window = window;
@@ -55,6 +67,13 @@ sealed class TaskbarButton
         _window.Activated += (_, _) => TakeAppId();
         _faces = new TrayFaceAnimator(window.Dispatcher);
         _faces.Changed += () => Draw(sameRows: true);
+        _window.SourceInitialized += (_, _) =>
+        {
+            // A picture drawn before the window had a handle is given now.
+            _picture = [];
+            Draw(sameRows: true);
+        };
+        _window.Closed += (_, _) => Forget(all: true);
     }
 
     /// New numbers or another environment in the tray menu.
@@ -150,9 +169,43 @@ sealed class TaskbarButton
             return;
         }
 
+        var handle = new WindowInteropHelper(_window).Handle;
+        if (handle == IntPtr.Zero)
+        {
+            return;
+        }
+
         _picture = picture;
-        _window.Icon = Decode(picture);
+        var small = RingIcon.RenderPng(Pixels(SmallSize), _lastRows.Ring, _lastRows.Dot, _faces.Frame, _faces.Face);
+        var icons = (Big: RingIcon.FromPng(picture, Pixels(Size)), Small: RingIcon.FromPng(small, Pixels(SmallSize)));
+        SendMessage(handle, SetIcon, BigIcon, icons.Big);
+        SendMessage(handle, SetIcon, SmallIcon, icons.Small);
+        _given.Enqueue((icons.Big, icons.Small, Environment.TickCount64));
+        Forget(all: false);
     }
+
+    /// Destroys the icons that were replaced long enough ago; all of them when the window is gone.
+    /// The newest stays while the window lives: it is the one the button shows.
+    private void Forget(bool all)
+    {
+        while (_given.Count > (all ? 0 : 1) && (all || Environment.TickCount64 - _given.Peek().Given > KeepReplaced.TotalMilliseconds))
+        {
+            var (big, small, _) = _given.Dequeue();
+            Windows.Win32.PInvoke.DestroyIcon(big);
+            Windows.Win32.PInvoke.DestroyIcon(small);
+        }
+    }
+
+    private const int SmallSize = 16;
+    private const int SetIcon = 0x0080;
+    private static readonly IntPtr BigIcon = 1;
+    private static readonly IntPtr SmallIcon = 0;
+
+    [System.Runtime.InteropServices.DllImport("user32.dll", EntryPoint = "SendMessageW")]
+    private static extern IntPtr SendMessage(IntPtr window, int message, IntPtr wParam, IntPtr lParam);
+
+    private static IntPtr SendMessage(IntPtr window, int message, IntPtr wParam, HICON icon) =>
+        SendMessage(window, message, wParam, (IntPtr)icon);
 
     /// Real pixels on the screen of the window, so the picture is not scaled up and blurred.
     private int Pixels(int units) => (int)Math.Round(units * VisualTreeHelper.GetDpi(_window).DpiScaleX);
@@ -169,13 +222,5 @@ sealed class TaskbarButton
         bitmap.Render(visual);
         bitmap.Freeze();
         return bitmap;
-    }
-
-    private static BitmapFrame Decode(byte[] png)
-    {
-        using var stream = new MemoryStream(png);
-        var frame = BitmapFrame.Create(stream, BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
-        frame.Freeze();
-        return frame;
     }
 }

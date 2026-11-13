@@ -17,9 +17,12 @@ static class RingIcon
 
     /// ring: the environment the icon shows. dot: the other one, or null with a single
     /// environment. Both null means Claude Code has not reported yet.
-    public static HICON Render(int size, CardRow? ring, CardRow? dot, IconFrame? frame = null, ImageSource? face = null, SessionBadge? badge = null)
+    public static HICON Render(int size, CardRow? ring, CardRow? dot, IconFrame? frame = null, ImageSource? face = null, SessionBadge? badge = null) =>
+        FromPng(RenderPng(size, ring, dot, frame, face, badge), size);
+
+    /// A picture already drawn, as an icon of Windows. The caller destroys it.
+    public static HICON FromPng(byte[] png, int size)
     {
-        var png = RenderPng(size, ring, dot, frame, face, badge);
         unsafe
         {
             fixed (byte* bytes = png)
