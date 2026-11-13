@@ -12,10 +12,8 @@ namespace Aiko.App;
 /// tray icon: the ring of the environment chosen in the tray menu and the dot of the other one. The
 /// corner, an overlay, shows the sign of the sessions, and the face of Aiko for its two seconds.
 ///
-/// A new icon makes Windows build the framed window again, and the terminal in it misses a frame: a
-/// flicker in the chat (D-414). So the icon changes only while the window is not in front, where the
-/// header shows the same numbers; the newest rings wait for the window to lose the front. A new
-/// overlay costs nothing of the kind, so the face goes there, as one picture without frames.
+/// A new icon goes to Windows past WindowChrome, which would hide the window and the terminal in it
+/// for a frame (TerminalWindow.TakeIcon, D-416), so the rings change as soon as the picture does.
 [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763")]
 sealed class TaskbarButton
 {
@@ -30,34 +28,27 @@ sealed class TaskbarButton
     private SessionBadge _badge = SessionBadge.None;
     private ImageSource? _face;
     private byte[] _picture = [];
-    private byte[]? _waiting;
 
     public TaskbarButton(Window window, Func<(CardRow? Ring, CardRow? Dot)> rows)
     {
         _window = window;
         _rows = rows;
         _window.TaskbarItemInfo ??= new TaskbarItemInfo();
-        _window.Deactivated += (_, _) => PutWaitingIcon();
-        _window.StateChanged += (_, _) => PutWaitingIcon();
     }
 
-    /// New numbers or another environment in the tray menu: the rings are drawn again. The icon
-    /// changes only when the picture did, and only while the window is not in front.
+    /// New numbers or another environment in the tray menu: the rings are drawn again, and the icon
+    /// changes only when the picture did.
     public void Update()
     {
         var (ring, dot) = _rows();
         var picture = RingIcon.RenderPng(Pixels(Size), ring, dot);
         if (picture.AsSpan().SequenceEqual(_picture))
         {
-            _waiting = null;
             return;
         }
 
-        _waiting = picture;
-        if (!InFront)
-        {
-            PutWaitingIcon();
-        }
+        _picture = picture;
+        _window.Icon = Decode(picture);
     }
 
     /// A face comes or goes, at the same moments as on the tray icon (D-211): it takes the corner
@@ -78,20 +69,6 @@ sealed class TaskbarButton
 
         _badge = badge;
         PutCorner();
-    }
-
-    private bool InFront => _window.IsActive && _window.WindowState != WindowState.Minimized;
-
-    private void PutWaitingIcon()
-    {
-        if (_waiting is not { } picture || InFront)
-        {
-            return;
-        }
-
-        _waiting = null;
-        _picture = picture;
-        _window.Icon = Decode(picture);
     }
 
     private void PutCorner() =>
