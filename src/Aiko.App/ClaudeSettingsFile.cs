@@ -29,6 +29,11 @@ static class ClaudeSettingsFile
 {
     private static readonly ClaudeSettingsEditor Editor = new(RealFiles.Instance, ThisComputer.Platform);
 
+    /// One change of a settings.json at a time. The window and the background queue of the plugins
+    /// both change these files, through the same temporary name; two at once could lose a change
+    /// without a word. Every change waits here for the one before it.
+    private static readonly object OneWriter = new();
+
     public static string PathIn(string configDirectory) => ClaudeSettingsEditor.PathIn(configDirectory);
 
     public static string BackupPathIn(string configDirectory) =>
@@ -55,27 +60,27 @@ static class ClaudeSettingsFile
     }
 
     public static PatchOutcome AddBridge(string configDirectory, string bridgeExePath) =>
-        Report(configDirectory, Editor.Add(configDirectory, LineFor(bridgeExePath)));
+        Report(configDirectory, InTurn(() => Editor.Add(configDirectory, LineFor(bridgeExePath))));
 
     /// The session start hook that reminds about folder bindings, written for the detected shell.
     public static PatchOutcome AddSessionHook(string configDirectory, string bridgeExePath) =>
-        Report(configDirectory, Editor.AddSessionHook(configDirectory, BridgeCommand.HookFor(bridgeExePath, ShellDetect.Current())));
+        Report(configDirectory, InTurn(() => Editor.AddSessionHook(configDirectory, BridgeCommand.HookFor(bridgeExePath, ShellDetect.Current()))));
 
     /// Aiko's line, its hook, its plugins and its marketplace (D-205).
     public static PatchOutcome RemoveAiko(string configDirectory) =>
-        Report(configDirectory, Editor.Remove(configDirectory));
+        Report(configDirectory, InTurn(() => Editor.Remove(configDirectory)));
 
     /// The rule that lets the model use the memory tools without a question (D-279).
     public static PatchOutcome SetMemoryPermission(string configDirectory, bool allowed) =>
-        Report(configDirectory, Editor.SetMemoryPermission(configDirectory, allowed));
+        Report(configDirectory, InTurn(() => Editor.SetMemoryPermission(configDirectory, allowed)));
 
     public static PatchOutcome TidyAfterPluginRemoval(string configDirectory) =>
-        Report(configDirectory, Editor.TidyAfterPluginRemoval(configDirectory));
+        Report(configDirectory, InTurn(() => Editor.TidyAfterPluginRemoval(configDirectory)));
 
     /// Called at startup for the folders Aiko already writes to. It never adds a line that is not
     /// there: a person who said "not now" keeps that answer.
     public static PatchOutcome RepairBridge(string configDirectory, string bridgeExePath) =>
-        Report(configDirectory, Editor.RepairIfOurs(configDirectory, LineFor(bridgeExePath)));
+        Report(configDirectory, InTurn(() => Editor.RepairIfOurs(configDirectory, LineFor(bridgeExePath))));
 
     /// The reason in the user's language. The core names the reason; the words live here.
     public static string Words(PatchProblem problem) => problem switch
@@ -84,6 +89,14 @@ static class ClaudeSettingsFile
         PatchProblem.CouldNotWrite => Strings.SettingsWriteFailed,
         _ => string.Empty,
     };
+
+    private static PatchOutcome InTurn(Func<PatchOutcome> change)
+    {
+        lock (OneWriter)
+        {
+            return change();
+        }
+    }
 
     private static PatchOutcome Report(string configDirectory, PatchOutcome outcome)
     {
