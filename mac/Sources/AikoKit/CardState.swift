@@ -39,6 +39,9 @@ public struct CardRow: Sendable, Equatable {
     /// used to say "Fable" whatever came back, which would be wrong the day that changes.
     public let modelName: String?
 
+    /// The name a provider gave the window; nil for the windows of Claude, named by their kind.
+    public let label: String?
+
     public init(
         kind: LimitKind,
         percent: Int,
@@ -46,7 +49,8 @@ public struct CardRow: Sendable, Equatable {
         isReset: Bool,
         countdown: ResetCountdown,
         pace: PaceEstimate,
-        modelName: String? = nil
+        modelName: String? = nil,
+        label: String? = nil
     ) {
         self.kind = kind
         self.percent = percent
@@ -55,6 +59,7 @@ public struct CardRow: Sendable, Equatable {
         self.countdown = countdown
         self.pace = pace
         self.modelName = modelName
+        self.label = label
     }
 }
 
@@ -86,11 +91,6 @@ public struct CardState: Sendable, Equatable {
 
     public static let cautionFrom = 75
     public static let criticalFrom = 90
-
-    /// The windows Claude Code reports, and how long each one lasts. Needed for the pace estimate:
-    /// the share of the window already spent is compared with the share of the limit already used.
-    public static let fiveHourWindow: TimeInterval = 5 * 3600
-    public static let sevenDayWindow: TimeInterval = 7 * 86400
 
     /// How long after the last word from the status line a session counts as working. Claude Code
     /// runs the status line as the conversation changes, so an idle or closed session goes quiet;
@@ -141,8 +141,8 @@ public struct CardState: Sendable, Equatable {
         }
 
         var rows: [CardRow] = []
-        addRow(&rows, snapshot, now, freshness, .fiveHour, fiveHourWindow)
-        addRow(&rows, snapshot, now, freshness, .sevenDay, sevenDayWindow)
+        addRow(&rows, snapshot, now, freshness, .fiveHour)
+        addRow(&rows, snapshot, now, freshness, .sevenDay)
 
         if let model = snapshot.model {
             let countdown = ResetCountdown.between(now, model.resetsAt)
@@ -170,18 +170,23 @@ public struct CardState: Sendable, Equatable {
         _ snapshot: LimitSnapshot,
         _ now: Date,
         _ freshness: DataFreshness,
-        _ kind: LimitKind,
-        _ windowLength: TimeInterval
+        _ kind: LimitKind
     ) {
         guard let status = snapshot.statusAt(now, kind) else { return }
 
+        // How long the window lasts is needed for the pace: the share of the window already gone
+        // is compared with the share of the limit already used.
+        let window = snapshot.windows.first { $0.kind == kind }
+        let length = window?.length ?? LimitKinds.defaultLength(kind)
         rows.append(CardRow(
             kind: kind,
             percent: status.percent,
             tone: toneFor(status.percent, freshness),
             isReset: status.isReset,
             countdown: status.countdown,
-            pace: estimatePace(status, windowLength, now, snapshot.windowResetsAt(kind))))
+            pace: length.map { estimatePace(status, $0, now, snapshot.windowResetsAt(kind)) }
+                ?? PaceEstimate(verdict: .unknown, timeLeft: 0),
+            label: window?.label))
     }
 
     /// How much of the window has to be gone, and how much of the limit spent, before a guess is

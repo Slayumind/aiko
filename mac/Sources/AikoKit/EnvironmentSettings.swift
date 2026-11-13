@@ -1,8 +1,20 @@
 import Foundation
 
+/// An agent an environment works with. Claude Code is the only one for now; each environment keeps
+/// its own list, because work and personal may use different ones (D-420).
+public enum AgentProvider: String, Sendable, Equatable, CaseIterable {
+    case claude
+}
+
 /// One environment: a name the user chose and the Claude Code config folders inside it.
 /// Each environment has one folder today, but the core keeps a list from the start.
 public struct AikoEnvironment: Sendable, Equatable {
+    public static let defaultProviders: [AgentProvider] = [.claude]
+
+    /// The agents of this environment. A file without the list means Claude alone, as every file
+    /// written before the list existed.
+    public var providers: [AgentProvider] = AikoEnvironment.defaultProviders
+
     public var name: String
     public var configDirectories: [String]
     public var directMode: Bool
@@ -153,7 +165,7 @@ public struct EnvironmentSettings: Sendable, Equatable {
             }
 
             let command = object["command"]?.stringValue
-            return AikoEnvironment(
+            var environment = AikoEnvironment(
                 name,
                 directories.compactMap(\.stringValue),
                 directMode: object["directMode"]?.boolValue ?? false,
@@ -162,6 +174,8 @@ public struct EnvironmentSettings: Sendable, Equatable {
                 projectFolders: (object["projectFolders"]?.arrayValue ?? [])
                     .compactMap(\.stringValue)
                     .filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty })
+            environment.providers = providersFrom(object["providers"]?.arrayValue)
+            return environment
         }
 
         guard !read.isEmpty else {
@@ -172,6 +186,18 @@ public struct EnvironmentSettings: Sendable, Equatable {
             read,
             ringEnvironment: root["ringEnvironment"]?.stringValue,
             defaultEnvironment: root["defaultEnvironment"]?.stringValue)
+    }
+
+    /// Names the file gives, read without regard to case; a name Aiko does not know is left out,
+    /// and a list left empty means Claude.
+    static func providersFrom(_ names: [JsonNode]?) -> [AgentProvider] {
+        var known: [AgentProvider] = []
+        for name in names ?? [] {
+            if let provider = name.stringValue.flatMap({ AgentProvider(rawValue: $0.lowercased()) }), !known.contains(provider) {
+                known.append(provider)
+            }
+        }
+        return known.isEmpty ? AikoEnvironment.defaultProviders : known
     }
 
     public func toJson() -> String {
@@ -195,6 +221,9 @@ public struct EnvironmentSettings: Sendable, Equatable {
             }
             if !environment.projectFolders.isEmpty {
                 file["projectFolders"] = .array(environment.projectFolders.map(JsonNode.string))
+            }
+            if environment.providers != AikoEnvironment.defaultProviders {
+                file["providers"] = .array(environment.providers.map { JsonNode.string($0.rawValue) })
             }
             return .object(file)
         })

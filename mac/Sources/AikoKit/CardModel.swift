@@ -147,7 +147,7 @@ public struct LimitRow: Sendable, Equatable {
         let toneWord = CardText.tone(row.tone)
 
         return LimitRow(
-            name: CardText.windowName(row.kind, row.modelName),
+            name: row.label ?? CardText.windowName(row.kind, row.modelName),
             percent: CardText.percent(row.percent),
             resets: CardText.resets(row.countdown),
             pace: toneWord.isEmpty ? CardText.pace(row.pace) : toneWord,

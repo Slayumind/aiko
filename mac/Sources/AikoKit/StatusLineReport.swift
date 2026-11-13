@@ -22,15 +22,35 @@ public enum Percentage {
     }
 }
 
+/// One limit window. length and label are for a provider whose windows are not the ones of Claude:
+/// how long the window lasts, for the pace, and what it is called. Claude leaves both out, and the
+/// lengths and words it is known for are used (LimitKinds). The twin of LimitWindow in C#.
 public struct LimitWindow: Sendable, Equatable {
     public let kind: LimitKind
     public let percent: Int
     public let resetsAt: Date
+    public let length: TimeInterval?
+    public let label: String?
 
-    public init(kind: LimitKind, percent: Int, resetsAt: Date) {
+    public init(kind: LimitKind, percent: Int, resetsAt: Date, length: TimeInterval? = nil, label: String? = nil) {
         self.kind = kind
         self.percent = percent
         self.resetsAt = resetsAt
+        self.length = length
+        self.label = label
+    }
+}
+
+/// What Aiko knows about the windows of Claude when the window itself says nothing.
+public enum LimitKinds {
+    /// How long a window lasts. The model week is reported without its length, so no honest
+    /// estimate of the pace can be made for it.
+    public static func defaultLength(_ kind: LimitKind) -> TimeInterval? {
+        switch kind {
+        case .fiveHour: return 5 * 3600
+        case .sevenDay: return 7 * 86400
+        case .modelWeek: return nil
+        }
     }
 }
 

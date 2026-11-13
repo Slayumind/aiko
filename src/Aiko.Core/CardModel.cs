@@ -147,8 +147,8 @@ public sealed record LimitRow
         var toneWord = CardText.Tone(row.Tone);
         return new LimitRow
         {
-            Name = CardText.WindowName(row.Kind, row.ModelName),
-            ShortName = CardText.ShortWindowName(row.Kind, row.ModelName),
+            Name = row.Label ?? CardText.WindowName(row.Kind, row.ModelName),
+            ShortName = row.Label ?? CardText.ShortWindowName(row.Kind, row.ModelName),
             Percent = CardText.Percent(row.Percent),
             Resets = CardText.Resets(row.Countdown),
             Countdown = CardText.Countdown(row.Countdown),
