@@ -93,8 +93,6 @@
     through a temporary project that cannot see files the first pass made.
   -->
   <ItemGroup>
-    <EmbeddedResource Update="Strings.resx" />
-    <EmbeddedResource Update="Strings.ru.resx" />
   </ItemGroup>
 
   <!-- The two Windows programs share these files: what this computer is, and how a file is written. -->

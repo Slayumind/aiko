@@ -16,7 +16,7 @@ static class ReleaseNotesRun
 
     public static async Task<IReadOnlyList<string>> ForAsync(string version, CancellationToken cancel)
     {
-        var russian = (Strings.Culture ?? CultureInfo.CurrentUICulture).TwoLetterISOLanguageName == "ru";
+        var russian = Strings.Language == StringLanguage.Russian;
         var key = version + (russian ? "/ru" : "/en");
         if (Known.TryGetValue(key, out var known))
         {

@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Shell;
+using Aiko.Core;
 using Aiko.Core.Terminal;
 
 namespace Aiko.App;

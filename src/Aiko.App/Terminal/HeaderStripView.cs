@@ -245,15 +245,15 @@ sealed class HeaderStripView
             head.Children.Add(link);
         }
 
-        if (block is { HaloVisibility: Visibility.Visible })
+        if (block is { ShowsHalo: true })
         {
             var state = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(12, 0, 0, 0) };
             var dot = new Grid { Width = 12, Height = 12, Margin = new Thickness(0, 0, 4, 0), VerticalAlignment = VerticalAlignment.Center };
             dot.Children.Add(new Ellipse { Width = 12, Height = 12, Fill = Tokens.Brush("Positive"), Opacity = 0.18 });
-            dot.Children.Add(new Ellipse { Width = 6, Height = 6, Fill = block.StateFill, Stroke = block.StateRing, StrokeThickness = 1.5 });
+            dot.Children.Add(new Ellipse { Width = 6, Height = 6, Fill = block.StateDot == StateDot.Filled ? Tokens.Brush("Positive") : Brushes.Transparent, Stroke = block.StateDot == StateDot.Filled ? Brushes.Transparent : Tokens.Brush("Muted"), StrokeThickness = 1.5 });
             state.Children.Add(dot);
             var words = TerminalPanel.Text(block.State, "TextTiny", "Ink", FontWeights.Normal);
-            words.Foreground = block.StateText;
+            words.Foreground = Tokens.Brush(block.StateIsBright ? "Ink" : "Muted");
             state.Children.Add(words);
             DockPanel.SetDock(state, Dock.Right);
             head.Children.Add(state);
@@ -296,7 +296,7 @@ sealed class HeaderStripView
         name.Margin = new Thickness(0, 0, 12, 0);
         grid.Children.Add(name);
 
-        var track = Track(row.Fill, row.Rest, 4, row.Tone, 1, grow);
+        var track = Track(new GridLength(row.Fill, GridUnitType.Star), new GridLength(100 - row.Fill, GridUnitType.Star), 4, Tokens.ToneBrush(row.Tone), 1, grow);
         track.Margin = new Thickness(0, 0, 8, 0);
         Grid.SetColumn(track, 1);
         grid.Children.Add(track);
@@ -313,10 +313,10 @@ sealed class HeaderStripView
 
         // Only the word of a tone ("running low"), in its colour; a guess about the pace is the
         // card's detail.
-        if (row.Pace.Length > 0 && !ReferenceEquals(row.PaceTone, Tokens.Brush("Muted")))
+        if (row.Pace.Length > 0 && row.PaceTakesTone)
         {
             var tone = TerminalPanel.Text(row.Pace, "TextSmall", "Muted", FontWeights.Normal);
-            tone.Foreground = row.PaceTone;
+            tone.Foreground = Tokens.ToneBrush(row.Tone);
             tone.Margin = new Thickness(8, 0, 0, 0);
             Grid.SetColumn(tone, 4);
             grid.Children.Add(tone);

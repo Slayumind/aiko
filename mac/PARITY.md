@@ -6,8 +6,8 @@ methods: one `[Theory]` with five `[InlineData]` rows counts as five, and so doe
 `@Test(arguments:)` that mirrors it. `dotnet test` prints cases; `swift test` prints methods, not
 cases. The cases the Swift side does not have are named at the bottom; the ones it has and Windows
 does not belong to the two small programs, whose decisions sit inline in `Program.cs` on Windows,
-and to the card words, the island and the settings window, which sit in `Aiko.App` on Windows
-where no test can reach them.
+and to the island and the settings window, which sit in `Aiko.App` on Windows where no test can
+reach them.
 
 `ParityMapTests` in `Aiko.Core.Tests` keeps this map true to the disk: every file it names must
 exist, and every file of the two cores must be named here. It does the same for the table in
@@ -70,6 +70,8 @@ a row cannot change in one core and stay as it was in the other. See `spec/cases
 | BridgeCommand.cs | BridgeCommand.swift | 29 | 29 | BridgeCommandTests (11) and BridgeRecognitionTests (18) |
 | CommandLinks.cs | CommandLinks.swift | 3 | 3 | |
 | AikoMarketplace.cs | AikoMarketplace.swift | — | — | its cases sit in PluginPlanTests and SkillPluginTests |
+| Strings.cs | Strings.swift | — | 3 | both are made by `tools/strings.py` from `tools/strings.json`, so a text is written once. The app, the checks and the XAML of Windows read the core table too (D-422) |
+| CardText.cs, CardModel.cs, TrayText.cs | CardText.swift, CardModel.swift, TrayText.swift | 8 | 41 | CardWordsTests on both sides: the words of the limits, the blocks of every environment and the tooltip of the icon (D-422). Rows in `spec/cases/card-words`, read in both languages. Windows has four more fields for the open header of the terminal window: `ShortName`, `Countdown`, `NeedsSignIn` and the `Updated` of a block |
 | AppSettings.cs | AppSettings.swift | 18 | 18 | `CloseHintShown`, the line about closing the window that is shown once (D-421), is in both |
 | WizardChecklist.cs | WizardChecklist.swift | 15 | 15 | `PlaceSeen`: the step "Place" is open until the person has seen it, and it is optional (D-421) |
 | CredentialFile.cs | CredentialFile.swift | 10 | 10 | `TryParse` with an out parameter is `parse`, which answers nil |
@@ -104,15 +106,11 @@ a row cannot change in one core and stay as it was in the other. See `spec/cases
 | — | SharedCaseTests.swift | 28 | 28 | the case files under `spec/cases/`, read by both suites |
 | — | UpdateInstaller.swift | — | 6 | the macOS half of an update: the zip, `ditto` and the bundle swap. Windows has Velopack instead, and UpdateInstall.cs holds the same steps around it where no xUnit case can reach them |
 
-The words and the numbers of the card sit in `src/Aiko.App` on Windows, where no xUnit case can
-reach them. In Swift they are part of AikoKit and have cases of their own:
+The drawing rules below sit in `src/Aiko.App` on Windows, where no xUnit case can reach them. In
+Swift they are part of AikoKit and have cases of their own:
 
 | C# file | Swift file | C# cases | Swift cases | Notes |
 |---|---|---|---|---|
-| Strings.resx, Strings.ru.resx | Strings.swift | — | 3 | both are made by `tools/strings.py` from `tools/strings.json`, so a text is written once |
-| Card/CardText.cs | CardText.swift | — | 20 | `clock` takes a time zone, where `$"{updatedAt:HH:mm}"` takes the machine's |
-| Card/CardModel.cs | CardModel.swift | — | 10 | brushes and `Visibility` become the tone and a plain "shown or not": AppKit and WPF spell those differently |
-| TrayText.cs | TrayText.swift | — | 6 | the 127 character limit is Windows', and one text for both is one text to translate |
 | RingIcon.cs, RingDrawing.cs | RingArt.swift | — | 13 | the 16 unit grid, the tones and the dashed ring as numbers; the drawing itself is `AikoMac/StatusIcon.swift` |
 | Theme/Motion.cs | Motion.swift, CardLifetime.swift | — | 6 | the durations and the curves, plus the hover delay and the two away turns of the card, which Windows no longer has (D-399) |
 | Island/IslandPanel.xaml.cs, Island/UnfoldPanel.cs, Island/FitPanel.cs | IslandLayout.swift | — | 28 | the size of the island, its line and corners per edge, the padding that keeps the rings still when the docked side loses its line, where every ring and percentage sits, and the 34 point square it closes into around the face |
@@ -209,7 +207,7 @@ AikoKit decided, and it answers the mouse.
 | Aiko.Checks/ShellCheck.cs (`--try-shell`) | the self tests in AikoShell.swift, IslandCheck.swift, SettingsCheck.swift | checks that drive the real shell without writing anything. One difference is left: on a machine that is not set up, the Mac self test still opens the checklist by itself, and the Windows check opens no page |
 | RingIcon.cs | StatusIcon.swift | draws the ring and the dot into an `NSImage` |
 | Theme/Tokens.xaml | Theme.swift | the palette and the sizes, as SwiftUI values |
-| — | CardView.swift | the card: header, blocks, rows, bars. On Windows `Card/CardModel.cs` and `CardText.cs` still give the limits in the header of the terminal window their words and numbers |
+| — | CardView.swift | the card: header, blocks, rows, bars. On Windows the same `CardModel` of the core gives the open header of the terminal window its words |
 | — | CardWindow.swift | the panel the card lives in, where it is placed and how it arrives |
 | SnapshotWatcher.cs | SnapshotWatch.swift | watches the snapshots folder; a `DispatchSource` in place of `FileSystemWatcher` |
 | Island/IslandWindow.xaml.cs | IslandWindow.swift | the island's window: where it goes, the hover, the drag and the landing |
