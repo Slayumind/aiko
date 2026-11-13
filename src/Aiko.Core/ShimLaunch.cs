@@ -17,6 +17,35 @@ public enum ConfigVariable
 public sealed record ShimPlan(AikoEnvironment? Environment, ConfigVariable Variable, string? ConfigDirectory, bool Explicit)
 {
     public static readonly ShimPlan PassThrough = new(null, ConfigVariable.Keep, null, false);
+
+    /// What the shim changes in the environment of Claude Code; a null value takes the variable out.
+    /// CLAUDE_CONFIG_DIR points Claude Code at the folder of this environment. AIKO_ENVIRONMENT and
+    /// AIKO_LAUNCH are read back by the session start hook, which says so when a command overrode a
+    /// folder binding (D-163). The twin of ShimPlan.variableChanges.
+    public IReadOnlyList<(string Name, string? Value)> VariableChanges
+    {
+        get
+        {
+            var changes = new List<(string Name, string? Value)>();
+            switch (Variable)
+            {
+                case ConfigVariable.Set when ConfigDirectory is not null:
+                    changes.Add((ClaudeConfigFolder.VariableName, ConfigDirectory));
+                    break;
+                case ConfigVariable.Clear:
+                    changes.Add((ClaudeConfigFolder.VariableName, null));
+                    break;
+            }
+
+            if (Environment is { } environment)
+            {
+                changes.Add((SessionReminder.EnvironmentVariable, environment.Name));
+                changes.Add((SessionReminder.LaunchVariable, Explicit ? SessionReminder.LaunchedByCommand : "binding"));
+            }
+
+            return changes;
+        }
+    }
 }
 
 /// Decides which environment a start of Claude Code belongs to.

@@ -8,7 +8,8 @@ using Aiko.Core;
 // Claude Code runs "Aiko.Bridge.exe plugin aiko-persona" to get the persona plugin (D-201). It
 // sends nothing on stdin, so this is decided before any input is read: waiting for input that
 // never comes would hang the install. Unlike the status line, a failure here must show as one.
-if (PersonaPluginOutput.IsRequest(args))
+var job = BridgeWork.JobFor(args);
+if (job == BridgeJob.PersonaPlugin)
 {
     return BuildPersonaPlugin();
 }
@@ -25,53 +26,30 @@ try
 {
     var input = ReadAllInput();
 
-    if (memoryMode is { } memoryHook)
-    {
-        AnswerMemoryHook(memoryHook, input);
-        return 0;
-    }
-
-    if (args is [SessionReminder.Argument, ..])
-    {
-        RemindAboutBinding(input);
-        return 0;
-    }
-
-    // The hook of a session in the terminal of Aiko (D-360). It comes with --settings, so it runs
-    // in every environment, with the personality or without it.
-    if (args is [Aiko.Core.Terminal.TerminalEvent.HookArgument, ..])
-    {
-        RecordTerminalEvent(input);
-        return 0;
-    }
-
-    // The persona plugin's hooks (D-206). Before this branch a hook call fell through to the status
-    // line code, which could run the person's own status line with hook input.
-    if (args is [PersonaPlugin.HookArgument, ..])
-    {
-        RecordActivity(input);
-        return 0;
-    }
-
     // Without the variable Claude Code works in ~\.claude, so the bridge does too. Naming that case
     // anything else made the app look for a file that was never written.
     var configDirectory = ClaudeConfigFolder.Resolve(
-        Environment.GetEnvironmentVariable("CLAUDE_CONFIG_DIR"),
+        Environment.GetEnvironmentVariable(ClaudeConfigFolder.VariableName),
         Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
-    var environment = SnapshotName.For(configDirectory);
 
-    var report = StatusLineReport.FromJson(input);
-    if (report.HasData)
+    switch (job)
     {
-        var snapshot = LimitSnapshot.FromStatusLine(environment, DateTimeOffset.Now, report);
-        WriteSnapshot(environment, SnapshotFile.ToJson(snapshot));
-    }
-
-    var wrapped = ReadWrappedCommand(configDirectory);
-    var output = wrapped is null ? "" : RunWrapped(wrapped, input);
-    if (output.Length > 0)
-    {
-        WriteOutput(output);
+        case BridgeJob.Memory when memoryMode is { } memoryHook:
+            AnswerMemoryHook(memoryHook, input);
+            break;
+        case BridgeJob.SessionStart:
+            RemindAboutBinding(input);
+            break;
+        case BridgeJob.TerminalHook:
+            // It comes with --settings, so it runs in every environment, with the personality or without it.
+            RecordTerminalEvent(input);
+            break;
+        case BridgeJob.Hook:
+            RecordActivity(configDirectory, input);
+            break;
+        default:
+            RunStatusLine(configDirectory, input);
+            break;
     }
 }
 catch (Exception)
@@ -80,6 +58,24 @@ catch (Exception)
 }
 
 return 0;
+
+/// The snapshot of the limits, then the status line the user already had.
+static void RunStatusLine(string configDirectory, string input)
+{
+    var settings = Path.Combine(configDirectory, "settings.json");
+    var plan = BridgeWork.StatusLine(ThisComputer.Folders, configDirectory, ReadIfThere(settings), input, DateTimeOffset.Now);
+    if (plan.Snapshot is { } snapshot)
+    {
+        Directory.CreateDirectory(ThisComputer.Folders.SnapshotsFolder);
+        AtomicFile.Replace(snapshot.Path, snapshot.Text);
+    }
+
+    var output = plan.WrappedCommand is { } wrapped ? RunWrapped(wrapped, input) : "";
+    if (output.Length > 0)
+    {
+        WriteOutput(output);
+    }
+}
 
 /// Read the payload as bytes: Console.In would decode it with the OEM code page, and on a
 /// Russian Windows that turns Cyrillic paths into rubbish.
@@ -98,59 +94,34 @@ static string ReadAllInput()
 /// and nothing at all otherwise: an empty hook answer changes nothing in Claude Code.
 static void RemindAboutBinding(string input)
 {
-    var folder = SessionReminder.WorkingDirectoryIn(input);
-    if (folder is null)
-    {
-        return;
-    }
-
-    var environments = ReadIfThere(ThisComputer.Folders.EnvironmentsFile);
-    var language = AppSettings.FromJson(ReadIfThere(ThisComputer.Folders.SettingsFile)).Language;
-
-    var message = SessionReminder.MessageFor(
+    var output = BridgeWork.SessionStart(
+        input,
         Environment.GetEnvironmentVariable(SessionReminder.LaunchVariable),
         Environment.GetEnvironmentVariable(SessionReminder.EnvironmentVariable),
-        folder,
-        EnvironmentSettings.FromJson(environments),
-        SessionReminder.IsRussian(language, WindowsLanguage.UserInterface()));
+        ReadIfThere(ThisComputer.Folders.EnvironmentsFile),
+        ReadIfThere(ThisComputer.Folders.SettingsFile),
+        language => SessionReminder.IsRussian(language, WindowsLanguage.UserInterface()));
 
-    if (message is not null)
+    if (output is not null)
     {
-        WriteOutput(SessionReminder.HookOutput(message));
+        WriteOutput(output);
     }
 }
 
 /// One small file per session for the face in the tray. An event that means nothing for the face
 /// writes nothing, and the same activity is not written again every few seconds.
-static void RecordActivity(string input)
+static void RecordActivity(string configDirectory, string input)
 {
-    if (HookEvent.FromJson(input) is not { } hook)
+    var step = BridgeWork.Activity(ThisComputer.Folders, configDirectory, input, path => File.Exists(path) ? File.ReadAllText(path) : null, DateTimeOffset.Now);
+    if (step.Remove is { } gone)
     {
-        return;
+        File.Delete(gone);
     }
-
-    var configDirectory = ClaudeConfigFolder.Resolve(
-        Environment.GetEnvironmentVariable("CLAUDE_CONFIG_DIR"),
-        Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
-    var folder = ThisComputer.Folders.ActivityFolder;
-    var environment = SnapshotName.For(configDirectory);
-    var path = Path.Combine(folder, ActivityRecord.FileName(environment, hook.SessionId));
-
-    if (hook.Activity == SessionActivity.Ended)
+    else if (step.Write is { } write)
     {
-        File.Delete(path);
-        return;
+        Directory.CreateDirectory(ThisComputer.Folders.ActivityFolder);
+        AtomicFile.Replace(write.Path, write.Text);
     }
-
-    var now = DateTimeOffset.Now;
-    var written = File.Exists(path) ? ActivityRecord.FromJson(File.ReadAllText(path)) : null;
-    if (!ActivityRecord.NeedsWrite(written, hook.Activity, now))
-    {
-        return;
-    }
-
-    Directory.CreateDirectory(folder);
-    AtomicFile.Replace(path, new ActivityRecord(environment, hook.Activity, now).ToJson());
 }
 
 /// The last event of a session of the terminal, for its row. The session is named by the variable
@@ -338,30 +309,6 @@ static void WriteOutput(string text)
     var bytes = Encoding.UTF8.GetBytes(text);
     stdout.Write(bytes, 0, bytes.Length);
     stdout.Flush();
-}
-
-static string SnapshotPath(string environment)
-{
-    Directory.CreateDirectory(ThisComputer.Folders.SnapshotsFolder);
-    return ThisComputer.Folders.SnapshotFile(environment);
-}
-
-static void WriteSnapshot(string environment, string json) => AtomicFile.Replace(SnapshotPath(environment), json);
-
-static string? ReadWrappedCommand(string? configDirectory)
-{
-    if (string.IsNullOrWhiteSpace(configDirectory))
-    {
-        return null;
-    }
-
-    var settings = Path.Combine(configDirectory, "settings.json");
-    if (!File.Exists(settings))
-    {
-        return null;
-    }
-
-    return SettingsJsonPatch.ReadWrappedCommand(File.ReadAllText(settings));
 }
 
 /// The status line the user had before Aiko. It gets the same input and its output is printed

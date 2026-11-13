@@ -468,96 +468,93 @@ sealed class TerminalHost
         _panel.ShowPalette(palette);
     }
 
-    /// Ctrl and the key, with Shift or without (D-353). False leaves the key to the program.
+    /// Ctrl and the key, with Shift or without (D-353). What a key does is the core's table
+    /// (TerminalKeys); here it is done. False leaves the key to the program.
     private bool KeyPressed(System.Windows.Input.Key key, bool shift, bool inTerminal)
     {
-        // Ctrl+, opens the settings and closes them (D-374), as in VS Code and Warp.
-        if (key == System.Windows.Input.Key.OemComma && !shift)
-        {
-            if (SettingsOpen)
-            {
-                CloseSettings();
-            }
-            else
-            {
-                OpenSettings();
-            }
+        var state = new TerminalKeyState(
+            SettingsOpen,
+            _model.Session(_sessions)?.Kind == SessionKind.Claude,
+            inTerminal,
+            inTerminal && OpenTerminal()?.SelectedText is { Length: > 0 });
 
-            return true;
-        }
-
-        // While the settings are open the keys of the sessions wait: the fields of a page take
-        // Ctrl+C and Ctrl+V themselves, and nothing changes behind the settings.
-        if (SettingsOpen && key is not (System.Windows.Input.Key.OemPlus or System.Windows.Input.Key.Add
-            or System.Windows.Input.Key.OemMinus or System.Windows.Input.Key.Subtract
-            or System.Windows.Input.Key.D0 or System.Windows.Input.Key.NumPad0))
+        switch (TerminalKeys.For(KeyName(key), shift, state))
         {
-            return false;
-        }
+            case TerminalKeyAction.ToggleSettings:
+                if (SettingsOpen)
+                {
+                    CloseSettings();
+                }
+                else
+                {
+                    OpenSettings();
+                }
 
-        switch (key)
-        {
-            case System.Windows.Input.Key.G when !shift && _model.Session(_sessions)?.Kind == SessionKind.Claude:
-                // A long text for Claude Code in the editor, as the rich input of Warp (D-370).
+                return true;
+            case TerminalKeyAction.Compose:
                 _panel.Editor.Compose();
                 return true;
-            case System.Windows.Input.Key.V when !shift && inTerminal:
-                // A picture goes as a picture, a file as its path, text as text (D-370).
+            case TerminalKeyAction.Paste:
                 if (OpenTerminal() is { } pasteInto && _model.Session(_sessions) is { } pasted)
                 {
                     _ = WriteInTurn(pasteInto, TerminalPaste.FromClipboard(ThisComputer.Folders.PicturesFolder(pasted.Id)));
                 }
 
                 return true;
-            case System.Windows.Input.Key.C when !shift && inTerminal && OpenTerminal()?.SelectedText is { Length: > 0 } chosen:
-                // With a selection Ctrl+C copies, as in Windows Terminal; without one it stops the program.
-                CopyText(chosen);
-                return true;
-            case System.Windows.Input.Key.OemPlus or System.Windows.Input.Key.Add:
-                // Ctrl+= and Ctrl++ make the window larger, as in Windows Terminal (D-384).
-                Zoom(WindowZoom.Larger);
-                return true;
-            case System.Windows.Input.Key.OemMinus or System.Windows.Input.Key.Subtract when !shift:
-                Zoom(WindowZoom.Smaller);
-                return true;
-            case System.Windows.Input.Key.D0 or System.Windows.Input.Key.NumPad0 when !shift:
-                Zoom(_ => WindowZoom.Default);
-                return true;
-            case System.Windows.Input.Key.T when shift:
-                PickFolderQuickly();
-                return true;
-            case System.Windows.Input.Key.K when shift:
-                OpenSessionPalette();
-                return true;
-            case System.Windows.Input.Key.F when shift:
-                // The search in the output of a command line (D-358); Claude Code keeps its own keys.
-                return OpenTerminal()?.OpenFind() == true;
-            case System.Windows.Input.Key.B when shift:
-                // Ctrl+B belongs to Claude Code (a command to the background) and to bash (D-376).
-                if (_panel.ToggleListFromKeys())
-                {
-                    Remember(settings => settings with { SessionListHidden = !settings.SessionListHidden });
-                }
-
-                return true;
-            case System.Windows.Input.Key.Tab:
-                GoRound(shift ? -1 : 1);
-                return true;
-            case System.Windows.Input.Key.Space when shift:
-                _panel.Editor.PressVoice();
-                return true;
-            case System.Windows.Input.Key.C when shift:
-                // Copies what is selected in the terminal, as in Windows Terminal.
+            case TerminalKeyAction.Copy:
                 if (OpenTerminal()?.SelectedText is { Length: > 0 } selected)
                 {
                     CopyText(selected);
                 }
 
                 return true;
+            case TerminalKeyAction.ZoomIn:
+                Zoom(WindowZoom.Larger);
+                return true;
+            case TerminalKeyAction.ZoomOut:
+                Zoom(WindowZoom.Smaller);
+                return true;
+            case TerminalKeyAction.ZoomReset:
+                Zoom(_ => WindowZoom.Default);
+                return true;
+            case TerminalKeyAction.NewSessionQuickly:
+                PickFolderQuickly();
+                return true;
+            case TerminalKeyAction.Palette:
+                OpenSessionPalette();
+                return true;
+            case TerminalKeyAction.Find:
+                return OpenTerminal()?.OpenFind() == true;
+            case TerminalKeyAction.ToggleList:
+                if (_panel.ToggleListFromKeys())
+                {
+                    Remember(settings => settings with { SessionListHidden = !settings.SessionListHidden });
+                }
+
+                return true;
+            case TerminalKeyAction.NextSession:
+                GoRound(1);
+                return true;
+            case TerminalKeyAction.PreviousSession:
+                GoRound(-1);
+                return true;
+            case TerminalKeyAction.Voice:
+                _panel.Editor.PressVoice();
+                return true;
             default:
                 return false;
         }
     }
+
+    /// The name of a WPF key in the table of the core.
+    private static string KeyName(System.Windows.Input.Key key) => key switch
+    {
+        System.Windows.Input.Key.OemComma => "Comma",
+        System.Windows.Input.Key.OemPlus or System.Windows.Input.Key.Add => "Plus",
+        System.Windows.Input.Key.OemMinus or System.Windows.Input.Key.Subtract => "Minus",
+        System.Windows.Input.Key.D0 or System.Windows.Input.Key.NumPad0 => "0",
+        _ => key.ToString(),
+    };
 
     private void GoRound(int step)
     {
