@@ -32,7 +32,7 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="CardSession" xml:space="preserve">
-    <value>Сессия · 5 часов</value>
+    <value>5 часов</value>
   </data>
   <data name="CardWeek" xml:space="preserve">
     <value>Неделя</value>
@@ -881,7 +881,7 @@
     <value>Сбросить ID</value>
   </data>
   <data name="ResetInstallIdWhat" xml:space="preserve">
-    <value>Aiko придумает новое значение. Прежние дни с новым ID уже не связать.</value>
+    <value>ID каждого дня считается из значения, которое хранится на этом компьютере. Сброс меняет и его: прошлые дни с будущими уже не связать.</value>
   </data>
   <data name="ResetInstallIdDone" xml:space="preserve">
     <value>ID теперь новый.</value>
@@ -1310,7 +1310,37 @@
     <value>Claude Code не запустился</value>
   </data>
   <data name="TerminalNotStartedBody" xml:space="preserve">
-    <value>Aiko не нашла его на этом компьютере. Установи Claude Code и открой сессию снова.</value>
+    <value>Aiko не нашла claude на этом компьютере.</value>
+  </data>
+  <data name="TerminalShellNotStartedTitle" xml:space="preserve">
+    <value>Командная строка не запустилась</value>
+  </data>
+  <data name="TerminalStartFailedBody" xml:space="preserve">
+    <value>Windows вернула ошибку {0}. Подробности — в журнале.</value>
+  </data>
+  <data name="TerminalStartAgain" xml:space="preserve">
+    <value>Запустить ещё раз</value>
+  </data>
+  <data name="TerminalHowToInstall" xml:space="preserve">
+    <value>Как установить</value>
+  </data>
+  <data name="TerminalFolderGoneTitle" xml:space="preserve">
+    <value>Папки {0} больше нет на диске</value>
+  </data>
+  <data name="TerminalFolderGoneBody" xml:space="preserve">
+    <value>Разговор сохранён, но запустить его негде.</value>
+  </data>
+  <data name="TerminalFolderGoneShell" xml:space="preserve">
+    <value>Командную строку негде открыть.</value>
+  </data>
+  <data name="TerminalRemoveFromList" xml:space="preserve">
+    <value>Убрать из списка</value>
+  </data>
+  <data name="TerminalCloseHint" xml:space="preserve">
+    <value>Закроешь окно — сессии продолжат работу, а Aiko останется у часов.</value>
+  </data>
+  <data name="TerminalCloseHintDone" xml:space="preserve">
+    <value>Понятно</value>
   </data>
   <data name="TerminalWorking" xml:space="preserve">
     <value>работает</value>
@@ -1426,6 +1456,15 @@
   <data name="TerminalSessionList" xml:space="preserve">
     <value>Список сессий · Ctrl+Shift+B</value>
   </data>
+  <data name="TerminalFindConversation" xml:space="preserve">
+    <value>Найти разговор · Ctrl+Shift+K</value>
+  </data>
+  <data name="TerminalKeysClaude" xml:space="preserve">
+    <value>Ctrl+G редактор · Ctrl+Shift+Space голос · Ctrl+Shift+K найти разговор</value>
+  </data>
+  <data name="TerminalKeysShell" xml:space="preserve">
+    <value># подсказка команды · Ctrl+Shift+F найти в выводе · Ctrl+Shift+K найти разговор</value>
+  </data>
   <data name="TerminalShowLimits" xml:space="preserve">
     <value>Показать лимиты сред</value>
   </data>
@@ -1484,16 +1523,16 @@
     <value>Открыть настройки</value>
   </data>
   <data name="NavTerminal" xml:space="preserve">
-    <value>Терминал</value>
+    <value>Окно</value>
   </data>
   <data name="NavVoiceOn" xml:space="preserve">
-    <value>голос включён</value>
+    <value>уведомления, голос включён</value>
   </data>
   <data name="NavVoiceOff" xml:space="preserve">
-    <value>голос выключен</value>
+    <value>уведомления, голос выключен</value>
   </data>
   <data name="NotifyLabel" xml:space="preserve">
-    <value>Уведомления</value>
+    <value>УВЕДОМЛЕНИЯ</value>
   </data>
   <data name="NotifyWhat" xml:space="preserve">
     <value>Значок в трее, кнопка в панели задач и остров показывают, сколько агентов ждут, закончили или остановились. Число уходит, когда ты открываешь эту сессию.</value>
@@ -1502,7 +1541,7 @@
     <value>Звук, когда у агента вопрос</value>
   </data>
   <data name="ZoomLabel" xml:space="preserve">
-    <value>Масштаб окна</value>
+    <value>МАСШТАБ ОКНА</value>
   </data>
   <data name="ZoomWhat" xml:space="preserve">
     <value>Текст, значки и терминал меняются вместе. В окне терминала — C⁠t⁠r⁠l⁠+⁠= и C⁠t⁠r⁠l⁠+⁠-, а C⁠t⁠r⁠l⁠+⁠0 возвращает 115 %.</value>
@@ -1517,13 +1556,13 @@
     <value>Ctrl+Shift+Space или кнопка микрофона в редакторе.</value>
   </data>
   <data name="VoiceLanguageLabel" xml:space="preserve">
-    <value>Язык речи</value>
+    <value>ЯЗЫК РЕЧИ</value>
   </data>
   <data name="VoiceLanguageWhat" xml:space="preserve">
     <value>Whisper на компьютере слушает этот язык. OpenAI узнаёт язык сам.</value>
   </data>
   <data name="VoiceEngineLabel" xml:space="preserve">
-    <value>Распознавание</value>
+    <value>РАСПОЗНАВАНИЕ</value>
   </data>
   <data name="VoiceLocalTitle" xml:space="preserve">
     <value>На компьютере</value>

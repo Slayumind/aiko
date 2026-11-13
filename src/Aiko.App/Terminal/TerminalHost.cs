@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using Aiko.Core;
@@ -25,6 +26,12 @@ sealed class TerminalHost
     /// Sessions of Claude Code whose program ended by itself (D-351): the row says "stopped" and
     /// Enter starts it again with --resume.
     private readonly Dictionary<string, long> _exited = [];
+
+    /// The line about closing the window was shown and put away: it does not come back (D-421).
+    private bool _closeHintShown = SettingsStore.Load().CloseHintShown;
+
+    /// Sessions whose terminal did not start, with why and the code Windows gave (D-421).
+    private readonly Dictionary<string, (StartProblem Problem, int Code)> _problems = [];
 
     // What each running session of Claude Code does (D-352): its title, its last hook event, and
     // when the person last looked at it and typed into it, in milliseconds.
@@ -110,6 +117,14 @@ sealed class TerminalHost
         };
         _window.Closing += (_, e) =>
         {
+            // Closed once with sessions running, the person has seen what the line says. The window
+            // is going, so nothing is drawn.
+            if (_terminals.Count > 0 && !_closeHintShown)
+            {
+                _closeHintShown = true;
+                SettingsStore.Change(settings => settings with { CloseHintShown = true });
+            }
+
             if (!e.Cancel)
             {
                 _sessions = _sessions.Placed(_window.Place);
@@ -162,6 +177,10 @@ sealed class TerminalHost
         _panel.ListToggled += () => Remember(settings => settings with { SessionListHidden = !settings.SessionListHidden });
         _panel.SignInAsked += SignIn;
         _panel.SettingsAsked += () =>
+        _panel.PaletteAsked += OpenSessionPalette;
+        _panel.RetryAsked += RetryStart;
+        _panel.CloseHintDone += CloseHintDone;
+        _panel.InstallPageAsked += () => Process.Start(new ProcessStartInfo(ClaudeInstallPage) { UseShellExecute = true });
         {
             if (SettingsOpen)
             {
@@ -171,7 +190,8 @@ sealed class TerminalHost
             {
                 OpenSettings();
             }
-        };
+        }
+        ;
 
         // Esc from anywhere in the settings, a text field included: what was typed is applied on the
         // way out, the same as leaving the field.
@@ -760,7 +780,7 @@ sealed class TerminalHost
         }
 
         var id = Guid.NewGuid().ToString();
-        var name = kind == SessionKind.Shell ? Shell().Name : "";
+        var name = kind == SessionKind.Shell ? Shell().Title : "";
         _sessions = _sessions
             .Add(id, environment.Name, folder, name, DateTimeOffset.UtcNow.ToUnixTimeSeconds(), kind)
             .Opened(id);
@@ -880,13 +900,34 @@ sealed class TerminalHost
             return known;
         }
 
+        if (_problems.ContainsKey(session.Id))
+        {
+            return null;
+        }
+
+        // A session whose folder is gone does not start somewhere else: Claude Code would not find
+        // its conversation there, and a command line would open in a folder nobody chose.
+        if (!Directory.Exists(session.Folder))
+        {
+            _problems[session.Id] = (StartProblem.FolderGone, 0);
+            return null;
+        }
+
         if (Launch(session) is not { } launch)
         {
+            _problems[session.Id] = (StartProblem.NoClaude, 0);
             return null;
         }
 
         var terminal = new TerminalSurface(launch, blocks: session.Kind == SessionKind.Shell);
         terminal.Exited += code => Ended(session.Id, code);
+        terminal.StartFailed += error =>
+        {
+            TerminalLog.StartFailed(session.Environment, session.Kind == SessionKind.Shell, error);
+            _terminals.Remove(session.Id);
+            _problems[session.Id] = (StartProblem.Failed, error);
+            Draw();
+        };
         if (terminal.Blocks is { } blocks)
         {
             blocks.Folder = session.Folder;
@@ -937,6 +978,32 @@ sealed class TerminalHost
         _sessions = _sessions.Used(session.Id, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
         Save();
         return terminal;
+    }
+
+    /// The official page on installing Claude Code.
+    private const string ClaudeInstallPage = "https://code.claude.com/docs/en/setup";
+
+    /// The line about closing the window is done with, by its cross or by the first close.
+    private void CloseHintDone()
+    {
+        if (_closeHintShown)
+        {
+            return;
+        }
+
+        _closeHintShown = true;
+        SettingsStore.Change(settings => settings with { CloseHintShown = true });
+        Draw();
+    }
+
+    /// "Start again": the session tries once more, with Claude Code found or the folder back.
+    private void RetryStart()
+    {
+        if (_model.Session(_sessions) is { } session)
+        {
+            _problems.Remove(session.Id);
+            Draw();
+        }
     }
 
     /// Whether Claude Code saved the conversation, in any project folder of the environment: the
@@ -1242,6 +1309,10 @@ sealed class TerminalHost
             DateTimeOffset.Now)
         {
             Stopped = session is not null && _exited.ContainsKey(session.Id),
+            Problem = session is not null && _problems.TryGetValue(session.Id, out var problem) ? problem.Problem : null,
+            ProblemCode = session is not null && _problems.TryGetValue(session.Id, out var failed) ? failed.Code : 0,
+            Shell = session?.Kind == SessionKind.Shell,
+            CloseHint = !_closeHintShown && _terminals.Count > 0,
         };
     }
 

@@ -2,8 +2,8 @@
   [
     "CardSession",
     [
-      "Session · 5 hours",
-      "Сессия · 5 часов"
+      "5 hours",
+      "5 часов"
     ]
   ],
   [
@@ -1983,8 +1983,8 @@
   [
     "ResetInstallIdWhat",
     [
-      "Aiko makes a new value. The days before it cannot be linked to the new one.",
-      "Aiko придумает новое значение. Прежние дни с новым ID уже не связать."
+      "The ID of each day is made from a value kept on this computer. Resetting changes that value too, so past days can't be linked to the days ahead.",
+      "ID каждого дня считается из значения, которое хранится на этом компьютере. Сброс меняет и его: прошлые дни с будущими уже не связать."
     ]
   ],
   [
@@ -2984,8 +2984,78 @@
   [
     "TerminalNotStartedBody",
     [
-      "Aiko did not find it on this computer. Install Claude Code, then open the session again.",
-      "Aiko не нашла его на этом компьютере. Установи Claude Code и открой сессию снова."
+      "Aiko did not find claude on this computer.",
+      "Aiko не нашла claude на этом компьютере."
+    ]
+  ],
+  [
+    "TerminalShellNotStartedTitle",
+    [
+      "The command line did not start",
+      "Командная строка не запустилась"
+    ]
+  ],
+  [
+    "TerminalStartFailedBody",
+    [
+      "Windows returned error {0}. The log has the details.",
+      "Windows вернула ошибку {0}. Подробности — в журнале."
+    ]
+  ],
+  [
+    "TerminalStartAgain",
+    [
+      "Start again",
+      "Запустить ещё раз"
+    ]
+  ],
+  [
+    "TerminalHowToInstall",
+    [
+      "How to install",
+      "Как установить"
+    ]
+  ],
+  [
+    "TerminalFolderGoneTitle",
+    [
+      "The folder {0} is no longer on the disk",
+      "Папки {0} больше нет на диске"
+    ]
+  ],
+  [
+    "TerminalFolderGoneBody",
+    [
+      "The conversation is saved, but there is nowhere to start it.",
+      "Разговор сохранён, но запустить его негде."
+    ]
+  ],
+  [
+    "TerminalFolderGoneShell",
+    [
+      "There is nowhere to open the command line.",
+      "Командную строку негде открыть."
+    ]
+  ],
+  [
+    "TerminalRemoveFromList",
+    [
+      "Remove from the list",
+      "Убрать из списка"
+    ]
+  ],
+  [
+    "TerminalCloseHint",
+    [
+      "Close the window and the sessions keep working, while Aiko stays by the clock.",
+      "Закроешь окно — сессии продолжат работу, а Aiko останется у часов."
+    ]
+  ],
+  [
+    "TerminalCloseHintDone",
+    [
+      "Got it",
+      "Понятно"
     ]
   ],
   [
@@ -3255,6 +3325,27 @@
     ]
   ],
   [
+    "TerminalFindConversation",
+    [
+      "Find a conversation · Ctrl+Shift+K",
+      "Найти разговор · Ctrl+Shift+K"
+    ]
+  ],
+  [
+    "TerminalKeysClaude",
+    [
+      "Ctrl+G editor · Ctrl+Shift+Space voice · Ctrl+Shift+K find a conversation",
+      "Ctrl+G редактор · Ctrl+Shift+Space голос · Ctrl+Shift+K найти разговор"
+    ]
+  ],
+  [
+    "TerminalKeysShell",
+    [
+      "# ask for a command · Ctrl+Shift+F find in the output · Ctrl+Shift+K find a conversation",
+      "# подсказка команды · Ctrl+Shift+F найти в выводе · Ctrl+Shift+K найти разговор"
+    ]
+  ],
+  [
     "TerminalShowLimits",
     [
       "Show the limits of the environments",
@@ -3390,29 +3481,29 @@
   [
     "NavTerminal",
     [
-      "Terminal",
-      "Терминал"
+      "Window",
+      "Окно"
     ]
   ],
   [
     "NavVoiceOn",
     [
-      "voice input on",
-      "голос включён"
+      "notifications, voice on",
+      "уведомления, голос включён"
     ]
   ],
   [
     "NavVoiceOff",
     [
-      "voice input off",
-      "голос выключен"
+      "notifications, voice off",
+      "уведомления, голос выключен"
     ]
   ],
   [
     "NotifyLabel",
     [
-      "Notifications",
-      "Уведомления"
+      "NOTIFICATIONS",
+      "УВЕДОМЛЕНИЯ"
     ]
   ],
   [
@@ -3432,8 +3523,8 @@
   [
     "ZoomLabel",
     [
-      "Window zoom",
-      "Масштаб окна"
+      "WINDOW ZOOM",
+      "МАСШТАБ ОКНА"
     ]
   ],
   [
@@ -3467,8 +3558,8 @@
   [
     "VoiceLanguageLabel",
     [
-      "Speech language",
-      "Язык речи"
+      "SPEECH LANGUAGE",
+      "ЯЗЫК РЕЧИ"
     ]
   ],
   [
@@ -3481,8 +3572,8 @@
   [
     "VoiceEngineLabel",
     [
-      "Recognition",
-      "Распознавание"
+      "RECOGNITION",
+      "РАСПОЗНАВАНИЕ"
     ]
   ],
   [

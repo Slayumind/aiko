@@ -79,6 +79,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   lists what Finish changes. The privacy step names what is never sent, and the update check
   mentions the count only when statistics are on.
 
+- **The window says what it can do.** A magnifier in the title bar opens the search of conversations,
+  and a quiet line under a session names its keys. The open island puts the letter of each
+  environment before its ring. A session that did not start says why and offers to start again,
+  to install Claude Code or, when its folder is gone, to leave the list. The first time sessions
+  run, one line says that closing the window keeps them going.
+
 ### Fixed
 
 - The log keeps only the name of a file or folder, not its full path. A system error used to write

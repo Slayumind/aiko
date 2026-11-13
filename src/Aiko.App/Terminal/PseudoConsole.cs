@@ -54,6 +54,28 @@ sealed class PseudoConsole : ITerminalConnection, IDisposable
             throw new Win32Exception();
         }
 
+        try
+        {
+            StartIn(inputRead, outputWrite);
+        }
+        catch
+        {
+            // A start that failed leaves no pipe behind for the finalizer.
+            inputWrite.Dispose();
+            outputRead.Dispose();
+            throw;
+        }
+
+        _input = new FileStream(inputWrite, FileAccess.Write);
+        _output = new FileStream(outputRead, FileAccess.Read);
+        IsRunning = true;
+        new Thread(Read) { IsBackground = true, Name = "pseudo console output" }.Start();
+        new Thread(Wait) { IsBackground = true, Name = "pseudo console exit" }.Start();
+    }
+
+    /// The pseudo console and the program in it. The ends of the pipes it takes are closed here.
+    private void StartIn(Microsoft.Win32.SafeHandles.SafeFileHandle inputRead, Microsoft.Win32.SafeHandles.SafeFileHandle outputWrite)
+    {
         var result = ConptyCreatePseudoConsole(new Coord(_columns, _rows), inputRead, outputWrite, 0, out _console);
         inputRead.Dispose();
         outputWrite.Dispose();
@@ -88,11 +110,6 @@ sealed class PseudoConsole : ITerminalConnection, IDisposable
         }
 
         _job = ProcessJob.Around(_process);
-        _input = new FileStream(inputWrite, FileAccess.Write);
-        _output = new FileStream(outputRead, FileAccess.Read);
-        IsRunning = true;
-        new Thread(Read) { IsBackground = true, Name = "pseudo console output" }.Start();
-        new Thread(Wait) { IsBackground = true, Name = "pseudo console exit" }.Start();
     }
 
     public void WriteInput(string data)

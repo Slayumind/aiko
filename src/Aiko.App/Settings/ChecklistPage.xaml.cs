@@ -68,7 +68,6 @@ public partial class ChecklistPage : UserControl
         InstallHow.Text = string.Format(Strings.InstallHowButton, InstallCommandText);
         MeetFace.Source = FaceDrawing.For(SettingsStore.LoadPersona().Face, AikoFace.Fresh, FaceGround.Dark, MeetFace.Width);
         NewName.Text = "";
-        DefaultChoice.Picked += _ => Refresh();
 
         GatherFacts();
         FillFromExisting();
@@ -144,9 +143,8 @@ public partial class ChecklistPage : UserControl
             ChooseSecond(second.ConfigDirectories[0], second.Name);
             _projectFolders.AddRange(second.ProjectFolders);
 
-            // The default list starts at the default in use, not at environment 1.
-            DefaultChoice.Items = [FirstNameText(), SecondNameText()];
-            DefaultChoice.SelectedIndex = _existing.Default(Home) == second ? 1 : 0;
+            // The switch starts at the default in use, not at environment 1.
+            RestToSecond.IsChecked = _existing.Default(Home) == second;
         }
 
         var settings = SettingsStore.Load();
@@ -573,11 +571,6 @@ public partial class ChecklistPage : UserControl
 
         NoBinds.Visibility = _projectFolders.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
-        var names = new[] { FirstNameText(), second }.Where(n => n.Length > 0).ToList();
-        var chosen = DefaultChoice.SelectedIndex;
-        DefaultChoice.Items = names;
-        DefaultChoice.SelectedIndex = chosen < 0 ? 0 : Math.Min(chosen, names.Count - 1);
-
         var commands = CommandsInUse();
         ExplicitWins.Text = commands.Count == 2 && second.Length > 0
             ? string.Format(Strings.ExplicitWins, commands[0], FirstNameText())
@@ -828,6 +821,14 @@ public partial class ChecklistPage : UserControl
         }
     }
 
+    private void OnRestChanged(object sender, RoutedEventArgs e)
+    {
+        if (IsLoaded)
+        {
+            Refresh();
+        }
+    }
+
     private void OnPlaceChanged(object sender, RoutedEventArgs e)
     {
         if (IsLoaded)
@@ -907,7 +908,7 @@ public partial class ChecklistPage : UserControl
         }
 
         // A default that was written down stays written down, under its current name.
-        var defaultName = DefaultChoice.SelectedIndex > 0 && environments.Count > 1 ? environments[1].Name
+        var defaultName = RestToSecond.IsChecked == true && environments.Count > 1 ? environments[1].Name
             : _existing.DefaultEnvironment is null ? null
             : environments[0].Name;
         // The ring keeps the environment the person put there, when it is still in the list.

@@ -98,6 +98,8 @@ public partial class IslandPanel : UserControl
                 Orientation = horizontal ? Orientation.Horizontal : Orientation.Vertical,
                 Margin = Gap(horizontal, Rings.Children.Count == 0),
             };
+            // Open, each ring says whose it is: the letter of its environment before it (D-421).
+            item.Children.Add(Unfolding(EnvironmentInitial.Of(card.Environment), horizontal, before: true, "Muted"));
             item.Children.Add(new RingGauge(row?.Percent, row?.Tone ?? LimitTone.Unknown, RingSize));
             item.Children.Add(Label(row?.Percent, horizontal));
             Rings.Children.Add(item);
@@ -132,17 +134,27 @@ public partial class IslandPanel : UserControl
     }
 
     /// The percentage beside a ring along a top or bottom edge, under it along a side.
-    private UnfoldPanel Label(int? percent, bool horizontal)
+    private UnfoldPanel Label(int? percent, bool horizontal) =>
+        Unfolding(percent is { } value ? $"{value}%" : "—", horizontal, before: false, "Ink");
+
+    /// A word that unfolds with the island: after the ring or, with before, in front of it.
+    private UnfoldPanel Unfolding(string text, bool horizontal, bool before, string tone)
     {
         var words = new TextBlock
         {
-            Text = percent is { } value ? $"{value}%" : "—",
+            Text = text,
             FontFamily = Tokens.Get<System.Windows.Media.FontFamily>("Mono"),
             FontSize = Tokens.Get<double>("TextTiny"),
-            Foreground = Tokens.Brush("Ink"),
+            Foreground = Tokens.Brush(tone),
             VerticalAlignment = VerticalAlignment.Center,
             HorizontalAlignment = HorizontalAlignment.Center,
-            Margin = horizontal ? new Thickness(6, 0, 0, 0) : new Thickness(0, 4, 0, 0),
+            Margin = (horizontal, before) switch
+            {
+                (true, true) => new Thickness(0, 0, 6, 0),
+                (true, false) => new Thickness(6, 0, 0, 0),
+                (false, true) => new Thickness(0, 0, 0, 4),
+                (false, false) => new Thickness(0, 4, 0, 0),
+            },
         };
 
         var label = new UnfoldPanel

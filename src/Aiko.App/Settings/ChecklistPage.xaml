@@ -171,13 +171,17 @@
           <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
             <Button Style="{StaticResource QuietButton}" Content="{x:Static local:Strings.AddProject}" Click="OnAddProject" />
           </StackPanel>
+          <!-- The same switch as on the page of the environment (D-421): on, every other folder opens in
+               environment 2. -->
           <Grid Margin="0,14,0,0">
             <Grid.ColumnDefinitions>
-              <ColumnDefinition Width="Auto" />
               <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <TextBlock Text="{x:Static local:Strings.AllOtherFolders}" Style="{StaticResource RowName}" VerticalAlignment="Center" />
-            <local:DropDown x:Name="DefaultChoice" Grid.Column="1" Margin="10,0,0,0" HorizontalAlignment="Left" MinWidth="180" />
+            <TextBlock Text="{x:Static local:Strings.DefaultForRest}" Style="{StaticResource RowName}" TextWrapping="Wrap"
+                       VerticalAlignment="Center" Margin="0,0,12,0" />
+            <ToggleButton x:Name="RestToSecond" Grid.Column="1" Style="{StaticResource Switch}" VerticalAlignment="Center"
+                          Checked="OnRestChanged" Unchecked="OnRestChanged" />
           </Grid>
           <TextBlock x:Name="ExplicitWins" Style="{StaticResource RowHint}" Margin="0,10,0,0" />
         </StackPanel>
@@ -249,9 +253,9 @@
           </Border>
 
           <TextBlock Text="{x:Static local:Strings.SectionNeverSent}" Style="{StaticResource SectionLabel}" Margin="0,14,0,6" />
-          <TextBlock Style="{StaticResource RowNote}" TextWrapping="Wrap" TextTrimming="None"
+          <TextBlock Style="{StaticResource RowHint}" TextWrapping="Wrap"
                      Text="{x:Static local:Strings.NeverSentWhat}" />
-          <TextBlock Style="{StaticResource RowNote}" Margin="0,6,0,0" TextWrapping="Wrap" TextTrimming="None"
+          <TextBlock Style="{StaticResource RowHint}" Margin="0,6,0,0" TextWrapping="Wrap"
                      Text="{x:Static local:Strings.WizardStatsLater}" />
 
           <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">

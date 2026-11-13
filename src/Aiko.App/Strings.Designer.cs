@@ -21,7 +21,7 @@ public static class Strings
 
     private static string Get(string key) => Resources.GetString(key, Culture) ?? key;
 
-    /// Session · 5 hours
+    /// 5 hours
     public static string CardSession => Get("CardSession");
 
     /// Week
@@ -870,7 +870,7 @@ public static class Strings
     /// Reset ID
     public static string ResetInstallId => Get("ResetInstallId");
 
-    /// Aiko makes a new value. The days before it cannot be linked to the new one.
+    /// The ID of each day is made from a value kept on this computer. Resetting changes that val...
     public static string ResetInstallIdWhat => Get("ResetInstallIdWhat");
 
     /// The ID is new.
@@ -1299,8 +1299,38 @@ public static class Strings
     /// Claude Code did not start
     public static string TerminalNotStartedTitle => Get("TerminalNotStartedTitle");
 
-    /// Aiko did not find it on this computer. Install Claude Code, then open the session again.
+    /// Aiko did not find claude on this computer.
     public static string TerminalNotStartedBody => Get("TerminalNotStartedBody");
+
+    /// The command line did not start
+    public static string TerminalShellNotStartedTitle => Get("TerminalShellNotStartedTitle");
+
+    /// Windows returned error {0}. The log has the details.
+    public static string TerminalStartFailedBody => Get("TerminalStartFailedBody");
+
+    /// Start again
+    public static string TerminalStartAgain => Get("TerminalStartAgain");
+
+    /// How to install
+    public static string TerminalHowToInstall => Get("TerminalHowToInstall");
+
+    /// The folder {0} is no longer on the disk
+    public static string TerminalFolderGoneTitle => Get("TerminalFolderGoneTitle");
+
+    /// The conversation is saved, but there is nowhere to start it.
+    public static string TerminalFolderGoneBody => Get("TerminalFolderGoneBody");
+
+    /// There is nowhere to open the command line.
+    public static string TerminalFolderGoneShell => Get("TerminalFolderGoneShell");
+
+    /// Remove from the list
+    public static string TerminalRemoveFromList => Get("TerminalRemoveFromList");
+
+    /// Close the window and the sessions keep working, while Aiko stays by the clock.
+    public static string TerminalCloseHint => Get("TerminalCloseHint");
+
+    /// Got it
+    public static string TerminalCloseHintDone => Get("TerminalCloseHintDone");
 
     /// working
     public static string TerminalWorking => Get("TerminalWorking");
@@ -1416,6 +1446,15 @@ public static class Strings
     /// Session list · Ctrl+Shift+B
     public static string TerminalSessionList => Get("TerminalSessionList");
 
+    /// Find a conversation · Ctrl+Shift+K
+    public static string TerminalFindConversation => Get("TerminalFindConversation");
+
+    /// Ctrl+G editor · Ctrl+Shift+Space voice · Ctrl+Shift+K find a conversation
+    public static string TerminalKeysClaude => Get("TerminalKeysClaude");
+
+    /// # ask for a command · Ctrl+Shift+F find in the output · Ctrl+Shift+K find a conversation
+    public static string TerminalKeysShell => Get("TerminalKeysShell");
+
     /// Show the limits of the environments
     public static string TerminalShowLimits => Get("TerminalShowLimits");
 
@@ -1473,16 +1512,16 @@ public static class Strings
     /// Open settings
     public static string VoiceOpenSettings => Get("VoiceOpenSettings");
 
-    /// Terminal
+    /// Window
     public static string NavTerminal => Get("NavTerminal");
 
-    /// voice input on
+    /// notifications, voice on
     public static string NavVoiceOn => Get("NavVoiceOn");
 
-    /// voice input off
+    /// notifications, voice off
     public static string NavVoiceOff => Get("NavVoiceOff");
 
-    /// Notifications
+    /// NOTIFICATIONS
     public static string NotifyLabel => Get("NotifyLabel");
 
     /// The tray icon, the taskbar button and the island show how many agents wait, have finished...
@@ -1491,7 +1530,7 @@ public static class Strings
     /// A sound when the agent has a question
     public static string NotifySound => Get("NotifySound");
 
-    /// Window zoom
+    /// WINDOW ZOOM
     public static string ZoomLabel => Get("ZoomLabel");
 
     /// Text, icons and the terminal change size together. In the terminal window: C⁠t⁠r⁠l⁠+⁠= an...
@@ -1506,13 +1545,13 @@ public static class Strings
     /// Ctrl+Shift+Space or the microphone button in the editor.
     public static string VoiceToggleWhat => Get("VoiceToggleWhat");
 
-    /// Speech language
+    /// SPEECH LANGUAGE
     public static string VoiceLanguageLabel => Get("VoiceLanguageLabel");
 
     /// Whisper on your computer listens for this language. OpenAI hears the language by itself.
     public static string VoiceLanguageWhat => Get("VoiceLanguageWhat");
 
-    /// Recognition
+    /// RECOGNITION
     public static string VoiceEngineLabel => Get("VoiceEngineLabel");
 
     /// On this computer
