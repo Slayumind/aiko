@@ -185,8 +185,6 @@ sealed class AikoShell : IDisposable
     /// The terminal window is open.
     public bool TerminalShownForCheck => _terminal is not null;
 
-    public void CloseTerminalForCheck() => _terminal?.Close();
-
     public IslandWindow? IslandForCheck => _island.Window;
 
     /// The settings are open: in the terminal window, or in a window of their own before the first

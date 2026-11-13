@@ -74,6 +74,11 @@ public partial class ChecklistPage : UserControl
         FillCandidates();
         Refresh();
         Open(openFirst ?? WizardChecklist.NextToOpen(Facts()));
+
+        // The page lives on while the person looks at other pages of the window. Hidden, it stops
+        // asking the disk every two seconds; shown again, it asks again for the open item.
+        Unloaded += (_, _) => Wait(null);
+        Loaded += (_, _) => WaitForInstall();
     }
 
     /// Raised after Finish wrote the environments, with the words for the page that comes next.
@@ -82,9 +87,8 @@ public partial class ChecklistPage : UserControl
     /// Opens one item, for "Add a second environment" and the like.
     public void OpenItem(ChecklistItem item) => Open(item);
 
-    /// Stops waiting for Claude Code or a sign-in. The page itself lives on while the person looks at
-    /// other pages of the window, so this is called when the window closes, not when the page hides.
-    public void Close() => _waiter?.Dispose();
+    /// Stops waiting for Claude Code or a sign-in, when the window closes.
+    public void Close() => Wait(null);
 
     // ---- facts ----
 
@@ -333,6 +337,12 @@ public partial class ChecklistPage : UserControl
     /// One item open at a time, so the window stays the size of what is being done.
     private void Open(ChecklistItem? item)
     {
+        // A wait belongs to the item it was started on: another item stops it.
+        if (item != _opened)
+        {
+            Wait(null);
+        }
+
         _opened = item;
         foreach (var row in _rows)
         {
@@ -352,7 +362,13 @@ public partial class ChecklistPage : UserControl
 
         ShowSteps();
 
-        if (item == ChecklistItem.Install && !_claudeInstalled)
+        WaitForInstall();
+    }
+
+    /// While the install item is open and Claude Code is not found, the page looks for it.
+    private void WaitForInstall()
+    {
+        if (_opened == ChecklistItem.Install && !_claudeInstalled && _waiter is null)
         {
             Wait(Waiter.ForClaude(() =>
             {
@@ -370,7 +386,7 @@ public partial class ChecklistPage : UserControl
         Open(WizardChecklist.NextToOpen(Facts()));
     }
 
-    private void Wait(Waiter waiter)
+    private void Wait(Waiter? waiter)
     {
         _waiter?.Dispose();
         _waiter = waiter;

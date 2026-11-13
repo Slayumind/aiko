@@ -82,7 +82,7 @@ sealed class TerminalSurface : Grid
 
         // A little air between the text and the edges of the window; the background around the
         // control is the background of the terminal, so the two read as one.
-        Background = new SolidColorBrush(Color.FromRgb(0x17, 0x17, 0x17));
+        Background = new SolidColorBrush(TerminalColors.Ground);
 
         // Tab and the arrows are the program's, not ways to move the focus of the window (D-370).
         KeyboardNavigation.SetTabNavigation(this, KeyboardNavigationMode.None);
@@ -207,7 +207,7 @@ sealed class TerminalSurface : Grid
 
         // The columns change with the font, so the pseudo console hears the new size.
         _points = points;
-        _control.SetTheme(Theme, Font, _points, Color.FromRgb(0x17, 0x17, 0x17));
+        _control.SetTheme(Theme, Font, _points, TerminalColors.Ground);
         _blocks?.UseFont(points, scale);
         Dispatcher.BeginInvoke(SyncSize, DispatcherPriority.Background);
     }
@@ -542,20 +542,14 @@ sealed class TerminalSurface : Grid
         }
     }
 
-    /// One scheme of sixteen colours from the palette of slayumind (D-295). The palette has no
-    /// grey between muted and raised that text can be read in, so bright black is the one colour
-    /// added: halfway between them.
+    /// The scheme of the control, from the one table of terminal colours.
     private static readonly TerminalTheme Theme = new()
     {
-        DefaultBackground = Rgb(0x171717),
+        DefaultBackground = Rgb(TerminalColors.Hex(TerminalColors.Ground)),
         DefaultForeground = Rgb(0xFAFAFA),
         DefaultSelectionBackground = Rgb(0x404040),
         CursorStyle = CursorStyle.BlinkingBar,
-        ColorTable =
-        [
-            Rgb(0x171717), Rgb(0xFF6467), Rgb(0x00BC7D), Rgb(0xFE9A00), Rgb(0x11A9F6), Rgb(0xD477CD), Rgb(0x00D3F2), Rgb(0xA1A1A1),
-            Rgb(0x737373), Rgb(0xFF8270), Rgb(0xAFE773), Rgb(0xFE9A00), Rgb(0x11A9F6), Rgb(0xF7BCF0), Rgb(0x24DCC3), Rgb(0xFAFAFA),
-        ],
+        ColorTable = [.. TerminalColors.Ansi.Select(Rgb)],
     };
 
     /// 0xRRGGBB to the COLORREF of Windows, 0x00BBGGRR.

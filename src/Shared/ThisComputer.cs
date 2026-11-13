@@ -1,11 +1,10 @@
 using Aiko.Core;
 
-namespace Aiko.App;
+namespace Aiko.Shared;
 
 /// What the core needs to know about this Windows computer: how Windows names programs and lists
-/// folders, and where Aiko's folders are.
-///
-/// The core describes the rules; this is the one place in the app that fills them in from Windows.
+/// folders, and where Aiko's folders are. The core describes the rules; the app and the bridge fill
+/// them in from this one file.
 static class ThisComputer
 {
     public static readonly PlatformConventions Platform = PlatformConventions.Windows;

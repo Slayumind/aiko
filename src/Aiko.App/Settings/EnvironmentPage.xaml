@@ -151,7 +151,7 @@
     <Button x:Name="RemoveButton" Content="{x:Static local:Strings.RemoveEnvironment}" Style="{StaticResource GhostDangerButton}"
             Margin="-10,0,0,0" Click="OnRemoveAsked" />
     <local:RevealPanel x:Name="ConfirmPanel">
-      <Border CornerRadius="10" Background="#0FFF6467" BorderBrush="#38FF6467" BorderThickness="1" Padding="12">
+      <Border CornerRadius="10" Background="{StaticResource DangerZone}" BorderBrush="{StaticResource DangerZoneLine}" BorderThickness="1" Padding="12">
         <StackPanel>
           <TextBlock x:Name="ConfirmLine" Style="{StaticResource RowHint}" Foreground="{StaticResource Ink}" />
           <CheckBox x:Name="RecycleBox" Style="{StaticResource Tick}" Margin="0,12,0,0"

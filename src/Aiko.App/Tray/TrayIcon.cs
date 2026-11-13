@@ -37,6 +37,7 @@ sealed class TrayIcon : IDisposable
     /// settings and the snapshots sixteen times in half a second.
     private (CardRow? Ring, CardRow? Dot) _lastRows;
     private SessionBadge _badge = SessionBadge.None;
+    private string _lastTooltip = "";
     private HwndSource? _source;
     private HICON _icon;
     private uint _iconDpi;
@@ -102,7 +103,8 @@ sealed class TrayIcon : IDisposable
         IsShown = false;
     }
 
-    /// New numbers: the picture and the tooltip are both made again.
+    /// New numbers: the picture and the tooltip are both made again. Most events change nothing the
+    /// icon shows, and then nothing is drawn.
     public void Update()
     {
         if (!IsShown)
@@ -110,7 +112,15 @@ sealed class TrayIcon : IDisposable
             return;
         }
 
-        var old = ReplacePicture(TaskbarDpi());
+        var dpi = TaskbarDpi();
+        var rows = _rows();
+        if (dpi == _iconDpi && rows == _lastRows && _tooltip() == _lastTooltip)
+        {
+            return;
+        }
+
+        _lastRows = rows;
+        var old = ReplacePicture(dpi, sameRows: true);
         var data = NewData();
         data.uFlags = NOTIFY_ICON_DATA_FLAGS.NIF_ICON | NOTIFY_ICON_DATA_FLAGS.NIF_TIP;
         data.hIcon = _icon;
@@ -217,7 +227,7 @@ sealed class TrayIcon : IDisposable
     /// reader has nothing else to read.
     private void WriteTooltip(ref NOTIFYICONDATAW data)
     {
-        var text = _tooltip();
+        var text = _lastTooltip = _tooltip();
         var room = data.szTip.AsSpan();
         room.Clear();
         text.AsSpan(0, Math.Min(text.Length, room.Length - 1)).CopyTo(room);
