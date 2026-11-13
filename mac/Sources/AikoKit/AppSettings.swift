@@ -49,9 +49,6 @@ public struct AppSettings: Sendable, Equatable {
     /// line in its settings.json. Somebody who turned her on before that must be told once.
     public var memoryShown = false
 
-    /// Whether the window has said once that closing it keeps the sessions running (D-421).
-    public var closeHintShown = false
-
     public var language: AikoLanguage = .system
 
     /// Games, video and presentations take the whole screen, and the island would sit on top.
@@ -126,7 +123,6 @@ public struct AppSettings: Sendable, Equatable {
         if let value = root["sendStats"]?.boolValue { settings.sendStats = value }
         if let value = root["privacyAsked"]?.boolValue { settings.privacyAsked = value }
         if let value = root["memoryShown"]?.boolValue { settings.memoryShown = value }
-        if let value = root["closeHintShown"]?.boolValue { settings.closeHintShown = value }
         if let value = root["hideIslandInFullScreen"]?.boolValue { settings.hideIslandInFullScreen = value }
         if let value = root["meetAikoShown"]?.boolValue { settings.meetAikoShown = value }
         if let value = root["voiceInput"]?.boolValue { settings.voiceInput = value }
@@ -156,7 +152,6 @@ public struct AppSettings: Sendable, Equatable {
             ("sendStats", .bool(sendStats)),
             ("privacyAsked", .bool(privacyAsked)),
             ("memoryShown", .bool(memoryShown)),
-            ("closeHintShown", .bool(closeHintShown)),
             ("language", .string(language.rawValue)),
             ("hideIslandInFullScreen", .bool(hideIslandInFullScreen)),
             ("island", .object(JsonObject([

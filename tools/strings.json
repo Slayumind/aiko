@@ -3045,13 +3045,6 @@
     ]
   ],
   [
-    "TerminalCloseHint",
-    [
-      "Close the window and the sessions keep working, while Aiko stays by the clock.",
-      "Закроешь окно — сессии продолжат работу, а Aiko останется у часов."
-    ]
-  ],
-  [
     "TerminalWorking",
     [
       "working",

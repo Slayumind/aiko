@@ -27,9 +27,6 @@ sealed partial class TerminalHost
     /// Enter starts it again with --resume.
     private readonly Dictionary<string, long> _exited = [];
 
-    /// The line about closing the window was shown and put away: it does not come back (D-421).
-    private bool _closeHintShown = SettingsStore.Load().CloseHintShown;
-
     /// Sessions whose terminal did not start, with why and the code Windows gave (D-421).
     private readonly Dictionary<string, (StartProblem Problem, int Code)> _problems = [];
 
@@ -117,14 +114,6 @@ sealed partial class TerminalHost
         };
         _window.Closing += (_, e) =>
         {
-            // Closed once with sessions running, the person has seen what the line says. The window
-            // is going, so nothing is drawn.
-            if (_terminals.Count > 0 && !_closeHintShown)
-            {
-                _closeHintShown = true;
-                SettingsStore.Change(settings => settings with { CloseHintShown = true });
-            }
-
             if (!e.Cancel)
             {
                 _sessions = _sessions.Placed(_window.Place);
@@ -189,7 +178,6 @@ sealed partial class TerminalHost
         };
         _panel.PaletteAsked += OpenSessionPalette;
         _panel.RetryAsked += RetryStart;
-        _panel.CloseHintDone += CloseHintDone;
         _panel.InstallPageAsked += () => Process.Start(new ProcessStartInfo(ClaudeInstallPage) { UseShellExecute = true });
 
         // Esc from anywhere in the settings, a text field included: what was typed is applied on the
@@ -832,7 +820,6 @@ sealed partial class TerminalHost
             Problem = session is not null && _problems.TryGetValue(session.Id, out var problem) ? problem.Problem : null,
             ProblemCode = session is not null && _problems.TryGetValue(session.Id, out var failed) ? failed.Code : 0,
             Shell = session?.Kind == SessionKind.Shell,
-            CloseHint = !_closeHintShown && _terminals.Count > 0,
         };
     }
 

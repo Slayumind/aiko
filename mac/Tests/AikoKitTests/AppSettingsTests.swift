@@ -154,13 +154,4 @@ struct AppSettingsTests {
         #expect(!settings.sessionListHidden)
         #expect(AppSettings.default.toJson().contains(#""openTerminalAtStartup": false"#))
     }
-
-    /// The line about closing the window is shown once (D-421): once put away, the file keeps it away.
-    @Test
-    func theLineAboutClosingTheWindowStaysAwayOncePutAway() {
-        #expect(!AppSettings.default.closeHintShown)
-        var settings = AppSettings.default
-        settings.closeHintShown = true
-        #expect(AppSettings.fromJson(settings.toJson()).closeHintShown)
-    }
 }

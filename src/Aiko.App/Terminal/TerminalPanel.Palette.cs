@@ -114,29 +114,6 @@ sealed partial class TerminalPanel
 
     private string? _shownTerminal;
 
-    /// One line over the button, until its cross is pressed or the window is closed once (D-421).
-    private Border CloseHint()
-    {
-        var words = Text(Strings.TerminalCloseHint, "TextNumber", "Ink", FontWeights.Normal);
-        words.TextWrapping = TextWrapping.Wrap;
-        var cross = BarButton(Marks.Line("M0,0 L8,8 M8,0 L0,8"), null, () => CloseHintDone?.Invoke(), 24);
-        cross.VerticalAlignment = VerticalAlignment.Top;
-        cross.Margin = new Thickness(6, -4, -6, 0);
-        var line = new DockPanel();
-        DockPanel.SetDock(cross, Dock.Right);
-        line.Children.Add(cross);
-        line.Children.Add(words);
-        return new Border
-        {
-            Child = line,
-            Padding = new Thickness(10, 8, 10, 8),
-            Margin = new Thickness(0, 0, 0, 8),
-            CornerRadius = new CornerRadius(8),
-            BorderBrush = Tokens.Brush("InputLine"),
-            BorderThickness = new Thickness(1),
-        };
-    }
-
     /// A session without its terminal says why and what to do about it (D-421).
     private UIElement NotStarted(TerminalView view)
     {
