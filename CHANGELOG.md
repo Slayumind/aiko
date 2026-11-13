@@ -39,7 +39,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   on the taskbar show how many agents wait for you, in orange. If none wait, they show how many
   stopped, in red, and a green dot says one has finished. The number stays until you open that
   session, and only a question comes with a sound. The button draws the same ring as the tray, and a
-  limit over 90% turns it red. While the window is open or minimized, the button stands in for the
+  limit over 90% turns it red; Aiko's face takes its place at the same moments as in the tray. If you
+  pin Aiko to the taskbar, Windows draws the button from the pin: the ring stays still, and the face
+  comes in its corner. While the window is open or minimized, the button stands in for the
   tray icon and the island; close the window and they come back, the island with the agents that
   wait, have finished, stopped and work.
 - **Everything in one window.** A click on the tray icon or the island opens it, and the menu of the
