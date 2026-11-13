@@ -190,6 +190,15 @@ sealed class AikoShell : IDisposable
 
     public void ClosePaletteForCheck() => _terminal?.ClosePaletteForCheck();
 
+    /// Every picture the taskbar button of the window gives Windows from now on; null stops.
+    public void WatchButtonForCheck(Action<byte[]>? seen)
+    {
+        if (_terminal is not null)
+        {
+            _terminal.Button.GivenForCheck = seen;
+        }
+    }
+
     public IslandWindow? IslandForCheck => _island.Window;
 
     /// The settings are open: in the terminal window, or in a window of their own before the first

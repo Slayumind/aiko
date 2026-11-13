@@ -76,6 +76,9 @@ sealed class TaskbarButton
         _window.Closed += (_, _) => Forget(all: true);
     }
 
+    /// Every picture given to the window, for --try-shell.
+    internal Action<byte[]>? GivenForCheck { get; set; }
+
     /// New numbers or another environment in the tray menu.
     public void Update() => Draw(sameRows: false);
 
@@ -176,6 +179,7 @@ sealed class TaskbarButton
         }
 
         _picture = picture;
+        GivenForCheck?.Invoke(picture);
         var small = RingIcon.RenderPng(Pixels(SmallSize), _lastRows.Ring, _lastRows.Dot, _faces.Frame, _faces.Face);
         var icons = (Big: RingIcon.FromPng(picture, Pixels(Size)), Small: RingIcon.FromPng(small, Pixels(SmallSize)));
         SendMessage(handle, SetIcon, BigIcon, icons.Big);
