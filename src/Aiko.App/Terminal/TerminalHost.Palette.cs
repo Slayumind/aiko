@@ -40,8 +40,15 @@ sealed partial class TerminalHost
 
     /// The palette of sessions (D-347, D-353): the sessions of Aiko at once, and the conversations
     /// Claude Code keeps in the folders of the environments as soon as they are read.
+    private int _palettesOpened;
+
+    internal (bool Open, int Opened) PaletteForCheck => (_panel.PaletteOpen, _palettesOpened);
+
+    internal void ClosePaletteForCheck() => _panel.ClosePalette();
+
     public void OpenSessionPalette()
     {
+        _palettesOpened++;
         if (!_window.IsVisible)
         {
             Show();

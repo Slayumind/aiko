@@ -62,6 +62,13 @@ static class Program
             return;
         }
 
+        // The tip of the windows in both languages (Theme/ToolTip.xaml).
+        if (args is ["--snapshot-tip", var tipPath, ..])
+        {
+            TipSheet.Write(tipPath);
+            return;
+        }
+
         // Every face in both styles, on a dark and a light taskbar, at the sizes the tray uses.
         if (args is ["--snapshot-faces", var facesPath, ..])
         {
@@ -257,7 +264,7 @@ static class Program
                 return;
             }
 
-            var terminalApp = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
+            var terminalApp = Tips.Install(new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown });
             var numbers = new ShellNumbers(new SnapshotWatcher());
             numbers.ReadAccounts();
             var terminal = new TerminalHost(environments, SettingsStore.LoadTerminal(), numbers.SnapshotFor, () => numbers.CardFor(numbers.Cards(), DateTimeOffset.Now), numbers.IconRows);

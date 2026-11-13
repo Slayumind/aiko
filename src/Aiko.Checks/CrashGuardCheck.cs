@@ -11,7 +11,7 @@ static class CrashGuardCheck
 {
     public static int Run()
     {
-        var application = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
+        var application = Tips.Install(new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown });
         var closed = 0;
         CrashGuard.Watch(application, () => closed++);
 

@@ -21,7 +21,7 @@ static class SettingsCheck
             return 1;
         }
 
-        var application = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
+        var application = Tips.Install(new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown });
         // The real window, not a stand-in: a drop-down list is a window of its own, and whether it
         // shows above its owner depends on the owner.
         var first = Core.EnvironmentEdits.Bindings(original)[0];

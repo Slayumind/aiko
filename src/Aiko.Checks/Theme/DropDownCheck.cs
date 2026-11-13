@@ -13,7 +13,7 @@ static class DropDownCheck
 {
     public static int Run()
     {
-        var application = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
+        var application = Tips.Install(new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown });
         var dropDown = new DropDown { Width = 200, HorizontalAlignment = HorizontalAlignment.Left, Items = ["First", "Second"], SelectedIndex = 0 };
         var window = new Window
         {

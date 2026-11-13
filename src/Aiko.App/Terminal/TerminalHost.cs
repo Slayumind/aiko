@@ -177,10 +177,6 @@ sealed partial class TerminalHost
         _panel.ListToggled += () => Remember(settings => settings with { SessionListHidden = !settings.SessionListHidden });
         _panel.SignInAsked += SignIn;
         _panel.SettingsAsked += () =>
-        _panel.PaletteAsked += OpenSessionPalette;
-        _panel.RetryAsked += RetryStart;
-        _panel.CloseHintDone += CloseHintDone;
-        _panel.InstallPageAsked += () => Process.Start(new ProcessStartInfo(ClaudeInstallPage) { UseShellExecute = true });
         {
             if (SettingsOpen)
             {
@@ -190,8 +186,11 @@ sealed partial class TerminalHost
             {
                 OpenSettings();
             }
-        }
-        ;
+        };
+        _panel.PaletteAsked += OpenSessionPalette;
+        _panel.RetryAsked += RetryStart;
+        _panel.CloseHintDone += CloseHintDone;
+        _panel.InstallPageAsked += () => Process.Start(new ProcessStartInfo(ClaudeInstallPage) { UseShellExecute = true });
 
         // Esc from anywhere in the settings, a text field included: what was typed is applied on the
         // way out, the same as leaving the field.

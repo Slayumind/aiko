@@ -12,7 +12,7 @@ static class IslandCheck
 {
     public static int Run()
     {
-        var application = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
+        var application = Tips.Install(new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown });
         var island = new IslandWindow();
         var moved = false;
         island.Moved += _ => moved = true;
@@ -44,7 +44,7 @@ static class IslandCheck
     /// to look at the glass and at the taskbar cutting it. The mouse is left alone.
     public static int ShowStrip()
     {
-        var application = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
+        var application = Tips.Install(new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown });
         var work = SystemParameters.WorkArea;
         // Something to see through: over a black terminal any glass this clear is invisible.
         var sample = new System.Windows.Controls.StackPanel { Background = new LinearGradientBrush(Color.FromRgb(0x3B, 0x2A, 0x6B), Color.FromRgb(0x0E, 0x5A, 0x4F), 0) };
@@ -98,7 +98,7 @@ static class IslandCheck
     /// and logs its size and place on the way. The mouse is left alone.
     public static int TryUnfold()
     {
-        var application = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
+        var application = Tips.Install(new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown });
         var island = new IslandWindow();
         island.Show(CardSnapshot.Example(), IslandPosition.Default);
 
@@ -138,7 +138,7 @@ static class IslandCheck
     /// it there for two seconds with the glass strip showing, and lets go. The mouse is left alone.
     public static int TryGlass()
     {
-        var application = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
+        var application = Tips.Install(new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown });
         var island = new IslandWindow();
 
         // Subscribed before the island shows: Loaded comes during Show, and a handler added later never runs.

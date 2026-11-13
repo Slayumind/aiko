@@ -13,7 +13,7 @@ static class LanguageCheck
     public static int Run()
     {
         var original = SettingsStore.Load();
-        var application = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
+        var application = Tips.Install(new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown });
         var panel = new SettingsPanel(SettingsPanel.GeneralPageKey);
         var window = SettingsCheck.Window(panel);
         var page = (GeneralPage)panel.PageHost.Content;
