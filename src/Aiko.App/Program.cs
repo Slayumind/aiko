@@ -32,6 +32,13 @@ static class Program
             .OnBeforeUninstallFastCallback(_ => Uninstall.Cleanup(keepMemory: null))
             .Run();
 
+        // One copy of Aiko (D-419): a second start by the person opens the window of the running
+        // copy, a second start at sign-in only exits.
+        if (!SingleCopy.Claim(AppStarts.Of(args)))
+        {
+            return;
+        }
+
         // Software rendering: the spike measured 33 MB against 92 MB with the DirectX stack, and
         // Aiko draws a small card a few times an hour. Nobody needs the GPU for that.
         RenderOptions.ProcessRenderMode = RenderMode.SoftwareOnly;
@@ -505,6 +512,7 @@ static class Program
         {
             shell = new AikoShell(application);
             shell.Show(withWindows: args is [Startup.Argument]);
+            SingleCopy.Listen(application.Dispatcher, shell.OpenAskedByAnotherStart);
         };
         application.Exit += (_, _) => shell?.Dispose();
 

@@ -312,8 +312,8 @@ sealed class AikoShell : IDisposable
             _terminal?.LimitsChanged();
         });
 
-    /// A face comes or goes (D-211), on the tray icon or on the island, wherever Aiko lives, and in
-    /// the corner of the taskbar button of the open window (D-415).
+    /// A face comes or goes (D-211), on the tray icon or on the island, wherever Aiko lives, and on
+    /// the taskbar button of the open window in place of its rings (D-417).
     private void OnFaceChanged(AikoFace? face)
     {
         var style = SettingsStore.LoadPersona().Face;
@@ -350,6 +350,10 @@ sealed class AikoShell : IDisposable
     /// A left click on the tray icon opens the terminal window or brings it forward (D-372). The
     /// limits are in the tooltip of the icon and in the header of the window.
     private void OnIconClicked() => OpenTerminal();
+
+    /// Another start of Aiko by the person, from the Start menu or a pin on the taskbar (D-419): the
+    /// same as a click on the tray icon.
+    public void OpenAskedByAnotherStart() => OpenTerminal();
 
     private void OnMenuRequested(IntPtr anchor)
     {

@@ -1,4 +1,5 @@
 using System.IO;
+using Aiko.Core;
 using Microsoft.Win32;
 
 namespace Aiko.App;
@@ -12,7 +13,7 @@ static class Startup
 
     /// Tells a start at sign-in from a start by the person: only the first may open the terminal
     /// window by the setting (D-350).
-    public const string Argument = "--autostart";
+    public const string Argument = AppStarts.SignInArgument;
 
     /// Quoted: the path holds spaces, and Windows would otherwise read the first word as the
     /// program and the rest as arguments.

@@ -33,6 +33,7 @@ stamp, not a table (D-255).
 | `shell-ask/` | what a command line asks Claude Code and how it reads the answer, and the link under a Ctrl+click (`ShellAsk`, `ShellLink`); Windows only until the terminal comes to the Mac |
 | `shell-screen/` | how the output of a command line is laid out and cut into one block per command by the marks of shell integration, from real recordings of three shells (`ShellScreen`, `ShellBlocks`, `VtParser`); Windows only until the terminal comes to the Mac |
 | `notices/` | which change of a session plays the sound, and the counts and the one sign of the tray and the taskbar button (`Notices`, `SessionCounts`); Windows only until the terminal comes to the Mac |
+| `taskbar-button/` | what the middle and the corner of the taskbar button of the terminal window show, and which app id the window takes so that Windows draws it (`ButtonLook`, `TaskbarIdentity`); Windows only, the Mac has no taskbar button |
 | `window-zoom/` | the steps of the zoom of the terminal window and the font of the terminal at each (`WindowZoom`); Windows only until the terminal comes to the Mac |
 | `model-name/` | the name of a model in the line under the input (`ModelName`) |
 | `slash-menu/` | the menu of commands that "/" opens in the field: when it opens, what it shows, in which order (`SlashMenu`) |
