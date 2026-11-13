@@ -304,8 +304,14 @@
   <data name="WizardUpdatesWhat" xml:space="preserve">
     <value>Раз в сутки Aiko спрашивает у slayumind.org свежую версию и сообщает, что одна копия сегодня работала. ID меняется каждый день.</value>
   </data>
+  <data name="WizardUpdatesVersion" xml:space="preserve">
+    <value>Раз в сутки Aiko спрашивает у slayumind.org свежую версию.</value>
+  </data>
+  <data name="WizardUpdatesCount" xml:space="preserve">
+    <value>С включённой статистикой вместе с вопросом уходит, что одна копия сегодня работала.</value>
+  </data>
   <data name="WizardDoneTray" xml:space="preserve">
-    <value>Aiko внизу, рядом с часами. Наведи мышь — покажется карточка, кликни — останется открытой.</value>
+    <value>Закроешь окно — Aiko останется у часов, а сессии продолжат работу. Щелчок по значку вернёт окно.</value>
   </data>
   <data name="WizardDoneMenuBar" xml:space="preserve">
     <value>Aiko наверху, рядом с часами. Наведи мышь — покажется карточка, кликни — останется открытой.</value>
@@ -314,7 +320,25 @@
     <value>Aiko вверху экрана. Перетащи куда угодно — она прилипнет к ближайшему краю.</value>
   </data>
   <data name="WizardDoneOverflow" xml:space="preserve">
-    <value>Windows 11 прячет значки новых приложений под стрелку рядом с часами. Открой её и перетащи Aiko на панель задач: под стрелкой карточка не открывается.</value>
+    <value>Windows 11 прячет значки новых приложений под стрелку у часов. Перетащи Aiko на панель задач, чтобы кольца лимитов было видно всегда.</value>
+  </data>
+  <data name="WizardDoneWindowIsland" xml:space="preserve">
+    <value>Закроешь окно — Aiko встанет островом вверху экрана, а сессии продолжат работу. Перетащи её к любому краю.</value>
+  </data>
+  <data name="WizardSummaryTitle" xml:space="preserve">
+    <value>По «Готово» Aiko</value>
+  </data>
+  <data name="WizardSummaryAccess" xml:space="preserve">
+    <value>добавит строку лимитов в Claude Code: {0}</value>
+  </data>
+  <data name="WizardSummaryCommands" xml:space="preserve">
+    <value>положит команды {0} в PATH</value>
+  </data>
+  <data name="WizardSummaryFolders" xml:space="preserve">
+    <value>привяжет папки проектов к среде «{1}» ({0})</value>
+  </data>
+  <data name="WizardSummaryPersona" xml:space="preserve">
+    <value>включит личность в среде «{0}»</value>
   </data>
   <data name="WizardDoneMenuBarRoom" xml:space="preserve">
     <value>В переполненной строке меню macOS прячет значки, которые дальше от часов. Если Aiko не помещается, закрой лишнее приложение.</value>
@@ -323,7 +347,7 @@
     <value>Первые цифры придут после следующего ответа Claude Code. До этого кольцо пунктирное.</value>
   </data>
   <data name="WizardDoneNoAccess" xml:space="preserve">
-    <value>Aiko пока не видит лимиты. Доступ можно включить в любой момент на странице «Общие».</value>
+    <value>Aiko пока не видит лимиты. Доступ можно включить в любой момент на странице «Общее».</value>
   </data>
   <data name="SettingsWriteFailed" xml:space="preserve">
     <value>Aiko не смогла записать файл настроек Claude Code. Попробуй ещё раз.</value>
@@ -332,7 +356,10 @@
     <value>Aiko не нашла свою программу-посредник.</value>
   </data>
   <data name="ChecklistTitle" xml:space="preserve">
-    <value>Настройка сред</value>
+    <value>Настройка Aiko</value>
+  </data>
+  <data name="WizardWelcome" xml:space="preserve">
+    <value>Aiko — окно для твоих сессий Claude Code. Среда — это один аккаунт Claude со своими папками проектов.</value>
   </data>
   <data name="ChecklistCount" xml:space="preserve">
     <value>готово {0} из {1}</value>
@@ -417,6 +444,24 @@
   </data>
   <data name="InstallLead" xml:space="preserve">
     <value>Claude Code на этом компьютере пока нет. Aiko показывает его лимиты, поэтому сначала установи его.</value>
+  </data>
+  <data name="InstallLeadSessions" xml:space="preserve">
+    <value>Claude Code на этом компьютере пока нет. Сессии в Aiko — это он, поэтому начнём с него.</value>
+  </data>
+  <data name="InstallRun" xml:space="preserve">
+    <value>Установить Claude Code</value>
+  </data>
+  <data name="InstallCopy" xml:space="preserve">
+    <value>Скопировать команду</value>
+  </data>
+  <data name="InstallHowButton" xml:space="preserve">
+    <value>Кнопка откроет PowerShell с командой {0}. Aiko заметит, когда установка закончится.</value>
+  </data>
+  <data name="InstallFailedLead" xml:space="preserve">
+    <value>Не вышло — </value>
+  </data>
+  <data name="InstallFailedLink" xml:space="preserve">
+    <value>страница установки Claude Code</value>
   </data>
   <data name="InstallHow" xml:space="preserve">
     <value>Открой PowerShell, вставь команду и нажми Enter. Aiko заметит, когда установка закончится.</value>
@@ -909,6 +954,9 @@
   </data>
   <data name="TemperamentBright" xml:space="preserve">
     <value>Яркий</value>
+  </data>
+  <data name="TemperamentMusou" xml:space="preserve">
+    <value>無双 · максимум</value>
   </data>
   <data name="TemperamentQuietAbout" xml:space="preserve">
     <value>Почти без характера: одна тёплая фраза в конце ответа.</value>

@@ -18,7 +18,8 @@ struct WizardChecklistTests {
         #expect(WizardChecklist.nextToOpen(Self.freshMachine) == .install)
         #expect(WizardChecklist.stateOf(.firstAccount, Self.freshMachine) == .locked)
         #expect(WizardChecklist.stateOf(.access, Self.freshMachine) == .locked)
-        #expect(WizardChecklist.stateOf(.place, Self.freshMachine) == .done)
+        #expect(WizardChecklist.stateOf(.place, Self.freshMachine) == .open)
+        #expect(WizardChecklist.progress(Self.freshMachine) == (0, 9))
         #expect(!WizardChecklist.canFinish(Self.freshMachine))
     }
 
@@ -34,7 +35,7 @@ struct WizardChecklistTests {
     @Test
     func withTwoAccountsAlreadyThereTheWizardGoesStraightToAccess() {
         #expect(WizardChecklist.nextToOpen(Self.twoAccountsFound) == .access)
-        #expect(WizardChecklist.progress(Self.twoAccountsFound) == (4, 9))
+        #expect(WizardChecklist.progress(Self.twoAccountsFound) == (3, 9))
     }
 
     @Test
@@ -77,6 +78,20 @@ struct WizardChecklistTests {
     }
 
     @Test
+    func thePlaceComesLastAndCountsOnceItWasSeen() {
+        var facts = Self.twoAccountsFound
+        facts.accessGranted = true
+        facts.commandsWanted = true
+        facts.foldersVisited = true
+        facts.personaWanted = false
+        facts.statsWanted = false
+
+        #expect(WizardChecklist.nextToOpen(facts) == .place)
+        #expect(WizardChecklist.progress(facts) == (8, 9))
+        #expect(WizardChecklist.canFinish(facts))
+    }
+
+    @Test
     func everyItemIsAnsweredAtTheEnd() {
         var facts = Self.twoAccountsFound
         facts.accessGranted = true
@@ -84,6 +99,7 @@ struct WizardChecklistTests {
         facts.foldersVisited = true
         facts.personaWanted = false
         facts.statsWanted = false
+        facts.placeSeen = true
 
         #expect(WizardChecklist.progress(facts) == (9, 9))
         #expect(WizardChecklist.nextToOpen(facts) == nil)

@@ -304,8 +304,14 @@
   <data name="WizardUpdatesWhat" xml:space="preserve">
     <value>Once a day, Aiko asks slayumind.org for the latest version and says that one copy of Aiko ran today. The ID it sends changes every day.</value>
   </data>
+  <data name="WizardUpdatesVersion" xml:space="preserve">
+    <value>Once a day, Aiko asks slayumind.org for the latest version.</value>
+  </data>
+  <data name="WizardUpdatesCount" xml:space="preserve">
+    <value>With statistics on, the same request says that one copy of Aiko ran today.</value>
+  </data>
   <data name="WizardDoneTray" xml:space="preserve">
-    <value>Aiko is down by the clock. Rest the mouse on it for the card, click to keep it open.</value>
+    <value>Close the window and Aiko stays by the clock while the sessions keep working. A click on the icon brings the window back.</value>
   </data>
   <data name="WizardDoneMenuBar" xml:space="preserve">
     <value>Aiko is up by the clock. Rest the mouse on it for the card, click to keep it open.</value>
@@ -314,7 +320,25 @@
     <value>Aiko is at the top of your screen. Drag it anywhere and it sticks to the nearest edge.</value>
   </data>
   <data name="WizardDoneOverflow" xml:space="preserve">
-    <value>Windows 11 hides new app icons under the arrow next to the clock. Open the arrow and drag Aiko onto the taskbar: under the arrow, the card can't open.</value>
+    <value>Windows 11 hides the icons of new apps under the arrow by the clock. Drag Aiko onto the taskbar to keep the limit rings in sight.</value>
+  </data>
+  <data name="WizardDoneWindowIsland" xml:space="preserve">
+    <value>Close the window and Aiko becomes an island at the top of the screen while the sessions keep working. Drag it to any edge.</value>
+  </data>
+  <data name="WizardSummaryTitle" xml:space="preserve">
+    <value>On Finish, Aiko</value>
+  </data>
+  <data name="WizardSummaryAccess" xml:space="preserve">
+    <value>adds the limits line to Claude Code in {0}</value>
+  </data>
+  <data name="WizardSummaryCommands" xml:space="preserve">
+    <value>puts the commands {0} into PATH</value>
+  </data>
+  <data name="WizardSummaryFolders" xml:space="preserve">
+    <value>binds project folders to {1} ({0})</value>
+  </data>
+  <data name="WizardSummaryPersona" xml:space="preserve">
+    <value>turns the personality on in {0}</value>
   </data>
   <data name="WizardDoneMenuBarRoom" xml:space="preserve">
     <value>A full menu bar hides the icons furthest from the clock. Close a menu bar app if Aiko doesn't fit.</value>
@@ -332,7 +356,10 @@
     <value>Aiko can't find its bridge program.</value>
   </data>
   <data name="ChecklistTitle" xml:space="preserve">
-    <value>Set up environments</value>
+    <value>Set up Aiko</value>
+  </data>
+  <data name="WizardWelcome" xml:space="preserve">
+    <value>Aiko is a window for your Claude Code sessions. An environment is one Claude account with its own project folders.</value>
   </data>
   <data name="ChecklistCount" xml:space="preserve">
     <value>{0} of {1} done</value>
@@ -417,6 +444,24 @@
   </data>
   <data name="InstallLead" xml:space="preserve">
     <value>Claude Code isn't on this computer yet. Aiko shows its limits, so install it first.</value>
+  </data>
+  <data name="InstallLeadSessions" xml:space="preserve">
+    <value>Claude Code is not on this computer yet. The sessions in Aiko are Claude Code, so it comes first.</value>
+  </data>
+  <data name="InstallRun" xml:space="preserve">
+    <value>Install Claude Code</value>
+  </data>
+  <data name="InstallCopy" xml:space="preserve">
+    <value>Copy the command</value>
+  </data>
+  <data name="InstallHowButton" xml:space="preserve">
+    <value>The button opens PowerShell with the command {0}. Aiko notices when the install is over.</value>
+  </data>
+  <data name="InstallFailedLead" xml:space="preserve">
+    <value>Didn't work? </value>
+  </data>
+  <data name="InstallFailedLink" xml:space="preserve">
+    <value>the Claude Code install page</value>
   </data>
   <data name="InstallHow" xml:space="preserve">
     <value>Open PowerShell, paste the command and press Enter. Aiko notices when it's done.</value>
@@ -909,6 +954,9 @@
   </data>
   <data name="TemperamentBright" xml:space="preserve">
     <value>Bright</value>
+  </data>
+  <data name="TemperamentMusou" xml:space="preserve">
+    <value>無双 · max</value>
   </data>
   <data name="TemperamentQuietAbout" xml:space="preserve">
     <value>Almost no character: one warm line at the end of an answer.</value>

@@ -64,9 +64,9 @@
                      Content="{x:Static local:Strings.TemperamentNormal}" Checked="OnTemperamentChanged" />
         <RadioButton Style="{StaticResource Segment}" GroupName="Temperament" Tag="Bright"
                      Content="{x:Static local:Strings.TemperamentBright}" Checked="OnTemperamentChanged" />
-        <!-- The same word in every language. -->
+        <!-- The same word in every language, with a plain gloss after it (D-421). -->
         <RadioButton Style="{StaticResource Segment}" GroupName="Temperament" Tag="Musou"
-                     Content="無双" Checked="OnTemperamentChanged" />
+                     Content="{x:Static local:Strings.TemperamentMusou}" Checked="OnTemperamentChanged" />
       </StackPanel>
     </Border>
     <TextBlock x:Name="TemperamentAbout" Style="{StaticResource RowHint}" Margin="0,8,0,0" />

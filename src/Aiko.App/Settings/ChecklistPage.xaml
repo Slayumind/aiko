@@ -17,6 +17,10 @@
   </UserControl.Resources>
 
   <StackPanel>
+    <!-- One line on what Aiko is and what an environment is, before the first word about either (D-421). -->
+    <TextBlock x:Name="Welcome" Text="{x:Static local:Strings.WizardWelcome}" Style="{StaticResource RowName}"
+               TextWrapping="Wrap" Margin="0,0,96,14" />
+
     <!-- The counter sits left of the "Saved" mark the window keeps in the top right corner. -->
     <WrapPanel Margin="0,0,96,14">
       <TextBlock Text="{x:Static local:Strings.ChecklistTitle}" FontFamily="{StaticResource Sans}" FontSize="16"
@@ -31,17 +35,16 @@
         <StackPanel>
           <TextBlock x:Name="InstallFound" Style="{StaticResource RowHint}" Text="{x:Static local:Strings.InstallFound}" />
           <StackPanel x:Name="InstallNeeded">
-            <TextBlock Style="{StaticResource RowHint}" Text="{x:Static local:Strings.InstallLead}" />
-            <Grid Margin="0,10,0,0">
-              <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-              </Grid.ColumnDefinitions>
-              <TextBox x:Name="InstallCommand" Style="{StaticResource CodeBlock}" />
-              <Button x:Name="CopyButton" Grid.Column="1" Margin="8,0,0,0" Style="{StaticResource QuietButton}"
-                      Content="{x:Static local:Strings.Copy}" Click="OnCopyInstall" />
-            </Grid>
-            <TextBlock Style="{StaticResource RowHint}" Margin="0,10,0,0" Text="{x:Static local:Strings.InstallHow}" />
+            <TextBlock Style="{StaticResource RowHint}" Text="{x:Static local:Strings.InstallLeadSessions}" />
+            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+              <Button Style="{StaticResource SmallButton}" Content="{x:Static local:Strings.InstallRun}" Click="OnRunInstall" />
+              <Button x:Name="CopyButton" Margin="8,0,0,0" Style="{StaticResource QuietButton}"
+                      Content="{x:Static local:Strings.InstallCopy}" Click="OnCopyInstall" />
+            </StackPanel>
+            <TextBlock x:Name="InstallHow" Style="{StaticResource RowHint}" Margin="0,10,0,0" />
+            <TextBlock Style="{StaticResource RowHint}" Margin="0,6,0,0">
+              <Run Text="{x:Static local:Strings.InstallFailedLead}" /><Hyperlink Click="OnInstallPage"><Run Text="{x:Static local:Strings.InstallFailedLink}" /></Hyperlink><Run Text="." />
+            </TextBlock>
             <TextBlock Style="{StaticResource RowName}" Margin="0,8,0,0" Text="{x:Static local:Strings.WaitInstall}" />
           </StackPanel>
         </StackPanel>
@@ -115,27 +118,6 @@
         </StackPanel>
       </local:ChecklistRow>
 
-      <local:ChecklistRow x:Name="FoldersRow" Item="ProjectFolders" Title="{x:Static local:Strings.ItemFolders}">
-        <StackPanel>
-          <TextBlock x:Name="FoldersLead" Style="{StaticResource RowHint}" />
-          <StackPanel x:Name="BoundList" Margin="0,10,0,0" />
-          <TextBlock x:Name="NoBinds" Style="{StaticResource RowNote}" TextWrapping="Wrap" TextTrimming="None"
-                     Text="{x:Static local:Strings.NoBinds}" />
-          <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-            <Button Style="{StaticResource QuietButton}" Content="{x:Static local:Strings.AddProject}" Click="OnAddProject" />
-          </StackPanel>
-          <Grid Margin="0,14,0,0">
-            <Grid.ColumnDefinitions>
-              <ColumnDefinition Width="Auto" />
-              <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <TextBlock Text="{x:Static local:Strings.AllOtherFolders}" Style="{StaticResource RowName}" VerticalAlignment="Center" />
-            <local:DropDown x:Name="DefaultChoice" Grid.Column="1" Margin="10,0,0,0" HorizontalAlignment="Left" MinWidth="180" />
-          </Grid>
-          <TextBlock x:Name="ExplicitWins" Style="{StaticResource RowHint}" Margin="0,10,0,0" />
-        </StackPanel>
-      </local:ChecklistRow>
-
       <TextBlock Text="{x:Static local:Strings.GroupShared}" Style="{StaticResource SectionLabel}" Margin="0,8,0,6" />
 
       <local:ChecklistRow x:Name="AccessRow" Item="Access" Title="{x:Static local:Strings.WizardStepAccess}">
@@ -180,6 +162,27 @@
         </StackPanel>
       </local:ChecklistRow>
 
+      <local:ChecklistRow x:Name="FoldersRow" Item="ProjectFolders" Title="{x:Static local:Strings.ItemFolders}">
+        <StackPanel>
+          <TextBlock x:Name="FoldersLead" Style="{StaticResource RowHint}" />
+          <StackPanel x:Name="BoundList" Margin="0,10,0,0" />
+          <TextBlock x:Name="NoBinds" Style="{StaticResource RowNote}" TextWrapping="Wrap" TextTrimming="None"
+                     Text="{x:Static local:Strings.NoBinds}" />
+          <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+            <Button Style="{StaticResource QuietButton}" Content="{x:Static local:Strings.AddProject}" Click="OnAddProject" />
+          </StackPanel>
+          <Grid Margin="0,14,0,0">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="{x:Static local:Strings.AllOtherFolders}" Style="{StaticResource RowName}" VerticalAlignment="Center" />
+            <local:DropDown x:Name="DefaultChoice" Grid.Column="1" Margin="10,0,0,0" HorizontalAlignment="Left" MinWidth="180" />
+          </Grid>
+          <TextBlock x:Name="ExplicitWins" Style="{StaticResource RowHint}" Margin="0,10,0,0" />
+        </StackPanel>
+      </local:ChecklistRow>
+
       <!-- Optional: the persona can wait, and the Personality page has everything else about it. -->
       <local:ChecklistRow x:Name="MeetRow" Item="MeetAiko" Title="{x:Static local:Strings.ItemMeetAiko}">
         <StackPanel>
@@ -197,6 +200,7 @@
           </Grid>
           <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
             <Button Style="{StaticResource QuietButton}" Content="{x:Static local:Strings.Later}" Margin="0,0,8,0" Click="OnMeetLater" />
+            <Button x:Name="MeetTurnOnSecond" Style="{StaticResource QuietButton}" Margin="0,0,8,0" Click="OnMeetTurnOnSecond" />
             <Button x:Name="MeetTurnOn" Style="{StaticResource QuietButton}" Click="OnMeetTurnOn" />
           </StackPanel>
         </StackPanel>
@@ -244,7 +248,8 @@
             </Grid>
           </Border>
 
-          <TextBlock Style="{StaticResource RowNote}" Margin="0,10,0,0" TextWrapping="Wrap" TextTrimming="None"
+          <TextBlock Text="{x:Static local:Strings.SectionNeverSent}" Style="{StaticResource SectionLabel}" Margin="0,14,0,6" />
+          <TextBlock Style="{StaticResource RowNote}" TextWrapping="Wrap" TextTrimming="None"
                      Text="{x:Static local:Strings.NeverSentWhat}" />
           <TextBlock Style="{StaticResource RowNote}" Margin="0,6,0,0" TextWrapping="Wrap" TextTrimming="None"
                      Text="{x:Static local:Strings.WizardStatsLater}" />
@@ -312,7 +317,7 @@
             </Grid.ColumnDefinitions>
             <StackPanel Margin="0,0,12,0">
               <TextBlock Text="{x:Static local:Strings.CheckUpdatesToggle}" Style="{StaticResource RowName}" />
-              <TextBlock Text="{x:Static local:Strings.WizardUpdatesWhat}" Style="{StaticResource RowNote}"
+              <TextBlock x:Name="UpdatesWhat" Style="{StaticResource RowNote}"
                          TextWrapping="Wrap" TextTrimming="None" />
             </StackPanel>
             <ToggleButton x:Name="CheckUpdates" Grid.Column="1" Style="{StaticResource Switch}"
@@ -328,6 +333,11 @@
         <TextBlock x:Name="DoneWhere" Style="{StaticResource RowName}" TextWrapping="Wrap" />
         <TextBlock x:Name="DoneOverflow" Style="{StaticResource RowHint}" Margin="0,8,0,0"
                    Text="{x:Static local:Strings.WizardDoneOverflow}" />
+        <!-- What Finish is about to change, so nothing happens behind the person's back (D-421). -->
+        <StackPanel x:Name="Summary" Margin="0,14,0,0">
+          <TextBlock Text="{x:Static local:Strings.WizardSummaryTitle}" Style="{StaticResource SectionLabel}" Margin="0,0,0,6" />
+          <StackPanel x:Name="SummaryLines" />
+        </StackPanel>
       </StackPanel>
     </local:RevealPanel>
 

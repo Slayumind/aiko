@@ -37,6 +37,9 @@ final class ChecklistModel: ObservableObject {
     @Published var personaWanted: Bool?
     @Published var statsWanted: Bool?
 
+    /// Where Aiko lives was shown, here or in an earlier run of the checklist (D-421).
+    @Published var placeSeen = false
+
     @Published var firstName = ""
     @Published var secondName = ""
     @Published var newName = ""
@@ -98,6 +101,7 @@ final class ChecklistModel: ObservableObject {
         facts.boundFolders = projectFolders.count
         facts.personaWanted = personaWanted
         facts.statsWanted = statsWanted
+        facts.placeSeen = placeSeen
         return facts
     }
 
@@ -144,6 +148,7 @@ final class ChecklistModel: ObservableObject {
 
         // What is already in place counts as answered, so adding a second environment asks only
         // about the second environment.
+        placeSeen = existing.hasEnvironments
         if existing.hasEnvironments {
             accessGranted = existing.environments.flatMap(\.configDirectories)
                 .allSatisfy(ClaudeSettingsFile.hasOurLine) ? true : nil
@@ -183,6 +188,10 @@ final class ChecklistModel: ObservableObject {
 
         if item == .projectFolders {
             foldersVisited = true
+        }
+
+        if item == .place {
+            placeSeen = true
         }
 
         if item == .install && !claudeInstalled {

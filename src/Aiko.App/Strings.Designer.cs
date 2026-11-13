@@ -294,7 +294,13 @@ public static class Strings
     /// Once a day, Aiko asks slayumind.org for the latest version and says that one copy of Aiko...
     public static string WizardUpdatesWhat => Get("WizardUpdatesWhat");
 
-    /// Aiko is down by the clock. Rest the mouse on it for the card, click to keep it open.
+    /// Once a day, Aiko asks slayumind.org for the latest version.
+    public static string WizardUpdatesVersion => Get("WizardUpdatesVersion");
+
+    /// With statistics on, the same request says that one copy of Aiko ran today.
+    public static string WizardUpdatesCount => Get("WizardUpdatesCount");
+
+    /// Close the window and Aiko stays by the clock while the sessions keep working. A click on ...
     public static string WizardDoneTray => Get("WizardDoneTray");
 
     /// Aiko is up by the clock. Rest the mouse on it for the card, click to keep it open.
@@ -303,8 +309,26 @@ public static class Strings
     /// Aiko is at the top of your screen. Drag it anywhere and it sticks to the nearest edge.
     public static string WizardDoneIsland => Get("WizardDoneIsland");
 
-    /// Windows 11 hides new app icons under the arrow next to the clock. Open the arrow and drag...
+    /// Windows 11 hides the icons of new apps under the arrow by the clock. Drag Aiko onto the t...
     public static string WizardDoneOverflow => Get("WizardDoneOverflow");
+
+    /// Close the window and Aiko becomes an island at the top of the screen while the sessions k...
+    public static string WizardDoneWindowIsland => Get("WizardDoneWindowIsland");
+
+    /// On Finish, Aiko
+    public static string WizardSummaryTitle => Get("WizardSummaryTitle");
+
+    /// adds the limits line to Claude Code in {0}
+    public static string WizardSummaryAccess => Get("WizardSummaryAccess");
+
+    /// puts the commands {0} into PATH
+    public static string WizardSummaryCommands => Get("WizardSummaryCommands");
+
+    /// binds project folders to {1} ({0})
+    public static string WizardSummaryFolders => Get("WizardSummaryFolders");
+
+    /// turns the personality on in {0}
+    public static string WizardSummaryPersona => Get("WizardSummaryPersona");
 
     /// A full menu bar hides the icons furthest from the clock. Close a menu bar app if Aiko doe...
     public static string WizardDoneMenuBarRoom => Get("WizardDoneMenuBarRoom");
@@ -321,8 +345,11 @@ public static class Strings
     /// Aiko can't find its bridge program.
     public static string SettingsBridgeUnknown => Get("SettingsBridgeUnknown");
 
-    /// Set up environments
+    /// Set up Aiko
     public static string ChecklistTitle => Get("ChecklistTitle");
+
+    /// Aiko is a window for your Claude Code sessions. An environment is one Claude account with...
+    public static string WizardWelcome => Get("WizardWelcome");
 
     /// {0} of {1} done
     public static string ChecklistCount => Get("ChecklistCount");
@@ -407,6 +434,24 @@ public static class Strings
 
     /// Claude Code isn't on this computer yet. Aiko shows its limits, so install it first.
     public static string InstallLead => Get("InstallLead");
+
+    /// Claude Code is not on this computer yet. The sessions in Aiko are Claude Code, so it come...
+    public static string InstallLeadSessions => Get("InstallLeadSessions");
+
+    /// Install Claude Code
+    public static string InstallRun => Get("InstallRun");
+
+    /// Copy the command
+    public static string InstallCopy => Get("InstallCopy");
+
+    /// The button opens PowerShell with the command {0}. Aiko notices when the install is over.
+    public static string InstallHowButton => Get("InstallHowButton");
+
+    /// Didn't work? 
+    public static string InstallFailedLead => Get("InstallFailedLead");
+
+    /// the Claude Code install page
+    public static string InstallFailedLink => Get("InstallFailedLink");
 
     /// Open PowerShell, paste the command and press Enter. Aiko notices when it's done.
     public static string InstallHow => Get("InstallHow");
@@ -899,6 +944,9 @@ public static class Strings
 
     /// Bright
     public static string TemperamentBright => Get("TemperamentBright");
+
+    /// 無双 · max
+    public static string TemperamentMusou => Get("TemperamentMusou");
 
     /// Almost no character: one warm line at the end of an answer.
     public static string TemperamentQuietAbout => Get("TemperamentQuietAbout");
