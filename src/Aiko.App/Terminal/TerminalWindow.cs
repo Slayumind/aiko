@@ -118,12 +118,15 @@ sealed class TerminalWindow : Window
     }
 
     private const int SetIcon = 0x0080;
+    private const int StyleIndex = -16;
+    private const long Caption = 0x00C00000;
 
     /// WindowChrome takes WS_VISIBLE off the window while Windows stores a new icon, so that Windows
     /// draws no old caption over the custom one. The terminal is a window of its own inside this one:
     /// hidden for that moment, it missed a frame, and the chat flickered on every new icon (RESEARCH,
-    /// D-416). This gives the icon to Windows with the window left visible. A check on a window with
-    /// this frame and a terminal showed no flicker and no old caption.
+    /// D-416). Windows draws the old caption only for a window with WS_CAPTION, so this takes off that
+    /// style alone for the moment and leaves the window, and the terminal, visible. With the window
+    /// left as it was, the old caption showed over the title bar.
     private static IntPtr TakeIcon(IntPtr window, int message, IntPtr wParam, IntPtr lParam, ref bool handled)
     {
         if (message != SetIcon)
@@ -132,9 +135,30 @@ sealed class TerminalWindow : Window
         }
 
         handled = true;
-        return DefWindowProc(window, (uint)message, wParam, lParam);
+        var style = GetWindowLongPtr(window, StyleIndex);
+        var plain = (IntPtr)((long)style & ~Caption);
+        if (plain == style)
+        {
+            return DefWindowProc(window, (uint)message, wParam, lParam);
+        }
+
+        SetWindowLongPtr(window, StyleIndex, plain);
+        try
+        {
+            return DefWindowProc(window, (uint)message, wParam, lParam);
+        }
+        finally
+        {
+            SetWindowLongPtr(window, StyleIndex, style);
+        }
     }
 
     [System.Runtime.InteropServices.DllImport("user32.dll")]
     private static extern IntPtr DefWindowProc(IntPtr window, uint message, IntPtr wParam, IntPtr lParam);
+
+    [System.Runtime.InteropServices.DllImport("user32.dll", EntryPoint = "GetWindowLongPtrW")]
+    private static extern IntPtr GetWindowLongPtr(IntPtr window, int index);
+
+    [System.Runtime.InteropServices.DllImport("user32.dll", EntryPoint = "SetWindowLongPtrW")]
+    private static extern IntPtr SetWindowLongPtr(IntPtr window, int index, IntPtr value);
 }
