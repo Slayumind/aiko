@@ -312,8 +312,8 @@ sealed class AikoShell : IDisposable
             _terminal?.LimitsChanged();
         });
 
-    /// A face comes or goes (D-211), on the tray icon or on the island, wherever Aiko lives, and in
-    /// the corner of the taskbar button of the open window (D-415).
+    /// A face comes or goes (D-211), on the tray icon or on the island, wherever Aiko lives, and on
+    /// the taskbar button of the open window in place of its rings (D-417).
     private void OnFaceChanged(AikoFace? face)
     {
         var style = SettingsStore.LoadPersona().Face;
