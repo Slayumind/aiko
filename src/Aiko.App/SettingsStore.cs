@@ -7,8 +7,15 @@ namespace Aiko.App;
 /// environments and the persona. All live in %APPDATA%, because they are the user's choices, not a cache.
 ///
 /// Nothing here throws. A settings file that cannot be read means the defaults, and Aiko starts.
+///
+/// Every file is read from the disk once per change. The window, the island, the icon and the
+/// numbers all ask for the environments on every event of the status line; a copy is kept with the
+/// time and the length of the file it came from, and only a file that changed is read again.
 static class SettingsStore
 {
+    private static readonly Dictionary<string, (DateTime Written, long Length, string Text)> Copies = new(StringComparer.OrdinalIgnoreCase);
+    private static (string Text, EnvironmentSettings Settings)? LastEnvironments;
+
     private static readonly string Folder = ThisComputer.Folders.SettingsFolder;
     private static readonly string SettingsFile = ThisComputer.Folders.SettingsFile;
     private static readonly string EnvironmentsFile = ThisComputer.Folders.EnvironmentsFile;
@@ -29,8 +36,22 @@ static class SettingsStore
         return settings;
     }
 
-    public static EnvironmentSettings LoadEnvironments() =>
-        EnvironmentSettings.FromJson(Read(EnvironmentsFile));
+    /// The list is read again only when the file changed; the same text gives the same object.
+    public static EnvironmentSettings LoadEnvironments()
+    {
+        var text = Read(EnvironmentsFile);
+        lock (Copies)
+        {
+            if (LastEnvironments is { } known && ReferenceEquals(known.Text, text))
+            {
+                return known.Settings;
+            }
+
+            var settings = EnvironmentSettings.FromJson(text);
+            LastEnvironments = (text, settings);
+            return settings;
+        }
+    }
 
     public static void SaveEnvironments(EnvironmentSettings environments) =>
         Write(EnvironmentsFile, environments.ToJson());
@@ -49,9 +70,18 @@ static class SettingsStore
     {
         try
         {
-            if (!File.Exists(path))
+            var file = new FileInfo(path);
+            if (!file.Exists)
             {
                 return string.Empty;
+            }
+
+            lock (Copies)
+            {
+                if (Copies.TryGetValue(path, out var copy) && copy.Written == file.LastWriteTimeUtc && copy.Length == file.Length)
+                {
+                    return copy.Text;
+                }
             }
 
             var text = File.ReadAllText(path);
@@ -59,6 +89,11 @@ static class SettingsStore
             {
                 SetAside(path);
                 return string.Empty;
+            }
+
+            lock (Copies)
+            {
+                Copies[path] = (file.LastWriteTimeUtc, file.Length, text);
             }
 
             return text;
@@ -99,9 +134,11 @@ static class SettingsStore
         try
         {
             Directory.CreateDirectory(Folder);
-            var temporary = path + ".tmp";
-            File.WriteAllText(temporary, text);
-            File.Move(temporary, path, overwrite: true);
+            AtomicFile.Replace(path, text);
+            lock (Copies)
+            {
+                Copies.Remove(path);
+            }
         }
         catch (IOException)
         {
