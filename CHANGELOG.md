@@ -86,6 +86,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Fixed
 
+- Voice input no longer adds names from Aiko's memory to what you said. The recogniser was told
+  the keys of the memory as a hint and sometimes gave one back alone, in the middle of speech. The
+  memory is no longer part of the hint, so it is not sent to OpenAI with the sound either.
 - The log keeps only the name of a file or folder, not its full path. A system error used to write
   the whole path there, though the privacy notes say the log has no working folders.
 - Aiko runs as one copy. Starting it again, from the Start menu, a pinned button or with a folder
