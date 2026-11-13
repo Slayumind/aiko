@@ -24,10 +24,7 @@ stamp, not a table (D-255).
 | `memory-keys/` | what may be a key of a fact, and when a key is found in a message (`MemoryRules`) |
 | `memory-nudge/` | which messages speak in the first person and get the memory note (`MemoryNudge`) |
 | `memory-limits/` | how long a fact may be with its meaning and keys (`MemoryRules`) |
-| `stream-events/` | what the terminal reads from one line of Claude Code, and what it drops (`StreamEvent`) |
-| `host-lines/` | the exact lines the terminal writes to Claude Code (`HostLine`) |
 | `launch-plan/` | the arguments and the environment of the Claude Code a conversation starts (`ClaudeLaunchPlan`) |
-| `permission-mode/` | the names of the four permission modes and their order (`PermissionModes`) |
 | `limit-badge/` | which limit the title bar of the terminal names (`LimitBadge`) |
 | `header-strip/` | the order and the numbers of the open header of the terminal window (`HeaderStrip`) |
 | `shell-ask/` | what a command line asks Claude Code and how it reads the answer, and the link under a Ctrl+click (`ShellAsk`, `ShellLink`); Windows only until the terminal comes to the Mac |
@@ -38,26 +35,19 @@ stamp, not a table (D-255).
 | `count-query/` | the query of the daily version check: the version only with counting off, six fields with it on (`CountQuery`); the Swift twin comes with the terminal on the Mac |
 | `redirect-headers/` | which headers go on after a redirect: a token stays with its host (`RedirectHeaders`); Windows only, the Mac sends no token |
 | `log-paths/` | a line for the log without full paths (`LogText`); Windows only until the Mac log comes under the same rule |
-| `model-name/` | the name of a model in the line under the input (`ModelName`) |
-| `slash-menu/` | the menu of commands that "/" opens in the field: when it opens, what it shows, in which order (`SlashMenu`) |
 | `file-mention/` | the files that "@" offers in the field: where the word starts, which files, in which order, what the field becomes (`FileMention`) |
-| `feed-entries/` | the rows of the feed: which steps in a row are one line, and how a long output is cut (`FeedEntries`, `LongOutput`) |
-| `shell-command/` | a command of "!": what is a command, what Claude gets, how the file reads back (`ShellCommand`) |
-| `context-gauge/` | how full the context of a conversation is, and the colour of its word under the field (`ContextGauge`) |
-| `conversation/` | what a row of stream lines and actions of the person makes of a conversation (`Conversation`), and how the list of sessions sees it (`TalkGlance`) |
-| `conversation-runner/` | when Claude Code is started for a conversation, with which arguments, what is written to it and what is logged (`ConversationRunner`, played against `ScriptedClaude`) |
-| `step-line/` | one step of the work as one line of the feed (`StepLine`) |
-| `request-card/` | a request as a card, and the line each choice writes back (`RequestCard`) |
-| `talk-keys/` | what Enter and Esc in the field do, and which card they answer (`TalkKeys`) |
+| `conversation-file/` | a conversation of Claude Code read from the start and the end of its file, for the palette of sessions (`ConversationFile`) |
+| `session-search/` | what the palette of sessions finds, in three groups (`SessionSearch`) |
+| `text-match/` | how the lists of the terminal match what is typed, and the quick pick of a folder for a new session (`TextMatch`) |
+| `terminal-title/` | what a session does, read from the title the terminal shows (`TerminalTitle`) |
+| `terminal-events/` | what a hook of the terminal says a session is doing (`TerminalEvent`) |
+| `terminal-copy/` | text copied out of a terminal: rows wrapped by the width joined again, the shared indent gone (`TerminalCopy`) |
+| `editor/` | what a key does in the editor under the terminal, what a send writes, the history of a command line and Tab for a path (`EditorKeys`) |
+| `release-notes/` | the titles of the notes of a newer release, read from GitHub (`ReleaseNotes`); Windows only until the terminal comes to the Mac |
 | `terminal-sessions/` | the list of sessions as the file `terminal.json`: adding, closing, moving, and what a broken file reads as (`TerminalSessions`) |
 | `session-name/` | the name of a session with an empty name field, and how a name and a folder are kept (`SessionName`) |
-| `new-session/` | the folders the form of a new session offers, the model it starts with, and the other environment a folder is bound to (`NewSessionChoices`) |
 | `terminal-window/` | the rows of the list of sessions, the process to stop before a fifth one starts, where the window opens and what is chosen in it (`SessionRows`, `ProcessCap`, `WindowPlace`, `TerminalWindowModel`) |
-| `transcript/` | the file Claude Code keeps of a conversation, read into the feed (`Transcript`) |
 | `transcript-path/` | where that file is (`TranscriptPath`) |
-| `markdown/` | the markdown of an answer read into blocks and inlines (`Markdown`) |
-| `answer-segments/` | the pieces an answer is drawn and selected in (`AnswerSegments`) |
-| `markdown-copy/` | what a selection inside the prose of an answer copies as markdown (`MarkdownCopy`) |
 | `file-link/` | which words look like a file with a line, and where a link leads (`FileLink`, `LinkTarget`) |
 | `voice-input/` | what a press, Esc and the mic do to a recording, and what the line under the input and the mic button show (`VoiceInput`) |
 | `dictation/` | which words of a recording are confirmed and which are the grey tail (`DictationText`) |

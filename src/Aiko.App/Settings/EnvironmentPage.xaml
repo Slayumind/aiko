@@ -5,8 +5,8 @@
 
   <!--
     One environment (D-177). The account on the left, as Claude Code knows it. What Aiko calls the
-    environment on the right: its name, its command and the folders bound to it. The folders are
-    only shown here; they change on the project folders page, where every folder is in one table.
+    environment on the right: its name, its command and the folders bound to it, which are bound
+    and unbound here.
   -->
   <UserControl.Resources>
     <ResourceDictionary>

@@ -177,4 +177,12 @@ public class AppSettingsTests
         Assert.False(settings.SessionListHidden);
         Assert.Contains("\"openTerminalAtStartup\": false", AppSettings.Default.ToJson());
     }
+
+    /// The line about closing the window is shown once (D-421): once put away, the file keeps it away.
+    [Fact]
+    public void The_line_about_closing_the_window_stays_away_once_put_away()
+    {
+        Assert.False(AppSettings.Default.CloseHintShown);
+        Assert.True(AppSettings.FromJson((AppSettings.Default with { CloseHintShown = true }).ToJson()).CloseHintShown);
+    }
 }

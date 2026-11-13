@@ -23,6 +23,9 @@ jobs:
     steps:
       - name: Check out
         uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          # The tags, to compare the skills plugin with the last release.
+          fetch-depth: 0
 
       - name: Set up .NET
         uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5
@@ -35,6 +38,21 @@ jobs:
         run: |
           $version = "${{ github.ref_name }}".TrimStart('v')
           "number=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Check that the skills plugin has a new version if it changed
+        # Claude Code updates a plugin from the GitHub marketplace only when its version grows. The
+        # app stamps its own copy with a hash of the files, so this number matters for people who
+        # took the skills without the app. A release that changed a skill and kept the number fails.
+        shell: bash
+        run: |
+          previous=$(git describe --tags --abbrev=0 "$GITHUB_REF_NAME^" 2>/dev/null) || exit 0
+          git diff --quiet "$previous" HEAD -- plugins/aiko && exit 0
+          old=$(git show "$previous:plugins/aiko/.claude-plugin/plugin.json" | jq -r .version)
+          new=$(jq -r .version plugins/aiko/.claude-plugin/plugin.json)
+          if [ "$old" = "$new" ]; then
+            echo "plugins/aiko changed since $previous, but its version is still $new"
+            exit 1
+          fi
 
       - name: Test
         run: dotnet test Aiko.slnx --configuration Release --verbosity quiet
