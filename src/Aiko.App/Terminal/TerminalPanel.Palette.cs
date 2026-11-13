@@ -24,8 +24,7 @@ sealed partial class TerminalPanel
         _palettePopup.HorizontalOffset = Math.Max(0, (ActualWidth - palette.Width) / 2 - palette.Margin.Left);
         _palettePopup.VerticalOffset = BarHeight + 8;
         PopupZoom.Fit(_palettePopup);
-        _palettePopup.IsOpen = true;
-        Motion.PopIn(palette, above: false);
+        Motion.OpenPopup(_palettePopup, palette, above: false);
         palette.FocusField();
     }
 
@@ -120,7 +119,7 @@ sealed partial class TerminalPanel
     {
         var words = Text(Strings.TerminalCloseHint, "TextNumber", "Ink", FontWeights.Normal);
         words.TextWrapping = TextWrapping.Wrap;
-        var cross = BarButton(Marks.Line("M0,0 L8,8 M8,0 L0,8"), Strings.TerminalCloseHintDone, () => CloseHintDone?.Invoke(), 24);
+        var cross = BarButton(Marks.Line("M0,0 L8,8 M8,0 L0,8"), null, () => CloseHintDone?.Invoke(), 24);
         cross.VerticalAlignment = VerticalAlignment.Top;
         cross.Margin = new Thickness(6, -4, -6, 0);
         var line = new DockPanel();
@@ -206,7 +205,7 @@ sealed partial class TerminalPanel
         buttons.Children.Add(stop);
         buttons.Children.Add(keep);
 
-        var cross = BarButton(Marks.Line("M0,0 L8,8 M8,0 L0,8"), ask.Keep, () => AskAnswered?.Invoke(false));
+        var cross = BarButton(Marks.Line("M0,0 L8,8 M8,0 L0,8"), null, () => AskAnswered?.Invoke(false));
         cross.HorizontalAlignment = HorizontalAlignment.Right;
         cross.VerticalAlignment = VerticalAlignment.Top;
         cross.Margin = new Thickness(0, -6, -8, 0);

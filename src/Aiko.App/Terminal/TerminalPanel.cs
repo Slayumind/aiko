@@ -193,13 +193,6 @@ sealed partial class TerminalPanel : UserControl
         // The list under the button, left edges together, as every drop-down of Aiko (DropDown).
         _listPopup.Placement = PlacementMode.Custom;
         _listPopup.CustomPopupPlacementCallback = (_, target, _) => [new CustomPopupPlacement(new Point(0, target.Height), PopupPrimaryAxis.Horizontal)];
-        _listPopup.Opened += (_, _) =>
-        {
-            if (_listPopup.Child is FrameworkElement list)
-            {
-                Motion.PopIn(list, above: false);
-            }
-        };
 
         _maximize = BarButton(_maximizeIcon, Strings.TerminalMaximize, () => MaximizeAsked?.Invoke());
         var minimize = BarButton(Marks.Line("M0,5 L10,5"), Strings.TerminalMinimize, () => MinimizeAsked?.Invoke());
@@ -457,7 +450,8 @@ sealed partial class TerminalPanel : UserControl
 
     private const double ChevronWidth = 28;
 
-    private Button BarButton(UIElement icon, string tip, Action click, double width = 40)
+    /// tip is null for a cross that only puts a thing away: what it does is plain without words.
+    private Button BarButton(UIElement icon, string? tip, Action click, double width = 40)
     {
         var hover = new Border { CornerRadius = new CornerRadius(6), Background = Tokens.Brush("Raised"), Opacity = 0 };
         var face = new Grid { Width = width, Height = 28 };

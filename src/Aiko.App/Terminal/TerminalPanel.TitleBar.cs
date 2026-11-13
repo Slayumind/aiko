@@ -267,7 +267,7 @@ sealed partial class TerminalPanel
         if (_narrow)
         {
             PopupZoom.Fit(_listPopup);
-            _listPopup.IsOpen = !_listPopup.IsOpen;
+            ToggleListPopup();
             return false;
         }
 
@@ -307,7 +307,7 @@ sealed partial class TerminalPanel
         if (_narrow)
         {
             PopupZoom.Fit(_listPopup);
-            _listPopup.IsOpen = !_listPopup.IsOpen;
+            ToggleListPopup();
             return;
         }
 
@@ -394,4 +394,16 @@ sealed partial class TerminalPanel
         Height = 14,
         VerticalAlignment = VerticalAlignment.Center,
     };
+
+    /// The list of a narrow window under its button: opened with the pop-in, closed at once.
+    private void ToggleListPopup()
+    {
+        if (_listPopup.IsOpen || _listPopup.Child is not FrameworkElement list)
+        {
+            _listPopup.IsOpen = false;
+            return;
+        }
+
+        Motion.OpenPopup(_listPopup, list, above: false);
+    }
 }

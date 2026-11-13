@@ -46,7 +46,7 @@ sealed partial class TerminalHost
 
     internal void ClosePaletteForCheck() => _panel.ClosePalette();
 
-    public void OpenSessionPalette()
+    public async void OpenSessionPalette()
     {
         _palettesOpened++;
         if (!_window.IsVisible)
@@ -71,23 +71,32 @@ sealed partial class TerminalHost
             _panel.ClosePalette();
             OpenFound(id);
         };
-        _panel.ShowPalette(palette);
-
+        // The conversations are read in the background. Most of the time they come within a
+        // moment, and the palette opens with its rows; rows that changed during the pop-in made it
+        // jump. A slow disk does not keep the palette waiting: it opens and fills in later.
         var home = System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile);
         var folders = _settings.Environments
             .Select(environment => (environment.Name, environment.ConfigDirectories.FirstOrDefault() ?? ClaudeConfigFolder.Resolve(null, home)))
             .ToList();
-        _ = LoadConversations(folders, palette);
-    }
+        var loading = _shelf.LoadAsync(folders);
+        if (await Task.WhenAny(loading, Task.Delay(PaletteWait)) == loading)
+        {
+            _conversations = await loading;
+            palette.Refresh();
+            _panel.ShowPalette(palette);
+            return;
+        }
 
-    private async Task LoadConversations(IReadOnlyList<(string, string)> folders, PaletteView palette)
-    {
-        _conversations = await _shelf.LoadAsync(folders);
+        _panel.ShowPalette(palette);
+        _conversations = await loading;
         if (_panel.PaletteOpen)
         {
             palette.Refresh();
         }
     }
+
+    /// How long the palette waits for the conversations before it opens without them.
+    private static readonly TimeSpan PaletteWait = TimeSpan.FromMilliseconds(150);
 
     private static PaletteRow SearchRow(SearchHit hit, DateTimeOffset now, bool quiet)
     {
