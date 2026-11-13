@@ -138,6 +138,15 @@ static class Motion
     public const double PopShift = 8;
 
     /// above: the element stands above its anchor, so it grows from its bottom edge and rises.
+    /// Opens a popup with what it shows already at the start of PopIn. Opened first, the window of
+    /// the popup could draw one frame of the finished picture, and the motion then jumped back to
+    /// nothing: a blink that came only sometimes.
+    public static void OpenPopup(System.Windows.Controls.Primitives.Popup popup, FrameworkElement shown, bool above)
+    {
+        PopIn(shown, above);
+        popup.IsOpen = true;
+    }
+
     public static void PopIn(FrameworkElement element, bool above)
     {
         element.RenderTransformOrigin = new Point(0.5, above ? 1 : 0);

@@ -420,7 +420,7 @@ public static class Strings
             ["TerminalEditorHintEmpty"] = ("Empty: **arrows**, **Enter**, **Esc**, **Shift+Tab** go to the terminal", "Пусто: **стрелки**, **Enter**, **Esc**, **Shift+Tab** уходят в терминал"),
             ["TerminalEditorPicture"] = ("picture {0}", "картинка {0}"),
             ["TerminalEditorPlaceholder"] = ("Type or say", "Напиши или скажи"),
-            ["TerminalSearchHint"] = ("Find a session or a conversation", "Найти сессию или разговор"),
+            ["TerminalSearchHint"] = ("Find a session", "Найти сессию"),
             ["TerminalSearchKeys"] = ("↑ ↓ choose · Enter open · Esc close", "↑ ↓ выбрать · Enter открыть · Esc закрыть"),
             ["TerminalSearchOpen"] = ("Open", "Открытые"),
             ["TerminalSearchClosed"] = ("Closed", "Закрытые"),
@@ -469,7 +469,6 @@ public static class Strings
             ["TerminalFolderGoneShell"] = ("There is nowhere to open the command line.", "Командную строку негде открыть."),
             ["TerminalRemoveFromList"] = ("Remove from the list", "Убрать из списка"),
             ["TerminalCloseHint"] = ("Close the window and the sessions keep working, while Aiko stays by the clock.", "Закроешь окно — сессии продолжат работу, а Aiko останется у часов."),
-            ["TerminalCloseHintDone"] = ("Got it", "Понятно"),
             ["TerminalWorking"] = ("working", "работает"),
             ["TerminalWaiting"] = ("waiting", "ждёт"),
             ["TerminalDone"] = ("done", "готово"),
@@ -508,7 +507,7 @@ public static class Strings
             ["TerminalMaximize"] = ("Maximize", "Развернуть"),
             ["TerminalRestore"] = ("Restore", "Восстановить"),
             ["TerminalSessionList"] = ("Session list · Ctrl+Shift+B", "Список сессий · Ctrl+Shift+B"),
-            ["TerminalFindConversation"] = ("Find a conversation · Ctrl+Shift+K", "Найти разговор · Ctrl+Shift+K"),
+            ["TerminalFindConversation"] = ("Search sessions · Ctrl+Shift+K", "Поиск сессий · Ctrl+Shift+K"),
             ["TerminalKeysClaude"] = ("Ctrl+G editor · Ctrl+Shift+Space voice · Ctrl+Shift+K find a conversation", "Ctrl+G редактор · Ctrl+Shift+Space голос · Ctrl+Shift+K найти разговор"),
             ["TerminalKeysShell"] = ("# ask for a command · Ctrl+Shift+F find in the output · Ctrl+Shift+K find a conversation", "# подсказка команды · Ctrl+Shift+F найти в выводе · Ctrl+Shift+K найти разговор"),
             ["TerminalShowLimits"] = ("Show the limits of the environments", "Показать лимиты сред"),
@@ -1732,7 +1731,7 @@ public static class Strings
     /// Type or say
     public static string TerminalEditorPlaceholder => Get("TerminalEditorPlaceholder");
 
-    /// Find a session or a conversation
+    /// Find a session
     public static string TerminalSearchHint => Get("TerminalSearchHint");
 
     /// ↑ ↓ choose · Enter open · Esc close
@@ -1879,9 +1878,6 @@ public static class Strings
     /// Close the window and the sessions keep working, while Aiko stays by the clock.
     public static string TerminalCloseHint => Get("TerminalCloseHint");
 
-    /// Got it
-    public static string TerminalCloseHintDone => Get("TerminalCloseHintDone");
-
     /// working
     public static string TerminalWorking => Get("TerminalWorking");
 
@@ -1996,7 +1992,7 @@ public static class Strings
     /// Session list · Ctrl+Shift+B
     public static string TerminalSessionList => Get("TerminalSessionList");
 
-    /// Find a conversation · Ctrl+Shift+K
+    /// Search sessions · Ctrl+Shift+K
     public static string TerminalFindConversation => Get("TerminalFindConversation");
 
     /// Ctrl+G editor · Ctrl+Shift+Space voice · Ctrl+Shift+K find a conversation

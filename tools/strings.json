@@ -2711,8 +2711,8 @@
   [
     "TerminalSearchHint",
     [
-      "Find a session or a conversation",
-      "Найти сессию или разговор"
+      "Find a session",
+      "Найти сессию"
     ]
   ],
   [
@@ -3052,13 +3052,6 @@
     ]
   ],
   [
-    "TerminalCloseHintDone",
-    [
-      "Got it",
-      "Понятно"
-    ]
-  ],
-  [
     "TerminalWorking",
     [
       "working",
@@ -3327,8 +3320,8 @@
   [
     "TerminalFindConversation",
     [
-      "Find a conversation · Ctrl+Shift+K",
-      "Найти разговор · Ctrl+Shift+K"
+      "Search sessions · Ctrl+Shift+K",
+      "Поиск сессий · Ctrl+Shift+K"
     ]
   ],
   [

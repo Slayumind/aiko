@@ -21,7 +21,7 @@ static class TipSheet
         foreach (var language in new[] { StringLanguage.English, StringLanguage.Russian })
         {
             Strings.Language = language;
-            foreach (var words in new[] { Strings.TerminalCloseHintDone, Strings.Settings, Strings.TerminalFindConversation, Strings.TerminalFolderGone })
+            foreach (var words in new[] { Strings.Settings, Strings.TerminalFindConversation, Strings.TerminalFolderGone })
             {
                 sheet.Children.Add(new ContentControl { Content = words, Template = (ControlTemplate)sheet.FindResource("TipTemplate"), HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0, 0, 0, 8) });
             }

@@ -231,9 +231,7 @@ sealed class DropDown : UserControl
         }
 
         PopupZoom.Fit(_popup);
-        _popup.IsOpen = true;
-
-        Motion.PopIn(_listFrame, above: false);
+        Motion.OpenPopup(_popup, _listFrame, above: false);
         _chevronTurn.BeginAnimation(RotateTransform.AngleProperty, Motion.To(180, Motion.Expand, Motion.Standard));
     }
 
