@@ -1,8 +1,9 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Aiko.App;
 
-namespace Aiko.App;
+namespace Aiko.Checks;
 
 /// --try-language: picks English on the General page of the real settings with the real mouse, in
 /// a window of the size of the terminal window, then puts the settings back. The owner could open the language list but a click on an

@@ -2,8 +2,9 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
+using Aiko.App;
 
-namespace Aiko.App;
+namespace Aiko.Checks;
 
 /// --try-tab: whether Tab and the arrows in a terminal reach it before WPF takes them (D-370). A window
 /// off the screen holds a real terminal with cmd.exe; a press of Tab and of Shift+Tab is put into the

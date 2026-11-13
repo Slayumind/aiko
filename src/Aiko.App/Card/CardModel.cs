@@ -162,7 +162,7 @@ public static class Tokens
 {
     private static readonly ResourceDictionary Dictionary = new()
     {
-        Source = new Uri("pack://application:,,,/Theme/Tokens.xaml", UriKind.Absolute),
+        Source = new Uri("pack://application:,,,/Aiko.App;component/Theme/Tokens.xaml", UriKind.Absolute),
     };
 
     public static Brush Brush(string key) => (Brush)Dictionary[key];

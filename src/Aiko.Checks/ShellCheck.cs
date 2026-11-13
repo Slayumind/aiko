@@ -1,10 +1,11 @@
 using System.Runtime.Versioning;
 using System.Windows;
 using System.Windows.Threading;
+using Aiko.App;
 using Aiko.Core;
 using Windows.Win32;
 
-namespace Aiko.App;
+namespace Aiko.Checks;
 
 /// --try-shell: starts the real shell and walks it through what a person does with it: the settings
 /// in the terminal window, the tray icon, its click and its menu, a face, the island and its click,

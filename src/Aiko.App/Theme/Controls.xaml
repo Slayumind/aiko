@@ -8,7 +8,7 @@
                     xmlns:local="clr-namespace:Aiko.App">
 
   <ResourceDictionary.MergedDictionaries>
-    <ResourceDictionary Source="pack://application:,,,/Theme/Tokens.xaml" />
+    <ResourceDictionary Source="pack://application:,,,/Aiko.App;component/Theme/Tokens.xaml" />
   </ResourceDictionary.MergedDictionaries>
 
   <!-- Group labels on the site are small, mono and in capitals. The capitals are typed in, since

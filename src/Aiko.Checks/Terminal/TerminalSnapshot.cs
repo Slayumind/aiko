@@ -1,7 +1,8 @@
+using Aiko.App;
 using Aiko.Core;
 using Aiko.Core.Terminal;
 
-namespace Aiko.App;
+namespace Aiko.Checks;
 
 /// The terminal window on made up sessions, drawn into a file for a look at it (/look). No program
 /// runs and nothing is read or written: the list shows every state of a row, the first folder

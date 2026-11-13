@@ -11,7 +11,7 @@
   <UserControl.Resources>
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="pack://application:,,,/Theme/Controls.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Aiko.App;component/Theme/Controls.xaml" />
       </ResourceDictionary.MergedDictionaries>
 
       <!-- Her own words in the sample, a little apart from the work in the middle. -->

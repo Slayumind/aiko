@@ -1,9 +1,10 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using Aiko.App;
 using Aiko.Core;
 
-namespace Aiko.App;
+namespace Aiko.Checks;
 
 /// Every face on one picture, laid out like the sheet in the mockup: big, then 32, 24 and 16 px, on a
 /// dark and a light taskbar. For --snapshot-faces.

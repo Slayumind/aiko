@@ -1,7 +1,8 @@
 using System.Windows;
 using System.Windows.Threading;
+using Aiko.App;
 
-namespace Aiko.App;
+namespace Aiko.Checks;
 
 /// --try-crash-guard: an empty app with the guard, no tray and no shell. Three errors in a row on
 /// the dispatcher must neither end the process nor be missed: the windows are closed once. The

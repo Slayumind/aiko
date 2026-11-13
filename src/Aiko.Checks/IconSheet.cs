@@ -2,10 +2,11 @@ using System.IO;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Aiko.App;
 using Aiko.Core;
 using Aiko.Core.Terminal;
 
-namespace Aiko.App;
+namespace Aiko.Checks;
 
 /// Draws every tray icon state into one picture, so the icon can be looked at without digging it
 /// out of the Windows overflow area. Started with --snapshot-icon.

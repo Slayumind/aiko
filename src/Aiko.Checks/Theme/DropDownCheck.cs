@@ -2,8 +2,9 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
+using Aiko.App;
 
-namespace Aiko.App;
+namespace Aiko.Checks;
 
 /// --try-dropdown: opens a small window with a DropDown and clicks it with the real mouse, the way
 /// a person would. The drop-down had only ever been drawn in snapshots, and a snapshot cannot tell

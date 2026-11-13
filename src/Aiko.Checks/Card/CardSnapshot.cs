@@ -1,6 +1,7 @@
+using Aiko.App;
 using Aiko.Core;
 
-namespace Aiko.App;
+namespace Aiko.Checks;
 
 /// Made up limits for the snapshots and checks of the island, so they can be looked at after every
 /// change without waiting for real limits to move.

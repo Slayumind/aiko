@@ -14,9 +14,6 @@ public partial class TerminalPage : UserControl
 
     private AppSettings _settings = SettingsStore.Load();
 
-    /// For snapshots: draws the page with this engine chosen, without saving it.
-    internal static VoiceEngine? TryEngine { get; set; }
-
     /// Filling the controls raises their events, and those events save. See GeneralPage.
     private bool _filling;
     private bool _failed;
@@ -48,7 +45,7 @@ public partial class TerminalPage : UserControl
     {
         _filling = true;
         VoiceOn.IsChecked = _settings.VoiceInput;
-        var engine = TryEngine ?? _settings.VoiceEngine;
+        var engine = SettingsScene.VoiceEngine ?? _settings.VoiceEngine;
         Local.IsChecked = engine == VoiceEngine.Local;
         Cloud.IsChecked = engine == VoiceEngine.OpenAI;
         SpeechSystem.IsChecked = _settings.VoiceLanguage == AikoLanguage.System;
