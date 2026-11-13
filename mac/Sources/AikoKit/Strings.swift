@@ -12,7 +12,7 @@ public enum StringLanguage: Sendable, Equatable {
 /// Every word Aiko says, in the language the user chose. One property per string, so a key that
 /// does not exist is a build error and not a blank label somebody finds months later.
 ///
-/// The table is the twin of Strings.resx and Strings.ru.resx on Windows.
+/// The table is the twin of Strings.cs in Aiko.Core on Windows.
 public enum Strings {
     /// Set at startup and again when the language changes. The lock is there because the bridge
     /// and the app may ask from another thread, not because the value changes often.

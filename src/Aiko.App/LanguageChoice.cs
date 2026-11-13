@@ -21,7 +21,7 @@ static class LanguageChoice
             _ => CultureInfo.CurrentUICulture,
         };
 
-        Strings.Culture = culture;
+        Strings.Language = culture.TwoLetterISOLanguageName == "ru" ? StringLanguage.Russian : StringLanguage.English;
         CultureInfo.CurrentUICulture = culture;
 
         // Dates and numbers stay with Windows on purpose. Somebody reading Aiko in English on a

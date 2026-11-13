@@ -1,0 +1,40 @@
+{
+  "about": "The words of the limits in both languages (CardText). Times are counted from 0: resetsIn and timeLeft are seconds; at is a Unix time read on the UTC clock.",
+  "window": [
+    { "kind": "FiveHour", "model": null, "en": "5 hours", "ru": "5 часов" },
+    { "kind": "SevenDay", "model": null, "en": "Week", "ru": "Неделя" },
+    { "kind": "ModelWeek", "model": "Fable", "en": "Fable · week", "ru": "Fable · неделя" },
+    { "kind": "ModelWeek", "model": null, "en": "model · week", "ru": "model · неделя" }
+  ],
+  "percent": [
+    { "percent": 0, "en": "0%", "ru": "0%" },
+    { "percent": 42, "en": "42%", "ru": "42%" },
+    { "percent": 100, "en": "100%", "ru": "100%" }
+  ],
+  "tone": [
+    { "tone": "Unknown", "en": "", "ru": "" },
+    { "tone": "Normal", "en": "", "ru": "" },
+    { "tone": "Caution", "en": "running low", "ru": "на исходе" },
+    { "tone": "Critical", "en": "almost gone", "ru": "почти не осталось" }
+  ],
+  "resets": [
+    { "resetsIn": 0, "en": "just reset", "ru": "сброс только что" },
+    { "resetsIn": 30, "en": "resets in <1m", "ru": "сброс через <1 м" },
+    { "resetsIn": 300, "en": "resets in 5m", "ru": "сброс через 5 м" },
+    { "resetsIn": 3960, "en": "resets in 1h 6m", "ru": "сброс через 1 ч 6 м" },
+    { "resetsIn": 183600, "en": "resets in 2d 3h", "ru": "сброс через 2 д 3 ч" }
+  ],
+  "pace": [
+    { "verdict": "Unknown", "timeLeft": 0, "en": "", "ru": "" },
+    { "verdict": "LastsPastReset", "timeLeft": 0, "en": "lasts until reset", "ru": "хватит до сброса" },
+    { "verdict": "RunsOutBeforeReset", "timeLeft": 45, "en": "~<1m at this pace", "ru": "хватит на ~<1 м" },
+    { "verdict": "RunsOutBeforeReset", "timeLeft": 2400, "en": "~40m at this pace", "ru": "хватит на ~40 м" },
+    { "verdict": "RunsOutBeforeReset", "timeLeft": 8100, "en": "~2h 15m at this pace", "ru": "хватит на ~2 ч 15 м" },
+    { "verdict": "RunsOutBeforeReset", "timeLeft": 104400, "en": "~1d 5h at this pace", "ru": "хватит на ~1 д 5 ч" }
+  ],
+  "updated": [
+    { "freshness": "None", "at": null, "en": "no data yet", "ru": "данных пока нет" },
+    { "freshness": "Live", "at": 1789117500, "en": "updated 09:05", "ru": "обновлено в 09:05" },
+    { "freshness": "Stale", "at": 1789117500, "en": "as of 09:05", "ru": "данные на 09:05" }
+  ]
+}
