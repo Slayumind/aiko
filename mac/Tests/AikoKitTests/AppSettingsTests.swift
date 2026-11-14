@@ -154,4 +154,19 @@ struct AppSettingsTests {
         #expect(!settings.sessionListHidden)
         #expect(AppSettings.default.toJson().contains(#""openTerminalAtStartup": false"#))
     }
+
+    /// The twins of WindowZoomTests and NoticesTests on Windows: the zoom and the sound of "waits".
+    @Test
+    func aNewSettingsFileHasTheDefaultZoomAndTheSound() {
+        #expect(AppSettings.default.windowZoom == 115)
+        #expect(AppSettings.fromJson("{}").windowZoom == 115)
+        #expect(AppSettings.fromJson("{}").notifySound)
+    }
+
+    @Test
+    func theZoomGoesThroughTheSettingsFile() {
+        var settings = AppSettings.default
+        settings.windowZoom = 130
+        #expect(AppSettings.fromJson(settings.toJson()).windowZoom == 130)
+    }
 }

@@ -82,6 +82,14 @@ public struct AppSettings: Sendable, Equatable {
     /// The list of sessions was hidden with its icon or Cmd+B (D-376).
     public var sessionListHidden = false
 
+    /// The zoom of the terminal window in percent, one of WindowZoom.steps (D-384). Read it through
+    /// WindowZoom.read: a hand-edited file may hold anything.
+    public var windowZoom = WindowZoom.defaultZoom
+
+    /// The sound of "waits for you", on by default (D-375). The counts are always shown and make no
+    /// sound, so they have no setting (D-409).
+    public var notifySound = true
+
 
     public init() {}
 
@@ -130,6 +138,8 @@ public struct AppSettings: Sendable, Equatable {
         if let value = root["openTerminalAtStartup"]?.boolValue { settings.openTerminalAtStartup = value }
         if let value = root["headerOpen"]?.boolValue { settings.headerOpen = value }
         if let value = root["sessionListHidden"]?.boolValue { settings.sessionListHidden = value }
+        if let value = root["windowZoom"]?.int64Value { settings.windowZoom = Int(value) }
+        if let value = root["notifySound"]?.boolValue { settings.notifySound = value }
 
         if let object = root["island"]?.objectValue {
             guard let text = object["edge"]?.stringValue, let edge = screenEdge(text) else { return .default }
@@ -166,6 +176,8 @@ public struct AppSettings: Sendable, Equatable {
             ("openTerminalAtStartup", .bool(openTerminalAtStartup)),
             ("headerOpen", .bool(headerOpen)),
             ("sessionListHidden", .bool(sessionListHidden)),
+            ("windowZoom", .number(String(windowZoom))),
+            ("notifySound", .bool(notifySound)),
         ])
 
         return JsonNode.object(root).toJsonString(indented: true) + "\n"
