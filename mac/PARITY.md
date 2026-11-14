@@ -115,7 +115,7 @@ Swift they are part of AikoKit and have cases of their own:
 | C# file | Swift file | C# cases | Swift cases | Notes |
 |---|---|---|---|---|
 | RingIcon.cs, RingDrawing.cs | RingArt.swift | — | 13 | the 16 unit grid, the tones and the dashed ring as numbers; the drawing itself is `AikoMac/StatusIcon.swift` |
-| Theme/Motion.cs | Motion.swift, CardLifetime.swift | — | 6 | the durations and the curves, plus the hover delay and the two away turns of the card, which Windows no longer has (D-399) |
+| Theme/Motion.cs | Motion.swift | — | — | the durations and the curves of every motion |
 | Island/IslandPanel.xaml.cs, Island/UnfoldPanel.cs, Island/FitPanel.cs | IslandLayout.swift | — | 28 | the size of the island, its line and corners per edge, the padding that keeps the rings still when the docked side loses its line, where every ring and percentage sits, and the 34 point square it closes into around the face |
 | Island/IslandWindow.xaml.cs | IslandDrag.swift | — | 7 | the 3 point threshold and the grip kept as a share of the size |
 | Island/RingGauge.cs | RingArt.swift | — | 2 | the island ring: the pen is 18 % of the ring, as RingGauge draws it |
@@ -202,20 +202,17 @@ AikoKit decided, and it answers the mouse.
 | AikoShell.cs | AikoShell.swift | the one owner that connects the parts below and decides who is told what |
 | Tray/TrayIcon.cs | MenuBarIcon.swift | the icon itself: the picture, the tooltip, the clicks and the mouse over it |
 | Tray/TrayMenu.cs | MenuBarMenu.swift | the menu of the icon; both answer with a `TrayCommand` |
-| — | CardHost.swift | the wait under a resting mouse, the pinned card and the watch that closes an unpinned one. Windows has no card since D-399: a click opens the terminal window |
 | Island/IslandHost.cs | IslandHost.swift | the island window, hiding behind a full screen window, saving where it was dragged |
 | ShellNumbers.cs | ShellNumbers.swift | the cards, the card model and the rows of the icon; Windows also brings in direct mode |
 | StartupChores.cs | StartupChores.swift | what is put right at every start; Windows also repairs status lines and clears old activity files |
 | Aiko.Checks/ShellCheck.cs (`--try-shell`) | the self tests in AikoShell.swift, IslandCheck.swift, SettingsCheck.swift | checks that drive the real shell without writing anything. One difference is left: on a machine that is not set up, the Mac self test still opens the checklist by itself, and the Windows check opens no page |
 | RingIcon.cs | StatusIcon.swift | draws the ring and the dot into an `NSImage` |
 | Theme/Tokens.xaml | Theme.swift | the palette and the sizes, as SwiftUI values |
-| — | CardView.swift | the card: header, blocks, rows, bars. On Windows the same `CardModel` of the core gives the open header of the terminal window its words |
-| — | CardWindow.swift | the panel the card lives in, where it is placed and how it arrives |
 | SnapshotWatcher.cs | SnapshotWatch.swift | watches the snapshots folder; a `DispatchSource` in place of `FileSystemWatcher` |
 | Island/IslandWindow.xaml.cs | IslandWindow.swift | the island's window: where it goes, the hover, the drag and the landing |
 | Island/IslandPanel.xaml(.cs), RingGauge.cs, UnfoldPanel.cs, FitPanel.cs | IslandView.swift | draws the island: the chrome, the rings, the percentages and the face |
 | Island/IslandGhost.cs | IslandStrip.swift | the landing strip, `NSVisualEffectView` in place of the acrylic accent |
-| Aiko.Checks/Island/IslandCheck.cs | IslandCheck.swift | the self test doors: `--try-island`, `--try-drag`, `--try-face`, `--try-card-island` |
+| Aiko.Checks/Island/IslandCheck.cs | IslandCheck.swift | the self test doors: `--try-island`, `--try-drag`, `--try-face` |
 | Island/IslandFaceAnimator.cs, Tray/TrayFaceAnimator.cs | FacePlay.swift | the steps between the rings and a face, once for both surfaces |
 | Faces/FaceDrawing.cs | FacePaint.swift | turns the shapes of FaceArt into AppKit drawing |
 | RingDrawing.cs | RingPaint.swift | one arc, drawn the same by the menu bar icon and by the island |
@@ -262,19 +259,19 @@ AikoKit decided, and it answers the mouse.
 
 Where it differs from Windows:
 
-- **The card always hangs under the status item.** The Windows taskbar can sit on any edge, so the
-  card asks whether there is room above. The macOS menu bar is always at the top. From the island
-  the card still opens above when the island sits on the bottom edge.
+- **No card** (D-399, D-425): the menu bar icon and the island open the terminal window, as the
+  tray icon and the island do on Windows. While the window is open Aiko has a Dock icon, the twin of
+  the button on the taskbar, and the menu bar icon steps aside, as the tray icon does (D-410).
 - **The gear and the cross** are system symbols. The Windows build carries the gear of the user's
   own icon set as a path in Tokens.xaml.
 - **The face is drawn, not handed over.** Windows gives the tray a picture, so a transition there is
   eight pictures per step; macOS draws the menu bar icon itself, so the island and the icon play the
   same smooth steps from one `FacePlay`.
-- **Proof that it starts.** `AIKO_MAC_SELF_TEST=1` opens the card, writes what it says and what
-  size it came out, and quits after three seconds. The island has its own doors, the twins of
-  `--try-island` and friends: `--try-island` unfolds and folds it, `--try-drag` drags it to the left
-  edge with the landing strip, `--try-face` plays a face, `--try-card-island` opens the card from
-  both a top and a bottom island. The Windows app has `--snapshot` as well, which saves a picture;
+- **Proof that it starts.** `AIKO_MAC_SELF_TEST=1` draws the icon, writes what it shows and quits
+  after three seconds. `--try-terminal` opens the terminal window with a command line in a
+  temporary folder and saves nothing. The island has its own doors, the twins of `--try-island` and
+  friends: `--try-island` unfolds and folds it, `--try-drag` drags it to the left edge with the
+  landing strip, `--try-face` plays a face. The Windows app has `--snapshot` as well, which saves a picture;
   over SSH a picture shows only the wallpaper, so nothing here draws one.
 
 - **The settings window has two doors of its own.** `--try-settings <page>` opens it at one page
@@ -318,8 +315,8 @@ These are the places where there was nothing to copy, with the reason for the ch
   what to run by AppleScript needs the Automation permission and a prompt nobody asked for. So Aiko
   writes `open-claude.command` into its own folder — `cd`, the config folder variable, `exec claude`
   — and hands it to Terminal with `open`. That needs no extra permission, and the file is written
-  again every time and safe to delete. The button sits on the card, where Windows keeps it, and not
-  on the environment page: in Russian two buttons do not fit that column.
+  again every time and safe to delete. With the card gone the button
+  goes with it; Claude Code now opens in the terminal window of Aiko.
 
 - **"Signed in" is read from `.claude.json`, not from a file that is never written.** Claude Code on
   macOS keeps its token in the Keychain, so `.credentials.json` is not there even for a folder in

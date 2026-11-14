@@ -5,8 +5,8 @@ import AppKit
 /// full screen window, and remembering where the person dragged it. The twin of IslandHost.cs.
 @MainActor
 final class IslandHost {
-    /// The island asks for the card: true for a click, which pins it.
-    var onCard: ((Bool) -> Void)?
+    /// A click on the island: it opens the terminal window.
+    var onClick: (() -> Void)?
 
     /// Set by a self test, which drags the island about. The settings of the person are not its
     /// to change.
@@ -22,7 +22,7 @@ final class IslandHost {
     func show(_ cards: [CardState], at position: IslandPosition, newerVersion: String?) {
         if window == nil {
             let made = IslandWindow()
-            made.onCard = { [weak self] pinned in self?.onCard?(pinned) }
+            made.onClick = { [weak self] in self?.onClick?() }
             made.onMoved = { [weak self] moved in self?.savePosition(moved) }
             window = made
         }

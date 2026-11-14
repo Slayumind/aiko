@@ -6,7 +6,9 @@ import AppKit
 /// the window and quits. Nothing is saved: the sessions of the person stay as they were.
 @MainActor
 enum TerminalCheck {
-    static func run(_ host: TerminalHost) {
+    /// iconShown: whether the menu bar icon is there. It steps aside while the window is open, as
+    /// the tray icon of Windows does (D-410).
+    static func run(_ host: TerminalHost, iconShown: @escaping @MainActor () -> Bool) {
         let folder = (NSTemporaryDirectory() as NSString).appendingPathComponent("aiko-try-terminal")
         try? FileManager.default.createDirectory(atPath: folder, withIntermediateDirectories: true)
 
@@ -14,11 +16,11 @@ enum TerminalCheck {
         host.startForCheck(in: folder)
         after(2) {
             Log.write("self test: terminal window shown=\(host.isShown), in the Dock=\(NSApp.activationPolicy() == .regular), "
-                + "terminals=\(host.terminalCountForCheck), running=\(host.runningForCheck)")
+                + "menu bar icon=\(iconShown()), terminals=\(host.terminalCountForCheck), running=\(host.runningForCheck)")
             host.closeForCheck()
             after(0.5) {
                 Log.write("self test: terminal window closed, shown=\(host.isShown), in the Dock=\(NSApp.activationPolicy() == .regular), "
-                    + "terminals still running=\(host.runningForCheck)")
+                    + "menu bar icon=\(iconShown()), terminals still running=\(host.runningForCheck)")
                 NSApp.terminate(nil)
             }
         }

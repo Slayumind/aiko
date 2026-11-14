@@ -34,6 +34,9 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
 
     var isShown: Bool { window?.isVisible == true }
 
+    /// The window was shown or closed.
+    var onShownChanged: ((Bool) -> Void)?
+
     /// Opens the window, or brings it forward.
     func show() {
         let window = self.window ?? makeWindow()
@@ -42,12 +45,14 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
         draw()
         window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
+        onShownChanged?(true)
     }
 
     /// The window goes; the programs in it go on.
     func windowShouldClose(_ sender: NSWindow) -> Bool {
         sender.orderOut(nil)
         NSApp.setActivationPolicy(.accessory)
+        onShownChanged?(false)
         return false
     }
 

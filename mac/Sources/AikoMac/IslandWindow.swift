@@ -14,9 +14,8 @@ final class IslandWindow {
     private var position = IslandPosition.default
     private var cards: [CardState] = []
 
-    /// The card is asked for by a click, or by resting the mouse on the island. True means a click:
-    /// the card then stays until it is closed, the same as after a click on the menu bar icon.
-    var onCard: ((Bool) -> Void)?
+    /// A click on the island: it opens the terminal window (D-399, D-425).
+    var onClick: (() -> Void)?
 
     /// What the daily update check found. It goes into the words of the island, not its picture.
     var newerVersion: String? {
@@ -96,7 +95,6 @@ final class IslandWindow {
     }
 
     func close() {
-        hoverTimer?.invalidate()
         revealEnds?.invalidate()
         unfolding.stop()
         landing.stop()
@@ -227,30 +225,15 @@ final class IslandWindow {
 
     // ---- The mouse ----
 
-    private var hoverTimer: Timer?
-
     private var pointerIsOver: Bool { holds(NSEvent.mouseLocation) }
 
     private func pointerCame() {
         guard drag == nil else { return }
 
-        hoverTimer?.invalidate()
-        hoverTimer = Timer.scheduledTimer(withTimeInterval: CardLifetime.hoverDelay, repeats: false) { _ in
-            MainActor.assumeIsolated {
-                self.hoverTimer = nil
-                if self.pointerIsOver {
-                    self.onCard?(false)
-                }
-            }
-        }
-
         unfold(true)
     }
 
     private func pointerLeft() {
-        hoverTimer?.invalidate()
-        hoverTimer = nil
-
         if !revealing, drag == nil {
             unfold(false)
         }
@@ -266,8 +249,6 @@ final class IslandWindow {
     /// The island taken in hand at this point of the screen. The mouse calls it, and so does the
     /// self test, which drags the island from code without touching the person's mouse.
     func press(at cursor: Point) {
-        hoverTimer?.invalidate()
-        hoverTimer = nil
         landing.stop()
         drag = IslandDrag(pressedAt: cursor, island: Screens.box(panel.frame))
     }
@@ -312,9 +293,9 @@ final class IslandWindow {
         strip?.close()
         strip = nil
 
-        // A press that moved nothing is a click, and it opens the card.
+        // A press that moved nothing is a click, and it opens the terminal window (D-399, D-425).
         guard held.isDragging else {
-            onCard?(true)
+            onClick?()
             return
         }
 
