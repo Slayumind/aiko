@@ -27,6 +27,9 @@ final class AikoShell {
     /// closes, the way every other window of Aiko is.
     private var settings: SettingsWindow?
 
+    /// The terminal window with the sessions (D-425), made on the first click and kept while Aiko runs.
+    private lazy var terminal = TerminalHost()
+
     /// The face for two seconds after a session event (D-211), and the way to it and back.
     private let faces = FacePlay()
     private var mood: MoodPlay?
@@ -50,7 +53,7 @@ final class AikoShell {
         icon.onClick = { [weak self] in self?.onIconClicked() }
         icon.onMenu = { [weak self] in self?.onMenuRequested() }
 
-        island.onCard = { [weak self] pinned in self?.cards.open(pinned: pinned) }
+        island.onCard = { [weak self] _ in self?.openWindow() }
     }
 
     /// A self test draws one thing to be looked at and must leave the machine as it found it.
@@ -153,6 +156,11 @@ final class AikoShell {
             return
         }
 
+
+        if what == "terminal" {
+            TerminalCheck.run(terminal)
+            return
+        }
 
         if what == "menu" {
             pickSettingsInTheMenu()
@@ -307,11 +315,19 @@ final class AikoShell {
 
     // ---- The icon is clicked ----
 
-    /// A left click opens the card. Swapping the ring instead left the click with no visible
-    /// answer beyond two colours trading places, which reads as a glitch.
+    /// A click on the icon or the island opens the terminal window, as on Windows (D-399, D-425);
+    /// before the first environment, the first run.
     private func onIconClicked() {
         cards.cancelHover()
-        cards.open(pinned: true)
+        openWindow()
+    }
+
+    private func openWindow() {
+        if Store.environments().environments.isEmpty {
+            _ = openSettings(at: nil)
+        } else {
+            terminal.show()
+        }
     }
 
     private func onMenuRequested() {
