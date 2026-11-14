@@ -1,5 +1,16 @@
 import Foundation
 
+/// Why the chosen session has no terminal (D-421): each one says so and offers its way out.
+/// The twin of StartProblem in TerminalWindowModel.cs.
+public enum StartProblem: String, Sendable, Equatable {
+    /// Claude Code is not on this computer: start again once it is installed.
+    case noClaude
+    /// The folder of the session is gone from the disk: the session can only leave the list.
+    case folderGone
+    /// The system refused to start the program, with an error code in the log: start again.
+    case failed
+}
+
 /// What the part of the window to the right of the list shows.
 public enum MainView: Sendable, Equatable {
     /// The environment has no session in the list: one sentence and a button.
