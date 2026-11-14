@@ -27,7 +27,7 @@ stamp, not a table (D-255).
 | `launch-plan/` | the arguments and the environment of the Claude Code a conversation starts (`ClaudeLaunchPlan`) |
 | `limit-badge/` | which limit the title bar of the terminal names (`LimitBadge`) |
 | `header-strip/` | the order and the numbers of the open header of the terminal window (`HeaderStrip`) |
-| `shell-ask/` | what a command line asks Claude Code and how it reads the answer, and the link under a Ctrl+click (`ShellAsk`, `ShellLink`); Windows only until the terminal comes to the Mac |
+| `shell-ask/` | what a command line asks Claude Code and how it reads the answer, and the link under a Ctrl+click (`ShellAsk`, `ShellLink`) |
 | `shell-screen/` | how the output of a command line is laid out and cut into one block per command by the marks of shell integration, from real recordings of three shells (`ShellScreen`, `ShellBlocks`, `VtParser`); Windows only until the terminal comes to the Mac |
 | `notices/` | which change of a session plays the sound, and the counts and the one sign of the tray and the taskbar button (`Notices`, `SessionCounts`) |
 | `taskbar-button/` | what the middle and the corner of the taskbar button of the terminal window show, and which app id the window takes so that Windows draws it (`ButtonLook`, `TaskbarIdentity`); Windows only, the Mac has no taskbar button |
@@ -44,7 +44,7 @@ stamp, not a table (D-255).
 | `terminal-events/` | what a hook of the terminal says a session is doing (`TerminalEvent`) |
 | `terminal-copy/` | text copied out of a terminal: rows wrapped by the width joined again, the shared indent gone (`TerminalCopy`) |
 | `editor/` | what a key does in the editor under the terminal, what a send writes, the history of a command line and Tab for a path (`EditorKeys`) |
-| `release-notes/` | the titles of the notes of a newer release, read from GitHub (`ReleaseNotes`); Windows only until the terminal comes to the Mac |
+| `release-notes/` | the titles of the notes of a newer release, read from GitHub (`ReleaseNotes`) |
 | `terminal-keys/` | what Ctrl and a key do in the terminal window, with Shift or without, and when the key is left to the program (`TerminalKeys`); Ctrl on Windows, Cmd on the Mac |
 | `terminal-sessions/` | the list of sessions as the file `terminal.json`: adding, closing, moving, and what a broken file reads as (`TerminalSessions`) |
 | `session-name/` | the name of a session with an empty name field, and how a name and a folder are kept (`SessionName`) |
