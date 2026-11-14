@@ -185,7 +185,8 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
                 LaunchRequest(
                     configDirectory: config, userProfile: Store.home, environmentName: session.environment,
                     sessionId: session.id, started: session.started,
-                    picturesFolder: Store.folders.picturesFolder(session.id)),
+                    picturesFolder: Store.folders.picturesFolder(session.id),
+                    onDisk: Self.conversationOnDisk(config, session.id)),
                 inheritedVariables: ProcessEnvironment.inheritedNames)
             arguments = plan.arguments
         }
@@ -242,6 +243,20 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
     private func save() {
         if !changingNothing {
             Store.saveTerminal(sessions)
+        }
+    }
+
+    /// Whether Claude Code saved the conversation: it writes the file only after the first message,
+    /// and a session closed before one has nothing to resume. Unsure means yes, as on Windows.
+    private static func conversationOnDisk(_ config: String, _ id: String) -> Bool {
+        let projects = TranscriptPath.projectsFolder(.macOS, config)
+        guard let folders = try? FileManager.default.contentsOfDirectory(atPath: projects) else {
+            // No folder yet: nothing saved. A folder that cannot be read: unsure.
+            return FileManager.default.fileExists(atPath: projects)
+        }
+        return folders.contains {
+            FileManager.default.fileExists(atPath: (projects as NSString)
+                .appendingPathComponent($0).appending("/" + TranscriptPath.fileName(id)))
         }
     }
 
