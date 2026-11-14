@@ -6,7 +6,7 @@ import AppKit
 /// them show the same numbers and the user swaps between the two places at will, so one class
 /// decides who is told what and when.
 ///
-/// The parts do the work: MenuBarIcon and MenuBarMenu, IslandHost, CardHost, ShellNumbers for what
+/// The parts do the work: MenuBarIcon and MenuBarMenu, IslandHost, TerminalHost, ShellNumbers for what
 /// the numbers are, StartupChores for what is put right at every start. This class only connects
 /// them. The twin of AikoShell.cs on Windows.
 @MainActor
@@ -18,7 +18,6 @@ final class AikoShell {
     private let icon = MenuBarIcon()
     private let menu = MenuBarMenu()
     private let island = IslandHost()
-    private let cards: CardHost
 
     private var watch: SnapshotWatch?
     private var updates: UpdateWatch?
@@ -28,7 +27,17 @@ final class AikoShell {
     private var settings: SettingsWindow?
 
     /// The terminal window with the sessions (D-425), made on the first click and kept while Aiko runs.
-    private lazy var terminal = TerminalHost()
+    private lazy var terminal: TerminalHost = {
+        let host = TerminalHost()
+        host.onShownChanged = { [weak self] shown in
+            self?.windowOpen = shown
+            self?.applyPlace()
+        }
+        return host
+    }()
+
+    /// While the window is open it has the Dock icon, and the menu bar icon steps aside (D-410).
+    private var windowOpen = false
 
     /// The face for two seconds after a session event (D-211), and the way to it and back.
     private let faces = FacePlay()
@@ -40,20 +49,16 @@ final class AikoShell {
     private var changingNothing = false
 
     init() {
-        cards = CardHost(numbers: numbers, icon: icon, island: island)
-        cards.onSettings = { [weak self] in self?.openSettings(at: nil) }
 
         icon.faces = faces
         icon.rows = { [weak self] in self?.numbers.iconRows() ?? (nil, nil) }
         icon.tooltip = { [weak self] in
             TrayText.tooltip(self?.numbers.cards() ?? [], newerVersion: self?.updates?.newerVersion)
         }
-        icon.onMouseEntered = { [weak self] in self?.cards.startHover() }
-        icon.onMouseExited = { [weak self] in self?.cards.cancelHover() }
         icon.onClick = { [weak self] in self?.onIconClicked() }
         icon.onMenu = { [weak self] in self?.onMenuRequested() }
 
-        island.onCard = { [weak self] _ in self?.openWindow() }
+        island.onClick = { [weak self] in self?.openWindow() }
     }
 
     /// A self test draws one thing to be looked at and must leave the machine as it found it.
@@ -119,7 +124,6 @@ final class AikoShell {
     }
 
     func stop() {
-        cards.stop()
         watch?.stop()
         updates?.stop()
         mood?.stop()
@@ -139,14 +143,18 @@ final class AikoShell {
             island.show(numbers.cards(), at: settings.island, newerVersion: updates?.newerVersion)
         } else {
             island.close()
-            icon.add()
+            if windowOpen {
+                icon.remove()
+            } else {
+                icon.add()
+            }
         }
     }
 
     // ---- Doors for the self tests: they drive the shell through these and nothing else ----
 
-    /// Proof that the app starts, reads the snapshots and lays the card out, for a machine nobody
-    /// is looking at. The shim has the same door under AIKO_SHIM_SELF_TEST.
+    /// Proof that the app starts, reads the snapshots and draws the icon, for a machine nobody is
+    /// looking at. The shim has the same door under AIKO_SHIM_SELF_TEST.
     func selfTest(_ what: String, value: String? = nil) {
         selfTesting = true
         island.changingNothing = true
@@ -158,7 +166,7 @@ final class AikoShell {
 
 
         if what == "terminal" {
-            TerminalCheck.run(terminal)
+            TerminalCheck.run(terminal) { [weak self] in self?.icon.isShown ?? false }
             return
         }
 
@@ -167,36 +175,17 @@ final class AikoShell {
             return
         }
 
-        if what != "1", what != "card" {
+        if what != "1" {
             IslandCheck.run(what, shell: self)
             return
         }
-
-        cards.open(pinned: true)
 
         let rows = numbers.iconRows()
         Log.write("self test: icon \(describe(icon.frame))")
         Log.write("self test: tooltip \"\(icon.tooltipForCheck)\"")
         Log.write("self test: ring \(describe(rows.ring)), dot \(describe(rows.dot))")
 
-        if let card = cards.window {
-            Log.write("self test: card \(describe(card.frame))")
-        }
-
-        let model = numbers.card()
-        Log.write("self test: header \"\(model.updated)\"")
-        for block in model.blocks {
-            // The plan itself is an account fact and stays out of the log, as on Windows.
-            Log.write("self test: block \"\(block.name)\" plan shown: \(block.showsPlan) "
-                + "state \"\(block.state)\" note \"\(block.showsNote ? block.note : "")\"")
-            for row in block.rows {
-                Log.write("self test: row \"\(row.name)\" \"\(row.percent)\" "
-                    + "\"\(row.resets)\" \"\(row.pace)\" fill \(row.fill)")
-            }
-        }
-
-        // Long enough for the card to draw and for a new snapshot to arrive, then away: nothing
-        // here is meant to stay on screen.
+        // Long enough for a new snapshot to arrive, then away: nothing here stays on screen.
         DispatchQueue.main.asyncAfter(deadline: .now() + 3) { NSApp.terminate(nil) }
     }
 
@@ -234,15 +223,6 @@ final class AikoShell {
     }
 
     /// The card as the island would open it, and where it ended up. Only the self test calls these.
-    func openCardForCheck(pinned: Bool) {
-        cards.open(pinned: pinned)
-    }
-
-    func closeCardForCheck() {
-        cards.closeForCheck()
-    }
-
-    var cardFrameForCheck: NSRect? { cards.window?.frame }
 
     /// The picture the menu bar holds right now, so a self test can see it change.
     var iconPictureForCheck: Data? { icon.pictureForCheck }
@@ -269,7 +249,6 @@ final class AikoShell {
 
         icon.update()
         island.update(numbers.cards())
-        cards.refresh()
 
         if selfTesting {
             Log.write("self test: new numbers, tooltip \"\(icon.tooltipForCheck)\"")
@@ -318,7 +297,6 @@ final class AikoShell {
     /// A click on the icon or the island opens the terminal window, as on Windows (D-399, D-425);
     /// before the first environment, the first run.
     private func onIconClicked() {
-        cards.cancelHover()
         openWindow()
     }
 
@@ -331,7 +309,6 @@ final class AikoShell {
     }
 
     private func onMenuRequested() {
-        cards.cancelHover()
 
         let items = menu.build(otherEnvironment: ShellNumbers.otherEnvironment()) { [weak self] command in
             self?.run(command)
@@ -347,12 +324,10 @@ final class AikoShell {
                 icon.update()
             }
 
+        case .open:
+            openWindow()
         case .settings:
             openSettings(at: nil)
-        case .refresh:
-            onRefresh()
-        case .updates:
-            openSettings(at: .general).startUpdateCheck()
         case .exit:
             NSApp.terminate(nil)
         }
@@ -366,7 +341,6 @@ final class AikoShell {
         applyPlace()
         icon.update()
         island.update(numbers.cards())
-        cards.refresh()
     }
 
     private func followMoods() {

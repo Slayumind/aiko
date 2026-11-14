@@ -21,9 +21,6 @@ final class MenuBarIcon: NSResponder {
     /// A right click: the menu is asked for.
     var onMenu: (() -> Void)?
 
-    var onMouseEntered: (() -> Void)?
-    var onMouseExited: (() -> Void)?
-
     private var statusItem: NSStatusItem?
 
     /// The rows the icon last drew. Frames of a face transition reuse them instead of reading the
@@ -42,11 +39,6 @@ final class MenuBarIcon: NSResponder {
             button.target = self
             button.action = #selector(clicked)
             button.sendAction(on: [.leftMouseUp, .rightMouseUp])
-            button.addTrackingArea(NSTrackingArea(
-                rect: .zero,
-                options: [.mouseEnteredAndExited, .activeAlways, .inVisibleRect],
-                owner: self,
-                userInfo: nil))
         }
 
         update()
@@ -89,11 +81,6 @@ final class MenuBarIcon: NSResponder {
         return frame
     }
 
-    var pointerIsOver: Bool {
-        guard let frame else { return false }
-        return frame.contains(NSEvent.mouseLocation)
-    }
-
     /// The menu under the icon. The call returns when the menu closes.
     func show(_ menu: NSMenu) {
         statusItem?.menu = menu
@@ -104,14 +91,6 @@ final class MenuBarIcon: NSResponder {
     /// What a self test reads back.
     var tooltipForCheck: String { statusItem?.button?.toolTip ?? "" }
     var pictureForCheck: Data? { statusItem?.button?.image?.tiffRepresentation }
-
-    override func mouseEntered(with event: NSEvent) {
-        onMouseEntered?()
-    }
-
-    override func mouseExited(with event: NSEvent) {
-        onMouseExited?()
-    }
 
     @objc private func clicked() {
         if NSApp.currentEvent?.type == .rightMouseUp {

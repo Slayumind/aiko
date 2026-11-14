@@ -6,9 +6,8 @@ import AppKit
 /// a value, and here a closed menu simply calls nobody.
 enum TrayCommand {
     case swapRing
+    case open
     case settings
-    case refresh
-    case updates
     case exit
 }
 
@@ -26,16 +25,14 @@ final class MenuBarMenu: NSObject {
         let menu = NSMenu()
         menu.autoenablesItems = false
 
-        // The click on the icon opens the card, so swapping the ring needs a home. Here it says
-        // which environment it would show, which the click never did.
+        // Here the swap of the ring says which environment it would show (D-399).
         if let other = otherEnvironment {
             add(menu, Strings.format(Strings.menuShowInRing, other), #selector(onSwapRing))
             menu.addItem(.separator())
         }
 
+        add(menu, Strings.menuOpen, #selector(onOpen))
         add(menu, Strings.settings, #selector(onSettings))
-        add(menu, Strings.menuRefresh, #selector(onRefresh))
-        add(menu, Strings.checkForUpdates, #selector(onCheckUpdates))
         menu.addItem(.separator())
         add(menu, Strings.quitAiko, #selector(onQuit))
         return menu
@@ -49,8 +46,7 @@ final class MenuBarMenu: NSObject {
     }
 
     @objc private func onSwapRing() { picked?(.swapRing) }
+    @objc private func onOpen() { picked?(.open) }
     @objc private func onSettings() { picked?(.settings) }
-    @objc private func onRefresh() { picked?(.refresh) }
-    @objc private func onCheckUpdates() { picked?(.updates) }
     @objc private func onQuit() { picked?(.exit) }
 }
