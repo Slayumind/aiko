@@ -141,4 +141,72 @@ struct TerminalRulesTests {
     func theLastDigitsChooseTheForm(_ count: Int64, _ form: CountForm) {
         #expect(CountForm.of(count) == form)
     }
+
+    // ---- shell-ask ----
+
+    @Test
+    func everyShellAskCaseReadsTheSameWay() {
+        let cases = SpecCases.json("shell-ask")
+        for row in cases["requests"]?.arrayValue ?? [] {
+            #expect(ShellAsk.isRequest(row["text"]?.stringValue ?? "") == row["request"]?.boolValue, "\(row["text"]?.stringValue ?? "")")
+        }
+
+        for row in cases["commands"]?.arrayValue ?? [] {
+            #expect(ShellAsk.commandIn(row["answer"]?.stringValue ?? "") == row["command"]?.stringValue)
+        }
+
+        for row in cases["wraps"]?.arrayValue ?? [] {
+            #expect(ShellAsk.wrap(row["text"]?.stringValue ?? "", width: Int(row["width"]?.int64Value ?? 0))
+                == (row["lines"]?.arrayValue ?? []).compactMap(\.stringValue))
+        }
+
+        for row in cases["links"]?.arrayValue ?? [] {
+            #expect(ShellLink.at(row["line"]?.stringValue ?? "", column: Int(row["column"]?.int64Value ?? 0))
+                == row["link"]?.stringValue, "\(row["line"]?.stringValue ?? "")")
+        }
+
+        for row in cases["folderNames"]?.arrayValue ?? [] {
+            #expect(ShellAsk.folderName(row["folder"]?.stringValue ?? "") == row["name"]?.stringValue)
+        }
+    }
+
+    @Test
+    func anExplanationTakesTheEndOfALongOutput() {
+        let output = String(repeating: "a", count: ShellAsk.mostOutput) + "THE ERROR"
+        let question = ShellAsk.explain(shell: "zsh", command: "make", exitCode: 2, output: output, language: "Russian")
+
+        #expect(question.contains("THE ERROR"))
+        #expect(question.contains("Exit code: 2"))
+        #expect(question.contains("zsh on macOS"))
+        #expect(question.contains("In Russian"))
+    }
+
+    @Test
+    func aSuggestionAsksWithoutTheMarkOfARequest() {
+        let question = ShellAsk.suggest(shell: "zsh", folder: "/Users/me/work", request: "# find big files")
+
+        #expect(question.contains("that does this: find big files"))
+        #expect(question.contains("(work)"))
+        #expect(!question.contains("Users"))
+    }
+
+    // ---- release-notes ----
+
+    @Test
+    func everyNotesCaseGivesTheSameTitlesInBothLanguages() {
+        let cases = SpecCases.json("release-notes")
+        #expect(ReleaseNotes.mostTitles == Int(cases["most"]?.int64Value ?? 0))
+
+        func strings(_ node: JsonNode?) -> [String] { (node?.arrayValue ?? []).compactMap(\.stringValue) }
+        for row in cases["titles"]?.arrayValue ?? [] {
+            let notes = row["notes"]?.stringValue ?? ""
+            #expect(ReleaseNotes.titles(notes, russian: false) == strings(row["english"]))
+            #expect(ReleaseNotes.titles(notes, russian: true) == strings(row["russian"]))
+        }
+
+        for row in cases["json"]?.arrayValue ?? [] {
+            #expect(ReleaseNotes.fromGitHubJson(row["answer"]?.stringValue ?? "", russian: row["russian"]?.boolValue ?? false)
+                == strings(row["titles"]))
+        }
+    }
 }

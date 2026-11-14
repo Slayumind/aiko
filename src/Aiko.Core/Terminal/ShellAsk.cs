@@ -32,7 +32,7 @@ public static class ShellAsk
     {
         var tail = output.Length > MostOutput ? output[^MostOutput..] : output;
         return $"""
-            A command failed in {Name(shell)} on Windows.
+            A command failed in {Place(shell)}.
             Command: {command}
             Exit code: {exitCode}
             Its output (the end of it):
@@ -47,7 +47,7 @@ public static class ShellAsk
     /// (D-420): the path names the person and their other folders.
     public static string Suggest(string shell, string folder, string request) =>
         $"""
-        Write one command for {Name(shell)} on Windows, in the current folder ({FolderName(folder)}), that does this: {RequestText(request)}
+        Write one command for {Place(shell)}, in the current folder ({FolderName(folder)}), that does this: {RequestText(request)}
         Answer with the command only: one line, no explanation, no Markdown, no code block.
         """;
 
@@ -122,10 +122,12 @@ public static class ShellAsk
         return lines;
     }
 
-    private static string Name(string shell) => shell switch
+    /// The shell and the system it runs on, as the question names them. The Mac twin asks for zsh.
+    private static string Place(string shell) => shell switch
     {
-        "bash" => "Git Bash",
-        "pwsh" => "PowerShell 7",
-        _ => "Windows PowerShell",
+        "bash" => "Git Bash on Windows",
+        "pwsh" => "PowerShell 7 on Windows",
+        "zsh" => "zsh on macOS",
+        _ => "Windows PowerShell on Windows",
     };
 }
