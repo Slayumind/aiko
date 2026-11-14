@@ -27,12 +27,15 @@ enum SpecCases {
     }
 
     /// The tests run from .build/, so the repository is the first folder above with the solution in it.
+    /// Without it every case file reads as empty and a test of cases passes with no row at all, so a
+    /// copy without the solution stops here, as SpecCases.Repository does on Windows.
     static func repository() -> URL {
         var folder = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
         while folder.path != "/"
             && !FileManager.default.fileExists(atPath: folder.appendingPathComponent("Aiko.slnx").path) {
             folder = folder.deletingLastPathComponent()
         }
+        precondition(folder.path != "/", "Aiko.slnx not found above \(#filePath): the case files cannot be read")
         return folder
     }
 }

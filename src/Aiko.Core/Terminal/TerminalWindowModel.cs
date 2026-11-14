@@ -1,6 +1,5 @@
 namespace Aiko.Core.Terminal;
 
-/// What the part of the window to the right of the list shows.
 /// Why the chosen session has no terminal (D-421): each one says so and offers its way out.
 public enum StartProblem
 {
@@ -14,6 +13,7 @@ public enum StartProblem
     Failed,
 }
 
+/// What the part of the window to the right of the list shows.
 public enum MainView
 {
     /// The environment has no session in the list: one sentence and a button.

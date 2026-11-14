@@ -192,12 +192,13 @@ enum UpdateRun {
 
     /// The day is UTC on both sides: the computer's own day would let one copy send two different
     /// identifiers inside one server day.
+    /// The query itself is CountQuery of the core, the same rule and rows as on Windows.
     private static func build() -> (address: String, week: String?, month: String?) {
-        let version = escape(AppVersion.current())
-        let settings = Store.settings()
-        let plain = "\(endpoint)?v=\(version)"
+        let version = AppVersion.current()
+        let plain = endpoint + CountQuery.query(
+            version: version, system: "", day: nil, persona: false, firstOfWeek: false, firstOfMonth: false)
 
-        guard settings.sendStats else { return (plain, nil, nil) }
+        guard Store.settings().sendStats else { return (plain, nil, nil) }
 
         let today = DateOnly.fromDaysSinceEpoch(
             Int((Date().timeIntervalSince1970 / 86400).rounded(.down)))
@@ -207,19 +208,16 @@ enum UpdateRun {
         let reported = ReportedPeriods.read()
         let week = Heartbeat.firstThisWeek(reported.week, today) ? Heartbeat.weekKey(today) : nil
         let month = Heartbeat.firstThisMonth(reported.month, today) ? Heartbeat.monthKey(today) : nil
-        let persona = Store.environments().environments.contains(where: \.persona) ? 1 : 0
 
-        let address = plain
-            + "&os=\(escape(AppVersion.system()))"
-            + "&day=\(id)&p=\(persona)"
-            + (week == nil ? "" : "&w=1")
-            + (month == nil ? "" : "&m=1")
+        let address = endpoint + CountQuery.query(
+            version: version,
+            system: AppVersion.system(),
+            day: id,
+            persona: Store.environments().environments.contains(where: \.persona),
+            firstOfWeek: week != nil,
+            firstOfMonth: month != nil)
 
         return (address, week, month)
-    }
-
-    private static func escape(_ text: String) -> String {
-        text.addingPercentEncoding(withAllowedCharacters: .alphanumerics) ?? text
     }
 }
 
