@@ -77,7 +77,7 @@ sealed class TaskbarButton
     }
 
     /// Every picture given to the window, for --try-shell.
-    internal Action<byte[]>? GivenForCheck { get; set; }
+    internal Action<byte[], IntPtr, IntPtr>? GivenForCheck { get; set; }
 
     /// New numbers or another environment in the tray menu.
     public void Update() => Draw(sameRows: false);
@@ -179,9 +179,9 @@ sealed class TaskbarButton
         }
 
         _picture = picture;
-        GivenForCheck?.Invoke(picture);
         var small = RingIcon.RenderPng(Pixels(SmallSize), _lastRows.Ring, _lastRows.Dot, _faces.Frame, _faces.Face);
         var icons = (Big: RingIcon.FromPng(picture, Pixels(Size)), Small: RingIcon.FromPng(small, Pixels(SmallSize)));
+        GivenForCheck?.Invoke(picture, (IntPtr)icons.Big, (IntPtr)icons.Small);
         SendMessage(handle, SetIcon, BigIcon, icons.Big);
         SendMessage(handle, SetIcon, SmallIcon, icons.Small);
         _given.Enqueue((icons.Big, icons.Small, Environment.TickCount64));
