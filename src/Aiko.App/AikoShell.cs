@@ -190,8 +190,9 @@ sealed class AikoShell : IDisposable
 
     public void ClosePaletteForCheck() => _terminal?.ClosePaletteForCheck();
 
-    /// Every picture the taskbar button of the window gives Windows from now on; null stops.
-    public void WatchButtonForCheck(Action<byte[]>? seen)
+    /// Every picture the taskbar button of the window gives Windows from now on, with the two icons
+    /// made of it; null stops.
+    public void WatchButtonForCheck(Action<byte[], IntPtr, IntPtr>? seen)
     {
         if (_terminal is not null)
         {

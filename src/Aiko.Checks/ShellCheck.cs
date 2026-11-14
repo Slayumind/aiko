@@ -149,8 +149,18 @@ static class ShellCheck
 
         var handle = new System.Windows.Interop.WindowInteropHelper(window).Handle;
         var seen = new HashSet<IntPtr>();
-        var pictures = new List<byte[]>();
-        shell.WatchButtonForCheck(pictures.Add);
+        // Each picture is looked at twice: as the PNG that was drawn, and as the two icons Windows
+        // got from it, read back at once while they are surely alive.
+        var pictures = 0;
+        var blank = 0;
+        shell.WatchButtonForCheck((png, big, small) =>
+        {
+            pictures++;
+            if (!HasInk(png) || !IconHasInk(big) || !IconHasInk(small))
+            {
+                blank++;
+            }
+        });
         shell.ShowFaceForCheck(AikoFace.Done);
         for (var i = 0; i < 25; i++)
         {
@@ -167,9 +177,8 @@ static class ShellCheck
 
         shell.WatchButtonForCheck(null);
         seen.Remove(IntPtr.Zero);
-        var blank = pictures.Count(picture => !HasInk(picture));
-        Log.Write($"--try-shell: the button gave {pictures.Count} pictures, {blank} of them with no pixel");
-        return (seen.Count, pictures.Count > 0 && blank == 0 && seen.All(Alive));
+        Log.Write($"--try-shell: the button gave {pictures} pictures, {blank} of them with no pixel in the picture or its icons");
+        return (seen.Count, pictures > 0 && blank == 0 && seen.All(Alive));
     }
 
     /// GetIconInfo answers for a live icon only, and makes copies of its two pictures to free.
@@ -185,10 +194,19 @@ static class ShellCheck
         return true;
     }
 
+    /// The icon as Windows holds it, read back into pixels.
+    private static bool IconHasInk(IntPtr icon) =>
+        Ink(System.Windows.Interop.Imaging.CreateBitmapSourceFromHIcon(icon, System.Windows.Int32Rect.Empty, System.Windows.Media.Imaging.BitmapSizeOptions.FromEmptyOptions()));
+
     private static bool HasInk(byte[] png)
     {
         using var stream = new System.IO.MemoryStream(png);
-        var frame = System.Windows.Media.Imaging.BitmapFrame.Create(stream, System.Windows.Media.Imaging.BitmapCreateOptions.None, System.Windows.Media.Imaging.BitmapCacheOption.OnLoad);
+        return Ink(System.Windows.Media.Imaging.BitmapFrame.Create(stream, System.Windows.Media.Imaging.BitmapCreateOptions.None, System.Windows.Media.Imaging.BitmapCacheOption.OnLoad));
+    }
+
+    /// Whether any pixel is not see-through.
+    private static bool Ink(System.Windows.Media.Imaging.BitmapSource frame)
+    {
         var bgra = new System.Windows.Media.Imaging.FormatConvertedBitmap(frame, System.Windows.Media.PixelFormats.Bgra32, null, 0);
         var pixels = new byte[bgra.PixelWidth * bgra.PixelHeight * 4];
         bgra.CopyPixels(pixels, bgra.PixelWidth * 4, 0);
