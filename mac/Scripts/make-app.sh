@@ -7,7 +7,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-products=".build/apple/Products/Release"
+products=".build/universal"
 app="build/Aiko.app"
 
 # The version has one home, the Windows project file, and macOS reads the same number. A checkout
@@ -24,7 +24,14 @@ version="${version:-0.0.0}"
 # commit in. tools/local-install-mac.ps1 does that.
 commit="${AIKO_COMMIT:-$(git rev-parse --short HEAD 2>/dev/null || true)}"
 
-swift build -c release --arch arm64 --arch x86_64
+# One build per kind of Mac, glued into one binary with lipo. A single build for both goes through
+# the Xcode build system, which cannot find the build plugin of SwiftTerm (2026-11-14).
+swift build -c release --arch arm64
+swift build -c release --arch x86_64
+mkdir -p "$products"
+for name in AikoMac aiko-bridge aiko-shim; do
+  lipo -create ".build/arm64-apple-macosx/release/$name" ".build/x86_64-apple-macosx/release/$name" -output "$products/$name"
+done
 
 rm -rf build
 mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources"

@@ -13,12 +13,17 @@ let package = Package(
         // The app itself. Scripts/make-app.sh wraps it in Aiko.app with the other two inside.
         .executable(name: "AikoMac", targets: ["AikoMac"]),
     ],
+    // SwiftTerm draws the real terminal of a session (D-360). Pinned to one version: a newer one
+    // comes in as a change of its own.
+    dependencies: [
+        .package(url: "https://github.com/migueldeicaza/SwiftTerm", exact: "1.20.0"),
+    ],
     targets: [
         // The core: the same rules as Aiko.Core on Windows, with no AppKit and no SwiftUI.
         .target(name: "AikoKit"),
         .executableTarget(name: "aiko-bridge", dependencies: ["AikoKit"]),
         .executableTarget(name: "aiko-shim", dependencies: ["AikoKit"]),
-        .executableTarget(name: "AikoMac", dependencies: ["AikoKit"]),
+        .executableTarget(name: "AikoMac", dependencies: ["AikoKit", .product(name: "SwiftTerm", package: "SwiftTerm")]),
         .testTarget(name: "AikoKitTests", dependencies: ["AikoKit"]),
     ]
 )
