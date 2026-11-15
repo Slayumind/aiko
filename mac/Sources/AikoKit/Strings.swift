@@ -71,7 +71,6 @@ public enum Strings {
         "QuitAiko": ("Quit Aiko", "Выйти из Aiko"),
         "CheckForUpdates": ("Check for updates", "Проверить обновления"),
         "CheckUpdatesToggle": ("Check for updates", "Проверять обновления"),
-        "SectionWhereToShow": ("WHERE TO SHOW", "ГДЕ ПОКАЗЫВАТЬ"),
         "SectionWhenClosed": ("WHEN THE WINDOW IS CLOSED", "КОГДА ОКНО ЗАКРЫТО"),
         "SectionStartupAndUpdates": ("STARTUP AND UPDATES", "ЗАПУСК И ОБНОВЛЕНИЯ"),
         "SectionLanguage": ("LANGUAGE", "ЯЗЫК"),
@@ -659,9 +658,6 @@ public enum Strings {
 
     /// Check for updates
     public static var checkUpdatesToggle: String { Strings.get("CheckUpdatesToggle") }
-
-    /// WHERE TO SHOW
-    public static var sectionWhereToShow: String { Strings.get("SectionWhereToShow") }
 
     /// WHEN THE WINDOW IS CLOSED
     public static var sectionWhenClosed: String { Strings.get("SectionWhenClosed") }

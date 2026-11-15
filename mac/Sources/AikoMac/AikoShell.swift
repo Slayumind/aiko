@@ -118,7 +118,23 @@ final class AikoShell {
             var shown = app
             shown.memoryShown = true
             Store.saveSettings(shown)
+        } else if !changingNothing, !showTerminalOnce(), app.openTerminalAtStartup, LoginItem.isEnabled() {
+            // macOS cannot tell a start at login from a start by hand, so while Aiko starts at
+            // login the switch opens the window at every start; Windows only at the start with it.
+            terminal.show()
         }
+    }
+
+    /// The terminal window opens by itself once, when Aiko is set up (D-350). Says whether it
+    /// opened now.
+    private func showTerminalOnce() -> Bool {
+        var app = Store.settings()
+        guard !app.terminalShown, Store.environments().hasEnvironments else { return false }
+
+        app.terminalShown = true
+        Store.saveSettings(app)
+        terminal.show()
+        return true
     }
 
     func stop() {

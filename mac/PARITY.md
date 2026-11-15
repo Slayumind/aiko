@@ -283,6 +283,11 @@ Where it differs from Windows:
 
 These are the places where there was nothing to copy, with the reason for the choice.
 
+- **"Open the terminal window too" opens it at every start while Aiko starts at login.** Windows
+  knows a start with Windows by its argument and opens the window only then (D-350). A login item
+  of macOS starts the app the same way a person does, so on the Mac the switch shows only while
+  Aiko starts at login and then works at each start.
+
 - **The launch commands reach PATH through `~/.zshrc`.** Windows writes the user PATH in the
   registry and tells Explorer about it, and every new process sees it. macOS has no such place:
   `path_helper` reads `/etc/paths` and `/etc/paths.d`, which are the system's, so a folder under the

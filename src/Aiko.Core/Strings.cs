@@ -64,7 +64,6 @@ public static class Strings
             ["QuitAiko"] = ("Quit Aiko", "Выйти из Aiko"),
             ["CheckForUpdates"] = ("Check for updates", "Проверить обновления"),
             ["CheckUpdatesToggle"] = ("Check for updates", "Проверять обновления"),
-            ["SectionWhereToShow"] = ("WHERE TO SHOW", "ГДЕ ПОКАЗЫВАТЬ"),
             ["SectionWhenClosed"] = ("WHEN THE WINDOW IS CLOSED", "КОГДА ОКНО ЗАКРЫТО"),
             ["SectionStartupAndUpdates"] = ("STARTUP AND UPDATES", "ЗАПУСК И ОБНОВЛЕНИЯ"),
             ["SectionLanguage"] = ("LANGUAGE", "ЯЗЫК"),
@@ -655,9 +654,6 @@ public static class Strings
 
     /// Check for updates
     public static string CheckUpdatesToggle => Get("CheckUpdatesToggle");
-
-    /// WHERE TO SHOW
-    public static string SectionWhereToShow => Get("SectionWhereToShow");
 
     /// WHEN THE WINDOW IS CLOSED
     public static string SectionWhenClosed => Get("SectionWhenClosed");

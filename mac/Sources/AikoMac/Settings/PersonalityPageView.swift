@@ -75,8 +75,7 @@ struct PersonalityPageView: View {
                     (Temperament.quiet, Strings.temperamentQuiet),
                     (Temperament.normal, Strings.temperamentNormal),
                     (Temperament.bright, Strings.temperamentBright),
-                    // The same word in every language.
-                    (Temperament.musou, "無双"),
+                    (Temperament.musou, Strings.temperamentMusou),
                 ],
                 picked: state.persona.temperament,
                 pick: pickTemperament)
