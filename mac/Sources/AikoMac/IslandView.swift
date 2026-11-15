@@ -18,6 +18,11 @@ final class IslandView: NSView {
     /// 0 folded, 1 with the percentages fully out.
     var unfold = 0.0
 
+    /// How many sessions wait, ended a turn, stopped and work (D-364): marks after the rings.
+    var sessions = SessionCounts.none {
+        didSet { needsDisplay = true }
+    }
+
     /// What the face is doing right now, if anything.
     var iconFrame = IconFrame.rings
     var faceFit = 0.0
@@ -64,7 +69,34 @@ final class IslandView: NSView {
             edge: edge,
             docked: docked,
             unfold: unfold,
-            faceFit: faceFit)
+            faceFit: faceFit,
+            sessions: marks().map { Self.number($0.count).size })
+    }
+
+    /// The marks in the order of Windows: waits, done, stopped, work; a mark only for a count above 0.
+    private func marks() -> [(kind: MarkKind, count: Int)] {
+        let all: [(kind: MarkKind, count: Int)] = [
+            (.waiting, sessions.waiting), (.done, sessions.done), (.stopped, sessions.stopped), (.working, sessions.working),
+        ]
+        return all.filter { $0.count > 0 }
+    }
+
+    private enum MarkKind {
+        case waiting, done, stopped, working
+    }
+
+    private static func number(_ count: Int) -> Words {
+        Words("\(count)")
+    }
+
+    /// Whether a point of the window is on the mark of "waits", with 4 points to spare around it as
+    /// on Windows: a click there opens the session that waits.
+    func onWaitingMark(_ point: NSPoint) -> Bool {
+        guard sessions.waiting > 0, let mark = islandFrame().marks.first else { return false }
+        let local = convert(point, from: nil)
+        let box = mark.sign
+        let wide = Box(box.x - 4, box.y - 4, mark.number.right - box.x + 8, box.height + 8)
+        return local.x >= wide.x && local.x <= wide.right && local.y >= wide.y && local.y <= wide.bottom
     }
 
     // ---- Drawing ----
@@ -102,7 +134,51 @@ final class IslandView: NSView {
         edging.stroke()
 
         drawRings(frame)
+        drawMarks(frame)
         drawFace(frame)
+    }
+
+    /// "Waits" with an orange pause, "done" with a green tick, "stopped" with a red cross and "work"
+    /// with a grey dot, as in the list of sessions; each with its number.
+    private func drawMarks(_ frame: IslandFrame) {
+        let alpha = CGFloat(frame.marksOpacity)
+        guard alpha > 0 else { return }
+        for (spot, mark) in zip(frame.marks, marks()) {
+            let sign = NSRect(x: spot.sign.x, y: spot.sign.y, width: spot.sign.width, height: spot.sign.height)
+            switch mark.kind {
+            case .waiting:
+                stroke(BarMarks.pause, size: NSSize(width: 5, height: 10), in: sign, colour: Theme.nsCaution, alpha: alpha)
+            case .done:
+                stroke(BarMarks.check, size: NSSize(width: 24, height: 24), in: sign.insetBy(dx: 1, dy: 1),
+                       colour: Theme.nsColour(RingArt.colour(for: .normal)), alpha: alpha, fill: true)
+            case .stopped:
+                stroke("M0,0 L8,8 M8,0 L0,8", size: NSSize(width: 8, height: 8), in: sign, colour: Theme.nsDestructive, alpha: alpha)
+            case .working:
+                Theme.nsMuted.withAlphaComponent(alpha).setFill()
+                NSBezierPath(ovalIn: NSRect(x: sign.midX - 4, y: sign.midY - 4, width: 8, height: 8)).fill()
+            }
+            Self.number(mark.count).draw(at: NSPoint(x: spot.number.x, y: spot.number.y), opacity: alpha)
+        }
+    }
+
+    /// A mark of the slayumind set, its box of size units centred in the field.
+    private func stroke(_ data: String, size: NSSize, in field: NSRect, colour: NSColor, alpha: CGFloat, fill: Bool = false) {
+        guard let context = NSGraphicsContext.current?.cgContext else { return }
+        let scale = min(field.width / size.width, field.height / size.height, 1)
+        context.saveGState()
+        context.translateBy(x: field.midX - size.width * scale / 2, y: field.midY - size.height * scale / 2)
+        context.scaleBy(x: scale, y: scale)
+        context.addPath(BarMarks.path(data).cgPath)
+        if fill {
+            context.setFillColor(colour.withAlphaComponent(alpha).cgColor)
+            context.fillPath()
+        } else {
+            context.setStrokeColor(colour.withAlphaComponent(alpha).cgColor)
+            context.setLineWidth(BarMarks.lineWidth / scale)
+            context.setLineCap(.round)
+            context.strokePath()
+        }
+        context.restoreGState()
     }
 
     private func drawRings(_ frame: IslandFrame) {

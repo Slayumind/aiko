@@ -83,6 +83,17 @@ public struct IslandRingSpot: Sendable, Equatable {
     }
 }
 
+/// One mark of the sessions after the rings (D-364): its sign in a field of 12, and its number.
+public struct IslandMarkSpot: Sendable, Equatable {
+    public let sign: Box
+    public let number: Box
+
+    public init(sign: Box, number: Box) {
+        self.sign = sign
+        self.number = number
+    }
+}
+
 /// Everything the island is, as numbers: how big it is, where its line and its corners are, and
 /// where every ring, every percentage and the face sit inside it.
 public struct IslandFrame: Sendable, Equatable {
@@ -100,6 +111,11 @@ public struct IslandFrame: Sendable, Equatable {
     public let asked: Extent
 
     public let spots: [IslandRingSpot]
+
+    /// The marks of the sessions, in the order they were asked for. They go with the percentages
+    /// while the island closes in on the face; marksOpacity says how much of them is left.
+    public let marks: [IslandMarkSpot]
+    public let marksOpacity: Double
 
     /// The 18 point square the face is drawn in, in the middle of the content.
     public let face: Box
@@ -122,6 +138,16 @@ public enum IslandLayout {
     /// horizontal edge make a 66 by 34 island and one ring on a side edge a 40 by 60 one.
     public static let roomAcross = 11.0
     public static let roomAlong = 8.0
+
+    /// The marks of the sessions: 12 after the rings, a sign in a field of 12 and its number 4 after
+    /// it, 10 between marks along a top or bottom edge and 6 between them in a column along a side.
+    /// The numbers of IslandPanel.DrawSessions on Windows.
+    public static let marksGap = 12.0
+    public static let signSize = 12.0
+    public static let numberGap = 4.0
+    public static let numberLeast = 7.0
+    public static let markGapAlong = 10.0
+    public static let markGapAcross = 6.0
 
     /// The gap between a ring and its percentage: beside it on a horizontal edge, under it on a
     /// side edge.
@@ -190,7 +216,8 @@ public enum IslandLayout {
         edge: ScreenEdge,
         docked: Bool = true,
         unfold: Double = 0,
-        faceFit: Double = 0
+        faceFit: Double = 0,
+        sessions: [Extent] = []
     ) -> IslandFrame {
         let horizontal = IslandPlacement.isHorizontal(edge)
         let share = min(max(unfold, 0), 1)
@@ -206,9 +233,21 @@ public enum IslandLayout {
             : words.map { item($0, horizontal: horizontal, share: share) }
 
         let asked = row(items, horizontal: horizontal)
+
+        // The marks of the sessions after the rings. A face takes them away with the percentages.
+        let markItems = sessions.map {
+            Extent(signSize + numberGap + max(numberLeast, $0.width), max(signSize, $0.height))
+        }
+        let block = marksBlock(markItems, horizontal: horizontal)
+        let keep = 1 - fit
+        let lead = markItems.isEmpty ? 0 : marksGap
+        let whole = horizontal
+            ? Extent(asked.width + ((lead + block.width) * keep), max(asked.height, block.height * keep))
+            : Extent(max(asked.width, block.width * keep), asked.height + ((lead + block.height) * keep))
+
         let box = Extent(
-            asked.width + ((faceContent.width - asked.width) * fit),
-            asked.height + ((faceContent.height - asked.height) * fit))
+            whole.width + ((faceContent.width - whole.width) * fit),
+            whole.height + ((faceContent.height - whole.height) * fit))
 
         let content = Box(line.left + pad.left, line.top + pad.top, box.width, box.height)
         let size = Extent(
@@ -218,9 +257,10 @@ public enum IslandLayout {
         // The rings keep the size they asked for and sit in the middle of the room, so closing in
         // on the face moves nothing sideways.
         var spots: [IslandRingSpot] = []
-        var at = horizontal
-            ? content.centreX - (asked.width / 2)
-            : content.centreY - (asked.height / 2)
+        let start = horizontal
+            ? content.centreX - (whole.width / 2)
+            : content.centreY - (whole.height / 2)
+        var at = start
         let across = horizontal
             ? content.centreY - (asked.height / 2)
             : content.centreX - (asked.width / 2)
@@ -249,6 +289,18 @@ public enum IslandLayout {
             at += (horizontal ? item.width : item.height) + ringGap
         }
 
+        var marks: [IslandMarkSpot] = []
+        var markAt = start + (horizontal ? asked.width : asked.height) + lead
+        for (index, item) in markItems.enumerated() {
+            let number = sessions[index]
+            let left = horizontal ? markAt : content.centreX - (item.width / 2)
+            let middle = horizontal ? content.centreY : markAt + (item.height / 2)
+            marks.append(IslandMarkSpot(
+                sign: Box(left, middle - (signSize / 2), signSize, signSize),
+                number: Box(left + signSize + numberGap, middle - (number.height / 2), max(numberLeast, number.width), number.height)))
+            markAt += (horizontal ? item.width + markGapAlong : item.height + markGapAcross)
+        }
+
         return IslandFrame(
             size: size,
             border: line,
@@ -257,6 +309,8 @@ public enum IslandLayout {
             content: content,
             asked: asked,
             spots: spots,
+            marks: marks,
+            marksOpacity: keep,
             face: Box(
                 content.centreX - (ringSize / 2),
                 content.centreY - (ringSize / 2),
@@ -276,6 +330,16 @@ public enum IslandLayout {
         horizontal
             ? Extent(ringSize + (words.width * share), max(ringSize, words.height * share))
             : Extent(max(ringSize, words.width * share), ringSize + (words.height * share))
+    }
+
+    /// The marks in a row along a top or bottom edge, in a column along a side one.
+    private static func marksBlock(_ items: [Extent], horizontal: Bool) -> Extent {
+        guard !items.isEmpty else { return .zero }
+        let widths = items.map(\.width)
+        let heights = items.map(\.height)
+        return horizontal
+            ? Extent(widths.reduce(0, +) + (markGapAlong * Double(items.count - 1)), heights.max() ?? 0)
+            : Extent(widths.max() ?? 0, heights.reduce(0, +) + (markGapAcross * Double(items.count - 1)))
     }
 
     /// The rings in a row along a top or bottom edge, in a column along a side one.

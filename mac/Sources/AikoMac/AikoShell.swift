@@ -61,6 +61,7 @@ final class AikoShell {
         icon.onMenu = { [weak self] in self?.onMenuRequested() }
 
         island.onClick = { [weak self] in self?.openWindow() }
+        island.onWaitingClick = { [weak self] id in self?.terminal.openSession(id) }
     }
 
     /// A self test draws one thing to be looked at and must leave the machine as it found it.
@@ -175,6 +176,8 @@ final class AikoShell {
 
     private func showSessions(_ counts: SessionCounts) {
         sessions = counts
+        icon.badge = counts.badge
+        island.showSessions(counts)
     }
 
     /// Times the sound of a session that starts to wait was due, for --try-pulse.
@@ -200,6 +203,13 @@ final class AikoShell {
     func selfTest(_ what: String, value: String? = nil) {
         selfTesting = true
         island.changingNothing = true
+
+        // AIKO_TRY_SESSIONS="waiting,done,stopped,working" puts counts on the island and the icon for
+        // a snapshot, with no sessions running.
+        if let asked = ProcessInfo.processInfo.environment["AIKO_TRY_SESSIONS"] {
+            let n = asked.split(separator: ",").map { Int($0) ?? 0 } + [0, 0, 0, 0]
+            showSessions(SessionCounts(working: n[3], waiting: n[0], done: n[1], stopped: n[2], firstWaiting: n[0] > 0 ? "check" : nil))
+        }
 
         if what == "settings" || what == "wizard" {
             SettingsCheck.run(what, value: value, shell: self)

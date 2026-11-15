@@ -16,7 +16,8 @@ enum StatusIcon {
         ring: CardRow?,
         dot: CardRow?,
         frame: IconFrame = .rings,
-        face: FacePicture? = nil
+        face: FacePicture? = nil,
+        badge: SessionBadge = .none
     ) -> NSImage {
         let image = NSImage(size: NSSize(width: size, height: size), flipped: false) { _ in
             // Drawing happens on a 16 unit grid and is scaled to the real size, so the icon keeps
@@ -24,6 +25,10 @@ enum StatusIcon {
             let scale = size / RingArt.grid
             let centre = NSPoint(x: RingArt.centre * scale, y: RingArt.centre * scale)
 
+            // The rings and the face keep one unit away from the sign of the sessions, so it never
+            // melts into the arc under it (BadgeDrawing.CutUnder on Windows).
+            NSGraphicsContext.saveGraphicsState()
+            BadgePaint.cutUnder(size, badge)?.addClip()
             if frame.ringOpacity > 0 {
                 drawRings(centre, scale, ring, dot, frame)
             }
@@ -31,7 +36,9 @@ enum StatusIcon {
             if let face, frame.showsFace {
                 drawFace(face, size, centre, frame)
             }
+            NSGraphicsContext.restoreGraphicsState()
 
+            BadgePaint.draw(size, badge)
             return true
         }
 

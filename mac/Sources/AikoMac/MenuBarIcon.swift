@@ -71,7 +71,16 @@ final class MenuBarIcon: NSResponder {
             ring: lastRows.ring,
             dot: lastRows.dot,
             frame: faces?.frame ?? .rings,
-            face: faces?.picture)
+            face: faces?.picture,
+            badge: badge)
+    }
+
+    /// The sign of the sessions in the corner of the icon (D-409): how many wait, stopped, or a dot
+    /// for a finished turn.
+    var badge = SessionBadge.none {
+        didSet {
+            if badge != oldValue { redraw() }
+        }
     }
 
     /// Where the menu bar put our icon, in screen points. Empty before the menu bar has placed it,

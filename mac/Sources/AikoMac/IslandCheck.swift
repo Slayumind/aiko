@@ -23,6 +23,12 @@ enum IslandCheck {
             face(shell, shell.islandForCheck())
         case "face-icon":
             faceOnTheIcon(shell)
+        case "hold":
+            // The island as it stands, for a snapshot: AIKO_TRY_SESSIONS gives it marks, and
+            // AIKO_TRY_SECONDS how long it stays.
+            let island = shell.islandForCheck()
+            Log.write("self test: island \(size(island)) at \(place(island))")
+            quit(after: Double(ProcessInfo.processInfo.environment["AIKO_TRY_SECONDS"] ?? "") ?? 8)
         default:
             Log.write("self test: there is no check called \(what)")
             quit(after: 0.2)
