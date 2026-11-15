@@ -86,6 +86,10 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
     let keysLine = NSTextField(labelWithString: "")
     var editorCollapsed: NSLayoutConstraint?
 
+    /// The bar in place of the editor when Claude Code ended by itself (D-351).
+    let stoppedBar = StoppedBar()
+    var stoppedCollapsed: NSLayoutConstraint?
+
     /// Whether the open session has room for the editor: a terminal whose program runs.
     var editorRoom = false
 
@@ -216,7 +220,7 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
                 terminal.leadingAnchor.constraint(equalTo: stage.leadingAnchor, constant: 8),
                 terminal.trailingAnchor.constraint(equalTo: stage.trailingAnchor, constant: -8),
                 terminal.topAnchor.constraint(equalTo: stage.topAnchor, constant: 8),
-                terminal.bottomAnchor.constraint(equalTo: editor.topAnchor, constant: -8),
+                terminal.bottomAnchor.constraint(equalTo: stoppedBar.topAnchor, constant: -8),
             ])
         }
         terminal.isHidden = false
@@ -351,13 +355,29 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
 
     nonisolated func hostCurrentDirectoryUpdate(source: TerminalView, directory: String?) {}
 
+    /// Claude Code ended by itself: its row says so, and Enter brings it back (D-351). A shell that
+    /// ended leaves the list.
     nonisolated func processTerminated(source: TerminalView, exitCode: Int32?) {
         Task { @MainActor [weak self] in
-            guard let self, let id = self.terminals.first(where: { $0.value === source })?.key else { return }
-            self.exitedAt[id] = Self.nowMs
+            guard let self, let id = self.terminals.first(where: { $0.value === source })?.key,
+                  let session = self.sessions.find(id) else { return }
             Log.write("terminal: a program ended with \(exitCode.map(String.init) ?? "no code")")
+            if session.kind == .shell {
+                self.closeSession(id)
+                return
+            }
+            self.exitedAt[id] = Self.nowMs
             self.draw()
         }
+    }
+
+    /// A stopped Claude Code starts again in the same place, with --resume.
+    func resume() {
+        guard let session = model.session(sessions), exitedAt.removeValue(forKey: session.id) != nil else { return }
+        if let old = terminals.removeValue(forKey: session.id) {
+            old.removeFromSuperview()
+        }
+        draw()
     }
 
     // ---- doors for --try-terminal ----

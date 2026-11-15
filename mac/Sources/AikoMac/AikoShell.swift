@@ -227,6 +227,11 @@ final class AikoShell {
             return
         }
 
+        if what == "stopped" {
+            StoppedCheck.run(terminal)
+            return
+        }
+
         if what == "pulse" {
             PulseCheck.run(terminal) { [weak self] in self?.waitingSounds ?? 0 }
             return

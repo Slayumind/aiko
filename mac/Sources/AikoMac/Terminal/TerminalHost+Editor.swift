@@ -11,13 +11,17 @@ extension TerminalHost {
         keysLine.textColor = Theme.nsMuted
         keysLine.lineBreakMode = .byTruncatingTail
         keysLine.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        for view in [editor, keysLine] as [NSView] {
+        for view in [stoppedBar, editor, keysLine] as [NSView] {
             view.translatesAutoresizingMaskIntoConstraints = false
             stage.addSubview(view)
         }
 
         let collapsed = editor.heightAnchor.constraint(equalToConstant: 0)
         editorCollapsed = collapsed
+        let stoppedAway = stoppedBar.heightAnchor.constraint(equalToConstant: 0)
+        stoppedCollapsed = stoppedAway
+        stoppedBar.isHidden = true
+        stoppedBar.resume = { [weak self] in self?.resume() }
         let keysLeft = keysLine.leadingAnchor.constraint(equalTo: stage.leadingAnchor, constant: 16)
         let keysRight = keysLine.trailingAnchor.constraint(equalTo: stage.trailingAnchor, constant: -16)
         let keysTop = keysLine.topAnchor.constraint(equalTo: editor.bottomAnchor, constant: 4)
@@ -27,11 +31,16 @@ extension TerminalHost {
             editor.trailingAnchor.constraint(equalTo: stage.trailingAnchor),
             keysLeft, keysRight, keysTop, keysBottom,
             collapsed,
+            stoppedBar.leadingAnchor.constraint(equalTo: stage.leadingAnchor),
+            stoppedBar.trailingAnchor.constraint(equalTo: stage.trailingAnchor),
+            stoppedBar.bottomAnchor.constraint(equalTo: editor.topAnchor),
+            stoppedAway,
         ])
 
         zoomFollowers.append { [weak self] zoom in
             guard let self else { return false }
             self.editor.zoom = zoom
+            self.stoppedBar.zoom = zoom
             self.keysLine.font = Theme.monoFont(Theme.textTiny * zoom)
             keysLeft.constant = 16 * zoom
             keysRight.constant = -16 * zoom
@@ -72,6 +81,10 @@ extension TerminalHost {
             keysLine.stringValue = session.kind == .shell ? Strings.terminalKeysShell : Strings.terminalKeysClaude
         }
         editorRoom = terminal != nil && session.map { exitedAt[$0.id] == nil } == true
+        // A program that ended takes no text: the bar to continue it stands in place of the editor.
+        let stopped = terminal != nil && session.map { exitedAt[$0.id] != nil } == true
+        stoppedBar.isHidden = !stopped
+        stoppedCollapsed?.isActive = !stopped
         placeEditor()
     }
 
@@ -89,7 +102,10 @@ extension TerminalHost {
     /// keyboard is always there (D-354, D-369).
     func focusOpenTerminal() {
         guard settings == nil else { return }
-        if editorRoom && editor.wanted {
+        if !stoppedBar.isHidden {
+            // Enter presses the button: the terminal of a program that ended takes no keys.
+            stoppedBar.takeKeys()
+        } else if editorRoom && editor.wanted {
             editor.focusText()
         } else if let terminal = openTerminal() {
             window?.makeFirstResponder(terminal)
