@@ -68,6 +68,9 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
     /// Whether the open session has room for the editor: a terminal whose program runs.
     var editorRoom = false
 
+    /// Voice input of the editor (D-313, D-354), made with the window.
+    var voice: VoiceDictation?
+
     init(limitsOf: @escaping (String) -> LimitSnapshot?, cardOf: @escaping () -> CardModel) {
         self.limitsOf = limitsOf
         self.cardOf = cardOf
@@ -116,6 +119,7 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
 
     /// The window goes; the programs in it go on.
     func windowShouldClose(_ sender: NSWindow) -> Bool {
+        voice?.close()
         sender.orderOut(nil)
         NSApp.setActivationPolicy(.accessory)
         onShownChanged?(false)
@@ -357,6 +361,12 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
     var terminalCountForCheck: Int { terminals.count }
 
     var settingsOpenForCheck: Bool { settings != nil }
+
+    var settingsPanelForCheck: String {
+        guard let panel = settingsCover else { return "none" }
+        return "frame \(Int(panel.frame.width))x\(Int(panel.frame.height)), "
+            + "bounds \(Int(panel.bounds.width))x\(Int(panel.bounds.height)), fitting \(Int(panel.fittingSize.height))"
+    }
 
     /// Opens or folds the header without writing the setting.
     func showHeaderForCheck(_ open: Bool) {

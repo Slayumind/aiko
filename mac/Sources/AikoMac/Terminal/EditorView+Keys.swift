@@ -18,6 +18,20 @@ extension EditorView {
     /// A key with its modifiers; true when the editor used it up. The live keys come here, and so do
     /// the keys of the check door, which has no keyboard.
     func press(_ keyCode: UInt16, _ flags: NSEvent.ModifierFlags) -> Bool {
+        if dictating {
+            switch keyCode {
+            case 53:
+                voiceCancelled?()
+                return true
+            case 36, 76:
+                // The second press of Enter ends the recording: the words go into the field, not out.
+                voicePressed?()
+                return true
+            default:
+                return false
+            }
+        }
+
         let shift = flags.contains(.shift)
         let control = flags.contains(.control)
         let other = flags.contains(.option) || flags.contains(.command)
@@ -48,6 +62,9 @@ extension EditorView {
     /// A digit, "/" or a letter while the editor passes keys to a menu of the program. True when it
     /// went to the program; otherwise the text view takes it.
     func typed(_ character: Character) -> Bool {
+        if dictating {
+            return false
+        }
         let press = EditorKeys.press(state(), .character, shift: false, character: character)
         return press.action == .pass && act(press)
     }

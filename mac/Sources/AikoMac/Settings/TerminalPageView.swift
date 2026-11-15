@@ -1,8 +1,8 @@
 import AikoKit
 import SwiftUI
 
-/// The page of the window itself: its zoom and the sound of the notices. The twin of
-/// Settings/TerminalPage.xaml(.cs). Voice input joins this page together with the voice itself.
+/// The page of the window itself: its zoom, the sound of the notices and voice input. The twin of
+/// Settings/TerminalPage.xaml(.cs).
 struct TerminalPageView: View {
     @ObservedObject var state: SettingsState
 
@@ -41,6 +41,8 @@ struct TerminalPageView: View {
                 .padding(.horizontal, 12)
                 .padding(.vertical, 10)
             }
+
+            VoiceSectionView(state: state)
         }
     }
 }

@@ -58,7 +58,7 @@ enum TerminalCheck {
     }
 
     /// AIKO_TRY_VIEW puts the window in one state for a snapshot: header, settings, search,
-    /// folders, or the editor: editor-shell, editor-compose, editor-mention. Nothing is written: the
+    /// folders, or the editor: editor-shell, editor-compose, editor-mention, editor-voice. Nothing is written: the
     /// header opens without the setting.
     private static func hold(_ host: TerminalHost, _ view: String?) {
         switch view {
@@ -67,8 +67,21 @@ enum TerminalCheck {
         case "search": host.openSessionPalette()
         case "folders": host.pickFolderQuickly()
         case "editor-shell", "editor-compose", "editor-mention": holdEditor(host, view ?? "")
+        case "editor-voice": holdVoice(host)
         default: break
         }
+    }
+
+    /// A recording in the editor of the command line, with AIKO_TRY_WAV playing in place of the
+    /// microphone: the red button, the wave, "listening" and the words as they come.
+    private static func holdVoice(_ host: TerminalHost) {
+        guard let wav = ProcessInfo.processInfo.environment["AIKO_TRY_WAV"], let sound = FileSound.read(wav) else { return }
+        Recording.source = { FileSound(sound) }
+        var settings = Store.settings()
+        settings.voiceInput = true
+        settings.voiceEngine = .local
+        host.voice?.use(settings)
+        after(1) { _ = host.pressForCheck(49, shift: true) }
     }
 
     /// The editor with the words of the snapshots of Windows (TerminalSnapshot.cs). A session of

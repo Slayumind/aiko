@@ -82,7 +82,7 @@ Nothing, unless you turn on or start one of these.
   address at all, and the site writes nothing. With update checks off and counting on, Aiko still
   makes that one request, because the count rides on it. It just doesn't read the version out of
   the answer.
-- **Voice input** (off by default, Windows for now): see **Voice input** below. On this computer it
+- **Voice input** (off by default): see **Voice input** below. On this computer it
   sends no sound anywhere; with your own OpenAI key the sound of each recording goes to OpenAI.
 - **Explain and suggest** in a shell session (Windows for now). Each one runs only when you start it:
   - **Explain** under a failed command sends the command, its exit code and the end of its output,
@@ -182,11 +182,13 @@ branch and the names of files from the conversation. Nothing from Aiko's memory 
 this computer the hint stays on the computer; with OpenAI it goes with the sound.
 
 **The key.** Aiko keeps your OpenAI key in Windows Credential Manager, as "Aiko: OpenAI key for
-voice input". Windows encrypts it for your account on this computer. Aiko never writes the key to
+voice input". Windows encrypts it for your account on this computer. On macOS it is in the
+Keychain under the same name, for this Mac only. Aiko never writes the key to
 a file, the log or the settings, and shows only its last four characters. **Remove key** on the
 page deletes it, and so does removing Aiko.
 
-The microphone is open only while you record: from the first press to the second. Aiko keeps no
+The microphone is open only while you record: from the first press to the second. On macOS the
+system asks once whether Aiko may use it, with words that say the same. Aiko keeps no
 recording and no text of it. The sound lives in memory until the words are in the field.
 
 ## The token
@@ -212,7 +214,8 @@ Without direct mode, Aiko never touches the token.
 - `%LOCALAPPDATA%\Aiko`: the limit numbers from Claude Code, the last direct mode answer, a short
   log, the speech model of voice input in `models` once you turn it on, and, where the personality
   is on, the session state files, the personality plugin and the local marketplace with the skills.
-- Windows Credential Manager: your OpenAI key for voice input, if you saved one.
+- Windows Credential Manager (the Keychain on macOS): your OpenAI key for voice input, if you
+  saved one. On macOS the speech model is in `~/Library/Caches/Aiko/models`.
 - `%USERPROFILE%\.claude*\settings.json`: one line added by Aiko, with a copy of the original next
   to it, and, where the personality is on, Aiko's plugins and marketplace and the permission line
   for the memory tools. Claude Code keeps its own copies of
@@ -225,7 +228,7 @@ Without direct mode, Aiko never touches the token.
 
 Removing Aiko puts the status line back, removes its plugins from Claude Code, takes its folder out
 of `PATH`, turns the profile functions back on, removes that value, deletes the OpenAI key from
-Credential Manager and deletes both of Aiko's folders.
+Credential Manager (the Keychain on macOS) and deletes both of Aiko's folders.
 
 One file may stay: the memory. When you press **Remove Aiko** in settings and the memory holds
 something, Aiko asks whether to keep it, and the answer is "keep" unless you untick it. Then

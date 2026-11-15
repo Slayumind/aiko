@@ -66,6 +66,9 @@ enum Theme {
     static var nsInputLine: NSColor { NSColor.white.withAlphaComponent(0.149) }
     static var nsMuted: NSColor { nsColour(Rgba(0xA1, 0xA1, 0xA1)) }
     static var nsRaised: NSColor { nsColour(Rgba(0x26, 0x26, 0x26)) }
+    static var nsDestructive: NSColor { nsColour(Rgba(0xFF, 0x64, 0x67)) }
+    static var nsCaution: NSColor { nsColour(Rgba(0xFE, 0x9A, 0x00)) }
+    static var nsHoverLayer: NSColor { NSColor.white.withAlphaComponent(0.071) }
 
     // ---- Sizes ----
 
@@ -112,6 +115,14 @@ enum Theme {
         }
 
         return .monospacedSystemFont(ofSize: size, weight: .regular)
+    }
+
+    /// The same sans font as `sans`, for text drawn by AppKit.
+    static func sansFont(_ size: CGFloat) -> NSFont {
+        if hasGeist, let font = NSFont(name: "Geist", size: size) {
+            return font
+        }
+        return .systemFont(ofSize: size)
     }
 
     /// Written once at startup and read by the views afterwards, all on the main thread.
