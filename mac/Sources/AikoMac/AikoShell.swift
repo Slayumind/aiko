@@ -227,6 +227,11 @@ final class AikoShell {
             return
         }
 
+        if what == "shell" {
+            ShellCheck.run(terminal)
+            return
+        }
+
         if what == "stopped" {
             StoppedCheck.run(terminal)
             return

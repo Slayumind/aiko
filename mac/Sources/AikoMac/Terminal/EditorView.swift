@@ -44,6 +44,15 @@ final class EditorView: NSView, NSTextViewDelegate {
     var offered: [String] = []
     var offersPaths = false
 
+    /// A command Claude Code proposed for the words in a command line (D-358), and the words it
+    /// answers; nil while there is none. The timer waits for a pause in the typing and stops.
+    var suggestion: String?
+    var suggestFor: String?
+    private var suggestPause: Timer?
+
+    /// Words in a command line that ask for a command, after a pause in the typing.
+    var suggestionAsked: ((String) -> Void)?
+
     /// The check door runs in a window that may not have the keyboard.
     var checkWithoutFocus = false
 
@@ -350,6 +359,7 @@ final class EditorView: NSView, NSTextViewDelegate {
         }
         offersPaths = false
         text.needsDisplay = true
+        waitForSuggestion()
         showHint()
         offer()
         refit()
@@ -374,12 +384,46 @@ final class EditorView: NSView, NSTextViewDelegate {
         }
     }
 
+    // ---- the command Claude Code proposes (D-358) ----
+
+    /// The command Claude Code proposed for these words; nil when it gave none. It shows only while
+    /// the words in the field are still the same.
+    func showSuggestion(_ words: String, _ command: String?) {
+        guard text.string == words else { return }
+        suggestFor = nil
+        suggestion = command
+        showHint()
+    }
+
+    /// New words in a command line drop the old proposal; words that ask for a command wait for a
+    /// pause in the typing before the question goes out.
+    private func waitForSuggestion() {
+        suggestion = nil
+        suggestFor = nil
+        suggestPause?.invalidate()
+        suggestPause = nil
+        guard session?.kind == .shell, ShellAsk.isRequest(text.string) else { return }
+        suggestPause = Timer.scheduledTimer(withTimeInterval: 0.7, repeats: false) { [weak self] _ in
+            MainActor.assumeIsolated { self?.askForSuggestion() }
+        }
+    }
+
+    private func askForSuggestion() {
+        suggestPause = nil
+        guard session?.kind == .shell, ShellAsk.isRequest(text.string) else { return }
+        suggestFor = text.string
+        showHint()
+        suggestionAsked?(text.string)
+    }
+
     // ---- the line under the field ----
 
     func showHint() {
         let state = state()
         let shell = state.kind == .shell
-        let words = state.composing ? Strings.terminalEditorHintCompose
+        let words = shell && suggestion != nil ? Strings.format(Strings.shellSuggestion, (suggestion ?? "").replacingOccurrences(of: "**", with: "* *"))
+            : shell && suggestFor != nil && suggestFor == text.string ? Strings.shellSuggesting
+            : state.composing ? Strings.terminalEditorHintCompose
             : state.passing && state.empty ? Strings.terminalEditorHintPassing
             : state.empty ? (shell ? Strings.terminalEditorHintShellEmpty : Strings.terminalEditorHintEmpty)
             : shell ? Strings.terminalEditorHintShellText

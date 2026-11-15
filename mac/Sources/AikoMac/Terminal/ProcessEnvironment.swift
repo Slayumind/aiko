@@ -11,6 +11,11 @@ enum ProcessEnvironment {
     /// The environment of Aiko with the PATH of a login shell and the changes of a plan; a change
     /// with no value takes the variable out.
     static func with(_ changes: [VariableChange]) -> [String] {
+        variables(changes).map { "\($0.key)=\($0.value)" }
+    }
+
+    /// The same as a dictionary, for a Process.
+    static func variables(_ changes: [VariableChange]) -> [String: String] {
         var variables = ProcessInfo.processInfo.environment
         if let path = path() {
             variables["PATH"] = path
@@ -23,7 +28,7 @@ enum ProcessEnvironment {
                 variables.removeValue(forKey: change.name)
             }
         }
-        return variables.map { "\($0.key)=\($0.value)" }
+        return variables
     }
 
     /// The names in the environment of Aiko itself, for the plans that take leftovers out.

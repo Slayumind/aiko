@@ -53,6 +53,7 @@ extension TerminalHost {
 
     private func wireEditor() {
         editor.passed = { [weak self] sequence in self?.openTerminal()?.send(txt: sequence) }
+        editor.suggestionAsked = { [weak self] words in self?.suggest(words) }
         editor.inserted = { [weak self] writes in self?.writeInTurn(writes) }
         editor.sent = { [weak self] writes in self?.writeInTurn(writes) }
         editor.wantedChanged = { [weak self] in

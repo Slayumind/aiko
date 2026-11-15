@@ -56,6 +56,10 @@ extension TerminalHost {
         problems[id] = nil
         forgetEditor(id)
         forgetPulse(id)
+        if let pane = shells.removeValue(forKey: id) {
+            pane.blocks.removeFromSuperview()
+            pane.find.removeFromSuperview()
+        }
         sessions = sessions.close(id)
         save()
         model = model.after(sessions)

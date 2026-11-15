@@ -93,6 +93,9 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
     /// Whether the open session has room for the editor: a terminal whose program runs.
     var editorRoom = false
 
+    /// The blocks of each command line with the marks of its shell (D-412).
+    var shells: [String: ShellPane] = [:]
+
     /// Voice input of the editor (D-313, D-354), made with the window.
     var voice: VoiceDictation?
 
@@ -212,7 +215,10 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
         markSeen()
         notice()
 
-        guard let terminal = shown else { return }
+        guard let terminal = shown else {
+            showShell(for: nil, terminal: nil)
+            return
+        }
         if terminal.superview !== stage {
             terminal.translatesAutoresizingMaskIntoConstraints = false
             stage.addSubview(terminal, positioned: .below, relativeTo: editor)
@@ -224,6 +230,8 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
             ])
         }
         terminal.isHidden = false
+        // After the terminal is in the stage: the blocks are tied to its place.
+        showShell(for: model.sessionId, terminal: terminal)
         focusOpenTerminal()
     }
 
@@ -302,10 +310,13 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
         let executable: String
         let arguments: [String]
         let plan: ClaudeLaunchPlan
+        var shell: ShellLaunch?
         switch session.kind {
         case .shell:
-            executable = ProcessEnvironment.shell
-            arguments = ["-l"]
+            let launch = ShellLaunch.find()
+            shell = launch
+            executable = launch.executable
+            arguments = launch.arguments
             plan = .forShell(.macOS, configDirectory: config, userProfile: Store.home,
                              inheritedVariables: ProcessEnvironment.inheritedNames)
         case .claude:
@@ -328,13 +339,16 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
         let view = AikoTerminalView(frame: stage.bounds)
         view.processDelegate = self
         wire(view, session.id)
+        if let shell {
+            wireShell(view, session, shell)
+        }
         view.nativeBackgroundColor = Theme.nsSurface
         view.nativeForegroundColor = Theme.nsInk
         view.font = Self.terminalFont()
         view.startProcess(
             executable: executable,
             args: arguments,
-            environment: ProcessEnvironment.with(plan.variables),
+            environment: ProcessEnvironment.with(plan.variables + (shell?.variables ?? [])),
             execName: nil,
             currentDirectory: session.folder)
         terminals[session.id] = view
@@ -344,7 +358,14 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
         return view
     }
 
-    nonisolated func sizeChanged(source: LocalProcessTerminalView, newCols: Int, newRows: Int) {}
+    /// The size of the terminal is the size of the screen the blocks are cut from.
+    nonisolated func sizeChanged(source: LocalProcessTerminalView, newCols: Int, newRows: Int) {
+        Task { @MainActor [weak self] in
+            guard let self, let id = self.terminals.first(where: { $0.value === source })?.key else { return }
+            self.shells[id]?.screen.resize(columns: newCols, rows: newRows)
+            self.shells[id]?.blocks.refresh()
+        }
+    }
 
     nonisolated func setTerminalTitle(source: LocalProcessTerminalView, title: String) {
         Task { @MainActor [weak self] in
