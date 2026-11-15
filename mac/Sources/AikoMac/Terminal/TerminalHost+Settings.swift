@@ -21,6 +21,7 @@ extension TerminalHost {
         state.onQuit = { [weak self] in self?.onQuitAsked?() }
         state.onChanged = { [weak self] in
             self?.onSettingsChanged?()
+            self?.applyZoom()
             self?.draw()
         }
         // Every word on screen was picked when its view was made, so the panel is built again.

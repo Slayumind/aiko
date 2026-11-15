@@ -24,12 +24,34 @@ enum TerminalCheck {
             host.showHeaderForCheck(true)
             Log.write("self test: terminal window \(host.headerForCheck)")
             host.showHeaderForCheck(false)
-            host.closeForCheck()
+            keys(host)
             after(0.5) {
-                Log.write("self test: terminal window closed, shown=\(host.isShown), in the Dock=\(NSApp.activationPolicy() == .regular), "
-                    + "menu bar icon=\(iconShown()), terminals still running=\(host.runningForCheck)")
-                NSApp.terminate(nil)
+                host.closeForCheck()
+                after(0.5) {
+                    Log.write("self test: terminal window closed, shown=\(host.isShown), in the Dock=\(NSApp.activationPolicy() == .regular), "
+                        + "menu bar icon=\(iconShown()), terminals still running=\(host.runningForCheck)")
+                    NSApp.terminate(nil)
+                }
             }
+        }
+    }
+
+    /// The keys of the window: each one opens what the table says, and the window is left as it was.
+    /// The search waits up to 150 ms for the conversations before it shows, so it is looked at later.
+    private static func keys(_ host: TerminalHost) {
+        let folders = host.pressForCheck(17, shift: true)
+        let foldersOpen = host.paletteOpen
+        host.closePalette()
+        let settings = host.pressForCheck(43, shift: false)
+        let settingsOpen = host.settingsOpenForCheck
+        host.closeSettings()
+        let search = host.pressForCheck(40, shift: true)
+        after(0.3) {
+            let searchOpen = host.paletteOpen
+            host.closePalette()
+            Log.write("self test: terminal window keys: Cmd+Shift+K search=\(search && searchOpen), "
+                + "Cmd+Shift+T folders=\(folders && foldersOpen), Cmd+, settings=\(settings && settingsOpen), "
+                + "all closed=\(!host.paletteOpen && !host.settingsOpenForCheck)")
         }
     }
 

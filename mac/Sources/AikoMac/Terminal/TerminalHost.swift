@@ -35,11 +35,17 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
     static let listWidth: CGFloat = 252
     var listWidthConstraint: NSLayoutConstraint?
     var holderWatch: NSObjectProtocol?
+    var keyWatch: Any?
     var bar: NSView?
 
     /// The settings while they are open, and their panel over the list and the terminal (D-374).
     var settings: SettingsState?
     var settingsCover: NSView?
+
+    /// The palette over the window while it is open, and what it finds outside Aiko (D-353).
+    var paletteCover: NSView?
+    let shelf = ConversationShelf()
+    var conversations: [Conversation] = []
 
     /// The messages in place of the terminal. Hidden while the terminal shows, so it takes no click.
     var stageCover: NSView?
@@ -59,7 +65,8 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
         state.onEnvironment = { [weak self] name in self?.toEnvironment(name) }
         state.onChoose = { [weak self] id in self?.choose(id) }
         state.onNew = { [weak self] folder, kind in self?.start(in: folder, kind: kind) }
-        state.onNewInOtherFolder = { [weak self] in self?.pickFolder() }
+        state.onNewInOtherFolder = { [weak self] in self?.pickFolderQuickly() }
+        state.onSearch = { [weak self] in self?.openSessionPalette() }
         state.onToggleList = { [weak self] in self?.toggleList() }
         state.onToggleHeader = { [weak self] in self?.toggleHeader() }
         state.onSettings = { [weak self] in self?.toggleSettings() }
@@ -125,14 +132,15 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
         draw()
     }
 
-    func pickFolder() {
+    /// A folder from the dialog of the system, starting at the folder of the open session.
+    func chooseFolder() -> String? {
         let panel = NSOpenPanel()
         panel.canChooseDirectories = true
         panel.canChooseFiles = false
         panel.allowsMultipleSelection = false
         panel.directoryURL = URL(fileURLWithPath: model.session(sessions)?.folder ?? Store.home)
-        guard panel.runModal() == .OK, let url = panel.url else { return }
-        start(in: url.path, kind: .claude)
+        guard panel.runModal() == .OK, let url = panel.url else { return nil }
+        return url.path
     }
 
     /// The list from the core, and the terminal of the chosen session on the stage.
@@ -283,6 +291,7 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
         view.processDelegate = self
         view.nativeBackgroundColor = Theme.nsSurface
         view.nativeForegroundColor = Theme.nsInk
+        view.font = Self.terminalFont()
         view.startProcess(
             executable: executable,
             args: arguments,

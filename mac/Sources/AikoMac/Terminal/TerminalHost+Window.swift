@@ -93,6 +93,7 @@ extension TerminalHost {
         ])
         window.contentView = root
         placeWindowButtons(window)
+        watchKeys()
         return window
     }
 
