@@ -91,6 +91,7 @@ extension TerminalHost {
         ])
         window.contentView = root
         self.window = window
+        layStage()
         applyZoom()
         watchKeys()
         return window

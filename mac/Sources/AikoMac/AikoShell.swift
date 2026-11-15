@@ -186,6 +186,11 @@ final class AikoShell {
             return
         }
 
+        if what == "editor" {
+            EditorCheck.run(terminal)
+            return
+        }
+
         if what == "menu" {
             pickSettingsInTheMenu()
             return

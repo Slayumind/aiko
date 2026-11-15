@@ -13,6 +13,12 @@ final class AikoDelegate: NSObject, NSApplicationDelegate {
             Store.settings().language, systemLanguageTag: Locale.preferredLanguages.first)
             ? .russian
             : .english
+        // A snapshot in the other language, as AIKO_TRY_LANGUAGE on Windows: the setting stays.
+        switch ProcessInfo.processInfo.environment["AIKO_TRY_LANGUAGE"] {
+        case "English": Strings.language = .english
+        case "Russian": Strings.language = .russian
+        default: break
+        }
 
         // The self test is asked for by a variable, or by an argument: `open Aiko.app --args
         // --try-island` is the only way to pass anything to an app that is opened, not run.

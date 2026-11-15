@@ -1,0 +1,60 @@
+import AppKit
+import SwiftTerm
+
+/// The terminal of a session with what SwiftTerm does not do on its own: files dropped on it, and a
+/// paste that can carry a picture or a file (D-370). The host decides where they go: into the editor
+/// when it is on screen, or straight into the line of the program.
+final class AikoTerminalView: LocalProcessTerminalView {
+    /// Cmd+V or Edit > Paste while the terminal has the keys.
+    var pasted: (() -> Void)?
+
+    /// Files dropped on the terminal, as paths.
+    var dropped: (([String]) -> Void)?
+
+    /// A click ended in the terminal: a selection may have been made there.
+    var clicked: (() -> Void)?
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        registerForDraggedTypes([.fileURL])
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("not made from a file")
+    }
+
+    override func paste(_ sender: Any) {
+        if let pasted {
+            pasted()
+        } else {
+            super.paste(sender)
+        }
+    }
+
+    override func mouseUp(with event: NSEvent) {
+        super.mouseUp(with: event)
+        clicked?()
+    }
+
+    override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
+        Self.files(sender).isEmpty ? [] : .copy
+    }
+
+    override func draggingUpdated(_ sender: NSDraggingInfo) -> NSDragOperation {
+        Self.files(sender).isEmpty ? [] : .copy
+    }
+
+    override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
+        let files = Self.files(sender)
+        guard !files.isEmpty, let dropped else { return false }
+        dropped(files)
+        return true
+    }
+
+    private static func files(_ drag: NSDraggingInfo) -> [String] {
+        let urls = drag.draggingPasteboard.readObjects(
+            forClasses: [NSURL.self], options: [.urlReadingFileURLsOnly: true]) as? [URL]
+        return urls?.map(\.path) ?? []
+    }
+}

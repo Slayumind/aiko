@@ -60,6 +60,14 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
     /// The strip of the open header and its height, which grows and folds (D-373).
     var headerHeight: NSLayoutConstraint?
 
+    /// The editor under the terminal and the line of keys under it (D-354, AIKO-505).
+    let editor = EditorView()
+    let keysLine = NSTextField(labelWithString: "")
+    var editorCollapsed: NSLayoutConstraint?
+
+    /// Whether the open session has room for the editor: a terminal whose program runs.
+    var editorRoom = false
+
     init(limitsOf: @escaping (String) -> LimitSnapshot?, cardOf: @escaping () -> CardModel) {
         self.limitsOf = limitsOf
         self.cardOf = cardOf
@@ -167,25 +175,24 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
         state.header = header()
         state.groups = SessionRows.of(sessions, model.environment) { [weak self] id in self?.live(id) }
         stageCover?.isHidden = state.stage == .none
-        for view in stage.subviews where view !== shown {
+        for view in terminals.values where view !== shown {
             view.isHidden = true
         }
+        showEditor(for: model.session(sessions), terminal: shown)
 
         guard let terminal = shown else { return }
         if terminal.superview !== stage {
             terminal.translatesAutoresizingMaskIntoConstraints = false
-            stage.addSubview(terminal)
+            stage.addSubview(terminal, positioned: .below, relativeTo: editor)
             NSLayoutConstraint.activate([
                 terminal.leadingAnchor.constraint(equalTo: stage.leadingAnchor, constant: 8),
                 terminal.trailingAnchor.constraint(equalTo: stage.trailingAnchor, constant: -8),
                 terminal.topAnchor.constraint(equalTo: stage.topAnchor, constant: 8),
-                terminal.bottomAnchor.constraint(equalTo: stage.bottomAnchor, constant: -8),
+                terminal.bottomAnchor.constraint(equalTo: editor.topAnchor, constant: -8),
             ])
         }
         terminal.isHidden = false
-        if settings == nil {
-            window?.makeFirstResponder(terminal)
-        }
+        focusOpenTerminal()
     }
 
     /// What stands in place of the terminal: the question before closing first, then the empty
@@ -291,8 +298,9 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
             arguments = plan.arguments
         }
 
-        let view = LocalProcessTerminalView(frame: stage.bounds)
+        let view = AikoTerminalView(frame: stage.bounds)
         view.processDelegate = self
+        wire(view, session.id)
         view.nativeBackgroundColor = Theme.nsSurface
         view.nativeForegroundColor = Theme.nsInk
         view.font = Self.terminalFont()
@@ -326,9 +334,20 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
 
     // ---- doors for --try-terminal ----
 
-    func startForCheck(in folder: String) {
+    /// A session for a self test, never written to terminal.json; its id.
+    @discardableResult
+    func startForCheck(in folder: String, kind: SessionKind = .shell) -> String? {
         changingNothing = true
-        start(in: folder, kind: .shell)
+        start(in: folder, kind: kind)
+        return model.sessionId
+    }
+
+    /// The text of the open terminal, row by row.
+    var screenForCheck: String {
+        guard let terminal = openTerminal() else { return "" }
+        // An empty cell is a zero, not a space.
+        return String(decoding: terminal.getTerminal().getBufferAsData(), as: UTF8.self)
+            .replacingOccurrences(of: "\u{0}", with: " ")
     }
 
     func closeForCheck() {

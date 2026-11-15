@@ -55,6 +55,7 @@ extension TerminalHost {
         }
         exited.remove(id)
         problems[id] = nil
+        forgetEditor(id)
         sessions = sessions.close(id)
         save()
         model = model.after(sessions)
