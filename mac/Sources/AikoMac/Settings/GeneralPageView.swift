@@ -33,7 +33,7 @@ struct GeneralPageView: View {
         VStack(alignment: .leading, spacing: 0) {
             Control.pageTitle(Strings.navGeneral)
 
-            Control.sectionLabel(Strings.sectionWhereToShow).padding(.top, 18).padding(.bottom, 8)
+            Control.sectionLabel(Strings.sectionWhenClosed).padding(.top, 18).padding(.bottom, 8)
             place
 
             Reveal(isOpen: state.app.place == .island) {
@@ -55,11 +55,27 @@ struct GeneralPageView: View {
                 Spacer(minLength: 12)
                 AikoSwitch(isOn: startsAtLogin, set: setStartup)
             }
+            .padding(.bottom, 10)
+
+            // Only worth showing when Aiko starts at login: off, it opens only the menu bar (D-350).
+            Reveal(isOpen: startsAtLogin) {
+                HStack(spacing: 12) {
+                    Control.rowName(Strings.openTerminalAtStartup)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Spacer(minLength: 12)
+                    AikoSwitch(isOn: state.app.openTerminalAtStartup) {
+                        var next = state.app
+                        next.openTerminalAtStartup = $0
+                        state.saveApp(next)
+                    }
+                }
+                .padding(.bottom, 10)
+            }
 
             // The update switch itself lives on the privacy page: it is a consent, not a
             // preference. The button stays here, because pressing it is the person's own action
             // (D-113).
-            updates.padding(.top, 20)
+            updates.padding(.top, 10)
 
             Control.sectionLabel(Strings.sectionLanguage).padding(.top, 22).padding(.bottom, 8)
             DropDown(

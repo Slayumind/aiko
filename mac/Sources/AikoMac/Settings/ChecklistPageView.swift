@@ -2,7 +2,7 @@ import AikoKit
 import AppKit
 import SwiftUI
 
-/// The environment checklist (D-165) as a page of the settings window (D-177): every item on one
+/// The environment checklist (D-165) as a page of the settings (D-177, D-374): every item on one
 /// page, the next one opens by itself on a fresh machine, and any item can be opened again to
 /// change its answer. Which item is ready, blocked or done is decided in AikoKit.WizardChecklist,
 /// and where it sits on the page in AikoKit.ChecklistLayout.
@@ -12,8 +12,19 @@ struct ChecklistPageView: View {
     @ObservedObject var state: SettingsState
     @ObservedObject var model: ChecklistModel
 
+    /// One item at a time, as the first run in the window shows it (D-391): the open item, the dots
+    /// of every item under it, a way back, a way on, and Finish once every item has an answer.
+    var steps = false
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
+            // One line on what Aiko is and what an environment is, before the first word about
+            // either (D-421).
+            Control.rowName(Strings.wizardWelcome)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.trailing, 96)
+                .padding(.bottom, 14)
+
             // The counter sits left of the "Saved" mark the window keeps in the top right corner.
             HStack(spacing: 12) {
                 Control.pageTitle(Strings.checklistTitle)
@@ -24,42 +35,89 @@ struct ChecklistPageView: View {
             .padding(.bottom, 14)
 
             ForEach(ChecklistLayout.order, id: \.self) { item in
-                if let label = ChecklistLayout.labelAbove(item) {
+                if !steps, let label = ChecklistLayout.labelAbove(item) {
                     Control.sectionLabel(label).padding(.top, 8).padding(.bottom, 6)
                 }
 
-                ChecklistRowView(
-                    title: ChecklistLayout.title(item),
-                    status: ChecklistLayout.status(item, model.state(of: item), model.words),
-                    state: model.state(of: item),
-                    isOpen: model.opened == item,
-                    press: { model.toggle(item) }) {
-                        panel(for: item)
-                    }
+                if !steps || model.opened == item {
+                    ChecklistRowView(
+                        title: ChecklistLayout.title(item),
+                        status: ChecklistLayout.status(item, model.state(of: item), model.words),
+                        state: model.state(of: item),
+                        isOpen: model.opened == item,
+                        step: steps,
+                        press: { if !steps { model.toggle(item) } }) {
+                            panel(for: item)
+                        }
+                }
             }
 
             // What happens next, shown once every item has an answer.
-            Reveal(isOpen: model.canFinish) {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(model.island ? Strings.wizardDoneIsland : Strings.wizardDoneMenuBar)
-                        .font(Theme.sans(Theme.textSmall))
-                        .foregroundStyle(Theme.ink)
-                        .fixedSize(horizontal: false, vertical: true)
-                    if !model.island {
-                        Control.rowHint(Strings.wizardDoneMenuBarRoom)
+            Reveal(isOpen: model.canFinish) { done }
+
+            if !steps {
+                Control.hairline().padding(.top, 16).padding(.bottom, 12)
+            }
+
+            HStack(spacing: 8) {
+                if steps { dots }
+                Spacer()
+                if steps {
+                    if model.step(-1) != nil {
+                        FlatButton(title: Strings.stepBack, look: .ghost) { model.stepBack() }
+                    }
+                    // Every step after the install needs Claude Code, so Next waits for it instead
+                    // of leading to the last step and back (D-421).
+                    if model.opened != nil && !(model.opened == .install && !model.claudeInstalled) {
+                        FlatButton(title: Strings.stepNext) { model.stepNext() }
                     }
                 }
-                .padding(.top, 14)
+                if !steps || model.canFinish {
+                    FlatButton(title: Strings.finish, enabled: model.canFinish) { model.finish() }
+                }
             }
-
-            Control.hairline().padding(.top, 16).padding(.bottom, 12)
-
-            HStack {
-                Spacer()
-                FlatButton(title: Strings.finish, enabled: model.canFinish) { model.finish() }
-            }
+            .padding(.top, steps ? 16 : 0)
         }
         .onDisappear { model.close() }
+    }
+
+    /// Where Aiko will be after Finish, and what Finish is about to change, so nothing happens
+    /// behind the person's back (D-421).
+    private var done: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Control.rowName(model.island ? Strings.wizardDoneWindowIsland : Strings.wizardDoneTray)
+                .fixedSize(horizontal: false, vertical: true)
+            if !model.island {
+                Control.rowHint(Strings.wizardDoneMenuBarRoom).padding(.top, 8)
+            }
+            let summary = model.summary
+            if !summary.isEmpty {
+                Control.sectionLabel(Strings.wizardSummaryTitle).padding(.top, 14).padding(.bottom, 6)
+                ForEach(summary, id: \.self) { line in
+                    Control.rowNote(line)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.bottom, 2)
+                }
+            }
+        }
+        .padding(.top, 14)
+    }
+
+    /// One dot per item: done ones muted, the open one a wider bar, the rest dim. A dot that is not
+    /// locked opens its item.
+    private var dots: some View {
+        HStack(spacing: 6) {
+            ForEach(ChecklistLayout.order, id: \.self) { item in
+                let open = model.opened == item
+                let itemState = model.state(of: item)
+                Capsule()
+                    .fill(open ? Theme.ink : itemState == .done ? Theme.muted : Theme.raised)
+                    .frame(width: open ? 18 : 6, height: 6)
+                    .contentShape(Rectangle())
+                    .onTapGesture { if itemState != .locked { model.open(item) } }
+                    .tip(ChecklistLayout.title(item))
+            }
+        }
     }
 
     @ViewBuilder
@@ -84,10 +142,12 @@ struct ChecklistPageView: View {
             if model.claudeInstalled {
                 Control.rowHint(Strings.installFound)
             } else {
-                Control.rowHint(Strings.installLead)
-                HStack(alignment: .top, spacing: 8) {
-                    CodeBlock(text: ChecklistModel.installCommand)
-                    FlatButton(title: model.copied ? Strings.copied : Strings.copy, look: .quiet) {
+                Control.rowHint(Strings.installLeadSessions)
+                // The button runs the official command in Terminal; the copy is for whoever wants
+                // to run it in a terminal of their own (D-421).
+                HStack(spacing: 8) {
+                    FlatButton(title: Strings.installRun) { ClaudeLauncher.runInstall() }
+                    FlatButton(title: model.copied ? Strings.copied : Strings.installCopy, look: .quiet) {
                         NSPasteboard.general.clearContents()
                         NSPasteboard.general.setString(ChecklistModel.installCommand, forType: .string)
                         model.copied = true
@@ -95,7 +155,20 @@ struct ChecklistPageView: View {
                 }
                 .padding(.top, 10)
 
-                Control.rowHint(Strings.installHowMac).padding(.top, 10)
+                Control.rowHint(Strings.format(Strings.installHowButtonMac, ChecklistModel.installCommand))
+                    .padding(.top, 10)
+                HStack(spacing: 0) {
+                    Text(Strings.installFailedLead)
+                        .font(Theme.sans(Theme.textSmall))
+                        .foregroundStyle(Theme.muted)
+                    LinkButton(title: Strings.installFailedLink) {
+                        if let url = URL(string: TerminalHost.claudeInstallPage) { NSWorkspace.shared.open(url) }
+                    }
+                    Text(".")
+                        .font(Theme.sans(Theme.textSmall))
+                        .foregroundStyle(Theme.muted)
+                }
+                .padding(.top, 6)
                 Control.rowName(Strings.waitInstall).padding(.top, 8)
             }
         }
@@ -226,13 +299,13 @@ struct ChecklistPageView: View {
             FlatButton(title: Strings.addProject, look: .quiet) { model.addProject() }
                 .padding(.top, 10)
 
-            HStack(spacing: 10) {
-                Control.rowName(Strings.allOtherFolders)
-                DropDown(items: model.environmentNames, index: model.defaultIndex) {
-                    model.defaultIndex = $0
-                }
-                .frame(minWidth: 180)
-                Spacer(minLength: 0)
+            // The same switch as on the page of the environment (D-421): on, every other folder
+            // opens in environment 2.
+            HStack(spacing: 12) {
+                Control.rowName(Strings.defaultForRest)
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 12)
+                AikoSwitch(isOn: model.defaultIndex == 1) { model.defaultIndex = $0 ? 1 : 0 }
             }
             .padding(.top, 14)
 
@@ -361,8 +434,16 @@ struct ChecklistPageView: View {
                     model.personaWanted = false
                     model.moveOn()
                 }
+                if model.secondSignedIn {
+                    FlatButton(title: Strings.format(Strings.meetAikoTurnOn, model.secondNameText), look: .quiet) {
+                        model.personaWanted = true
+                        model.personaSecond = true
+                        model.moveOn()
+                    }
+                }
                 FlatButton(title: Strings.format(Strings.meetAikoTurnOn, model.firstNameText), look: .quiet) {
                     model.personaWanted = true
+                    model.personaSecond = false
                     model.moveOn()
                 }
             }
@@ -378,12 +459,9 @@ struct ChecklistPageView: View {
         VStack(alignment: .leading, spacing: 0) {
             Control.rowHint(Strings.wizardStatsWhat)
             PrivacyLedger(muted: false, small: true).padding(.top, 10)
-            Control.rowNote(Strings.neverSentWhat)
-                .fixedSize(horizontal: false, vertical: true)
-                .padding(.top, 10)
-            Control.rowNote(Strings.wizardStatsLater)
-                .fixedSize(horizontal: false, vertical: true)
-                .padding(.top, 6)
+            Control.sectionLabel(Strings.sectionNeverSent).padding(.top, 14).padding(.bottom, 6)
+            Control.rowHint(Strings.neverSentWhat)
+            Control.rowHint(Strings.wizardStatsLater).padding(.top, 6)
 
             HStack(spacing: 8) {
                 Spacer()
@@ -431,7 +509,7 @@ struct ChecklistPageView: View {
             HStack(alignment: .top, spacing: 12) {
                 VStack(alignment: .leading, spacing: 2) {
                     Control.rowName(Strings.checkUpdatesToggle)
-                    Control.rowNote(Strings.wizardUpdatesWhat)
+                    Control.rowNote(model.updatesWhat)
                         .fixedSize(horizontal: false, vertical: true)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
@@ -450,6 +528,9 @@ struct ChecklistRowView<Content: View>: View {
     let status: String
     let state: ItemState
     let isOpen: Bool
+
+    /// One item at a time: the header has no chevron and no click, the body is always open.
+    var step = false
     let press: () -> Void
     @ViewBuilder let content: () -> Content
 
@@ -464,7 +545,7 @@ struct ChecklistRowView<Content: View>: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 10)
-        .background(hovering && state != .locked ? Theme.hoverLayer : .clear)
+        .background(hovering && state != .locked && !step ? Theme.hoverLayer : .clear)
         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
@@ -492,12 +573,14 @@ struct ChecklistRowView<Content: View>: View {
                 .foregroundStyle(Theme.muted)
                 .lineLimit(1)
 
-            Image(systemName: "chevron.down")
-                .font(.system(size: 9, weight: .medium))
-                .foregroundStyle(Theme.muted)
-                .rotationEffect(.degrees(isOpen ? 180 : 0))
-                .animation(Motion.curve(Motion.standard, Motion.expand), value: isOpen)
-                .padding(.leading, 10)
+            if !step {
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 9, weight: .medium))
+                    .foregroundStyle(Theme.muted)
+                    .rotationEffect(.degrees(isOpen ? 180 : 0))
+                    .animation(Motion.curve(Motion.standard, Motion.expand), value: isOpen)
+                    .padding(.leading, 10)
+            }
         }
         .frame(minHeight: 22)
         .contentShape(Rectangle())

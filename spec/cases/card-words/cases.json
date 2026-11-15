@@ -6,6 +6,11 @@
     { "kind": "ModelWeek", "model": "Fable", "en": "Fable · week", "ru": "Fable · неделя" },
     { "kind": "ModelWeek", "model": null, "en": "model · week", "ru": "model · неделя" }
   ],
+  "short": [
+    { "kind": "FiveHour", "model": null, "en": "5 h", "ru": "5 ч" },
+    { "kind": "SevenDay", "model": null, "en": "wk", "ru": "нед" },
+    { "kind": "ModelWeek", "model": "Fable", "en": "Fable", "ru": "Fable" }
+  ],
   "percent": [
     { "percent": 0, "en": "0%", "ru": "0%" },
     { "percent": 42, "en": "42%", "ru": "42%" },
@@ -23,6 +28,11 @@
     { "resetsIn": 300, "en": "resets in 5m", "ru": "сброс через 5 м" },
     { "resetsIn": 3960, "en": "resets in 1h 6m", "ru": "сброс через 1 ч 6 м" },
     { "resetsIn": 183600, "en": "resets in 2d 3h", "ru": "сброс через 2 д 3 ч" }
+  ],
+  "countdown": [
+    { "resetsIn": 0, "en": "just reset", "ru": "сброс только что" },
+    { "resetsIn": 3960, "en": "1h 6m", "ru": "1 ч 6 м" },
+    { "resetsIn": 183600, "en": "2d 3h", "ru": "2 д 3 ч" }
   ],
   "pace": [
     { "verdict": "Unknown", "timeLeft": 0, "en": "", "ru": "" },

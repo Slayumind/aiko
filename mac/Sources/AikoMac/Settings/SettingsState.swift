@@ -199,6 +199,11 @@ final class SettingsState: ObservableObject {
     var onChanged: () -> Void = {}
     var onReopen: () -> Void = {}
 
+    /// The first run in the window (D-394): the checklist alone, one step at a time, with no menu.
+    /// Finish hands the window over to the terminal.
+    var firstRun = false
+    var onFirstRunFinished: () -> Void = {}
+
     private var savedUntil: Task<Void, Never>?
 
     init(page: SettingsPage?) {
@@ -226,6 +231,7 @@ final class SettingsState: ObservableObject {
             environments: environments,
             plans: byFolder,
             sendsStats: app.sendStats,
+            voiceInput: app.voiceInput,
             checklistOpen: checklist != nil,
             platform: .macOS,
             userProfile: Store.home)
@@ -395,6 +401,10 @@ final class SettingsState: ObservableObject {
         let model = ChecklistModel(openFirst: item)
         model.onFinished = { [weak self] note in
             guard let self else { return }
+            if self.firstRun {
+                self.onFirstRunFinished()
+                return
+            }
             self.checklist = nil
             self.editor.reload()
             self.showNoteOnFirstEnvironment(note)

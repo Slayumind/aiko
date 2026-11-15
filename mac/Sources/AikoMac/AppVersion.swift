@@ -3,7 +3,7 @@ import ServiceManagement
 
 /// The version of the running Aiko.
 ///
-/// Two places compare it, the settings window and the update check, and they have to agree:
+/// Two places compare it, the settings and the update check, and they have to agree:
 /// comparing two differently shaped version strings is how a copy decides it is up to date when it
 /// is not. So `current` is always three numbers, and the commit is only for people to read.
 ///

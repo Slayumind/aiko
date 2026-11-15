@@ -1,7 +1,7 @@
 import AikoKit
 import Foundation
 
-/// The memory file, as the settings window reads and changes it. The twin of MemoryStore.cs.
+/// The memory file, as the settings read and change it. The twin of MemoryStore.cs.
 ///
 /// The bridge writes the same file from hooks and from the memory server of every open session,
 /// so a change here follows the bridge's rules (aiko-bridge/Disk.swift): take the lock file, read

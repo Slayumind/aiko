@@ -23,6 +23,17 @@ public class CardWordsTests
             Assert.Equal(row.GetProperty(column).GetString(), CardText.WindowName(Enum.Parse<LimitKind>(row.GetProperty("kind").GetString()!), row.GetProperty("model").GetString()));
         }
 
+        foreach (var row in Cases.GetProperty("short").EnumerateArray())
+        {
+            Assert.Equal(row.GetProperty(column).GetString(), CardText.ShortWindowName(Enum.Parse<LimitKind>(row.GetProperty("kind").GetString()!), row.GetProperty("model").GetString()));
+        }
+
+        foreach (var row in Cases.GetProperty("countdown").EnumerateArray())
+        {
+            var countdown = ResetCountdown.Between(Zero, Zero.AddSeconds(row.GetProperty("resetsIn").GetInt32()));
+            Assert.Equal(row.GetProperty(column).GetString(), CardText.Countdown(countdown));
+        }
+
         foreach (var row in Cases.GetProperty("percent").EnumerateArray())
         {
             Assert.Equal(row.GetProperty(column).GetString(), CardText.Percent(row.GetProperty("percent").GetInt32()));
@@ -102,8 +113,8 @@ public class CardWordsTests
         var working = EnvironmentBlock.From(card, first: false, noAccess: false, new CardAccount("Max 5x", SignedIn: true), working: true);
         var signedOut = EnvironmentBlock.From(card, first: true, noAccess: false, new CardAccount("", SignedIn: false), working: true);
 
-        Assert.Equal(("Max 5x", true, "working now", StateDot.Filled, true, "Open Claude Code", true), (working.Plan, working.ShowsPlan, working.State, working.StateDot, working.ShowsHalo, working.OpenLabel, working.ShowsSeparator));
-        Assert.Equal((false, StateDot.Hollow, false, "Sign in", true, false), (signedOut.ShowsPlan, signedOut.StateDot, signedOut.ShowsHalo, signedOut.OpenLabel, signedOut.NeedsSignIn, signedOut.ShowsSeparator));
+        Assert.Equal(("Max 5x", true, "working now", StateDot.Filled, true, false, true), (working.Plan, working.ShowsPlan, working.State, working.StateDot, working.ShowsHalo, working.NeedsSignIn, working.ShowsSeparator));
+        Assert.Equal((false, StateDot.Hollow, false, true, false), (signedOut.ShowsPlan, signedOut.StateDot, signedOut.ShowsHalo, signedOut.NeedsSignIn, signedOut.ShowsSeparator));
     }
 
     [Fact]

@@ -417,7 +417,7 @@ private struct MemoryIconButton: View {
         }
         .buttonStyle(.plain)
         .onHover { hovering = $0 }
-        .help(name)
+        .tip(name)
         .accessibilityLabel(name)
     }
 }

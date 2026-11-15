@@ -138,8 +138,13 @@ def swift_name(key):
     return "`%s`" % name if name in keywords else name
 
 
+def mac_keys(text):
+    """Every Ctrl+ in the words is a key of Aiko itself, and on the Mac that key is Cmd (D-425)."""
+    return text.replace("Ctrl+", "Cmd+")
+
+
 def swift_text(text):
-    return text.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
+    return mac_keys(text).replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
 
 
 def write_swift(path, data):
@@ -150,7 +155,7 @@ def write_swift(path, data):
     parts.append("    ]\n")
 
     for key, value in data:
-        summary = value[0].replace("\n", " ")
+        summary = mac_keys(value[0]).replace("\n", " ")
         if len(summary) > 92:
             summary = summary[:89] + "..."
         # Spelled with the type name because a bare get( reads as the start of a getter.

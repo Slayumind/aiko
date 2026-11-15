@@ -43,7 +43,24 @@ enum ClaudeLauncher {
                 ? workingDirectory : Store.home,
             isDefaultFolder: ClaudeConfigFolder.isDefault(.macOS, configFolder, Store.home))
 
-        let path = (Store.folders.localFolder as NSString).appendingPathComponent(MacTerminal.scriptName)
+        guard openInTerminal(script, named: MacTerminal.scriptName) else { return false }
+
+        Log.write("launch: Claude Code opened for \((configFolder as NSString).lastPathComponent)")
+        return true
+    }
+
+    /// The checklist's "Install Claude Code" (D-421): the official command in a new Terminal window.
+    @discardableResult
+    static func runInstall() -> Bool {
+        let opened = openInTerminal(MacTerminal.installScript(), named: MacTerminal.installScriptName)
+        Log.write(opened ? "checklist: opened Terminal to install Claude Code" : "checklist: Terminal did not open")
+        return opened
+    }
+
+    /// Writes a script beside Aiko's own files and hands it to Terminal, which runs it in a new
+    /// window. No Automation permission is involved.
+    private static func openInTerminal(_ script: String, named name: String) -> Bool {
+        let path = (Store.folders.localFolder as NSString).appendingPathComponent(name)
         do {
             try FileManager.default.createDirectory(
                 atPath: Store.folders.localFolder, withIntermediateDirectories: true)
@@ -69,7 +86,6 @@ enum ClaudeLauncher {
                 }
             }
 
-        Log.write("launch: Claude Code opened for \((configFolder as NSString).lastPathComponent)")
         return true
     }
 

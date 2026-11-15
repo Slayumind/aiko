@@ -173,7 +173,8 @@ struct CardWordsTests {
         #expect(block.state == "working now")
         #expect(block.stateDot == .filled)
         #expect(block.showsHalo)
-        #expect(block.openLabel == "Open Claude Code")
+        #expect(!block.needsSignIn)
+        #expect(block.updated == "updated 12:00")
     }
 
     @Test
@@ -202,7 +203,7 @@ struct CardWordsTests {
         #expect(block.state == "sign in needed")
         #expect(block.stateDot == .hollow)
         #expect(!block.showsPlan)
-        #expect(block.openLabel == "Sign in")
+        #expect(block.needsSignIn)
         #expect(block.note == "Sign in so Aiko can see the limits of this environment.")
         #expect(block.showsNote)
     }
@@ -227,7 +228,7 @@ struct CardWordsTests {
         #expect(model.blocks[0].note == CardText.noDataNote)
         #expect(model.blocks[0].showsNote)
         #expect(!model.blocks[0].showsState)
-        #expect(!model.blocks[0].showsOpen)
+        #expect(!model.blocks[0].needsSignIn)
     }
 
     @Test
@@ -313,6 +314,16 @@ struct CardWordsTests {
         for row in cases["window"]?.arrayValue ?? [] {
             #expect(CardText.windowName(Self.kind(row["kind"]?.stringValue), row["model"]?.stringValue)
                 == row[column]?.stringValue)
+        }
+
+        for row in cases["short"]?.arrayValue ?? [] {
+            #expect(CardText.shortWindowName(Self.kind(row["kind"]?.stringValue), row["model"]?.stringValue)
+                == row[column]?.stringValue)
+        }
+
+        for row in cases["countdown"]?.arrayValue ?? [] {
+            let countdown = ResetCountdown.between(zero, zero.addingTimeInterval(row["resetsIn"]?.doubleValue ?? 0))
+            #expect(CardText.countdown(countdown) == row[column]?.stringValue)
         }
 
         for row in cases["percent"]?.arrayValue ?? [] {
