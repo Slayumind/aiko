@@ -25,6 +25,7 @@ enum TerminalCheck {
             Log.write("self test: terminal window \(host.headerForCheck)")
             host.showHeaderForCheck(false)
             keys(host)
+            tips()
             after(0.5) {
                 host.closeForCheck()
                 after(0.5) {
@@ -53,6 +54,18 @@ enum TerminalCheck {
                 + "Cmd+Shift+T folders=\(folders && foldersOpen), Cmd+, settings=\(settings && settingsOpen), "
                 + "all closed=\(!host.paletteOpen && !host.settingsOpenForCheck)")
         }
+    }
+
+    /// A short tip stands on one line, a long one wraps in 320 points, as on Windows.
+    private static func tips() {
+        let point = NSPoint(x: 400, y: 400)
+        Tips.show(Strings.settings, at: point)
+        let short = Tips.sizeForCheck
+        Tips.show(String(repeating: Strings.terminalNotStartedBody + " ", count: 3), at: point)
+        let long = Tips.sizeForCheck
+        Tips.cancel()
+        func describe(_ size: NSSize?) -> String { size.map { "\(Int($0.width))x\(Int($0.height))" } ?? "missing" }
+        Log.write("self test: terminal window tips: short \(describe(short)), long \(describe(long))")
     }
 
     private static func after(_ seconds: Double, _ work: @escaping @MainActor () -> Void) {

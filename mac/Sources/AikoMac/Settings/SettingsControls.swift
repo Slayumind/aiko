@@ -254,7 +254,7 @@ struct MarkButton<Mark: View>: View {
         }
         .buttonStyle(.plain)
         .onHover { hovering = $0 }
-        .help(help)
+        .tip(help)
     }
 }
 

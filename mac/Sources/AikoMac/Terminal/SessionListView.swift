@@ -1,4 +1,5 @@
 import AikoKit
+import AppKit
 import SwiftUI
 
 /// The left side of the terminal window, the twin of TerminalPanel.SessionList.cs: the sessions of
@@ -59,6 +60,11 @@ private struct GroupHeader: View {
                 small("M0.5,1.5 L4,1.5 L5.5,3 L11.5,3 L11.5,9.5 L0.5,9.5 Z",
                       gone ? Strings.terminalFolderGone : Strings.terminalGroupOpenFolder) {
                     gone = state.onOpenFolder?(group.folder) == false
+                    // A folder gone from the disk opens nothing: the tip says so at once, until the
+                    // pointer leaves the button.
+                    if gone {
+                        DispatchQueue.main.async { Tips.show(Strings.terminalFolderGone, at: NSEvent.mouseLocation) }
+                    }
                 }
             }
             .opacity(hovered ? 1 : 0)
@@ -67,7 +73,7 @@ private struct GroupHeader: View {
         .padding(.trailing, 4)
         .padding(.top, 8)
         .contentShape(Rectangle())
-        .help(group.folder)
+        .tip(group.folder)
         .onHover { inside in
             withAnimation(Motion.reduceMotion ? nil : .easeOut(duration: 0.12)) { hovered = inside }
             if !inside { gone = false }
@@ -82,7 +88,7 @@ private struct GroupHeader: View {
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .help(tip)
+        .tip(tip)
     }
 }
 

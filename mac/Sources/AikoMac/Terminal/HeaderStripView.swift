@@ -104,7 +104,7 @@ private struct HeaderCard: View {
                 DragGesture(minimumDistance: 0)
                     .onChanged { _ in if !active && !pressed { withAnimation(.easeOut(duration: 0.08)) { pressed = true } } }
                     .onEnded { _ in withAnimation(.spring(duration: 0.25)) { pressed = false } })
-            .help(active ? "" : item.column.environment)
+            .tip(active ? "" : item.column.environment)
     }
 
     @ViewBuilder private var content: some View {
@@ -180,7 +180,7 @@ private struct HeaderCard: View {
                         .font(Theme.sans(Theme.textTiny))
                         .foregroundStyle(Theme.ink)
                         .underline()
-                        .help(Strings.stateSignInNeeded)
+                        .tip(Strings.stateSignInNeeded)
                         .onTapGesture { state.onSignIn?(item.column.environment) }
                         .padding(.leading, 12)
                 }

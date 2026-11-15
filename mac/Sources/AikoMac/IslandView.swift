@@ -45,8 +45,8 @@ final class IslandView: NSView {
 
         // The numbers go in words too: a ring and a colour say nothing to a screen reader, and
         // nothing at all to somebody who cannot tell the green from the red.
-        toolTip = TrayText.tooltip(cards, newerVersion: newerVersion)
-        setAccessibilityLabel(toolTip)
+        tipText = TrayText.tooltip(cards, newerVersion: newerVersion)
+        setAccessibilityLabel(tipText)
         needsDisplay = true
     }
 
@@ -243,15 +243,21 @@ final class IslandView: NSView {
             userInfo: nil))
     }
 
+    /// The words of the numbers, shown in the tip of Aiko, as on the island of Windows.
+    private var tipText = ""
+
     override func mouseEntered(with event: NSEvent) {
+        Tips.hover(tipText, owner: ObjectIdentifier(self))
         onEnter?()
     }
 
     override func mouseExited(with event: NSEvent) {
+        Tips.leave(owner: ObjectIdentifier(self))
         onLeave?()
     }
 
     override func mouseDown(with event: NSEvent) {
+        Tips.leave(owner: ObjectIdentifier(self))
         onPress?(NSEvent.mouseLocation)
     }
 

@@ -89,7 +89,7 @@ struct TitleBarView: View {
             .contentShape(Capsule())
         }
         .buttonStyle(.plain)
-        .help(tab.waiting > 0 ? tip(tab) : "")
+        .tip(tab.waiting > 0 ? tip(tab) : "")
         .layoutPriority(tab.selected ? 1 : 0)
     }
 
@@ -142,6 +142,6 @@ struct BarButton<Mark: View>: View {
         .onHover { inside in
             withAnimation(Motion.reduceMotion ? nil : .easeOut(duration: 0.12)) { hovered = inside }
         }
-        .help(tip)
+        .tip(tip)
     }
 }

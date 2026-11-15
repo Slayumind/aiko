@@ -229,7 +229,7 @@ struct EnvironmentPageView: View {
                     .foregroundStyle(Theme.ink)
                     .lineLimit(1)
                     .truncationMode(.tail)
-                    .help(path)
+                    .tip(path)
                 Spacer(minLength: 0)
                 MarkButton(help: Strings.removeBinding, press: {
                     state.editor.commit(EnvironmentEdits.unbind(state.environments, path), "unbound a folder")
