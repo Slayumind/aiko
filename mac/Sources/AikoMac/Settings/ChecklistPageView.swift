@@ -2,7 +2,7 @@ import AikoKit
 import AppKit
 import SwiftUI
 
-/// The environment checklist (D-165) as a page of the settings window (D-177): every item on one
+/// The environment checklist (D-165) as a page of the settings (D-177, D-374): every item on one
 /// page, the next one opens by itself on a fresh machine, and any item can be opened again to
 /// change its answer. Which item is ready, blocked or done is decided in AikoKit.WizardChecklist,
 /// and where it sits on the page in AikoKit.ChecklistLayout.

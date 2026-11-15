@@ -2,7 +2,7 @@ import AikoKit
 import AppKit
 import SwiftUI
 
-/// One face as a picture, for the settings window. The twin of what FaceDrawing.For hands a WPF
+/// One face as a picture, for the settings. The twin of what FaceDrawing.For hands a WPF
 /// Image on Windows.
 ///
 /// The island and the menu bar icon draw their faces straight into a view, because they animate

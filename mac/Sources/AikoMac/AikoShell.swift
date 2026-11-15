@@ -2,9 +2,9 @@ import AikoKit
 import AppKit
 
 /// The one owner of everything Aiko shows on macOS: the icon in the menu bar or the island at the
-/// edge of the screen, the card under whichever of them is there, and the settings window. All of
-/// them show the same numbers and the user swaps between the two places at will, so one class
-/// decides who is told what and when.
+/// edge of the screen, and the terminal window with the settings in it. All of them show the same
+/// numbers and the user swaps between the two places at will, so one class decides who is told
+/// what and when.
 ///
 /// The parts do the work: MenuBarIcon and MenuBarMenu, IslandHost, TerminalHost, ShellNumbers for what
 /// the numbers are, StartupChores for what is put right at every start. This class only connects
@@ -22,14 +22,11 @@ final class AikoShell {
     private var watch: SnapshotWatch?
     private var updates: UpdateWatch?
 
-    /// One settings window at a time (D-177). It is made when it is asked for and dropped when it
-    /// closes, the way every other window of Aiko is.
-    private var settings: SettingsWindow?
-
     /// The terminal window with the sessions (D-425), made on the first click and kept while Aiko runs.
     private lazy var terminal: TerminalHost = {
         let host = TerminalHost(limitsOf: { [weak self] name in self?.numbers.snapshot(for: name) })
-        host.onSettingsAsked = { [weak self] in _ = self?.openSettings(at: nil) }
+        host.onQuitAsked = { NSApp.terminate(nil) }
+        host.onSettingsChanged = { [weak self] in self?.onRefresh() }
         host.onShownChanged = { [weak self] shown in
             self?.windowOpen = shown
             self?.applyPlace()
@@ -204,7 +201,7 @@ final class AikoShell {
             items.performActionForItem(at: at)
         }
 
-        Log.write("self test: menu picked \"\(Strings.settings)\", settings window open: \(settings != nil)")
+        Log.write("self test: menu picked \"\(Strings.settings)\", settings open: \(terminal.settingsOpenForCheck)")
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) { NSApp.terminate(nil) }
     }
 
@@ -222,8 +219,6 @@ final class AikoShell {
     func showFaceForCheck(_ face: AikoFace?) {
         onFace(face)
     }
-
-    /// The card as the island would open it, and where it ended up. Only the self test calls these.
 
     /// The picture the menu bar holds right now, so a self test can see it change.
     var iconPictureForCheck: Data? { icon.pictureForCheck }
@@ -337,7 +332,7 @@ final class AikoShell {
         }
     }
 
-    /// Called after every change in the settings window and from the menu: everything that depends
+    /// Called after every change in the settings and from the menu: everything that depends
     /// on the settings is worked out again.
     private func onRefresh() {
         numbers.noteWhereWeHaveNoAccess()
@@ -355,28 +350,12 @@ final class AikoShell {
         }
     }
 
-    // ---- The settings window ----
+    // ---- The settings ----
 
-    /// The one settings window. A second ask brings the one that is open to the front, so two
-    /// windows can never disagree about what is saved.
+    /// The settings live in the terminal window (D-374): a second ask moves the open ones to the
+    /// page asked for, so two copies can never disagree about what is saved.
     @discardableResult
-    func openSettings(at page: SettingsPage?, item: ChecklistItem? = nil) -> SettingsWindow {
-        if let open = settings {
-            if let page { open.state.show(page) }
-            if let item { open.openChecklist(at: item) }
-            open.show()
-            return open
-        }
-
-        let window = SettingsWindow(page: page)
-        window.onQuit = { NSApp.terminate(nil) }
-        window.onChanged = { [weak self] in self?.onRefresh() }
-        window.onClosed = { [weak self] in self?.settings = nil }
-        window.onReopen = { [weak self] page in self?.openSettings(at: page) }
-
-        settings = window
-        if let item { window.openChecklist(at: item) }
-        window.show()
-        return window
+    func openSettings(at page: SettingsPage?, item: ChecklistItem? = nil) -> SettingsState {
+        terminal.openSettings(at: page, item: item)
     }
 }

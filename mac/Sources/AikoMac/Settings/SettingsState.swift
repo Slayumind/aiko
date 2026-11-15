@@ -226,6 +226,7 @@ final class SettingsState: ObservableObject {
             environments: environments,
             plans: byFolder,
             sendsStats: app.sendStats,
+            voiceInput: app.voiceInput,
             checklistOpen: checklist != nil,
             platform: .macOS,
             userProfile: Store.home)

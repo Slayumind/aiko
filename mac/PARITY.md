@@ -226,11 +226,11 @@ AikoKit decided, and it answers the mouse.
 | SettingsStore.cs, ClaudeAccounts.cs | Store.swift | reads the settings, the environments and the plan of an account |
 | Log.cs | Log.swift | the same file, the same line format |
 | Uninstall.cs | Uninstall.swift | putting everything back on the way out. Windows is called by the installer's hook and then removes the program with `Update.exe uninstall`; macOS has no uninstaller, so the app does the work itself, moves its own bundle to the Bin and quits. Both carry the answer about the memory from the settings page to `UninstallPlan`; the Windows hook has no window and passes "nobody was asked", and macOS has no such path |
-| Settings/SettingsPanel.xaml(.cs) | Settings/SettingsWindow.swift | the menu and the page area. On Windows the settings open inside the terminal window, on macOS in a borderless window of their own that Esc closes |
+| Settings/SettingsPanel.xaml(.cs), Terminal/TerminalHost.Settings.cs | Settings/SettingsPanel.swift, Terminal/TerminalHost+Settings.swift | the settings inside the terminal window (D-374): the menu on the place of the list, as wide as it, and the page in a column of 640 on the left. The gear, a pill or Esc goes back to the same session |
+| Settings/TerminalPage.xaml(.cs) | Settings/TerminalPageView.swift | the zoom of the window and the sound of a question. Voice input joins it on macOS together with the voice itself |
 | Settings/SavedMark.cs, Theme/Controls.xaml, Theme/DropDown.cs, Theme/RevealPanel.cs | Settings/SettingsControls.swift | the switch, the segments, the picked card, the fields, the buttons (with the light one for Save and a plus before the words), the tick, the chip, the drop down and the "Saved" mark |
 | Settings/EnvironmentsEditor.cs | Settings/SettingsState.swift | what the window is looking at, and every change written through one place |
-| Settings/EnvironmentPage.xaml(.cs) | Settings/EnvironmentPageView.swift | one environment: the account, the name, the command, the bound folders and removal |
-| — | Settings/FoldersPageView.swift | every bound folder in one table. Windows binds folders on the page of each environment |
+| Settings/EnvironmentPage.xaml(.cs) | Settings/EnvironmentPageView.swift | one environment: the account, the name, the command, the bound folders with the switch for every other folder (D-398), and removal |
 | Settings/PersonalityPage.xaml(.cs) | Settings/PersonalityPageView.swift | one switch per environment for all of Aiko (her character, her skills and her memory), the memory block, the face, the temperament, the sample answer and the list of skills |
 | Settings/MemoryBlock.cs | Settings/MemoryBlockView.swift, MemoryBlockModel.swift | the memory under the table: quotas, facts, the two forms, the warnings, the foot and the erase question. The model keeps what is open and has the snapshot door `AIKO_TRY_MEMORY` |
 | Settings/MemoryStore.cs | Settings/MemoryStore.swift | the memory file for the window: the bridge's lock file, read again, change, write in one step |
@@ -274,14 +274,12 @@ Where it differs from Windows:
   landing strip, `--try-face` plays a face. The Windows app has `--snapshot` as well, which saves a picture;
   over SSH a picture shows only the wallpaper, so nothing here draws one.
 
-- **The settings window has two doors of its own.** `--try-settings <page>` opens it at one page
-  (`general`, `folders`, `personality`, `privacy`, `setup`, `env1`, `env2`) and `--try-wizard
-  <item>` at one checklist item. Both write down the size, the menu and the state of every item,
-  and quit after `AIKO_TRY_SECONDS`. `AIKO_TRY_GROW=1` makes the window as tall as the page, the
-  way `SettingsPanel.GrowToPage` does for `--snapshot-settings` on Windows, and `=end` keeps its
-  bottom on screen when the page is taller than the screen itself. Neither door saves anything.
+- **The settings have two doors of their own.** `--try-settings <page>` opens the terminal window
+  at one page (`general`, `terminal`, `personality`, `privacy`, `setup`, `env1`, `env2`) and
+  `--try-wizard <item>` at one checklist item. Both write down the menu and the state of every
+  item, and quit after `AIKO_TRY_SECONDS`. Neither door saves anything.
 
-## What macOS does differently in the settings window
+## What macOS does differently in the settings
 
 These are the places where there was nothing to copy, with the reason for the choice.
 

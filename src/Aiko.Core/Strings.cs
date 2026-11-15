@@ -64,7 +64,6 @@ public static class Strings
             ["QuitAiko"] = ("Quit Aiko", "Выйти из Aiko"),
             ["CheckForUpdates"] = ("Check for updates", "Проверить обновления"),
             ["CheckUpdatesToggle"] = ("Check for updates", "Проверять обновления"),
-            ["SectionEnvironments"] = ("ENVIRONMENTS", "СРЕДЫ"),
             ["SectionWhereToShow"] = ("WHERE TO SHOW", "ГДЕ ПОКАЗЫВАТЬ"),
             ["SectionWhenClosed"] = ("WHEN THE WINDOW IS CLOSED", "КОГДА ОКНО ЗАКРЫТО"),
             ["SectionStartupAndUpdates"] = ("STARTUP AND UPDATES", "ЗАПУСК И ОБНОВЛЕНИЯ"),
@@ -225,7 +224,6 @@ public static class Strings
             ["DoneCommands"] = ("Commands: {0}. Open a new terminal to use them.", "Команды: {0}. Они заработают в новом окне терминала."),
             ["SetUpEnvironments"] = ("Set up environments", "Настроить среды"),
             ["NavGeneral"] = ("General", "Общее"),
-            ["NavBound"] = ("{0} bound", "привязано: {0}"),
             ["AddSecondEnvironment"] = ("Add a second environment", "Добавить вторую среду"),
             ["Saved"] = ("Saved", "Сохранено"),
             ["ByDefault"] = ("default", "по умолчанию"),
@@ -243,10 +241,8 @@ public static class Strings
             ["NameTaken"] = ("The other environment has this name.", "Это имя уже у другой среды."),
             ["SectionBoundFolders"] = ("BOUND FOLDERS", "ПРИВЯЗАННЫЕ ПАПКИ"),
             ["NoneBound"] = ("No folders.", "Ни одной папки."),
-            ["RestToo"] = ("And every other folder: this is the default environment.", "И все остальные папки: это среда по умолчанию."),
             ["DefaultForRest"] = ("Every other folder opens here", "Все остальные папки — сюда"),
             ["FolderMovedFrom"] = ("Moved here from {0}", "Перенесена сюда из {0}"),
-            ["EditInFolders"] = ("Change in project folders", "Изменить в папках проектов"),
             ["RemoveEnvironment"] = ("Remove environment", "Удалить среду"),
             ["RemoveEnvironmentLine"] = ("Aiko's line and plugins leave this folder's settings.json, and so do the command {0} and the bindings to {1}.", "Из settings.json этой папки уйдут строка и плагины Aiko, а с ними команда {0} и привязки к {1}."),
             ["MoveToRecycleBin"] = ("And move the folder to the Recycle Bin", "И переместить папку в Корзину"),
@@ -260,8 +256,6 @@ public static class Strings
             ["EnvironmentRemovedToBin"] = ("{0} removed. The folder is in the Recycle Bin.", "{0} удалена, папка в Корзине."),
             ["EnvironmentRemovedToTrash"] = ("{0} removed. The folder is in the Trash.", "{0} удалена, папка в Корзине."),
             ["FoldersTableLead"] = ("In a folder and in every folder inside, plain claude starts its environment. A command like {0} beats a binding, and Claude Code reminds you of the binding.", "В папке и во всех вложенных обычный claude запускает её среду. Команда вроде {0} сильнее привязки, но Claude Code напомнит о привязке."),
-            ["FolderColumn"] = ("FOLDER", "ПАПКА"),
-            ["EnvironmentColumn"] = ("ENVIRONMENT", "СРЕДА"),
             ["AllOtherFolders"] = ("All other folders", "Все остальные папки"),
             ["AddFolder"] = ("Add a folder", "Добавить папку"),
             ["RemoveBinding"] = ("Remove binding", "Убрать привязку"),
@@ -661,9 +655,6 @@ public static class Strings
 
     /// Check for updates
     public static string CheckUpdatesToggle => Get("CheckUpdatesToggle");
-
-    /// ENVIRONMENTS
-    public static string SectionEnvironments => Get("SectionEnvironments");
 
     /// WHERE TO SHOW
     public static string SectionWhereToShow => Get("SectionWhereToShow");
@@ -1145,9 +1136,6 @@ public static class Strings
     /// General
     public static string NavGeneral => Get("NavGeneral");
 
-    /// {0} bound
-    public static string NavBound => Get("NavBound");
-
     /// Add a second environment
     public static string AddSecondEnvironment => Get("AddSecondEnvironment");
 
@@ -1199,17 +1187,11 @@ public static class Strings
     /// No folders.
     public static string NoneBound => Get("NoneBound");
 
-    /// And every other folder: this is the default environment.
-    public static string RestToo => Get("RestToo");
-
     /// Every other folder opens here
     public static string DefaultForRest => Get("DefaultForRest");
 
     /// Moved here from {0}
     public static string FolderMovedFrom => Get("FolderMovedFrom");
-
-    /// Change in project folders
-    public static string EditInFolders => Get("EditInFolders");
 
     /// Remove environment
     public static string RemoveEnvironment => Get("RemoveEnvironment");
@@ -1249,12 +1231,6 @@ public static class Strings
 
     /// In a folder and in every folder inside, plain claude starts its environment. A command li...
     public static string FoldersTableLead => Get("FoldersTableLead");
-
-    /// FOLDER
-    public static string FolderColumn => Get("FolderColumn");
-
-    /// ENVIRONMENT
-    public static string EnvironmentColumn => Get("EnvironmentColumn");
 
     /// All other folders
     public static string AllOtherFolders => Get("AllOtherFolders");

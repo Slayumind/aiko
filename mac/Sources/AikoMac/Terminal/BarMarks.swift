@@ -13,6 +13,9 @@ enum BarMarks {
     static let search = "M4.5,0.5 A4,4 0 1 1 4.49,0.5 Z M7.6,7.6 L11,11"
     static let pause = "M0.5,0.5 L0.5,9.5 M4.5,0.5 L4.5,9.5"
 
+    /// The sound of a question of the agent: a speaker with two waves (D-396).
+    static let sound = "M0.5,3.5 L2.5,3.5 L5,1 L5,9 L2.5,6.5 L0.5,6.5 Z M7,3.3 Q8.1,5 7,6.7 M8.6,1.8 Q10.6,5 8.6,8.2"
+
     /// check.svg of the project's icon set (SiteIcons.Check).
     static let check = "M23.855,6.353l-13.883,14c-.419,.418-.973,.647-1.562,.647s-1.144-.229-1.561-.646L.152,13.859c-.198-.192-.203-.509-.012-.707,.194-.198,.51-.203,.707-.012l6.703,6.5c.469,.467,1.256,.461,1.713,.006L23.145,5.647c.195-.194,.511-.197,.708-.003,.195,.195,.197,.512,.003,.708Z"
 

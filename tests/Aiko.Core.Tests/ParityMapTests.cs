@@ -49,8 +49,9 @@ public partial class ParityMapTests
         folders.SelectMany(folder => Directory.EnumerateFiles(Path.Combine(Root, folder), "*", SearchOption.AllDirectories))
             .Where(path => !path.Split(Path.DirectorySeparatorChar).Any(part => part is "bin" or "obj" or ".build"));
 
-    /// A file name the map can mention: "Notices.cs", "IslandView.swift", "Tokens.xaml", "App.xaml.cs".
-    [GeneratedRegex(@"\b[A-Za-z][A-Za-z0-9]*(\.xaml)?\.(cs|swift|xaml)\b")]
+    /// A file name the map can mention: "Notices.cs", "IslandView.swift", "Tokens.xaml", "App.xaml.cs",
+    /// and a part of a class in a file of its own: "TerminalHost.Settings.cs", "TerminalHost+Settings.swift".
+    [GeneratedRegex(@"\b[A-Za-z][A-Za-z0-9]*([.+][A-Za-z][A-Za-z0-9]*)?(\.xaml)?\.(cs|swift|xaml)\b")]
     private static partial Regex FileName();
 
     /// The folder at the start of a row of the table: "| `notices/` | ...".

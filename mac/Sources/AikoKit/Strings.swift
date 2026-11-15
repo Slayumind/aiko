@@ -71,7 +71,6 @@ public enum Strings {
         "QuitAiko": ("Quit Aiko", "Выйти из Aiko"),
         "CheckForUpdates": ("Check for updates", "Проверить обновления"),
         "CheckUpdatesToggle": ("Check for updates", "Проверять обновления"),
-        "SectionEnvironments": ("ENVIRONMENTS", "СРЕДЫ"),
         "SectionWhereToShow": ("WHERE TO SHOW", "ГДЕ ПОКАЗЫВАТЬ"),
         "SectionWhenClosed": ("WHEN THE WINDOW IS CLOSED", "КОГДА ОКНО ЗАКРЫТО"),
         "SectionStartupAndUpdates": ("STARTUP AND UPDATES", "ЗАПУСК И ОБНОВЛЕНИЯ"),
@@ -232,7 +231,6 @@ public enum Strings {
         "DoneCommands": ("Commands: {0}. Open a new terminal to use them.", "Команды: {0}. Они заработают в новом окне терминала."),
         "SetUpEnvironments": ("Set up environments", "Настроить среды"),
         "NavGeneral": ("General", "Общее"),
-        "NavBound": ("{0} bound", "привязано: {0}"),
         "AddSecondEnvironment": ("Add a second environment", "Добавить вторую среду"),
         "Saved": ("Saved", "Сохранено"),
         "ByDefault": ("default", "по умолчанию"),
@@ -250,10 +248,8 @@ public enum Strings {
         "NameTaken": ("The other environment has this name.", "Это имя уже у другой среды."),
         "SectionBoundFolders": ("BOUND FOLDERS", "ПРИВЯЗАННЫЕ ПАПКИ"),
         "NoneBound": ("No folders.", "Ни одной папки."),
-        "RestToo": ("And every other folder: this is the default environment.", "И все остальные папки: это среда по умолчанию."),
         "DefaultForRest": ("Every other folder opens here", "Все остальные папки — сюда"),
         "FolderMovedFrom": ("Moved here from {0}", "Перенесена сюда из {0}"),
-        "EditInFolders": ("Change in project folders", "Изменить в папках проектов"),
         "RemoveEnvironment": ("Remove environment", "Удалить среду"),
         "RemoveEnvironmentLine": ("Aiko's line and plugins leave this folder's settings.json, and so do the command {0} and the bindings to {1}.", "Из settings.json этой папки уйдут строка и плагины Aiko, а с ними команда {0} и привязки к {1}."),
         "MoveToRecycleBin": ("And move the folder to the Recycle Bin", "И переместить папку в Корзину"),
@@ -267,8 +263,6 @@ public enum Strings {
         "EnvironmentRemovedToBin": ("{0} removed. The folder is in the Recycle Bin.", "{0} удалена, папка в Корзине."),
         "EnvironmentRemovedToTrash": ("{0} removed. The folder is in the Trash.", "{0} удалена, папка в Корзине."),
         "FoldersTableLead": ("In a folder and in every folder inside, plain claude starts its environment. A command like {0} beats a binding, and Claude Code reminds you of the binding.", "В папке и во всех вложенных обычный claude запускает её среду. Команда вроде {0} сильнее привязки, но Claude Code напомнит о привязке."),
-        "FolderColumn": ("FOLDER", "ПАПКА"),
-        "EnvironmentColumn": ("ENVIRONMENT", "СРЕДА"),
         "AllOtherFolders": ("All other folders", "Все остальные папки"),
         "AddFolder": ("Add a folder", "Добавить папку"),
         "RemoveBinding": ("Remove binding", "Убрать привязку"),
@@ -665,9 +659,6 @@ public enum Strings {
 
     /// Check for updates
     public static var checkUpdatesToggle: String { Strings.get("CheckUpdatesToggle") }
-
-    /// ENVIRONMENTS
-    public static var sectionEnvironments: String { Strings.get("SectionEnvironments") }
 
     /// WHERE TO SHOW
     public static var sectionWhereToShow: String { Strings.get("SectionWhereToShow") }
@@ -1149,9 +1140,6 @@ public enum Strings {
     /// General
     public static var navGeneral: String { Strings.get("NavGeneral") }
 
-    /// {0} bound
-    public static var navBound: String { Strings.get("NavBound") }
-
     /// Add a second environment
     public static var addSecondEnvironment: String { Strings.get("AddSecondEnvironment") }
 
@@ -1203,17 +1191,11 @@ public enum Strings {
     /// No folders.
     public static var noneBound: String { Strings.get("NoneBound") }
 
-    /// And every other folder: this is the default environment.
-    public static var restToo: String { Strings.get("RestToo") }
-
     /// Every other folder opens here
     public static var defaultForRest: String { Strings.get("DefaultForRest") }
 
     /// Moved here from {0}
     public static var folderMovedFrom: String { Strings.get("FolderMovedFrom") }
-
-    /// Change in project folders
-    public static var editInFolders: String { Strings.get("EditInFolders") }
 
     /// Remove environment
     public static var removeEnvironment: String { Strings.get("RemoveEnvironment") }
@@ -1253,12 +1235,6 @@ public enum Strings {
 
     /// In a folder and in every folder inside, plain claude starts its environment. A command li...
     public static var foldersTableLead: String { Strings.get("FoldersTableLead") }
-
-    /// FOLDER
-    public static var folderColumn: String { Strings.get("FolderColumn") }
-
-    /// ENVIRONMENT
-    public static var environmentColumn: String { Strings.get("EnvironmentColumn") }
 
     /// All other folders
     public static var allOtherFolders: String { Strings.get("AllOtherFolders") }

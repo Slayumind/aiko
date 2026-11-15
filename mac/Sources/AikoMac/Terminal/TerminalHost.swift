@@ -37,6 +37,10 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
     var holderWatch: NSObjectProtocol?
     var bar: NSView?
 
+    /// The settings while they are open, and their panel over the list and the terminal (D-374).
+    var settings: SettingsState?
+    var settingsCover: NSView?
+
     /// The messages in place of the terminal. Hidden while the terminal shows, so it takes no click.
     var stageCover: NSView?
 
@@ -51,7 +55,7 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
         state.onNewInOtherFolder = { [weak self] in self?.pickFolder() }
         state.onToggleList = { [weak self] in self?.toggleList() }
         state.onToggleHeader = { [weak self] in self?.toggleHeader() }
-        state.onSettings = { [weak self] in self?.onSettingsAsked?() }
+        state.onSettings = { [weak self] in self?.toggleSettings() }
         wireSessionActions()
     }
 
@@ -60,8 +64,11 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
     /// The window was shown or closed.
     var onShownChanged: ((Bool) -> Void)?
 
-    /// The gear of the title bar was pressed.
-    var onSettingsAsked: (() -> Void)?
+    /// "Quit Aiko" on the general page: the shell quits.
+    var onQuitAsked: (() -> Void)?
+
+    /// A setting was saved: the shell follows it while the settings are still open.
+    var onSettingsChanged: (() -> Void)?
 
     /// New numbers arrived: the pills show them.
     func limitsChanged() {
@@ -155,7 +162,9 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
             ])
         }
         terminal.isHidden = false
-        window?.makeFirstResponder(terminal)
+        if settings == nil {
+            window?.makeFirstResponder(terminal)
+        }
     }
 
     /// What stands in place of the terminal: the question before closing first, then the empty
@@ -280,6 +289,8 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
     }
 
     var terminalCountForCheck: Int { terminals.count }
+
+    var settingsOpenForCheck: Bool { settings != nil }
 
     /// Where the bar and the window buttons stand, in points from the top of the window.
     var barForCheck: String {
