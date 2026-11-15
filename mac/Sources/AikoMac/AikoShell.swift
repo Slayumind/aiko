@@ -33,6 +33,8 @@ final class AikoShell {
             self?.windowOpen = shown
             self?.applyPlace()
         }
+        host.onWaitingStarted = { [weak self] in self?.playWaiting() }
+        host.onSessionsChanged = { [weak self] counts in self?.showSessions(counts) }
         return host
     }()
 
@@ -167,6 +169,26 @@ final class AikoShell {
         }
     }
 
+    /// How many sessions wait, ended a turn, stopped and work (D-364, D-409): the menu bar icon and
+    /// the island show them.
+    private(set) var sessions = SessionCounts.none
+
+    private func showSessions(_ counts: SessionCounts) {
+        sessions = counts
+    }
+
+    /// Times the sound of a session that starts to wait was due, for --try-pulse.
+    private(set) var waitingSounds = 0
+
+    /// The sound of a session that starts to wait (D-375). A check changes nothing for the person,
+    /// so it plays none.
+    private func playWaiting() {
+        waitingSounds += 1
+        if !selfTesting, let path = Bundle.main.path(forResource: "waiting", ofType: "wav") {
+            NSSound(contentsOfFile: path, byReference: true)?.play()
+        }
+    }
+
     // ---- Doors for the self tests: they drive the shell through these and nothing else ----
 
     /// The settings panel at the zoom of the window: its frame, the bounds SwiftUI lays out in, and
@@ -192,6 +214,11 @@ final class AikoShell {
 
         if what == "editor" {
             EditorCheck.run(terminal)
+            return
+        }
+
+        if what == "pulse" {
+            PulseCheck.run(terminal) { [weak self] in self?.waitingSounds ?? 0 }
             return
         }
 

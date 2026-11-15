@@ -58,6 +58,9 @@ if [ "$(shasum -a 256 ".build/voice/$vad" | cut -d' ' -f1)" != "$vad_sha" ]; the
 fi
 cp ".build/voice/$vad" "$app/Contents/Resources/"
 
+# The sound of a session that waits for the person (D-375), the same file Windows plays.
+cp ../src/Aiko.App/Assets/Sounds/waiting.wav "$app/Contents/Resources/"
+
 # The bundle ships the bridge under the name BridgeCommand.isAiko reads a status line by, and the
 # shim under the name Claude Code is started with. SwiftPM cannot build them under those names.
 cp "$products/aiko-bridge" "$app/Contents/MacOS/Aiko.Bridge"

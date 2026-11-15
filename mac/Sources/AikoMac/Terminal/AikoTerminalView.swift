@@ -1,3 +1,4 @@
+import AikoKit
 import AppKit
 import SwiftTerm
 
@@ -13,6 +14,10 @@ final class AikoTerminalView: LocalProcessTerminalView {
 
     /// A click ended in the terminal: a selection may have been made there.
     var clicked: (() -> Void)?
+
+    /// Input went to the program that the person typed, here or through the editor: a question the
+    /// program asked is answered (TerminalPulse.isTyped tells it from what the terminal sends itself).
+    var typedByPerson: (() -> Void)?
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -30,6 +35,13 @@ final class AikoTerminalView: LocalProcessTerminalView {
         } else {
             super.paste(sender)
         }
+    }
+
+    override func send(source: TerminalView, data: ArraySlice<UInt8>) {
+        if let typedByPerson, TerminalPulse.isTyped(String(decoding: data, as: UTF8.self)) {
+            typedByPerson()
+        }
+        super.send(source: source, data: data)
     }
 
     override func mouseUp(with event: NSEvent) {

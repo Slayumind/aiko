@@ -53,9 +53,9 @@ extension TerminalHost {
             }
             terminal.removeFromSuperview()
         }
-        exited.remove(id)
         problems[id] = nil
         forgetEditor(id)
+        forgetPulse(id)
         sessions = sessions.close(id)
         save()
         model = model.after(sessions)

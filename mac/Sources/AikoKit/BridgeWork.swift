@@ -18,6 +18,10 @@ public enum BridgeMode: Sendable, Equatable {
     /// "hook": one session event for the face in the tray.
     case hook
 
+    /// The hook of a session of the terminal: its last event goes into the file of the session
+    /// (TerminalEvent).
+    case terminalHook
+
     /// "memory rules|facts|prompt|serve": the three memory hooks and the memory server.
     case memory(MemoryBridgeMode)
 
@@ -35,6 +39,7 @@ public enum BridgeMode: Sendable, Equatable {
 
         switch arguments.first {
         case SessionReminder.argument: return .sessionStart
+        case TerminalEvent.hookArgument: return .terminalHook
         case PersonaPlugin.hookArgument: return .hook
         default: return .statusLine
         }

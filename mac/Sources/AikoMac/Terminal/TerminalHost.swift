@@ -17,7 +17,28 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
     var sessions = Store.terminal()
     var model: TerminalWindowModel
     var terminals: [String: LocalProcessTerminalView] = [:]
-    var exited: Set<String> = []
+
+    /// When a program ended, for its row and for the count of stopped sessions.
+    var exitedAt: [String: Int64] = [:]
+
+    // What each session does (TerminalHost+Pulse.swift): the title of Claude Code, its last hook
+    // event, when the person last looked at it and last typed into it.
+    let events = TerminalEvents()
+    var titles: [String: ClaudeTitle] = [:]
+    var lastEvents: [String: TerminalEvent] = [:]
+    var seenAt: [String: Int64] = [:]
+    var answeredAt: [String: Int64] = [:]
+    var activities: [String: TerminalActivity] = [:]
+    var sessionCounts = SessionCounts.none
+
+    /// The Dock badge asked macOS for leave once in this run; macOS keeps the answer.
+    var askedToBadge = false
+
+    /// The counts changed: the menu bar icon and the island show them.
+    var onSessionsChanged: ((SessionCounts) -> Void)?
+
+    /// A session started to wait and the sound is due (D-375): the shell plays it.
+    var onWaitingStarted: (() -> Void)?
 
     /// Why a session has no terminal, until it is started again (D-421).
     var problems: [String: StartProblem] = [:]
@@ -86,6 +107,7 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
         state.onToggleHeader = { [weak self] in self?.toggleHeader() }
         state.onSettings = { [weak self] in self?.toggleSettings() }
         wireSessionActions()
+        wirePulse()
     }
 
     var isShown: Bool { window?.isVisible == true }
@@ -183,6 +205,8 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
             view.isHidden = true
         }
         showEditor(for: model.session(sessions), terminal: shown)
+        markSeen()
+        notice()
 
         guard let terminal = shown else { return }
         if terminal.superview !== stage {
@@ -254,11 +278,6 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
         }
     }
 
-    func live(_ id: String) -> LiveTerminal? {
-        guard terminals[id] != nil else { return nil }
-        return LiveTerminal(activity: exited.contains(id) ? .exited : .idle, line: "")
-    }
-
     // ---- the terminals ----
 
     /// The terminal of a session, started the first time it is shown. Nil when the program cannot
@@ -295,7 +314,7 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
                 .macOS,
                 LaunchRequest(
                     configDirectory: config, userProfile: Store.home, environmentName: session.environment,
-                    sessionId: session.id, started: session.started,
+                    sessionId: session.id, started: session.started, hooksFile: TerminalEvents.hooksFile(),
                     picturesFolder: Store.folders.picturesFolder(session.id),
                     onDisk: Self.conversationOnDisk(config, session.id)),
                 inheritedVariables: ProcessEnvironment.inheritedNames)
@@ -323,14 +342,19 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
 
     nonisolated func sizeChanged(source: LocalProcessTerminalView, newCols: Int, newRows: Int) {}
 
-    nonisolated func setTerminalTitle(source: LocalProcessTerminalView, title: String) {}
+    nonisolated func setTerminalTitle(source: LocalProcessTerminalView, title: String) {
+        Task { @MainActor [weak self] in
+            guard let self, let id = self.terminals.first(where: { $0.value === source })?.key else { return }
+            self.titleCame(id, title)
+        }
+    }
 
     nonisolated func hostCurrentDirectoryUpdate(source: TerminalView, directory: String?) {}
 
     nonisolated func processTerminated(source: TerminalView, exitCode: Int32?) {
         Task { @MainActor [weak self] in
             guard let self, let id = self.terminals.first(where: { $0.value === source })?.key else { return }
-            self.exited.insert(id)
+            self.exitedAt[id] = Self.nowMs
             Log.write("terminal: a program ended with \(exitCode.map(String.init) ?? "no code")")
             self.draw()
         }

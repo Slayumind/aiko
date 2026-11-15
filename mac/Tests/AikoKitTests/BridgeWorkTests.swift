@@ -45,6 +45,7 @@ struct BridgeWorkTests {
         #expect(BridgeMode.forArguments(["--session-start"]) == .sessionStart)
         #expect(BridgeMode.forArguments(["--session-start", "ignored"]) == .sessionStart)
         #expect(BridgeMode.forArguments(["hook"]) == .hook)
+        #expect(BridgeMode.forArguments(["terminal-event"]) == .terminalHook)
         #expect(BridgeMode.forArguments(["hook", "ignored"]) == .hook)
     }
 
