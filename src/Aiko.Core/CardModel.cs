@@ -62,12 +62,7 @@ public sealed record EnvironmentBlock
     public required bool StateIsBright { get; init; }
     public required bool ShowsHalo { get; init; }
 
-    /// "Open Claude Code", or "Sign in" when the account is not connected. Both open Claude Code
-    /// for this environment; signing in happens there.
-    public required string OpenLabel { get; init; }
-    public required bool ShowsOpen { get; init; }
-
-    /// The account is known and not signed in: the open header offers "Sign in". Windows only.
+    /// The account is known and not signed in: the open header offers "Sign in".
     public required bool NeedsSignIn { get; init; }
 
     /// "Updated at 12:04", or "Last data at 9:30": how fresh the numbers of this environment are,
@@ -104,8 +99,6 @@ public sealed record EnvironmentBlock
             ShowsState = account is not null,
             StateIsBright = busy,
             ShowsHalo = busy,
-            OpenLabel = signedIn ? Strings.OpenClaudeCode : Strings.SignIn,
-            ShowsOpen = account is not null,
             NeedsSignIn = account is { SignedIn: false },
             Updated = CardText.Updated(card.Freshness, card.UpdatedAt, zone),
         };
@@ -120,13 +113,13 @@ public sealed record LimitRow
 {
     public required string Name { get; init; }
 
-    /// The name for a narrow place: "5 h", "wk", or the model name alone. Windows only.
+    /// The name for a narrow place: "5 h", "wk", or the model name alone.
     public required string ShortName { get; init; }
 
     public required string Percent { get; init; }
     public required string Resets { get; init; }
 
-    /// The same time without the words around it: "1h 6m" for "resets in 1h 6m". Windows only.
+    /// The same time without the words around it: "1h 6m" for "resets in 1h 6m".
     public required string Countdown { get; init; }
 
     public required string Pace { get; init; }

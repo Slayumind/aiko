@@ -284,7 +284,6 @@ public static class Strings
             ["DeleteKeepMemory"] = ("Keep what Aiko remembers about me", "Сохранить то, что Aiko помнит обо мне"),
             ["DeleteMemoryStays"] = ("One file stays: {0}. When you install Aiko again, it finds the memory there.", "Останется один файл: {0}. Когда поставишь Aiko снова, она найдёт память там."),
             ["DeleteMemoryGoes"] = ("The memory goes with Aiko's folders. It cannot be brought back.", "Память уйдёт вместе с папками Aiko. Вернуть её нельзя."),
-            ["OpenClaudeCode"] = ("Open Claude Code", "Открыть Claude Code"),
             ["CardSignInNote"] = ("Sign in so Aiko can see the limits of this environment.", "Войди, чтобы Aiko видела лимиты этой среды."),
             ["StateWorkingNow"] = ("working now", "сейчас работает"),
             ["NavPersonality"] = ("Personality", "Личность"),
@@ -1314,9 +1313,6 @@ public static class Strings
 
     /// The memory goes with Aiko's folders. It cannot be brought back.
     public static string DeleteMemoryGoes => Get("DeleteMemoryGoes");
-
-    /// Open Claude Code
-    public static string OpenClaudeCode => Get("OpenClaudeCode");
 
     /// Sign in so Aiko can see the limits of this environment.
     public static string CardSignInNote => Get("CardSignInNote");
