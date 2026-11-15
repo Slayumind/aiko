@@ -29,6 +29,12 @@ enum Theme {
     /// The plate under the chosen menu item, and under a plan chip.
     static let chosenLayer = Color.white.opacity(0.078)
 
+    /// The red plate of a button that stops something (DangerTint on Windows).
+    static let dangerTint = Color(red: 1, green: 0x64 / 255.0, blue: 0x67 / 255.0).opacity(0x29 / 255.0)
+
+    /// What lies under a question stays there, only quieter (Scrim on Windows).
+    static let scrim = Color(red: 0x0A / 255.0, green: 0x0A / 255.0, blue: 0x0A / 255.0).opacity(0x99 / 255.0)
+
     static func tone(_ tone: LimitTone) -> Color {
         colour(RingArt.colour(for: tone))
     }

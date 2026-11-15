@@ -423,7 +423,7 @@ public enum Strings {
         "TerminalEditorHintCompose": ("**Enter** into the line of Claude Code · **Shift+Enter** new line · **Esc** close", "**Enter** вставить в строку Claude Code · **Shift+Enter** новая строка · **Esc** закрыть"),
         "TerminalEditorHintShellText": ("**Enter** run · **Tab** path · **Shift+Enter** new line", "**Enter** выполнить · **Tab** путь · **Shift+Enter** новая строка"),
         "TerminalEditorHintShellEmpty": ("Empty: **↑ ↓** history; **Enter**, **Esc**, **Tab** go to the terminal", "Пусто: **↑ ↓** история; **Enter**, **Esc**, **Tab** уходят в терминал"),
-        "TerminalEditorHintText": ("**Enter** send · **Shift+Enter** new line · **Ctrl+Shift+Space** voice", "**Enter** отправить · **Shift+Enter** новая строка · **Ctrl+Shift+Space** голос"),
+        "TerminalEditorHintText": ("**Enter** send · **Shift+Enter** new line · **Cmd+Shift+Space** voice", "**Enter** отправить · **Shift+Enter** новая строка · **Cmd+Shift+Space** голос"),
         "TerminalEditorHintEmpty": ("Empty: **arrows**, **Enter**, **Esc**, **Shift+Tab** go to the terminal", "Пусто: **стрелки**, **Enter**, **Esc**, **Shift+Tab** уходят в терминал"),
         "TerminalEditorPicture": ("picture {0}", "картинка {0}"),
         "TerminalEditorPlaceholder": ("Type or say", "Напиши или скажи"),
@@ -435,13 +435,13 @@ public enum Strings {
         "TerminalSourceTerminal": ("terminal", "терминал"),
         "TerminalSourceOther": ("other app", "другая программа"),
         "TerminalNewSession": ("New session", "Новая сессия"),
-        "TerminalNewSessionKey": ("Ctrl+Shift+T", "Ctrl+Shift+T"),
+        "TerminalNewSessionKey": ("Cmd+Shift+T", "Cmd+Shift+T"),
         "TerminalGroupNewSession": ("New session of Claude Code in this folder", "Новая сессия Claude Code в этой папке"),
         "TerminalGroupNewShell": ("Command line in this folder", "Командная строка в этой папке"),
         "TerminalGroupOpenFolder": ("Open the folder", "Открыть папку"),
         "TerminalFolderGone": ("This folder is no longer on the disk", "Этой папки больше нет на диске"),
         "TerminalPickFolderHint": ("Folder for the new session", "Папка для новой сессии"),
-        "TerminalPickFolderKeys": ("↑ ↓ choose · Enter Claude Code · Ctrl+Enter command line · Esc close", "↑ ↓ выбрать · Enter Claude Code · Ctrl+Enter командная строка · Esc закрыть"),
+        "TerminalPickFolderKeys": ("↑ ↓ choose · Enter Claude Code · Cmd+Enter command line · Esc close", "↑ ↓ выбрать · Enter Claude Code · Cmd+Enter командная строка · Esc закрыть"),
         "TerminalPickOtherFolder": ("Another folder…", "Другая папка…"),
         "TerminalEventThinking": ("thinking", "думает"),
         "TerminalEventReading": ("reading {0}", "читает {0}"),
@@ -512,10 +512,10 @@ public enum Strings {
         "TerminalMinimize": ("Minimize", "Свернуть"),
         "TerminalMaximize": ("Maximize", "Развернуть"),
         "TerminalRestore": ("Restore", "Восстановить"),
-        "TerminalSessionList": ("Session list · Ctrl+Shift+B", "Список сессий · Ctrl+Shift+B"),
-        "TerminalFindConversation": ("Search sessions · Ctrl+Shift+K", "Поиск сессий · Ctrl+Shift+K"),
-        "TerminalKeysClaude": ("Ctrl+G editor · Ctrl+Shift+Space voice · Ctrl+Shift+K find a conversation", "Ctrl+G редактор · Ctrl+Shift+Space голос · Ctrl+Shift+K найти разговор"),
-        "TerminalKeysShell": ("# ask for a command · Ctrl+Shift+F find in the output · Ctrl+Shift+K find a conversation", "# подсказка команды · Ctrl+Shift+F найти в выводе · Ctrl+Shift+K найти разговор"),
+        "TerminalSessionList": ("Session list · Cmd+Shift+B", "Список сессий · Cmd+Shift+B"),
+        "TerminalFindConversation": ("Search sessions · Cmd+Shift+K", "Поиск сессий · Cmd+Shift+K"),
+        "TerminalKeysClaude": ("Cmd+G editor · Cmd+Shift+Space voice · Cmd+Shift+K find a conversation", "Cmd+G редактор · Cmd+Shift+Space голос · Cmd+Shift+K найти разговор"),
+        "TerminalKeysShell": ("# ask for a command · Cmd+Shift+F find in the output · Cmd+Shift+K find a conversation", "# подсказка команды · Cmd+Shift+F найти в выводе · Cmd+Shift+K найти разговор"),
         "TerminalShowLimits": ("Show the limits of the environments", "Показать лимиты сред"),
         "TerminalHideLimits": ("Hide the limits", "Скрыть лимиты"),
         "CardShortSession": ("5 h", "5 ч"),
@@ -523,8 +523,8 @@ public enum Strings {
         "TerminalDirectOn": ("direct mode on", "прямой режим вкл"),
         "TerminalDirectOff": ("direct mode off", "прямой режим выкл"),
         "TerminalCloseWindow": ("Close", "Закрыть"),
-        "VoiceButtonTip": ("Voice input · Ctrl+Shift+Space", "Голосовой ввод · Ctrl+Shift+Space"),
-        "VoiceStopTip": ("Finish recording · Ctrl+Shift+Space", "Закончить запись · Ctrl+Shift+Space"),
+        "VoiceButtonTip": ("Voice input · Cmd+Shift+Space", "Голосовой ввод · Cmd+Shift+Space"),
+        "VoiceStopTip": ("Finish recording · Cmd+Shift+Space", "Закончить запись · Cmd+Shift+Space"),
         "VoiceWarming": ("starting the mic", "микрофон включается"),
         "VoiceListening": ("listening {0}", "слушаю {0}"),
         "VoiceFinishing": ("finishing", "дописываю"),
@@ -545,7 +545,7 @@ public enum Strings {
         "ZoomWhat": ("Text, icons and the terminal change size together. In the terminal window: C⁠t⁠r⁠l⁠+⁠= and C⁠t⁠r⁠l⁠+⁠-, and C⁠t⁠r⁠l⁠+⁠0 brings back 115%.", "Текст, значки и терминал меняются вместе. В окне терминала — C⁠t⁠r⁠l⁠+⁠= и C⁠t⁠r⁠l⁠+⁠-, а C⁠t⁠r⁠l⁠+⁠0 возвращает 115 %."),
         "ZoomStep": ("{0}%", "{0} %"),
         "VoiceToggle": ("Voice input", "Голосовой ввод"),
-        "VoiceToggleWhat": ("Ctrl+Shift+Space or the microphone button in the editor.", "Ctrl+Shift+Space или кнопка микрофона в редакторе."),
+        "VoiceToggleWhat": ("Cmd+Shift+Space or the microphone button in the editor.", "Cmd+Shift+Space или кнопка микрофона в редакторе."),
         "VoiceLanguageLabel": ("SPEECH LANGUAGE", "ЯЗЫК РЕЧИ"),
         "VoiceLanguageWhat": ("Whisper on your computer listens for this language. OpenAI hears the language by itself.", "Whisper на компьютере слушает этот язык. OpenAI узнаёт язык сам."),
         "VoiceEngineLabel": ("RECOGNITION", "РАСПОЗНАВАНИЕ"),
@@ -1722,7 +1722,7 @@ public enum Strings {
     /// Empty: **↑ ↓** history; **Enter**, **Esc**, **Tab** go to the terminal
     public static var terminalEditorHintShellEmpty: String { Strings.get("TerminalEditorHintShellEmpty") }
 
-    /// **Enter** send · **Shift+Enter** new line · **Ctrl+Shift+Space** voice
+    /// **Enter** send · **Shift+Enter** new line · **Cmd+Shift+Space** voice
     public static var terminalEditorHintText: String { Strings.get("TerminalEditorHintText") }
 
     /// Empty: **arrows**, **Enter**, **Esc**, **Shift+Tab** go to the terminal
@@ -1758,7 +1758,7 @@ public enum Strings {
     /// New session
     public static var terminalNewSession: String { Strings.get("TerminalNewSession") }
 
-    /// Ctrl+Shift+T
+    /// Cmd+Shift+T
     public static var terminalNewSessionKey: String { Strings.get("TerminalNewSessionKey") }
 
     /// New session of Claude Code in this folder
@@ -1776,7 +1776,7 @@ public enum Strings {
     /// Folder for the new session
     public static var terminalPickFolderHint: String { Strings.get("TerminalPickFolderHint") }
 
-    /// ↑ ↓ choose · Enter Claude Code · Ctrl+Enter command line · Esc close
+    /// ↑ ↓ choose · Enter Claude Code · Cmd+Enter command line · Esc close
     public static var terminalPickFolderKeys: String { Strings.get("TerminalPickFolderKeys") }
 
     /// Another folder…
@@ -1989,16 +1989,16 @@ public enum Strings {
     /// Restore
     public static var terminalRestore: String { Strings.get("TerminalRestore") }
 
-    /// Session list · Ctrl+Shift+B
+    /// Session list · Cmd+Shift+B
     public static var terminalSessionList: String { Strings.get("TerminalSessionList") }
 
-    /// Search sessions · Ctrl+Shift+K
+    /// Search sessions · Cmd+Shift+K
     public static var terminalFindConversation: String { Strings.get("TerminalFindConversation") }
 
-    /// Ctrl+G editor · Ctrl+Shift+Space voice · Ctrl+Shift+K find a conversation
+    /// Cmd+G editor · Cmd+Shift+Space voice · Cmd+Shift+K find a conversation
     public static var terminalKeysClaude: String { Strings.get("TerminalKeysClaude") }
 
-    /// # ask for a command · Ctrl+Shift+F find in the output · Ctrl+Shift+K find a conversation
+    /// # ask for a command · Cmd+Shift+F find in the output · Cmd+Shift+K find a conversation
     public static var terminalKeysShell: String { Strings.get("TerminalKeysShell") }
 
     /// Show the limits of the environments
@@ -2022,10 +2022,10 @@ public enum Strings {
     /// Close
     public static var terminalCloseWindow: String { Strings.get("TerminalCloseWindow") }
 
-    /// Voice input · Ctrl+Shift+Space
+    /// Voice input · Cmd+Shift+Space
     public static var voiceButtonTip: String { Strings.get("VoiceButtonTip") }
 
-    /// Finish recording · Ctrl+Shift+Space
+    /// Finish recording · Cmd+Shift+Space
     public static var voiceStopTip: String { Strings.get("VoiceStopTip") }
 
     /// starting the mic
@@ -2088,7 +2088,7 @@ public enum Strings {
     /// Voice input
     public static var voiceToggle: String { Strings.get("VoiceToggle") }
 
-    /// Ctrl+Shift+Space or the microphone button in the editor.
+    /// Cmd+Shift+Space or the microphone button in the editor.
     public static var voiceToggleWhat: String { Strings.get("VoiceToggleWhat") }
 
     /// SPEECH LANGUAGE

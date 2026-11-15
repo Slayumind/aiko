@@ -4,6 +4,7 @@ import AppKit
 /// --try-terminal: the terminal window with a real command line, run over SSH with nobody at the
 /// screen. It opens the window, starts a shell in a temporary folder, writes what it sees, closes
 /// the window and quits. Nothing is saved: the sessions of the person stay as they were.
+/// AIKO_TRY_SECONDS holds the window longer, so a snapshot can be taken of it.
 @MainActor
 enum TerminalCheck {
     /// iconShown: whether the menu bar icon is there. It steps aside while the window is open, as
@@ -14,9 +15,12 @@ enum TerminalCheck {
 
         host.show()
         host.startForCheck(in: folder)
-        after(2) {
+        let seconds = Double(ProcessInfo.processInfo.environment["AIKO_TRY_SECONDS"] ?? "") ?? 2
+        after(seconds) {
             Log.write("self test: terminal window shown=\(host.isShown), in the Dock=\(NSApp.activationPolicy() == .regular), "
                 + "menu bar icon=\(iconShown()), terminals=\(host.terminalCountForCheck), running=\(host.runningForCheck)")
+            Log.write("self test: terminal window \(host.barForCheck)")
+            Log.write("self test: terminal window \(host.rowsForCheck)")
             host.closeForCheck()
             after(0.5) {
                 Log.write("self test: terminal window closed, shown=\(host.isShown), in the Dock=\(NSApp.activationPolicy() == .regular), "

@@ -28,7 +28,8 @@ final class AikoShell {
 
     /// The terminal window with the sessions (D-425), made on the first click and kept while Aiko runs.
     private lazy var terminal: TerminalHost = {
-        let host = TerminalHost()
+        let host = TerminalHost(limitsOf: { [weak self] name in self?.numbers.snapshot(for: name) })
+        host.onSettingsAsked = { [weak self] in _ = self?.openSettings(at: nil) }
         host.onShownChanged = { [weak self] shown in
             self?.windowOpen = shown
             self?.applyPlace()
@@ -249,6 +250,9 @@ final class AikoShell {
 
         icon.update()
         island.update(numbers.cards())
+        if windowOpen {
+            terminal.limitsChanged()
+        }
 
         if selfTesting {
             Log.write("self test: new numbers, tooltip \"\(icon.tooltipForCheck)\"")

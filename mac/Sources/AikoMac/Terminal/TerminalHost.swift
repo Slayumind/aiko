@@ -11,18 +11,37 @@ import SwiftUI
 /// terminal window has a button on the taskbar of Windows; closed, Aiko goes back to the menu bar.
 @MainActor
 final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDelegate {
-    private let state = TerminalState()
-    private var window: NSWindow?
-    private let stage = NSView()
-    private var sessions = Store.terminal()
-    private var model: TerminalWindowModel
-    private var terminals: [String: LocalProcessTerminalView] = [:]
-    private var exited: Set<String> = []
+    let state = TerminalState()
+    var window: NSWindow?
+    let stage = NSView()
+    var sessions = Store.terminal()
+    var model: TerminalWindowModel
+    var terminals: [String: LocalProcessTerminalView] = [:]
+    var exited: Set<String> = []
+
+    /// Why a session has no terminal, until it is started again (D-421).
+    var problems: [String: StartProblem] = [:]
+
+    /// The running session the person asked to close: the question stands until it is answered.
+    var closing: String?
 
     /// Set by a self test: nothing is written to terminal.json.
-    private var changingNothing = false
+    var changingNothing = false
 
-    override init() {
+    /// The limits of an environment, as the menu bar icon has them: the ring and percentage of its pill.
+    let limitsOf: (String) -> LimitSnapshot?
+
+    /// The width of the session list, as TerminalPanel.ListWidth.
+    static let listWidth: CGFloat = 252
+    var listWidthConstraint: NSLayoutConstraint?
+    var holderWatch: NSObjectProtocol?
+    var bar: NSView?
+
+    /// The messages in place of the terminal. Hidden while the terminal shows, so it takes no click.
+    var stageCover: NSView?
+
+    init(limitsOf: @escaping (String) -> LimitSnapshot?) {
+        self.limitsOf = limitsOf
         let environments = Store.environments().environments.map(\.name)
         model = TerminalWindowModel.opened(Store.terminal(), environments)
         super.init()
@@ -30,12 +49,24 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
         state.onChoose = { [weak self] id in self?.choose(id) }
         state.onNew = { [weak self] folder, kind in self?.start(in: folder, kind: kind) }
         state.onNewInOtherFolder = { [weak self] in self?.pickFolder() }
+        state.onToggleList = { [weak self] in self?.toggleList() }
+        state.onToggleHeader = { [weak self] in self?.toggleHeader() }
+        state.onSettings = { [weak self] in self?.onSettingsAsked?() }
+        wireSessionActions()
     }
 
     var isShown: Bool { window?.isVisible == true }
 
     /// The window was shown or closed.
     var onShownChanged: ((Bool) -> Void)?
+
+    /// The gear of the title bar was pressed.
+    var onSettingsAsked: (() -> Void)?
+
+    /// New numbers arrived: the pills show them.
+    func limitsChanged() {
+        state.tabs = tabs()
+    }
 
     /// Opens the window, or brings it forward.
     func show() {
@@ -44,6 +75,7 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
         NSApp.setActivationPolicy(.regular)
         draw()
         window.makeKeyAndOrderFront(nil)
+        placeWindowButtons(window)
         NSApp.activate(ignoringOtherApps: true)
         onShownChanged?(true)
     }
@@ -58,17 +90,17 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
 
     // ---- what the person does ----
 
-    private func toEnvironment(_ name: String) {
+    func toEnvironment(_ name: String) {
         model = model.toEnvironment(name, sessions)
         draw()
     }
 
-    private func choose(_ id: String) {
+    func choose(_ id: String) {
         model = model.toSession(id, sessions)
         draw()
     }
 
-    private func start(in folder: String, kind: SessionKind) {
+    func start(in folder: String, kind: SessionKind) {
         let id = UUID().uuidString.lowercased()
         let name = SessionName.defaultName(folder, taken: sessions.namesIn(model.environment, folder))
         sessions = sessions.add(
@@ -78,7 +110,7 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
         draw()
     }
 
-    private func pickFolder() {
+    func pickFolder() {
         let panel = NSOpenPanel()
         panel.canChooseDirectories = true
         panel.canChooseFiles = false
@@ -88,58 +120,30 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
         start(in: url.path, kind: .claude)
     }
 
-    // ---- the window ----
-
-    private func makeWindow() -> NSWindow {
-        let place = WindowPlace.fit(nil, Self.screens())
-        let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: place.width, height: place.height),
-            styleMask: [.titled, .closable, .miniaturizable, .resizable],
-            backing: .buffered,
-            defer: false)
-        window.title = "Aiko"
-        window.minSize = NSSize(width: WindowPlace.minWidth, height: WindowPlace.minHeight)
-        window.backgroundColor = Theme.nsSurface
-        window.isReleasedWhenClosed = false
-        window.delegate = self
-        window.center()
-
-        let list = NSHostingView(rootView: SessionListView(state: state))
-        list.translatesAutoresizingMaskIntoConstraints = false
-        stage.translatesAutoresizingMaskIntoConstraints = false
-        stage.wantsLayer = true
-        stage.layer?.backgroundColor = Theme.nsSurface.cgColor
-
-        let root = NSView()
-        root.addSubview(list)
-        root.addSubview(stage)
-        NSLayoutConstraint.activate([
-            list.leadingAnchor.constraint(equalTo: root.leadingAnchor),
-            list.topAnchor.constraint(equalTo: root.topAnchor),
-            list.bottomAnchor.constraint(equalTo: root.bottomAnchor),
-            list.widthAnchor.constraint(equalToConstant: 280),
-            stage.leadingAnchor.constraint(equalTo: list.trailingAnchor),
-            stage.trailingAnchor.constraint(equalTo: root.trailingAnchor),
-            stage.topAnchor.constraint(equalTo: root.topAnchor),
-            stage.bottomAnchor.constraint(equalTo: root.bottomAnchor),
-        ])
-        window.contentView = root
-        return window
-    }
-
     /// The list from the core, and the terminal of the chosen session on the stage.
-    private func draw() {
+    func draw() {
         let environments = Store.environments().environments.map(\.name)
         state.environments = environments
         state.environment = model.environment
-        state.groups = SessionRows.of(sessions, model.environment) { [weak self] id in self?.live(id) }
         state.chosen = model.sessionId
 
-        for view in stage.subviews {
+        // A question or a message takes the place of the terminals rather than covering them. The
+        // terminal is started first, so a session that cannot start says why at once.
+        var shown: LocalProcessTerminalView?
+        if stageMessage() == .none, let session = model.session(sessions) {
+            shown = terminal(for: session)
+        }
+        state.stage = stageMessage()
+
+        // The rows after the terminal is started: a session that starts now is running in its row.
+        state.tabs = tabs()
+        state.groups = SessionRows.of(sessions, model.environment) { [weak self] id in self?.live(id) }
+        stageCover?.isHidden = state.stage == .none
+        for view in stage.subviews where view !== shown {
             view.isHidden = true
         }
 
-        guard let session = model.session(sessions), let terminal = terminal(for: session) else { return }
+        guard let terminal = shown else { return }
         if terminal.superview !== stage {
             terminal.translatesAutoresizingMaskIntoConstraints = false
             stage.addSubview(terminal)
@@ -154,7 +158,37 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
         window?.makeFirstResponder(terminal)
     }
 
-    private func live(_ id: String) -> LiveTerminal? {
+    /// What stands in place of the terminal: the question before closing first, then the empty
+    /// environment, then why the chosen session has no terminal (D-421).
+    func stageMessage() -> StageMessage {
+        if let id = closing, let session = sessions.find(id) {
+            return .ask(title: Strings.format(Strings.terminalCloseTitle, session.name), body: Strings.terminalCloseBody,
+                        stop: Strings.terminalStopAndClose, keep: Strings.terminalKeepOpen)
+        }
+        guard model.view(sessions) == .terminal, let session = model.session(sessions) else {
+            return .noSessions(environment: model.environment)
+        }
+        if let problem = problems[session.id] {
+            return .problem(problem, shell: session.kind == .shell, folder: session.folder)
+        }
+        return .none
+    }
+
+    /// The pills: each environment with the limit closer to its end (D-355) and its waiting sessions.
+    func tabs() -> [TabItem] {
+        let now = Date()
+        return Store.environments().environments.map { environment in
+            let badge = limitsOf(environment.name).flatMap { LimitBadge.forSnapshot($0, now) }
+            return TabItem(
+                name: environment.name,
+                selected: environment.name == model.environment,
+                waiting: SessionRows.waiting(sessions, environment.name) { [weak self] id in self?.live(id) },
+                percent: badge?.percent,
+                tone: badge?.tone ?? .unknown)
+        }
+    }
+
+    func live(_ id: String) -> LiveTerminal? {
         guard terminals[id] != nil else { return nil }
         return LiveTerminal(activity: exited.contains(id) ? .exited : .idle, line: "")
     }
@@ -163,13 +197,16 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
 
     /// The terminal of a session, started the first time it is shown. Nil when the program cannot
     /// start: no Claude Code, or the folder is gone.
-    private func terminal(for session: TerminalSession) -> LocalProcessTerminalView? {
+    func terminal(for session: TerminalSession) -> LocalProcessTerminalView? {
         if let running = terminals[session.id] {
             return running
         }
 
-        guard FileManager.default.fileExists(atPath: session.folder),
-              let environment = Store.environments().environments.first(where: { $0.name == session.environment })
+        guard FileManager.default.fileExists(atPath: session.folder) else {
+            problems[session.id] = .folderGone
+            return nil
+        }
+        guard let environment = Store.environments().environments.first(where: { $0.name == session.environment })
         else { return nil }
 
         let config = environment.configDirectories.first ?? ClaudeConfigFolder.resolve(.macOS, nil, Store.home)
@@ -183,7 +220,10 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
             plan = .forShell(.macOS, configDirectory: config, userProfile: Store.home,
                              inheritedVariables: ProcessEnvironment.inheritedNames)
         case .claude:
-            guard let claude = ClaudeLauncher.findClaude() else { return nil }
+            guard let claude = ClaudeLauncher.findClaude() else {
+                problems[session.id] = .noClaude
+                return nil
+            }
             executable = claude
             plan = .forRequest(
                 .macOS,
@@ -241,11 +281,28 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
 
     var terminalCountForCheck: Int { terminals.count }
 
+    /// Where the bar and the window buttons stand, in points from the top of the window.
+    var barForCheck: String {
+        guard let window, let bar, let close = window.standardWindowButton(.closeButton),
+              let content = window.contentView else { return "no window" }
+        let barFrame = bar.convert(bar.bounds, to: nil)
+        let button = close.convert(close.bounds, to: nil)
+        let top = content.frame.height
+        return "bar \(Int(top - barFrame.maxY))..\(Int(top - barFrame.minY)), "
+            + "close button middle \(Int(top - button.midY)), list \(Int(listWidthConstraint?.constant ?? -1))"
+    }
+
+    /// Each row of the list with its state, and what stands in place of the terminal.
+    var rowsForCheck: String {
+        let rows = state.groups.flatMap(\.rows).map { "\($0.state)" }.joined(separator: " ")
+        return "rows [\(rows)], stage \(state.stage)"
+    }
+
     var runningForCheck: Bool { terminals.values.contains { $0.process.running } }
 
     // ---- small parts ----
 
-    private func save() {
+    func save() {
         if !changingNothing {
             Store.saveTerminal(sessions)
         }
@@ -253,7 +310,7 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
 
     /// Whether Claude Code saved the conversation: it writes the file only after the first message,
     /// and a session closed before one has nothing to resume. Unsure means yes, as on Windows.
-    private static func conversationOnDisk(_ config: String, _ id: String) -> Bool {
+    static func conversationOnDisk(_ config: String, _ id: String) -> Bool {
         let projects = TranscriptPath.projectsFolder(.macOS, config)
         guard let folders = try? FileManager.default.contentsOfDirectory(atPath: projects) else {
             // No folder yet: nothing saved. A folder that cannot be read: unsure.
@@ -265,11 +322,13 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
         }
     }
 
-    private static func now() -> Int64 {
-        Int64(Date().timeIntervalSince1970 * 1000)
+    /// Seconds, as terminal.json keeps them on both systems: the day of the second line and the
+    /// start of a session for --resume read them so.
+    static func now() -> Int64 {
+        Int64(Date().timeIntervalSince1970)
     }
 
-    private static func screens() -> [ScreenArea] {
+    static func screens() -> [ScreenArea] {
         NSScreen.screens.map {
             ScreenArea(left: $0.visibleFrame.minX, top: $0.visibleFrame.minY,
                        width: $0.visibleFrame.width, height: $0.visibleFrame.height)
