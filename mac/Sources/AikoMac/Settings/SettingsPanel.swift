@@ -52,17 +52,28 @@ struct SettingsPanelView: View {
     /// The pages were made for a column this wide: a wider one makes lines too long to read (D-391).
     static let pageWidth: CGFloat = 640
 
+    private static let pageEnd = "page end"
+
     private var page: some View {
         ZStack(alignment: .topTrailing) {
-            ScrollView(.vertical) {
-                SettingsPageView(state: state)
-                    .padding(.horizontal, 20)
-                    .padding(.top, 18)
-                    .padding(.bottom, 20)
-                    .frame(maxWidth: Self.pageWidth, alignment: .leading)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+            ScrollViewReader { scroller in
+                ScrollView(.vertical) {
+                    SettingsPageView(state: state)
+                        .padding(.horizontal, 20)
+                        .padding(.top, 18)
+                        .padding(.bottom, 20)
+                        .frame(maxWidth: Self.pageWidth, alignment: .leading)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Color.clear.frame(height: 1).id(Self.pageEnd)
+                }
+                .scrollIndicators(.automatic)
+                .onAppear {
+                    // AIKO_TRY_SCROLL=end shows the bottom of a long page, for a snapshot.
+                    if ProcessInfo.processInfo.environment["AIKO_TRY_SCROLL"] == "end" {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { scroller.scrollTo(Self.pageEnd, anchor: .bottom) }
+                    }
+                }
             }
-            .scrollIndicators(.automatic)
 
             SavedMark(shown: state.saved)
                 .padding(.top, 23)

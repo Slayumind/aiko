@@ -23,7 +23,17 @@ let package = Package(
         .target(name: "AikoKit"),
         .executableTarget(name: "aiko-bridge", dependencies: ["AikoKit"]),
         .executableTarget(name: "aiko-shim", dependencies: ["AikoKit"]),
-        .executableTarget(name: "AikoMac", dependencies: ["AikoKit", .product(name: "SwiftTerm", package: "SwiftTerm")]),
+        // whisper.cpp for voice input, the same release b5454 (1.9.5) Windows ships (D-427). A
+        // universal framework with Metal inside; Scripts/make-app.sh puts it in Contents/Frameworks.
+        .binaryTarget(
+            name: "whisper",
+            url: "https://github.com/ggml-org/whisper.cpp/releases/download/b5454/whisper-b5454-xcframework.zip",
+            checksum: "e57f8c48933000acabc13bb913fbe82805d483a2deff692cc6738836bd92393b"),
+        .executableTarget(
+            name: "AikoMac",
+            dependencies: ["AikoKit", "whisper", .product(name: "SwiftTerm", package: "SwiftTerm")],
+            // The framework sits in Contents/Frameworks of the bundle, as in every Mac app.
+            linkerSettings: [.unsafeFlags(["-Xlinker", "-rpath", "-Xlinker", "@executable_path/../Frameworks"])]),
         .testTarget(name: "AikoKitTests", dependencies: ["AikoKit"]),
     ]
 )

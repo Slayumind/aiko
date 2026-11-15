@@ -11,6 +11,9 @@ import AppKit
 /// page stays, and then the app quits.
 @MainActor
 enum SettingsCheck {
+    /// "terminal-openai" draws the page of the window with OpenAI chosen, without saving it: the
+    /// twin of SettingsScene.VoiceEngine on Windows.
+    static var voiceEngine: VoiceEngine?
     static func run(_ what: String, value: String?, shell: AikoShell) {
         let seconds = Double(ProcessInfo.processInfo.environment["AIKO_TRY_SECONDS"] ?? "") ?? 6
 
@@ -20,6 +23,9 @@ enum SettingsCheck {
 
         Log.write("self test: settings at \(state.page.key), language \(Strings.language), "
             + "fewer animations: \(Motion.reduceMotion)")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            Log.write("self test: settings panel \(shell.settingsPanelForCheck)")
+        }
 
         if let checklist = state.checklist {
             Log.write("self test: checklist \(checklist.progress.done) of \(checklist.progress.total) done, "
@@ -55,6 +61,10 @@ enum SettingsCheck {
     /// opens the first environment, so a typo shows something rather than nothing.
     private static func page(_ value: String?, shell: AikoShell) -> SettingsPage? {
         guard let value, !value.isEmpty else { return nil }
+        if value == "terminal-openai" {
+            voiceEngine = .openAI
+            return .terminal
+        }
         if let page = SettingsPage.fromKey(value) { return page }
 
         // "env1" and "env2" spare the caller a whole path on the command line.

@@ -65,7 +65,7 @@ final class EditorTextView: NSTextView {
 
     override func draw(_ dirtyRect: NSRect) {
         super.draw(dirtyRect)
-        guard string.isEmpty, !placeholder.isEmpty, let font else { return }
+        guard string.isEmpty, !placeholder.isEmpty, owner?.dictating != true, let font else { return }
         let left = textContainerInset.width + (textContainer?.lineFragmentPadding ?? 0)
         (placeholder as NSString).draw(
             at: NSPoint(x: left, y: textContainerInset.height),

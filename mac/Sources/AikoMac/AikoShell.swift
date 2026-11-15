@@ -169,6 +169,10 @@ final class AikoShell {
 
     // ---- Doors for the self tests: they drive the shell through these and nothing else ----
 
+    /// The settings panel at the zoom of the window: its frame, the bounds SwiftUI lays out in, and
+    /// the height its content asks for.
+    var settingsPanelForCheck: String { terminal.settingsPanelForCheck }
+
     /// Proof that the app starts, reads the snapshots and draws the icon, for a machine nobody is
     /// looking at. The shim has the same door under AIKO_SHIM_SELF_TEST.
     func selfTest(_ what: String, value: String? = nil) {
@@ -188,6 +192,11 @@ final class AikoShell {
 
         if what == "editor" {
             EditorCheck.run(terminal)
+            return
+        }
+
+        if what == "voice" {
+            VoiceCheck.run(terminal, wav: value)
             return
         }
 

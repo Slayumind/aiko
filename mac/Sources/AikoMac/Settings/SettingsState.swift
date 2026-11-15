@@ -380,6 +380,8 @@ final class SettingsState: ObservableObject {
         deleting = true
         checklist?.close()
         checklist = nil
+        // A download still going would write the model back into the folder being removed.
+        ModelDownload.stop()
 
         Task.detached {
             let outcome = Uninstall.everything(keepMemory: keepMemory)

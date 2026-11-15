@@ -47,6 +47,29 @@ final class EditorView: NSView, NSTextViewDelegate {
     /// The check door runs in a window that may not have the keyboard.
     var checkWithoutFocus = false
 
+    // Voice input (EditorView+Voice.swift): a recording shows its words in the field, read only.
+    var dictating = false
+    var strip = false
+    var before = ""
+    var after = ""
+    /// The field as it was when the recording began: Esc puts it back exactly.
+    var kept = (text: "", caret: 0)
+    var voiceActive = false
+    var shownNotice = VoiceNotice.none
+    var voicePressed: (() -> Void)?
+    var voiceCancelled: (() -> Void)?
+    var voiceSettingsAsked: (() -> Void)?
+    let mic = MicButton()
+    let wave = WaveView()
+    let voiceLine = NSStackView()
+    let voiceWord = NSTextField(labelWithString: "")
+    let voiceWhere = NSTextField(labelWithString: "")
+    let voiceCancel = NSTextField(labelWithString: "")
+    let noticeBar = NoticeBar()
+    private var micSize: NSLayoutConstraint?
+    private var micGap: NSLayoutConstraint?
+    private var micTop: NSLayoutConstraint?
+
     let text = EditorTextView(usingTextLayoutManager: false)
     let scroll = NSScrollView()
     let choices = ChoiceList()
@@ -54,7 +77,7 @@ final class EditorView: NSView, NSTextViewDelegate {
     private let top = NSView()
     private let sign = NSTextField(labelWithString: "›")
     private let field = NSView()
-    private let hint = NSTextField(wrappingLabelWithString: "")
+    let hint = NSTextField(wrappingLabelWithString: "")
     private let stack = NSStackView()
     /// Each line of the stack is as wide as the editor without its sides.
     private var lineWidths: [NSLayoutConstraint] = []
@@ -76,7 +99,7 @@ final class EditorView: NSView, NSTextViewDelegate {
     /// only while it is opened with Cmd+G.
     var wantedChanged: (() -> Void)?
 
-    var wanted: Bool { session?.kind == .shell || composing }
+    var wanted: Bool { session?.kind == .shell || composing || strip }
 
     var zoom: CGFloat = 1 {
         didSet {
@@ -130,24 +153,46 @@ final class EditorView: NSView, NSTextViewDelegate {
         hint.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         pictures.isHidden = true
 
-        for view in [sign, scroll] as [NSView] {
+        for view in [sign, scroll, mic] as [NSView] {
             view.translatesAutoresizingMaskIntoConstraints = false
             field.addSubview(view)
         }
         let textHeight = scroll.heightAnchor.constraint(equalToConstant: 16)
         let signGap = scroll.leadingAnchor.constraint(equalTo: sign.trailingAnchor, constant: 10)
+        let micSize = mic.widthAnchor.constraint(equalToConstant: 24)
+        let micGap = mic.leadingAnchor.constraint(equalTo: scroll.trailingAnchor, constant: 10)
+        let micTop = mic.topAnchor.constraint(equalTo: field.topAnchor, constant: -4)
         self.textHeight = textHeight
         self.signGap = signGap
+        self.micSize = micSize
+        self.micGap = micGap
+        self.micTop = micTop
         sign.setContentHuggingPriority(.required, for: .horizontal)
+        mic.isHidden = true
+        mic.pressed = { [weak self] in self?.voicePressed?() }
         NSLayoutConstraint.activate([
             sign.leadingAnchor.constraint(equalTo: field.leadingAnchor),
             sign.topAnchor.constraint(equalTo: field.topAnchor),
             signGap,
-            scroll.trailingAnchor.constraint(equalTo: field.trailingAnchor),
+            micGap,
+            mic.trailingAnchor.constraint(equalTo: field.trailingAnchor),
+            micSize,
+            mic.heightAnchor.constraint(equalTo: mic.widthAnchor),
+            micTop,
             scroll.topAnchor.constraint(equalTo: field.topAnchor),
             scroll.bottomAnchor.constraint(equalTo: field.bottomAnchor),
             textHeight,
         ])
+
+        for label in [voiceWord, voiceWhere, voiceCancel] {
+            label.textColor = Theme.nsMuted
+        }
+        voiceLine.orientation = .horizontal
+        voiceLine.alignment = .centerY
+        voiceLine.setViews([wave, voiceWord, voiceWhere, voiceCancel], in: .leading)
+        voiceLine.isHidden = true
+        noticeBar.isHidden = true
+        noticeBar.clicked = { [weak self] in self?.noticeLinkClicked() }
 
         stack.orientation = .vertical
         stack.alignment = .leading
@@ -156,8 +201,8 @@ final class EditorView: NSView, NSTextViewDelegate {
         stack.setHuggingPriority(NSLayoutConstraint.Priority(999), for: .vertical)
         pictures.setContentHuggingPriority(NSLayoutConstraint.Priority(999), for: .vertical)
         hint.setContentHuggingPriority(NSLayoutConstraint.Priority(999), for: .vertical)
-        stack.setViews([pictures, field, hint], in: .top)
-        lineWidths = [pictures, field, hint].map { $0.widthAnchor.constraint(equalTo: stack.widthAnchor) }
+        stack.setViews([noticeBar, pictures, field, hint, voiceLine], in: .top)
+        lineWidths = [noticeBar, pictures, field, hint].map { $0.widthAnchor.constraint(equalTo: stack.widthAnchor) }
         NSLayoutConstraint.activate(lineWidths)
 
         // Below required: the host folds the editor to no height while it is away.
@@ -199,7 +244,7 @@ final class EditorView: NSView, NSTextViewDelegate {
         if abs(hint.preferredMaxLayoutWidth - width) > 0.5 {
             hint.preferredMaxLayoutWidth = width
         }
-        fitText()
+        refit()
         super.layout()
     }
 
@@ -226,6 +271,10 @@ final class EditorView: NSView, NSTextViewDelegate {
         if session?.id == next.id {
             session = next
             return
+        }
+
+        if dictating {
+            voiceCancelled?()
         }
 
         keep()
@@ -255,7 +304,7 @@ final class EditorView: NSView, NSTextViewDelegate {
 
     /// Cmd+G in a session of Claude Code opens the editor for a long text, and closes it again.
     func compose() {
-        guard session?.kind == .claude else { return }
+        guard session?.kind == .claude, !dictating else { return }
         composing.toggle()
         showHint()
         wantedChanged?()
@@ -269,6 +318,13 @@ final class EditorView: NSView, NSTextViewDelegate {
         choices.close()
         showHint()
         wantedChanged?()
+    }
+
+    /// The mic stands right of the field while voice input is on; away, it takes no room.
+    func placeMic() {
+        micSize?.constant = mic.isHidden ? 0 : 24 * zoom
+        micGap?.constant = mic.isHidden ? 0 : 10 * zoom
+        micTop?.constant = -4 * zoom
     }
 
     private func keep() {
@@ -296,7 +352,7 @@ final class EditorView: NSView, NSTextViewDelegate {
         text.needsDisplay = true
         showHint()
         offer()
-        fitText()
+        refit()
     }
 
     /// Text set by the editor itself, with the caret after it.
@@ -307,7 +363,7 @@ final class EditorView: NSView, NSTextViewDelegate {
     }
 
     /// The field is as tall as its text, up to mostHeight.
-    private func fitText() {
+    func refit() {
         guard let layout = text.layoutManager, let container = text.textContainer, let font = text.font else { return }
         layout.ensureLayout(for: container)
         let line = layout.defaultLineHeight(for: font)
@@ -363,6 +419,15 @@ final class EditorView: NSView, NSTextViewDelegate {
         stack.setCustomSpacing(6 * zoom, after: field)
         pictures.gap = 6 * zoom
         choices.zoom = zoom
+        let tiny = Theme.monoFont(Theme.textTiny * zoom)
+        for label in [voiceWord, voiceWhere, voiceCancel] {
+            label.font = tiny
+        }
+        wave.zoom = zoom
+        voiceLine.spacing = 10 * zoom
+        voiceLine.setCustomSpacing(8 * zoom, after: wave)
+        stack.setCustomSpacing(8 * zoom, after: noticeBar)
+        placeMic()
         showHint()
         drawPictures()
         needsLayout = true

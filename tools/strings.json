@@ -3343,7 +3343,13 @@
     [
       "Windows Settings",
       "Параметры Windows"
-    ]
+    ],
+    {
+      "mac": [
+        "System Settings",
+        "Системные настройки"
+      ]
+    }
   ],
   [
     "VoiceNeedsModel",
@@ -3551,8 +3557,15 @@
   [
     "VoiceHonest",
     [
-      "The sound of every recording goes to OpenAI.",
-      "Звук каждой записи уходит в OpenAI."
+      "This data goes there: the recording of your voice and the names of the folders, branches and files of the sessions where you dictate.",
+      "Туда отправляются данные: запись голоса и имена папок, веток и файлов сессий, в которых ты диктуешь."
+    ]
+  ],
+  [
+    "VoiceMicPurpose",
+    [
+      "Aiko turns the microphone on only while you dictate. Speech is turned into text locally with Whisper. If you chose OpenAI in the settings, this data goes there: the recording of your voice and the names of the folders, branches and files of the sessions where you dictate.",
+      "Aiko включает микрофон, только пока ты диктуешь. Речь распознаётся локально с помощью Whisper. Если в настройках выбран OpenAI, туда отправляются данные: запись голоса и имена папок, веток и файлов сессий, в которых ты диктуешь."
     ]
   ],
   [
@@ -3588,14 +3601,26 @@
     [
       "Windows did not save the key.",
       "Windows не сохранила ключ."
-    ]
+    ],
+    {
+      "mac": [
+        "The Keychain did not save the key.",
+        "Связка ключей не сохранила ключ."
+      ]
+    }
   ],
   [
     "VoiceKeyWhere",
     [
       "Kept in Windows Credential Manager. Removing Aiko erases it.",
       "Хранится в Диспетчере учётных данных Windows. Удаление Aiko его сотрёт."
-    ]
+    ],
+    {
+      "mac": [
+        "Kept in the macOS Keychain. Removing Aiko erases it.",
+        "Хранится в Связке ключей macOS. Удаление Aiko его сотрёт."
+      ]
+    }
   ],
   [
     "VoiceCloudFailed",

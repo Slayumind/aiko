@@ -51,6 +51,16 @@ extension TerminalHost {
             self.placeEditor()
             DispatchQueue.main.async { self.focusOpenTerminal() }
         }
+
+        let voice = VoiceDictation(field: editor) { [weak self] in self?.voiceContext() }
+        voice.settingsAsked = { [weak self] in self?.openSettings(at: .terminal) }
+        voice.use(Store.settings())
+        self.voice = voice
+    }
+
+    /// What the hint of a recording is made of: the folder of the open session (D-313, D-424).
+    private func voiceContext() -> VoiceContext? {
+        model.session(sessions).map { VoiceContext(folder: $0.folder, files: []) }
     }
 
     /// The editor of the open session, or none: a program that ended takes no text.

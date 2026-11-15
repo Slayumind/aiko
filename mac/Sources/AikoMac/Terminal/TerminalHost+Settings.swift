@@ -24,6 +24,7 @@ extension TerminalHost {
         state.onClose = { [weak self] in self?.closeSettings() }
         state.onQuit = { [weak self] in self?.onQuitAsked?() }
         state.onChanged = { [weak self] in
+            self?.voice?.use(Store.settings())
             self?.onSettingsChanged?()
             self?.applyZoom()
             self?.draw()

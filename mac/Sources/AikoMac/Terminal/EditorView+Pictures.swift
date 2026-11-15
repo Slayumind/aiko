@@ -28,6 +28,9 @@ extension EditorView {
     /// A picture file goes as a picture; any other file or folder is its path in the text, in quotes
     /// when it has a space.
     func take(_ paths: [String]) {
+        if dictating {
+            return
+        }
         var words: [String] = []
         for path in paths {
             if TerminalPaste.isPicture(path), let picture = TerminalPaste.load(path) {
