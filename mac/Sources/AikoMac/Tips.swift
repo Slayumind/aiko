@@ -12,16 +12,20 @@ enum Tips {
     /// How long the pointer rests before the tip shows: the hover time of the system on Windows.
     static let delay: TimeInterval = 0.4
 
+    /// The zoom of the terminal window: a tip over it takes it too, as on Windows (PopupZoom). The
+    /// island has none.
+    static var windowZoom: CGFloat = 1
+
     private static var window: NSPanel?
     private static var waiting: DispatchWorkItem?
     private static var owner: AnyHashable?
 
     /// The pointer came to something with a tip: it shows after a rest, unless the pointer moves on.
-    static func hover(_ text: String, owner: AnyHashable) {
+    static func hover(_ text: String, owner: AnyHashable, zoom: CGFloat = 1) {
         guard !text.isEmpty else { return }
         cancel()
         self.owner = owner
-        let work = DispatchWorkItem { MainActor.assumeIsolated { show(text, at: NSEvent.mouseLocation) } }
+        let work = DispatchWorkItem { MainActor.assumeIsolated { show(text, at: NSEvent.mouseLocation, zoom: zoom) } }
         waiting = work
         DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: work)
     }
@@ -40,13 +44,13 @@ enum Tips {
     }
 
     /// The tip at a point of the screen, under the pointer and inside the screen.
-    static func show(_ text: String, at point: NSPoint) {
+    static func show(_ text: String, at point: NSPoint, zoom: CGFloat = 1) {
         let panel = window ?? makeWindow()
         window = panel
         // One line when it fits, and lines wrapped in the widest tip when it does not.
-        var view = NSHostingView(rootView: TipView(text: text, wraps: false))
-        if view.fittingSize.width > TipView.mostWidth {
-            view = NSHostingView(rootView: TipView(text: text, wraps: true))
+        var view = NSHostingView(rootView: TipView(text: text, wraps: false, zoom: zoom))
+        if view.fittingSize.width > TipView.mostWidth * zoom {
+            view = NSHostingView(rootView: TipView(text: text, wraps: true, zoom: zoom))
         }
         panel.contentView = view
         let size = view.fittingSize
@@ -84,6 +88,7 @@ enum Tips {
 struct TipView: View {
     let text: String
     let wraps: Bool
+    var zoom: CGFloat = 1
 
     /// The widest tip, as on Windows, and the text inside its padding.
     static let mostWidth: CGFloat = 320
@@ -91,24 +96,24 @@ struct TipView: View {
 
     private var words: some View {
         Text(text)
-            .font(Theme.sans(Theme.textSmall))
+            .font(Theme.sans(Theme.textSmall * zoom))
             .foregroundStyle(Theme.ink)
     }
 
     var body: some View {
         Group {
             if wraps {
-                words.frame(width: Self.width, alignment: .leading).fixedSize(horizontal: false, vertical: true)
+                words.frame(width: Self.width * zoom, alignment: .leading).fixedSize(horizontal: false, vertical: true)
             } else {
                 words.fixedSize()
             }
         }
-            .padding(.leading, 8)
-            .padding(.trailing, 8)
-            .padding(.top, 4)
-            .padding(.bottom, 5)
-            .background(RoundedRectangle(cornerRadius: 8).fill(Theme.surface))
-            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Theme.inputLine, lineWidth: 1))
+            .padding(.leading, 8 * zoom)
+            .padding(.trailing, 8 * zoom)
+            .padding(.top, 4 * zoom)
+            .padding(.bottom, 5 * zoom)
+            .background(RoundedRectangle(cornerRadius: 8 * zoom).fill(Theme.surface))
+            .overlay(RoundedRectangle(cornerRadius: 8 * zoom).stroke(Theme.inputLine, lineWidth: 1))
     }
 }
 
@@ -127,7 +132,7 @@ private struct TipModifier: ViewModifier {
         content
             .onHover { inside in
                 if inside {
-                    Tips.hover(text, owner: id)
+                    Tips.hover(text, owner: id, zoom: Tips.windowZoom)
                 } else {
                     Tips.leave(owner: id)
                 }

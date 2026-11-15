@@ -259,10 +259,12 @@ private struct LimitLine: View {
                 .font(Theme.mono(Theme.textTiny))
                 .foregroundStyle(Theme.ink)
                 .frame(width: 40, alignment: .trailing)
+            // The time has a place of its own and is never cut: a longer word widens the place, as
+            // on Windows, and the bar gives way.
             Text(row.countdown)
                 .font(Theme.mono(Theme.textTiny))
                 .foregroundStyle(Theme.muted)
-                .lineLimit(1)
+                .fixedSize()
                 .frame(minWidth: 64, alignment: .leading)
                 .padding(.leading, 12)
             // Only the word of a tone ("running low"), in its colour; a guess about the pace is the
@@ -270,7 +272,7 @@ private struct LimitLine: View {
             Text(row.paceTakesTone ? row.pace : "")
                 .font(Theme.sans(Theme.textSmall))
                 .foregroundStyle(Theme.tone(row.tone))
-                .lineLimit(1)
+                .fixedSize()
                 .frame(minWidth: 72, alignment: .leading)
                 .padding(.leading, 8)
         }

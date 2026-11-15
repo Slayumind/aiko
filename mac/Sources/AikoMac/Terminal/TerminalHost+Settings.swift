@@ -78,8 +78,7 @@ extension TerminalHost {
         guard let state = settings, let window, let root = window.contentView, let bar else { return }
         settingsCover?.removeFromSuperview()
 
-        let panel = NSHostingView(rootView: SettingsPanelView(state: state, menuWidth: Self.listWidth))
-        panel.safeAreaRegions = []
+        let panel = zoomed(SettingsPanelView(state: state, menuWidth: Self.listWidth))
         panel.translatesAutoresizingMaskIntoConstraints = false
         root.addSubview(panel, positioned: .below, relativeTo: bar)
         NSLayoutConstraint.activate([

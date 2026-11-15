@@ -36,6 +36,10 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
     var listWidthConstraint: NSLayoutConstraint?
     var holderWatch: NSObjectProtocol?
     var keyWatch: Any?
+
+    /// The views that follow the zoom of the window, and the two sizes of AppKit that grow with it.
+    var zoomFollowers: [(CGFloat) -> Bool] = []
+    var zoomedSizes: (bar: NSLayoutConstraint, list: NSLayoutConstraint)?
     var bar: NSView?
 
     /// The settings while they are open, and their panel over the list and the terminal (D-374).
@@ -357,7 +361,7 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
         let barFrame = bar.convert(bar.bounds, to: nil)
         let button = close.convert(close.bounds, to: nil)
         let top = content.frame.height
-        return "bar \(Int(top - barFrame.maxY))..\(Int(top - barFrame.minY)), "
+        return "zoom \(Int((zoom * 100).rounded())) %, bar \(Int(top - barFrame.maxY))..\(Int(top - barFrame.minY)), "
             + "close button middle \(Int(top - button.midY)), list \(Int(listWidthConstraint?.constant ?? -1))"
     }
 
