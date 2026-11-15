@@ -119,6 +119,10 @@ sealed class TerminalWindow : Window
     }
 
     private const int SetIcon = 0x0080;
+    private const int GetIcon = 0x007F;
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern bool InSendMessage();
     private const int StyleIndex = -16;
     private const long Caption = 0x00C00000;
 
@@ -130,11 +134,20 @@ sealed class TerminalWindow : Window
     /// left as it was, the old caption showed over the title bar.
     private static IntPtr TakeIcon(IntPtr window, int message, IntPtr wParam, IntPtr lParam, ref bool handled)
     {
+        if (message == GetIcon)
+        {
+            handled = true;
+            var answer = DefWindowProc(window, (uint)message, wParam, lParam);
+            IconProbe.Asked(wParam, answer, InSendMessage());
+            return answer;
+        }
+
         if (message != SetIcon)
         {
             return IntPtr.Zero;
         }
 
+        IconProbe.Set(wParam, lParam);
         handled = true;
         var style = GetWindowLongPtr(window, StyleIndex);
         var plain = (IntPtr)((long)style & ~Caption);

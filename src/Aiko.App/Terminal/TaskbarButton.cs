@@ -52,7 +52,7 @@ sealed class TaskbarButton
     private readonly Queue<(HICON Big, HICON Small, long Given)> _given = new();
 
     /// How long an icon lives after a newer one took its place.
-    private static readonly TimeSpan KeepReplaced = TimeSpan.FromSeconds(3);
+    private static readonly TimeSpan KeepReplaced = IconProbe.KeepReplaced;
 
     public TaskbarButton(Window window, Func<(CardRow? Ring, CardRow? Dot)> rows)
     {
@@ -65,6 +65,7 @@ sealed class TaskbarButton
         // pins are read again each time the window becomes active, and the window moves to the right
         // button while it is open.
         _window.Activated += (_, _) => TakeAppId();
+        IconProbe.Started();
         _faces = new TrayFaceAnimator(window.Dispatcher);
         _faces.Changed += () => Draw(sameRows: true);
         _window.SourceInitialized += (_, _) =>
@@ -195,6 +196,8 @@ sealed class TaskbarButton
         while (_given.Count > (all ? 0 : 1) && (all || Environment.TickCount64 - _given.Peek().Given > KeepReplaced.TotalMilliseconds))
         {
             var (big, small, _) = _given.Dequeue();
+            IconProbe.Destroyed((IntPtr)big);
+            IconProbe.Destroyed((IntPtr)small);
             Windows.Win32.PInvoke.DestroyIcon(big);
             Windows.Win32.PInvoke.DestroyIcon(small);
         }
