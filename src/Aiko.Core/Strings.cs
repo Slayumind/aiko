@@ -540,7 +540,8 @@ public static class Strings
             ["VoiceModelRemove"] = ("Remove the model", "Удалить модель"),
             ["VoiceCloudTitle"] = ("OpenAI with your own key", "OpenAI по своему ключу"),
             ["VoiceCloudWhat"] = ("gpt-4o-transcribe. Better with terms, billed to your key.", "gpt-4o-transcribe. Точнее на терминах, платишь по своему ключу."),
-            ["VoiceHonest"] = ("The sound of every recording goes to OpenAI.", "Звук каждой записи уходит в OpenAI."),
+            ["VoiceHonest"] = ("This data goes there: the recording of your voice and the names of the folders, branches and files of the sessions where you dictate.", "Туда отправляются данные: запись голоса и имена папок, веток и файлов сессий, в которых ты диктуешь."),
+            ["VoiceMicPurpose"] = ("Aiko turns the microphone on only while you dictate. Speech is turned into text locally with Whisper. If you chose OpenAI in the settings, this data goes there: the recording of your voice and the names of the folders, branches and files of the sessions where you dictate.", "Aiko включает микрофон, только пока ты диктуешь. Речь распознаётся локально с помощью Whisper. Если в настройках выбран OpenAI, туда отправляются данные: запись голоса и имена папок, веток и файлов сессий, в которых ты диктуешь."),
             ["VoiceKeyLabel"] = ("Key", "Ключ"),
             ["VoiceKeySave"] = ("Save", "Сохранить"),
             ["VoiceKeyRemove"] = ("Remove key", "Удалить ключ"),
@@ -2076,8 +2077,11 @@ public static class Strings
     /// gpt-4o-transcribe. Better with terms, billed to your key.
     public static string VoiceCloudWhat => Get("VoiceCloudWhat");
 
-    /// The sound of every recording goes to OpenAI.
+    /// This data goes there: the recording of your voice and the names of the folders, branches ...
     public static string VoiceHonest => Get("VoiceHonest");
+
+    /// Aiko turns the microphone on only while you dictate. Speech is turned into text locally w...
+    public static string VoiceMicPurpose => Get("VoiceMicPurpose");
 
     /// Key
     public static string VoiceKeyLabel => Get("VoiceKeyLabel");

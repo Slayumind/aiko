@@ -517,7 +517,7 @@ public enum Strings {
         "VoiceOnComputer": ("on this computer", "на компьютере"),
         "VoiceCancelHint": ("Esc to cancel", "Esc — отменить"),
         "VoiceNoMic": ("No microphone found. Plug one in or allow access to it.", "Микрофон не найден. Подключи его или разреши доступ к нему."),
-        "VoiceNoMicLink": ("Windows Settings", "Параметры Windows"),
+        "VoiceNoMicLink": ("System Settings", "Системные настройки"),
         "VoiceNeedsModel": ("Voice input needs a speech model, 465 MB.", "Для голосового ввода нужна модель распознавания, 465 МБ."),
         "VoiceNeedsKey": ("Recognition through OpenAI needs your key.", "Для распознавания через OpenAI нужен твой ключ."),
         "VoiceOpenSettings": ("Open settings", "Открыть настройки"),
@@ -547,13 +547,14 @@ public enum Strings {
         "VoiceModelRemove": ("Remove the model", "Удалить модель"),
         "VoiceCloudTitle": ("OpenAI with your own key", "OpenAI по своему ключу"),
         "VoiceCloudWhat": ("gpt-4o-transcribe. Better with terms, billed to your key.", "gpt-4o-transcribe. Точнее на терминах, платишь по своему ключу."),
-        "VoiceHonest": ("The sound of every recording goes to OpenAI.", "Звук каждой записи уходит в OpenAI."),
+        "VoiceHonest": ("This data goes there: the recording of your voice and the names of the folders, branches and files of the sessions where you dictate.", "Туда отправляются данные: запись голоса и имена папок, веток и файлов сессий, в которых ты диктуешь."),
+        "VoiceMicPurpose": ("Aiko turns the microphone on only while you dictate. Speech is turned into text locally with Whisper. If you chose OpenAI in the settings, this data goes there: the recording of your voice and the names of the folders, branches and files of the sessions where you dictate.", "Aiko включает микрофон, только пока ты диктуешь. Речь распознаётся локально с помощью Whisper. Если в настройках выбран OpenAI, туда отправляются данные: запись голоса и имена папок, веток и файлов сессий, в которых ты диктуешь."),
         "VoiceKeyLabel": ("Key", "Ключ"),
         "VoiceKeySave": ("Save", "Сохранить"),
         "VoiceKeyRemove": ("Remove key", "Удалить ключ"),
         "VoiceKeyBad": ("This does not look like an OpenAI key: it starts with sk-.", "Это не похоже на ключ OpenAI: он начинается с sk-."),
-        "VoiceKeyNotSaved": ("Windows did not save the key.", "Windows не сохранила ключ."),
-        "VoiceKeyWhere": ("Kept in Windows Credential Manager. Removing Aiko erases it.", "Хранится в Диспетчере учётных данных Windows. Удаление Aiko его сотрёт."),
+        "VoiceKeyNotSaved": ("The Keychain did not save the key.", "Связка ключей не сохранила ключ."),
+        "VoiceKeyWhere": ("Kept in the macOS Keychain. Removing Aiko erases it.", "Хранится в Связке ключей macOS. Удаление Aiko его сотрёт."),
         "VoiceCloudFailed": ("OpenAI did not take the recording. Check the key and the connection.", "OpenAI не принял запись. Проверь ключ и соединение."),
         "VoiceCloudNoMoney": ("The OpenAI account is out of money.", "На счёте OpenAI кончились деньги."),
         "VoiceCloudBusy": ("OpenAI asks to wait a minute.", "OpenAI просит подождать минуту."),
@@ -1990,7 +1991,7 @@ public enum Strings {
     /// No microphone found. Plug one in or allow access to it.
     public static var voiceNoMic: String { Strings.get("VoiceNoMic") }
 
-    /// Windows Settings
+    /// System Settings
     public static var voiceNoMicLink: String { Strings.get("VoiceNoMicLink") }
 
     /// Voice input needs a speech model, 465 MB.
@@ -2080,8 +2081,11 @@ public enum Strings {
     /// gpt-4o-transcribe. Better with terms, billed to your key.
     public static var voiceCloudWhat: String { Strings.get("VoiceCloudWhat") }
 
-    /// The sound of every recording goes to OpenAI.
+    /// This data goes there: the recording of your voice and the names of the folders, branches ...
     public static var voiceHonest: String { Strings.get("VoiceHonest") }
+
+    /// Aiko turns the microphone on only while you dictate. Speech is turned into text locally w...
+    public static var voiceMicPurpose: String { Strings.get("VoiceMicPurpose") }
 
     /// Key
     public static var voiceKeyLabel: String { Strings.get("VoiceKeyLabel") }
@@ -2095,10 +2099,10 @@ public enum Strings {
     /// This does not look like an OpenAI key: it starts with sk-.
     public static var voiceKeyBad: String { Strings.get("VoiceKeyBad") }
 
-    /// Windows did not save the key.
+    /// The Keychain did not save the key.
     public static var voiceKeyNotSaved: String { Strings.get("VoiceKeyNotSaved") }
 
-    /// Kept in Windows Credential Manager. Removing Aiko erases it.
+    /// Kept in the macOS Keychain. Removing Aiko erases it.
     public static var voiceKeyWhere: String { Strings.get("VoiceKeyWhere") }
 
     /// OpenAI did not take the recording. Check the key and the connection.

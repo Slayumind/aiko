@@ -65,12 +65,12 @@ def cs_text(text):
 
 def write_core(path, data):
     parts = [CORE_HEAD]
-    for key, value in data:
+    for key, value, *_ in data:
         parts.append('            ["%s"] = ("%s", "%s"),\n' % (key, cs_text(value[0]), cs_text(value[1])))
     parts.append("        };\n\n")
     parts.append("    public static string Get(string key) =>\n"
                  "        Table.TryGetValue(key, out var pair) ? (Language == StringLanguage.Russian ? pair.Russian : pair.English) : key;\n")
-    for key, value in data:
+    for key, value, *_ in data:
         summary = value[0].replace("\n", " ")
         if len(summary) > 92:
             summary = summary[:89] + "..."
@@ -138,6 +138,12 @@ def swift_name(key):
     return "`%s`" % name if name in keywords else name
 
 
+def for_mac(entry):
+    """The words of the Mac: its own where the entry has them (a place of Windows, such as
+    Credential Manager, has another name there), the words of Windows otherwise."""
+    return entry[2]["mac"] if len(entry) > 2 else entry[1]
+
+
 def mac_keys(text):
     """Every Ctrl+ in the words is a key of Aiko itself, and on the Mac that key is Cmd (D-425)."""
     return text.replace("Ctrl+", "Cmd+")
@@ -149,12 +155,14 @@ def swift_text(text):
 
 def write_swift(path, data):
     parts = [SWIFT_HEAD]
-    for key, value in data:
+    for entry in data:
+        key, value = entry[0], for_mac(entry)
         parts.append('        "%s": ("%s", "%s"),\n'
                      % (key, swift_text(value[0]), swift_text(value[1])))
     parts.append("    ]\n")
 
-    for key, value in data:
+    for entry in data:
+        key, value = entry[0], for_mac(entry)
         summary = mac_keys(value[0]).replace("\n", " ")
         if len(summary) > 92:
             summary = summary[:89] + "..."
@@ -168,11 +176,12 @@ def write_swift(path, data):
 def check(data):
     """What a rewrite breaks quietly. A missing key is a build error on both systems, but these
     three are not, and the last one cost a Russian window its numbers once."""
-    keys = [k for k, _ in data]
+    keys = [entry[0] for entry in data]
     if len(keys) != len(set(keys)):
         raise SystemExit("two entries share a key")
 
-    for key, (english, russian) in data:
+    pairs = [(entry[0], entry[1]) for entry in data] + [(entry[0] + " on the Mac", entry[2]["mac"]) for entry in data if len(entry) > 2]
+    for key, (english, russian) in pairs:
         if not english.strip() or not russian.strip():
             raise SystemExit("%s: one of the two languages is empty" % key)
 
