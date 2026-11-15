@@ -616,13 +616,6 @@
     ]
   ],
   [
-    "WizardUpdatesWhat",
-    [
-      "Once a day, Aiko asks slayumind.org for the latest version and says that one copy of Aiko ran today. The ID it sends changes every day.",
-      "Раз в сутки Aiko спрашивает у slayumind.org свежую версию и сообщает, что одна копия сегодня работала. ID меняется каждый день."
-    ]
-  ],
-  [
     "WizardUpdatesVersion",
     [
       "Once a day, Aiko asks slayumind.org for the latest version.",
@@ -641,20 +634,6 @@
     [
       "Close the window and Aiko stays by the clock while the sessions keep working. A click on the icon brings the window back.",
       "Закроешь окно — Aiko останется у часов, а сессии продолжат работу. Щелчок по значку вернёт окно."
-    ]
-  ],
-  [
-    "WizardDoneMenuBar",
-    [
-      "Aiko is up by the clock. Rest the mouse on it for the card, click to keep it open.",
-      "Aiko наверху, рядом с часами. Наведи мышь — покажется карточка, кликни — останется открытой."
-    ]
-  ],
-  [
-    "WizardDoneIsland",
-    [
-      "Aiko is at the top of your screen. Drag it anywhere and it sticks to the nearest edge.",
-      "Aiko вверху экрана. Перетащи куда угодно — она прилипнет к ближайшему краю."
     ]
   ],
   [
@@ -917,13 +896,6 @@
     ]
   ],
   [
-    "Copy",
-    [
-      "Copy",
-      "Скопировать"
-    ]
-  ],
-  [
     "Copied",
     [
       "Copied",
@@ -942,13 +914,6 @@
     [
       "Claude Code is already on this computer.",
       "Claude Code уже есть на этом компьютере."
-    ]
-  ],
-  [
-    "InstallLead",
-    [
-      "Claude Code isn't on this computer yet. Aiko shows its limits, so install it first.",
-      "Claude Code на этом компьютере пока нет. Aiko показывает его лимиты, поэтому сначала установи его."
     ]
   ],
   [
@@ -980,6 +945,13 @@
     ]
   ],
   [
+    "InstallHowButtonMac",
+    [
+      "The button opens Terminal with the command {0}. Aiko notices when the install is over.",
+      "Кнопка откроет Терминал с командой {0}. Aiko заметит, когда установка закончится."
+    ]
+  ],
+  [
     "InstallFailedLead",
     [
       "Didn't work? ",
@@ -998,13 +970,6 @@
     [
       "Open PowerShell, paste the command and press Enter. Aiko notices when it's done.",
       "Открой PowerShell, вставь команду и нажми Enter. Aiko заметит, когда установка закончится."
-    ]
-  ],
-  [
-    "InstallHowMac",
-    [
-      "Open Terminal, paste the command and press Enter. Aiko notices when it's done.",
-      "Открой Терминал, вставь команду и нажми Enter. Aiko заметит, когда установка закончится."
     ]
   ],
   [
@@ -1551,13 +1516,6 @@
     [
       "In a folder and in every folder inside, plain claude starts its environment. A command like {0} beats a binding, and Claude Code reminds you of the binding.",
       "В папке и во всех вложенных обычный claude запускает её среду. Команда вроде {0} сильнее привязки, но Claude Code напомнит о привязке."
-    ]
-  ],
-  [
-    "AllOtherFolders",
-    [
-      "All other folders",
-      "Все остальные папки"
     ]
   ],
   [

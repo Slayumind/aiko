@@ -105,6 +105,15 @@ struct MacTerminalTests {
 
         #expect(script.contains("export CLAUDE_CONFIG_DIR='/Users/someone/.claude-work'"))
     }
+
+    @Test
+    func theInstallScriptRunsTheOfficialCommandAndNothingElse() {
+        let lines = MacTerminal.installScript().split(separator: "\n").map(String.init)
+
+        #expect(lines.first == "#!/bin/zsh")
+        #expect(lines.last == "curl -fsSL https://claude.ai/install.sh | bash")
+        #expect(lines.count == 3)
+    }
 }
 
 struct ClaudeCodeInstallTests {

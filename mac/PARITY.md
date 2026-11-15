@@ -120,7 +120,7 @@ Swift they are part of AikoKit and have cases of their own:
 | Island/IslandWindow.xaml.cs | IslandDrag.swift | — | 7 | the 3 point threshold and the grip kept as a share of the size |
 | Island/RingGauge.cs | RingArt.swift | — | 2 | the island ring: the pen is 18 % of the ring, as RingGauge draws it |
 | Settings/SettingsPanel.xaml(.cs) | SettingsNav.swift | — | 10 | the page keys, the order of the menu, the small line under each title, and the body height a screen allows |
-| Settings/ChecklistPage.xaml(.cs) | ChecklistLayout.swift | — | 8 | the reading order of the nine items, the three group labels and the word beside each header |
+| Settings/ChecklistPage.xaml(.cs) | ChecklistLayout.swift | — | 8 | the one order of the nine items (D-421), the three group labels and the word beside each header |
 | GeneralPage.xaml.cs (OnCopyDiagnostics) | DiagnosticsText.swift | — | 2 | the lines of the bug report, English in every language as on Windows |
 
 Helpers with no file of their own in the C# core:
@@ -236,7 +236,7 @@ AikoKit decided, and it answers the mouse.
 | Settings/MemoryStore.cs | Settings/MemoryStore.swift | the memory file for the window: the bridge's lock file, read again, change, write in one step |
 | Settings/PrivacyPage.xaml(.cs) | Settings/PrivacyPageView.swift | the two consents and the list of fields that would be sent |
 | Settings/GeneralPage.xaml(.cs) | Settings/GeneralPageView.swift | where Aiko shows, startup, the update line, the language, access, diagnostics, starting over. The update line is one state and one action from `UpdateBlock`, with the percent in place of the button while a download runs; `AIKO_TRY_UPDATE` draws it at a stage for a snapshot. The time of the last answer is `UpdateRun.lastAnswered` in AikoHttp.swift. The switch "open the terminal window too" under the start with the system waits for the terminal on macOS (AIKO-351) |
-| Settings/ChecklistPage.xaml(.cs), ChecklistRow.cs | Settings/ChecklistPageView.swift, ChecklistModel.swift | the nine items, their bodies and Finish |
+| Settings/ChecklistPage.xaml(.cs), ChecklistRow.cs, Terminal/FirstRunHost.cs | Settings/ChecklistPageView.swift, ChecklistModel.swift, SettingsPanel.swift | the nine items, their bodies, the summary before Finish, and the first run in the window one step at a time (D-391, D-394, D-421). The install button opens Terminal with the official command, as Windows opens PowerShell |
 | Aiko.Checks/Settings/SettingsCheck.cs | Settings/SettingsCheck.swift | the self test doors `--try-settings` and `--try-wizard` |
 | Commands/ClaudeLauncher.cs, ClaudeFolders.cs | Commands/ClaudeLauncher.swift | finds Claude Code, opens it, waits for a sign-in, lists the config folders |
 | Commands/CommandFolder.cs | Commands/CommandFolder.swift | the shim, the command links and the block in `~/.zshrc` |

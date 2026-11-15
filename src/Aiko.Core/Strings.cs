@@ -121,12 +121,9 @@ public static class Strings
             ["WizardTheFiles"] = ("FILES AIKO CHANGES", "ФАЙЛЫ, КОТОРЫЕ ИЗМЕНЯТСЯ"),
             ["WizardBackupNote"] = ("Aiko keeps a copy of each file next to it. Removing Aiko puts everything back.", "Aiko сохранит копию каждого файла рядом с ним. Удалишь Aiko — всё вернётся как было."),
             ["WizardBridgeNotFound"] = ("Aiko can't find its bridge program.", "Aiko не нашла свою программу-посредник."),
-            ["WizardUpdatesWhat"] = ("Once a day, Aiko asks slayumind.org for the latest version and says that one copy of Aiko ran today. The ID it sends changes every day.", "Раз в сутки Aiko спрашивает у slayumind.org свежую версию и сообщает, что одна копия сегодня работала. ID меняется каждый день."),
             ["WizardUpdatesVersion"] = ("Once a day, Aiko asks slayumind.org for the latest version.", "Раз в сутки Aiko спрашивает у slayumind.org свежую версию."),
             ["WizardUpdatesCount"] = ("With statistics on, the same request says that one copy of Aiko ran today.", "С включённой статистикой вместе с вопросом уходит, что одна копия сегодня работала."),
             ["WizardDoneTray"] = ("Close the window and Aiko stays by the clock while the sessions keep working. A click on the icon brings the window back.", "Закроешь окно — Aiko останется у часов, а сессии продолжат работу. Щелчок по значку вернёт окно."),
-            ["WizardDoneMenuBar"] = ("Aiko is up by the clock. Rest the mouse on it for the card, click to keep it open.", "Aiko наверху, рядом с часами. Наведи мышь — покажется карточка, кликни — останется открытой."),
-            ["WizardDoneIsland"] = ("Aiko is at the top of your screen. Drag it anywhere and it sticks to the nearest edge.", "Aiko вверху экрана. Перетащи куда угодно — она прилипнет к ближайшему краю."),
             ["WizardDoneOverflow"] = ("Windows 11 hides the icons of new apps under the arrow by the clock. Drag Aiko onto the taskbar to keep the limit rings in sight.", "Windows 11 прячет значки новых приложений под стрелку у часов. Перетащи Aiko на панель задач, чтобы кольца лимитов было видно всегда."),
             ["WizardDoneWindowIsland"] = ("Close the window and Aiko becomes an island at the top of the screen while the sessions keep working. Drag it to any edge.", "Закроешь окно — Aiko встанет островом вверху экрана, а сессии продолжат работу. Перетащи её к любому краю."),
             ["WizardSummaryTitle"] = ("On Finish, Aiko", "По «Готово» Aiko"),
@@ -164,19 +161,17 @@ public static class Strings
             ["StateTray"] = ("tray", "трей"),
             ["StateIsland"] = ("island", "остров"),
             ["StateMenuBar"] = ("menu bar", "строка меню"),
-            ["Copy"] = ("Copy", "Скопировать"),
             ["Copied"] = ("Copied", "Скопировано"),
             ["Later"] = ("Later", "Позже"),
             ["InstallFound"] = ("Claude Code is already on this computer.", "Claude Code уже есть на этом компьютере."),
-            ["InstallLead"] = ("Claude Code isn't on this computer yet. Aiko shows its limits, so install it first.", "Claude Code на этом компьютере пока нет. Aiko показывает его лимиты, поэтому сначала установи его."),
             ["InstallLeadSessions"] = ("Claude Code is not on this computer yet. The sessions in Aiko are Claude Code, so it comes first.", "Claude Code на этом компьютере пока нет. Сессии в Aiko — это он, поэтому начнём с него."),
             ["InstallRun"] = ("Install Claude Code", "Установить Claude Code"),
             ["InstallCopy"] = ("Copy the command", "Скопировать команду"),
             ["InstallHowButton"] = ("The button opens PowerShell with the command {0}. Aiko notices when the install is over.", "Кнопка откроет PowerShell с командой {0}. Aiko заметит, когда установка закончится."),
+            ["InstallHowButtonMac"] = ("The button opens Terminal with the command {0}. Aiko notices when the install is over.", "Кнопка откроет Терминал с командой {0}. Aiko заметит, когда установка закончится."),
             ["InstallFailedLead"] = ("Didn't work? ", "Не вышло — "),
             ["InstallFailedLink"] = ("the Claude Code install page", "страница установки Claude Code"),
             ["InstallHow"] = ("Open PowerShell, paste the command and press Enter. Aiko notices when it's done.", "Открой PowerShell, вставь команду и нажми Enter. Aiko заметит, когда установка закончится."),
-            ["InstallHowMac"] = ("Open Terminal, paste the command and press Enter. Aiko notices when it's done.", "Открой Терминал, вставь команду и нажми Enter. Aiko заметит, когда установка закончится."),
             ["WaitInstall"] = ("Waiting for Claude Code…", "Ждём Claude Code…"),
             ["Env1Lead"] = ("Environment 1 is the .claude folder. VS Code and Claude Desktop use it too.", "Среда 1 — это папка .claude. Ею же пользуются VS Code и Claude Desktop."),
             ["Env1Empty"] = ("This folder has no account yet.", "В этой папке ещё нет аккаунта."),
@@ -255,7 +250,6 @@ public static class Strings
             ["EnvironmentRemovedToBin"] = ("{0} removed. The folder is in the Recycle Bin.", "{0} удалена, папка в Корзине."),
             ["EnvironmentRemovedToTrash"] = ("{0} removed. The folder is in the Trash.", "{0} удалена, папка в Корзине."),
             ["FoldersTableLead"] = ("In a folder and in every folder inside, plain claude starts its environment. A command like {0} beats a binding, and Claude Code reminds you of the binding.", "В папке и во всех вложенных обычный claude запускает её среду. Команда вроде {0} сильнее привязки, но Claude Code напомнит о привязке."),
-            ["AllOtherFolders"] = ("All other folders", "Все остальные папки"),
             ["AddFolder"] = ("Add a folder", "Добавить папку"),
             ["RemoveBinding"] = ("Remove binding", "Убрать привязку"),
             ["FoldersOneEnvironment"] = ("Bindings matter once you have two environments. Right now every folder runs in {0}.", "Привязка нужна, когда сред две. Сейчас все папки работают в {0}."),
@@ -825,9 +819,6 @@ public static class Strings
     /// Aiko can't find its bridge program.
     public static string WizardBridgeNotFound => Get("WizardBridgeNotFound");
 
-    /// Once a day, Aiko asks slayumind.org for the latest version and says that one copy of Aiko...
-    public static string WizardUpdatesWhat => Get("WizardUpdatesWhat");
-
     /// Once a day, Aiko asks slayumind.org for the latest version.
     public static string WizardUpdatesVersion => Get("WizardUpdatesVersion");
 
@@ -836,12 +827,6 @@ public static class Strings
 
     /// Close the window and Aiko stays by the clock while the sessions keep working. A click on ...
     public static string WizardDoneTray => Get("WizardDoneTray");
-
-    /// Aiko is up by the clock. Rest the mouse on it for the card, click to keep it open.
-    public static string WizardDoneMenuBar => Get("WizardDoneMenuBar");
-
-    /// Aiko is at the top of your screen. Drag it anywhere and it sticks to the nearest edge.
-    public static string WizardDoneIsland => Get("WizardDoneIsland");
 
     /// Windows 11 hides the icons of new apps under the arrow by the clock. Drag Aiko onto the t...
     public static string WizardDoneOverflow => Get("WizardDoneOverflow");
@@ -954,9 +939,6 @@ public static class Strings
     /// menu bar
     public static string StateMenuBar => Get("StateMenuBar");
 
-    /// Copy
-    public static string Copy => Get("Copy");
-
     /// Copied
     public static string Copied => Get("Copied");
 
@@ -965,9 +947,6 @@ public static class Strings
 
     /// Claude Code is already on this computer.
     public static string InstallFound => Get("InstallFound");
-
-    /// Claude Code isn't on this computer yet. Aiko shows its limits, so install it first.
-    public static string InstallLead => Get("InstallLead");
 
     /// Claude Code is not on this computer yet. The sessions in Aiko are Claude Code, so it come...
     public static string InstallLeadSessions => Get("InstallLeadSessions");
@@ -981,6 +960,9 @@ public static class Strings
     /// The button opens PowerShell with the command {0}. Aiko notices when the install is over.
     public static string InstallHowButton => Get("InstallHowButton");
 
+    /// The button opens Terminal with the command {0}. Aiko notices when the install is over.
+    public static string InstallHowButtonMac => Get("InstallHowButtonMac");
+
     /// Didn't work? 
     public static string InstallFailedLead => Get("InstallFailedLead");
 
@@ -989,9 +971,6 @@ public static class Strings
 
     /// Open PowerShell, paste the command and press Enter. Aiko notices when it's done.
     public static string InstallHow => Get("InstallHow");
-
-    /// Open Terminal, paste the command and press Enter. Aiko notices when it's done.
-    public static string InstallHowMac => Get("InstallHowMac");
 
     /// Waiting for Claude Code…
     public static string WaitInstall => Get("WaitInstall");
@@ -1226,9 +1205,6 @@ public static class Strings
 
     /// In a folder and in every folder inside, plain claude starts its environment. A command li...
     public static string FoldersTableLead => Get("FoldersTableLead");
-
-    /// All other folders
-    public static string AllOtherFolders => Get("AllOtherFolders");
 
     /// Add a folder
     public static string AddFolder => Get("AddFolder");

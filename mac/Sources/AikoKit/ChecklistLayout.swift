@@ -19,21 +19,11 @@ public struct ChecklistWords: Sendable, Equatable {
 
 /// The order of the items on the page and the words beside each one.
 ///
-/// The order here is the reading order of ChecklistPage.xaml, which is not the order
-/// WizardChecklist walks: bindings are shown under the second environment they choose between,
-/// while the wizard asks for access and the commands first.
+/// The order is the one WizardChecklist walks, the same as the rows of ChecklistPage.xaml: the page,
+/// the dots of the steps and Next agree (D-421).
 public enum ChecklistLayout {
-    public static let order: [ChecklistItem] = [
-        .install,
-        .firstAccount,
-        .secondEnvironment,
-        .projectFolders,
-        .access,
-        .commands,
-        .meetAiko,
-        .privacy,
-        .place,
-    ]
+    /// One order of the steps for the page, the dots, Next and the next open item (D-421).
+    public static let order = WizardChecklist.order
 
     /// The group label above an item, when it starts a group.
     public static func labelAbove(_ item: ChecklistItem) -> String? {

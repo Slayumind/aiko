@@ -35,6 +35,9 @@ final class ChecklistModel: ObservableObject {
     @Published var commandsWanted: Bool?
     @Published var foldersVisited = false
     @Published var personaWanted: Bool?
+
+    /// "Meet Aiko" was answered with the second environment (D-421).
+    @Published var personaSecond = false
     @Published var statsWanted: Bool?
 
     /// Where Aiko lives was shown, here or in an earlier run of the checklist (D-421).
@@ -131,10 +134,6 @@ final class ChecklistModel: ObservableObject {
 
     var configFolders: [String] {
         secondFolder == nil ? [Self.firstFolder] : [Self.firstFolder, secondFolder!]
-    }
-
-    var environmentNames: [String] {
-        [firstNameText, secondNameText].filter { !$0.isEmpty }
     }
 
     var canFinish: Bool { WizardChecklist.canFinish(facts) }
@@ -429,8 +428,9 @@ final class ChecklistModel: ObservableObject {
                 name,
                 [folder],
                 directMode: before?.directMode ?? false,
-                // "Meet Aiko" turns it on in environment 1. "Later" never turns off what is on.
-                persona: (before?.persona ?? false) || (index == 0 && personaWanted == true),
+                // "Meet Aiko" turns it on in the environment it named. "Later" never turns off what
+                // is on.
+                persona: (before?.persona ?? false) || (index == (personaSecond ? 1 : 0) && personaWanted == true),
                 customCommand: customCommand[index],
                 projectFolders: projects)
         }
@@ -454,6 +454,59 @@ final class ChecklistModel: ObservableObject {
             : environments[0].name
 
         return EnvironmentSettings(environments, ringEnvironment: ring, defaultEnvironment: defaultName)
+    }
+
+    // ---- one step at a time (D-391) ----
+
+    /// The next or the previous item that can be opened, from the open one; from the page with every
+    /// answer, back goes to the last item.
+    func step(_ way: Int) -> ChecklistItem? {
+        let order = WizardChecklist.order
+        let from = opened.flatMap { order.firstIndex(of: $0) } ?? (way < 0 ? order.count : -1)
+        var next = from + way
+        while next >= 0 && next < order.count {
+            if state(of: order[next]) != .locked { return order[next] }
+            next += way
+        }
+        return nil
+    }
+
+    /// On past the last item: to the first one still without an answer, or to the page that has them all.
+    func stepNext() {
+        open(step(1) ?? WizardChecklist.nextToOpen(facts))
+    }
+
+    func stepBack() {
+        open(step(-1))
+    }
+
+    // ---- what Finish is about to do ----
+
+    /// What Finish is about to change outside Aiko, one line each, from the answers given (D-421).
+    var summary: [String] {
+        var lines: [String] = []
+        let names = secondFolder == nil ? firstNameText : "\(firstNameText), \(secondNameText)"
+        if accessGranted == true {
+            lines.append(Strings.format(Strings.wizardSummaryAccess, names))
+        }
+        if commandsWanted == true, !commandsInUse.isEmpty {
+            lines.append(Strings.format(Strings.wizardSummaryCommands, commandsInUse.joined(separator: ", ")))
+        }
+        if secondFolder != nil, !projectFolders.isEmpty {
+            lines.append(Strings.format(Strings.wizardSummaryFolders, projectFolders.count, secondNameText))
+        }
+        // A persona that is already on somewhere is not news.
+        if personaWanted == true, !existing.environments.contains(where: \.persona) {
+            lines.append(Strings.format(Strings.wizardSummaryPersona, personaSecond ? secondNameText : firstNameText))
+        }
+        return lines.enumerated().map { at, line in "· " + line + (at == lines.count - 1 ? "." : ";") }
+    }
+
+    /// The count rides on the same request only with statistics on, so only then is it said.
+    var updatesWhat: String {
+        statsWanted == true
+            ? Strings.wizardUpdatesVersion + " " + Strings.wizardUpdatesCount
+            : Strings.wizardUpdatesVersion
     }
 
     private func applyPlace() {

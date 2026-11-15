@@ -13,6 +13,30 @@ struct SettingsPanelView: View {
     let menuWidth: CGFloat
 
     var body: some View {
+        if state.firstRun {
+            firstRun
+        } else {
+            panel
+        }
+    }
+
+    /// The checklist alone, one step at a time in a column in the middle, with no menu (D-394).
+    private var firstRun: some View {
+        ScrollView(.vertical) {
+            Group {
+                if let checklist = state.checklist {
+                    ChecklistPageView(state: state, model: checklist, steps: true)
+                }
+            }
+            .frame(width: 520)
+            .padding(.top, 48)
+            .padding(.bottom, 32)
+            .frame(maxWidth: .infinity)
+        }
+        .background(Theme.surface)
+    }
+
+    private var panel: some View {
         HStack(spacing: 0) {
             SettingsNavView(state: state)
                 .frame(width: menuWidth)

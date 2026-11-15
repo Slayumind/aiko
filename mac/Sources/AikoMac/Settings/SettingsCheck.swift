@@ -29,6 +29,12 @@ enum SettingsCheck {
                 // writes everything and the page stays where it is.
                 + "finish wired: \(checklist.onFinished != nil)")
 
+            if state.firstRun {
+                Log.write("self test: first run, one step at a time: open \(checklist.opened.map { "\($0)" } ?? "none"), "
+                    + "back to \(checklist.step(-1).map { "\($0)" } ?? "nothing"), "
+                    + "next to \(checklist.step(1).map { "\($0)" } ?? "nothing")")
+            }
+
             for item in ChecklistLayout.order {
                 Log.write("self test: item \(item) \(checklist.state(of: item)) "
                     + "\"\(ChecklistLayout.status(item, checklist.state(of: item), checklist.words))\"")
