@@ -15,6 +15,7 @@ enum TerminalCheck {
 
         host.show()
         host.startForCheck(in: folder)
+        hold(host, ProcessInfo.processInfo.environment["AIKO_TRY_VIEW"])
         let seconds = Double(ProcessInfo.processInfo.environment["AIKO_TRY_SECONDS"] ?? "") ?? 2
         after(seconds) {
             Log.write("self test: terminal window shown=\(host.isShown), in the Dock=\(NSApp.activationPolicy() == .regular), "
@@ -53,6 +54,18 @@ enum TerminalCheck {
             Log.write("self test: terminal window keys: Cmd+Shift+K search=\(search && searchOpen), "
                 + "Cmd+Shift+T folders=\(folders && foldersOpen), Cmd+, settings=\(settings && settingsOpen), "
                 + "all closed=\(!host.paletteOpen && !host.settingsOpenForCheck)")
+        }
+    }
+
+    /// AIKO_TRY_VIEW puts the window in one state for a snapshot: header, settings, search or
+    /// folders. Nothing is written: the header opens without the setting.
+    private static func hold(_ host: TerminalHost, _ view: String?) {
+        switch view {
+        case "header": host.showHeaderForCheck(true)
+        case "settings": host.openSettings(at: .general)
+        case "search": host.openSessionPalette()
+        case "folders": host.pickFolderQuickly()
+        default: break
         }
     }
 

@@ -135,8 +135,7 @@ extension TerminalHost {
         closePalette()
         palette.onClosed = { [weak self] in self?.closePalette() }
 
-        let cover = NSHostingView(rootView: PaletteCover(palette: palette, close: { [weak self] in self?.closePalette() }))
-        cover.safeAreaRegions = []
+        let cover = zoomed(PaletteCover(palette: palette, close: { [weak self] in self?.closePalette() }))
         cover.translatesAutoresizingMaskIntoConstraints = false
         root.addSubview(cover)
         NSLayoutConstraint.activate([

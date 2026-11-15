@@ -63,7 +63,7 @@ private struct GroupHeader: View {
                     // A folder gone from the disk opens nothing: the tip says so at once, until the
                     // pointer leaves the button.
                     if gone {
-                        DispatchQueue.main.async { Tips.show(Strings.terminalFolderGone, at: NSEvent.mouseLocation) }
+                        DispatchQueue.main.async { Tips.show(Strings.terminalFolderGone, at: NSEvent.mouseLocation, zoom: Tips.windowZoom) }
                     }
                 }
             }

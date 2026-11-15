@@ -30,18 +30,13 @@ extension TerminalHost {
         state.headerOpen = settings.headerOpen
         state.listHidden = settings.sessionListHidden
 
-        // The title of the system is a safe area for SwiftUI; the bar draws over it on purpose.
-        let bar = NSHostingView(rootView: TitleBarView(state: state))
-        bar.safeAreaRegions = []
-        let list = NSHostingView(rootView: SessionListView(state: state))
-        list.safeAreaRegions = []
+        let bar = zoomed(TitleBarView(state: state))
+        let list = zoomed(SessionListView(state: state))
         self.bar = bar
-        let strip = NSHostingView(rootView: HeaderStripView(state: state))
-        strip.safeAreaRegions = []
+        let strip = zoomed(HeaderStripView(state: state))
         strip.wantsLayer = true
         strip.layer?.masksToBounds = true
-        let cover = NSHostingView(rootView: StageView(state: state))
-        cover.safeAreaRegions = []
+        let cover = zoomed(StageView(state: state))
         stageCover = cover
         let listHolder = NSView()
         listHolder.wantsLayer = true
@@ -61,15 +56,18 @@ extension TerminalHost {
         root.addSubview(bar)
 
         // The list keeps its width while its column slides, so it is cut, not squeezed.
-        let stripHeight = strip.heightAnchor.constraint(equalToConstant: state.headerOpen ? HeaderStripView.height : 0)
+        let stripHeight = strip.heightAnchor.constraint(equalToConstant: 0)
         headerHeight = stripHeight
-        let listWidth = listHolder.widthAnchor.constraint(equalToConstant: state.listHidden ? 0 : Self.listWidth)
+        let listWidth = listHolder.widthAnchor.constraint(equalToConstant: 0)
         listWidthConstraint = listWidth
+        let barHeight = bar.heightAnchor.constraint(equalToConstant: 0)
+        let listInner = list.widthAnchor.constraint(equalToConstant: 0)
+        zoomedSizes = (barHeight, listInner)
         NSLayoutConstraint.activate([
             bar.leadingAnchor.constraint(equalTo: root.leadingAnchor),
             bar.trailingAnchor.constraint(equalTo: root.trailingAnchor),
             bar.topAnchor.constraint(equalTo: root.topAnchor),
-            bar.heightAnchor.constraint(equalToConstant: TitleBarView.height),
+            barHeight,
             strip.leadingAnchor.constraint(equalTo: root.leadingAnchor),
             strip.trailingAnchor.constraint(equalTo: root.trailingAnchor),
             strip.topAnchor.constraint(equalTo: bar.bottomAnchor),
@@ -81,7 +79,7 @@ extension TerminalHost {
             list.leadingAnchor.constraint(equalTo: listHolder.leadingAnchor),
             list.topAnchor.constraint(equalTo: listHolder.topAnchor),
             list.bottomAnchor.constraint(equalTo: listHolder.bottomAnchor),
-            list.widthAnchor.constraint(equalToConstant: Self.listWidth),
+            listInner,
             stage.leadingAnchor.constraint(equalTo: listHolder.trailingAnchor),
             stage.trailingAnchor.constraint(equalTo: root.trailingAnchor),
             stage.topAnchor.constraint(equalTo: strip.bottomAnchor),
@@ -92,9 +90,46 @@ extension TerminalHost {
             cover.bottomAnchor.constraint(equalTo: stage.bottomAnchor),
         ])
         window.contentView = root
-        placeWindowButtons(window)
+        self.window = window
+        applyZoom()
         watchKeys()
         return window
+    }
+
+    /// A SwiftUI part of the window at the zoom of the window: it follows every change of the zoom.
+    func zoomed<Content: View>(_ view: Content) -> ZoomedHostingView<Content> {
+        let host = ZoomedHostingView(rootView: view)
+        host.zoom = zoom
+        // A view that is gone answers false and leaves the list.
+        zoomFollowers.append { [weak host] zoom in
+            host?.zoom = zoom
+            return host != nil
+        }
+        return host
+    }
+
+    /// The zoom of the window from the settings: 1.15 for 115 % (D-384).
+    var zoom: CGFloat { CGFloat(WindowZoom.scale(Store.settings().windowZoom)) }
+
+    /// The height of the bar in whole points. AppKit keeps the title of the system on whole points,
+    /// and a height of 50.6 was put back and set again for ever.
+    var barHeight: CGFloat { (TitleBarView.height * zoom).rounded() }
+
+    /// Everything that has a size in the window takes the zoom: the bar, the list, the header, the
+    /// views of SwiftUI, the window buttons and the font of the terminal.
+    func applyZoom() {
+        let zoom = self.zoom
+        zoomFollowers = zoomFollowers.filter { $0(zoom) }
+        Tips.windowZoom = zoom
+        zoomedSizes?.bar.constant = barHeight
+        zoomedSizes?.list.constant = Self.listWidth * zoom
+        placeList(animated: false)
+        placeHeader(animated: false)
+        let font = Self.terminalFont()
+        for terminal in terminals.values where terminal.font != font {
+            terminal.font = font
+        }
+        if let window { placeWindowButtons(window) }
     }
 
     /// The three buttons of the Mac stand in the middle of the bar, as the three of Windows do: the
@@ -117,7 +152,7 @@ extension TerminalHost {
             }
         }
 
-        let height = TitleBarView.height
+        let height = barHeight
         let frame = NSRect(x: holder.frame.minX, y: window.frame.height - height,
                            width: holder.frame.width, height: height)
         if holder.frame != frame {
@@ -159,7 +194,7 @@ extension TerminalHost {
 
     /// The header opens in place and the body moves down: nothing covers a real terminal.
     func placeHeader(animated: Bool) {
-        let height = state.headerOpen ? HeaderStripView.height : 0
+        let height = state.headerOpen ? HeaderStripView.height * zoom : 0
         guard let constraint = headerHeight, constraint.constant != height else { return }
         if animated && !Motion.reduceMotion {
             NSAnimationContext.runAnimationGroup { context in
@@ -175,7 +210,7 @@ extension TerminalHost {
     }
 
     func placeList(animated: Bool) {
-        let width = state.listHidden ? 0 : Self.listWidth
+        let width = state.listHidden ? 0 : Self.listWidth * zoom
         guard let constraint = listWidthConstraint, constraint.constant != width else { return }
         if animated && !Motion.reduceMotion {
             NSAnimationContext.runAnimationGroup { context in
