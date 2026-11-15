@@ -166,6 +166,11 @@ extension TerminalHost {
         }
     }
 
+    /// The window took the keyboard: the open session is seen, and its count goes.
+    func windowDidBecomeKey(_ notification: Notification) {
+        draw()
+    }
+
     func windowDidResize(_ notification: Notification) {
         if let window { placeWindowButtons(window) }
     }

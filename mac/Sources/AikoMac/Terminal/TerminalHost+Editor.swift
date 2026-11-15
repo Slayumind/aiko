@@ -71,7 +71,7 @@ extension TerminalHost {
                 picturesFolder: Store.folders.picturesFolder(session.id)))
             keysLine.stringValue = session.kind == .shell ? Strings.terminalKeysShell : Strings.terminalKeysClaude
         }
-        editorRoom = terminal != nil && session.map { !exited.contains($0.id) } == true
+        editorRoom = terminal != nil && session.map { exitedAt[$0.id] == nil } == true
         placeEditor()
     }
 
@@ -121,6 +121,7 @@ extension TerminalHost {
             self?.writeInTurn(TerminalPaste.fromPasteboard(.general, picturesFolder: Store.folders.picturesFolder(id)))
         }
         terminal.dropped = { [weak self] paths in self?.dropped(paths) }
+        terminal.typedByPerson = { [weak self] in self?.typed(id) }
         terminal.clicked = { [weak self] in
             // In a session of Claude Code the keys stay with the terminal (D-370).
             guard let self, self.editor.wanted else { return }

@@ -158,4 +158,45 @@ struct IslandLayoutTests {
         #expect(frame.spots[0].clip.width == 0)
         #expect(frame.size == Extent(40, 34))
     }
+
+    // ---- the marks of the sessions (D-364) ----
+
+    /// "1" in Geist Mono 11, near enough: narrower than the least room a number gets.
+    static let one = Extent(6.6, 13)
+
+    @Test
+    func twoMarksOnATopEdgeComeTwelveAfterTheRingsAndTenApart() {
+        let frame = IslandLayout.frame(labels: [Self.words, Self.words], edge: .top, sessions: [Self.one, Self.one])
+
+        // 66 for the rings, then 12, then two marks of 12 + 4 + 7 with 10 between them.
+        #expect(frame.size == Extent(66 + 12 + 23 + 10 + 23, 34))
+        #expect(frame.marks.count == 2)
+        #expect(frame.marks[1].sign.x - frame.marks[0].sign.x == 33)
+        #expect(frame.marks[0].number.x == frame.marks[0].sign.x + 16)
+        #expect(frame.marksOpacity == 1)
+    }
+
+    @Test
+    func onASideEdgeTheMarksStandInAColumnSixApart() {
+        let frame = IslandLayout.frame(labels: [Self.words], edge: .left, sessions: [Self.one, Self.one])
+
+        #expect(frame.marks[1].sign.y - frame.marks[0].sign.y == 13 + 6)
+        #expect(frame.marks[0].sign.y > frame.spots[0].ring.bottom)
+    }
+
+    @Test
+    func theRingsMakeRoomForTheMarksAndDoNotOverlapThem() {
+        let frame = IslandLayout.frame(labels: [Self.words, Self.words], edge: .top, sessions: [Self.one])
+
+        #expect(frame.marks[0].sign.x >= frame.spots[1].ring.right + 12)
+    }
+
+    @Test
+    func aFaceTakesTheMarksAwayWithThePercentages() {
+        let plain = IslandLayout.frame(labels: [Self.words, Self.words], edge: .top, faceFit: 1)
+        let marked = IslandLayout.frame(labels: [Self.words, Self.words], edge: .top, faceFit: 1, sessions: [Self.one])
+
+        #expect(marked.size == plain.size)
+        #expect(marked.marksOpacity == 0)
+    }
 }

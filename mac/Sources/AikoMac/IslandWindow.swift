@@ -17,6 +17,9 @@ final class IslandWindow {
     /// A click on the island: it opens the terminal window (D-399, D-425).
     var onClick: (() -> Void)?
 
+    /// A click on the mark of "waits": the session that waits opens (D-364).
+    var onWaitingClick: (() -> Void)?
+
     /// What the daily update check found. It goes into the words of the island, not its picture.
     var newerVersion: String? {
         get { view.newerVersion }
@@ -242,6 +245,14 @@ final class IslandWindow {
     // ---- In hand: the island follows the pointer and the strip shows where it will land ----
 
     private var drag: IslandDrag?
+    /// How many sessions wait, ended a turn, stopped and work: marks after the rings.
+    func showSessions(_ counts: SessionCounts) {
+        view.sessions = counts
+        if drag?.isDragging != true {
+            fit()
+        }
+    }
+
     private var handEdge = ScreenEdge.top
     private var strip: IslandStrip?
     private let landing = Tween()
@@ -293,9 +304,14 @@ final class IslandWindow {
         strip?.close()
         strip = nil
 
-        // A press that moved nothing is a click, and it opens the terminal window (D-399, D-425).
+        // A press that moved nothing is a click, and it opens the terminal window (D-399, D-425); on
+        // the mark of "waits" it opens the session that waits.
         guard held.isDragging else {
-            onClick?()
+            if view.onWaitingMark(panel.convertPoint(fromScreen: NSEvent.mouseLocation)) {
+                onWaitingClick?()
+            } else {
+                onClick?()
+            }
             return
         }
 

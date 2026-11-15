@@ -33,6 +33,8 @@ final class AikoShell {
             self?.windowOpen = shown
             self?.applyPlace()
         }
+        host.onWaitingStarted = { [weak self] in self?.playWaiting() }
+        host.onSessionsChanged = { [weak self] counts in self?.showSessions(counts) }
         return host
     }()
 
@@ -59,6 +61,7 @@ final class AikoShell {
         icon.onMenu = { [weak self] in self?.onMenuRequested() }
 
         island.onClick = { [weak self] in self?.openWindow() }
+        island.onWaitingClick = { [weak self] id in self?.terminal.openSession(id) }
     }
 
     /// A self test draws one thing to be looked at and must leave the machine as it found it.
@@ -167,6 +170,28 @@ final class AikoShell {
         }
     }
 
+    /// How many sessions wait, ended a turn, stopped and work (D-364, D-409): the menu bar icon and
+    /// the island show them.
+    private(set) var sessions = SessionCounts.none
+
+    private func showSessions(_ counts: SessionCounts) {
+        sessions = counts
+        icon.badge = counts.badge
+        island.showSessions(counts)
+    }
+
+    /// Times the sound of a session that starts to wait was due, for --try-pulse.
+    private(set) var waitingSounds = 0
+
+    /// The sound of a session that starts to wait (D-375). A check changes nothing for the person,
+    /// so it plays none.
+    private func playWaiting() {
+        waitingSounds += 1
+        if !selfTesting, let path = Bundle.main.path(forResource: "waiting", ofType: "wav") {
+            NSSound(contentsOfFile: path, byReference: true)?.play()
+        }
+    }
+
     // ---- Doors for the self tests: they drive the shell through these and nothing else ----
 
     /// The settings panel at the zoom of the window: its frame, the bounds SwiftUI lays out in, and
@@ -178,6 +203,13 @@ final class AikoShell {
     func selfTest(_ what: String, value: String? = nil) {
         selfTesting = true
         island.changingNothing = true
+
+        // AIKO_TRY_SESSIONS="waiting,done,stopped,working" puts counts on the island and the icon for
+        // a snapshot, with no sessions running.
+        if let asked = ProcessInfo.processInfo.environment["AIKO_TRY_SESSIONS"] {
+            let n = asked.split(separator: ",").map { Int($0) ?? 0 } + [0, 0, 0, 0]
+            showSessions(SessionCounts(working: n[3], waiting: n[0], done: n[1], stopped: n[2], firstWaiting: n[0] > 0 ? "check" : nil))
+        }
 
         if what == "settings" || what == "wizard" {
             SettingsCheck.run(what, value: value, shell: self)
@@ -192,6 +224,11 @@ final class AikoShell {
 
         if what == "editor" {
             EditorCheck.run(terminal)
+            return
+        }
+
+        if what == "pulse" {
+            PulseCheck.run(terminal) { [weak self] in self?.waitingSounds ?? 0 }
             return
         }
 

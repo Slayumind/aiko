@@ -8,6 +8,12 @@ final class IslandHost {
     /// A click on the island: it opens the terminal window.
     var onClick: (() -> Void)?
 
+    /// The id of the session a click on the mark of "waits" opens.
+    var onWaitingClick: ((String) -> Void)?
+
+    /// The counts of the sessions, kept for an island made later.
+    private var sessions = SessionCounts.none
+
     /// Set by a self test, which drags the island about. The settings of the person are not its
     /// to change.
     var changingNothing = false
@@ -23,6 +29,10 @@ final class IslandHost {
         if window == nil {
             let made = IslandWindow()
             made.onClick = { [weak self] in self?.onClick?() }
+            made.onWaitingClick = { [weak self] in
+                if let id = self?.sessions.firstWaiting { self?.onWaitingClick?(id) }
+            }
+            made.showSessions(sessions)
             made.onMoved = { [weak self] moved in self?.savePosition(moved) }
             window = made
         }
@@ -38,6 +48,11 @@ final class IslandHost {
         }
 
         onFullScreen(FullScreenWatch.isFullScreenInFront())
+    }
+
+    func showSessions(_ counts: SessionCounts) {
+        sessions = counts
+        window?.showSessions(counts)
     }
 
     func close() {
