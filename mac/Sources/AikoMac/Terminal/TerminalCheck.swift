@@ -58,7 +58,7 @@ enum TerminalCheck {
     }
 
     /// AIKO_TRY_VIEW puts the window in one state for a snapshot: header, settings, search,
-    /// folders, or the editor: editor-shell, editor-compose, editor-mention, editor-voice. Nothing is written: the
+    /// folders, the editor (editor-shell, editor-compose, editor-mention, editor-voice) or stopped. Nothing is written: the
     /// header opens without the setting.
     private static func hold(_ host: TerminalHost, _ view: String?) {
         switch view {
@@ -68,8 +68,19 @@ enum TerminalCheck {
         case "folders": host.pickFolderQuickly()
         case "editor-shell", "editor-compose", "editor-mention": holdEditor(host, view ?? "")
         case "editor-voice": holdVoice(host)
+        case "stopped": holdStopped(host)
         default: break
         }
+    }
+
+    /// Claude Code that ended by itself, with the bar to continue it: it starts in the folder of
+    /// --try-editor and is stopped with two Ctrl+C.
+    private static func holdStopped(_ host: TerminalHost) {
+        let folder = (NSTemporaryDirectory() as NSString).appendingPathComponent("aiko-try-editor")
+        try? FileManager.default.createDirectory(atPath: folder, withIntermediateDirectories: true)
+        host.startForCheck(in: folder, kind: .claude)
+        after(5) { host.openTerminal()?.send(txt: "\u{03}") }
+        after(5.5) { host.openTerminal()?.send(txt: "\u{03}") }
     }
 
     /// A recording in the editor of the command line, with AIKO_TRY_WAV playing in place of the
