@@ -36,6 +36,13 @@ extension EditorView {
         let control = flags.contains(.control)
         let other = flags.contains(.option) || flags.contains(.command)
 
+        // Tab takes the proposed command into the field; it never runs by itself (D-363).
+        if keyCode == 48, !control, !other, !shift, let proposed = suggestion {
+            suggestion = nil
+            setText(proposed, caret: (proposed as NSString).length)
+            return true
+        }
+
         if choices.isOpen, !control, !other, choiceKey(keyCode) {
             return true
         }

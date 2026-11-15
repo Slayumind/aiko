@@ -69,8 +69,21 @@ enum TerminalCheck {
         case "editor-shell", "editor-compose", "editor-mention": holdEditor(host, view ?? "")
         case "editor-voice": holdVoice(host)
         case "stopped": holdStopped(host)
+        case "shell": holdShell(host)
         default: break
         }
+    }
+
+    /// A command line with three blocks, one failed and one long, and the buttons of the failed one.
+    private static func holdShell(_ host: TerminalHost) {
+        guard let id = host.model.sessionId, let pane = host.shells[id] else { return }
+        for (at, command) in ["ls -la", "cat missing.txt", "seq 1 60"].enumerated() {
+            after(1 + Double(at)) {
+                host.editor.setText(command, caret: (command as NSString).length)
+                _ = host.editor.press(36, [])
+            }
+        }
+        after(4.5) { pane.blocks.hoverForCheck(1) }
     }
 
     /// Claude Code that ended by itself, with the bar to continue it: it starts in the folder of

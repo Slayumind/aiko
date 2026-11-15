@@ -84,7 +84,9 @@ extension TerminalHost {
         case .voice:
             // Voice always writes into the field of the open session (D-320).
             editor.pressVoice()
-        case .none, .copy, .paste, .find:
+        case .find:
+            return openFind()
+        case .none, .copy, .paste:
             return false
         }
         return true

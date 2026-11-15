@@ -12,6 +12,14 @@ final class AikoTerminalView: LocalProcessTerminalView {
     /// Files dropped on the terminal, as paths.
     var dropped: (([String]) -> Void)?
 
+    /// Output of the program, as it came: a command line cuts it into blocks.
+    var received: ((ArraySlice<UInt8>) -> Void)?
+
+    override func dataReceived(slice: ArraySlice<UInt8>) {
+        super.dataReceived(slice: slice)
+        received?(slice)
+    }
+
     /// A click ended in the terminal: a selection may have been made there.
     var clicked: (() -> Void)?
 

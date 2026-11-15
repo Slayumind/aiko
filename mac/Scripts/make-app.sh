@@ -58,6 +58,12 @@ if [ "$(shasum -a 256 ".build/voice/$vad" | cut -d' ' -f1)" != "$vad_sha" ]; the
 fi
 cp ".build/voice/$vad" "$app/Contents/Resources/"
 
+# The marks of shell integration for a command line (D-412): Aiko's own startup files for zsh, and
+# the rc file of bash that Windows gives Git Bash.
+mkdir -p "$app/Contents/Resources/Shell"
+cp -R Shell/zsh "$app/Contents/Resources/Shell/"
+cp ../src/Aiko.App/Assets/Shell/aiko.bash "$app/Contents/Resources/Shell/"
+
 # The sound of a session that waits for the person (D-375), the same file Windows plays.
 cp ../src/Aiko.App/Assets/Sounds/waiting.wav "$app/Contents/Resources/"
 
