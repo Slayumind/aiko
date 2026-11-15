@@ -63,6 +63,9 @@ enum Theme {
     static var nsSurface: NSColor { nsColour(Rgba(0x17, 0x17, 0x17)) }
     static var nsInk: NSColor { nsColour(Rgba(0xFA, 0xFA, 0xFA)) }
     static var nsHairline: NSColor { NSColor.white.withAlphaComponent(0.10) }
+    static var nsInputLine: NSColor { NSColor.white.withAlphaComponent(0.149) }
+    static var nsMuted: NSColor { nsColour(Rgba(0xA1, 0xA1, 0xA1)) }
+    static var nsRaised: NSColor { nsColour(Rgba(0x26, 0x26, 0x26)) }
 
     // ---- Sizes ----
 

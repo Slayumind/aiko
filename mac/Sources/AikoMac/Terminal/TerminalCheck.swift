@@ -57,15 +57,45 @@ enum TerminalCheck {
         }
     }
 
-    /// AIKO_TRY_VIEW puts the window in one state for a snapshot: header, settings, search or
-    /// folders. Nothing is written: the header opens without the setting.
+    /// AIKO_TRY_VIEW puts the window in one state for a snapshot: header, settings, search,
+    /// folders, or the editor: editor-shell, editor-compose, editor-mention. Nothing is written: the
+    /// header opens without the setting.
     private static func hold(_ host: TerminalHost, _ view: String?) {
         switch view {
         case "header": host.showHeaderForCheck(true)
         case "settings": host.openSettings(at: .general)
         case "search": host.openSessionPalette()
         case "folders": host.pickFolderQuickly()
+        case "editor-shell", "editor-compose", "editor-mention": holdEditor(host, view ?? "")
         default: break
+        }
+    }
+
+    /// The editor with the words of the snapshots of Windows (TerminalSnapshot.cs). A session of
+    /// Claude Code starts in the folder of --try-editor, which that check has trusted.
+    private static func holdEditor(_ host: TerminalHost, _ view: String) {
+        let folder = (NSTemporaryDirectory() as NSString).appendingPathComponent("aiko-try-editor")
+        try? FileManager.default.createDirectory(atPath: folder, withIntermediateDirectories: true)
+        try? "lantern\n".write(toFile: (folder as NSString).appendingPathComponent("note.txt"), atomically: true, encoding: .utf8)
+        let picture = (folder as NSString).appendingPathComponent("red.png")
+        EditorCheck.writeRedPicture(picture)
+        let editor = host.editor
+        editor.checkWithoutFocus = true
+        if view == "editor-shell" {
+            editor.setText("git log --oneline -5", caret: 19)
+            editor.take([picture, picture])
+            return
+        }
+
+        host.startForCheck(in: folder, kind: .claude)
+        after(4) {
+            _ = host.pressForCheck(5, shift: false)
+            if view == "editor-mention" {
+                editor.setText("Посмотри @no", caret: 12)
+            } else {
+                editor.setText("Сначала проверь, что Esc в пустом редакторе доходит до карточки.\nПотом прогони тесты.", caret: 86)
+                editor.take([picture])
+            }
         }
     }
 

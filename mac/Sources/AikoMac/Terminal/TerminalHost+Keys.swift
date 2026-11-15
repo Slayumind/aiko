@@ -56,8 +56,9 @@ extension TerminalHost {
             hasSelection: false)
     }
 
-    /// Does what the table said. Copy and paste are left to the terminal; the editor, the voice and
-    /// the search in the output come to the Mac with the parts they belong to.
+    /// Does what the table said. Copy and paste go through the Edit menu, as in every Mac app: the
+    /// terminal and the editor take a pasted picture or file there. The voice and the search in the
+    /// output come to the Mac with the parts they belong to.
     private func run(_ action: TerminalKeyAction) -> Bool {
         switch action {
         case .toggleSettings:
@@ -78,7 +79,9 @@ extension TerminalHost {
             goRound(1)
         case .previousSession:
             goRound(-1)
-        case .none, .copy, .paste, .compose, .find, .voice:
+        case .compose:
+            editor.compose()
+        case .none, .copy, .paste, .find, .voice:
             return false
         }
         return true
