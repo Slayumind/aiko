@@ -48,11 +48,8 @@ sealed class TaskbarButton
     private string? _appId;
     private byte[] _picture = [];
 
-    /// The icons given to the window, oldest first, with the time each was given.
-    private readonly Queue<(HICON Big, HICON Small, long Given)> _given = new();
-
-    /// How long an icon lives after a newer one took its place.
-    private static readonly TimeSpan KeepReplaced = TimeSpan.FromSeconds(3);
+    /// The icons given to the window; a replaced one lives a few seconds more (ReplacedIcons).
+    private readonly ReplacedIcons<(HICON Big, HICON Small)> _given = new(TimeSpan.FromSeconds(3));
 
     public TaskbarButton(Window window, Func<(CardRow? Ring, CardRow? Dot)> rows)
     {
@@ -73,7 +70,7 @@ sealed class TaskbarButton
             _picture = [];
             Draw(sameRows: true);
         };
-        _window.Closed += (_, _) => Forget(all: true);
+        _window.Closed += (_, _) => Destroy(_given.TakeAll());
     }
 
     /// Every picture given to the window, for --try-shell.
@@ -184,17 +181,13 @@ sealed class TaskbarButton
         GivenForCheck?.Invoke(picture, (IntPtr)icons.Big, (IntPtr)icons.Small);
         SendMessage(handle, SetIcon, BigIcon, icons.Big);
         SendMessage(handle, SetIcon, SmallIcon, icons.Small);
-        _given.Enqueue((icons.Big, icons.Small, Environment.TickCount64));
-        Forget(all: false);
+        Destroy(_given.Give(icons, Environment.TickCount64));
     }
 
-    /// Destroys the icons that were replaced long enough ago; all of them when the window is gone.
-    /// The newest stays while the window lives: it is the one the button shows.
-    private void Forget(bool all)
+    private static void Destroy(IReadOnlyList<(HICON Big, HICON Small)> icons)
     {
-        while (_given.Count > (all ? 0 : 1) && (all || Environment.TickCount64 - _given.Peek().Given > KeepReplaced.TotalMilliseconds))
+        foreach (var (big, small) in icons)
         {
-            var (big, small, _) = _given.Dequeue();
             Windows.Win32.PInvoke.DestroyIcon(big);
             Windows.Win32.PInvoke.DestroyIcon(small);
         }
