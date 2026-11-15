@@ -36,6 +36,10 @@ extension TerminalHost {
         let list = NSHostingView(rootView: SessionListView(state: state))
         list.safeAreaRegions = []
         self.bar = bar
+        let strip = NSHostingView(rootView: HeaderStripView(state: state))
+        strip.safeAreaRegions = []
+        strip.wantsLayer = true
+        strip.layer?.masksToBounds = true
         let cover = NSHostingView(rootView: StageView(state: state))
         cover.safeAreaRegions = []
         stageCover = cover
@@ -46,9 +50,10 @@ extension TerminalHost {
         stage.layer?.backgroundColor = Theme.nsSurface.cgColor
 
         let root = NSView()
-        for view in [bar, listHolder, list, stage, cover] as [NSView] {
+        for view in [bar, strip, listHolder, list, stage, cover] as [NSView] {
             view.translatesAutoresizingMaskIntoConstraints = false
         }
+        root.addSubview(strip)
         root.addSubview(listHolder)
         listHolder.addSubview(list)
         root.addSubview(stage)
@@ -56,6 +61,8 @@ extension TerminalHost {
         root.addSubview(bar)
 
         // The list keeps its width while its column slides, so it is cut, not squeezed.
+        let stripHeight = strip.heightAnchor.constraint(equalToConstant: state.headerOpen ? HeaderStripView.height : 0)
+        headerHeight = stripHeight
         let listWidth = listHolder.widthAnchor.constraint(equalToConstant: state.listHidden ? 0 : Self.listWidth)
         listWidthConstraint = listWidth
         NSLayoutConstraint.activate([
@@ -63,8 +70,12 @@ extension TerminalHost {
             bar.trailingAnchor.constraint(equalTo: root.trailingAnchor),
             bar.topAnchor.constraint(equalTo: root.topAnchor),
             bar.heightAnchor.constraint(equalToConstant: TitleBarView.height),
+            strip.leadingAnchor.constraint(equalTo: root.leadingAnchor),
+            strip.trailingAnchor.constraint(equalTo: root.trailingAnchor),
+            strip.topAnchor.constraint(equalTo: bar.bottomAnchor),
+            stripHeight,
             listHolder.leadingAnchor.constraint(equalTo: root.leadingAnchor),
-            listHolder.topAnchor.constraint(equalTo: bar.bottomAnchor),
+            listHolder.topAnchor.constraint(equalTo: strip.bottomAnchor),
             listHolder.bottomAnchor.constraint(equalTo: root.bottomAnchor),
             listWidth,
             list.leadingAnchor.constraint(equalTo: listHolder.leadingAnchor),
@@ -73,7 +84,7 @@ extension TerminalHost {
             list.widthAnchor.constraint(equalToConstant: Self.listWidth),
             stage.leadingAnchor.constraint(equalTo: listHolder.trailingAnchor),
             stage.trailingAnchor.constraint(equalTo: root.trailingAnchor),
-            stage.topAnchor.constraint(equalTo: bar.bottomAnchor),
+            stage.topAnchor.constraint(equalTo: strip.bottomAnchor),
             stage.bottomAnchor.constraint(equalTo: root.bottomAnchor),
             cover.leadingAnchor.constraint(equalTo: stage.leadingAnchor),
             cover.trailingAnchor.constraint(equalTo: stage.trailingAnchor),
@@ -141,6 +152,25 @@ extension TerminalHost {
         settings.headerOpen.toggle()
         Store.saveSettings(settings)
         state.headerOpen = settings.headerOpen
+        state.header = header()
+        placeHeader(animated: true)
+    }
+
+    /// The header opens in place and the body moves down: nothing covers a real terminal.
+    func placeHeader(animated: Bool) {
+        let height = state.headerOpen ? HeaderStripView.height : 0
+        guard let constraint = headerHeight, constraint.constant != height else { return }
+        if animated && !Motion.reduceMotion {
+            NSAnimationContext.runAnimationGroup { context in
+                context.duration = 0.32
+                context.timingFunction = CAMediaTimingFunction(name: .easeOut)
+                context.allowsImplicitAnimation = true
+                constraint.animator().constant = height
+                window?.contentView?.layoutSubtreeIfNeeded()
+            }
+        } else {
+            constraint.constant = height
+        }
     }
 
     func placeList(animated: Bool) {

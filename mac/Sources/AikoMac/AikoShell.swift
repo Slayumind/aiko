@@ -24,7 +24,9 @@ final class AikoShell {
 
     /// The terminal window with the sessions (D-425), made on the first click and kept while Aiko runs.
     private lazy var terminal: TerminalHost = {
-        let host = TerminalHost(limitsOf: { [weak self] name in self?.numbers.snapshot(for: name) })
+        let host = TerminalHost(
+            limitsOf: { [weak self] name in self?.numbers.snapshot(for: name) },
+            cardOf: { [weak self] in self?.numbers.card() ?? CardModel(updated: "", blocks: []) })
         host.onQuitAsked = { NSApp.terminate(nil) }
         host.onSettingsChanged = { [weak self] in self?.onRefresh() }
         host.onShownChanged = { [weak self] shown in

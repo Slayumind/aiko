@@ -9,6 +9,7 @@ final class TerminalState: ObservableObject {
     @Published var environments: [String] = []
     @Published var environment = ""
     @Published var tabs: [TabItem] = []
+    @Published var header: [HeaderColumnItem] = []
     @Published var groups: [RowGroup] = []
     @Published var chosen: String?
     @Published var headerOpen = false
@@ -31,6 +32,7 @@ final class TerminalState: ObservableObject {
 
     /// Opens the folder in Finder; false when the folder is gone from the disk.
     var onOpenFolder: ((String) -> Bool)?
+    var onSignIn: ((String) -> Void)?
     var onToggleList: (() -> Void)?
     var onToggleHeader: (() -> Void)?
     var onSearch: (() -> Void)?

@@ -44,8 +44,15 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
     /// The messages in place of the terminal. Hidden while the terminal shows, so it takes no click.
     var stageCover: NSView?
 
-    init(limitsOf: @escaping (String) -> LimitSnapshot?) {
+    /// The words of every environment, as the menu bar icon has them: the active card of the header.
+    let cardOf: () -> CardModel
+
+    /// The strip of the open header and its height, which grows and folds (D-373).
+    var headerHeight: NSLayoutConstraint?
+
+    init(limitsOf: @escaping (String) -> LimitSnapshot?, cardOf: @escaping () -> CardModel) {
         self.limitsOf = limitsOf
+        self.cardOf = cardOf
         let environments = Store.environments().environments.map(\.name)
         model = TerminalWindowModel.opened(Store.terminal(), environments)
         super.init()
@@ -73,6 +80,7 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
     /// New numbers arrived: the pills show them.
     func limitsChanged() {
         state.tabs = tabs()
+        state.header = header()
     }
 
     /// Opens the window, or brings it forward.
@@ -144,6 +152,7 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
 
         // The rows after the terminal is started: a session that starts now is running in its row.
         state.tabs = tabs()
+        state.header = header()
         state.groups = SessionRows.of(sessions, model.environment) { [weak self] id in self?.live(id) }
         stageCover?.isHidden = state.stage == .none
         for view in stage.subviews where view !== shown {
@@ -194,6 +203,31 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
                 waiting: SessionRows.waiting(sessions, environment.name) { [weak self] id in self?.live(id) },
                 percent: badge?.percent,
                 tone: badge?.tone ?? .unknown)
+        }
+    }
+
+    /// The open header (D-373, D-376): the active environment first. The words are read only while
+    /// the header is open.
+    func header() -> [HeaderColumnItem] {
+        guard state.headerOpen else { return [] }
+
+        let environments = Store.environments().environments
+        let blocks = cardOf().blocks
+        let columns = HeaderStrip.columns(
+            environments.map { environment in
+                HeaderInput(
+                    environment: environment.name,
+                    limits: limitsOf(environment.name),
+                    waiting: SessionRows.waiting(sessions, environment.name) { [weak self] id in self?.live(id) })
+            },
+            model.environment,
+            Date())
+
+        return columns.map { column in
+            HeaderColumnItem(
+                column: column,
+                block: column.active ? blocks.first { $0.name == column.environment } : nil,
+                direct: environments.first { $0.name == column.environment }?.directMode ?? false)
         }
     }
 
@@ -291,6 +325,21 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
     var terminalCountForCheck: Int { terminals.count }
 
     var settingsOpenForCheck: Bool { settings != nil }
+
+    /// Opens or folds the header without writing the setting.
+    func showHeaderForCheck(_ open: Bool) {
+        state.headerOpen = open
+        state.header = header()
+        placeHeader(animated: false)
+    }
+
+    /// The columns of the header, the active one first, and the height of its strip.
+    var headerForCheck: String {
+        let columns = state.header.map { item in
+            "\(item.column.environment)\(item.column.active ? " active, \(item.block?.rows.count ?? 0) rows" : "")"
+        }
+        return "header [\(columns.joined(separator: "; "))], strip \(Int(headerHeight?.constant ?? -1))"
+    }
 
     /// Where the bar and the window buttons stand, in points from the top of the window.
     var barForCheck: String {

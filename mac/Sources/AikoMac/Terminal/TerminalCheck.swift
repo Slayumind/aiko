@@ -21,6 +21,9 @@ enum TerminalCheck {
                 + "menu bar icon=\(iconShown()), terminals=\(host.terminalCountForCheck), running=\(host.runningForCheck)")
             Log.write("self test: terminal window \(host.barForCheck)")
             Log.write("self test: terminal window \(host.rowsForCheck)")
+            host.showHeaderForCheck(true)
+            Log.write("self test: terminal window \(host.headerForCheck)")
+            host.showHeaderForCheck(false)
             host.closeForCheck()
             after(0.5) {
                 Log.write("self test: terminal window closed, shown=\(host.isShown), in the Dock=\(NSApp.activationPolicy() == .regular), "
