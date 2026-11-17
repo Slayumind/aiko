@@ -66,17 +66,37 @@ public static class BridgeWork
         };
     }
 
+    /// How long the same numbers are not written again. Claude Code runs the status line many
+    /// times a minute, and every write wakes the app. A minute keeps "working now" true, which
+    /// lasts CardState.WorkingFor after the last write.
+    public static readonly TimeSpan SameNumbersKeepFor = TimeSpan.FromMinutes(1);
+
     /// The status line. Never throws and never refuses: anything unexpected reads as "no data",
-    /// and the user's own line still runs.
-    public static StatusLinePlan StatusLine(AikoFolders folders, string configDirectory, string? settingsJson, string input, DateTimeOffset now)
+    /// and the user's own line still runs. written is the snapshot file as it is now, or null.
+    public static StatusLinePlan StatusLine(AikoFolders folders, string configDirectory, string? settingsJson, string input, DateTimeOffset now, string? written = null)
     {
         var environment = SnapshotName.For(configDirectory);
         var report = StatusLineReport.FromJson(input);
-        var snapshot = report.HasData
-            ? new FileWrite(folders.SnapshotFile(environment), SnapshotFile.ToJson(LimitSnapshot.FromStatusLine(environment, now, report)))
+        var fresh = report.HasData ? LimitSnapshot.FromStatusLine(environment, now, report) : null;
+        var snapshot = fresh is not null && !SameAsWritten(written, fresh, now)
+            ? new FileWrite(folders.SnapshotFile(environment), SnapshotFile.ToJson(fresh))
             : null;
         var wrapped = SettingsJsonPatch.ReadWrappedCommand(settingsJson ?? "");
         return new StatusLinePlan(snapshot, string.IsNullOrWhiteSpace(wrapped) ? null : wrapped);
+    }
+
+    /// The file already holds these numbers, and it was written less than SameNumbersKeepFor ago.
+    private static bool SameAsWritten(string? written, LimitSnapshot fresh, DateTimeOffset now)
+    {
+        if (string.IsNullOrEmpty(written))
+        {
+            return false;
+        }
+
+        var before = SnapshotFile.FromJson(written, fresh.Environment);
+        var age = now - before.ReceivedAt;
+        return age >= TimeSpan.Zero && age < SameNumbersKeepFor
+            && SnapshotFile.ToJson(before with { ReceivedAt = fresh.ReceivedAt }) == SnapshotFile.ToJson(fresh);
     }
 
     /// One session event. The file of a session is read back first, because the same activity is

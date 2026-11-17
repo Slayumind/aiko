@@ -242,7 +242,7 @@ sealed partial class TerminalHost
 
     public void Show()
     {
-        Draw();
+        Draw(evenHidden: true);
         _window.Show();
         _window.Activate();
         OnTaskbarChanged?.Invoke(_window.IsVisible);
@@ -778,8 +778,16 @@ sealed partial class TerminalHost
             : format.Replace(": {0}", "", StringComparison.Ordinal).Replace(" {0}", "", StringComparison.Ordinal);
     }
 
-    private void Draw()
+    private void Draw(bool evenHidden = false)
     {
+        // A hidden window with programs running is drawn again when it is shown. Until then only
+        // the counts of the tray and the island follow the sessions.
+        if (!evenHidden && !_window.IsVisible)
+        {
+            Notice();
+            return;
+        }
+
         // The open session in a window in focus is seen: a turn that ends there is no news.
         if (TerminalPulse.Sees(_window.InView, _window.IsActive) && _model.Session(_sessions) is { } open)
         {
@@ -953,7 +961,11 @@ sealed partial class TerminalHost
 
     private readonly bool _keepsNothing;
 
-    private static ShellLaunch Shell() => ShellLaunch.Find();
+    /// The shell a command line starts with. The window draws often and the search reads PATH, so
+    /// it is looked for again only when a command line starts.
+    private ShellLaunch Shell() => _shellFound ??= ShellLaunch.Find();
+
+    private ShellLaunch? _shellFound;
 
     /// Words in a command line asked for a command: Claude Code proposes one under the field.
     private void Suggest(string words)

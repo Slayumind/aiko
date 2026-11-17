@@ -120,6 +120,7 @@ sealed class ShellBlocksView : FrameworkElement
     /// New output: the rows are counted again and drawn. Called on the window's thread.
     public void Refresh()
     {
+        RefreshesForCheck++;
         lock (_gate)
         {
             _rows = Lay(ShellBlocks.Of(_screen));
@@ -475,14 +476,32 @@ sealed class ShellBlocksView : FrameworkElement
 
     private void DrawMatches(DrawingContext context, int line, double top)
     {
-        for (var i = 0; i < _matches.Count; i++)
+        for (var i = FirstMatchOn(line); i < _matches.Count && _matches[i].Line == line; i++)
         {
-            var (at, start, length) = _matches[i];
-            if (at == line)
+            var (_, start, length) = _matches[i];
+            context.DrawRectangle(i == _match ? MatchNow : Match, null, new Rect(TextLeft + (start * _charWidth), top, length * _charWidth, LineHeight));
+        }
+    }
+
+    /// The matches go in the order of the lines, so the first one on a line is found by halves: a
+    /// one-letter search over a long output gives many thousands, and every frame draws them.
+    private int FirstMatchOn(int line)
+    {
+        var (low, high) = (0, _matches.Count);
+        while (low < high)
+        {
+            var middle = (low + high) / 2;
+            if (_matches[middle].Line < line)
             {
-                context.DrawRectangle(i == _match ? MatchNow : Match, null, new Rect(TextLeft + (start * _charWidth), top, length * _charWidth, LineHeight));
+                low = middle + 1;
+            }
+            else
+            {
+                high = middle;
             }
         }
+
+        return low;
     }
 
     private void DrawLine(DrawingContext context, int line, double top, double dpi)
@@ -619,6 +638,9 @@ sealed class ShellBlocksView : FrameworkElement
     // ---- doors for --try-shell-view ----
 
     internal int RowsForCheck => _rows.Count;
+
+    /// How many times the rows were counted again since the view was made.
+    internal int RefreshesForCheck { get; private set; }
 
     internal int BlockCountForCheck => _rows.Count(row => row.Kind == RowKind.Command);
 

@@ -94,7 +94,16 @@ enum Store {
     /// A file of Aiko, by the rule of StoredFile (D-431): a spoiled one is set aside as .bad, and
     /// one that could not be read is kept from saves until it can be. Nil gives the defaults.
     private static func readOwn(_ path: String) -> String? {
-        let exists = FileManager.default.fileExists(atPath: path)
+        // The window, the menu bar and the island ask on every status line: a file that did not
+        // change since the last read is not read again, as on Windows.
+        let stamp = (try? FileManager.default.attributesOfItem(atPath: path)).map {
+            Stamp(changed: $0[.modificationDate] as? Date ?? .distantPast, size: ($0[.size] as? NSNumber)?.int64Value ?? -1)
+        }
+        if let stamp, let copy = guardedCopies({ $0[path] }), copy.stamp == stamp {
+            return copy.text
+        }
+
+        let exists = stamp != nil || FileManager.default.fileExists(atPath: path)
         let bytes = exists ? FileManager.default.contents(atPath: path) : nil
         let text = bytes.map { String(decoding: $0, as: UTF8.self) }
         let name = (path as NSString).lastPathComponent
@@ -113,8 +122,25 @@ enum Store {
             return nil
         case .missing, .read:
             _ = guarded { $0.remove(path) }
+            if let stamp, let text {
+                guardedCopies { $0[path] = (stamp, text) }
+            }
             return text
         }
+    }
+
+    /// When a file was changed and how long it was, the way a copy is matched to its file.
+    private struct Stamp: Equatable {
+        let changed: Date
+        let size: Int64
+    }
+
+    private nonisolated(unsafe) static var copies: [String: (stamp: Stamp, text: String)] = [:]
+
+    private static func guardedCopies<T>(_ use: (inout [String: (stamp: Stamp, text: String)]) -> T) -> T {
+        unreadLock.lock()
+        defer { unreadLock.unlock() }
+        return use(&copies)
     }
 
     /// The files of Aiko that could not be read the last time. The window, the menu bar and the
@@ -146,5 +172,6 @@ enum Store {
         if rename(temporary, path) != 0 {
             try? FileManager.default.removeItem(atPath: temporary)
         }
+        _ = guardedCopies { $0.removeValue(forKey: path) }
     }
 }

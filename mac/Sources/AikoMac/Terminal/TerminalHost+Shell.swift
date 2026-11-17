@@ -22,13 +22,49 @@ final class ShellPane {
         blocks.folder = folder
     }
 
-    /// A piece of output: the screen takes it as text, whole characters only.
+    /// A piece of output: the screen takes it as text, whole characters only. The rows follow at
+    /// most once each refreshEvery: a command that prints fast once kept the main thread busy
+    /// with them, and the keys waited.
     func feed(_ bytes: ArraySlice<UInt8>) {
-        var all = leftover + bytes
+        var all = leftover.isEmpty ? Array(bytes) : leftover + bytes
         let whole = Self.wholeCharacters(all)
         leftover = Array(all[whole...])
         all.removeSubrange(whole...)
         screen.feed(String(decoding: all, as: UTF8.self), now: TerminalHost.nowMs)
+        scheduleRefresh()
+    }
+
+    /// How often, in seconds, the blocks follow output that keeps coming. The same as on Windows.
+    static let refreshEvery: TimeInterval = 0.05
+
+    private var refreshPending = false
+    private var refreshedAt: TimeInterval = 0
+
+    /// A session that is not open counts its rows once, when it is shown again.
+    private var stale = false
+
+    private func scheduleRefresh() {
+        guard !refreshPending else { return }
+        refreshPending = true
+        let wait = max(0, Self.refreshEvery - (ProcessInfo.processInfo.systemUptime - refreshedAt))
+        DispatchQueue.main.asyncAfter(deadline: .now() + wait) { [weak self] in
+            MainActor.assumeIsolated {
+                guard let self else { return }
+                self.refreshPending = false
+                self.refreshedAt = ProcessInfo.processInfo.systemUptime
+                if self.blocks.isHiddenOrHasHiddenAncestor || self.blocks.window == nil {
+                    self.stale = true
+                } else {
+                    self.blocks.refresh()
+                }
+            }
+        }
+    }
+
+    /// The pane is shown again: rows that output changed while it was away are counted now.
+    func refreshIfStale() {
+        guard stale else { return }
+        stale = false
         blocks.refresh()
     }
 
@@ -106,6 +142,7 @@ extension TerminalHost {
         }
         let blocks = !pane.screen.fullScreen
         pane.blocks.isHidden = !blocks
+        if blocks { pane.refreshIfStale() }
         terminal.alphaValue = blocks ? 0 : 1
         if !blocks {
             pane.find.isHidden = true
