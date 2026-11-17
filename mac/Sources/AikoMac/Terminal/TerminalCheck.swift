@@ -27,6 +27,7 @@ enum TerminalCheck {
             host.showHeaderForCheck(false)
             keys(host)
             tips()
+            copyWhole()
             after(0.5) {
                 host.closeForCheck()
                 after(0.5) {
@@ -134,6 +135,34 @@ enum TerminalCheck {
                 editor.take([picture])
             }
         }
+    }
+
+    /// A paragraph Claude Code wrapped by the width is copied whole (D-371). Claude Code breaks its
+    /// text itself, with a line break and an indent under the start of the text, so a terminal of 40
+    /// columns with no program gets the rows the way Claude Code prints them; the selection of all
+    /// of them comes back as one line. The clipboard of the person is not touched.
+    private static func copyWhole() {
+        let columns = 40
+        let terminal = AikoTerminalView(frame: NSRect(x: 0, y: 0, width: 400, height: 200))
+        terminal.getTerminal().resize(cols: columns, rows: 10)
+
+        let words = (1...24).map { "word\($0)" }
+        var rows: [String] = []
+        var row = "● "
+        for word in words {
+            if row.count + word.count + 1 > columns, row.count > 2 {
+                rows.append(row)
+                row = "  "
+            }
+            row += (row.hasSuffix(" ") ? "" : " ") + word
+        }
+        rows.append(row)
+        terminal.feed(text: rows.joined(separator: "\r\n") + "\r\n")
+
+        terminal.selectAll(nil)
+        let copied = terminal.copiedText()?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        Log.write("self test: terminal window copy: \(rows.count) rows from Claude Code, "
+            + "copied whole=\(copied == "● " + words.joined(separator: " "))")
     }
 
     /// A short tip stands on one line, a long one wraps in 320 points, as on Windows.

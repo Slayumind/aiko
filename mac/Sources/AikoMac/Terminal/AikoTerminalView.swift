@@ -45,6 +45,20 @@ final class AikoTerminalView: LocalProcessTerminalView {
         }
     }
 
+    /// Cmd+C or Edit > Copy: the rows the program wrapped by the width are joined again, so a
+    /// paragraph comes out whole (D-371), as Ctrl+C does on Windows.
+    override func copy(_ sender: Any) {
+        guard let text = copiedText() else { return }
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(text, forType: .string)
+    }
+
+    /// The selection ready for the clipboard, or nil when nothing is selected.
+    func copiedText() -> String? {
+        guard let text = getSelection(), !text.isEmpty else { return nil }
+        return TerminalCopy.unwrap(text, columns: getTerminal().cols)
+    }
+
     override func send(source: TerminalView, data: ArraySlice<UInt8>) {
         if let typedByPerson, TerminalPulse.isTyped(String(decoding: data, as: UTF8.self)) {
             typedByPerson()
