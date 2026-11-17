@@ -412,6 +412,9 @@ exactly, which is what the Swift tests do; the Mac app passes `.macOS`.
 
 ## Differences we could not avoid
 
+- **A session that did not start.** Windows names the error code of `CreateProcess` and offers "Open the
+  log". SwiftTerm on the Mac reports no such code: a program that cannot start ends at once and shows as
+  stopped, with "Continue".
 - **Time.** `DateTimeOffset` counts in 100 ns ticks; Swift `Date` counts in seconds as a double.
   Every value the tests use is exact in both. `ResetCountdown` and the pace estimate cut at the
   same tick as `TimeSpan.FromSeconds` does.
