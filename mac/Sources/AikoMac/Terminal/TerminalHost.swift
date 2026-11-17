@@ -61,6 +61,9 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
     var holderWatch: NSObjectProtocol?
     var keyWatch: Any?
 
+    /// A zoom a self test puts on the window without writing the setting.
+    var zoomForCheck: CGFloat?
+
     /// The loader over a terminal that has drawn nothing yet (D-368), and the terminal it is over.
     var loader: NSView?
     weak var loaderFor: NSView?

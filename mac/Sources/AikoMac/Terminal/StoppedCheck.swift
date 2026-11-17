@@ -33,6 +33,7 @@ enum StoppedCheck {
             check("Claude Code that ends shows the bar in place of the editor",
                   stopped && host.editor.isHidden && host.live(id)?.activity == .exited && host.sessions.find(id) != nil)
             check("Enter on the bar has the keys", host.stoppedBar.hasKeys)
+            await stress(host)
 
             host.stoppedBar.resume?()
             let back = await until(30) { host.stoppedBar.isHidden && host.screenForCheck.contains("shift+tab") }
@@ -45,6 +46,28 @@ enum StoppedCheck {
             host.closeSession(id)
             finish(host)
         }
+    }
+
+    /// The bar once looped the layout of the window to a crash (15.11). With the bar on screen the
+    /// window goes through narrow and wide at every step of the zoom; living to the end is the check.
+    private static func stress(_ host: TerminalHost) async {
+        guard let window = host.window else { return }
+        let start = window.frame
+        var steps = 0
+        for zoom in WindowZoom.steps {
+            host.zoomForCheck = CGFloat(WindowZoom.scale(zoom))
+            host.applyZoom()
+            for width in [WindowPlace.minWidth, 700, 1100, 900, 520] {
+                window.setFrame(NSRect(x: start.minX, y: start.minY, width: width, height: start.height), display: true)
+                window.layoutIfNeeded()
+                steps += 1
+                try? await Task.sleep(for: .milliseconds(60))
+            }
+        }
+        window.setFrame(start, display: true)
+        host.zoomForCheck = nil
+        host.applyZoom()
+        check("the bar lives through \(steps) sizes of the window at every zoom", !host.stoppedBar.isHidden)
     }
 
     private static func finish(_ host: TerminalHost) {

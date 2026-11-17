@@ -120,7 +120,7 @@ extension TerminalHost {
     }
 
     /// The zoom of the window from the settings: 1.15 for 115 % (D-384).
-    var zoom: CGFloat { CGFloat(WindowZoom.scale(Store.settings().windowZoom)) }
+    var zoom: CGFloat { zoomForCheck ?? CGFloat(WindowZoom.scale(Store.settings().windowZoom)) }
 
     /// The height of the bar in whole points. AppKit keeps the title of the system on whole points,
     /// and a height of 50.6 was put back and set again for ever.
