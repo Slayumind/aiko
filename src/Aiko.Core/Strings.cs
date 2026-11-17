@@ -449,6 +449,7 @@ public static class Strings
             ["TerminalShellNotStartedTitle"] = ("The command line did not start", "Командная строка не запустилась"),
             ["TerminalStartFailedBody"] = ("Windows returned error {0}. The log has the details.", "Windows вернула ошибку {0}. Подробности — в журнале."),
             ["TerminalStartAgain"] = ("Start again", "Запустить ещё раз"),
+            ["TerminalOpenLog"] = ("Open the log", "Открыть журнал"),
             ["TerminalHowToInstall"] = ("How to install", "Как установить"),
             ["TerminalFolderGoneTitle"] = ("The folder {0} is no longer on the disk", "Папки {0} больше нет на диске"),
             ["TerminalFolderGoneBody"] = ("The conversation is saved, but there is nowhere to start it.", "Разговор сохранён, но запустить его негде."),
@@ -473,6 +474,7 @@ public static class Strings
             ["ShellExplaining"] = ("Asking Claude Code…", "Спрашиваю Claude Code…"),
             ["ShellExplainFailed"] = ("Claude Code did not answer. Press Explain again in a minute.", "Claude Code не ответил. Нажми «Объяснить» ещё раз через минуту."),
             ["ShellSuggestion"] = ("{0}   **Tab** take", "{0}   **Tab** взять"),
+            ["ShellSuggestFailed"] = ("Claude Code did not answer. Change the words or try again in a minute.", "Claude Code не ответил. Измени слова или попробуй через минуту."),
             ["ShellSuggesting"] = ("Looking for a command…", "Ищу команду…"),
             ["ShellFind"] = ("Find in the output", "Найти в выводе"),
             ["ShellFindCount"] = ("{0} of {1}", "{0} из {1}"),
@@ -521,6 +523,11 @@ public static class Strings
             ["VoiceCancelHint"] = ("Esc to cancel", "Esc — отменить"),
             ["VoiceNoMic"] = ("No microphone found. Plug one in or allow access to it.", "Микрофон не найден. Подключи его или разреши доступ к нему."),
             ["VoiceNoMicLink"] = ("Windows Settings", "Параметры Windows"),
+            ["DockBadgesOffMac"] = ("macOS does not let Aiko put the number on its Dock icon.", "macOS не даёт Aiko ставить число на значок в Dock."),
+            ["DockBadgesSettingsMac"] = ("Notification settings", "Настройки уведомлений"),
+            ["ClaudeDidNotOpen"] = ("Claude Code did not open. Press the button again; the log has the details.", "Claude Code не открылся. Нажми кнопку ещё раз — подробности в журнале."),
+            ["FolderNotMade"] = ("Aiko could not create the folder {0}. The log has the details.", "Aiko не смогла создать папку {0}. Подробности в журнале."),
+            ["VoiceTurnedOff"] = ("Voice input is off.", "Голосовой ввод выключен."),
             ["VoiceNeedsModel"] = ("Voice input needs a speech model, 465 MB.", "Для голосового ввода нужна модель распознавания, 465 МБ."),
             ["VoiceNeedsKey"] = ("Recognition through OpenAI needs your key.", "Для распознавания через OpenAI нужен твой ключ."),
             ["VoiceOpenSettings"] = ("Open settings", "Открыть настройки"),
@@ -1814,6 +1821,9 @@ public static class Strings
     /// Start again
     public static string TerminalStartAgain => Get("TerminalStartAgain");
 
+    /// Open the log
+    public static string TerminalOpenLog => Get("TerminalOpenLog");
+
     /// How to install
     public static string TerminalHowToInstall => Get("TerminalHowToInstall");
 
@@ -1885,6 +1895,9 @@ public static class Strings
 
     /// {0}   **Tab** take
     public static string ShellSuggestion => Get("ShellSuggestion");
+
+    /// Claude Code did not answer. Change the words or try again in a minute.
+    public static string ShellSuggestFailed => Get("ShellSuggestFailed");
 
     /// Looking for a command…
     public static string ShellSuggesting => Get("ShellSuggesting");
@@ -2029,6 +2042,21 @@ public static class Strings
 
     /// Windows Settings
     public static string VoiceNoMicLink => Get("VoiceNoMicLink");
+
+    /// macOS does not let Aiko put the number on its Dock icon.
+    public static string DockBadgesOffMac => Get("DockBadgesOffMac");
+
+    /// Notification settings
+    public static string DockBadgesSettingsMac => Get("DockBadgesSettingsMac");
+
+    /// Claude Code did not open. Press the button again; the log has the details.
+    public static string ClaudeDidNotOpen => Get("ClaudeDidNotOpen");
+
+    /// Aiko could not create the folder {0}. The log has the details.
+    public static string FolderNotMade => Get("FolderNotMade");
+
+    /// Voice input is off.
+    public static string VoiceTurnedOff => Get("VoiceTurnedOff");
 
     /// Voice input needs a speech model, 465 MB.
     public static string VoiceNeedsModel => Get("VoiceNeedsModel");

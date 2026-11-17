@@ -62,6 +62,9 @@ final class ChecklistModel: ObservableObject {
     @Published var creating = false
     @Published var firstWaiting = false
     @Published var secondWaiting = false
+    /// What went wrong under a sign-in button: Claude Code did not open, or the folder was not made.
+    @Published var firstProblem: String?
+    @Published var secondProblem: String?
     @Published var copied = false
     @Published var accessResult: String?
 
@@ -227,10 +230,13 @@ final class ChecklistModel: ObservableObject {
     // ---- environment 1 ----
 
     func signInFirst() {
+        // A Claude Code that did not open is said under the button, never left in silence.
         guard ClaudeLauncher.open(configFolder: Self.firstFolder, workingDirectory: Store.home) else {
+            firstProblem = Strings.claudeDidNotOpen
             return
         }
 
+        firstProblem = nil
         firstWaiting = true
         wait(Waiter.forSignIn(Self.firstFolder) { [weak self] in
             self?.firstWaiting = false
@@ -280,12 +286,17 @@ final class ChecklistModel: ObservableObject {
             try FileManager.default.createDirectory(atPath: folder, withIntermediateDirectories: true)
         } catch {
             Log.write("checklist: could not create \((folder as NSString).lastPathComponent)")
+            secondProblem = Strings.format(Strings.folderNotMade, (folder as NSString).lastPathComponent)
             return
         }
 
         choose(second: folder, named: name)
-        guard ClaudeLauncher.open(configFolder: folder, workingDirectory: Store.home) else { return }
+        guard ClaudeLauncher.open(configFolder: folder, workingDirectory: Store.home) else {
+            secondProblem = Strings.claudeDidNotOpen
+            return
+        }
 
+        secondProblem = nil
         secondWaiting = true
         wait(Waiter.forSignIn(folder) { [weak self] in
             self?.secondWaiting = false

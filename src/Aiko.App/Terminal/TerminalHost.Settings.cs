@@ -37,6 +37,13 @@ sealed partial class TerminalHost
         _settingsPanel?.OpenChecklist(item);
     }
 
+    /// The note of a finished first run: the settings open on the first environment with it.
+    public void ShowChecklistNote(string note)
+    {
+        OpenSettings();
+        _settingsPanel?.ShowNoteOnFirstEnvironment(note);
+    }
+
     /// Back to the same session, as it was.
     public void CloseSettings()
     {

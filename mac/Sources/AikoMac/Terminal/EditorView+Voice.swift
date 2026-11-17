@@ -36,8 +36,15 @@ extension EditorView: DictationField {
         }
         voiceCancel.stringValue = line.cancelHint ? Strings.voiceCancelHint : ""
 
+        // The line lives in the editor. In a session of Claude Code the editor is not on screen
+        // until Cmd+G, so a new line opens it the way Cmd+G does, and Cmd+G closes it again.
+        let newNotice = notice != .none && notice != shownNotice
         shownNotice = notice
+        if newNotice && !wanted && session?.kind == .claude {
+            compose()
+        }
         let words: (String, String) = switch notice {
+        case .turnedOff: (Strings.voiceTurnedOff, Strings.voiceOpenSettings)
         case .noMicrophone: (Strings.voiceNoMic, Strings.voiceNoMicLink)
         case .needsModel: (Strings.voiceNeedsModel, Strings.voiceOpenSettings)
         case .needsKey: (Strings.voiceNeedsKey, Strings.voiceOpenSettings)

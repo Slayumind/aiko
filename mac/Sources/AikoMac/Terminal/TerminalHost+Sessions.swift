@@ -13,7 +13,7 @@ extension TerminalHost {
         state.onAnswer = { [weak self] stop in self?.answer(stop) }
         state.onOpenFolder = { folder in Self.openFolder(folder) }
         state.onRetry = { [weak self] in self?.retry() }
-        state.onSignIn = { name in Self.signIn(name) }
+        state.onSignIn = { [weak self] name in self?.signIn(name) }
         state.onInstallPage = {
             if let url = URL(string: Self.claudeInstallPage) { NSWorkspace.shared.open(url) }
         }
@@ -158,10 +158,14 @@ extension TerminalHost {
 
     /// "Sign in" in the open header opens Claude Code of that environment, as "Sign in again" in its
     /// settings does: signing in happens there.
-    static func signIn(_ environment: String) {
+    /// When Claude Code does not open, the page of the environment takes over: it has the same
+    /// button and says what went wrong under it.
+    func signIn(_ environment: String) {
         guard let folder = Store.environments().environments.first(where: { $0.name == environment })?
             .configDirectories.first else { return }
-        _ = ClaudeLauncher.open(configFolder: folder, workingDirectory: Store.home)
+        if !ClaudeLauncher.open(configFolder: folder, workingDirectory: Store.home) {
+            openSettings(at: .environment(folder))
+        }
     }
 
     /// The folder of a group in Finder (D-408); false when the folder is gone from the disk.

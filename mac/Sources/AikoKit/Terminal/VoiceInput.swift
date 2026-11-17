@@ -25,6 +25,10 @@ public enum VoicePhase: String, Sendable, Equatable {
 /// The line above the input that voice input may show.
 public enum VoiceNotice: String, Sendable, Equatable {
     case none = "None"
+
+    /// The voice key was pressed while voice input is off in the settings: the line says so and
+    /// leads to the page that turns it on.
+    case turnedOff = "TurnedOff"
     case noMicrophone = "NoMicrophone"
     case needsModel = "NeedsModel"
     case needsKey = "NeedsKey"
@@ -114,7 +118,8 @@ public struct VoiceLine: Sendable, Equatable {
 /// The rules of voice input in the input field (D-313, D-315). Two presses: press, speak, press.
 public enum VoiceInput {
     public static func next(_ state: VoiceState, _ cue: VoiceCue, _ readiness: VoiceReadiness) -> VoiceState {
-        if state.phase == .off { return state }
+        // The key is named in every hint of the window, so a press while voice is off is answered.
+        if state.phase == .off { return cue == .press ? VoiceState(.off, .turnedOff) : state }
 
         switch (state.phase, cue) {
         case (.idle, .press):

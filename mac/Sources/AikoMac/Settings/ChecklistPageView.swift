@@ -189,7 +189,9 @@ struct ChecklistPageView: View {
                 Control.rowName(Strings.env1Empty).padding(.top, 10)
                 FlatButton(title: Strings.signIn, look: .quiet) { model.signInFirst() }
                     .padding(.top, 10)
-                if model.firstWaiting {
+                if let problem = model.firstProblem {
+                    Control.rowHint(problem).padding(.top, 10)
+                } else if model.firstWaiting {
                     Control.rowHint(Strings.loginHow).padding(.top, 10)
                 }
                 Control.rowNote(Strings.loginNever)
@@ -240,7 +242,9 @@ struct ChecklistPageView: View {
                 .padding(.top, 10)
             }
 
-            if model.secondWaiting {
+            if let problem = model.secondProblem {
+                Control.rowHint(problem).padding(.top, 10)
+            } else if model.secondWaiting {
                 Control.rowHint(Strings.loginHow).padding(.top, 10)
             }
 

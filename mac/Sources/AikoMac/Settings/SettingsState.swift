@@ -209,7 +209,8 @@ final class SettingsState: ObservableObject {
     /// The first run in the window (D-394): the checklist alone, one step at a time, with no menu.
     /// Finish hands the window over to the terminal.
     var firstRun = false
-    var onFirstRunFinished: () -> Void = {}
+    /// Finish of the first run, with the note of the checklist: "" when all went well.
+    var onFirstRunFinished: (String) -> Void = { _ in }
 
     private var savedUntil: Task<Void, Never>?
 
@@ -419,7 +420,7 @@ final class SettingsState: ObservableObject {
         model.onFinished = { [weak self] note in
             guard let self else { return }
             if self.firstRun {
-                self.onFirstRunFinished()
+                self.onFirstRunFinished(note)
                 return
             }
             self.checklist = nil

@@ -12,6 +12,8 @@ struct EnvironmentPageView: View {
     let folder: String
 
     @State private var opened = false
+    /// Claude Code did not open: the line under the button says so instead.
+    @State private var notOpened = false
     @State private var asking = false
     @State private var toTrash = false
     @State private var waiter: Waiter?
@@ -122,8 +124,8 @@ struct EnvironmentPageView: View {
             FlatButton(title: signedIn ? Strings.signInAgain : Strings.signIn, press: signIn)
                 .padding(.top, 10)
 
-            Reveal(isOpen: opened) {
-                Control.rowHint(Strings.claudeOpened).padding(.top, 6)
+            Reveal(isOpen: opened || notOpened) {
+                Control.rowHint(notOpened ? Strings.claudeDidNotOpen : Strings.claudeOpened).padding(.top, 6)
             }
 
             // Direct mode reads the access token, and on macOS that token lives in the Keychain,
@@ -347,7 +349,11 @@ struct EnvironmentPageView: View {
     }
 
     private func signIn() {
-        guard ClaudeLauncher.open(configFolder: folder, workingDirectory: Store.home) else { return }
+        guard ClaudeLauncher.open(configFolder: folder, workingDirectory: Store.home) else {
+            notOpened = true
+            return
+        }
+        notOpened = false
         opened = true
 
         // The dot turns green by itself once the sign-in is done in the browser.

@@ -514,13 +514,20 @@ sealed class AikoShell : IDisposable
         var firstRun = new FirstRunHost();
         firstRun.QuitAsked += Quit;
         firstRun.SettingsChanged += FollowSettings;
-        firstRun.Finished += () =>
+        firstRun.Finished += note =>
         {
             firstRun.Close();
             FollowSettings();
             if (!_changingNothing && !ShowTerminalOnce())
             {
                 OpenTerminal();
+            }
+
+            // What the checklist could not do (settings.json not written, commands that need a new
+            // terminal) is said once, on the page of the first environment, as after any checklist.
+            if (note.Length > 0 && _terminal is { } terminal)
+            {
+                terminal.ShowChecklistNote(note);
             }
         };
         firstRun.Closed += () =>

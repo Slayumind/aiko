@@ -182,6 +182,7 @@ sealed partial class TerminalHost
         _panel.PaletteAsked += OpenSessionPalette;
         _panel.RetryAsked += RetryStart;
         _panel.InstallPageAsked += () => Process.Start(new ProcessStartInfo(ClaudeInstallPage) { UseShellExecute = true });
+        _panel.LogAsked += () => Process.Start(new ProcessStartInfo(Log.FilePath) { UseShellExecute = true });
 
         // Esc from anywhere in the settings, a text field included: what was typed is applied on the
         // way out, the same as leaving the field.
@@ -199,9 +200,12 @@ sealed partial class TerminalHost
     /// card of limits did before (D-399).
     private void SignIn(string environment)
     {
-        if (_settings.Environments.FirstOrDefault(e => e.Name == environment) is { } found)
+        // When Claude Code does not open, the page of the environment takes over: it has the same
+        // button and says what went wrong under it.
+        if (_settings.Environments.FirstOrDefault(e => e.Name == environment) is { } found
+            && !ClaudeLauncher.Open(found.ConfigDirectories[0], System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile)))
         {
-            ClaudeLauncher.Open(found.ConfigDirectories[0], System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile));
+            OpenSettings("env:" + found.ConfigDirectories[0]);
         }
     }
 

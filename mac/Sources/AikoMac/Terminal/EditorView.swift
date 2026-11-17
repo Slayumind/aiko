@@ -47,6 +47,9 @@ final class EditorView: NSView, NSTextViewDelegate {
     /// A command Claude Code proposed for the words in a command line (D-358), and the words it
     /// answers; nil while there is none. The timer waits for a pause in the typing and stops.
     var suggestion: String?
+
+    /// The words Claude Code gave no command for: the line says so until they change.
+    var suggestFailedFor: String?
     var suggestFor: String?
     private var suggestPause: Timer?
 
@@ -392,6 +395,7 @@ final class EditorView: NSView, NSTextViewDelegate {
         guard text.string == words else { return }
         suggestFor = nil
         suggestion = command
+        suggestFailedFor = command == nil ? words : nil
         showHint()
     }
 
@@ -400,6 +404,7 @@ final class EditorView: NSView, NSTextViewDelegate {
     private func waitForSuggestion() {
         suggestion = nil
         suggestFor = nil
+        suggestFailedFor = nil
         suggestPause?.invalidate()
         suggestPause = nil
         guard session?.kind == .shell, ShellAsk.isRequest(text.string) else { return }
@@ -423,6 +428,7 @@ final class EditorView: NSView, NSTextViewDelegate {
         let shell = state.kind == .shell
         let words = shell && suggestion != nil ? Strings.format(Strings.shellSuggestion, (suggestion ?? "").replacingOccurrences(of: "**", with: "* *"))
             : shell && suggestFor != nil && suggestFor == text.string ? Strings.shellSuggesting
+            : shell && suggestFailedFor != nil && suggestFailedFor == text.string ? Strings.shellSuggestFailed
             : state.composing ? Strings.terminalEditorHintCompose
             : state.passing && state.empty ? Strings.terminalEditorHintPassing
             : state.empty ? (shell ? Strings.terminalEditorHintShellEmpty : Strings.terminalEditorHintEmpty)

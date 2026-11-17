@@ -127,7 +127,7 @@ sealed partial class TerminalPanel
             StartProblem.Failed => Message(
                 view.Shell ? Strings.TerminalShellNotStartedTitle : Strings.TerminalNotStartedTitle,
                 string.Format(CultureInfo.CurrentCulture, Strings.TerminalStartFailedBody, view.ProblemCode),
-                again),
+                TwoButtons(again, Flat(Strings.TerminalOpenLog, () => LogAsked?.Invoke(), ghost: false))),
             _ => Message(
                 Strings.TerminalNotStartedTitle,
                 Strings.TerminalNotStartedBody,

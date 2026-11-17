@@ -243,12 +243,14 @@ public partial class EnvironmentPage : UserControl
 
     private void OnSignIn(object sender, RoutedEventArgs e)
     {
-        if (!ClaudeLauncher.Open(_folder, Home))
+        var opened = ClaudeLauncher.Open(_folder, Home);
+        OpenedLine.Text = opened ? Strings.ClaudeOpened : Strings.ClaudeDidNotOpen;
+        OpenedPanel.IsOpen = true;
+        if (!opened)
         {
             return;
         }
 
-        OpenedPanel.IsOpen = true;
 
         // The dot turns green by itself once the sign-in is done in the browser.
         if (!File.Exists(ClaudeInstall.CredentialsPathIn(ThisComputer.Platform, _folder)))

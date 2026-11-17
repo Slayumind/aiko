@@ -20,7 +20,7 @@ extension TerminalHost {
         // AIKO_TRY_FIRST_RUN=1 shows the first run on a Mac that is set up, for --try-wizard.
         state.firstRun = !Store.environments().hasEnvironments
             || ProcessInfo.processInfo.environment["AIKO_TRY_FIRST_RUN"] == "1"
-        state.onFirstRunFinished = { [weak self] in self?.finishFirstRun() }
+        state.onFirstRunFinished = { [weak self] note in self?.finishFirstRun(note: note) }
         state.onClose = { [weak self] in self?.closeSettings() }
         state.onQuit = { [weak self] in self?.onQuitAsked?() }
         state.askBeforeStopping = { [weak self] reason, step in
@@ -60,7 +60,10 @@ extension TerminalHost {
 
     /// The first run wrote the environments: the terminal takes the window, and it counts as the
     /// one time the window opened by itself (D-350).
-    func finishFirstRun() {
+    ///
+    /// What the checklist could not do (settings.json not written, commands that need a new
+    /// terminal) is said once, on the page of the first environment, as after any checklist.
+    func finishFirstRun(note: String = "") {
         closeSettings()
         var app = Store.settings()
         app.terminalShown = true
@@ -68,6 +71,9 @@ extension TerminalHost {
         model = TerminalWindowModel.opened(sessions, Store.environments().environments.map(\.name))
         onSettingsChanged?()
         draw()
+        if !note.isEmpty {
+            openSettings(at: nil).showNoteOnFirstEnvironment(note)
+        }
     }
 
     /// The gear opens the settings and closes them again.

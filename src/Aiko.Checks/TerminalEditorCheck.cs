@@ -240,6 +240,13 @@ static class TerminalEditorCheck
         check("the second Esc closes the editor", !editor.Wanted, "");
         editor.ClearForCheck();
 
+        // 4a. A line about voice input opens the editor that holds it: the voice key with voice off.
+        var off = VoiceInput.Next(VoiceState.For(false), VoiceCue.Press, VoiceReadiness.Ready);
+        editor.ShowVoice(VoiceInput.Line(off, TimeSpan.Zero, VoiceEngine.Local), off.Notice);
+        check("the voice key with voice off opens the editor and says so", editor.Wanted && off.Notice == VoiceNotice.TurnedOff, $"{off.Notice}");
+        editor.ShowVoice(VoiceInput.Line(VoiceState.For(true), TimeSpan.Zero, VoiceEngine.Local), VoiceNotice.None);
+        editor.Compose();
+
         // 5. Voice without the editor: the words show in it while heard, then go into the line.
         inserted.Clear();
         var sendsBefore = sends;

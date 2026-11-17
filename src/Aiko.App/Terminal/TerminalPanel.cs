@@ -349,6 +349,9 @@ sealed partial class TerminalPanel : UserControl
     /// "How to install" when Claude Code is not on the computer.
     public event Action? InstallPageAsked;
 
+    /// "Open the log" under a session that did not start: the words say the log has the details.
+    public event Action? LogAsked;
+
     /// "Sign in" on the card of an environment whose account is not connected.
     public event Action<string>? SignInAsked;
 

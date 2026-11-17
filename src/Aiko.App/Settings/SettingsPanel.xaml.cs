@@ -119,7 +119,8 @@ public partial class SettingsPanel : UserControl
     private readonly bool _firstRun;
 
     /// The first run is done: the environments are written, and the terminal can take the window.
-    public event Action? FirstRunFinished;
+    /// Finish of the first run, with the note of the checklist: "" when all went well.
+    public event Action<string>? FirstRunFinished;
 
     public bool IsFirstRun => _firstRun;
 
@@ -387,7 +388,7 @@ public partial class SettingsPanel : UserControl
             _editor.Reload();
             if (_firstRun)
             {
-                FirstRunFinished?.Invoke();
+                FirstRunFinished?.Invoke(note);
                 return;
             }
 
@@ -417,7 +418,9 @@ public partial class SettingsPanel : UserControl
             _ => QuitRequested?.Invoke(), TaskScheduler.FromCurrentSynchronizationContext());
     });
 
-    private void ShowNoteOnFirstEnvironment(string note)
+    /// The note of a finished checklist on the page of the first environment, where the person
+    /// can act on it.
+    public void ShowNoteOnFirstEnvironment(string note)
     {
         Navigate(EnvironmentPage(0) ?? GeneralPageKey);
         (PageHost.Content as EnvironmentPage)?.ShowNote(note);
