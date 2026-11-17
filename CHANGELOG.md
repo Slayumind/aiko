@@ -6,7 +6,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 [semantic versioning](https://semver.org/spec/v2.0.0.html). The same notes in Russian are in
 [CHANGELOG.ru.md](CHANGELOG.ru.md), under the same headings.
 
-## [Unreleased]
+## [0.5.0] - 2026-11-17
+
+Aiko gets a window. Claude Code and the command line run in it, on Windows and macOS, grouped by
+account and project folder.
 
 ### Added
 
