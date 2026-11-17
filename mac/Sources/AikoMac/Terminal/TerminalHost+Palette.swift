@@ -132,6 +132,7 @@ extension TerminalHost {
     /// else closes it, as Esc does.
     func showPalette(_ palette: PaletteState) {
         guard let window, let root = window.contentView else { return }
+        state.listPopOpen = false
         closePalette()
         palette.onClosed = { [weak self] in self?.closePalette() }
 

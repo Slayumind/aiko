@@ -3475,7 +3475,13 @@
     [
       "The tray icon, the taskbar button and the island show how many agents wait, have finished or stopped. A number goes when you open that session.",
       "Значок в трее, кнопка в панели задач и остров показывают, сколько агентов ждут, закончили или остановились. Число уходит, когда ты открываешь эту сессию."
-    ]
+    ],
+    {
+      "mac": [
+        "The menu bar icon, the Dock icon and the island show how many agents wait, have finished or stopped. A number goes when you open that session.",
+        "Значок в строке меню, значок в Dock и остров показывают, сколько агентов ждут, закончили или остановились. Число уходит, когда ты открываешь эту сессию."
+      ]
+    }
   ],
   [
     "NotifySound",

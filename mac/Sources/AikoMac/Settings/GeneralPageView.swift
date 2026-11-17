@@ -15,6 +15,8 @@ struct GeneralPageView: View {
 
     /// Where the update line stands, and what went wrong with the last download, in words.
     @State private var stage = UpdateStage.notAsked
+    /// The titles of the notes of the newer version (D-397), under its line.
+    @State private var news: [String] = []
     @State private var problem: String?
     @State private var percent = 0
     @State private var asking = false
@@ -76,6 +78,19 @@ struct GeneralPageView: View {
             // preference. The button stays here, because pressing it is the person's own action
             // (D-113).
             updates.padding(.top, 10)
+            if !news.isEmpty {
+                VStack(alignment: .leading, spacing: 4) {
+                    ForEach(news, id: \.self) { title in
+                        HStack(alignment: .firstTextBaseline, spacing: 8) {
+                            Circle().fill(Theme.muted).frame(width: 4, height: 4)
+                                .alignmentGuide(.firstTextBaseline) { $0[.bottom] + 2 }
+                                .padding(.leading, 2)
+                            Control.rowHint(title)
+                        }
+                    }
+                }
+                .padding(.top, 6)
+            }
 
             Control.sectionLabel(Strings.sectionLanguage).padding(.top, 22).padding(.bottom, 8)
             DropDown(
@@ -120,6 +135,14 @@ struct GeneralPageView: View {
                 state.askForUpdate = false
                 check()
             }
+        }
+        .task(id: newsVersion) {
+            guard let version = newsVersion else {
+                news = []
+                return
+            }
+            let titles = await ReleaseNotesRun.titles(for: version)
+            if version == newsVersion { news = titles }
         }
     }
 
@@ -216,6 +239,18 @@ struct GeneralPageView: View {
             return (Strings.format(Strings.updateReady, newer), Strings.updateReadyDetail)
         case .downloadFailed, .cannotInstall:
             return (problem ?? Strings.updateDownloadFailed, comparing)
+        }
+    }
+
+    /// The version whose notes stand under the line: only while a newer one is out, coming or
+    /// ready, as on Windows.
+    private var newsVersion: String? {
+        switch stage {
+        case .available, .downloading, .ready:
+            let newer = newerShown
+            return newer.isEmpty ? nil : newer
+        default:
+            return nil
         }
     }
 

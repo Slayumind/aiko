@@ -81,6 +81,12 @@ enum ClaudeSettingsFile {
         report(configDirectory, editor.addSessionHook(configDirectory, BridgeCommand.hookFor(bridgePath, shell)))
     }
 
+    /// Our own line again, with the bridge where it is now. Only a line that is already ours is
+    /// touched.
+    static func repairBridge(_ configDirectory: String, _ bridgePath: String) -> PatchOutcome {
+        report(configDirectory, editor.repairIfOurs(configDirectory, lineFor(bridgePath)))
+    }
+
     /// Aiko's line, its hook, its plugins and its marketplace (D-205).
     static func removeAiko(_ configDirectory: String) -> PatchOutcome {
         report(configDirectory, editor.remove(configDirectory))

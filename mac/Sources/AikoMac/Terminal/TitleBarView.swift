@@ -49,8 +49,17 @@ struct TitleBarView: View {
             BarButton(tip: Strings.terminalFindConversation, action: { state.onSearch?() }) {
                 LineMark(data: BarMarks.search)
             }
-            BarButton(tip: Strings.settings, lit: state.settingsOpen, action: { state.onSettings?() }) {
+            BarButton(tip: state.settingsOpen ? Strings.settingsCloseTip : Strings.settings, lit: state.settingsOpen,
+                      action: { state.onSettings?() }) {
                 FilledMark(data: BarMarks.gear, size: 14)
+            }
+            .overlay(alignment: .topTrailing) {
+                // A quiet dot while a newer version is out (D-391); the General page says which.
+                if state.updateDot {
+                    Circle().fill(Theme.positive).frame(width: 6, height: 6)
+                        .padding(.top, 6).padding(.trailing, 11)
+                        .allowsHitTesting(false)
+                }
             }
         }
         .padding(.trailing, 8)
@@ -65,21 +74,28 @@ struct TitleBarView: View {
 
     /// The name and its number are one line of text, so they stand on one baseline; one weight for
     /// every pill, so a pill keeps its width when it is chosen and the background lands on it.
+    /// In a narrow window a pill that is not chosen keeps only its first mark, and the number of
+    /// its waiting sessions; the name and the limit move to the tip.
     private func pill(_ tab: TabItem) -> some View {
-        Button { state.onEnvironment?(tab.name) } label: {
-            HStack(spacing: 6) {
+        let small = state.narrow && !tab.selected
+        return Button { state.onEnvironment?(tab.name) } label: {
+            HStack(spacing: small ? 4 : 6) {
                 if tab.waiting > 0 {
                     LineMark(data: BarMarks.pause, tone: Theme.caution)
                         .frame(width: 14, height: 14)
                 } else {
                     RingMark(percent: tab.percent, tone: tab.tone)
                 }
-                label(tab)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
+                if !small {
+                    label(tab)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                } else if tab.waiting > 0 {
+                    Text("\(tab.waiting)").font(Theme.mono(Theme.textTiny)).foregroundColor(Theme.caution)
+                }
             }
-            .padding(.leading, 10)
-            .padding(.trailing, 12)
+            .padding(.leading, small ? 8 : 10)
+            .padding(.trailing, small ? 8 : 12)
             .frame(height: 28)
             .background {
                 if tab.selected {
@@ -89,7 +105,7 @@ struct TitleBarView: View {
             .contentShape(Capsule())
         }
         .buttonStyle(.plain)
-        .tip(tab.waiting > 0 ? tip(tab) : "")
+        .tip(small || tab.waiting > 0 ? tip(tab) : "")
         .layoutPriority(tab.selected ? 1 : 0)
     }
 

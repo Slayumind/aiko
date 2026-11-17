@@ -68,7 +68,7 @@ a row cannot change in one core and stay as it was in the other. See `spec/cases
 | ClaudeConfigFolder.cs | ClaudeConfigFolder.swift | 7 | 7 | |
 | ClaudeInstall.cs | ClaudeInstall.swift | 7 | 7 | |
 | ShimLaunch.cs, RealClaude.cs, UserPathList.cs | ShimLaunch.swift, RealClaude.swift, UserPathList.swift | 22 | 16 | the other 6 C# cases are about PowerShellProfile; what the shim sets in the environment of Claude Code is `VariableChanges` on both sides, with 4 cases each |
-| BridgeWork.cs | BridgeWork.swift | 31 | 35 | what one run of the bridge does: which job it was started for, the snapshot to write, the activity file of a session and the reminder at session start. `Aiko.Bridge/Program.cs` only reads stdin and the disk and does what the answers say. Windows has one more job, the hook of its terminal (`terminal-event`); the persona plugin folder stays in `PersonaPluginOutput` on Windows |
+| BridgeWork.cs | BridgeWork.swift | 31 | 35 | what one run of the bridge does: which job it was started for, the snapshot to write, the activity file of a session and the reminder at session start. `Aiko.Bridge/Program.cs` only reads stdin and the disk and does what the answers say. Both have the hook of the terminal (`terminal-event`). The same numbers within a minute are not written again (D-432). The persona plugin folder stays in `PersonaPluginOutput` on Windows |
 | BridgeCommand.cs | BridgeCommand.swift | 29 | 29 | BridgeCommandTests (11) and BridgeRecognitionTests (18) |
 | CommandLinks.cs | CommandLinks.swift | 3 | 3 | |
 | AikoMarketplace.cs | AikoMarketplace.swift | — | — | its cases sit in PluginPlanTests and SkillPluginTests |
@@ -86,7 +86,7 @@ a row cannot change in one core and stay as it was in the other. See `spec/cases
 | MemoryPage.cs | MemoryPage.swift | 5 | 5 | the other 5 cases of `MemoryHandTests`; `Length` is in UTF-16 units in both |
 | Terminal/ClaudeLaunchPlan.cs, LimitBadge.cs, HeaderStrip.cs, FileLink.cs | the same names under Terminal/ | — | — | how Claude Code and a command line start in a real terminal (D-349, D-360), with the hook of the terminal through `--settings`; the limit on a tab; the open header with the active environment first (D-376); `file:line` and web links. Tables in `spec/cases/` (`launch-plan`, `limit-badge`, `header-strip`, `file-link`) |
 | Terminal/TerminalTitle.cs, TerminalEvent.cs | the same names under Terminal/ | — | — | what a session does (D-366): the title read from the output of the terminal, the hook event of a session, what a row says from both, and which input the person typed. Tables in `spec/cases/` (`terminal-title`, `terminal-events`). `TitleReader` counts UTF-16 units in C# and Unicode scalars in Swift; `IsTyped` reads UTF-16 units in both |
-| Terminal/VoiceInput.cs, DictationText.cs, VoiceHint.cs, VoiceModel.cs | the same names under Terminal/ | — | — | voice input in the field: the model and the key, the presses and what the line and the button show, the text that grows while a person speaks, the hint for the recogniser (D-313, D-315). Every rule is a table in `spec/cases/` (`voice-input`, `dictation`, `voice-hint`). The mic and the recogniser on the Mac follow before the release (D-312) |
+| Terminal/VoiceInput.cs, DictationText.cs, VoiceHint.cs, VoiceModel.cs | the same names under Terminal/ | — | — | voice input in the field: the model and the key, the presses and what the line and the button show, the text that grows while a person speaks, the hint for the recogniser (D-313, D-315). Every rule is a table in `spec/cases/` (`voice-input`, `dictation`, `voice-hint`). The mic and the recogniser are in both apps |
 | Terminal/FileMention.cs | Terminal/FileMention.swift | 1 | 1 | the files that "@" offers: where the "@" word starts, which files in which order, what the field becomes; a table in `spec/cases/file-mention`. Places are in UTF-16 units on both sides |
 | Terminal/TextMatch.cs | Terminal/TextMatch.swift | — | — | how the lists of the terminal match what is typed (case and ё do not count), and the quick pick of a folder for a new session (D-350). A table in `spec/cases/text-match`. Places are UTF-16 units in both |
 | Terminal/ConversationFile.cs, SessionSearch.cs | the same names under Terminal/ | — | — | the palette of sessions (D-347, D-353): a conversation of Claude Code read from the start and the end of its file, and what the palette finds in three groups. Tables in `spec/cases/` (`conversation-file`, `session-search`). The snippet counts UTF-16 units in both |
@@ -105,9 +105,10 @@ a row cannot change in one core and stay as it was in the other. See `spec/cases
 | EnvironmentInitial.cs | EnvironmentInitial.swift | 6 | 6 | the letter of an environment beside its ring on the open island (D-421) |
 | Terminal/TaskbarLook.cs | none | — | — | the taskbar button of the terminal window (D-418): what it shows pinned and not pinned, and the app id of the window. A table in `spec/cases/taskbar-button`. Windows only: the Dock icon of the Mac is another surface |
 | Terminal/ReplacedIcons.cs | none | 4 | — | which icons of the taskbar button may be destroyed: a replaced one lives 3 s after its replacement, so Explorer never draws a destroyed one as a black square. Windows only: the Mac does not change its Dock icon |
-| AppStart.cs | none | 6 | — | which start of Aiko keeps one copy and which opens the window of the running one (D-419). Windows only: macOS itself keeps one copy of an app and sends the running one a reopen event, which the Mac answers with its window when the terminal comes there |
+| AppStart.cs | none | 6 | — | which start of Aiko keeps one copy and which opens the window of the running one (D-419). Windows only: macOS itself keeps one copy of an app and sends the running one a reopen event, which the Mac answers with its window (`applicationShouldHandleReopen`) |
 | CountQuery.cs | CountQuery.swift | 1 | 1 | the query of the daily version check (D-420), the same on both: AikoHttp.swift builds the address with it, and the dot of a version is no longer escaped as `%2E`. A table in `spec/cases/count-query` |
-| RedirectHeaders.cs, LogText.cs | none | 2 | — | a token stays with its host after a redirect, and a log line keeps only the last part of a path (D-420). Tables in `spec/cases/redirect-headers` and `log-paths`. Windows only: the Mac sends no token, and its log comes under the same rule with the terminal on the Mac |
+| LogText.cs | LogText.swift | — | — | a log line keeps only the last part of a path (D-420). A table in `spec/cases/log-paths`, read by LogTextTests on both. The Mac log writes every line through it |
+| RedirectHeaders.cs | none | 2 | — | a token stays with its host after a redirect. A table in `spec/cases/redirect-headers`. Windows only: the Mac sends no token |
 | TerminalPrivacyTests.cs | TerminalPrivacyTests.swift | 2 | 2 | the source scan: in the terminal only `TerminalLog` writes to the log, and its methods take no text but the name of an environment. The Mac leaves out the files of its self test doors, whose names end in Check: they run only with `--try-*` |
 | — | SharedCaseTests.swift | 28 | 28 | the case files under `spec/cases/`, read by both suites |
 | — | UpdateInstaller.swift | — | 6 | the macOS half of an update: the zip, `ditto` and the bundle swap. Windows has Velopack instead, and UpdateInstall.cs holds the same steps around it where no xUnit case can reach them |
@@ -231,7 +232,7 @@ AikoKit decided, and it answers the mouse.
 | Log.cs | Log.swift | the same file, the same line format |
 | Uninstall.cs | Uninstall.swift | putting everything back on the way out. Windows is called by the installer's hook and then removes the program with `Update.exe uninstall`; macOS has no uninstaller, so the app does the work itself, moves its own bundle to the Bin and quits. Both carry the answer about the memory from the settings page to `UninstallPlan`; the Windows hook has no window and passes "nobody was asked", and macOS has no such path |
 | Settings/SettingsPanel.xaml(.cs), Terminal/TerminalHost.Settings.cs | Settings/SettingsPanel.swift, Terminal/TerminalHost+Settings.swift | the settings inside the terminal window (D-374): the menu on the place of the list, as wide as it, and the page in a column of 640 on the left. The gear, a pill or Esc goes back to the same session |
-| Settings/TerminalPage.xaml(.cs) | Settings/TerminalPageView.swift | the zoom of the window and the sound of a question. Voice input joins it on macOS together with the voice itself |
+| Settings/TerminalPage.xaml(.cs) | Settings/TerminalPageView.swift | the zoom of the window, the sound of a question and voice input |
 | Settings/SavedMark.cs, Theme/Controls.xaml, Theme/DropDown.cs, Theme/RevealPanel.cs | Settings/SettingsControls.swift | the switch, the segments, the picked card, the fields, the buttons (with the light one for Save and a plus before the words), the tick, the chip, the drop down and the "Saved" mark |
 | Settings/EnvironmentsEditor.cs | Settings/SettingsState.swift | what the window is looking at, and every change written through one place |
 | Settings/EnvironmentPage.xaml(.cs) | Settings/EnvironmentPageView.swift | one environment: the account, the name, the command, the bound folders with the switch for every other folder (D-398), and removal |
@@ -239,7 +240,7 @@ AikoKit decided, and it answers the mouse.
 | Settings/MemoryBlock.cs | Settings/MemoryBlockView.swift, MemoryBlockModel.swift | the memory under the table: quotas, facts, the two forms, the warnings, the foot and the erase question. The model keeps what is open and has the snapshot door `AIKO_TRY_MEMORY` |
 | Settings/MemoryStore.cs | Settings/MemoryStore.swift | the memory file for the window: the bridge's lock file, read again, change, write in one step |
 | Settings/PrivacyPage.xaml(.cs) | Settings/PrivacyPageView.swift | the two consents and the list of fields that would be sent |
-| Settings/GeneralPage.xaml(.cs) | Settings/GeneralPageView.swift | where Aiko shows, startup, the update line, the language, access, diagnostics, starting over. The update line is one state and one action from `UpdateBlock`, with the percent in place of the button while a download runs; `AIKO_TRY_UPDATE` draws it at a stage for a snapshot. The time of the last answer is `UpdateRun.lastAnswered` in AikoHttp.swift. The switch "open the terminal window too" under the start with the system waits for the terminal on macOS (AIKO-351) |
+| Settings/GeneralPage.xaml(.cs) | Settings/GeneralPageView.swift | where Aiko shows, startup, the update line, the language, access, diagnostics, starting over. The update line is one state and one action from `UpdateBlock`, with the percent in place of the button while a download runs; `AIKO_TRY_UPDATE` draws it at a stage for a snapshot. The time of the last answer is `UpdateRun.lastAnswered` in AikoHttp.swift. The switch "open the terminal window too" under the start with the system is in both. The titles of the notes of a newer version stand under its line (D-397), `ReleaseNotesRun` on both |
 | Settings/ChecklistPage.xaml(.cs), ChecklistRow.cs, Terminal/FirstRunHost.cs | Settings/ChecklistPageView.swift, ChecklistModel.swift, SettingsPanel.swift | the nine items, their bodies, the summary before Finish, and the first run in the window one step at a time (D-391, D-394, D-421). The install button opens Terminal with the official command, as Windows opens PowerShell |
 | Aiko.Checks/Settings/SettingsCheck.cs | Settings/SettingsCheck.swift | the self test doors `--try-settings` and `--try-wizard` |
 | Commands/ClaudeLauncher.cs, ClaudeFolders.cs | Commands/ClaudeLauncher.swift | finds Claude Code, opens it, waits for a sign-in, lists the config folders |
@@ -249,7 +250,7 @@ AikoKit decided, and it answers the mouse.
 | Terminal/TerminalLog.cs, ProcessJob.cs | Terminal/TerminalLog.swift, ProcessTree.swift | the log of the terminal, and a program that ends with all it started (D-351). macOS has no job: the session of the terminal gets a hang-up and a request to end, and what is left a second later is killed. Quitting with programs running asks first, as on Windows |
 | Terminal/TerminalHost.cs, TerminalHost.Launch.cs, TerminalEvents.cs, WindowKeys.cs | Terminal/TerminalHost.swift, TerminalHost+Sessions.swift, TerminalState.swift, ProcessEnvironment.swift, TerminalCheck.swift, TerminalEvents.swift, TerminalHost+Pulse.swift, PulseCheck.swift, StoppedBar.swift, StoppedCheck.swift | the terminal behind its window (D-349, D-425): sessions, real terminals on SwiftTerm, rename and close with the question, the Dock icon while the window is open, the hook of the terminal and what each session does, the counts with the number in the Dock and the sound of waiting, the bar that continues a Claude Code that ended (a command line that ends leaves the list); the self tests `--try-terminal`, `--try-pulse` and `--try-stopped`. The Dock badge is the one of the system, in its own red, and macOS shows it only when Aiko may badge its icon (D-426) |
 | Terminal/TerminalPanel.cs, TerminalPanel.TitleBar.cs, TerminalPills.cs | Terminal/TerminalHost+Window.swift, TitleBarView.swift, BarMarks.swift, ZoomedHostingView.swift | the window and its title bar: the list button, the chevron, the pills, the search and the gear. The three window buttons of the Mac stand in the middle of the bar on the left. The zoom of the window (D-384, D-429): the views of SwiftUI are laid out in the room divided by the zoom and drawn larger with `scaleEffect`, as the LayoutTransform of Windows, and the terminal takes its font |
-| Terminal/TerminalPanel.SessionList.cs | Terminal/SessionListView.swift | the list of sessions by folder, the state and the second line of a row, the buttons of a folder, rename in place |
+| Terminal/TerminalPanel.SessionList.cs | Terminal/SessionListView.swift | the list of sessions by folder, the state and the second line of a row, the buttons of a folder, rename in place. Below 720 points the list opens under its button in a card (`ListPopView`), and the pills not chosen keep only their mark (D-376) |
 | Terminal/TerminalPanel.Palette.cs | Terminal/StageView.swift | what stands in place of the terminal: no session, a session that cannot start (D-421), the question before closing |
 | Terminal/HeaderStripView.cs | Terminal/HeaderStripView.swift | the open header of limits (D-373, D-376) |
 | Terminal/PaletteView.cs, TerminalHost.Palette.cs, ConversationShelf.cs | Terminal/PaletteView.swift, TerminalHost+Palette.swift, ConversationShelf.swift | the quick pick of a folder and the search of sessions and conversations (D-347, D-353) |
@@ -267,6 +268,15 @@ AikoKit decided, and it answers the mouse.
 | UpdateInstall.cs | UpdateInstall.swift | downloads an update and installs it once it passes. Windows wraps Velopack's `UpdateManager`; macOS hands the release folder, the key and this bundle to `UpdateInstaller` in the core. Velopack reports the percent on Windows; on macOS the redirect delegate in AikoHttp.swift watches the bytes of the zip |
 | AppVersion.cs, Startup.cs | AppVersion.swift | the version from Info.plist, and the login item in place of the Run key |
 | Faces/FaceDrawing.cs | FaceImage.swift | one face as a picture, for the settings window |
+| ReleaseNotesRun.cs | ReleaseNotesRun.swift | the titles of the notes of a newer version from GitHub (D-397), through the guard of allowed hosts |
+| Terminal/RowDrag.cs | Terminal/SessionListView.swift | a session dragged in its folder (D-400, D-401): the same numbers, the copy tilted with the shadow of cards, the pale place, the slide and the landing. The list keeps its order until the copy has landed |
+| LanguageChoice.cs | AikoDelegate.swift, Settings/GeneralPageView.swift | which language Aiko speaks: the system one or the one the person chose |
+| ShellDetect.cs | none | which shell Claude Code runs the status line with: Git Bash or PowerShell. Windows only: macOS has one, zsh (`ClaudeShellLookup`) |
+| CrashGuard.cs | none | an error in a window is written down and Aiko goes on. Windows only: Swift cannot catch a trap, and macOS writes a crash report, which the gate of the Mac counts |
+| GraphicsWarmUp.cs | none | Direct3D loaded on a second thread at the start. Windows only: WPF needs it, AppKit does not |
+| Terminal/TaskbarButton.cs, TaskbarPins.cs | none | the picture of the taskbar button and the pins (D-409, D-418). The Dock icon shows the system badge with the number; whether it repeats the rings of the tray is open for the owner |
+| Direct/*.cs | none | direct mode with the usage API. Windows only: on macOS Claude Code keeps the token in the Keychain, and Aiko does not read it (`DirectModeMac`) |
+| MouseInput.cs | `dragRowForCheck` in Terminal/TerminalHost+Window.swift | the real mouse for self tests; the Mac sends mouse events through the window |
 
 `Scripts/make-app.sh` builds `build/Aiko.app`: one universal binary, the bridge inside as
 `Aiko.Bridge`, the shim as `claude`, an ad-hoc signature.
@@ -276,8 +286,8 @@ Where it differs from Windows:
 - **No card** (D-399, D-425): the menu bar icon and the island open the terminal window, as the
   tray icon and the island do on Windows. While the window is open Aiko has a Dock icon, the twin of
   the button on the taskbar, and the menu bar icon steps aside, as the tray icon does (D-410).
-- **The gear and the cross** are system symbols. The Windows build carries the gear of the user's
-  own icon set as a path in Tokens.xaml.
+- **The cross** in the settings is a system symbol. The gear is the path of the user's own icon set,
+  the same as in Tokens.xaml on Windows (BarMarks.swift).
 - **The face is drawn, not handed over.** Windows gives the tray a picture, so a transition there is
   eight pictures per step; macOS draws the menu bar icon itself, so the island and the icon play the
   same smooth steps from one `FacePlay`.
@@ -372,7 +382,7 @@ These are the places where there was nothing to copy, with the reason for the ch
   two must stay the same: `flock` on `memory.json.lock`, 80 tries 25 ms apart, a temporary file and
   `rename`, and `.bad` for a file that was not a memory.
 
-Not there yet: direct mode and signing for release.
+Not there yet: signing for release. Direct mode is Windows only (`DirectModeMac`).
 
 ## Names that had to change
 

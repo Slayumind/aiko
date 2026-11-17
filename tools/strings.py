@@ -144,9 +144,43 @@ def for_mac(entry):
     return entry[2]["mac"] if len(entry) > 2 else entry[1]
 
 
+JOINER = "⁠"
+
+
 def mac_keys(text):
-    """Every Ctrl+ in the words is a key of Aiko itself, and on the Mac that key is Cmd (D-425)."""
-    return text.replace("Ctrl+", "Cmd+")
+    """Every Ctrl+ in the words is a key of Aiko itself, and on the Mac that key is Cmd (D-425).
+    A key may be written with word joiners between its letters, so a line never breaks inside it;
+    that spelling turns into Cmd with the joiners kept."""
+    joined = JOINER.join("Ctrl+")
+    return text.replace("Ctrl+", "Cmd+").replace(joined, JOINER.join("Cmd+"))
+
+
+def check_mac_keys(data):
+    """No word of the Mac may still say Ctrl: the key is Cmd there, and a spelling the swap
+    does not know would slip through."""
+    for entry in data:
+        for text in for_mac(entry):
+            if "Ctrl" in mac_keys(text).replace(JOINER, ""):
+                raise SystemExit("%s: the Mac words still say Ctrl" % entry[0])
+
+
+WINDOWS_PLACES = re.compile(r"\bWindows\b|\btray\b|\btaskbar\b|Credential Manager|\bExplorer\b")
+
+
+def check_mac_places(data):
+    """A word the Mac shows that names a place of Windows (the tray, the taskbar, Windows
+    Settings) needs words of the Mac. Keys made for the Mac alone end with Mac."""
+    sources = []
+    for folder, _, files in os.walk(os.path.join(ROOT, "mac", "Sources")):
+        sources += [io.open(os.path.join(folder, name), encoding="utf-8").read()
+                    for name in files if name.endswith(".swift") and name != "Strings.swift"]
+    swift = "\n".join(sources)
+    for entry in data:
+        key = entry[0]
+        if len(entry) > 2 or key.endswith("Mac") or not WINDOWS_PLACES.search(entry[1][0]):
+            continue
+        if re.search(r"Strings\.%s\b" % re.escape(swift_name(key).strip("`")), swift):
+            raise SystemExit("%s: the Mac shows it, and it names a place of Windows" % key)
 
 
 def swift_text(text):
@@ -196,6 +230,8 @@ def check(data):
 def main():
     data = json.load(io.open(os.path.join(HERE, "strings.json"), encoding="utf-8"))
     check(data)
+    check_mac_keys(data)
+    check_mac_places(data)
 
     write_core(os.path.join(ROOT, "src", "Aiko.Core", "Strings.cs"), data)
     write_swift(os.path.join(ROOT, "mac", "Sources", "AikoKit", "Strings.swift"), data)

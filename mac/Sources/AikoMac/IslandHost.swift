@@ -86,8 +86,8 @@ final class IslandHost {
         window?.holds(point) == true
     }
 
-    /// The window of the terminal is on screen (D-310): its title shows the limit, so the island
-    /// steps aside. A minimized or closed terminal brings it back.
+    /// The window of the terminal has the Dock icon, shown or minimized (D-409, D-410): its title
+    /// shows the limit, so the island steps aside. Only a closed window brings it back.
     func followTerminal(_ inView: Bool) {
         underTerminal = inView
         apply()

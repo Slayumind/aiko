@@ -27,17 +27,58 @@ enum TerminalCheck {
             host.showHeaderForCheck(true)
             Log.write("self test: terminal window \(host.headerForCheck)")
             host.showHeaderForCheck(false)
+            narrow(host)
             places(host)
             keys(host)
             tips()
             copyWhole()
-            after(0.5) {
+            dragRows(host, folder) {
                 host.closeForCheck()
                 after(0.5) {
                     Log.write("self test: terminal window closed, shown=\(host.isShown), in the Dock=\(NSApp.activationPolicy() == .regular), "
                         + "menu bar icon=\(iconShown()), terminals still running=\(host.runningForCheck)")
                     quitAndEnd(host, session)
                 }
+            }
+        }
+    }
+
+    /// A session dragged down past the two below it lands at the end of its folder (D-400), with
+    /// real mouse events; a press that does not move is still a click. The two extra command lines
+    /// close again after.
+    private static func dragRows(_ host: TerminalHost, _ folder: String, then: @escaping @MainActor () -> Void) {
+        // After the keys step has looked at its search: two shells starting at once keep the main
+        // thread busy, and the search would open after that step had closed it.
+        after(0.6) {
+            let first = host.rowOrderForCheck(folder).first
+            let second = host.startForCheck(in: folder)
+            let third = host.startForCheck(in: folder)
+            after(0.8) { dragFirst(host, folder, first, [second, third].compactMap { $0 }, then) }
+        }
+    }
+
+    private static func dragFirst(
+        _ host: TerminalHost, _ folder: String, _ first: String?, _ extras: [String],
+        _ then: @escaping @MainActor () -> Void
+    ) {
+        let before = host.rowOrderForCheck(folder)
+        guard let first, before.count == 3, let height = host.state.rowFramesForCheck[first]?.height else {
+            Log.write("self test: terminal window drag: FAIL no three rows (\(before.count))")
+            then()
+            return
+        }
+        host.dragRowForCheck(first, down: height * 2.2 * host.zoom) {
+            let now = host.rowOrderForCheck(folder)
+            let landed = now == [before[1], before[2], first]
+            Log.write("self test: terminal window drag: the first row lands at the end=\(landed) "
+                + "(\(before.map { String($0.prefix(4)) }) -> \(now.map { String($0.prefix(4)) })), "
+                + "nothing written=\(host.changingNothing)")
+            // A press that does not move is still a click: it opens the row.
+            let other = before[1]
+            host.dragRowForCheck(other, down: 0) {
+                Log.write("self test: terminal window drag: a press without a move opens the row=\(host.state.chosen == other)")
+                for extra in extras { host.closeSession(extra) }
+                after(0.5) { then() }
             }
         }
     }
@@ -124,6 +165,38 @@ enum TerminalCheck {
         }
     }
 
+    /// Below 720 points the list leaves its column for the pop-in under its button, and the list
+    /// button opens and closes it without touching the setting; wide again, the column is back
+    /// (D-376).
+    private static func narrow(_ host: TerminalHost) {
+        let before = host.windowWidthForCheck
+        let hiddenBefore = Store.settings().sessionListHidden
+        host.resizeForCheck(width: 640)
+        let narrow = host.state.narrow && host.listWidthForCheck == 0
+        host.toggleList()
+        let opened = host.state.listPopOpen && host.listPopShownForCheck
+        host.choose(host.state.chosen ?? "")
+        let closedByPick = !host.state.listPopOpen && !host.listPopShownForCheck
+        let settingKept = Store.settings().sessionListHidden == hiddenBefore
+        host.resizeForCheck(width: max(before, 1000))
+        let wide = !host.state.narrow && (host.listWidthForCheck > 0) != hiddenBefore
+        host.resizeForCheck(width: before)
+        Log.write("self test: terminal window narrow: list leaves its column=\(narrow), the button opens it=\(opened), "
+            + "a pick closes it=\(closedByPick), the setting kept=\(settingKept), wide again=\(wide)")
+    }
+
+    /// Three command lines in one folder, the first held half way down, for a picture of the drag.
+    private static func holdDrag(_ host: TerminalHost) {
+        let folder = (NSTemporaryDirectory() as NSString).appendingPathComponent("aiko-try-terminal")
+        _ = host.startForCheck(in: folder)
+        _ = host.startForCheck(in: folder)
+        after(1) {
+            guard let first = host.rowOrderForCheck(folder).first,
+                  let height = host.state.rowFramesForCheck[first]?.height else { return }
+            host.dragRowForCheck(first, down: height * 1.3 * host.zoom, letGo: false) {}
+        }
+    }
+
     /// AIKO_TRY_VIEW puts the window in one state for a snapshot: header, settings, search,
     /// folders, the editor (editor-shell, editor-compose, editor-mention, editor-voice) or stopped. Nothing is written: the
     /// header opens without the setting.
@@ -133,6 +206,12 @@ enum TerminalCheck {
         case "settings": host.openSettings(at: .general)
         case "search": host.openSessionPalette()
         case "folders": host.pickFolderQuickly()
+        case "narrow": host.resizeForCheck(width: 640)
+        case "drag": holdDrag(host)
+        case "update-dot": host.showUpdate(true)
+        case "narrow-list":
+            host.resizeForCheck(width: 640)
+            host.toggleList()
         case "editor-shell", "editor-compose", "editor-mention": holdEditor(host, view ?? "")
         case "editor-voice": holdVoice(host)
         case "stopped": holdStopped(host)

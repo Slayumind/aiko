@@ -9,6 +9,18 @@ import SwiftUI
 struct SessionListView: View {
     @ObservedObject var state: TerminalState
 
+    /// In the card of a narrow window the list is only as tall as its rows, up to the card.
+    var inCard = false
+
+    /// Where each row stands in the list, for the drag.
+    @State private var frames: [String: CGRect] = [:]
+
+    /// The row being dragged, how far the pointer went, and where it would land.
+    @State private var drag: (id: String, ids: [String], moved: CGSize, to: Int)?
+
+    /// The copy settles into its place before the list takes the new order.
+    @State private var landing = false
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             ScrollView {
@@ -17,16 +29,105 @@ struct SessionListView: View {
                         GroupHeader(group: group, state: state)
                         ForEach(group.rows, id: \.id) { row in
                             SessionRowView(row: row, chosen: row.id == state.chosen && !state.settingsOpen, state: state)
+                                .opacity(drag?.id == row.id ? RowDragLook.pale : 1)
+                                .offset(y: shift(row.id))
+                                .background(GeometryReader { place in
+                                    Color.clear.preference(key: RowFrames.self, value: [row.id: place.frame(in: .named(RowDragLook.space))])
+                                })
+                                .gesture(dragGesture(row.id, group.rows.map(\.id)))
                         }
                     }
                 }
                 .padding(.horizontal, 8)
                 .padding(.top, 4)
+                .coordinateSpace(name: RowDragLook.space)
+                .onPreferenceChange(RowFrames.self) { found in
+                    if drag == nil {
+                        frames = found
+                        state.rowFramesForCheck = found
+                    }
+                }
+                .overlay(alignment: .topLeading) { copy }
             }
+            .fixedSize(horizontal: false, vertical: inCard)
             newSession
         }
-        .frame(maxHeight: .infinity, alignment: .top)
+        .frame(maxHeight: inCard ? nil : .infinity, alignment: .top)
         .background(Theme.surface)
+    }
+
+    // ---- moving a session in its folder (D-400, D-401), the twin of RowDrag.cs ----
+
+    /// After 6 points a copy of the row lifts off and follows the pointer; the row stays as a pale
+    /// place that moves through its folder, and the other rows slide out of its way.
+    private func dragGesture(_ id: String, _ ids: [String]) -> some Gesture {
+        DragGesture(minimumDistance: RowDragLook.start, coordinateSpace: .named(RowDragLook.space))
+            .onChanged { change in
+                guard !landing, drag == nil || drag?.id == id else { return }
+                if drag == nil { state.dragging = id }
+                let to = place(id, ids, change.translation.height)
+                withAnimation(Motion.reduceMotion ? nil : .easeOut(duration: RowDragLook.slide)) {
+                    drag = (id, ids, change.translation, to)
+                }
+            }
+            .onEnded { _ in
+                guard let ended = drag, ended.id == id else { return }
+                landing = true
+                // The copy glides into the place, then the list takes the new order.
+                withAnimation(Motion.reduceMotion ? nil : .easeOut(duration: RowDragLook.land)) {
+                    drag = (ended.id, ended.ids, CGSize(width: 0, height: shift(ended.id)), ended.to)
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + (Motion.reduceMotion ? 0 : RowDragLook.land)) {
+                    let others = ended.ids.filter { $0 != ended.id }
+                    let before = ended.to < others.count ? others[ended.to] : nil
+                    drag = nil
+                    landing = false
+                    state.dragging = nil
+                    if ended.ids.firstIndex(of: ended.id) != ended.to {
+                        state.onMove?(ended.id, before)
+                    } else {
+                        state.onDragEnded?()
+                    }
+                }
+            }
+    }
+
+    /// Where the dragged row would land among the other rows of its folder: before the first one
+    /// whose middle is below the middle of the copy.
+    private func place(_ id: String, _ ids: [String], _ moved: CGFloat) -> Int {
+        guard let own = frames[id] else { return ids.firstIndex(of: id) ?? 0 }
+        let middle = own.midY + moved
+        let others = ids.filter { $0 != id }
+        return others.firstIndex { (frames[$0]?.midY ?? .infinity) > middle } ?? others.count
+    }
+
+    /// How far a row of the dragged folder moves from where it stands: the new order is laid from
+    /// the top of the folder down, row by row.
+    private func shift(_ id: String) -> CGFloat {
+        guard let drag, drag.ids.contains(id), let first = drag.ids.first.flatMap({ frames[$0] }) else { return 0 }
+        var order = drag.ids.filter { $0 != drag.id }
+        order.insert(drag.id, at: min(drag.to, order.count))
+        var top = first.minY
+        for each in order {
+            guard let frame = frames[each] else { return 0 }
+            if each == id { return top - frame.minY }
+            top += frame.height
+        }
+        return 0
+    }
+
+    /// The copy that follows the pointer, tilted and with the shadow of cards.
+    @ViewBuilder private var copy: some View {
+        if let drag, let frame = frames[drag.id],
+           let row = state.groups.flatMap(\.rows).first(where: { $0.id == drag.id }) {
+            SessionRowView(row: row, chosen: row.id == state.chosen, state: state)
+                .frame(width: frame.width)
+                .background(RoundedRectangle(cornerRadius: 10).fill(Theme.raised))
+                .rotationEffect(.degrees(landing ? 0 : RowDragLook.tilt))
+                .shadow(color: .black.opacity(Theme.shadowOpacity), radius: Theme.shadowBlur / 2, y: Theme.shadowOffset)
+                .offset(x: frame.minX, y: frame.minY + drag.moved.height)
+                .allowsHitTesting(false)
+        }
     }
 
     /// One button under the list: the quick pick of a folder, with its key (D-353).
@@ -259,5 +360,55 @@ enum SessionListWords {
             let format = Date.FormatStyle().day().month(.wide).locale(locale)
             return used.formatted(format)
         }
+    }
+}
+
+/// The list of a narrow window, open under its button over the terminal (D-376), the twin of the
+/// pop-in of TerminalPanel.SessionList.cs: the same list in a card, the left edges together as in
+/// every drop-down of Aiko. A click outside closes it.
+struct ListPopView: View {
+    @ObservedObject var state: TerminalState
+
+    /// Where the list button stands in the bar: after the window buttons, as in TitleBarView.
+    static let left: CGFloat = TitleBarView.windowButtons + 6
+
+    /// The bottom of the list button: the bar is 44 high and the button 28, in its middle.
+    static let top: CGFloat = (TitleBarView.height + 28) / 2
+
+    var body: some View {
+        ZStack(alignment: .topLeading) {
+            Color.clear
+                .contentShape(Rectangle())
+                .onTapGesture { state.listPopOpen = false }
+            SessionListView(state: state, inCard: true)
+                .frame(width: TerminalHost.listWidth + 20)
+                .frame(maxHeight: 480)
+                .fixedSize(horizontal: false, vertical: true)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Theme.inputLine, lineWidth: 1))
+                .shadow(color: .black.opacity(Theme.shadowOpacity), radius: Theme.shadowBlur / 2, y: Theme.shadowOffset)
+                .padding(.top, Self.top + 4)
+                .padding(.leading, Self.left)
+                .padding(.bottom, 12)
+        }
+    }
+}
+
+/// The numbers of the Office (office-dnd.ts, desktop-board.tsx), as in RowDrag.cs (D-401).
+enum RowDragLook {
+    static let start: CGFloat = 6
+    static let tilt: Double = -2
+    static let pale: Double = 0.3
+    static let slide: Double = 0.25
+    static let land: Double = 0.18
+    static let space = "session rows"
+}
+
+/// Where each row stands, by its id.
+struct RowFrames: PreferenceKey {
+    static let defaultValue: [String: CGRect] = [:]
+
+    static func reduce(value: inout [String: CGRect], nextValue: () -> [String: CGRect]) {
+        value.merge(nextValue()) { _, new in new }
     }
 }
