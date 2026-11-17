@@ -92,6 +92,6 @@ extension TerminalHost {
         self.state.settingsOpen = true
 
         // The keys go to the panel, so Esc closes it and no key reaches a terminal under it.
-        window.makeFirstResponder(panel)
+        window.makeFirstResponder(panel.host)
     }
 }

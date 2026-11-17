@@ -106,6 +106,7 @@ extension TerminalHost {
             host?.zoom = zoom
             return host != nil
         }
+        zoomChecks.append { [weak host] in host.map { $0.seesItsRoomForCheck } }
         return host
     }
 

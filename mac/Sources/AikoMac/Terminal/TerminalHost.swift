@@ -63,6 +63,9 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
 
     /// The views that follow the zoom of the window, and the two sizes of AppKit that grow with it.
     var zoomFollowers: [(CGFloat) -> Bool] = []
+
+    /// For --try-terminal: whether each zoomed view that is still there sees its room.
+    var zoomChecks: [() -> Bool?] = []
     var zoomedSizes: (bar: NSLayoutConstraint, list: NSLayoutConstraint)?
     var bar: NSView?
 
@@ -465,7 +468,8 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
         let barFrame = bar.convert(bar.bounds, to: nil)
         let button = close.convert(close.bounds, to: nil)
         let top = content.frame.height
-        return "zoom \(Int((zoom * 100).rounded())) %, bar \(Int(top - barFrame.maxY))..\(Int(top - barFrame.minY)), "
+        let rooms = zoomChecks.compactMap { $0() }
+        return "zoom \(Int((zoom * 100).rounded())) %, views seeing their room \(rooms.filter { $0 }.count) of \(rooms.count), bar \(Int(top - barFrame.maxY))..\(Int(top - barFrame.minY)), "
             + "close button middle \(Int(top - button.midY)), list \(Int(listWidthConstraint?.constant ?? -1))"
     }
 

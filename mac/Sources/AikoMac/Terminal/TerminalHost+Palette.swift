@@ -145,7 +145,7 @@ extension TerminalHost {
             cover.bottomAnchor.constraint(equalTo: root.bottomAnchor),
         ])
         paletteCover = cover
-        window.makeFirstResponder(cover)
+        window.makeFirstResponder(cover.host)
     }
 
     func closePalette() {
