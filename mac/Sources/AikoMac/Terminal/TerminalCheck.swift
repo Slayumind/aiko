@@ -54,7 +54,58 @@ enum TerminalCheck {
             after(2) {
                 let back = host.window?.styleMask.contains(.fullScreen) == false
                 Log.write("self test: terminal window full screen: entered=\(full), left=\(back), \(host.barForCheck)")
-                then()
+                windowStates(host, then: then)
+            }
+        }
+    }
+
+    /// Every other state of the window the person can reach with the mouse, each one in and out:
+    /// full screen with the header, the settings and a narrow window; the Dock and back; the
+    /// green button with Option (zoom) and back. The window fights the system in none of them; a
+    /// crash leaves no line here, so the gate counts the crash reports.
+    private static func windowStates(_ host: TerminalHost, then: @escaping @MainActor () -> Void) {
+        guard let window = host.window else { return then() }
+        let width = window.frame.width
+        var seen: [String] = []
+
+        func fullWith(_ name: String, _ before: @escaping @MainActor () -> Void, _ after_: @escaping @MainActor () -> Void,
+                      _ next: @escaping @MainActor () -> Void) {
+            before()
+            window.toggleFullScreen(nil)
+            after(2.5) {
+                let full = window.styleMask.contains(.fullScreen)
+                window.toggleFullScreen(nil)
+                after(2) {
+                    after_()
+                    seen.append("\(name)=\(full && !window.styleMask.contains(.fullScreen))")
+                    next()
+                }
+            }
+        }
+
+        fullWith("full screen with the header", { host.showHeaderForCheck(true) }, { host.showHeaderForCheck(false) }) {
+            fullWith("with the settings", { host.openSettings(at: .general) }, { host.closeSettings() }) {
+                fullWith("narrow", { host.resizeForCheck(width: 640) }, { host.resizeForCheck(width: width) }) {
+                    window.miniaturize(nil)
+                    after(1.5) {
+                        let docked = window.isMiniaturized
+                        window.deminiaturize(nil)
+                        after(1.5) {
+                            seen.append("the Dock and back=\(docked && !window.isMiniaturized)")
+                            window.zoom(nil)
+                            after(1) {
+                                let zoomed = window.isZoomed
+                                window.zoom(nil)
+                                after(1) {
+                                    seen.append("zoomed and back=\(zoomed && !window.isZoomed)")
+                                    Log.write("self test: terminal window states: " + seen.joined(separator: ", ")
+                                        + ", \(host.barForCheck)")
+                                    then()
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
