@@ -84,7 +84,7 @@ Nothing, unless you turn on or start one of these.
   the answer.
 - **Voice input** (off by default): see **Voice input** below. On this computer it
   sends no sound anywhere; with your own OpenAI key the sound of each recording goes to OpenAI.
-- **Explain and suggest** in a shell session (Windows for now). Each one runs only when you start it:
+- **Explain and suggest** in a shell session. Each one runs only when you start it:
   - **Explain** under a failed command sends the command, its exit code and the end of its output,
     up to 6,000 characters.
   - A line that starts with `#`, such as `# find big files`, asks for a command. It sends that line,

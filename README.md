@@ -10,16 +10,10 @@ The model is a resource: when a better one comes out, Aiko gets better too.
 
 The goal is one window for agent sessions, your projects and your limits.
 
-On Windows that window is here. Real Claude Code sessions and command lines run in it, grouped by
-account and project folder, with the limits of each account in the header. Close the window and the
-sessions keep working. Aiko stays by the clock or as an island at the top of the screen, and shows
-the limits and the sessions that wait for you.
-
-On macOS Aiko lives in the menu bar for now, and the window comes next. Rest the mouse on the icon and
-a card shows every environment you set up: the five-hour window, the week, and the weekly limit of
-the heavy model. For each one you see when it resets and how long it lasts at your current pace.
-
-![The Aiko card on macOS](assets/card.png)
+That window is here, on Windows and on macOS. Real Claude Code sessions and command lines run in it,
+grouped by account and project folder, with the limits of each account in the header. Close the
+window and the sessions keep working. Aiko stays by the clock on Windows or in the menu bar on macOS,
+or as an island at the top of the screen, and shows the limits and the sessions that wait for you.
 
 Free and open source. Not affiliated with Anthropic.
 
@@ -143,8 +137,15 @@ Download the installer and run it. Aiko installs for the current user and needs 
 rights.
 
 The build isn't signed yet, so **SmartScreen will warn you**. Choose *More info*, then *Run
-anyway*. Signing is planned. Until then, every release comes with `SHA256SUMS.txt` and a build
-provenance attestation, and [SECURITY.md](SECURITY.md) shows how to check them.
+anyway*. Every release comes with `SHA256SUMS.txt` and a build provenance attestation, and
+[SECURITY.md](SECURITY.md) shows how to check them.
+
+Signing is being set up, with free code signing from [SignPath.io](https://about.signpath.io) and a
+certificate from [SignPath Foundation](https://signpath.org). The [code signing policy](CODE-SIGNING.md)
+says what will be signed and who approves each release.
+
+Windows 11 hides new app icons under the arrow next to the clock. Open the arrow and drag Aiko onto
+the taskbar to keep the limit rings in sight.
 
 ### macOS
 
@@ -154,13 +155,6 @@ Apple silicon and Intel Macs. You need macOS 14 or newer.
 The app is signed with an Apple Developer ID and notarized, so it opens the normal way. There is
 nothing to allow in System Settings and no command to run. [SECURITY.md](SECURITY.md) shows how to
 check the signature yourself.
-
-Free code signing provided by [SignPath.io](https://about.signpath.io), certificate by
-[SignPath Foundation](https://signpath.org). The [code signing policy](CODE-SIGNING.md) says what is
-signed and who approves each release.
-
-Windows 11 hides new app icons under the arrow next to the clock. Open the arrow and drag Aiko onto
-the taskbar to keep the limit rings in sight.
 
 ## Remove
 

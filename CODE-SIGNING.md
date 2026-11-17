@@ -3,8 +3,8 @@
 Free code signing provided by [SignPath.io](https://about.signpath.io), certificate by
 [SignPath Foundation](https://signpath.org).
 
-Signing is being set up. Releases up to and including 0.2.3 are not signed. This page says which
-release is the first signed one once it is out.
+Signing is being set up. No release is signed yet. This page says which release is the first signed
+one once it is out.
 
 ## What is signed
 
