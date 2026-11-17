@@ -144,6 +144,11 @@ final class VoiceDictation {
 
     private func tick() {
         field.pushLevel(recording?.level ?? 0)
+        if VoiceInput.tooLong(state, listened: listenedSince.map { Date().timeIntervalSince($0) } ?? 0) {
+            Log.write("voice: the recording reached its longest and finished")
+            press()
+            return
+        }
         show()
     }
 

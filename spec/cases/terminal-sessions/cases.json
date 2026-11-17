@@ -1,12 +1,12 @@
 {
-  "comment": "The list of sessions of the terminal, the file terminal.json (D-293). A scenario reads a file, does the steps and gives what is saved, the groups of one environment and the session the window opens on. The list keeps the order of the person; a group is a folder, in the order the folders first appear. A closed session leaves the list and stays in the file. Not a word of a conversation is in the file. A renamed environment takes its sessions with it. Claude Code chooses its own mode and model (D-349): a session keeps neither, and an older file that has them is read without them. A name the person gave is marked named and stays; until then Claude Code names a session of its own by its title, a shell never. A closed session the palette found comes back at its old place; a conversation started outside Aiko joins at the end as started, under its title. A session dragged in its folder stands before another one or last in the folder; only that folder's sessions trade places (D-400).",
+  "comment": "The list of sessions of the terminal, the file terminal.json (D-293). A scenario reads a file, does the steps and gives what is saved, the groups of one environment and the session the window opens on. The list keeps the order of the person; a group is a folder, in the order the folders first appear. A closed session leaves the list and stays in the file. Not a word of a conversation is in the file. A renamed environment takes its sessions with it. Claude Code chooses its own mode and model (D-349): a session keeps neither, and an older file that has them is read without them. A name the person gave is marked named and stays; until then Claude Code names a session of its own by its title, a shell never. A closed session the palette found comes back at its old place; a conversation started outside Aiko joins at the end as started, under its title. A session dragged in its folder stands before another one or last in the folder; only that folder's sessions trade places (D-400). The file carries schemaVersion 1. A session of a kind this version does not know, written by a newer Aiko, stays in the file as it was, after the others, and is not in the list.",
   "scenarios": [
     {
       "name": "no file yet",
       "file": null,
       "steps": [],
       "environment": "Aiko",
-      "saved": {
+      "saved": { "schemaVersion": 1,
         "sessions": []
       },
       "groups": [],
@@ -17,7 +17,7 @@
       "file": "{ not json",
       "steps": [],
       "environment": "Aiko",
-      "saved": {
+      "saved": { "schemaVersion": 1,
         "sessions": []
       },
       "groups": [],
@@ -31,7 +31,7 @@
       ],
       "steps": [],
       "environment": "Aiko",
-      "saved": {
+      "saved": { "schemaVersion": 1,
         "sessions": []
       },
       "groups": [],
@@ -51,7 +51,7 @@
         }
       ],
       "environment": "Aiko",
-      "saved": {
+      "saved": { "schemaVersion": 1,
         "sessions": [
           {
             "id": "a1",
@@ -99,7 +99,7 @@
         }
       ],
       "environment": "Aiko",
-      "saved": {
+      "saved": { "schemaVersion": 1,
         "sessions": [
           {
             "id": "a1",
@@ -173,7 +173,7 @@
         }
       ],
       "environment": "Aiko",
-      "saved": {
+      "saved": { "schemaVersion": 1,
         "sessions": [
           {
             "id": "a1",
@@ -302,7 +302,7 @@
         }
       ],
       "environment": "Aiko",
-      "saved": {
+      "saved": { "schemaVersion": 1,
         "sessions": [
           {
             "id": "a1",
@@ -440,7 +440,7 @@
       },
       "steps": [],
       "environment": "Aiko",
-      "saved": {
+      "saved": { "schemaVersion": 1,
         "sessions": [
           {
             "id": "a1",
@@ -549,7 +549,7 @@
       },
       "steps": [],
       "environment": "Work",
-      "saved": {
+      "saved": { "schemaVersion": 1,
         "sessions": [
           {
             "id": "a1",
@@ -683,7 +683,7 @@
         }
       ],
       "environment": "Aiko",
-      "saved": {
+      "saved": { "schemaVersion": 1,
         "sessions": [
           {
             "id": "a1",
@@ -803,7 +803,7 @@
         }
       ],
       "environment": "Aiko",
-      "saved": {
+      "saved": { "schemaVersion": 1,
         "sessions": [
           {
             "id": "a1",
@@ -923,7 +923,7 @@
         }
       ],
       "environment": "Aiko",
-      "saved": {
+      "saved": { "schemaVersion": 1,
         "sessions": [
           {
             "id": "a1",
@@ -1037,7 +1037,7 @@
         }
       ],
       "environment": "Aiko",
-      "saved": {
+      "saved": { "schemaVersion": 1,
         "sessions": [
           {
             "id": "a1",
@@ -1151,7 +1151,7 @@
         }
       ],
       "environment": "Aiko",
-      "saved": {
+      "saved": { "schemaVersion": 1,
         "sessions": [
           {
             "id": "a1",
@@ -1265,7 +1265,7 @@
         }
       ],
       "environment": "Aiko",
-      "saved": {
+      "saved": { "schemaVersion": 1,
         "sessions": [
           {
             "id": "a1",
@@ -1376,7 +1376,7 @@
         }
       ],
       "environment": "Aiko",
-      "saved": {
+      "saved": { "schemaVersion": 1,
         "sessions": [
           {
             "id": "a1",
@@ -1489,7 +1489,7 @@
         }
       ],
       "environment": "Aiko",
-      "saved": {
+      "saved": { "schemaVersion": 1,
         "sessions": [
           {
             "id": "a1",
@@ -1606,7 +1606,7 @@
         }
       ],
       "environment": "Work",
-      "saved": {
+      "saved": { "schemaVersion": 1,
         "sessions": [
           {
             "id": "a1",
@@ -1711,7 +1711,7 @@
         }
       ],
       "environment": "Aiko",
-      "saved": {
+      "saved": { "schemaVersion": 1,
         "sessions": [
           {
             "id": "a1",
@@ -1834,7 +1834,7 @@
       },
       "steps": [],
       "environment": "Aiko",
-      "saved": {
+      "saved": { "schemaVersion": 1,
         "sessions": [
           {
             "id": "a1",
@@ -1899,7 +1899,7 @@
         }
       ],
       "environment": "Aiko",
-      "saved": {
+      "saved": { "schemaVersion": 1,
         "sessions": [
           {
             "id": "a1",
@@ -1954,7 +1954,7 @@
         }
       ],
       "environment": "Aiko",
-      "saved": {
+      "saved": { "schemaVersion": 1,
         "sessions": [],
         "window": {
           "left": -20,
@@ -1980,7 +1980,7 @@
       },
       "steps": [],
       "environment": "Aiko",
-      "saved": {
+      "saved": { "schemaVersion": 1,
         "sessions": []
       },
       "groups": [],
@@ -2021,7 +2021,7 @@
         }
       ],
       "environment": "Job",
-      "saved": {
+      "saved": { "schemaVersion": 1,
         "sessions": [
           {
             "id": "a1",
@@ -2143,7 +2143,7 @@
         }
       ],
       "environment": "Aiko",
-      "saved": {
+      "saved": { "schemaVersion": 1,
         "sessions": [
           {
             "id": "a1",
@@ -2243,7 +2243,7 @@
         }
       ],
       "environment": "Aiko",
-      "saved": {
+      "saved": { "schemaVersion": 1,
         "sessions": [
           {
             "id": "a1",
@@ -2341,7 +2341,7 @@
         }
       ],
       "environment": "Aiko",
-      "saved": {
+      "saved": { "schemaVersion": 1,
         "sessions": [
           {
             "id": "a1",
@@ -2448,7 +2448,7 @@
         }
       ],
       "environment": "Aiko",
-      "saved": {
+      "saved": { "schemaVersion": 1,
         "sessions": [
           {
             "id": "a1",
@@ -2550,7 +2550,7 @@
         }
       ],
       "environment": "Aiko",
-      "saved": {
+      "saved": { "schemaVersion": 1,
         "sessions": [
           {
             "id": "a3",
@@ -2630,7 +2630,7 @@
         }
       ],
       "environment": "Aiko",
-      "saved": {
+      "saved": { "schemaVersion": 1,
         "sessions": [
           {
             "id": "a2",
@@ -2718,7 +2718,7 @@
         }
       ],
       "environment": "Aiko",
-      "saved": {
+      "saved": { "schemaVersion": 1,
         "sessions": [
           {
             "id": "a1",
@@ -2758,6 +2758,75 @@
         }
       ],
       "toOpen": "s1"
+    },
+    {
+      "name": "a session of a kind this version does not know stays in the file as it was, out of the list",
+      "file": {
+        "sessions": [
+          {
+            "id": "c1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "aiko 1",
+            "started": true,
+            "closed": false,
+            "lastUsed": 100
+          },
+          {
+            "id": "x1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "later",
+            "kind": "codex",
+            "conversation": "abc",
+            "lastUsed": 90
+          }
+        ],
+        "last": "c1"
+      },
+      "steps": [
+        {
+          "do": "rename",
+          "id": "c1",
+          "name": "main"
+        }
+      ],
+      "environment": "Aiko",
+      "saved": {
+        "schemaVersion": 1,
+        "sessions": [
+          {
+            "id": "c1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "main",
+            "started": true,
+            "closed": false,
+            "named": true,
+            "lastUsed": 100
+          },
+          {
+            "id": "x1",
+            "environment": "Aiko",
+            "folder": "/work/aiko",
+            "name": "later",
+            "kind": "codex",
+            "conversation": "abc",
+            "lastUsed": 90
+          }
+        ],
+        "last": "c1"
+      },
+      "groups": [
+        {
+          "folder": "/work/aiko",
+          "name": "aiko",
+          "sessions": [
+            "main"
+          ]
+        }
+      ],
+      "toOpen": "c1"
     }
   ]
 }

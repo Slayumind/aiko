@@ -211,6 +211,13 @@ static class Program
             return;
         }
 
+        // Closed terminals give their windows back: --try-surface-leak report.txt
+        if (args is ["--try-surface-leak", var leakReport, ..])
+        {
+            Environment.Exit(SurfaceLeakCheck.Run(leakReport));
+            return;
+        }
+
         // A running command line through every way out: --try-stop report.txt (D-351)
         if (args is ["--try-stop", var stopReport, ..])
         {

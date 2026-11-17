@@ -323,6 +323,9 @@ static void WriteOutput(string text)
 /// The looking only happens when there is something to run, which is never for most people.
 static string RunWrapped(string command, string input)
 {
+    // How long the status line of the person may take, the same 2 s as on the Mac.
+    const int WrappedWait = 2000;
+
     var gitBash = WindowsGitBash.Find(
         File.Exists,
         WindowsGitBash.Places(ThisComputer.SystemFolders, Environment.GetEnvironmentVariable("PATH") ?? string.Empty));
@@ -350,18 +353,40 @@ static string RunWrapped(string command, string input)
         return "";
     }
 
-    var output = process.StandardOutput.ReadToEndAsync();
-    try
+    // The output is read in pieces until a deadline, as the Mac bridge does: a command that starts
+    // something in the background leaves that program holding the pipe, and waiting for the end of
+    // the output would stop the status line until it exits.
+    var deadline = Stopwatch.StartNew();
+    var text = new StringBuilder();
+    var reading = Task.Run(async () =>
     {
-        process.StandardInput.Write(input);
-        process.StandardInput.Close();
-    }
-    catch (IOException)
-    {
-        // The command may exit without reading its input; that is its right.
-    }
+        var piece = new char[4096];
+        int read;
+        while ((read = await process.StandardOutput.ReadAsync(piece, 0, piece.Length).ConfigureAwait(false)) > 0)
+        {
+            lock (text)
+            {
+                text.Append(piece, 0, read);
+            }
+        }
+    });
 
-    if (!process.WaitForExit(2000))
+    // The input goes over on another thread: a command that never reads it would otherwise fill
+    // the pipe and stop the bridge.
+    _ = Task.Run(() =>
+    {
+        try
+        {
+            process.StandardInput.Write(input);
+            process.StandardInput.Close();
+        }
+        catch (IOException)
+        {
+            // The command may exit without reading its input; that is its right.
+        }
+    });
+
+    if (!process.WaitForExit(WrappedWait))
     {
         try
         {
@@ -370,8 +395,11 @@ static string RunWrapped(string command, string input)
         catch (InvalidOperationException)
         {
         }
-        return "";
     }
 
-    return output.GetAwaiter().GetResult();
+    reading.Wait(TimeSpan.FromMilliseconds(Math.Max(0, WrappedWait - deadline.ElapsedMilliseconds)));
+    lock (text)
+    {
+        return text.ToString();
+    }
 }

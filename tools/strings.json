@@ -168,13 +168,6 @@
     ]
   ],
   [
-    "MenuRefresh",
-    [
-      "Refresh limits",
-      "Обновить лимиты"
-    ]
-  ],
-  [
     "Settings",
     [
       "Settings",
@@ -189,24 +182,10 @@
     ]
   ],
   [
-    "Close",
-    [
-      "Close",
-      "Закрыть"
-    ]
-  ],
-  [
     "QuitAiko",
     [
       "Quit Aiko",
       "Выйти из Aiko"
-    ]
-  ],
-  [
-    "CheckForUpdates",
-    [
-      "Check for updates",
-      "Проверить обновления"
     ]
   ],
   [
@@ -522,13 +501,6 @@
     [
       "Copy diagnostics",
       "Скопировать диагностику"
-    ]
-  ],
-  [
-    "SettingsWindowTitle",
-    [
-      "Aiko settings",
-      "Настройки Aiko"
     ]
   ],
   [
@@ -1509,13 +1481,6 @@
     [
       "{0} removed. The folder is in the Trash.",
       "{0} удалена, папка в Корзине."
-    ]
-  ],
-  [
-    "FoldersTableLead",
-    [
-      "In a folder and in every folder inside, plain claude starts its environment. A command like {0} beats a binding, and Claude Code reminds you of the binding.",
-      "В папке и во всех вложенных обычный claude запускает её среду. Команда вроде {0} сильнее привязки, но Claude Code напомнит о привязке."
     ]
   ],
   [

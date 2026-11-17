@@ -41,7 +41,13 @@ sealed partial class TerminalHost
         terminal.StartFailed += error =>
         {
             TerminalLog.StartFailed(session.Environment, session.Kind == SessionKind.Shell, error);
-            _terminals.Remove(session.Id);
+            // Let go the way a closed session is: out of the panel, and the pseudo console closed.
+            if (_terminals.Remove(session.Id, out var failed))
+            {
+                _panel.Release(failed);
+                failed.Close();
+            }
+
             _problems[session.Id] = (StartProblem.Failed, error);
             Draw();
         };

@@ -166,6 +166,15 @@ public static class VoiceInput
         _ => new VoiceLine(VoiceWord.None, null, null, false, VoiceButton.Idle, false),
     };
 
+    /// The longest recording. The local engine reads the whole recording again while it grows, and
+    /// a mic left on would take memory and the processor without end; at this length the recording
+    /// finishes as a second press would, and the words stay.
+    public static readonly TimeSpan Longest = TimeSpan.FromMinutes(5);
+
+    /// Whether a recording has reached Longest and finishes by itself.
+    public static bool TooLong(VoiceState state, TimeSpan listened) =>
+        state.Phase == VoicePhase.Listening && listened >= Longest;
+
     /// Minutes and seconds, the way a voice recorder counts: 0:04, 12:30.
     public static string Clock(TimeSpan time)
     {
