@@ -14,6 +14,7 @@ public partial class PersonalityPage : UserControl
     private static readonly Dictionary<string, string> SkillAbout = new()
     {
         ["copy"] = Strings.SkillAikoCopy,
+        ["interface"] = Strings.SkillAikoInterface,
         ["release-gate"] = Strings.SkillAikoReleaseGate,
         ["docs-hygiene"] = Strings.SkillAikoDocsHygiene,
         ["playtest"] = Strings.SkillAikoPlaytest,
@@ -26,6 +27,8 @@ public partial class PersonalityPage : UserControl
         ["balance"] = Strings.SkillAikoBalance,
         ["calendar"] = Strings.SkillAikoCalendar,
         ["drive"] = Strings.SkillAikoDrive,
+        ["envoy"] = Strings.SkillAikoEnvoy,
+        ["roadmap"] = Strings.SkillAikoRoadmap,
     };
 
     private readonly EnvironmentsEditor _editor;
@@ -162,7 +165,7 @@ public partial class PersonalityPage : UserControl
             var app = SettingsStore.Load();
             if (!app.MemoryShown)
             {
-                SettingsStore.Save(app with { MemoryShown = true });
+                SettingsStore.Change(settings => settings with { MemoryShown = true });
             }
         }
     }

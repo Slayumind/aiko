@@ -22,23 +22,26 @@ dotnet test Aiko.slnx
 dotnet run --project src/Aiko.App
 ```
 
-Three projects and one test project:
+Five projects and one test project:
 
 - `Aiko.Core` holds everything that can be decided without a screen: reading limits, counting down
   to a reset, backing off after an error, editing the Claude Code settings file. Tests go here.
 - `Aiko.App` has the tray icon, the windows and the timers, with as little logic as possible.
 - `Aiko.Bridge` is a tiny program Claude Code runs as its status line. It writes a file the app
   reads.
+- `Aiko.Shim` stands in for `claude.exe` in the commands and the folder bindings.
+- `Aiko.Checks` draws and drives parts of the app for checks and snapshots. The installer does not
+  carry it: a check may change the files it tries.
 - `Aiko.Core.Tests` uses xUnit.
 
 To look at a window without running the whole app:
 
 ```
-dotnet run --project src/Aiko.App -- --snapshot card.png
+dotnet run --project src/Aiko.Checks -- --snapshot-terminal window.png header
 ```
 
 There are also `--snapshot-icon`, `--snapshot-island`,
-`--snapshot-settings <file> general|folders|env1|env2 [tall]` and `--snapshot-wizard <file> [item]`,
+`--snapshot-settings <file> general|personality|terminal|privacy|env1|env2 [tall]` and `--snapshot-wizard <file> [item]`,
 which draws the checklist page with one item open, for example `Commands`.
 
 ## How a change should look
@@ -68,7 +71,7 @@ Three rules for Russian, all learned on real windows:
 
 - **Rephrase, don't translate.** Write the sentence the way a Russian speaker would say it.
 - **Leave room.** Russian text is about a fifth longer. Once it made two labels in one grid cell
-  overlap. Look at the window before you call it done: `--snapshot`, `--snapshot-settings`,
+  overlap. Look at the window before you call it done: `--snapshot-terminal`, `--snapshot-settings`,
   `--snapshot-wizard`.
 - **Never build a sentence from pieces.** Russian words change their endings, and joined pieces
   stop matching.

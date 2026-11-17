@@ -19,7 +19,8 @@ public class WizardChecklistTests
         Assert.Equal(ChecklistItem.Install, WizardChecklist.NextToOpen(FreshMachine));
         Assert.Equal(ItemState.Locked, WizardChecklist.StateOf(ChecklistItem.FirstAccount, FreshMachine));
         Assert.Equal(ItemState.Locked, WizardChecklist.StateOf(ChecklistItem.Access, FreshMachine));
-        Assert.Equal(ItemState.Done, WizardChecklist.StateOf(ChecklistItem.Place, FreshMachine));
+        Assert.Equal(ItemState.Open, WizardChecklist.StateOf(ChecklistItem.Place, FreshMachine));
+        Assert.Equal((0, 9), WizardChecklist.Progress(FreshMachine));
         Assert.False(WizardChecklist.CanFinish(FreshMachine));
     }
 
@@ -36,7 +37,7 @@ public class WizardChecklistTests
     public void With_two_accounts_already_there_the_wizard_goes_straight_to_access()
     {
         Assert.Equal(ChecklistItem.Access, WizardChecklist.NextToOpen(TwoAccountsFound));
-        Assert.Equal((4, 9), WizardChecklist.Progress(TwoAccountsFound));
+        Assert.Equal((3, 9), WizardChecklist.Progress(TwoAccountsFound));
     }
 
     [Fact]
@@ -76,9 +77,19 @@ public class WizardChecklistTests
     }
 
     [Fact]
-    public void Every_item_is_answered_at_the_end()
+    public void The_place_comes_last_and_counts_once_it_was_seen()
     {
         var facts = TwoAccountsFound with { AccessGranted = true, CommandsWanted = true, FoldersVisited = true, PersonaWanted = false, StatsWanted = false };
+
+        Assert.Equal(ChecklistItem.Place, WizardChecklist.NextToOpen(facts));
+        Assert.Equal((8, 9), WizardChecklist.Progress(facts));
+        Assert.True(WizardChecklist.CanFinish(facts));
+    }
+
+    [Fact]
+    public void Every_item_is_answered_at_the_end()
+    {
+        var facts = TwoAccountsFound with { AccessGranted = true, CommandsWanted = true, FoldersVisited = true, PersonaWanted = false, StatsWanted = false, PlaceSeen = true };
 
         Assert.Equal((9, 9), WizardChecklist.Progress(facts));
         Assert.Null(WizardChecklist.NextToOpen(facts));

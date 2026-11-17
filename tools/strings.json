@@ -2,8 +2,8 @@
   [
     "CardSession",
     [
-      "Session · 5 hours",
-      "Сессия · 5 часов"
+      "5 hours",
+      "5 часов"
     ]
   ],
   [
@@ -161,10 +161,10 @@
     ]
   ],
   [
-    "MenuRefresh",
+    "MenuOpen",
     [
-      "Refresh limits",
-      "Обновить лимиты"
+      "Open",
+      "Открыть"
     ]
   ],
   [
@@ -175,10 +175,10 @@
     ]
   ],
   [
-    "Close",
+    "SettingsCloseTip",
     [
-      "Close",
-      "Закрыть"
+      "Close settings · Esc",
+      "Закрыть настройки · Esc"
     ]
   ],
   [
@@ -189,13 +189,6 @@
     ]
   ],
   [
-    "CheckForUpdates",
-    [
-      "Check for updates",
-      "Проверить обновления"
-    ]
-  ],
-  [
     "CheckUpdatesToggle",
     [
       "Check for updates",
@@ -203,17 +196,10 @@
     ]
   ],
   [
-    "SectionEnvironments",
+    "SectionWhenClosed",
     [
-      "ENVIRONMENTS",
-      "СРЕДЫ"
-    ]
-  ],
-  [
-    "SectionWhereToShow",
-    [
-      "WHERE TO SHOW",
-      "ГДЕ ПОКАЗЫВАТЬ"
+      "WHEN THE WINDOW IS CLOSED",
+      "КОГДА ОКНО ЗАКРЫТО"
     ]
   ],
   [
@@ -333,6 +319,13 @@
     [
       "Start with Windows",
       "Запускать вместе с Windows"
+    ]
+  ],
+  [
+    "OpenTerminalAtStartup",
+    [
+      "Open the terminal window too",
+      "Открывать и окно терминалов"
     ]
   ],
   [
@@ -511,13 +504,6 @@
     ]
   ],
   [
-    "SettingsWindowTitle",
-    [
-      "Aiko settings",
-      "Настройки Aiko"
-    ]
-  ],
-  [
     "EnvironmentPlainName",
     [
       "Main",
@@ -550,6 +536,20 @@
     [
       "Finish",
       "Готово"
+    ]
+  ],
+  [
+    "StepBack",
+    [
+      "Back",
+      "Назад"
+    ]
+  ],
+  [
+    "StepNext",
+    [
+      "Next",
+      "Дальше"
     ]
   ],
   [
@@ -588,38 +588,73 @@
     ]
   ],
   [
-    "WizardUpdatesWhat",
+    "WizardUpdatesVersion",
     [
-      "Once a day, Aiko asks slayumind.org for the latest version and says that one copy of Aiko ran today. The ID it sends changes every day.",
-      "Раз в сутки Aiko спрашивает у slayumind.org свежую версию и сообщает, что одна копия сегодня работала. ID меняется каждый день."
+      "Once a day, Aiko asks slayumind.org for the latest version.",
+      "Раз в сутки Aiko спрашивает у slayumind.org свежую версию."
+    ]
+  ],
+  [
+    "WizardUpdatesCount",
+    [
+      "With statistics on, the same request says that one copy of Aiko ran today.",
+      "С включённой статистикой вместе с вопросом уходит, что одна копия сегодня работала."
     ]
   ],
   [
     "WizardDoneTray",
     [
-      "Aiko is down by the clock. Rest the mouse on it for the card, click to keep it open.",
-      "Aiko внизу, рядом с часами. Наведи мышь — покажется карточка, кликни — останется открытой."
-    ]
-  ],
-  [
-    "WizardDoneMenuBar",
-    [
-      "Aiko is up by the clock. Rest the mouse on it for the card, click to keep it open.",
-      "Aiko наверху, рядом с часами. Наведи мышь — покажется карточка, кликни — останется открытой."
-    ]
-  ],
-  [
-    "WizardDoneIsland",
-    [
-      "Aiko is at the top of your screen. Drag it anywhere and it sticks to the nearest edge.",
-      "Aiko вверху экрана. Перетащи куда угодно — она прилипнет к ближайшему краю."
+      "Close the window and Aiko stays by the clock while the sessions keep working. A click on the icon brings the window back.",
+      "Закроешь окно — Aiko останется у часов, а сессии продолжат работу. Щелчок по значку вернёт окно."
     ]
   ],
   [
     "WizardDoneOverflow",
     [
-      "Windows 11 hides new app icons under the arrow next to the clock. Open the arrow and drag Aiko onto the taskbar: under the arrow, the card can't open.",
-      "Windows 11 прячет значки новых приложений под стрелку рядом с часами. Открой её и перетащи Aiko на панель задач: под стрелкой карточка не открывается."
+      "Windows 11 hides the icons of new apps under the arrow by the clock. Drag Aiko onto the taskbar to keep the limit rings in sight.",
+      "Windows 11 прячет значки новых приложений под стрелку у часов. Перетащи Aiko на панель задач, чтобы кольца лимитов было видно всегда."
+    ]
+  ],
+  [
+    "WizardDoneWindowIsland",
+    [
+      "Close the window and Aiko becomes an island at the top of the screen while the sessions keep working. Drag it to any edge.",
+      "Закроешь окно — Aiko встанет островом вверху экрана, а сессии продолжат работу. Перетащи её к любому краю."
+    ]
+  ],
+  [
+    "WizardSummaryTitle",
+    [
+      "On Finish, Aiko",
+      "По «Готово» Aiko"
+    ]
+  ],
+  [
+    "WizardSummaryAccess",
+    [
+      "adds the limits line to Claude Code in {0}",
+      "добавит строку лимитов в Claude Code: {0}"
+    ]
+  ],
+  [
+    "WizardSummaryCommands",
+    [
+      "puts the commands {0} into PATH",
+      "положит команды {0} в PATH"
+    ]
+  ],
+  [
+    "WizardSummaryFolders",
+    [
+      "binds project folders to {1} ({0})",
+      "привяжет папки проектов к среде «{1}» ({0})"
+    ]
+  ],
+  [
+    "WizardSummaryPersona",
+    [
+      "turns the personality on in {0}",
+      "включит личность в среде «{0}»"
     ]
   ],
   [
@@ -640,7 +675,7 @@
     "WizardDoneNoAccess",
     [
       "Aiko can't see your limits yet. You can turn on access at any time on the General page.",
-      "Aiko пока не видит лимиты. Доступ можно включить в любой момент на странице «Общие»."
+      "Aiko пока не видит лимиты. Доступ можно включить в любой момент на странице «Общее»."
     ]
   ],
   [
@@ -660,8 +695,15 @@
   [
     "ChecklistTitle",
     [
-      "Set up environments",
-      "Настройка сред"
+      "Set up Aiko",
+      "Настройка Aiko"
+    ]
+  ],
+  [
+    "WizardWelcome",
+    [
+      "Aiko is a window for your Claude Code sessions. An environment is one Claude account with its own project folders.",
+      "Aiko — окно для твоих сессий Claude Code. Среда — это один аккаунт Claude со своими папками проектов."
     ]
   ],
   [
@@ -826,13 +868,6 @@
     ]
   ],
   [
-    "Copy",
-    [
-      "Copy",
-      "Скопировать"
-    ]
-  ],
-  [
     "Copied",
     [
       "Copied",
@@ -854,10 +889,52 @@
     ]
   ],
   [
-    "InstallLead",
+    "InstallLeadSessions",
     [
-      "Claude Code isn't on this computer yet. Aiko shows its limits, so install it first.",
-      "Claude Code на этом компьютере пока нет. Aiko показывает его лимиты, поэтому сначала установи его."
+      "Claude Code is not on this computer yet. The sessions in Aiko are Claude Code, so it comes first.",
+      "Claude Code на этом компьютере пока нет. Сессии в Aiko — это он, поэтому начнём с него."
+    ]
+  ],
+  [
+    "InstallRun",
+    [
+      "Install Claude Code",
+      "Установить Claude Code"
+    ]
+  ],
+  [
+    "InstallCopy",
+    [
+      "Copy the command",
+      "Скопировать команду"
+    ]
+  ],
+  [
+    "InstallHowButton",
+    [
+      "The button opens PowerShell with the command {0}. Aiko notices when the install is over.",
+      "Кнопка откроет PowerShell с командой {0}. Aiko заметит, когда установка закончится."
+    ]
+  ],
+  [
+    "InstallHowButtonMac",
+    [
+      "The button opens Terminal with the command {0}. Aiko notices when the install is over.",
+      "Кнопка откроет Терминал с командой {0}. Aiko заметит, когда установка закончится."
+    ]
+  ],
+  [
+    "InstallFailedLead",
+    [
+      "Didn't work? ",
+      "Не вышло — "
+    ]
+  ],
+  [
+    "InstallFailedLink",
+    [
+      "the Claude Code install page",
+      "страница установки Claude Code"
     ]
   ],
   [
@@ -865,13 +942,6 @@
     [
       "Open PowerShell, paste the command and press Enter. Aiko notices when it's done.",
       "Открой PowerShell, вставь команду и нажми Enter. Aiko заметит, когда установка закончится."
-    ]
-  ],
-  [
-    "InstallHowMac",
-    [
-      "Open Terminal, paste the command and press Enter. Aiko notices when it's done.",
-      "Открой Терминал, вставь команду и нажми Enter. Aiko заметит, когда установка закончится."
     ]
   ],
   [
@@ -1197,13 +1267,6 @@
     ]
   ],
   [
-    "NavBound",
-    [
-      "{0} bound",
-      "привязано: {0}"
-    ]
-  ],
-  [
     "AddSecondEnvironment",
     [
       "Add a second environment",
@@ -1323,17 +1386,17 @@
     ]
   ],
   [
-    "RestToo",
+    "DefaultForRest",
     [
-      "And every other folder: this is the default environment.",
-      "И все остальные папки: это среда по умолчанию."
+      "Every other folder opens here",
+      "Все остальные папки — сюда"
     ]
   ],
   [
-    "EditInFolders",
+    "FolderMovedFrom",
     [
-      "Change in project folders",
-      "Изменить в папках проектов"
+      "Moved here from {0}",
+      "Перенесена сюда из {0}"
     ]
   ],
   [
@@ -1418,34 +1481,6 @@
     [
       "{0} removed. The folder is in the Trash.",
       "{0} удалена, папка в Корзине."
-    ]
-  ],
-  [
-    "FoldersTableLead",
-    [
-      "In a folder and in every folder inside, plain claude starts its environment. A command like {0} beats a binding, and Claude Code reminds you of the binding.",
-      "В папке и во всех вложенных обычный claude запускает её среду. Команда вроде {0} сильнее привязки, но Claude Code напомнит о привязке."
-    ]
-  ],
-  [
-    "FolderColumn",
-    [
-      "FOLDER",
-      "ПАПКА"
-    ]
-  ],
-  [
-    "EnvironmentColumn",
-    [
-      "ENVIRONMENT",
-      "СРЕДА"
-    ]
-  ],
-  [
-    "AllOtherFolders",
-    [
-      "All other folders",
-      "Все остальные папки"
     ]
   ],
   [
@@ -1645,13 +1680,6 @@
     ]
   ],
   [
-    "OpenClaudeCode",
-    [
-      "Open Claude Code",
-      "Открыть Claude Code"
-    ]
-  ],
-  [
     "CardSignInNote",
     [
       "Sign in so Aiko can see the limits of this environment.",
@@ -1822,8 +1850,8 @@
   [
     "ResetInstallIdWhat",
     [
-      "Aiko makes a new value. The days before it cannot be linked to the new one.",
-      "Aiko придумает новое значение. Прежние дни с новым ID уже не связать."
+      "The ID of each day is made from a value kept on this computer. Resetting changes that value too, so past days can't be linked to the days ahead.",
+      "ID каждого дня считается из значения, которое хранится на этом компьютере. Сброс меняет и его: прошлые дни с будущими уже не связать."
     ]
   ],
   [
@@ -1992,6 +2020,13 @@
     [
       "Bright",
       "Яркий"
+    ]
+  ],
+  [
+    "TemperamentMusou",
+    [
+      "無双 · max",
+      "無双 · максимум"
     ]
   ],
   [
@@ -2338,6 +2373,13 @@
     ]
   ],
   [
+    "SkillAikoInterface",
+    [
+      "Any web interface that looks designed, not generated: the product's own look, an audit, every state, motion and reactions.",
+      "Любой веб-интерфейс, который выглядит сделанным дизайнером: свой вид продукта, аудит, все состояния, анимации и реакции."
+    ]
+  ],
+  [
     "SkillAikoCopy",
     [
       "Texts that sound like a person wrote them: UI, README, release notes. Russian and English.",
@@ -2429,6 +2471,20 @@
     ]
   ],
   [
+    "SkillAikoEnvoy",
+    [
+      "Takes your errand to a colleague in a work chat and helps them as Aiko. Brings anything outside the task back to you.",
+      "Идёт с твоим поручением к коллеге в рабочий чат и помогает сама, как Айко. Всё, что за рамками задачи, несёт тебе."
+    ]
+  ],
+  [
+    "SkillAikoRoadmap",
+    [
+      "Builds a shared roadmap for several teams: domains and owners, releases in month windows and one queue to the team everyone needs.",
+      "Собирает общий роадмап нескольких команд: домены и владельцы, релизы по окнам месяцев и одна очередь к команде, которая нужна всем."
+    ]
+  ],
+  [
     "ItemMeetAiko",
     [
       "Meet Aiko",
@@ -2461,6 +2517,1220 @@
     [
       "on",
       "включена"
+    ]
+  ],
+  [
+    "TerminalEditorHintPassing",
+    [
+      "Keys go to the menu of Claude Code · **Enter** or **Esc** ends it",
+      "Клавиши уходят в меню Claude Code · **Enter** или **Esc** — закончить"
+    ]
+  ],
+  [
+    "TerminalEditorHintCompose",
+    [
+      "**Enter** into the line of Claude Code · **Shift+Enter** new line · **Esc** close",
+      "**Enter** вставить в строку Claude Code · **Shift+Enter** новая строка · **Esc** закрыть"
+    ]
+  ],
+  [
+    "TerminalEditorHintShellText",
+    [
+      "**Enter** run · **Tab** path · **Shift+Enter** new line",
+      "**Enter** выполнить · **Tab** путь · **Shift+Enter** новая строка"
+    ]
+  ],
+  [
+    "TerminalEditorHintShellEmpty",
+    [
+      "Empty: **↑ ↓** history; **Enter**, **Esc**, **Tab** go to the terminal",
+      "Пусто: **↑ ↓** история; **Enter**, **Esc**, **Tab** уходят в терминал"
+    ]
+  ],
+  [
+    "TerminalEditorHintText",
+    [
+      "**Enter** send · **Shift+Enter** new line · **Ctrl+Shift+Space** voice",
+      "**Enter** отправить · **Shift+Enter** новая строка · **Ctrl+Shift+Space** голос"
+    ]
+  ],
+  [
+    "TerminalEditorHintEmpty",
+    [
+      "Empty: **arrows**, **Enter**, **Esc**, **Shift+Tab** go to the terminal",
+      "Пусто: **стрелки**, **Enter**, **Esc**, **Shift+Tab** уходят в терминал"
+    ]
+  ],
+  [
+    "TerminalEditorPicture",
+    [
+      "picture {0}",
+      "картинка {0}"
+    ]
+  ],
+  [
+    "TerminalEditorPlaceholder",
+    [
+      "Type or say",
+      "Напиши или скажи"
+    ]
+  ],
+  [
+    "TerminalSearchHint",
+    [
+      "Find a session",
+      "Найти сессию"
+    ]
+  ],
+  [
+    "TerminalSearchKeys",
+    [
+      "↑ ↓ choose · Enter open · Esc close",
+      "↑ ↓ выбрать · Enter открыть · Esc закрыть"
+    ]
+  ],
+  [
+    "TerminalSearchOpen",
+    [
+      "Open",
+      "Открытые"
+    ]
+  ],
+  [
+    "TerminalSearchClosed",
+    [
+      "Closed",
+      "Закрытые"
+    ]
+  ],
+  [
+    "TerminalSearchOutside",
+    [
+      "Started outside Aiko",
+      "Начаты вне Aiko"
+    ]
+  ],
+  [
+    "TerminalSourceTerminal",
+    [
+      "terminal",
+      "терминал"
+    ]
+  ],
+  [
+    "TerminalSourceOther",
+    [
+      "other app",
+      "другая программа"
+    ]
+  ],
+  [
+    "TerminalNewSession",
+    [
+      "New session",
+      "Новая сессия"
+    ]
+  ],
+  [
+    "TerminalNewSessionKey",
+    [
+      "Ctrl+Shift+T",
+      "Ctrl+Shift+T"
+    ]
+  ],
+  [
+    "TerminalGroupNewSession",
+    [
+      "New session of Claude Code in this folder",
+      "Новая сессия Claude Code в этой папке"
+    ]
+  ],
+  [
+    "TerminalGroupNewShell",
+    [
+      "Command line in this folder",
+      "Командная строка в этой папке"
+    ]
+  ],
+  [
+    "TerminalGroupOpenFolder",
+    [
+      "Open the folder",
+      "Открыть папку"
+    ]
+  ],
+  [
+    "TerminalFolderGone",
+    [
+      "This folder is no longer on the disk",
+      "Этой папки больше нет на диске"
+    ]
+  ],
+  [
+    "TerminalPickFolderHint",
+    [
+      "Folder for the new session",
+      "Папка для новой сессии"
+    ]
+  ],
+  [
+    "TerminalPickFolderKeys",
+    [
+      "↑ ↓ choose · Enter Claude Code · Ctrl+Enter command line · Esc close",
+      "↑ ↓ выбрать · Enter Claude Code · Ctrl+Enter командная строка · Esc закрыть"
+    ]
+  ],
+  [
+    "TerminalPickOtherFolder",
+    [
+      "Another folder…",
+      "Другая папка…"
+    ]
+  ],
+  [
+    "TerminalEventThinking",
+    [
+      "thinking",
+      "думает"
+    ]
+  ],
+  [
+    "TerminalEventReading",
+    [
+      "reading {0}",
+      "читает {0}"
+    ]
+  ],
+  [
+    "TerminalEventEditing",
+    [
+      "editing {0}",
+      "правит {0}"
+    ]
+  ],
+  [
+    "TerminalEventRunning",
+    [
+      "running: {0}",
+      "запускает: {0}"
+    ]
+  ],
+  [
+    "TerminalEventSearching",
+    [
+      "searching: {0}",
+      "ищет: {0}"
+    ]
+  ],
+  [
+    "TerminalEventBrowsing",
+    [
+      "on the web: {0}",
+      "в сети: {0}"
+    ]
+  ],
+  [
+    "TerminalEventDelegating",
+    [
+      "agent: {0}",
+      "агент: {0}"
+    ]
+  ],
+  [
+    "TerminalEventUsing",
+    [
+      "tool: {0}",
+      "инструмент: {0}"
+    ]
+  ],
+  [
+    "TerminalEventAsksPermission",
+    [
+      "waits for permission: {0}",
+      "ждёт разрешения: {0}"
+    ]
+  ],
+  [
+    "TerminalEventAsksQuestion",
+    [
+      "waits for your answer",
+      "ждёт ответа"
+    ]
+  ],
+  [
+    "TerminalEventFailed",
+    [
+      "the turn failed",
+      "ход прервался с ошибкой"
+    ]
+  ],
+  [
+    "TerminalEventOutOfLimit",
+    [
+      "stopped on the limit",
+      "упёрлась в лимит"
+    ]
+  ],
+  [
+    "TerminalTitle",
+    [
+      "Terminal",
+      "Терминал"
+    ]
+  ],
+  [
+    "TerminalCreateSession",
+    [
+      "Create session",
+      "Создать сессию"
+    ]
+  ],
+  [
+    "TerminalStoppedLine",
+    [
+      "Claude Code stopped. The conversation is saved: press Enter to continue.",
+      "Claude Code остановился. Разговор сохранён: нажми Enter, чтобы продолжить."
+    ]
+  ],
+  [
+    "TerminalResume",
+    [
+      "Continue",
+      "Продолжить"
+    ]
+  ],
+  [
+    "TerminalRenameSession",
+    [
+      "Rename",
+      "Переименовать"
+    ]
+  ],
+  [
+    "TerminalCloseSession",
+    [
+      "Close session",
+      "Закрыть сессию"
+    ]
+  ],
+  [
+    "TerminalChooseFolder",
+    [
+      "Choose another folder",
+      "Выбрать другую папку"
+    ]
+  ],
+  [
+    "TerminalNoSessionsTitle",
+    [
+      "Start your first session in {0}",
+      "Начни первую сессию в среде {0}"
+    ]
+  ],
+  [
+    "TerminalNoSessionsBody",
+    [
+      "A session is one conversation with Claude Code in one folder.",
+      "Сессия — это один разговор с Claude Code в одной папке."
+    ]
+  ],
+  [
+    "TerminalStarting",
+    [
+      "Starting…",
+      "Запускается…"
+    ]
+  ],
+  [
+    "TerminalNotStartedTitle",
+    [
+      "Claude Code did not start",
+      "Claude Code не запустился"
+    ]
+  ],
+  [
+    "TerminalNotStartedBody",
+    [
+      "Aiko did not find claude on this computer.",
+      "Aiko не нашла claude на этом компьютере."
+    ]
+  ],
+  [
+    "TerminalShellNotStartedTitle",
+    [
+      "The command line did not start",
+      "Командная строка не запустилась"
+    ]
+  ],
+  [
+    "TerminalStartFailedBody",
+    [
+      "Windows returned error {0}. The log has the details.",
+      "Windows вернула ошибку {0}. Подробности — в журнале."
+    ]
+  ],
+  [
+    "TerminalStartAgain",
+    [
+      "Start again",
+      "Запустить ещё раз"
+    ]
+  ],
+  [
+    "TerminalOpenLog",
+    [
+      "Open the log",
+      "Открыть журнал"
+    ]
+  ],
+  [
+    "TerminalHowToInstall",
+    [
+      "How to install",
+      "Как установить"
+    ]
+  ],
+  [
+    "TerminalFolderGoneTitle",
+    [
+      "The folder {0} is no longer on the disk",
+      "Папки {0} больше нет на диске"
+    ]
+  ],
+  [
+    "TerminalFolderGoneBody",
+    [
+      "The conversation is saved, but there is nowhere to start it.",
+      "Разговор сохранён, но запустить его негде."
+    ]
+  ],
+  [
+    "TerminalFolderGoneShell",
+    [
+      "There is nowhere to open the command line.",
+      "Командную строку негде открыть."
+    ]
+  ],
+  [
+    "TerminalRemoveFromList",
+    [
+      "Remove from the list",
+      "Убрать из списка"
+    ]
+  ],
+  [
+    "TerminalWorking",
+    [
+      "working",
+      "работает"
+    ]
+  ],
+  [
+    "TerminalWaiting",
+    [
+      "waiting",
+      "ждёт"
+    ]
+  ],
+  [
+    "TerminalDone",
+    [
+      "done",
+      "готово"
+    ]
+  ],
+  [
+    "TerminalAsleep",
+    [
+      "asleep",
+      "спит"
+    ]
+  ],
+  [
+    "TerminalStopped",
+    [
+      "stopped",
+      "остановилась"
+    ]
+  ],
+  [
+    "ShellMoreOne",
+    [
+      "… {0} more line",
+      "… ещё {0} строка"
+    ]
+  ],
+  [
+    "ShellMoreFew",
+    [
+      "… {0} more lines",
+      "… ещё {0} строки"
+    ]
+  ],
+  [
+    "ShellMoreMany",
+    [
+      "… {0} more lines",
+      "… ещё {0} строк"
+    ]
+  ],
+  [
+    "ShellRunning",
+    [
+      "running",
+      "идёт"
+    ]
+  ],
+  [
+    "ShellExitCode",
+    [
+      "code {0}",
+      "код {0}"
+    ]
+  ],
+  [
+    "ShellSeconds",
+    [
+      "{0} s",
+      "{0} с"
+    ]
+  ],
+  [
+    "ShellCopy",
+    [
+      "Copy",
+      "Копировать"
+    ]
+  ],
+  [
+    "ShellCopied",
+    [
+      "Copied",
+      "Скопировано"
+    ]
+  ],
+  [
+    "ShellFold",
+    [
+      "Fold",
+      "Свернуть"
+    ]
+  ],
+  [
+    "ShellUnfold",
+    [
+      "Unfold",
+      "Развернуть"
+    ]
+  ],
+  [
+    "ShellExplain",
+    [
+      "Explain",
+      "Объяснить"
+    ]
+  ],
+  [
+    "ShellExplaining",
+    [
+      "Asking Claude Code…",
+      "Спрашиваю Claude Code…"
+    ]
+  ],
+  [
+    "ShellExplainFailed",
+    [
+      "Claude Code did not answer. Press Explain again in a minute.",
+      "Claude Code не ответил. Нажми «Объяснить» ещё раз через минуту."
+    ]
+  ],
+  [
+    "ShellSuggestion",
+    [
+      "{0}   **Tab** take",
+      "{0}   **Tab** взять"
+    ]
+  ],
+  [
+    "ShellSuggestFailed",
+    [
+      "Claude Code did not answer. Edit the request to ask again.",
+      "Claude Code не ответил. Поправь запрос, чтобы спросить снова."
+    ]
+  ],
+  [
+    "ShellSuggesting",
+    [
+      "Looking for a command…",
+      "Ищу команду…"
+    ]
+  ],
+  [
+    "ShellFind",
+    [
+      "Find in the output",
+      "Найти в выводе"
+    ]
+  ],
+  [
+    "ShellFindCount",
+    [
+      "{0} of {1}",
+      "{0} из {1}"
+    ]
+  ],
+  [
+    "ShellFindNone",
+    [
+      "Nothing found",
+      "Не нашлось"
+    ]
+  ],
+  [
+    "TerminalTabWaitingOne",
+    [
+      "{0} waiting",
+      "{0} ждёт"
+    ]
+  ],
+  [
+    "TerminalTabWaitingMany",
+    [
+      "{0} waiting",
+      "{0} ждут"
+    ]
+  ],
+  [
+    "TerminalYesterday",
+    [
+      "Yesterday, {0}",
+      "Вчера, {0}"
+    ]
+  ],
+  [
+    "TerminalCloseTitle",
+    [
+      "Session “{0}” is still running",
+      "Сессия «{0}» ещё работает"
+    ]
+  ],
+  [
+    "TerminalCloseBody",
+    [
+      "If you close it now, the program in it stops.",
+      "Если закрыть её сейчас, программа в ней остановится."
+    ]
+  ],
+  [
+    "TerminalQuitTitle",
+    [
+      "Some sessions are still running",
+      "Часть сессий ещё работает"
+    ]
+  ],
+  [
+    "TerminalQuitBody",
+    [
+      "If you quit Aiko now, Claude Code and the command lines in its window stop.",
+      "Если выйти из Aiko сейчас, Claude Code и командные строки в её окне остановятся."
+    ]
+  ],
+  [
+    "TerminalStopAndQuit",
+    [
+      "Stop and quit",
+      "Остановить и выйти"
+    ]
+  ],
+  [
+    "TerminalDontQuit",
+    [
+      "Don’t quit",
+      "Не выходить"
+    ]
+  ],
+  [
+    "TerminalRestartBody",
+    [
+      "If you restart Aiko now, Claude Code and the command lines in its window stop.",
+      "Если перезапустить Aiko сейчас, Claude Code и командные строки в её окне остановятся."
+    ]
+  ],
+  [
+    "TerminalStopAndRestart",
+    [
+      "Stop and restart",
+      "Остановить и перезапустить"
+    ]
+  ],
+  [
+    "TerminalDontRestart",
+    [
+      "Don’t restart",
+      "Не перезапускать"
+    ]
+  ],
+  [
+    "TerminalRemoveBody",
+    [
+      "If you remove Aiko now, Claude Code and the command lines in its window stop.",
+      "Если удалить Aiko сейчас, Claude Code и командные строки в её окне остановятся."
+    ]
+  ],
+  [
+    "TerminalStopAndRemove",
+    [
+      "Stop and remove",
+      "Остановить и удалить"
+    ]
+  ],
+  [
+    "TerminalDontRemove",
+    [
+      "Don’t remove",
+      "Не удалять"
+    ]
+  ],
+  [
+    "TerminalRemoveEnvironmentBody",
+    [
+      "If you remove this environment now, its Claude Code and command lines stop.",
+      "Если удалить эту среду сейчас, её Claude Code и командные строки остановятся."
+    ]
+  ],
+  [
+    "TerminalStartOverBody",
+    [
+      "If you start over now, Claude Code and the command lines in this window stop.",
+      "Если начать заново сейчас, Claude Code и командные строки в этом окне остановятся."
+    ]
+  ],
+  [
+    "TerminalStopAndStartOver",
+    [
+      "Stop and start over",
+      "Остановить и начать заново"
+    ]
+  ],
+  [
+    "TerminalDontStartOver",
+    [
+      "Don’t start over",
+      "Не начинать заново"
+    ]
+  ],
+  [
+    "TerminalStopAndClose",
+    [
+      "Stop and close",
+      "Остановить и закрыть"
+    ]
+  ],
+  [
+    "TerminalKeepOpen",
+    [
+      "Keep open",
+      "Не закрывать"
+    ]
+  ],
+  [
+    "TerminalMinimize",
+    [
+      "Minimize",
+      "Свернуть"
+    ]
+  ],
+  [
+    "TerminalMaximize",
+    [
+      "Maximize",
+      "Развернуть"
+    ]
+  ],
+  [
+    "TerminalRestore",
+    [
+      "Restore",
+      "Восстановить"
+    ]
+  ],
+  [
+    "TerminalSessionList",
+    [
+      "Session list · Ctrl+Shift+B",
+      "Список сессий · Ctrl+Shift+B"
+    ]
+  ],
+  [
+    "TerminalFindConversation",
+    [
+      "Search sessions · Ctrl+Shift+K",
+      "Поиск сессий · Ctrl+Shift+K"
+    ]
+  ],
+  [
+    "TerminalKeysClaude",
+    [
+      "Ctrl+G editor · Ctrl+Shift+Space voice · Ctrl+Shift+K find a conversation",
+      "Ctrl+G редактор · Ctrl+Shift+Space голос · Ctrl+Shift+K найти разговор"
+    ]
+  ],
+  [
+    "TerminalKeysShell",
+    [
+      "# ask for a command · Ctrl+Shift+F find in the output · Ctrl+Shift+K find a conversation",
+      "# подсказка команды · Ctrl+Shift+F найти в выводе · Ctrl+Shift+K найти разговор"
+    ]
+  ],
+  [
+    "TerminalShowLimits",
+    [
+      "Show the limits of the environments",
+      "Показать лимиты сред"
+    ]
+  ],
+  [
+    "TerminalHideLimits",
+    [
+      "Hide the limits",
+      "Скрыть лимиты"
+    ]
+  ],
+  [
+    "CardShortSession",
+    [
+      "5 h",
+      "5 ч"
+    ]
+  ],
+  [
+    "CardShortWeek",
+    [
+      "wk",
+      "нед"
+    ]
+  ],
+  [
+    "TerminalDirectOn",
+    [
+      "direct mode on",
+      "прямой режим вкл"
+    ]
+  ],
+  [
+    "TerminalDirectOff",
+    [
+      "direct mode off",
+      "прямой режим выкл"
+    ]
+  ],
+  [
+    "TerminalCloseWindow",
+    [
+      "Close",
+      "Закрыть"
+    ]
+  ],
+  [
+    "VoiceButtonTip",
+    [
+      "Voice input · Ctrl+Shift+Space",
+      "Голосовой ввод · Ctrl+Shift+Space"
+    ]
+  ],
+  [
+    "VoiceStopTip",
+    [
+      "Finish recording · Ctrl+Shift+Space",
+      "Закончить запись · Ctrl+Shift+Space"
+    ]
+  ],
+  [
+    "VoiceWarming",
+    [
+      "starting the mic",
+      "микрофон включается"
+    ]
+  ],
+  [
+    "VoiceListening",
+    [
+      "listening {0}",
+      "слушаю {0}"
+    ]
+  ],
+  [
+    "VoiceFinishing",
+    [
+      "finishing",
+      "дописываю"
+    ]
+  ],
+  [
+    "VoiceOnComputer",
+    [
+      "on this computer",
+      "на компьютере"
+    ]
+  ],
+  [
+    "VoiceCancelHint",
+    [
+      "Esc to cancel",
+      "Esc — отменить"
+    ]
+  ],
+  [
+    "VoiceNoMic",
+    [
+      "No microphone found. Plug one in or allow access to it.",
+      "Микрофон не найден. Подключи его или разреши доступ к нему."
+    ]
+  ],
+  [
+    "VoiceNoMicLink",
+    [
+      "Windows Settings",
+      "Параметры Windows"
+    ],
+    {
+      "mac": [
+        "System Settings",
+        "Системные настройки"
+      ]
+    }
+  ],
+  [
+    "DockBadgesOffMac",
+    [
+      "macOS does not let Aiko put the number on its Dock icon.",
+      "macOS не даёт Aiko ставить число на значок в Dock."
+    ]
+  ],
+  [
+    "DockBadgesSettingsMac",
+    [
+      "Notification settings",
+      "Настройки уведомлений"
+    ]
+  ],
+  [
+    "ClaudeDidNotOpen",
+    [
+      "Claude Code did not open. Press the button again; the log has the details.",
+      "Claude Code не открылся. Нажми кнопку ещё раз — подробности в журнале."
+    ]
+  ],
+  [
+    "FolderNotMade",
+    [
+      "Aiko could not create the folder {0}. The log has the details.",
+      "Aiko не смогла создать папку {0}. Подробности в журнале."
+    ]
+  ],
+  [
+    "VoiceTurnedOff",
+    [
+      "Voice input is off.",
+      "Голосовой ввод выключен."
+    ]
+  ],
+  [
+    "VoiceNeedsModel",
+    [
+      "Voice input needs a speech model, 465 MB.",
+      "Для голосового ввода нужна модель распознавания, 465 МБ."
+    ]
+  ],
+  [
+    "VoiceNeedsKey",
+    [
+      "Recognition through OpenAI needs your key.",
+      "Для распознавания через OpenAI нужен твой ключ."
+    ]
+  ],
+  [
+    "VoiceOpenSettings",
+    [
+      "Open settings",
+      "Открыть настройки"
+    ]
+  ],
+  [
+    "NavTerminal",
+    [
+      "Window",
+      "Окно"
+    ]
+  ],
+  [
+    "NavVoiceOn",
+    [
+      "notifications, voice on",
+      "уведомления, голос включён"
+    ]
+  ],
+  [
+    "NavVoiceOff",
+    [
+      "notifications, voice off",
+      "уведомления, голос выключен"
+    ]
+  ],
+  [
+    "NotifyLabel",
+    [
+      "NOTIFICATIONS",
+      "УВЕДОМЛЕНИЯ"
+    ]
+  ],
+  [
+    "NotifyWhat",
+    [
+      "The tray icon, the taskbar button and the island show how many agents wait, have finished or stopped. A number goes when you open that session.",
+      "Значок в трее, кнопка в панели задач и остров показывают, сколько агентов ждут, закончили или остановились. Число уходит, когда ты открываешь эту сессию."
+    ],
+    {
+      "mac": [
+        "The menu bar icon, the Dock icon and the island show how many agents wait, have finished or stopped. A number goes when you open that session.",
+        "Значок в строке меню, значок в Dock и остров показывают, сколько агентов ждут, закончили или остановились. Число уходит, когда ты открываешь эту сессию."
+      ]
+    }
+  ],
+  [
+    "NotifySound",
+    [
+      "A sound when the agent has a question",
+      "Звук, когда у агента вопрос"
+    ]
+  ],
+  [
+    "ZoomLabel",
+    [
+      "WINDOW ZOOM",
+      "МАСШТАБ ОКНА"
+    ]
+  ],
+  [
+    "ZoomWhat",
+    [
+      "Text, icons and the terminal change size together. In the terminal window: C⁠t⁠r⁠l⁠+⁠= and C⁠t⁠r⁠l⁠+⁠-, and C⁠t⁠r⁠l⁠+⁠0 brings back 115%.",
+      "Текст, значки и терминал меняются вместе. В окне терминала — C⁠t⁠r⁠l⁠+⁠= и C⁠t⁠r⁠l⁠+⁠-, а C⁠t⁠r⁠l⁠+⁠0 возвращает 115 %."
+    ]
+  ],
+  [
+    "ZoomStep",
+    [
+      "{0}%",
+      "{0} %"
+    ]
+  ],
+  [
+    "VoiceToggle",
+    [
+      "Voice input",
+      "Голосовой ввод"
+    ]
+  ],
+  [
+    "VoiceToggleWhat",
+    [
+      "Ctrl+Shift+Space or the microphone button in the editor.",
+      "Ctrl+Shift+Space или кнопка микрофона в редакторе."
+    ]
+  ],
+  [
+    "VoiceLanguageLabel",
+    [
+      "SPEECH LANGUAGE",
+      "ЯЗЫК РЕЧИ"
+    ]
+  ],
+  [
+    "VoiceLanguageWhat",
+    [
+      "Whisper on your computer listens for this language. OpenAI hears the language by itself.",
+      "Whisper на компьютере слушает этот язык. OpenAI узнаёт язык сам."
+    ]
+  ],
+  [
+    "VoiceEngineLabel",
+    [
+      "RECOGNITION",
+      "РАСПОЗНАВАНИЕ"
+    ]
+  ],
+  [
+    "VoiceLocalTitle",
+    [
+      "On this computer",
+      "На компьютере"
+    ]
+  ],
+  [
+    "VoiceLocalWhat",
+    [
+      "Whisper small. Free, and the sound stays on this computer.",
+      "Whisper small. Бесплатно, звук не уходит с компьютера."
+    ]
+  ],
+  [
+    "VoiceModelWillDownload",
+    [
+      "The speech model, {0} MB, downloads when you turn this on.",
+      "Модель распознавания, {0} МБ, скачается при включении."
+    ]
+  ],
+  [
+    "VoiceModelDownloaded",
+    [
+      "{0} of {1} MB downloaded",
+      "Скачано {0} из {1} МБ"
+    ]
+  ],
+  [
+    "VoiceModelReady",
+    [
+      "Model downloaded, {0} MB.",
+      "Модель скачана, {0} МБ."
+    ]
+  ],
+  [
+    "VoiceModelStopped",
+    [
+      "Download stopped at {0} of {1} MB.",
+      "Загрузка остановлена на {0} из {1} МБ."
+    ]
+  ],
+  [
+    "VoiceModelFailed",
+    [
+      "The model did not download. Check the connection and try again.",
+      "Модель не скачалась. Проверь соединение и попробуй ещё раз."
+    ]
+  ],
+  [
+    "VoiceDownloadStop",
+    [
+      "Stop",
+      "Остановить"
+    ]
+  ],
+  [
+    "VoiceDownloadGo",
+    [
+      "Download",
+      "Скачать"
+    ]
+  ],
+  [
+    "VoiceModelRemove",
+    [
+      "Remove the model",
+      "Удалить модель"
+    ]
+  ],
+  [
+    "VoiceCloudTitle",
+    [
+      "OpenAI with your own key",
+      "OpenAI по своему ключу"
+    ]
+  ],
+  [
+    "VoiceCloudWhat",
+    [
+      "gpt-4o-transcribe. Better with terms, billed to your key.",
+      "gpt-4o-transcribe. Точнее на терминах, платишь по своему ключу."
+    ]
+  ],
+  [
+    "VoiceHonest",
+    [
+      "This data goes there: the recording of your voice and the names of the folders, branches and files of the sessions where you dictate.",
+      "Туда отправляются данные: запись голоса и имена папок, веток и файлов сессий, в которых ты диктуешь."
+    ]
+  ],
+  [
+    "VoiceMicPurpose",
+    [
+      "Aiko turns the microphone on only while you dictate. Speech is turned into text locally with Whisper. If you chose OpenAI in the settings, this data goes there: the recording of your voice and the names of the folders, branches and files of the sessions where you dictate.",
+      "Aiko включает микрофон, только пока ты диктуешь. Речь распознаётся локально с помощью Whisper. Если в настройках выбран OpenAI, туда отправляются данные: запись голоса и имена папок, веток и файлов сессий, в которых ты диктуешь."
+    ]
+  ],
+  [
+    "VoiceKeyLabel",
+    [
+      "Key",
+      "Ключ"
+    ]
+  ],
+  [
+    "VoiceKeySave",
+    [
+      "Save",
+      "Сохранить"
+    ]
+  ],
+  [
+    "VoiceKeyRemove",
+    [
+      "Remove key",
+      "Удалить ключ"
+    ]
+  ],
+  [
+    "VoiceKeyBad",
+    [
+      "This does not look like an OpenAI key: it starts with sk-.",
+      "Это не похоже на ключ OpenAI: он начинается с sk-."
+    ]
+  ],
+  [
+    "VoiceKeyNotSaved",
+    [
+      "Windows did not save the key.",
+      "Windows не сохранила ключ."
+    ],
+    {
+      "mac": [
+        "The Keychain did not save the key.",
+        "Связка ключей не сохранила ключ."
+      ]
+    }
+  ],
+  [
+    "VoiceKeyWhere",
+    [
+      "Kept in Windows Credential Manager. Removing Aiko erases it.",
+      "Хранится в Диспетчере учётных данных Windows. Удаление Aiko его сотрёт."
+    ],
+    {
+      "mac": [
+        "Kept in the macOS Keychain. Removing Aiko erases it.",
+        "Хранится в Связке ключей macOS. Удаление Aiko его сотрёт."
+      ]
+    }
+  ],
+  [
+    "VoiceCloudFailed",
+    [
+      "OpenAI did not take the recording. Check the key and the connection.",
+      "OpenAI не принял запись. Проверь ключ и соединение."
+    ]
+  ],
+  [
+    "VoiceCloudNoMoney",
+    [
+      "The OpenAI account is out of money.",
+      "На счёте OpenAI кончились деньги."
+    ]
+  ],
+  [
+    "VoiceCloudBusy",
+    [
+      "OpenAI asks to wait a minute.",
+      "OpenAI просит подождать минуту."
     ]
   ]
 ]

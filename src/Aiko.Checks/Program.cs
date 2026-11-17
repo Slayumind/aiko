@@ -1,0 +1,664 @@
+using System.IO;
+using System.Runtime.Versioning;
+using System.Windows;
+using System.Windows.Interop;
+using System.Windows.Media;
+using Aiko.App;
+using Aiko.Core;
+using Aiko.Core.Terminal;
+
+namespace Aiko.Checks;
+
+/// The checks and snapshots of Aiko, apart from the product (D-420). Each one draws or drives a part
+/// of the real app and exits. The installer does not carry this program: a check may change the files
+/// it tries, and a person should never start one by chance.
+[SupportedOSPlatform("windows10.0.17763")]
+static class Program
+{
+    [STAThread]
+    static void Main(string[] args)
+    {
+        RenderOptions.ProcessRenderMode = RenderMode.SoftwareOnly;
+
+        // Before any window is made: the words are picked when a control is created. AIKO_TRY_LANGUAGE=
+        // English or Russian draws in that language and leaves the settings file alone.
+        LanguageChoice.Apply(
+            Enum.TryParse<AikoLanguage>(Environment.GetEnvironmentVariable("AIKO_TRY_LANGUAGE"), ignoreCase: true, out var tryLanguage)
+                ? tryLanguage
+                : SettingsStore.Load().Language);
+
+        // The states a snapshot of the settings asks for (SettingsScene): AIKO_TRY_UPDATE=UpToDate,
+        // Available, Downloading, Ready, CheckFailed, DownloadFailed or CannotInstall;
+        // AIKO_TRY_MEMORY_FILE=<path> draws the memory from that file; AIKO_TRY_MEMORY=open, edit, add
+        // or erase.
+        SettingsScene.Update = Enum.TryParse<UpdateStage>(Environment.GetEnvironmentVariable("AIKO_TRY_UPDATE"), out var stage) ? stage : null;
+        SettingsScene.MemoryFile = Environment.GetEnvironmentVariable("AIKO_TRY_MEMORY_FILE");
+        SettingsScene.MemoryState = Environment.GetEnvironmentVariable("AIKO_TRY_MEMORY");
+
+        // A snapshot draws a window at once and reads its pixels. Anything still fading in would be
+        // caught half there.
+        if (args is [var first, ..] && first.StartsWith("--snapshot", StringComparison.Ordinal))
+        {
+            Motion.TurnOff();
+        }
+
+        // The icon sheets draw the rings in the colours of the tokens, which WPF reads from the resources
+        // of the app only once an Application exists. They open no window, so nothing else makes one.
+        if (args is ["--snapshot-icon", ..])
+        {
+            _ = Tips.Install(new Application());
+        }
+
+        // Draw the icon into a file and stop. Windows hides new tray icons in the overflow area,
+        // so this is the only way to look at the drawing itself.
+        if (args is ["--snapshot-icon", var faceIconPath, "faces", ..])
+        {
+            IconSheet.WriteFaces(faceIconPath);
+            return;
+        }
+
+        if (args is ["--snapshot-icon", var badgeIconPath, "badges", ..])
+        {
+            IconSheet.WriteBadges(badgeIconPath);
+            return;
+        }
+
+        if (args is ["--snapshot-icon", var iconPath, ..])
+        {
+            IconSheet.Write(iconPath);
+            return;
+        }
+
+        // The tip of the windows in both languages (Theme/ToolTip.xaml).
+        if (args is ["--snapshot-tip", var tipPath, ..])
+        {
+            TipSheet.Write(tipPath);
+            return;
+        }
+
+        // Every face in both styles, on a dark and a light taskbar, at the sizes the tray uses.
+        if (args is ["--snapshot-faces", var facesPath, ..])
+        {
+            FaceSheet.Write(facesPath);
+            return;
+        }
+
+        // Adds the status line to one folder and says in the log what happened. For the question
+        // "why can Aiko not write to my settings file", and for trying the change on a copy.
+        if (args is ["--try-access", var folder, ..])
+        {
+            var bridge = BridgePath.Current();
+            var outcome = bridge is null
+                ? PatchOutcome.Failed(PatchProblem.BridgeUnknown)
+                : ClaudeSettingsFile.AddBridge(folder, bridge);
+
+            // The name, not the path. PRIVACY.md says the log holds a Claude Code folder name and
+            // not the path to it, and a promise in that file has to hold for every code path.
+            Log.Write($"--try-access {FolderName(folder)}: changed={outcome.Changed} problem={outcome.Problem}");
+            Environment.Exit(outcome.Changed ? 0 : 1);
+            return;
+        }
+
+        // The other half of --try-access: puts the status line back for one folder. Uninstalling
+        // does this for every folder, and that is not something to try out on a live machine.
+        if (args is ["--try-restore", var restoreFolder, ..])
+        {
+            var outcome = ClaudeSettingsFile.RemoveAiko(restoreFolder);
+            Log.Write($"--try-restore {FolderName(restoreFolder)}: changed={outcome.Changed} problem={outcome.Problem}");
+            Environment.Exit(outcome.Changed ? 0 : 1);
+            return;
+        }
+
+        // The persona plugin for one temperament, written into a folder for tools/persona-evals:
+        // --write-persona-plugin Musou <folder>. The real persona.json is not read or changed.
+        if (args is ["--write-persona-plugin", var temperamentName, var personaFolder, ..])
+        {
+            if (!Enum.TryParse<Temperament>(temperamentName, ignoreCase: true, out var temperament) || BridgePath.Current() is not { } bridge)
+            {
+                Environment.Exit(1);
+                return;
+            }
+
+            foreach (var (relative, content) in PersonaPlugin.Files(temperament, bridge))
+            {
+                var path = Path.Combine(personaFolder, relative.Replace('/', Path.DirectorySeparatorChar));
+                Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+                File.WriteAllText(path, content, new System.Text.UTF8Encoding(false));
+            }
+
+            Environment.Exit(0);
+            return;
+        }
+
+        // Aiko's skills the way the plugin sync installs them, into throwaway folders:
+        // --try-skills <marketplace folder> <config folder>. Three runs: install; the same again, so
+        // nothing is copied or updated; then the skills switched off, so the plugin is disabled.
+        if (args is ["--try-skills", var marketFolder, var skillConfig, ..])
+        {
+            var cli = new ClaudeCli(ClaudeLauncher.FindClaude()!);
+            var plugin = AikoMarketplace.PluginId(SkillCatalog.PluginName);
+            for (var run = 1; run <= 3; run++)
+            {
+                var changed = SkillShelf.CopyTo(marketFolder);
+                var file = AikoMarketplace.FileIn(ThisComputer.Platform, marketFolder);
+                Directory.CreateDirectory(Path.GetDirectoryName(file)!);
+                File.WriteAllText(file, AikoMarketplace.Json(@"""C:\none\Aiko.Bridge.exe"" plugin aiko-persona", SkillShelf.Shipped));
+
+                var steps = new List<PluginStep>();
+                if (run == 1)
+                {
+                    steps.Add(new PluginStep(PluginStepKind.AddMarketplace, marketFolder));
+                    steps.Add(new PluginStep(PluginStepKind.Install, plugin));
+                }
+                else if (changed)
+                {
+                    steps.Add(new PluginStep(PluginStepKind.Update, plugin));
+                }
+
+                if (run == 3)
+                {
+                    steps.Add(new PluginStep(PluginStepKind.Disable, plugin));
+                }
+
+                var results = PluginReconciler.Apply(cli, skillConfig, steps);
+                Log.Write($"--try-skills run {run}: skills {string.Join(", ", SkillShelf.Skills)}, copied {changed}, "
+                    + string.Join(", ", results.Select(r => $"{r.Step.Kind} {r.Step.Target} exit {r.Result.ExitCode}")));
+            }
+
+            return;
+        }
+
+        // Direct mode with an expired token, on a throwaway folder with a fake credentials file:
+        // --try-direct-expired <empty folder>. Aiko must wait for Claude Code, send nothing and leave
+        // the file exactly as it was. Never pointed at a real account folder.
+        if (args is ["--try-direct-expired", var expiredFolder, ..])
+        {
+            Environment.Exit(TryDirectExpired(expiredFolder));
+            return;
+        }
+
+        // The whole way from a hook to a face, on a made-up environment: the real bridge writes the
+        // session file, the watcher sees it and the player shows and hides faces. Draws nothing.
+        if (args is ["--try-activity", ..])
+        {
+            TryActivity();
+            return;
+        }
+
+        // What uninstalling does to the plugins of one folder: the keys, then claude.exe with the
+        // same 20 second budget. Meant for a throwaway config folder, not a live one.
+        if (args is ["--try-plugin-removal", var pluginFolder, ..])
+        {
+            var started = DateTimeOffset.UtcNow;
+            var keys = ClaudeSettingsFile.RemoveAiko(pluginFolder);
+            PluginSync.RemoveNow([pluginFolder], started + TimeSpan.FromSeconds(20));
+            Log.Write($"--try-plugin-removal {FolderName(pluginFolder)}: keys changed={keys.Changed}, took {(DateTimeOffset.UtcNow - started).TotalSeconds:0.0} s");
+            Environment.Exit(keys.Problem == PatchProblem.None ? 0 : 1);
+            return;
+        }
+        // Opens a drop-down in a small window and clicks it with the real mouse.
+        if (args is ["--try-dropdown", ..])
+        {
+            Environment.Exit(DropDownCheck.Run());
+            return;
+        }
+
+        // Starts the real shell without writing anything and walks it through the icon, the card,
+        // a face, the island and the settings window.
+        if (args is ["--try-shell", ..])
+        {
+            Environment.Exit(ShellCheck.Run());
+            return;
+        }
+
+        // Closed terminals give their windows back: --try-surface-leak report.txt
+        if (args is ["--try-surface-leak", var leakReport, ..])
+        {
+            Environment.Exit(SurfaceLeakCheck.Run(leakReport));
+            return;
+        }
+
+        // A running command line through every way out: --try-stop report.txt (D-351)
+        if (args is ["--try-stop", var stopReport, ..])
+        {
+            Environment.Exit(StopCheck.Run(stopReport));
+            return;
+        }
+
+        // Throws in an empty app three times and checks that it lives on and closes its windows.
+        if (args is ["--try-crash-guard", ..])
+        {
+            Environment.Exit(CrashGuardCheck.Run());
+            return;
+        }
+
+        // Drags the island with the real mouse to the left edge and checks where it lands.
+        if (args is ["--try-island", ..])
+        {
+            Environment.Exit(IslandCheck.Run());
+            return;
+        }
+
+        // Drags an island to the bottom edge from code and holds it there, to look at the glass.
+        if (args is ["--try-glass", ..])
+        {
+            Environment.Exit(IslandCheck.TryGlass());
+            return;
+        }
+
+        // Unfolds an island at the top of the screen from code and logs its size on the way.
+        if (args is ["--try-unfold", ..])
+        {
+            Environment.Exit(IslandCheck.TryUnfold());
+            return;
+        }
+
+        // Shows the landing strip at the top of the screen for a moment, without touching the mouse.
+        if (args is ["--try-strip", ..])
+        {
+            Environment.Exit(IslandCheck.ShowStrip());
+            return;
+        }
+
+        // Picks a language on the General page with the real mouse, then puts the settings back.
+        if (args is ["--try-language", ..])
+        {
+            Environment.Exit(LanguageCheck.Run());
+            return;
+        }
+
+        // Uses the settings window with the real mouse and keyboard, then puts the environments back.
+        if (args is ["--try-settings", ..])
+        {
+            Environment.Exit(SettingsCheck.Run());
+            return;
+        }
+
+        // Opens the window of the terminal on the real sessions, without the rest of Aiko. Its
+        // terminals run the real Claude Code and shells. The limits come from the status line only.
+        if (args is ["--try-terminal", ..])
+        {
+            var environments = SettingsStore.LoadEnvironments();
+            if (environments.Environments.Count == 0)
+            {
+                Environment.Exit(1);
+                return;
+            }
+
+            var terminalApp = Tips.Install(new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown });
+            var numbers = new ShellNumbers(new SnapshotWatcher());
+            numbers.ReadAccounts();
+            var terminal = new TerminalHost(environments, SettingsStore.LoadTerminal(), numbers.SnapshotFor, () => numbers.CardFor(numbers.Cards(), DateTimeOffset.Now), numbers.IconRows);
+            terminal.Closed += terminalApp.Shutdown;
+            terminal.Show();
+            terminalApp.Run();
+            return;
+        }
+
+        // Reads a recorded phrase with the whisper the app ships, the way a recording is read. A door
+        // for checks: the text goes to the log, so use a phrase made for testing.
+        if (args is ["--try-voice", var voiceModel, var voiceWav, ..])
+        {
+            var started = System.Diagnostics.Stopwatch.StartNew();
+            using var recognizer = LocalRecognizer.Open(voiceModel, "ru", "Aiko, in-progress, TalkInput.cs.");
+            var loaded = started.ElapsedMilliseconds;
+            var text = recognizer?.Read(TryVoiceSamples(voiceWav)) ?? "";
+            Log.Write($"--try-voice: whisper {(WhisperNative.Ready ? "ready" : "missing")}, loaded in {loaded} ms, "
+                + $"read in {started.ElapsedMilliseconds - loaded} ms: {text}");
+            Environment.Exit(recognizer is null ? 1 : 0);
+            return;
+        }
+
+        // The same with OpenAI (D-317), played in real time. The key comes from OPENAI_API_KEY, not
+        // from Credential Manager, so a check never touches the stored one. Costs a fraction of a cent.
+        if (args is ["--try-voice-cloud", var cloudWav, ..])
+        {
+            Environment.Exit(TryVoiceCloud(cloudWav).GetAwaiter().GetResult());
+            return;
+        }
+
+        // A program in a pseudo console, closed while it still prints: Aiko must outlive it. Opens
+        // no window and starts no Claude Code.
+        // Whether a change of a session name can freeze the list: --try-rename <report>
+        if (args is ["--try-rename", var renameReport, ..])
+        {
+            Environment.Exit(TerminalRenameCheck.Run(renameReport));
+            return;
+        }
+
+        // Whether Tab in a terminal reaches the program before WPF: --try-tab <report>
+        if (args is ["--try-tab", var tabReport, ..])
+        {
+            Environment.Exit(TerminalTabCheck.Run(tabReport));
+            return;
+        }
+
+        // The editor with a real Claude Code and a Git Bash, off the screen: --try-editor <folder> <report>
+        if (args is ["--try-editor", var editorFolder, var editorReport, ..])
+        {
+            Environment.Exit(TerminalEditorCheck.Run(editorFolder, editorReport));
+            return;
+        }
+
+        // A real Claude Code with the hook of the terminal, in a pseudo console: --try-terminal-hooks <folder> <report>
+        if (args is ["--try-terminal-hooks", var hookFolder, var hookReport, ..])
+        {
+            Environment.Exit(TerminalHookCheck.Run(hookFolder, hookReport));
+            return;
+        }
+
+        if (args is ["--try-pty", ..])
+        {
+            Environment.Exit(TryPty());
+            return;
+        }
+
+        // Where Aiko would find Claude Code, read from a fresh PATH. Opens nothing.
+        if (args is ["--try-claude", ..])
+        {
+            var claude = ClaudeLauncher.FindClaude();
+            Log.Write($"--try-claude: {(claude is null ? "not found" : Path.GetFileName(Path.GetDirectoryName(claude)) + "\\" + Path.GetFileName(claude))}");
+            Environment.Exit(claude is null ? 1 : 0);
+            return;
+        }
+
+        // Sets the command folder up from the installed shim, reports what is in it and removes it
+        // again. PATH is not touched: that part is checked in Windows Sandbox.
+        if (args is ["--try-commands", ..])
+        {
+            var ok = CommandFolder.Sync(SettingsStore.LoadEnvironments());
+            var files = ok ? Directory.EnumerateFiles(CommandFolder.Folder).Select(Path.GetFileName) : [];
+            Log.Write($"--try-commands: set up={ok}, files: {string.Join(", ", files)}");
+            if (ok)
+            {
+                Directory.Delete(CommandFolder.Folder, recursive: true);
+            }
+
+            Environment.Exit(ok ? 0 : 1);
+            return;
+        }
+
+        // Turns the account switching functions off and on again in a copy of a profile, and
+        // checks that the copy came back byte for byte. For trying it without touching the real one.
+        if (args is ["--try-profile", var profileCopy, ..])
+        {
+            var before = File.ReadAllBytes(profileCopy);
+            var found = PowerShellProfile.FindClaudeSwitchers(System.Text.Encoding.Latin1.GetString(before));
+            var turnedOff = PowerShellProfiles.TurnOff(profileCopy, found);
+            var remaining = PowerShellProfile.FindClaudeSwitchers(File.ReadAllText(profileCopy, System.Text.Encoding.Latin1)).Count;
+            var backupThere = File.Exists(profileCopy + PowerShellProfiles.BackupSuffix);
+
+            var text = System.Text.Encoding.Latin1.GetString(File.ReadAllBytes(profileCopy));
+            File.WriteAllBytes(profileCopy, System.Text.Encoding.Latin1.GetBytes(PowerShellProfile.TurnOn(text)));
+            File.Delete(profileCopy + PowerShellProfiles.BackupSuffix);
+            var same = before.AsSpan().SequenceEqual(File.ReadAllBytes(profileCopy));
+
+            Log.Write($"--try-profile: found {found.Count} ({string.Join(", ", found.Select(f => f.Name))}), turned off={turnedOff}, left after={remaining}, backup={backupThere}, same bytes after on={same}");
+            Environment.Exit(same && turnedOff && remaining == 0 ? 0 : 1);
+            return;
+        }
+
+        // The checkpoint of shell blocks in a window: --try-shell-view report.txt [picture.png] (D-412)
+        if (args is ["--try-shell-view", var viewReport, ..])
+        {
+            Environment.Exit(ShellViewCheck.Run(viewReport, args.Length > 2 ? args[2] : null));
+            return;
+        }
+
+        // Every shell with Aiko's marks in a real ConPTY: --try-shell-blocks out-folder [test-project] (D-412)
+        if (args is ["--try-shell-blocks", var blocksFolder, ..])
+        {
+            Environment.Exit(ShellBlocksCheck.Run(blocksFolder, args.Length > 2 ? args[2] : null));
+            return;
+        }
+
+        // The terminal window on made up sessions: --snapshot-terminal out.png [palette | folders | loader]
+        if (args is ["--snapshot-terminal", var terminalPath, ..])
+        {
+            TerminalSnapshot.Write(terminalPath, args.Length > 2 ? args[2] : null);
+            return;
+        }
+
+        if (args is ["--snapshot-island", var islandPath, ..])
+        {
+            var edge = args.Length > 2 && Enum.TryParse<ScreenEdge>(args[2], true, out var asked)
+                ? asked
+                : ScreenEdge.Top;
+
+            // --snapshot-island out.png Left open: the island unfolded, as on a hover.
+            // --snapshot-island out.png Top face: a face in place of the rings.
+            var panel = new IslandPanel();
+            panel.Show(CardSnapshot.Example(), edge);
+            if (args is [.., "open"])
+            {
+                panel.Unfold(true, animate: false);
+            }
+
+            // --snapshot-island out.png Left sessions: one session waits, one is done, one stopped
+            // and two work (D-364, D-409).
+            if (args is [.., "sessions"])
+            {
+                panel.ShowSessions(new SessionCounts(Working: 2, Waiting: 1, Done: 1, Stopped: 1, FirstWaiting: "a2"));
+            }
+
+            if (args is [.., "face"])
+            {
+                panel.SetFace(TrayFaceMotion.At(FacePhase.FaceIn, 1), FaceDrawing.For(FaceStyle.Chibi, AikoFace.Done, FaceGround.Dark, 18));
+                panel.MarkForMeasure();
+            }
+
+            Snapshot.Write(panel, islandPath);
+            return;
+        }
+
+        if (args is ["--snapshot-wizard", var wizardPath, ..])
+        {
+            // The first run as the terminal window shows it, one step at a time, at the item asked
+            // for by name: --snapshot-wizard out.png Commands
+            ChecklistItem? item = args.Length > 2 && Enum.TryParse<ChecklistItem>(args[2], true, out var asked) ? asked : null;
+            var checklist = new SettingsPanel(SettingsPanel.ChecklistPageKey, firstRun: true);
+            if (item is { } open)
+            {
+                checklist.OpenChecklist(open);
+            }
+
+            var window = new TerminalPanel { Width = 1040, Height = 640 };
+            window.ShowSettings(checklist);
+            Snapshot.Write(window, wizardPath);
+            return;
+        }
+
+        if (args is ["--snapshot-settings", var settingsPath, ..])
+        {
+            // The page to draw: --snapshot-settings out.png general | personality | terminal | privacy |
+            // terminal-openai | env1 | env2 [tall]
+            // "tall" draws the whole page, not only the part that fits the window.
+            var page = args.Length > 2 ? args[2] : null;
+            if (page == "terminal-openai")
+            {
+                SettingsScene.VoiceEngine = Aiko.Core.Terminal.VoiceEngine.OpenAI;
+                page = SettingsPanel.TerminalPageKey;
+            }
+
+            var panel = new SettingsPanel(page switch
+            {
+                "env1" => new SettingsPanel().EnvironmentPage(0),
+                "env2" => new SettingsPanel().EnvironmentPage(1),
+                _ => page,
+            });
+            // The place the settings have in a terminal window of 1040 by 640.
+            panel.Width = 1040;
+            if (args is not [.., "tall"])
+            {
+                panel.Height = 640 - 44;
+            }
+
+            Snapshot.Write(panel, settingsPath);
+            return;
+        }
+
+        Log.Write($"Aiko.Checks: no check is called {string.Join(" ", args)}");
+        Environment.Exit(2);
+    }
+
+    /// --try-pty: a command that prints for a few seconds, closed after the first output. The output
+    /// thread is still reading then; the check passes when Aiko is alive a second later and the
+    /// program has ended.
+    private static int TryPty()
+    {
+        var printed = new ManualResetEventSlim(false);
+        var ended = new ManualResetEventSlim(false);
+        var console = new PseudoConsole(new PtyLaunch(
+            "cmd.exe /c ping -n 6 127.0.0.1",
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+            new Dictionary<string, string?>()));
+        console.TerminalOutput += (_, _) => printed.Set();
+        console.Exited += _ => ended.Set();
+        console.Start();
+
+        var sawOutput = printed.Wait(TimeSpan.FromSeconds(5));
+        console.Dispose();
+        var endedSoon = ended.Wait(TimeSpan.FromSeconds(5));
+        Thread.Sleep(1000);
+
+        Log.Write($"--try-pty: output seen={sawOutput}, ended after close={endedSoon}, alive=True");
+        return sawOutput && endedSoon ? 0 : 1;
+    }
+
+    private static int TryDirectExpired(string folder)
+    {
+        var credentials = Path.Combine(folder, ".credentials.json");
+        if (File.Exists(credentials))
+        {
+            Log.Write("--try-direct-expired: the folder already has credentials, refusing");
+            return 2;
+        }
+
+        Directory.CreateDirectory(folder);
+        var expired = DateTimeOffset.UtcNow.AddHours(-1).ToUnixTimeMilliseconds();
+        File.WriteAllText(credentials, $$"""{ "claudeAiOauth": { "accessToken": "not-a-real-token", "refreshToken": "not-a-real-token", "expiresAt": {{expired}}, "subscriptionType": "max" } }""");
+        var before = File.ReadAllBytes(credentials);
+        var logBefore = File.Exists(Log.FilePath) ? File.ReadAllLines(Log.FilePath).Length : 0;
+
+        var dispatcher = System.Windows.Threading.Dispatcher.CurrentDispatcher;
+        using var poller = new DirectPoller(dispatcher);
+        poller.Follow(new EnvironmentSettings([new AikoEnvironment("probe", [folder]) { DirectMode = true }]));
+
+        // One tick of the poller is twenty seconds.
+        var frame = new System.Windows.Threading.DispatcherFrame();
+        var stop = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(25) };
+        stop.Tick += (_, _) => { stop.Stop(); frame.Continue = false; };
+        stop.Start();
+        System.Windows.Threading.Dispatcher.PushFrame(frame);
+
+        var lines = File.ReadAllLines(Log.FilePath).Skip(logBefore).Where(l => l.Contains("direct mode for probe", StringComparison.Ordinal)).ToList();
+        var waited = lines.Any(l => l.Contains("the token has expired", StringComparison.Ordinal));
+        var asked = lines.Any(l => !l.Contains("the token has expired", StringComparison.Ordinal));
+        var untouched = before.AsSpan().SequenceEqual(File.ReadAllBytes(credentials));
+        var latest = poller.Latest.ContainsKey("probe");
+
+        File.Delete(credentials);
+        Log.Write($"--try-direct-expired: waited={waited}, asked the server={asked}, file untouched={untouched}, numbers={latest}");
+        return waited && !asked && untouched && !latest ? 0 : 1;
+    }
+
+    private static void TryActivity()
+    {
+        var folder = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ClaudeConfigFolder.NamedFolderName("aiko-probe"));
+        var clock = System.Diagnostics.Stopwatch.StartNew();
+        var faces = new List<string>();
+
+        var dispatcher = System.Windows.Threading.Dispatcher.CurrentDispatcher;
+        using var player = new TrayMoodPlayer(dispatcher);
+        player.FaceChanged += face => faces.Add($"{face?.ToString() ?? "rings"} {clock.Elapsed.TotalSeconds:0.0}s");
+        player.Follow(new EnvironmentSettings([new AikoEnvironment("probe", [folder]) { Persona = true }]));
+
+        void Send(string hookEvent)
+        {
+            var start = new System.Diagnostics.ProcessStartInfo(BridgePath.Current()!, "hook")
+            {
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardInput = true,
+            };
+            start.Environment["CLAUDE_CONFIG_DIR"] = folder;
+            using var bridge = System.Diagnostics.Process.Start(start)!;
+            bridge.StandardInput.Write($$"""{ "session_id": "aiko-probe", "hook_event_name": "{{hookEvent}}" }""");
+            bridge.StandardInput.Close();
+            bridge.WaitForExit();
+        }
+
+        var frame = new System.Windows.Threading.DispatcherFrame();
+        Task.Run(() =>
+        {
+            Send("UserPromptSubmit");
+            Thread.Sleep(3000);
+            Send("PermissionRequest");
+            Thread.Sleep(500);
+            Send("PostToolUse");
+            Thread.Sleep(3000);
+            Send("Stop");
+            Thread.Sleep(3000);
+            Send("SessionEnd");
+        }).ContinueWith(_ => dispatcher.BeginInvoke(() => frame.Continue = false));
+        System.Windows.Threading.Dispatcher.PushFrame(frame);
+
+        Log.Write($"--try-activity: {string.Join(", ", faces)}");
+    }
+
+    /// The last part of a folder path, whichever separator it ends with.
+    private static async Task<int> TryVoiceCloud(string wav)
+    {
+        var started = System.Diagnostics.Stopwatch.StartNew();
+        await using var cloud = await CloudRecognizer.Open("Aiko, in-progress, TalkInput.cs.", CancellationToken.None,
+            Environment.GetEnvironmentVariable("OPENAI_API_KEY"));
+        if (cloud is null)
+        {
+            Log.Write("--try-voice-cloud: did not open");
+            return 1;
+        }
+
+        var phrases = 0;
+        cloud.Changed += (_, reading) => phrases += reading.Length == 0 ? 1 : 0;
+        var sound = TryVoiceSamples(wav);
+        for (var at = 0; at < sound.Length; at += 1600)
+        {
+            await cloud.Append(sound.AsSpan(at, Math.Min(1600, sound.Length - at)));
+            await Task.Delay(100);
+        }
+
+        var spoken = started.ElapsedMilliseconds;
+        var text = await cloud.Finish();
+        Log.Write($"--try-voice-cloud: {(text is null ? "failed: " + cloud.Problem : "ok")}, phrases {phrases}, "
+            + $"last text {started.ElapsedMilliseconds - spoken} ms after the sound: {text}");
+        return text is null ? 1 : 0;
+    }
+
+    /// The sound of a 16 kHz mono 16-bit wav, as the mic gives it.
+    private static float[] TryVoiceSamples(string path)
+    {
+        var bytes = File.ReadAllBytes(path);
+        for (var at = 12; at + 8 <= bytes.Length;)
+        {
+            var size = BitConverter.ToInt32(bytes, at + 4);
+            if (System.Text.Encoding.ASCII.GetString(bytes, at, 4) == "data")
+            {
+                var samples = new float[size / 2];
+                for (var i = 0; i < samples.Length; i++)
+                {
+                    samples[i] = BitConverter.ToInt16(bytes, at + 8 + i * 2) / 32768f;
+                }
+
+                return samples;
+            }
+
+            at += 8 + size + (size & 1);
+        }
+
+        return [];
+    }
+
+    private static string FolderName(string path) =>
+        Path.GetFileName(path.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+}

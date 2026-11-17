@@ -18,6 +18,10 @@ public enum BridgeMode: Sendable, Equatable {
     /// "hook": one session event for the face in the tray.
     case hook
 
+    /// The hook of a session of the terminal: its last event goes into the file of the session
+    /// (TerminalEvent).
+    case terminalHook
+
     /// "memory rules|facts|prompt|serve": the three memory hooks and the memory server.
     case memory(MemoryBridgeMode)
 
@@ -35,6 +39,7 @@ public enum BridgeMode: Sendable, Equatable {
 
         switch arguments.first {
         case SessionReminder.argument: return .sessionStart
+        case TerminalEvent.hookArgument: return .terminalHook
         case PersonaPlugin.hookArgument: return .hook
         default: return .statusLine
         }
@@ -94,28 +99,46 @@ public struct PersonaPluginBuild: Sendable {
 /// Every rule about what to write, where, and when to write nothing at all lives here, so a test
 /// can reach it.
 public enum BridgeWork {
+    /// How long the same numbers are not written again. Claude Code runs the status line many
+    /// times a minute, and every write wakes the app. A minute keeps "working now" true, which
+    /// lasts CardState.workingFor after the last write.
+    public static let sameNumbersKeepFor: TimeInterval = 60
+
     /// The status line. Never throws and never refuses: anything unexpected reads as "no data",
-    /// and the user's own line still runs.
+    /// and the user's own line still runs. written is the snapshot file as it is now, or nil.
     public static func statusLine(
         folders: AikoFolders,
         configDirectory: String,
         settingsJson: String?,
         input: String,
-        now: Date
+        now: Date,
+        written: String? = nil
     ) -> StatusLinePlan {
         let environment = SnapshotName.forConfigDirectory(configDirectory)
         let report = StatusLineReport.fromJson(input)
 
         var snapshot: FileWrite?
         if report.hasData {
-            snapshot = FileWrite(
-                path: folders.snapshotFile(environment),
-                text: SnapshotFile.toJson(LimitSnapshot.fromStatusLine(environment, now, report)))
+            let fresh = LimitSnapshot.fromStatusLine(environment, now, report)
+            if !sameAsWritten(written, fresh, now) {
+                snapshot = FileWrite(path: folders.snapshotFile(environment), text: SnapshotFile.toJson(fresh))
+            }
         }
 
         let wrapped = SettingsJsonPatch.readWrappedCommand(settingsJson ?? "")
         let command = (wrapped?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true) ? nil : wrapped
         return StatusLinePlan(snapshot: snapshot, wrappedCommand: command)
+    }
+
+    /// The file already holds these numbers, and it was written less than sameNumbersKeepFor ago.
+    private static func sameAsWritten(_ written: String?, _ fresh: LimitSnapshot, _ now: Date) -> Bool {
+        guard let written, !written.isEmpty else { return false }
+        let before = SnapshotFile.fromJson(written, fallbackEnvironment: fresh.environment)
+        let age = now.timeIntervalSince(before.receivedAt)
+        let moved = LimitSnapshot(
+            environment: before.environment, source: before.source, receivedAt: fresh.receivedAt,
+            windows: before.windows, model: before.model)
+        return age >= 0 && age < sameNumbersKeepFor && SnapshotFile.toJson(moved) == SnapshotFile.toJson(fresh)
     }
 
     /// One session event. The file of a session is read back first, because the same activity is

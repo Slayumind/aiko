@@ -1,6 +1,6 @@
 ---
 name: balance
-description: Balance the numbers of a game from one anchor resource - find the resource everything else can be priced in (usually health or the win condition), price items, cards and abilities in it, build progression curves with rounding and hand-made spikes, compare classes by a relative anchor, choose the scale of numbers so there is room to grow, and map how systems feed each other. Includes a curve, audit and class budget calculator. Use when setting the first numbers of a game, pricing a new item, card or ability, when a table of weapons, enemies or classes "feels off", when one option makes others useless, or before adding content to a game that is already out.
+description: Balance the numbers of a game from one anchor resource - find the resource everything else can be priced in (usually health or the win condition), price items, cards and abilities in it, build progression curves with rounding and hand-made spikes, compare classes by a relative anchor, choose the scale of numbers so there is room to grow, map how systems feed each other with named economy patterns, and tune a number by letting agents of different skill play. Includes a curve, audit, class budget and depth calculator. Use when setting the first numbers of a game, pricing a new item, card or ability, when a table of weapons, enemies or classes "feels off", when one option makes others useless, when a parameter such as enemy speed or a cost has to be picked so that skill matters, or before adding content to a game that is already out.
 ---
 
 # aiko balance
@@ -112,7 +112,23 @@ the first release; changing it later touches every table and every save.
 
 Combat, economy, crafting, movement and physics are balanced apart, then meet at alpha, and the
 surprises start. Before that, draw the flows: for each resource, where it comes from, what it buys and
-which other system it feeds. Then ask for each arrow:
+which other system it feeds.
+
+Use the words of Machinations (Joris Dormans), so a flow map reads the same in every project:
+
+- a **source** makes a resource;
+- a **pool** holds it;
+- a **drain** destroys it;
+- a **converter** turns one resource into another (crafting, a shop);
+- a **trader** moves it between owners without making or destroying any;
+- a **gate** splits a flow.
+
+The anchor is the pool everything is priced in; every price is a converter rate.
+
+Then name the shapes you see. The patterns of Adams and Dormans (`references/methods.md`) are loops
+that keep turning up: an engine that grows, friction that slows it, a stopping mechanism that makes
+each use worth less. A named shape has known risks: a dynamic engine with no friction runs away. Then
+ask for each arrow:
 
 - If this flow gets bigger or smaller, what else changes? Look for chains: a multiplier on a
   multiplier, a loop where the output buys more input.
@@ -124,7 +140,47 @@ which other system it feeds. Then ask for each arrow:
 Write down each interaction you find. Some show up only after release; the map tells you where to
 look first.
 
-## 7. Audit a table and hand it over
+## 7. Tune a number with agents
+
+Some numbers have no price: how fast an enemy moves, how often it spawns, how much a missile costs to
+fire. In the General Video Game AI games, the fast, normal and slow monsters of Zelda differed in one
+such number only. Pick it by letting agents play, not by feel:
+
+1. Choose 2-6 values of the number. Each value is a variant.
+2. Let a ladder of agents play every variant: one that does nothing, random, greedy, and a search with
+   a small and a large budget. `aiko:playtest`, `references/ladder.md`, says how to build them.
+3. Put one row per game in `runs.csv`: `variant`, `agent`, `result` (win, loss or draw), and if you
+   have them `ticks` (how long the game lasted) and `rules` (the share of rules that fired).
+4. Run the calculator:
+
+```
+python "<skill base directory>/scripts/balance.py" depth runs.csv --ladder random,greedy,search --floor nothing --min-ticks 50 --min-rules 80
+```
+
+It gives every agent's win rate with its noise and the **depth** of each variant: the smallest gap
+between neighbours on the ladder. A variant is deep when every step up in skill wins more. It names
+the guards that failed:
+
+- the floor wins;
+- nobody can lose, or nobody can win;
+- a win comes too soon;
+- few rules fire;
+- too few runs;
+- a gap smaller than the noise.
+
+It then names the deepest variant that passes them all.
+
+Three rules from the studies this comes from:
+
+- **The optimiser finds holes in the agents.** When depth alone was the target, it picked an enemy
+  that did nothing, or a cost so high that not playing won. Keep the guards on, and look at the
+  winning variant in play before you take it.
+- **Symmetric games need equal agents.** Two copies of the same agent should come out near 50/50.
+  Agents of different strength measure the agents, not the game.
+- **Agents rule out; people choose.** Depth tells broken variants from playable ones. Show the player
+  the two best and let them pick.
+
+## 8. Audit a table and hand it over
 
 For an existing table of items (weapons, cards, shop goods), run the audit:
 

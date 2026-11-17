@@ -1,0 +1,167 @@
+{
+  "comment": "The name of a session (D-299). An empty field gives the folder with the lowest number no open session of that folder has. A name is kept as one line without spaces around it. A folder is kept without a slash at its end, and its name is its last part; a slash of either kind is read on both systems. The parent of a folder is the name of the folder it sits in, shown beside the name in the form so two folders of one name differ; a drive or the root has none. fromMessages: the name a new session gets from its first message: the first line with words, its spaces squeezed, at most 50 UTF-16 units cut at a space when one comes after the first 20, without a comma or a dash at the end; a message with no words gives the fallback.",
+  "defaults": [
+    {
+      "folder": "C:\\Users\\someone\\projects\\aiko",
+      "taken": [],
+      "name": "aiko 1"
+    },
+    {
+      "folder": "C:\\Users\\someone\\projects\\aiko",
+      "taken": [
+        "aiko 1",
+        "aiko 2"
+      ],
+      "name": "aiko 3"
+    },
+    {
+      "folder": "C:\\Users\\someone\\projects\\aiko",
+      "taken": [
+        "aiko 2",
+        "the terminal"
+      ],
+      "name": "aiko 1"
+    },
+    {
+      "folder": "C:\\Users\\someone\\projects\\aiko",
+      "taken": [
+        "aiko 1",
+        "aiko 3"
+      ],
+      "name": "aiko 2"
+    },
+    {
+      "folder": "C:\\Users\\someone\\projects\\aiko",
+      "taken": [
+        "Aiko 1"
+      ],
+      "name": "aiko 1"
+    },
+    {
+      "folder": "/Users/someone/мои проекты/",
+      "taken": [
+        "мои проекты 1"
+      ],
+      "name": "мои проекты 2"
+    },
+    {
+      "folder": "D:\\",
+      "taken": [],
+      "name": "D: 1"
+    },
+    {
+      "folder": "/",
+      "taken": [],
+      "name": "/ 1"
+    }
+  ],
+  "names": [
+    {
+      "input": "  the terminal  ",
+      "name": "the terminal"
+    },
+    {
+      "input": "two\r\nlines\there",
+      "name": "two lines here"
+    },
+    {
+      "input": "   ",
+      "name": ""
+    },
+    {
+      "input": "",
+      "name": ""
+    },
+    {
+      "input": "полишинг памяти",
+      "name": "полишинг памяти"
+    }
+  ],
+  "folders": [
+    {
+      "input": "C:\\Users\\someone\\projects\\aiko",
+      "path": "C:\\Users\\someone\\projects\\aiko",
+      "name": "aiko",
+      "parent": "projects"
+    },
+    {
+      "input": "C:\\Users\\someone\\projects\\aiko\\",
+      "path": "C:\\Users\\someone\\projects\\aiko",
+      "name": "aiko",
+      "parent": "projects"
+    },
+    {
+      "input": "/Users/someone/projects/aiko///",
+      "path": "/Users/someone/projects/aiko",
+      "name": "aiko",
+      "parent": "projects"
+    },
+    {
+      "input": "C:/mixed\\slashes/",
+      "path": "C:/mixed\\slashes",
+      "name": "slashes",
+      "parent": "mixed"
+    },
+    {
+      "input": "D:\\",
+      "path": "D:\\",
+      "name": "D:",
+      "parent": ""
+    },
+    {
+      "input": "/",
+      "path": "/",
+      "name": "/",
+      "parent": ""
+    },
+    {
+      "input": "  /work/app  ",
+      "path": "/work/app",
+      "name": "app",
+      "parent": "work"
+    },
+    {
+      "input": "",
+      "path": "",
+      "name": "",
+      "parent": ""
+    }
+  ],
+  "fromMessages": [
+    {
+      "message": "Почему форма пропускает пустое имя?",
+      "fallback": "aiko 3",
+      "name": "Почему форма пропускает пустое имя?"
+    },
+    {
+      "message": "  \n\n  Сделай меню   плотнее\nи ещё одно",
+      "fallback": "aiko 3",
+      "name": "Сделай меню плотнее"
+    },
+    {
+      "message": "Проверь, что выпадающий список в настройках не закрывается сразу после нажатия мышью",
+      "fallback": "aiko 3",
+      "name": "Проверь, что выпадающий список в настройках не"
+    },
+    {
+      "message": "Сделай так: меню, поле, ленту, панель задач — всё как в прототипе",
+      "fallback": "aiko 3",
+      "name": "Сделай так: меню, поле, ленту, панель задач — всё"
+    },
+    {
+      "message": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "fallback": "aiko 3",
+      "name": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "message": "",
+      "fallback": "aiko 3",
+      "name": "aiko 3"
+    },
+    {
+      "message": " \n\t\n",
+      "fallback": "code-crawler 1",
+      "name": "code-crawler 1"
+    }
+  ]
+}

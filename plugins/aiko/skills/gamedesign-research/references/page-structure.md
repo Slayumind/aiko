@@ -24,6 +24,8 @@ dark or light reading page: one text face, one mono face for numbers, one accent
 
 - A table: family · how it decides · example games. 6-12 families.
 - Below it, "patterns that repeat almost everywhere": 5-10 items, each with named example games.
+- Where a family is a known decision trap or economy pattern, use its shared name
+  (`research-brief.md`, "Shared names") and keep the game's own word next to it.
 
 ## §2 References
 
@@ -61,7 +63,8 @@ One section per stand, each in this order:
 
 1. The formula of one step in one line.
 2. "How one step is computed": numbered list, about 10 items.
-3. Vocabulary table (condition or action · cost · effect) and unit or object stats.
+3. The rules sheet (`rules-sheet.md`), collapsed, and the vocabulary table (condition or action ·
+   cost · effect) with unit or object stats.
 4. The stand itself.
 5. A worked example of the first steps, and "try this" with 2-3 experiments.
 6. A collapsed block "what changed in the port, and sources".
@@ -71,7 +74,12 @@ One section per stand, each in this order:
 A table of 8-12 design choices × the tier-1 systems or the stand systems. Rows are decisions a
 designer has to make (unit of a rule, target choice, fallback when nothing fits, resource, timing,
 reactions, the most common player complaint, input). After stands exist, add "what the stands
-showed" in 3-5 points.
+showed" in 3-5 points, and the rules that never fired.
+
+Under it, the features table: every game of the review × the features agreed in the brief. Sort it
+so games with the same answers sit together; groups that show up are worth a sentence. Features are
+a lens, not a measure of distance: researchers who compared about 1,000 board games by 499 features
+still called such distances subjective.
 
 ## Open questions
 

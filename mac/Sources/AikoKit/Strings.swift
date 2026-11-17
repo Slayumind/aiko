@@ -12,7 +12,7 @@ public enum StringLanguage: Sendable, Equatable {
 /// Every word Aiko says, in the language the user chose. One property per string, so a key that
 /// does not exist is a build error and not a blank label somebody finds months later.
 ///
-/// The table is the twin of Strings.resx and Strings.ru.resx on Windows.
+/// The table is the twin of Strings.cs in Aiko.Core on Windows.
 public enum Strings {
     /// Set at startup and again when the language changes. The lock is there because the bridge
     /// and the app may ask from another thread, not because the value changes often.
@@ -40,7 +40,7 @@ public enum Strings {
     }
 
     public static let table: [String: (english: String, russian: String)] = [
-        "CardSession": ("Session · 5 hours", "Сессия · 5 часов"),
+        "CardSession": ("5 hours", "5 часов"),
         "CardWeek": ("Week", "Неделя"),
         "CardModelWeek": ("{0} · week", "{0} · неделя"),
         "CardPercent": ("{0}%", "{0}%"),
@@ -63,14 +63,12 @@ public enum Strings {
         "TrayLastSeen": ("as of {0}", "данные на {0}"),
         "TrayUpdateOut": ("Aiko {0} is out", "вышла Aiko {0}"),
         "MenuShowInRing": ("Show {0} in the ring", "Показать в кольце: {0}"),
-        "MenuRefresh": ("Refresh limits", "Обновить лимиты"),
+        "MenuOpen": ("Open", "Открыть"),
         "Settings": ("Settings", "Настройки"),
-        "Close": ("Close", "Закрыть"),
+        "SettingsCloseTip": ("Close settings · Esc", "Закрыть настройки · Esc"),
         "QuitAiko": ("Quit Aiko", "Выйти из Aiko"),
-        "CheckForUpdates": ("Check for updates", "Проверить обновления"),
         "CheckUpdatesToggle": ("Check for updates", "Проверять обновления"),
-        "SectionEnvironments": ("ENVIRONMENTS", "СРЕДЫ"),
-        "SectionWhereToShow": ("WHERE TO SHOW", "ГДЕ ПОКАЗЫВАТЬ"),
+        "SectionWhenClosed": ("WHEN THE WINDOW IS CLOSED", "КОГДА ОКНО ЗАКРЫТО"),
         "SectionStartupAndUpdates": ("STARTUP AND UPDATES", "ЗАПУСК И ОБНОВЛЕНИЯ"),
         "SectionLanguage": ("LANGUAGE", "ЯЗЫК"),
         "DirectMode": ("Direct mode", "Прямой режим"),
@@ -88,6 +86,7 @@ public enum Strings {
         "PlaceMenuBar": ("Menu bar", "Строка меню"),
         "HideIslandInFullScreen": ("Hide the island in full screen", "Прятать остров в полноэкранных окнах"),
         "StartWithWindows": ("Start with Windows", "Запускать вместе с Windows"),
+        "OpenTerminalAtStartup": ("Open the terminal window too", "Открывать и окно терминалов"),
         "StartAtLogin": ("Start at login", "Запускать при входе"),
         "CheckUpdatesWhat": ("Once a day Aiko asks slayumind.org for the latest version. The files come from GitHub, and Aiko checks their signature before it replaces anything.", "Раз в сутки Aiko спрашивает у slayumind.org последнюю версию. Файлы приходят с GitHub, и Aiko проверяет их подпись, прежде чем что-то заменить."),
         "CheckNow": ("Check for updates", "Проверить обновления"),
@@ -113,28 +112,35 @@ public enum Strings {
         "LanguageEnglish": ("English", "English"),
         "LanguageRussian": ("Русский", "Русский"),
         "CopyDiagnostics": ("Copy diagnostics", "Скопировать диагностику"),
-        "SettingsWindowTitle": ("Aiko settings", "Настройки Aiko"),
         "EnvironmentPlainName": ("Main", "Основная"),
         "WizardStepAccess": ("Access to the limits", "Доступ к лимитам"),
         "WizardStepWhere": ("Where to show Aiko", "Где показывать Aiko"),
         "NotNow": ("Not now", "Не сейчас"),
         "Finish": ("Finish", "Готово"),
+        "StepBack": ("Back", "Назад"),
+        "StepNext": ("Next", "Дальше"),
         "WizardAccessExplain": ("Claude Code sends its limits to a status line. Aiko adds one line to the settings file of each environment. If you already have a status line, Aiko runs it and shows what it prints.", "Claude Code отдаёт лимиты строке состояния. Aiko добавит одну строку в файл настроек каждой среды. Если у тебя уже есть своя строка состояния, Aiko запустит её и покажет её вывод."),
         "WizardTheLine": ("THE LINE AIKO ADDS", "СТРОКА, КОТОРУЮ ДОБАВИТ AIKO"),
         "WizardTheFiles": ("FILES AIKO CHANGES", "ФАЙЛЫ, КОТОРЫЕ ИЗМЕНЯТСЯ"),
         "WizardBackupNote": ("Aiko keeps a copy of each file next to it. Removing Aiko puts everything back.", "Aiko сохранит копию каждого файла рядом с ним. Удалишь Aiko — всё вернётся как было."),
         "WizardBridgeNotFound": ("Aiko can't find its bridge program.", "Aiko не нашла свою программу-посредник."),
-        "WizardUpdatesWhat": ("Once a day, Aiko asks slayumind.org for the latest version and says that one copy of Aiko ran today. The ID it sends changes every day.", "Раз в сутки Aiko спрашивает у slayumind.org свежую версию и сообщает, что одна копия сегодня работала. ID меняется каждый день."),
-        "WizardDoneTray": ("Aiko is down by the clock. Rest the mouse on it for the card, click to keep it open.", "Aiko внизу, рядом с часами. Наведи мышь — покажется карточка, кликни — останется открытой."),
-        "WizardDoneMenuBar": ("Aiko is up by the clock. Rest the mouse on it for the card, click to keep it open.", "Aiko наверху, рядом с часами. Наведи мышь — покажется карточка, кликни — останется открытой."),
-        "WizardDoneIsland": ("Aiko is at the top of your screen. Drag it anywhere and it sticks to the nearest edge.", "Aiko вверху экрана. Перетащи куда угодно — она прилипнет к ближайшему краю."),
-        "WizardDoneOverflow": ("Windows 11 hides new app icons under the arrow next to the clock. Open the arrow and drag Aiko onto the taskbar: under the arrow, the card can't open.", "Windows 11 прячет значки новых приложений под стрелку рядом с часами. Открой её и перетащи Aiko на панель задач: под стрелкой карточка не открывается."),
+        "WizardUpdatesVersion": ("Once a day, Aiko asks slayumind.org for the latest version.", "Раз в сутки Aiko спрашивает у slayumind.org свежую версию."),
+        "WizardUpdatesCount": ("With statistics on, the same request says that one copy of Aiko ran today.", "С включённой статистикой вместе с вопросом уходит, что одна копия сегодня работала."),
+        "WizardDoneTray": ("Close the window and Aiko stays by the clock while the sessions keep working. A click on the icon brings the window back.", "Закроешь окно — Aiko останется у часов, а сессии продолжат работу. Щелчок по значку вернёт окно."),
+        "WizardDoneOverflow": ("Windows 11 hides the icons of new apps under the arrow by the clock. Drag Aiko onto the taskbar to keep the limit rings in sight.", "Windows 11 прячет значки новых приложений под стрелку у часов. Перетащи Aiko на панель задач, чтобы кольца лимитов было видно всегда."),
+        "WizardDoneWindowIsland": ("Close the window and Aiko becomes an island at the top of the screen while the sessions keep working. Drag it to any edge.", "Закроешь окно — Aiko встанет островом вверху экрана, а сессии продолжат работу. Перетащи её к любому краю."),
+        "WizardSummaryTitle": ("On Finish, Aiko", "По «Готово» Aiko"),
+        "WizardSummaryAccess": ("adds the limits line to Claude Code in {0}", "добавит строку лимитов в Claude Code: {0}"),
+        "WizardSummaryCommands": ("puts the commands {0} into PATH", "положит команды {0} в PATH"),
+        "WizardSummaryFolders": ("binds project folders to {1} ({0})", "привяжет папки проектов к среде «{1}» ({0})"),
+        "WizardSummaryPersona": ("turns the personality on in {0}", "включит личность в среде «{0}»"),
         "WizardDoneMenuBarRoom": ("A full menu bar hides the icons furthest from the clock. Close a menu bar app if Aiko doesn't fit.", "В переполненной строке меню macOS прячет значки, которые дальше от часов. Если Aiko не помещается, закрой лишнее приложение."),
         "WizardDoneFirstNumbers": ("The first numbers arrive after your next answer from Claude Code. Until then, the ring is dashed.", "Первые цифры придут после следующего ответа Claude Code. До этого кольцо пунктирное."),
-        "WizardDoneNoAccess": ("Aiko can't see your limits yet. You can turn on access at any time on the General page.", "Aiko пока не видит лимиты. Доступ можно включить в любой момент на странице «Общие»."),
+        "WizardDoneNoAccess": ("Aiko can't see your limits yet. You can turn on access at any time on the General page.", "Aiko пока не видит лимиты. Доступ можно включить в любой момент на странице «Общее»."),
         "SettingsWriteFailed": ("Aiko couldn't write the Claude Code settings file. Try again.", "Aiko не смогла записать файл настроек Claude Code. Попробуй ещё раз."),
         "SettingsBridgeUnknown": ("Aiko can't find its bridge program.", "Aiko не нашла свою программу-посредник."),
-        "ChecklistTitle": ("Set up environments", "Настройка сред"),
+        "ChecklistTitle": ("Set up Aiko", "Настройка Aiko"),
+        "WizardWelcome": ("Aiko is a window for your Claude Code sessions. An environment is one Claude account with its own project folders.", "Aiko — окно для твоих сессий Claude Code. Среда — это один аккаунт Claude со своими папками проектов."),
         "ChecklistCount": ("{0} of {1} done", "готово {0} из {1}"),
         "GroupFirst": ("ENVIRONMENT 1", "СРЕДА 1"),
         "GroupSecond": ("ENVIRONMENT 2", "СРЕДА 2"),
@@ -158,13 +164,17 @@ public enum Strings {
         "StateTray": ("tray", "трей"),
         "StateIsland": ("island", "остров"),
         "StateMenuBar": ("menu bar", "строка меню"),
-        "Copy": ("Copy", "Скопировать"),
         "Copied": ("Copied", "Скопировано"),
         "Later": ("Later", "Позже"),
         "InstallFound": ("Claude Code is already on this computer.", "Claude Code уже есть на этом компьютере."),
-        "InstallLead": ("Claude Code isn't on this computer yet. Aiko shows its limits, so install it first.", "Claude Code на этом компьютере пока нет. Aiko показывает его лимиты, поэтому сначала установи его."),
+        "InstallLeadSessions": ("Claude Code is not on this computer yet. The sessions in Aiko are Claude Code, so it comes first.", "Claude Code на этом компьютере пока нет. Сессии в Aiko — это он, поэтому начнём с него."),
+        "InstallRun": ("Install Claude Code", "Установить Claude Code"),
+        "InstallCopy": ("Copy the command", "Скопировать команду"),
+        "InstallHowButton": ("The button opens PowerShell with the command {0}. Aiko notices when the install is over.", "Кнопка откроет PowerShell с командой {0}. Aiko заметит, когда установка закончится."),
+        "InstallHowButtonMac": ("The button opens Terminal with the command {0}. Aiko notices when the install is over.", "Кнопка откроет Терминал с командой {0}. Aiko заметит, когда установка закончится."),
+        "InstallFailedLead": ("Didn't work? ", "Не вышло — "),
+        "InstallFailedLink": ("the Claude Code install page", "страница установки Claude Code"),
         "InstallHow": ("Open PowerShell, paste the command and press Enter. Aiko notices when it's done.", "Открой PowerShell, вставь команду и нажми Enter. Aiko заметит, когда установка закончится."),
-        "InstallHowMac": ("Open Terminal, paste the command and press Enter. Aiko notices when it's done.", "Открой Терминал, вставь команду и нажми Enter. Aiko заметит, когда установка закончится."),
         "WaitInstall": ("Waiting for Claude Code…", "Ждём Claude Code…"),
         "Env1Lead": ("Environment 1 is the .claude folder. VS Code and Claude Desktop use it too.", "Среда 1 — это папка .claude. Ею же пользуются VS Code и Claude Desktop."),
         "Env1Empty": ("This folder has no account yet.", "В этой папке ещё нет аккаунта."),
@@ -211,7 +221,6 @@ public enum Strings {
         "DoneCommands": ("Commands: {0}. Open a new terminal to use them.", "Команды: {0}. Они заработают в новом окне терминала."),
         "SetUpEnvironments": ("Set up environments", "Настроить среды"),
         "NavGeneral": ("General", "Общее"),
-        "NavBound": ("{0} bound", "привязано: {0}"),
         "AddSecondEnvironment": ("Add a second environment", "Добавить вторую среду"),
         "Saved": ("Saved", "Сохранено"),
         "ByDefault": ("default", "по умолчанию"),
@@ -229,8 +238,8 @@ public enum Strings {
         "NameTaken": ("The other environment has this name.", "Это имя уже у другой среды."),
         "SectionBoundFolders": ("BOUND FOLDERS", "ПРИВЯЗАННЫЕ ПАПКИ"),
         "NoneBound": ("No folders.", "Ни одной папки."),
-        "RestToo": ("And every other folder: this is the default environment.", "И все остальные папки: это среда по умолчанию."),
-        "EditInFolders": ("Change in project folders", "Изменить в папках проектов"),
+        "DefaultForRest": ("Every other folder opens here", "Все остальные папки — сюда"),
+        "FolderMovedFrom": ("Moved here from {0}", "Перенесена сюда из {0}"),
         "RemoveEnvironment": ("Remove environment", "Удалить среду"),
         "RemoveEnvironmentLine": ("Aiko's line and plugins leave this folder's settings.json, and so do the command {0} and the bindings to {1}.", "Из settings.json этой папки уйдут строка и плагины Aiko, а с ними команда {0} и привязки к {1}."),
         "MoveToRecycleBin": ("And move the folder to the Recycle Bin", "И переместить папку в Корзину"),
@@ -243,10 +252,6 @@ public enum Strings {
         "EnvironmentRemoved": ("{0} removed.", "{0} удалена."),
         "EnvironmentRemovedToBin": ("{0} removed. The folder is in the Recycle Bin.", "{0} удалена, папка в Корзине."),
         "EnvironmentRemovedToTrash": ("{0} removed. The folder is in the Trash.", "{0} удалена, папка в Корзине."),
-        "FoldersTableLead": ("In a folder and in every folder inside, plain claude starts its environment. A command like {0} beats a binding, and Claude Code reminds you of the binding.", "В папке и во всех вложенных обычный claude запускает её среду. Команда вроде {0} сильнее привязки, но Claude Code напомнит о привязке."),
-        "FolderColumn": ("FOLDER", "ПАПКА"),
-        "EnvironmentColumn": ("ENVIRONMENT", "СРЕДА"),
-        "AllOtherFolders": ("All other folders", "Все остальные папки"),
         "AddFolder": ("Add a folder", "Добавить папку"),
         "RemoveBinding": ("Remove binding", "Убрать привязку"),
         "FoldersOneEnvironment": ("Bindings matter once you have two environments. Right now every folder runs in {0}.", "Привязка нужна, когда сред две. Сейчас все папки работают в {0}."),
@@ -275,7 +280,6 @@ public enum Strings {
         "DeleteKeepMemory": ("Keep what Aiko remembers about me", "Сохранить то, что Aiko помнит обо мне"),
         "DeleteMemoryStays": ("One file stays: {0}. When you install Aiko again, it finds the memory there.", "Останется один файл: {0}. Когда поставишь Aiko снова, она найдёт память там."),
         "DeleteMemoryGoes": ("The memory goes with Aiko's folders. It cannot be brought back.", "Память уйдёт вместе с папками Aiko. Вернуть её нельзя."),
-        "OpenClaudeCode": ("Open Claude Code", "Открыть Claude Code"),
         "CardSignInNote": ("Sign in so Aiko can see the limits of this environment.", "Войди, чтобы Aiko видела лимиты этой среды."),
         "StateWorkingNow": ("working now", "сейчас работает"),
         "NavPersonality": ("Personality", "Личность"),
@@ -300,7 +304,7 @@ public enum Strings {
         "NeverSentWhat": ("Your name, email, project folders, limits, token, session texts and what the memory holds. The site doesn't read or store the IP address.", "Имя, почта, папки проектов, лимиты, токен, тексты сессий и содержимое памяти. IP-адрес сайт не читает и не хранит."),
         "StatsKeptFor": ("The records are deleted after 90 days.", "Записи удаляются через 90 дней."),
         "ResetInstallId": ("Reset ID", "Сбросить ID"),
-        "ResetInstallIdWhat": ("Aiko makes a new value. The days before it cannot be linked to the new one.", "Aiko придумает новое значение. Прежние дни с новым ID уже не связать."),
+        "ResetInstallIdWhat": ("The ID of each day is made from a value kept on this computer. Resetting changes that value too, so past days can't be linked to the days ahead.", "ID каждого дня считается из значения, которое хранится на этом компьютере. Сброс меняет и его: прошлые дни с будущими уже не связать."),
         "ResetInstallIdDone": ("The ID is new.", "ID теперь новый."),
         "OpenPrivacyDoc": ("Open PRIVACY.md", "Открыть PRIVACY.md"),
         "WizardStats": ("Anonymous statistics", "Анонимная статистика"),
@@ -325,6 +329,7 @@ public enum Strings {
         "TemperamentQuiet": ("Quiet", "Тихий"),
         "TemperamentNormal": ("Normal", "Обычный"),
         "TemperamentBright": ("Bright", "Яркий"),
+        "TemperamentMusou": ("無双 · max", "無双 · максимум"),
         "TemperamentQuietAbout": ("Almost no character: one warm line at the end of an answer.", "Почти без характера: одна тёплая фраза в конце ответа."),
         "TemperamentNormalAbout": ("A short interjection at the start, a quick verdict at the end. Japanese words now and then.", "Короткое междометие в начале, оценка в конце. Японские слова — изредка."),
         "TemperamentBrightAbout": ("An interjection in every answer, game metaphors, Japanese words more often.", "Междометие в каждом ответе, игровые метафоры, японские слова чаще."),
@@ -374,6 +379,7 @@ public enum Strings {
         "SectionSkills": ("SKILLS · {0}", "НАВЫКИ · {0}"),
         "SkillDomainProjects": ("PROJECT MANAGEMENT", "УПРАВЛЕНИЕ ПРОЕКТАМИ"),
         "SkillDomainGames": ("GAME DEVELOPMENT", "РАЗРАБОТКА ИГР"),
+        "SkillAikoInterface": ("Any web interface that looks designed, not generated: the product's own look, an audit, every state, motion and reactions.", "Любой веб-интерфейс, который выглядит сделанным дизайнером: свой вид продукта, аудит, все состояния, анимации и реакции."),
         "SkillAikoCopy": ("Texts that sound like a person wrote them: UI, README, release notes. Russian and English.", "Тексты, которые звучат как написанные человеком: интерфейс, README, заметки к релизу. На русском и английском."),
         "SkillAikoReleaseGate": ("Checks a release before it ships: what can't be undone, how to roll back, GO or NO-GO.", "Проверяет релиз до выката: что необратимо, как откатить, GO или NO-GO."),
         "SkillAikoDocsHygiene": ("Keeps project docs honest: each fact in one place, a log of decisions, contradictions found.", "Держит документы проекта в порядке: факт в одном месте, журнал решений, найденные противоречия."),
@@ -387,14 +393,186 @@ public enum Strings {
         "SkillAikoBalance": ("Balances a game's numbers from one anchor, usually health: progression curves, classes and item tables.", "Балансирует цифры игры от одного якоря, обычно здоровья: кривые прогрессии, классы и таблицы предметов."),
         "SkillAikoCalendar": ("Plans your day in Google Calendar and finds free time. Adds events only after your yes.", "Планирует день по Google Calendar и ищет свободное время. События добавляет только после твоего «да»."),
         "SkillAikoDrive": ("Reads documents from Google Drive and puts project files onto Drive.", "Берёт документы с Google Drive в работу и кладёт файлы проекта на Drive."),
+        "SkillAikoEnvoy": ("Takes your errand to a colleague in a work chat and helps them as Aiko. Brings anything outside the task back to you.", "Идёт с твоим поручением к коллеге в рабочий чат и помогает сама, как Айко. Всё, что за рамками задачи, несёт тебе."),
+        "SkillAikoRoadmap": ("Builds a shared roadmap for several teams: domains and owners, releases in month windows and one queue to the team everyone needs.", "Собирает общий роадмап нескольких команд: домены и владельцы, релизы по окнам месяцев и одна очередь к команде, которая нужна всем."),
         "ItemMeetAiko": ("Meet Aiko", "Познакомься с Aiko"),
         "MeetAikoLead": ("Aiko can talk in your Claude Code sessions in her own voice. She brings her skills and a small memory about you. In code and commits she stays quiet.", "Aiko может отвечать в твоих сессиях Claude Code своим голосом. С ней приходят её навыки и небольшая память о тебе. В коде и коммитах она молчит."),
         "MeetAikoSettings": ("The temperament, the mood, the skills and the memory are on the Personality page. It works in new sessions.", "Темперамент, настроение, навыки и память — на странице «Личность». Действует в новых сессиях."),
         "MeetAikoTurnOn": ("Turn on in {0}", "Включить в среде {0}"),
         "StateOn": ("on", "включена"),
+        "TerminalEditorHintPassing": ("Keys go to the menu of Claude Code · **Enter** or **Esc** ends it", "Клавиши уходят в меню Claude Code · **Enter** или **Esc** — закончить"),
+        "TerminalEditorHintCompose": ("**Enter** into the line of Claude Code · **Shift+Enter** new line · **Esc** close", "**Enter** вставить в строку Claude Code · **Shift+Enter** новая строка · **Esc** закрыть"),
+        "TerminalEditorHintShellText": ("**Enter** run · **Tab** path · **Shift+Enter** new line", "**Enter** выполнить · **Tab** путь · **Shift+Enter** новая строка"),
+        "TerminalEditorHintShellEmpty": ("Empty: **↑ ↓** history; **Enter**, **Esc**, **Tab** go to the terminal", "Пусто: **↑ ↓** история; **Enter**, **Esc**, **Tab** уходят в терминал"),
+        "TerminalEditorHintText": ("**Enter** send · **Shift+Enter** new line · **Cmd+Shift+Space** voice", "**Enter** отправить · **Shift+Enter** новая строка · **Cmd+Shift+Space** голос"),
+        "TerminalEditorHintEmpty": ("Empty: **arrows**, **Enter**, **Esc**, **Shift+Tab** go to the terminal", "Пусто: **стрелки**, **Enter**, **Esc**, **Shift+Tab** уходят в терминал"),
+        "TerminalEditorPicture": ("picture {0}", "картинка {0}"),
+        "TerminalEditorPlaceholder": ("Type or say", "Напиши или скажи"),
+        "TerminalSearchHint": ("Find a session", "Найти сессию"),
+        "TerminalSearchKeys": ("↑ ↓ choose · Enter open · Esc close", "↑ ↓ выбрать · Enter открыть · Esc закрыть"),
+        "TerminalSearchOpen": ("Open", "Открытые"),
+        "TerminalSearchClosed": ("Closed", "Закрытые"),
+        "TerminalSearchOutside": ("Started outside Aiko", "Начаты вне Aiko"),
+        "TerminalSourceTerminal": ("terminal", "терминал"),
+        "TerminalSourceOther": ("other app", "другая программа"),
+        "TerminalNewSession": ("New session", "Новая сессия"),
+        "TerminalNewSessionKey": ("Cmd+Shift+T", "Cmd+Shift+T"),
+        "TerminalGroupNewSession": ("New session of Claude Code in this folder", "Новая сессия Claude Code в этой папке"),
+        "TerminalGroupNewShell": ("Command line in this folder", "Командная строка в этой папке"),
+        "TerminalGroupOpenFolder": ("Open the folder", "Открыть папку"),
+        "TerminalFolderGone": ("This folder is no longer on the disk", "Этой папки больше нет на диске"),
+        "TerminalPickFolderHint": ("Folder for the new session", "Папка для новой сессии"),
+        "TerminalPickFolderKeys": ("↑ ↓ choose · Enter Claude Code · Cmd+Enter command line · Esc close", "↑ ↓ выбрать · Enter Claude Code · Cmd+Enter командная строка · Esc закрыть"),
+        "TerminalPickOtherFolder": ("Another folder…", "Другая папка…"),
+        "TerminalEventThinking": ("thinking", "думает"),
+        "TerminalEventReading": ("reading {0}", "читает {0}"),
+        "TerminalEventEditing": ("editing {0}", "правит {0}"),
+        "TerminalEventRunning": ("running: {0}", "запускает: {0}"),
+        "TerminalEventSearching": ("searching: {0}", "ищет: {0}"),
+        "TerminalEventBrowsing": ("on the web: {0}", "в сети: {0}"),
+        "TerminalEventDelegating": ("agent: {0}", "агент: {0}"),
+        "TerminalEventUsing": ("tool: {0}", "инструмент: {0}"),
+        "TerminalEventAsksPermission": ("waits for permission: {0}", "ждёт разрешения: {0}"),
+        "TerminalEventAsksQuestion": ("waits for your answer", "ждёт ответа"),
+        "TerminalEventFailed": ("the turn failed", "ход прервался с ошибкой"),
+        "TerminalEventOutOfLimit": ("stopped on the limit", "упёрлась в лимит"),
+        "TerminalTitle": ("Terminal", "Терминал"),
+        "TerminalCreateSession": ("Create session", "Создать сессию"),
+        "TerminalStoppedLine": ("Claude Code stopped. The conversation is saved: press Enter to continue.", "Claude Code остановился. Разговор сохранён: нажми Enter, чтобы продолжить."),
+        "TerminalResume": ("Continue", "Продолжить"),
+        "TerminalRenameSession": ("Rename", "Переименовать"),
+        "TerminalCloseSession": ("Close session", "Закрыть сессию"),
+        "TerminalChooseFolder": ("Choose another folder", "Выбрать другую папку"),
+        "TerminalNoSessionsTitle": ("Start your first session in {0}", "Начни первую сессию в среде {0}"),
+        "TerminalNoSessionsBody": ("A session is one conversation with Claude Code in one folder.", "Сессия — это один разговор с Claude Code в одной папке."),
+        "TerminalStarting": ("Starting…", "Запускается…"),
+        "TerminalNotStartedTitle": ("Claude Code did not start", "Claude Code не запустился"),
+        "TerminalNotStartedBody": ("Aiko did not find claude on this computer.", "Aiko не нашла claude на этом компьютере."),
+        "TerminalShellNotStartedTitle": ("The command line did not start", "Командная строка не запустилась"),
+        "TerminalStartFailedBody": ("Windows returned error {0}. The log has the details.", "Windows вернула ошибку {0}. Подробности — в журнале."),
+        "TerminalStartAgain": ("Start again", "Запустить ещё раз"),
+        "TerminalOpenLog": ("Open the log", "Открыть журнал"),
+        "TerminalHowToInstall": ("How to install", "Как установить"),
+        "TerminalFolderGoneTitle": ("The folder {0} is no longer on the disk", "Папки {0} больше нет на диске"),
+        "TerminalFolderGoneBody": ("The conversation is saved, but there is nowhere to start it.", "Разговор сохранён, но запустить его негде."),
+        "TerminalFolderGoneShell": ("There is nowhere to open the command line.", "Командную строку негде открыть."),
+        "TerminalRemoveFromList": ("Remove from the list", "Убрать из списка"),
+        "TerminalWorking": ("working", "работает"),
+        "TerminalWaiting": ("waiting", "ждёт"),
+        "TerminalDone": ("done", "готово"),
+        "TerminalAsleep": ("asleep", "спит"),
+        "TerminalStopped": ("stopped", "остановилась"),
+        "ShellMoreOne": ("… {0} more line", "… ещё {0} строка"),
+        "ShellMoreFew": ("… {0} more lines", "… ещё {0} строки"),
+        "ShellMoreMany": ("… {0} more lines", "… ещё {0} строк"),
+        "ShellRunning": ("running", "идёт"),
+        "ShellExitCode": ("code {0}", "код {0}"),
+        "ShellSeconds": ("{0} s", "{0} с"),
+        "ShellCopy": ("Copy", "Копировать"),
+        "ShellCopied": ("Copied", "Скопировано"),
+        "ShellFold": ("Fold", "Свернуть"),
+        "ShellUnfold": ("Unfold", "Развернуть"),
+        "ShellExplain": ("Explain", "Объяснить"),
+        "ShellExplaining": ("Asking Claude Code…", "Спрашиваю Claude Code…"),
+        "ShellExplainFailed": ("Claude Code did not answer. Press Explain again in a minute.", "Claude Code не ответил. Нажми «Объяснить» ещё раз через минуту."),
+        "ShellSuggestion": ("{0}   **Tab** take", "{0}   **Tab** взять"),
+        "ShellSuggestFailed": ("Claude Code did not answer. Edit the request to ask again.", "Claude Code не ответил. Поправь запрос, чтобы спросить снова."),
+        "ShellSuggesting": ("Looking for a command…", "Ищу команду…"),
+        "ShellFind": ("Find in the output", "Найти в выводе"),
+        "ShellFindCount": ("{0} of {1}", "{0} из {1}"),
+        "ShellFindNone": ("Nothing found", "Не нашлось"),
+        "TerminalTabWaitingOne": ("{0} waiting", "{0} ждёт"),
+        "TerminalTabWaitingMany": ("{0} waiting", "{0} ждут"),
+        "TerminalYesterday": ("Yesterday, {0}", "Вчера, {0}"),
+        "TerminalCloseTitle": ("Session “{0}” is still running", "Сессия «{0}» ещё работает"),
+        "TerminalCloseBody": ("If you close it now, the program in it stops.", "Если закрыть её сейчас, программа в ней остановится."),
+        "TerminalQuitTitle": ("Some sessions are still running", "Часть сессий ещё работает"),
+        "TerminalQuitBody": ("If you quit Aiko now, Claude Code and the command lines in its window stop.", "Если выйти из Aiko сейчас, Claude Code и командные строки в её окне остановятся."),
+        "TerminalStopAndQuit": ("Stop and quit", "Остановить и выйти"),
+        "TerminalDontQuit": ("Don’t quit", "Не выходить"),
+        "TerminalRestartBody": ("If you restart Aiko now, Claude Code and the command lines in its window stop.", "Если перезапустить Aiko сейчас, Claude Code и командные строки в её окне остановятся."),
+        "TerminalStopAndRestart": ("Stop and restart", "Остановить и перезапустить"),
+        "TerminalDontRestart": ("Don’t restart", "Не перезапускать"),
+        "TerminalRemoveBody": ("If you remove Aiko now, Claude Code and the command lines in its window stop.", "Если удалить Aiko сейчас, Claude Code и командные строки в её окне остановятся."),
+        "TerminalStopAndRemove": ("Stop and remove", "Остановить и удалить"),
+        "TerminalDontRemove": ("Don’t remove", "Не удалять"),
+        "TerminalRemoveEnvironmentBody": ("If you remove this environment now, its Claude Code and command lines stop.", "Если удалить эту среду сейчас, её Claude Code и командные строки остановятся."),
+        "TerminalStartOverBody": ("If you start over now, Claude Code and the command lines in this window stop.", "Если начать заново сейчас, Claude Code и командные строки в этом окне остановятся."),
+        "TerminalStopAndStartOver": ("Stop and start over", "Остановить и начать заново"),
+        "TerminalDontStartOver": ("Don’t start over", "Не начинать заново"),
+        "TerminalStopAndClose": ("Stop and close", "Остановить и закрыть"),
+        "TerminalKeepOpen": ("Keep open", "Не закрывать"),
+        "TerminalMinimize": ("Minimize", "Свернуть"),
+        "TerminalMaximize": ("Maximize", "Развернуть"),
+        "TerminalRestore": ("Restore", "Восстановить"),
+        "TerminalSessionList": ("Session list · Cmd+Shift+B", "Список сессий · Cmd+Shift+B"),
+        "TerminalFindConversation": ("Search sessions · Cmd+Shift+K", "Поиск сессий · Cmd+Shift+K"),
+        "TerminalKeysClaude": ("Cmd+G editor · Cmd+Shift+Space voice · Cmd+Shift+K find a conversation", "Cmd+G редактор · Cmd+Shift+Space голос · Cmd+Shift+K найти разговор"),
+        "TerminalKeysShell": ("# ask for a command · Cmd+Shift+F find in the output · Cmd+Shift+K find a conversation", "# подсказка команды · Cmd+Shift+F найти в выводе · Cmd+Shift+K найти разговор"),
+        "TerminalShowLimits": ("Show the limits of the environments", "Показать лимиты сред"),
+        "TerminalHideLimits": ("Hide the limits", "Скрыть лимиты"),
+        "CardShortSession": ("5 h", "5 ч"),
+        "CardShortWeek": ("wk", "нед"),
+        "TerminalDirectOn": ("direct mode on", "прямой режим вкл"),
+        "TerminalDirectOff": ("direct mode off", "прямой режим выкл"),
+        "TerminalCloseWindow": ("Close", "Закрыть"),
+        "VoiceButtonTip": ("Voice input · Cmd+Shift+Space", "Голосовой ввод · Cmd+Shift+Space"),
+        "VoiceStopTip": ("Finish recording · Cmd+Shift+Space", "Закончить запись · Cmd+Shift+Space"),
+        "VoiceWarming": ("starting the mic", "микрофон включается"),
+        "VoiceListening": ("listening {0}", "слушаю {0}"),
+        "VoiceFinishing": ("finishing", "дописываю"),
+        "VoiceOnComputer": ("on this computer", "на компьютере"),
+        "VoiceCancelHint": ("Esc to cancel", "Esc — отменить"),
+        "VoiceNoMic": ("No microphone found. Plug one in or allow access to it.", "Микрофон не найден. Подключи его или разреши доступ к нему."),
+        "VoiceNoMicLink": ("System Settings", "Системные настройки"),
+        "DockBadgesOffMac": ("macOS does not let Aiko put the number on its Dock icon.", "macOS не даёт Aiko ставить число на значок в Dock."),
+        "DockBadgesSettingsMac": ("Notification settings", "Настройки уведомлений"),
+        "ClaudeDidNotOpen": ("Claude Code did not open. Press the button again; the log has the details.", "Claude Code не открылся. Нажми кнопку ещё раз — подробности в журнале."),
+        "FolderNotMade": ("Aiko could not create the folder {0}. The log has the details.", "Aiko не смогла создать папку {0}. Подробности в журнале."),
+        "VoiceTurnedOff": ("Voice input is off.", "Голосовой ввод выключен."),
+        "VoiceNeedsModel": ("Voice input needs a speech model, 465 MB.", "Для голосового ввода нужна модель распознавания, 465 МБ."),
+        "VoiceNeedsKey": ("Recognition through OpenAI needs your key.", "Для распознавания через OpenAI нужен твой ключ."),
+        "VoiceOpenSettings": ("Open settings", "Открыть настройки"),
+        "NavTerminal": ("Window", "Окно"),
+        "NavVoiceOn": ("notifications, voice on", "уведомления, голос включён"),
+        "NavVoiceOff": ("notifications, voice off", "уведомления, голос выключен"),
+        "NotifyLabel": ("NOTIFICATIONS", "УВЕДОМЛЕНИЯ"),
+        "NotifyWhat": ("The menu bar icon, the Dock icon and the island show how many agents wait, have finished or stopped. A number goes when you open that session.", "Значок в строке меню, значок в Dock и остров показывают, сколько агентов ждут, закончили или остановились. Число уходит, когда ты открываешь эту сессию."),
+        "NotifySound": ("A sound when the agent has a question", "Звук, когда у агента вопрос"),
+        "ZoomLabel": ("WINDOW ZOOM", "МАСШТАБ ОКНА"),
+        "ZoomWhat": ("Text, icons and the terminal change size together. In the terminal window: C⁠m⁠d⁠+⁠= and C⁠m⁠d⁠+⁠-, and C⁠m⁠d⁠+⁠0 brings back 115%.", "Текст, значки и терминал меняются вместе. В окне терминала — C⁠m⁠d⁠+⁠= и C⁠m⁠d⁠+⁠-, а C⁠m⁠d⁠+⁠0 возвращает 115 %."),
+        "ZoomStep": ("{0}%", "{0} %"),
+        "VoiceToggle": ("Voice input", "Голосовой ввод"),
+        "VoiceToggleWhat": ("Cmd+Shift+Space or the microphone button in the editor.", "Cmd+Shift+Space или кнопка микрофона в редакторе."),
+        "VoiceLanguageLabel": ("SPEECH LANGUAGE", "ЯЗЫК РЕЧИ"),
+        "VoiceLanguageWhat": ("Whisper on your computer listens for this language. OpenAI hears the language by itself.", "Whisper на компьютере слушает этот язык. OpenAI узнаёт язык сам."),
+        "VoiceEngineLabel": ("RECOGNITION", "РАСПОЗНАВАНИЕ"),
+        "VoiceLocalTitle": ("On this computer", "На компьютере"),
+        "VoiceLocalWhat": ("Whisper small. Free, and the sound stays on this computer.", "Whisper small. Бесплатно, звук не уходит с компьютера."),
+        "VoiceModelWillDownload": ("The speech model, {0} MB, downloads when you turn this on.", "Модель распознавания, {0} МБ, скачается при включении."),
+        "VoiceModelDownloaded": ("{0} of {1} MB downloaded", "Скачано {0} из {1} МБ"),
+        "VoiceModelReady": ("Model downloaded, {0} MB.", "Модель скачана, {0} МБ."),
+        "VoiceModelStopped": ("Download stopped at {0} of {1} MB.", "Загрузка остановлена на {0} из {1} МБ."),
+        "VoiceModelFailed": ("The model did not download. Check the connection and try again.", "Модель не скачалась. Проверь соединение и попробуй ещё раз."),
+        "VoiceDownloadStop": ("Stop", "Остановить"),
+        "VoiceDownloadGo": ("Download", "Скачать"),
+        "VoiceModelRemove": ("Remove the model", "Удалить модель"),
+        "VoiceCloudTitle": ("OpenAI with your own key", "OpenAI по своему ключу"),
+        "VoiceCloudWhat": ("gpt-4o-transcribe. Better with terms, billed to your key.", "gpt-4o-transcribe. Точнее на терминах, платишь по своему ключу."),
+        "VoiceHonest": ("This data goes there: the recording of your voice and the names of the folders, branches and files of the sessions where you dictate.", "Туда отправляются данные: запись голоса и имена папок, веток и файлов сессий, в которых ты диктуешь."),
+        "VoiceMicPurpose": ("Aiko turns the microphone on only while you dictate. Speech is turned into text locally with Whisper. If you chose OpenAI in the settings, this data goes there: the recording of your voice and the names of the folders, branches and files of the sessions where you dictate.", "Aiko включает микрофон, только пока ты диктуешь. Речь распознаётся локально с помощью Whisper. Если в настройках выбран OpenAI, туда отправляются данные: запись голоса и имена папок, веток и файлов сессий, в которых ты диктуешь."),
+        "VoiceKeyLabel": ("Key", "Ключ"),
+        "VoiceKeySave": ("Save", "Сохранить"),
+        "VoiceKeyRemove": ("Remove key", "Удалить ключ"),
+        "VoiceKeyBad": ("This does not look like an OpenAI key: it starts with sk-.", "Это не похоже на ключ OpenAI: он начинается с sk-."),
+        "VoiceKeyNotSaved": ("The Keychain did not save the key.", "Связка ключей не сохранила ключ."),
+        "VoiceKeyWhere": ("Kept in the macOS Keychain. Removing Aiko erases it.", "Хранится в Связке ключей macOS. Удаление Aiko его сотрёт."),
+        "VoiceCloudFailed": ("OpenAI did not take the recording. Check the key and the connection.", "OpenAI не принял запись. Проверь ключ и соединение."),
+        "VoiceCloudNoMoney": ("The OpenAI account is out of money.", "На счёте OpenAI кончились деньги."),
+        "VoiceCloudBusy": ("OpenAI asks to wait a minute.", "OpenAI просит подождать минуту."),
     ]
 
-    /// Session · 5 hours
+    /// 5 hours
     public static var cardSession: String { Strings.get("CardSession") }
 
     /// Week
@@ -463,29 +641,23 @@ public enum Strings {
     /// Show {0} in the ring
     public static var menuShowInRing: String { Strings.get("MenuShowInRing") }
 
-    /// Refresh limits
-    public static var menuRefresh: String { Strings.get("MenuRefresh") }
+    /// Open
+    public static var menuOpen: String { Strings.get("MenuOpen") }
 
     /// Settings
     public static var settings: String { Strings.get("Settings") }
 
-    /// Close
-    public static var close: String { Strings.get("Close") }
+    /// Close settings · Esc
+    public static var settingsCloseTip: String { Strings.get("SettingsCloseTip") }
 
     /// Quit Aiko
     public static var quitAiko: String { Strings.get("QuitAiko") }
 
     /// Check for updates
-    public static var checkForUpdates: String { Strings.get("CheckForUpdates") }
-
-    /// Check for updates
     public static var checkUpdatesToggle: String { Strings.get("CheckUpdatesToggle") }
 
-    /// ENVIRONMENTS
-    public static var sectionEnvironments: String { Strings.get("SectionEnvironments") }
-
-    /// WHERE TO SHOW
-    public static var sectionWhereToShow: String { Strings.get("SectionWhereToShow") }
+    /// WHEN THE WINDOW IS CLOSED
+    public static var sectionWhenClosed: String { Strings.get("SectionWhenClosed") }
 
     /// STARTUP AND UPDATES
     public static var sectionStartupAndUpdates: String { Strings.get("SectionStartupAndUpdates") }
@@ -537,6 +709,9 @@ public enum Strings {
 
     /// Start with Windows
     public static var startWithWindows: String { Strings.get("StartWithWindows") }
+
+    /// Open the terminal window too
+    public static var openTerminalAtStartup: String { Strings.get("OpenTerminalAtStartup") }
 
     /// Start at login
     public static var startAtLogin: String { Strings.get("StartAtLogin") }
@@ -613,9 +788,6 @@ public enum Strings {
     /// Copy diagnostics
     public static var copyDiagnostics: String { Strings.get("CopyDiagnostics") }
 
-    /// Aiko settings
-    public static var settingsWindowTitle: String { Strings.get("SettingsWindowTitle") }
-
     /// Main
     public static var environmentPlainName: String { Strings.get("EnvironmentPlainName") }
 
@@ -630,6 +802,12 @@ public enum Strings {
 
     /// Finish
     public static var finish: String { Strings.get("Finish") }
+
+    /// Back
+    public static var stepBack: String { Strings.get("StepBack") }
+
+    /// Next
+    public static var stepNext: String { Strings.get("StepNext") }
 
     /// Claude Code sends its limits to a status line. Aiko adds one line to the settings file of...
     public static var wizardAccessExplain: String { Strings.get("WizardAccessExplain") }
@@ -646,20 +824,35 @@ public enum Strings {
     /// Aiko can't find its bridge program.
     public static var wizardBridgeNotFound: String { Strings.get("WizardBridgeNotFound") }
 
-    /// Once a day, Aiko asks slayumind.org for the latest version and says that one copy of Aiko...
-    public static var wizardUpdatesWhat: String { Strings.get("WizardUpdatesWhat") }
+    /// Once a day, Aiko asks slayumind.org for the latest version.
+    public static var wizardUpdatesVersion: String { Strings.get("WizardUpdatesVersion") }
 
-    /// Aiko is down by the clock. Rest the mouse on it for the card, click to keep it open.
+    /// With statistics on, the same request says that one copy of Aiko ran today.
+    public static var wizardUpdatesCount: String { Strings.get("WizardUpdatesCount") }
+
+    /// Close the window and Aiko stays by the clock while the sessions keep working. A click on ...
     public static var wizardDoneTray: String { Strings.get("WizardDoneTray") }
 
-    /// Aiko is up by the clock. Rest the mouse on it for the card, click to keep it open.
-    public static var wizardDoneMenuBar: String { Strings.get("WizardDoneMenuBar") }
-
-    /// Aiko is at the top of your screen. Drag it anywhere and it sticks to the nearest edge.
-    public static var wizardDoneIsland: String { Strings.get("WizardDoneIsland") }
-
-    /// Windows 11 hides new app icons under the arrow next to the clock. Open the arrow and drag...
+    /// Windows 11 hides the icons of new apps under the arrow by the clock. Drag Aiko onto the t...
     public static var wizardDoneOverflow: String { Strings.get("WizardDoneOverflow") }
+
+    /// Close the window and Aiko becomes an island at the top of the screen while the sessions k...
+    public static var wizardDoneWindowIsland: String { Strings.get("WizardDoneWindowIsland") }
+
+    /// On Finish, Aiko
+    public static var wizardSummaryTitle: String { Strings.get("WizardSummaryTitle") }
+
+    /// adds the limits line to Claude Code in {0}
+    public static var wizardSummaryAccess: String { Strings.get("WizardSummaryAccess") }
+
+    /// puts the commands {0} into PATH
+    public static var wizardSummaryCommands: String { Strings.get("WizardSummaryCommands") }
+
+    /// binds project folders to {1} ({0})
+    public static var wizardSummaryFolders: String { Strings.get("WizardSummaryFolders") }
+
+    /// turns the personality on in {0}
+    public static var wizardSummaryPersona: String { Strings.get("WizardSummaryPersona") }
 
     /// A full menu bar hides the icons furthest from the clock. Close a menu bar app if Aiko doe...
     public static var wizardDoneMenuBarRoom: String { Strings.get("WizardDoneMenuBarRoom") }
@@ -676,8 +869,11 @@ public enum Strings {
     /// Aiko can't find its bridge program.
     public static var settingsBridgeUnknown: String { Strings.get("SettingsBridgeUnknown") }
 
-    /// Set up environments
+    /// Set up Aiko
     public static var checklistTitle: String { Strings.get("ChecklistTitle") }
+
+    /// Aiko is a window for your Claude Code sessions. An environment is one Claude account with...
+    public static var wizardWelcome: String { Strings.get("WizardWelcome") }
 
     /// {0} of {1} done
     public static var checklistCount: String { Strings.get("ChecklistCount") }
@@ -748,9 +944,6 @@ public enum Strings {
     /// menu bar
     public static var stateMenuBar: String { Strings.get("StateMenuBar") }
 
-    /// Copy
-    public static var copy: String { Strings.get("Copy") }
-
     /// Copied
     public static var copied: String { Strings.get("Copied") }
 
@@ -760,14 +953,29 @@ public enum Strings {
     /// Claude Code is already on this computer.
     public static var installFound: String { Strings.get("InstallFound") }
 
-    /// Claude Code isn't on this computer yet. Aiko shows its limits, so install it first.
-    public static var installLead: String { Strings.get("InstallLead") }
+    /// Claude Code is not on this computer yet. The sessions in Aiko are Claude Code, so it come...
+    public static var installLeadSessions: String { Strings.get("InstallLeadSessions") }
+
+    /// Install Claude Code
+    public static var installRun: String { Strings.get("InstallRun") }
+
+    /// Copy the command
+    public static var installCopy: String { Strings.get("InstallCopy") }
+
+    /// The button opens PowerShell with the command {0}. Aiko notices when the install is over.
+    public static var installHowButton: String { Strings.get("InstallHowButton") }
+
+    /// The button opens Terminal with the command {0}. Aiko notices when the install is over.
+    public static var installHowButtonMac: String { Strings.get("InstallHowButtonMac") }
+
+    /// Didn't work? 
+    public static var installFailedLead: String { Strings.get("InstallFailedLead") }
+
+    /// the Claude Code install page
+    public static var installFailedLink: String { Strings.get("InstallFailedLink") }
 
     /// Open PowerShell, paste the command and press Enter. Aiko notices when it's done.
     public static var installHow: String { Strings.get("InstallHow") }
-
-    /// Open Terminal, paste the command and press Enter. Aiko notices when it's done.
-    public static var installHowMac: String { Strings.get("InstallHowMac") }
 
     /// Waiting for Claude Code…
     public static var waitInstall: String { Strings.get("WaitInstall") }
@@ -907,9 +1115,6 @@ public enum Strings {
     /// General
     public static var navGeneral: String { Strings.get("NavGeneral") }
 
-    /// {0} bound
-    public static var navBound: String { Strings.get("NavBound") }
-
     /// Add a second environment
     public static var addSecondEnvironment: String { Strings.get("AddSecondEnvironment") }
 
@@ -961,11 +1166,11 @@ public enum Strings {
     /// No folders.
     public static var noneBound: String { Strings.get("NoneBound") }
 
-    /// And every other folder: this is the default environment.
-    public static var restToo: String { Strings.get("RestToo") }
+    /// Every other folder opens here
+    public static var defaultForRest: String { Strings.get("DefaultForRest") }
 
-    /// Change in project folders
-    public static var editInFolders: String { Strings.get("EditInFolders") }
+    /// Moved here from {0}
+    public static var folderMovedFrom: String { Strings.get("FolderMovedFrom") }
 
     /// Remove environment
     public static var removeEnvironment: String { Strings.get("RemoveEnvironment") }
@@ -1002,18 +1207,6 @@ public enum Strings {
 
     /// {0} removed. The folder is in the Trash.
     public static var environmentRemovedToTrash: String { Strings.get("EnvironmentRemovedToTrash") }
-
-    /// In a folder and in every folder inside, plain claude starts its environment. A command li...
-    public static var foldersTableLead: String { Strings.get("FoldersTableLead") }
-
-    /// FOLDER
-    public static var folderColumn: String { Strings.get("FolderColumn") }
-
-    /// ENVIRONMENT
-    public static var environmentColumn: String { Strings.get("EnvironmentColumn") }
-
-    /// All other folders
-    public static var allOtherFolders: String { Strings.get("AllOtherFolders") }
 
     /// Add a folder
     public static var addFolder: String { Strings.get("AddFolder") }
@@ -1099,9 +1292,6 @@ public enum Strings {
     /// The memory goes with Aiko's folders. It cannot be brought back.
     public static var deleteMemoryGoes: String { Strings.get("DeleteMemoryGoes") }
 
-    /// Open Claude Code
-    public static var openClaudeCode: String { Strings.get("OpenClaudeCode") }
-
     /// Sign in so Aiko can see the limits of this environment.
     public static var cardSignInNote: String { Strings.get("CardSignInNote") }
 
@@ -1174,7 +1364,7 @@ public enum Strings {
     /// Reset ID
     public static var resetInstallId: String { Strings.get("ResetInstallId") }
 
-    /// Aiko makes a new value. The days before it cannot be linked to the new one.
+    /// The ID of each day is made from a value kept on this computer. Resetting changes that val...
     public static var resetInstallIdWhat: String { Strings.get("ResetInstallIdWhat") }
 
     /// The ID is new.
@@ -1248,6 +1438,9 @@ public enum Strings {
 
     /// Bright
     public static var temperamentBright: String { Strings.get("TemperamentBright") }
+
+    /// 無双 · max
+    public static var temperamentMusou: String { Strings.get("TemperamentMusou") }
 
     /// Almost no character: one warm line at the end of an answer.
     public static var temperamentQuietAbout: String { Strings.get("TemperamentQuietAbout") }
@@ -1396,6 +1589,9 @@ public enum Strings {
     /// GAME DEVELOPMENT
     public static var skillDomainGames: String { Strings.get("SkillDomainGames") }
 
+    /// Any web interface that looks designed, not generated: the product's own look, an audit, e...
+    public static var skillAikoInterface: String { Strings.get("SkillAikoInterface") }
+
     /// Texts that sound like a person wrote them: UI, README, release notes. Russian and English.
     public static var skillAikoCopy: String { Strings.get("SkillAikoCopy") }
 
@@ -1435,6 +1631,12 @@ public enum Strings {
     /// Reads documents from Google Drive and puts project files onto Drive.
     public static var skillAikoDrive: String { Strings.get("SkillAikoDrive") }
 
+    /// Takes your errand to a colleague in a work chat and helps them as Aiko. Brings anything o...
+    public static var skillAikoEnvoy: String { Strings.get("SkillAikoEnvoy") }
+
+    /// Builds a shared roadmap for several teams: domains and owners, releases in month windows ...
+    public static var skillAikoRoadmap: String { Strings.get("SkillAikoRoadmap") }
+
     /// Meet Aiko
     public static var itemMeetAiko: String { Strings.get("ItemMeetAiko") }
 
@@ -1449,4 +1651,514 @@ public enum Strings {
 
     /// on
     public static var stateOn: String { Strings.get("StateOn") }
+
+    /// Keys go to the menu of Claude Code · **Enter** or **Esc** ends it
+    public static var terminalEditorHintPassing: String { Strings.get("TerminalEditorHintPassing") }
+
+    /// **Enter** into the line of Claude Code · **Shift+Enter** new line · **Esc** close
+    public static var terminalEditorHintCompose: String { Strings.get("TerminalEditorHintCompose") }
+
+    /// **Enter** run · **Tab** path · **Shift+Enter** new line
+    public static var terminalEditorHintShellText: String { Strings.get("TerminalEditorHintShellText") }
+
+    /// Empty: **↑ ↓** history; **Enter**, **Esc**, **Tab** go to the terminal
+    public static var terminalEditorHintShellEmpty: String { Strings.get("TerminalEditorHintShellEmpty") }
+
+    /// **Enter** send · **Shift+Enter** new line · **Cmd+Shift+Space** voice
+    public static var terminalEditorHintText: String { Strings.get("TerminalEditorHintText") }
+
+    /// Empty: **arrows**, **Enter**, **Esc**, **Shift+Tab** go to the terminal
+    public static var terminalEditorHintEmpty: String { Strings.get("TerminalEditorHintEmpty") }
+
+    /// picture {0}
+    public static var terminalEditorPicture: String { Strings.get("TerminalEditorPicture") }
+
+    /// Type or say
+    public static var terminalEditorPlaceholder: String { Strings.get("TerminalEditorPlaceholder") }
+
+    /// Find a session
+    public static var terminalSearchHint: String { Strings.get("TerminalSearchHint") }
+
+    /// ↑ ↓ choose · Enter open · Esc close
+    public static var terminalSearchKeys: String { Strings.get("TerminalSearchKeys") }
+
+    /// Open
+    public static var terminalSearchOpen: String { Strings.get("TerminalSearchOpen") }
+
+    /// Closed
+    public static var terminalSearchClosed: String { Strings.get("TerminalSearchClosed") }
+
+    /// Started outside Aiko
+    public static var terminalSearchOutside: String { Strings.get("TerminalSearchOutside") }
+
+    /// terminal
+    public static var terminalSourceTerminal: String { Strings.get("TerminalSourceTerminal") }
+
+    /// other app
+    public static var terminalSourceOther: String { Strings.get("TerminalSourceOther") }
+
+    /// New session
+    public static var terminalNewSession: String { Strings.get("TerminalNewSession") }
+
+    /// Cmd+Shift+T
+    public static var terminalNewSessionKey: String { Strings.get("TerminalNewSessionKey") }
+
+    /// New session of Claude Code in this folder
+    public static var terminalGroupNewSession: String { Strings.get("TerminalGroupNewSession") }
+
+    /// Command line in this folder
+    public static var terminalGroupNewShell: String { Strings.get("TerminalGroupNewShell") }
+
+    /// Open the folder
+    public static var terminalGroupOpenFolder: String { Strings.get("TerminalGroupOpenFolder") }
+
+    /// This folder is no longer on the disk
+    public static var terminalFolderGone: String { Strings.get("TerminalFolderGone") }
+
+    /// Folder for the new session
+    public static var terminalPickFolderHint: String { Strings.get("TerminalPickFolderHint") }
+
+    /// ↑ ↓ choose · Enter Claude Code · Cmd+Enter command line · Esc close
+    public static var terminalPickFolderKeys: String { Strings.get("TerminalPickFolderKeys") }
+
+    /// Another folder…
+    public static var terminalPickOtherFolder: String { Strings.get("TerminalPickOtherFolder") }
+
+    /// thinking
+    public static var terminalEventThinking: String { Strings.get("TerminalEventThinking") }
+
+    /// reading {0}
+    public static var terminalEventReading: String { Strings.get("TerminalEventReading") }
+
+    /// editing {0}
+    public static var terminalEventEditing: String { Strings.get("TerminalEventEditing") }
+
+    /// running: {0}
+    public static var terminalEventRunning: String { Strings.get("TerminalEventRunning") }
+
+    /// searching: {0}
+    public static var terminalEventSearching: String { Strings.get("TerminalEventSearching") }
+
+    /// on the web: {0}
+    public static var terminalEventBrowsing: String { Strings.get("TerminalEventBrowsing") }
+
+    /// agent: {0}
+    public static var terminalEventDelegating: String { Strings.get("TerminalEventDelegating") }
+
+    /// tool: {0}
+    public static var terminalEventUsing: String { Strings.get("TerminalEventUsing") }
+
+    /// waits for permission: {0}
+    public static var terminalEventAsksPermission: String { Strings.get("TerminalEventAsksPermission") }
+
+    /// waits for your answer
+    public static var terminalEventAsksQuestion: String { Strings.get("TerminalEventAsksQuestion") }
+
+    /// the turn failed
+    public static var terminalEventFailed: String { Strings.get("TerminalEventFailed") }
+
+    /// stopped on the limit
+    public static var terminalEventOutOfLimit: String { Strings.get("TerminalEventOutOfLimit") }
+
+    /// Terminal
+    public static var terminalTitle: String { Strings.get("TerminalTitle") }
+
+    /// Create session
+    public static var terminalCreateSession: String { Strings.get("TerminalCreateSession") }
+
+    /// Claude Code stopped. The conversation is saved: press Enter to continue.
+    public static var terminalStoppedLine: String { Strings.get("TerminalStoppedLine") }
+
+    /// Continue
+    public static var terminalResume: String { Strings.get("TerminalResume") }
+
+    /// Rename
+    public static var terminalRenameSession: String { Strings.get("TerminalRenameSession") }
+
+    /// Close session
+    public static var terminalCloseSession: String { Strings.get("TerminalCloseSession") }
+
+    /// Choose another folder
+    public static var terminalChooseFolder: String { Strings.get("TerminalChooseFolder") }
+
+    /// Start your first session in {0}
+    public static var terminalNoSessionsTitle: String { Strings.get("TerminalNoSessionsTitle") }
+
+    /// A session is one conversation with Claude Code in one folder.
+    public static var terminalNoSessionsBody: String { Strings.get("TerminalNoSessionsBody") }
+
+    /// Starting…
+    public static var terminalStarting: String { Strings.get("TerminalStarting") }
+
+    /// Claude Code did not start
+    public static var terminalNotStartedTitle: String { Strings.get("TerminalNotStartedTitle") }
+
+    /// Aiko did not find claude on this computer.
+    public static var terminalNotStartedBody: String { Strings.get("TerminalNotStartedBody") }
+
+    /// The command line did not start
+    public static var terminalShellNotStartedTitle: String { Strings.get("TerminalShellNotStartedTitle") }
+
+    /// Windows returned error {0}. The log has the details.
+    public static var terminalStartFailedBody: String { Strings.get("TerminalStartFailedBody") }
+
+    /// Start again
+    public static var terminalStartAgain: String { Strings.get("TerminalStartAgain") }
+
+    /// Open the log
+    public static var terminalOpenLog: String { Strings.get("TerminalOpenLog") }
+
+    /// How to install
+    public static var terminalHowToInstall: String { Strings.get("TerminalHowToInstall") }
+
+    /// The folder {0} is no longer on the disk
+    public static var terminalFolderGoneTitle: String { Strings.get("TerminalFolderGoneTitle") }
+
+    /// The conversation is saved, but there is nowhere to start it.
+    public static var terminalFolderGoneBody: String { Strings.get("TerminalFolderGoneBody") }
+
+    /// There is nowhere to open the command line.
+    public static var terminalFolderGoneShell: String { Strings.get("TerminalFolderGoneShell") }
+
+    /// Remove from the list
+    public static var terminalRemoveFromList: String { Strings.get("TerminalRemoveFromList") }
+
+    /// working
+    public static var terminalWorking: String { Strings.get("TerminalWorking") }
+
+    /// waiting
+    public static var terminalWaiting: String { Strings.get("TerminalWaiting") }
+
+    /// done
+    public static var terminalDone: String { Strings.get("TerminalDone") }
+
+    /// asleep
+    public static var terminalAsleep: String { Strings.get("TerminalAsleep") }
+
+    /// stopped
+    public static var terminalStopped: String { Strings.get("TerminalStopped") }
+
+    /// … {0} more line
+    public static var shellMoreOne: String { Strings.get("ShellMoreOne") }
+
+    /// … {0} more lines
+    public static var shellMoreFew: String { Strings.get("ShellMoreFew") }
+
+    /// … {0} more lines
+    public static var shellMoreMany: String { Strings.get("ShellMoreMany") }
+
+    /// running
+    public static var shellRunning: String { Strings.get("ShellRunning") }
+
+    /// code {0}
+    public static var shellExitCode: String { Strings.get("ShellExitCode") }
+
+    /// {0} s
+    public static var shellSeconds: String { Strings.get("ShellSeconds") }
+
+    /// Copy
+    public static var shellCopy: String { Strings.get("ShellCopy") }
+
+    /// Copied
+    public static var shellCopied: String { Strings.get("ShellCopied") }
+
+    /// Fold
+    public static var shellFold: String { Strings.get("ShellFold") }
+
+    /// Unfold
+    public static var shellUnfold: String { Strings.get("ShellUnfold") }
+
+    /// Explain
+    public static var shellExplain: String { Strings.get("ShellExplain") }
+
+    /// Asking Claude Code…
+    public static var shellExplaining: String { Strings.get("ShellExplaining") }
+
+    /// Claude Code did not answer. Press Explain again in a minute.
+    public static var shellExplainFailed: String { Strings.get("ShellExplainFailed") }
+
+    /// {0}   **Tab** take
+    public static var shellSuggestion: String { Strings.get("ShellSuggestion") }
+
+    /// Claude Code did not answer. Edit the request to ask again.
+    public static var shellSuggestFailed: String { Strings.get("ShellSuggestFailed") }
+
+    /// Looking for a command…
+    public static var shellSuggesting: String { Strings.get("ShellSuggesting") }
+
+    /// Find in the output
+    public static var shellFind: String { Strings.get("ShellFind") }
+
+    /// {0} of {1}
+    public static var shellFindCount: String { Strings.get("ShellFindCount") }
+
+    /// Nothing found
+    public static var shellFindNone: String { Strings.get("ShellFindNone") }
+
+    /// {0} waiting
+    public static var terminalTabWaitingOne: String { Strings.get("TerminalTabWaitingOne") }
+
+    /// {0} waiting
+    public static var terminalTabWaitingMany: String { Strings.get("TerminalTabWaitingMany") }
+
+    /// Yesterday, {0}
+    public static var terminalYesterday: String { Strings.get("TerminalYesterday") }
+
+    /// Session “{0}” is still running
+    public static var terminalCloseTitle: String { Strings.get("TerminalCloseTitle") }
+
+    /// If you close it now, the program in it stops.
+    public static var terminalCloseBody: String { Strings.get("TerminalCloseBody") }
+
+    /// Some sessions are still running
+    public static var terminalQuitTitle: String { Strings.get("TerminalQuitTitle") }
+
+    /// If you quit Aiko now, Claude Code and the command lines in its window stop.
+    public static var terminalQuitBody: String { Strings.get("TerminalQuitBody") }
+
+    /// Stop and quit
+    public static var terminalStopAndQuit: String { Strings.get("TerminalStopAndQuit") }
+
+    /// Don’t quit
+    public static var terminalDontQuit: String { Strings.get("TerminalDontQuit") }
+
+    /// If you restart Aiko now, Claude Code and the command lines in its window stop.
+    public static var terminalRestartBody: String { Strings.get("TerminalRestartBody") }
+
+    /// Stop and restart
+    public static var terminalStopAndRestart: String { Strings.get("TerminalStopAndRestart") }
+
+    /// Don’t restart
+    public static var terminalDontRestart: String { Strings.get("TerminalDontRestart") }
+
+    /// If you remove Aiko now, Claude Code and the command lines in its window stop.
+    public static var terminalRemoveBody: String { Strings.get("TerminalRemoveBody") }
+
+    /// Stop and remove
+    public static var terminalStopAndRemove: String { Strings.get("TerminalStopAndRemove") }
+
+    /// Don’t remove
+    public static var terminalDontRemove: String { Strings.get("TerminalDontRemove") }
+
+    /// If you remove this environment now, its Claude Code and command lines stop.
+    public static var terminalRemoveEnvironmentBody: String { Strings.get("TerminalRemoveEnvironmentBody") }
+
+    /// If you start over now, Claude Code and the command lines in this window stop.
+    public static var terminalStartOverBody: String { Strings.get("TerminalStartOverBody") }
+
+    /// Stop and start over
+    public static var terminalStopAndStartOver: String { Strings.get("TerminalStopAndStartOver") }
+
+    /// Don’t start over
+    public static var terminalDontStartOver: String { Strings.get("TerminalDontStartOver") }
+
+    /// Stop and close
+    public static var terminalStopAndClose: String { Strings.get("TerminalStopAndClose") }
+
+    /// Keep open
+    public static var terminalKeepOpen: String { Strings.get("TerminalKeepOpen") }
+
+    /// Minimize
+    public static var terminalMinimize: String { Strings.get("TerminalMinimize") }
+
+    /// Maximize
+    public static var terminalMaximize: String { Strings.get("TerminalMaximize") }
+
+    /// Restore
+    public static var terminalRestore: String { Strings.get("TerminalRestore") }
+
+    /// Session list · Cmd+Shift+B
+    public static var terminalSessionList: String { Strings.get("TerminalSessionList") }
+
+    /// Search sessions · Cmd+Shift+K
+    public static var terminalFindConversation: String { Strings.get("TerminalFindConversation") }
+
+    /// Cmd+G editor · Cmd+Shift+Space voice · Cmd+Shift+K find a conversation
+    public static var terminalKeysClaude: String { Strings.get("TerminalKeysClaude") }
+
+    /// # ask for a command · Cmd+Shift+F find in the output · Cmd+Shift+K find a conversation
+    public static var terminalKeysShell: String { Strings.get("TerminalKeysShell") }
+
+    /// Show the limits of the environments
+    public static var terminalShowLimits: String { Strings.get("TerminalShowLimits") }
+
+    /// Hide the limits
+    public static var terminalHideLimits: String { Strings.get("TerminalHideLimits") }
+
+    /// 5 h
+    public static var cardShortSession: String { Strings.get("CardShortSession") }
+
+    /// wk
+    public static var cardShortWeek: String { Strings.get("CardShortWeek") }
+
+    /// direct mode on
+    public static var terminalDirectOn: String { Strings.get("TerminalDirectOn") }
+
+    /// direct mode off
+    public static var terminalDirectOff: String { Strings.get("TerminalDirectOff") }
+
+    /// Close
+    public static var terminalCloseWindow: String { Strings.get("TerminalCloseWindow") }
+
+    /// Voice input · Cmd+Shift+Space
+    public static var voiceButtonTip: String { Strings.get("VoiceButtonTip") }
+
+    /// Finish recording · Cmd+Shift+Space
+    public static var voiceStopTip: String { Strings.get("VoiceStopTip") }
+
+    /// starting the mic
+    public static var voiceWarming: String { Strings.get("VoiceWarming") }
+
+    /// listening {0}
+    public static var voiceListening: String { Strings.get("VoiceListening") }
+
+    /// finishing
+    public static var voiceFinishing: String { Strings.get("VoiceFinishing") }
+
+    /// on this computer
+    public static var voiceOnComputer: String { Strings.get("VoiceOnComputer") }
+
+    /// Esc to cancel
+    public static var voiceCancelHint: String { Strings.get("VoiceCancelHint") }
+
+    /// No microphone found. Plug one in or allow access to it.
+    public static var voiceNoMic: String { Strings.get("VoiceNoMic") }
+
+    /// System Settings
+    public static var voiceNoMicLink: String { Strings.get("VoiceNoMicLink") }
+
+    /// macOS does not let Aiko put the number on its Dock icon.
+    public static var dockBadgesOffMac: String { Strings.get("DockBadgesOffMac") }
+
+    /// Notification settings
+    public static var dockBadgesSettingsMac: String { Strings.get("DockBadgesSettingsMac") }
+
+    /// Claude Code did not open. Press the button again; the log has the details.
+    public static var claudeDidNotOpen: String { Strings.get("ClaudeDidNotOpen") }
+
+    /// Aiko could not create the folder {0}. The log has the details.
+    public static var folderNotMade: String { Strings.get("FolderNotMade") }
+
+    /// Voice input is off.
+    public static var voiceTurnedOff: String { Strings.get("VoiceTurnedOff") }
+
+    /// Voice input needs a speech model, 465 MB.
+    public static var voiceNeedsModel: String { Strings.get("VoiceNeedsModel") }
+
+    /// Recognition through OpenAI needs your key.
+    public static var voiceNeedsKey: String { Strings.get("VoiceNeedsKey") }
+
+    /// Open settings
+    public static var voiceOpenSettings: String { Strings.get("VoiceOpenSettings") }
+
+    /// Window
+    public static var navTerminal: String { Strings.get("NavTerminal") }
+
+    /// notifications, voice on
+    public static var navVoiceOn: String { Strings.get("NavVoiceOn") }
+
+    /// notifications, voice off
+    public static var navVoiceOff: String { Strings.get("NavVoiceOff") }
+
+    /// NOTIFICATIONS
+    public static var notifyLabel: String { Strings.get("NotifyLabel") }
+
+    /// The menu bar icon, the Dock icon and the island show how many agents wait, have finished ...
+    public static var notifyWhat: String { Strings.get("NotifyWhat") }
+
+    /// A sound when the agent has a question
+    public static var notifySound: String { Strings.get("NotifySound") }
+
+    /// WINDOW ZOOM
+    public static var zoomLabel: String { Strings.get("ZoomLabel") }
+
+    /// Text, icons and the terminal change size together. In the terminal window: C⁠m⁠d⁠+⁠= and ...
+    public static var zoomWhat: String { Strings.get("ZoomWhat") }
+
+    /// {0}%
+    public static var zoomStep: String { Strings.get("ZoomStep") }
+
+    /// Voice input
+    public static var voiceToggle: String { Strings.get("VoiceToggle") }
+
+    /// Cmd+Shift+Space or the microphone button in the editor.
+    public static var voiceToggleWhat: String { Strings.get("VoiceToggleWhat") }
+
+    /// SPEECH LANGUAGE
+    public static var voiceLanguageLabel: String { Strings.get("VoiceLanguageLabel") }
+
+    /// Whisper on your computer listens for this language. OpenAI hears the language by itself.
+    public static var voiceLanguageWhat: String { Strings.get("VoiceLanguageWhat") }
+
+    /// RECOGNITION
+    public static var voiceEngineLabel: String { Strings.get("VoiceEngineLabel") }
+
+    /// On this computer
+    public static var voiceLocalTitle: String { Strings.get("VoiceLocalTitle") }
+
+    /// Whisper small. Free, and the sound stays on this computer.
+    public static var voiceLocalWhat: String { Strings.get("VoiceLocalWhat") }
+
+    /// The speech model, {0} MB, downloads when you turn this on.
+    public static var voiceModelWillDownload: String { Strings.get("VoiceModelWillDownload") }
+
+    /// {0} of {1} MB downloaded
+    public static var voiceModelDownloaded: String { Strings.get("VoiceModelDownloaded") }
+
+    /// Model downloaded, {0} MB.
+    public static var voiceModelReady: String { Strings.get("VoiceModelReady") }
+
+    /// Download stopped at {0} of {1} MB.
+    public static var voiceModelStopped: String { Strings.get("VoiceModelStopped") }
+
+    /// The model did not download. Check the connection and try again.
+    public static var voiceModelFailed: String { Strings.get("VoiceModelFailed") }
+
+    /// Stop
+    public static var voiceDownloadStop: String { Strings.get("VoiceDownloadStop") }
+
+    /// Download
+    public static var voiceDownloadGo: String { Strings.get("VoiceDownloadGo") }
+
+    /// Remove the model
+    public static var voiceModelRemove: String { Strings.get("VoiceModelRemove") }
+
+    /// OpenAI with your own key
+    public static var voiceCloudTitle: String { Strings.get("VoiceCloudTitle") }
+
+    /// gpt-4o-transcribe. Better with terms, billed to your key.
+    public static var voiceCloudWhat: String { Strings.get("VoiceCloudWhat") }
+
+    /// This data goes there: the recording of your voice and the names of the folders, branches ...
+    public static var voiceHonest: String { Strings.get("VoiceHonest") }
+
+    /// Aiko turns the microphone on only while you dictate. Speech is turned into text locally w...
+    public static var voiceMicPurpose: String { Strings.get("VoiceMicPurpose") }
+
+    /// Key
+    public static var voiceKeyLabel: String { Strings.get("VoiceKeyLabel") }
+
+    /// Save
+    public static var voiceKeySave: String { Strings.get("VoiceKeySave") }
+
+    /// Remove key
+    public static var voiceKeyRemove: String { Strings.get("VoiceKeyRemove") }
+
+    /// This does not look like an OpenAI key: it starts with sk-.
+    public static var voiceKeyBad: String { Strings.get("VoiceKeyBad") }
+
+    /// The Keychain did not save the key.
+    public static var voiceKeyNotSaved: String { Strings.get("VoiceKeyNotSaved") }
+
+    /// Kept in the macOS Keychain. Removing Aiko erases it.
+    public static var voiceKeyWhere: String { Strings.get("VoiceKeyWhere") }
+
+    /// OpenAI did not take the recording. Check the key and the connection.
+    public static var voiceCloudFailed: String { Strings.get("VoiceCloudFailed") }
+
+    /// The OpenAI account is out of money.
+    public static var voiceCloudNoMoney: String { Strings.get("VoiceCloudNoMoney") }
+
+    /// OpenAI asks to wait a minute.
+    public static var voiceCloudBusy: String { Strings.get("VoiceCloudBusy") }
 }

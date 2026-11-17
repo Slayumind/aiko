@@ -1,0 +1,74 @@
+{
+  "comment": "How the lists of the terminal match what the person types (D-346), and the quick pick of a folder for a new session (D-350). parts: the text cut at every match, a match marked; null when nothing matches or the query is empty. The query is one line: runs of spaces become one. Case does not count, and ё is е. folders: the folders the sessions of one environment ran in, closed ones counted, plus others with the time they were used; the latest used first, at most 20; for a query, a match in the name of the folder first, then a match only in the path above it. Each hit is [folder, name parts as [text, match], parent].",
+  "parts": [
+    { "text": "Fix the build", "query": "build", "parts": [["Fix the ", false], ["build", true]] },
+    { "text": "Голос в редактор", "query": "ГОЛОС", "parts": [["Голос", true], [" в редактор", false]] },
+    { "text": "Ёлка и елка", "query": "елка", "parts": [["Ёлка", true], [" и ", false], ["елка", true]] },
+    { "text": "a  b", "query": "a  b", "parts": null },
+    { "text": "a b", "query": "  a   b ", "parts": [["a b", true]] },
+    { "text": "aaa", "query": "aa", "parts": [["aa", true], ["a", false]] },
+    { "text": "anything", "query": "", "parts": null },
+    { "text": "anything", "query": "nope", "parts": null }
+  ],
+  "sessions": {
+    "sessions": [
+      { "id": "a1", "environment": "Aiko", "folder": "C:\\work\\aiko", "name": "aiko 1", "started": true, "closed": false, "lastUsed": 300 },
+      { "id": "s1", "environment": "Aiko", "folder": "C:\\work\\site", "name": "site 1", "started": true, "closed": true, "lastUsed": 500 },
+      { "id": "a2", "environment": "Aiko", "folder": "C:\\work\\aiko\\", "name": "aiko 2", "started": true, "closed": false, "lastUsed": 100 },
+      { "id": "g1", "environment": "Aiko", "folder": "C:\\games\\crawler", "name": "crawler 1", "started": true, "closed": false, "lastUsed": 200 },
+      { "id": "w1", "environment": "Work", "folder": "C:\\kodland\\sparks", "name": "sparks 1", "started": true, "closed": false, "lastUsed": 900 }
+    ]
+  },
+  "folders": [
+    {
+      "name": "the latest used first, closed sessions counted, one row per folder",
+      "environment": "Aiko",
+      "query": "",
+      "others": [],
+      "hits": [
+        ["C:\\work\\site", [["site", false]], "work"],
+        ["C:\\work\\aiko", [["aiko", false]], "work"],
+        ["C:\\games\\crawler", [["crawler", false]], "games"]
+      ]
+    },
+    {
+      "name": "folders of other conversations join by their time",
+      "environment": "Aiko",
+      "query": "",
+      "others": [["C:\\work\\notes", 400], ["C:\\work\\aiko", 1000]],
+      "hits": [
+        ["C:\\work\\aiko", [["aiko", false]], "work"],
+        ["C:\\work\\site", [["site", false]], "work"],
+        ["C:\\work\\notes", [["notes", false]], "work"],
+        ["C:\\games\\crawler", [["crawler", false]], "games"]
+      ]
+    },
+    {
+      "name": "a match in the name before a match in the path",
+      "environment": "Aiko",
+      "query": "WORK",
+      "others": [["C:\\homework", 50]],
+      "hits": [
+        ["C:\\homework", [["home", false], ["work", true]], ""],
+        ["C:\\work\\site", [["site", false]], "work"],
+        ["C:\\work\\aiko", [["aiko", false]], "work"]
+      ]
+    },
+    {
+      "name": "another environment has its own folders",
+      "environment": "Work",
+      "query": "spark",
+      "others": [],
+      "hits": [
+        ["C:\\kodland\\sparks", [["spark", true], ["s", false]], "kodland"]
+      ]
+    },
+    {
+      "name": "nothing matches",
+      "environment": "Aiko",
+      "query": "zzz",
+      "others": [],
+      "hits": []
+    }
+  ]
+}

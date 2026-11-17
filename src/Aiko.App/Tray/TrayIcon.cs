@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Threading;
 using Aiko.Core;
+using Aiko.Core.Terminal;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.Graphics.Gdi;
@@ -35,6 +36,8 @@ sealed class TrayIcon : IDisposable
     /// The rows the icon last drew. Frames of a face transition reuse them instead of reading the
     /// settings and the snapshots sixteen times in half a second.
     private (CardRow? Ring, CardRow? Dot) _lastRows;
+    private SessionBadge _badge = SessionBadge.None;
+    private string _lastTooltip = "";
     private HwndSource? _source;
     private HICON _icon;
     private uint _iconDpi;
@@ -51,9 +54,6 @@ sealed class TrayIcon : IDisposable
 
     /// A left click on the icon.
     public event Action? Clicked;
-
-    /// The mouse is over the icon. It arrives many times a second.
-    public event Action? MouseMoved;
 
     /// A right click, with the point Windows sent for the menu.
     public event Action<IntPtr>? MenuRequested;
@@ -103,7 +103,8 @@ sealed class TrayIcon : IDisposable
         IsShown = false;
     }
 
-    /// New numbers: the picture and the tooltip are both made again.
+    /// New numbers: the picture and the tooltip are both made again. Most events change nothing the
+    /// icon shows, and then nothing is drawn.
     public void Update()
     {
         if (!IsShown)
@@ -111,7 +112,15 @@ sealed class TrayIcon : IDisposable
             return;
         }
 
-        var old = ReplacePicture(TaskbarDpi());
+        var dpi = TaskbarDpi();
+        var rows = _rows();
+        if (dpi == _iconDpi && rows == _lastRows && _tooltip() == _lastTooltip)
+        {
+            return;
+        }
+
+        _lastRows = rows;
+        var old = ReplacePicture(dpi, sameRows: true);
         var data = NewData();
         data.uFlags = NOTIFY_ICON_DATA_FLAGS.NIF_ICON | NOTIFY_ICON_DATA_FLAGS.NIF_TIP;
         data.hIcon = _icon;
@@ -122,6 +131,18 @@ sealed class TrayIcon : IDisposable
         {
             PInvoke.DestroyIcon(old);
         }
+    }
+
+    /// The sign of the sessions in the corner of the icon (D-409). Only a change draws again.
+    public void ShowBadge(SessionBadge badge)
+    {
+        if (badge == _badge)
+        {
+            return;
+        }
+
+        _badge = badge;
+        Redraw();
     }
 
     /// A face comes onto the icon or goes (D-211). Nothing happens while the icon is not shown.
@@ -166,19 +187,6 @@ sealed class TrayIcon : IDisposable
         }
     }
 
-    public bool CursorOver
-    {
-        get
-        {
-            if (Rect is not { } rect || !PInvoke.GetCursorPos(out var point))
-            {
-                return false;
-            }
-
-            return rect.Contains(point.X, point.Y);
-        }
-    }
-
     /// A message for the hidden window, from a check. A key sent this way reaches the open menu
     /// of the icon and never another program.
     public void PostForCheck(uint message, nuint wParam) => PInvoke.PostMessage(Window, message, wParam, 0);
@@ -194,7 +202,7 @@ sealed class TrayIcon : IDisposable
         _source?.Dispose();
     }
 
-    /// One frame of a face transition: only the picture changes, not the tooltip.
+    /// One frame of a face transition or a new sign: only the picture changes, not the tooltip.
     private void Redraw()
     {
         if (!IsShown)
@@ -219,7 +227,7 @@ sealed class TrayIcon : IDisposable
     /// reader has nothing else to read.
     private void WriteTooltip(ref NOTIFYICONDATAW data)
     {
-        var text = _tooltip();
+        var text = _lastTooltip = _tooltip();
         var room = data.szTip.AsSpan();
         room.Clear();
         text.AsSpan(0, Math.Min(text.Length, room.Length - 1)).CopyTo(room);
@@ -236,7 +244,7 @@ sealed class TrayIcon : IDisposable
             _lastRows = _rows();
         }
 
-        _icon = RingIcon.Render(_iconSize, _lastRows.Ring, _lastRows.Dot, _faceAnimator.Frame, _faceAnimator.Face);
+        _icon = RingIcon.Render(_iconSize, _lastRows.Ring, _lastRows.Dot, _faceAnimator.Frame, _faceAnimator.Face, _badge);
         return old;
     }
 
@@ -296,9 +304,6 @@ sealed class TrayIcon : IDisposable
         {
             case NinSelect:
                 Clicked?.Invoke();
-                break;
-            case PInvoke.WM_MOUSEMOVE:
-                MouseMoved?.Invoke();
                 break;
             case PInvoke.WM_CONTEXTMENU:
                 MenuRequested?.Invoke(anchor);

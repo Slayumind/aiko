@@ -30,7 +30,7 @@ struct CardWordsTests {
 
     @Test
     func everyWindowHasItsOwnName() {
-        #expect(CardText.windowName(.fiveHour) == "Session · 5 hours")
+        #expect(CardText.windowName(.fiveHour) == "5 hours")
         #expect(CardText.windowName(.sevenDay) == "Week")
         #expect(CardText.windowName(.modelWeek, "Fable") == "Fable · week")
     }
@@ -173,7 +173,8 @@ struct CardWordsTests {
         #expect(block.state == "working now")
         #expect(block.stateDot == .filled)
         #expect(block.showsHalo)
-        #expect(block.openLabel == "Open Claude Code")
+        #expect(!block.needsSignIn)
+        #expect(block.updated == "updated 12:00")
     }
 
     @Test
@@ -202,7 +203,7 @@ struct CardWordsTests {
         #expect(block.state == "sign in needed")
         #expect(block.stateDot == .hollow)
         #expect(!block.showsPlan)
-        #expect(block.openLabel == "Sign in")
+        #expect(block.needsSignIn)
         #expect(block.note == "Sign in so Aiko can see the limits of this environment.")
         #expect(block.showsNote)
     }
@@ -227,7 +228,7 @@ struct CardWordsTests {
         #expect(model.blocks[0].note == CardText.noDataNote)
         #expect(model.blocks[0].showsNote)
         #expect(!model.blocks[0].showsState)
-        #expect(!model.blocks[0].showsOpen)
+        #expect(!model.blocks[0].needsSignIn)
     }
 
     @Test
@@ -240,7 +241,7 @@ struct CardWordsTests {
             countdown: ResetCountdown(isReset: false, days: 0, hours: 2, minutes: 0, unit: .hoursAndMinutes),
             pace: PaceEstimate(verdict: .lastsPastReset, timeLeft: 7200)))
 
-        #expect(row.name == "Session · 5 hours")
+        #expect(row.name == "5 hours")
         #expect(row.percent == "42%")
         #expect(row.resets == "resets in 2h 0m")
         #expect(row.pace == "lasts until reset")
@@ -278,7 +279,7 @@ struct CardWordsTests {
 
         #expect(model.updated == "обновлено в 12:00")
         #expect(model.blocks[0].state == "сейчас работает")
-        #expect(model.blocks[0].rows[0].name == "Сессия · 5 часов")
+        #expect(model.blocks[0].rows[0].name == "5 часов")
         #expect(model.blocks[0].rows[0].percent == "42%")
     }
 
@@ -297,5 +298,89 @@ struct CardWordsTests {
     func placeholdersAreFilledInOrder() {
         #expect(Strings.format("{0}d {1}h", 2, 3) == "2d 3h")
         #expect(Strings.format("no placeholder", 1) == "no placeholder")
+    }
+
+    // ---- The shared table ----
+
+    /// The rows of spec/cases/card-words, which the Windows core reads too, in both languages.
+    @Test(arguments: [(StringLanguage.english, "en"), (StringLanguage.russian, "ru")])
+    func everyWordOfTheTableIsSaidTheSame(_ language: StringLanguage, _ column: String) {
+        Strings.language = language
+        defer { Strings.language = .english }
+
+        let cases = SpecCases.json("card-words")
+        let zero = Date(timeIntervalSince1970: 0)
+
+        for row in cases["window"]?.arrayValue ?? [] {
+            #expect(CardText.windowName(Self.kind(row["kind"]?.stringValue), row["model"]?.stringValue)
+                == row[column]?.stringValue)
+        }
+
+        for row in cases["short"]?.arrayValue ?? [] {
+            #expect(CardText.shortWindowName(Self.kind(row["kind"]?.stringValue), row["model"]?.stringValue)
+                == row[column]?.stringValue)
+        }
+
+        for row in cases["countdown"]?.arrayValue ?? [] {
+            let countdown = ResetCountdown.between(zero, zero.addingTimeInterval(row["resetsIn"]?.doubleValue ?? 0))
+            #expect(CardText.countdown(countdown) == row[column]?.stringValue)
+        }
+
+        for row in cases["percent"]?.arrayValue ?? [] {
+            #expect(CardText.percent(Int(row["percent"]?.int64Value ?? 0)) == row[column]?.stringValue)
+        }
+
+        for row in cases["tone"]?.arrayValue ?? [] {
+            #expect(CardText.tone(Self.tone(row["tone"]?.stringValue)) == row[column]?.stringValue)
+        }
+
+        for row in cases["resets"]?.arrayValue ?? [] {
+            let countdown = ResetCountdown.between(zero, zero.addingTimeInterval(row["resetsIn"]?.doubleValue ?? 0))
+            #expect(CardText.resets(countdown) == row[column]?.stringValue)
+        }
+
+        for row in cases["pace"]?.arrayValue ?? [] {
+            let pace = PaceEstimate(verdict: Self.verdict(row["verdict"]?.stringValue), timeLeft: row["timeLeft"]?.doubleValue ?? 0)
+            #expect(CardText.pace(pace) == row[column]?.stringValue)
+        }
+
+        for row in cases["updated"]?.arrayValue ?? [] {
+            let at = row["at"]?.doubleValue.map { Date(timeIntervalSince1970: $0) }
+            #expect(CardText.updated(Self.freshness(row["freshness"]?.stringValue), at, timeZone: Self.utcZone)
+                == row[column]?.stringValue)
+        }
+    }
+
+    private static func kind(_ name: String?) -> LimitKind {
+        switch name {
+        case "FiveHour": return .fiveHour
+        case "SevenDay": return .sevenDay
+        default: return .modelWeek
+        }
+    }
+
+    private static func tone(_ name: String?) -> LimitTone {
+        switch name {
+        case "Normal": return .normal
+        case "Caution": return .caution
+        case "Critical": return .critical
+        default: return .unknown
+        }
+    }
+
+    private static func verdict(_ name: String?) -> PaceVerdict {
+        switch name {
+        case "LastsPastReset": return .lastsPastReset
+        case "RunsOutBeforeReset": return .runsOutBeforeReset
+        default: return .unknown
+        }
+    }
+
+    private static func freshness(_ name: String?) -> DataFreshness {
+        switch name {
+        case "Live": return .live
+        case "Stale": return .stale
+        default: return .none
+        }
     }
 }

@@ -27,13 +27,44 @@
   -->
   <ItemGroup>
     <Resource Include="Assets\Fonts\*.ttf" />
+    <!-- The sound of "waits for you" (D-375): made for Aiko, quiet in the file itself. -->
+    <Resource Include="Assets\Sounds\*.wav" />
     <Content Include="Assets\Fonts\OFL.txt" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="Assets\Shell\*" CopyToOutputDirectory="PreserveNewest" />
     <!-- Aiko's skills ship next to the app and are copied into the local marketplace from there. -->
     <Content Include="..\..\plugins\**\*" Exclude="..\..\plugins\**\__pycache__\**" Link="plugins\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
+  <!--
+    whisper.cpp for voice input (D-314): its dlls and the VAD model go to a whisper folder next to
+    the app. They are fetched, checked by SHA256, into artifacts/whisper by tools/fetch-whisper.ps1
+    the first time the app is built; they are not in git.
+  -->
+  <PropertyGroup>
+    <WhisperFolder>$(MSBuildThisFileDirectory)..\..\artifacts\whisper\</WhisperFolder>
+  </PropertyGroup>
+  <Target Name="FetchWhisper" BeforeTargets="BeforeBuild" Condition="!Exists('$(WhisperFolder)whisper.dll')">
+    <Exec Command="pwsh -NoProfile -File &quot;$(MSBuildThisFileDirectory)..\..\tools\fetch-whisper.ps1&quot;" />
+    <!-- Inside a target %(Filename) would batch over every Content item, so a type of its own. -->
+    <ItemGroup>
+      <FetchedWhisper Include="$(WhisperFolder)*" />
+      <Content Include="@(FetchedWhisper)" Link="whisper\%(FetchedWhisper.Filename)%(FetchedWhisper.Extension)" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+  </Target>
+  <ItemGroup>
+    <Content Include="$(WhisperFolder)*" Link="whisper\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <!-- MIT asks for the licence to travel with the files. -->
+    <Content Include="Assets\Licenses\*.txt" Exclude="Assets\Licenses\windows-terminal-LICENSE.txt" Link="whisper\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="Assets\Licenses\windows-terminal-LICENSE.txt" Link="windows-terminal-LICENSE.txt" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Aiko.Core\Aiko.Core.csproj" />
+  </ItemGroup>
+
+  <!-- The checks and snapshots live in Aiko.Checks (D-420) and drive the insides of the app. -->
+  <ItemGroup>
+    <InternalsVisibleTo Include="Aiko.Checks" />
   </ItemGroup>
 
   <ItemGroup>
@@ -42,6 +73,17 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Velopack" />
+    <!-- The terminal control of Windows Terminal (D-360). Its native renderer comes with it. -->
+    <PackageReference Include="CI.Microsoft.Terminal.Wpf" />
+    <!--
+      ConPTY newer than the one in Windows. Its own targets put OpenConsole.exe into an x64 folder
+      while conpty.dll lands elsewhere; the spike ran both side by side, so they are copied here by hand.
+    -->
+    <PackageReference Include="Microsoft.Windows.Console.ConPTY" ExcludeAssets="all" GeneratePathProperty="true" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(PkgMicrosoft_Windows_Console_ConPTY)\runtimes\win-x64\native\conpty.dll" Link="conpty.dll" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="$(PkgMicrosoft_Windows_Console_ConPTY)\build\native\runtimes\x64\OpenConsole.exe" Link="OpenConsole.exe" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <!--
@@ -51,8 +93,12 @@
     through a temporary project that cannot see files the first pass made.
   -->
   <ItemGroup>
-    <EmbeddedResource Update="Strings.resx" />
-    <EmbeddedResource Update="Strings.ru.resx" />
+  </ItemGroup>
+
+  <!-- The two Windows programs share these files: what this computer is, and how a file is written. -->
+  <ItemGroup>
+    <Compile Include="..\Shared\*.cs" Link="Shared\%(Filename)%(Extension)" />
+    <Using Include="Aiko.Shared" />
   </ItemGroup>
 
 </Project>

@@ -1,0 +1,262 @@
+using System.Text.Json;
+using Aiko.Core;
+using Aiko.Core.Terminal;
+
+namespace Aiko.Core.Tests;
+
+/// Voice input read from spec/cases, the same tables the Swift tests read.
+public class VoiceCaseTests
+{
+    [Fact]
+    public void Every_press_and_cue_leads_where_the_table_says()
+    {
+        foreach (var row in SpecCases.Json("voice-input").GetProperty("next").EnumerateArray())
+        {
+            var next = VoiceInput.Next(
+                State(row.GetProperty("from")),
+                Enum.Parse<VoiceCue>(row.GetProperty("cue").GetString()!),
+                Enum.Parse<VoiceReadiness>(row.GetProperty("ready").GetString()!));
+
+            Assert.True(State(row.GetProperty("to")) == next, row.GetProperty("name").GetString());
+        }
+    }
+
+    [Fact]
+    public void Every_phase_shows_the_line_and_button_of_the_table()
+    {
+        foreach (var row in SpecCases.Json("voice-input").GetProperty("lines").EnumerateArray())
+        {
+            var line = VoiceInput.Line(
+                new VoiceState(Enum.Parse<VoicePhase>(row.GetProperty("phase").GetString()!), VoiceNotice.None),
+                TimeSpan.FromSeconds(row.GetProperty("seconds").GetDouble()),
+                Enum.Parse<VoiceEngine>(row.GetProperty("engine").GetString()!));
+
+            var where = row.GetProperty("where").GetString();
+            Assert.Equal(
+                new VoiceLine(
+                    Enum.Parse<VoiceWord>(row.GetProperty("word").GetString()!),
+                    row.GetProperty("time").GetString(),
+                    where is null ? null : Enum.Parse<VoiceEngine>(where),
+                    row.GetProperty("cancel").GetBoolean(),
+                    Enum.Parse<VoiceButton>(row.GetProperty("button").GetString()!),
+                    row.GetProperty("wave").GetBoolean()),
+                line);
+        }
+    }
+
+    [Fact]
+    public void A_recording_finishes_by_itself_at_the_longest()
+    {
+        var cases = SpecCases.Json("voice-input");
+        Assert.Equal(cases.GetProperty("longest").GetInt32(), (int)VoiceInput.Longest.TotalSeconds);
+        foreach (var row in cases.GetProperty("tooLong").EnumerateArray())
+        {
+            var state = new VoiceState(Enum.Parse<VoicePhase>(row.GetProperty("phase").GetString()!), VoiceNotice.None);
+            Assert.Equal(
+                row.GetProperty("ends").GetBoolean(),
+                VoiceInput.TooLong(state, TimeSpan.FromSeconds(row.GetProperty("seconds").GetInt32())));
+        }
+    }
+
+    [Fact]
+    public void A_refusal_of_OpenAI_reads_as_the_table_says()
+    {
+        foreach (var row in SpecCases.Json("voice-input").GetProperty("cloudCue").EnumerateArray())
+        {
+            var status = row.GetProperty("status");
+            var cue = VoiceInput.CloudCue(
+                row.GetProperty("code").GetString(),
+                status.ValueKind == JsonValueKind.Null ? null : status.GetInt32());
+            Assert.True(Enum.Parse<VoiceCue>(row.GetProperty("cue").GetString()!) == cue, row.GetProperty("name").GetString());
+        }
+    }
+
+    [Fact]
+    public void Only_Esc_and_a_lost_mic_drop_the_words()
+    {
+        foreach (var row in SpecCases.Json("voice-input").GetProperty("keepsText").EnumerateArray())
+        {
+            var cue = row.GetProperty("cue").GetString()!;
+            Assert.True(row.GetProperty("keeps").GetBoolean() == VoiceInput.KeepsText(Enum.Parse<VoiceCue>(cue)), cue);
+        }
+    }
+
+    [Fact]
+    public void The_clock_counts_minutes_and_seconds()
+    {
+        foreach (var row in SpecCases.Json("voice-input").GetProperty("clock").EnumerateArray())
+        {
+            Assert.Equal(
+                row.GetProperty("text").GetString(),
+                VoiceInput.Clock(TimeSpan.FromSeconds(row.GetProperty("seconds").GetDouble())));
+        }
+    }
+
+    [Fact]
+    public void Dictated_words_go_where_the_caret_stood()
+    {
+        foreach (var row in SpecCases.Json("dictation").GetProperty("placed").EnumerateArray())
+        {
+            var name = row.GetProperty("name").GetString();
+            var (before, after) = DictationText.Around(row.GetProperty("field").GetString()!, row.GetProperty("caret").GetInt32());
+            var (text, caret) = DictationText.Placed(before, row.GetProperty("words").GetString()!, after);
+            Assert.True(row.GetProperty("text").GetString() == text, $"{name}: {text}");
+            Assert.True(row.GetProperty("resultCaret").GetInt32() == caret, $"{name}: caret {caret}");
+        }
+    }
+
+    [Fact]
+    public void Confirmed_words_grow_and_never_change()
+    {
+        foreach (var row in SpecCases.Json("dictation").GetProperty("phrases").EnumerateArray())
+        {
+            var phrases = DictationText.Phrases(row.GetProperty("done").GetString()!, row.GetProperty("reading").GetString()!);
+            Assert.Equal(row.GetProperty("confirmed").GetString(), phrases.ConfirmedText);
+            Assert.Equal(row.GetProperty("tail").GetString(), phrases.TailText);
+        }
+
+        foreach (var run in SpecCases.Json("dictation").GetProperty("runs").EnumerateArray())
+        {
+            var name = run.GetProperty("name").GetString();
+            var text = DictationText.Empty;
+            var steps = run.GetProperty("steps").EnumerateArray().ToList();
+            var passes = run.GetProperty("passes").EnumerateArray().ToList();
+            Assert.Equal(passes.Count, steps.Count);
+
+            for (var i = 0; i < passes.Count; i++)
+            {
+                // What was confirmed stays as it was: the next pass only adds after it.
+                var before = text.ConfirmedText;
+                text = text.Pass(passes[i].GetString()!);
+                Assert.True(text.ConfirmedText.StartsWith(before, StringComparison.Ordinal), $"{name}, pass {i + 1} changed confirmed words");
+                Assert.True(steps[i].GetProperty("confirmed").GetString() == text.ConfirmedText, $"{name}, pass {i + 1}: {text.ConfirmedText}");
+                Assert.True(steps[i].GetProperty("tail").GetString() == text.TailText, $"{name}, pass {i + 1}: {text.TailText}");
+            }
+
+            if (run.GetProperty("final").GetString() is { } final)
+            {
+                text = text.Final(final);
+                Assert.Equal("", text.TailText);
+            }
+
+            Assert.True(run.GetProperty("text").GetString() == text.Text, $"{name}: {text.Text}");
+        }
+    }
+
+    [Fact]
+    public void The_hint_names_the_folder_branch_and_files()
+    {
+        var cases = SpecCases.Json("voice-hint");
+        foreach (var row in cases.GetProperty("hints").EnumerateArray())
+        {
+            var hint = VoiceHint.Build(
+                row.GetProperty("folder").GetString(),
+                row.GetProperty("branch").GetString(),
+                row.GetProperty("files").EnumerateArray().Select(f => f.GetString()!),
+                row.TryGetProperty("language", out var language) ? language.GetString() : null,
+                row.GetProperty("max").GetInt32());
+
+            Assert.True(row.GetProperty("hint").GetString() == hint, $"{row.GetProperty("name").GetString()}: {hint}");
+        }
+
+        foreach (var row in cases.GetProperty("echoes").EnumerateArray())
+        {
+            Assert.True(
+                row.GetProperty("echo").GetBoolean() == VoiceHint.IsEcho(row.GetProperty("phrase").GetString()!, row.GetProperty("hint").GetString()!),
+                row.GetProperty("name").GetString());
+        }
+
+        foreach (var row in cases.GetProperty("unechoed").EnumerateArray())
+        {
+            var name = row.GetProperty("name").GetString();
+            var result = VoiceHint.WithoutEcho(row.GetProperty("phrase").GetString()!, row.GetProperty("hint").GetString()!);
+
+            Assert.True(row.GetProperty("text").GetString() == result.Text, $"{name}: {result.Text}");
+            Assert.True(row.GetProperty("dropped").GetInt32() == result.Dropped.Count, $"{name}: {result.Dropped.Count}");
+            var inHint = row.GetProperty("inHint");
+            Assert.True(
+                (inHint.ValueKind == JsonValueKind.Null ? null : inHint.GetInt32()) == result.Dropped.FirstOrDefault()?.InHint,
+                $"{name}: inHint");
+        }
+
+        foreach (var row in cases.GetProperty("branches").EnumerateArray())
+        {
+            Assert.Equal(row.GetProperty("branch").GetString(), VoiceHint.Branch(row.GetProperty("head").GetString()));
+        }
+
+        foreach (var row in cases.GetProperty("gitFolders").EnumerateArray())
+        {
+            Assert.Equal(row.GetProperty("folder").GetString(), VoiceHint.GitFolder(row.GetProperty("file").GetString()));
+        }
+
+        foreach (var row in cases.GetProperty("languages").EnumerateArray())
+        {
+            Assert.Equal(
+                row.GetProperty("language").GetString(),
+                VoiceHint.Language(
+                    Enum.Parse<AikoLanguage>(row.GetProperty("setting").GetString()!),
+                    row.GetProperty("system").GetString()!));
+        }
+    }
+
+    [Fact]
+    public void The_model_and_the_key_follow_the_table()
+    {
+        var cases = SpecCases.Json("voice-model");
+        Assert.Equal(VoiceModel.Url, cases.GetProperty("url").GetString());
+        Assert.Equal(VoiceModel.Bytes, cases.GetProperty("bytes").GetInt64());
+        Assert.Equal(VoiceModel.Sha256, cases.GetProperty("sha256").GetString());
+        Assert.Equal(VoiceModel.CloudModel, cases.GetProperty("cloudModel").GetString());
+
+        foreach (var row in cases.GetProperty("megabytes").EnumerateArray())
+        {
+            Assert.Equal(row.GetProperty("megabytes").GetInt64(), VoiceModel.Megabytes(row.GetProperty("bytes").GetInt64()));
+        }
+
+        foreach (var row in cases.GetProperty("readiness").EnumerateArray())
+        {
+            var bytes = row.GetProperty("modelBytes");
+            Assert.Equal(
+                Enum.Parse<VoiceReadiness>(row.GetProperty("ready").GetString()!),
+                VoiceModel.Readiness(
+                    Enum.Parse<VoiceEngine>(row.GetProperty("engine").GetString()!),
+                    bytes.ValueKind == JsonValueKind.Null ? null : bytes.GetInt64(),
+                    row.GetProperty("keyStored").GetBoolean()));
+        }
+
+        foreach (var row in cases.GetProperty("keys").EnumerateArray())
+        {
+            var key = VoiceModel.CleanKey(row.GetProperty("pasted").GetString());
+            Assert.Equal(row.GetProperty("key").GetString(), key);
+            Assert.Equal(row.GetProperty("mask").GetString(), key is null ? null : VoiceModel.MaskKey(key));
+        }
+    }
+
+    /// The files of a conversation for the hint, from spec/cases/voice-hint.
+    [Fact]
+    public void The_hint_takes_the_files_a_conversation_read_or_changed()
+    {
+        foreach (var row in SpecCases.Json("voice-hint").GetProperty("files").EnumerateArray())
+        {
+            List<FileTouch> items = [];
+            foreach (var step in row.GetProperty("steps").EnumerateArray())
+            {
+                var kind = step.GetProperty("kind").GetString() switch
+                {
+                    "read" => TouchKind.Read,
+                    "edit" => TouchKind.Edit,
+                    _ => TouchKind.Other,
+                };
+                items.Add(new FileTouch(kind, step.GetProperty("subject").GetString()!, step.TryGetProperty("hidden", out var hidden) && hidden.GetBoolean()));
+            }
+
+            Assert.True(
+                row.GetProperty("files").EnumerateArray().Select(file => file.GetString()!).SequenceEqual(VoiceHint.Files(items)),
+                row.GetProperty("name").GetString());
+        }
+    }
+
+    private static VoiceState State(JsonElement pair) => new(
+        Enum.Parse<VoicePhase>(pair[0].GetString()!),
+        Enum.Parse<VoiceNotice>(pair[1].GetString()!));
+}

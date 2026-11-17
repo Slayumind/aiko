@@ -32,7 +32,8 @@ public struct CardModel: Sendable, Equatable {
                 first: index == 0,
                 noAccess: noAccess.contains(card.environment),
                 account: accounts[card.environment],
-                working: card.isWorkingAt(now))
+                working: card.isWorkingAt(now),
+                timeZone: timeZone)
         }
 
         return CardModel(
@@ -69,17 +70,20 @@ public struct EnvironmentBlock: Sendable, Equatable {
     public let stateIsBright: Bool
     public let showsHalo: Bool
 
-    /// "Open Claude Code", or "Sign in" when the account is not connected. Both open Claude Code
-    /// for this environment; signing in happens there.
-    public let openLabel: String
-    public let showsOpen: Bool
+    /// The account is known and not signed in: the open header offers "Sign in".
+    public let needsSignIn: Bool
+
+    /// "updated 12:04", or "as of 9:30": how fresh the numbers of this environment are, for the
+    /// line under the open header.
+    public let updated: String
 
     public static func from(
         _ card: CardState,
         first: Bool,
         noAccess: Bool,
         account: CardAccount? = nil,
-        working: Bool = false
+        working: Bool = false,
+        timeZone: TimeZone = .current
     ) -> EnvironmentBlock {
         let rows = card.rows.map(LimitRow.from)
         let signedIn = account?.signedIn == true
@@ -109,8 +113,8 @@ public struct EnvironmentBlock: Sendable, Equatable {
             showsState: account != nil,
             stateIsBright: busy,
             showsHalo: busy,
-            openLabel: signedIn ? Strings.openClaudeCode : Strings.signIn,
-            showsOpen: account != nil)
+            needsSignIn: account.map { !$0.signedIn } ?? false,
+            updated: CardText.updated(card.freshness, card.updatedAt, timeZone: timeZone))
     }
 }
 
@@ -128,8 +132,16 @@ public struct CardAccount: Sendable, Equatable {
 
 public struct LimitRow: Sendable, Equatable {
     public let name: String
+
+    /// The name for a narrow place: "5 h", "wk", or the model name alone.
+    public let shortName: String
+
     public let percent: String
     public let resets: String
+
+    /// The same time without the words around it: "1h 6m" for "resets in 1h 6m".
+    public let countdown: String
+
     public let pace: String
     public let tone: LimitTone
 
@@ -147,9 +159,11 @@ public struct LimitRow: Sendable, Equatable {
         let toneWord = CardText.tone(row.tone)
 
         return LimitRow(
-            name: CardText.windowName(row.kind, row.modelName),
+            name: row.label ?? CardText.windowName(row.kind, row.modelName),
+            shortName: row.label ?? CardText.shortWindowName(row.kind, row.modelName),
             percent: CardText.percent(row.percent),
             resets: CardText.resets(row.countdown),
+            countdown: CardText.countdown(row.countdown),
             pace: toneWord.isEmpty ? CardText.pace(row.pace) : toneWord,
             tone: row.tone,
             paceTakesTone: !toneWord.isEmpty,

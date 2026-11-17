@@ -10,7 +10,7 @@ public enum SettingsPage: Sendable, Equatable {
     case environment(String)
 
     case checklist
-    case folders
+    case terminal
     case personality
     case privacy
     case general
@@ -21,7 +21,7 @@ public enum SettingsPage: Sendable, Equatable {
         switch self {
         case .environment(let folder): return SettingsPage.environmentPrefix + folder
         case .checklist: return "setup"
-        case .folders: return "folders"
+        case .terminal: return "terminal"
         case .personality: return "personality"
         case .privacy: return "privacy"
         case .general: return "general"
@@ -31,7 +31,7 @@ public enum SettingsPage: Sendable, Equatable {
     public static func fromKey(_ key: String) -> SettingsPage? {
         switch key {
         case "setup": return .checklist
-        case "folders": return .folders
+        case "terminal": return .terminal
         case "personality": return .personality
         case "privacy": return .privacy
         case "general": return .general
@@ -48,7 +48,7 @@ public struct SettingsNavItem: Sendable, Equatable {
     public let page: SettingsPage
     public let title: String
 
-    /// The small line under the title: the plan and the command, or how many folders are bound.
+    /// The small line under the title: the plan and the command, or what a page has switched on.
     public let note: String?
 
     public init(page: SettingsPage, title: String, note: String?) {
@@ -59,13 +59,13 @@ public struct SettingsNavItem: Sendable, Equatable {
 }
 
 public enum SettingsNavEntry: Sendable, Equatable {
-    case label(String)
     case item(SettingsNavItem)
 
     /// The empty place of environment 2, drawn with a dashed edge.
     case addSecondEnvironment
 
-    case separator
+    /// The room between two groups of the menu: no label and no line (D-404).
+    case gap
 }
 
 /// The menu of the settings window (D-177). The twin of SettingsPanel.BuildNav on Windows.
@@ -85,16 +85,21 @@ public enum SettingsNav {
         return [first] + settings.environments.filter { $0 != first }
     }
 
-    /// `plans` is the plan label of each config folder, read from .claude.json by the app.
+    /// `plans` is the plan label of each config folder, read from .claude.json by the app. The order
+    /// of D-374: General, the environments, then Window, Personality and Privacy (D-404).
     public static func rows(
         environments: EnvironmentSettings,
         plans: [String: String],
         sendsStats: Bool,
+        voiceInput: Bool,
         checklistOpen: Bool,
         platform: PlatformConventions,
         userProfile: String
     ) -> [SettingsNavEntry] {
-        var rows: [SettingsNavEntry] = [.label(Strings.sectionEnvironments)]
+        var rows: [SettingsNavEntry] = [
+            .item(SettingsNavItem(page: .general, title: Strings.navGeneral, note: nil)),
+            .gap,
+        ]
 
         for environment in ordered(environments, platform, userProfile) {
             let folder = environment.configDirectories.first ?? ""
@@ -111,13 +116,11 @@ public enum SettingsNav {
             rows.append(.addSecondEnvironment)
         }
 
-        rows.append(.separator)
-
-        let bound = EnvironmentEdits.bindings(environments).count
+        rows.append(.gap)
         rows.append(.item(SettingsNavItem(
-            page: .folders,
-            title: Strings.itemFolders,
-            note: bound > 0 ? Strings.format(Strings.navBound, bound) : nil)))
+            page: .terminal,
+            title: Strings.navTerminal,
+            note: voiceInput ? Strings.navVoiceOn : Strings.navVoiceOff)))
 
         if environments.hasEnvironments {
             let talking = environments.environments.filter(\.persona).count
@@ -131,8 +134,6 @@ public enum SettingsNav {
             page: .privacy,
             title: Strings.navPrivacy,
             note: sendsStats ? Strings.navPrivacyStatsOn : Strings.navPrivacyStatsOff)))
-
-        rows.append(.item(SettingsNavItem(page: .general, title: Strings.navGeneral, note: nil)))
 
         return rows
     }

@@ -20,6 +20,7 @@ struct PersonalityPageView: View {
     private static var about: [String: String] {
         [
         "copy": Strings.skillAikoCopy,
+        "interface": Strings.skillAikoInterface,
         "release-gate": Strings.skillAikoReleaseGate,
         "docs-hygiene": Strings.skillAikoDocsHygiene,
         "playtest": Strings.skillAikoPlaytest,
@@ -31,7 +32,9 @@ struct PersonalityPageView: View {
         "gamedesign-research": Strings.skillAikoGamedesignResearch,
         "balance": Strings.skillAikoBalance,
         "calendar": Strings.skillAikoCalendar,
-         "drive": Strings.skillAikoDrive]
+         "drive": Strings.skillAikoDrive,
+         "envoy": Strings.skillAikoEnvoy,
+         "roadmap": Strings.skillAikoRoadmap]
     }
 
     private var aikoIsOnSomewhere: Bool { state.environments.environments.contains(where: \.persona) }
@@ -72,8 +75,7 @@ struct PersonalityPageView: View {
                     (Temperament.quiet, Strings.temperamentQuiet),
                     (Temperament.normal, Strings.temperamentNormal),
                     (Temperament.bright, Strings.temperamentBright),
-                    // The same word in every language.
-                    (Temperament.musou, "無双"),
+                    (Temperament.musou, Strings.temperamentMusou),
                 ],
                 picked: state.persona.temperament,
                 pick: pickTemperament)

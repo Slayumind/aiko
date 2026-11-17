@@ -36,6 +36,7 @@ public class SessionReminderTests
     [InlineData("command", "Personal", @"C:\projects\aiko")] // the command matches the binding
     [InlineData("command", "Work", @"C:\temp")] // no binding here, so nothing to remind about
     [InlineData(null, null, @"C:\projects\aiko")] // not started through the shim at all
+    [InlineData("terminal", "Work", @"C:\projects\aiko")] // the terminal of Aiko: its form already said so
     public void Quiet_when_there_is_nothing_to_say(string? launch, string? running, string folder)
     {
         Assert.Null(SessionReminder.MessageFor(launch, running, folder, Settings, russian: false));

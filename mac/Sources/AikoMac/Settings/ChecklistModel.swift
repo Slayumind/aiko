@@ -35,7 +35,13 @@ final class ChecklistModel: ObservableObject {
     @Published var commandsWanted: Bool?
     @Published var foldersVisited = false
     @Published var personaWanted: Bool?
+
+    /// "Meet Aiko" was answered with the second environment (D-421).
+    @Published var personaSecond = false
     @Published var statsWanted: Bool?
+
+    /// Where Aiko lives was shown, here or in an earlier run of the checklist (D-421).
+    @Published var placeSeen = false
 
     @Published var firstName = ""
     @Published var secondName = ""
@@ -56,6 +62,9 @@ final class ChecklistModel: ObservableObject {
     @Published var creating = false
     @Published var firstWaiting = false
     @Published var secondWaiting = false
+    /// What went wrong under a sign-in button: Claude Code did not open, or the folder was not made.
+    @Published var firstProblem: String?
+    @Published var secondProblem: String?
     @Published var copied = false
     @Published var accessResult: String?
 
@@ -98,6 +107,7 @@ final class ChecklistModel: ObservableObject {
         facts.boundFolders = projectFolders.count
         facts.personaWanted = personaWanted
         facts.statsWanted = statsWanted
+        facts.placeSeen = placeSeen
         return facts
     }
 
@@ -129,10 +139,6 @@ final class ChecklistModel: ObservableObject {
         secondFolder == nil ? [Self.firstFolder] : [Self.firstFolder, secondFolder!]
     }
 
-    var environmentNames: [String] {
-        [firstNameText, secondNameText].filter { !$0.isEmpty }
-    }
-
     var canFinish: Bool { WizardChecklist.canFinish(facts) }
 
     var progress: (done: Int, total: Int) { WizardChecklist.progress(facts) }
@@ -144,6 +150,7 @@ final class ChecklistModel: ObservableObject {
 
         // What is already in place counts as answered, so adding a second environment asks only
         // about the second environment.
+        placeSeen = existing.hasEnvironments
         if existing.hasEnvironments {
             accessGranted = existing.environments.flatMap(\.configDirectories)
                 .allSatisfy(ClaudeSettingsFile.hasOurLine) ? true : nil
@@ -185,6 +192,10 @@ final class ChecklistModel: ObservableObject {
             foldersVisited = true
         }
 
+        if item == .place {
+            placeSeen = true
+        }
+
         if item == .install && !claudeInstalled {
             wait(Waiter.forClaude { [weak self] in
                 self?.claudeInstalled = true
@@ -219,10 +230,13 @@ final class ChecklistModel: ObservableObject {
     // ---- environment 1 ----
 
     func signInFirst() {
+        // A Claude Code that did not open is said under the button, never left in silence.
         guard ClaudeLauncher.open(configFolder: Self.firstFolder, workingDirectory: Store.home) else {
+            firstProblem = Strings.claudeDidNotOpen
             return
         }
 
+        firstProblem = nil
         firstWaiting = true
         wait(Waiter.forSignIn(Self.firstFolder) { [weak self] in
             self?.firstWaiting = false
@@ -272,12 +286,17 @@ final class ChecklistModel: ObservableObject {
             try FileManager.default.createDirectory(atPath: folder, withIntermediateDirectories: true)
         } catch {
             Log.write("checklist: could not create \((folder as NSString).lastPathComponent)")
+            secondProblem = Strings.format(Strings.folderNotMade, (folder as NSString).lastPathComponent)
             return
         }
 
         choose(second: folder, named: name)
-        guard ClaudeLauncher.open(configFolder: folder, workingDirectory: Store.home) else { return }
+        guard ClaudeLauncher.open(configFolder: folder, workingDirectory: Store.home) else {
+            secondProblem = Strings.claudeDidNotOpen
+            return
+        }
 
+        secondProblem = nil
         secondWaiting = true
         wait(Waiter.forSignIn(folder) { [weak self] in
             self?.secondWaiting = false
@@ -420,8 +439,9 @@ final class ChecklistModel: ObservableObject {
                 name,
                 [folder],
                 directMode: before?.directMode ?? false,
-                // "Meet Aiko" turns it on in environment 1. "Later" never turns off what is on.
-                persona: (before?.persona ?? false) || (index == 0 && personaWanted == true),
+                // "Meet Aiko" turns it on in the environment it named. "Later" never turns off what
+                // is on.
+                persona: (before?.persona ?? false) || (index == (personaSecond ? 1 : 0) && personaWanted == true),
                 customCommand: customCommand[index],
                 projectFolders: projects)
         }
@@ -445,6 +465,59 @@ final class ChecklistModel: ObservableObject {
             : environments[0].name
 
         return EnvironmentSettings(environments, ringEnvironment: ring, defaultEnvironment: defaultName)
+    }
+
+    // ---- one step at a time (D-391) ----
+
+    /// The next or the previous item that can be opened, from the open one; from the page with every
+    /// answer, back goes to the last item.
+    func step(_ way: Int) -> ChecklistItem? {
+        let order = WizardChecklist.order
+        let from = opened.flatMap { order.firstIndex(of: $0) } ?? (way < 0 ? order.count : -1)
+        var next = from + way
+        while next >= 0 && next < order.count {
+            if state(of: order[next]) != .locked { return order[next] }
+            next += way
+        }
+        return nil
+    }
+
+    /// On past the last item: to the first one still without an answer, or to the page that has them all.
+    func stepNext() {
+        open(step(1) ?? WizardChecklist.nextToOpen(facts))
+    }
+
+    func stepBack() {
+        open(step(-1))
+    }
+
+    // ---- what Finish is about to do ----
+
+    /// What Finish is about to change outside Aiko, one line each, from the answers given (D-421).
+    var summary: [String] {
+        var lines: [String] = []
+        let names = secondFolder == nil ? firstNameText : "\(firstNameText), \(secondNameText)"
+        if accessGranted == true {
+            lines.append(Strings.format(Strings.wizardSummaryAccess, names))
+        }
+        if commandsWanted == true, !commandsInUse.isEmpty {
+            lines.append(Strings.format(Strings.wizardSummaryCommands, commandsInUse.joined(separator: ", ")))
+        }
+        if secondFolder != nil, !projectFolders.isEmpty {
+            lines.append(Strings.format(Strings.wizardSummaryFolders, projectFolders.count, secondNameText))
+        }
+        // A persona that is already on somewhere is not news.
+        if personaWanted == true, !existing.environments.contains(where: \.persona) {
+            lines.append(Strings.format(Strings.wizardSummaryPersona, personaSecond ? secondNameText : firstNameText))
+        }
+        return lines.enumerated().map { at, line in "· " + line + (at == lines.count - 1 ? "." : ";") }
+    }
+
+    /// The count rides on the same request only with statistics on, so only then is it said.
+    var updatesWhat: String {
+        statsWanted == true
+            ? Strings.wizardUpdatesVersion + " " + Strings.wizardUpdatesCount
+            : Strings.wizardUpdatesVersion
     }
 
     private func applyPlace() {

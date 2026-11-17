@@ -1,22 +1,25 @@
 <UserControl x:Class="Aiko.App.GeneralPage"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:Aiko.App">
+             xmlns:local="clr-namespace:Aiko.App"
+             xmlns:core="clr-namespace:Aiko.Core;assembly=Aiko.Core">
 
   <!-- Everything that is not about one environment: where Aiko lives, startup, language, access. -->
   <UserControl.Resources>
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="pack://application:,,,/Theme/Controls.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/Aiko.App;component/Theme/Controls.xaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </UserControl.Resources>
 
   <StackPanel>
-    <TextBlock Text="{x:Static local:Strings.NavGeneral}" FontFamily="{StaticResource Sans}" FontSize="16"
+    <TextBlock Text="{x:Static core:Strings.NavGeneral}" FontFamily="{StaticResource Sans}" FontSize="16"
                FontWeight="Medium" Foreground="{StaticResource Ink}" />
 
-    <TextBlock Text="{x:Static local:Strings.SectionWhereToShow}" Style="{StaticResource SectionLabel}" Margin="0,18,0,8" />
+    <!-- The terminal window is the main window: the tray and the island are how Aiko waits while it is
+         closed (D-372, D-394). -->
+    <TextBlock Text="{x:Static core:Strings.SectionWhenClosed}" Style="{StaticResource SectionLabel}" Margin="0,18,0,8" />
     <Grid MaxWidth="360" HorizontalAlignment="Left">
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="170" />
@@ -36,7 +39,7 @@
                        HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,6,0" />
             </Grid>
           </Border>
-          <TextBlock Text="{x:Static local:Strings.PlaceTray}" Style="{StaticResource RowName}" Margin="0,8,0,0"
+          <TextBlock Text="{x:Static core:Strings.PlaceTray}" Style="{StaticResource RowName}" Margin="0,8,0,0"
                      HorizontalAlignment="Center" />
         </StackPanel>
       </RadioButton>
@@ -50,7 +53,7 @@
             <Border Width="38" Height="9" CornerRadius="0,0,5,5" Background="{StaticResource Raised}"
                     HorizontalAlignment="Center" VerticalAlignment="Top" />
           </Border>
-          <TextBlock Text="{x:Static local:Strings.PlaceIsland}" Style="{StaticResource RowName}" Margin="0,8,0,0"
+          <TextBlock Text="{x:Static core:Strings.PlaceIsland}" Style="{StaticResource RowName}" Margin="0,8,0,0"
                      HorizontalAlignment="Center" />
         </StackPanel>
       </RadioButton>
@@ -63,23 +66,36 @@
           <ColumnDefinition Width="*" />
           <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
-        <TextBlock Text="{x:Static local:Strings.HideIslandInFullScreen}" Style="{StaticResource RowName}"
+        <TextBlock Text="{x:Static core:Strings.HideIslandInFullScreen}" Style="{StaticResource RowName}"
                    TextWrapping="Wrap" Margin="0,0,12,0" />
         <ToggleButton x:Name="HideInFullScreen" Grid.Column="1" Style="{StaticResource Switch}"
                       Checked="OnHideChanged" Unchecked="OnHideChanged" />
       </Grid>
     </local:RevealPanel>
 
-    <TextBlock Text="{x:Static local:Strings.SectionStartupAndUpdates}" Style="{StaticResource SectionLabel}" Margin="0,22,0,8" />
+    <TextBlock Text="{x:Static core:Strings.SectionStartupAndUpdates}" Style="{StaticResource SectionLabel}" Margin="0,22,0,8" />
     <Grid Margin="0,0,0,10">
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="*" />
         <ColumnDefinition Width="Auto" />
       </Grid.ColumnDefinitions>
-      <TextBlock Text="{x:Static local:Strings.StartWithWindows}" Style="{StaticResource RowName}" Margin="0,0,12,0" />
+      <TextBlock Text="{x:Static core:Strings.StartWithWindows}" Style="{StaticResource RowName}" Margin="0,0,12,0" />
       <ToggleButton x:Name="RunAtStartup" Grid.Column="1" Style="{StaticResource Switch}"
                     Checked="OnStartupChanged" Unchecked="OnStartupChanged" />
     </Grid>
+    <!-- Only worth showing when Aiko starts with Windows: off, it opens only the tray (D-350). -->
+    <local:RevealPanel x:Name="StartupOnly">
+      <Grid Margin="0,0,0,10">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <TextBlock Text="{x:Static core:Strings.OpenTerminalAtStartup}" Style="{StaticResource RowName}"
+                   TextWrapping="Wrap" Margin="0,0,12,0" />
+        <ToggleButton x:Name="TerminalAtStartup" Grid.Column="1" Style="{StaticResource Switch}"
+                      Checked="OnTerminalAtStartupChanged" Unchecked="OnTerminalAtStartupChanged" />
+      </Grid>
+    </local:RevealPanel>
     <!-- The switch itself lives on the privacy page: it is a consent, not a preference. The
          button stays here, because pressing it is the person's own action (D-113). -->
 
@@ -102,29 +118,32 @@
                  VerticalAlignment="Center" Margin="10,0" Visibility="Collapsed" />
     </Grid>
 
-    <TextBlock Text="{x:Static local:Strings.SectionLanguage}" Style="{StaticResource SectionLabel}" Margin="0,22,0,8" />
+    <!-- What the newer version brings (D-397). -->
+    <StackPanel x:Name="NewsList" Margin="0,6,0,0" Visibility="Collapsed" />
+
+    <TextBlock Text="{x:Static core:Strings.SectionLanguage}" Style="{StaticResource SectionLabel}" Margin="0,22,0,8" />
     <local:DropDown x:Name="LanguageChoiceDrop" Width="220" HorizontalAlignment="Left" />
 
-    <TextBlock Text="{x:Static local:Strings.SectionAccess}" Style="{StaticResource SectionLabel}" Margin="0,22,0,8" />
+    <TextBlock Text="{x:Static core:Strings.SectionAccess}" Style="{StaticResource SectionLabel}" Margin="0,22,0,8" />
     <Grid>
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="*" />
         <ColumnDefinition Width="Auto" />
       </Grid.ColumnDefinitions>
       <TextBlock x:Name="AccessLine" Style="{StaticResource RowHint}" VerticalAlignment="Center" Margin="0,0,12,0" />
-      <Button x:Name="AccessButton" Grid.Column="1" Content="{x:Static local:Strings.AccessCheck}"
+      <Button x:Name="AccessButton" Grid.Column="1" Content="{x:Static core:Strings.AccessCheck}"
               Style="{StaticResource SmallButton}" Click="OnCheckAccess" />
     </Grid>
 
-    <TextBlock Text="{x:Static local:Strings.SectionDiagnostics}" Style="{StaticResource SectionLabel}" Margin="0,22,0,8" />
+    <TextBlock Text="{x:Static core:Strings.SectionDiagnostics}" Style="{StaticResource SectionLabel}" Margin="0,22,0,8" />
     <Grid>
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="*" />
         <ColumnDefinition Width="Auto" />
       </Grid.ColumnDefinitions>
-      <TextBlock x:Name="DiagnosticsLine" Text="{x:Static local:Strings.DiagnosticsWhat}" Style="{StaticResource RowHint}"
+      <TextBlock x:Name="DiagnosticsLine" Text="{x:Static core:Strings.DiagnosticsWhat}" Style="{StaticResource RowHint}"
                  VerticalAlignment="Center" Margin="0,0,12,0" />
-      <Button Grid.Column="1" Content="{x:Static local:Strings.CopyDiagnostics}" Style="{StaticResource SmallButton}"
+      <Button Grid.Column="1" Content="{x:Static core:Strings.CopyDiagnostics}" Style="{StaticResource SmallButton}"
               Click="OnCopyDiagnostics" />
     </Grid>
 
@@ -136,22 +155,22 @@
         <ColumnDefinition Width="*" />
         <ColumnDefinition Width="Auto" />
       </Grid.ColumnDefinitions>
-      <TextBlock Text="{x:Static local:Strings.RestartWhat}" Style="{StaticResource RowHint}" VerticalAlignment="Center"
+      <TextBlock Text="{x:Static core:Strings.RestartWhat}" Style="{StaticResource RowHint}" VerticalAlignment="Center"
                  Margin="0,0,12,0" />
-      <Button Grid.Column="1" Content="{x:Static local:Strings.Restart}" Style="{StaticResource GhostDangerButton}"
+      <Button Grid.Column="1" Content="{x:Static core:Strings.Restart}" Style="{StaticResource GhostDangerButton}"
               Margin="0,0,-10,0" Click="OnRestartAsked" />
     </Grid>
     <local:RevealPanel x:Name="RestartConfirm">
-      <Border CornerRadius="10" Background="#0FFF6467" BorderBrush="#38FF6467" BorderThickness="1" Padding="12">
+      <Border CornerRadius="10" Background="{StaticResource DangerZone}" BorderBrush="{StaticResource DangerZoneLine}" BorderThickness="1" Padding="12">
         <StackPanel>
           <TextBlock x:Name="RestartLine" Style="{StaticResource RowHint}" Foreground="{StaticResource Ink}" />
           <CheckBox x:Name="RestartBin" Style="{StaticResource Tick}" Margin="0,12,0,0">
             <TextBlock x:Name="RestartBinText" TextWrapping="Wrap" />
           </CheckBox>
-          <TextBlock Text="{x:Static local:Strings.RestartKeep}" Style="{StaticResource RowHint}" Margin="0,8,0,0" />
+          <TextBlock Text="{x:Static core:Strings.RestartKeep}" Style="{StaticResource RowHint}" Margin="0,8,0,0" />
           <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
-            <Button Content="{x:Static local:Strings.Cancel}" Style="{StaticResource GhostButton}" Click="OnRestartCancelled" />
-            <Button Content="{x:Static local:Strings.Restart}" Style="{StaticResource DangerButton}" Margin="8,0,0,0"
+            <Button Content="{x:Static core:Strings.Cancel}" Style="{StaticResource GhostButton}" Click="OnRestartCancelled" />
+            <Button Content="{x:Static core:Strings.Restart}" Style="{StaticResource DangerButton}" Margin="8,0,0,0"
                     Click="OnRestartConfirmed" />
           </StackPanel>
         </StackPanel>
@@ -164,13 +183,13 @@
         <ColumnDefinition Width="*" />
         <ColumnDefinition Width="Auto" />
       </Grid.ColumnDefinitions>
-      <TextBlock Text="{x:Static local:Strings.DeleteWhat}" Style="{StaticResource RowHint}" VerticalAlignment="Center"
+      <TextBlock Text="{x:Static core:Strings.DeleteWhat}" Style="{StaticResource RowHint}" VerticalAlignment="Center"
                  Margin="0,0,12,0" />
-      <Button Grid.Column="1" Content="{x:Static local:Strings.Delete}" Style="{StaticResource GhostDangerButton}"
+      <Button Grid.Column="1" Content="{x:Static core:Strings.Delete}" Style="{StaticResource GhostDangerButton}"
               Margin="0,0,-10,0" Click="OnDeleteAsked" />
     </Grid>
     <local:RevealPanel x:Name="DeleteConfirm">
-      <Border CornerRadius="10" Background="#0FFF6467" BorderBrush="#38FF6467" BorderThickness="1" Padding="12"
+      <Border CornerRadius="10" Background="{StaticResource DangerZone}" BorderBrush="{StaticResource DangerZoneLine}" BorderThickness="1" Padding="12"
               Margin="0,14,0,0">
         <StackPanel>
           <TextBlock x:Name="DeleteLine" Style="{StaticResource RowHint}" Foreground="{StaticResource Ink}" />
@@ -179,25 +198,25 @@
           <StackPanel x:Name="DeleteMemory" Margin="0,12,0,0" Visibility="Collapsed">
             <CheckBox x:Name="DeleteKeepMemory" Style="{StaticResource Tick}"
                       Checked="OnDeleteKeepMemoryChanged" Unchecked="OnDeleteKeepMemoryChanged">
-              <TextBlock Text="{x:Static local:Strings.DeleteKeepMemory}" TextWrapping="Wrap" />
+              <TextBlock Text="{x:Static core:Strings.DeleteKeepMemory}" TextWrapping="Wrap" />
             </CheckBox>
             <TextBlock x:Name="DeleteMemoryLine" Style="{StaticResource RowHint}" Margin="0,6,0,0" />
           </StackPanel>
-          <TextBlock Text="{x:Static local:Strings.DeleteKeep}" Style="{StaticResource RowHint}" Margin="0,8,0,0" />
-          <TextBlock x:Name="DeletePortable" Text="{x:Static local:Strings.DeletePortable}" Style="{StaticResource RowHint}"
+          <TextBlock Text="{x:Static core:Strings.DeleteKeep}" Style="{StaticResource RowHint}" Margin="0,8,0,0" />
+          <TextBlock x:Name="DeletePortable" Text="{x:Static core:Strings.DeletePortable}" Style="{StaticResource RowHint}"
                      Margin="0,6,0,0" Visibility="Collapsed" />
-          <TextBlock x:Name="DeleteWorking" Text="{x:Static local:Strings.DeleteWorking}" Style="{StaticResource RowHint}"
+          <TextBlock x:Name="DeleteWorking" Text="{x:Static core:Strings.DeleteWorking}" Style="{StaticResource RowHint}"
                      Margin="0,12,0,0" Visibility="Collapsed" />
           <StackPanel x:Name="DeleteButtons" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
-            <Button Content="{x:Static local:Strings.Cancel}" Style="{StaticResource GhostButton}" Click="OnDeleteCancelled" />
-            <Button Content="{x:Static local:Strings.Delete}" Style="{StaticResource DangerButton}" Margin="8,0,0,0"
+            <Button Content="{x:Static core:Strings.Cancel}" Style="{StaticResource GhostButton}" Click="OnDeleteCancelled" />
+            <Button Content="{x:Static core:Strings.Delete}" Style="{StaticResource DangerButton}" Margin="8,0,0,0"
                     Click="OnDeleteConfirmed" />
           </StackPanel>
         </StackPanel>
       </Border>
     </local:RevealPanel>
 
-    <Button Content="{x:Static local:Strings.QuitAiko}" Style="{StaticResource GhostButton}" HorizontalAlignment="Right"
+    <Button Content="{x:Static core:Strings.QuitAiko}" Style="{StaticResource GhostButton}" HorizontalAlignment="Right"
             Margin="0,14,-10,0" Click="OnQuit" />
   </StackPanel>
 </UserControl>

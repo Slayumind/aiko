@@ -45,6 +45,10 @@ public struct WizardFacts: Sendable, Equatable {
     /// "don't" is what happens until it is.
     public var statsWanted: Bool?
 
+    /// The person has seen where Aiko lives. The place has an answer from the start (the tray), so
+    /// it is never missing, but it counts as done only once it was shown (D-421).
+    public var placeSeen = false
+
     public init() {}
 }
 
@@ -55,9 +59,10 @@ public struct WizardFacts: Sendable, Equatable {
 public enum WizardChecklist {
     public static let order = ChecklistItem.allCases
 
-    /// Project folders can be left empty, and where Aiko shows already has an answer: the tray.
+    /// Project folders can be left empty, the persona can wait, and where Aiko shows already has an
+    /// answer: the tray.
     public static func isOptional(_ item: ChecklistItem) -> Bool {
-        item == .projectFolders || item == .meetAiko
+        item == .projectFolders || item == .meetAiko || item == .place
     }
 
     public static func stateOf(_ item: ChecklistItem, _ facts: WizardFacts) -> ItemState {
@@ -95,7 +100,7 @@ public enum WizardChecklist {
             return answered(facts.firstSignedIn, facts.statsWanted)
 
         case .place:
-            return .done
+            return facts.placeSeen ? .done : .open
         }
     }
 

@@ -15,11 +15,14 @@ enum ClaudeLauncher {
     /// core then falls back to ~/.local/bin, which is where the native installer puts Claude Code.
     private static let extraFolders = ["/usr/local/bin", "/opt/homebrew/bin"]
 
+    /// The PATH of a login shell comes too: a Claude Code installed with npm or under nvm is in a
+    /// folder only that PATH names, and the sessions start with it anyway.
     static func findClaude() -> String? {
+        let user = (extraFolders + [ProcessEnvironment.loginShellPath].compactMap { $0 }).joined(separator: ":")
         let path = ClaudeInstall.freshPath(
             .macOS,
             machinePath: ProcessInfo.processInfo.environment["PATH"],
-            userPath: extraFolders.joined(separator: ":"),
+            userPath: user,
             expand: { $0 })
 
         return ClaudeInstall.find(.macOS, freshPath: path, commandFolder: CommandFolder.folder,
@@ -43,7 +46,24 @@ enum ClaudeLauncher {
                 ? workingDirectory : Store.home,
             isDefaultFolder: ClaudeConfigFolder.isDefault(.macOS, configFolder, Store.home))
 
-        let path = (Store.folders.localFolder as NSString).appendingPathComponent(MacTerminal.scriptName)
+        guard openInTerminal(script, named: MacTerminal.scriptName) else { return false }
+
+        Log.write("launch: Claude Code opened for \((configFolder as NSString).lastPathComponent)")
+        return true
+    }
+
+    /// The checklist's "Install Claude Code" (D-421): the official command in a new Terminal window.
+    @discardableResult
+    static func runInstall() -> Bool {
+        let opened = openInTerminal(MacTerminal.installScript(), named: MacTerminal.installScriptName)
+        Log.write(opened ? "checklist: opened Terminal to install Claude Code" : "checklist: Terminal did not open")
+        return opened
+    }
+
+    /// Writes a script beside Aiko's own files and hands it to Terminal, which runs it in a new
+    /// window. No Automation permission is involved.
+    private static func openInTerminal(_ script: String, named name: String) -> Bool {
+        let path = (Store.folders.localFolder as NSString).appendingPathComponent(name)
         do {
             try FileManager.default.createDirectory(
                 atPath: Store.folders.localFolder, withIntermediateDirectories: true)
@@ -69,7 +89,6 @@ enum ClaudeLauncher {
                 }
             }
 
-        Log.write("launch: Claude Code opened for \((configFolder as NSString).lastPathComponent)")
         return true
     }
 

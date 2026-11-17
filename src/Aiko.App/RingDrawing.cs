@@ -15,10 +15,10 @@ static class RingDrawing
     public static readonly Color TrackColor = Color.FromArgb(0x66, 0x9A, 0x9A, 0x9A);
     public static readonly Color NoDataColor = Color.FromArgb(0x8C, 0x9A, 0x9A, 0x9A);
 
-    public static readonly Color Normal = Color.FromRgb(0x00, 0xBC, 0x7D);
-    public static readonly Color Caution = Color.FromRgb(0xFE, 0x9A, 0x00);
-    public static readonly Color Critical = Color.FromRgb(0xFF, 0x64, 0x67);
-    public static readonly Color Muted = Color.FromRgb(0xA1, 0xA1, 0xA1);
+    public static Color Normal => Tokens.Colour("PositiveColor");
+    public static Color Caution => Tokens.Colour("CautionColor");
+    public static Color Critical => Tokens.Colour("DestructiveColor");
+    public static Color Muted => Tokens.Colour("MutedColor");
 
     public static Color ColourFor(LimitTone tone) => tone switch
     {

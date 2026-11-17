@@ -1,0 +1,24 @@
+{
+  "comment": "The zoom of the terminal window (D-384): three steps, 115 by default. Ctrl+= and Ctrl+- move one step and stop at the ends, Ctrl+0 goes back to the default. A value from the settings file that is not a step reads as the default. The terminal gets its font in whole points: the nearest to the text of the window, 13 units times the zoom, at 96 units in an inch and 72 points.",
+  "steps": [100, 115, 130],
+  "default": 115,
+  "moves": [
+    { "from": 100, "larger": 115, "smaller": 100 },
+    { "from": 115, "larger": 130, "smaller": 100 },
+    { "from": 130, "larger": 130, "smaller": 115 }
+  ],
+  "read": [
+    { "stored": 100, "zoom": 100 },
+    { "stored": 115, "zoom": 115 },
+    { "stored": 130, "zoom": 130 },
+    { "stored": 0, "zoom": 115 },
+    { "stored": 120, "zoom": 115 },
+    { "stored": -5, "zoom": 115 },
+    { "stored": 400, "zoom": 115 }
+  ],
+  "terminalPoints": [
+    { "zoom": 100, "points": 10 },
+    { "zoom": 115, "points": 11 },
+    { "zoom": 130, "points": 13 }
+  ]
+}

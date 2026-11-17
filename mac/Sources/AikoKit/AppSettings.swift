@@ -61,6 +61,36 @@ public struct AppSettings: Sendable, Equatable {
     /// The checklist opens once on "Meet Aiko" for people who update from 0.1 (D-200).
     public var meetAikoShown = false
 
+    /// Off by default: it needs a 465 MB model or a key of the person's own (D-313).
+    public var voiceInput = false
+
+    public var voiceEngine: VoiceEngine = .local
+
+    /// The language Whisper listens for. System is the language of the computer, not of Aiko's
+    /// interface: people often speak another language than the one they read in (D-326).
+    public var voiceLanguage: AikoLanguage = .system
+
+    /// The terminal window opened by itself once, after Aiko was set up (D-350).
+    public var terminalShown = false
+
+    /// What a start with the system opens: only the menu bar, or the terminal window too (D-350).
+    public var openTerminalAtStartup = false
+
+    /// The header of the terminal window stays open until it is closed, across starts (D-373).
+    public var headerOpen = false
+
+    /// The list of sessions was hidden with its icon or Cmd+B (D-376).
+    public var sessionListHidden = false
+
+    /// The zoom of the terminal window in percent, one of WindowZoom.steps (D-384). Read it through
+    /// WindowZoom.read: a hand-edited file may hold anything.
+    public var windowZoom = WindowZoom.defaultZoom
+
+    /// The sound of "waits for you", on by default (D-375). The counts are always shown and make no
+    /// sound, so they have no setting (D-409).
+    public var notifySound = true
+
+
     public init() {}
 
     public static let `default` = AppSettings()
@@ -86,6 +116,14 @@ public struct AppSettings: Sendable, Equatable {
             guard let language = AikoLanguage(rawValue: text) else { return .default }
             settings.language = language
         }
+        if let text = root["voiceEngine"]?.stringValue {
+            guard let engine = VoiceEngine(rawValue: text) else { return .default }
+            settings.voiceEngine = engine
+        }
+        if let text = root["voiceLanguage"]?.stringValue {
+            guard let language = AikoLanguage(rawValue: text) else { return .default }
+            settings.voiceLanguage = language
+        }
 
         if let value = root["schemaVersion"]?.int64Value { settings.schemaVersion = Int(value) }
         if let value = root["runAtStartup"]?.boolValue { settings.runAtStartup = value }
@@ -95,6 +133,13 @@ public struct AppSettings: Sendable, Equatable {
         if let value = root["memoryShown"]?.boolValue { settings.memoryShown = value }
         if let value = root["hideIslandInFullScreen"]?.boolValue { settings.hideIslandInFullScreen = value }
         if let value = root["meetAikoShown"]?.boolValue { settings.meetAikoShown = value }
+        if let value = root["voiceInput"]?.boolValue { settings.voiceInput = value }
+        if let value = root["terminalShown"]?.boolValue { settings.terminalShown = value }
+        if let value = root["openTerminalAtStartup"]?.boolValue { settings.openTerminalAtStartup = value }
+        if let value = root["headerOpen"]?.boolValue { settings.headerOpen = value }
+        if let value = root["sessionListHidden"]?.boolValue { settings.sessionListHidden = value }
+        if let value = root["windowZoom"]?.int64Value { settings.windowZoom = Int(value) }
+        if let value = root["notifySound"]?.boolValue { settings.notifySound = value }
 
         if let object = root["island"]?.objectValue {
             guard let text = object["edge"]?.stringValue, let edge = screenEdge(text) else { return .default }
@@ -124,6 +169,15 @@ public struct AppSettings: Sendable, Equatable {
                 ("along", .number(numberText(island.along))),
             ]))),
             ("meetAikoShown", .bool(meetAikoShown)),
+            ("voiceInput", .bool(voiceInput)),
+            ("voiceEngine", .string(voiceEngine.rawValue)),
+            ("voiceLanguage", .string(voiceLanguage.rawValue)),
+            ("terminalShown", .bool(terminalShown)),
+            ("openTerminalAtStartup", .bool(openTerminalAtStartup)),
+            ("headerOpen", .bool(headerOpen)),
+            ("sessionListHidden", .bool(sessionListHidden)),
+            ("windowZoom", .number(String(windowZoom))),
+            ("notifySound", .bool(notifySound)),
         ])
 
         return JsonNode.object(root).toJsonString(indented: true) + "\n"

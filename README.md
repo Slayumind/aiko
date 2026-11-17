@@ -2,14 +2,18 @@
 
 # Aiko
 
-**See how much of your Claude Code limits is left, for two accounts at once, without opening a
-terminal.**
+**One place to work with AI agents.**
 
-Aiko sits in the Windows tray and in the macOS menu bar. Rest the mouse on it and a card shows every
-environment you set up: the five-hour window, the week, and the weekly limit of the heavy model. For
-each one you see when it resets and how long it lasts at your current pace.
+Aiko is a persona that sits above your agents and models. She remembers you across sessions and
+accounts, gives every session the same skills, and shows how much of your Claude Code limits is left.
+The model is a resource: when a better one comes out, Aiko gets better too.
 
-![The Aiko card](assets/card.png)
+The goal is one window for agent sessions, your projects and your limits.
+
+That window is here, on Windows and on macOS. Real Claude Code sessions and command lines run in it,
+grouped by account and project folder, with the limits of each account in the header. Close the
+window and the sessions keep working. Aiko stays by the clock on Windows or in the menu bar on macOS,
+or as an island at the top of the screen, and shows the limits and the sessions that wait for you.
 
 Free and open source. Not affiliated with Anthropic.
 
@@ -47,7 +51,7 @@ sample answer for each level. She stays quiet where it matters: code, commits, f
 error explanations, security warnings, dangerous actions and bad news are written in a plain neutral
 voice. The switch works in new sessions; open sessions finish the way they started.
 
-With the personality come thirteen skills, with one switch for all of them. They live in one plugin
+With the personality come sixteen skills, with one switch for all of them. They live in one plugin
 called `aiko`, so you call a skill by its full name:
 
 **Project management**
@@ -55,10 +59,13 @@ called `aiko`, so you call a skill by its full name:
 | Skill | What it is for |
 |---|---|
 | `/aiko:copy` | UI text, READMEs and release notes that read as written by a person, in Russian and English |
+| `/aiko:interface` | any web interface that looks designed for its product: the product's own look, an audit, every state at real widths, motion and reactions |
 | `/aiko:docs-hygiene` | a state file built from measured facts, a decision log, duplicates and contradictions found |
 | `/aiko:release-gate` | a check before a release: GO or NO-GO, irreversible changes, rollout and rollback |
 | `/aiko:calendar` | a day planned around Google Calendar, free time found, events added after your yes |
 | `/aiko:drive` | documents from Google Drive read into the work, project files put onto Drive |
+| `/aiko:envoy` | an errand to a colleague in a work chat: Aiko talks to them herself and brings back what is outside the task |
+| `/aiko:roadmap` | a shared roadmap for several teams: domains and owners, releases in month windows, one queue to the team everyone needs |
 
 **Game development**
 
@@ -74,7 +81,7 @@ called `aiko`, so you call a skill by its full name:
 | `/aiko:palette` | colours checked against a palette and fixed with the smallest change, in OKLCH |
 
 The `calendar` and `drive` skills need the Google Calendar and Google Drive connectors, turned on in
-Claude's connector settings.
+Claude's connector settings. The `envoy` skill needs a connector to your work chat, such as Slack.
 
 Aiko installs all of this as Claude Code plugins from a marketplace on your own computer, so nothing is
 downloaded. Your own plugins, output style and settings stay as they are. If you set your own output
@@ -130,8 +137,15 @@ Download the installer and run it. Aiko installs for the current user and needs 
 rights.
 
 The build isn't signed yet, so **SmartScreen will warn you**. Choose *More info*, then *Run
-anyway*. Signing is planned. Until then, every release comes with `SHA256SUMS.txt` and a build
-provenance attestation, and [SECURITY.md](SECURITY.md) shows how to check them.
+anyway*. Every release comes with `SHA256SUMS.txt` and a build provenance attestation, and
+[SECURITY.md](SECURITY.md) shows how to check them.
+
+Signing is being set up, with free code signing from [SignPath.io](https://about.signpath.io) and a
+certificate from [SignPath Foundation](https://signpath.org). The [code signing policy](CODE-SIGNING.md)
+says what will be signed and who approves each release.
+
+Windows 11 hides new app icons under the arrow next to the clock. Open the arrow and drag Aiko onto
+the taskbar to keep the limit rings in sight.
 
 ### macOS
 
@@ -141,13 +155,6 @@ Apple silicon and Intel Macs. You need macOS 14 or newer.
 The app is signed with an Apple Developer ID and notarized, so it opens the normal way. There is
 nothing to allow in System Settings and no command to run. [SECURITY.md](SECURITY.md) shows how to
 check the signature yourself.
-
-Free code signing provided by [SignPath.io](https://about.signpath.io), certificate by
-[SignPath Foundation](https://signpath.org). The [code signing policy](CODE-SIGNING.md) says what is
-signed and who approves each release.
-
-Windows 11 hides new app icons under the arrow next to the clock. Open the arrow and drag Aiko onto
-the taskbar: under the arrow, the card can't open.
 
 ## Remove
 

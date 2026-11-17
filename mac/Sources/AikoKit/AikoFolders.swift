@@ -64,6 +64,10 @@ public struct AikoFolders: Sendable, Equatable {
 
     public var reportedPeriodsFile: String { platform.join(settingsFolder, "reported.json") }
 
+    /// The sessions of the terminal: their names, folders and conversation ids. No text of a
+    /// conversation is ever written there.
+    public var terminalFile: String { platform.join(settingsFolder, "terminal.json") }
+
     /// The limit snapshots the bridge writes, one file per config folder.
     public var snapshotsFolder: String { platform.join(localFolder, "environments") }
 
@@ -73,6 +77,15 @@ public struct AikoFolders: Sendable, Equatable {
 
     /// A folder of its own, because the tray reads every file in the snapshots folder as a snapshot.
     public var activityFolder: String { platform.join(localFolder, "activity") }
+
+    /// The last hook event of each session of the terminal, and the settings with that hook.
+    public var terminalEventsFolder: String { platform.join(localFolder, "terminal") }
+
+    /// The settings every session of the terminal starts with (TerminalHooks).
+    public var terminalHooksFile: String { platform.join(localFolder, "terminal-hooks.json") }
+
+    /// The pictures pasted into the editor of one session. The folder goes when the session is closed.
+    public func picturesFolder(_ sessionId: String) -> String { platform.join(localFolder, "pictures", sessionId) }
 
     /// The last answers of the usage API.
     public var directCacheFolder: String { platform.join(localFolder, "direct") }
@@ -88,6 +101,10 @@ public struct AikoFolders: Sendable, Equatable {
     public var personaPluginsFolder: String { platform.join(localFolder, "plugins") }
 
     public var logFile: String { platform.join(localFolder, "log.txt") }
+
+    /// The speech model of voice input, 465 MB, downloaded when voice input is first turned on
+    /// (D-313). It can be downloaded again, so it sits with what Aiko makes for itself.
+    public var voiceModelFile: String { platform.join(localFolder, "models", "ggml-small.bin") }
 
     /// The installed app itself, as Velopack lays it out on Windows.
     public var installedAppFolder: String {

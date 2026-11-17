@@ -21,9 +21,6 @@ final class MenuBarIcon: NSResponder {
     /// A right click: the menu is asked for.
     var onMenu: (() -> Void)?
 
-    var onMouseEntered: (() -> Void)?
-    var onMouseExited: (() -> Void)?
-
     private var statusItem: NSStatusItem?
 
     /// The rows the icon last drew. Frames of a face transition reuse them instead of reading the
@@ -42,11 +39,6 @@ final class MenuBarIcon: NSResponder {
             button.target = self
             button.action = #selector(clicked)
             button.sendAction(on: [.leftMouseUp, .rightMouseUp])
-            button.addTrackingArea(NSTrackingArea(
-                rect: .zero,
-                options: [.mouseEnteredAndExited, .activeAlways, .inVisibleRect],
-                owner: self,
-                userInfo: nil))
         }
 
         update()
@@ -79,7 +71,16 @@ final class MenuBarIcon: NSResponder {
             ring: lastRows.ring,
             dot: lastRows.dot,
             frame: faces?.frame ?? .rings,
-            face: faces?.picture)
+            face: faces?.picture,
+            badge: badge)
+    }
+
+    /// The sign of the sessions in the corner of the icon (D-409): how many wait, stopped, or a dot
+    /// for a finished turn.
+    var badge = SessionBadge.none {
+        didSet {
+            if badge != oldValue { redraw() }
+        }
     }
 
     /// Where the menu bar put our icon, in screen points. Empty before the menu bar has placed it,
@@ -87,11 +88,6 @@ final class MenuBarIcon: NSResponder {
     var frame: NSRect? {
         guard let frame = statusItem?.button?.window?.frame, frame.width > 0 else { return nil }
         return frame
-    }
-
-    var pointerIsOver: Bool {
-        guard let frame else { return false }
-        return frame.contains(NSEvent.mouseLocation)
     }
 
     /// The menu under the icon. The call returns when the menu closes.
@@ -104,14 +100,6 @@ final class MenuBarIcon: NSResponder {
     /// What a self test reads back.
     var tooltipForCheck: String { statusItem?.button?.toolTip ?? "" }
     var pictureForCheck: Data? { statusItem?.button?.image?.tiffRepresentation }
-
-    override func mouseEntered(with event: NSEvent) {
-        onMouseEntered?()
-    }
-
-    override func mouseExited(with event: NSEvent) {
-        onMouseExited?()
-    }
 
     @objc private func clicked() {
         if NSApp.currentEvent?.type == .rightMouseUp {

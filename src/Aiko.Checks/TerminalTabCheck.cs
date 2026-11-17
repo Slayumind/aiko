@@ -1,0 +1,101 @@
+using System.IO;
+using System.Runtime.InteropServices;
+using System.Windows;
+using System.Windows.Interop;
+using Aiko.App;
+
+namespace Aiko.Checks;
+
+/// --try-tab: whether Tab and the arrows in a terminal reach it before WPF takes them (D-370). A window
+/// off the screen holds a real terminal with cmd.exe; a press of Tab and of Shift+Tab is put into the
+/// queue of the window of the terminal, as the keyboard would put it, and the check sees whether the
+/// hook of WindowKeys sent it to the program and emptied the message. Nothing reaches other windows
+/// or the desktop.
+[System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763")]
+static class TerminalTabCheck
+{
+    private const int KeyDown = 0x0100;
+    private const int Tab = 0x09;
+    private const int Left = 0x25;
+    private const int Down = 0x28;
+
+    public static int Run(string reportPath)
+    {
+        var report = new List<string>();
+        var failed = false;
+        void Check(string what, bool ok)
+        {
+            failed |= !ok;
+            report.Add($"{(ok ? "PASS" : "FAIL")} {what}");
+        }
+
+        var application = Tips.Install(new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown });
+        application.Startup += async (_, _) =>
+        {
+            var terminal = new TerminalSurface(new PtyLaunch("cmd.exe /k", Path.GetTempPath(), new Dictionary<string, string?>()));
+            var window = new Window
+            {
+                Left = -10000,
+                Top = -10000,
+                Width = 600,
+                Height = 300,
+                ShowInTaskbar = false,
+                ShowActivated = false,
+                WindowStyle = WindowStyle.None,
+                Content = terminal,
+            };
+            window.Show();
+            await Task.Delay(1500);
+
+            var sent = new List<bool>();
+            using var keys = new WindowKeys(new WindowInteropHelper(window).Handle, (_, _, _) => false)
+            {
+                TerminalTab = shift =>
+                {
+                    sent.Add(shift);
+                    return true;
+                },
+            };
+
+            var child = Descendants(terminal).OfType<HwndHost>().Select(host => host.Handle).FirstOrDefault(handle => handle != IntPtr.Zero);
+            Check("the terminal has a window of its own", child != IntPtr.Zero);
+
+            PostMessage(child, KeyDown, Tab, IntPtr.Zero);
+            await Task.Delay(500);
+            Check("Tab put into the window of the terminal goes to the program", sent.Count == 1 && !sent[0]);
+
+            // An arrow goes to the terminal's own window past the navigation of WPF, which would move
+            // the focus over the buttons of the window with it.
+            var arrows = new List<int>();
+            keys.ArrowSent += key => arrows.Add(key);
+            PostMessage(child, KeyDown, Left, IntPtr.Zero);
+            PostMessage(child, KeyDown, Down, IntPtr.Zero);
+            await Task.Delay(500);
+            Check("Left and Down put into the window of the terminal go to it past WPF", arrows is [Left, Down]);
+
+            terminal.Close();
+            window.Close();
+            File.WriteAllLines(reportPath, report);
+            application.Shutdown();
+        };
+        application.Run();
+        return failed ? 1 : 0;
+    }
+
+    private static IEnumerable<DependencyObject> Descendants(DependencyObject parent)
+    {
+        for (var at = 0; at < System.Windows.Media.VisualTreeHelper.GetChildrenCount(parent); at++)
+        {
+            var child = System.Windows.Media.VisualTreeHelper.GetChild(parent, at);
+            yield return child;
+            foreach (var deeper in Descendants(child))
+            {
+                yield return deeper;
+            }
+        }
+    }
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool PostMessage(IntPtr window, int message, int wParam, IntPtr lParam);
+}

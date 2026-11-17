@@ -33,6 +33,19 @@ sealed class ShellNumbers(SnapshotWatcher watcher)
             .ToList();
     }
 
+    /// The latest limits of one environment, from whichever source spoke last. Null when nothing
+    /// was reported for it yet.
+    public LimitSnapshot? SnapshotFor(string environment)
+    {
+        var direct = Direct?.Latest;
+        return EnvironmentSnapshots.Combine(SettingsStore.LoadEnvironments(), watcher.ByFile)
+            .Where(snapshot => snapshot.Environment == environment)
+            .Select(snapshot => direct is not null && direct.TryGetValue(environment, out var fromApi)
+                ? LimitSnapshot.Newer(snapshot, fromApi)
+                : snapshot)
+            .FirstOrDefault();
+    }
+
     /// The card for these environments, with what the card alone needs: the plan and whether
     /// Aiko's line is in the settings.
     public CardModel CardFor(IReadOnlyList<CardState> cards, DateTimeOffset now) =>

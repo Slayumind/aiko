@@ -25,6 +25,13 @@
   <SolidColorBrush x:Key="Caution" Color="{StaticResource CautionColor}" />
   <SolidColorBrush x:Key="Destructive" Color="{StaticResource DestructiveColor}" />
 
+  <!-- Red at low strength: the ground of a danger button, and the box around a step that cannot be undone. -->
+  <SolidColorBrush x:Key="DangerTint" Color="#29FF6467" />
+  <SolidColorBrush x:Key="DangerZone" Color="#0FFF6467" />
+  <SolidColorBrush x:Key="DangerZoneLine" Color="#38FF6467" />
+  <!-- What lies under a panel that floats over the window: still there, only quieter. -->
+  <SolidColorBrush x:Key="Scrim" Color="#990A0A0A" />
+
   <!-- Hairlines are white at low opacity, not a grey of their own: they have to sit on both the
        card and the raised surface without becoming a line of their own colour. -->
   <Color x:Key="HairlineColor">#1AFFFFFF</Color>
@@ -35,26 +42,13 @@
   <!-- Hover lightens whatever is under it by this much, as a layer that fades in. -->
   <SolidColorBrush x:Key="HoverLayer" Color="#12FFFFFF" />
 
-  <FontFamily x:Key="Sans">pack://application:,,,/Assets/Fonts/#Geist</FontFamily>
-  <FontFamily x:Key="Mono">pack://application:,,,/Assets/Fonts/#Geist Mono</FontFamily>
+  <FontFamily x:Key="Sans">pack://application:,,,/Aiko.App;component/Assets/Fonts/#Geist</FontFamily>
+  <FontFamily x:Key="Mono">pack://application:,,,/Aiko.App;component/Assets/Fonts/#Geist Mono</FontFamily>
 
   <sys:Double x:Key="TextTiny">11</sys:Double>
   <sys:Double x:Key="TextSmall">12</sys:Double>
   <sys:Double x:Key="TextNumber">13</sys:Double>
   <sys:Double x:Key="TextName">14</sys:Double>
-
-  <!-- One material for the icon, the card, the island and the windows. -->
-  <CornerRadius x:Key="CardRadius">14</CornerRadius>
-  <CornerRadius x:Key="BarRadius">2</CornerRadius>
-  <sys:Double x:Key="CardWidth">296</sys:Double>
-  <sys:Double x:Key="CardPadding">14</sys:Double>
-  <sys:Double x:Key="BarHeight">4</sys:Double>
-  <sys:Double x:Key="Step">4</sys:Double>
-
-  <Thickness x:Key="CardPad">14</Thickness>
-  <Thickness x:Key="BlockGap">0,12,0,0</Thickness>
-  <Thickness x:Key="RowGap">0,8,0,0</Thickness>
-  <Thickness x:Key="UnderBar">0,3,0,0</Thickness>
 
   <!-- Only floating things get a shadow, and only this one. -->
   <DropShadowEffect x:Key="CardShadow" BlurRadius="24" ShadowDepth="8" Direction="270"

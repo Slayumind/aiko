@@ -25,11 +25,29 @@ enum Bridge {
         switch mode {
         case .memory(let job): answerMemoryHook(job, input)
         case .sessionStart: remindAboutBinding(input)
+        // It comes with --settings, so it runs in every environment, with the personality or without it.
+        case .terminalHook: recordTerminalEvent(input)
         case .hook: recordActivity(input)
         default: runStatusLine(input)
         }
 
         return 0
+    }
+
+    /// The last event of a session of the terminal, for its row. The session is named by the variable
+    /// Aiko gave it, not by the id in the input: a file name never comes from what Claude Code sends.
+    /// The twin of RecordTerminalEvent in Aiko.Bridge.
+    private static func recordTerminalEvent(_ input: String) {
+        let now = Int64(Date().timeIntervalSince1970 * 1000)
+        guard let file = TerminalEvent.fileName(ProcessInfo.processInfo.environment[TerminalEvent.sessionVariable]),
+              let event = TerminalEvent.fromHook(input, now: now) else { return }
+
+        let folder = AikoFolders.forThisMac().terminalEventsFolder
+        let path = (folder as NSString).appendingPathComponent(file)
+        let written = (try? String(contentsOfFile: path, encoding: .utf8)).flatMap { TerminalEvent.fromJson($0) }
+        guard event.replaces(written) else { return }
+
+        try? Disk.writeInOneStep(FileWrite(path: path, text: event.toJson()))
     }
 
     /// Read the payload as bytes and drop a byte order mark. The same text goes on to the status
@@ -53,7 +71,8 @@ enum Bridge {
             configDirectory: folder,
             settingsJson: Disk.readIfThere(ClaudeSettingsEditor.pathIn(folder)),
             input: input,
-            now: Date())
+            now: Date(),
+            written: Disk.readIfThere(folders.snapshotFile(SnapshotName.forConfigDirectory(folder))))
 
         if let snapshot = plan.snapshot {
             try? Disk.writeInOneStep(snapshot)

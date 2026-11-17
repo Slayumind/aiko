@@ -68,6 +68,13 @@ struct AppSettingsTests {
         settings.language = .russian
         settings.hideIslandInFullScreen = false
         settings.island = IslandPosition(.right, 0.25)
+        settings.voiceInput = true
+        settings.voiceEngine = .openAI
+        settings.voiceLanguage = .english
+        settings.terminalShown = true
+        settings.openTerminalAtStartup = true
+        settings.headerOpen = true
+        settings.sessionListHidden = true
 
         #expect(AppSettings.fromJson(settings.toJson()) == settings)
     }
@@ -121,5 +128,45 @@ struct AppSettingsTests {
 
         #expect(back.meetAikoShown)
         #expect(back.schemaVersion == AppSettings.currentSchema)
+    }
+
+    /// It needs a 465 MB download or a key, so nobody gets it without turning it on (D-313).
+    @Test
+    func voiceInputIsOffAndLocalUntilTurnedOn() {
+        let settings = AppSettings.fromJson(#"{ "schemaVersion": 3, "place": "Tray" }"#)
+
+        #expect(settings.voiceInput == false)
+        #expect(settings.voiceEngine == .local)
+        #expect(AppSettings.default.toJson().contains(#""voiceEngine": "Local""#))
+        #expect(settings.voiceLanguage == .system)
+        #expect(AppSettings.default.toJson().contains(#""voiceLanguage": "System""#))
+    }
+
+    /// The terminal window opens by itself once, and a start with the system opens only the menu
+    /// bar until the person asks for the terminal (D-350).
+    @Test
+    func theTerminalIsNotShownYetAndAStartWithTheSystemOpensOnlyTheMenuBar() {
+        let settings = AppSettings.fromJson(#"{ "schemaVersion": 3, "place": "Tray" }"#)
+
+        #expect(!settings.terminalShown)
+        #expect(!settings.openTerminalAtStartup)
+        #expect(!settings.headerOpen)
+        #expect(!settings.sessionListHidden)
+        #expect(AppSettings.default.toJson().contains(#""openTerminalAtStartup": false"#))
+    }
+
+    /// The twins of WindowZoomTests and NoticesTests on Windows: the zoom and the sound of "waits".
+    @Test
+    func aNewSettingsFileHasTheDefaultZoomAndTheSound() {
+        #expect(AppSettings.default.windowZoom == 115)
+        #expect(AppSettings.fromJson("{}").windowZoom == 115)
+        #expect(AppSettings.fromJson("{}").notifySound)
+    }
+
+    @Test
+    func theZoomGoesThroughTheSettingsFile() {
+        var settings = AppSettings.default
+        settings.windowZoom = 130
+        #expect(AppSettings.fromJson(settings.toJson()).windowZoom == 130)
     }
 }

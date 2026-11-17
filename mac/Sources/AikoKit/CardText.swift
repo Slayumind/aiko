@@ -17,6 +17,18 @@ public enum CardText {
         }
     }
 
+    /// The short name of a limit window, for a narrow place: "5 h", "wk", or the model alone.
+    public static func shortWindowName(_ kind: LimitKind, _ modelName: String? = nil) -> String {
+        switch kind {
+        case .fiveHour:
+            return Strings.cardShortSession
+        case .sevenDay:
+            return Strings.cardShortWeek
+        case .modelWeek:
+            return modelName ?? windowName(kind)
+        }
+    }
+
     /// The share of the limit already gone, said so. A bare "42%" reads as forty two percent left
     /// just as easily as forty two percent spent, and the two are opposite news.
     public static func percent(_ percent: Int) -> String {
@@ -43,6 +55,12 @@ public enum CardText {
         countdown.isReset
             ? Strings.cardJustReset
             : Strings.format(Strings.cardResets, left(countdown))
+    }
+
+    /// The time left on its own, "1h 6m", for a place where the column already says it is the
+    /// time to a reset (the open header of the terminal window).
+    public static func countdown(_ countdown: ResetCountdown) -> String {
+        countdown.isReset ? Strings.cardJustReset : left(countdown)
     }
 
     private static func left(_ countdown: ResetCountdown) -> String {

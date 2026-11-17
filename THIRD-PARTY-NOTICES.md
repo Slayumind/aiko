@@ -19,12 +19,52 @@ build-time tool, and none of it ends up in the program.
 - Licence: MIT
 - Source: https://github.com/microsoft/CsWin32
 
+## Windows Terminal control and ConPTY
+
+The terminal in the Aiko window. The control (`Microsoft.Terminal.Wpf`, `Microsoft.Terminal.Control.dll`)
+draws the screen of the program, and ConPTY (`conpty.dll`, `OpenConsole.exe`) runs the program in a
+pseudo console. Both come from the Windows Terminal project.
+
+- Licence: MIT, Copyright (c) Microsoft Corporation
+- Source: https://github.com/microsoft/terminal
+- The licence text ships next to the app: `src/Aiko.App/Assets/Licenses/windows-terminal-LICENSE.txt`
+
 ## Velopack
 
 Builds the installer and handles updates.
 
 - Licence: MIT
 - Source: https://github.com/velopack/velopack
+
+## whisper.cpp
+
+Turns speech into text for voice input, on the computer. Aiko ships its libraries (`whisper.dll`,
+`ggml*.dll`) from release b5454 (version 1.9.5). The speech model is not shipped: it is downloaded
+when voice input is turned on.
+
+- Licence: MIT, Copyright (c) 2023-2026 The ggml authors
+- Source: https://github.com/ggml-org/whisper.cpp
+- The full licence texts of both ship in the `whisper` folder of the app:
+  `src/Aiko.App/Assets/Licenses/`
+
+## Silero VAD
+
+Tells speech from silence before whisper.cpp reads the sound. Aiko ships the model in the ggml
+format (`ggml-silero-v5.1.2.bin`).
+
+- Licence: MIT, Copyright (c) 2020-present Silero Team
+- Source: https://github.com/snakers4/silero-vad, converted by https://huggingface.co/ggml-org/whisper-vad
+
+## frontend-design and unslop (in the interface skill)
+
+The `interface` skill retells and extends ideas from two skills: Anthropic's `frontend-design`
+(how to choose a direction and avoid template defaults) and Damir Sokolovsky's `unslop` (the signs
+of AI-looking interfaces, the order of the passes and the starting values). The text is written anew;
+no files are copied. The starting values in `references/tokens.md` are adapted from unslop.
+
+- frontend-design: Licence Apache-2.0, Copyright (c) Anthropic PBC.
+  Source: https://github.com/anthropics/claude-plugins-official
+- unslop: Licence CC BY 4.0, by Damir Sokolovsky (@heydamir). Source: https://github.com/heydamir/unslop
 
 ## Not included
 

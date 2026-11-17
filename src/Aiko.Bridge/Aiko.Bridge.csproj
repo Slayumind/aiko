@@ -21,4 +21,10 @@
     <ProjectReference Include="..\Aiko.Core\Aiko.Core.csproj" />
   </ItemGroup>
 
+  <!-- The two Windows programs share these files: what this computer is, and how a file is written. -->
+  <ItemGroup>
+    <Compile Include="..\Shared\*.cs" Link="Shared\%(Filename)%(Extension)" />
+    <Using Include="Aiko.Shared" />
+  </ItemGroup>
+
 </Project>

@@ -45,6 +45,10 @@ public sealed record AikoFolders(PlatformConventions Platform, string SettingsBa
     /// theirs, it is backed up with them, and macOS must not empty it.
     public string MemoryFile => Platform.Join(SettingsFolder, "memory.json");
 
+    /// The sessions of the terminal: their names, folders and conversation ids. No text of a
+    /// conversation is ever written there.
+    public string TerminalFile => Platform.Join(SettingsFolder, "terminal.json");
+
     public string InstallIdFile => Platform.Join(SettingsFolder, "install-id");
 
     public string ReportedPeriodsFile => Platform.Join(SettingsFolder, "reported.json");
@@ -56,6 +60,15 @@ public sealed record AikoFolders(PlatformConventions Platform, string SettingsBa
 
     /// A folder of its own, because the tray reads every file in the snapshots folder as a limit snapshot.
     public string ActivityFolder => Platform.Join(LocalFolder, "activity");
+
+    /// The last hook event of each session of the terminal, and the settings with that hook.
+    public string TerminalEventsFolder => Platform.Join(LocalFolder, "terminal");
+
+    /// The settings every session of the terminal starts with (TerminalHooks).
+    public string TerminalHooksFile => Platform.Join(LocalFolder, "terminal-hooks.json");
+
+    /// The pictures pasted into the editor of one session. The folder goes when the session is closed.
+    public string PicturesFolder(string sessionId) => Platform.Join(LocalFolder, "pictures", sessionId);
 
     /// The last answers of the usage API.
     public string DirectCacheFolder => Platform.Join(LocalFolder, "direct");
@@ -71,6 +84,10 @@ public sealed record AikoFolders(PlatformConventions Platform, string SettingsBa
     public string PersonaPluginsFolder => Platform.Join(LocalFolder, "plugins");
 
     public string LogFile => Platform.Join(LocalFolder, "log.txt");
+
+    /// The speech model of voice input, 465 MB, downloaded when voice input is first turned on
+    /// (D-313). It can be downloaded again, so it sits with what Aiko makes for itself.
+    public string VoiceModelFile => Platform.Join(LocalFolder, "models", "ggml-small.bin");
 
     /// The installed app itself, as Velopack lays it out. Windows only: on macOS the app is a
     /// bundle in /Applications and nothing under the base folders points at it.

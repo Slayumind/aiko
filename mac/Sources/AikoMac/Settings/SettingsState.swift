@@ -196,8 +196,21 @@ final class SettingsState: ObservableObject {
 
     var onClose: () -> Void = {}
     var onQuit: () -> Void = {}
+
+    /// What the window does before a step that stops every session: it asks while programs run
+    /// and runs the step after a yes (D-351). With no sessions the step runs at once.
+    var askBeforeStopping: (StopReason, @escaping () -> Void) -> Void = { _, step in step() }
+
+    /// The same before an environment goes: only its own sessions are asked about.
+    var askBeforeRemovingEnvironment: (String, @escaping () -> Void) -> Void = { _, step in step() }
     var onChanged: () -> Void = {}
     var onReopen: () -> Void = {}
+
+    /// The first run in the window (D-394): the checklist alone, one step at a time, with no menu.
+    /// Finish hands the window over to the terminal.
+    var firstRun = false
+    /// Finish of the first run, with the note of the checklist: "" when all went well.
+    var onFirstRunFinished: (String) -> Void = { _ in }
 
     private var savedUntil: Task<Void, Never>?
 
@@ -226,6 +239,7 @@ final class SettingsState: ObservableObject {
             environments: environments,
             plans: byFolder,
             sendsStats: app.sendStats,
+            voiceInput: app.voiceInput,
             checklistOpen: checklist != nil,
             platform: .macOS,
             userProfile: Store.home)
@@ -360,10 +374,13 @@ final class SettingsState: ObservableObject {
 
     /// Everything Aiko set up goes, and the checklist opens from the start, in this same window.
     func startOver(trashSecond: Bool) {
-        checklist?.close()
-        checklist = nil
-        editor.startOver(trashSecond: trashSecond)
-        openChecklist()
+        askBeforeStopping(.startOver) { [weak self] in
+            guard let self else { return }
+            self.checklist?.close()
+            self.checklist = nil
+            self.editor.startOver(trashSecond: trashSecond)
+            self.openChecklist()
+        }
     }
 
     /// Aiko takes everything back and goes. Claude Code may take seconds to answer, so the work
@@ -371,9 +388,16 @@ final class SettingsState: ObservableObject {
     /// managed to put itself in the Bin. keepMemory is the person's answer on the page.
     func deleteAiko(keepMemory: Bool) {
         guard !deleting else { return }
+        askBeforeStopping(.remove) { [weak self] in self?.removeEverything(keepMemory: keepMemory) }
+    }
+
+    private func removeEverything(keepMemory: Bool) {
+        guard !deleting else { return }
         deleting = true
         checklist?.close()
         checklist = nil
+        // A download still going would write the model back into the folder being removed.
+        ModelDownload.stop()
 
         Task.detached {
             let outcome = Uninstall.everything(keepMemory: keepMemory)
@@ -395,6 +419,10 @@ final class SettingsState: ObservableObject {
         let model = ChecklistModel(openFirst: item)
         model.onFinished = { [weak self] note in
             guard let self else { return }
+            if self.firstRun {
+                self.onFirstRunFinished(note)
+                return
+            }
             self.checklist = nil
             self.editor.reload()
             self.showNoteOnFirstEnvironment(note)

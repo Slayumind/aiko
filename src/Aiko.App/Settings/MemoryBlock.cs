@@ -17,11 +17,6 @@ namespace Aiko.App;
 /// rebuilt list cannot disagree with the file.
 sealed class MemoryBlock : StackPanel
 {
-    /// A door for snapshots: AIKO_TRY_MEMORY_FILE=<path> draws the block from that file in place of
-    /// the person's own memory, so a picture for the site never shows real facts. With it the block
-    /// only draws: nothing is written and the real file is not opened.
-    private static readonly string? SampleFile = Environment.GetEnvironmentVariable("AIKO_TRY_MEMORY_FILE");
-
     private readonly HashSet<MemoryCategory> _open = [];
 
     private MemoryFile _memory = Load();
@@ -46,11 +41,9 @@ sealed class MemoryBlock : StackPanel
         Loaded += (_, _) => Reload();
     }
 
-    /// A door for snapshots: AIKO_TRY_MEMORY=open, edit, add or erase draws the block in that state,
-    /// so every state of the mockup can be looked at without clicking.
     private void TryState()
     {
-        var state = Environment.GetEnvironmentVariable("AIKO_TRY_MEMORY");
+        var state = SettingsScene.MemoryState;
         if (string.IsNullOrEmpty(state))
         {
             return;
@@ -73,9 +66,9 @@ sealed class MemoryBlock : StackPanel
     }
 
     private static MemoryFile Load() =>
-        string.IsNullOrEmpty(SampleFile)
+        string.IsNullOrEmpty(SettingsScene.MemoryFile)
             ? MemoryStore.Load()
-            : MemoryFile.FromJson(System.IO.File.ReadAllText(SampleFile)).Memory;
+            : MemoryFile.FromJson(System.IO.File.ReadAllText(SettingsScene.MemoryFile)).Memory;
 
     private void Build()
     {
@@ -487,7 +480,7 @@ sealed class MemoryBlock : StackPanel
 
     private void OpenFile()
     {
-        if (!string.IsNullOrEmpty(SampleFile))
+        if (!string.IsNullOrEmpty(SettingsScene.MemoryFile))
         {
             return;
         }
@@ -522,7 +515,7 @@ sealed class MemoryBlock : StackPanel
     /// saved a moment ago is not lost, and then the block is drawn from what was written.
     private void Apply(Func<MemoryFile, MemoryHandEdit> change, Action? then = null)
     {
-        if (!string.IsNullOrEmpty(SampleFile))
+        if (!string.IsNullOrEmpty(SettingsScene.MemoryFile))
         {
             return;
         }
@@ -570,7 +563,7 @@ sealed class MemoryBlock : StackPanel
     /// finds nothing there. So it reads the styles from the dictionary itself, as Tokens does.
     private static readonly ResourceDictionary Controls = new()
     {
-        Source = new Uri("pack://application:,,,/Theme/Controls.xaml", UriKind.Absolute),
+        Source = new Uri("pack://application:,,,/Aiko.App;component/Theme/Controls.xaml", UriKind.Absolute),
     };
 
     private static Style StyleOf(string key) => (Style)Controls[key];

@@ -39,6 +39,20 @@ struct PersonaPromptTests {
         #expect(prompt.contains("not one long silent place"))
     }
 
+    /// On an errand Aiko talks to a colleague as herself (the envoy skill). The exception is narrow:
+    /// it names who she is, and the rest of the silent places still hold.
+    @Test(arguments: Temperament.allCases)
+    func anErrandToAColleagueIsTheOnlyExceptionAndItIsNarrow(temperament: Temperament) throws {
+        let prompt = PersonaPrompt.compose(temperament)
+        let start = try #require(prompt.range(of: "# Where you stay silent"))
+        let guardrails = prompt[start.lowerBound...]
+
+        #expect(guardrails.contains("One exception: an errand"))
+        #expect(guardrails.contains("the envoy skill"))
+        #expect(guardrails.contains("the user's AI agent, writing from the user's account"))
+        #expect(guardrails.contains("The rest of this list still holds inside an errand"))
+    }
+
     @Test
     func eachTemperamentHasItsOwnBlock() {
         let blocks = Temperament.allCases.map(PersonaPrompt.compose)

@@ -55,6 +55,36 @@ With weights of 1 this is a plain sum. Weights come from section 2 of the skill:
 stat is worth in the anchor. A gap from the median of more than a few percent is worth a look; a gap
 inside it is not proof of balance.
 
+## Flow patterns
+
+The internal economy patterns of Adams and Dormans, *Game Mechanics: Advanced Game Design* (2012),
+appendix B. The list here was read from a secondary summary of the book; check the book before you
+quote it.
+
+| Pattern | Shape | Watch for |
+|---|---|---|
+| Static engine | a steady flow of a resource | the player has nothing to decide about it |
+| Dynamic engine | spend the resource to raise its own flow | runs away without friction |
+| Converter engine | two converters feed each other and make a surplus | the surplus decides the game |
+| Engine building | building and tuning the engine is the main play | a dominant build |
+| Static friction | a steady drain | grinds the player down when flows are low |
+| Dynamic friction | a drain that grows with the player | the player feels punished for success |
+| Stopping mechanism | each use costs more or gives less | the last uses feel worthless |
+| Attrition | players drain each other's resources | the first to fall behind never catches up |
+| Escalating challenge | the opposition grows with progress | a wall when growth outpaces the player |
+| Escalating complexity | more things to manage over time | the player loses track |
+| Arms race | players invest against each other | spending without progress |
+| Slow cycle | a resource that matters on a long rhythm | the player forgets it |
+
+## Depth from a ladder of agents
+
+For numbers without a price (speed, spawn rate, a cooldown), the target is skill depth: agents of
+known strength play every variant, and the depth is the smallest gap between neighbours on the ladder
+by win rate (Kunanusont et al. 2017, https://arxiv.org/abs/1705.01080; Khalifa et al. 2017,
+https://arxiv.org/abs/1906.05160). The noise of a win rate p over n runs is shown as
+1.96 x sqrt(p(1-p)/n), and a gap below the sum of both noises is not read. Raising one gap alone
+(strongest against random) let the search pick games where only the strongest agent mattered.
+
 ## When the numbers stop
 
 Stop computing and say so when:

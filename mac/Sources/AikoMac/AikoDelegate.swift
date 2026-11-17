@@ -13,6 +13,12 @@ final class AikoDelegate: NSObject, NSApplicationDelegate {
             Store.settings().language, systemLanguageTag: Locale.preferredLanguages.first)
             ? .russian
             : .english
+        // A snapshot in the other language, as AIKO_TRY_LANGUAGE on Windows: the setting stays.
+        switch ProcessInfo.processInfo.environment["AIKO_TRY_LANGUAGE"] {
+        case "English": Strings.language = .english
+        case "Russian": Strings.language = .russian
+        default: break
+        }
 
         // The self test is asked for by a variable, or by an argument: `open Aiko.app --args
         // --try-island` is the only way to pass anything to an app that is opened, not run.
@@ -42,6 +48,34 @@ final class AikoDelegate: NSObject, NSApplicationDelegate {
         }
 
         return nil
+    }
+
+    /// With programs running in the window Aiko asks first and quits only after a yes (D-351).
+    /// The end of the Mac session does not wait for that answer, as the end of a Windows session
+    /// does not: log out, restart and shut down quit at once.
+    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        if Self.macSessionEnds() {
+            shell.endForSessionEnd()
+            return .terminateNow
+        }
+        return shell.mayQuit { yes in sender.reply(toApplicationShouldTerminate: yes) }
+    }
+
+    /// The quit event of log out, restart or shut down names its reason.
+    private static func macSessionEnds() -> Bool {
+        guard let event = NSAppleEventManager.shared().currentAppleEvent,
+              let reason = event.attributeDescriptor(forKeyword: code("why?"))?.enumCodeValue else { return false }
+        return ["logo", "rlgo", "rrst", "rest", "rsdn", "shut"].map(code).contains(reason)
+    }
+
+    private static func code(_ text: String) -> OSType {
+        text.utf8.reduce(0) { $0 << 8 | OSType($1) }
+    }
+
+    /// Aiko started again while it runs, from Spotlight, Launchpad or the Finder (D-419).
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        shell.openAskedByAnotherStart()
+        return false
     }
 
     func applicationWillTerminate(_ notification: Notification) {

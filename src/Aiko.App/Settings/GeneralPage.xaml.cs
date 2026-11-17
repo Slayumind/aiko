@@ -37,7 +37,7 @@ public partial class GeneralPage : UserControl
     {
         InitializeComponent();
         Fill();
-        ShowUpdate(UpdateInstall.ReadyVersion is null ? UpdateStage.NotAsked : UpdateStage.Ready);
+        ShowUpdate(UpdateInstall.ReadyVersion is not null ? UpdateStage.Ready : KnownNewer() ? UpdateStage.Available : UpdateStage.NotAsked);
         TryUpdateStage();
         LanguageChoiceDrop.Picked += OnLanguagePicked;
         Unloaded += (_, _) => _closing.Cancel();
@@ -47,6 +47,10 @@ public partial class GeneralPage : UserControl
     public event Action? Saved;
 
     public event Action? QuitRequested;
+
+    /// Raised when the update is ready and the person asked to restart into it. The window asks
+    /// about running sessions first (D-351).
+    public event Action? RestartForUpdateRequested;
 
     /// Raised after the second click on "Start over", with whether the second folder goes to the
     /// Recycle Bin.
@@ -71,6 +75,8 @@ public partial class GeneralPage : UserControl
         // The switch shows what Windows actually holds, not what our file remembers: the person may
         // have removed the entry elsewhere.
         RunAtStartup.IsChecked = Startup.IsEnabled();
+        StartupOnly.IsOpen = RunAtStartup.IsChecked == true;
+        TerminalAtStartup.IsChecked = _settings.OpenTerminalAtStartup;
 
         LanguageChoiceDrop.Items = [Strings.LanguageSystem, "Русский", "English"];
         LanguageChoiceDrop.SelectedIndex = Array.IndexOf(Languages, _settings.Language);
@@ -80,15 +86,16 @@ public partial class GeneralPage : UserControl
         _filling = false;
     }
 
-    private void Save(AppSettings settings)
+    /// The change goes to what the file holds now, not to the copy the page read when it opened:
+    /// the terminal window may have changed its zoom or its header since.
+    private void Save(Func<AppSettings, AppSettings> change)
     {
         if (_filling)
         {
             return;
         }
 
-        _settings = settings;
-        SettingsStore.Save(settings);
+        _settings = SettingsStore.Change(change);
         Saved?.Invoke();
     }
 
@@ -96,11 +103,11 @@ public partial class GeneralPage : UserControl
     {
         // A setting that changes nothing should not look as if it does.
         IslandOnly.IsOpen = PlaceIsland.IsChecked == true;
-        Save(_settings with { Place = PlaceIsland.IsChecked == true ? AikoPlace.Island : AikoPlace.Tray });
+        Save(settings => settings with { Place = PlaceIsland.IsChecked == true ? AikoPlace.Island : AikoPlace.Tray });
     }
 
     private void OnHideChanged(object sender, RoutedEventArgs e) =>
-        Save(_settings with { HideIslandInFullScreen = HideInFullScreen.IsChecked == true });
+        Save(settings => settings with { HideIslandInFullScreen = HideInFullScreen.IsChecked == true });
 
     /// Startup is a key in the registry, not a line in our file, so this one writes to Windows.
     private void OnStartupChanged(object sender, RoutedEventArgs e)
@@ -112,7 +119,18 @@ public partial class GeneralPage : UserControl
 
         var wanted = RunAtStartup.IsChecked == true;
         Startup.Set(wanted);
-        Save(_settings with { RunAtStartup = wanted });
+        StartupOnly.IsOpen = wanted;
+        Save(settings => settings with { RunAtStartup = wanted });
+    }
+
+    private void OnTerminalAtStartupChanged(object sender, RoutedEventArgs e)
+    {
+        if (_filling)
+        {
+            return;
+        }
+
+        Save(settings => settings with { OpenTerminalAtStartup = TerminalAtStartup.IsChecked == true });
     }
 
     private void OnLanguagePicked(int index)
@@ -123,7 +141,7 @@ public partial class GeneralPage : UserControl
             return;
         }
 
-        Save(_settings with { Language = language });
+        Save(settings => settings with { Language = language });
         LanguageChoice.Apply(language);
 
         // Every word on screen was picked when its control was made, so the window has to be built
@@ -176,11 +194,9 @@ public partial class GeneralPage : UserControl
         _ => "the one Windows uses",
     };
 
-    /// A door for snapshots: AIKO_TRY_UPDATE=UpToDate, Available, Downloading, Ready, CheckFailed,
-    /// DownloadFailed or CannotInstall draws the update line at that stage, with a made-up version.
     private void TryUpdateStage()
     {
-        if (!Enum.TryParse<UpdateStage>(Environment.GetEnvironmentVariable("AIKO_TRY_UPDATE"), out var stage))
+        if (SettingsScene.Update is not { } stage)
         {
             return;
         }
@@ -193,10 +209,6 @@ public partial class GeneralPage : UserControl
             ShowPercent(64);
         }
     }
-
-    /// The tray menu has a "Check for updates" item. It opens this page and asks straight away, so
-    /// the answer appears where the button already is.
-    public async void StartUpdateCheck() => await CheckAsync();
 
     /// The one button of the line does whatever is the next step from where the line stands.
     private async void OnUpdateButton(object sender, RoutedEventArgs e)
@@ -212,12 +224,26 @@ public partial class GeneralPage : UserControl
                 await InstallAsync();
                 break;
             case UpdateAction.Restart:
-                UpdateInstall.ApplyAndRestart();
+                RestartForUpdateRequested?.Invoke();
                 break;
             case UpdateAction.OpenDownloadPage:
                 OnOpenDownload(sender, e);
                 break;
         }
+    }
+
+    /// A newer version the daily check found in this run: the page says so at once (D-397). Only
+    /// with update checks on, as the switch promises that Aiko does not go looking otherwise.
+    private bool KnownNewer()
+    {
+        if (!_settings.CheckUpdates || UpdateRun.LastInfo is not { } info || info.CompareWith(AppVersion.Current()) != UpdateState.Available)
+        {
+            return false;
+        }
+
+        _newerVersion = info.Latest;
+        _downloadUrl = info.DownloadUrl ?? ReleasesPage;
+        return true;
     }
 
     private async Task CheckAsync()
@@ -291,6 +317,52 @@ public partial class GeneralPage : UserControl
         },
     };
 
+    private string? _newsFor;
+
+    /// What the newer version brings, under its line: the titles of the notes of its release, in
+    /// the language of Aiko (D-397). Nothing while there is no newer version or no notes.
+    private async void ShowNews(string? version)
+    {
+        if (string.IsNullOrEmpty(version))
+        {
+            _newsFor = null;
+            NewsList.Children.Clear();
+            NewsList.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        if (version == _newsFor)
+        {
+            return;
+        }
+
+        // A snapshot draws no notes: it asks no one, and it has no loop of the window to come back to.
+        if (SettingsScene.Update is not null)
+        {
+            return;
+        }
+
+        _newsFor = version;
+        var titles = await ReleaseNotesRun.ForAsync(version, _closing.Token);
+        if (_closing.IsCancellationRequested || version != _newsFor)
+        {
+            return;
+        }
+
+        NewsList.Children.Clear();
+        foreach (var title in titles)
+        {
+            NewsList.Children.Add(new System.Windows.Controls.Primitives.BulletDecorator
+            {
+                Bullet = new System.Windows.Shapes.Ellipse { Width = 4, Height = 4, Fill = Tokens.Brush("Muted"), Margin = new Thickness(2, 0, 8, 0) },
+                Child = new TextBlock { Text = title, Style = (Style)FindResource("RowHint"), TextWrapping = TextWrapping.Wrap },
+                Margin = new Thickness(0, 4, 0, 0),
+            });
+        }
+
+        NewsList.Visibility = titles.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+    }
+
     /// Draws the line for a stage: what it says, the small print under it, and the one action.
     private void ShowUpdate(UpdateStage stage)
     {
@@ -314,6 +386,7 @@ public partial class GeneralPage : UserControl
             _ => (current, string.Empty),
         };
         UpdateDetail.Visibility = UpdateDetail.Text.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
+        ShowNews(stage is UpdateStage.Available or UpdateStage.Downloading or UpdateStage.Ready ? newer : null);
 
         var action = UpdateBlock.ActionFor(stage);
         UpdateButton.Content = action switch

@@ -2,11 +2,11 @@ import AikoKit
 import AppKit
 
 /// The one owner of everything Aiko shows on macOS: the icon in the menu bar or the island at the
-/// edge of the screen, the card under whichever of them is there, and the settings window. All of
-/// them show the same numbers and the user swaps between the two places at will, so one class
-/// decides who is told what and when.
+/// edge of the screen, and the terminal window with the settings in it. All of them show the same
+/// numbers and the user swaps between the two places at will, so one class decides who is told
+/// what and when.
 ///
-/// The parts do the work: MenuBarIcon and MenuBarMenu, IslandHost, CardHost, ShellNumbers for what
+/// The parts do the work: MenuBarIcon and MenuBarMenu, IslandHost, TerminalHost, ShellNumbers for what
 /// the numbers are, StartupChores for what is put right at every start. This class only connects
 /// them. The twin of AikoShell.cs on Windows.
 @MainActor
@@ -18,14 +18,36 @@ final class AikoShell {
     private let icon = MenuBarIcon()
     private let menu = MenuBarMenu()
     private let island = IslandHost()
-    private let cards: CardHost
 
     private var watch: SnapshotWatch?
     private var updates: UpdateWatch?
 
-    /// One settings window at a time (D-177). It is made when it is asked for and dropped when it
-    /// closes, the way every other window of Aiko is.
-    private var settings: SettingsWindow?
+    /// The terminal window with the sessions (D-425), made on the first click and kept while Aiko runs.
+    private lazy var terminal: TerminalHost = {
+        let host = TerminalHost(
+            limitsOf: { [weak self] name in self?.numbers.snapshot(for: name) },
+            cardOf: { [weak self] in self?.numbers.card() ?? CardModel(updated: "", blocks: []) })
+        host.onQuitAsked = { NSApp.terminate(nil) }
+        host.onSettingsChanged = { [weak self] in self?.onRefresh() }
+        host.onShownChanged = { [weak self] shown in
+            self?.windowOpen = shown
+            // The window has the Dock icon, shown or minimized: the island steps aside until the
+            // window is closed (D-409, D-410).
+            self?.island.followTerminal(shown)
+            self?.applyPlace()
+        }
+        host.showUpdate(self.updates?.newerVersion != nil)
+        self.terminalMade = true
+        host.onWaitingStarted = { [weak self] in self?.playWaiting() }
+        host.onSessionsChanged = { [weak self] counts in self?.showSessions(counts) }
+        return host
+    }()
+
+    /// While the window is open it has the Dock icon, and the menu bar icon steps aside (D-410).
+    private var windowOpen = false
+
+    /// The terminal host is made on the first click; until then nothing of it is touched.
+    private var terminalMade = false
 
     /// The face for two seconds after a session event (D-211), and the way to it and back.
     private let faces = FacePlay()
@@ -37,20 +59,17 @@ final class AikoShell {
     private var changingNothing = false
 
     init() {
-        cards = CardHost(numbers: numbers, icon: icon, island: island)
-        cards.onSettings = { [weak self] in self?.openSettings(at: nil) }
 
         icon.faces = faces
         icon.rows = { [weak self] in self?.numbers.iconRows() ?? (nil, nil) }
         icon.tooltip = { [weak self] in
             TrayText.tooltip(self?.numbers.cards() ?? [], newerVersion: self?.updates?.newerVersion)
         }
-        icon.onMouseEntered = { [weak self] in self?.cards.startHover() }
-        icon.onMouseExited = { [weak self] in self?.cards.cancelHover() }
         icon.onClick = { [weak self] in self?.onIconClicked() }
         icon.onMenu = { [weak self] in self?.onMenuRequested() }
 
-        island.onCard = { [weak self] pinned in self?.cards.open(pinned: pinned) }
+        island.onClick = { [weak self] in self?.openWindow() }
+        island.onWaitingClick = { [weak self] id in self?.terminal.openSession(id) }
     }
 
     /// A self test draws one thing to be looked at and must leave the machine as it found it.
@@ -84,7 +103,9 @@ final class AikoShell {
             return
         }
 
+        StartupChores.repairOurStatusLines(environments)
         StartupChores.refreshPluginsAndCommands(environments)
+        StartupChores.clearStaleActivity()
 
         // Not in a self test: the check sends a request and writes down the reported week.
         let checks = UpdateWatch()
@@ -112,11 +133,46 @@ final class AikoShell {
             var shown = app
             shown.memoryShown = true
             Store.saveSettings(shown)
+        } else if !changingNothing, !showTerminalOnce(), app.openTerminalAtStartup, LoginItem.isEnabled() {
+            // macOS cannot tell a start at login from a start by hand, so while Aiko starts at
+            // login the switch opens the window at every start; Windows only at the start with it.
+            terminal.show()
         }
     }
 
+    /// The terminal window opens by itself once, when Aiko is set up (D-350). Says whether it
+    /// opened now.
+    private func showTerminalOnce() -> Bool {
+        var app = Store.settings()
+        guard !app.terminalShown, Store.environments().hasEnvironments else { return false }
+
+        app.terminalShown = true
+        Store.saveSettings(app)
+        terminal.show()
+        return true
+    }
+
+    /// Quit now, or ask first while programs run in the window: the answer comes to `answer`.
+    func mayQuit(_ answer: @escaping (Bool) -> Void) -> NSApplication.TerminateReply {
+        guard !selfTesting, terminal.anyRunning else {
+            terminal.endForQuit()
+            return .terminateNow
+        }
+        terminal.askToStop(.quit) { [weak self] yes in
+            if yes { self?.terminal.endForQuit() }
+            answer(yes)
+        }
+        return .terminateLater
+    }
+
+    /// Log out, restart or shut down: the programs end with Aiko, and the sessions stay for the
+    /// next start.
+    func endForSessionEnd() {
+        terminal.endForQuit()
+    }
+
     func stop() {
-        cards.stop()
+        terminal.rememberPlace()
         watch?.stop()
         updates?.stop()
         mood?.stop()
@@ -136,20 +192,88 @@ final class AikoShell {
             island.show(numbers.cards(), at: settings.island, newerVersion: updates?.newerVersion)
         } else {
             island.close()
-            icon.add()
+            if windowOpen {
+                icon.remove()
+            } else {
+                icon.add()
+            }
+        }
+    }
+
+    /// How many sessions wait, ended a turn, stopped and work (D-364, D-409): the menu bar icon and
+    /// the island show them.
+    private(set) var sessions = SessionCounts.none
+
+    private func showSessions(_ counts: SessionCounts) {
+        sessions = counts
+        icon.badge = counts.badge
+        island.showSessions(counts)
+    }
+
+    /// Times the sound of a session that starts to wait was due, for --try-pulse.
+    private(set) var waitingSounds = 0
+
+    /// The sound of a session that starts to wait (D-375). A check changes nothing for the person,
+    /// so it plays none.
+    private func playWaiting() {
+        waitingSounds += 1
+        if !selfTesting, let path = Bundle.main.path(forResource: "waiting", ofType: "wav") {
+            NSSound(contentsOfFile: path, byReference: true)?.play()
         }
     }
 
     // ---- Doors for the self tests: they drive the shell through these and nothing else ----
 
-    /// Proof that the app starts, reads the snapshots and lays the card out, for a machine nobody
-    /// is looking at. The shim has the same door under AIKO_SHIM_SELF_TEST.
+    /// The settings panel at the zoom of the window: its frame, the bounds SwiftUI lays out in, and
+    /// the height its content asks for.
+    var settingsPanelForCheck: String { terminal.settingsPanelForCheck }
+
+    /// Proof that the app starts, reads the snapshots and draws the icon, for a machine nobody is
+    /// looking at. The shim has the same door under AIKO_SHIM_SELF_TEST.
     func selfTest(_ what: String, value: String? = nil) {
         selfTesting = true
         island.changingNothing = true
 
+        // AIKO_TRY_SESSIONS="waiting,done,stopped,working" puts counts on the island and the icon for
+        // a snapshot, with no sessions running.
+        if let asked = ProcessInfo.processInfo.environment["AIKO_TRY_SESSIONS"] {
+            let n = asked.split(separator: ",").map { Int($0) ?? 0 } + [0, 0, 0, 0]
+            showSessions(SessionCounts(working: n[3], waiting: n[0], done: n[1], stopped: n[2], firstWaiting: n[0] > 0 ? "check" : nil))
+        }
+
         if what == "settings" || what == "wizard" {
             SettingsCheck.run(what, value: value, shell: self)
+            return
+        }
+
+
+        if what == "terminal" {
+            TerminalCheck.run(terminal) { [weak self] in self?.icon.isShown ?? false }
+            return
+        }
+
+        if what == "editor" {
+            EditorCheck.run(terminal)
+            return
+        }
+
+        if what == "shell" {
+            ShellCheck.run(terminal)
+            return
+        }
+
+        if what == "stopped" {
+            StoppedCheck.run(terminal)
+            return
+        }
+
+        if what == "pulse" {
+            PulseCheck.run(terminal) { [weak self] in self?.waitingSounds ?? 0 }
+            return
+        }
+
+        if what == "voice" {
+            VoiceCheck.run(terminal, wav: value)
             return
         }
 
@@ -158,36 +282,17 @@ final class AikoShell {
             return
         }
 
-        if what != "1", what != "card" {
+        if what != "1" {
             IslandCheck.run(what, shell: self)
             return
         }
-
-        cards.open(pinned: true)
 
         let rows = numbers.iconRows()
         Log.write("self test: icon \(describe(icon.frame))")
         Log.write("self test: tooltip \"\(icon.tooltipForCheck)\"")
         Log.write("self test: ring \(describe(rows.ring)), dot \(describe(rows.dot))")
 
-        if let card = cards.window {
-            Log.write("self test: card \(describe(card.frame))")
-        }
-
-        let model = numbers.card()
-        Log.write("self test: header \"\(model.updated)\"")
-        for block in model.blocks {
-            // The plan itself is an account fact and stays out of the log, as on Windows.
-            Log.write("self test: block \"\(block.name)\" plan shown: \(block.showsPlan) "
-                + "state \"\(block.state)\" note \"\(block.showsNote ? block.note : "")\"")
-            for row in block.rows {
-                Log.write("self test: row \"\(row.name)\" \"\(row.percent)\" "
-                    + "\"\(row.resets)\" \"\(row.pace)\" fill \(row.fill)")
-            }
-        }
-
-        // Long enough for the card to draw and for a new snapshot to arrive, then away: nothing
-        // here is meant to stay on screen.
+        // Long enough for a new snapshot to arrive, then away: nothing here stays on screen.
         DispatchQueue.main.asyncAfter(deadline: .now() + 3) { NSApp.terminate(nil) }
     }
 
@@ -205,7 +310,7 @@ final class AikoShell {
             items.performActionForItem(at: at)
         }
 
-        Log.write("self test: menu picked \"\(Strings.settings)\", settings window open: \(settings != nil)")
+        Log.write("self test: menu picked \"\(Strings.settings)\", settings open: \(terminal.settingsOpenForCheck)")
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) { NSApp.terminate(nil) }
     }
 
@@ -223,17 +328,6 @@ final class AikoShell {
     func showFaceForCheck(_ face: AikoFace?) {
         onFace(face)
     }
-
-    /// The card as the island would open it, and where it ended up. Only the self test calls these.
-    func openCardForCheck(pinned: Bool) {
-        cards.open(pinned: pinned)
-    }
-
-    func closeCardForCheck() {
-        cards.closeForCheck()
-    }
-
-    var cardFrameForCheck: NSRect? { cards.window?.frame }
 
     /// The picture the menu bar holds right now, so a self test can see it change.
     var iconPictureForCheck: Data? { icon.pictureForCheck }
@@ -260,7 +354,9 @@ final class AikoShell {
 
         icon.update()
         island.update(numbers.cards())
-        cards.refresh()
+        if windowOpen {
+            terminal.limitsChanged()
+        }
 
         if selfTesting {
             Log.write("self test: new numbers, tooltip \"\(icon.tooltipForCheck)\"")
@@ -271,6 +367,16 @@ final class AikoShell {
     private func onNewerVersion() {
         icon.update()
         island.update(numbers.cards(), newerVersion: updates?.newerVersion)
+        if terminalMade {
+            terminal.showUpdate(updates?.newerVersion != nil)
+        }
+    }
+
+    /// Aiko started again while it runs (D-419): Spotlight, Launchpad or the Finder open the window
+    /// of this copy, the same as a click on the menu bar icon. A full menu bar or the notch may hide
+    /// the icon, and this is the way back then.
+    func openAskedByAnotherStart() {
+        openWindow()
     }
 
     // ---- The face (D-211) ----
@@ -306,15 +412,21 @@ final class AikoShell {
 
     // ---- The icon is clicked ----
 
-    /// A left click opens the card. Swapping the ring instead left the click with no visible
-    /// answer beyond two colours trading places, which reads as a glitch.
+    /// A click on the icon or the island opens the terminal window, as on Windows (D-399, D-425);
+    /// before the first environment, the first run.
     private func onIconClicked() {
-        cards.cancelHover()
-        cards.open(pinned: true)
+        openWindow()
+    }
+
+    private func openWindow() {
+        if Store.environments().environments.isEmpty {
+            _ = openSettings(at: nil)
+        } else {
+            terminal.show()
+        }
     }
 
     private func onMenuRequested() {
-        cards.cancelHover()
 
         let items = menu.build(otherEnvironment: ShellNumbers.otherEnvironment()) { [weak self] command in
             self?.run(command)
@@ -329,18 +441,17 @@ final class AikoShell {
             if !changingNothing, ShellNumbers.swapRing() {
                 icon.update()
             }
+
+        case .open:
+            openWindow()
         case .settings:
             openSettings(at: nil)
-        case .refresh:
-            onRefresh()
-        case .updates:
-            openSettings(at: .general).startUpdateCheck()
         case .exit:
             NSApp.terminate(nil)
         }
     }
 
-    /// Called after every change in the settings window and from the menu: everything that depends
+    /// Called after every change in the settings and from the menu: everything that depends
     /// on the settings is worked out again.
     private func onRefresh() {
         numbers.noteWhereWeHaveNoAccess()
@@ -348,7 +459,6 @@ final class AikoShell {
         applyPlace()
         icon.update()
         island.update(numbers.cards())
-        cards.refresh()
     }
 
     private func followMoods() {
@@ -359,28 +469,12 @@ final class AikoShell {
         }
     }
 
-    // ---- The settings window ----
+    // ---- The settings ----
 
-    /// The one settings window. A second ask brings the one that is open to the front, so two
-    /// windows can never disagree about what is saved.
+    /// The settings live in the terminal window (D-374): a second ask moves the open ones to the
+    /// page asked for, so two copies can never disagree about what is saved.
     @discardableResult
-    func openSettings(at page: SettingsPage?, item: ChecklistItem? = nil) -> SettingsWindow {
-        if let open = settings {
-            if let page { open.state.show(page) }
-            if let item { open.openChecklist(at: item) }
-            open.show()
-            return open
-        }
-
-        let window = SettingsWindow(page: page)
-        window.onQuit = { NSApp.terminate(nil) }
-        window.onChanged = { [weak self] in self?.onRefresh() }
-        window.onClosed = { [weak self] in self?.settings = nil }
-        window.onReopen = { [weak self] page in self?.openSettings(at: page) }
-
-        settings = window
-        if let item { window.openChecklist(at: item) }
-        window.show()
-        return window
+    func openSettings(at page: SettingsPage?, item: ChecklistItem? = nil) -> SettingsState {
+        terminal.openSettings(at: page, item: item)
     }
 }

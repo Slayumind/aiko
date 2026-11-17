@@ -11,11 +11,19 @@ public enum SnapshotFile {
         root["source"] = .string(name(snapshot.source))
         root["receivedAt"] = .string(dateText(snapshot.receivedAt))
         root["windows"] = .array(snapshot.windows.map { window in
-            .object(JsonObject([
+            var file = JsonObject([
                 ("kind", .string(name(window.kind))),
                 ("percent", .number(String(window.percent))),
                 ("resetsAt", .string(dateText(window.resetsAt))),
-            ]))
+            ])
+            // Only from a provider whose windows are not the ones of Claude.
+            if let length = window.length {
+                file["lengthSeconds"] = .number(String(Int64(length)))
+            }
+            if let label = window.label {
+                file["label"] = .string(label)
+            }
+            return .object(file)
         })
 
         if let model = snapshot.model {
@@ -40,10 +48,14 @@ public enum SnapshotFile {
         let environment = root["environment"]?.stringValue ?? fallbackEnvironment
         let windows = (root["windows"]?.arrayValue ?? []).compactMap { node -> LimitWindow? in
             guard let object = node.objectValue else { return nil }
+            let seconds = object["lengthSeconds"]?.int64Value ?? 0
+            let label = object["label"]?.stringValue?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
             return LimitWindow(
                 kind: limitKind(object["kind"]?.stringValue) ?? .fiveHour,
                 percent: Int(object["percent"]?.int64Value ?? 0),
-                resetsAt: date(object["resetsAt"]?.stringValue))
+                resetsAt: date(object["resetsAt"]?.stringValue),
+                length: seconds > 0 ? TimeInterval(seconds) : nil,
+                label: label.isEmpty ? nil : object["label"]?.stringValue)
         }
 
         guard !windows.isEmpty else {

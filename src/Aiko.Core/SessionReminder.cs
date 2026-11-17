@@ -17,6 +17,9 @@ public static class SessionReminder
     public const string EnvironmentVariable = "AIKO_ENVIRONMENT";
     public const string LaunchedByCommand = "command";
 
+    /// The terminal of Aiko started the session. The reminder stays quiet (D-304).
+    public const string LaunchedByTerminal = "terminal";
+
     public static string? MessageFor(
         string? launch,
         string? runningEnvironment,

@@ -29,6 +29,12 @@ enum Theme {
     /// The plate under the chosen menu item, and under a plan chip.
     static let chosenLayer = Color.white.opacity(0.078)
 
+    /// The red plate of a button that stops something (DangerTint on Windows).
+    static let dangerTint = Color(red: 1, green: 0x64 / 255.0, blue: 0x67 / 255.0).opacity(0x29 / 255.0)
+
+    /// What lies under a question stays there, only quieter (Scrim on Windows).
+    static let scrim = Color(red: 0x0A / 255.0, green: 0x0A / 255.0, blue: 0x0A / 255.0).opacity(0x99 / 255.0)
+
     static func tone(_ tone: LimitTone) -> Color {
         colour(RingArt.colour(for: tone))
     }
@@ -57,6 +63,12 @@ enum Theme {
     static var nsSurface: NSColor { nsColour(Rgba(0x17, 0x17, 0x17)) }
     static var nsInk: NSColor { nsColour(Rgba(0xFA, 0xFA, 0xFA)) }
     static var nsHairline: NSColor { NSColor.white.withAlphaComponent(0.10) }
+    static var nsInputLine: NSColor { NSColor.white.withAlphaComponent(0.149) }
+    static var nsMuted: NSColor { nsColour(Rgba(0xA1, 0xA1, 0xA1)) }
+    static var nsRaised: NSColor { nsColour(Rgba(0x26, 0x26, 0x26)) }
+    static var nsDestructive: NSColor { nsColour(Rgba(0xFF, 0x64, 0x67)) }
+    static var nsCaution: NSColor { nsColour(Rgba(0xFE, 0x9A, 0x00)) }
+    static var nsHoverLayer: NSColor { NSColor.white.withAlphaComponent(0.071) }
 
     // ---- Sizes ----
 
@@ -83,6 +95,8 @@ enum Theme {
     /// Room around the card inside its window, so the shadow is not cut off at the edge.
     static let shadowRoom: CGFloat = 20
 
+    // ---- Icons ----
+
     // ---- Fonts ----
 
     static func sans(_ size: CGFloat, weight: Font.Weight = .regular) -> Font {
@@ -101,6 +115,14 @@ enum Theme {
         }
 
         return .monospacedSystemFont(ofSize: size, weight: .regular)
+    }
+
+    /// The same sans font as `sans`, for text drawn by AppKit.
+    static func sansFont(_ size: CGFloat) -> NSFont {
+        if hasGeist, let font = NSFont(name: "Geist", size: size) {
+            return font
+        }
+        return .systemFont(ofSize: size)
     }
 
     /// Written once at startup and read by the views afterwards, all on the main thread.

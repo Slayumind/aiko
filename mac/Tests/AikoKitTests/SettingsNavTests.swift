@@ -16,12 +16,14 @@ struct SettingsNavTests {
         _ settings: EnvironmentSettings,
         plans: [String: String] = [:],
         sendsStats: Bool = false,
+        voiceInput: Bool = false,
         checklistOpen: Bool = false
     ) -> [SettingsNavEntry] {
         SettingsNav.rows(
             environments: settings,
             plans: plans,
             sendsStats: sendsStats,
+            voiceInput: voiceInput,
             checklistOpen: checklistOpen,
             platform: .macOS,
             userProfile: home)
@@ -36,7 +38,10 @@ struct SettingsNavTests {
         #expect(SettingsPage.general.key == "general")
         #expect(SettingsPage.checklist.key == "setup")
         #expect(SettingsPage.environment("/Users/someone/.claude").key == "env:/Users/someone/.claude")
-        #expect(SettingsPage.fromKey("folders") == .folders)
+        #expect(SettingsPage.terminal.key == "terminal")
+        #expect(SettingsPage.fromKey("terminal") == .terminal)
+        // The folders live in the page of their environment now (D-374).
+        #expect(SettingsPage.fromKey("folders") == nil)
         #expect(SettingsPage.fromKey("env:/Users/someone/.claude") == .environment("/Users/someone/.claude"))
         #expect(SettingsPage.fromKey("env:") == nil)
         #expect(SettingsPage.fromKey("nothing") == nil)
@@ -59,7 +64,7 @@ struct SettingsNavTests {
     @Test
     func anEnvironmentRowSaysThePlanAndTheCommandUnderTheName() {
         let rows = Self.rows(Self.two(), plans: ["/Users/someone/.claude": "Max 20x"])
-        let items = Self.items(rows)
+        let items = Self.items(rows).filter { if case .environment = $0.page { true } else { false } }
 
         #expect(items[0].title == "Main")
         #expect(items[0].note == "Max 20x · aiko-main")
@@ -89,13 +94,14 @@ struct SettingsNavTests {
     }
 
     @Test
-    func theLowerRowsCountWhatIsBoundAndWhoTalks() {
-        let items = Self.items(Self.rows(Self.two(), sendsStats: true))
-        let folders = items.first { $0.page == .folders }
+    func theLowerRowsSayWhatIsSwitchedOn() {
+        let items = Self.items(Self.rows(Self.two(), sendsStats: true, voiceInput: true))
+        let window = items.first { $0.page == .terminal }
         let personality = items.first { $0.page == .personality }
         let privacy = items.first { $0.page == .privacy }
 
-        #expect(folders?.note == Strings.format(Strings.navBound, 1))
+        #expect(window?.note == Strings.navVoiceOn)
+        #expect(Self.items(Self.rows(Self.two())).first { $0.page == .terminal }?.note == Strings.navVoiceOff)
         #expect(personality?.note == Strings.format(Strings.navPersonaOn, 1))
         #expect(privacy?.note == Strings.navPrivacyStatsOn)
     }
@@ -104,15 +110,16 @@ struct SettingsNavTests {
     func theOrderOfTheMenuIsTheOrderOfTheWindowsOne() {
         let rows = Self.rows(Self.two())
 
-        #expect(rows.first == .label(Strings.sectionEnvironments))
-        #expect(rows.contains(.separator))
+        // Three groups told apart by room alone (D-404).
+        #expect(rows.filter { $0 == .gap }.count == 2)
+        #expect(rows[1] == .gap)
         #expect(Self.items(rows).map(\.page) == [
+            .general,
             .environment("/Users/someone/.claude"),
             .environment("/Users/someone/.claude-work"),
-            .folders,
+            .terminal,
             .personality,
             .privacy,
-            .general,
         ])
     }
 

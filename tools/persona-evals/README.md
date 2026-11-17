@@ -7,8 +7,8 @@ may talk, the check allows only the Japanese words on the persona's list, in Jap
 The checks are deterministic (`checks.mjs`, tested with `node --test`). A run costs Claude usage.
 
 ```
-dotnet build src/Aiko.App
-node tools/persona-evals/run.mjs --app src/Aiko.App/bin/Debug/net10.0-windows/Aiko.App.exe
+dotnet build src/Aiko.Checks
+node tools/persona-evals/run.mjs --app src/Aiko.Checks/bin/Debug/net10.0-windows/Aiko.Checks.exe
 node tools/persona-evals/run.mjs --app <exe> --temperaments Musou --cases commit,error
 node tools/persona-evals/run.mjs --app <exe> --temperaments Bright --model claude-fable-5-1
 ```

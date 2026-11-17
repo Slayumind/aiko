@@ -89,8 +89,6 @@ static class CommandFolder
 
     public static void RemoveFromPath() => ChangeUserPath(value => UserPathList.Remove(Platform, value, Folder));
 
-    public static bool IsInPath() => UserPathList.Contains(Platform, ReadUserPath(), Folder);
-
     /// Everything Aiko put here goes: the PATH entry and the folder.
     public static void Remove()
     {

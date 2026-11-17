@@ -12,9 +12,14 @@ sealed class IslandHost(Dispatcher dispatcher)
 
     private IslandWindow? _window;
     private FullScreenWatch? _fullScreen;
+    private bool _fullScreenInFront;
+    private bool _underTerminal;
 
-    /// The island asks for the card: true for a click, which pins it.
-    public event Action<bool>? CardRequested;
+    /// A click on the island, away from the mark of "waits".
+    public event Action? Clicked;
+
+    /// For --try-shell: the click a person makes.
+    public void ClickForCheck() => Clicked?.Invoke();
 
     /// Set by a check, which drags the island about. The settings of the person are not its to change.
     public bool ChangingNothing { get; set; }
@@ -23,9 +28,7 @@ sealed class IslandHost(Dispatcher dispatcher)
 
     public IslandWindow? Window => _window;
 
-    public bool CursorOver => _window is { IsVisible: true } window && Pointer.IsOver(window);
-
-    /// Where the island is, for a card that opens right under it. Null while it is not shown.
+    /// Where the island is, for a notice that comes up next to it. Null while it is not shown.
     public Rect? Bounds =>
         _window is { } window ? new Rect(window.Left, window.Top, window.ActualWidth, window.ActualHeight) : null;
 
@@ -34,12 +37,14 @@ sealed class IslandHost(Dispatcher dispatcher)
         if (_window is null)
         {
             var window = new IslandWindow();
-            window.CardRequested += pinned => CardRequested?.Invoke(pinned);
+            window.Clicked += () => Clicked?.Invoke();
             window.Moved += SavePosition;
+            window.SessionRequested += id => SessionRequested?.Invoke(id);
             _window = window;
         }
 
         _window.Show(cards, position);
+        _window.ShowSessions(_sessions);
 
         // Only watched while the island is on screen: the tray icon has nothing to hide from.
         if (_fullScreen is null)
@@ -63,9 +68,30 @@ sealed class IslandHost(Dispatcher dispatcher)
 
     public void Update(IReadOnlyList<CardState> cards) => _window?.Update(cards);
 
+    private Aiko.Core.Terminal.SessionCounts _sessions = Aiko.Core.Terminal.SessionCounts.None;
+
+    /// How many sessions work and wait (D-364), kept for an island that opens later.
+    public void ShowSessions(Aiko.Core.Terminal.SessionCounts sessions)
+    {
+        _sessions = sessions;
+        _window?.ShowSessions(sessions);
+    }
+
+    /// A click on the mark of "waits": the session to open.
+    public event Action<string>? SessionRequested;
+
     /// Hides or shows the island for what is in front right now. Called again when the setting
     /// that asks for the hiding changes.
     public void FollowFullScreen() => OnFullScreenChanged(FullScreenWatch.IsFullScreenInFront());
+
+    /// The window of the terminal has a button on the taskbar (D-409): the button shows the ring and
+    /// the sign of the sessions, so the island steps aside, also while the window is minimized. Only
+    /// a closed or hidden window brings it back.
+    public void FollowTerminal(bool onTaskbar)
+    {
+        _underTerminal = onTaskbar;
+        Apply();
+    }
 
     /// A face comes onto the island or goes (D-211). The island is always dark, whatever the taskbar.
     public void ShowFace(AikoFace? face, FaceStyle style)
@@ -88,24 +114,31 @@ sealed class IslandHost(Dispatcher dispatcher)
     private void OnFullScreenChanged(bool fullScreen) =>
         dispatcher.BeginInvoke(() =>
         {
-            if (_window is not { } island)
-            {
-                return;
-            }
-
-            var hide = fullScreen && SettingsStore.Load().HideIslandInFullScreen;
-            var wanted = hide ? Visibility.Hidden : Visibility.Visible;
-
-            // Windows says which window came to the front on every switch, which is many times a
-            // minute. Only a real change is worth a line.
-            if (island.Visibility == wanted)
-            {
-                return;
-            }
-
-            island.Visibility = wanted;
-            Log.Write($"island {(hide ? "hidden behind a full screen window" : "shown again")}");
+            _fullScreenInFront = fullScreen;
+            Apply();
         });
+
+    private void Apply()
+    {
+        if (_window is not { } island)
+        {
+            return;
+        }
+
+        var behindFullScreen = _fullScreenInFront && SettingsStore.Load().HideIslandInFullScreen;
+        var hide = behindFullScreen || _underTerminal;
+        var wanted = hide ? Visibility.Hidden : Visibility.Visible;
+
+        // Windows says which window came to the front on every switch, which is many times a
+        // minute. Only a real change is worth a line.
+        if (island.Visibility == wanted)
+        {
+            return;
+        }
+
+        island.Visibility = wanted;
+        Log.Write($"island {(!hide ? "shown again" : _underTerminal ? "hidden while the terminal is open" : "hidden behind a full screen window")}");
+    }
 
     private void SavePosition(IslandPosition position)
     {
@@ -115,7 +148,7 @@ sealed class IslandHost(Dispatcher dispatcher)
             return;
         }
 
-        SettingsStore.Save(SettingsStore.Load() with { Island = position });
+        SettingsStore.Change(settings => settings with { Island = position });
         Log.Write($"island moved to {position.Edge} at {position.Along:0.00}");
     }
 }

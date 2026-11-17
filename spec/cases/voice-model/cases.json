@@ -1,0 +1,31 @@
+{
+  "comment": "The speech model and the OpenAI key of voice input (D-313, D-314, D-316). The model comes from our own release on GitHub and is checked by its SHA256. The local engine is ready when the file on disk has exactly the size of the model; a file of another size is a download that stopped. OpenAI is ready when a key is stored. A key is shown only by its kind and its last four characters.",
+  "url": "https://github.com/Slayumind/aiko/releases/download/voice-model-1/ggml-small.bin",
+  "bytes": 487601967,
+  "sha256": "1be3a9b2063867b937e64e2ec7483364a79917e157fa98c5d94b5c1fffea987b",
+  "cloudModel": "gpt-4o-transcribe",
+  "megabytes": [
+    { "bytes": 487601967, "megabytes": 465 },
+    { "bytes": 222298112, "megabytes": 212 },
+    { "bytes": 1048575, "megabytes": 0 },
+    { "bytes": 0, "megabytes": 0 },
+    { "bytes": -5, "megabytes": 0 }
+  ],
+  "readiness": [
+    { "engine": "Local", "modelBytes": 487601967, "keyStored": false, "ready": "Ready" },
+    { "engine": "Local", "modelBytes": null, "keyStored": true, "ready": "NeedsModel" },
+    { "engine": "Local", "modelBytes": 222298112, "keyStored": false, "ready": "NeedsModel" },
+    { "engine": "OpenAI", "modelBytes": null, "keyStored": true, "ready": "Ready" },
+    { "engine": "OpenAI", "modelBytes": 487601967, "keyStored": false, "ready": "NeedsKey" }
+  ],
+  "keys": [
+    { "pasted": "  sk-proj-AbCdEf0123456789_xyz-4F2a \n", "key": "sk-proj-AbCdEf0123456789_xyz-4F2a", "mask": "sk-proj-••••••••••4F2a" },
+    { "pasted": "sk-AbCdEfGhIjKlMnOpQrSt1234", "key": "sk-AbCdEfGhIjKlMnOpQrSt1234", "mask": "sk-••••••••••1234" },
+    { "pasted": "sk-short", "key": null, "mask": null },
+    { "pasted": "pk-AbCdEfGhIjKlMnOpQrSt1234", "key": null, "mask": null },
+    { "pasted": "sk-AbCdEf GhIjKlMnOpQrSt1234", "key": null, "mask": null },
+    { "pasted": "sk-АбвгдежзийклмнопрстуфхцЧ", "key": null, "mask": null },
+    { "pasted": "", "key": null, "mask": null },
+    { "pasted": null, "key": null, "mask": null }
+  ]
+}

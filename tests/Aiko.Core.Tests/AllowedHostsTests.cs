@@ -16,6 +16,8 @@ public class AllowedHostsTests
     [InlineData("https://github.com/Slayumind/aiko/releases/download/v0.3.0/SHA256SUMS.txt")]
     [InlineData("https://release-assets.githubusercontent.com/github-production-release-asset/1")]
     [InlineData("https://objects.githubusercontent.com/github-production-release-asset/1")]
+    [InlineData("https://api.openai.com/v1/realtime?intent=transcription")]
+    [InlineData("wss://api.openai.com/v1/realtime?intent=transcription")]
     public void The_hosts_of_an_update_and_of_the_limits_are_allowed(string address)
     {
         Assert.True(AllowedHosts.Allows(new Uri(address)));
@@ -47,6 +49,7 @@ public class AllowedHostsTests
     [Theory]
     [InlineData("http://slayumind.org/api")]
     [InlineData("ftp://slayumind.org/api")]
+    [InlineData("ws://api.openai.com/v1/realtime")]
     public void Anything_but_https_is_refused(string address)
     {
         // The access token travels on one of these connections in direct mode.
@@ -83,7 +86,7 @@ public class AllowedHostsTests
                 continue;
             }
 
-            if (Regex.IsMatch(File.ReadAllText(file), @"new\s+HttpClient\s*\(")
+            if (Regex.IsMatch(File.ReadAllText(file), @"new\s+(HttpClient|ClientWebSocket)\s*\(")
                 && Path.GetFileName(file) != "AikoHttp.cs")
             {
                 made.Add(Path.GetFileName(file));
@@ -92,7 +95,7 @@ public class AllowedHostsTests
 
         Assert.True(
             made.Count == 0,
-            $"HttpClient is made outside AikoHttp in: {string.Join(", ", made)}. Use AikoHttp.Client so the host guard applies.");
+            $"HttpClient or ClientWebSocket is made outside AikoHttp in: {string.Join(", ", made)}. Use AikoHttp so the host guard applies.");
     }
 
     private static string Repository()

@@ -5,8 +5,14 @@ import AppKit
 /// full screen window, and remembering where the person dragged it. The twin of IslandHost.cs.
 @MainActor
 final class IslandHost {
-    /// The island asks for the card: true for a click, which pins it.
-    var onCard: ((Bool) -> Void)?
+    /// A click on the island: it opens the terminal window.
+    var onClick: (() -> Void)?
+
+    /// The id of the session a click on the mark of "waits" opens.
+    var onWaitingClick: ((String) -> Void)?
+
+    /// The counts of the sessions, kept for an island made later.
+    private var sessions = SessionCounts.none
 
     /// Set by a self test, which drags the island about. The settings of the person are not its
     /// to change.
@@ -14,13 +20,19 @@ final class IslandHost {
 
     private(set) var window: IslandWindow?
     private var fullScreen: FullScreenWatch?
+    private var fullScreenInFront = false
+    private var underTerminal = false
 
     var isShown: Bool { window != nil }
 
     func show(_ cards: [CardState], at position: IslandPosition, newerVersion: String?) {
         if window == nil {
             let made = IslandWindow()
-            made.onCard = { [weak self] pinned in self?.onCard?(pinned) }
+            made.onClick = { [weak self] in self?.onClick?() }
+            made.onWaitingClick = { [weak self] in
+                if let id = self?.sessions.firstWaiting { self?.onWaitingClick?(id) }
+            }
+            made.showSessions(sessions)
             made.onMoved = { [weak self] moved in self?.savePosition(moved) }
             window = made
         }
@@ -36,6 +48,11 @@ final class IslandHost {
         }
 
         onFullScreen(FullScreenWatch.isFullScreenInFront())
+    }
+
+    func showSessions(_ counts: SessionCounts) {
+        sessions = counts
+        window?.showSessions(counts)
     }
 
     func close() {
@@ -69,15 +86,28 @@ final class IslandHost {
         window?.holds(point) == true
     }
 
+    /// The window of the terminal has the Dock icon, shown or minimized (D-409, D-410): its title
+    /// shows the limit, so the island steps aside. Only a closed window brings it back.
+    func followTerminal(_ inView: Bool) {
+        underTerminal = inView
+        apply()
+    }
+
     private func onFullScreen(_ full: Bool) {
+        fullScreenInFront = full
+        apply()
+    }
+
+    private func apply() {
         guard let window else { return }
 
-        let hide = full && Store.settings().hideIslandInFullScreen
+        let hide = (fullScreenInFront && Store.settings().hideIslandInFullScreen) || underTerminal
         guard window.isVisible == hide else { return }
 
         // Only a real change is worth a line: the space changes many times a minute.
         window.hide(hide)
-        Log.write("island \(hide ? "hidden behind a full screen window" : "shown again")")
+        let why = underTerminal ? "hidden while the terminal is open" : "hidden behind a full screen window"
+        Log.write("island \(hide ? why : "shown again")")
     }
 
     private func savePosition(_ position: IslandPosition) {

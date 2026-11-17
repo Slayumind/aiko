@@ -8,7 +8,7 @@
                     xmlns:local="clr-namespace:Aiko.App">
 
   <ResourceDictionary.MergedDictionaries>
-    <ResourceDictionary Source="pack://application:,,,/Theme/Tokens.xaml" />
+    <ResourceDictionary Source="pack://application:,,,/Aiko.App;component/Theme/Tokens.xaml" />
   </ResourceDictionary.MergedDictionaries>
 
   <!-- Group labels on the site are small, mono and in capitals. The capitals are typed in, since
@@ -120,6 +120,13 @@
         </ControlTemplate>
       </Setter.Value>
     </Setter>
+  </Style>
+
+  <!-- Rows of settings in one frame, with a hairline between them: "Where Aiko is on", the notices. -->
+  <Style x:Key="Rows" TargetType="Border">
+    <Setter Property="CornerRadius" Value="10" />
+    <Setter Property="BorderBrush" Value="{StaticResource Hairline}" />
+    <Setter Property="BorderThickness" Value="1" />
   </Style>
 
   <Style x:Key="SegmentBar" TargetType="Border">
@@ -313,7 +320,7 @@
 
   <Style x:Key="DangerButton" TargetType="Button" BasedOn="{StaticResource SmallButton}">
     <Setter Property="Foreground" Value="{StaticResource Destructive}" />
-    <Setter Property="Background" Value="#29FF6467" />
+    <Setter Property="Background" Value="{StaticResource DangerTint}" />
     <Setter Property="BorderBrush" Value="#17FF6467" />
   </Style>
 
@@ -321,35 +328,6 @@
     <Setter Property="Foreground" Value="{StaticResource Destructive}" />
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="BorderBrush" Value="#1FFF6467" />
-  </Style>
-
-  <!-- Goes somewhere else in the same window. Underlined, so it does not read as a label. -->
-  <Style x:Key="LinkButton" TargetType="Button">
-    <Setter Property="Cursor" Value="Hand" />
-    <Setter Property="HorizontalAlignment" Value="Left" />
-    <Setter Property="Foreground" Value="{StaticResource Ink}" />
-    <Setter Property="Template">
-      <Setter.Value>
-        <ControlTemplate TargetType="Button">
-          <TextBlock x:Name="Words" Text="{Binding Content, RelativeSource={RelativeSource TemplatedParent}}"
-                     FontFamily="{StaticResource Sans}" FontSize="{StaticResource TextSmall}"
-                     Foreground="{TemplateBinding Foreground}" Background="Transparent">
-            <TextBlock.TextDecorations>
-              <TextDecoration Location="Underline" PenOffset="2">
-                <TextDecoration.Pen>
-                  <Pen Brush="#4DFFFFFF" Thickness="1" />
-                </TextDecoration.Pen>
-              </TextDecoration>
-            </TextBlock.TextDecorations>
-          </TextBlock>
-          <ControlTemplate.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
-              <Setter TargetName="Words" Property="TextDecorations" Value="Underline" />
-            </Trigger>
-          </ControlTemplate.Triggers>
-        </ControlTemplate>
-      </Setter.Value>
-    </Setter>
   </Style>
 
   <!-- The close cross in a window header. -->
@@ -423,6 +401,39 @@
     </Setter>
   </Style>
 
+  <!-- One of a few choices, the round pair of Tick: a ring, filled to a thick edge when chosen. -->
+  <Style x:Key="Dot" TargetType="RadioButton">
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="Foreground" Value="{StaticResource Ink}" />
+    <Setter Property="FontFamily" Value="{StaticResource Sans}" />
+    <Setter Property="FontSize" Value="{StaticResource TextSmall}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="RadioButton">
+          <Grid Background="Transparent">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Top" local:Motion.Press="True">
+              <Ellipse x:Name="Ring" Stroke="{StaticResource InputLine}" StrokeThickness="1.5" />
+              <Ellipse x:Name="Chosen" Stroke="{StaticResource Ink}" StrokeThickness="5" Opacity="0" />
+            </Grid>
+            <ContentPresenter Grid.Column="1" VerticalAlignment="Top" />
+          </Grid>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsChecked" Value="True">
+              <Setter TargetName="Chosen" Property="Opacity" Value="1" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+              <Setter Property="Opacity" Value="0.45" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
   <!-- A plan name or a count: mono on a faint plate. -->
   <Style x:Key="Chip" TargetType="Border">
     <Setter Property="CornerRadius" Value="5" />
@@ -481,6 +492,55 @@
     </Setter>
   </Style>
 
+  <!--
+    A right-click menu looks like the list of a drop-down (DropDown): Surface, one line, radius 10,
+    padding 4 and the shadow of a card, rows of 30 with radius 8. The margin keeps room for the
+    shadow inside the popup. Both styles have no key, so they reach every menu of a window that
+    merges this file, the menu of a text field too.
+  -->
+  <Style TargetType="ContextMenu">
+    <Setter Property="OverridesDefaultStyle" Value="True" />
+    <!-- The zoom of the window the menu opens over (PopupZoom). -->
+    <Setter Property="LayoutTransform" Value="{Binding PlacementTarget, RelativeSource={RelativeSource Self}, Converter={x:Static local:PopupZoom.Converter}}" />
+    <Setter Property="HasDropShadow" Value="False" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ContextMenu">
+          <Border Margin="0,0,12,12" MinWidth="180" Padding="4" CornerRadius="10"
+                  Background="{StaticResource Surface}" BorderBrush="{StaticResource InputLine}" BorderThickness="1"
+                  Effect="{StaticResource CardShadow}">
+            <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle" />
+          </Border>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style TargetType="MenuItem">
+    <Setter Property="OverridesDefaultStyle" Value="True" />
+    <Setter Property="FontFamily" Value="{StaticResource Sans}" />
+    <Setter Property="FontSize" Value="{StaticResource TextNumber}" />
+    <Setter Property="Foreground" Value="{StaticResource Ink}" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="MenuItem">
+          <Border x:Name="Back" Height="30" Padding="10,0,10,0" CornerRadius="8" Background="Transparent">
+            <ContentPresenter ContentSource="Header" VerticalAlignment="Center" RecognizesAccessKey="True" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsHighlighted" Value="True">
+              <Setter TargetName="Back" Property="Background" Value="{StaticResource Raised}" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+              <Setter Property="Foreground" Value="{StaticResource Muted}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
   <!-- A thin scroll bar that only shows when there is something to scroll. -->
   <Style x:Key="ThinScrollBar" TargetType="ScrollBar">
     <Setter Property="Width" Value="6" />
@@ -511,7 +571,8 @@
       <Setter.Value>
         <ControlTemplate TargetType="ScrollViewer">
           <Grid>
-            <ScrollContentPresenter CanContentScroll="{TemplateBinding CanContentScroll}" />
+            <ScrollContentPresenter CanContentScroll="{TemplateBinding CanContentScroll}"
+                                    Margin="{TemplateBinding Padding}" />
             <ScrollBar x:Name="PART_VerticalScrollBar" Style="{StaticResource ThinScrollBar}"
                        HorizontalAlignment="Right" Margin="0,8,3,8"
                        Value="{TemplateBinding VerticalOffset}" Maximum="{TemplateBinding ScrollableHeight}"

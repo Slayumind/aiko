@@ -1,4 +1,5 @@
 using System.Runtime.Versioning;
+using Aiko.Core;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.UI.WindowsAndMessaging;
@@ -10,9 +11,8 @@ enum TrayCommand
 {
     None,
     SwapRing,
+    Open,
     Settings,
-    Refresh,
-    Updates,
     Exit,
 }
 
@@ -22,10 +22,9 @@ enum TrayCommand
 static class TrayMenu
 {
     private const uint Settings = 1;
-    private const uint Refresh = 2;
-    private const uint Updates = 3;
     private const uint Exit = 4;
     private const uint Swap = 5;
+    private const uint Open = 6;
     private const uint TpmRightButton = 0x0002;
     private const uint TpmNoNotify = 0x0080;
     private const uint TpmReturnCommand = 0x0100;
@@ -40,8 +39,8 @@ static class TrayMenu
 
         var menu = PInvoke.CreatePopupMenu();
 
-        // The click on the icon opens the card now, so swapping the ring needs a home. Here it
-        // says which environment it would show, which the click never did.
+        // Which environment the ring of the icon shows, when there are two. The click opens the
+        // window, so the swap needs a home, and here it says which environment it would show.
         if (otherEnvironment is not null)
         {
             fixed (char* swap = string.Format(Strings.MenuShowInRing, otherEnvironment))
@@ -52,14 +51,13 @@ static class TrayMenu
             PInvoke.AppendMenu(menu, MENU_ITEM_FLAGS.MF_SEPARATOR, 0, null);
         }
 
-        fixed (char* settings = Strings.Settings,
-                     refresh = Strings.MenuRefresh,
-                     updates = Strings.CheckForUpdates,
+        // Open, the settings and quit (D-372): refreshing and the update check are in the window.
+        fixed (char* open = Strings.MenuOpen,
+                     settings = Strings.Settings,
                      exit = Strings.QuitAiko)
         {
+            PInvoke.AppendMenu(menu, MENU_ITEM_FLAGS.MF_STRING, Open, open);
             PInvoke.AppendMenu(menu, MENU_ITEM_FLAGS.MF_STRING, Settings, settings);
-            PInvoke.AppendMenu(menu, MENU_ITEM_FLAGS.MF_STRING, Refresh, refresh);
-            PInvoke.AppendMenu(menu, MENU_ITEM_FLAGS.MF_STRING, Updates, updates);
             PInvoke.AppendMenu(menu, MENU_ITEM_FLAGS.MF_SEPARATOR, 0, null);
             PInvoke.AppendMenu(menu, MENU_ITEM_FLAGS.MF_STRING, Exit, exit);
         }
@@ -73,9 +71,8 @@ static class TrayMenu
         return command switch
         {
             Swap => TrayCommand.SwapRing,
+            Open => TrayCommand.Open,
             Settings => TrayCommand.Settings,
-            Refresh => TrayCommand.Refresh,
-            Updates => TrayCommand.Updates,
             Exit => TrayCommand.Exit,
             _ => TrayCommand.None,
         };

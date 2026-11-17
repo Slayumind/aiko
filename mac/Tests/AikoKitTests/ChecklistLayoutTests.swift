@@ -4,10 +4,10 @@ import Testing
 
 struct ChecklistLayoutTests {
     @Test
-    func theNineItemsAreReadInTheOrderThePageDrawsThem() {
+    func theNineItemsAreReadInTheOneOrderOfTheSteps() {
         #expect(ChecklistLayout.order == [
-            .install, .firstAccount, .secondEnvironment, .projectFolders,
-            .access, .commands, .meetAiko, .privacy, .place,
+            .install, .firstAccount, .secondEnvironment, .access,
+            .commands, .projectFolders, .meetAiko, .privacy, .place,
         ])
         #expect(Set(ChecklistLayout.order) == Set(ChecklistItem.allCases))
     }

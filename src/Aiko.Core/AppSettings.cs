@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Aiko.Core.Terminal;
 
 namespace Aiko.Core;
 
@@ -69,6 +70,35 @@ public sealed record AppSettings
 
     /// The checklist opens once on "Meet Aiko" for people who update from 0.1 (D-200).
     public bool MeetAikoShown { get; init; }
+
+    /// Off by default: it needs a 465 MB model or a key of the person's own (D-313).
+    public bool VoiceInput { get; init; }
+
+    public VoiceEngine VoiceEngine { get; init; } = VoiceEngine.Local;
+
+    /// The language Whisper listens for. System is the language of the computer, not of Aiko's
+    /// interface: people often speak another language than the one they read in (D-326).
+    public AikoLanguage VoiceLanguage { get; init; } = AikoLanguage.System;
+
+    /// The terminal window opened by itself once, after Aiko was set up (D-350).
+    public bool TerminalShown { get; init; }
+
+    /// What a start with Windows opens: only the tray, or the terminal window too (D-350).
+    public bool OpenTerminalAtStartup { get; init; }
+
+    /// The header of the terminal window stays open until it is closed, across starts (D-373).
+    public bool HeaderOpen { get; init; }
+
+    /// The list of sessions was hidden with its icon or Ctrl+B (D-376).
+    public bool SessionListHidden { get; init; }
+
+    /// The zoom of the terminal window in percent, one of WindowZoom.Steps (D-384). Read it through
+    /// WindowZoom.Read: a hand-edited file may hold anything.
+    public int WindowZoom { get; init; } = Terminal.WindowZoom.Default;
+
+    /// The sound of "waits for you", on by default (D-375). The counts are always shown and make no
+    /// sound, so they have no setting (D-409).
+    public bool NotifySound { get; init; } = true;
 
     /// A settings file we cannot read is not a reason to stop: Aiko starts with the defaults.
     /// Putting the unreadable file aside before that happens is the store's job, so that the next

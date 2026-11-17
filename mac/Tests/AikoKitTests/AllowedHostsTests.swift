@@ -14,6 +14,8 @@ struct AllowedHostsTests {
         "https://github.com/Slayumind/aiko/releases/download/v0.3.0/SHA256SUMS.txt",
         "https://release-assets.githubusercontent.com/github-production-release-asset/1",
         "https://objects.githubusercontent.com/github-production-release-asset/1",
+        "https://api.openai.com/v1/realtime?intent=transcription",
+        "wss://api.openai.com/v1/realtime?intent=transcription",
     ])
     func theHostsOfAnUpdateAndOfTheLimitsAreAllowed(address: String) {
         #expect(AllowedHosts.allows(URL(string: address)))
@@ -42,7 +44,7 @@ struct AllowedHostsTests {
         #expect(!AllowedHosts.allows(URL(string: address)))
     }
 
-    @Test(arguments: ["http://slayumind.org/api", "ftp://slayumind.org/api"])
+    @Test(arguments: ["http://slayumind.org/api", "ftp://slayumind.org/api", "ws://api.openai.com/v1/realtime"])
     func anythingButHttpsIsRefused(address: String) {
         // The access token travels on one of these connections in direct mode.
         #expect(!AllowedHosts.allows(URL(string: address)))

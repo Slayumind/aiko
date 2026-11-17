@@ -3,8 +3,8 @@ import AppKit
 import SwiftUI
 
 /// One environment (D-177). The account on the left, as Claude Code knows it. What Aiko calls the
-/// environment on the right: its name, its command and the folders bound to it. The folders are
-/// only shown here; they change on the project folders page, where every folder is in one table.
+/// environment on the right: its name, its command and the folders bound to it, which are bound and
+/// unbound here (D-374, D-398).
 ///
 /// The twin of Settings/EnvironmentPage.xaml(.cs).
 struct EnvironmentPageView: View {
@@ -12,10 +12,15 @@ struct EnvironmentPageView: View {
     let folder: String
 
     @State private var opened = false
+    /// Claude Code did not open: the line under the button says so instead.
+    @State private var notOpened = false
     @State private var asking = false
     @State private var toTrash = false
     @State private var waiter: Waiter?
     @State private var signedIn = false
+
+    /// A folder that just came from another environment, and the name of that environment.
+    @State private var moved: (folder: String, from: String)?
 
     private var environment: AikoEnvironment? {
         state.environments.environments.first { $0.holds(folder) }
@@ -119,8 +124,8 @@ struct EnvironmentPageView: View {
             FlatButton(title: signedIn ? Strings.signInAgain : Strings.signIn, press: signIn)
                 .padding(.top, 10)
 
-            Reveal(isOpen: opened) {
-                Control.rowHint(Strings.claudeOpened).padding(.top, 6)
+            Reveal(isOpen: opened || notOpened) {
+                Control.rowHint(notOpened ? Strings.claudeDidNotOpen : Strings.claudeOpened).padding(.top, 6)
             }
 
             // Direct mode reads the access token, and on macOS that token lives in the Keychain,
@@ -178,37 +183,112 @@ struct EnvironmentPageView: View {
             }
 
             Control.sectionLabel(Strings.sectionBoundFolders).padding(.top, 16).padding(.bottom, 6)
-            bound(environment)
-            if isDefault && two {
-                Control.rowHint(Strings.restToo).padding(.top, 6)
-            }
-            if two {
-                LinkButton(title: Strings.editInFolders) { state.show(.folders) }
-                    .padding(.top, 10)
-            }
+            folders(environment, two: two, isDefault: isDefault)
         }
     }
 
-    private func bound(_ environment: AikoEnvironment) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            if environment.projectFolders.isEmpty {
-                Control.rowHint(Strings.noneBound)
-            } else {
+    /// The folders of this environment (D-394, D-398): a folder of another environment added here
+    /// moves here and says so, and one switch says which environment takes every other folder.
+    @ViewBuilder
+    private func folders(_ environment: AikoEnvironment, two: Bool, isDefault: Bool) -> some View {
+        if two {
+            Reveal(isOpen: !CommandFolder.isSetUp) {
+                needCommands.padding(.bottom, 8)
+            }
+
+            VStack(alignment: .leading, spacing: 4) {
                 ForEach(environment.projectFolders.sorted { $0.caseInsensitiveCompare($1) == .orderedAscending },
                         id: \.self) { path in
-                    Text(path)
-                        .font(Theme.mono(Theme.textTiny))
-                        .foregroundStyle(Theme.ink)
-                        .lineLimit(1)
-                        .truncationMode(.head)
-                        .help(path)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 6)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(Theme.hoverLayer)
-                        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                    folderRow(path)
+                }
+                if environment.projectFolders.isEmpty {
+                    Control.rowHint(Strings.noneBound).padding(.bottom, 2)
                 }
             }
+
+            FlatButton(title: Strings.addFolder, symbol: "plus") { addFolder(to: environment) }
+                .padding(.top, 4)
+
+            HStack(spacing: 12) {
+                Control.rowName(Strings.defaultForRest)
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 12)
+                AikoSwitch(isOn: isDefault) { on in setDefault(environment, on: on) }
+            }
+            .padding(.top, 14)
+        } else {
+            Control.rowHint(Strings.format(Strings.foldersOneEnvironment, environment.name))
+        }
+    }
+
+    /// One bound folder: its path and a cross that unbinds it; under a folder that just came from
+    /// another environment, a line that says from which.
+    private func folderRow(_ path: String) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            HStack(spacing: 8) {
+                Text(path)
+                    .font(Theme.mono(Theme.textTiny))
+                    .foregroundStyle(Theme.ink)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .tip(path)
+                Spacer(minLength: 0)
+                MarkButton(help: Strings.removeBinding, press: {
+                    state.editor.commit(EnvironmentEdits.unbind(state.environments, path), "unbound a folder")
+                }) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 9, weight: .medium))
+                        .foregroundStyle(Theme.muted)
+                }
+            }
+            if let moved, RealClaude.sameFolder(moved.folder, path) {
+                Control.rowHint(Strings.format(Strings.folderMovedFrom, moved.from))
+            }
+        }
+        .padding(.leading, 10)
+        .padding(.trailing, 4)
+        .padding(.vertical, 4)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Theme.hoverLayer)
+        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+    }
+
+    private var needCommands: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(Strings.foldersNeedCommands)
+                .font(Theme.sans(Theme.textSmall))
+                .foregroundStyle(Theme.ink)
+                .fixedSize(horizontal: false, vertical: true)
+            FlatButton(title: Strings.setUpEnvironments) { state.openChecklist(at: .commands) }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Theme.caution.opacity(0.05))
+        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .strokeBorder(Theme.caution.opacity(0.22), lineWidth: 1))
+    }
+
+    /// Binds the folder here. A folder of another environment moves here, and its row says from where.
+    private func addFolder(to environment: AikoEnvironment) {
+        guard let picked = FolderPicker.pick(title: Strings.pickProject),
+              !environment.projectFolders.contains(where: { RealClaude.sameFolder($0, picked) }) else { return }
+
+        let from = EnvironmentEdits.bindings(state.environments)
+            .first { RealClaude.sameFolder($0.folder, picked) }?.environment
+        moved = from.map { (folder: picked, from: $0) }
+        state.editor.commit(
+            EnvironmentEdits.bind(state.environments, picked, environment.name),
+            from == nil ? "bound a folder" : "moved a folder to another environment")
+    }
+
+    /// On: every folder that is not bound runs here. Off: it runs in the other environment.
+    private func setDefault(_ environment: AikoEnvironment, on: Bool) {
+        let target = on ? environment.name : state.environments.environments.first { $0.name != environment.name }?.name
+        if let target {
+            state.editor.commit(EnvironmentEdits.setDefault(state.environments, target), "changed the default environment")
         }
     }
 
@@ -269,7 +349,11 @@ struct EnvironmentPageView: View {
     }
 
     private func signIn() {
-        guard ClaudeLauncher.open(configFolder: folder, workingDirectory: Store.home) else { return }
+        guard ClaudeLauncher.open(configFolder: folder, workingDirectory: Store.home) else {
+            notOpened = true
+            return
+        }
+        notOpened = false
         opened = true
 
         // The dot turns green by itself once the sign-in is done in the browser.
@@ -284,9 +368,13 @@ struct EnvironmentPageView: View {
     private func remove(_ name: String) {
         waiter?.stop()
         state.stopEditing()
-        let trashed = state.editor.remove(name, toTrash: toTrash)
-        state.showNoteOnFirstEnvironment(
-            Strings.format(trashed ? Strings.environmentRemovedToTrash : Strings.environmentRemoved, name))
+        let toTrash = toTrash
+        let state = state
+        state.askBeforeRemovingEnvironment(name) {
+            let trashed = state.editor.remove(name, toTrash: toTrash)
+            state.showNoteOnFirstEnvironment(
+                Strings.format(trashed ? Strings.environmentRemovedToTrash : Strings.environmentRemoved, name))
+        }
     }
 
     /// The folder the way people read it: ~/.claude-work rather than the whole path.

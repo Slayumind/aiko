@@ -121,6 +121,20 @@ public enum ZshProfile {
 public enum MacTerminal {
     public static let scriptName = "open-claude.command"
 
+    /// The script the "Install Claude Code" button of the checklist opens (D-421).
+    public static let installScriptName = "install-claude.command"
+
+    /// Runs the official install command in a new Terminal window and leaves the window open, so
+    /// the person reads how it went. The twin of the PowerShell window Windows opens.
+    public static func installScript() -> String {
+        """
+        #!/bin/zsh
+        # Written by Aiko when the checklist installs Claude Code. Safe to delete.
+        \(ClaudeCodeInstall.command(.macOS))
+
+        """
+    }
+
     /// The script for one environment. Environment 1 is the plain .claude folder, and it is used
     /// the way a plain `claude` would use it: by leaving the variable out, never by pointing it
     /// at the folder.

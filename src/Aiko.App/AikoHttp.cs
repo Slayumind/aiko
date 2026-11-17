@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http;
+using System.Net.WebSockets;
 using Aiko.Core;
 
 namespace Aiko.App;
@@ -34,6 +35,34 @@ static class AikoHttp
         var client = new HttpClient(new OnlyAllowedHosts(inner)) { Timeout = timeout };
         client.DefaultRequestHeaders.UserAgent.ParseAdd($"Aiko/{UpdateClient.CurrentVersion()}");
         return client;
+    }
+
+    /// For voice input with OpenAI (D-317): a socket that opens through the same guard. The
+    /// opening request of a socket is an https request, so the list of hosts applies to it.
+    public static async Task<ClientWebSocket> Socket(Uri address, string bearer, CancellationToken cancel)
+    {
+        var socket = new ClientWebSocket();
+        socket.Options.CollectHttpResponseDetails = true;
+        socket.Options.SetRequestHeader("Authorization", "Bearer " + bearer);
+        socket.Options.SetRequestHeader("User-Agent", $"Aiko/{UpdateClient.CurrentVersion()}");
+        using var invoker = new HttpMessageInvoker(new OnlyAllowedHosts(new SocketsHttpHandler { AllowAutoRedirect = false }));
+        try
+        {
+            await socket.ConnectAsync(address, invoker, cancel).ConfigureAwait(false);
+            return socket;
+        }
+        catch (WebSocketException refused) when (socket.HttpStatusCode != 0)
+        {
+            // The server answered the handshake with an error, say 429: its status says why.
+            var status = socket.HttpStatusCode;
+            socket.Dispose();
+            throw new HttpRequestException($"the socket was refused with {(int)status}", refused, status);
+        }
+        catch
+        {
+            socket.Dispose();
+            throw;
+        }
     }
 }
 
@@ -79,11 +108,12 @@ sealed class OnlyAllowedHosts(HttpMessageHandler inner) : DelegatingHandler(inne
             or HttpStatusCode.TemporaryRedirect or HttpStatusCode.PermanentRedirect;
 
     /// Aiko only ever asks for things, so the next request is the same GET at the new address.
-    /// Headers that name the caller travel on; nothing carries a body.
+    /// Headers that name the caller travel on, a token only to the same host (RedirectHeaders);
+    /// nothing carries a body.
     private static HttpRequestMessage Follow(HttpRequestMessage previous, Uri next)
     {
         var request = new HttpRequestMessage(HttpMethod.Get, next);
-        foreach (var header in previous.Headers)
+        foreach (var header in previous.Headers.Where(header => RedirectHeaders.Keeps(header.Key, previous.RequestUri!, next)))
         {
             request.Headers.TryAddWithoutValidation(header.Key, header.Value);
         }

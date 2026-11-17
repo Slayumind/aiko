@@ -2,7 +2,7 @@
 // Control prompts for Aiko's persona: real `claude -p` sessions with the persona plugin, checked
 // for character where the persona must stay silent (D-195) and for foreign Japanese where it talks.
 //
-//   node tools/persona-evals/run.mjs --app <Aiko.App.exe> [--temperaments Quiet,Normal,Bright,Musou]
+//   node tools/persona-evals/run.mjs --app <Aiko.Checks.exe> [--temperaments Quiet,Normal,Bright,Musou]
 //        [--cases commit,error] [--model claude-fable-5-1] [--out <folder>] [--budget 10] [--stop-at-percent 80]
 //   node tools/persona-evals/run.mjs --rejudge <report.json>     checks an earlier report again
 //
@@ -169,7 +169,7 @@ function main() {
   const flags = parseArgs(process.argv.slice(2));
   if (flags?.rejudge) return rejudge(flags.rejudge);
   if (!flags || !flags.app || !existsSync(flags.app)) {
-    console.error("usage: node tools/persona-evals/run.mjs --app <Aiko.App.exe> [--temperaments ...] [--cases ...] [--model id] [--out dir] [--budget 10] [--stop-at-percent 80]");
+    console.error("usage: node tools/persona-evals/run.mjs --app <Aiko.Checks.exe> [--temperaments ...] [--cases ...] [--model id] [--out dir] [--budget 10] [--stop-at-percent 80]");
     return 2;
   }
 

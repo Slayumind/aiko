@@ -1,4 +1,3 @@
-using System.IO;
 using System.Runtime.Versioning;
 using System.Windows;
 using System.Windows.Interop;
@@ -8,15 +7,19 @@ using Velopack;
 
 namespace Aiko.App;
 
+/// The start of Aiko. It knows a plain start, a start at sign-in, the hooks of the installer and two
+/// commands for the setup of environments. Checks and snapshots are another program, Aiko.Checks
+/// (D-420): a person should never start one by chance.
 [SupportedOSPlatform("windows10.0.17763")]
 static class Program
 {
     [STAThread]
     static void Main(string[] args)
     {
-        // A plain start only. The installer's hooks and the snapshot and --try commands come with
-        // arguments, and most of them never open a window.
-        if (args.Length == 0)
+        var start = AppStarts.Of(args);
+
+        // The installer's hooks and the commands never open a window.
+        if (start != AppStart.Other)
         {
             GraphicsWarmUp.Start();
         }
@@ -31,448 +34,49 @@ static class Program
             .OnBeforeUninstallFastCallback(_ => Uninstall.Cleanup(keepMemory: null))
             .Run();
 
-        // Software rendering: the spike measured 33 MB against 92 MB with the DirectX stack, and
-        // Aiko draws a small card a few times an hour. Nobody needs the GPU for that.
-        RenderOptions.ProcessRenderMode = RenderMode.SoftwareOnly;
-
-        // Before any window is made: the words are picked when a control is created, so a late
-        // change would leave half a window in the other language.
-        //
-        // A door for snapshots: AIKO_TRY_LANGUAGE=English or Russian draws in that language and
-        // leaves the settings file alone.
-        LanguageChoice.Apply(
-            Enum.TryParse<AikoLanguage>(Environment.GetEnvironmentVariable("AIKO_TRY_LANGUAGE"), ignoreCase: true, out var tryLanguage)
-                ? tryLanguage
-                : SettingsStore.Load().Language);
-
-        // A snapshot draws a window at once and reads its pixels. Anything still fading in would be
-        // caught half there.
-        if (args is [var first, ..] && first.StartsWith("--snapshot", StringComparison.Ordinal))
+        // One copy of Aiko (D-419): a second start by the person opens the window of the running
+        // copy, a second start at sign-in only exits.
+        if (!SingleCopy.Claim(start))
         {
-            Motion.TurnOff();
-        }
-
-        // Draw the icon into a file and stop. Windows hides new tray icons in the overflow area,
-        // so this is the only way to look at the drawing itself.
-        if (args is ["--snapshot-icon", var faceIconPath, "faces", ..])
-        {
-            IconSheet.WriteFaces(faceIconPath);
-            return;
-        }
-
-        if (args is ["--snapshot-icon", var iconPath, ..])
-        {
-            IconSheet.Write(iconPath);
-            return;
-        }
-
-        // Every face in both styles, on a dark and a light taskbar, at the sizes the tray uses.
-        if (args is ["--snapshot-faces", var facesPath, ..])
-        {
-            FaceSheet.Write(facesPath);
-            return;
-        }
-
-        // The same for the card: draw it on test numbers and stop.
-        if (args is ["--snapshot", var cardPath, ..])
-        {
-            CardSnapshot.Write(cardPath);
-            return;
-        }
-
-        // Not test numbers but the real ones, to see what Aiko shows on this machine right now.
-        if (args is ["--snapshot-live", var livePath, ..])
-        {
-            CardSnapshot.WriteLive(livePath);
-            return;
-        }
-
-        // Adds the status line to one folder and says in the log what happened. For the question
-        // "why can Aiko not write to my settings file", and for trying the change on a copy.
-        if (args is ["--try-access", var folder, ..])
-        {
-            var bridge = BridgePath.Current();
-            var outcome = bridge is null
-                ? PatchOutcome.Failed(PatchProblem.BridgeUnknown)
-                : ClaudeSettingsFile.AddBridge(folder, bridge);
-
-            // The name, not the path. PRIVACY.md says the log holds a Claude Code folder name and
-            // not the path to it, and a promise in that file has to hold for every code path.
-            Log.Write($"--try-access {FolderName(folder)}: changed={outcome.Changed} problem={outcome.Problem}");
-            Environment.Exit(outcome.Changed ? 0 : 1);
-            return;
-        }
-
-        // The other half of --try-access: puts the status line back for one folder. Uninstalling
-        // does this for every folder, and that is not something to try out on a live machine.
-        if (args is ["--try-restore", var restoreFolder, ..])
-        {
-            var outcome = ClaudeSettingsFile.RemoveAiko(restoreFolder);
-            Log.Write($"--try-restore {FolderName(restoreFolder)}: changed={outcome.Changed} problem={outcome.Problem}");
-            Environment.Exit(outcome.Changed ? 0 : 1);
-            return;
-        }
-
-        // The persona plugin for one temperament, written into a folder for tools/persona-evals:
-        // --write-persona-plugin Musou <folder>. The real persona.json is not read or changed.
-        if (args is ["--write-persona-plugin", var temperamentName, var personaFolder, ..])
-        {
-            if (!Enum.TryParse<Temperament>(temperamentName, ignoreCase: true, out var temperament) || BridgePath.Current() is not { } bridge)
-            {
-                Environment.Exit(1);
-                return;
-            }
-
-            foreach (var (relative, content) in PersonaPlugin.Files(temperament, bridge))
-            {
-                var path = Path.Combine(personaFolder, relative.Replace('/', Path.DirectorySeparatorChar));
-                Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-                File.WriteAllText(path, content, new System.Text.UTF8Encoding(false));
-            }
-
-            Environment.Exit(0);
-            return;
-        }
-
-        // Aiko's skills the way the plugin sync installs them, into throwaway folders:
-        // --try-skills <marketplace folder> <config folder>. Three runs: install; the same again, so
-        // nothing is copied or updated; then the skills switched off, so the plugin is disabled.
-        if (args is ["--try-skills", var marketFolder, var skillConfig, ..])
-        {
-            var cli = new ClaudeCli(ClaudeLauncher.FindClaude()!);
-            var plugin = AikoMarketplace.PluginId(SkillCatalog.PluginName);
-            for (var run = 1; run <= 3; run++)
-            {
-                var changed = SkillShelf.CopyTo(marketFolder);
-                var file = AikoMarketplace.FileIn(ThisComputer.Platform, marketFolder);
-                Directory.CreateDirectory(Path.GetDirectoryName(file)!);
-                File.WriteAllText(file, AikoMarketplace.Json(@"""C:\none\Aiko.Bridge.exe"" plugin aiko-persona", SkillShelf.Shipped));
-
-                var steps = new List<PluginStep>();
-                if (run == 1)
-                {
-                    steps.Add(new PluginStep(PluginStepKind.AddMarketplace, marketFolder));
-                    steps.Add(new PluginStep(PluginStepKind.Install, plugin));
-                }
-                else if (changed)
-                {
-                    steps.Add(new PluginStep(PluginStepKind.Update, plugin));
-                }
-
-                if (run == 3)
-                {
-                    steps.Add(new PluginStep(PluginStepKind.Disable, plugin));
-                }
-
-                var results = PluginReconciler.Apply(cli, skillConfig, steps);
-                Log.Write($"--try-skills run {run}: skills {string.Join(", ", SkillShelf.Skills)}, copied {changed}, "
-                    + string.Join(", ", results.Select(r => $"{r.Step.Kind} {r.Step.Target} exit {r.Result.ExitCode}")));
-            }
-
-            return;
-        }
-
-        // Direct mode with an expired token, on a throwaway folder with a fake credentials file:
-        // --try-direct-expired <empty folder>. Aiko must wait for Claude Code, send nothing and leave
-        // the file exactly as it was. Never pointed at a real account folder.
-        if (args is ["--try-direct-expired", var expiredFolder, ..])
-        {
-            Environment.Exit(TryDirectExpired(expiredFolder));
-            return;
-        }
-
-        // The whole way from a hook to a face, on a made-up environment: the real bridge writes the
-        // session file, the watcher sees it and the player shows and hides faces. Draws nothing.
-        if (args is ["--try-activity", ..])
-        {
-            TryActivity();
-            return;
-        }
-
-        // What uninstalling does to the plugins of one folder: the keys, then claude.exe with the
-        // same 20 second budget. Meant for a throwaway config folder, not a live one.
-        if (args is ["--try-plugin-removal", var pluginFolder, ..])
-        {
-            var started = DateTimeOffset.UtcNow;
-            var keys = ClaudeSettingsFile.RemoveAiko(pluginFolder);
-            PluginSync.RemoveNow([pluginFolder], started + TimeSpan.FromSeconds(20));
-            Log.Write($"--try-plugin-removal {FolderName(pluginFolder)}: keys changed={keys.Changed}, took {(DateTimeOffset.UtcNow - started).TotalSeconds:0.0} s");
-            Environment.Exit(keys.Problem == PatchProblem.None ? 0 : 1);
             return;
         }
 
         // Puts the saved environments into effect outside Aiko, the way the wizard's Finish does:
         // status lines and the reminder hook, the command folder in PATH, profile functions off.
-        if (args is ["--apply-environments", ..])
+        if (args is [AppStarts.ApplyEnvironments, ..])
         {
             Environment.Exit(EnvironmentSetup.ApplySaved() ? 0 : 1);
             return;
         }
 
         // Takes back the command folder, the PATH entry and the profile changes.
-        if (args is ["--undo-environment-setup", ..])
+        if (args is [AppStarts.UndoEnvironmentSetup, ..])
         {
             EnvironmentSetup.Undo();
             Environment.Exit(0);
             return;
         }
 
-        // Opens a drop-down in a small window and clicks it with the real mouse.
-        if (args is ["--try-dropdown", ..])
-        {
-            Environment.Exit(DropDownCheck.Run());
-            return;
-        }
+        // Software rendering: the spike measured 33 MB against 92 MB with the DirectX stack, and
+        // Aiko draws a small card a few times an hour. Nobody needs the GPU for that.
+        RenderOptions.ProcessRenderMode = RenderMode.SoftwareOnly;
 
-        // Starts the real shell without writing anything and walks it through the icon, the card,
-        // a face, the island and the settings window.
-        if (args is ["--try-shell", ..])
-        {
-            Environment.Exit(ShellCheck.Run());
-            return;
-        }
+        // Before any window is made: the words are picked when a control is created, so a late
+        // change would leave half a window in the other language.
+        LanguageChoice.Apply(SettingsStore.Load().Language);
 
-        // Drags the island with the real mouse to the left edge and checks where it lands.
-        if (args is ["--try-island", ..])
-        {
-            Environment.Exit(IslandCheck.Run());
-            return;
-        }
-
-        // Drags an island to the bottom edge from code and holds it there, to look at the glass.
-        if (args is ["--try-glass", ..])
-        {
-            Environment.Exit(IslandCheck.TryGlass());
-            return;
-        }
-
-        // Unfolds an island at the top of the screen from code and logs its size on the way.
-        if (args is ["--try-unfold", ..])
-        {
-            Environment.Exit(IslandCheck.TryUnfold());
-            return;
-        }
-
-        // Shows the landing strip at the top of the screen for a moment, without touching the mouse.
-        if (args is ["--try-strip", ..])
-        {
-            Environment.Exit(IslandCheck.ShowStrip());
-            return;
-        }
-
-        // Picks a language on the General page with the real mouse, then puts the settings back.
-        if (args is ["--try-language", ..])
-        {
-            Environment.Exit(LanguageCheck.Run());
-            return;
-        }
-
-        // Uses the settings window with the real mouse and keyboard, then puts the environments back.
-        if (args is ["--try-settings", ..])
-        {
-            Environment.Exit(SettingsCheck.Run());
-            return;
-        }
-
-        // Where Aiko would find Claude Code, read from a fresh PATH. Opens nothing.
-        if (args is ["--try-claude", ..])
-        {
-            var claude = ClaudeLauncher.FindClaude();
-            Log.Write($"--try-claude: {(claude is null ? "not found" : Path.GetFileName(Path.GetDirectoryName(claude)) + "\\" + Path.GetFileName(claude))}");
-            Environment.Exit(claude is null ? 1 : 0);
-            return;
-        }
-
-        // Sets the command folder up from the installed shim, reports what is in it and removes it
-        // again. PATH is not touched: that part is checked in Windows Sandbox.
-        if (args is ["--try-commands", ..])
-        {
-            var ok = CommandFolder.Sync(SettingsStore.LoadEnvironments());
-            var files = ok ? Directory.EnumerateFiles(CommandFolder.Folder).Select(Path.GetFileName) : [];
-            Log.Write($"--try-commands: set up={ok}, files: {string.Join(", ", files)}");
-            if (ok)
-            {
-                Directory.Delete(CommandFolder.Folder, recursive: true);
-            }
-
-            Environment.Exit(ok ? 0 : 1);
-            return;
-        }
-
-        // Turns the account switching functions off and on again in a copy of a profile, and
-        // checks that the copy came back byte for byte. For trying it without touching the real one.
-        if (args is ["--try-profile", var profileCopy, ..])
-        {
-            var before = File.ReadAllBytes(profileCopy);
-            var found = PowerShellProfile.FindClaudeSwitchers(System.Text.Encoding.Latin1.GetString(before));
-            var turnedOff = PowerShellProfiles.TurnOff(profileCopy, found);
-            var remaining = PowerShellProfile.FindClaudeSwitchers(File.ReadAllText(profileCopy, System.Text.Encoding.Latin1)).Count;
-            var backupThere = File.Exists(profileCopy + PowerShellProfiles.BackupSuffix);
-
-            var text = System.Text.Encoding.Latin1.GetString(File.ReadAllBytes(profileCopy));
-            File.WriteAllBytes(profileCopy, System.Text.Encoding.Latin1.GetBytes(PowerShellProfile.TurnOn(text)));
-            File.Delete(profileCopy + PowerShellProfiles.BackupSuffix);
-            var same = before.AsSpan().SequenceEqual(File.ReadAllBytes(profileCopy));
-
-            Log.Write($"--try-profile: found {found.Count} ({string.Join(", ", found.Select(f => f.Name))}), turned off={turnedOff}, left after={remaining}, backup={backupThere}, same bytes after on={same}");
-            Environment.Exit(same && turnedOff && remaining == 0 ? 0 : 1);
-            return;
-        }
-
-        if (args is ["--snapshot-island", var islandPath, ..])
-        {
-            var edge = args.Length > 2 && Enum.TryParse<ScreenEdge>(args[2], true, out var asked)
-                ? asked
-                : ScreenEdge.Top;
-
-            // --snapshot-island out.png Left open: the island unfolded, as on a hover.
-            // --snapshot-island out.png Top face: a face in place of the rings.
-            var panel = new IslandPanel();
-            panel.Show(CardSnapshot.Example(), edge);
-            if (args is [.., "open"])
-            {
-                panel.Unfold(true, animate: false);
-            }
-
-            if (args is [.., "face"])
-            {
-                panel.SetFace(TrayFaceMotion.At(FacePhase.FaceIn, 1), FaceDrawing.For(FaceStyle.Chibi, AikoFace.Done, FaceGround.Dark, 18));
-                panel.MarkForMeasure();
-            }
-
-            Snapshot.Write(panel, islandPath);
-            return;
-        }
-
-        if (args is ["--snapshot-wizard", var wizardPath, ..])
-        {
-            // The item to open, by name or number: --snapshot-wizard out.png Commands
-            ChecklistItem? item = args.Length > 2 && Enum.TryParse<ChecklistItem>(args[2], true, out var asked) ? asked : null;
-            var checklist = new SettingsPanel(SettingsPanel.ChecklistPageKey);
-            if (item is { } open)
-            {
-                checklist.OpenChecklist(open);
-            }
-
-            Snapshot.Write(checklist, wizardPath);
-            return;
-        }
-
-        if (args is ["--snapshot-settings", var settingsPath, ..])
-        {
-            // The page to draw: --snapshot-settings out.png general | folders | personality | env1 | env2 [tall]
-            // "tall" draws the whole page, not only the part that fits the window.
-            var page = args.Length > 2 ? args[2] : null;
-            var panel = new SettingsPanel(page switch
-            {
-                "env1" => new SettingsPanel().EnvironmentPage(0),
-                "env2" => new SettingsPanel().EnvironmentPage(1),
-                _ => page,
-            });
-            if (args is [.., "tall"])
-            {
-                panel.GrowToPage();
-            }
-            Snapshot.Write(panel, settingsPath);
-            return;
-        }
-
-        var application = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
+        var application = Tips.Install(new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown });
         AikoShell? shell = null;
+        CrashGuard.Watch(application, () => shell?.CloseWindows());
 
         application.Startup += (_, _) =>
         {
             shell = new AikoShell(application);
-            shell.Show();
+            shell.Show(withWindows: start == AppStart.AtSignIn);
+            SingleCopy.Listen(application.Dispatcher, shell.OpenAskedByAnotherStart);
         };
         application.Exit += (_, _) => shell?.Dispose();
 
         application.Run();
     }
-
-    private static int TryDirectExpired(string folder)
-    {
-        var credentials = Path.Combine(folder, ".credentials.json");
-        if (File.Exists(credentials))
-        {
-            Log.Write("--try-direct-expired: the folder already has credentials, refusing");
-            return 2;
-        }
-
-        Directory.CreateDirectory(folder);
-        var expired = DateTimeOffset.UtcNow.AddHours(-1).ToUnixTimeMilliseconds();
-        File.WriteAllText(credentials, $$"""{ "claudeAiOauth": { "accessToken": "not-a-real-token", "refreshToken": "not-a-real-token", "expiresAt": {{expired}}, "subscriptionType": "max" } }""");
-        var before = File.ReadAllBytes(credentials);
-        var logBefore = File.Exists(Log.FilePath) ? File.ReadAllLines(Log.FilePath).Length : 0;
-
-        var dispatcher = System.Windows.Threading.Dispatcher.CurrentDispatcher;
-        using var poller = new DirectPoller(dispatcher);
-        poller.Follow(new EnvironmentSettings([new AikoEnvironment("probe", [folder]) { DirectMode = true }]));
-
-        // One tick of the poller is twenty seconds.
-        var frame = new System.Windows.Threading.DispatcherFrame();
-        var stop = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(25) };
-        stop.Tick += (_, _) => { stop.Stop(); frame.Continue = false; };
-        stop.Start();
-        System.Windows.Threading.Dispatcher.PushFrame(frame);
-
-        var lines = File.ReadAllLines(Log.FilePath).Skip(logBefore).Where(l => l.Contains("direct mode for probe", StringComparison.Ordinal)).ToList();
-        var waited = lines.Any(l => l.Contains("the token has expired", StringComparison.Ordinal));
-        var asked = lines.Any(l => !l.Contains("the token has expired", StringComparison.Ordinal));
-        var untouched = before.AsSpan().SequenceEqual(File.ReadAllBytes(credentials));
-        var latest = poller.Latest.ContainsKey("probe");
-
-        File.Delete(credentials);
-        Log.Write($"--try-direct-expired: waited={waited}, asked the server={asked}, file untouched={untouched}, numbers={latest}");
-        return waited && !asked && untouched && !latest ? 0 : 1;
-    }
-
-    private static void TryActivity()
-    {
-        var folder = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ClaudeConfigFolder.NamedFolderName("aiko-probe"));
-        var clock = System.Diagnostics.Stopwatch.StartNew();
-        var faces = new List<string>();
-
-        var dispatcher = System.Windows.Threading.Dispatcher.CurrentDispatcher;
-        using var player = new TrayMoodPlayer(dispatcher);
-        player.FaceChanged += face => faces.Add($"{face?.ToString() ?? "rings"} {clock.Elapsed.TotalSeconds:0.0}s");
-        player.Follow(new EnvironmentSettings([new AikoEnvironment("probe", [folder]) { Persona = true }]));
-
-        void Send(string hookEvent)
-        {
-            var start = new System.Diagnostics.ProcessStartInfo(BridgePath.Current()!, "hook")
-            {
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                RedirectStandardInput = true,
-            };
-            start.Environment["CLAUDE_CONFIG_DIR"] = folder;
-            using var bridge = System.Diagnostics.Process.Start(start)!;
-            bridge.StandardInput.Write($$"""{ "session_id": "aiko-probe", "hook_event_name": "{{hookEvent}}" }""");
-            bridge.StandardInput.Close();
-            bridge.WaitForExit();
-        }
-
-        var frame = new System.Windows.Threading.DispatcherFrame();
-        Task.Run(() =>
-        {
-            Send("UserPromptSubmit");
-            Thread.Sleep(3000);
-            Send("PermissionRequest");
-            Thread.Sleep(500);
-            Send("PostToolUse");
-            Thread.Sleep(3000);
-            Send("Stop");
-            Thread.Sleep(3000);
-            Send("SessionEnd");
-        }).ContinueWith(_ => dispatcher.BeginInvoke(() => frame.Continue = false));
-        System.Windows.Threading.Dispatcher.PushFrame(frame);
-
-        Log.Write($"--try-activity: {string.Join(", ", faces)}");
-    }
-
-    /// The last part of a folder path, whichever separator it ends with.
-    private static string FolderName(string path) =>
-        Path.GetFileName(path.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
 }

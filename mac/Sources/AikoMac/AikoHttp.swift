@@ -70,6 +70,169 @@ enum AikoHttp {
     }
 }
 
+extension AikoHttp {
+    /// A large file in pieces, as they come: the speech model of voice input (D-316), 465 MB, which
+    /// should not sit in memory whole. `from` asks for the rest of a file that stopped half way.
+    /// `receive` hears the status and each piece; a piece it throws on stops the download. Answers
+    /// the status, or nil when the address is not allowed, the line broke or it was stopped.
+    static func stream(
+        _ address: String, from offset: Int64, timeout: TimeInterval,
+        receive: @escaping @Sendable (Int, Data) throws -> Void
+    ) async -> Int? {
+        guard let url = URL(string: address), AllowedHosts.allows(url) else {
+            Log.write("blocked an address outside the allowed hosts")
+            return nil
+        }
+
+        var request = URLRequest(url: url)
+        if offset > 0 {
+            request.setValue("bytes=\(offset)-", forHTTPHeaderField: "Range")
+        }
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.timeoutIntervalForRequest = 60
+        configuration.timeoutIntervalForResource = timeout
+        configuration.httpAdditionalHeaders = ["User-Agent": "Aiko/\(AppVersion.current())"]
+
+        let pieces = Pieces(receive: receive)
+        let session = URLSession(configuration: configuration, delegate: pieces, delegateQueue: nil)
+        defer { session.finishTasksAndInvalidate() }
+        return await withTaskCancellationHandler {
+            await withCheckedContinuation { done in
+                pieces.done = done
+                session.dataTask(with: request).resume()
+            }
+        } onCancel: {
+            session.invalidateAndCancel()
+        }
+    }
+}
+
+extension AikoHttp {
+    /// A WebSocket with the person's key in its header: voice input through OpenAI (D-317). Answers
+    /// the open socket, or the HTTP status OpenAI refused the handshake with (0 when it did not
+    /// answer at all). The twin of AikoHttp.Socket on Windows.
+    static func socket(_ address: String, bearer: String) async -> (socket: CloudSocket?, refused: Int) {
+        guard let url = URL(string: address), AllowedHosts.allows(url) else {
+            Log.write("blocked an address outside the allowed hosts")
+            return (nil, 0)
+        }
+
+        var request = URLRequest(url: url)
+        request.setValue("Bearer " + bearer, forHTTPHeaderField: "Authorization")
+        request.setValue("Aiko/\(AppVersion.current())", forHTTPHeaderField: "User-Agent")
+        let opening = Opening()
+        let session = URLSession(configuration: .ephemeral, delegate: opening, delegateQueue: nil)
+        let task = session.webSocketTask(with: request)
+        let opened = await withCheckedContinuation { done in
+            opening.done = done
+            task.resume()
+        }
+        guard opened else {
+            let status = (task.response as? HTTPURLResponse)?.statusCode ?? 0
+            session.invalidateAndCancel()
+            return (nil, status)
+        }
+        return (CloudSocket(session: session, task: task), 0)
+    }
+}
+
+/// An open WebSocket: text in and out, then closed.
+final class CloudSocket: @unchecked Sendable {
+    private let session: URLSession
+    private let task: URLSessionWebSocketTask
+
+    fileprivate init(session: URLSession, task: URLSessionWebSocketTask) {
+        self.session = session
+        self.task = task
+    }
+
+    func send(_ text: String) async throws {
+        try await task.send(.string(text))
+    }
+
+    /// The next message, or nil when the socket closed.
+    func receive() async throws -> Data? {
+        switch try await task.receive() {
+        case .string(let text): return Data(text.utf8)
+        case .data(let data): return data
+        @unknown default: return nil
+        }
+    }
+
+    func close() {
+        task.cancel(with: .normalClosure, reason: nil)
+        session.invalidateAndCancel()
+    }
+}
+
+/// Tells whether the handshake of a socket went through. A redirect is never followed.
+private final class Opening: NSObject, URLSessionWebSocketDelegate, @unchecked Sendable {
+    var done: CheckedContinuation<Bool, Never>?
+
+    func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didOpenWithProtocol protocol: String?) {
+        done?.resume(returning: true)
+        done = nil
+    }
+
+    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+        done?.resume(returning: false)
+        done = nil
+    }
+
+    func urlSession(
+        _ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse,
+        newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void
+    ) {
+        completionHandler(nil)
+    }
+}
+
+/// The pieces of one streamed download, and the same check of every redirect as OnlyAllowedHops.
+private final class Pieces: NSObject, URLSessionDataDelegate, @unchecked Sendable {
+    private let receive: @Sendable (Int, Data) throws -> Void
+    private var status = 0
+    private var failed = false
+    var done: CheckedContinuation<Int?, Never>?
+
+    init(receive: @escaping @Sendable (Int, Data) throws -> Void) {
+        self.receive = receive
+    }
+
+    func urlSession(
+        _ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse,
+        completionHandler: @escaping (URLSession.ResponseDisposition) -> Void
+    ) {
+        status = (response as? HTTPURLResponse)?.statusCode ?? 0
+        completionHandler(.allow)
+    }
+
+    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
+        do {
+            try receive(status, data)
+        } catch {
+            failed = true
+            dataTask.cancel()
+        }
+    }
+
+    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+        done?.resume(returning: error == nil && !failed ? status : nil)
+        done = nil
+    }
+
+    func urlSession(
+        _ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse,
+        newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void
+    ) {
+        guard AllowedHosts.allows(request.url) else {
+            Log.write("a redirect went outside the allowed hosts and was not followed")
+            completionHandler(nil)
+            return
+        }
+        completionHandler(request)
+    }
+}
+
 /// Checks the address of every redirect before it is followed.
 ///
 /// Without this the list of allowed hosts would only cover the first request: GitHub answers a
@@ -192,12 +355,13 @@ enum UpdateRun {
 
     /// The day is UTC on both sides: the computer's own day would let one copy send two different
     /// identifiers inside one server day.
+    /// The query itself is CountQuery of the core, the same rule and rows as on Windows.
     private static func build() -> (address: String, week: String?, month: String?) {
-        let version = escape(AppVersion.current())
-        let settings = Store.settings()
-        let plain = "\(endpoint)?v=\(version)"
+        let version = AppVersion.current()
+        let plain = endpoint + CountQuery.query(
+            version: version, system: "", day: nil, persona: false, firstOfWeek: false, firstOfMonth: false)
 
-        guard settings.sendStats else { return (plain, nil, nil) }
+        guard Store.settings().sendStats else { return (plain, nil, nil) }
 
         let today = DateOnly.fromDaysSinceEpoch(
             Int((Date().timeIntervalSince1970 / 86400).rounded(.down)))
@@ -207,19 +371,16 @@ enum UpdateRun {
         let reported = ReportedPeriods.read()
         let week = Heartbeat.firstThisWeek(reported.week, today) ? Heartbeat.weekKey(today) : nil
         let month = Heartbeat.firstThisMonth(reported.month, today) ? Heartbeat.monthKey(today) : nil
-        let persona = Store.environments().environments.contains(where: \.persona) ? 1 : 0
 
-        let address = plain
-            + "&os=\(escape(AppVersion.system()))"
-            + "&day=\(id)&p=\(persona)"
-            + (week == nil ? "" : "&w=1")
-            + (month == nil ? "" : "&m=1")
+        let address = endpoint + CountQuery.query(
+            version: version,
+            system: AppVersion.system(),
+            day: id,
+            persona: Store.environments().environments.contains(where: \.persona),
+            firstOfWeek: week != nil,
+            firstOfMonth: month != nil)
 
         return (address, week, month)
-    }
-
-    private static func escape(_ text: String) -> String {
-        text.addingPercentEncoding(withAllowedCharacters: .alphanumerics) ?? text
     }
 }
 

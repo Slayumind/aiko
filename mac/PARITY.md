@@ -3,11 +3,14 @@
 The macOS app repeats the Windows core, so every ported file keeps its behaviour and every xUnit
 case has a Swift case with the same name and the same numbers. Test counts below are cases, not
 methods: one `[Theory]` with five `[InlineData]` rows counts as five, and so does the Swift
-`@Test(arguments:)` that mirrors it. `dotnet test` prints cases and says 1072; `swift test` prints
-methods, not cases, and says 781. The 14 the Swift side does not have are named at the bottom; the ones it has and Windows
-does not belong to the two small programs, whose decisions sit inline in `Program.cs` on Windows,
-and to the card words, the island and the settings window, which sit in `Aiko.App` on Windows
-where no test can reach them.
+`@Test(arguments:)` that mirrors it. `dotnet test` prints cases; `swift test` prints methods, not
+cases. The cases the Swift side does not have are named at the bottom; the ones it has and Windows
+does not belong to the island and the settings window, which sit in `Aiko.App` on Windows where no
+test can reach them.
+
+`ParityMapTests` in `Aiko.Core.Tests` keeps this map true to the disk: every file it names must
+exist, and every file of the two cores must be named here. It does the same for the table in
+`spec/cases/README.md`.
 
 Rules that are a table of inputs and answers live in `spec/cases/` and are read by both suites, so
 a row cannot change in one core and stay as it was in the other. See `spec/cases/README.md`.
@@ -17,6 +20,7 @@ a row cannot change in one core and stay as it was in the other. See `spec/cases
 | C# file | Swift file | C# cases | Swift cases | Notes |
 |---|---|---|---|---|
 | JsonText.cs | JsonText.swift | 15 | 15 | |
+| StoredFile.cs | StoredFile.swift | — | — | what happens to settings, environments, sessions and persona after a read (D-431): a spoiled file is set aside as `.bad`, one that could not be read is kept from saves. A table in `spec/cases/stored-file`, read by StoredFileTests on both |
 | LimitSnapshot.cs | LimitSnapshot.swift | 8 | 8 | |
 | StatusLineReport.cs | StatusLineReport.swift | 14 | 14 | |
 | UsageReport.cs | UsageReport.swift | 11 | 11 | |
@@ -37,7 +41,7 @@ a row cannot change in one core and stay as it was in the other. See `spec/cases
 | TrayMood.cs | TrayMood.swift | 6 | 6 | which face an event brings is in `spec/cases/tray-mood/`; `hasFace` takes the environments, as on Windows |
 | SessionActivity.cs | SessionActivity.swift | 6 | 6 | what a hook means and what a broken record reads as are in `spec/cases/hook-events/` |
 | Heartbeat.cs | Heartbeat.swift | 17 | 17 | |
-| SessionReminder.cs | SessionReminder.swift | 18 | 20 | its other 6 C# cases are about the hook in settings.json and sit in SettingsJsonPatchTests; 8 Swift cases of its own read the system language from a tag (MacLanguageTests) |
+| SessionReminder.cs | SessionReminder.swift | 19 | 21 | its other 6 C# cases are about the hook in settings.json and sit in SettingsJsonPatchTests; 8 Swift cases of its own read the system language from a tag (MacLanguageTests) |
 | PersonaSettings.cs | PersonaSettings.swift | 10 | 10 | |
 | PersonaPrompt.cs | PersonaPrompt.swift, PersonaPlugin.swift | 33 | 33 | the prompt text and the plugin files hash the same in both languages |
 | PersonaPluginOutput.cs | PersonaPluginOutput.swift | 7 | 7 | |
@@ -54,19 +58,24 @@ a row cannot change in one core and stay as it was in the other. See `spec/cases
 | ClaudeShell.cs | PlatformConventions.swift | 4 | 4 | the shell of each system is in `spec/cases/platform-paths/`; the 8 cases left over are about WindowsGitBash |
 | AikoFolders.cs | AikoFolders.swift | 5 | 5 | both layouts, the trailing separator included, are pinned in `spec/cases/folder-layout/` |
 | SnapshotName.cs | SnapshotName.swift | — | — | every case is in `spec/cases/snapshot-name/`, read by both suites |
+| SnapshotLeftovers.cs | SnapshotLeftovers.swift | — | — | which temporary files of a bridge are old enough to remove at start; every case is in `spec/cases/snapshot-leftovers/`. Only the Windows bridge also retries a refused move: `rename` on macOS replaces a file that is being read |
 | SnapshotFile.cs | SnapshotFile.swift | 9 | 9 | |
 | EnvironmentSnapshots.cs | EnvironmentSnapshots.swift | 6 | 6 | |
 | EnvironmentSettings.cs, LaunchCommand.cs, ProjectBinding.cs | EnvironmentSettings.swift, LaunchCommand.swift, ProjectBinding.swift | 26 | 26 | EnvironmentSettingsTests (13) and EnvironmentModelTests (13); the command of an environment is in `spec/cases/launch-command/` |
 | EnvironmentEdits.cs | EnvironmentEdits.swift | 24 | 24 | |
+| StatusLineReport.cs, CardState.cs, SnapshotFile.cs, EnvironmentSettings.cs: the seam for another agent | the same Swift files | 5 | 5 | ProviderTests (D-420): `AgentProvider` and the providers of an environment, written only when they are not Claude alone; `LimitWindow.Length` and `Label`, with `LimitKinds.DefaultLength` for the windows of Claude. The Swift side was written without a Mac at hand and is checked by CI |
 | EnvironmentScan.cs | EnvironmentScan.swift | 12 | 12 | |
 | ClaudeConfigFolder.cs | ClaudeConfigFolder.swift | 7 | 7 | |
 | ClaudeInstall.cs | ClaudeInstall.swift | 7 | 7 | |
-| ShimLaunch.cs, RealClaude.cs, UserPathList.cs | ShimLaunch.swift, RealClaude.swift, UserPathList.swift | 18 | 16 | the other 6 C# cases are about PowerShellProfile; 4 Swift cases of their own cover what the shim sets in the environment of Claude Code, which Aiko.Shim does inline |
+| ShimLaunch.cs, RealClaude.cs, UserPathList.cs | ShimLaunch.swift, RealClaude.swift, UserPathList.swift | 22 | 16 | the other 6 C# cases are about PowerShellProfile; what the shim sets in the environment of Claude Code is `VariableChanges` on both sides, with 4 cases each |
+| BridgeWork.cs | BridgeWork.swift | 31 | 35 | what one run of the bridge does: which job it was started for, the snapshot to write, the activity file of a session and the reminder at session start. `Aiko.Bridge/Program.cs` only reads stdin and the disk and does what the answers say. Both have the hook of the terminal (`terminal-event`). The same numbers within a minute are not written again (D-432). The persona plugin folder stays in `PersonaPluginOutput` on Windows |
 | BridgeCommand.cs | BridgeCommand.swift | 29 | 29 | BridgeCommandTests (11) and BridgeRecognitionTests (18) |
 | CommandLinks.cs | CommandLinks.swift | 3 | 3 | |
 | AikoMarketplace.cs | AikoMarketplace.swift | — | — | its cases sit in PluginPlanTests and SkillPluginTests |
-| AppSettings.cs | AppSettings.swift | 15 | 15 | |
-| WizardChecklist.cs | WizardChecklist.swift | 14 | 14 | |
+| Strings.cs | Strings.swift | — | 3 | both are made by `tools/strings.py` from `tools/strings.json`, so a text is written once. The app, the checks and the XAML of Windows read the core table too (D-422) |
+| CardText.cs, CardModel.cs, TrayText.cs | CardText.swift, CardModel.swift, TrayText.swift | 8 | 41 | CardWordsTests on both sides: the words of the limits, the blocks of every environment and the tooltip of the icon (D-422). Rows in `spec/cases/card-words`, read in both languages, with the short name and the countdown of the open header |
+| AppSettings.cs | AppSettings.swift | 17 | 19 | the zoom of the terminal window and the sound of "waits" are in both; their C# cases sit in WindowZoomTests and NoticesTests |
+| WizardChecklist.cs | WizardChecklist.swift | 15 | 15 | `PlaceSeen`: the step "Place" is open until the person has seen it, and it is optional (D-421) |
 | CredentialFile.cs | CredentialFile.swift | 10 | 10 | `TryParse` with an out parameter is `parse`, which answers nil |
 | MemoryFact.cs, MemoryFile.cs | MemoryFact.swift, MemoryFile.swift | 65 | 65 | an entry Aiko cannot use goes back into the file as it was written, which Swift reads with `JsonRawText`; the file is the same in both cores apart from the line ends |
 | MemoryRules.cs, MemoryEdits.cs | MemoryRules.swift, MemoryEdits.swift | 44 | 44 | what may be a key, when a key is found and how long a fact may be are in `spec/cases/memory-keys/` and `memory-limits/`; lengths are UTF-16 units in both |
@@ -75,32 +84,53 @@ a row cannot change in one core and stay as it was in the other. See `spec/cases
 | MemoryBridge.cs | MemoryBridge.swift | 28 | 28 | a fact over the limit stays out of the block for the model in both, pinned or not |
 | MemoryHand.cs | MemoryHand.swift | 22 | 22 | the changes a person makes in the settings window; `MemoryHandTests` holds these and the cases of the page. `OneLine` is `MemoryText.oneLine` here |
 | MemoryPage.cs | MemoryPage.swift | 5 | 5 | the other 5 cases of `MemoryHandTests`; `Length` is in UTF-16 units in both |
-| — | SharedCaseTests.swift | 10 | 10 | the case files under `spec/cases/`, read by both suites |
+| Terminal/ClaudeLaunchPlan.cs, LimitBadge.cs, HeaderStrip.cs, FileLink.cs | the same names under Terminal/ | — | — | how Claude Code and a command line start in a real terminal (D-349, D-360), with the hook of the terminal through `--settings`; the limit on a tab; the open header with the active environment first (D-376); `file:line` and web links. Tables in `spec/cases/` (`launch-plan`, `limit-badge`, `header-strip`, `file-link`) |
+| Terminal/TerminalTitle.cs, TerminalEvent.cs | the same names under Terminal/ | — | — | what a session does (D-366): the title read from the output of the terminal, the hook event of a session, what a row says from both, and which input the person typed. Tables in `spec/cases/` (`terminal-title`, `terminal-events`). `TitleReader` counts UTF-16 units in C# and Unicode scalars in Swift; `IsTyped` reads UTF-16 units in both |
+| Terminal/VoiceInput.cs, DictationText.cs, VoiceHint.cs, VoiceModel.cs | the same names under Terminal/ | — | — | voice input in the field: the model and the key, the presses and what the line and the button show, the text that grows while a person speaks, the hint for the recogniser (D-313, D-315). Every rule is a table in `spec/cases/` (`voice-input`, `dictation`, `voice-hint`). The mic and the recogniser are in both apps |
+| Terminal/FileMention.cs | Terminal/FileMention.swift | 1 | 1 | the files that "@" offers: where the "@" word starts, which files in which order, what the field becomes; a table in `spec/cases/file-mention`. Places are in UTF-16 units on both sides |
+| Terminal/TextMatch.cs | Terminal/TextMatch.swift | — | — | how the lists of the terminal match what is typed (case and ё do not count), and the quick pick of a folder for a new session (D-350). A table in `spec/cases/text-match`. Places are UTF-16 units in both |
+| Terminal/ConversationFile.cs, SessionSearch.cs | the same names under Terminal/ | — | — | the palette of sessions (D-347, D-353): a conversation of Claude Code read from the start and the end of its file, and what the palette finds in three groups. Tables in `spec/cases/` (`conversation-file`, `session-search`). The snippet counts UTF-16 units in both |
+| Terminal/StopQuestion.cs | Terminal/StopQuestion.swift | — | — | the question before a step that stops every session (D-351): quit, restart for an update, remove Aiko, start over. One title, words of its own for each step. StopQuestionTests on both |
+| Terminal/TerminalCopy.cs | Terminal/TerminalCopy.swift | — | — | text copied out of a terminal (D-371): the rows Claude Code wrapped by the width are joined again, the shared indent goes. A table in `spec/cases/terminal-copy`. Lengths are UTF-16 units in both |
+| Terminal/EditorKeys.cs | Terminal/EditorKeys.swift | — | — | the editor under the terminal (D-354, D-369): what a key does, what a send writes, the history of a command line and Tab for a path. A table in `spec/cases/editor`. Places are UTF-16 units in both; a line break of a send is worked on in units in Swift, where `"\r\n"` is one Character |
+| Terminal/TerminalSessions.cs, SessionName.cs | the same names under Terminal/ | — | — | the list of sessions that is the file `terminal.json` and the name a session gets. A name the person gave is marked `named`, and the title of Claude Code does not change it (D-352). Tables in `spec/cases/` (`terminal-sessions`, `session-name`). Names and paths are read as UTF-16 units in both cores. `moved`, a session dragged in its folder (D-400), is in both |
+| Terminal/SessionRows.cs, WindowPlace.cs, TerminalWindowModel.cs | the same names under Terminal/ | — | — | the window of the terminal without its view: the rows of the list, where the window stands, and which session is chosen. Tables in `spec/cases/terminal-window`. `StartProblem`, why a session has no terminal (D-421), is in both |
+| Terminal/TranscriptPath.cs | Terminal/TranscriptPath.swift | — | — | where Claude Code keeps the file of a conversation; a table in `spec/cases/transcript-path` |
+| Terminal/WindowZoom.cs, Notices.cs, SessionCounts.cs | Terminal/WindowZoom.swift, Terminal/SessionCounts.swift | — | — | the zoom of the window (D-384), which change of a session plays the sound (D-375) and the counts and the one sign of the icons (D-364, D-409). Tables in `spec/cases/` (`window-zoom`, `notices`), read by WindowZoomTests and NoticesTests on Windows and TerminalRulesTests on the Mac. `Notices` sits in SessionCounts.swift |
+| ReleaseNotes.cs | ReleaseNotes.swift | 3 | 1 | the titles of the notes of a newer release (D-397). A table in `spec/cases/release-notes` |
+| Terminal/ShellAsk.cs, ShellLink.cs | Terminal/ShellAsk.swift | 7 | 3 | what a command line asks Claude Code: only a line that starts with `#`, with the folder by its name and not its path (D-420), and how the answer is read; the address or the file under a Ctrl+click on Windows and Cmd+click on the Mac (D-358). The shell names its system: Git Bash and PowerShell on Windows, zsh on macOS. A table in `spec/cases/shell-ask`. Wrap counts Characters in Swift and UTF-16 units in C#; ShellLink counts UTF-16 units in both. `ShellLink` sits in ShellAsk.swift |
+| Terminal/TerminalKeys.cs | Terminal/TerminalKeys.swift | 1 | 1 | what Ctrl on Windows and Cmd on the Mac do with a key in the terminal window (D-353, D-370, D-374, D-425): the app names the key and does the action. A table in `spec/cases/terminal-keys` |
+| Terminal/ShellScreen.cs, ShellBlocks.cs, VtParser.cs | Terminal/ShellScreen.swift, ShellBlocks.swift, VtParser.swift | 6 | 6 | how the output of a command line is laid out and cut into one block per command by the marks of shell integration (D-363, D-412). A table in `spec/cases/shell-screen`, from real recordings of three shells. The parser reads UTF-16 units on both sides; `CellWidth` sits in ShellScreen.swift. The Swift test of 10 000 lines allows a second, the C# one half of it: a debug build of Swift is slower |
+| CountForm.cs | CountForm.swift | 12 | 12 | which form of a word goes with a number: Russian has three, English two |
+| EnvironmentInitial.cs | EnvironmentInitial.swift | 6 | 6 | the letter of an environment beside its ring on the open island (D-421) |
+| Terminal/TaskbarLook.cs | none | — | — | the taskbar button of the terminal window (D-418): what it shows pinned and not pinned, and the app id of the window. A table in `spec/cases/taskbar-button`. Windows only: the Dock icon of the Mac is another surface |
+| Terminal/ReplacedIcons.cs | none | 4 | — | which icons of the taskbar button may be destroyed: a replaced one lives 3 s after its replacement, so Explorer never draws a destroyed one as a black square. Windows only: the Mac does not change its Dock icon |
+| AppStart.cs | none | 6 | — | which start of Aiko keeps one copy and which opens the window of the running one (D-419). Windows only: macOS itself keeps one copy of an app and sends the running one a reopen event, which the Mac answers with its window (`applicationShouldHandleReopen`) |
+| CountQuery.cs | CountQuery.swift | 1 | 1 | the query of the daily version check (D-420), the same on both: AikoHttp.swift builds the address with it, and the dot of a version is no longer escaped as `%2E`. A table in `spec/cases/count-query` |
+| LogText.cs | LogText.swift | — | — | a log line keeps only the last part of a path (D-420). A table in `spec/cases/log-paths`, read by LogTextTests on both. The Mac log writes every line through it |
+| RedirectHeaders.cs | none | 2 | — | a token stays with its host after a redirect. A table in `spec/cases/redirect-headers`. Windows only: the Mac sends no token |
+| TerminalPrivacyTests.cs | TerminalPrivacyTests.swift | 2 | 2 | the source scan: in the terminal only `TerminalLog` writes to the log, and its methods take no text but the name of an environment. The Mac leaves out the files of its self test doors, whose names end in Check: they run only with `--try-*` |
+| — | SharedCaseTests.swift | 28 | 28 | the case files under `spec/cases/`, read by both suites |
 | — | UpdateInstaller.swift | — | 6 | the macOS half of an update: the zip, `ditto` and the bundle swap. Windows has Velopack instead, and UpdateInstall.cs holds the same steps around it where no xUnit case can reach them |
 
-The words and the numbers of the card sit in `src/Aiko.App` on Windows, where no xUnit case can
-reach them. In Swift they are part of AikoKit and have cases of their own:
+The drawing rules below sit in `src/Aiko.App` on Windows, where no xUnit case can reach them. In
+Swift they are part of AikoKit and have cases of their own:
 
 | C# file | Swift file | C# cases | Swift cases | Notes |
 |---|---|---|---|---|
-| Strings.resx, Strings.ru.resx | Strings.swift | — | 3 | both are made by `tools/strings.py` from `tools/strings.json`, so a text is written once |
-| Card/CardText.cs | CardText.swift | — | 20 | `clock` takes a time zone, where `$"{updatedAt:HH:mm}"` takes the machine's |
-| Card/CardModel.cs | CardModel.swift | — | 10 | brushes and `Visibility` become the tone and a plain "shown or not": AppKit and WPF spell those differently |
-| TrayText.cs | TrayText.swift | — | 6 | the 127 character limit is Windows', and one text for both is one text to translate |
 | RingIcon.cs, RingDrawing.cs | RingArt.swift | — | 13 | the 16 unit grid, the tones and the dashed ring as numbers; the drawing itself is `AikoMac/StatusIcon.swift` |
-| Theme/Motion.cs | Motion.swift, CardLifetime.swift | — | 6 | the durations and the curves, plus the hover delay and the two away turns that CardHost.cs keeps inline |
-| Island/IslandPanel.xaml.cs, Island/UnfoldPanel.cs, Island/FitPanel.cs | IslandLayout.swift | — | 28 | the size of the island, its line and corners per edge, the padding that keeps the rings still when the docked side loses its line, where every ring and percentage sits, and the 34 point square it closes into around the face |
+| Theme/Motion.cs | Motion.swift | — | — | the durations and the curves of every motion |
+| Island/IslandPanel.xaml.cs, Island/UnfoldPanel.cs, Island/FitPanel.cs | IslandLayout.swift | — | 28 | the size of the island, its line and corners per edge, the padding that keeps the rings still when the docked side loses its line, where every ring and percentage sits, the 34 point square it closes into around the face, and the marks of the sessions after the rings (12 after them, 10 apart along an edge, 6 in a column), which go with the percentages while the island closes in on the face |
 | Island/IslandWindow.xaml.cs | IslandDrag.swift | — | 7 | the 3 point threshold and the grip kept as a share of the size |
 | Island/RingGauge.cs | RingArt.swift | — | 2 | the island ring: the pen is 18 % of the ring, as RingGauge draws it |
 | Settings/SettingsPanel.xaml(.cs) | SettingsNav.swift | — | 10 | the page keys, the order of the menu, the small line under each title, and the body height a screen allows |
-| Settings/ChecklistPage.xaml(.cs) | ChecklistLayout.swift | — | 8 | the reading order of the nine items, the three group labels and the word beside each header |
+| Settings/ChecklistPage.xaml(.cs) | ChecklistLayout.swift | — | 8 | the one order of the nine items (D-421), the three group labels and the word beside each header |
 | GeneralPage.xaml.cs (OnCopyDiagnostics) | DiagnosticsText.swift | — | 2 | the lines of the bug report, English in every language as on Windows |
 
 Helpers with no file of their own in the C# core:
 
 | Swift file | Why it exists |
 |---|---|
-| BridgeWork.swift | what one run of the bridge does: which job it was started for, the snapshot to write, the activity file of a session, the reminder at session start, the persona plugin folder. On Windows the same choices sit inline in `Aiko.Bridge/Program.cs`, where no test can reach them (35 cases in BridgeWorkTests) |
 | JsonNode.swift | System.Text.Json keeps the order of keys and the text of numbers when it writes a file back; `JSONSerialization` keeps neither, and Aiko rewrites files that belong to Claude Code |
 | CivilTime.swift | `DateOnly`, ISO weeks and the round-trip ("O") time format |
 | MemoryText.swift | the memory's questions about a text, answered the way .NET answers them: what `Trim` and `Split` call white space, what `\w` is for one UTF-16 unit, and which two units `RegexOptions.IgnoreCase` takes for the same letter. Foundation has other lists for all three, and the limits and word edges of the memory must agree to the unit (74 cases in MemoryTextTests, shared with JsonRawText) |
@@ -108,6 +138,7 @@ Helpers with no file of their own in the C# core:
 | SvgPath.swift | reads the SVG path data FaceArt writes. WPF parses it itself with `Geometry.Parse`; AppKit has nothing of the kind, so the core reads it and hands the drawing layer moves, lines and cubic curves. Arcs and quadratic curves become cubics here (15 cases in SvgPathTests, one of which reads every shape of all 56 faces) |
 | SignedIn.swift | whether a folder has an account. Windows reads `.credentials.json`; macOS keeps the same token in the Keychain, so that file is never written and the answer comes from the account block of `.claude.json` (3 cases in SignedInTests) |
 | MacShell.swift | two things Windows has a system service for. `ZshProfile` writes Aiko's marked block into `~/.zshrc`, because a folder under the home directory reaches a shell's PATH only through the shell profile; `MacTerminal` writes the script that opens Claude Code in a Terminal window (11 cases in ZshProfileTests and MacTerminalTests) |
+| Terminal/LoginShellPath.swift | reads the PATH of a console from what a login shell printed. Claude Code is started with it: an app started from Finder has only the short PATH of the system. On Windows a program gets the PATH of the user from the system (5 cases in LoginShellPathTests) |
 | `PathText` in PlatformConventions.swift | reading a path without asking the machine it runs on: `Path.GetFileName` and `Path.TrimEndingDirectorySeparator` answer differently on Windows and on macOS, and Aiko reads paths written for the other system all the time |
 
 ## The two programs
@@ -171,24 +202,22 @@ AikoKit decided, and it answers the mouse.
 
 | Windows file | macOS file | What it does |
 |---|---|---|
-| Program.cs, App.xaml.cs | main.swift, AikoDelegate.swift | starts without a Dock icon, picks the language, registers the fonts |
+| Program.cs | main.swift, AikoDelegate.swift | starts without a Dock icon, picks the language, registers the fonts |
 | AikoShell.cs | AikoShell.swift | the one owner that connects the parts below and decides who is told what |
 | Tray/TrayIcon.cs | MenuBarIcon.swift | the icon itself: the picture, the tooltip, the clicks and the mouse over it |
 | Tray/TrayMenu.cs | MenuBarMenu.swift | the menu of the icon; both answer with a `TrayCommand` |
-| Card/CardHost.cs | CardHost.swift | the wait under a resting mouse, the pinned card and the watch that closes an unpinned one |
 | Island/IslandHost.cs | IslandHost.swift | the island window, hiding behind a full screen window, saving where it was dragged |
 | ShellNumbers.cs | ShellNumbers.swift | the cards, the card model and the rows of the icon; Windows also brings in direct mode |
 | StartupChores.cs | StartupChores.swift | what is put right at every start; Windows also repairs status lines and clears old activity files |
-| ShellCheck.cs (`--try-shell`) | the self tests in AikoShell.swift, IslandCheck.swift, SettingsCheck.swift | checks that drive the real shell without writing anything. One difference is left: on a machine that is not set up, the Mac self test still opens the checklist by itself, and the Windows check opens no page |
+| Aiko.Checks/ShellCheck.cs (`--try-shell`) | the self tests in AikoShell.swift, IslandCheck.swift, SettingsCheck.swift | checks that drive the real shell without writing anything. One difference is left: on a machine that is not set up, the Mac self test still opens the checklist by itself, and the Windows check opens no page |
 | RingIcon.cs | StatusIcon.swift | draws the ring and the dot into an `NSImage` |
 | Theme/Tokens.xaml | Theme.swift | the palette and the sizes, as SwiftUI values |
-| Card/CardPanel.xaml | CardView.swift | the card: header, blocks, rows, bars |
-| Card/CardWindow.xaml.cs | CardWindow.swift | the panel it lives in, where it is placed and how it arrives |
 | SnapshotWatcher.cs | SnapshotWatch.swift | watches the snapshots folder; a `DispatchSource` in place of `FileSystemWatcher` |
 | Island/IslandWindow.xaml.cs | IslandWindow.swift | the island's window: where it goes, the hover, the drag and the landing |
-| Island/IslandPanel.xaml(.cs), RingGauge.cs, UnfoldPanel.cs, FitPanel.cs | IslandView.swift | draws the island: the chrome, the rings, the percentages and the face |
+| BadgeDrawing.cs | BadgePaint.swift | the sign of the sessions in the corner of the tray and menu bar icon (D-409): the number of waiting sessions in orange, of stopped ones in red, a green dot for a finished turn, with a gap of one unit cut out of the rings around it |
+| Island/IslandPanel.xaml(.cs), RingGauge.cs, UnfoldPanel.cs, FitPanel.cs | IslandView.swift | draws the island: the chrome, the rings, the percentages, the marks of the sessions and the face; a click on the mark of "waits" opens that session |
 | Island/IslandGhost.cs | IslandStrip.swift | the landing strip, `NSVisualEffectView` in place of the acrylic accent |
-| Island/IslandCheck.cs | IslandCheck.swift | the self test doors: `--try-island`, `--try-drag`, `--try-face`, `--try-card-island` |
+| Aiko.Checks/Island/IslandCheck.cs | IslandCheck.swift | the self test doors: `--try-island`, `--try-drag`, `--try-face` |
 | Island/IslandFaceAnimator.cs, Tray/TrayFaceAnimator.cs | FacePlay.swift | the steps between the rings and a face, once for both surfaces |
 | Faces/FaceDrawing.cs | FacePaint.swift | turns the shapes of FaceArt into AppKit drawing |
 | RingDrawing.cs | RingPaint.swift | one arc, drawn the same by the menu bar icon and by the island |
@@ -202,58 +231,86 @@ AikoKit decided, and it answers the mouse.
 | SettingsStore.cs, ClaudeAccounts.cs | Store.swift | reads the settings, the environments and the plan of an account |
 | Log.cs | Log.swift | the same file, the same line format |
 | Uninstall.cs | Uninstall.swift | putting everything back on the way out. Windows is called by the installer's hook and then removes the program with `Update.exe uninstall`; macOS has no uninstaller, so the app does the work itself, moves its own bundle to the Bin and quits. Both carry the answer about the memory from the settings page to `UninstallPlan`; the Windows hook has no window and passes "nobody was asked", and macOS has no such path |
-| Settings/SettingsWindow.xaml(.cs), SettingsPanel.xaml | Settings/SettingsWindow.swift | the borderless window, the header, the menu and the page area; Esc closes it |
+| Settings/SettingsPanel.xaml(.cs), Terminal/TerminalHost.Settings.cs | Settings/SettingsPanel.swift, Terminal/TerminalHost+Settings.swift | the settings inside the terminal window (D-374): the menu on the place of the list, as wide as it, and the page in a column of 640 on the left. The gear, a pill or Esc goes back to the same session |
+| Settings/TerminalPage.xaml(.cs) | Settings/TerminalPageView.swift | the zoom of the window, the sound of a question and voice input |
 | Settings/SavedMark.cs, Theme/Controls.xaml, Theme/DropDown.cs, Theme/RevealPanel.cs | Settings/SettingsControls.swift | the switch, the segments, the picked card, the fields, the buttons (with the light one for Save and a plus before the words), the tick, the chip, the drop down and the "Saved" mark |
 | Settings/EnvironmentsEditor.cs | Settings/SettingsState.swift | what the window is looking at, and every change written through one place |
-| Settings/EnvironmentPage.xaml(.cs) | Settings/EnvironmentPageView.swift | one environment: the account, the name, the command, the bound folders and removal |
-| Settings/FoldersPage.xaml(.cs) | Settings/FoldersPageView.swift | every bound folder in one table |
+| Settings/EnvironmentPage.xaml(.cs) | Settings/EnvironmentPageView.swift | one environment: the account, the name, the command, the bound folders with the switch for every other folder (D-398), and removal |
 | Settings/PersonalityPage.xaml(.cs) | Settings/PersonalityPageView.swift | one switch per environment for all of Aiko (her character, her skills and her memory), the memory block, the face, the temperament, the sample answer and the list of skills |
 | Settings/MemoryBlock.cs | Settings/MemoryBlockView.swift, MemoryBlockModel.swift | the memory under the table: quotas, facts, the two forms, the warnings, the foot and the erase question. The model keeps what is open and has the snapshot door `AIKO_TRY_MEMORY` |
 | Settings/MemoryStore.cs | Settings/MemoryStore.swift | the memory file for the window: the bridge's lock file, read again, change, write in one step |
 | Settings/PrivacyPage.xaml(.cs) | Settings/PrivacyPageView.swift | the two consents and the list of fields that would be sent |
-| Settings/GeneralPage.xaml(.cs) | Settings/GeneralPageView.swift | where Aiko shows, startup, the update line, the language, access, diagnostics, starting over. The update line is one state and one action from `UpdateBlock`, with the percent in place of the button while a download runs; `AIKO_TRY_UPDATE` draws it at a stage for a snapshot. The time of the last answer is `UpdateRun.lastAnswered` in AikoHttp.swift |
-| Settings/ChecklistPage.xaml(.cs), ChecklistRow.cs | Settings/ChecklistPageView.swift, ChecklistModel.swift | the nine items, their bodies and Finish |
-| Settings/SettingsCheck.cs | Settings/SettingsCheck.swift | the self test doors `--try-settings` and `--try-wizard` |
+| Settings/GeneralPage.xaml(.cs) | Settings/GeneralPageView.swift | where Aiko shows, startup, the update line, the language, access, diagnostics, starting over. The update line is one state and one action from `UpdateBlock`, with the percent in place of the button while a download runs; `AIKO_TRY_UPDATE` draws it at a stage for a snapshot. The time of the last answer is `UpdateRun.lastAnswered` in AikoHttp.swift. The switch "open the terminal window too" under the start with the system is in both. The titles of the notes of a newer version stand under its line (D-397), `ReleaseNotesRun` on both |
+| Settings/ChecklistPage.xaml(.cs), ChecklistRow.cs, Terminal/FirstRunHost.cs | Settings/ChecklistPageView.swift, ChecklistModel.swift, SettingsPanel.swift | the nine items, their bodies, the summary before Finish, and the first run in the window one step at a time (D-391, D-394, D-421). The install button opens Terminal with the official command, as Windows opens PowerShell |
+| Aiko.Checks/Settings/SettingsCheck.cs | Settings/SettingsCheck.swift | the self test doors `--try-settings` and `--try-wizard` |
 | Commands/ClaudeLauncher.cs, ClaudeFolders.cs | Commands/ClaudeLauncher.swift | finds Claude Code, opens it, waits for a sign-in, lists the config folders |
 | Commands/CommandFolder.cs | Commands/CommandFolder.swift | the shim, the command links and the block in `~/.zshrc` |
 | Commands/EnvironmentSetup.cs | Commands/EnvironmentSetup.swift | puts a saved list of environments into effect outside Aiko |
 | Plugins/PluginSync.cs, ClaudeCli.cs, SkillShelf.cs | Plugins/PluginSync.swift | the marketplace, the skills copy and the claude commands that install the plugins; the rule for the memory tools in every folder, and the update of the persona plugin when its hash is not the one noted |
+| Terminal/TerminalLog.cs, ProcessJob.cs | Terminal/TerminalLog.swift, ProcessTree.swift | the log of the terminal, and a program that ends with all it started (D-351). macOS has no job: the session of the terminal gets a hang-up and a request to end, and what is left a second later is killed. Quitting with programs running asks first, as on Windows |
+| Terminal/TerminalHost.cs, TerminalHost.Launch.cs, TerminalEvents.cs, WindowKeys.cs | Terminal/TerminalHost.swift, TerminalHost+Sessions.swift, TerminalState.swift, ProcessEnvironment.swift, TerminalCheck.swift, TerminalEvents.swift, TerminalHost+Pulse.swift, PulseCheck.swift, StoppedBar.swift, StoppedCheck.swift | the terminal behind its window (D-349, D-425): sessions, real terminals on SwiftTerm, rename and close with the question, the Dock icon while the window is open, the hook of the terminal and what each session does, the counts with the number in the Dock and the sound of waiting, the bar that continues a Claude Code that ended (a command line that ends leaves the list); the self tests `--try-terminal`, `--try-pulse` and `--try-stopped`. The Dock badge is the one of the system, in its own red, and macOS shows it only when Aiko may badge its icon (D-426) |
+| Terminal/TerminalPanel.cs, TerminalPanel.TitleBar.cs, TerminalPills.cs | Terminal/TerminalHost+Window.swift, TitleBarView.swift, BarMarks.swift, ZoomedHostingView.swift | the window and its title bar: the list button, the chevron, the pills, the search and the gear. The three window buttons of the Mac stand in the middle of the bar on the left. The zoom of the window (D-384, D-429): the views of SwiftUI are laid out in the room divided by the zoom and drawn larger with `scaleEffect`, as the LayoutTransform of Windows, and the terminal takes its font |
+| Terminal/TerminalPanel.SessionList.cs | Terminal/SessionListView.swift | the list of sessions by folder, the state and the second line of a row, the buttons of a folder, rename in place. Below 720 points the list opens under its button in a card (`ListPopView`), and the pills not chosen keep only their mark (D-376) |
+| Terminal/TerminalPanel.Palette.cs | Terminal/StageView.swift | what stands in place of the terminal: no session, a session that cannot start (D-421), the question before closing |
+| Terminal/HeaderStripView.cs | Terminal/HeaderStripView.swift | the open header of limits (D-373, D-376) |
+| Terminal/PaletteView.cs, TerminalHost.Palette.cs, ConversationShelf.cs | Terminal/PaletteView.swift, TerminalHost+Palette.swift, ConversationShelf.swift | the quick pick of a folder and the search of sessions and conversations (D-347, D-353) |
+| Terminal/TerminalHost.Keys.cs | Terminal/TerminalHost+Keys.swift | the keys of the window from the table of the core, Cmd for Ctrl. The next session is Ctrl+Tab: Cmd+Tab belongs to macOS |
+| Theme/ToolTip.xaml, Theme/Tips.cs | Tips.swift | the tip of every window, the island too: Surface, a thin edge, radius 8, the small text, one line or wrapped in 320. The icon of the menu bar keeps the tip of the system, as the tray icon of Windows does |
+| Terminal/TerminalWindow.cs, WorkAreas.cs | Terminal/TerminalHost+Window.swift, Screens.swift | where the window stands on all screens: the place it was closed at, kept while a screen still has it, by the rule of WindowPlace in the core |
+| Terminal/TerminalSurface.cs, PseudoConsole.cs, TerminalLoader.cs; their checks in Aiko.Checks: TerminalSnapshot.cs, TerminalHookCheck.cs, TerminalTabCheck.cs | Terminal/AikoTerminalView.swift, TerminalHost+Loader.swift, TerminalCheck.swift, PulseCheck.swift | the real terminal, on ConPTY and on SwiftTerm (D-360), with the loader until its first letter (D-368) and the copy of whole paragraphs (D-371) |
+| Terminal/TerminalView.cs | Terminal/TerminalState.swift | what the window draws at one moment: Windows hands one record to the panel, the Mac publishes the parts to its SwiftUI views |
+| Terminal/ShellBlocksView.cs, ShellFindBar.cs, ShellLinks.cs, ShellLaunch.cs, the shell part of TerminalSurface.cs; Assets/Shell/aiko.bash | Terminal/ShellBlocksView.swift, ShellLinks.swift (the find bar too), ShellLaunch.swift, TerminalHost+Shell.swift; mac/Shell/zsh; the check ShellCheck.swift (--try-shell) | a command line as blocks (D-363, D-412): the marks of the shell cut its output, Copy, Fold and Explain under the mouse, the search, Cmd+click on an address or a file, and the command Claude Code proposes for a line that starts with #. A full-screen program shows the real terminal. zsh, the shell of a Mac, gets Aiko's own startup files through ZDOTDIR, which read the person's first; bash gets aiko.bash as on Windows; another shell starts with no blocks |
+| Terminal/TerminalEditor*.cs, ChoicePopup.cs, ProjectFiles.cs, TerminalPaste.cs; the check TerminalEditorCheck.cs | Terminal/EditorView*.swift, EditorTextView.swift, ChoiceList.swift, ProjectFiles.swift, TerminalPaste.swift, AikoTerminalView.swift; the check EditorCheck.swift (--try-editor) | the editor under the terminal, the list of "@" and Tab, and pictures and files pasted or dropped (D-354, D-362, D-369, D-370). The Mac check stops the text and the picture in the line of Claude Code and sends nothing to the model; Windows sends two short messages |
+| Voice/Microphone.cs, LocalRecognizer.cs, WhisperNative.cs, CloudRecognizer.cs, ModelDownload.cs, VoiceDictation.cs, VoiceKey.cs, VoiceEchoLog.cs; TerminalEditor.Voice.cs; the voice part of Settings/TerminalPage.xaml(.cs) | Voice/*.swift (the check VoiceCheck.swift, --try-voice); Terminal/EditorView+Voice.swift; Settings/VoiceSectionView.swift | voice input (D-313…D-322, D-354, D-427): the mic through AVAudioEngine, whisper.xcframework of the same release on Metal, OpenAI Realtime with the key in the Keychain. The words show in the field itself while they come, where Windows lays a second text over it. The Mac check plays a recorded phrase in place of the mic |
+| Theme/DropDown.cs | Settings/SettingsControls.swift (DropDown) | the group titles of the folder list: drawn rows on Windows, menu section titles on macOS |
 | ClaudeSettingsFile.cs, BridgePath.cs | ClaudeSettingsFile.swift | Aiko's line in somebody else's settings.json, and where the bridge is |
 | AikoHttp.cs, UpdateClient.cs, UpdateRun.cs, InstallId.cs, ReportedPeriods.cs | AikoHttp.swift | the one place that makes a URLSession, the version check and the daily count; both check the host of every redirect before following it |
 | UpdateInstall.cs | UpdateInstall.swift | downloads an update and installs it once it passes. Windows wraps Velopack's `UpdateManager`; macOS hands the release folder, the key and this bundle to `UpdateInstaller` in the core. Velopack reports the percent on Windows; on macOS the redirect delegate in AikoHttp.swift watches the bytes of the zip |
 | AppVersion.cs, Startup.cs | AppVersion.swift | the version from Info.plist, and the login item in place of the Run key |
 | Faces/FaceDrawing.cs | FaceImage.swift | one face as a picture, for the settings window |
+| ReleaseNotesRun.cs | ReleaseNotesRun.swift | the titles of the notes of a newer version from GitHub (D-397), through the guard of allowed hosts |
+| Terminal/RowDrag.cs | Terminal/SessionListView.swift | a session dragged in its folder (D-400, D-401): the same numbers, the copy tilted with the shadow of cards, the pale place, the slide and the landing. The list keeps its order until the copy has landed |
+| LanguageChoice.cs | AikoDelegate.swift, Settings/GeneralPageView.swift | which language Aiko speaks: the system one or the one the person chose |
+| ShellDetect.cs | none | which shell Claude Code runs the status line with: Git Bash or PowerShell. Windows only: macOS has one, zsh (`ClaudeShellLookup`) |
+| CrashGuard.cs | none | an error in a window is written down and Aiko goes on. Windows only: Swift cannot catch a trap, and macOS writes a crash report, which the gate of the Mac counts |
+| GraphicsWarmUp.cs | none | Direct3D loaded on a second thread at the start. Windows only: WPF needs it, AppKit does not |
+| Terminal/TaskbarButton.cs, TaskbarPins.cs | none | the picture of the taskbar button and the pins (D-409, D-418). The Dock icon shows the system badge with the number; whether it repeats the rings of the tray is open for the owner |
+| Direct/*.cs | none | direct mode with the usage API. Windows only: on macOS Claude Code keeps the token in the Keychain, and Aiko does not read it (`DirectModeMac`) |
+| MouseInput.cs | `dragRowForCheck` in Terminal/TerminalHost+Window.swift | the real mouse for self tests; the Mac sends mouse events through the window |
 
 `Scripts/make-app.sh` builds `build/Aiko.app`: one universal binary, the bridge inside as
 `Aiko.Bridge`, the shim as `claude`, an ad-hoc signature.
 
 Where it differs from Windows:
 
-- **The card always hangs under the status item.** The Windows taskbar can sit on any edge, so the
-  card asks whether there is room above. The macOS menu bar is always at the top. From the island
-  the card still opens above when the island sits on the bottom edge.
-- **The gear and the cross** are system symbols. The Windows build carries the gear of the user's
-  own icon set as a path in Tokens.xaml.
+- **No card** (D-399, D-425): the menu bar icon and the island open the terminal window, as the
+  tray icon and the island do on Windows. While the window is open Aiko has a Dock icon, the twin of
+  the button on the taskbar, and the menu bar icon steps aside, as the tray icon does (D-410).
+- **The cross** in the settings is a system symbol. The gear is the path of the user's own icon set,
+  the same as in Tokens.xaml on Windows (BarMarks.swift).
 - **The face is drawn, not handed over.** Windows gives the tray a picture, so a transition there is
   eight pictures per step; macOS draws the menu bar icon itself, so the island and the icon play the
   same smooth steps from one `FacePlay`.
-- **Proof that it starts.** `AIKO_MAC_SELF_TEST=1` opens the card, writes what it says and what
-  size it came out, and quits after three seconds. The island has its own doors, the twins of
-  `--try-island` and friends: `--try-island` unfolds and folds it, `--try-drag` drags it to the left
-  edge with the landing strip, `--try-face` plays a face, `--try-card-island` opens the card from
-  both a top and a bottom island. The Windows app has `--snapshot` as well, which saves a picture;
+- **Proof that it starts.** `AIKO_MAC_SELF_TEST=1` draws the icon, writes what it shows and quits
+  after three seconds. `--try-terminal` opens the terminal window with a command line in a
+  temporary folder and saves nothing. The island has its own doors, the twins of `--try-island` and
+  friends: `--try-island` unfolds and folds it, `--try-drag` drags it to the left edge with the
+  landing strip, `--try-face` plays a face. The Windows app has `--snapshot` as well, which saves a picture;
   over SSH a picture shows only the wallpaper, so nothing here draws one.
 
-- **The settings window has two doors of its own.** `--try-settings <page>` opens it at one page
-  (`general`, `folders`, `personality`, `privacy`, `setup`, `env1`, `env2`) and `--try-wizard
-  <item>` at one checklist item. Both write down the size, the menu and the state of every item,
-  and quit after `AIKO_TRY_SECONDS`. `AIKO_TRY_GROW=1` makes the window as tall as the page, the
-  way `SettingsPanel.GrowToPage` does for `--snapshot-settings` on Windows, and `=end` keeps its
-  bottom on screen when the page is taller than the screen itself. Neither door saves anything.
+- **The settings have two doors of their own.** `--try-settings <page>` opens the terminal window
+  at one page (`general`, `terminal`, `personality`, `privacy`, `setup`, `env1`, `env2`) and
+  `--try-wizard <item>` at one checklist item. Both write down the menu and the state of every
+  item, and quit after `AIKO_TRY_SECONDS`. Neither door saves anything.
 
-## What macOS does differently in the settings window
+## What macOS does differently in the settings
 
 These are the places where there was nothing to copy, with the reason for the choice.
+
+- **"Open the terminal window too" opens it at every start while Aiko starts at login.** Windows
+  knows a start with Windows by its argument and opens the window only then (D-350). A login item
+  of macOS starts the app the same way a person does, so on the Mac the switch shows only while
+  Aiko starts at login and then works at each start.
 
 - **The launch commands reach PATH through `~/.zshrc`.** Windows writes the user PATH in the
   registry and tells Explorer about it, and every new process sees it. macOS has no such place:
@@ -285,8 +342,8 @@ These are the places where there was nothing to copy, with the reason for the ch
   what to run by AppleScript needs the Automation permission and a prompt nobody asked for. So Aiko
   writes `open-claude.command` into its own folder — `cd`, the config folder variable, `exec claude`
   — and hands it to Terminal with `open`. That needs no extra permission, and the file is written
-  again every time and safe to delete. The button sits on the card, where Windows keeps it, and not
-  on the environment page: in Russian two buttons do not fit that column.
+  again every time and safe to delete. With the card gone the button
+  goes with it; Claude Code now opens in the terminal window of Aiko.
 
 - **"Signed in" is read from `.claude.json`, not from a file that is never written.** Claude Code on
   macOS keeps its token in the Keychain, so `.credentials.json` is not there even for a folder in
@@ -325,7 +382,7 @@ These are the places where there was nothing to copy, with the reason for the ch
   two must stay the same: `flock` on `memory.json.lock`, 80 tries 25 ms apart, a temporary file and
   `rename`, and `.bad` for a file that was not a memory.
 
-Not there yet: direct mode and signing for release.
+Not there yet: signing for release. Direct mode is Windows only (`DirectModeMac`).
 
 ## Names that had to change
 
@@ -355,6 +412,9 @@ exactly, which is what the Swift tests do; the Mac app passes `.macOS`.
 
 ## Differences we could not avoid
 
+- **A session that did not start.** Windows names the error code of `CreateProcess` and offers "Open the
+  log". SwiftTerm on the Mac reports no such code: a program that cannot start ends at once and shows as
+  stopped, with "Continue".
 - **Time.** `DateTimeOffset` counts in 100 ns ticks; Swift `Date` counts in seconds as a double.
   Every value the tests use is exact in both. `ResetCountdown` and the pace estimate cut at the
   same tick as `TimeSpan.FromSeconds` does.

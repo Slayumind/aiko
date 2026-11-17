@@ -26,7 +26,8 @@ enum Log {
             try? manager.removeItem(atPath: path)
         }
 
-        let line = "\(stamp())  \(message)\n"
+        // No full paths (D-420): the line keeps the last part of each, as on Windows.
+        let line = "\(stamp())  \(LogText.withoutPaths(message))\n"
         guard let bytes = line.data(using: .utf8) else { return }
 
         if let handle = FileHandle(forWritingAtPath: path) {

@@ -1,0 +1,184 @@
+namespace Aiko.Core.Terminal;
+
+/// Who turns speech into text (D-314): whisper small on this computer, or OpenAI with the
+/// person's own key.
+public enum VoiceEngine
+{
+    Local,
+    OpenAI,
+}
+
+/// Where a recording is. Off means voice input is turned off in the settings: no button, and
+/// Ctrl+Space does nothing.
+public enum VoicePhase
+{
+    Off,
+    Idle,
+
+    /// The mic is open but no sound came yet. The Windows mic gives silence for the first 0.4 s,
+    /// so "listening" is shown only from the first sound, and the first word is not lost (D-314).
+    Warming,
+    Listening,
+
+    /// The second press closed the mic. The last words are still being recognised.
+    Finishing,
+}
+
+/// The line above the input that voice input may show.
+public enum VoiceNotice
+{
+    None,
+
+    /// The voice key was pressed while voice input is off in the settings: the line says so and
+    /// leads to the page that turns it on.
+    TurnedOff,
+    NoMicrophone,
+    NeedsModel,
+    NeedsKey,
+
+    /// OpenAI did not take the recording: a wrong key, no connection, any other refusal (D-317).
+    CloudFailed,
+
+    /// OpenAI refused because the account of the key has no money left (D-405).
+    CloudNoMoney,
+
+    /// OpenAI asked to slow down: too many requests in a short time (D-405).
+    CloudBusy,
+}
+
+/// What happened: a press of Ctrl+Space or the button, Esc, or news from the mic and the engine.
+public enum VoiceCue
+{
+    Press,
+    FirstSound,
+    Cancel,
+    Finished,
+    NoMicrophone,
+    CloudFailed,
+    CloudNoMoney,
+    CloudBusy,
+}
+
+/// Whether the chosen engine can work: the model is on disk, or the key is stored.
+public enum VoiceReadiness
+{
+    Ready,
+    NeedsModel,
+    NeedsKey,
+}
+
+public sealed record VoiceState(VoicePhase Phase, VoiceNotice Notice)
+{
+    public static VoiceState For(bool turnedOn) =>
+        new(turnedOn ? VoicePhase.Idle : VoicePhase.Off, VoiceNotice.None);
+
+    public bool Recording => Phase is VoicePhase.Warming or VoicePhase.Listening;
+}
+
+public enum VoiceButton
+{
+    Hidden,
+    Idle,
+
+    /// Round and tinted red, from the press until the second press (D-315).
+    Recording,
+}
+
+public enum VoiceWord
+{
+    /// The line under the input shows the mode, the model and the environment as usual.
+    None,
+    Warming,
+    Listening,
+    Finishing,
+}
+
+/// What the input shows for one moment of a recording (D-315, D-319). Time and the wave of the sound
+/// show only while listening;
+/// Engine names where the sound goes while the mic is open or the text is finishing.
+public sealed record VoiceLine(
+    VoiceWord Word,
+    string? Time,
+    VoiceEngine? Engine,
+    bool CancelHint,
+    VoiceButton Button,
+    bool Wave);
+
+/// The rules of voice input in the input field (D-313, D-315). Two presses: press, speak, press.
+public static class VoiceInput
+{
+    public static VoiceState Next(VoiceState state, VoiceCue cue, VoiceReadiness readiness)
+    {
+        // The key is named in every hint of the window, so a press while voice is off is answered.
+        if (state.Phase == VoicePhase.Off)
+        {
+            return cue == VoiceCue.Press ? state with { Notice = VoiceNotice.TurnedOff } : state;
+        }
+
+        return (state.Phase, cue) switch
+        {
+            (VoicePhase.Idle, VoiceCue.Press) => readiness switch
+            {
+                VoiceReadiness.NeedsModel => state with { Notice = VoiceNotice.NeedsModel },
+                VoiceReadiness.NeedsKey => state with { Notice = VoiceNotice.NeedsKey },
+                _ => new VoiceState(VoicePhase.Warming, VoiceNotice.None),
+            },
+            (VoicePhase.Warming, VoiceCue.FirstSound) => state with { Phase = VoicePhase.Listening },
+            (VoicePhase.Warming or VoicePhase.Listening, VoiceCue.Press) => state with { Phase = VoicePhase.Finishing },
+            (VoicePhase.Warming or VoicePhase.Listening or VoicePhase.Finishing, VoiceCue.Cancel) =>
+                state with { Phase = VoicePhase.Idle },
+            (VoicePhase.Finishing, VoiceCue.Finished) => state with { Phase = VoicePhase.Idle },
+            (VoicePhase.Warming or VoicePhase.Listening, VoiceCue.NoMicrophone) =>
+                new VoiceState(VoicePhase.Idle, VoiceNotice.NoMicrophone),
+            (_, VoiceCue.NoMicrophone) => state with { Notice = VoiceNotice.NoMicrophone },
+            (VoicePhase.Warming or VoicePhase.Listening or VoicePhase.Finishing, VoiceCue.CloudFailed) =>
+                new VoiceState(VoicePhase.Idle, VoiceNotice.CloudFailed),
+            (VoicePhase.Warming or VoicePhase.Listening or VoicePhase.Finishing, VoiceCue.CloudNoMoney) =>
+                new VoiceState(VoicePhase.Idle, VoiceNotice.CloudNoMoney),
+            (VoicePhase.Warming or VoicePhase.Listening or VoicePhase.Finishing, VoiceCue.CloudBusy) =>
+                new VoiceState(VoicePhase.Idle, VoiceNotice.CloudBusy),
+            _ => state,
+        };
+    }
+
+    /// Why OpenAI refused, from the code of its error event or the HTTP status of a refused
+    /// connection (D-405). 429 on connecting comes without a code: for one person dictating, an
+    /// empty account is far more likely than the limit of requests, so it reads as no money.
+    public static VoiceCue CloudCue(string? code, int? status) => (code, status) switch
+    {
+        ("insufficient_quota", _) => VoiceCue.CloudNoMoney,
+        ("rate_limit_exceeded", _) => VoiceCue.CloudBusy,
+        (null, 429) => VoiceCue.CloudNoMoney,
+        _ => VoiceCue.CloudFailed,
+    };
+
+    /// Whether the end of a recording keeps the words recognised so far. A refusal of OpenAI in the
+    /// middle keeps the phrases it already sent back; only Esc and a lost mic drop them (D-405).
+    public static bool KeepsText(VoiceCue cue) =>
+        cue is VoiceCue.Finished or VoiceCue.CloudFailed or VoiceCue.CloudNoMoney or VoiceCue.CloudBusy;
+
+    public static VoiceLine Line(VoiceState state, TimeSpan listened, VoiceEngine engine) => state.Phase switch
+    {
+        VoicePhase.Off => new VoiceLine(VoiceWord.None, null, null, false, VoiceButton.Hidden, false),
+        VoicePhase.Warming => new VoiceLine(VoiceWord.Warming, null, engine, true, VoiceButton.Recording, false),
+        VoicePhase.Listening => new VoiceLine(VoiceWord.Listening, Clock(listened), engine, true, VoiceButton.Recording, true),
+        VoicePhase.Finishing => new VoiceLine(VoiceWord.Finishing, null, engine, false, VoiceButton.Idle, false),
+        _ => new VoiceLine(VoiceWord.None, null, null, false, VoiceButton.Idle, false),
+    };
+
+    /// The longest recording. The local engine reads the whole recording again while it grows, and
+    /// a mic left on would take memory and the processor without end; at this length the recording
+    /// finishes as a second press would, and the words stay.
+    public static readonly TimeSpan Longest = TimeSpan.FromMinutes(5);
+
+    /// Whether a recording has reached Longest and finishes by itself.
+    public static bool TooLong(VoiceState state, TimeSpan listened) =>
+        state.Phase == VoicePhase.Listening && listened >= Longest;
+
+    /// Minutes and seconds, the way a voice recorder counts: 0:04, 12:30.
+    public static string Clock(TimeSpan time)
+    {
+        var seconds = Math.Max(0, (long)time.TotalSeconds);
+        return $"{seconds / 60}:{seconds % 60:00}";
+    }
+}

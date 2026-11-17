@@ -2,10 +2,10 @@ import AikoKit
 import AppKit
 import SwiftUI
 
-/// The few controls the settings window needs, in the shape the site uses. The twin of
+/// The few controls the settings need, in the shape the site uses. The twin of
 /// Theme/Controls.xaml: a switch, a segmented choice, a quiet button and a card you pick.
 ///
-/// They live in one file so the settings window and the checklist page cannot drift apart, which
+/// They live in one file so the settings pages and the checklist page cannot drift apart, which
 /// is the same reason the WPF ones share a dictionary.
 enum Control {
     /// Group labels on the site are small, mono and in capitals. The capitals are typed into
@@ -146,7 +146,7 @@ struct PickCard<Content: View>: View {
     }
 }
 
-/// The small buttons of the settings window. One shape for all of them: the face and the colour of
+/// The small buttons of the settings. One shape for all of them: the face and the colour of
 /// the words change, and the hover layer takes the colour of the words.
 struct FlatButton: View {
     enum Look {
@@ -254,7 +254,7 @@ struct MarkButton<Mark: View>: View {
         }
         .buttonStyle(.plain)
         .onHover { hovering = $0 }
-        .help(help)
+        .tip(help)
     }
 }
 
@@ -341,11 +341,18 @@ struct CodeBlock: View {
 struct DropDown: View {
     let items: [String]
     let index: Int
+
+    /// Group titles, each above the item with its index. A title cannot be picked.
+    var headers: [Int: String] = [:]
     let pick: (Int) -> Void
 
     var body: some View {
         Menu {
             ForEach(Array(items.enumerated()), id: \.offset) { at, item in
+                if let header = headers[at] {
+                    if at > 0 { Divider() }
+                    Text(header)
+                }
                 Button(item) { pick(at) }
             }
         } label: {

@@ -3,7 +3,120 @@
 All notable changes to Aiko are listed here.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and Aiko uses
-[semantic versioning](https://semver.org/spec/v2.0.0.html).
+[semantic versioning](https://semver.org/spec/v2.0.0.html). The same notes in Russian are in
+[CHANGELOG.ru.md](CHANGELOG.ru.md), under the same headings.
+
+## [0.5.0] - 2026-11-17
+
+Aiko gets a window. Claude Code and the command line run in it, on Windows and macOS, grouped by
+account and project folder.
+
+### Added
+
+- **Real terminals in the Aiko window, on Windows and the Mac.** Claude Code runs as it is, with its own input,
+  menus and permission prompts, and a command line (Git Bash or PowerShell) opens in the folder of
+  its session. Sessions are grouped by environment and folder. Ctrl+= and Ctrl+- zoom the text of the
+  window and the terminal together: 100, 115 or 130%. On the Mac the same keys use Cmd.
+- **Sessions keep running.** Close the window, and Claude Code goes on working. After a restart of
+  Aiko a conversation continues where it was, and a command line opens in the same folder. Quitting
+  Aiko asks first when something still runs.
+- **The list says what each agent does.** A mark shows whether she works, has a question or is done,
+  and a second line says what she did last: "reading office.mjs", "waits for permission: npm test".
+  Point at a folder and press "+" for Claude Code, ">_" for a command line or the folder mark to
+  open it in Explorer; Ctrl+Shift+T opens a quick pick of your folders. Drag a session to put it in
+  another place in its folder.
+- **One place to type.** Type in the line of Claude Code, with its menus. Ctrl+G opens an editor for a
+  long text, Ctrl+V puts a screenshot in as a picture and a file as its path, and
+  Ctrl+Shift+Space writes down what you say. Ctrl+C copies a selection with its paragraphs whole.
+- **Any conversation, one key away.** Ctrl+Shift+K finds a session or a conversation you started
+  in another terminal or in VS Code, by its name or your first message, and continues it here.
+  Ctrl+Tab goes to the next session.
+- **Command lines as blocks.** In a session of Git Bash or PowerShell each command is a block: a grey
+  rule when it passed, a red one with the exit code when it failed, an orange one while it runs, and
+  its time. A long output folds to its first lines. Point at a block for Copy, Fold and, after a
+  failure, Explain: Claude Code says under the block why it failed. Start a line with "#" and say what you
+  need, in any language, and a command comes up under the field; Tab takes it, Enter is yours.
+  Ctrl+Shift+F finds text in the output, Ctrl+click opens an address or a file. vim, less and other
+  full-screen programs run in the terminal itself.
+- **Aiko tells you when an agent needs you.** No pop-ups: the tray icon and the button of the window
+  on the taskbar show how many agents wait for you, in orange. If none wait, they show how many
+  stopped, in red, and a green dot says one has finished. The number stays until you open that
+  session, and only a question comes with a sound. The button draws the same ring as the tray, and a
+  limit over 90% turns it red; Aiko's face takes its place at the same moments as in the tray. If you
+  pin Aiko to the taskbar, Windows draws the button from the pin: the ring stays still, and the face
+  comes in its corner. While the window is open or minimized, the button stands in for the
+  tray icon and the island; close the window and they come back, the island with the agents that
+  wait, have finished, stopped and work.
+- **Everything in one window.** A click on the tray icon or the island opens it, and the menu of the
+  icon keeps Open, Settings and Quit. Each environment is a pill in the title bar with its ring and
+  percent; the arrow opens the limits of all of them in place, says how fresh they are and offers
+  Sign in when an account needs it. The gear and Ctrl+, open the settings right there; Esc or a pill takes
+  you back to the sessions; the project folders are on the page of their environment. The first
+  run happens in the same window, one step at a time. The card of limits and the settings window are
+  gone.
+- **The interface skill.** `/aiko:interface` builds and polishes a web interface so it looks made for
+  its product: a page, an app screen, a dashboard, a form or an embed. It starts from the product's
+  own look, finds the signs of AI-looking UI, fixes the screen in passes from spacing to motion and
+  checks every state at desktop and phone widths. Events get a visible answer where they happen, from
+  a tick on a saved field to glass reactions like in Mac video calls, and a small tool measures the
+  motion frame by frame.
+- **The roadmap skill.** Aiko builds and keeps a shared roadmap for several teams. She collects what
+  each domain owner already has, cuts the work into domains with owners and borders, and writes every
+  release as one short card: why, what changes for each role, pains, unblocks and acceptance criteria.
+  Releases sit in month windows: this month is a promise, next month a forecast, later an intent. The
+  asks to a team that every domain needs, such as IT, go into one queue with priority marks. It works
+  with any tools: a wiki, a tracker, a sheet or a web page.
+- **The envoy skill.** Send Aiko to help a colleague in Slack or another work chat. You give her the
+  task and the limits once; she asks the questions, checks the thread and does the work, and brings
+  back anything outside the task. Her messages start with her face and name, so nobody takes them for
+  yours. The copy skill now helps with messages to colleagues too.
+- **Game skills that measure.** Playtest lets a ladder of agents play, from one that does nothing to
+  a strong search, and checks that more skill wins more. Balance picks a number like enemy speed the
+  same way, with `balance.py depth`. Game research writes each system as a short rules sheet and
+  finds rules that never fire.
+
+### Changed
+
+- **The first run on a new computer.** A button installs Claude Code in a PowerShell window, and Next
+  waits until it is there. The steps go in one order, the counter starts at zero, and the last step
+  lists what Finish changes. The privacy step names what is never sent, and the update check
+  mentions the count only when statistics are on.
+
+- **The window says what it can do.** A magnifier in the title bar opens the search of conversations,
+  and a quiet line under a session names its keys. The open island puts the letter of each
+  environment before its ring. A session that did not start says why and offers to start again,
+  to install Claude Code or, when its folder is gone, to leave the list.
+
+### Fixed
+
+- Voice input no longer adds names from Aiko's memory to what you said. The recogniser was told
+  the keys of the memory as a hint and sometimes gave one back alone, in the middle of speech. The
+  memory is no longer part of the hint, so it is not sent to OpenAI with the sound either.
+- The log keeps only the name of a file or folder, not its full path. A system error used to write
+  the whole path there, though the privacy notes say the log has no working folders.
+- Aiko runs as one copy. Starting it again, from the Start menu, a pinned button or with a folder
+  dropped on it, opens the window of the Aiko that already runs. Before, every start added one more Aiko to the tray.
+- A session that stopped before your first message, or stayed empty until Aiko restarted, now
+  starts again. Before, Enter or the restart only said "No conversation found".
+- A mistake in one window no longer closes Aiko: the tray, the island and the sessions keep running.
+- Restarting for an update, Remove Aiko, Start over and removing an environment ask first when
+  sessions still run, as quitting does, and the question shows over the settings. Before, some of
+  them stopped the sessions without a word, and on the Mac "Don't restart" left two Aikos running.
+- A settings file Aiko cannot read is no longer replaced with the defaults. A broken one is kept as
+  .bad, now on the Mac too, and one that another program holds for a moment is left alone.
+- A command that prints fast no longer slows down typing in the window.
+- The voice key says so when voice input is off, and a note about voice input now shows in a
+  session of Claude Code too.
+- When Claude Code does not open for a sign-in, the checklist and the page of the environment say so.
+- Your own status line no longer holds the status line of Claude Code when it starts a program in the
+  background.
+- Your own settings of Claude Code, such as CLAUDE_CODE_GIT_BASH_PATH, reach the sessions in the
+  terminal.
+- Renaming an environment keeps its sessions, also with the window open.
+- If OpenAI refuses voice input halfway, the words it already wrote stay in the field. When the
+  account of the key is out of money, Aiko says so instead of asking you to check the key.
+- The bridge no longer leaves temporary files next to the limit snapshots, and Aiko clears the old
+  ones when it starts.
 
 ## [0.4.1] - 2026-10-12
 

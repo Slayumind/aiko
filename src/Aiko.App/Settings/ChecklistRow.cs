@@ -21,6 +21,21 @@ sealed class ChecklistRow : UserControl
     private readonly TextBlock _title = new();
     private readonly TextBlock _status = new();
     private readonly RotateTransform _chevronTurn = new();
+    private Path? _chevron;
+
+    /// One step at a time (D-391) the header folds nothing: the chevron goes, and so does the hand.
+    public void ShowAsStep()
+    {
+        if (_chevron is not null)
+        {
+            _chevron.Visibility = Visibility.Collapsed;
+        }
+
+        _asStep = true;
+        _frame.Cursor = Cursors.Arrow;
+    }
+
+    private bool _asStep;
     private readonly RevealPanel _reveal = new();
     private readonly ContentPresenter _body = new() { Margin = new Thickness(26, 10, 0, 2) };
     private ItemState _state = ItemState.Locked;
@@ -83,7 +98,7 @@ sealed class ChecklistRow : UserControl
             }
 
             Opacity = value is ItemState.Locked ? 0.55 : 1;
-            _frame.Cursor = value is ItemState.Locked ? Cursors.Arrow : Cursors.Hand;
+            _frame.Cursor = value is ItemState.Locked || _asStep ? Cursors.Arrow : Cursors.Hand;
         }
     }
 
@@ -101,7 +116,7 @@ sealed class ChecklistRow : UserControl
         _status.Foreground = Tokens.Brush("Muted");
         _status.VerticalAlignment = VerticalAlignment.Center;
 
-        var chevron = new Path
+        var chevron = _chevron = new Path
         {
             Data = Geometry.Parse("M0,0 L4,4 L8,0"),
             Stroke = Tokens.Brush("Muted"),

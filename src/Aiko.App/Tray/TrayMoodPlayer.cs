@@ -29,8 +29,6 @@ sealed class TrayMoodPlayer : IDisposable
     /// The face to draw, or null for the rings. Raised on the dispatcher thread.
     public event Action<AikoFace?>? FaceChanged;
 
-    public AikoFace? Showing => _showing?.Face;
-
     /// Called at startup and after every settings change.
     public void Follow(EnvironmentSettings environments)
     {

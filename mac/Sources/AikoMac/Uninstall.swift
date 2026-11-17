@@ -67,6 +67,10 @@ enum Uninstall {
         // Before the bundle moves: macOS knows the login item by where the app is now.
         LoginItem.set(false)
 
+        // The OpenAI key of voice input is not in a folder of Aiko: the Keychain keeps it (D-313).
+        // The model is in the local folder and goes with it; its download was stopped before this.
+        VoiceKey.remove()
+
         let outcome = binTheApp() ? Outcome.done : .appStays
 
         // The last line: after this the folder the log lives in is gone, and writing would make it

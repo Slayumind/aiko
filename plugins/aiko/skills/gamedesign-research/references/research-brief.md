@@ -34,6 +34,7 @@ For every game you keep, return:
 - the interface: how the player reads and edits it; gamepad or touch if relevant
 - progression: how the system grows over the game
 - what to take and what to avoid, one line each
+- the features: <list from the brief>, one short answer each, "not verified" when unsure
 - 1-3 source links (official docs, wikis, patch notes, developer posts, papers, long guides)
 - 1-2 screenshots of the mechanic's interface, downloaded to refs/<slug>-<n>.jpg
   (see images rules below), each with one line on what it shows
@@ -59,6 +60,42 @@ End with "dropped games and why", one line each.
   wiki, then guides. Japanese or other original-language sources are often more accurate for
   games made there.
 - Community forum posts are good for "what players complain about"; label them as such.
+
+## Features
+
+A feature is a question every game in the review answers in a word or a number. The same table
+for all games turns a pile of cards into a comparison. Pick 6-12 from the mechanic; they come from
+the rules, not from taste.
+
+A source for the idea: researchers of the General Video Game AI competition described 49 games by 14
+features read from the rules (Bontrager et al., AIIDE 2016): can the player die, is there a "use"
+action, is it a survival game, what share of things are harmful, collectible or goals. Two of them,
+"can use" and "can die", were enough to tell action games from puzzles.
+
+For party AI tactics, for example: rules per character (number), conditions per rule, what happens
+when no rule fits, can the player pause, does the AI use items, are rules shared between characters.
+
+## Shared names
+
+Use these names in the taxonomy when a family fits one, next to the game's own word.
+
+**Decision traps** (Anderson et al., "Deceptive Games", 2018). Each one beat at least some of the
+best game-playing agents:
+
+- **Greed:** a small reward now closes the way to a bigger one.
+- **Smoothness:** the best route passes near danger, so most tries along it fail.
+- **Delayed reward:** the payoff comes long after the choice.
+- **Generality:** a rule that held nine times breaks the tenth time.
+
+**Economy patterns** (Adams and Dormans, *Game Mechanics: Advanced Game Design*, appendix B; the list
+was read from a secondary summary):
+
+- **Engines:** a static engine (steady flow), a dynamic engine (spend now to earn more later), a
+  converter engine (two converters in a loop), engine building (building it is the game).
+- **Friction:** static friction, dynamic friction, a stopping mechanism (each use costs more or gives
+  less).
+- **Others:** attrition, escalating challenge, escalating complexity, arms race, trade, worker
+  placement, slow cycle.
 
 ## Tiers
 

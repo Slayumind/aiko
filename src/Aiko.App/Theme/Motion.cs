@@ -17,6 +17,9 @@ static class Motion
     public static readonly Duration Expand = new(TimeSpan.FromMilliseconds(180));
     public static readonly Duration Settle = new(TimeSpan.FromMilliseconds(280));
 
+    /// A panel that opens by its height, as the panel "Tasks" above the field (D-342).
+    public static readonly Duration Unfold = new(TimeSpan.FromMilliseconds(400));
+
     public const double PressedScale = 0.97;
     public const double AppearShift = 4;
 
@@ -30,6 +33,10 @@ static class Motion
     public static IEasingFunction Standard { get; } = Freeze(new BezierEase(CubicBezier.Standard));
 
     public static IEasingFunction Spring { get; } = Freeze(new BezierEase(CubicBezier.Spring));
+
+    /// For what goes away: slow at the start and fast at the end. With Standard a fade loses most of
+    /// its colour in the first third and reads as a jump.
+    public static IEasingFunction Exit { get; } = Freeze(new BezierEase(new CubicBezier(0.4, 0, 1, 1)));
 
     public static Duration Or0(Duration duration) => IsOn ? duration : new Duration(TimeSpan.Zero);
 
@@ -59,9 +66,18 @@ static class Motion
         element.RenderTransformOrigin = new Point(0.5, 0.5);
         element.RenderTransform = scale;
 
+        // Pressed at once; the pointer leaving undoes the look and coming back restores it, as long
+        // as the button is still held (react-aria usePress).
         element.PreviewMouseLeftButtonDown += (_, _) => ScaleTo(scale, PressedScale, Press, Standard);
         element.PreviewMouseLeftButtonUp += (_, _) => ScaleTo(scale, 1, Settle, Spring);
         element.MouseLeave += (_, _) => ScaleTo(scale, 1, Settle, Spring);
+        element.MouseEnter += (_, e) =>
+        {
+            if (e.LeftButton == System.Windows.Input.MouseButtonState.Pressed && element.IsMouseCaptureWithin)
+            {
+                ScaleTo(scale, PressedScale, Press, Standard);
+            }
+        };
     }
 
     private static void ScaleTo(ScaleTransform scale, double value, Duration duration, IEasingFunction easing)
@@ -109,6 +125,47 @@ static class Motion
 
         element.BeginAnimation(UIElement.OpacityProperty, new DoubleAnimation(0, 1, Expand) { EasingFunction = Standard });
         shift.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(AppearShift, 0, Expand) { EasingFunction = Standard });
+    }
+
+    // ---- Motion.PopIn: how every menu and list comes up (D-342) ----
+
+    /// A list or menu comes up from its anchor: 150 ms, from 0.95 of its size and 8 px away from
+    /// the anchor, fading in (shadcn, Radix; research of 2026-10-26). The element's own render
+    /// transform is replaced.
+    public static readonly Duration Pop = new(TimeSpan.FromMilliseconds(150));
+
+    public const double PopScale = 0.95;
+    public const double PopShift = 8;
+
+    /// above: the element stands above its anchor, so it grows from its bottom edge and rises.
+    /// Opens a popup with what it shows already at the start of PopIn. Opened first, the window of
+    /// the popup could draw one frame of the finished picture, and the motion then jumped back to
+    /// nothing: a blink that came only sometimes.
+    public static void OpenPopup(System.Windows.Controls.Primitives.Popup popup, FrameworkElement shown, bool above)
+    {
+        PopIn(shown, above);
+        popup.IsOpen = true;
+    }
+
+    public static void PopIn(FrameworkElement element, bool above)
+    {
+        element.RenderTransformOrigin = new Point(0.5, above ? 1 : 0);
+        if (!IsOn)
+        {
+            element.RenderTransform = Transform.Identity;
+            element.Opacity = 1;
+            return;
+        }
+
+        var scale = new ScaleTransform(PopScale, PopScale);
+        var shift = new TranslateTransform(0, above ? PopShift : -PopShift);
+        element.RenderTransform = new TransformGroup { Children = { scale, shift } };
+
+        var grow = new DoubleAnimation(PopScale, 1, Pop) { EasingFunction = Standard };
+        scale.BeginAnimation(ScaleTransform.ScaleXProperty, grow);
+        scale.BeginAnimation(ScaleTransform.ScaleYProperty, grow);
+        shift.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(0, Pop) { EasingFunction = Standard });
+        element.BeginAnimation(UIElement.OpacityProperty, new DoubleAnimation(0, 1, Pop) { EasingFunction = Standard });
     }
 
     // ---- Motion.Switch: the knob slides and the track changes colour ----

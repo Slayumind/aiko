@@ -1,0 +1,185 @@
+using System.Text.RegularExpressions;
+
+namespace Aiko.Core.Terminal;
+
+/// What a step of Claude Code did with a file, as far as the hint of voice input cares.
+public enum TouchKind
+{
+    Read,
+    Edit,
+    Other,
+}
+
+/// A file a session touched. Hidden is a file of Aiko itself, such as its memory, which the hint
+/// leaves out.
+public sealed record FileTouch(TouchKind Kind, string Path, bool Hidden = false);
+
+/// A sentence cut out as the hint given back: how many parts it had and how many of them were items
+/// of the hint. For the log, which keeps numbers and never the words (PRIVACY.md).
+public sealed record EchoCut(int Parts, int InHint);
+
+/// A phrase without the hint given back. LookAlikes: sentences kept although three or more of
+/// their parts are items of the hint, so the log can show a near miss.
+public sealed record Unechoed(string Text, IReadOnlyList<EchoCut> Dropped, int LookAlikes);
+
+/// What the recogniser is told before it listens (D-313): the folder of the session, its branch and
+/// the names of files from the conversation. These are the names a person spells their own way, the
+/// words recognition gets wrong first. Nothing of Aiko's memory goes (D-424): a key of it came back
+/// alone in the middle of speech, a name from home in a session at work.
+public static class VoiceHint
+{
+    /// Whisper reads about 220 tokens of a prompt; OpenAI reads a similar amount. 400 characters
+    /// stays inside both for Russian and English.
+    public const int MaxLength = 400;
+
+    /// Words of the terminal a person says about their work, in the language Whisper hears. They
+    /// come right after the folder and the branch, so a long list of files never cuts them (AIKO-311).
+    private static readonly IReadOnlyDictionary<string, string[]> TerminalWords = new Dictionary<string, string[]>
+    {
+        ["ru"] = ["Enter", "Esc", "поле ввода", "сессия", "отрисовано"],
+        ["en"] = ["Enter", "Esc", "input field", "session", "rendered"],
+    };
+
+    /// files are paths or names; only the name is kept. language is "ru" or "en", or null for no
+    /// words of the terminal.
+    public static string Build(
+        string? folder,
+        string? branch,
+        IEnumerable<string> files,
+        string? language = null,
+        int maxLength = MaxLength)
+    {
+        var items = new List<string>();
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        void Add(string? item)
+        {
+            var text = item?.Trim();
+            if (!string.IsNullOrEmpty(text) && seen.Add(text))
+            {
+                items.Add(text);
+            }
+        }
+
+        Add(LastPart(folder));
+        Add(branch);
+        foreach (var word in language is not null && TerminalWords.TryGetValue(language, out var words) ? words : [])
+        {
+            Add(word);
+        }
+
+        foreach (var file in files)
+        {
+            Add(LastPart(file));
+        }
+
+        var hint = "";
+        foreach (var item in items)
+        {
+            var longer = hint.Length == 0 ? item : $"{hint}, {item}";
+            if (longer.Length + 1 > maxLength)
+            {
+                break;
+            }
+
+            hint = longer;
+        }
+
+        return hint.Length == 0 ? "" : hint + ".";
+    }
+
+    /// The language Whisper is told to hear: the one chosen on the Terminal page, and with System
+    /// the language of the computer (D-314, D-326). Automatic detection was worse and slower in
+    /// the spike.
+    public static string Language(AikoLanguage setting, string systemLanguage) => setting switch
+    {
+        AikoLanguage.Russian => "ru",
+        AikoLanguage.English => "en",
+        _ => systemLanguage.StartsWith("ru", StringComparison.OrdinalIgnoreCase) ? "ru" : "en",
+    };
+
+    /// Whether a sentence is the hint given back. A recogniser that does not catch the sound may
+    /// answer with its prompt: on 2026-10-15 OpenAI wrote the whole hint for an English sentence.
+    /// A sentence of three or more parts, every one an item of the hint, is that. So is one of four
+    /// or more items and one other part: on 2026-10-23 OpenAI gave the hint back in the middle of
+    /// speech five times, with the folder kodland spelled кодland.
+    public static bool IsEcho(string phrase, string hint)
+    {
+        var items = Parts(hint).ToHashSet();
+        var parts = Parts(phrase).ToList();
+        var inHint = parts.Count(items.Contains);
+        return items.Count > 0 && parts.Count >= 3
+            && (inHint == parts.Count || (inHint >= 4 && inHint == parts.Count - 1));
+    }
+
+    /// The phrase without the sentences that are the hint given back (IsEcho); the speech around
+    /// them stays. What was cut and what nearly was is counted for the log.
+    public static Unechoed WithoutEcho(string phrase, string hint)
+    {
+        var items = Parts(hint).ToHashSet();
+        var kept = new List<string>();
+        var dropped = new List<EchoCut>();
+        var lookAlikes = 0;
+        foreach (var sentence in SentenceEnd.Split(phrase.Trim()).Where(s => s.Length > 0))
+        {
+            var parts = Parts(sentence).ToList();
+            var inHint = parts.Count(items.Contains);
+            if (IsEcho(sentence, hint))
+            {
+                dropped.Add(new EchoCut(parts.Count, inHint));
+                continue;
+            }
+
+            if (items.Count > 0 && inHint >= 3)
+            {
+                lookAlikes++;
+            }
+
+            kept.Add(sentence);
+        }
+
+        return new Unechoed(string.Join(' ', kept), dropped, lookAlikes);
+    }
+
+    /// The space after the end of a sentence. The dot of a file name has no space after it.
+    private static readonly Regex SentenceEnd = new(@"(?<=[.!?…])\s+", RegexOptions.Compiled);
+
+    private static IEnumerable<string> Parts(string text) =>
+        text.Split(',', StringSplitOptions.RemoveEmptyEntries)
+            .Select(part => part.Trim().TrimEnd('.').Trim().ToLowerInvariant().Replace('ё', 'е'))
+            .Where(part => part.Length > 0);
+
+    /// The files a session read or changed, the newest first, each once. The newest go first
+    /// because the hint is cut from the end. The touches come in the order they happened.
+    public static IReadOnlyList<string> Files(IEnumerable<FileTouch> touches) =>
+        [.. touches
+            .Where(touch => touch.Kind is TouchKind.Read or TouchKind.Edit && !touch.Hidden && touch.Path.Length > 0)
+            .Select(touch => touch.Path)
+            .Reverse()
+            .Distinct(StringComparer.OrdinalIgnoreCase)];
+
+    /// The branch a .git/HEAD file names: "ref: refs/heads/feature/voice" is feature/voice. A HEAD
+    /// that holds a commit (a detached checkout) names no branch.
+    public static string? Branch(string? head)
+    {
+        const string Prefix = "ref: refs/heads/";
+        var line = head?.Trim();
+        return line is not null && line.StartsWith(Prefix, StringComparison.Ordinal) && line.Length > Prefix.Length
+            ? line[Prefix.Length..]
+            : null;
+    }
+
+    /// In a worktree .git is a file, "gitdir: <folder>", and HEAD sits in that folder.
+    public static string? GitFolder(string? dotGitFile)
+    {
+        const string Prefix = "gitdir:";
+        var line = dotGitFile?.Trim();
+        return line is not null && line.StartsWith(Prefix, StringComparison.Ordinal) && line.Length > Prefix.Length
+            ? line[Prefix.Length..].Trim()
+            : null;
+    }
+
+    /// The last part of a path written on either system: C:\work\Aiko\, /Users/me/Aiko.
+    private static string? LastPart(string? path) =>
+        path?.TrimEnd('\\', '/').Split('\\', '/').LastOrDefault();
+}

@@ -60,31 +60,24 @@ sealed class UpdateClient : IDisposable
     /// inside one server day, and the unique index counted it twice.
     private static Request Build(StatsChoice stats)
     {
-        var version = Uri.EscapeDataString(CurrentVersion());
+        var version = CurrentVersion();
+        var windows = Environment.OSVersion.Version.ToString();
 
         if (!stats.Allowed)
         {
-            return new Request(new Uri($"{Endpoint}?v={version}"), null, null);
+            return new Request(new Uri(Endpoint + CountQuery.For(version, windows, null, false, false, false)), null, null);
         }
 
+        // No steady value on this computer gives an empty identifier, and then no identifier at all.
+        // See InstallId.
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
         var id = Heartbeat.DailyId(InstallId.Current(), today);
-        if (id.Length == 0)
-        {
-            // No steady value on this computer, so no identifier at all. See InstallId.
-            return new Request(new Uri($"{Endpoint}?v={version}"), null, null);
-        }
-
         var reported = ReportedPeriods.Read();
-        var week = Heartbeat.FirstThisWeek(reported.Week, today) ? Heartbeat.WeekKey(today) : null;
-        var month = Heartbeat.FirstThisMonth(reported.Month, today) ? Heartbeat.MonthKey(today) : null;
+        var week = id.Length > 0 && Heartbeat.FirstThisWeek(reported.Week, today) ? Heartbeat.WeekKey(today) : null;
+        var month = id.Length > 0 && Heartbeat.FirstThisMonth(reported.Month, today) ? Heartbeat.MonthKey(today) : null;
 
-        var windows = Uri.EscapeDataString(Environment.OSVersion.Version.ToString());
-        var address = $"{Endpoint}?v={version}&os={windows}&day={id}&p={(stats.Persona ? 1 : 0)}"
-            + (week is null ? string.Empty : "&w=1")
-            + (month is null ? string.Empty : "&m=1");
-
-        return new Request(new Uri(address), week, month);
+        var query = CountQuery.For(version, windows, id, stats.Persona, week is not null, month is not null);
+        return new Request(new Uri(Endpoint + query), week, month);
     }
 
     public static string CurrentVersion() =>

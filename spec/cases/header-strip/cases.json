@@ -1,0 +1,77 @@
+{
+  "comment": "The open header of the terminal window (D-373, D-376). The active environment comes first and in full; the others follow in their own order as quiet columns. A number is null when that window is not known; a window whose reset time has passed counts as zero. An active name that is not in the list makes the first environment active. Times are seconds from the moment of the question.",
+  "headers": [
+    {
+      "name": "the first environment is active",
+      "active": "Aiko",
+      "environments": [
+        { "name": "Aiko", "waiting": 0, "windows": [{ "kind": "fiveHour", "percent": 42, "resetsInSeconds": 3600 }, { "kind": "sevenDay", "percent": 18, "resetsInSeconds": 86400 }] },
+        { "name": "Work", "waiting": 1, "windows": [{ "kind": "fiveHour", "percent": 82, "resetsInSeconds": 1800 }, { "kind": "sevenDay", "percent": 40, "resetsInSeconds": 86400 }] }
+      ],
+      "columns": [
+        { "name": "Aiko", "active": true, "fiveHour": 42, "sevenDay": 18, "waiting": 0 },
+        { "name": "Work", "active": false, "fiveHour": 82, "sevenDay": 40, "waiting": 1 }
+      ]
+    },
+    {
+      "name": "the second environment is active and moves to the left",
+      "active": "Work",
+      "environments": [
+        { "name": "Aiko", "waiting": 0, "windows": [{ "kind": "fiveHour", "percent": 42, "resetsInSeconds": 3600 }] },
+        { "name": "Work", "waiting": 1, "windows": [{ "kind": "fiveHour", "percent": 82, "resetsInSeconds": 1800 }] }
+      ],
+      "columns": [
+        { "name": "Work", "active": true, "fiveHour": 82, "sevenDay": null, "waiting": 1 },
+        { "name": "Aiko", "active": false, "fiveHour": 42, "sevenDay": null, "waiting": 0 }
+      ]
+    },
+    {
+      "name": "the others keep their own order behind the active one",
+      "active": "B",
+      "environments": [
+        { "name": "A", "waiting": 0, "windows": [] },
+        { "name": "B", "waiting": 2, "windows": [] },
+        { "name": "C", "waiting": 0, "windows": [] }
+      ],
+      "columns": [
+        { "name": "B", "active": true, "fiveHour": null, "sevenDay": null, "waiting": 2 },
+        { "name": "A", "active": false, "fiveHour": null, "sevenDay": null, "waiting": 0 },
+        { "name": "C", "active": false, "fiveHour": null, "sevenDay": null, "waiting": 0 }
+      ]
+    },
+    {
+      "name": "an environment without numbers yet",
+      "active": "Aiko",
+      "environments": [
+        { "name": "Aiko", "waiting": 0, "windows": null },
+        { "name": "Work", "waiting": 0, "windows": [{ "kind": "sevenDay", "percent": 61, "resetsInSeconds": 86400 }] }
+      ],
+      "columns": [
+        { "name": "Aiko", "active": true, "fiveHour": null, "sevenDay": null, "waiting": 0 },
+        { "name": "Work", "active": false, "fiveHour": null, "sevenDay": 61, "waiting": 0 }
+      ]
+    },
+    {
+      "name": "a window that has turned over counts as zero",
+      "active": "Aiko",
+      "environments": [
+        { "name": "Aiko", "waiting": 0, "windows": [{ "kind": "fiveHour", "percent": 95, "resetsInSeconds": -60 }, { "kind": "sevenDay", "percent": 30, "resetsInSeconds": 86400 }] }
+      ],
+      "columns": [
+        { "name": "Aiko", "active": true, "fiveHour": 0, "sevenDay": 30, "waiting": 0 }
+      ]
+    },
+    {
+      "name": "an unknown active name makes the first one active",
+      "active": "Gone",
+      "environments": [
+        { "name": "Aiko", "waiting": 0, "windows": [] },
+        { "name": "Work", "waiting": 0, "windows": [] }
+      ],
+      "columns": [
+        { "name": "Aiko", "active": true, "fiveHour": null, "sevenDay": null, "waiting": 0 },
+        { "name": "Work", "active": false, "fiveHour": null, "sevenDay": null, "waiting": 0 }
+      ]
+    }
+  ]
+}

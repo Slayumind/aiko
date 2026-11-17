@@ -36,12 +36,12 @@ static class MemoryStore
     {
         try
         {
-            using var gate = TakeLock();
+            using var gate = MemoryDisk.TakeLock(File);
             var read = MemoryFile.FromJson(ReadIfThere());
             var edit = change(read.Memory);
             if (edit.Changed)
             {
-                Write(edit.Memory.ToJson(), keepBadFile: read.Unreadable);
+                MemoryDisk.Write(File, edit.Memory.ToJson(), keepBadFile: read.Unreadable);
             }
 
             return edit;
@@ -58,10 +58,10 @@ static class MemoryStore
     {
         try
         {
-            using var gate = TakeLock();
+            using var gate = MemoryDisk.TakeLock(File);
             if (!System.IO.File.Exists(File))
             {
-                Write(MemoryFile.Empty.ToJson(), keepBadFile: false);
+                MemoryDisk.Write(File, MemoryFile.Empty.ToJson(), keepBadFile: false);
             }
 
             return true;
@@ -73,33 +73,4 @@ static class MemoryStore
     }
 
     private static string ReadIfThere() => System.IO.File.Exists(File) ? System.IO.File.ReadAllText(File) : "";
-
-    /// The same lock file and the same patience as the bridge: 80 tries, 25 ms apart.
-    private static FileStream TakeLock()
-    {
-        Directory.CreateDirectory(System.IO.Path.GetDirectoryName(File)!);
-        for (var attempt = 0; ; attempt++)
-        {
-            try
-            {
-                return new FileStream(File + ".lock", FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
-            }
-            catch (IOException) when (attempt < 80)
-            {
-                Thread.Sleep(25);
-            }
-        }
-    }
-
-    private static void Write(string json, bool keepBadFile)
-    {
-        if (keepBadFile && System.IO.File.Exists(File))
-        {
-            System.IO.File.Move(File, File + ".bad", overwrite: true);
-        }
-
-        var temporary = File + "." + Environment.ProcessId + ".tmp";
-        System.IO.File.WriteAllText(temporary, json, new UTF8Encoding(false));
-        System.IO.File.Move(temporary, File, overwrite: true);
-    }
 }

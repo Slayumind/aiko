@@ -7,13 +7,10 @@ import Foundation
 /// One source: `update-public-key.pem` at the root of the repository. Windows builds that file
 /// into Aiko.Core, and this copy is written from it by the script above; UpdateKeyTests fails if
 /// the two ever say different things.
-///
-/// Until the owner makes the key pair, the file holds comment lines only. Aiko then installs
-/// nothing at all and writes one line saying why, which is what it did before auto-update existed.
 public enum UpdateKey {
     private static let pemHeader = "-----BEGIN PUBLIC KEY-----"
 
-    /// A file with no PEM block in it is the placeholder that ships today.
+    /// A file with no PEM block in it is no key: Aiko then installs nothing and writes one line saying why.
     public static func isPlaceholder(_ pem: String) -> Bool {
         !pem.contains(pemHeader)
     }

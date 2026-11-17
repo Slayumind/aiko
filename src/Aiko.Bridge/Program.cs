@@ -8,7 +8,8 @@ using Aiko.Core;
 // Claude Code runs "Aiko.Bridge.exe plugin aiko-persona" to get the persona plugin (D-201). It
 // sends nothing on stdin, so this is decided before any input is read: waiting for input that
 // never comes would hang the install. Unlike the status line, a failure here must show as one.
-if (PersonaPluginOutput.IsRequest(args))
+var job = BridgeWork.JobFor(args);
+if (job == BridgeJob.PersonaPlugin)
 {
     return BuildPersonaPlugin();
 }
@@ -25,45 +26,30 @@ try
 {
     var input = ReadAllInput();
 
-    if (memoryMode is { } memoryHook)
-    {
-        AnswerMemoryHook(memoryHook, input);
-        return 0;
-    }
-
-    if (args is [SessionReminder.Argument, ..])
-    {
-        RemindAboutBinding(input);
-        return 0;
-    }
-
-    // The persona plugin's hooks (D-206). Before this branch a hook call fell through to the status
-    // line code, which could run the person's own status line with hook input.
-    if (args is [PersonaPlugin.HookArgument, ..])
-    {
-        RecordActivity(input);
-        return 0;
-    }
-
     // Without the variable Claude Code works in ~\.claude, so the bridge does too. Naming that case
     // anything else made the app look for a file that was never written.
     var configDirectory = ClaudeConfigFolder.Resolve(
-        Environment.GetEnvironmentVariable("CLAUDE_CONFIG_DIR"),
+        Environment.GetEnvironmentVariable(ClaudeConfigFolder.VariableName),
         Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
-    var environment = SnapshotName.For(configDirectory);
 
-    var report = StatusLineReport.FromJson(input);
-    if (report.HasData)
+    switch (job)
     {
-        var snapshot = LimitSnapshot.FromStatusLine(environment, DateTimeOffset.Now, report);
-        WriteSnapshot(environment, SnapshotFile.ToJson(snapshot));
-    }
-
-    var wrapped = ReadWrappedCommand(configDirectory);
-    var output = wrapped is null ? "" : RunWrapped(wrapped, input);
-    if (output.Length > 0)
-    {
-        WriteOutput(output);
+        case BridgeJob.Memory when memoryMode is { } memoryHook:
+            AnswerMemoryHook(memoryHook, input);
+            break;
+        case BridgeJob.SessionStart:
+            RemindAboutBinding(input);
+            break;
+        case BridgeJob.TerminalHook:
+            // It comes with --settings, so it runs in every environment, with the personality or without it.
+            RecordTerminalEvent(input);
+            break;
+        case BridgeJob.Hook:
+            RecordActivity(configDirectory, input);
+            break;
+        default:
+            RunStatusLine(configDirectory, input);
+            break;
     }
 }
 catch (Exception)
@@ -72,6 +58,25 @@ catch (Exception)
 }
 
 return 0;
+
+/// The snapshot of the limits, then the status line the user already had.
+static void RunStatusLine(string configDirectory, string input)
+{
+    var settings = Path.Combine(configDirectory, "settings.json");
+    var snapshotFile = ThisComputer.Folders.SnapshotFile(SnapshotName.For(configDirectory));
+    var plan = BridgeWork.StatusLine(ThisComputer.Folders, configDirectory, ReadIfThere(settings), input, DateTimeOffset.Now, ReadIfThere(snapshotFile));
+    if (plan.Snapshot is { } snapshot)
+    {
+        Directory.CreateDirectory(ThisComputer.Folders.SnapshotsFolder);
+        AtomicFile.Replace(snapshot.Path, snapshot.Text);
+    }
+
+    var output = plan.WrappedCommand is { } wrapped ? RunWrapped(wrapped, input) : "";
+    if (output.Length > 0)
+    {
+        WriteOutput(output);
+    }
+}
 
 /// Read the payload as bytes: Console.In would decode it with the OEM code page, and on a
 /// Russian Windows that turns Cyrillic paths into rubbish.
@@ -90,61 +95,56 @@ static string ReadAllInput()
 /// and nothing at all otherwise: an empty hook answer changes nothing in Claude Code.
 static void RemindAboutBinding(string input)
 {
-    var folder = SessionReminder.WorkingDirectoryIn(input);
-    if (folder is null)
-    {
-        return;
-    }
-
-    var environments = ReadIfThere(ThisComputer.Folders.EnvironmentsFile);
-    var language = AppSettings.FromJson(ReadIfThere(ThisComputer.Folders.SettingsFile)).Language;
-
-    var message = SessionReminder.MessageFor(
+    var output = BridgeWork.SessionStart(
+        input,
         Environment.GetEnvironmentVariable(SessionReminder.LaunchVariable),
         Environment.GetEnvironmentVariable(SessionReminder.EnvironmentVariable),
-        folder,
-        EnvironmentSettings.FromJson(environments),
-        SessionReminder.IsRussian(language, WindowsLanguage.UserInterface()));
+        ReadIfThere(ThisComputer.Folders.EnvironmentsFile),
+        ReadIfThere(ThisComputer.Folders.SettingsFile),
+        language => SessionReminder.IsRussian(language, WindowsLanguage.UserInterface()));
 
-    if (message is not null)
+    if (output is not null)
     {
-        WriteOutput(SessionReminder.HookOutput(message));
+        WriteOutput(output);
     }
 }
 
 /// One small file per session for the face in the tray. An event that means nothing for the face
 /// writes nothing, and the same activity is not written again every few seconds.
-static void RecordActivity(string input)
+static void RecordActivity(string configDirectory, string input)
 {
-    if (HookEvent.FromJson(input) is not { } hook)
+    var step = BridgeWork.Activity(ThisComputer.Folders, configDirectory, input, path => File.Exists(path) ? File.ReadAllText(path) : null, DateTimeOffset.Now);
+    if (step.Remove is { } gone)
+    {
+        File.Delete(gone);
+    }
+    else if (step.Write is { } write)
+    {
+        Directory.CreateDirectory(ThisComputer.Folders.ActivityFolder);
+        AtomicFile.Replace(write.Path, write.Text);
+    }
+}
+
+/// The last event of a session of the terminal, for its row. The session is named by the variable
+/// Aiko gave it, not by the id in the input: a file name never comes from what Claude Code sends.
+static void RecordTerminalEvent(string input)
+{
+    var file = Aiko.Core.Terminal.TerminalEvent.FileName(Environment.GetEnvironmentVariable(Aiko.Core.Terminal.TerminalEvent.SessionVariable));
+    if (file is null || Aiko.Core.Terminal.TerminalEvent.FromHook(input, DateTimeOffset.Now.ToUnixTimeMilliseconds()) is not { } terminalEvent)
     {
         return;
     }
 
-    var configDirectory = ClaudeConfigFolder.Resolve(
-        Environment.GetEnvironmentVariable("CLAUDE_CONFIG_DIR"),
-        Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
-    var folder = ThisComputer.Folders.ActivityFolder;
-    var environment = SnapshotName.For(configDirectory);
-    var path = Path.Combine(folder, ActivityRecord.FileName(environment, hook.SessionId));
-
-    if (hook.Activity == SessionActivity.Ended)
-    {
-        File.Delete(path);
-        return;
-    }
-
-    var now = DateTimeOffset.Now;
-    var written = File.Exists(path) ? ActivityRecord.FromJson(File.ReadAllText(path)) : null;
-    if (!ActivityRecord.NeedsWrite(written, hook.Activity, now))
+    var folder = ThisComputer.Folders.TerminalEventsFolder;
+    var path = Path.Combine(folder, file);
+    var written = File.Exists(path) ? Aiko.Core.Terminal.TerminalEvent.FromJson(File.ReadAllText(path)) : null;
+    if (!terminalEvent.Replaces(written))
     {
         return;
     }
 
     Directory.CreateDirectory(folder);
-    var temporary = path + "." + Environment.ProcessId + ".tmp";
-    File.WriteAllText(temporary, new ActivityRecord(environment, hook.Activity, now).ToJson(), new UTF8Encoding(false));
-    File.Move(temporary, path, overwrite: true);
+    AtomicFile.Replace(path, terminalEvent.ToJson());
 }
 
 /// The memory hooks of the persona plugin. The rules and the facts go to the model at the start of
@@ -166,12 +166,12 @@ static void AnswerMemoryHook(MemoryBridgeMode mode, string input)
     }
 
     MemoryBridgeStep step;
-    using (TakeMemoryLock())
+    using (MemoryDisk.TakeLock(ThisComputer.Folders.MemoryFile))
     {
         step = MemoryBridge.OnPrompt(input, ReadIfThere(path), today);
         if (step.MemoryJson is { } json)
         {
-            WriteMemory(json, step.BadFile);
+            MemoryDisk.Write(ThisComputer.Folders.MemoryFile, json, step.BadFile);
         }
     }
 
@@ -210,12 +210,12 @@ static string? AnswerServerLine(string line, string version)
 {
     try
     {
-        using var gate = TakeMemoryLock();
+        using var gate = MemoryDisk.TakeLock(ThisComputer.Folders.MemoryFile);
         var path = ThisComputer.Folders.MemoryFile;
         var step = MemoryBridge.OnServerLine(line, ReadIfThere(path), DateOnly.FromDateTime(DateTime.Now), version);
         if (step.MemoryJson is { } json)
         {
-            WriteMemory(json, step.BadFile);
+            MemoryDisk.Write(ThisComputer.Folders.MemoryFile, json, step.BadFile);
         }
 
         return step.Output;
@@ -224,40 +224,6 @@ static string? AnswerServerLine(string line, string version)
     {
         return MemoryBridge.WriteFailedReply(line);
     }
-}
-
-/// One writer at a time. Hooks of several sessions, the memory server and the app all read the
-/// file, change it and write it back; without a gate the slower one would undo the other's change.
-static FileStream TakeMemoryLock()
-{
-    var path = ThisComputer.Folders.MemoryFile + ".lock";
-    Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-    for (var attempt = 0; ; attempt++)
-    {
-        try
-        {
-            return new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
-        }
-        catch (IOException) when (attempt < 80)
-        {
-            Thread.Sleep(25);
-        }
-    }
-}
-
-/// A file that was not a memory is kept as ".bad" before the new one takes its place, so a slip
-/// in a hand edit never costs the person their facts.
-static void WriteMemory(string json, bool keepBadFile)
-{
-    var path = ThisComputer.Folders.MemoryFile;
-    if (keepBadFile && File.Exists(path))
-    {
-        File.Move(path, path + ".bad", overwrite: true);
-    }
-
-    var temporary = path + "." + Environment.ProcessId + ".tmp";
-    File.WriteAllText(temporary, json, new UTF8Encoding(false));
-    File.Move(temporary, path, overwrite: true);
 }
 
 /// Writes the plugin folder for the environment this run belongs to and prints its path.
@@ -346,37 +312,6 @@ static void WriteOutput(string text)
     stdout.Flush();
 }
 
-static string SnapshotPath(string environment)
-{
-    Directory.CreateDirectory(ThisComputer.Folders.SnapshotsFolder);
-    return ThisComputer.Folders.SnapshotFile(environment);
-}
-
-/// Write to a temporary file and move it over the old one, so the tray never sees half a file.
-static void WriteSnapshot(string environment, string json)
-{
-    var path = SnapshotPath(environment);
-    var temporary = path + "." + Environment.ProcessId + ".tmp";
-    File.WriteAllText(temporary, json, new UTF8Encoding(false));
-    File.Move(temporary, path, overwrite: true);
-}
-
-static string? ReadWrappedCommand(string? configDirectory)
-{
-    if (string.IsNullOrWhiteSpace(configDirectory))
-    {
-        return null;
-    }
-
-    var settings = Path.Combine(configDirectory, "settings.json");
-    if (!File.Exists(settings))
-    {
-        return null;
-    }
-
-    return SettingsJsonPatch.ReadWrappedCommand(File.ReadAllText(settings));
-}
-
 /// The status line the user had before Aiko. It gets the same input and its output is printed
 /// as is, so nothing the user built is lost.
 ///
@@ -388,6 +323,9 @@ static string? ReadWrappedCommand(string? configDirectory)
 /// The looking only happens when there is something to run, which is never for most people.
 static string RunWrapped(string command, string input)
 {
+    // How long the status line of the person may take, the same 2 s as on the Mac.
+    const int WrappedWait = 2000;
+
     var gitBash = WindowsGitBash.Find(
         File.Exists,
         WindowsGitBash.Places(ThisComputer.SystemFolders, Environment.GetEnvironmentVariable("PATH") ?? string.Empty));
@@ -415,18 +353,40 @@ static string RunWrapped(string command, string input)
         return "";
     }
 
-    var output = process.StandardOutput.ReadToEndAsync();
-    try
+    // The output is read in pieces until a deadline, as the Mac bridge does: a command that starts
+    // something in the background leaves that program holding the pipe, and waiting for the end of
+    // the output would stop the status line until it exits.
+    var deadline = Stopwatch.StartNew();
+    var text = new StringBuilder();
+    var reading = Task.Run(async () =>
     {
-        process.StandardInput.Write(input);
-        process.StandardInput.Close();
-    }
-    catch (IOException)
-    {
-        // The command may exit without reading its input; that is its right.
-    }
+        var piece = new char[4096];
+        int read;
+        while ((read = await process.StandardOutput.ReadAsync(piece, 0, piece.Length).ConfigureAwait(false)) > 0)
+        {
+            lock (text)
+            {
+                text.Append(piece, 0, read);
+            }
+        }
+    });
 
-    if (!process.WaitForExit(2000))
+    // The input goes over on another thread: a command that never reads it would otherwise fill
+    // the pipe and stop the bridge.
+    _ = Task.Run(() =>
+    {
+        try
+        {
+            process.StandardInput.Write(input);
+            process.StandardInput.Close();
+        }
+        catch (IOException)
+        {
+            // The command may exit without reading its input; that is its right.
+        }
+    });
+
+    if (!process.WaitForExit(WrappedWait))
     {
         try
         {
@@ -435,25 +395,11 @@ static string RunWrapped(string command, string input)
         catch (InvalidOperationException)
         {
         }
-        return "";
     }
 
-    return output.GetAwaiter().GetResult();
-}
-
-/// What the core needs to know about this Windows computer. The core describes the rules; the
-/// bridge only fills them in from Windows.
-static class ThisComputer
-{
-    public static readonly PlatformConventions Platform = PlatformConventions.Windows;
-
-    public static readonly AikoFolders Folders = AikoFolders.Windows(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
-
-    public static readonly WindowsSystemFolders SystemFolders = new(
-        Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
-        Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        Environment.GetFolderPath(Environment.SpecialFolder.Windows));
+    reading.Wait(TimeSpan.FromMilliseconds(Math.Max(0, WrappedWait - deadline.ElapsedMilliseconds)));
+    lock (text)
+    {
+        return text.ToString();
+    }
 }

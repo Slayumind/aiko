@@ -14,7 +14,6 @@ namespace Aiko.App;
 
 public partial class IslandWindow : Window
 {
-    private readonly DispatcherTimer _hover;
     private IslandPosition _position = IslandPosition.Default;
 
     public IslandWindow()
@@ -26,28 +25,16 @@ public partial class IslandWindow : Window
         MouseLeftButtonUp += OnReleased;
         LostMouseCapture += (_, _) => EndDrag();
 
-        // The island answers to resting the mouse on it as well as to a click, the same 1.5
-        // seconds as the tray icon.
-        _hover = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1.5) };
-        _hover.Tick += (_, _) =>
-        {
-            _hover!.Stop();
-            if (IsMouseOver)
-            {
-                CardRequested?.Invoke(false);
-            }
-        };
+        // The mouse over the island shows its numbers; a click opens the terminal window (D-372).
         MouseEnter += (_, _) =>
         {
             if (!_pressed)
             {
-                _hover.Start();
                 Unfold(true);
             }
         };
         MouseLeave += (_, _) =>
         {
-            _hover.Stop();
             if (!_revealing && !_pressed)
             {
                 Unfold(false);
@@ -138,12 +125,27 @@ public partial class IslandWindow : Window
         Unfold(true);
     }
 
-    /// The card is asked for by a click, or by resting the mouse on the island. True means a click:
-    /// the card then stays until it is closed, the same as after a click on the tray icon.
-    public event Action<bool>? CardRequested;
+    /// A click on the island, away from the mark of "waits": the terminal window opens (D-372).
+    public event Action? Clicked;
 
     /// Raised after a drag, with the edge the island ended up on.
     public event Action<IslandPosition>? Moved;
+
+    /// A click on the mark of "waits" (D-355): the id of the waiting session to open.
+    public event Action<string>? SessionRequested;
+
+    /// The marks of the sessions after the rings (D-364). New counts change the size, never the place.
+    public void ShowSessions(Aiko.Core.Terminal.SessionCounts sessions)
+    {
+        Panel.ShowSessions(sessions);
+        if (_dragging || !IsVisible)
+        {
+            return;
+        }
+
+        Fit();
+        PlaceAt(_position, log: false);
+    }
 
     public void Show(IReadOnlyList<CardState> cards, IslandPosition position)
     {
@@ -236,7 +238,6 @@ public partial class IslandWindow : Window
     /// --try-glass, which drags the island from code without touching the person's mouse.
     internal void PressAt(Point cursor)
     {
-        _hover.Stop();
         _pressed = true;
         _pressedAt = cursor;
         _grip = new Point((_pressedAt.X - Left) / ActualWidth, (_pressedAt.Y - Top) / ActualHeight);
@@ -286,10 +287,18 @@ public partial class IslandWindow : Window
         var wasDragging = _dragging;
         EndDrag();
 
-        // A press that moved nothing is a click, and it opens the card.
+        // A press that moved nothing is a click: on the mark of "waits" it opens that session,
+        // anywhere else the terminal window.
         if (!wasDragging)
         {
-            CardRequested?.Invoke(true);
+            if (Panel.WaitingUnder(e) is { } waiting)
+            {
+                SessionRequested?.Invoke(waiting);
+            }
+            else
+            {
+                Clicked?.Invoke();
+            }
         }
     }
 
