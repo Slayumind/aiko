@@ -11,7 +11,7 @@ enum Store {
     static var home: String { NSHomeDirectory() }
 
     static func settings() -> AppSettings {
-        AppSettings.fromJson(read(folders.settingsFile))
+        AppSettings.fromJson(readOwn(folders.settingsFile))
     }
 
     /// The settings file is written back whole, so a field this version does not know about would
@@ -23,7 +23,7 @@ enum Store {
     /// Which face Aiko wears (D-215). Read when a face is about to be drawn: the file is tiny and
     /// the settings window can change it while Aiko runs.
     static func persona() -> PersonaSettings {
-        PersonaSettings.fromJson(read(folders.personaFile) ?? "")
+        PersonaSettings.fromJson(readOwn(folders.personaFile) ?? "")
     }
 
     static func savePersona(_ persona: PersonaSettings) {
@@ -32,7 +32,7 @@ enum Store {
 
     /// The sessions of the terminal: names, folders and conversation ids, never a conversation.
     static func terminal() -> TerminalSessions {
-        TerminalSessions.fromJson(read(folders.terminalFile))
+        TerminalSessions.fromJson(readOwn(folders.terminalFile))
     }
 
     static func saveTerminal(_ sessions: TerminalSessions) {
@@ -40,7 +40,7 @@ enum Store {
     }
 
     static func environments() -> EnvironmentSettings {
-        EnvironmentSettings.fromJson(read(folders.environmentsFile))
+        EnvironmentSettings.fromJson(readOwn(folders.environmentsFile))
     }
 
     static func saveEnvironments(_ environments: EnvironmentSettings) {
@@ -86,13 +86,55 @@ enum Store {
             account: account(in: directory))
     }
 
+    /// A file of Claude Code: read as it is, never moved or guarded.
     private static func read(_ path: String) -> String? {
         try? String(contentsOfFile: path, encoding: .utf8)
+    }
+
+    /// A file of Aiko, by the rule of StoredFile (D-431): a spoiled one is set aside as .bad, and
+    /// one that could not be read is kept from saves until it can be. Nil gives the defaults.
+    private static func readOwn(_ path: String) -> String? {
+        let exists = FileManager.default.fileExists(atPath: path)
+        let bytes = exists ? FileManager.default.contents(atPath: path) : nil
+        let text = bytes.map { String(decoding: $0, as: UTF8.self) }
+        let name = (path as NSString).lastPathComponent
+
+        switch StoredFile.of(exists: exists, text: text) {
+        case .unreadable:
+            if guarded({ $0.insert(path).inserted }) {
+                Log.write("\(name) could not be read: it is not written until it can be")
+            }
+            return nil
+        case .spoiled:
+            _ = guarded { $0.remove(path) }
+            if rename(path, path + ".bad") == 0 {
+                Log.write("\(name) could not be read and was kept as \(name).bad")
+            }
+            return nil
+        case .missing, .read:
+            _ = guarded { $0.remove(path) }
+            return text
+        }
+    }
+
+    /// The files of Aiko that could not be read the last time. The window, the menu bar and the
+    /// bridge watch read from more than one thread, so the set has a lock.
+    private nonisolated(unsafe) static var unread: Set<String> = []
+    private static let unreadLock = NSLock()
+
+    private static func guarded<T>(_ use: (inout Set<String>) -> T) -> T {
+        unreadLock.lock()
+        defer { unreadLock.unlock() }
+        return use(&unread)
     }
 
     /// Written through a temporary file: a power cut in the middle of a save would otherwise leave
     /// half a file, and half a settings file reads as no settings at all.
     private static func write(_ path: String, _ text: String) {
+        if guarded({ $0.contains(path) }) {
+            Log.write("\((path as NSString).lastPathComponent) was not saved: it could not be read before")
+            return
+        }
         let folder = (path as NSString).deletingLastPathComponent
         try? FileManager.default.createDirectory(atPath: folder, withIntermediateDirectories: true)
 
