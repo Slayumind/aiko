@@ -535,10 +535,10 @@ public enum Strings {
         "NavVoiceOn": ("notifications, voice on", "уведомления, голос включён"),
         "NavVoiceOff": ("notifications, voice off", "уведомления, голос выключен"),
         "NotifyLabel": ("NOTIFICATIONS", "УВЕДОМЛЕНИЯ"),
-        "NotifyWhat": ("The tray icon, the taskbar button and the island show how many agents wait, have finished or stopped. A number goes when you open that session.", "Значок в трее, кнопка в панели задач и остров показывают, сколько агентов ждут, закончили или остановились. Число уходит, когда ты открываешь эту сессию."),
+        "NotifyWhat": ("The menu bar icon, the Dock icon and the island show how many agents wait, have finished or stopped. A number goes when you open that session.", "Значок в строке меню, значок в Dock и остров показывают, сколько агентов ждут, закончили или остановились. Число уходит, когда ты открываешь эту сессию."),
         "NotifySound": ("A sound when the agent has a question", "Звук, когда у агента вопрос"),
         "ZoomLabel": ("WINDOW ZOOM", "МАСШТАБ ОКНА"),
-        "ZoomWhat": ("Text, icons and the terminal change size together. In the terminal window: C⁠t⁠r⁠l⁠+⁠= and C⁠t⁠r⁠l⁠+⁠-, and C⁠t⁠r⁠l⁠+⁠0 brings back 115%.", "Текст, значки и терминал меняются вместе. В окне терминала — C⁠t⁠r⁠l⁠+⁠= и C⁠t⁠r⁠l⁠+⁠-, а C⁠t⁠r⁠l⁠+⁠0 возвращает 115 %."),
+        "ZoomWhat": ("Text, icons and the terminal change size together. In the terminal window: C⁠m⁠d⁠+⁠= and C⁠m⁠d⁠+⁠-, and C⁠m⁠d⁠+⁠0 brings back 115%.", "Текст, значки и терминал меняются вместе. В окне терминала — C⁠m⁠d⁠+⁠= и C⁠m⁠d⁠+⁠-, а C⁠m⁠d⁠+⁠0 возвращает 115 %."),
         "ZoomStep": ("{0}%", "{0} %"),
         "VoiceToggle": ("Voice input", "Голосовой ввод"),
         "VoiceToggleWhat": ("Cmd+Shift+Space or the microphone button in the editor.", "Cmd+Shift+Space или кнопка микрофона в редакторе."),
@@ -2055,7 +2055,7 @@ public enum Strings {
     /// NOTIFICATIONS
     public static var notifyLabel: String { Strings.get("NotifyLabel") }
 
-    /// The tray icon, the taskbar button and the island show how many agents wait, have finished...
+    /// The menu bar icon, the Dock icon and the island show how many agents wait, have finished ...
     public static var notifyWhat: String { Strings.get("NotifyWhat") }
 
     /// A sound when the agent has a question
@@ -2064,7 +2064,7 @@ public enum Strings {
     /// WINDOW ZOOM
     public static var zoomLabel: String { Strings.get("ZoomLabel") }
 
-    /// Text, icons and the terminal change size together. In the terminal window: C⁠t⁠r⁠l⁠+⁠= an...
+    /// Text, icons and the terminal change size together. In the terminal window: C⁠m⁠d⁠+⁠= and ...
     public static var zoomWhat: String { Strings.get("ZoomWhat") }
 
     /// {0}%

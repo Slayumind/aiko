@@ -15,6 +15,8 @@ final class TerminalState: ObservableObject {
     @Published var headerOpen = false
     @Published var listHidden = false
     @Published var settingsOpen = false
+    /// A quiet dot on the gear while a newer version is out (D-391).
+    @Published var updateDot = false
     @Published var stage = StageMessage.none
 
     var onRetry: (() -> Void)?

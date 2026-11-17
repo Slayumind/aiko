@@ -49,8 +49,17 @@ struct TitleBarView: View {
             BarButton(tip: Strings.terminalFindConversation, action: { state.onSearch?() }) {
                 LineMark(data: BarMarks.search)
             }
-            BarButton(tip: Strings.settings, lit: state.settingsOpen, action: { state.onSettings?() }) {
+            BarButton(tip: state.settingsOpen ? Strings.settingsCloseTip : Strings.settings, lit: state.settingsOpen,
+                      action: { state.onSettings?() }) {
                 FilledMark(data: BarMarks.gear, size: 14)
+            }
+            .overlay(alignment: .topTrailing) {
+                // A quiet dot while a newer version is out (D-391); the General page says which.
+                if state.updateDot {
+                    Circle().fill(Theme.positive).frame(width: 6, height: 6)
+                        .padding(.top, 6).padding(.trailing, 11)
+                        .allowsHitTesting(false)
+                }
             }
         }
         .padding(.trailing, 8)

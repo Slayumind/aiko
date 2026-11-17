@@ -16,7 +16,7 @@ extension TerminalHost {
             styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
             backing: .buffered,
             defer: false)
-        window.title = "Aiko"
+        window.title = Strings.terminalTitle
         window.titleVisibility = .hidden
         window.titlebarAppearsTransparent = true
         window.minSize = NSSize(width: WindowPlace.minWidth, height: WindowPlace.minHeight)

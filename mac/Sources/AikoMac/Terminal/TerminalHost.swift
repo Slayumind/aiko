@@ -155,6 +155,11 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
         state.header = header()
     }
 
+    /// A newer version is out, or stopped being out: the dot on the gear follows (D-391).
+    func showUpdate(_ newer: Bool) {
+        state.updateDot = newer
+    }
+
     /// Opens the window, or brings it forward.
     func show() {
         let window = self.window ?? makeWindow()
@@ -202,6 +207,7 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
     /// A folder from the dialog of the system, starting at the folder of the open session.
     func chooseFolder() -> String? {
         let panel = NSOpenPanel()
+        panel.message = Strings.terminalChooseFolder
         panel.canChooseDirectories = true
         panel.canChooseFiles = false
         panel.allowsMultipleSelection = false

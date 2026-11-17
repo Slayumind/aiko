@@ -1,5 +1,5 @@
 {
-  "comment": "A line for the log without full paths (D-420): a path keeps only its last part. A path in quotes may have spaces; a path without quotes ends at the first space. Windows only until the Mac log comes under the same rule.",
+  "comment": "A line for the log without full paths (D-420): a path keeps only its last part. A path in quotes may have spaces; a path without quotes ends at the first space. Both logs, Windows and the Mac.",
   "rows": [
     { "line": "System.IO.DirectoryNotFoundException: Could not find a part of the path 'C:\\Users\\me\\personal projects\\aiko\\a.txt'.", "clean": "System.IO.DirectoryNotFoundException: Could not find a part of the path 'a.txt'." },
     { "line": "Access to the path \"C:\\Users\\me\\AppData\\Local\\Aiko\\pictures\\4f1180c2\" is denied.", "clean": "Access to the path \"4f1180c2\" is denied." },

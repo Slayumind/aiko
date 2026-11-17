@@ -72,6 +72,12 @@ final class AikoDelegate: NSObject, NSApplicationDelegate {
         text.utf8.reduce(0) { $0 << 8 | OSType($1) }
     }
 
+    /// Aiko started again while it runs, from Spotlight, Launchpad or the Finder (D-419).
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        shell.openAskedByAnotherStart()
+        return false
+    }
+
     func applicationWillTerminate(_ notification: Notification) {
         shell.stop()
     }

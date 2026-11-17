@@ -31,8 +31,13 @@ final class AikoShell {
         host.onSettingsChanged = { [weak self] in self?.onRefresh() }
         host.onShownChanged = { [weak self] shown in
             self?.windowOpen = shown
+            // The window has the Dock icon, shown or minimized: the island steps aside until the
+            // window is closed (D-409, D-410).
+            self?.island.followTerminal(shown)
             self?.applyPlace()
         }
+        host.showUpdate(self.updates?.newerVersion != nil)
+        self.terminalMade = true
         host.onWaitingStarted = { [weak self] in self?.playWaiting() }
         host.onSessionsChanged = { [weak self] counts in self?.showSessions(counts) }
         return host
@@ -40,6 +45,9 @@ final class AikoShell {
 
     /// While the window is open it has the Dock icon, and the menu bar icon steps aside (D-410).
     private var windowOpen = false
+
+    /// The terminal host is made on the first click; until then nothing of it is touched.
+    private var terminalMade = false
 
     /// The face for two seconds after a session event (D-211), and the way to it and back.
     private let faces = FacePlay()
@@ -95,7 +103,9 @@ final class AikoShell {
             return
         }
 
+        StartupChores.repairOurStatusLines(environments)
         StartupChores.refreshPluginsAndCommands(environments)
+        StartupChores.clearStaleActivity()
 
         // Not in a self test: the check sends a request and writes down the reported week.
         let checks = UpdateWatch()
@@ -357,6 +367,16 @@ final class AikoShell {
     private func onNewerVersion() {
         icon.update()
         island.update(numbers.cards(), newerVersion: updates?.newerVersion)
+        if terminalMade {
+            terminal.showUpdate(updates?.newerVersion != nil)
+        }
+    }
+
+    /// Aiko started again while it runs (D-419): Spotlight, Launchpad or the Finder open the window
+    /// of this copy, the same as a click on the menu bar icon. A full menu bar or the notch may hide
+    /// the icon, and this is the way back then.
+    func openAskedByAnotherStart() {
+        openWindow()
     }
 
     // ---- The face (D-211) ----

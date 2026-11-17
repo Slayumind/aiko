@@ -36,7 +36,7 @@ stamp, not a table (D-255).
 | `card-words/` | the words of the limits in both languages: the name of a window, the percent, the word of a tone, the reset, the pace and how fresh the numbers are (`CardText`) |
 | `count-query/` | the query of the daily version check: the version only with counting off, six fields with it on (`CountQuery`) |
 | `redirect-headers/` | which headers go on after a redirect: a token stays with its host (`RedirectHeaders`); Windows only, the Mac sends no token |
-| `log-paths/` | a line for the log without full paths (`LogText`); Windows only until the Mac log comes under the same rule |
+| `log-paths/` | a line for the log without full paths (`LogText`), for the logs of both platforms |
 | `file-mention/` | the files that "@" offers in the field: where the word starts, which files, in which order, what the field becomes (`FileMention`) |
 | `conversation-file/` | a conversation of Claude Code read from the start and the end of its file, for the palette of sessions (`ConversationFile`) |
 | `session-search/` | what the palette of sessions finds, in three groups (`SessionSearch`) |
