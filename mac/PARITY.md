@@ -20,6 +20,7 @@ a row cannot change in one core and stay as it was in the other. See `spec/cases
 | C# file | Swift file | C# cases | Swift cases | Notes |
 |---|---|---|---|---|
 | JsonText.cs | JsonText.swift | 15 | 15 | |
+| StoredFile.cs | StoredFile.swift | — | — | what happens to settings, environments, sessions and persona after a read (D-431): a spoiled file is set aside as `.bad`, one that could not be read is kept from saves. A table in `spec/cases/stored-file`, read by StoredFileTests on both |
 | LimitSnapshot.cs | LimitSnapshot.swift | 8 | 8 | |
 | StatusLineReport.cs | StatusLineReport.swift | 14 | 14 | |
 | UsageReport.cs | UsageReport.swift | 11 | 11 | |

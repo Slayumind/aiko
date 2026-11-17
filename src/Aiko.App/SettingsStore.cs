@@ -66,45 +66,91 @@ static class SettingsStore
 
     public static void SavePersona(PersonaSettings persona) => Write(PersonaFile, persona.ToJson());
 
+    /// The text of the file, or "" for the defaults. What happens to the file is the rule of
+    /// StoredFile: a spoiled one is set aside, and one that could not be read is kept from saves.
     private static string Read(string path)
     {
-        try
+        var file = new FileInfo(path);
+        if (!file.Exists)
         {
-            var file = new FileInfo(path);
-            if (!file.Exists)
-            {
-                return string.Empty;
-            }
+            Readable(path);
+            return string.Empty;
+        }
 
-            lock (Copies)
+        lock (Copies)
+        {
+            if (Copies.TryGetValue(path, out var copy) && copy.Written == file.LastWriteTimeUtc && copy.Length == file.Length)
             {
-                if (Copies.TryGetValue(path, out var copy) && copy.Written == file.LastWriteTimeUtc && copy.Length == file.Length)
+                return copy.Text;
+            }
+        }
+
+        var text = ReadBusy(path);
+        switch (StoredFile.Of(exists: true, text))
+        {
+            case StoredFileState.Unreadable:
+                lock (Copies)
                 {
-                    return copy.Text;
+                    if (Unread.Add(path))
+                    {
+                        Log.Write($"{Path.GetFileName(path)} could not be read: it is not written until it can be");
+                    }
                 }
-            }
 
-            var text = File.ReadAllText(path);
-            if (text.Length > 0 && !JsonText.IsObject(text))
-            {
+                return string.Empty;
+            case StoredFileState.Spoiled:
+                Readable(path);
                 SetAside(path);
                 return string.Empty;
-            }
+            default:
+                Readable(path);
+                lock (Copies)
+                {
+                    Copies[path] = (file.LastWriteTimeUtc, file.Length, text!);
+                }
 
-            lock (Copies)
+                return text!;
+        }
+    }
+
+    /// A file another program holds for a moment (a backup or an antivirus) is tried again a few
+    /// times. Null when it still cannot be read.
+    private static string? ReadBusy(string path)
+    {
+        for (var attempt = 0; ; attempt++)
+        {
+            try
             {
-                Copies[path] = (file.LastWriteTimeUtc, file.Length, text);
+                return File.ReadAllText(path);
             }
+            catch (FileNotFoundException)
+            {
+                return string.Empty;
+            }
+            catch (IOException) when (attempt < 2)
+            {
+                Thread.Sleep(50);
+            }
+            catch (IOException)
+            {
+                return null;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return null;
+            }
+        }
+    }
 
-            return text;
-        }
-        catch (IOException)
+    /// The files that could not be read the last time: a save would put the defaults in place of
+    /// the person's choices, so they are not written until a read works again.
+    private static readonly HashSet<string> Unread = new(StringComparer.OrdinalIgnoreCase);
+
+    private static void Readable(string path)
+    {
+        lock (Copies)
         {
-            return string.Empty;
-        }
-        catch (UnauthorizedAccessException)
-        {
-            return string.Empty;
+            Unread.Remove(path);
         }
     }
 
@@ -131,6 +177,15 @@ static class SettingsStore
     /// leave half a file, and half a settings file reads as no settings at all.
     private static void Write(string path, string text)
     {
+        lock (Copies)
+        {
+            if (Unread.Contains(path))
+            {
+                Log.Write($"{Path.GetFileName(path)} was not saved: it could not be read before");
+                return;
+            }
+        }
+
         try
         {
             Directory.CreateDirectory(Folder);

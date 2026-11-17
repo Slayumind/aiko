@@ -1,0 +1,12 @@
+{
+  "comment": "What Aiko does with one of its own files after it tried to read it: settings.json, environments.json, terminal.json, persona.json. A missing or empty file reads as the defaults. A file that is not a JSON object is set aside as .bad, and the defaults are used. A file that exists but could not be read (busy, no rights) also gives the defaults for now, but nothing may be written over it until it is read again: the next save would put the defaults in place of the person's choices. text null means the read failed. On the Mac, bytes that are not UTF-8 are read with replacement characters and so are not a JSON object.",
+  "cases": [
+    { "exists": false, "text": null, "state": "Missing", "mayWrite": true },
+    { "exists": true, "text": "", "state": "Read", "mayWrite": true },
+    { "exists": true, "text": "{\"schemaVersion\":2}", "state": "Read", "mayWrite": true },
+    { "exists": true, "text": "{\"half\":", "state": "Spoiled", "mayWrite": true },
+    { "exists": true, "text": "[1,2]", "state": "Spoiled", "mayWrite": true },
+    { "exists": true, "text": "��", "state": "Spoiled", "mayWrite": true },
+    { "exists": true, "text": null, "state": "Unreadable", "mayWrite": false }
+  ]
+}
