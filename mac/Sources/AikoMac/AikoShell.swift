@@ -142,6 +142,19 @@ final class AikoShell {
         return true
     }
 
+    /// Quit now, or ask first while programs run in the window: the answer comes to `answer`.
+    func mayQuit(_ answer: @escaping (Bool) -> Void) -> NSApplication.TerminateReply {
+        guard !selfTesting, terminal.anyRunning else {
+            terminal.endAll()
+            return .terminateNow
+        }
+        terminal.askToQuit { [weak self] yes in
+            if yes { self?.terminal.endAll() }
+            answer(yes)
+        }
+        return .terminateLater
+    }
+
     func stop() {
         watch?.stop()
         updates?.stop()

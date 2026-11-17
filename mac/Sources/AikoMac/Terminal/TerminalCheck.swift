@@ -14,7 +14,7 @@ enum TerminalCheck {
         try? FileManager.default.createDirectory(atPath: folder, withIntermediateDirectories: true)
 
         host.show()
-        host.startForCheck(in: folder)
+        let session = host.startForCheck(in: folder)
         hold(host, ProcessInfo.processInfo.environment["AIKO_TRY_VIEW"])
         let seconds = Double(ProcessInfo.processInfo.environment["AIKO_TRY_SECONDS"] ?? "") ?? 2
         after(seconds) {
@@ -33,8 +33,37 @@ enum TerminalCheck {
                 after(0.5) {
                     Log.write("self test: terminal window closed, shown=\(host.isShown), in the Dock=\(NSApp.activationPolicy() == .regular), "
                         + "menu bar icon=\(iconShown()), terminals still running=\(host.runningForCheck)")
-                    NSApp.terminate(nil)
+                    quitAndEnd(host, session)
                 }
+            }
+        }
+    }
+
+    /// Quitting with a program running asks first, and "Don't quit" leaves everything as it was. A
+    /// closed session ends with all it started: a sleep run in the background of the command line is
+    /// gone with it (D-351).
+    private static func quitAndEnd(_ host: TerminalHost, _ session: String?) {
+        var answered: Bool?
+        host.askToQuit { answered = $0 }
+        let asked = host.askingToQuitForCheck
+        host.answer(false)
+        let kept = answered == false && !host.askingToQuitForCheck && host.runningForCheck
+
+        guard let session else {
+            Log.write("self test: terminal window quit: no session to end")
+            NSApp.terminate(nil)
+            return
+        }
+        let leader = host.leaderForCheck(session)
+        host.typeForCheck(session, "sleep 300 &\r")
+        after(0.8) {
+            let before = ProcessTree.members(of: leader).count
+            host.closeSession(session)
+            after(ProcessTree.grace + 0.5) {
+                let after = ProcessTree.members(of: leader).count
+                Log.write("self test: terminal window quit: asked=\(asked), don't quit kept=\(kept), "
+                    + "session processes \(before) before close, \(after) after")
+                NSApp.terminate(nil)
             }
         }
     }

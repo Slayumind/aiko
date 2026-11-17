@@ -56,7 +56,7 @@ enum ProcessEnvironment {
             try process.run()
             process.waitUntilExit()
         } catch {
-            Log.write("terminal: the login shell did not start (\(error.localizedDescription))")
+            TerminalLog.loginShellNotStarted()
             return nil
         }
 

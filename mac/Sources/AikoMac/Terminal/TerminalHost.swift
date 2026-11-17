@@ -46,6 +46,9 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
     /// The running session the person asked to close: the question stands until it is answered.
     var closing: String?
 
+    /// Aiko waits for the answer to "stop the sessions and quit?" (D-351).
+    var quitAfter: ((Bool) -> Void)?
+
     /// Set by a self test: nothing is written to terminal.json.
     var changingNothing = false
 
@@ -238,6 +241,10 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
     /// What stands in place of the terminal: the question before closing first, then the empty
     /// environment, then why the chosen session has no terminal (D-421).
     func stageMessage() -> StageMessage {
+        if quitAfter != nil {
+            return .ask(title: Strings.terminalQuitTitle, body: Strings.terminalQuitBody,
+                        stop: Strings.terminalStopAndQuit, keep: Strings.terminalDontQuit)
+        }
         if let id = closing, let session = sessions.find(id) {
             return .ask(title: Strings.format(Strings.terminalCloseTitle, session.name), body: Strings.terminalCloseBody,
                         stop: Strings.terminalStopAndClose, keep: Strings.terminalKeepOpen)
@@ -354,7 +361,9 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
         terminals[session.id] = view
         sessions = sessions.markStarted(session.id).used(session.id, now: Self.now())
         save()
-        Log.write("terminal: \(session.kind == .shell ? "a command line" : "Claude Code") started for \(session.environment)")
+        TerminalLog.started(
+            environment: session.environment, shell: session.kind == .shell,
+            resumed: plan.arguments.contains("--resume"))
         return view
     }
 
@@ -382,7 +391,8 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
         Task { @MainActor [weak self] in
             guard let self, let id = self.terminals.first(where: { $0.value === source })?.key,
                   let session = self.sessions.find(id) else { return }
-            Log.write("terminal: a program ended with \(exitCode.map(String.init) ?? "no code")")
+            TerminalLog.exited(
+                environment: session.environment, shell: session.kind == .shell, exitCode: exitCode.map(Int.init))
             if session.kind == .shell {
                 self.closeSession(id)
                 return
@@ -466,6 +476,15 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
     }
 
     var runningForCheck: Bool { terminals.values.contains { $0.process.running } }
+
+    /// The session leader of the program of a session, and a line typed into it, for --try-terminal.
+    func leaderForCheck(_ id: String) -> pid_t { terminals[id]?.process.shellPid ?? 0 }
+
+    func typeForCheck(_ id: String, _ line: String) {
+        terminals[id]?.send(txt: line)
+    }
+
+    var askingToQuitForCheck: Bool { state.stage == stageMessage() && quitAfter != nil }
 
     // ---- small parts ----
 
