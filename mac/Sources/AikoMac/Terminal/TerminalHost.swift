@@ -68,6 +68,9 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
     static let listWidth: CGFloat = 252
     var listWidthConstraint: NSLayoutConstraint?
     var holderWatch: NSObjectProtocol?
+
+    /// The buttons are being placed: the frame change this makes is not an answer to wait for.
+    var placingButtons = false
     var keyWatch: Any?
 
     /// A zoom a self test puts on the window without writing the setting.

@@ -32,13 +32,29 @@ enum TerminalCheck {
             keys(host)
             tips()
             copyWhole()
-            dragRows(host, folder) {
+            dragRows(host, folder) { fullScreen(host) {
                 host.closeForCheck()
                 after(0.5) {
                     Log.write("self test: terminal window closed, shown=\(host.isShown), in the Dock=\(NSApp.activationPolicy() == .regular), "
                         + "menu bar icon=\(iconShown()), terminals still running=\(host.runningForCheck)")
                     quitAndEnd(host, session)
                 }
+            } }
+        }
+    }
+
+    /// The green button and back (review of 17.11): macOS moves the title of the system in full
+    /// screen, and the window must not fight it. A crash here leaves no line, so the gate counts the
+    /// crash reports too.
+    private static func fullScreen(_ host: TerminalHost, then: @escaping @MainActor () -> Void) {
+        host.window?.toggleFullScreen(nil)
+        after(3) {
+            let full = host.window?.styleMask.contains(.fullScreen) == true
+            host.window?.toggleFullScreen(nil)
+            after(2) {
+                let back = host.window?.styleMask.contains(.fullScreen) == false
+                Log.write("self test: terminal window full screen: entered=\(full), left=\(back), \(host.barForCheck)")
+                then()
             }
         }
     }
@@ -209,6 +225,7 @@ enum TerminalCheck {
         case "narrow": host.resizeForCheck(width: 640)
         case "drag": holdDrag(host)
         case "update-dot": host.showUpdate(true)
+        case "full-screen": host.window?.toggleFullScreen(nil)
         case "narrow-list":
             host.resizeForCheck(width: 640)
             host.toggleList()

@@ -161,9 +161,16 @@ extension TerminalHost {
     /// AppKit lays the title out again when the window is shown, resized or leaves full screen, and
     /// puts the buttons back at the top; so the holder tells when its frame changes, and the buttons
     /// move back each time.
+    ///
+    /// In full screen macOS owns the title: it slides it in from the top and sets its frame again
+    /// each time we set ours, which ended in a stack overflow (17.11). There the buttons stay where
+    /// macOS puts them, and a frame set from inside this function never starts it again.
     func placeWindowButtons(_ window: NSWindow) {
-        guard let close = window.standardWindowButton(.closeButton),
+        guard !placingButtons, !window.styleMask.contains(.fullScreen),
+              let close = window.standardWindowButton(.closeButton),
               let holder = close.superview?.superview else { return }
+        placingButtons = true
+        defer { placingButtons = false }
         if holderWatch == nil {
             holder.postsFrameChangedNotifications = true
             holderWatch = NotificationCenter.default.addObserver(
