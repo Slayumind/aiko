@@ -211,6 +211,13 @@ static class Program
             return;
         }
 
+        // A running command line through every way out: --try-stop report.txt (D-351)
+        if (args is ["--try-stop", var stopReport, ..])
+        {
+            Environment.Exit(StopCheck.Run(stopReport));
+            return;
+        }
+
         // Throws in an empty app three times and checks that it lives on and closes its windows.
         if (args is ["--try-crash-guard", ..])
         {

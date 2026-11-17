@@ -57,6 +57,8 @@ sealed partial class TerminalHost
     {
         var settings = new SettingsPanel(page);
         settings.QuitRequested += () => QuitAsked?.Invoke();
+        settings.AskBeforeStopping = AskToStop;
+        settings.AskBeforeRemovingEnvironment = AskToRemoveEnvironment;
         settings.SettingsChanged += () =>
         {
             // The zoom and voice input of this window are set on the Terminal page.
@@ -102,4 +104,17 @@ sealed partial class TerminalHost
         SettingsStore.Change(change);
         Draw();
     }
+
+    // ---- doors for --try-stop ----
+
+    /// What the window asks about now, or null.
+    internal StopReason? AskingForCheck => _stopping?.Reason;
+
+    internal void AnswerForCheck(bool stop) => Answer(stop);
+
+    internal bool ShownForCheck => _window.IsVisible;
+
+    internal string? SettingsPageForCheck => _settingsPanel?.CurrentPage;
+
+    internal TerminalSessions SessionsForCheck => _sessions;
 }

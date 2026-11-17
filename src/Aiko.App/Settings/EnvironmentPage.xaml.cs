@@ -417,8 +417,16 @@ public partial class EnvironmentPage : UserControl
         }
 
         var name = environment.Name;
+        var toBin = RecycleBox.IsChecked == true;
         Leave();
-        var recycled = _editor.Remove(name, RecycleBox.IsChecked == true);
-        Removed?.Invoke(string.Format(recycled ? Strings.EnvironmentRemovedToBin : Strings.EnvironmentRemoved, name));
+        AskBeforeRemoving(name, () =>
+        {
+            var recycled = _editor.Remove(name, toBin);
+            Removed?.Invoke(string.Format(recycled ? Strings.EnvironmentRemovedToBin : Strings.EnvironmentRemoved, name));
+        });
     }
+
+    /// What the window does before the environment goes: while its sessions run it asks, and stops
+    /// them after a yes (D-351). With no window of sessions the step runs at once.
+    public Action<string, Action> AskBeforeRemoving { get; set; } = (_, step) => step();
 }

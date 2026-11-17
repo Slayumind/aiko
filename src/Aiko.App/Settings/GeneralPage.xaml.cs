@@ -48,6 +48,10 @@ public partial class GeneralPage : UserControl
 
     public event Action? QuitRequested;
 
+    /// Raised when the update is ready and the person asked to restart into it. The window asks
+    /// about running sessions first (D-351).
+    public event Action? RestartForUpdateRequested;
+
     /// Raised after the second click on "Start over", with whether the second folder goes to the
     /// Recycle Bin.
     public event Action<bool>? RestartRequested;
@@ -220,7 +224,7 @@ public partial class GeneralPage : UserControl
                 await InstallAsync();
                 break;
             case UpdateAction.Restart:
-                UpdateInstall.ApplyAndRestart();
+                RestartForUpdateRequested?.Invoke();
                 break;
             case UpdateAction.OpenDownloadPage:
                 OnOpenDownload(sender, e);
