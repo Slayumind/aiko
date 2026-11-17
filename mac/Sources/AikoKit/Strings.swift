@@ -476,7 +476,7 @@ public enum Strings {
         "ShellExplaining": ("Asking Claude Code…", "Спрашиваю Claude Code…"),
         "ShellExplainFailed": ("Claude Code did not answer. Press Explain again in a minute.", "Claude Code не ответил. Нажми «Объяснить» ещё раз через минуту."),
         "ShellSuggestion": ("{0}   **Tab** take", "{0}   **Tab** взять"),
-        "ShellSuggestFailed": ("Claude Code did not answer. Change the words or try again in a minute.", "Claude Code не ответил. Измени слова или попробуй через минуту."),
+        "ShellSuggestFailed": ("Claude Code did not answer. Edit the request to ask again.", "Claude Code не ответил. Поправь запрос, чтобы спросить снова."),
         "ShellSuggesting": ("Looking for a command…", "Ищу команду…"),
         "ShellFind": ("Find in the output", "Найти в выводе"),
         "ShellFindCount": ("{0} of {1}", "{0} из {1}"),
@@ -1880,7 +1880,7 @@ public enum Strings {
     /// {0}   **Tab** take
     public static var shellSuggestion: String { Strings.get("ShellSuggestion") }
 
-    /// Claude Code did not answer. Change the words or try again in a minute.
+    /// Claude Code did not answer. Edit the request to ask again.
     public static var shellSuggestFailed: String { Strings.get("ShellSuggestFailed") }
 
     /// Looking for a command…

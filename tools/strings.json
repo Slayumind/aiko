@@ -3054,8 +3054,8 @@
   [
     "ShellSuggestFailed",
     [
-      "Claude Code did not answer. Change the words or try again in a minute.",
-      "Claude Code не ответил. Измени слова или попробуй через минуту."
+      "Claude Code did not answer. Edit the request to ask again.",
+      "Claude Code не ответил. Поправь запрос, чтобы спросить снова."
     ]
   ],
   [
