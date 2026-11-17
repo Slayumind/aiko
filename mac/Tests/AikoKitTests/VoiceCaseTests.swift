@@ -212,6 +212,22 @@ struct VoiceCaseTests {
         }
     }
 
+    @Test
+    func aRecordingFinishesByItselfAtTheLongest() {
+        let cases = SpecCases.json("voice-input")
+        #expect(Int(VoiceInput.longest) == Int(cases["longest"]?.int64Value ?? 0))
+        let rows = cases["tooLong"]?.arrayValue ?? []
+        #expect(!rows.isEmpty)
+        for row in rows {
+            guard let phase = row["phase"]?.stringValue.flatMap(VoicePhase.init(rawValue:)) else {
+                Issue.record("unreadable row in tooLong")
+                continue
+            }
+            #expect(VoiceInput.tooLong(VoiceState(phase, .none), listened: row["seconds"]?.doubleValue ?? 0)
+                == row["ends"]?.boolValue)
+        }
+    }
+
     private static func state(_ node: JsonNode?) -> VoiceState? {
         guard let pair = node?.arrayValue, pair.count == 2,
               let phase = pair[0].stringValue.flatMap(VoicePhase.init(rawValue:)),

@@ -163,6 +163,13 @@ sealed class VoiceDictation
     private void Tick()
     {
         _input.PushLevel(_recording?.Level ?? 0);
+        if (VoiceInput.TooLong(_state, _listened.Elapsed))
+        {
+            Log.Write("voice: the recording reached its longest and finished");
+            Press();
+            return;
+        }
+
         Show();
     }
 

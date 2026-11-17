@@ -57,6 +57,14 @@ public struct TerminalSessions: Sendable, Equatable {
     /// Where the window stood when it was closed. Nil until it was closed once.
     public private(set) var window: WindowPlace?
 
+    /// The number of the shape of the file. A newer Aiko that changes the shape writes a higher one.
+    public static let schemaVersion = 1
+
+    /// Sessions of a kind this version does not know, written by a newer Aiko: kept as they were,
+    /// written back after the others, never started and not in the list. An older Aiko would
+    /// otherwise start them as Claude Code and drop their kind with the next save.
+    public private(set) var kept: [JsonNode] = []
+
     public static let empty = TerminalSessions(sessions: [], lastId: nil)
 
     // MARK: - Reading the list
@@ -325,21 +333,27 @@ public struct TerminalSessions: Sendable, Equatable {
         }
 
         var sessions: [TerminalSession] = []
+        var kept: [JsonNode] = []
         for item in root["sessions"]?.arrayValue ?? [] {
-            if let session = sessionIn(item), !sessions.contains(where: { $0.id == session.id }) {
+            if !knownKind(item) {
+                kept.append(item)
+            } else if let session = sessionIn(item), !sessions.contains(where: { $0.id == session.id }) {
                 sessions.append(session)
             }
         }
 
         let last = root["last"]?.stringValue
-        return TerminalSessions(
+        var read = TerminalSessions(
             sessions: sessions,
             lastId: sessions.contains { $0.id == last && !$0.closed } ? last : nil,
             window: placeIn(root["window"]))
+        read.kept = kept
+        return read
     }
 
     public func toJson() -> String {
         var root = JsonObject()
+        root["schemaVersion"] = .number(String(Self.schemaVersion))
         root["sessions"] = .array(sessions.map { session in
             var file = JsonObject()
             file["id"] = .string(session.id)
@@ -358,7 +372,7 @@ public struct TerminalSessions: Sendable, Equatable {
             }
             file["lastUsed"] = .number(String(session.lastUsed))
             return .object(file)
-        })
+        } + kept)
         if let lastId {
             root["last"] = .string(lastId)
         }
@@ -373,6 +387,14 @@ public struct TerminalSessions: Sendable, Equatable {
         }
 
         return JsonNode.object(root).toJsonString(indented: true, escaping: .relaxed) + "\n"
+    }
+
+    /// No kind is Claude Code, the old shape of the file; "claude" and "shell" are the two this
+    /// version runs.
+    private static func knownKind(_ item: JsonNode) -> Bool {
+        guard item.isObject, let kind = item["kind"] else { return true }
+        guard let word = kind.stringValue else { return true }
+        return ["", "claude", "shell"].contains(word)
     }
 
     private static func sessionIn(_ item: JsonNode) -> TerminalSession? {

@@ -63,5 +63,12 @@
     { "seconds": 60, "text": "1:00" },
     { "seconds": 750, "text": "12:30" },
     { "seconds": -3, "text": "0:00" }
+  ],
+  "longest": 300,
+  "tooLong": [
+    { "phase": "Listening", "seconds": 299, "ends": false },
+    { "phase": "Listening", "seconds": 300, "ends": true },
+    { "phase": "Warming", "seconds": 400, "ends": false },
+    { "phase": "Finishing", "seconds": 400, "ends": false }
   ]
 }

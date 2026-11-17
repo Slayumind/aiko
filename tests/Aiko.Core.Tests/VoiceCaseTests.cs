@@ -45,6 +45,20 @@ public class VoiceCaseTests
     }
 
     [Fact]
+    public void A_recording_finishes_by_itself_at_the_longest()
+    {
+        var cases = SpecCases.Json("voice-input");
+        Assert.Equal(cases.GetProperty("longest").GetInt32(), (int)VoiceInput.Longest.TotalSeconds);
+        foreach (var row in cases.GetProperty("tooLong").EnumerateArray())
+        {
+            var state = new VoiceState(Enum.Parse<VoicePhase>(row.GetProperty("phase").GetString()!), VoiceNotice.None);
+            Assert.Equal(
+                row.GetProperty("ends").GetBoolean(),
+                VoiceInput.TooLong(state, TimeSpan.FromSeconds(row.GetProperty("seconds").GetInt32())));
+        }
+    }
+
+    [Fact]
     public void A_refusal_of_OpenAI_reads_as_the_table_says()
     {
         foreach (var row in SpecCases.Json("voice-input").GetProperty("cloudCue").EnumerateArray())

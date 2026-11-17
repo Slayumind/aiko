@@ -64,12 +64,9 @@ public enum Strings {
         "TrayUpdateOut": ("Aiko {0} is out", "вышла Aiko {0}"),
         "MenuShowInRing": ("Show {0} in the ring", "Показать в кольце: {0}"),
         "MenuOpen": ("Open", "Открыть"),
-        "MenuRefresh": ("Refresh limits", "Обновить лимиты"),
         "Settings": ("Settings", "Настройки"),
         "SettingsCloseTip": ("Close settings · Esc", "Закрыть настройки · Esc"),
-        "Close": ("Close", "Закрыть"),
         "QuitAiko": ("Quit Aiko", "Выйти из Aiko"),
-        "CheckForUpdates": ("Check for updates", "Проверить обновления"),
         "CheckUpdatesToggle": ("Check for updates", "Проверять обновления"),
         "SectionWhenClosed": ("WHEN THE WINDOW IS CLOSED", "КОГДА ОКНО ЗАКРЫТО"),
         "SectionStartupAndUpdates": ("STARTUP AND UPDATES", "ЗАПУСК И ОБНОВЛЕНИЯ"),
@@ -115,7 +112,6 @@ public enum Strings {
         "LanguageEnglish": ("English", "English"),
         "LanguageRussian": ("Русский", "Русский"),
         "CopyDiagnostics": ("Copy diagnostics", "Скопировать диагностику"),
-        "SettingsWindowTitle": ("Aiko settings", "Настройки Aiko"),
         "EnvironmentPlainName": ("Main", "Основная"),
         "WizardStepAccess": ("Access to the limits", "Доступ к лимитам"),
         "WizardStepWhere": ("Where to show Aiko", "Где показывать Aiko"),
@@ -256,7 +252,6 @@ public enum Strings {
         "EnvironmentRemoved": ("{0} removed.", "{0} удалена."),
         "EnvironmentRemovedToBin": ("{0} removed. The folder is in the Recycle Bin.", "{0} удалена, папка в Корзине."),
         "EnvironmentRemovedToTrash": ("{0} removed. The folder is in the Trash.", "{0} удалена, папка в Корзине."),
-        "FoldersTableLead": ("In a folder and in every folder inside, plain claude starts its environment. A command like {0} beats a binding, and Claude Code reminds you of the binding.", "В папке и во всех вложенных обычный claude запускает её среду. Команда вроде {0} сильнее привязки, но Claude Code напомнит о привязке."),
         "AddFolder": ("Add a folder", "Добавить папку"),
         "RemoveBinding": ("Remove binding", "Убрать привязку"),
         "FoldersOneEnvironment": ("Bindings matter once you have two environments. Right now every folder runs in {0}.", "Привязка нужна, когда сред две. Сейчас все папки работают в {0}."),
@@ -649,23 +644,14 @@ public enum Strings {
     /// Open
     public static var menuOpen: String { Strings.get("MenuOpen") }
 
-    /// Refresh limits
-    public static var menuRefresh: String { Strings.get("MenuRefresh") }
-
     /// Settings
     public static var settings: String { Strings.get("Settings") }
 
     /// Close settings · Esc
     public static var settingsCloseTip: String { Strings.get("SettingsCloseTip") }
 
-    /// Close
-    public static var close: String { Strings.get("Close") }
-
     /// Quit Aiko
     public static var quitAiko: String { Strings.get("QuitAiko") }
-
-    /// Check for updates
-    public static var checkForUpdates: String { Strings.get("CheckForUpdates") }
 
     /// Check for updates
     public static var checkUpdatesToggle: String { Strings.get("CheckUpdatesToggle") }
@@ -801,9 +787,6 @@ public enum Strings {
 
     /// Copy diagnostics
     public static var copyDiagnostics: String { Strings.get("CopyDiagnostics") }
-
-    /// Aiko settings
-    public static var settingsWindowTitle: String { Strings.get("SettingsWindowTitle") }
 
     /// Main
     public static var environmentPlainName: String { Strings.get("EnvironmentPlainName") }
@@ -1224,9 +1207,6 @@ public enum Strings {
 
     /// {0} removed. The folder is in the Trash.
     public static var environmentRemovedToTrash: String { Strings.get("EnvironmentRemovedToTrash") }
-
-    /// In a folder and in every folder inside, plain claude starts its environment. A command li...
-    public static var foldersTableLead: String { Strings.get("FoldersTableLead") }
 
     /// Add a folder
     public static var addFolder: String { Strings.get("AddFolder") }

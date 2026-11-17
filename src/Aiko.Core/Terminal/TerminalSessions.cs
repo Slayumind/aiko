@@ -44,6 +44,14 @@ public sealed record TerminalSessions(IReadOnlyList<TerminalSession> Sessions, s
     /// Where the window stood when it was closed. Null until it was closed once.
     public WindowPlace? Window { get; init; }
 
+    /// The number of the shape of the file. A newer Aiko that changes the shape writes a higher one.
+    public const int SchemaVersion = 1;
+
+    /// Sessions of a kind this version does not know, written by a newer Aiko: kept as they were,
+    /// written back after the others, never started and not in the list. An older Aiko would
+    /// otherwise start them as Claude Code and drop their kind with the next save.
+    public IReadOnlyList<string> Kept { get; init; } = [];
+
     // ---- reading the list ----
 
     public TerminalSession? Find(string id) => Sessions.FirstOrDefault(session => session.Id == id);
@@ -253,11 +261,16 @@ public sealed record TerminalSessions(IReadOnlyList<TerminalSession> Sessions, s
             }
 
             var sessions = new List<TerminalSession>();
+            var kept = new List<string>();
             if (root.TryGetProperty("sessions", out var list) && list.ValueKind == JsonValueKind.Array)
             {
                 foreach (var item in list.EnumerateArray())
                 {
-                    if (SessionIn(item) is { } session && sessions.All(read => read.Id != session.Id))
+                    if (!KnownKind(item))
+                    {
+                        kept.Add(item.GetRawText());
+                    }
+                    else if (SessionIn(item) is { } session && sessions.All(read => read.Id != session.Id))
                     {
                         sessions.Add(session);
                     }
@@ -268,6 +281,7 @@ public sealed record TerminalSessions(IReadOnlyList<TerminalSession> Sessions, s
             return new TerminalSessions(sessions, sessions.Any(session => session.Id == last && !session.Closed) ? last : null)
             {
                 Window = root.TryGetProperty("window", out var window) ? PlaceIn(window) : null,
+                Kept = kept,
             };
         }
         catch (JsonException)
@@ -282,6 +296,7 @@ public sealed record TerminalSessions(IReadOnlyList<TerminalSession> Sessions, s
         using (var writer = new Utf8JsonWriter(stream, new JsonWriterOptions { Indented = true, Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping }))
         {
             writer.WriteStartObject();
+            writer.WriteNumber("schemaVersion", SchemaVersion);
             writer.WriteStartArray("sessions");
             foreach (var session in Sessions)
             {
@@ -305,6 +320,10 @@ public sealed record TerminalSessions(IReadOnlyList<TerminalSession> Sessions, s
                 writer.WriteNumber("lastUsed", session.LastUsed);
                 writer.WriteEndObject();
             }
+            foreach (var raw in Kept)
+            {
+                writer.WriteRawValue(raw);
+            }
             writer.WriteEndArray();
             if (LastId is { } last)
             {
@@ -325,6 +344,14 @@ public sealed record TerminalSessions(IReadOnlyList<TerminalSession> Sessions, s
 
         return Encoding.UTF8.GetString(stream.GetBuffer(), 0, (int)stream.Length) + "\n";
     }
+
+    /// No kind is Claude Code, the old shape of the file; "claude" and "shell" are the two this
+    /// version runs.
+    private static bool KnownKind(JsonElement item) =>
+        item.ValueKind != JsonValueKind.Object
+        || !item.TryGetProperty("kind", out var kind)
+        || kind.ValueKind != JsonValueKind.String
+        || kind.GetString() is "" or "claude" or "shell";
 
     private static TerminalSession? SessionIn(JsonElement item)
     {

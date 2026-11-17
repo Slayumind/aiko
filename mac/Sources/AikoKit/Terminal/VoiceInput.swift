@@ -182,6 +182,16 @@ public enum VoiceInput {
         }
     }
 
+    /// The longest recording, in seconds. The local engine reads the whole recording again while it
+    /// grows, and a mic left on would take memory and the processor without end; at this length the
+    /// recording finishes as a second press would, and the words stay.
+    public static let longest: TimeInterval = 5 * 60
+
+    /// Whether a recording has reached longest and finishes by itself.
+    public static func tooLong(_ state: VoiceState, listened: TimeInterval) -> Bool {
+        state.phase == .listening && listened >= longest
+    }
+
     /// Minutes and seconds, the way a voice recorder counts: 0:04, 12:30.
     public static func clock(_ time: TimeInterval) -> String {
         let seconds = max(0, Int64(time.rounded(.towardZero)))
