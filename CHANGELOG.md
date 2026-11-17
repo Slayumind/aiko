@@ -10,10 +10,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Added
 
-- **Real terminals in the Aiko window, on Windows.** Claude Code runs as it is, with its own input,
+- **Real terminals in the Aiko window, on Windows and the Mac.** Claude Code runs as it is, with its own input,
   menus and permission prompts, and a command line (Git Bash or PowerShell) opens in the folder of
   its session. Sessions are grouped by environment and folder. Ctrl+= and Ctrl+- zoom the text of the
-  window and the terminal together: 100, 115 or 130%. The Mac follows before the release.
+  window and the terminal together: 100, 115 or 130%. On the Mac the same keys use Cmd.
 - **Sessions keep running.** Close the window, and Claude Code goes on working. After a restart of
   Aiko a conversation continues where it was, and a command line opens in the same folder. Quitting
   Aiko asks first when something still runs.
@@ -96,6 +96,17 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - A session that stopped before your first message, or stayed empty until Aiko restarted, now
   starts again. Before, Enter or the restart only said "No conversation found".
 - A mistake in one window no longer closes Aiko: the tray, the island and the sessions keep running.
+- Restarting for an update, Remove Aiko, Start over and removing an environment ask first when
+  sessions still run, as quitting does, and the question shows over the settings. Before, some of
+  them stopped the sessions without a word, and on the Mac "Don't restart" left two Aikos running.
+- A settings file Aiko cannot read is no longer replaced with the defaults. A broken one is kept as
+  .bad, now on the Mac too, and one that another program holds for a moment is left alone.
+- A command that prints fast no longer slows down typing in the window.
+- The voice key says so when voice input is off, and a note about voice input now shows in a
+  session of Claude Code too.
+- When Claude Code does not open for a sign-in, the checklist and the page of the environment say so.
+- Your own status line no longer holds the status line of Claude Code when it starts a program in the
+  background.
 - Your own settings of Claude Code, such as CLAUDE_CODE_GIT_BASH_PATH, reach the sessions in the
   terminal.
 - Renaming an environment keeps its sessions, also with the window open.
