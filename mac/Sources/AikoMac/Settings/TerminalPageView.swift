@@ -63,10 +63,17 @@ struct TerminalPageView: View {
             VoiceSectionView(state: state)
         }
         .task {
-            let settings = await UNUserNotificationCenter.current().notificationSettings()
-            // Before the first question macOS answers "not determined": nothing is refused yet.
-            badgesRefused = settings.authorizationStatus == .denied
-                || (settings.authorizationStatus != .notDetermined && settings.badgeSetting == .disabled)
+            badgesRefused = await Self.badgesRefusedNow()
         }
+    }
+
+    /// Reads the settings and answers in the same nonisolated function, so only a Bool crosses back.
+    /// UNNotificationSettings is not Sendable, and Swift 6.1 (the CI toolchain) refuses to send it
+    /// out of a nonisolated call; newer Swift allows it, so the Mac build alone does not catch this.
+    nonisolated private static func badgesRefusedNow() async -> Bool {
+        let settings = await UNUserNotificationCenter.current().notificationSettings()
+        // Before the first question macOS answers "not determined": nothing is refused yet.
+        return settings.authorizationStatus == .denied
+            || (settings.authorizationStatus != .notDetermined && settings.badgeSetting == .disabled)
     }
 }
