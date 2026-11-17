@@ -60,6 +60,13 @@ enum EditorCheck {
         editor.setText("two", caret: 3)
         _ = editor.press(36, [.shift])
         check("Shift+Enter makes a new line and sends nothing", editor.text.string == "two\n", editor.text.string.debugDescription)
+
+        // A request with # that Claude Code left without an answer says so under the field.
+        editor.setText("# list the files", caret: 16)
+        editor.showSuggestion("# list the files", nil)
+        let failed = Strings.shellSuggestFailed.replacingOccurrences(of: "**", with: "")
+        check("a request with no answer says so", editor.hint.stringValue.hasPrefix(String(failed.prefix(20))),
+              editor.hint.stringValue)
         editor.setText("", caret: 0)
         return id
     }
@@ -114,6 +121,16 @@ enum EditorCheck {
         check("the first Esc closes the list and keeps the editor", !editor.choices.isOpen && editor.wanted)
         _ = editor.press(53, [])
         check("the second Esc closes the editor", !editor.wanted)
+
+        // The voice key with voice input off: the line says so, and the editor opens to show it.
+        var off = Store.settings()
+        off.voiceInput = false
+        host.voice?.use(off)
+        editor.pressVoice()
+        check("the voice key with voice off opens the editor and says so",
+              editor.wanted && !editor.isHidden && editor.shownNotice == .turnedOff, "\(editor.shownNotice)")
+        host.voice?.use(Store.settings())
+        if editor.wanted { editor.hide() }
 
         // The line of Claude Code is cleared and the program is left; the pictures of the check go.
         host.openTerminal()?.send(txt: "\u{03}")

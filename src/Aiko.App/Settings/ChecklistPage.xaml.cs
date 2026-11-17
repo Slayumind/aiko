@@ -428,12 +428,15 @@ public partial class ChecklistPage : UserControl
 
     private void OnSignInFirst(object sender, RoutedEventArgs e)
     {
-        if (!ClaudeLauncher.Open(FirstFolder, Home))
+        // A Claude Code that did not open is said under the button, never left in silence.
+        var opened = ClaudeLauncher.Open(FirstFolder, Home);
+        FirstWaiting.Text = opened ? Strings.LoginHow : Strings.ClaudeDidNotOpen;
+        FirstWaiting.Visibility = Visibility.Visible;
+        if (!opened)
         {
             return;
         }
 
-        FirstWaiting.Visibility = Visibility.Visible;
         Wait(Waiter.ForSignIn(FirstFolder, () =>
         {
             FirstWaiting.Visibility = Visibility.Collapsed;
@@ -533,16 +536,20 @@ public partial class ChecklistPage : UserControl
         catch (Exception error) when (error is IOException or UnauthorizedAccessException)
         {
             Log.Write($"wizard: could not create {Path.GetFileName(folder)} ({error.GetType().Name})");
+            SecondWaiting.Text = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.FolderNotMade, Path.GetFileName(folder));
+            SecondWaiting.Visibility = Visibility.Visible;
             return;
         }
 
         ChooseSecond(folder, name);
-        if (!ClaudeLauncher.Open(folder, Home))
+        var opened = ClaudeLauncher.Open(folder, Home);
+        SecondWaiting.Text = opened ? Strings.LoginHow : Strings.ClaudeDidNotOpen;
+        SecondWaiting.Visibility = Visibility.Visible;
+        if (!opened)
         {
             return;
         }
 
-        SecondWaiting.Visibility = Visibility.Visible;
         Wait(Waiter.ForSignIn(folder, () =>
         {
             SecondWaiting.Visibility = Visibility.Collapsed;

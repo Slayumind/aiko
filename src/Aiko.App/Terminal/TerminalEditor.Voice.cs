@@ -51,10 +51,18 @@ sealed partial class TerminalEditor
         };
         _voiceCancel.Text = line.CancelHint ? Strings.VoiceCancelHint : "";
 
+        // The line lives in the editor. In a session of Claude Code the editor is not on screen
+        // until Ctrl+G, so a new line opens it the way Ctrl+G does, and Ctrl+G closes it again.
+        var newNotice = notice != VoiceNotice.None && notice != _shownNotice;
         _shownNotice = notice;
         _notice.Visibility = notice == VoiceNotice.None ? Visibility.Collapsed : Visibility.Visible;
+        if (newNotice && !Wanted && _session?.Kind == SessionKind.Claude)
+        {
+            Compose();
+        }
         (_noticeText.Text, _noticeLink.Text) = notice switch
         {
+            VoiceNotice.TurnedOff => (Strings.VoiceTurnedOff, Strings.VoiceOpenSettings),
             VoiceNotice.NoMicrophone => (Strings.VoiceNoMic, Strings.VoiceNoMicLink),
             VoiceNotice.NeedsModel => (Strings.VoiceNeedsModel, Strings.VoiceOpenSettings),
             VoiceNotice.NeedsKey => (Strings.VoiceNeedsKey, Strings.VoiceOpenSettings),

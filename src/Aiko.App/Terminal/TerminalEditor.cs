@@ -64,6 +64,9 @@ sealed partial class TerminalEditor : UserControl, IDictationField
     /// answers; null while there is none. The timer waits for a pause in the typing and stops.
     private string? _suggestion;
     private string? _suggestFor;
+
+    /// The words Claude Code gave no command for: the line says so until they change.
+    private string? _suggestFailedFor;
     private readonly System.Windows.Threading.DispatcherTimer _suggestPause = new() { Interval = TimeSpan.FromMilliseconds(700) };
     private Draft _draft = new();
 
@@ -244,6 +247,7 @@ sealed partial class TerminalEditor : UserControl, IDictationField
 
         _suggestFor = null;
         _suggestion = command;
+        _suggestFailedFor = command is null ? words : null;
         ShowHint();
     }
 
@@ -328,6 +332,7 @@ sealed partial class TerminalEditor : UserControl, IDictationField
         var shell = state.Kind == SessionKind.Shell;
         var words = shell && _suggestion is { } proposed ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.ShellSuggestion, proposed.Replace("**", "* *"))
             : shell && _suggestFor == _text.Text && _suggestFor is not null ? Strings.ShellSuggesting
+            : shell && _suggestFailedFor == _text.Text && _suggestFailedFor is not null ? Strings.ShellSuggestFailed
             : state.Composing ? Strings.TerminalEditorHintCompose
             : state.Passing && state.Empty ? Strings.TerminalEditorHintPassing
             : state.Empty ? (shell ? Strings.TerminalEditorHintShellEmpty : Strings.TerminalEditorHintEmpty)

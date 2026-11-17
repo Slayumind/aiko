@@ -74,7 +74,7 @@
         <TextBlock x:Name="FolderLine" Style="{StaticResource RowNote}" Margin="2,6,0,0" />
         <Button x:Name="SignInButton" Style="{StaticResource SmallButton}" Margin="0,10,0,0" Click="OnSignIn" />
         <local:RevealPanel x:Name="OpenedPanel">
-          <TextBlock Text="{x:Static core:Strings.ClaudeOpened}" Style="{StaticResource RowHint}" Margin="0,6,0,0" />
+          <TextBlock x:Name="OpenedLine" Text="{x:Static core:Strings.ClaudeOpened}" Style="{StaticResource RowHint}" Margin="0,6,0,0" />
         </local:RevealPanel>
 
         <Grid Margin="0,22,0,0">

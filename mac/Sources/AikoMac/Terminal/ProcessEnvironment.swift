@@ -31,6 +31,10 @@ enum ProcessEnvironment {
         return variables
     }
 
+    /// The PATH of a login shell, read once: where Terminal would find a program, nvm and npm
+    /// folders included.
+    static var loginShellPath: String? { path() }
+
     /// The names in the environment of Aiko itself, for the plans that take leftovers out.
     static var inheritedNames: [String] { Array(ProcessInfo.processInfo.environment.keys) }
 

@@ -31,7 +31,7 @@ sealed class FirstRunHost
     public event Action? QuitAsked;
 
     /// Finish wrote the environments: the terminal takes the window.
-    public event Action? Finished;
+    public event Action<string>? Finished;
 
     public event Action? Closed;
 
@@ -55,7 +55,7 @@ sealed class FirstRunHost
         var settings = new SettingsPanel(page, firstRun: true);
         settings.SettingsChanged += () => SettingsChanged?.Invoke();
         settings.QuitRequested += () => QuitAsked?.Invoke();
-        settings.FirstRunFinished += () => Finished?.Invoke();
+        settings.FirstRunFinished += note => Finished?.Invoke(note);
 
         // A new language: the checklist is made again in it.
         settings.ReopenRequested += () =>

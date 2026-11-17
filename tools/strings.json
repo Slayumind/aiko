@@ -2912,6 +2912,13 @@
     ]
   ],
   [
+    "TerminalOpenLog",
+    [
+      "Open the log",
+      "Открыть журнал"
+    ]
+  ],
+  [
     "TerminalHowToInstall",
     [
       "How to install",
@@ -3077,6 +3084,13 @@
     [
       "{0}   **Tab** take",
       "{0}   **Tab** взять"
+    ]
+  ],
+  [
+    "ShellSuggestFailed",
+    [
+      "Claude Code did not answer. Change the words or try again in a minute.",
+      "Claude Code не ответил. Измени слова или попробуй через минуту."
     ]
   ],
   [
@@ -3420,6 +3434,41 @@
         "Системные настройки"
       ]
     }
+  ],
+  [
+    "DockBadgesOffMac",
+    [
+      "macOS does not let Aiko put the number on its Dock icon.",
+      "macOS не даёт Aiko ставить число на значок в Dock."
+    ]
+  ],
+  [
+    "DockBadgesSettingsMac",
+    [
+      "Notification settings",
+      "Настройки уведомлений"
+    ]
+  ],
+  [
+    "ClaudeDidNotOpen",
+    [
+      "Claude Code did not open. Press the button again; the log has the details.",
+      "Claude Code не открылся. Нажми кнопку ещё раз — подробности в журнале."
+    ]
+  ],
+  [
+    "FolderNotMade",
+    [
+      "Aiko could not create the folder {0}. The log has the details.",
+      "Aiko не смогла создать папку {0}. Подробности в журнале."
+    ]
+  ],
+  [
+    "VoiceTurnedOff",
+    [
+      "Voice input is off.",
+      "Голосовой ввод выключен."
+    ]
   ],
   [
     "VoiceNeedsModel",

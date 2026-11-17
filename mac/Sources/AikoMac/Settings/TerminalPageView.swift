@@ -1,10 +1,15 @@
 import AikoKit
 import SwiftUI
+import UserNotifications
 
 /// The page of the window itself: its zoom, the sound of the notices and voice input. The twin of
 /// Settings/TerminalPage.xaml(.cs).
 struct TerminalPageView: View {
     @ObservedObject var state: SettingsState
+
+    /// The person refused the badges of Aiko (D-426): the count in the Dock cannot show, so the
+    /// page says so and leads to the switch.
+    @State private var badgesRefused = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -26,6 +31,19 @@ struct TerminalPageView: View {
             // one (D-375).
             Control.sectionLabel(Strings.notifyLabel).padding(.top, 22).padding(.bottom, 4)
             Control.rowHint(Strings.notifyWhat).padding(.bottom, 8)
+            if badgesRefused {
+                HStack(spacing: 8) {
+                    Text(Strings.dockBadgesOffMac)
+                        .font(Theme.sans(Theme.textSmall))
+                        .foregroundStyle(Theme.caution)
+                    LinkButton(title: Strings.dockBadgesSettingsMac) {
+                        if let page = URL(string: "x-apple.systempreferences:com.apple.Notifications-Settings.extension") {
+                            NSWorkspace.shared.open(page)
+                        }
+                    }
+                }
+                .padding(.bottom, 8)
+            }
             RowsBox {
                 HStack(spacing: 10) {
                     LineMark(data: BarMarks.sound, tone: Theme.ink)
@@ -43,6 +61,12 @@ struct TerminalPageView: View {
             }
 
             VoiceSectionView(state: state)
+        }
+        .task {
+            let settings = await UNUserNotificationCenter.current().notificationSettings()
+            // Before the first question macOS answers "not determined": nothing is refused yet.
+            badgesRefused = settings.authorizationStatus == .denied
+                || (settings.authorizationStatus != .notDetermined && settings.badgeSetting == .disabled)
         }
     }
 }

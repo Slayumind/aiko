@@ -456,6 +456,7 @@ public enum Strings {
         "TerminalShellNotStartedTitle": ("The command line did not start", "Командная строка не запустилась"),
         "TerminalStartFailedBody": ("Windows returned error {0}. The log has the details.", "Windows вернула ошибку {0}. Подробности — в журнале."),
         "TerminalStartAgain": ("Start again", "Запустить ещё раз"),
+        "TerminalOpenLog": ("Open the log", "Открыть журнал"),
         "TerminalHowToInstall": ("How to install", "Как установить"),
         "TerminalFolderGoneTitle": ("The folder {0} is no longer on the disk", "Папки {0} больше нет на диске"),
         "TerminalFolderGoneBody": ("The conversation is saved, but there is nowhere to start it.", "Разговор сохранён, но запустить его негде."),
@@ -480,6 +481,7 @@ public enum Strings {
         "ShellExplaining": ("Asking Claude Code…", "Спрашиваю Claude Code…"),
         "ShellExplainFailed": ("Claude Code did not answer. Press Explain again in a minute.", "Claude Code не ответил. Нажми «Объяснить» ещё раз через минуту."),
         "ShellSuggestion": ("{0}   **Tab** take", "{0}   **Tab** взять"),
+        "ShellSuggestFailed": ("Claude Code did not answer. Change the words or try again in a minute.", "Claude Code не ответил. Измени слова или попробуй через минуту."),
         "ShellSuggesting": ("Looking for a command…", "Ищу команду…"),
         "ShellFind": ("Find in the output", "Найти в выводе"),
         "ShellFindCount": ("{0} of {1}", "{0} из {1}"),
@@ -528,6 +530,11 @@ public enum Strings {
         "VoiceCancelHint": ("Esc to cancel", "Esc — отменить"),
         "VoiceNoMic": ("No microphone found. Plug one in or allow access to it.", "Микрофон не найден. Подключи его или разреши доступ к нему."),
         "VoiceNoMicLink": ("System Settings", "Системные настройки"),
+        "DockBadgesOffMac": ("macOS does not let Aiko put the number on its Dock icon.", "macOS не даёт Aiko ставить число на значок в Dock."),
+        "DockBadgesSettingsMac": ("Notification settings", "Настройки уведомлений"),
+        "ClaudeDidNotOpen": ("Claude Code did not open. Press the button again; the log has the details.", "Claude Code не открылся. Нажми кнопку ещё раз — подробности в журнале."),
+        "FolderNotMade": ("Aiko could not create the folder {0}. The log has the details.", "Aiko не смогла создать папку {0}. Подробности в журнале."),
+        "VoiceTurnedOff": ("Voice input is off.", "Голосовой ввод выключен."),
         "VoiceNeedsModel": ("Voice input needs a speech model, 465 MB.", "Для голосового ввода нужна модель распознавания, 465 МБ."),
         "VoiceNeedsKey": ("Recognition through OpenAI needs your key.", "Для распознавания через OpenAI нужен твой ключ."),
         "VoiceOpenSettings": ("Open settings", "Открыть настройки"),
@@ -1818,6 +1825,9 @@ public enum Strings {
     /// Start again
     public static var terminalStartAgain: String { Strings.get("TerminalStartAgain") }
 
+    /// Open the log
+    public static var terminalOpenLog: String { Strings.get("TerminalOpenLog") }
+
     /// How to install
     public static var terminalHowToInstall: String { Strings.get("TerminalHowToInstall") }
 
@@ -1889,6 +1899,9 @@ public enum Strings {
 
     /// {0}   **Tab** take
     public static var shellSuggestion: String { Strings.get("ShellSuggestion") }
+
+    /// Claude Code did not answer. Change the words or try again in a minute.
+    public static var shellSuggestFailed: String { Strings.get("ShellSuggestFailed") }
 
     /// Looking for a command…
     public static var shellSuggesting: String { Strings.get("ShellSuggesting") }
@@ -2033,6 +2046,21 @@ public enum Strings {
 
     /// System Settings
     public static var voiceNoMicLink: String { Strings.get("VoiceNoMicLink") }
+
+    /// macOS does not let Aiko put the number on its Dock icon.
+    public static var dockBadgesOffMac: String { Strings.get("DockBadgesOffMac") }
+
+    /// Notification settings
+    public static var dockBadgesSettingsMac: String { Strings.get("DockBadgesSettingsMac") }
+
+    /// Claude Code did not open. Press the button again; the log has the details.
+    public static var claudeDidNotOpen: String { Strings.get("ClaudeDidNotOpen") }
+
+    /// Aiko could not create the folder {0}. The log has the details.
+    public static var folderNotMade: String { Strings.get("FolderNotMade") }
+
+    /// Voice input is off.
+    public static var voiceTurnedOff: String { Strings.get("VoiceTurnedOff") }
 
     /// Voice input needs a speech model, 465 MB.
     public static var voiceNeedsModel: String { Strings.get("VoiceNeedsModel") }

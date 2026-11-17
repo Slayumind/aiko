@@ -55,6 +55,7 @@ sealed partial class TerminalEditor
     {
         _suggestion = null;
         _suggestFor = null;
+        _suggestFailedFor = null;
         _suggestPause.Stop();
         if (_session?.Kind == SessionKind.Shell && ShellAsk.IsRequest(_text.Text))
         {

@@ -15,11 +15,14 @@ enum ClaudeLauncher {
     /// core then falls back to ~/.local/bin, which is where the native installer puts Claude Code.
     private static let extraFolders = ["/usr/local/bin", "/opt/homebrew/bin"]
 
+    /// The PATH of a login shell comes too: a Claude Code installed with npm or under nvm is in a
+    /// folder only that PATH names, and the sessions start with it anyway.
     static func findClaude() -> String? {
+        let user = (extraFolders + [ProcessEnvironment.loginShellPath].compactMap { $0 }).joined(separator: ":")
         let path = ClaudeInstall.freshPath(
             .macOS,
             machinePath: ProcessInfo.processInfo.environment["PATH"],
-            userPath: extraFolders.joined(separator: ":"),
+            userPath: user,
             expand: { $0 })
 
         return ClaudeInstall.find(.macOS, freshPath: path, commandFolder: CommandFolder.folder,

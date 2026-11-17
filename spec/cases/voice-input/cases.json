@@ -1,7 +1,8 @@
 {
-  "comment": "Voice input in the field (D-313, D-315). Two presses: press, speak, press. Listening is shown from the first sound, not from the press (D-314). A press with no model or no key shows a line above the field and starts nothing. Esc drops the recording. When OpenAI fails, the recording ends, the phrases it already sent back stay in the field, and a line above the field says why: no money on the key, too many requests, or any other refusal (D-317, D-405). The button is red from the press to the second press; the wave of the sound under the field moves only while listening (D-319).",
+  "comment": "Voice input in the field (D-313, D-315). Two presses: press, speak, press. Listening is shown from the first sound, not from the press (D-314). A press with no model or no key, or while voice input is off, shows a line above the field and starts nothing. Esc drops the recording. When OpenAI fails, the recording ends, the phrases it already sent back stay in the field, and a line above the field says why: no money on the key, too many requests, or any other refusal (D-317, D-405). The button is red from the press to the second press; the wave of the sound under the field moves only while listening (D-319).",
   "next": [
-    { "name": "voice turned off ignores a press", "from": ["Off", "None"], "cue": "Press", "ready": "Ready", "to": ["Off", "None"] },
+    { "name": "a press while voice is off says so and starts nothing", "from": ["Off", "None"], "cue": "Press", "ready": "Ready", "to": ["Off", "TurnedOff"] },
+    { "name": "anything else while voice is off changes nothing", "from": ["Off", "None"], "cue": "Cancel", "ready": "Ready", "to": ["Off", "None"] },
     { "name": "a press opens the mic", "from": ["Idle", "None"], "cue": "Press", "ready": "Ready", "to": ["Warming", "None"] },
     { "name": "a press with no model asks for it", "from": ["Idle", "None"], "cue": "Press", "ready": "NeedsModel", "to": ["Idle", "NeedsModel"] },
     { "name": "a press with no key asks for it", "from": ["Idle", "None"], "cue": "Press", "ready": "NeedsKey", "to": ["Idle", "NeedsKey"] },

@@ -28,6 +28,10 @@ public enum VoicePhase
 public enum VoiceNotice
 {
     None,
+
+    /// The voice key was pressed while voice input is off in the settings: the line says so and
+    /// leads to the page that turns it on.
+    TurnedOff,
     NoMicrophone,
     NeedsModel,
     NeedsKey,
@@ -105,9 +109,10 @@ public static class VoiceInput
 {
     public static VoiceState Next(VoiceState state, VoiceCue cue, VoiceReadiness readiness)
     {
+        // The key is named in every hint of the window, so a press while voice is off is answered.
         if (state.Phase == VoicePhase.Off)
         {
-            return state;
+            return cue == VoiceCue.Press ? state with { Notice = VoiceNotice.TurnedOff } : state;
         }
 
         return (state.Phase, cue) switch
