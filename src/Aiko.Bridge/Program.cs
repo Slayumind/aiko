@@ -63,7 +63,8 @@ return 0;
 static void RunStatusLine(string configDirectory, string input)
 {
     var settings = Path.Combine(configDirectory, "settings.json");
-    var plan = BridgeWork.StatusLine(ThisComputer.Folders, configDirectory, ReadIfThere(settings), input, DateTimeOffset.Now);
+    var snapshotFile = ThisComputer.Folders.SnapshotFile(SnapshotName.For(configDirectory));
+    var plan = BridgeWork.StatusLine(ThisComputer.Folders, configDirectory, ReadIfThere(settings), input, DateTimeOffset.Now, ReadIfThere(snapshotFile));
     if (plan.Snapshot is { } snapshot)
     {
         Directory.CreateDirectory(ThisComputer.Folders.SnapshotsFolder);

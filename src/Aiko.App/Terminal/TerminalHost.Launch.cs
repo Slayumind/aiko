@@ -142,7 +142,7 @@ sealed partial class TerminalHost
         if (session.Kind == SessionKind.Shell)
         {
             var plan = ClaudeLaunchPlan.ForShell(config, home, inherited);
-            var shell = Shell();
+            var shell = _shellFound = ShellLaunch.Find();
             return new PtyLaunch(shell.CommandLine, folder, Variables(plan));
         }
 

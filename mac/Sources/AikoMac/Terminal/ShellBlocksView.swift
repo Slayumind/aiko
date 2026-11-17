@@ -110,6 +110,7 @@ final class ShellBlocksView: NSView {
 
     /// New output: the rows are counted again and drawn.
     func refresh() {
+        refreshesForCheck += 1
         rows = lay(ShellBlocks.of(screen))
         if followsEnd {
             offset = maxOffset()
@@ -380,10 +381,24 @@ final class ShellBlocksView: NSView {
     }
 
     private func drawMatches(_ line: Int, _ y: CGFloat) {
-        for (index, found) in matches.enumerated() where found.line == line {
+        var index = firstMatch(on: line)
+        while index < matches.count, matches[index].line == line {
+            let found = matches[index]
             (index == matchAt ? Self.matchNow : Self.match).setFill()
             NSRect(x: textLeft + CGFloat(found.start) * charWidth, y: y, width: CGFloat(found.length) * charWidth, height: lineHeight).fill()
+            index += 1
         }
+    }
+
+    /// The matches go in the order of the lines, so the first one on a line is found by halves: a
+    /// one-letter search over a long output gives many thousands, and every frame draws them.
+    private func firstMatch(on line: Int) -> Int {
+        var (low, high) = (0, matches.count)
+        while low < high {
+            let middle = (low + high) / 2
+            if matches[middle].line < line { low = middle + 1 } else { high = middle }
+        }
+        return low
     }
 
     private func drawLine(_ line: Int, _ y: CGFloat) {
@@ -449,12 +464,21 @@ final class ShellBlocksView: NSView {
         guard milliseconds < 60_000 else {
             return "\(milliseconds / 60_000):" + String(format: "%02lld", milliseconds / 1000 % 60)
         }
+        let number = Strings.language == .russian ? Self.russianSeconds : Self.englishSeconds
+        return Strings.format(Strings.shellSeconds, number.string(from: NSNumber(value: Double(milliseconds) / 1000)) ?? "0")
+    }
+
+    /// Made once: every frame draws the time of each command, and a formatter is slow to make.
+    private static let russianSeconds = secondsFormatter("ru_RU")
+    private static let englishSeconds = secondsFormatter("en_US")
+
+    private static func secondsFormatter(_ locale: String) -> NumberFormatter {
         let number = NumberFormatter()
         number.minimumFractionDigits = 1
         number.maximumFractionDigits = 1
         number.minimumIntegerDigits = 1
-        number.locale = Locale(identifier: Strings.language == .russian ? "ru_RU" : "en_US")
-        return Strings.format(Strings.shellSeconds, number.string(from: NSNumber(value: Double(milliseconds) / 1000)) ?? "0")
+        number.locale = Locale(identifier: locale)
+        return number
     }
 
     private func more(_ count: Int) -> String {
@@ -474,8 +498,14 @@ final class ShellBlocksView: NSView {
         let rgb: UInt32 = colour >= CellStyle.trueColor ? UInt32(colour & 0xFFFFFF)
             : colour < 16 ? Self.ansi[colour]
             : Self.cube(colour)
-        return Self.rgb(UInt8(rgb >> 16 & 0xFF), UInt8(rgb >> 8 & 0xFF), UInt8(rgb & 0xFF))
+        if let known = colours[rgb] { return known }
+        let made = Self.rgb(UInt8(rgb >> 16 & 0xFF), UInt8(rgb >> 8 & 0xFF), UInt8(rgb & 0xFF))
+        colours[rgb] = made
+        return made
     }
+
+    /// The colours already made, as on Windows: every frame draws each run with one.
+    private var colours: [UInt32: NSColor] = [:]
 
     /// The 216 colours of the cube and the 24 greys of the xterm palette.
     private static func cube(_ index: Int) -> UInt32 {
@@ -496,6 +526,9 @@ final class ShellBlocksView: NSView {
 
     var blockCountForCheck: Int { rows.filter { $0.kind == .command }.count }
     var rowsForCheck: Int { rows.count }
+
+    /// How many times the rows were counted again since the view was made.
+    private(set) var refreshesForCheck = 0
     var matchesForCheck: Int { matches.count }
 
     func hoverForCheck(_ index: Int) {

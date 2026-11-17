@@ -85,6 +85,24 @@ struct BridgeWorkTests {
         #expect(written.windows.first { $0.kind == .fiveHour }?.percent == 28)
     }
 
+    @Test
+    func theSameNumbersAreNotWrittenAgainWithinAMinute() {
+        let noon = utc(2026, 9, 12, 12)
+        func plan(_ input: String, _ at: Date, _ written: String?) -> StatusLinePlan {
+            BridgeWork.statusLine(
+                folders: Self.folders, configDirectory: Self.configDirectory, settingsJson: nil,
+                input: input, now: at, written: written)
+        }
+        let first = plan(Self.payload, noon, nil).snapshot?.text
+
+        #expect(plan(Self.payload, noon.addingTimeInterval(59), first).snapshot == nil)
+        #expect(plan(Self.payload, noon.addingTimeInterval(60), first).snapshot != nil)
+
+        let other = Self.payload.replacingOccurrences(of: "28", with: "29")
+        #expect(other != Self.payload)
+        #expect(plan(other, noon.addingTimeInterval(5), first).snapshot != nil)
+    }
+
     @Test(arguments: ["", "not json at all", "{}", #"{ "rate_limits": {} }"#])
     func inputWithNoLimitsWritesNothing(input: String) {
         let plan = BridgeWork.statusLine(

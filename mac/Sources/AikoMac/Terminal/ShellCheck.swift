@@ -61,6 +61,29 @@ enum ShellCheck {
             let back = await until(5) { !pane.screen.fullScreen && !blocks.isHidden }
             check("back from it the blocks come again", back)
 
+            // A command that prints fast for a while: the main thread still answers at once, and
+            // the rows are counted a bounded number of times a second.
+            let refreshesBefore = blocks.refreshesForCheck
+            var delays: [Double] = []
+            let started = Date()
+            editor.setText("seq 1 200000", caret: 12)
+            _ = editor.press(36, [])
+            while Date().timeIntervalSince(started) < 6 {
+                let asked = Date()
+                await withCheckedContinuation { (done: CheckedContinuation<Void, Never>) in
+                    DispatchQueue.main.async { done.resume() }
+                }
+                delays.append(Date().timeIntervalSince(asked) * 1000)
+                try? await Task.sleep(nanoseconds: 30_000_000)
+            }
+            delays.sort()
+            let perSecond = Double(blocks.refreshesForCheck - refreshesBefore) / Date().timeIntervalSince(started)
+            let keyWait = delays[Int(Double(delays.count) * 0.95)]
+            check("keys come through while a command prints fast", keyWait < 50,
+                  String(format: "95th %.0f ms, worst %.0f ms", keyWait, delays.last ?? 0))
+            check("the rows are counted at most 20 times a second while it prints", perSecond <= 20.5,
+                  String(format: "%.1f a second", perSecond))
+
             host.closeSession(id)
             finish(host)
         }

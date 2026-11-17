@@ -135,6 +135,39 @@ static class ShellViewCheck
             var worst = frames[^1];
             Check("a frame of ten thousand lines draws within a frame of 60 a second", frames[(int)(frames.Count * 0.95)] < FrameMilliseconds, $"median {median:0.0} ms, 95th {frames[(int)(frames.Count * 0.95)]:0.0} ms, worst {worst:0.0} ms");
 
+            // One count of the rows over ten thousand lines, as each new piece of output asks for.
+            var counts = new List<double>();
+            for (var pass = 0; pass < 20; pass++)
+            {
+                var watch = Stopwatch.StartNew();
+                view.Refresh();
+                counts.Add(watch.Elapsed.TotalMilliseconds);
+            }
+
+            counts.Sort();
+            report.Add($"INFO one count of the rows over ten thousand lines: median {counts[10]:0.0} ms, worst {counts[^1]:0.0} ms");
+
+            // A command that prints fast for a while: keys must still come through at once, and the
+            // rows are counted a bounded number of times a second.
+            var refreshesBefore = view.RefreshesForCheck;
+            var delays = new List<double>();
+            var stream = Stopwatch.StartNew();
+            terminal.Type("seq 1 200000\r");
+            while (stream.Elapsed.TotalSeconds < 6)
+            {
+                var asked = Stopwatch.StartNew();
+                await application.Dispatcher.InvokeAsync(() => { }, System.Windows.Threading.DispatcherPriority.Input);
+                delays.Add(asked.Elapsed.TotalMilliseconds);
+                await Task.Delay(30);
+            }
+
+            delays.Sort();
+            var perSecond = (view.RefreshesForCheck - refreshesBefore) / stream.Elapsed.TotalSeconds;
+            var keyWait = delays[(int)(delays.Count * 0.95)];
+            Check("keys come through while a command prints fast", keyWait < 50, $"95th {keyWait:0} ms, worst {delays[^1]:0} ms");
+            Check("the rows are counted at most 20 times a second while it prints", perSecond <= 20.5, $"{perSecond:0.0} a second");
+            await Task.Delay(3000);
+
             terminal.Type("less note.txt\r");
             await Until(() => fullScreen.Contains(true), 10);
             Check("less takes the whole screen: the terminal is shown", terminal.TerminalVisibleForCheck && !view.IsVisible);

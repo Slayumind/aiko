@@ -93,6 +93,14 @@ sealed class TerminalSurface : Grid
         {
             _shell = new ShellScreen(120, 30);
             _blocks = new ShellBlocksView(_shell, _shellGate);
+            _blocks.IsVisibleChanged += (_, _) =>
+            {
+                if (_blocks.IsVisible && _blocksStale)
+                {
+                    _blocksStale = false;
+                    _blocks.Refresh();
+                }
+            };
             _shell.FullScreenChanged += on => Dispatcher.BeginInvoke(() => ShowFullScreen(on));
 
             // Hidden, not collapsed: the control keeps its size, so the pseudo console keeps its rows.
@@ -466,11 +474,40 @@ sealed class TerminalSurface : Grid
 
         if (Interlocked.Exchange(ref _refreshQueued, 1) == 0)
         {
-            Dispatcher.BeginInvoke(() =>
+            // At most one count of the rows each RefreshEvery, and below the keys: a command that
+            // prints fast once starved the input for as long as it printed.
+            var wait = Math.Max(0, RefreshEvery - (Clock.ElapsedMilliseconds - Interlocked.Read(ref _refreshedAt)));
+            Dispatcher.BeginInvoke(async () =>
             {
+                if (wait > 0)
+                {
+                    await Task.Delay((int)wait);
+                }
+
+                Interlocked.Exchange(ref _refreshedAt, Clock.ElapsedMilliseconds);
                 Interlocked.Exchange(ref _refreshQueued, 0);
-                _blocks!.Refresh();
-            }, DispatcherPriority.Render);
+                RefreshShown();
+            }, DispatcherPriority.Background);
+        }
+    }
+
+    /// How often, in milliseconds, the blocks follow output that keeps coming.
+    private const long RefreshEvery = 50;
+
+    private long _refreshedAt;
+
+    /// A session that is not open counts its rows once, when it is shown again.
+    private bool _blocksStale;
+
+    private void RefreshShown()
+    {
+        if (_blocks!.IsVisible)
+        {
+            _blocks.Refresh();
+        }
+        else
+        {
+            _blocksStale = true;
         }
     }
 

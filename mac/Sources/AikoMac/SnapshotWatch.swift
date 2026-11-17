@@ -82,8 +82,8 @@ final class SnapshotWatch {
     }
 
     private func reload() {
+        // No line in the log here: this runs on every status line, and the log is short.
         readAll()
-        Log.write("snapshots read again: \(byFile.count)")
         updated?()
     }
 

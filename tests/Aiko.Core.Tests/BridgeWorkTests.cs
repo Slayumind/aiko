@@ -50,6 +50,25 @@ public class BridgeWorkTests
         Assert.Equal(("claude-work", 2), (written.Environment, written.Windows.Count));
     }
 
+    [Fact]
+    public void The_same_numbers_are_not_written_again_within_a_minute()
+    {
+        var first = BridgeWork.StatusLine(Folders, ConfigDirectory, null, Payload, Noon).Snapshot!.Text;
+
+        Assert.Null(BridgeWork.StatusLine(Folders, ConfigDirectory, null, Payload, Noon.AddSeconds(59), first).Snapshot);
+        Assert.NotNull(BridgeWork.StatusLine(Folders, ConfigDirectory, null, Payload, Noon.AddSeconds(60), first).Snapshot);
+    }
+
+    [Fact]
+    public void New_numbers_are_written_at_once()
+    {
+        var first = BridgeWork.StatusLine(Folders, ConfigDirectory, null, Payload, Noon).Snapshot!.Text;
+        var other = Payload.Replace("28", "29", StringComparison.Ordinal);
+
+        Assert.NotEqual(Payload, other);
+        Assert.NotNull(BridgeWork.StatusLine(Folders, ConfigDirectory, null, other, Noon.AddSeconds(5), first).Snapshot);
+    }
+
     [Theory]
     [InlineData("")]
     [InlineData("not json at all")]

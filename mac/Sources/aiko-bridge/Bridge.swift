@@ -71,7 +71,8 @@ enum Bridge {
             configDirectory: folder,
             settingsJson: Disk.readIfThere(ClaudeSettingsEditor.pathIn(folder)),
             input: input,
-            now: Date())
+            now: Date(),
+            written: Disk.readIfThere(folders.snapshotFile(SnapshotName.forConfigDirectory(folder))))
 
         if let snapshot = plan.snapshot {
             try? Disk.writeInOneStep(snapshot)
