@@ -145,14 +145,20 @@ final class AikoShell {
     /// Quit now, or ask first while programs run in the window: the answer comes to `answer`.
     func mayQuit(_ answer: @escaping (Bool) -> Void) -> NSApplication.TerminateReply {
         guard !selfTesting, terminal.anyRunning else {
-            terminal.endAll()
+            terminal.endForQuit()
             return .terminateNow
         }
-        terminal.askToQuit { [weak self] yes in
-            if yes { self?.terminal.endAll() }
+        terminal.askToStop(.quit) { [weak self] yes in
+            if yes { self?.terminal.endForQuit() }
             answer(yes)
         }
         return .terminateLater
+    }
+
+    /// Log out, restart or shut down: the programs end with Aiko, and the sessions stay for the
+    /// next start.
+    func endForSessionEnd() {
+        terminal.endForQuit()
     }
 
     func stop() {

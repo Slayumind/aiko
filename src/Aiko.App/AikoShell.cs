@@ -234,12 +234,12 @@ sealed class AikoShell : IDisposable
 
     public void CancelMenuForCheck() => _tray.PostForCheck(Windows.Win32.PInvoke.WM_CANCELMODE, 0);
 
-    /// After an error that repeats (CrashGuard): the terminal and the settings close, the tray and
-    /// the island stay. The sessions of the terminal live on without its window (D-351).
+    /// After an error that repeats (CrashGuard): the first run closes, and the terminal window
+    /// steps aside. The tray and the island stay, and so do the sessions of the terminal (D-351).
     public void CloseWindows()
     {
         _firstRun?.Close();
-        _terminal?.Close();
+        _terminal?.StepAside();
     }
 
     public void Dispose()
@@ -429,7 +429,7 @@ sealed class AikoShell : IDisposable
     {
         if (_terminal is { AnyRunning: true } terminal)
         {
-            terminal.AskToQuit(_application.Shutdown);
+            terminal.AskToStop(StopReason.Quit, _application.Shutdown);
             return;
         }
 

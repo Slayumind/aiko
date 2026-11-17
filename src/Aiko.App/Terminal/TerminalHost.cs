@@ -53,8 +53,11 @@ sealed partial class TerminalHost
     private string? _closing;
     private bool _quitting;
 
-    /// Aiko asked to quit while programs run: what to do once the person agrees.
-    private Action? _quitAfter;
+    /// A step that stops every session waits for the person's answer: why, and what runs after a yes.
+    private (StopReason Reason, Action Step)? _stopping;
+
+    /// The page of the settings that was open when the question came. A no opens it again.
+    private string? _settingsBeforeAsking;
 
     /// limitsOf gives the latest limits of an environment by its name; cardOf the words of the
     /// card of limits, which the open header shows for the active environment (D-376). iconRows:
@@ -233,8 +236,9 @@ sealed partial class TerminalHost
 
     internal TerminalPanel Panel => _panel;
 
-    /// Whether a program still runs in a terminal of the window.
-    public bool AnyRunning => _terminals.Values.Any(terminal => terminal.IsRunning);
+    /// Whether a program still runs in a terminal of the window and the person could lose it. Once
+    /// Aiko is on its way out the programs are already being stopped.
+    public bool AnyRunning => !_quitting && _terminals.Values.Any(terminal => terminal.IsRunning);
 
     public void Show()
     {
@@ -277,12 +281,48 @@ sealed partial class TerminalHost
         Draw();
     }
 
-    /// Aiko is asked to quit while programs still run in the window (D-351): the window comes
-    /// forward with the question, and quit runs only after the person agrees.
-    public void AskToQuit(Action quit)
+    /// A step that stops every session: quit, restart for an update, remove Aiko or start over
+    /// (D-351). While programs run, the window comes forward with the question and the step runs
+    /// only after the person agrees. The open settings step aside so the question is seen.
+    public void AskToStop(StopReason reason, Action step) => Ask(reason, step, AnyRunning);
+
+    /// An environment goes: only its own running sessions are asked about, and after a yes they stop
+    /// and leave the list with it.
+    public void AskToRemoveEnvironment(string environment, Action step)
     {
-        _quitAfter = quit;
+        var running = _sessions.Sessions
+            .Where(session => session.Environment == environment
+                && _terminals.TryGetValue(session.Id, out var terminal) && terminal.IsRunning)
+            .Select(session => session.Id)
+            .ToList();
+
+        Ask(StopReason.RemoveEnvironment, () =>
+        {
+            foreach (var id in running)
+            {
+                CloseSession(id);
+            }
+
+            step();
+        }, running.Count > 0);
+    }
+
+    private void Ask(StopReason reason, Action step, bool atStake)
+    {
+        if (!atStake)
+        {
+            step();
+            return;
+        }
+
+        _stopping = (reason, step);
         _closing = null;
+        if (_settingsPanel is { } settings)
+        {
+            _settingsBeforeAsking = settings.CurrentPage;
+            CloseSettings();
+        }
+
         Activate();
         Draw();
     }
@@ -292,6 +332,19 @@ sealed partial class TerminalHost
     {
         _quitting = true;
         _window.Close();
+    }
+
+    /// An error repeats in the window (CrashGuard). The sessions live on (D-351): with programs
+    /// running the window only hides, and the tray or the card brings it back.
+    public void StepAside()
+    {
+        if (AnyRunning)
+        {
+            _window.Hide();
+            return;
+        }
+
+        Close();
     }
 
     /// The window again: from the tray or the card, also after it was hidden with programs running.
@@ -496,7 +549,7 @@ sealed partial class TerminalHost
         if (_terminals.TryGetValue(id, out var terminal) && terminal.IsRunning)
         {
             _closing = id;
-            _quitAfter = null;
+            _stopping = null;
             Draw();
             return;
         }
@@ -507,23 +560,50 @@ sealed partial class TerminalHost
     private void Answer(bool stop)
     {
         var id = _closing;
-        var quit = _quitAfter;
+        var stopping = _stopping;
+        var settingsPage = _settingsBeforeAsking;
         _closing = null;
-        _quitAfter = null;
+        _stopping = null;
+        _settingsBeforeAsking = null;
 
-        if (stop && quit is not null)
+        if (stop && stopping is { } agreed && !StopQuestion.EndsEverySession(agreed.Reason))
         {
-            // The window must not hide itself on the way out.
+            // One environment goes: its step stops its sessions, and the settings come back.
+            agreed.Step();
+            OpenSettings();
+        }
+        else if (stop && stopping is { } leaving)
+        {
+            // The window must not hide itself on the way out, and a program that ends now is not
+            // a session that ended by itself: it stays in terminal.json.
             _quitting = true;
-            quit();
+            if (leaving.Reason != StopReason.Quit)
+            {
+                EndAll();
+            }
+
+            leaving.Step();
         }
         else if (stop && id is not null)
         {
             CloseSession(id);
         }
+        else if (stopping is not null && settingsPage is not null)
+        {
+            OpenSettings(settingsPage);
+        }
         else
         {
             Draw();
+        }
+    }
+
+    /// Every program of the window ends now; quit closes the window and ends them on its own.
+    private void EndAll()
+    {
+        foreach (var terminal in _terminals.Values)
+        {
+            terminal.Close();
         }
     }
 
@@ -564,7 +644,9 @@ sealed partial class TerminalHost
     /// ended leaves the list.
     private void Ended(string id, int code)
     {
-        if (_sessions.Find(id) is not { } session)
+        // On the way out every program ends because Aiko ends it. The sessions stay as they are,
+        // and the next start brings them back (D-351).
+        if (_quitting || _sessions.Find(id) is not { } session)
         {
             return;
         }
@@ -794,8 +876,8 @@ sealed partial class TerminalHost
     {
         var session = _model.Session(_sessions);
 
-        AskView? ask = _quitAfter is not null
-            ? new AskView(Strings.TerminalQuitTitle, Strings.TerminalQuitBody, Strings.TerminalStopAndQuit, Strings.TerminalDontQuit)
+        AskView? ask = _stopping is { } stopping && StopQuestion.For(stopping.Reason) is var question
+            ? new AskView(question.Title, question.Body, question.Stop, question.Keep)
             : _closing is { } id && _sessions.Find(id) is { } closing
                 ? new AskView(string.Format(Strings.TerminalCloseTitle, closing.Name), Strings.TerminalCloseBody, Strings.TerminalStopAndClose, Strings.TerminalKeepOpen)
                 : null;

@@ -23,6 +23,14 @@ extension TerminalHost {
         state.onFirstRunFinished = { [weak self] in self?.finishFirstRun() }
         state.onClose = { [weak self] in self?.closeSettings() }
         state.onQuit = { [weak self] in self?.onQuitAsked?() }
+        state.askBeforeStopping = { [weak self] reason, step in
+            guard let self else { return step() }
+            self.askBefore(reason, step)
+        }
+        state.askBeforeRemovingEnvironment = { [weak self] name, step in
+            guard let self else { return step() }
+            self.askToRemoveEnvironment(name, step)
+        }
         state.onChanged = { [weak self] in
             self?.voice?.use(Store.settings())
             self?.onSettingsChanged?()

@@ -486,6 +486,16 @@ public static class Strings
             ["TerminalQuitBody"] = ("If you quit Aiko now, Claude Code and the command lines in its window stop.", "Если выйти из Aiko сейчас, Claude Code и командные строки в её окне остановятся."),
             ["TerminalStopAndQuit"] = ("Stop and quit", "Остановить и выйти"),
             ["TerminalDontQuit"] = ("Don’t quit", "Не выходить"),
+            ["TerminalRestartBody"] = ("If you restart Aiko now, Claude Code and the command lines in its window stop.", "Если перезапустить Aiko сейчас, Claude Code и командные строки в её окне остановятся."),
+            ["TerminalStopAndRestart"] = ("Stop and restart", "Остановить и перезапустить"),
+            ["TerminalDontRestart"] = ("Don’t restart", "Не перезапускать"),
+            ["TerminalRemoveBody"] = ("If you remove Aiko now, Claude Code and the command lines in its window stop.", "Если удалить Aiko сейчас, Claude Code и командные строки в её окне остановятся."),
+            ["TerminalStopAndRemove"] = ("Stop and remove", "Остановить и удалить"),
+            ["TerminalDontRemove"] = ("Don’t remove", "Не удалять"),
+            ["TerminalRemoveEnvironmentBody"] = ("If you remove this environment now, its Claude Code and command lines stop.", "Если удалить эту среду сейчас, её Claude Code и командные строки остановятся."),
+            ["TerminalStartOverBody"] = ("If you start over now, Claude Code and the command lines in this window stop.", "Если начать заново сейчас, Claude Code и командные строки в этом окне остановятся."),
+            ["TerminalStopAndStartOver"] = ("Stop and start over", "Остановить и начать заново"),
+            ["TerminalDontStartOver"] = ("Don’t start over", "Не начинать заново"),
             ["TerminalStopAndClose"] = ("Stop and close", "Остановить и закрыть"),
             ["TerminalKeepOpen"] = ("Keep open", "Не закрывать"),
             ["TerminalMinimize"] = ("Minimize", "Свернуть"),
@@ -1914,6 +1924,36 @@ public static class Strings
 
     /// Don’t quit
     public static string TerminalDontQuit => Get("TerminalDontQuit");
+
+    /// If you restart Aiko now, Claude Code and the command lines in its window stop.
+    public static string TerminalRestartBody => Get("TerminalRestartBody");
+
+    /// Stop and restart
+    public static string TerminalStopAndRestart => Get("TerminalStopAndRestart");
+
+    /// Don’t restart
+    public static string TerminalDontRestart => Get("TerminalDontRestart");
+
+    /// If you remove Aiko now, Claude Code and the command lines in its window stop.
+    public static string TerminalRemoveBody => Get("TerminalRemoveBody");
+
+    /// Stop and remove
+    public static string TerminalStopAndRemove => Get("TerminalStopAndRemove");
+
+    /// Don’t remove
+    public static string TerminalDontRemove => Get("TerminalDontRemove");
+
+    /// If you remove this environment now, its Claude Code and command lines stop.
+    public static string TerminalRemoveEnvironmentBody => Get("TerminalRemoveEnvironmentBody");
+
+    /// If you start over now, Claude Code and the command lines in this window stop.
+    public static string TerminalStartOverBody => Get("TerminalStartOverBody");
+
+    /// Stop and start over
+    public static string TerminalStopAndStartOver => Get("TerminalStopAndStartOver");
+
+    /// Don’t start over
+    public static string TerminalDontStartOver => Get("TerminalDontStartOver");
 
     /// Stop and close
     public static string TerminalStopAndClose => Get("TerminalStopAndClose");

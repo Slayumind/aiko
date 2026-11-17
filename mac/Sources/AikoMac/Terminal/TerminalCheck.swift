@@ -47,25 +47,44 @@ enum TerminalCheck {
     /// gone with it (D-351).
     private static func quitAndEnd(_ host: TerminalHost, _ session: String?) {
         var answered: Bool?
-        host.askToQuit { answered = $0 }
-        let asked = host.askingToQuitForCheck
+        host.askToStop(.quit) { answered = $0 }
+        let asked = host.askingForCheck == .quit
         host.answer(false)
-        let kept = answered == false && !host.askingToQuitForCheck && host.runningForCheck
+        let kept = answered == false && host.askingForCheck == nil && host.runningForCheck
 
         guard let session else {
             Log.write("self test: terminal window quit: no session to end")
             NSApp.terminate(nil)
             return
         }
+        // A step of the settings: the settings step aside so the question is seen, nothing runs
+        // before the answer, and "no" gives the same page back (D-351).
+        host.openSettings(at: .general)
+        var ran = 0
+        host.askBefore(.remove) { ran += 1 }
+        let settingsAsked = host.askingForCheck == .remove && !host.settingsOpenForCheck && ran == 0
+        host.answer(false)
+        let settingsBack = host.settingsPageForCheck == .general && ran == 0 && host.runningForCheck
+        host.closeSettings()
+
         let leader = host.leaderForCheck(session)
         host.typeForCheck(session, "sleep 300 &\r")
         after(0.8) {
+            // Its environment goes: only its sessions are asked about, and a yes closes them with
+            // all they started.
             let before = ProcessTree.members(of: leader).count
-            host.closeSession(session)
+            var removed = 0
+            host.askToRemoveEnvironment(host.environmentForCheck(session) ?? "") { removed += 1 }
+            let environmentAsked = host.askingForCheck == .removeEnvironment && removed == 0
+            host.answer(true)
             after(ProcessTree.grace + 0.5) {
                 let after = ProcessTree.members(of: leader).count
                 Log.write("self test: terminal window quit: asked=\(asked), don't quit kept=\(kept), "
                     + "session processes \(before) before close, \(after) after")
+                Log.write("self test: stop question: from the settings asked=\(settingsAsked), "
+                    + "no gives the page back=\(settingsBack), environment asked=\(environmentAsked), "
+                    + "removed once=\(removed == 1), session closed=\(host.closedForCheck(session)), "
+                    + "settings back=\(host.settingsOpenForCheck)")
                 NSApp.terminate(nil)
             }
         }

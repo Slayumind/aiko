@@ -263,7 +263,7 @@ struct GeneralPageView: View {
         // checks on its own, not whether the person may ask.
         case .check: check()
         case .install: install()
-        case .restart: UpdateInstall.relaunch()
+        case .restart: state.askBeforeStopping(.restart) { UpdateInstall.relaunch() }
         case .openDownloadPage: open(downloadUrl)
         case .none: break
         }

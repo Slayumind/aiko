@@ -493,6 +493,16 @@ public enum Strings {
         "TerminalQuitBody": ("If you quit Aiko now, Claude Code and the command lines in its window stop.", "Если выйти из Aiko сейчас, Claude Code и командные строки в её окне остановятся."),
         "TerminalStopAndQuit": ("Stop and quit", "Остановить и выйти"),
         "TerminalDontQuit": ("Don’t quit", "Не выходить"),
+        "TerminalRestartBody": ("If you restart Aiko now, Claude Code and the command lines in its window stop.", "Если перезапустить Aiko сейчас, Claude Code и командные строки в её окне остановятся."),
+        "TerminalStopAndRestart": ("Stop and restart", "Остановить и перезапустить"),
+        "TerminalDontRestart": ("Don’t restart", "Не перезапускать"),
+        "TerminalRemoveBody": ("If you remove Aiko now, Claude Code and the command lines in its window stop.", "Если удалить Aiko сейчас, Claude Code и командные строки в её окне остановятся."),
+        "TerminalStopAndRemove": ("Stop and remove", "Остановить и удалить"),
+        "TerminalDontRemove": ("Don’t remove", "Не удалять"),
+        "TerminalRemoveEnvironmentBody": ("If you remove this environment now, its Claude Code and command lines stop.", "Если удалить эту среду сейчас, её Claude Code и командные строки остановятся."),
+        "TerminalStartOverBody": ("If you start over now, Claude Code and the command lines in this window stop.", "Если начать заново сейчас, Claude Code и командные строки в этом окне остановятся."),
+        "TerminalStopAndStartOver": ("Stop and start over", "Остановить и начать заново"),
+        "TerminalDontStartOver": ("Don’t start over", "Не начинать заново"),
         "TerminalStopAndClose": ("Stop and close", "Остановить и закрыть"),
         "TerminalKeepOpen": ("Keep open", "Не закрывать"),
         "TerminalMinimize": ("Minimize", "Свернуть"),
@@ -1918,6 +1928,36 @@ public enum Strings {
 
     /// Don’t quit
     public static var terminalDontQuit: String { Strings.get("TerminalDontQuit") }
+
+    /// If you restart Aiko now, Claude Code and the command lines in its window stop.
+    public static var terminalRestartBody: String { Strings.get("TerminalRestartBody") }
+
+    /// Stop and restart
+    public static var terminalStopAndRestart: String { Strings.get("TerminalStopAndRestart") }
+
+    /// Don’t restart
+    public static var terminalDontRestart: String { Strings.get("TerminalDontRestart") }
+
+    /// If you remove Aiko now, Claude Code and the command lines in its window stop.
+    public static var terminalRemoveBody: String { Strings.get("TerminalRemoveBody") }
+
+    /// Stop and remove
+    public static var terminalStopAndRemove: String { Strings.get("TerminalStopAndRemove") }
+
+    /// Don’t remove
+    public static var terminalDontRemove: String { Strings.get("TerminalDontRemove") }
+
+    /// If you remove this environment now, its Claude Code and command lines stop.
+    public static var terminalRemoveEnvironmentBody: String { Strings.get("TerminalRemoveEnvironmentBody") }
+
+    /// If you start over now, Claude Code and the command lines in this window stop.
+    public static var terminalStartOverBody: String { Strings.get("TerminalStartOverBody") }
+
+    /// Stop and start over
+    public static var terminalStopAndStartOver: String { Strings.get("TerminalStopAndStartOver") }
+
+    /// Don’t start over
+    public static var terminalDontStartOver: String { Strings.get("TerminalDontStartOver") }
 
     /// Stop and close
     public static var terminalStopAndClose: String { Strings.get("TerminalStopAndClose") }

@@ -4,6 +4,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using Aiko.Core;
+using Aiko.Core.Terminal;
 
 namespace Aiko.App;
 
@@ -51,6 +52,13 @@ public partial class SettingsPanel : UserControl
     }
 
     public event Action? QuitRequested;
+
+    /// What the window does before a step that stops every session: it asks while programs run
+    /// and runs the step after a yes (D-351). With no window of sessions the step runs at once.
+    public Action<StopReason, Action> AskBeforeStopping { get; set; } = (_, step) => step();
+
+    /// The same before an environment goes: only its own sessions are asked about.
+    public Action<string, Action> AskBeforeRemovingEnvironment { get; set; } = (_, step) => step();
 
     /// Raised when the window has to come back in another language.
     public event Action? ReopenRequested;
@@ -319,6 +327,7 @@ public partial class SettingsPanel : UserControl
             var general = new GeneralPage();
             general.Saved += OnGeneralSaved;
             general.QuitRequested += () => QuitRequested?.Invoke();
+            general.RestartForUpdateRequested += () => AskBeforeStopping(StopReason.Restart, UpdateInstall.ApplyAndRestart);
             general.RestartRequested += StartOver;
             general.DeleteRequested += RemoveAiko;
             general.ReopenRequested += () => ReopenRequested?.Invoke();
@@ -365,6 +374,7 @@ public partial class SettingsPanel : UserControl
         var environment = new EnvironmentPage(_editor, folder);
         environment.ChecklistRequested += item => OpenChecklist(item);
         environment.Removed += ShowNoteOnFirstEnvironment;
+        environment.AskBeforeRemoving = (name, step) => AskBeforeRemovingEnvironment(name, step);
         return environment;
     }
 
@@ -387,25 +397,25 @@ public partial class SettingsPanel : UserControl
     }
 
     /// Everything Aiko set up goes, and the checklist opens from the start, here in the same window.
-    private void StartOver(bool recycleSecond)
+    private void StartOver(bool recycleSecond) => AskBeforeStopping(StopReason.StartOver, () =>
     {
         _checklist?.Close();
         _checklist = null;
 
         _editor.StartOver(recycleSecond);
         OpenChecklist();
-    }
+    });
 
     /// Aiko takes everything back and goes. Claude Code can take seconds to forget the plugins, so
     /// the work happens off the window's thread and the page waits with a line of its own.
-    private void RemoveAiko(bool keepMemory)
+    private void RemoveAiko(bool keepMemory) => AskBeforeStopping(StopReason.Remove, () =>
     {
         _checklist?.Close();
         _checklist = null;
 
         Task.Run(() => Uninstall.RemoveFromApp(keepMemory)).ContinueWith(
             _ => QuitRequested?.Invoke(), TaskScheduler.FromCurrentSynchronizationContext());
-    }
+    });
 
     private void ShowNoteOnFirstEnvironment(string note)
     {

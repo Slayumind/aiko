@@ -22,6 +22,7 @@ sealed record PtyLaunch(string CommandLine, string Folder, IReadOnlyDictionary<s
 sealed class PseudoConsole : ITerminalConnection, IDisposable
 {
     private const uint ExtendedStartupInfoPresent = 0x00080000;
+    private const int UseStdHandles = 0x00000100;
     private const uint CreateUnicodeEnvironment = 0x00000400;
     private const int PseudoConsoleAttribute = 0x00020016;
 
@@ -84,8 +85,12 @@ sealed class PseudoConsole : ITerminalConnection, IDisposable
             throw new Win32Exception(result);
         }
 
+        // Empty standard handles, given on purpose. Without the flag a program inherits the
+        // standard handles of Aiko when they are redirected (Aiko started by another program),
+        // and a shell then reads the end of that input and exits at once.
         var info = new StartupInfoEx();
         info.StartupInfo.cb = Marshal.SizeOf<StartupInfoEx>();
+        info.StartupInfo.Flags = UseStdHandles;
         var size = IntPtr.Zero;
         InitializeProcThreadAttributeList(IntPtr.Zero, 1, 0, ref size);
         info.AttributeList = Marshal.AllocHGlobal(size);
