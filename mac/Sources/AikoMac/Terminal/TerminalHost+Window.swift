@@ -31,6 +31,7 @@ extension TerminalHost {
 
         let bar = zoomed(TitleBarView(state: state))
         let list = zoomed(SessionListView(state: state))
+        listView = list
         self.bar = bar
         let strip = zoomed(HeaderStripView(state: state))
         strip.wantsLayer = true
@@ -53,6 +54,12 @@ extension TerminalHost {
         root.addSubview(stage)
         root.addSubview(cover)
         root.addSubview(bar)
+        let pop = zoomed(ListPopView(state: state))
+        pop.translatesAutoresizingMaskIntoConstraints = false
+        pop.isHidden = true
+        root.addSubview(pop)
+        listPop = pop
+        listPopWatch = state.$listPopOpen.sink { [weak pop] open in pop?.isHidden = !open }
 
         // The list keeps its width while its column slides, so it is cut, not squeezed.
         let stripHeight = strip.heightAnchor.constraint(equalToConstant: 0)
@@ -87,6 +94,10 @@ extension TerminalHost {
             cover.trailingAnchor.constraint(equalTo: stage.trailingAnchor),
             cover.topAnchor.constraint(equalTo: stage.topAnchor),
             cover.bottomAnchor.constraint(equalTo: stage.bottomAnchor),
+            pop.leadingAnchor.constraint(equalTo: root.leadingAnchor),
+            pop.trailingAnchor.constraint(equalTo: root.trailingAnchor),
+            pop.topAnchor.constraint(equalTo: root.topAnchor),
+            pop.bottomAnchor.constraint(equalTo: root.bottomAnchor),
         ])
         window.contentView = root
         self.window = window
@@ -134,6 +145,7 @@ extension TerminalHost {
         Tips.windowZoom = zoom
         zoomedSizes?.bar.constant = barHeight
         zoomedSizes?.list.constant = Self.listWidth * zoom
+        followWidth()
         placeList(animated: false)
         placeHeader(animated: false)
         let font = Self.terminalFont()
@@ -183,6 +195,18 @@ extension TerminalHost {
 
     func windowDidResize(_ notification: Notification) {
         if let window { placeWindowButtons(window) }
+        followWidth()
+    }
+
+    /// Below WindowPlace.narrowBelow, in points of the window before the zoom, as on Windows: the
+    /// list leaves its column for the pop-in under its button (D-376).
+    func followWidth() {
+        guard let width = window?.contentView?.bounds.width, width > 0 else { return }
+        let narrow = WindowPlace.isNarrow(Double(width / zoom))
+        guard narrow != state.narrow else { return }
+        state.narrow = narrow
+        state.listPopOpen = false
+        placeList(animated: false)
     }
 
     func windowDidExitFullScreen(_ notification: Notification) {
@@ -191,6 +215,11 @@ extension TerminalHost {
 
     /// The list button hides the column of sessions or shows it again (D-376), and remembers it.
     func toggleList() {
+        // A narrow window only opens or closes its list; the wide one remembers the column.
+        if state.narrow {
+            state.listPopOpen.toggle()
+            return
+        }
         var settings = Store.settings()
         settings.sessionListHidden.toggle()
         Store.saveSettings(settings)
@@ -226,7 +255,7 @@ extension TerminalHost {
     }
 
     func placeList(animated: Bool) {
-        let width = state.listHidden ? 0 : Self.listWidth * zoom
+        let width = state.listHidden || state.narrow ? 0 : Self.listWidth * zoom
         guard let constraint = listWidthConstraint, constraint.constant != width else { return }
         if animated && !Motion.reduceMotion {
             NSAnimationContext.runAnimationGroup { context in
@@ -237,6 +266,43 @@ extension TerminalHost {
             }
         } else {
             constraint.constant = width
+        }
+    }
+}
+
+extension TerminalHost {
+    /// The order of the sessions of a folder in the list, top down.
+    func rowOrderForCheck(_ folder: String) -> [String] {
+        state.groups.first { $0.folder == folder }?.rows.map(\.id) ?? []
+    }
+
+    /// A row pressed in its middle, moved down by the given points in small steps as a hand
+    /// would, and let go: real mouse events through the window, the way a person drags it.
+    func dragRowForCheck(_ id: String, down: CGFloat, letGo: Bool = true, done: @escaping @MainActor () -> Void) {
+        guard let window, let list = listView, let frame = state.rowFramesForCheck[id] else {
+            done()
+            return
+        }
+        let start = list.convert(NSPoint(x: frame.midX * zoom, y: frame.midY * zoom), to: nil)
+        func send(_ type: NSEvent.EventType, _ dy: CGFloat) {
+            // The window counts from the bottom, so down is a smaller y.
+            let point = NSPoint(x: start.x, y: start.y - dy)
+            if let event = NSEvent.mouseEvent(
+                with: type, location: point, modifierFlags: [], timestamp: ProcessInfo.processInfo.systemUptime,
+                windowNumber: window.windowNumber, context: nil, eventNumber: 0, clickCount: 1, pressure: 1) {
+                window.sendEvent(event)
+            }
+        }
+        send(.leftMouseDown, 0)
+        let steps = 12
+        for step in 1...steps {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.03 * Double(step)) {
+                send(.leftMouseDragged, down * CGFloat(step) / CGFloat(steps))
+            }
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.03 * Double(steps + 3)) {
+            if letGo { send(.leftMouseUp, down) }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { done() }
         }
     }
 }

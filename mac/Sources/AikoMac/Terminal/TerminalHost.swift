@@ -1,5 +1,6 @@
 import AikoKit
 import AppKit
+import Combine
 import SwiftTerm
 import SwiftUI
 
@@ -84,6 +85,9 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
     var zoomedSizes: (bar: NSLayoutConstraint, list: NSLayoutConstraint)?
     var bar: NSView?
 
+    /// The column of sessions, for a self test that drags a row in it.
+    var listView: NSView?
+
     /// The settings while they are open, and their panel over the list and the terminal (D-374).
     var settings: SettingsState?
     var settingsCover: NSView?
@@ -95,6 +99,11 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
 
     /// The messages in place of the terminal. Hidden while the terminal shows, so it takes no click.
     var stageCover: NSView?
+
+    /// The list of a narrow window under its button, over everything else; hidden while closed,
+    /// so it takes no click (D-376).
+    var listPop: NSView?
+    var listPopWatch: AnyCancellable?
 
     /// The words of every environment, as the menu bar icon has them: the active card of the header.
     let cardOf: () -> CardModel
@@ -128,6 +137,8 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
         super.init()
         state.onEnvironment = { [weak self] name in self?.toEnvironment(name) }
         state.onChoose = { [weak self] id in self?.choose(id) }
+        state.onMove = { [weak self] id, before in self?.move(id, before: before) }
+        state.onDragEnded = { [weak self] in self?.draw() }
         state.onNew = { [weak self] folder, kind in self?.start(in: folder, kind: kind) }
         state.onNewInOtherFolder = { [weak self] in self?.pickFolderQuickly() }
         state.onSearch = { [weak self] in self?.openSessionPalette() }
@@ -189,7 +200,15 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
         draw()
     }
 
+    /// A session moved in its folder (D-400); the order is kept in terminal.json.
+    func move(_ id: String, before: String?) {
+        sessions = sessions.moved(id, before: before)
+        save()
+        draw()
+    }
+
     func choose(_ id: String) {
+        state.listPopOpen = false
         model = model.toSession(id, sessions)
         draw()
     }
@@ -234,7 +253,10 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
         // The rows after the terminal is started: a session that starts now is running in its row.
         state.tabs = tabs()
         state.header = header()
-        state.groups = SessionRows.of(sessions, model.environment) { [weak self] id in self?.live(id) }
+        // A row being dragged keeps the list as it is until the copy has landed (D-400).
+        if state.dragging == nil {
+            state.groups = SessionRows.of(sessions, model.environment) { [weak self] id in self?.live(id) }
+        }
         stageCover?.isHidden = state.stage == .none
         for view in terminals.values where view !== shown {
             view.isHidden = true
@@ -465,6 +487,22 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
     var terminalCountForCheck: Int { terminals.count }
 
     var settingsOpenForCheck: Bool { settings != nil }
+
+    /// The width of the window in points, before the zoom is taken out.
+    var windowWidthForCheck: CGFloat { window?.frame.width ?? 0 }
+
+    /// The window at this width, as a drag of its edge would leave it.
+    func resizeForCheck(width: CGFloat) {
+        guard let window else { return }
+        var frame = window.frame
+        frame.size.width = width
+        window.setFrame(frame, display: true)
+        followWidth()
+    }
+
+    var listWidthForCheck: CGFloat { listWidthConstraint?.constant ?? -1 }
+
+    var listPopShownForCheck: Bool { listPop.map { !$0.isHidden } ?? false }
 
     /// The page of the open settings, or nil when they are closed.
     var settingsPageForCheck: SettingsPage? { settings?.page }
