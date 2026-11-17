@@ -14,7 +14,8 @@ enum TerminalCheck {
         try? FileManager.default.createDirectory(atPath: folder, withIntermediateDirectories: true)
 
         host.show()
-        host.startForCheck(in: folder)
+        let session = host.startForCheck(in: folder)
+        let loaderAtStart = host.loaderShownForCheck
         hold(host, ProcessInfo.processInfo.environment["AIKO_TRY_VIEW"])
         let seconds = Double(ProcessInfo.processInfo.environment["AIKO_TRY_SECONDS"] ?? "") ?? 2
         after(seconds) {
@@ -22,20 +23,67 @@ enum TerminalCheck {
                 + "menu bar icon=\(iconShown()), terminals=\(host.terminalCountForCheck), running=\(host.runningForCheck)")
             Log.write("self test: terminal window \(host.barForCheck)")
             Log.write("self test: terminal window \(host.rowsForCheck)")
+            Log.write("self test: terminal window loader: at the start \(loaderAtStart), after the first letter \(host.loaderShownForCheck)")
             host.showHeaderForCheck(true)
             Log.write("self test: terminal window \(host.headerForCheck)")
             host.showHeaderForCheck(false)
+            places(host)
             keys(host)
             tips()
+            copyWhole()
             after(0.5) {
                 host.closeForCheck()
                 after(0.5) {
                     Log.write("self test: terminal window closed, shown=\(host.isShown), in the Dock=\(NSApp.activationPolicy() == .regular), "
                         + "menu bar icon=\(iconShown()), terminals still running=\(host.runningForCheck)")
-                    NSApp.terminate(nil)
+                    quitAndEnd(host, session)
                 }
             }
         }
+    }
+
+    /// Quitting with a program running asks first, and "Don't quit" leaves everything as it was. A
+    /// closed session ends with all it started: a sleep run in the background of the command line is
+    /// gone with it (D-351).
+    private static func quitAndEnd(_ host: TerminalHost, _ session: String?) {
+        var answered: Bool?
+        host.askToQuit { answered = $0 }
+        let asked = host.askingToQuitForCheck
+        host.answer(false)
+        let kept = answered == false && !host.askingToQuitForCheck && host.runningForCheck
+
+        guard let session else {
+            Log.write("self test: terminal window quit: no session to end")
+            NSApp.terminate(nil)
+            return
+        }
+        let leader = host.leaderForCheck(session)
+        host.typeForCheck(session, "sleep 300 &\r")
+        after(0.8) {
+            let before = ProcessTree.members(of: leader).count
+            host.closeSession(session)
+            after(ProcessTree.grace + 0.5) {
+                let after = ProcessTree.members(of: leader).count
+                Log.write("self test: terminal window quit: asked=\(asked), don't quit kept=\(kept), "
+                    + "session processes \(before) before close, \(after) after")
+                NSApp.terminate(nil)
+            }
+        }
+    }
+
+    /// A saved place on a screen is where the window opens; a place no screen has any more gives the
+    /// middle of the first screen (WindowPlace.fit). The place is not written: the self test saves
+    /// nothing.
+    private static func places(_ host: TerminalHost) {
+        let saved = WindowPlace(left: 120, top: 140, width: 900, height: 600, maximized: false)
+        let kept = host.placeForCheck(saved)
+        let gone = host.placeForCheck(WindowPlace(left: 99_999, top: 99_999, width: 900, height: 600, maximized: false))
+        _ = host.placeForCheck(nil)
+        func describe(_ box: Box?) -> String {
+            box.map { "\(Int($0.x)),\(Int($0.y)) \(Int($0.width))x\(Int($0.height))" } ?? "none"
+        }
+        Log.write("self test: terminal window place: saved 120,140 900x600 opens at \(describe(kept)), "
+            + "a place off every screen opens at \(describe(gone))")
     }
 
     /// The keys of the window: each one opens what the table says, and the window is left as it was.
@@ -134,6 +182,34 @@ enum TerminalCheck {
                 editor.take([picture])
             }
         }
+    }
+
+    /// A paragraph Claude Code wrapped by the width is copied whole (D-371). Claude Code breaks its
+    /// text itself, with a line break and an indent under the start of the text, so a terminal of 40
+    /// columns with no program gets the rows the way Claude Code prints them; the selection of all
+    /// of them comes back as one line. The clipboard of the person is not touched.
+    private static func copyWhole() {
+        let columns = 40
+        let terminal = AikoTerminalView(frame: NSRect(x: 0, y: 0, width: 400, height: 200))
+        terminal.getTerminal().resize(cols: columns, rows: 10)
+
+        let words = (1...24).map { "word\($0)" }
+        var rows: [String] = []
+        var row = "● "
+        for word in words {
+            if row.count + word.count + 1 > columns, row.count > 2 {
+                rows.append(row)
+                row = "  "
+            }
+            row += (row.hasSuffix(" ") ? "" : " ") + word
+        }
+        rows.append(row)
+        terminal.feed(text: rows.joined(separator: "\r\n") + "\r\n")
+
+        terminal.selectAll(nil)
+        let copied = terminal.copiedText()?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        Log.write("self test: terminal window copy: \(rows.count) rows from Claude Code, "
+            + "copied whole=\(copied == "● " + words.joined(separator: " "))")
     }
 
     /// A short tip stands on one line, a long one wraps in 320 points, as on Windows.

@@ -30,6 +30,7 @@ extension TerminalHost {
     func askToClose(_ id: String) {
         if let terminal = terminals[id], terminal.process.running {
             closing = id
+            quitAfter = nil
             draw()
             return
         }
@@ -38,17 +39,44 @@ extension TerminalHost {
 
     func answer(_ stop: Bool) {
         let id = closing
+        let quit = quitAfter
         closing = nil
-        if stop, let id {
+        quitAfter = nil
+        if let quit {
+            quit(stop)
+            if !stop { draw() }
+        } else if stop, let id {
             closeSession(id)
         } else {
             draw()
         }
     }
 
+    /// A program still runs in the window.
+    var anyRunning: Bool { terminals.values.contains { $0.process.running } }
+
+    /// Aiko is asked to quit while programs still run in the window (D-351): the window comes
+    /// forward with the question, and the answer says whether Aiko quits.
+    func askToQuit(_ quit: @escaping (Bool) -> Void) {
+        quitAfter = quit
+        closing = nil
+        show()
+        draw()
+    }
+
+    /// Aiko quits: every program in the window ends with all it started.
+    func endAll() {
+        let running = terminals.values.filter { $0.process.running }
+        ProcessTree.endNow(running.map { $0.process.shellPid })
+        for terminal in running {
+            terminal.process.terminate()
+        }
+    }
+
     func closeSession(_ id: String) {
         if let terminal = terminals.removeValue(forKey: id) {
             if terminal.process.running {
+                ProcessTree.endSession(of: terminal.process.shellPid)
                 terminal.process.terminate()
             }
             terminal.removeFromSuperview()

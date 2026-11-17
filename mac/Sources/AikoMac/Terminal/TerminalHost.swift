@@ -46,6 +46,9 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
     /// The running session the person asked to close: the question stands until it is answered.
     var closing: String?
 
+    /// Aiko waits for the answer to "stop the sessions and quit?" (D-351).
+    var quitAfter: ((Bool) -> Void)?
+
     /// Set by a self test: nothing is written to terminal.json.
     var changingNothing = false
 
@@ -58,8 +61,18 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
     var holderWatch: NSObjectProtocol?
     var keyWatch: Any?
 
+    /// A zoom a self test puts on the window without writing the setting.
+    var zoomForCheck: CGFloat?
+
+    /// The loader over a terminal that has drawn nothing yet (D-368), and the terminal it is over.
+    var loader: NSView?
+    weak var loaderFor: NSView?
+
     /// The views that follow the zoom of the window, and the two sizes of AppKit that grow with it.
     var zoomFollowers: [(CGFloat) -> Bool] = []
+
+    /// For --try-terminal: whether each zoomed view that is still there sees its room.
+    var zoomChecks: [() -> Bool?] = []
     var zoomedSizes: (bar: NSLayoutConstraint, list: NSLayoutConstraint)?
     var bar: NSView?
 
@@ -148,6 +161,7 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
 
     /// The window goes; the programs in it go on.
     func windowShouldClose(_ sender: NSWindow) -> Bool {
+        rememberPlace()
         voice?.close()
         sender.orderOut(nil)
         NSApp.setActivationPolicy(.accessory)
@@ -217,6 +231,7 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
 
         guard let terminal = shown else {
             showShell(for: nil, terminal: nil)
+            showLoader(over: nil)
             return
         }
         if terminal.superview !== stage {
@@ -230,7 +245,9 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
             ])
         }
         terminal.isHidden = false
-        // After the terminal is in the stage: the blocks are tied to its place.
+        // After the terminal is in the stage: the loader and the blocks are tied to its place. The
+        // blocks come last, so a command line keeps its terminal out of sight under them.
+        showLoader(over: terminal as? AikoTerminalView)
         showShell(for: model.sessionId, terminal: terminal)
         focusOpenTerminal()
     }
@@ -238,6 +255,10 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
     /// What stands in place of the terminal: the question before closing first, then the empty
     /// environment, then why the chosen session has no terminal (D-421).
     func stageMessage() -> StageMessage {
+        if quitAfter != nil {
+            return .ask(title: Strings.terminalQuitTitle, body: Strings.terminalQuitBody,
+                        stop: Strings.terminalStopAndQuit, keep: Strings.terminalDontQuit)
+        }
         if let id = closing, let session = sessions.find(id) {
             return .ask(title: Strings.format(Strings.terminalCloseTitle, session.name), body: Strings.terminalCloseBody,
                         stop: Strings.terminalStopAndClose, keep: Strings.terminalKeepOpen)
@@ -354,7 +375,9 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
         terminals[session.id] = view
         sessions = sessions.markStarted(session.id).used(session.id, now: Self.now())
         save()
-        Log.write("terminal: \(session.kind == .shell ? "a command line" : "Claude Code") started for \(session.environment)")
+        TerminalLog.started(
+            environment: session.environment, shell: session.kind == .shell,
+            resumed: plan.arguments.contains("--resume"))
         return view
     }
 
@@ -382,7 +405,8 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
         Task { @MainActor [weak self] in
             guard let self, let id = self.terminals.first(where: { $0.value === source })?.key,
                   let session = self.sessions.find(id) else { return }
-            Log.write("terminal: a program ended with \(exitCode.map(String.init) ?? "no code")")
+            TerminalLog.exited(
+                environment: session.environment, shell: session.kind == .shell, exitCode: exitCode.map(Int.init))
             if session.kind == .shell {
                 self.closeSession(id)
                 return
@@ -427,6 +451,16 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
 
     var settingsOpenForCheck: Bool { settings != nil }
 
+    /// Whether the loader stands over the terminal now.
+    var loaderShownForCheck: Bool { loader.map { !$0.isHidden && $0.superview != nil } ?? false }
+
+    /// Puts the window where a saved place says and tells where it stands, from the top left.
+    func placeForCheck(_ saved: WindowPlace?) -> Box? {
+        guard let window else { return nil }
+        place(window, saved)
+        return Screens.box(window.frame)
+    }
+
     var settingsPanelForCheck: String {
         guard let panel = settingsCover else { return "none" }
         return "frame \(Int(panel.frame.width))x\(Int(panel.frame.height)), "
@@ -455,7 +489,8 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
         let barFrame = bar.convert(bar.bounds, to: nil)
         let button = close.convert(close.bounds, to: nil)
         let top = content.frame.height
-        return "zoom \(Int((zoom * 100).rounded())) %, bar \(Int(top - barFrame.maxY))..\(Int(top - barFrame.minY)), "
+        let rooms = zoomChecks.compactMap { $0() }
+        return "zoom \(Int((zoom * 100).rounded())) %, views seeing their room \(rooms.filter { $0 }.count) of \(rooms.count), bar \(Int(top - barFrame.maxY))..\(Int(top - barFrame.minY)), "
             + "close button middle \(Int(top - button.midY)), list \(Int(listWidthConstraint?.constant ?? -1))"
     }
 
@@ -466,6 +501,15 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
     }
 
     var runningForCheck: Bool { terminals.values.contains { $0.process.running } }
+
+    /// The session leader of the program of a session, and a line typed into it, for --try-terminal.
+    func leaderForCheck(_ id: String) -> pid_t { terminals[id]?.process.shellPid ?? 0 }
+
+    func typeForCheck(_ id: String, _ line: String) {
+        terminals[id]?.send(txt: line)
+    }
+
+    var askingToQuitForCheck: Bool { state.stage == stageMessage() && quitAfter != nil }
 
     // ---- small parts ----
 
@@ -495,10 +539,22 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
         Int64(Date().timeIntervalSince1970)
     }
 
+    /// The room of every screen without the menu bar and the Dock, counted from the top left as the
+    /// core counts it (Screens).
     static func screens() -> [ScreenArea] {
         NSScreen.screens.map {
-            ScreenArea(left: $0.visibleFrame.minX, top: $0.visibleFrame.minY,
-                       width: $0.visibleFrame.width, height: $0.visibleFrame.height)
+            let box = Screens.box($0.visibleFrame)
+            return ScreenArea(left: box.x, top: box.y, width: box.width, height: box.height)
         }
+    }
+
+    /// The window remembers where it stood, as on Windows: closed or with Aiko quitting, it opens
+    /// there again, on any screen that still has it.
+    func rememberPlace() {
+        guard let window, window.isVisible else { return }
+        let box = Screens.box(window.frame)
+        sessions = sessions.placed(WindowPlace(
+            left: box.x, top: box.y, width: box.width, height: box.height, maximized: window.isZoomed))
+        save()
     }
 }

@@ -9,11 +9,10 @@ extension TerminalHost {
     // ---- the window ----
 
     func makeWindow() -> NSWindow {
-        let place = WindowPlace.fit(nil, Self.screens())
         // The bar of Aiko is the title bar (D-392): the title of the system is see-through and empty,
         // and its three buttons stand in the middle of the bar.
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: place.width, height: place.height),
+            contentRect: NSRect(x: 0, y: 0, width: WindowPlace.defaultWidth, height: WindowPlace.defaultHeight),
             styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
             backing: .buffered,
             defer: false)
@@ -24,7 +23,7 @@ extension TerminalHost {
         window.backgroundColor = Theme.nsSurface
         window.isReleasedWhenClosed = false
         window.delegate = self
-        window.center()
+        place(window, sessions.window)
 
         let settings = Store.settings()
         state.headerOpen = settings.headerOpen
@@ -97,6 +96,16 @@ extension TerminalHost {
         return window
     }
 
+    /// Where the window stood when it was closed last, while that place is still on a screen; the
+    /// middle of the first screen otherwise (WindowPlace.fit, the same rule as on Windows).
+    func place(_ window: NSWindow, _ saved: WindowPlace?) {
+        let place = WindowPlace.fit(saved, Self.screens())
+        window.setFrame(Screens.rect(Box(place.left, place.top, place.width, place.height)), display: false)
+        if place.maximized != window.isZoomed {
+            window.zoom(nil)
+        }
+    }
+
     /// A SwiftUI part of the window at the zoom of the window: it follows every change of the zoom.
     func zoomed<Content: View>(_ view: Content) -> ZoomedHostingView<Content> {
         let host = ZoomedHostingView(rootView: view)
@@ -106,11 +115,12 @@ extension TerminalHost {
             host?.zoom = zoom
             return host != nil
         }
+        zoomChecks.append { [weak host] in host.map { $0.seesItsRoomForCheck } }
         return host
     }
 
     /// The zoom of the window from the settings: 1.15 for 115 % (D-384).
-    var zoom: CGFloat { CGFloat(WindowZoom.scale(Store.settings().windowZoom)) }
+    var zoom: CGFloat { zoomForCheck ?? CGFloat(WindowZoom.scale(Store.settings().windowZoom)) }
 
     /// The height of the bar in whole points. AppKit keeps the title of the system on whole points,
     /// and a height of 50.6 was put back and set again for ever.

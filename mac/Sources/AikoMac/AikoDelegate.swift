@@ -50,6 +50,11 @@ final class AikoDelegate: NSObject, NSApplicationDelegate {
         return nil
     }
 
+    /// With programs running in the window Aiko asks first and quits only after a yes (D-351).
+    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        shell.mayQuit { yes in sender.reply(toApplicationShouldTerminate: yes) }
+    }
+
     func applicationWillTerminate(_ notification: Notification) {
         shell.stop()
     }

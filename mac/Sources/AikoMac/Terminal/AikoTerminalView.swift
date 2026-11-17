@@ -15,9 +15,20 @@ final class AikoTerminalView: LocalProcessTerminalView {
     /// Output of the program, as it came: a command line cuts it into blocks.
     var received: ((ArraySlice<UInt8>) -> Void)?
 
+    /// Whether the program has drawn a letter yet (D-368): until then the window shows the loader.
+    /// A letter is anything but the sequences that clear, move the cursor, colour or name the window.
+    private(set) var drawn = false
+
+    /// The first letter came.
+    var drewFirst: (() -> Void)?
+
     override func dataReceived(slice: ArraySlice<UInt8>) {
         super.dataReceived(slice: slice)
         received?(slice)
+        if !drawn, TerminalScreen.hasText(String(decoding: slice, as: UTF8.self)) {
+            drawn = true
+            drewFirst?()
+        }
     }
 
     /// A click ended in the terminal: a selection may have been made there.
@@ -43,6 +54,20 @@ final class AikoTerminalView: LocalProcessTerminalView {
         } else {
             super.paste(sender)
         }
+    }
+
+    /// Cmd+C or Edit > Copy: the rows the program wrapped by the width are joined again, so a
+    /// paragraph comes out whole (D-371), as Ctrl+C does on Windows.
+    override func copy(_ sender: Any) {
+        guard let text = copiedText() else { return }
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(text, forType: .string)
+    }
+
+    /// The selection ready for the clipboard, or nil when nothing is selected.
+    func copiedText() -> String? {
+        guard let text = getSelection(), !text.isEmpty else { return nil }
+        return TerminalCopy.unwrap(text, columns: getTerminal().cols)
     }
 
     override func send(source: TerminalView, data: ArraySlice<UInt8>) {
