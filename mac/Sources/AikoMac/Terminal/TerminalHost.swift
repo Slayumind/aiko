@@ -46,8 +46,16 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
     /// The running session the person asked to close: the question stands until it is answered.
     var closing: String?
 
-    /// Aiko waits for the answer to "stop the sessions and quit?" (D-351).
-    var quitAfter: ((Bool) -> Void)?
+    /// A step that stops sessions waits for the person's answer (D-351): why, and what to do
+    /// with the answer.
+    var stopping: (reason: StopReason, answer: (Bool) -> Void)?
+
+    /// The page of the settings that was open when the question came. A no opens it again.
+    var settingsBeforeAsking: SettingsPage?
+
+    /// Aiko is on its way out: the programs end because Aiko ends them, and the sessions stay as
+    /// they are for the next start.
+    var quitting = false
 
     /// Set by a self test: nothing is written to terminal.json.
     var changingNothing = false
@@ -255,9 +263,9 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
     /// What stands in place of the terminal: the question before closing first, then the empty
     /// environment, then why the chosen session has no terminal (D-421).
     func stageMessage() -> StageMessage {
-        if quitAfter != nil {
-            return .ask(title: Strings.terminalQuitTitle, body: Strings.terminalQuitBody,
-                        stop: Strings.terminalStopAndQuit, keep: Strings.terminalDontQuit)
+        if let stopping {
+            let question = StopQuestion.of(stopping.reason)
+            return .ask(title: question.title, body: question.body, stop: question.stop, keep: question.keep)
         }
         if let id = closing, let session = sessions.find(id) {
             return .ask(title: Strings.format(Strings.terminalCloseTitle, session.name), body: Strings.terminalCloseBody,
@@ -403,7 +411,8 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
     /// ended leaves the list.
     nonisolated func processTerminated(source: TerminalView, exitCode: Int32?) {
         Task { @MainActor [weak self] in
-            guard let self, let id = self.terminals.first(where: { $0.value === source })?.key,
+            // On the way out every program ends because Aiko ends it: the list stays as it is.
+            guard let self, !self.quitting, let id = self.terminals.first(where: { $0.value === source })?.key,
                   let session = self.sessions.find(id) else { return }
             TerminalLog.exited(
                 environment: session.environment, shell: session.kind == .shell, exitCode: exitCode.map(Int.init))
@@ -450,6 +459,15 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
     var terminalCountForCheck: Int { terminals.count }
 
     var settingsOpenForCheck: Bool { settings != nil }
+
+    /// The page of the open settings, or nil when they are closed.
+    var settingsPageForCheck: SettingsPage? { settings?.page }
+
+    /// The environment of a session, for a question about it.
+    func environmentForCheck(_ id: String) -> String? { sessions.find(id)?.environment }
+
+    /// Whether the session is in the list and closed.
+    func closedForCheck(_ id: String) -> Bool { sessions.find(id)?.closed == true }
 
     /// Whether the loader stands over the terminal now.
     var loaderShownForCheck: Bool { loader.map { !$0.isHidden && $0.superview != nil } ?? false }
@@ -509,7 +527,8 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
         terminals[id]?.send(txt: line)
     }
 
-    var askingToQuitForCheck: Bool { state.stage == stageMessage() && quitAfter != nil }
+    /// What the window asks about now, when the question is on the stage.
+    var askingForCheck: StopReason? { state.stage == stageMessage() ? stopping?.reason : nil }
 
     // ---- small parts ----
 

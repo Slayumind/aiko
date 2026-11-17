@@ -51,8 +51,25 @@ final class AikoDelegate: NSObject, NSApplicationDelegate {
     }
 
     /// With programs running in the window Aiko asks first and quits only after a yes (D-351).
+    /// The end of the Mac session does not wait for that answer, as the end of a Windows session
+    /// does not: log out, restart and shut down quit at once.
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-        shell.mayQuit { yes in sender.reply(toApplicationShouldTerminate: yes) }
+        if Self.macSessionEnds() {
+            shell.endForSessionEnd()
+            return .terminateNow
+        }
+        return shell.mayQuit { yes in sender.reply(toApplicationShouldTerminate: yes) }
+    }
+
+    /// The quit event of log out, restart or shut down names its reason.
+    private static func macSessionEnds() -> Bool {
+        guard let event = NSAppleEventManager.shared().currentAppleEvent,
+              let reason = event.attributeDescriptor(forKeyword: code("why?"))?.enumCodeValue else { return false }
+        return ["logo", "rlgo", "rrst", "rest", "rsdn", "shut"].map(code).contains(reason)
+    }
+
+    private static func code(_ text: String) -> OSType {
+        text.utf8.reduce(0) { $0 << 8 | OSType($1) }
     }
 
     func applicationWillTerminate(_ notification: Notification) {

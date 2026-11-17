@@ -196,6 +196,13 @@ final class SettingsState: ObservableObject {
 
     var onClose: () -> Void = {}
     var onQuit: () -> Void = {}
+
+    /// What the window does before a step that stops every session: it asks while programs run
+    /// and runs the step after a yes (D-351). With no sessions the step runs at once.
+    var askBeforeStopping: (StopReason, @escaping () -> Void) -> Void = { _, step in step() }
+
+    /// The same before an environment goes: only its own sessions are asked about.
+    var askBeforeRemovingEnvironment: (String, @escaping () -> Void) -> Void = { _, step in step() }
     var onChanged: () -> Void = {}
     var onReopen: () -> Void = {}
 
@@ -366,16 +373,24 @@ final class SettingsState: ObservableObject {
 
     /// Everything Aiko set up goes, and the checklist opens from the start, in this same window.
     func startOver(trashSecond: Bool) {
-        checklist?.close()
-        checklist = nil
-        editor.startOver(trashSecond: trashSecond)
-        openChecklist()
+        askBeforeStopping(.startOver) { [weak self] in
+            guard let self else { return }
+            self.checklist?.close()
+            self.checklist = nil
+            self.editor.startOver(trashSecond: trashSecond)
+            self.openChecklist()
+        }
     }
 
     /// Aiko takes everything back and goes. Claude Code may take seconds to answer, so the work
     /// happens off this thread and the page waits with a line; then Aiko quits, whether or not it
     /// managed to put itself in the Bin. keepMemory is the person's answer on the page.
     func deleteAiko(keepMemory: Bool) {
+        guard !deleting else { return }
+        askBeforeStopping(.remove) { [weak self] in self?.removeEverything(keepMemory: keepMemory) }
+    }
+
+    private func removeEverything(keepMemory: Bool) {
         guard !deleting else { return }
         deleting = true
         checklist?.close()

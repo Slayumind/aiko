@@ -30,7 +30,7 @@ extension TerminalHost {
     func askToClose(_ id: String) {
         if let terminal = terminals[id], terminal.process.running {
             closing = id
-            quitAfter = nil
+            stopping = nil
             draw()
             return
         }
@@ -39,12 +39,16 @@ extension TerminalHost {
 
     func answer(_ stop: Bool) {
         let id = closing
-        let quit = quitAfter
+        let asked = stopping
+        let page = settingsBeforeAsking
         closing = nil
-        quitAfter = nil
-        if let quit {
-            quit(stop)
-            if !stop { draw() }
+        stopping = nil
+        settingsBeforeAsking = nil
+        if let asked {
+            asked.answer(stop)
+            if !stop {
+                if let page { openSettings(at: page) } else { draw() }
+            }
         } else if stop, let id {
             closeSession(id)
         } else {
@@ -52,19 +56,69 @@ extension TerminalHost {
         }
     }
 
-    /// A program still runs in the window.
-    var anyRunning: Bool { terminals.values.contains { $0.process.running } }
+    /// A program still runs in the window and the person could lose it. Once Aiko is on its way
+    /// out the programs are already being stopped.
+    var anyRunning: Bool { !quitting && terminals.values.contains { $0.process.running } }
 
     /// Aiko is asked to quit while programs still run in the window (D-351): the window comes
     /// forward with the question, and the answer says whether Aiko quits.
-    func askToQuit(_ quit: @escaping (Bool) -> Void) {
-        quitAfter = quit
+    func askToStop(_ reason: StopReason, _ answer: @escaping (Bool) -> Void) {
+        stopping = (reason, answer)
         closing = nil
+        if let open = settings {
+            settingsBeforeAsking = open.page
+            closeSettings()
+        }
         show()
         draw()
     }
 
-    /// Aiko quits: every program in the window ends with all it started.
+    /// A step of the settings that stops every session: restart for an update, remove Aiko, start
+    /// over. While programs run the window asks first; after a yes they end and the step runs.
+    /// Start over keeps Aiko, so the settings come back with the checklist from the start.
+    func askBefore(_ reason: StopReason, _ step: @escaping () -> Void) {
+        guard anyRunning else {
+            step()
+            return
+        }
+        askToStop(reason) { [weak self] yes in
+            guard let self, yes else { return }
+            if reason == .startOver {
+                self.endAll()
+                step()
+                self.openSettings(at: nil)
+            } else {
+                self.endForQuit()
+                step()
+            }
+        }
+    }
+
+    /// An environment goes: only its own running sessions are asked about, and after a yes they
+    /// stop and close with it.
+    func askToRemoveEnvironment(_ name: String, _ step: @escaping () -> Void) {
+        let running = sessions.sessions
+            .filter { $0.environment == name && terminals[$0.id]?.process.running == true }
+            .map(\.id)
+        guard !running.isEmpty else {
+            step()
+            return
+        }
+        askToStop(.removeEnvironment) { [weak self] yes in
+            guard let self, yes else { return }
+            running.forEach(self.closeSession)
+            step()
+            self.openSettings(at: nil)
+        }
+    }
+
+    /// Aiko leaves: what ends now stays in the list for the next start.
+    func endForQuit() {
+        quitting = true
+        endAll()
+    }
+
+    /// Every program in the window ends with all it started.
     func endAll() {
         let running = terminals.values.filter { $0.process.running }
         ProcessTree.endNow(running.map { $0.process.shellPid })

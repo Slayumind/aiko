@@ -362,9 +362,13 @@ struct EnvironmentPageView: View {
     private func remove(_ name: String) {
         waiter?.stop()
         state.stopEditing()
-        let trashed = state.editor.remove(name, toTrash: toTrash)
-        state.showNoteOnFirstEnvironment(
-            Strings.format(trashed ? Strings.environmentRemovedToTrash : Strings.environmentRemoved, name))
+        let toTrash = toTrash
+        let state = state
+        state.askBeforeRemovingEnvironment(name) {
+            let trashed = state.editor.remove(name, toTrash: toTrash)
+            state.showNoteOnFirstEnvironment(
+                Strings.format(trashed ? Strings.environmentRemovedToTrash : Strings.environmentRemoved, name))
+        }
     }
 
     /// The folder the way people read it: ~/.claude-work rather than the whole path.
