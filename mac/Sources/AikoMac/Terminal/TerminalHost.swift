@@ -61,6 +61,10 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
     var holderWatch: NSObjectProtocol?
     var keyWatch: Any?
 
+    /// The loader over a terminal that has drawn nothing yet (D-368), and the terminal it is over.
+    var loader: NSView?
+    weak var loaderFor: NSView?
+
     /// The views that follow the zoom of the window, and the two sizes of AppKit that grow with it.
     var zoomFollowers: [(CGFloat) -> Bool] = []
 
@@ -224,6 +228,7 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
 
         guard let terminal = shown else {
             showShell(for: nil, terminal: nil)
+            showLoader(over: nil)
             return
         }
         if terminal.superview !== stage {
@@ -237,7 +242,9 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
             ])
         }
         terminal.isHidden = false
-        // After the terminal is in the stage: the blocks are tied to its place.
+        // After the terminal is in the stage: the loader and the blocks are tied to its place. The
+        // blocks come last, so a command line keeps its terminal out of sight under them.
+        showLoader(over: terminal as? AikoTerminalView)
         showShell(for: model.sessionId, terminal: terminal)
         focusOpenTerminal()
     }
@@ -440,6 +447,9 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
     var terminalCountForCheck: Int { terminals.count }
 
     var settingsOpenForCheck: Bool { settings != nil }
+
+    /// Whether the loader stands over the terminal now.
+    var loaderShownForCheck: Bool { loader.map { !$0.isHidden && $0.superview != nil } ?? false }
 
     /// Puts the window where a saved place says and tells where it stands, from the top left.
     func placeForCheck(_ saved: WindowPlace?) -> Box? {

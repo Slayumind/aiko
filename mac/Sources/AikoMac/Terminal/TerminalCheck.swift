@@ -15,6 +15,7 @@ enum TerminalCheck {
 
         host.show()
         let session = host.startForCheck(in: folder)
+        let loaderAtStart = host.loaderShownForCheck
         hold(host, ProcessInfo.processInfo.environment["AIKO_TRY_VIEW"])
         let seconds = Double(ProcessInfo.processInfo.environment["AIKO_TRY_SECONDS"] ?? "") ?? 2
         after(seconds) {
@@ -22,6 +23,7 @@ enum TerminalCheck {
                 + "menu bar icon=\(iconShown()), terminals=\(host.terminalCountForCheck), running=\(host.runningForCheck)")
             Log.write("self test: terminal window \(host.barForCheck)")
             Log.write("self test: terminal window \(host.rowsForCheck)")
+            Log.write("self test: terminal window loader: at the start \(loaderAtStart), after the first letter \(host.loaderShownForCheck)")
             host.showHeaderForCheck(true)
             Log.write("self test: terminal window \(host.headerForCheck)")
             host.showHeaderForCheck(false)
