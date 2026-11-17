@@ -154,6 +154,7 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
 
     /// The window goes; the programs in it go on.
     func windowShouldClose(_ sender: NSWindow) -> Bool {
+        rememberPlace()
         voice?.close()
         sender.orderOut(nil)
         NSApp.setActivationPolicy(.accessory)
@@ -440,6 +441,13 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
 
     var settingsOpenForCheck: Bool { settings != nil }
 
+    /// Puts the window where a saved place says and tells where it stands, from the top left.
+    func placeForCheck(_ saved: WindowPlace?) -> Box? {
+        guard let window else { return nil }
+        place(window, saved)
+        return Screens.box(window.frame)
+    }
+
     var settingsPanelForCheck: String {
         guard let panel = settingsCover else { return "none" }
         return "frame \(Int(panel.frame.width))x\(Int(panel.frame.height)), "
@@ -518,10 +526,22 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
         Int64(Date().timeIntervalSince1970)
     }
 
+    /// The room of every screen without the menu bar and the Dock, counted from the top left as the
+    /// core counts it (Screens).
     static func screens() -> [ScreenArea] {
         NSScreen.screens.map {
-            ScreenArea(left: $0.visibleFrame.minX, top: $0.visibleFrame.minY,
-                       width: $0.visibleFrame.width, height: $0.visibleFrame.height)
+            let box = Screens.box($0.visibleFrame)
+            return ScreenArea(left: box.x, top: box.y, width: box.width, height: box.height)
         }
+    }
+
+    /// The window remembers where it stood, as on Windows: closed or with Aiko quitting, it opens
+    /// there again, on any screen that still has it.
+    func rememberPlace() {
+        guard let window, window.isVisible else { return }
+        let box = Screens.box(window.frame)
+        sessions = sessions.placed(WindowPlace(
+            left: box.x, top: box.y, width: box.width, height: box.height, maximized: window.isZoomed))
+        save()
     }
 }

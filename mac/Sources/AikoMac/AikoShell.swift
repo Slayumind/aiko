@@ -156,6 +156,7 @@ final class AikoShell {
     }
 
     func stop() {
+        terminal.rememberPlace()
         watch?.stop()
         updates?.stop()
         mood?.stop()

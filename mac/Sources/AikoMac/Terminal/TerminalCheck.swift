@@ -25,6 +25,7 @@ enum TerminalCheck {
             host.showHeaderForCheck(true)
             Log.write("self test: terminal window \(host.headerForCheck)")
             host.showHeaderForCheck(false)
+            places(host)
             keys(host)
             tips()
             copyWhole()
@@ -66,6 +67,21 @@ enum TerminalCheck {
                 NSApp.terminate(nil)
             }
         }
+    }
+
+    /// A saved place on a screen is where the window opens; a place no screen has any more gives the
+    /// middle of the first screen (WindowPlace.fit). The place is not written: the self test saves
+    /// nothing.
+    private static func places(_ host: TerminalHost) {
+        let saved = WindowPlace(left: 120, top: 140, width: 900, height: 600, maximized: false)
+        let kept = host.placeForCheck(saved)
+        let gone = host.placeForCheck(WindowPlace(left: 99_999, top: 99_999, width: 900, height: 600, maximized: false))
+        _ = host.placeForCheck(nil)
+        func describe(_ box: Box?) -> String {
+            box.map { "\(Int($0.x)),\(Int($0.y)) \(Int($0.width))x\(Int($0.height))" } ?? "none"
+        }
+        Log.write("self test: terminal window place: saved 120,140 900x600 opens at \(describe(kept)), "
+            + "a place off every screen opens at \(describe(gone))")
     }
 
     /// The keys of the window: each one opens what the table says, and the window is left as it was.
