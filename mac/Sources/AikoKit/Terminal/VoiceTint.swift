@@ -3,6 +3,7 @@ import Foundation
 /// Gives the voice of the personality its colour in the terminal (D-457). The twin of VoiceTint.cs.
 public final class VoiceTint {
     private static let escape: Unicode.Scalar = "\u{1b}"
+    private static let replyDot: Unicode.Scalar = "●"
     private static let mostHeld = 128
 
     private let colour: String
@@ -19,6 +20,17 @@ public final class VoiceTint {
         var result = String.UnicodeScalarView()
         var at = 0
         while at < text.count {
+            if text[at] == Self.replyDot {
+                let opensVoice = Self.opensVoice(text, at + 1)
+                if opensVoice == nil, text.count - at <= Self.mostHeld {
+                    held = Array(text[at...])
+                    return String(result)
+                }
+                result.append(opensVoice == true ? " " : Self.replyDot)
+                at += 1
+                continue
+            }
+
             if text[at] != Self.escape {
                 result.append(text[at])
                 at += 1
@@ -46,6 +58,36 @@ public final class VoiceTint {
             at = end + 1
         }
         return String(result)
+    }
+
+    /// Whether italics start right after the dot, with only a move along the line and styles between;
+    /// nil when the output stops before that is known.
+    private static func opensVoice(_ text: [Unicode.Scalar], _ start: Int) -> Bool? {
+        var at = start
+        while true {
+            guard at < text.count else { return nil }
+            guard text[at] == escape else { return false }
+            guard let end = sequenceEnd(text, at) else { return nil }
+            guard text[at + 1] == "[", text[end] == "G" || text[end] == "m" else { return false }
+            if text[end] == "m", hasItalics(text[(at + 2)..<end]) { return true }
+            at = end + 1
+        }
+    }
+
+    private static func hasItalics(_ parameters: ArraySlice<Unicode.Scalar>) -> Bool {
+        var view = String.UnicodeScalarView()
+        view.append(contentsOf: parameters)
+        let codes = String(view).split(separator: ";", omittingEmptySubsequences: false).map(String.init)
+        var i = 0
+        while i < codes.count {
+            let code = String(codes[i].drop { $0 == "0" })
+            if code == "3" { return true }
+            if code == "38" || code == "48" || code == "58", i + 1 < codes.count {
+                i += codes[i + 1] == "5" ? 2 : codes[i + 1] == "2" ? 4 : 0
+            }
+            i += 1
+        }
+        return false
     }
 
     /// The last character of the sequence at this place; nil when it has not all come yet.

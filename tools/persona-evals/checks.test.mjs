@@ -5,7 +5,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { ALLOWED_JAPANESE, foreignJapanese, gameName, problems, quietProblems } from "./checks.mjs";
+import { ALLOWED_JAPANESE, foreignJapanese, gameName, openingProblem, problems, quietProblems } from "./checks.mjs";
 
 const kinds = (text, mode) => problems(text, mode).map((p) => p.split(":")[0]);
 
@@ -92,4 +92,10 @@ test("a long reply may keep character only in its last paragraph", () => {
   const long = "1. Сделайте бэкап.\n\n2. Обновите расширения.\n\nよし, удачи с миграцией!";
   assert.deepEqual(quietProblems(long, "Musou"), []);
   assert.deepEqual(quietProblems("やった, начнём.\n\n1. Сделайте бэкап.\n\nУдачи!", "Musou").map((p) => p.split(":")[0]), ["japanese"]);
+});
+
+test("a reply in the voice opens with an italic face of the set", () => {
+  assert.equal(openingProblem("*(^▽^) やった!*\n\nГотово."), null);
+  assert.match(openingProblem("(^_^) привет"), /no italic/);
+  assert.match(openingProblem("*(o_O) привет*"), /no face/);
 });

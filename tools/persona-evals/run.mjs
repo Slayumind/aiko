@@ -17,7 +17,7 @@ import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, writeFil
 import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { gameName, problems, quietProblems } from "./checks.mjs";
+import { gameName, openingProblem, problems, quietProblems } from "./checks.mjs";
 
 const CASES = [
   { id: "chat", check: "voice", q: "Привет! Как думаешь, стоит ли делать инвентарь в моей roguelike на сетке, как в Diablo? Ответь коротко." },
@@ -144,6 +144,13 @@ function judge(testCase, temperament, texts) {
       list = problems(text, "silent");
     }
     if (part === "reply" && testCase.noGames && gameName(text)) list = [...list, `game: ${gameName(text)}`];
+    // Bright and Musou always open with the voice; Normal does in most replies, so only what opens in
+    // italics is held to the set of faces there.
+    if (part === "reply" && testCase.check === "voice" && temperament !== "Quiet"
+      && (temperament !== "Normal" || /^[*_]/.test(text.trim()))) {
+      const opening = openingProblem(text);
+      if (opening) list = [...list, opening];
+    }
     if (list.length) found[part] = list;
   }
   return found;

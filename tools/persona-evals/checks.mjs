@@ -63,6 +63,17 @@ export function problems(text, mode) {
   return found;
 }
 
+/** The faces of the personality, one for each feeling of the drawn set. */
+export const FACES = ["(^_^)", "(^▽^)", "(•_•)", "(?_?)", "(-_-;)", "(-_-)", "(>_<)"];
+
+/** What is wrong with the opening of a reply in the voice of the personality, or null. */
+export function openingProblem(text) {
+  const first = text.trim().split("\n")[0].trim();
+  if (!/^[*_]/.test(first)) return `no italic opening: ${first.slice(0, 40)}`;
+  const body = first.replace(/^[*_]+\s*/, "");
+  return FACES.some((face) => body.startsWith(face)) ? null : `no face from the set: ${first.slice(0, 40)}`;
+}
+
 /** A favourite game named in the text, or null. */
 export function gameName(text) {
   return firstMatch(text, GAME);
