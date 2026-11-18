@@ -316,11 +316,6 @@ public static class Strings
             ["AikoOnWhat"] = ("Where Aiko is on, she reads each message you send to keep her memory fresh, and adds one line to that environment's settings.json: a permission for her two memory tools. Turning her off does not erase the memory.", "Там, где Aiko включена, она читает каждое твоё сообщение, чтобы память не устаревала, и добавляет в settings.json этой среды одну строку: разрешение на два своих инструмента памяти. Выключение память не стирает."),
             ["SkillsWhere"] = ("Skills work in the environments where Aiko is on.", "Навыки работают в тех средах, где Aiko включена."),
             ["PersonaOwnStyle"] = ("While the personality is on, your style {0} doesn't work. Turn it off and it comes back.", "Пока личность включена, твой стиль {0} не работает. Выключишь — вернётся."),
-            ["SectionFace"] = ("MOOD", "НАСТРОЕНИЕ"),
-            ["FaceChibi"] = ("Chibi", "Чиби"),
-            ["FaceEmoji"] = ("Emoji", "Смайлик"),
-            ["FaceWhere"] = ("Aiko shows her mood in the tray, on the island and in windows, as a drawing or an emoji.", "Aiko показывает настроение в трее, на острове и в окнах — рисунком или смайликом."),
-            ["FaceWhereMac"] = ("Aiko shows her mood in the menu bar, on the island and in windows, as a drawing or an emoji.", "Aiko показывает настроение в строке меню, на острове и в окнах — рисунком или смайликом."),
             ["SectionTemperament"] = ("TEMPERAMENT", "ТЕМПЕРАМЕНТ"),
             ["TemperamentQuiet"] = ("Quiet", "Тихий"),
             ["TemperamentNormal"] = ("Normal", "Обычный"),
@@ -1419,21 +1414,6 @@ public static class Strings
 
     /// While the personality is on, your style {0} doesn't work. Turn it off and it comes back.
     public static string PersonaOwnStyle => Get("PersonaOwnStyle");
-
-    /// MOOD
-    public static string SectionFace => Get("SectionFace");
-
-    /// Chibi
-    public static string FaceChibi => Get("FaceChibi");
-
-    /// Emoji
-    public static string FaceEmoji => Get("FaceEmoji");
-
-    /// Aiko shows her mood in the tray, on the island and in windows, as a drawing or an emoji.
-    public static string FaceWhere => Get("FaceWhere");
-
-    /// Aiko shows her mood in the menu bar, on the island and in windows, as a drawing or an emoji.
-    public static string FaceWhereMac => Get("FaceWhereMac");
 
     /// TEMPERAMENT
     public static string SectionTemperament => Get("SectionTemperament");

@@ -13,14 +13,7 @@ public enum Temperament
     Musou,
 }
 
-/// What Aiko looks like in the tray, on the island and in the windows (D-216).
-public enum FaceStyle
-{
-    Chibi,
-    Emoji,
-}
-
-/// Aiko herself: one temperament and one face for all environments (D-196). Whether she is on in
+/// Aiko herself: one temperament for all environments (D-196). Whether she is on in
 /// an environment is a flag of that environment, not stored here.
 public sealed record PersonaSettings
 {
@@ -32,8 +25,6 @@ public sealed record PersonaSettings
     public int SchemaVersion { get; init; } = CurrentSchema;
 
     public Temperament Temperament { get; init; } = Temperament.Normal;
-
-    public FaceStyle Face { get; init; } = FaceStyle.Chibi;
 
     /// Same rule as AppSettings: a file we cannot read, or a value from a newer Aiko, means the
     /// defaults for the whole file rather than half of it applied.

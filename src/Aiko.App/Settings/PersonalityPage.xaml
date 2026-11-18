@@ -43,17 +43,6 @@
     <!-- The memory itself: quotas, facts and what a person may do to them (MemoryBlock.cs). -->
     <local:MemoryBlock Margin="0,22,0,0" />
 
-    <TextBlock Text="{x:Static core:Strings.SectionFace}" Style="{StaticResource SectionLabel}" Margin="0,22,0,8" />
-    <local:PixelBorder Style="{StaticResource SegmentBar}">
-      <StackPanel Orientation="Horizontal">
-        <RadioButton x:Name="FaceChibi" Style="{StaticResource Segment}" GroupName="Face"
-                     Content="{x:Static core:Strings.FaceChibi}" Checked="OnFaceChanged" />
-        <RadioButton x:Name="FaceEmoji" Style="{StaticResource Segment}" GroupName="Face"
-                     Content="{x:Static core:Strings.FaceEmoji}" Checked="OnFaceChanged" />
-      </StackPanel>
-    </local:PixelBorder>
-    <TextBlock Text="{x:Static core:Strings.FaceWhere}" Style="{StaticResource RowHint}" Margin="0,8,0,0" />
-
     <TextBlock Text="{x:Static core:Strings.SectionTemperament}" Style="{StaticResource SectionLabel}" Margin="0,22,0,8" />
     <local:PixelBorder Style="{StaticResource SegmentBar}">
       <StackPanel x:Name="TemperamentChoice" Orientation="Horizontal">

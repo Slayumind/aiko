@@ -66,7 +66,7 @@ public partial class ChecklistPage : UserControl
         }
 
         InstallHow.Text = string.Format(Strings.InstallHowButton, InstallCommandText);
-        MeetFace.Source = FaceDrawing.For(SettingsStore.LoadPersona().Face, AikoFace.Fresh, FaceGround.Dark, MeetFace.Width);
+        MeetFace.Source = FaceDrawing.For(AikoFace.Fresh, FaceGround.Dark, MeetFace.Width);
         NewName.Text = "";
 
         GatherFacts();

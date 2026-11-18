@@ -1987,41 +1987,6 @@
     ]
   ],
   [
-    "SectionFace",
-    [
-      "MOOD",
-      "НАСТРОЕНИЕ"
-    ]
-  ],
-  [
-    "FaceChibi",
-    [
-      "Chibi",
-      "Чиби"
-    ]
-  ],
-  [
-    "FaceEmoji",
-    [
-      "Emoji",
-      "Смайлик"
-    ]
-  ],
-  [
-    "FaceWhere",
-    [
-      "Aiko shows her mood in the tray, on the island and in windows, as a drawing or an emoji.",
-      "Aiko показывает настроение в трее, на острове и в окнах — рисунком или смайликом."
-    ]
-  ],
-  [
-    "FaceWhereMac",
-    [
-      "Aiko shows her mood in the menu bar, on the island and in windows, as a drawing or an emoji.",
-      "Aiko показывает настроение в строке меню, на острове и в окнах — рисунком или смайликом."
-    ]
-  ],
-  [
     "SectionTemperament",
     [
       "TEMPERAMENT",

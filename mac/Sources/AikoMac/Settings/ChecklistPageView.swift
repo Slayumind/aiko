@@ -423,7 +423,7 @@ struct ChecklistPageView: View {
     private var meetAiko: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .top, spacing: 12) {
-                FaceView(style: state.persona.face, face: .fresh, size: 44)
+                FaceView(face: .fresh, size: 44)
                 VStack(alignment: .leading, spacing: 8) {
                     Control.rowHint(Strings.meetAikoLead)
                     Control.rowNote(Strings.meetAikoSettings)

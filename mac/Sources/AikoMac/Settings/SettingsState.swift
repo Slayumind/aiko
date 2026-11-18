@@ -92,7 +92,7 @@ final class EnvironmentsEditor {
             _ = Trash.send(folder)
         }
 
-        // The persona file stays: the temperament, the face and the skills are kept for next time.
+        // The persona file stays: the temperament and the skills are kept for next time.
         PluginSync.remove(
             before.environments.flatMap(\.configDirectories).filter { folder in
                 !trashed.contains { RealClaude.sameFolder($0, folder) }

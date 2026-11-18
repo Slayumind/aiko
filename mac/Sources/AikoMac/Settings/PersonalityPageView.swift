@@ -47,7 +47,7 @@ struct PersonalityPageView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 10) {
-                FaceView(style: state.persona.face, face: face, size: 24)
+                FaceView(face: face, size: 24)
                 Control.pageTitle(Strings.navPersonality)
             }
 
@@ -58,16 +58,6 @@ struct PersonalityPageView: View {
 
             // The memory itself: quotas, facts and what a person may do to them.
             MemoryBlockView().padding(.top, 22)
-
-            Control.sectionLabel(Strings.sectionFace).padding(.top, 22).padding(.bottom, 8)
-            SegmentBar(
-                choices: [(FaceStyle.chibi, Strings.faceChibi), (FaceStyle.emoji, Strings.faceEmoji)],
-                picked: state.persona.face) { face in
-                    var next = state.persona
-                    next.face = face
-                    state.savePersona(next)
-                }
-            Control.rowHint(Strings.faceWhereMac).padding(.top, 8)
 
             Control.sectionLabel(Strings.sectionTemperament).padding(.top, 22).padding(.bottom, 8)
             SegmentBar(
@@ -204,7 +194,7 @@ struct PersonalityPageView: View {
             }
 
             HStack(alignment: .top, spacing: 8) {
-                FaceView(style: state.persona.face, face: face, size: 20)
+                FaceView(face: face, size: 20)
                 VStack(alignment: .leading, spacing: 10) {
                     if !answer.open.isEmpty {
                         chat(answer.open, Self.voiceInk)

@@ -8,13 +8,7 @@ public enum Temperament: String, Sendable, Equatable, CaseIterable {
     case musou = "Musou"
 }
 
-/// What Aiko looks like in the tray, on the island and in the windows (D-216).
-public enum FaceStyle: String, Sendable, Equatable, CaseIterable {
-    case chibi = "Chibi"
-    case emoji = "Emoji"
-}
-
-/// Aiko herself: one temperament and one face for all environments (D-196). Whether she is on in
+/// Aiko herself: one temperament for all environments (D-196). Whether she is on in
 /// an environment is a flag of that environment, not stored here.
 public struct PersonaSettings: Sendable, Equatable {
     /// See AppSettings.CurrentSchema for why this is written from the start.
@@ -22,16 +16,13 @@ public struct PersonaSettings: Sendable, Equatable {
 
     public var schemaVersion: Int
     public var temperament: Temperament
-    public var face: FaceStyle
 
     public init(
         schemaVersion: Int = PersonaSettings.currentSchema,
-        temperament: Temperament = .normal,
-        face: FaceStyle = .chibi
+        temperament: Temperament = .normal
     ) {
         self.schemaVersion = schemaVersion
         self.temperament = temperament
-        self.face = face
     }
 
     public static let `default` = PersonaSettings()
@@ -57,10 +48,6 @@ public struct PersonaSettings: Sendable, Equatable {
             guard let temperament = named(value, Temperament.allCases) else { return `default` }
             settings.temperament = temperament
         }
-        if let value = file["face"] {
-            guard let face = named(value, FaceStyle.allCases) else { return `default` }
-            settings.face = face
-        }
 
         return settings
     }
@@ -69,7 +56,6 @@ public struct PersonaSettings: Sendable, Equatable {
         let object = JsonObject([
             ("schemaVersion", .number(String(schemaVersion))),
             ("temperament", .string(temperament.rawValue)),
-            ("face", .string(face.rawValue)),
         ])
         return JsonNode.object(object).toJsonString(indented: true) + "\n"
     }

@@ -83,7 +83,7 @@ static class Program
             return;
         }
 
-        // Every face in both styles, on a dark and a light taskbar, at the sizes the tray uses.
+        // Every face, on a dark and a light taskbar, at the sizes the tray uses.
         if (args is ["--snapshot-faces", var facesPath, ..])
         {
             FaceSheet.Write(facesPath);
@@ -457,7 +457,7 @@ static class Program
 
             if (args is [.., "face"])
             {
-                panel.SetFace(TrayFaceMotion.At(FacePhase.FaceIn, 1), FaceDrawing.For(FaceStyle.Chibi, AikoFace.Done, FaceGround.Dark, 18));
+                panel.SetFace(TrayFaceMotion.At(FacePhase.FaceIn, 1), FaceDrawing.For(AikoFace.Done, FaceGround.Dark, 18));
                 panel.MarkForMeasure();
             }
 

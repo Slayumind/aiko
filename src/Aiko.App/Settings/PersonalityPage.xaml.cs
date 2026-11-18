@@ -47,8 +47,6 @@ public partial class PersonalityPage : UserControl
         SampleCommitLine.Text = SampleCommit;
 
         _filling = true;
-        FaceChibi.IsChecked = _persona.Face == FaceStyle.Chibi;
-        FaceEmoji.IsChecked = _persona.Face == FaceStyle.Emoji;
         foreach (var choice in TemperamentChoice.Children.OfType<RadioButton>())
         {
             choice.IsChecked = (string)choice.Tag == _persona.Temperament.ToString();
@@ -216,20 +214,14 @@ public partial class PersonalityPage : UserControl
         }
     }
 
-    // ---- face and temperament ----
+    // ---- temperament ----
 
-    private void OnFaceChanged(object sender, RoutedEventArgs e)
-    {
-        SavePersona(_persona with { Face = FaceEmoji.IsChecked == true ? FaceStyle.Emoji : FaceStyle.Chibi });
-        ShowFaces();
-    }
-
-    /// The face next to the title, in the chosen style. A calm
+    /// The face next to the title. A calm
     /// temperament smiles, a loud one beams, as in the mockup.
     private void ShowFaces()
     {
         var face = _persona.Temperament is Temperament.Bright or Temperament.Musou ? AikoFace.Done : AikoFace.Fresh;
-        HeaderFace.Source = FaceDrawing.For(_persona.Face, face, FaceGround.Dark, HeaderFace.Width);
+        HeaderFace.Source = FaceDrawing.For(face, FaceGround.Dark, HeaderFace.Width);
     }
 
     private void OnTemperamentChanged(object sender, RoutedEventArgs e)

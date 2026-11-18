@@ -329,11 +329,9 @@ sealed class AikoShell : IDisposable
     /// the taskbar button of the open window in place of its rings (D-417).
     private void OnFaceChanged(AikoFace? face)
     {
-        var style = SettingsStore.LoadPersona().Face;
-
-        _island.ShowFace(face, style);
-        _tray.ShowFace(face, style);
-        _terminal?.Button.ShowFace(face, style);
+        _island.ShowFace(face);
+        _tray.ShowFace(face);
+        _terminal?.Button.ShowFace(face);
     }
 
     /// The tray icon and the taskbar button draw the same rings (D-409).

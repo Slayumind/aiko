@@ -49,7 +49,7 @@ a row cannot change in one core and stay as it was in the other. See `spec/cases
 | SkillCatalog.cs | SkillCatalog.swift | 3 | 3 | |
 | SkillPlugin.cs | SkillPlugin.swift | 17 | 17 | |
 | ClaudeAccount.cs | ClaudeAccount.swift | 16 | 16 | 2 of them are about ClaudeConfigFolder, as in the xUnit file |
-| FaceArt.cs | FaceArt.swift | 63 | 63 | every one of the 56 pictures hashes the same in both languages |
+| FaceArt.cs | FaceArt.swift | 63 | 63 | every one of the 28 pictures hashes the same in both languages |
 | SettingsJsonPatch.cs | SettingsJsonPatch.swift | 20 | 26 | the 6 extra come from SessionReminderTests; a method answers "nothing to change" with nil instead of a bool and an out parameter |
 | SettingsJsonPatch.cs, ClaudeSettingsEditor.cs: the rule for the memory tools | the same two Swift files | 14 | 14 | MemoryPermissionTests; `TrySetMemoryPermission` is `setMemoryPermission`, which answers nil when nothing changes |
 | ClaudeSettingsEditor.cs, IFileAccess.cs | ClaudeSettingsEditor.swift | 38 | 38 | ClaudeSettingsEditorTests (19) and PluginRemovalTests (19); `FileAccess` is IFileAccess with Swift errors in place of exceptions |

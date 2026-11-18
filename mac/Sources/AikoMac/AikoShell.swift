@@ -388,13 +388,11 @@ final class AikoShell {
             return
         }
 
-        let style = Store.persona().face
-
         // The island is always dark, whatever the menu bar is. The icon follows the menu bar, which
         // follows the person's appearance.
         let ground: FaceGround = island.isShown || isDarkMenuBar ? .dark : .light
         let size = island.isShown ? Self.islandFaceSize : Double(MenuBarIcon.size)
-        faces.show(FaceArt.draw(style, face, ground, size <= FaceArt.smallUpTo))
+        faces.show(FaceArt.draw(face, ground, size <= FaceArt.smallUpTo))
     }
 
     private var isDarkMenuBar: Bool {
