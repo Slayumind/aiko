@@ -214,9 +214,9 @@ sealed partial class TerminalPanel : UserControl
         _bar.Children.Add(left);
         Grid.SetColumn(_right, 1);
         _bar.Children.Add(_right);
-        var stateLine = new Border { Height = 1, VerticalAlignment = VerticalAlignment.Bottom, Background = _stateBrush };
-        Grid.SetColumnSpan(stateLine, 2);
-        _bar.Children.Add(stateLine);
+        var hairline = new Border { Height = 1, VerticalAlignment = VerticalAlignment.Bottom, Background = Tokens.Brush("Hairline") };
+        Grid.SetColumnSpan(hairline, 2);
+        _bar.Children.Add(hairline);
         _pills.Refit = FitPills;
         _bar.SizeChanged += (_, _) => FitPills();
 

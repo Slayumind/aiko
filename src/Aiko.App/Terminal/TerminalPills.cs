@@ -12,7 +12,6 @@ namespace Aiko.App;
 [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763")]
 sealed class TerminalPills
 {
-    private const double PillHeight = 32;
     private static readonly Duration Fade = new(TimeSpan.FromMilliseconds(240));
 
     /// The background slides to the chosen pill, and the names change their colour, in this time.
@@ -22,7 +21,7 @@ sealed class TerminalPills
     /// every event; a new name takes the brush that is already moving, so the fade does not jump.
     private readonly Dictionary<string, SolidColorBrush> _fading = [];
 
-    private readonly StackPanel _row = new() { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
+    private readonly StackPanel _row = new() { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Stretch };
     private readonly TranslateTransform _backShift = new();
     private readonly Border _back;
     private readonly TranslateTransform _rootShift = new();
@@ -34,10 +33,11 @@ sealed class TerminalPills
     {
         _back = new Border
         {
-            Height = PillHeight,
+            // From the top edge of the window down to the line under the title bar.
+            Margin = new Thickness(0, 0, 0, 1),
             Background = Tokens.Brush("Raised"),
             HorizontalAlignment = HorizontalAlignment.Left,
-            VerticalAlignment = VerticalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Stretch,
             RenderTransform = _backShift,
             Opacity = 0,
         };
@@ -53,7 +53,7 @@ sealed class TerminalPills
     private int _selected = -1;
     private IReadOnlyList<Pill> _shown = [];
 
-    public Grid Root { get; } = new() { VerticalAlignment = VerticalAlignment.Center };
+    public Grid Root { get; } = new() { VerticalAlignment = VerticalAlignment.Stretch };
 
     /// Asked after the pills are drawn anew, so the panel can say how much room they have.
     public Action? Refit { get; set; }

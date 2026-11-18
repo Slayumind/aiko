@@ -109,7 +109,7 @@ sealed partial class TerminalPanel
         // to measure the header against, and nothing to grow from.
         var grow = first && Motion.IsOn && IsLoaded && ActualWidth > 0;
         var from = _strip.Visibility == Visibility.Visible ? _strip.ActualHeight : 0;
-        _header.Show(view.Header, first && !grow ? HeaderMotion.None : motion);
+        _header.Show(view.Header, first && !grow ? HeaderMotion.None : motion, SignalOf(view));
         _strip.Visibility = Visibility.Visible;
         if (motion == HeaderMotion.Switch && Motion.IsOn && IsLoaded)
         {
@@ -368,7 +368,6 @@ sealed partial class TerminalPanel
 
         var back = new Border
         {
-            Height = 32,
             Padding = new Thickness(small ? 8 : 10, 0, small ? 8 : 12, 0),
             Margin = new Thickness(0, 0, 4, 0),
             Background = Brushes.Transparent,
