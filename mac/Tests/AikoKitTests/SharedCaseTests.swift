@@ -454,7 +454,7 @@ struct SharedCaseTests {
                 sessionId: row["sessionId"]?.stringValue ?? "",
                 started: row["started"]?.boolValue ?? false,
                 hooksFile: row["hooksFile"]?.stringValue ?? "",
-                onDisk: row["onDisk"]?.boolValue ?? true)
+                onDisk: row["onDisk"]?.boolValue ?? true, conversationId: row["conversationId"]?.stringValue ?? "")
 
             let plan = ClaudeLaunchPlan.forRequest(platform, request, inheritedVariables: Self.strings(row["inherited"]))
             let name = row["name"]?.stringValue ?? ""
@@ -534,7 +534,9 @@ struct SharedCaseTests {
             let found = TerminalEvent.fromHook(input?.stringValue ?? input?.toJsonString(escaping: .relaxed), now: now)
             let expected = row["event"].flatMap { node -> TerminalEvent? in
                 guard let kind = kind(node) else { return nil }
-                return TerminalEvent(kind: kind, detail: node["detail"]?.stringValue ?? "", at: now)
+                return TerminalEvent(
+                    kind: kind, detail: node["detail"]?.stringValue ?? "", at: now,
+                    conversation: node["conversation"]?.stringValue ?? "")
             }
             #expect(found == expected, "\(row["name"]?.stringValue ?? "")")
         }
@@ -547,7 +549,9 @@ struct SharedCaseTests {
             let read = TerminalEvent.fromJson(Self.fileIn(row["file"]))
             let expected = row["event"].flatMap { node -> TerminalEvent? in
                 guard let kind = kind(node), let at = node["at"]?.int64Value else { return nil }
-                return TerminalEvent(kind: kind, detail: node["detail"]?.stringValue ?? "", at: at)
+                return TerminalEvent(
+                    kind: kind, detail: node["detail"]?.stringValue ?? "", at: at,
+                    conversation: node["conversation"]?.stringValue ?? "")
             }
             #expect(read == expected)
             if let read {

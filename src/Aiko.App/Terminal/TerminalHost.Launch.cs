@@ -157,10 +157,19 @@ sealed partial class TerminalHost
             return null;
         }
 
+        // After /clear the session goes on in a new conversation. One that was never saved is not
+        // there to come back to, so the session keeps the one it has.
+        var conversation = TerminalEvents.LastConversation(session.Id);
+        if (conversation.Length > 0 && !ConversationOnDisk(config, conversation))
+        {
+            conversation = "";
+        }
+
         var claudePlan = ClaudeLaunchPlan.For(
             new LaunchRequest(
                 config, home, environment.Name, session.Id, session.Started, TerminalEvents.HooksFile(),
-                session.Started && ConversationOnDisk(config, session.Id)),
+                session.Started && ConversationOnDisk(config, conversation.Length > 0 ? conversation : session.Id),
+                conversation),
             inherited);
         return new PtyLaunch(CommandLine(claude, claudePlan.Arguments), folder, Variables(claudePlan));
     }

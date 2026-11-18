@@ -1,5 +1,5 @@
 {
-  "comment": "How the terminal starts Claude Code for one session in a real terminal (D-349, D-360): the arguments in order, and what changes in the environment. Claude Code chooses its own mode and model, so only the id of the conversation is passed: --session-id the first time, --resume after that, once the file of the conversation is on the disk (onDisk, true when not given). Claude Code writes it only after the first message, so a session that stopped before one starts fresh with the same id. A variable with a null value is removed. The first environment runs with CLAUDE_CONFIG_DIR removed, never pointed at .claude (D-156). The paths are Windows ones, as in shim-launch. Only what a Claude Code session leaves for its children is removed (CLAUDECODE, CLAUDE_PID, CLAUDE_EFFORT, the entry point, the session, messaging and exec path of Claude Code, and AIKO_*); the person's own settings, such as CLAUDE_CODE_GIT_BASH_PATH, stay. A shell gets the environment of its session too, so a claude typed in it runs in the same environment, but none of the variables of the session start hook. The hook of the terminal comes with --settings and its file, when the file is there (hooksFile), and the variable AIKO_TERMINAL_SESSION names the session for it. Each name comes once: a leftover that the plan sets again is set, not removed first. The pictures of the editor are not an added folder: --add-dir makes Claude Code ask at every start. picturesRules are the read-only rules the hook settings carry for them (D-451); a sign with a meaning in a rule becomes ?.",
+  "comment": "How the terminal starts Claude Code for one session in a real terminal (D-349, D-360): the arguments in order, and what changes in the environment. Claude Code chooses its own mode and model, so only the id of the conversation is passed: --session-id the first time, --resume after that, once the file of the conversation is on the disk (onDisk, true when not given). Claude Code writes it only after the first message, so a session that stopped before one starts fresh with the same id. A variable with a null value is removed. The first environment runs with CLAUDE_CONFIG_DIR removed, never pointed at .claude (D-156). The paths are Windows ones, as in shim-launch. Only what a Claude Code session leaves for its children is removed (CLAUDECODE, CLAUDE_PID, CLAUDE_EFFORT, the entry point, the session, messaging and exec path of Claude Code, and AIKO_*); the person's own settings, such as CLAUDE_CODE_GIT_BASH_PATH, stay. A shell gets the environment of its session too, so a claude typed in it runs in the same environment, but none of the variables of the session start hook. The hook of the terminal comes with --settings and its file, when the file is there (hooksFile), and the variable AIKO_TERMINAL_SESSION names the session for it. Each name comes once: a leftover that the plan sets again is set, not removed first. The pictures of the editor are not an added folder: --add-dir makes Claude Code ask at every start. /clear starts a new conversation in the same session: conversationId is the one to resume, and the session keeps its own id for its hook. picturesRules are the read-only rules the hook settings carry for them (D-451); a sign with a meaning in a rule becomes ?.",
   "platform": "windows",
   "userProfile": "C:\\Users\\someone",
   "cases": [
@@ -249,6 +249,37 @@
         }
       ],
       "hooksFile": "C:UserssomeoneAppDataLocalAiko\terminal-hooks.json"
+    },
+    {
+      "name": "after /clear the session comes back to the newer conversation",
+      "configDirectory": "C:\\Users\\someone\\.claude-work",
+      "environment": "Work · Kodland",
+      "sessionId": "s-2",
+      "started": true,
+      "inherited": [],
+      "arguments": [
+        "--resume",
+        "7a1d3c52-9e04-4b6f-8c21-0f3e5d7a9b64"
+      ],
+      "variables": [
+        {
+          "name": "CLAUDE_CONFIG_DIR",
+          "value": "C:\\Users\\someone\\.claude-work"
+        },
+        {
+          "name": "AIKO_ENVIRONMENT",
+          "value": "Work · Kodland"
+        },
+        {
+          "name": "AIKO_LAUNCH",
+          "value": "terminal"
+        },
+        {
+          "name": "AIKO_TERMINAL_SESSION",
+          "value": "s-2"
+        }
+      ],
+      "conversationId": "7a1d3c52-9e04-4b6f-8c21-0f3e5d7a9b64"
     }
   ],
   "picturesRules": [

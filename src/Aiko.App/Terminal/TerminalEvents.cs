@@ -54,6 +54,24 @@ sealed class TerminalEvents : IDisposable
         }
     }
 
+    /// The conversation the last hook of the session named; empty when there is none.
+    public static string LastConversation(string id)
+    {
+        if (TerminalEvent.FileName(id) is not { } file)
+        {
+            return "";
+        }
+
+        try
+        {
+            return TerminalEvent.FromJson(File.ReadAllText(Path.Combine(ThisComputer.Folders.TerminalEventsFolder, file)))?.Conversation ?? "";
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            return "";
+        }
+    }
+
     /// The session was closed: its file goes, so a session started later never sees it.
     public void Forget(string id)
     {

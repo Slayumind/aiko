@@ -297,6 +297,18 @@
       "name": "not a hook call",
       "input": "not json",
       "event": null
+    },
+    {
+      "name": "the id of the conversation comes with the event",
+      "input": {
+        "hook_event_name": "UserPromptSubmit",
+        "session_id": "7a1d3c52-9e04-4b6f-8c21-0f3e5d7a9b64"
+      },
+      "event": {
+        "kind": "thinking",
+        "detail": "",
+        "conversation": "7a1d3c52-9e04-4b6f-8c21-0f3e5d7a9b64"
+      }
     }
   ],
   "files": [
@@ -376,6 +388,33 @@
     {
       "file": "{ broken",
       "event": null
+    },
+    {
+      "file": {
+        "kind": "thinking",
+        "detail": "",
+        "at": 5,
+        "conversation": "7a1d3c52-9e04-4b6f-8c21-0f3e5d7a9b64"
+      },
+      "event": {
+        "kind": "thinking",
+        "detail": "",
+        "at": 5,
+        "conversation": "7a1d3c52-9e04-4b6f-8c21-0f3e5d7a9b64"
+      }
+    },
+    {
+      "file": {
+        "kind": "thinking",
+        "detail": "",
+        "at": 5,
+        "conversation": "--dangerous"
+      },
+      "event": {
+        "kind": "thinking",
+        "detail": "",
+        "at": 5
+      }
     }
   ],
   "pulse": [

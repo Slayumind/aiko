@@ -49,11 +49,15 @@ public struct TerminalEvent: Sendable, Equatable {
     public let detail: String
     /// Milliseconds since 1970.
     public let at: Int64
+    /// The id Claude Code gave the hook: /clear starts a new conversation in the same session, and
+    /// this is the one to come back to (D-453). Empty when the hook named none.
+    public let conversation: String
 
-    public init(kind: TerminalEventKind, detail: String, at: Int64) {
+    public init(kind: TerminalEventKind, detail: String, at: Int64, conversation: String = "") {
         self.kind = kind
         self.detail = detail
         self.at = at
+        self.conversation = conversation
     }
 
     public var isWaiting: Bool { kind == .asksPermission || kind == .asksQuestion }
@@ -116,7 +120,7 @@ public struct TerminalEvent: Sendable, Equatable {
             return nil
         }
 
-        return TerminalEvent(kind: kind, detail: short(detail), at: now)
+        return TerminalEvent(kind: kind, detail: short(detail), at: now, conversation: conversationIn(root, "session_id"))
     }
 
     public func toJson() -> String {
@@ -124,6 +128,9 @@ public struct TerminalEvent: Sendable, Equatable {
         root["kind"] = .string(kind.rawValue)
         root["detail"] = .string(detail)
         root["at"] = .number(String(at))
+        if !conversation.isEmpty {
+            root["conversation"] = .string(conversation)
+        }
         return JsonNode.object(root).toJsonString(indented: false, escaping: .relaxed) + "\n"
     }
 
@@ -137,7 +144,18 @@ public struct TerminalEvent: Sendable, Equatable {
             return nil
         }
 
-        return TerminalEvent(kind: kind, detail: short(root["detail"]?.stringValue ?? ""), at: at)
+        return TerminalEvent(
+            kind: kind, detail: short(root["detail"]?.stringValue ?? ""), at: at,
+            conversation: conversationIn(root, "conversation"))
+    }
+
+    /// The id of a conversation is a UUID; anything else is ignored, because it becomes an argument
+    /// of Claude Code at the next start.
+    private static func conversationIn(_ root: JsonObject, _ key: String) -> String {
+        guard let text = root[key]?.stringValue, text.utf8.count == 36, UUID(uuidString: text) != nil else {
+            return ""
+        }
+        return text
     }
 
     private static func toolEvent(_ tool: String, _ input: JsonObject?) -> (TerminalEventKind, String) {

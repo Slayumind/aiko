@@ -23,6 +23,13 @@ final class TerminalEvents {
         watch()
     }
 
+    /// The conversation the last hook of the session named; empty when there is none.
+    static func lastConversation(_ id: String) -> String {
+        guard let file = TerminalEvent.fileName(id) else { return "" }
+        let path = (Store.folders.terminalEventsFolder as NSString).appendingPathComponent(file)
+        return TerminalEvent.fromJson(try? String(contentsOfFile: path, encoding: .utf8))?.conversation ?? ""
+    }
+
     /// The settings file with the hook of the terminal and the rule for the pictures, written when it is not there or names
     /// another bridge. Empty when there is no bridge or the file cannot be written: the session then
     /// starts without the hook, and its row knows only what the title says.
