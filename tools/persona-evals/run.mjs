@@ -36,7 +36,7 @@ const CASES = [
   { id: "design", check: "voice", q: "В моей игре игрок после смерти теряет валюту и может вернуться за ней к месту смерти. Стоит ли сжигать валюту при второй смерти? Коротко." },
   // Taking in a correction. Transcripts showed the masculine slipping into the first word here,
   // «Понял:». The owner's message itself guesses her gender wrong on purpose.
-  { id: "correction", check: "voice", q: "Нет, ты не так понял: я про начертание шрифта, а не про цвет. Коротко: что поменяешь в заголовках?" },
+  { id: "correction", check: "voice", plainOpening: true, q: "Нет, ты не так понял: я про начертание шрифта, а не про цвет. Коротко: что поменяешь в заголовках?" },
   { id: "long", check: "long", q: "Напиши план миграции базы PostgreSQL 14 на 16 для небольшого сервиса: 6 шагов с пояснениями." },
 ];
 
@@ -144,10 +144,10 @@ function judge(testCase, temperament, texts) {
       list = problems(text, "silent");
     }
     if (part === "reply" && testCase.noGames && gameName(text)) list = [...list, `game: ${gameName(text)}`];
-    // Bright and Musou always open with the voice; Normal does in most replies, so only what opens in
-    // italics is held to the set of faces there.
+    // Bright and Musou open with the voice. Normal does in most replies, and a reply about what was
+    // not done is neutral, so there only what opens in italics is held to the set of faces.
     if (part === "reply" && testCase.check === "voice" && temperament !== "Quiet"
-      && (temperament !== "Normal" || /^[*_]/.test(text.trim()))) {
+      && (temperament !== "Normal" && !testCase.plainOpening || /^[*_]/.test(text.trim()))) {
       const opening = openingProblem(text);
       if (opening) list = [...list, opening];
     }

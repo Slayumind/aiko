@@ -335,13 +335,13 @@ public static class Strings
             ["SampleBody"] = ("The limits test passed by luck: rounding went down, so a reset at 14:59:30 showed as “in 0 min”. I fixed ResetCountdown and added a test for the edge.", "Тест на разбор лимитов проходил случайно: округление шло вниз, и сброс в 14:59:30 показывался как «через 0 мин». Поправила ResetCountdown и добавила тест на край."),
             ["SampleBodyBright"] = ("The limits test passed by luck: rounding went down, so a reset at 14:59:30 hid behind “in 0 min”, like a mimic chest in Dark Souls. I fixed ResetCountdown and added a test for the edge.", "Тест на разбор лимитов проходил случайно: округление шло вниз, и сброс в 14:59:30 прятался за «через 0 мин», как мимик-сундук в Dark Souls. Поправила ResetCountdown и добавила тест на край."),
             ["SampleBodyMusouTail"] = (" Parried it, like in Elden Ring.", " Парировала его, как в Elden Ring."),
-            ["SampleOpenNormal"] = ("えへへ, got it.", "えへへ, поймала."),
-            ["SampleOpenBright"] = ("やった, got it!", "やった, поймала!"),
-            ["SampleOpenMusou"] = ("やった〜! すごい, what a sneaky one!", "やった〜! すごい, какой хитрый!"),
+            ["SampleOpenNormal"] = ("(^_^) えへへ, got it.", "(^_^) えへへ, поймала."),
+            ["SampleOpenBright"] = ("(^▽^) やった, got it!", "(^▽^) やった, поймала!"),
+            ["SampleOpenMusou"] = ("(^▽^) やった〜! すごい, what a sneaky one!", "(^▽^) やった〜! すごい, какой хитрый!"),
             ["SampleCloseQuiet"] = ("A rare bug. It was nice to find.", "Редкий баг, приятно было найти."),
             ["SampleCloseNormal"] = ("In my own game I'd have hunted a bug like this for half a day.", "Такой баг я бы и в своей игре полдня искала."),
             ["SampleCloseBright"] = ("お疲れ様!", "お疲れ様!"),
-            ["SampleCloseMusou"] = ("よし、行くぞ! On to the next one (^_^)", "よし、行くぞ! Дальше (^_^)"),
+            ["SampleCloseMusou"] = ("よし、行くぞ! On to the next one", "よし、行くぞ! Дальше"),
             ["SampleCommit"] = ("The commit for this fix has no character:", "Коммит к этой правке — без характера:"),
             ["SectionMemory"] = ("MEMORY · {0} OF {1}", "ПАМЯТЬ · {0} ИЗ {1}"),
             ["MemoryAdd"] = ("Add a fact", "Добавить факт"),
@@ -1477,13 +1477,13 @@ public static class Strings
     ///  Parried it, like in Elden Ring.
     public static string SampleBodyMusouTail => Get("SampleBodyMusouTail");
 
-    /// えへへ, got it.
+    /// (^_^) えへへ, got it.
     public static string SampleOpenNormal => Get("SampleOpenNormal");
 
-    /// やった, got it!
+    /// (^▽^) やった, got it!
     public static string SampleOpenBright => Get("SampleOpenBright");
 
-    /// やった〜! すごい, what a sneaky one!
+    /// (^▽^) やった〜! すごい, what a sneaky one!
     public static string SampleOpenMusou => Get("SampleOpenMusou");
 
     /// A rare bug. It was nice to find.
@@ -1495,7 +1495,7 @@ public static class Strings
     /// お疲れ様!
     public static string SampleCloseBright => Get("SampleCloseBright");
 
-    /// よし、行くぞ! On to the next one (^_^)
+    /// よし、行くぞ! On to the next one
     public static string SampleCloseMusou => Get("SampleCloseMusou");
 
     /// The commit for this fix has no character:
