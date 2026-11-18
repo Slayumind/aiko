@@ -34,6 +34,7 @@ static class LookCheck
         CheckIsland(Check);
         CheckIslandEdge(Check, ScreenEdge.Left);
         CheckIslandEdge(Check, ScreenEdge.Top);
+        CheckIslandHeights(Check);
         CheckCrispLines(Check);
         CheckFrameTitle(Check);
         CheckGhost(Check, Path.ChangeExtension(reportPath, ".ghost.png"));
@@ -187,6 +188,21 @@ static class LookCheck
         var soft = Enumerable.Range(0, 200).Count(x => row[(x * 4) + 1] is > 8 and < 247);
         window.Close();
         check("lines stay sharp at 115%", soft == 0, $"{soft} blurred columns");
+    }
+
+    /// Along a side the island is a little taller, so it looks as high as along the top.
+    private static void CheckIslandHeights(Action<string, bool, string> check)
+    {
+        double Height(ScreenEdge edge)
+        {
+            var panel = new IslandPanel();
+            panel.Show(CardSnapshot.Example(), edge);
+            panel.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+            return panel.DesiredSize.Height;
+        }
+
+        var (top, side) = (Height(ScreenEdge.Top), Height(ScreenEdge.Left));
+        check("the island is 2 units taller along a side", side - top == 2, $"{top:0} and {side:0}");
     }
 
     /// Docked, the island is solid up to the screen: no strip of the desktop shows between them.

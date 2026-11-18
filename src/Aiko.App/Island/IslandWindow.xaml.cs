@@ -256,7 +256,13 @@ public partial class IslandWindow : Window
 
         var work = WorkArea();
         var edge = IslandPlacement.NearestEdge(cursor.X, cursor.Y, work, _handEdge);
-        _handEdge = edge;
+        if (edge != _handEdge)
+        {
+            // The island takes the height it has at the new edge while it is still in hand.
+            _handEdge = edge;
+            Panel.Show(Cards, edge, docked: false);
+            Fit();
+        }
 
         Left = cursor.X - (ActualWidth * _grip.X);
         Top = cursor.Y - (ActualHeight * _grip.Y);

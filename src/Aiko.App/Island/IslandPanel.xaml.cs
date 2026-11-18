@@ -68,7 +68,8 @@ public partial class IslandPanel : UserControl
 
         // The missing line goes into the padding, so the rings do not move by a pixel on landing.
         var line = Body.BorderThickness;
-        Body.Padding = new Thickness(11 - line.Left, 8 - line.Top, 11 - line.Right, 8 - line.Bottom);
+        var depth = IslandPlacement.IsHorizontal(edge) ? TopPadding : SidePadding;
+        Body.Padding = new Thickness(11 - line.Left, depth - line.Top, 11 - line.Right, depth - line.Bottom);
 
         // Around the face the room is the same on every side: the island closes in on the side where
         // its padding is wider, and the face overlaps that padding.
@@ -177,6 +178,11 @@ public partial class IslandPanel : UserControl
     }
 
     private const double CutSize = 8;
+
+    /// Room above and below the rings. Along a side both lines of the island show, and it looks
+    /// lower than along the top at the same height, so it is a little taller there.
+    private const double TopPadding = 8;
+    private const double SidePadding = 9;
     private ScreenEdge _shapeEdge = ScreenEdge.Top;
     private bool _shapeDocked = true;
 
