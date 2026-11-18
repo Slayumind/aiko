@@ -45,11 +45,11 @@ internal static class StatusMark
 
     public static FrameworkElement WaitingSign() => Marks.Pause();
 
-    public static FrameworkElement DoneSign() => SiteIcons.Draw(SiteIcons.Check, 10, "Muted");
+    public static FrameworkElement DoneSign() => SiteIcons.Draw(SiteIcons.Check, 10, "Positive");
 
     public static FrameworkElement StoppedSign() => Marks.Line("M0,0 L8,8 M8,0 L0,8", "Destructive");
 
-    public static FrameworkElement WorkingSign() => SiteIcons.Draw(SiteIcons.Scrubber, 8, "Positive");
+    public static FrameworkElement WorkingSign() => SiteIcons.Draw(SiteIcons.Scrubber, 8, "Ink");
 
     /// A sign with a number after it, for counts of sessions on the island and on the tabs.
     public static (StackPanel Row, TextBlock Number) Counted(FrameworkElement sign)
@@ -84,11 +84,12 @@ internal static class StatusMark
 
     private static string Tone(StatusLook look) => look switch
     {
-        StatusLook.Working => "Positive",
+        StatusLook.Working => "Ink",
+        StatusLook.Done => "Positive",
         StatusLook.Waiting => "Caution",
         StatusLook.Stopped => "Destructive",
         StatusLook.LimitNearEnd => "LimitStrong",
-        _ => "Muted",
+        _ => "QuietText",
     };
 
     private static FrameworkElement Sign(StatusLook look, string tone) => look switch

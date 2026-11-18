@@ -57,7 +57,7 @@
   <!-- A block that stands a little apart from the page. -->
   <SolidColorBrush x:Key="BlockFill" Color="#08FFFFFF" />
 
-  <!-- The sample of the spoken reply on the personality page. -->
+  <!-- The voice of the personality: its sample in the settings and its lines in the terminal. -->
   <SolidColorBrush x:Key="VoiceInk" Color="#FFCFE9DF" />
 
   <FontFamily x:Key="Mono">pack://application:,,,/Aiko.App;component/Assets/Fonts/#Geist Mono</FontFamily>

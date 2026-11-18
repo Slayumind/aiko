@@ -611,7 +611,7 @@ sealed class HeaderStripView
 
         private static string FrameColour(WindowSignal signal) => signal switch
         {
-            WindowSignal.Working => "PositiveColor",
+            WindowSignal.Working => "InkColor",
             WindowSignal.Waiting => "CautionColor",
             WindowSignal.Stopped => "DestructiveColor",
             WindowSignal.LimitNearEnd => "LimitStrongColor",

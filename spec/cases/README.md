@@ -33,6 +33,7 @@ stamp, not a table (D-255).
 | `notices/` | which change of a session plays the sound, and the counts and the one sign of the tray and the taskbar button (`Notices`, `SessionCounts`) |
 | `taskbar-button/` | what the middle and the corner of the taskbar button of the terminal window show, and which app id the window takes so that Windows draws it (`ButtonLook`, `TaskbarIdentity`); Windows only, the Mac has no taskbar button |
 | `window-signal/` | which state colours the terminal window: a question, a limit near its end, a stopped session or work |
+| `voice-tint/` | the colour of the voice of the personality in the terminal output |
 | `window-zoom/` | the steps of the zoom of the terminal window and the font of the terminal at each (`WindowZoom`) |
 | `card-words/` | the words of the limits in both languages: the name of a window, the percent, the word of a tone, the reset, the pace and how fresh the numbers are (`CardText`) |
 | `count-query/` | the query of the daily version check: the version only with counting off, six fields with it on (`CountQuery`) |

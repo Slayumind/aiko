@@ -174,6 +174,10 @@ sealed partial class TerminalHost
                 conversation,
                 ThisComputer.Folders.PicturesFolder(session.Id)),
             inherited);
-        return new PtyLaunch(CommandLine(claude, claudePlan.Arguments), folder, Variables(claudePlan));
+        var voice = ((System.Windows.Media.SolidColorBrush)Tokens.Brush("VoiceInk")).Color;
+        return new PtyLaunch(CommandLine(claude, claudePlan.Arguments), folder, Variables(claudePlan))
+        {
+            Tint = environment.Persona ? new VoiceTint(voice.R, voice.G, voice.B) : null,
+        };
     }
 }
