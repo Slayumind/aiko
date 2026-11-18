@@ -156,7 +156,6 @@ sealed class MemoryBlock : StackPanel
 
         return new Border
         {
-            CornerRadius = new CornerRadius(12),
             BorderBrush = Tokens.Brush("Hairline"),
             BorderThickness = new Thickness(1),
             Background = Tokens.Brush("Background"),
@@ -185,9 +184,9 @@ sealed class MemoryBlock : StackPanel
         var bar = new Grid { Height = 4, VerticalAlignment = VerticalAlignment.Center };
         bar.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(Math.Min(section.Count, section.Quota), GridUnitType.Star) });
         bar.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(Math.Max(section.Quota - section.Count, 0), GridUnitType.Star) });
-        bar.Children.Add(new Border { CornerRadius = new CornerRadius(2), Background = Tokens.Brush("Raised") });
+        bar.Children.Add(new Border { Background = Tokens.Brush("Raised") });
         Grid.SetColumnSpan(bar.Children[0], 2);
-        bar.Children.Add(new Border { CornerRadius = new CornerRadius(2), Background = Tokens.Brush("Muted") });
+        bar.Children.Add(new Border { Background = Tokens.Brush("Muted") });
         Grid.SetColumn(bar, 1);
         grid.Children.Add(bar);
 
@@ -469,7 +468,6 @@ sealed class MemoryBlock : StackPanel
 
         return new Border
         {
-            CornerRadius = new CornerRadius(12),
             BorderBrush = Tokens.Brush("Hairline"),
             BorderThickness = new Thickness(1),
             Padding = new Thickness(14, 12, 12, 12),

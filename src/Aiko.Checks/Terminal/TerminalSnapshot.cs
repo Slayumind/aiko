@@ -11,7 +11,7 @@ namespace Aiko.Checks;
 static class TerminalSnapshot
 {
     /// --snapshot-terminal out.png [palette | folders | loader | header | header-work | narrow |
-    /// narrow-header | nolist | settings | settings-personality | settings-terminal | settings-privacy |
+    /// narrow-header | nolist | frame | settings | settings-personality | settings-terminal | settings-privacy |
     /// settings-general]. The settings read the real settings of this computer, as the window does.
     public static void Write(string path, string? part)
     {
@@ -69,6 +69,12 @@ static class TerminalSnapshot
             null,
             now));
         panel.ShowGroupHoverForSnapshot();
+        if (part == "frame")
+        {
+            Prepare(panel.Editor, shell: false);
+            panel.ShowTerminalFramesForSnapshot();
+        }
+
         if (part?.StartsWith("settings", StringComparison.Ordinal) == true)
         {
             panel.ShowSettings(new SettingsPanel(part.Length > 9 ? part[9..] : null));
@@ -117,13 +123,18 @@ static class TerminalSnapshot
             false))]);
     }
 
+    private static void Prepare(TerminalEditor editor, bool shell)
+    {
+        editor.Show(new EditorSession("s1", shell ? SessionKind.Shell : SessionKind.Claude, "C:\\work", '/', "C:\\work\\pictures"));
+        editor.ShowVoice(new VoiceLine(VoiceWord.None, null, null, false, VoiceButton.Idle, false), VoiceNotice.None);
+    }
+
     /// editor (empty), editor-text, editor-compose, editor-shell, editor-voice.
     private static System.Windows.FrameworkElement Editor(string part)
     {
         var editor = new TerminalEditor { Width = 760 };
         var shell = part == "editor-shell";
-        editor.Show(new EditorSession("s1", shell ? SessionKind.Shell : SessionKind.Claude, "C:\\work", '/', "C:\\work\\pictures"));
-        editor.ShowVoice(new VoiceLine(VoiceWord.None, null, null, false, VoiceButton.Idle, false), VoiceNotice.None);
+        Prepare(editor, shell);
         switch (part)
         {
             case "editor-text":

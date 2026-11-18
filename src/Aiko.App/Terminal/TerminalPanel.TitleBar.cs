@@ -367,10 +367,9 @@ sealed partial class TerminalPanel
 
         var back = new Border
         {
-            Height = 28,
+            Height = 32,
             Padding = new Thickness(small ? 8 : 10, 0, small ? 8 : 12, 0),
             Margin = new Thickness(0, 0, 4, 0),
-            CornerRadius = new CornerRadius(14),
             Background = Brushes.Transparent,
             Cursor = Cursors.Hand,
             Child = row,

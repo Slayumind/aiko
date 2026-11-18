@@ -185,7 +185,6 @@ public partial class EnvironmentPage : UserControl
 
         return new Border
         {
-            CornerRadius = new CornerRadius(8),
             Background = Tokens.Brush("HoverLayer"),
             Padding = new Thickness(10, 4, 4, 4),
             Margin = new Thickness(0, 0, 0, 4),

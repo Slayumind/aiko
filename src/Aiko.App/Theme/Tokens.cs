@@ -23,9 +23,9 @@ public static class Tokens
 
     public static Brush ToneBrush(LimitTone tone) => tone switch
     {
-        LimitTone.Normal => Brush("Positive"),
-        LimitTone.Caution => Brush("Caution"),
-        LimitTone.Critical => Brush("Destructive"),
+        LimitTone.Normal => Brush("Ink"),
+        LimitTone.Caution => Brush("LookLimitSoft"),
+        LimitTone.Critical => Brush("LookLimit"),
         _ => Brush("Muted"),
     };
 }

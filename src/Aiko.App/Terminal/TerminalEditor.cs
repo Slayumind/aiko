@@ -43,7 +43,6 @@ sealed partial class TerminalEditor : UserControl, IDictationField
     private readonly TextBlock _placeholder;
     private readonly TextBlock _dictation = new() { TextWrapping = TextWrapping.Wrap, IsHitTestVisible = false, Visibility = Visibility.Collapsed };
     private readonly WrapPanel _pictures = new() { Visibility = Visibility.Collapsed, Margin = new Thickness(0, 0, 0, 6) };
-    private readonly Border _top = new() { Height = 1, Background = Tokens.Brush("Hairline") };
     private readonly TextBlock _hint = Widgets.Mono("", "Muted");
     private readonly StackPanel _voiceLine = new() { Orientation = Orientation.Horizontal, Visibility = Visibility.Collapsed };
     private readonly StackPanel _wave = Wave();
@@ -88,7 +87,7 @@ sealed partial class TerminalEditor : UserControl, IDictationField
     public TerminalEditor()
     {
         Focusable = false;
-        Background = Tokens.Brush("Surface");
+        Background = Brushes.Transparent;
 
         _text.FontFamily = Tokens.Get<FontFamily>("Mono");
         _text.FontSize = Tokens.Get<double>("TextNumber");
@@ -109,8 +108,6 @@ sealed partial class TerminalEditor : UserControl, IDictationField
         _suggestPause.Tick += (_, _) => AskForSuggestion();
         _text.SelectionChanged += (_, _) => Offer();
         _text.LostKeyboardFocus += (_, _) => _choices!.Close();
-        _text.GotKeyboardFocus += (_, _) => _top.Background = Tokens.Brush("InputLine");
-        _text.LostKeyboardFocus += (_, _) => _top.Background = Tokens.Brush("Hairline");
         CommandManager.AddPreviewCanExecuteHandler(_text, OnCanPaste);
         CommandManager.AddPreviewExecutedHandler(_text, OnPasteCommand);
         _text.PreviewDragOver += OnDragOver;
@@ -182,8 +179,6 @@ sealed partial class TerminalEditor : UserControl, IDictationField
         inside.Children.Add(under);
 
         var all = new DockPanel { Cursor = Cursors.IBeam };
-        DockPanel.SetDock(_top, Dock.Top);
-        all.Children.Add(_top);
         all.Children.Add(inside);
         all.MouseLeftButtonDown += (_, _) => FocusText();
         Content = all;

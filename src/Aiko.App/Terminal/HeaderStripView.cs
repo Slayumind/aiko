@@ -245,16 +245,10 @@ sealed class HeaderStripView
             head.Children.Add(link);
         }
 
-        if (block is { ShowsHalo: true })
+        if (block is not null && HeadState(column, block) is { } state)
         {
-            var state = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(12, 0, 0, 0) };
-            var dot = new Grid { Width = 12, Height = 12, Margin = new Thickness(0, 0, 4, 0), VerticalAlignment = VerticalAlignment.Center };
-            dot.Children.Add(new Ellipse { Width = 12, Height = 12, Fill = Tokens.Brush("Positive"), Opacity = 0.18 });
-            dot.Children.Add(new Ellipse { Width = 6, Height = 6, Fill = block.StateDot == StateDot.Filled ? Tokens.Brush("Positive") : Brushes.Transparent, Stroke = block.StateDot == StateDot.Filled ? Brushes.Transparent : Tokens.Brush("Muted"), StrokeThickness = 1.5 });
-            state.Children.Add(dot);
-            var words = Widgets.Text(block.State, "TextTiny", "Ink", FontWeights.Normal);
-            words.Foreground = Tokens.Brush(block.StateIsBright ? "Ink" : "Muted");
-            state.Children.Add(words);
+            state.Margin = new Thickness(12, 0, 0, 0);
+            state.VerticalAlignment = VerticalAlignment.Center;
             DockPanel.SetDock(state, Dock.Right);
             head.Children.Add(state);
         }
@@ -268,15 +262,28 @@ sealed class HeaderStripView
         name.TextTrimming = TextTrimming.CharacterEllipsis;
         left.Children.Add(name);
 
-        if (!quiet && column.Column.Waiting > 0)
-        {
-            var waiting = Widgets.Text(WaitingWords(column.Column.Waiting), "TextSmall", "Caution", FontWeights.Normal);
-            waiting.Margin = new Thickness(8, 0, 0, 0);
-            left.Children.Add(waiting);
-        }
-
         head.Children.Add(left);
         return head;
+    }
+
+    /// The state of the chosen environment, as a sign and a word: a question first, then a limit
+    /// near its end, then whether it works (D-441).
+    private static FrameworkElement? HeadState(HeaderColumnView column, EnvironmentBlock block)
+    {
+        if (column.Column.Waiting > 0)
+        {
+            return StatusMark.Create(StatusLook.Waiting, Strings.TerminalWaiting);
+        }
+
+        if (ToneOf(column) == LimitTone.Critical)
+        {
+            var percent = Math.Max(column.Column.FiveHour ?? 0, column.Column.SevenDay ?? 0);
+            return StatusMark.Create(StatusLook.LimitNearEnd, string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.TerminalLimitMark, percent));
+        }
+
+        return block.ShowsHalo
+            ? StatusMark.Create(block.StateDot == StateDot.Filled && block.StateIsBright ? StatusLook.Working : StatusLook.Asleep, block.State)
+            : null;
     }
 
     /// "Session · 5 hours ━━━━━━──── 42%  1h 6m  running low": one line of 24 px per limit.
@@ -296,12 +303,13 @@ sealed class HeaderStripView
         name.Margin = new Thickness(0, 0, 12, 0);
         grid.Children.Add(name);
 
-        var track = Track(new GridLength(row.Fill, GridUnitType.Star), new GridLength(100 - row.Fill, GridUnitType.Star), 4, Tokens.ToneBrush(row.Tone), 1, grow);
+        var track = Bar(row.Fill, Tokens.ToneBrush(row.Tone), grow);
         track.Margin = new Thickness(0, 0, 8, 0);
         Grid.SetColumn(track, 1);
         grid.Children.Add(track);
 
         var percent = Widgets.Mono(row.Percent, "Ink");
+        percent.Foreground = Tokens.ToneBrush(row.Tone);
         percent.HorizontalAlignment = HorizontalAlignment.Right;
         Grid.SetColumn(percent, 2);
         grid.Children.Add(percent);
@@ -338,7 +346,7 @@ sealed class HeaderStripView
         grid.Children.Add(name);
 
         var used = Math.Clamp(percent ?? 0, 0, 100);
-        var track = Track(new GridLength(used, GridUnitType.Star), new GridLength(100 - used, GridUnitType.Star), 2, Tokens.Brush("Muted"), 0.5);
+        var track = new LimitBar { Value = used / 100.0, Fill = Tokens.Brush("Muted"), Height = 8, TrackHeight = 3, VerticalAlignment = VerticalAlignment.Center };
         track.Margin = new Thickness(0, 0, 4, 0);
         Grid.SetColumn(track, 1);
         grid.Children.Add(track);
@@ -350,28 +358,17 @@ sealed class HeaderStripView
         return grid;
     }
 
-    /// A bar: a grey track and the used part in two star columns, so the fill follows the
-    /// percentage without any measuring in code. grow, when set, is when the used part starts to
-    /// grow from the left edge to its value; a scale, so the layout stays still.
-    private static FrameworkElement Track(GridLength fill, GridLength rest, double height, Brush tone, double toneOpacity, TimeSpan? grow = null)
+    /// A bar of a limit. grow, when set, is when it starts to fill from the left edge to its value.
+    private static LimitBar Bar(int percent, Brush tone, TimeSpan? grow)
     {
-        var track = new Grid { Height = height, VerticalAlignment = VerticalAlignment.Center };
-        track.ColumnDefinitions.Add(new ColumnDefinition { Width = fill });
-        track.ColumnDefinitions.Add(new ColumnDefinition { Width = rest });
-        var back = new Border { CornerRadius = new CornerRadius(height / 2), Background = Tokens.Brush("Raised") };
-        Grid.SetColumnSpan(back, 2);
-        track.Children.Add(back);
-        var used = new Border { CornerRadius = new CornerRadius(height / 2), Background = tone, Opacity = toneOpacity };
+        var value = percent / 100.0;
+        var bar = new LimitBar { Value = value, Fill = tone, VerticalAlignment = VerticalAlignment.Center };
         if (grow is { } after && Motion.IsOn)
         {
-            var scale = new ScaleTransform(0, 1);
-            used.RenderTransformOrigin = new Point(0, 0.5);
-            used.RenderTransform = scale;
-            scale.BeginAnimation(ScaleTransform.ScaleXProperty, new DoubleAnimation(0, 1, BarGrow) { BeginTime = after, EasingFunction = Motion.Standard });
+            bar.BeginAnimation(LimitBar.ValueProperty, new DoubleAnimation(0, value, BarGrow) { BeginTime = after, EasingFunction = Motion.Standard });
         }
 
-        track.Children.Add(used);
-        return track;
+        return bar;
     }
 
     /// "Max 5x · Aiko · direct mode off · updated at 12:04": who this environment is, on one line, with its name in Aiko
@@ -393,7 +390,7 @@ sealed class HeaderStripView
             parts.Add(block.Updated);
         }
 
-        var line = Widgets.Text(string.Join("  ·  ", parts), "TextSmall", "Muted", FontWeights.Normal);
+        var line = Widgets.Text(string.Join(" · ", parts), "TextSmall", "Muted", FontWeights.Normal);
         line.Margin = new Thickness(0, 8, 0, 0);
         line.TextTrimming = TextTrimming.CharacterEllipsis;
         return line;
@@ -452,7 +449,7 @@ sealed class HeaderStripView
             _body.Children.Add(_current);
             _body.Children.Add(_leaving);
             var face = new Grid();
-            face.Children.Add(new Border { CornerRadius = new CornerRadius(13), Background = _hover });
+            face.Children.Add(new Border { Background = _hover });
             face.Children.Add(_body);
 
             // The cards are the segments of one switch, as the segmented buttons of Aiko are: the
@@ -460,7 +457,6 @@ sealed class HeaderStripView
             // Framed and filled both, the cards looked cramped over the grey body (D-392, D-393).
             Root = new Border
             {
-                CornerRadius = new CornerRadius(14),
                 Background = Brushes.Transparent,
                 BorderBrush = Brushes.Transparent,
                 BorderThickness = new Thickness(1),
@@ -580,7 +576,7 @@ sealed class HeaderStripView
             Root.Cursor = active ? null : System.Windows.Input.Cursors.Hand;
             Root.ToolTip = active ? null : Environment;
             Panel.SetZIndex(Root, active ? 1 : 0);
-            Root.Background = active ? Tokens.Brush("Surface") : Brushes.Transparent;
+            Root.Background = active ? Tokens.Brush("LookCard") : Brushes.Transparent;
             if (active)
             {
                 _hover.BeginAnimation(SolidColorBrush.ColorProperty, null);

@@ -1,5 +1,12 @@
 [
   [
+    "TerminalLimitMark",
+    [
+      "limit {0}%",
+      "лимит {0}%"
+    ]
+  ],
+  [
     "SwitchOff",
     [
       "Off",
@@ -618,9 +625,15 @@
   [
     "WizardDoneTray",
     [
-      "Close the window and Aiko stays by the clock while the sessions keep working. A click on the icon brings the window back.",
-      "Закроешь окно — Aiko останется у часов, а сессии продолжат работу. Щелчок по значку вернёт окно."
-    ]
+      "Close the window and Aiko stays in the tray while the sessions keep working. A click on the icon brings the window back.",
+      "Закроешь окно — Aiko останется в трее, а сессии продолжат работу. Щелчок по значку вернёт окно."
+    ],
+    {
+      "mac": [
+        "Close the window and Aiko stays in the menu bar while the sessions keep working. A click on the icon brings the window back.",
+        "Закроешь окно — Aiko останется в строке меню, а сессии продолжат работу. Щелчок по значку вернёт окно."
+      ]
+    }
   ],
   [
     "WizardDoneOverflow",

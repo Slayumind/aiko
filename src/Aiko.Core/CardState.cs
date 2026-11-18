@@ -42,7 +42,7 @@ public sealed record CardState(
     DateTimeOffset? UpdatedAt,
     IReadOnlyList<CardRow> Rows)
 {
-    public const int CautionFrom = 75;
+    public const int CautionFrom = 70;
     public const int CriticalFrom = 90;
 
 

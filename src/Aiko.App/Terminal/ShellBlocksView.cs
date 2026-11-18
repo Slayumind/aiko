@@ -30,15 +30,28 @@ sealed class ShellBlocksView : FrameworkElement
     private static readonly Brush Text = Brush(0xFA, 0xFA, 0xFA);
     private static readonly Brush Output = Brush(0xBD, 0xBD, 0xBD);
     private static readonly Brush Muted = Brush(0xA1, 0xA1, 0xA1);
-    private static readonly Brush Raised = Brush(0x40, 0x40, 0x40);
+    private static readonly Brush Raised = Brush(0x4D, 0x4D, 0x4D);
     private static readonly Brush Destructive = Brush(0xFF, 0x64, 0x67);
     private static readonly Brush Caution = Brush(0xFE, 0x9A, 0x00);
-    private static readonly Brush Ground = Brush(0x14, 0x14, 0x16);
-    private static readonly Brush Hovered = Brush(0x1B, 0x1B, 0x1D);
+    private static readonly Brush Ground = Brush(0x0A, 0x0A, 0x0A);
+    private static readonly Brush Hovered = Brush(0x26, 0x26, 0x26);
+    private static readonly Brush ButtonLit = Brush(0x3A, 0x3A, 0x3A);
+    private static readonly Brush OnMatch = Brush(0x0A, 0x0A, 0x0A);
     private static readonly Brush Match = Brush(0x4A, 0x4A, 0x4A);
-    private static readonly Brush MatchNow = Brush(0x7A, 0x52, 0x10);
-    private static readonly Pen Edge = new(Brush(0x2A, 0x2A, 0x2C), 1);
-    private static readonly Pen EdgeMain = new(Brush(0x3B, 0x3B, 0x3D), 1);
+    private static readonly Brush MatchNow = Caution;
+
+    private static readonly Geometry CopyIcon = Icon(SiteIcons.Copy);
+    private static readonly Geometry CheckIcon = Icon(SiteIcons.Check);
+    private static readonly Geometry FoldIcon = Icon("M2.5,17 L12,7.5 L21.5,17");
+    private static readonly Geometry UnfoldIcon = Icon("M2.5,7 L12,16.5 L21.5,7");
+    private static readonly Geometry ExplainIcon = Icon("M6.5,8 A5.5,5.5 0 1 1 15.1,12.5 C13.1,13.9 12,15 12,17 M12,21 L12,21.6");
+
+    private static Geometry Icon(string data)
+    {
+        var icon = Geometry.Parse(data);
+        icon.Freeze();
+        return icon;
+    }
 
     private readonly ShellScreen _screen;
     private readonly object _gate;
@@ -62,6 +75,8 @@ sealed class ShellBlocksView : FrameworkElement
     private double _scale = 1;
     private double _charWidth = 7.8;
     private long? _hover;
+    private Point _pointer;
+    private bool _pointerOnButton;
     private long? _copied;
 
     public ShellBlocksView(ShellScreen screen, object gate)
@@ -245,6 +260,13 @@ sealed class ShellBlocksView : FrameworkElement
         }
 
         var overButton = _buttons.Any(button => button.Area.Contains(at));
+        if (_pointer != at && (overButton || _pointerOnButton))
+        {
+            InvalidateVisual();
+        }
+
+        _pointer = at;
+        _pointerOnButton = overButton;
         var overLink = Keyboard.Modifiers.HasFlag(ModifierKeys.Control) && row is { Kind: RowKind.Output } output && LinkAt(output.Line, at.X) is not null;
         Cursor = overButton || overLink ? Cursors.Hand : Cursors.Arrow;
     }
@@ -252,6 +274,7 @@ sealed class ShellBlocksView : FrameworkElement
     protected override void OnMouseLeave(MouseEventArgs e)
     {
         _hover = null;
+        _pointerOnButton = false;
         Cursor = Cursors.Arrow;
         InvalidateVisual();
     }
@@ -402,6 +425,7 @@ sealed class ShellBlocksView : FrameworkElement
                     case RowKind.Output:
                         DrawMatches(context, row.Line, top);
                         DrawLine(context, row.Line, top, dpi);
+                        DrawChosenMatch(context, row.Line, top, dpi);
                         break;
                     case RowKind.More:
                         context.DrawText(Formatted(More(row.Line), Muted, _face, _fontSize * 0.9, dpi), new Point(TextLeft, top + 2));
@@ -441,34 +465,42 @@ sealed class ShellBlocksView : FrameworkElement
     private double DrawButtons(DrawingContext context, ShellBlock block, double right, double top, double dpi)
     {
         var key = block.StartedAt;
-        var buttons = new List<(string Label, bool Main, Action Act)>
+        var buttons = new List<(Geometry Icon, bool Line, Action Act)>
         {
-            (_copied == key ? Strings.ShellCopied : Strings.ShellCopy, false, () => Copy(block)),
+            (_copied == key ? CheckIcon : CopyIcon, false, () => Copy(block)),
         };
         if (block.LineCount > 0)
         {
-            buttons.Add((_folded.Contains(key) ? Strings.ShellUnfold : Strings.ShellFold, false, () => Fold(block)));
+            buttons.Add((_folded.Contains(key) ? UnfoldIcon : FoldIcon, true, () => Fold(block)));
         }
 
         if (block.Failed)
         {
-            buttons.Add((Strings.ShellExplain, true, () => Explain(block)));
+            buttons.Add((ExplainIcon, true, () => Explain(block)));
         }
 
-        var size = 11.5 * _scale;
-        var height = Math.Min(LineHeight - 2, 20 * _scale);
+        var iconSize = 14 * _scale;
+        var width = 26 * _scale;
+        var height = Math.Min(LineHeight, 20 * _scale);
+        var pen = new Pen(Muted, 1.3 * 24 / iconSize);
         var x = right;
         for (var i = buttons.Count - 1; i >= 0; i--)
         {
-            var (label, main, act) = buttons[i];
-            var text = Formatted(label, main ? Text : Muted, _sans, size, dpi);
-            var width = text.WidthIncludingTrailingWhitespace + (12 * _scale);
+            var (icon, isLine, act) = buttons[i];
             x -= width;
             var area = new Rect(x, top + ((LineHeight - height) / 2), width, height);
-            context.DrawRoundedRectangle(Ground, main ? EdgeMain : Edge, area, 5 * _scale, 5 * _scale);
-            context.DrawText(text, new Point(x + (6 * _scale), area.Top + ((height - text.Height) / 2)));
+            if (_pointerOnButton && area.Contains(_pointer))
+            {
+                context.DrawRectangle(ButtonLit, null, area);
+            }
+
+            context.PushTransform(new TranslateTransform(x + ((width - iconSize) / 2), area.Top + ((height - iconSize) / 2)));
+            context.PushTransform(new ScaleTransform(iconSize / 24, iconSize / 24));
+            context.DrawGeometry(isLine ? null : Muted, isLine ? pen : null, icon);
+            context.Pop();
+            context.Pop();
             _buttons.Add((area, act));
-            x -= 4 * _scale;
+            x -= 2 * _scale;
         }
 
         return x;
@@ -502,6 +534,23 @@ sealed class ShellBlocksView : FrameworkElement
         }
 
         return low;
+    }
+
+    /// The chosen match stands on solid orange, so its letters are dark.
+    private void DrawChosenMatch(DrawingContext context, int line, double top, double dpi)
+    {
+        if (_match < 0 || _match >= _matches.Count || _matches[_match].Line != line)
+        {
+            return;
+        }
+
+        var (_, start, length) = _matches[_match];
+        var text = string.Concat(_screen.Runs(line).Select(run => run.Text));
+        if (start < text.Length)
+        {
+            var word = text.Substring(start, Math.Min(length, text.Length - start));
+            context.DrawText(Formatted(word, OnMatch, _face, _fontSize, dpi), new Point(TextLeft + (start * _charWidth), top));
+        }
     }
 
     private void DrawLine(DrawingContext context, int line, double top, double dpi)

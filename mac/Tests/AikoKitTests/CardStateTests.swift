@@ -12,8 +12,8 @@ struct CardStateTests {
 
     @Test(arguments: [
         (0, LimitTone.normal),
-        (74, LimitTone.normal),
-        (75, LimitTone.caution),
+        (69, LimitTone.normal),
+        (70, LimitTone.caution),
         (89, LimitTone.caution),
         (90, LimitTone.critical),
         (100, LimitTone.critical),

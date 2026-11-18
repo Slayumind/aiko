@@ -12,7 +12,7 @@ namespace Aiko.App;
 [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763")]
 sealed class TerminalPills
 {
-    private const double PillHeight = 28;
+    private const double PillHeight = 32;
     private static readonly Duration Fade = new(TimeSpan.FromMilliseconds(240));
 
     /// The background slides to the chosen pill, and the names change their colour, in this time.
@@ -35,7 +35,6 @@ sealed class TerminalPills
         _back = new Border
         {
             Height = PillHeight,
-            CornerRadius = new CornerRadius(PillHeight / 2),
             Background = Tokens.Brush("Raised"),
             HorizontalAlignment = HorizontalAlignment.Left,
             VerticalAlignment = VerticalAlignment.Center,

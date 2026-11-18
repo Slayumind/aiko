@@ -115,13 +115,12 @@ sealed class DropDown : UserControl
         row.Children.Add(chevron);
         row.Children.Add(_chosen);
 
-        var hover = new Border { CornerRadius = new CornerRadius(0), Background = Brush("HoverLayer"), Opacity = 0 };
+        var hover = new Border { Background = Brush("HoverLayer"), Opacity = 0 };
         var face = new Grid();
         face.Children.Add(hover);
         face.Children.Add(new Border { Padding = new Thickness(10, 0, 10, 0), Child = row });
 
         _button.Height = 30;
-        _button.CornerRadius = new CornerRadius(0);
         // The look of a text field of the site: a quiet fill and a thin line (D-332).
         _button.Background = Brush("Background");
         _button.BorderBrush = Brush("Hairline");
@@ -148,7 +147,6 @@ sealed class DropDown : UserControl
         _listFrame.Background = Brush("Background");
         _listFrame.BorderBrush = Brush("Hairline");
         _listFrame.BorderThickness = new Thickness(1);
-        _listFrame.CornerRadius = new CornerRadius(0);
         _listFrame.Padding = new Thickness(4);
         _listFrame.Margin = new Thickness(0, 4, 0, 12);
         _listFrame.Effect = Tokens.Get<System.Windows.Media.Effects.Effect>("CardShadow");
@@ -354,7 +352,6 @@ sealed class DropDown : UserControl
         {
             Height = 28,
             Padding = new Thickness(8, 0, 8, 0),
-            CornerRadius = new CornerRadius(0),
             Background = index == _highlighted ? Brush("Raised") : Brushes.Transparent,
             Cursor = Cursors.Hand,
             Child = row,

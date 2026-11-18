@@ -160,7 +160,6 @@ sealed class ChecklistRow : UserControl
         stack.Children.Add(header);
         stack.Children.Add(_reveal);
 
-        _hover.CornerRadius = new CornerRadius(10);
         _hover.Background = Tokens.Brush("HoverLayer");
         _hover.Opacity = 0;
         _hover.IsHitTestVisible = false;
@@ -169,7 +168,6 @@ sealed class ChecklistRow : UserControl
         layers.Children.Add(_hover);
         layers.Children.Add(new Border { Padding = new Thickness(12, 10, 12, 10), Child = stack });
 
-        _frame.CornerRadius = new CornerRadius(10);
         _frame.BorderBrush = Tokens.Brush("Hairline");
         _frame.BorderThickness = new Thickness(1);
         _frame.Margin = new Thickness(0, 0, 0, 6);

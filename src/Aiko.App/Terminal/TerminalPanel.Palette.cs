@@ -209,7 +209,6 @@ sealed partial class TerminalPanel
             HorizontalAlignment = HorizontalAlignment.Center,
             Margin = new Thickness(20, 28, 20, 0),
             Padding = new Thickness(18, 16, 18, 16),
-            CornerRadius = new CornerRadius(14),
             Background = Tokens.Brush("Surface"),
             BorderBrush = Tokens.Brush("InputLine"),
             BorderThickness = new Thickness(1),

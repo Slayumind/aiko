@@ -243,8 +243,6 @@ public partial class SettingsPanel : UserControl
         var face = new Grid();
         face.Children.Add(new Rectangle
         {
-            RadiusX = 8,
-            RadiusY = 8,
             Stroke = Tokens.Brush("InputLine"),
             StrokeThickness = 1,
             StrokeDashArray = [4, 3],

@@ -90,7 +90,6 @@ sealed class PaletteView : Border
         Background = Tokens.Brush("Surface");
         BorderBrush = Tokens.Brush("Hairline");
         BorderThickness = new Thickness(1);
-        CornerRadius = new CornerRadius(12);
         Effect = Tokens.Get<System.Windows.Media.Effects.Effect>("CardShadow");
         Child = column;
 
@@ -192,7 +191,6 @@ sealed class PaletteView : Border
 
         var line = new Border
         {
-            CornerRadius = new CornerRadius(8),
             Padding = new Thickness(8, 7, 8, 7),
             Background = Brushes.Transparent,
             Cursor = Cursors.Hand,

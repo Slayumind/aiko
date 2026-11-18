@@ -15,9 +15,11 @@
        above the page; the island is pressed against the edge of the screen and stays there. The
        room the shadow needs showed up as a gap and kept the island from touching the edge. -->
   <Grid>
-    <Border x:Name="Body"
-            Background="{StaticResource Surface}"
-            BorderBrush="{StaticResource Hairline}" BorderThickness="1"
+    <Path x:Name="Ground" Fill="{StaticResource Surface}" />
+    <Path x:Name="Edge" Stroke="{StaticResource Hairline}" StrokeThickness="1" />
+    <Border x:Name="Body" SizeChanged="OnBodySized"
+            Background="Transparent"
+            BorderBrush="Transparent" BorderThickness="1"
             Padding="10,7">
       <!-- The face takes the place of the rings for a moment after an event (D-211). It sits over them
            rather than instead of them, so the island keeps its size and does not move. -->

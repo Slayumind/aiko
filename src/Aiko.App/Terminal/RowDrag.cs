@@ -152,7 +152,6 @@ sealed class RowDrag
         Height = row.ActualHeight,
         Margin = row.Margin,
         Padding = new Thickness(10, 8, 10, 8),
-        CornerRadius = new CornerRadius(10),
         Background = Tokens.Brush("Raised"),
         BorderBrush = Tokens.Brush("InputLine"),
         BorderThickness = new Thickness(1),

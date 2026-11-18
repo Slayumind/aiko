@@ -35,7 +35,7 @@ static class BadgeDrawing
         {
             BadgeKind.Waiting => RingDrawing.Caution,
             BadgeKind.Stopped => RingDrawing.Critical,
-            _ => RingDrawing.Normal,
+            _ => RingDrawing.Muted,
         });
         context.DrawGeometry(ground, null, shape);
         if (badge.Kind != BadgeKind.Done)
@@ -95,7 +95,7 @@ static class BadgeDrawing
             if (badge.Kind == BadgeKind.Done)
             {
                 var radius = 4.5 * scale;
-                context.DrawEllipse(new SolidColorBrush(RingDrawing.Normal), new Pen(new SolidColorBrush(Edge), scale), new Point(size / 2.0, size / 2.0), radius, radius);
+                context.DrawEllipse(new SolidColorBrush(RingDrawing.Muted), new Pen(new SolidColorBrush(Edge), scale), new Point(size / 2.0, size / 2.0), radius, radius);
             }
             else
             {

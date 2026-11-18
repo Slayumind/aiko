@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using Aiko.Core;
 using Aiko.Core.Terminal;
 
@@ -59,13 +60,9 @@ public partial class IslandPanel : UserControl
         DrawSessions();
 
         // Docked, the side against the screen has no corners and no line: it reads as part of the edge.
-        Body.CornerRadius = !docked ? new CornerRadius(14) : edge switch
-        {
-            ScreenEdge.Top => new CornerRadius(0, 0, 14, 14),
-            ScreenEdge.Bottom => new CornerRadius(14, 14, 0, 0),
-            ScreenEdge.Left => new CornerRadius(0, 14, 14, 0),
-            _ => new CornerRadius(14, 0, 0, 14),
-        };
+        _shapeEdge = edge;
+        _shapeDocked = docked;
+        DrawShape();
         Body.BorderThickness = !docked ? new Thickness(1) : edge switch
         {
             ScreenEdge.Top => new Thickness(1, 0, 1, 1),
@@ -192,6 +189,69 @@ public partial class IslandPanel : UserControl
         return at.X >= -4 && at.Y >= -4 && at.X <= mark.ActualWidth + 4 && at.Y <= mark.ActualHeight + 4 ? id : null;
     }
 
+    private const double CutSize = 8;
+    private ScreenEdge _shapeEdge = ScreenEdge.Top;
+    private bool _shapeDocked = true;
+
+    private void OnBodySized(object sender, SizeChangedEventArgs e) => DrawShape();
+
+    /// The free corners are cut at 45 degrees (D-448). Against the screen the island has no line and
+    /// no cut, so it reads as a part of the edge.
+    private void DrawShape()
+    {
+        var (width, height) = (Body.ActualWidth, Body.ActualHeight);
+        if (width <= 0 || height <= 0)
+        {
+            return;
+        }
+
+        var (cutTop, cutRight, cutBottom, cutLeft) = !_shapeDocked
+            ? (true, true, true, true)
+            : (_shapeEdge != ScreenEdge.Top, _shapeEdge != ScreenEdge.Right, _shapeEdge != ScreenEdge.Bottom, _shapeEdge != ScreenEdge.Left);
+        var inset = 0.5;
+        var (l, t, r, b) = (inset, inset, width - inset, height - inset);
+        var corners = new List<Point>();
+        void Corner(bool cut, Point first, Point sharp, Point second)
+        {
+            if (cut)
+            {
+                corners.Add(first);
+                corners.Add(second);
+            }
+            else
+            {
+                corners.Add(sharp);
+            }
+        }
+
+        Corner(cutLeft && cutTop, new Point(l, t + CutSize), new Point(l, t), new Point(l + CutSize, t));
+        var afterTopLeft = corners.Count;
+        Corner(cutTop && cutRight, new Point(r - CutSize, t), new Point(r, t), new Point(r, t + CutSize));
+        var afterTopRight = corners.Count;
+        Corner(cutRight && cutBottom, new Point(r, b - CutSize), new Point(r, b), new Point(r - CutSize, b));
+        var afterBottomRight = corners.Count;
+        Corner(cutBottom && cutLeft, new Point(l + CutSize, b), new Point(l, b), new Point(l, b - CutSize));
+
+        // The outline starts after the side that lies on the screen and stops before it.
+        var start = !_shapeDocked ? 0 : _shapeEdge switch
+        {
+            ScreenEdge.Top => afterTopLeft,
+            ScreenEdge.Right => afterTopRight,
+            ScreenEdge.Bottom => afterBottomRight,
+            _ => 0,
+        };
+        var ordered = corners.Skip(start).Concat(corners.Take(start)).ToList();
+        Ground.Data = Figure(ordered, closed: true);
+        Edge.Data = Figure(ordered, closed: !_shapeDocked);
+    }
+
+    private static PathGeometry Figure(IReadOnlyList<Point> points, bool closed)
+    {
+        var figure = new PathFigure { StartPoint = points[0], IsClosed = closed, IsFilled = true };
+        figure.Segments.Add(new PolyLineSegment(points.Skip(1), true));
+        return new PathGeometry([figure]);
+    }
+
     /// "Waits" with an orange pause, "done" with a green tick, "stopped" with a red cross and "work"
     /// with a grey dot, as in the list of sessions; each in a field of 12 with its number 4 units after
     /// it; 12 units after the rings, in a row along a top or bottom edge and in a column 6 apart along
@@ -210,7 +270,7 @@ public partial class IslandPanel : UserControl
 
         if (_sessions.Done > 0)
         {
-            AddMark(SiteIcons.Draw(SiteIcons.Check, 10, "Positive"), _sessions.Done);
+            AddMark(SiteIcons.Draw(SiteIcons.Check, 10, "Muted"), _sessions.Done);
         }
 
         if (_sessions.Stopped > 0)
@@ -220,7 +280,7 @@ public partial class IslandPanel : UserControl
 
         if (_sessions.Working > 0)
         {
-            AddMark(new System.Windows.Shapes.Ellipse { Width = 8, Height = 8, Fill = Tokens.Brush("Muted") }, _sessions.Working);
+            AddMark(SiteIcons.Draw(SiteIcons.Scrubber, 8, "Positive"), _sessions.Working);
         }
     }
 

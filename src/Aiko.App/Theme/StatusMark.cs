@@ -1,6 +1,8 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using Aiko.Core;
+using Aiko.Core.Terminal;
 
 namespace Aiko.App;
 
@@ -40,6 +42,17 @@ internal static class StatusMark
             },
         };
     }
+
+    /// The mark of a session; a session the person has seen has none.
+    public static FrameworkElement? Of(RowState state) => state switch
+    {
+        RowState.Working => Create(StatusLook.Working, Strings.TerminalWorking),
+        RowState.Waiting => Create(StatusLook.Waiting, Strings.TerminalWaiting),
+        RowState.Done => Create(StatusLook.Done, Strings.TerminalDone),
+        RowState.Asleep => Create(StatusLook.Asleep, Strings.TerminalAsleep),
+        RowState.Stopped => Create(StatusLook.Stopped, Strings.TerminalStopped),
+        _ => null,
+    };
 
     private static string Tone(StatusLook look) => look switch
     {

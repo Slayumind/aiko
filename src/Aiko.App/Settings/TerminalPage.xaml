@@ -73,8 +73,8 @@
 
     <!-- The model: what it is now and the one thing to do with it. -->
     <StackPanel Margin="24,10,0,0">
-      <Border x:Name="Track" Height="4" CornerRadius="2" Background="{StaticResource Raised}" Visibility="Collapsed">
-        <Border x:Name="TrackFill" HorizontalAlignment="Left" CornerRadius="2" Background="{StaticResource Ink}" Width="0" />
+      <Border x:Name="Track" Height="4" Background="{StaticResource Raised}" Visibility="Collapsed">
+        <Border x:Name="TrackFill" HorizontalAlignment="Left" Background="{StaticResource Ink}" Width="0" />
       </Border>
       <Grid Margin="0,8,0,0">
         <Grid.ColumnDefinitions>
@@ -104,7 +104,7 @@
           <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
         <TextBlock Text="{x:Static core:Strings.VoiceKeyLabel}" Style="{StaticResource RowHint}" VerticalAlignment="Center" Margin="0,0,10,0" />
-        <Border Grid.Column="1" CornerRadius="8" Background="{StaticResource Raised}" BorderBrush="{StaticResource Hairline}"
+        <Border Grid.Column="1" Background="{StaticResource Raised}" BorderBrush="{StaticResource Hairline}"
                 BorderThickness="1" Padding="8,5">
           <Grid>
             <PasswordBox x:Name="KeyBox" Background="Transparent" BorderThickness="0" Foreground="{StaticResource Ink}"

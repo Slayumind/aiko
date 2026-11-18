@@ -73,10 +73,10 @@
     <TextBlock x:Name="TemperamentAbout" Style="{StaticResource RowHint}" Margin="0,8,0,0" />
 
     <TextBlock Text="{x:Static core:Strings.SectionSampleReply}" Style="{StaticResource SectionLabel}" Margin="0,22,0,8" />
-    <Border CornerRadius="12" Background="{StaticResource Background}" BorderBrush="{StaticResource Hairline}"
+    <Border Background="{StaticResource Background}" BorderBrush="{StaticResource Hairline}"
             BorderThickness="1" Padding="12,10">
       <StackPanel>
-        <Border CornerRadius="10" Background="{StaticResource Raised}" Padding="10,7" HorizontalAlignment="Right"
+        <Border Background="{StaticResource Raised}" Padding="10,7" HorizontalAlignment="Right"
                 MaxWidth="380">
           <TextBlock Text="{x:Static core:Strings.SampleQuestion}" Style="{StaticResource ChatText}" LineHeight="18" />
         </Border>

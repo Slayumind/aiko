@@ -17,7 +17,7 @@ struct IslandRevealTests {
     }
 
     @Test(arguments: [
-        (70, 76, true),
+        (65, 76, true),
         (80, 91, true),
         (40, 95, true),
         (76, 80, false),
@@ -36,7 +36,7 @@ struct IslandRevealTests {
 
     @Test
     func eitherEnvironmentCrossingIsEnough() {
-        let before = [card("Aiko", 30), card("Work", 70)]
+        let before = [card("Aiko", 30), card("Work", 65)]
         let after = [card("Aiko", 31), card("Work", 78)]
 
         #expect(IslandReveal.toneRose(before, after))

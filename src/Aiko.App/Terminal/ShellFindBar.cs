@@ -22,7 +22,6 @@ sealed class ShellFindBar : Border
         VerticalAlignment = VerticalAlignment.Top;
         Margin = new Thickness(0, 8, 16, 0);
         Padding = new Thickness(10, 5, 10, 5);
-        CornerRadius = new CornerRadius(8);
         Background = Tokens.Brush("Surface");
         BorderBrush = Tokens.Brush("Hairline");
         BorderThickness = new Thickness(1);

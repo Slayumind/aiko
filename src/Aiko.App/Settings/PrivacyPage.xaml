@@ -50,7 +50,7 @@
 
     <!-- Dimmed while nothing is sent, so the page reads as a list of what would go, not of what
          goes. -->
-    <Border x:Name="Ledger" CornerRadius="10" Background="{StaticResource Surface}"
+    <Border x:Name="Ledger" Background="{StaticResource Surface}"
             BorderBrush="{StaticResource Hairline}" BorderThickness="1" Padding="12">
       <Grid>
         <Grid.ColumnDefinitions>

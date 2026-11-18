@@ -21,7 +21,6 @@ internal static class Widgets
         box.BorderBrush = Tokens.Brush("Hairline");
         box.BorderThickness = new Thickness(1);
         box.Padding = new Thickness(9, 6, 9, 6);
-        box.Resources[typeof(Border)] = new Style(typeof(Border)) { Setters = { new Setter(Border.CornerRadiusProperty, new CornerRadius(0)) } };
     }
 
     internal static TextBlock Text(string text, string size, string tone, FontWeight weight) => new()
@@ -76,11 +75,10 @@ internal static class Widgets
 
         row.Children.Add(Text(text, "TextNumber", ink, main ? FontWeights.Medium : FontWeights.Normal));
 
-        var hover = new Border { CornerRadius = new CornerRadius(0), Background = Tokens.Brush("HoverLayer"), Opacity = 0 };
+        var hover = new Border { Background = Tokens.Brush("HoverLayer"), Opacity = 0 };
         var face = new Grid();
         face.Children.Add(new Border
         {
-            CornerRadius = new CornerRadius(0),
             Background = Brushes.Transparent,
             BorderBrush = ghost ? Brushes.Transparent : Tokens.Brush(danger ? "Destructive" : main ? "Muted" : "Hairline"),
             BorderThickness = new Thickness(1),
@@ -101,7 +99,7 @@ internal static class Widgets
     /// the other buttons (D-332).
     internal static Button Icon(UIElement icon)
     {
-        var hover = new Border { CornerRadius = new CornerRadius(0), Background = Tokens.Brush("HoverLayer"), Opacity = 0 };
+        var hover = new Border { Background = Tokens.Brush("HoverLayer"), Opacity = 0 };
         var face = new Grid { Width = 28, Height = 28 };
         face.Children.Add(hover);
         // In the middle of its hover: a line left to stretch draws from the left edge.
@@ -136,7 +134,6 @@ internal static class Widgets
         var ring = new FrameworkElementFactory(typeof(Border));
         ring.SetValue(Border.BorderBrushProperty, Tokens.Brush("Ink"));
         ring.SetValue(Border.BorderThicknessProperty, new Thickness(2));
-        ring.SetValue(Border.CornerRadiusProperty, new CornerRadius(0));
         ring.SetValue(FrameworkElement.MarginProperty, new Thickness(-3));
         return new Style { Setters = { new Setter(Control.TemplateProperty, new ControlTemplate { VisualTree = ring }) } };
     }

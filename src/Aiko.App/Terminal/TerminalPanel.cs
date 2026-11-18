@@ -22,7 +22,7 @@ sealed partial class TerminalPanel : UserControl
     public const double BarHeight = 44;
     private const double ListWidth = 252;
 
-    /// The title bar stays black over the grey body of the window (D-392).
+    /// The title bar has the ground of the window.
     private readonly Grid _bar = new() { Height = BarHeight, Background = Tokens.Brush("Background") };
     private readonly TerminalPills _pills = new();
     private readonly StackPanel _right = new() { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
@@ -48,7 +48,7 @@ sealed partial class TerminalPanel : UserControl
     private readonly Button _search;
 
     /// The gear stays lit while the settings are open, as a pressed segment.
-    private readonly Border _gearLit = new() { CornerRadius = new CornerRadius(6), Background = Tokens.Brush("Raised"), Visibility = Visibility.Collapsed };
+    private readonly Border _gearLit = new() { Background = Tokens.Brush("Raised"), Visibility = Visibility.Collapsed };
 
     /// A quiet dot on the gear while a newer version is out (D-391); the General page says which.
     private readonly System.Windows.Shapes.Ellipse _gearDot = new()
@@ -145,7 +145,7 @@ sealed partial class TerminalPanel : UserControl
     private bool _editorRoom;
 
     private void ShowEditor() =>
-        Editor.Visibility = _editorRoom && Editor.Wanted ? Visibility.Visible : Visibility.Collapsed;
+        _editorFrame.Visibility = _editorRoom && Editor.Wanted ? Visibility.Visible : Visibility.Collapsed;
 
     public TerminalPanel()
     {
@@ -213,9 +213,9 @@ sealed partial class TerminalPanel : UserControl
         _bar.Children.Add(left);
         Grid.SetColumn(_right, 1);
         _bar.Children.Add(_right);
-        var hairline = new Border { Height = 1, VerticalAlignment = VerticalAlignment.Bottom, Background = Tokens.Brush("Hairline") };
-        Grid.SetColumnSpan(hairline, 2);
-        _bar.Children.Add(hairline);
+        var stateLine = new Border { Height = 1, VerticalAlignment = VerticalAlignment.Bottom, Background = _stateBrush };
+        Grid.SetColumnSpan(stateLine, 2);
+        _bar.Children.Add(stateLine);
         _pills.Refit = FitPills;
         _bar.SizeChanged += (_, _) => FitPills();
 
@@ -277,10 +277,12 @@ sealed partial class TerminalPanel : UserControl
         terminalSide.Children.Add(_keys);
         DockPanel.SetDock(_stopped, Dock.Bottom);
         terminalSide.Children.Add(_stopped);
-        DockPanel.SetDock(Editor, Dock.Bottom);
-        terminalSide.Children.Add(Editor);
+        _editorFrame.Content = Editor;
+        DockPanel.SetDock(_editorFrame, Dock.Bottom);
+        terminalSide.Children.Add(_editorFrame);
         Editor.WantedChanged += ShowEditor;
-        terminalSide.Children.Add(_terminals);
+        _terminalFrame.Content = _terminals;
+        terminalSide.Children.Add(_terminalFrame);
         _terminalSide = terminalSide;
 
         _palettePopup.PlacementTarget = this;
@@ -412,6 +414,7 @@ sealed partial class TerminalPanel : UserControl
         _narrow = ActualWidth > 0 ? WindowPlace.IsNarrow(ActualWidth) : WindowPlace.IsNarrow(Width);
 
         ShowBar(view);
+        ShowSignal(view);
         ShowList(view);
         ShowMain(view);
     }
@@ -453,8 +456,8 @@ sealed partial class TerminalPanel : UserControl
     /// tip is null for a cross that only puts a thing away: what it does is plain without words.
     private Button BarButton(UIElement icon, string? tip, Action click, double width = 40)
     {
-        var hover = new Border { CornerRadius = new CornerRadius(6), Background = Tokens.Brush("Raised"), Opacity = 0 };
-        var face = new Grid { Width = width, Height = 28 };
+        var hover = new Border { Background = Tokens.Brush("Raised"), Opacity = 0 };
+        var face = new Grid { Width = width, Height = 32 };
         face.Children.Add(hover);
         face.Children.Add(new Border { Child = icon, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center });
 

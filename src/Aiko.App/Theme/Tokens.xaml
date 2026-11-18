@@ -8,7 +8,7 @@
                     xmlns:sys="clr-namespace:System;assembly=System.Runtime">
 
   <Color x:Key="BackgroundColor">#FF0A0A0A</Color>
-  <Color x:Key="SurfaceColor">#FF171717</Color>
+  <Color x:Key="SurfaceColor">#FF0A0A0A</Color>
   <Color x:Key="RaisedColor">#FF262626</Color>
   <Color x:Key="MutedColor">#FFA1A1A1</Color>
   <Color x:Key="InkColor">#FFFAFAFA</Color>
@@ -29,10 +29,12 @@
        sessions (D-440). The violets are outside the site palette by the owner's decision. -->
   <Color x:Key="LookLimitSoftColor">#FFC9B6FF</Color>
   <Color x:Key="LookLimitColor">#FF9D7BFF</Color>
+  <Color x:Key="LookCardColor">#FF171717</Color>
   <Color x:Key="LookQuietColor">#FF7A7A7A</Color>
   <Color x:Key="LookTrackColor">#FF4D4D4D</Color>
   <SolidColorBrush x:Key="LookLimitSoft" Color="{StaticResource LookLimitSoftColor}" />
   <SolidColorBrush x:Key="LookLimit" Color="{StaticResource LookLimitColor}" />
+  <SolidColorBrush x:Key="LookCard" Color="{StaticResource LookCardColor}" />
   <SolidColorBrush x:Key="LookQuiet" Color="{StaticResource LookQuietColor}" />
   <SolidColorBrush x:Key="LookTrack" Color="{StaticResource LookTrackColor}" />
 

@@ -46,8 +46,8 @@
     {
       "name": "just under caution",
       "ageSeconds": 10,
-      "windows": [{ "kind": "fiveHour", "percent": 74, "resetsInSeconds": 3600 }],
-      "badge": { "kind": "fiveHour", "percent": 74, "tone": "normal" }
+      "windows": [{ "kind": "fiveHour", "percent": 69, "resetsInSeconds": 3600 }],
+      "badge": { "kind": "fiveHour", "percent": 69, "tone": "normal" }
     },
     {
       "name": "old numbers lose their colour",

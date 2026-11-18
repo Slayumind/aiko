@@ -29,8 +29,8 @@ static class Marks
         Data = Geometry.Parse(data),
         Stroke = Tokens.Brush(tone),
         StrokeThickness = LineWidth,
-        StrokeStartLineCap = PenLineCap.Round,
-        StrokeEndLineCap = PenLineCap.Round,
+        StrokeStartLineCap = PenLineCap.Flat,
+        StrokeEndLineCap = PenLineCap.Flat,
         StrokeLineJoin = PenLineJoin.Round,
         VerticalAlignment = VerticalAlignment.Center,
     };
@@ -57,8 +57,8 @@ static class Marks
             {
                 Stroke = Tokens.ToneBrush(tone),
                 StrokeThickness = thickness,
-                StrokeStartLineCap = PenLineCap.Round,
-                StrokeEndLineCap = PenLineCap.Round,
+                StrokeStartLineCap = PenLineCap.Flat,
+                StrokeEndLineCap = PenLineCap.Flat,
                 Data = Arc(size / 2, (size - thickness) / 2, used / 100.0),
             });
         }

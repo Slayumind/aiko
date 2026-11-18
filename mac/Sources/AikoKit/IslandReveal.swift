@@ -1,6 +1,6 @@
 import Foundation
 
-/// When the island opens by itself (D-161): for a moment, when a session limit crosses 75 % or 90 %
+/// When the island opens by itself (D-161): for a moment, when a session limit crosses 70 % or 90 %
 /// on the way up. The numbers on the island are then in front of the person without a hover.
 public enum IslandReveal {
     public static let showFor: TimeInterval = 2

@@ -28,7 +28,6 @@ sealed class TerminalWindow : Window
         CaptionHeight = TerminalPanel.BarHeight,
         ResizeBorderThickness = new Thickness(6),
         GlassFrameThickness = new Thickness(0),
-        CornerRadius = new CornerRadius(0),
         UseAeroCaptionButtons = false,
     };
 

@@ -33,6 +33,7 @@ public static class Strings
     public static readonly IReadOnlyDictionary<string, (string English, string Russian)> Table =
         new Dictionary<string, (string English, string Russian)>
         {
+            ["TerminalLimitMark"] = ("limit {0}%", "лимит {0}%"),
             ["SwitchOff"] = ("Off", "Выкл"),
             ["SwitchOn"] = ("On", "Вкл"),
             ["CardSession"] = ("5 hours", "5 часов"),
@@ -121,7 +122,7 @@ public static class Strings
             ["WizardBridgeNotFound"] = ("Aiko can't find its bridge program.", "Aiko не нашла свою программу-посредник."),
             ["WizardUpdatesVersion"] = ("Once a day, Aiko asks slayumind.org for the latest version.", "Раз в сутки Aiko спрашивает у slayumind.org свежую версию."),
             ["WizardUpdatesCount"] = ("With statistics on, the same request says that one copy of Aiko ran today.", "С включённой статистикой вместе с вопросом уходит, что одна копия сегодня работала."),
-            ["WizardDoneTray"] = ("Close the window and Aiko stays by the clock while the sessions keep working. A click on the icon brings the window back.", "Закроешь окно — Aiko останется у часов, а сессии продолжат работу. Щелчок по значку вернёт окно."),
+            ["WizardDoneTray"] = ("Close the window and Aiko stays in the tray while the sessions keep working. A click on the icon brings the window back.", "Закроешь окно — Aiko останется в трее, а сессии продолжат работу. Щелчок по значку вернёт окно."),
             ["WizardDoneOverflow"] = ("Windows 11 hides the icons of new apps under the arrow by the clock. Drag Aiko onto the taskbar to keep the limit rings in sight.", "Windows 11 прячет значки новых приложений под стрелку у часов. Перетащи Aiko на панель задач, чтобы кольца лимитов было видно всегда."),
             ["WizardDoneWindowIsland"] = ("Close the window and Aiko becomes an island at the top of the screen while the sessions keep working. Drag it to any edge.", "Закроешь окно — Aiko встанет островом вверху экрана, а сессии продолжат работу. Перетащи её к любому краю."),
             ["WizardSummaryTitle"] = ("On Finish, Aiko", "По «Готово» Aiko"),
@@ -570,6 +571,9 @@ public static class Strings
     public static string Get(string key) =>
         Table.TryGetValue(key, out var pair) ? (Language == StringLanguage.Russian ? pair.Russian : pair.English) : key;
 
+    /// limit {0}%
+    public static string TerminalLimitMark => Get("TerminalLimitMark");
+
     /// Off
     public static string SwitchOff => Get("SwitchOff");
 
@@ -834,7 +838,7 @@ public static class Strings
     /// With statistics on, the same request says that one copy of Aiko ran today.
     public static string WizardUpdatesCount => Get("WizardUpdatesCount");
 
-    /// Close the window and Aiko stays by the clock while the sessions keep working. A click on ...
+    /// Close the window and Aiko stays in the tray while the sessions keep working. A click on t...
     public static string WizardDoneTray => Get("WizardDoneTray");
 
     /// Windows 11 hides the icons of new apps under the arrow by the clock. Drag Aiko onto the t...

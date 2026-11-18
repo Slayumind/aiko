@@ -30,7 +30,6 @@ sealed class ChoicePopup
             MaxWidth = 520,
             Margin = new Thickness(12, 12, 12, 4),
             Padding = new Thickness(4),
-            CornerRadius = new CornerRadius(10),
             Background = Tokens.Brush("Surface"),
             BorderBrush = Tokens.Brush("InputLine"),
             BorderThickness = new Thickness(1),
@@ -61,7 +60,7 @@ sealed class ChoicePopup
             line.Inlines.Add(new Run(text[..start]));
             line.Inlines.Add(new Run(text.Substring(start, length)) { Foreground = Tokens.Brush("Ink") });
             line.Inlines.Add(new Run(text[(start + length)..]));
-            var row = new Border { CornerRadius = new CornerRadius(6), Padding = new Thickness(8, 5, 8, 5), Cursor = Cursors.Hand, Child = line };
+            var row = new Border { Padding = new Thickness(8, 5, 8, 5), Cursor = Cursors.Hand, Child = line };
             row.MouseLeftButtonUp += (_, _) => Clicked?.Invoke(index);
             _lines.Add(row);
             _rows.Children.Add(row);

@@ -40,6 +40,7 @@ public enum Strings {
     }
 
     public static let table: [String: (english: String, russian: String)] = [
+        "TerminalLimitMark": ("limit {0}%", "лимит {0}%"),
         "SwitchOff": ("Off", "Выкл"),
         "SwitchOn": ("On", "Вкл"),
         "CardSession": ("5 hours", "5 часов"),
@@ -128,7 +129,7 @@ public enum Strings {
         "WizardBridgeNotFound": ("Aiko can't find its bridge program.", "Aiko не нашла свою программу-посредник."),
         "WizardUpdatesVersion": ("Once a day, Aiko asks slayumind.org for the latest version.", "Раз в сутки Aiko спрашивает у slayumind.org свежую версию."),
         "WizardUpdatesCount": ("With statistics on, the same request says that one copy of Aiko ran today.", "С включённой статистикой вместе с вопросом уходит, что одна копия сегодня работала."),
-        "WizardDoneTray": ("Close the window and Aiko stays by the clock while the sessions keep working. A click on the icon brings the window back.", "Закроешь окно — Aiko останется у часов, а сессии продолжат работу. Щелчок по значку вернёт окно."),
+        "WizardDoneTray": ("Close the window and Aiko stays in the menu bar while the sessions keep working. A click on the icon brings the window back.", "Закроешь окно — Aiko останется в строке меню, а сессии продолжат работу. Щелчок по значку вернёт окно."),
         "WizardDoneOverflow": ("Windows 11 hides the icons of new apps under the arrow by the clock. Drag Aiko onto the taskbar to keep the limit rings in sight.", "Windows 11 прячет значки новых приложений под стрелку у часов. Перетащи Aiko на панель задач, чтобы кольца лимитов было видно всегда."),
         "WizardDoneWindowIsland": ("Close the window and Aiko becomes an island at the top of the screen while the sessions keep working. Drag it to any edge.", "Закроешь окно — Aiko встанет островом вверху экрана, а сессии продолжат работу. Перетащи её к любому краю."),
         "WizardSummaryTitle": ("On Finish, Aiko", "По «Готово» Aiko"),
@@ -574,6 +575,9 @@ public enum Strings {
         "VoiceCloudBusy": ("OpenAI asks to wait a minute.", "OpenAI просит подождать минуту."),
     ]
 
+    /// limit {0}%
+    public static var terminalLimitMark: String { Strings.get("TerminalLimitMark") }
+
     /// Off
     public static var switchOff: String { Strings.get("SwitchOff") }
 
@@ -838,7 +842,7 @@ public enum Strings {
     /// With statistics on, the same request says that one copy of Aiko ran today.
     public static var wizardUpdatesCount: String { Strings.get("WizardUpdatesCount") }
 
-    /// Close the window and Aiko stays by the clock while the sessions keep working. A click on ...
+    /// Close the window and Aiko stays in the menu bar while the sessions keep working. A click ...
     public static var wizardDoneTray: String { Strings.get("WizardDoneTray") }
 
     /// Windows 11 hides the icons of new apps under the arrow by the clock. Drag Aiko onto the t...
