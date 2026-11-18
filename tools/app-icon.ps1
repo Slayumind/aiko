@@ -2,7 +2,7 @@
 #
 #   pwsh -NoProfile -File tools/app-icon.ps1
 #
-# The ring is a grey track and a green arc over 42 % of the circle, from the top, clockwise. There is
+# The ring is a grey track and a violet arc over 42 % of the circle, from the top, clockwise. There is
 # no plate behind it: a dark plate melted into a dark taskbar at 16 px. The track is half see-through,
 # so the same file reads on a dark and on a light taskbar. Every size is drawn on its own grid rather
 # than scaled down from 256, so the small ones stay sharp.
@@ -11,7 +11,7 @@ $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.Drawing
 
 $sizes = 16, 20, 24, 32, 40, 48, 64, 256
-$green = [System.Drawing.Color]::FromArgb(255, 0, 188, 125)
+$violet = [System.Drawing.Color]::FromArgb(255, 157, 123, 255)
 $track = [System.Drawing.Color]::FromArgb(120, 140, 140, 140)
 $target = Join-Path $PSScriptRoot '..\src\Aiko.App\Assets\aiko.ico'
 
@@ -27,7 +27,7 @@ function Draw-Ring([int] $size) {
     $centre = $size / 2.0
     $box = [System.Drawing.RectangleF]::new($centre - $radius, $centre - $radius, 2 * $radius, 2 * $radius)
     $graphics.DrawEllipse([System.Drawing.Pen]::new($track, $stroke), $box)
-    $graphics.DrawArc([System.Drawing.Pen]::new($green, $stroke), $box, -90, 360 * 0.42)
+    $graphics.DrawArc([System.Drawing.Pen]::new($violet, $stroke), $box, -90, 360 * 0.42)
     $graphics.Dispose()
 
     $stream = [System.IO.MemoryStream]::new()
