@@ -25,6 +25,19 @@
   <SolidColorBrush x:Key="Caution" Color="{StaticResource CautionColor}" />
   <SolidColorBrush x:Key="Destructive" Color="{StaticResource DestructiveColor}" />
 
+  <!-- The new look. Limits have their own violet scale, so green, orange and red speak only about
+       sessions (D-440). The violets are outside the site palette by the owner's decision. -->
+  <Color x:Key="LookLimitSoftColor">#FFC9B6FF</Color>
+  <Color x:Key="LookLimitColor">#FF9D7BFF</Color>
+  <Color x:Key="LookQuietColor">#FF7A7A7A</Color>
+  <Color x:Key="LookTrackColor">#FF4D4D4D</Color>
+  <Color x:Key="LookLineColor">#38FFFFFF</Color>
+  <SolidColorBrush x:Key="LookLimitSoft" Color="{StaticResource LookLimitSoftColor}" />
+  <SolidColorBrush x:Key="LookLimit" Color="{StaticResource LookLimitColor}" />
+  <SolidColorBrush x:Key="LookQuiet" Color="{StaticResource LookQuietColor}" />
+  <SolidColorBrush x:Key="LookTrack" Color="{StaticResource LookTrackColor}" />
+  <SolidColorBrush x:Key="LookLine" Color="{StaticResource LookLineColor}" />
+
   <!-- Red at low strength: the ground of a danger button, and the box around a step that cannot be undone. -->
   <SolidColorBrush x:Key="DangerTint" Color="#29FF6467" />
   <SolidColorBrush x:Key="DangerZone" Color="#0FFF6467" />

@@ -69,6 +69,13 @@ static class Program
             return;
         }
 
+        // Every part of the new look on one sheet: --snapshot-look out.png [100 | 115 | 130]
+        if (args is ["--snapshot-look", var lookPath, ..])
+        {
+            LookSheet.Write(lookPath, args.Length > 2 && double.TryParse(args[2], out var zoom) ? zoom : 100);
+            return;
+        }
+
         // The tip of the windows in both languages (Theme/ToolTip.xaml).
         if (args is ["--snapshot-tip", var tipPath, ..])
         {
