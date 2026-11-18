@@ -31,12 +31,10 @@
   <Color x:Key="LookLimitColor">#FF9D7BFF</Color>
   <Color x:Key="LookQuietColor">#FF7A7A7A</Color>
   <Color x:Key="LookTrackColor">#FF4D4D4D</Color>
-  <Color x:Key="LookLineColor">#38FFFFFF</Color>
   <SolidColorBrush x:Key="LookLimitSoft" Color="{StaticResource LookLimitSoftColor}" />
   <SolidColorBrush x:Key="LookLimit" Color="{StaticResource LookLimitColor}" />
   <SolidColorBrush x:Key="LookQuiet" Color="{StaticResource LookQuietColor}" />
   <SolidColorBrush x:Key="LookTrack" Color="{StaticResource LookTrackColor}" />
-  <SolidColorBrush x:Key="LookLine" Color="{StaticResource LookLineColor}" />
 
   <!-- Red at low strength: the ground of a danger button, and the box around a step that cannot be undone. -->
   <SolidColorBrush x:Key="DangerTint" Color="#29FF6467" />
@@ -47,21 +45,20 @@
 
   <!-- Hairlines are white at low opacity, not a grey of their own: they have to sit on both the
        card and the raised surface without becoming a line of their own colour. -->
-  <Color x:Key="HairlineColor">#1AFFFFFF</Color>
-  <Color x:Key="InputLineColor">#26FFFFFF</Color>
+  <Color x:Key="HairlineColor">#38FFFFFF</Color>
+  <Color x:Key="InputLineColor">#38FFFFFF</Color>
   <SolidColorBrush x:Key="Hairline" Color="{StaticResource HairlineColor}" />
   <SolidColorBrush x:Key="InputLine" Color="{StaticResource InputLineColor}" />
 
   <!-- Hover lightens whatever is under it by this much, as a layer that fades in. -->
   <SolidColorBrush x:Key="HoverLayer" Color="#12FFFFFF" />
 
-  <FontFamily x:Key="Sans">pack://application:,,,/Aiko.App;component/Assets/Fonts/#Geist</FontFamily>
   <FontFamily x:Key="Mono">pack://application:,,,/Aiko.App;component/Assets/Fonts/#Geist Mono</FontFamily>
 
   <sys:Double x:Key="TextTiny">11</sys:Double>
   <sys:Double x:Key="TextSmall">12</sys:Double>
   <sys:Double x:Key="TextNumber">13</sys:Double>
-  <sys:Double x:Key="TextName">14</sys:Double>
+  <sys:Double x:Key="TextName">13</sys:Double>
 
   <!-- Only floating things get a shadow, and only this one. -->
   <DropShadowEffect x:Key="CardShadow" BlurRadius="24" ShadowDepth="8" Direction="270"

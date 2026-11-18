@@ -162,7 +162,7 @@ sealed partial class TerminalPanel : UserControl
         };
 
         Background = Tokens.Brush("Surface");
-        FontFamily = Tokens.Get<FontFamily>("Sans");
+        FontFamily = Tokens.Get<FontFamily>("Mono");
         Focusable = false;
         PreviewMouseDown += EndRenameOnPressAway;
 

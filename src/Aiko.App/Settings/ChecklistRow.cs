@@ -104,7 +104,7 @@ sealed class ChecklistRow : UserControl
 
     private void Build()
     {
-        _title.FontFamily = Tokens.Get<FontFamily>("Sans");
+        _title.FontFamily = Tokens.Get<FontFamily>("Mono");
         _title.FontSize = Tokens.Get<double>("TextSmall");
         _title.Foreground = Tokens.Brush("Ink");
         _title.VerticalAlignment = VerticalAlignment.Center;

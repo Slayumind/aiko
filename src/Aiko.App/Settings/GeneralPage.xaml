@@ -14,7 +14,7 @@
   </UserControl.Resources>
 
   <StackPanel>
-    <TextBlock Text="{x:Static core:Strings.NavGeneral}" FontFamily="{StaticResource Sans}" FontSize="16"
+    <TextBlock Text="{x:Static core:Strings.NavGeneral}" FontFamily="{StaticResource Mono}" FontSize="16"
                FontWeight="Medium" Foreground="{StaticResource Ink}" />
 
     <!-- The terminal window is the main window: the tray and the island are how Aiko waits while it is

@@ -104,7 +104,7 @@ sealed class DropDown : UserControl
             RenderTransform = _chevronTurn,
         };
 
-        _chosen.FontFamily = Tokens.Get<FontFamily>("Sans");
+        _chosen.FontFamily = Tokens.Get<FontFamily>("Mono");
         _chosen.FontSize = Tokens.Get<double>("TextSmall");
         _chosen.Foreground = Brush("Ink");
         _chosen.VerticalAlignment = VerticalAlignment.Center;
@@ -115,16 +115,16 @@ sealed class DropDown : UserControl
         row.Children.Add(chevron);
         row.Children.Add(_chosen);
 
-        var hover = new Border { CornerRadius = new CornerRadius(8), Background = Brush("HoverLayer"), Opacity = 0 };
+        var hover = new Border { CornerRadius = new CornerRadius(0), Background = Brush("HoverLayer"), Opacity = 0 };
         var face = new Grid();
         face.Children.Add(hover);
         face.Children.Add(new Border { Padding = new Thickness(10, 0, 10, 0), Child = row });
 
         _button.Height = 30;
-        _button.CornerRadius = new CornerRadius(8);
+        _button.CornerRadius = new CornerRadius(0);
         // The look of a text field of the site: a quiet fill and a thin line (D-332).
-        _button.Background = Brush("Surface");
-        _button.BorderBrush = Brush("InputLine");
+        _button.Background = Brush("Background");
+        _button.BorderBrush = Brush("Hairline");
         _button.BorderThickness = new Thickness(1);
         _button.Cursor = Cursors.Hand;
         _button.Child = face;
@@ -145,10 +145,10 @@ sealed class DropDown : UserControl
         _listFrame.PreviewMouseLeftButtonUp += (_, _) => _popup.StaysOpen = false;
         Motion.SetPress(_button, true);
 
-        _listFrame.Background = Brush("Surface");
-        _listFrame.BorderBrush = Brush("InputLine");
+        _listFrame.Background = Brush("Background");
+        _listFrame.BorderBrush = Brush("Hairline");
         _listFrame.BorderThickness = new Thickness(1);
-        _listFrame.CornerRadius = new CornerRadius(10);
+        _listFrame.CornerRadius = new CornerRadius(0);
         _listFrame.Padding = new Thickness(4);
         _listFrame.Margin = new Thickness(0, 4, 0, 12);
         _listFrame.Effect = Tokens.Get<System.Windows.Media.Effects.Effect>("CardShadow");
@@ -316,7 +316,7 @@ sealed class DropDown : UserControl
     private static TextBlock Header(string text, bool first) => new()
     {
         Text = text,
-        FontFamily = Tokens.Get<FontFamily>("Sans"),
+        FontFamily = Tokens.Get<FontFamily>("Mono"),
         FontSize = Tokens.Get<double>("TextTiny"),
         Foreground = Tokens.Brush("Muted"),
         Margin = new Thickness(8, first ? 4 : 10, 8, 4),
@@ -327,7 +327,7 @@ sealed class DropDown : UserControl
         var text = new TextBlock
         {
             Text = _items[index],
-            FontFamily = Tokens.Get<FontFamily>("Sans"),
+            FontFamily = Tokens.Get<FontFamily>("Mono"),
             FontSize = Tokens.Get<double>("TextSmall"),
             Foreground = Brush(index == _selected ? "Ink" : "Muted"),
             VerticalAlignment = VerticalAlignment.Center,
@@ -354,7 +354,7 @@ sealed class DropDown : UserControl
         {
             Height = 28,
             Padding = new Thickness(8, 0, 8, 0),
-            CornerRadius = new CornerRadius(6),
+            CornerRadius = new CornerRadius(0),
             Background = index == _highlighted ? Brush("Raised") : Brushes.Transparent,
             Cursor = Cursors.Hand,
             Child = row,

@@ -49,7 +49,7 @@ sealed class ShellBlocksView : FrameworkElement
     private readonly List<(Rect Area, Action Act)> _buttons = [];
     private readonly Typeface _face = new(new FontFamily("Cascadia Mono, Consolas"), FontStyles.Normal, FontWeights.Normal, FontStretches.Normal);
     private readonly Typeface _bold = new(new FontFamily("Cascadia Mono, Consolas"), FontStyles.Normal, FontWeights.SemiBold, FontStretches.Normal);
-    private readonly Typeface _sans = new(Tokens.Get<FontFamily>("Sans"), FontStyles.Normal, FontWeights.Normal, FontStretches.Normal);
+    private readonly Typeface _sans = new(Tokens.Get<FontFamily>("Mono"), FontStyles.Normal, FontWeights.Normal, FontStretches.Normal);
     private readonly Dictionary<int, Brush> _colors = [];
     private readonly DispatcherTimer _copiedTimer;
     private List<Row> _rows = [];

@@ -17,7 +17,7 @@ internal sealed class TitledFrame : PixelElement
 
     public Thickness Padding { get; init; } = new(12, 8, 12, 10);
 
-    public Brush Line { get; init; } = Tokens.Brush("LookLine");
+    public Brush Line { get; init; } = Tokens.Brush("Hairline");
 
     public UIElement? Title
     {

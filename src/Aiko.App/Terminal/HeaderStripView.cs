@@ -402,7 +402,7 @@ sealed class HeaderStripView
     /// The place of the tone word: the word of "running low" in the current language, and the gap
     /// before it.
     private static double ToneReserve() =>
-        Math.Ceiling(TextWidth(Strings.CardToneCaution, Tokens.Get<FontFamily>("Sans"), Tokens.Get<double>("TextSmall"))) + 8;
+        Math.Ceiling(TextWidth(Strings.CardToneCaution, Tokens.Get<FontFamily>("Mono"), Tokens.Get<double>("TextSmall"))) + 8;
 
     /// The place of the countdown: the longest time it can show, and the gap before it.
     private static double CountdownReserve()
@@ -801,7 +801,7 @@ sealed class LimitWindowName : TextBlock
         _long = longName;
         _short = shortName;
         Text = longName;
-        FontFamily = Tokens.Get<FontFamily>("Sans");
+        FontFamily = Tokens.Get<FontFamily>("Mono");
         FontSize = Tokens.Get<double>("TextSmall");
         Foreground = Tokens.Brush("Muted");
         VerticalAlignment = VerticalAlignment.Center;

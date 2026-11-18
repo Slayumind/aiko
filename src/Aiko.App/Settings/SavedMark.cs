@@ -39,7 +39,7 @@ sealed class SavedMark : StackPanel
         Children.Add(new TextBlock
         {
             Text = Strings.Saved,
-            FontFamily = Tokens.Get<FontFamily>("Sans"),
+            FontFamily = Tokens.Get<FontFamily>("Mono"),
             FontSize = Tokens.Get<double>("TextSmall"),
             Foreground = Tokens.Brush("Muted"),
             VerticalAlignment = VerticalAlignment.Center,

@@ -33,6 +33,8 @@ public static class Strings
     public static readonly IReadOnlyDictionary<string, (string English, string Russian)> Table =
         new Dictionary<string, (string English, string Russian)>
         {
+            ["SwitchOff"] = ("Off", "Выкл"),
+            ["SwitchOn"] = ("On", "Вкл"),
             ["CardSession"] = ("5 hours", "5 часов"),
             ["CardWeek"] = ("Week", "Неделя"),
             ["CardModelWeek"] = ("{0} · week", "{0} · неделя"),
@@ -567,6 +569,12 @@ public static class Strings
 
     public static string Get(string key) =>
         Table.TryGetValue(key, out var pair) ? (Language == StringLanguage.Russian ? pair.Russian : pair.English) : key;
+
+    /// Off
+    public static string SwitchOff => Get("SwitchOff");
+
+    /// On
+    public static string SwitchOn => Get("SwitchOn");
 
     /// 5 hours
     public static string CardSession => Get("CardSession");

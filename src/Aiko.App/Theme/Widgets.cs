@@ -13,21 +13,21 @@ internal static class Widgets
 {
     internal static void Field(TextBox box)
     {
-        box.FontFamily = Tokens.Get<FontFamily>("Sans");
+        box.FontFamily = Tokens.Get<FontFamily>("Mono");
         box.FontSize = Tokens.Get<double>("TextName");
         box.Foreground = Tokens.Brush("Ink");
         box.CaretBrush = Tokens.Brush("Ink");
-        box.Background = Tokens.Brush("Surface");
-        box.BorderBrush = Tokens.Brush("InputLine");
+        box.Background = Tokens.Brush("Background");
+        box.BorderBrush = Tokens.Brush("Hairline");
         box.BorderThickness = new Thickness(1);
         box.Padding = new Thickness(9, 6, 9, 6);
-        box.Resources[typeof(Border)] = new Style(typeof(Border)) { Setters = { new Setter(Border.CornerRadiusProperty, new CornerRadius(8)) } };
+        box.Resources[typeof(Border)] = new Style(typeof(Border)) { Setters = { new Setter(Border.CornerRadiusProperty, new CornerRadius(0)) } };
     }
 
     internal static TextBlock Text(string text, string size, string tone, FontWeight weight) => new()
     {
         Text = text,
-        FontFamily = Tokens.Get<FontFamily>("Sans"),
+        FontFamily = Tokens.Get<FontFamily>("Mono"),
         FontSize = Tokens.Get<double>(size),
         FontWeight = weight,
         Foreground = Tokens.Brush(tone),
@@ -53,13 +53,13 @@ internal static class Widgets
         VerticalAlignment = VerticalAlignment.Center,
     };
 
-    /// One button for the whole window: the filled one is the main action, the outlined one the
-    /// second, the ghost one the quiet third (DESIGN, one fill per control).
+    /// One button for the whole window: every button is outlined. The main action has the brighter
+    /// line, the ghost one has none.
     /// aside stands at the right end of the button, such as the key of its action.
     internal static Button Flat(string text, Action click, bool ghost, bool main = false, bool danger = false, bool plus = false, UIElement? aside = null, string? mark = null)
     {
         var row = new DockPanel();
-        var ink = main ? "Background" : danger ? "Destructive" : ghost ? "Muted" : "Ink";
+        var ink = danger ? "Destructive" : ghost ? "Muted" : "Ink";
         if (aside is not null)
         {
             DockPanel.SetDock(aside, Dock.Right);
@@ -76,13 +76,13 @@ internal static class Widgets
 
         row.Children.Add(Text(text, "TextNumber", ink, main ? FontWeights.Medium : FontWeights.Normal));
 
-        var hover = new Border { CornerRadius = new CornerRadius(8), Background = Tokens.Brush("HoverLayer"), Opacity = 0 };
+        var hover = new Border { CornerRadius = new CornerRadius(0), Background = Tokens.Brush("HoverLayer"), Opacity = 0 };
         var face = new Grid();
         face.Children.Add(new Border
         {
-            CornerRadius = new CornerRadius(8),
-            Background = main ? Tokens.Brush("Ink") : danger ? Tokens.Brush("DangerTint") : Brushes.Transparent,
-            BorderBrush = main || danger || ghost ? Brushes.Transparent : Tokens.Brush("InputLine"),
+            CornerRadius = new CornerRadius(0),
+            Background = Brushes.Transparent,
+            BorderBrush = ghost ? Brushes.Transparent : Tokens.Brush(danger ? "Destructive" : main ? "Muted" : "Hairline"),
             BorderThickness = new Thickness(1),
         });
         face.Children.Add(hover);
@@ -97,11 +97,11 @@ internal static class Widgets
         return button;
     }
 
-    /// A button that is only an icon: 28 by 28, a soft fill on hover, the same press and focus as
+    /// A button that is only an icon: 28 by 28, a light layer on hover, the same press and focus as
     /// the other buttons (D-332).
     internal static Button Icon(UIElement icon)
     {
-        var hover = new Border { CornerRadius = new CornerRadius(8), Background = Tokens.Brush("HoverLayer"), Opacity = 0 };
+        var hover = new Border { CornerRadius = new CornerRadius(0), Background = Tokens.Brush("HoverLayer"), Opacity = 0 };
         var face = new Grid { Width = 28, Height = 28 };
         face.Children.Add(hover);
         // In the middle of its hover: a line left to stretch draws from the left edge.
@@ -136,7 +136,7 @@ internal static class Widgets
         var ring = new FrameworkElementFactory(typeof(Border));
         ring.SetValue(Border.BorderBrushProperty, Tokens.Brush("Ink"));
         ring.SetValue(Border.BorderThicknessProperty, new Thickness(2));
-        ring.SetValue(Border.CornerRadiusProperty, new CornerRadius(10));
+        ring.SetValue(Border.CornerRadiusProperty, new CornerRadius(0));
         ring.SetValue(FrameworkElement.MarginProperty, new Thickness(-3));
         return new Style { Setters = { new Setter(Control.TemplateProperty, new ControlTemplate { VisualTree = ring }) } };
     }

@@ -38,7 +38,7 @@ sealed class PaletteView : Border
         lens.Margin = new Thickness(0, 0, 10, 0);
         DockPanel.SetDock(lens, Dock.Left);
 
-        _field.FontFamily = Tokens.Get<FontFamily>("Sans");
+        _field.FontFamily = Tokens.Get<FontFamily>("Mono");
         _field.FontSize = Tokens.Get<double>("TextName");
         _field.Foreground = Tokens.Brush("Ink");
         _field.CaretBrush = Tokens.Brush("Ink");

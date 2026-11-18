@@ -1,5 +1,19 @@
 [
   [
+    "SwitchOff",
+    [
+      "Off",
+      "Выкл"
+    ]
+  ],
+  [
+    "SwitchOn",
+    [
+      "On",
+      "Вкл"
+    ]
+  ],
+  [
     "CardSession",
     [
       "5 hours",

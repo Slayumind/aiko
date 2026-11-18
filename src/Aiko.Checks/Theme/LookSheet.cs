@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using Aiko.App;
 
@@ -43,13 +44,18 @@ static class LookSheet
         }
 
         sheet.Children.Add(marks);
+        sheet.Resources.MergedDictionaries.Add(new ResourceDictionary
+        {
+            Source = new Uri("pack://application:,,,/Aiko.App;component/Theme/Controls.xaml", UriKind.Absolute),
+        });
+        var style = (Style)sheet.FindResource("Switch");
         sheet.Children.Add(new StackPanel
         {
             Orientation = Orientation.Horizontal,
             Children =
             {
-                new StateSwitch("Выкл", "Вкл", "Запускать вместе с Windows") { IsChecked = true, Margin = new Thickness(0, 0, 24, 0) },
-                new StateSwitch("Off", "On", "Open the terminal window too") { IsChecked = false },
+                new ToggleButton { Style = style, IsChecked = true, Margin = new Thickness(0, 0, 24, 0) },
+                new ToggleButton { Style = style, IsChecked = false },
             },
         });
 

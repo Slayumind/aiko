@@ -19,7 +19,7 @@
       <SolidColorBrush x:Key="VoiceInk" Color="#FFCFE9DF" />
 
       <Style x:Key="ChatText" TargetType="TextBlock">
-        <Setter Property="FontFamily" Value="{StaticResource Sans}" />
+        <Setter Property="FontFamily" Value="{StaticResource Mono}" />
         <Setter Property="FontSize" Value="{StaticResource TextNumber}" />
         <Setter Property="Foreground" Value="{StaticResource Ink}" />
         <Setter Property="TextWrapping" Value="Wrap" />
@@ -31,7 +31,7 @@
   <StackPanel>
     <StackPanel Orientation="Horizontal">
       <Image x:Name="HeaderFace" Width="24" Height="24" Margin="0,0,10,0" VerticalAlignment="Center" />
-      <TextBlock Text="{x:Static core:Strings.NavPersonality}" FontFamily="{StaticResource Sans}" FontSize="16"
+      <TextBlock Text="{x:Static core:Strings.NavPersonality}" FontFamily="{StaticResource Mono}" FontSize="16"
                  FontWeight="Medium" Foreground="{StaticResource Ink}" VerticalAlignment="Center" />
     </StackPanel>
 

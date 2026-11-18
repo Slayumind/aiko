@@ -40,6 +40,8 @@ public enum Strings {
     }
 
     public static let table: [String: (english: String, russian: String)] = [
+        "SwitchOff": ("Off", "Выкл"),
+        "SwitchOn": ("On", "Вкл"),
         "CardSession": ("5 hours", "5 часов"),
         "CardWeek": ("Week", "Неделя"),
         "CardModelWeek": ("{0} · week", "{0} · неделя"),
@@ -571,6 +573,12 @@ public enum Strings {
         "VoiceCloudNoMoney": ("The OpenAI account is out of money.", "На счёте OpenAI кончились деньги."),
         "VoiceCloudBusy": ("OpenAI asks to wait a minute.", "OpenAI просит подождать минуту."),
     ]
+
+    /// Off
+    public static var switchOff: String { Strings.get("SwitchOff") }
+
+    /// On
+    public static var switchOn: String { Strings.get("SwitchOn") }
 
     /// 5 hours
     public static var cardSession: String { Strings.get("CardSession") }
