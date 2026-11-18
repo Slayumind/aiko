@@ -37,8 +37,9 @@ sealed partial class TerminalPanel
 
         _listHidden = view.Header.ListHidden;
         _chevron.ToolTip = view.Header.Open ? Strings.TerminalHideLimits : Strings.TerminalShowLimits;
-        _chevron.RenderTransformOrigin = new Point(0.5, 0.5);
-        _chevron.RenderTransform = _chevronTurn;
+        // Only the mark turns: the highlight of the button stays where it is.
+        _chevronMark.RenderTransformOrigin = new Point(0.5, 0.5);
+        _chevronMark.RenderTransform = _chevronTurn;
         var turn = view.Header.Open ? 180 : 0;
         if (!Motion.IsOn)
         {

@@ -15,8 +15,11 @@
        above the page; the island is pressed against the edge of the screen and stays there. The
        room the shadow needs showed up as a gap and kept the island from touching the edge. -->
   <Grid>
-    <Path x:Name="Ground" Fill="{StaticResource Surface}" />
-    <Path x:Name="Edge" Stroke="{StaticResource Hairline}" StrokeThickness="1" />
+    <!-- The shape follows the body. In a canvas it adds nothing to the size of the island. -->
+    <Canvas>
+      <Path x:Name="Ground" Fill="{StaticResource Surface}" />
+      <Path x:Name="Edge" Stroke="{StaticResource Hairline}" StrokeThickness="1" />
+    </Canvas>
     <Border x:Name="Body" SizeChanged="OnBodySized"
             Background="Transparent"
             BorderBrush="Transparent" BorderThickness="1"

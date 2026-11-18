@@ -41,6 +41,7 @@ sealed partial class TerminalPanel : UserControl
     private readonly Popup _palettePopup = new() { StaysOpen = false, AllowsTransparency = true, Placement = PlacementMode.Relative };
     private readonly Button _listToggle;
     private readonly Button _chevron;
+    private readonly FrameworkElement _chevronMark = Marks.Line("M0,0 L4,4 L8,0");
     private readonly Button _gear;
 
     /// The magnifier left of the gear: the palette of conversations, which only a shortcut opened
@@ -185,7 +186,7 @@ sealed partial class TerminalPanel : UserControl
         _listPopup.PlacementTarget = _listToggle;
         // The chevron is a small mark: its button is as narrow as it is tall, so the hover shows
         // where a click lands and does not reach towards the pills.
-        _chevron = BarButton(Marks.Line("M0,0 L4,4 L8,0"), Strings.TerminalShowLimits, () => HeaderToggled?.Invoke(), ChevronWidth);
+        _chevron = BarButton(_chevronMark, Strings.TerminalShowLimits, () => HeaderToggled?.Invoke(), ChevronWidth);
         _search = BarButton(Marks.Line("M4.5,0.5 A4,4 0 1 1 4.49,0.5 Z M7.6,7.6 L11,11"), Strings.TerminalFindConversation, () => PaletteAsked?.Invoke());
         _gear = BarButton(GearIcon(), Strings.Settings, () => SettingsAsked?.Invoke());
         ((Grid)_gear.Content).Children.Insert(0, _gearLit);

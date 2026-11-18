@@ -239,6 +239,13 @@ static class Program
             return;
         }
 
+        // Layout faults of the new look: frames and the shape of the island.
+        if (args is ["--try-look", var lookReport, ..])
+        {
+            Environment.Exit(LookCheck.Run(lookReport));
+            return;
+        }
+
         // Drags the island with the real mouse to the left edge and checks where it lands.
         if (args is ["--try-island", ..])
         {

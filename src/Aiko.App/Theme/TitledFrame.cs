@@ -37,6 +37,9 @@ internal sealed class TitledFrame : PixelElement
         set => Replace(ref _content, value);
     }
 
+    /// Styles and resources of the window reach the content through this list.
+    protected override System.Collections.IEnumerator LogicalChildren => _parts.GetEnumerator();
+
     protected override int VisualChildrenCount => _parts.Count;
 
     protected override Visual GetVisualChild(int index) => _parts[index];
@@ -134,6 +137,8 @@ internal sealed class TitledFrame : PixelElement
             AddLogicalChild(value);
         }
 
+        // The size of the frame may stay the same, and the gaps in its line must still follow.
         InvalidateMeasure();
+        InvalidateVisual();
     }
 }
