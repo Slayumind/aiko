@@ -32,6 +32,8 @@ static class LookCheck
         CheckFrameStyle(Check);
         CheckFrameGap(Check);
         CheckIsland(Check);
+        CheckIslandEdge(Check, ScreenEdge.Left);
+        CheckIslandEdge(Check, ScreenEdge.Top);
 
         File.WriteAllLines(reportPath, report);
         application.Shutdown();
@@ -114,6 +116,28 @@ static class LookCheck
 
         check("the top line closes where a label was", Alpha(width - 24) == Alpha(width / 2) && Alpha(width / 2) > 0, $"gap {Alpha(width - 24)}, line {Alpha(width / 2)}");
         window.Close();
+    }
+
+    /// Docked, the island is solid up to the screen: no strip of the desktop shows between them.
+    private static void CheckIslandEdge(Action<string, bool, string> check, ScreenEdge edge)
+    {
+        var panel = new IslandPanel();
+        panel.Show(CardSnapshot.Example(), edge);
+        var window = Offscreen(panel);
+        window.Width = double.NaN;
+        window.Height = double.NaN;
+        window.SizeToContent = SizeToContent.WidthAndHeight;
+        window.Show();
+        window.UpdateLayout();
+
+        var (width, height) = ((int)Math.Ceiling(panel.ActualWidth), (int)Math.Ceiling(panel.ActualHeight));
+        var bitmap = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32);
+        bitmap.Render(panel);
+        var pixel = new byte[4];
+        var at = edge == ScreenEdge.Left ? new Int32Rect(0, height / 2, 1, 1) : new Int32Rect(width / 2, 0, 1, 1);
+        bitmap.CopyPixels(at, pixel, 4, 0);
+        window.Close();
+        check($"the island touches the {edge} edge", pixel[3] == 255, $"alpha {pixel[3]}");
     }
 
     private static void CheckIsland(Action<string, bool, string> check)

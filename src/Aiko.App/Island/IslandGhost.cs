@@ -13,12 +13,11 @@ namespace Aiko.App;
 ///
 /// The glass is drawn by Windows, not by Aiko: WPF draws in software here and cannot blur what lies
 /// behind a window. The system backdrop only frosts the active window, and this one never is, so
-/// it uses the acrylic accent instead (RESEARCH, spike 2026-09-14). Windows then rounds all four
-/// corners, and a window region would switch the glass off, so the strip reaches past the screen
-/// edge by one corner radius: the corners on that side fall outside the screen.
+/// it uses the acrylic accent instead (RESEARCH, spike 2026-09-14). A window region gives it the
+/// shape of the island: the free corners are cut at 45 degrees (D-453).
 sealed class IslandGhost : Window
 {
-    private const double Radius = 8;
+    private const double CutSize = 8;
 
     private ScreenEdge? _edge;
 
@@ -33,7 +32,12 @@ sealed class IslandGhost : Window
         Topmost = true;
         Focusable = false;
         IsHitTestVisible = false;
-        SourceInitialized += (_, _) => MakeGlass();
+        SourceInitialized += (_, _) =>
+        {
+            MakeGlass();
+            CutCorners();
+        };
+        SizeChanged += (_, _) => CutCorners();
     }
 
     /// Raised the first time the strip shows. Both windows stay above everything, and the one shown
@@ -47,21 +51,21 @@ sealed class IslandGhost : Window
         var glide = _edge is not null && _edge != edge && Motion.IsOn;
         _edge = edge;
 
-        var pane = PastTheEdge(box, edge);
-        Width = pane.Width;
-        Height = pane.Height;
+        Width = box.Width;
+        Height = box.Height;
+        CutCorners();
 
         if (glide)
         {
-            BeginAnimation(LeftProperty, Motion.To(pane.X, Motion.Expand, Motion.Standard));
-            BeginAnimation(TopProperty, Motion.To(pane.Y, Motion.Expand, Motion.Standard));
+            BeginAnimation(LeftProperty, Motion.To(box.X, Motion.Expand, Motion.Standard));
+            BeginAnimation(TopProperty, Motion.To(box.Y, Motion.Expand, Motion.Standard));
         }
         else
         {
             BeginAnimation(LeftProperty, null);
             BeginAnimation(TopProperty, null);
-            Left = pane.X;
-            Top = pane.Y;
+            Left = box.X;
+            Top = box.Y;
         }
 
         if (!IsVisible)
@@ -72,14 +76,42 @@ sealed class IslandGhost : Window
         }
     }
 
-    /// The same box, grown past the screen edge by one corner radius.
-    private static Box PastTheEdge(Box box, ScreenEdge edge) => edge switch
+    /// The outline of the landed island: the two corners against the screen stay whole.
+    private void CutCorners()
     {
-        ScreenEdge.Top => box with { Y = box.Y - Radius, Height = box.Height + Radius },
-        ScreenEdge.Bottom => box with { Height = box.Height + Radius },
-        ScreenEdge.Left => box with { X = box.X - Radius, Width = box.Width + Radius },
-        _ => box with { Width = box.Width + Radius },
-    };
+        var handle = new WindowInteropHelper(this).Handle;
+        if (handle == 0 || _edge is not { } edge || ActualWidth <= 0 || ActualHeight <= 0)
+        {
+            return;
+        }
+
+        var scale = VisualTreeHelper.GetDpi(this);
+        var width = (int)Math.Round(ActualWidth * scale.DpiScaleX);
+        var height = (int)Math.Round(ActualHeight * scale.DpiScaleY);
+        var cut = (int)Math.Round(CutSize * scale.DpiScaleX);
+        var (top, right, bottom, left) = (edge != ScreenEdge.Top, edge != ScreenEdge.Right, edge != ScreenEdge.Bottom, edge != ScreenEdge.Left);
+        var points = new List<RegionPoint>();
+        void Corner(bool cutIt, RegionPoint first, RegionPoint sharp, RegionPoint second)
+        {
+            if (cutIt)
+            {
+                points.Add(first);
+                points.Add(second);
+            }
+            else
+            {
+                points.Add(sharp);
+            }
+        }
+
+        Corner(left && top, new(0, cut), new(0, 0), new(cut, 0));
+        Corner(top && right, new(width - cut, 0), new(width, 0), new(width, cut));
+        Corner(right && bottom, new(width, height - cut), new(width, height), new(width - cut, height));
+        Corner(bottom && left, new(cut, height), new(0, height), new(0, height - cut));
+
+        // Windows owns the region from here on and frees the one it replaces.
+        SetWindowRgn(handle, CreatePolygonRgn([.. points], points.Count, Winding), true);
+    }
 
     private void MakeGlass()
     {
@@ -103,8 +135,8 @@ sealed class IslandGhost : Window
             Marshal.FreeHGlobal(memory);
         }
 
-        var round = RoundCorners;
-        DwmSetWindowAttribute(handle, CornerPreference, ref round, sizeof(int));
+        var square = SquareCorners;
+        DwmSetWindowAttribute(handle, CornerPreference, ref square, sizeof(int));
     }
 
     /// ACCENT_ENABLE_ACRYLICBLURBEHIND: the strongest blur Windows gives a window without focus.
@@ -117,8 +149,13 @@ sealed class IslandGhost : Window
     private const int AccentPolicyAttribute = 19;
     private const int CornerPreference = 33;
 
-    /// DWMWCP_ROUND: the 8 px corner Windows 11 gives its own windows. Radius above is the same.
-    private const int RoundCorners = 2;
+    /// DWMWCP_DONOTROUND: the corners come from the region alone.
+    private const int SquareCorners = 1;
+
+    private const int Winding = 2;
+
+    [StructLayout(LayoutKind.Sequential)]
+    private readonly record struct RegionPoint(int X, int Y);
 
     [StructLayout(LayoutKind.Sequential)]
     private struct AccentPolicy
@@ -140,6 +177,12 @@ sealed class IslandGhost : Window
 #pragma warning disable SYSLIB1054
     [DllImport("user32.dll")]
     private static extern bool SetWindowCompositionAttribute(nint window, ref CompositionAttributeData data);
+
+    [DllImport("user32.dll")]
+    private static extern int SetWindowRgn(nint window, nint region, bool redraw);
+
+    [DllImport("gdi32.dll")]
+    private static extern nint CreatePolygonRgn(RegionPoint[] points, int count, int mode);
 
     [DllImport("dwmapi.dll")]
     private static extern int DwmSetWindowAttribute(nint window, int attribute, ref int value, int size);

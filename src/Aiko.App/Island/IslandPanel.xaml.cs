@@ -208,8 +208,10 @@ public partial class IslandPanel : UserControl
         var (cutTop, cutRight, cutBottom, cutLeft) = !_shapeDocked
             ? (true, true, true, true)
             : (_shapeEdge != ScreenEdge.Top, _shapeEdge != ScreenEdge.Right, _shapeEdge != ScreenEdge.Bottom, _shapeEdge != ScreenEdge.Left);
-        var inset = 0.5;
-        var (l, t, r, b) = (inset, inset, width - inset, height - inset);
+        // A line sits half a unit inside the free sides. Against the screen the shape goes to the
+        // very edge, or the desktop shows through as a thin strip.
+        double Inset(ScreenEdge side) => _shapeDocked && _shapeEdge == side ? 0 : 0.5;
+        var (l, t, r, b) = (Inset(ScreenEdge.Left), Inset(ScreenEdge.Top), width - Inset(ScreenEdge.Right), height - Inset(ScreenEdge.Bottom));
         var corners = new List<Point>();
         void Corner(bool cut, Point first, Point sharp, Point second)
         {
