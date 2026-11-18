@@ -345,7 +345,7 @@
       </StackPanel>
     </local:RevealPanel>
 
-    <local:PixelBorder x:Name="FooterLine" Height="1" Background="{StaticResource Hairline}" Margin="0,16,0,12" />
+    <local:Rule x:Name="FooterLine" Margin="0,16,0,12" />
 
     <!-- In the window the checklist goes one item at a time (D-391): the dots of the steps, a way
          back, a way on, and Finish once every item has an answer. -->

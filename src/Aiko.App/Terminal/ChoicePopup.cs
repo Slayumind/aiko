@@ -24,16 +24,12 @@ sealed class ChoicePopup
     public ChoicePopup(UIElement target)
     {
         _popup.PlacementTarget = target;
-        _popup.Child = new PixelBorder
+        _popup.Child = new FloatingPanel
         {
             MinWidth = 240,
             MaxWidth = 520,
             Margin = new Thickness(12, 12, 12, 4),
             Padding = new Thickness(4),
-            Background = Tokens.Brush("Background"),
-            BorderBrush = Tokens.Brush("Hairline"),
-            BorderThickness = new Thickness(1),
-            Effect = Tokens.FloatShadow,
             Child = _rows,
         };
     }

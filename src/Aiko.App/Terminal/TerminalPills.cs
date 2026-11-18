@@ -174,6 +174,9 @@ sealed class TerminalPills
             return;
         }
 
+        // Whatever the text measures, the pills never reach the buttons after them.
+        Root.MaxWidth = room;
+
         var label = _selected >= 0 && _selected < _shown.Count ? _shown[_selected].Label : null;
         if (label is not null)
         {
@@ -241,7 +244,13 @@ sealed class TerminalPills
 
         _sliding = true;
         var move = Motion.To(x, Slide, Motion.Standard);
-        move.Completed += (_, _) => _sliding = false;
+        move.Completed += (_, _) =>
+        {
+            _sliding = false;
+
+            // The pill may have changed its width while the background was on its way.
+            Place(_selected, slide: false);
+        };
         _backShift.BeginAnimation(TranslateTransform.XProperty, move);
         _back.BeginAnimation(FrameworkElement.WidthProperty, Motion.To(width, Slide, Motion.Standard));
     }

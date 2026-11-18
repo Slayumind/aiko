@@ -116,7 +116,7 @@
              takes every other folder. -->
         <TextBlock Text="{x:Static core:Strings.SectionBoundFolders}" Style="{StaticResource SectionLabel}" Margin="0,16,0,6" />
         <local:RevealPanel x:Name="NeedCommandsPanel">
-          <local:PixelBorder Background="{StaticResource CautionZone}" BorderBrush="{StaticResource CautionZoneLine}" BorderThickness="1" Padding="12,10" Margin="0,0,0,8">
+          <local:PixelBorder Style="{StaticResource CautionBox}" Padding="12,10" Margin="0,0,0,8">
             <StackPanel>
               <TextBlock Text="{x:Static core:Strings.FoldersNeedCommands}" Style="{StaticResource RowHint}" Foreground="{StaticResource Ink}" />
               <Button Content="{x:Static core:Strings.SetUpEnvironments}" Style="{StaticResource SmallButton}"
@@ -146,12 +146,12 @@
       </StackPanel>
     </Grid>
 
-    <local:PixelBorder Height="1" Background="{StaticResource Hairline}" Margin="0,22,0,14" />
+    <local:Rule Margin="0,22,0,14" />
     <TextBlock x:Name="KeepClaudeNote" Text="{x:Static core:Strings.KeepClaude}" Style="{StaticResource RowHint}" />
     <Button x:Name="RemoveButton" Content="{x:Static core:Strings.RemoveEnvironment}" Style="{StaticResource GhostDangerButton}"
             Margin="-10,0,0,0" Click="OnRemoveAsked" />
     <local:RevealPanel x:Name="ConfirmPanel">
-      <local:PixelBorder Background="{StaticResource DangerZone}" BorderBrush="{StaticResource DangerZoneLine}" BorderThickness="1" Padding="12">
+      <local:PixelBorder Style="{StaticResource DangerBox}" Padding="12">
         <StackPanel>
           <TextBlock x:Name="ConfirmLine" Style="{StaticResource RowHint}" Foreground="{StaticResource Ink}" />
           <CheckBox x:Name="RecycleBox" Style="{StaticResource Tick}" Margin="0,12,0,0"

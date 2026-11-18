@@ -158,6 +158,19 @@
     <Setter Property="BorderThickness" Value="1" />
   </Style>
 
+  <!-- The box around a step that cannot be undone, and around a warning. -->
+  <Style x:Key="DangerBox" TargetType="Border">
+    <Setter Property="Background" Value="{StaticResource DangerZone}" />
+    <Setter Property="BorderBrush" Value="{StaticResource DangerZoneLine}" />
+    <Setter Property="BorderThickness" Value="1" />
+  </Style>
+
+  <Style x:Key="CautionBox" TargetType="Border">
+    <Setter Property="Background" Value="{StaticResource CautionZone}" />
+    <Setter Property="BorderBrush" Value="{StaticResource CautionZoneLine}" />
+    <Setter Property="BorderThickness" Value="1" />
+  </Style>
+
   <Style x:Key="SegmentBar" TargetType="Border">
     <Setter Property="BorderBrush" Value="{StaticResource Hairline}" />
     <Setter Property="BorderThickness" Value="1" />
@@ -533,11 +546,9 @@
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="ContextMenu">
-          <local:PixelBorder Margin="0,0,12,12" MinWidth="180" Padding="4"
-                  Background="{StaticResource Background}" BorderBrush="{StaticResource Hairline}" BorderThickness="1"
-                  Effect="{StaticResource CardShadow}">
+          <local:FloatingPanel Margin="0,0,12,12" MinWidth="180" Padding="4">
             <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle" />
-          </local:PixelBorder>
+          </local:FloatingPanel>
         </ControlTemplate>
       </Setter.Value>
     </Setter>

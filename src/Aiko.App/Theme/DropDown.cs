@@ -23,7 +23,7 @@ sealed class DropDown : UserControl
     /// PageUp and PageDown move this many rows (Cherry Studio, research of 2026-10-26).
     private const int PageRows = 7;
 
-    private readonly PixelBorder _listFrame = new();
+    private readonly FloatingPanel _listFrame = new();
     private IReadOnlyList<string> _items = [];
     private IReadOnlyList<string> _short = [];
     private IReadOnlyDictionary<int, string> _headers = new Dictionary<int, string>();
@@ -144,12 +144,8 @@ sealed class DropDown : UserControl
         _listFrame.PreviewMouseLeftButtonUp += (_, _) => _popup.StaysOpen = false;
         Motion.SetPress(_button, true);
 
-        _listFrame.Background = Brush("Background");
-        _listFrame.BorderBrush = Brush("Hairline");
-        _listFrame.BorderThickness = new Thickness(1);
         _listFrame.Padding = new Thickness(4);
         _listFrame.Margin = new Thickness(0, 4, 0, 12);
-        _listFrame.Effect = Tokens.FloatShadow;
         _listFrame.Child = _list;
 
         // A press on the list bubbles to the page through the drop-down. A scroll viewer there,

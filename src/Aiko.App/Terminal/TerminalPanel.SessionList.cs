@@ -74,16 +74,12 @@ sealed partial class TerminalPanel
         {
             SlideList(0);
             // Drawn anew while open too, so it takes the zoom here and not only on opening.
-            _listPopup.Child = new PixelBorder
+            _listPopup.Child = new FloatingPanel
             {
                 LayoutTransform = PopupZoom.Of(_listToggle),
                 Width = ListWidth + 20,
                 MaxHeight = 480,
                 Margin = new Thickness(0, 4, 12, 12),
-                BorderBrush = Tokens.Brush("Hairline"),
-                BorderThickness = new Thickness(1),
-                Background = Tokens.Brush("Background"),
-                Effect = Tokens.FloatShadow,
                 Child = holder,
             };
         }

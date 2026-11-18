@@ -202,17 +202,13 @@ sealed partial class TerminalPanel
         inside.Children.Add(column);
         inside.Children.Add(cross);
 
-        var card = new PixelBorder
+        var card = new FloatingPanel
         {
             Width = 420,
             VerticalAlignment = VerticalAlignment.Top,
             HorizontalAlignment = HorizontalAlignment.Center,
             Margin = new Thickness(20, 28, 20, 0),
             Padding = new Thickness(18, 16, 18, 16),
-            Background = Tokens.Brush("Background"),
-            BorderBrush = Tokens.Brush("Hairline"),
-            BorderThickness = new Thickness(1),
-            Effect = Tokens.FloatShadow,
             Child = inside,
         };
 

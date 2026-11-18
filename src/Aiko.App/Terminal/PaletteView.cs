@@ -18,7 +18,7 @@ sealed record PaletteGroup(string Title, IReadOnlyList<PaletteRow> Rows);
 /// keys at the bottom. It sits in a popup, a window of its own, because nothing WPF draws in the
 /// main window can cover a real terminal. The core finds; this only draws and listens to the keys.
 [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763")]
-sealed class PaletteView : PixelBorder
+sealed class PaletteView : FloatingPanel
 {
     public const double CardWidth = 520;
     private const double MostHeight = 380;
@@ -87,10 +87,6 @@ sealed class PaletteView : PixelBorder
         Width = CardWidth;
         // Room for the shadow inside the popup.
         Margin = new Thickness(16, 0, 16, 16);
-        Background = Tokens.Brush("Background");
-        BorderBrush = Tokens.Brush("Hairline");
-        BorderThickness = new Thickness(1);
-        Effect = Tokens.FloatShadow;
         Child = column;
 
         _field.TextChanged += (_, _) =>
@@ -238,5 +234,5 @@ sealed class PaletteView : PixelBorder
         }
     }
 
-    private static PixelBorder Hairline() => new() { Height = 1, Background = Tokens.Brush("Hairline") };
+    private static Rule Hairline() => new();
 }

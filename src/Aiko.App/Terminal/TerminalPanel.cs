@@ -214,7 +214,7 @@ sealed partial class TerminalPanel : UserControl
         _bar.Children.Add(left);
         Grid.SetColumn(_right, 1);
         _bar.Children.Add(_right);
-        var hairline = new PixelBorder { Height = 1, VerticalAlignment = VerticalAlignment.Bottom, Background = Tokens.Brush("Hairline") };
+        var hairline = new Rule { VerticalAlignment = VerticalAlignment.Bottom };
         Grid.SetColumnSpan(hairline, 2);
         _bar.Children.Add(hairline);
         _pills.Refit = FitPills;
@@ -241,7 +241,7 @@ sealed partial class TerminalPanel : UserControl
         _body.ColumnDefinitions.Add(new ColumnDefinition());
         var listSide = new Grid();
         listSide.Children.Add(_list);
-        listSide.Children.Add(new PixelBorder { Width = 1, HorizontalAlignment = HorizontalAlignment.Right, Background = Tokens.Brush("Hairline") });
+        listSide.Children.Add(new Rule { Orientation = Orientation.Vertical, HorizontalAlignment = HorizontalAlignment.Right });
         _body.Children.Add(listSide);
         Grid.SetColumn(_main, 1);
         _body.Children.Add(_main);
