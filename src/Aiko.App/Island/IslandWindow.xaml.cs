@@ -271,7 +271,7 @@ public partial class IslandWindow : Window
         var centreX = Left + (ActualWidth / 2);
         var centreY = Top + (ActualHeight / 2);
         var landing = IslandPlacement.DropAt(edge, centreX, centreY, ActualWidth, ActualHeight, work);
-        _ghost?.PlaceOn(IslandPlacement.Place(landing, ActualWidth, ActualHeight, work), edge);
+        _ghost?.PlaceOn(IslandPlacement.Place(landing, ActualWidth, ActualHeight, work), edge, work);
     }
 
     /// Lets the island go where it is, as a mouse button coming up would.
@@ -314,7 +314,7 @@ public partial class IslandWindow : Window
 
         Panel.Show(Cards, _handEdge, docked: false);
         Fit();
-        _ghost = new IslandGhost();
+        _ghost = new IslandGhost(this);
         _ghost.Shown += () => TaskbarOrder.PutOnTop(this);
     }
 

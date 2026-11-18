@@ -51,6 +51,9 @@
   <!-- Hover lightens whatever is under it by this much, as a layer that fades in. -->
   <SolidColorBrush x:Key="HoverLayer" Color="#12FFFFFF" />
 
+  <!-- The tone of the glass of the landing strip over its blurred picture. -->
+  <SolidColorBrush x:Key="GlassTint" Color="#0D171717" />
+
   <!-- A block that stands a little apart from the page. -->
   <SolidColorBrush x:Key="BlockFill" Color="#08FFFFFF" />
 

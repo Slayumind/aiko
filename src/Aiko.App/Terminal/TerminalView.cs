@@ -5,7 +5,7 @@ namespace Aiko.App;
 
 /// The pill of one environment in the title bar (D-376): its ring and percentage are the limit that
 /// is closer to its end (D-355), null when nothing is known yet.
-sealed record TabView(string Name, bool Selected, int Waiting, int? Percent, LimitTone Tone);
+sealed record TabView(string Name, bool Selected, int Waiting, int? Percent, LimitTone Tone, int Done = 0, int Stopped = 0);
 
 /// One column of the open header. The active one carries the words of the card (Block) and the
 /// profile line; a quiet one only shows its two numbers.

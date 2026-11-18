@@ -21,8 +21,8 @@
       <ColumnDefinition Width="*" />
     </Grid.ColumnDefinitions>
 
-    <DockPanel Margin="8,12,8,10">
-      <TextBlock x:Name="VersionLine" DockPanel.Dock="Bottom" Style="{StaticResource RowNote}" Margin="10,8,0,0" />
+    <DockPanel Margin="0,12,0,10">
+      <TextBlock x:Name="VersionLine" DockPanel.Dock="Bottom" Style="{StaticResource RowNote}" Margin="18,8,18,0" />
       <StackPanel x:Name="Nav" />
     </DockPanel>
     <local:Rule x:Name="NavLine" Orientation="Vertical" HorizontalAlignment="Right" />

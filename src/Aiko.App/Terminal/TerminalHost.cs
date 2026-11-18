@@ -934,7 +934,9 @@ sealed partial class TerminalHost
             environment == _model.Environment,
             SessionRows.Waiting(_sessions, environment, Live),
             badge?.Percent,
-            badge?.Tone ?? LimitTone.Unknown);
+            badge?.Tone ?? LimitTone.Unknown,
+            SessionRows.Done(_sessions, environment, Live),
+            SessionRows.Stopped(_sessions, environment, Live));
     }
 
     /// The open header (D-373, D-376). The card is read only when the header is open: it is the

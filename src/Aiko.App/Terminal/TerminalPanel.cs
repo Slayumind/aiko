@@ -182,7 +182,7 @@ sealed partial class TerminalPanel : UserControl
         // The list icon: in a wide window it hides the column of sessions, in a narrow one it opens
         // the list over the terminal (D-376).
         _listToggle = BarButton(ListIcon(), Strings.TerminalSessionList, ToggleList);
-        _listToggle.Margin = new Thickness(6, 0, 2, 0);
+        _listToggle.Margin = new Thickness(6, 0, 2, 1);
         _listPopup.PlacementTarget = _listToggle;
         // The chevron is a small mark: its button is as narrow as it is tall, so the hover shows
         // where a click lands and does not reach towards the pills.
@@ -443,22 +443,13 @@ sealed partial class TerminalPanel : UserControl
         });
     }
 
-    /// The waiting mark in the box of a pill's ring, so the name does not move when one turns
-    /// into the other.
-    private static FrameworkElement WaitingMark()
-    {
-        var pause = Marks.Pause();
-        pause.HorizontalAlignment = HorizontalAlignment.Center;
-        return new Grid { Width = 14, Height = 14, Background = Brushes.Transparent, VerticalAlignment = VerticalAlignment.Center, Children = { pause } };
-    }
-
     private const double ChevronWidth = 28;
 
     /// tip is null for a cross that only puts a thing away: what it does is plain without words.
     private Button BarButton(UIElement icon, string? tip, Action click, double width = 40)
     {
         var hover = new Border { Background = Tokens.Brush("Raised"), Opacity = 0 };
-        var face = new Grid { Width = width, Height = 32 };
+        var face = new Grid { Width = width };
         face.Children.Add(hover);
         face.Children.Add(new Border { Child = icon, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center });
 
@@ -468,8 +459,9 @@ sealed partial class TerminalPanel : UserControl
             ToolTip = tip,
             Focusable = false,
             Cursor = Cursors.Hand,
-            VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Thickness(0, 0, 4, 0),
+            // The highlight reaches from the top of the window to the line, as on the tabs.
+            VerticalAlignment = VerticalAlignment.Stretch,
+            Margin = new Thickness(0, 0, 4, 1),
             Template = Bare(),
         };
         button.MouseEnter += (_, _) => hover.BeginAnimation(OpacityProperty, Motion.To(1, Motion.Or0(Motion.Hover), Motion.Standard));

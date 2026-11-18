@@ -66,7 +66,7 @@ sealed partial class TerminalPanel
             VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
             HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
             Focusable = false,
-            Padding = new Thickness(8, 4, 8, 0),
+            Padding = new Thickness(0, 4, 0, 0),
             Content = _rows,
         });
 
@@ -118,7 +118,7 @@ sealed partial class TerminalPanel
             buttons.Children.Add(button);
         }
 
-        var header = new DockPanel { Margin = new Thickness(10, 8, 4, 0), Background = Brushes.Transparent, ToolTip = group.Folder };
+        var header = new DockPanel { Margin = new Thickness(18, 8, 12, 0), Background = Brushes.Transparent, ToolTip = group.Folder };
         DockPanel.SetDock(buttons, Dock.Right);
         header.Children.Add(buttons);
         var name = Mono(group.Name, "Muted");
@@ -230,7 +230,7 @@ sealed partial class TerminalPanel
         var hover = new Border { Background = Tokens.Brush("HoverLayer"), Opacity = 0 };
         var face = new Grid();
         face.Children.Add(hover);
-        face.Children.Add(new Border { Padding = new Thickness(10, 8, 10, 8), Child = lines });
+        face.Children.Add(new Border { Padding = new Thickness(18, 8, 18, 8), Child = lines });
 
         var back = new Border
         {

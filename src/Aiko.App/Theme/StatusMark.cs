@@ -43,6 +43,34 @@ internal static class StatusMark
         };
     }
 
+    public static FrameworkElement WaitingSign() => Marks.Pause();
+
+    public static FrameworkElement DoneSign() => SiteIcons.Draw(SiteIcons.Check, 10, "Muted");
+
+    public static FrameworkElement StoppedSign() => Marks.Line("M0,0 L8,8 M8,0 L0,8", "Destructive");
+
+    public static FrameworkElement WorkingSign() => SiteIcons.Draw(SiteIcons.Scrubber, 8, "Positive");
+
+    /// A sign with a number after it, for counts of sessions on the island and on the tabs.
+    public static (StackPanel Row, TextBlock Number) Counted(FrameworkElement sign)
+    {
+        sign.HorizontalAlignment = HorizontalAlignment.Center;
+        sign.VerticalAlignment = VerticalAlignment.Center;
+        var number = new TextBlock
+        {
+            FontFamily = Tokens.Mono,
+            FontSize = Tokens.Get<double>("TextTiny"),
+            Foreground = Tokens.Brush("Ink"),
+            MinWidth = 7,
+            Margin = new Thickness(4, 0, 0, 0),
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+        var row = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
+        row.Children.Add(new Grid { Width = 12, Height = 12, Children = { sign } });
+        row.Children.Add(number);
+        return (row, number);
+    }
+
     /// The mark of a session; a session the person has seen has none.
     public static FrameworkElement? Of(RowState state) => state switch
     {

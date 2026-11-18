@@ -45,7 +45,7 @@ static class TerminalSnapshot
         var seconds = now.ToUnixTimeSeconds();
         var active = part == "header-work" ? "Work · Kodland" : "Aiko";
         panel.Show(new TerminalView(
-            [new TabView("Aiko", active == "Aiko", 0, 42, LimitTone.Normal), new TabView("Work · Kodland", active != "Aiko", 1, 82, LimitTone.Caution)],
+            [new TabView("Aiko", active == "Aiko", 0, 42, LimitTone.Normal, Done: 1), new TabView("Work · Kodland", active != "Aiko", 1, 82, LimitTone.Caution, Stopped: 1)],
             Header(part, active, now),
             [
                 new RowGroup("C:\\work\\aiko", "aiko",

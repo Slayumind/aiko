@@ -22,6 +22,17 @@ public class SessionConversationTests
     }
 
     [Fact]
+    public void The_tab_counts_what_wants_attention()
+    {
+        LiveTerminal? Done(string id) => new(TerminalActivity.Done, "");
+        LiveTerminal? Stopped(string id) => new(TerminalActivity.Exited, "");
+
+        Assert.Equal(1, SessionRows.Done(One(), "Aiko", Done));
+        Assert.Equal(0, SessionRows.Stopped(One(), "Aiko", Done));
+        Assert.Equal(1, SessionRows.Stopped(One(), "Aiko", Stopped));
+    }
+
+    [Fact]
     public void An_empty_id_or_the_same_one_changes_nothing()
     {
         var sessions = One();

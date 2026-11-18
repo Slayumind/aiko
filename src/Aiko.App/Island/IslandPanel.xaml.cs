@@ -266,23 +266,23 @@ public partial class IslandPanel : UserControl
         Sessions.Margin = _sessions.IsEmpty ? new Thickness(0) : _horizontal ? new Thickness(12, 0, 0, 0) : new Thickness(0, 12, 0, 0);
         if (_sessions.Waiting > 0)
         {
-            _waitingMark = AddMark(Marks.Pause(), _sessions.Waiting);
+            _waitingMark = AddMark(StatusMark.WaitingSign(), _sessions.Waiting);
             _waitingMark.Cursor = System.Windows.Input.Cursors.Hand;
         }
 
         if (_sessions.Done > 0)
         {
-            AddMark(SiteIcons.Draw(SiteIcons.Check, 10, "Muted"), _sessions.Done);
+            AddMark(StatusMark.DoneSign(), _sessions.Done);
         }
 
         if (_sessions.Stopped > 0)
         {
-            AddMark(Marks.Line("M0,0 L8,8 M8,0 L0,8", "Destructive"), _sessions.Stopped);
+            AddMark(StatusMark.StoppedSign(), _sessions.Stopped);
         }
 
         if (_sessions.Working > 0)
         {
-            AddMark(SiteIcons.Draw(SiteIcons.Scrubber, 8, "Positive"), _sessions.Working);
+            AddMark(StatusMark.WorkingSign(), _sessions.Working);
         }
     }
 
@@ -300,20 +300,8 @@ public partial class IslandPanel : UserControl
 
     private static FrameworkElement SessionMark(FrameworkElement sign, int count)
     {
-        sign.HorizontalAlignment = HorizontalAlignment.Center;
-        sign.VerticalAlignment = VerticalAlignment.Center;
-        var row = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Center, Background = System.Windows.Media.Brushes.Transparent };
-        row.Children.Add(new Grid { Width = 12, Height = 12, Children = { sign } });
-        row.Children.Add(new TextBlock
-        {
-            Text = count.ToString(System.Globalization.CultureInfo.CurrentCulture),
-            FontFamily = Tokens.Mono,
-            FontSize = Tokens.Get<double>("TextTiny"),
-            Foreground = Tokens.Brush("Ink"),
-            MinWidth = 7,
-            Margin = new Thickness(4, 0, 0, 0),
-            VerticalAlignment = VerticalAlignment.Center,
-        });
+        var (row, number) = StatusMark.Counted(sign);
+        number.Text = count.ToString(System.Globalization.CultureInfo.CurrentCulture);
         return row;
     }
 

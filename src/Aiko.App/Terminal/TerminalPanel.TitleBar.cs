@@ -315,23 +315,22 @@ sealed partial class TerminalPanel
         ListToggled?.Invoke();
     }
 
-    /// The pill of an environment (D-376): the ring and percentage of its limit, its name, and how
-    /// many of its sessions wait. While a session waits, the waiting mark takes the place of the
-    /// ring and the percentage, and the limit moves to the tooltip. In a narrow window a pill that
-    /// is not chosen keeps only its first mark; the name and the number move to the tooltip.
+    private readonly Dictionary<string, TabMarks> _tabMarks = [];
+
+    /// The pill of an environment (D-376): the ring and percentage of its limit, its name, and the
+    /// sessions that want attention. In a narrow window a pill that is not chosen keeps the ring and
+    /// the marks; the name and the number move to the tooltip.
     private Pill Tab(TabView tab)
     {
         TextBlock? label = null;
         var small = _narrow && !tab.Selected;
-        var waiting = tab.Waiting > 0;
         var percent = tab.Percent is { } known ? known.ToString(CultureInfo.CurrentCulture) + "%" : null;
         var row = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
 
         // The mark is a part of the pill: a click on it picks the environment, as anywhere on the
         // pill. Only the chevron opens the header (D-407): the ring stood right after the chevron,
         // and a click on the first pill opened the header instead.
-        var mark = waiting ? WaitingMark() : Marks.Ring(tab.Percent, tab.Tone, 14, 2);
-        row.Children.Add(mark);
+        row.Children.Add(Marks.Ring(tab.Percent, tab.Tone, 14, 2));
 
         if (!small)
         {
@@ -341,11 +340,7 @@ sealed partial class TerminalPanel
             // texts of 13 and 11 units, each centred, put the smaller one a pixel higher.
             var name = Text(tab.Name, "TextBody", tab.Selected ? "Ink" : "Muted", FontWeights.Medium);
             name.Margin = new Thickness(6, 0, 0, 0);
-            if (waiting)
-            {
-                AddNumber(name, tab.Waiting.ToString(CultureInfo.CurrentCulture), "Caution");
-            }
-            else if (percent is not null)
+            if (percent is not null)
             {
                 AddNumber(name, percent, "Muted");
             }
@@ -353,18 +348,16 @@ sealed partial class TerminalPanel
             row.Children.Add(name);
             label = name;
         }
-        else if (waiting)
+
+        if (!_tabMarks.TryGetValue(tab.Name, out var marks))
         {
-            var count = Mono(tab.Waiting.ToString(CultureInfo.CurrentCulture), "Caution");
-            count.Margin = new Thickness(4, 0, 0, 0);
-            row.Children.Add(count);
+            marks = new TabMarks();
+            _tabMarks[tab.Name] = marks;
         }
 
-        string? tip = null;
-        if (small || waiting)
-        {
-            tip = percent is null ? tab.Name : tab.Name + " · " + percent;
-        }
+        (marks.Root.Parent as Panel)?.Children.Remove(marks.Root);
+        row.Children.Add(marks.Root);
+        marks.Show(tab.Waiting, tab.Done, tab.Stopped);
 
         var back = new Border
         {
@@ -373,7 +366,7 @@ sealed partial class TerminalPanel
             Background = Brushes.Transparent,
             Cursor = Cursors.Hand,
             Child = row,
-            ToolTip = tip,
+            ToolTip = small ? (percent is null ? tab.Name : tab.Name + " · " + percent) : null,
         };
         back.MouseLeftButtonUp += (_, _) => TabPicked?.Invoke(tab.Name);
         WindowChromeHit(back);

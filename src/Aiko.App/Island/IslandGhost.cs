@@ -2,33 +2,49 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
 using Aiko.Core;
 
 namespace Aiko.App;
 
-/// The landing strip: a pane of Windows glass on the edge where the island in hand will land (D-161, D-186).
+/// The landing strip: a pane of glass in the shape of the island, on the edge where the island in
+/// hand will land (D-161, D-186, D-456).
 ///
-/// A window of its own, because it sits on the edge while the island is somewhere else. It never
-/// takes the focus or a click, and it exists only while the island is in hand.
-///
-/// The glass is drawn by Windows, not by Aiko: WPF draws in software here and cannot blur what lies
-/// behind a window. The system backdrop only frosts the active window, and this one never is, so
-/// it uses the acrylic accent instead (RESEARCH, spike 2026-09-14). A window region gives it the
-/// shape of the island: the free corners are cut at 45 degrees (D-453).
+/// Windows blurs only a whole window, and a window region switches that glass off, so the strip
+/// makes its own. The first time it comes to an edge it takes a picture of that edge of the screen
+/// without Aiko's island and strip, blurs it once, and shows the part under the strip. Following the
+/// mouse only moves the window over that picture. The strip exists only while the island is in hand
+/// and never takes the focus or a click.
 sealed class IslandGhost : Window
 {
     private const double CutSize = 8;
 
-    /// An older Windows switched the glass off for a window with a region (spike 2026-09-14). This
-    /// build keeps it (2026-11-18); before it the strip stays a plain rectangle of glass.
-    private const int RegionKeepsGlassFrom = 26300;
+    /// How far from the edge the picture reaches, in layout units: more than any island is deep.
+    private const double BandDepth = 160;
+
+    /// The picture is blurred at a quarter of its size, which is also what makes it quick.
+    private const double BlurScale = 0.25;
+    private const int BlurRadius = 6;
+    private const int BlurPasses = 2;
+
+    private readonly Window? _island;
+    private readonly ImageBrush _glass = new() { ViewboxUnits = BrushMappingMode.Absolute, Stretch = Stretch.Fill };
+    private readonly Path _picture = new();
+    private readonly Path _tint = new() { Fill = Tokens.Brush("GlassTint") };
+    private readonly Dictionary<(ScreenEdge Edge, Box Work), Band> _bands = [];
 
     private ScreenEdge? _edge;
+    private Band? _band;
 
-    public IslandGhost()
+    private sealed record Band(Box Area, BitmapSource Picture);
+
+    /// island is left out of the picture, as the strip itself is.
+    public IslandGhost(Window? island = null)
     {
+        _island = island;
         WindowStyle = WindowStyle.None;
-        AllowsTransparency = false;
+        AllowsTransparency = true;
         Background = Brushes.Transparent;
         ResizeMode = ResizeMode.NoResize;
         ShowInTaskbar = false;
@@ -36,12 +52,12 @@ sealed class IslandGhost : Window
         Topmost = true;
         Focusable = false;
         IsHitTestVisible = false;
-        SourceInitialized += (_, _) =>
-        {
-            MakeGlass();
-            CutCorners();
-        };
-        SizeChanged += (_, _) => CutCorners();
+        _picture.Fill = _glass;
+        var face = new System.Windows.Controls.Grid();
+        face.Children.Add(_picture);
+        face.Children.Add(_tint);
+        Content = face;
+        LocationChanged += (_, _) => ShowPartUnderStrip();
     }
 
     /// Raised the first time the strip shows. Both windows stay above everything, and the one shown
@@ -50,14 +66,15 @@ sealed class IslandGhost : Window
 
     /// Moves the strip to where the island would land. A new edge glides there; sliding along the
     /// same edge follows the mouse at once, which is what keeps it feeling attached.
-    public void PlaceOn(Box box, ScreenEdge edge)
+    public void PlaceOn(Box box, ScreenEdge edge, Box work)
     {
         var glide = _edge is not null && _edge != edge && Motion.IsOn;
         _edge = edge;
-
+        _band = BandOf(edge, work);
+        _glass.ImageSource = _band.Picture;
         Width = box.Width;
         Height = box.Height;
-        CutCorners();
+        DrawShape(edge, box.Width, box.Height);
 
         if (glide)
         {
@@ -72,6 +89,7 @@ sealed class IslandGhost : Window
             Top = box.Y;
         }
 
+        ShowPartUnderStrip();
         if (!IsVisible)
         {
             Show();
@@ -80,24 +98,22 @@ sealed class IslandGhost : Window
         }
     }
 
-    /// The outline of the landed island: the two corners against the screen stay whole.
-    private void CutCorners()
+    private void ShowPartUnderStrip()
     {
-        var handle = new WindowInteropHelper(this).Handle;
-        if (Environment.OSVersion.Version.Build < RegionKeepsGlassFrom || handle == 0 || _edge is not { } edge || ActualWidth <= 0 || ActualHeight <= 0)
+        if (_band is { } band)
         {
-            return;
+            _glass.Viewbox = new Rect(Left - band.Area.X, Top - band.Area.Y, Width, Height);
         }
+    }
 
-        var scale = VisualTreeHelper.GetDpi(this);
-        var width = (int)Math.Round(ActualWidth * scale.DpiScaleX);
-        var height = (int)Math.Round(ActualHeight * scale.DpiScaleY);
-        var cut = (int)Math.Round(CutSize * scale.DpiScaleX);
+    /// The outline of the landed island: the two corners against the screen stay whole.
+    private void DrawShape(ScreenEdge edge, double width, double height)
+    {
         var (top, right, bottom, left) = (edge != ScreenEdge.Top, edge != ScreenEdge.Right, edge != ScreenEdge.Bottom, edge != ScreenEdge.Left);
-        var points = new List<RegionPoint>();
-        void Corner(bool cutIt, RegionPoint first, RegionPoint sharp, RegionPoint second)
+        var points = new List<Point>();
+        void Corner(bool cut, Point first, Point sharp, Point second)
         {
-            if (cutIt)
+            if (cut)
             {
                 points.Add(first);
                 points.Add(second);
@@ -108,87 +124,147 @@ sealed class IslandGhost : Window
             }
         }
 
-        Corner(left && top, new(0, cut), new(0, 0), new(cut, 0));
-        Corner(top && right, new(width - cut, 0), new(width, 0), new(width, cut));
-        Corner(right && bottom, new(width, height - cut), new(width, height), new(width - cut, height));
-        Corner(bottom && left, new(cut, height), new(0, height), new(0, height - cut));
+        Corner(left && top, new Point(0, CutSize), new Point(0, 0), new Point(CutSize, 0));
+        Corner(top && right, new Point(width - CutSize, 0), new Point(width, 0), new Point(width, CutSize));
+        Corner(right && bottom, new Point(width, height - CutSize), new Point(width, height), new Point(width - CutSize, height));
+        Corner(bottom && left, new Point(CutSize, height), new Point(0, height), new Point(0, height - CutSize));
 
-        // Windows owns the region from here on and frees the one it replaces.
-        SetWindowRgn(handle, CreatePolygonRgn([.. points], points.Count, Winding), true);
+        var figure = new PathFigure { StartPoint = points[0], IsClosed = true, IsFilled = true };
+        figure.Segments.Add(new PolyLineSegment(points.Skip(1), false));
+        var shape = new PathGeometry([figure]);
+        _picture.Data = shape;
+        _tint.Data = shape;
     }
 
-    private void MakeGlass()
+    private Band BandOf(ScreenEdge edge, Box work)
     {
-        var handle = new WindowInteropHelper(this).Handle;
-        HwndSource.FromHwnd(handle)!.CompositionTarget.BackgroundColor = Colors.Transparent;
+        if (_bands.TryGetValue((edge, work), out var known))
+        {
+            return known;
+        }
 
-        var accent = new AccentPolicy { AccentState = AcrylicBlurBehind, GradientColor = AcrylicTint };
-        var size = Marshal.SizeOf<AccentPolicy>();
-        var memory = Marshal.AllocHGlobal(size);
+        var area = edge switch
+        {
+            ScreenEdge.Top => work with { Height = BandDepth },
+            ScreenEdge.Bottom => work with { Y = work.Y + work.Height - BandDepth, Height = BandDepth },
+            ScreenEdge.Left => work with { Width = BandDepth },
+            _ => work with { X = work.X + work.Width - BandDepth, Width = BandDepth },
+        };
+        var band = new Band(area, Blurred(TakePicture(area), area));
+        _bands[(edge, work)] = band;
+        return band;
+    }
+
+    /// The screen under the area, without the island and the strip.
+    private BitmapSource TakePicture(Box area)
+    {
+        var scale = VisualTreeHelper.GetDpi(_island ?? this);
+        var x = (int)Math.Round(area.X * scale.DpiScaleX);
+        var y = (int)Math.Round(area.Y * scale.DpiScaleY);
+        var width = Math.Max(1, (int)Math.Round(area.Width * scale.DpiScaleX));
+        var height = Math.Max(1, (int)Math.Round(area.Height * scale.DpiScaleY));
+
+        Window?[] own = [_island, this];
+        var handles = own.Where(window => window is not null).Select(window => new WindowInteropHelper(window!).Handle).Where(handle => handle != 0).ToList();
+        handles.ForEach(handle => SetWindowDisplayAffinity(handle, ExcludeFromCapture));
+        var screen = GetDC(0);
+        var memory = CreateCompatibleDC(screen);
+        var bitmap = CreateCompatibleBitmap(screen, width, height);
+        var before = SelectObject(memory, bitmap);
         try
         {
-            Marshal.StructureToPtr(accent, memory, false);
-            var data = new CompositionAttributeData { Attribute = AccentPolicyAttribute, Data = memory, SizeOfData = size };
-            if (!SetWindowCompositionAttribute(handle, ref data))
-            {
-                Log.Write("landing strip: Windows gave no glass");
-            }
+            BitBlt(memory, 0, 0, width, height, screen, x, y, SourceCopy);
+            SelectObject(memory, before);
+            return Imaging.CreateBitmapSourceFromHBitmap(bitmap, 0, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
         }
         finally
         {
-            Marshal.FreeHGlobal(memory);
+            handles.ForEach(handle => SetWindowDisplayAffinity(handle, NoAffinity));
+            DeleteObject(bitmap);
+            DeleteDC(memory);
+            _ = ReleaseDC(0, screen);
+        }
+    }
+
+    /// A blurred copy that measures exactly the area in layout units, so the brush can pick the part
+    /// under the strip by its place on the screen.
+    private static BitmapSource Blurred(BitmapSource picture, Box area)
+    {
+        var plain = new FormatConvertedBitmap(picture, PixelFormats.Bgr32, null, 0);
+        var small = new TransformedBitmap(plain, new ScaleTransform(BlurScale, BlurScale));
+        var (width, height) = (small.PixelWidth, small.PixelHeight);
+        var pixels = new byte[width * height * 4];
+        small.CopyPixels(pixels, width * 4, 0);
+        for (var pass = 0; pass < BlurPasses; pass++)
+        {
+            pixels = BoxBlur(pixels, width, height, 4, width * 4);
+            pixels = BoxBlur(pixels, height, width, width * 4, 4);
         }
 
-        var square = SquareCorners;
-        DwmSetWindowAttribute(handle, CornerPreference, ref square, sizeof(int));
+        var result = BitmapSource.Create(width, height, width / area.Width * 96, height / area.Height * 96, PixelFormats.Bgr32, null, pixels, width * 4);
+        result.Freeze();
+        return result;
     }
 
-    /// ACCENT_ENABLE_ACRYLICBLURBEHIND: the strongest blur Windows gives a window without focus.
-    private const int AcrylicBlurBehind = 4;
-
-    /// The colour acrylic lays over its blur, ABGR: Aiko's surface #171717 at 5 %, so the glass is 95 %
-    /// see-through, as the owner asked. Aiko draws nothing of its own over it.
-    private const int AcrylicTint = 0x0D171717;
-
-    private const int AccentPolicyAttribute = 19;
-    private const int CornerPreference = 33;
-
-    /// DWMWCP_DONOTROUND: the corners come from the region alone.
-    private const int SquareCorners = 1;
-
-    private const int Winding = 2;
-
-    [StructLayout(LayoutKind.Sequential)]
-    private readonly record struct RegionPoint(int X, int Y);
-
-    [StructLayout(LayoutKind.Sequential)]
-    private struct AccentPolicy
+    /// One pass of a box blur along lines of the given length. step goes along a line, nextLine to
+    /// the same place of the next one.
+    private static byte[] BoxBlur(byte[] source, int length, int lines, int step, int nextLine)
     {
-        public int AccentState;
-        public int AccentFlags;
-        public int GradientColor;
-        public int AnimationId;
+        var target = new byte[source.Length];
+        var window = (2 * BlurRadius) + 1;
+        for (var line = 0; line < lines; line++)
+        {
+            var start = line * nextLine;
+            for (var channel = 0; channel < 3; channel++)
+            {
+                int At(int i) => source[start + (Math.Clamp(i, 0, length - 1) * step) + channel];
+                var sum = 0;
+                for (var i = -BlurRadius; i <= BlurRadius; i++)
+                {
+                    sum += At(i);
+                }
+
+                for (var i = 0; i < length; i++)
+                {
+                    target[start + (i * step) + channel] = (byte)(sum / window);
+                    sum += At(i + BlurRadius + 1) - At(i - BlurRadius);
+                }
+            }
+        }
+
+        return target;
     }
 
-    [StructLayout(LayoutKind.Sequential)]
-    private struct CompositionAttributeData
-    {
-        public int Attribute;
-        public nint Data;
-        public int SizeOfData;
-    }
+    private const uint NoAffinity = 0;
+    private const uint ExcludeFromCapture = 0x11;
+    private const int SourceCopy = 0x00CC0020;
 
 #pragma warning disable SYSLIB1054
     [DllImport("user32.dll")]
-    private static extern bool SetWindowCompositionAttribute(nint window, ref CompositionAttributeData data);
+    private static extern bool SetWindowDisplayAffinity(nint window, uint affinity);
 
     [DllImport("user32.dll")]
-    private static extern int SetWindowRgn(nint window, nint region, bool redraw);
+    private static extern nint GetDC(nint window);
+
+    [DllImport("user32.dll")]
+    private static extern int ReleaseDC(nint window, nint context);
 
     [DllImport("gdi32.dll")]
-    private static extern nint CreatePolygonRgn(RegionPoint[] points, int count, int mode);
+    private static extern nint CreateCompatibleDC(nint context);
 
-    [DllImport("dwmapi.dll")]
-    private static extern int DwmSetWindowAttribute(nint window, int attribute, ref int value, int size);
+    [DllImport("gdi32.dll")]
+    private static extern nint CreateCompatibleBitmap(nint context, int width, int height);
+
+    [DllImport("gdi32.dll")]
+    private static extern nint SelectObject(nint context, nint item);
+
+    [DllImport("gdi32.dll")]
+    private static extern bool BitBlt(nint target, int x, int y, int width, int height, nint source, int sourceX, int sourceY, int operation);
+
+    [DllImport("gdi32.dll")]
+    private static extern bool DeleteObject(nint item);
+
+    [DllImport("gdi32.dll")]
+    private static extern bool DeleteDC(nint context);
 #pragma warning restore SYSLIB1054
 }

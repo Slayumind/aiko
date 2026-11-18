@@ -74,6 +74,14 @@ public static class SessionRows
     public static int Waiting(TerminalSessions sessions, string environment, Func<string, LiveTerminal?> live) =>
         sessions.Open(environment).Count(session => live(session.Id)?.Activity == TerminalActivity.Waiting);
 
+    /// How many sessions of the environment finished a turn the person has not seen.
+    public static int Done(TerminalSessions sessions, string environment, Func<string, LiveTerminal?> live) =>
+        sessions.Open(environment).Count(session => live(session.Id)?.Activity == TerminalActivity.Done);
+
+    /// How many sessions of the environment ended by themselves.
+    public static int Stopped(TerminalSessions sessions, string environment, Func<string, LiveTerminal?> live) =>
+        sessions.Open(environment).Count(session => live(session.Id)?.Activity == TerminalActivity.Exited);
+
     /// The day a session was used on, counted by the clock of the person: offsetMinutes is how far
     /// that clock is from UTC. A time that is still to come reads as today.
     public static UsedDay DayOf(long usedSeconds, long nowSeconds, int offsetMinutes)

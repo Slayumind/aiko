@@ -47,7 +47,16 @@ sealed class TerminalPills
         Root.ClipToBounds = true;
 
         // The numbers in the pills change their widths: the background follows, without a slide.
-        _row.SizeChanged += (_, _) => Place(_selected, slide: false);
+        _row.SizeChanged += (_, _) =>
+        {
+            Place(_selected, slide: false);
+
+            // A mark that unfolds can use up the room: the pills give way as it grows.
+            if (_row.ActualWidth > Root.MaxWidth)
+            {
+                Refit?.Invoke();
+            }
+        };
     }
 
     private int _selected = -1;

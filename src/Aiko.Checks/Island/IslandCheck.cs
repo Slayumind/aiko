@@ -77,7 +77,10 @@ static class IslandCheck
 
         // Over the bottom edge, where the part past the edge has to hide under the taskbar.
         var frosted = new IslandGhost();
-        frosted.PlaceOn(new Box(work.X + (work.Width / 2) - 120, work.Bottom - 60, 240, 60), ScreenEdge.Bottom);
+        // After the sample is on the screen: the strip takes its picture when it is placed.
+        backdrop.UpdateLayout();
+        Thread.Sleep(300);
+        frosted.PlaceOn(new Box(work.X + (work.Width / 2) - 120, work.Bottom - 60, 240, 60), ScreenEdge.Bottom, new Box(work.X, work.Y, work.Width, work.Height));
 
         // The strip sits just under the taskbar, and a window shown later lands above it, so the
         // sample goes under the strip by hand.

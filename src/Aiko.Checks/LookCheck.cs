@@ -36,6 +36,7 @@ static class LookCheck
         CheckIslandEdge(Check, ScreenEdge.Top);
         CheckCrispLines(Check);
         CheckFrameTitle(Check);
+        CheckGhost(Check, Path.ChangeExtension(reportPath, ".ghost.png"));
 
         File.WriteAllLines(reportPath, report);
         application.Shutdown();
@@ -118,6 +119,34 @@ static class LookCheck
 
         check("the top line closes where a label was", Alpha(width - 24) == Alpha(width / 2) && Alpha(width / 2) > 0, $"gap {Alpha(width - 24)}, line {Alpha(width / 2)}");
         window.Close();
+    }
+
+    /// The landing strip has the shape of the island: free corners cut, the ones at the screen whole.
+    private static void CheckGhost(Action<string, bool, string> check, string picture)
+    {
+        var work = SystemParameters.WorkArea;
+        var ghost = new IslandGhost();
+        ghost.PlaceOn(new Box(work.X + 200, work.Y, 240, 60), ScreenEdge.Top, new Box(work.X, work.Y, work.Width, work.Height));
+        ghost.UpdateLayout();
+        var face = (FrameworkElement)ghost.Content;
+        var bitmap = new RenderTargetBitmap(240, 60, 96, 96, PixelFormats.Pbgra32);
+        bitmap.Render(face);
+        byte Alpha(int x, int y)
+        {
+            var pixel = new byte[4];
+            bitmap.CopyPixels(new Int32Rect(x, y, 1, 1), pixel, 4, 0);
+            return pixel[3];
+        }
+
+        var encoder = new PngBitmapEncoder { Frames = { BitmapFrame.Create(bitmap) } };
+        using (var file = File.Create(picture))
+        {
+            encoder.Save(file);
+        }
+
+        ghost.Close();
+        check("the glass has cut free corners", Alpha(1, 58) == 0 && Alpha(238, 58) == 0, $"{Alpha(1, 58)}, {Alpha(238, 58)}");
+        check("the glass is whole at the screen and in the middle", Alpha(1, 1) == 255 && Alpha(238, 1) == 255 && Alpha(120, 30) == 255, $"{Alpha(1, 1)}, {Alpha(120, 30)}");
     }
 
     /// A long name stops before the state at the other end of the line.
