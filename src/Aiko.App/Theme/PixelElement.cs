@@ -59,7 +59,7 @@ internal abstract class PixelElement : FrameworkElement
     protected PixelElement()
     {
         SnapsToDevicePixels = false;
-        LayoutUpdated += RedrawWhenMoved;
+        PixelWatch.Follow(this, RedrawWhenMoved);
     }
 
     protected PixelGrid Grid()
@@ -71,7 +71,7 @@ internal abstract class PixelElement : FrameworkElement
     protected static void FillOnPixels(DrawingContext context, Brush? brush, Rect shape) =>
         PixelGrid.Fill(context, brush, shape);
 
-    private void RedrawWhenMoved(object? sender, EventArgs e)
+    private void RedrawWhenMoved()
     {
         if (PixelGrid.Of(this) != _drawnOn)
         {

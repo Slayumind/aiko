@@ -30,13 +30,13 @@ final class TerminalEvents {
         return TerminalEvent.fromJson(try? String(contentsOfFile: path, encoding: .utf8))?.conversation ?? ""
     }
 
-    /// The settings file with the hook of the terminal and the rule for the pictures, written when it is not there or names
+    /// The settings file with the hook of the terminal, written when it is not there or names
     /// another bridge. Empty when there is no bridge or the file cannot be written: the session then
     /// starts without the hook, and its row knows only what the title says.
     static func hooksFile() -> String {
         guard let bridge = BridgePath.current() else { return "" }
         let path = Store.folders.terminalHooksFile
-        let text = TerminalHooks.settingsJson(bridge, picturesFolder: Store.folders.picturesRoot)
+        let text = TerminalHooks.settingsJson(bridge)
         if (try? String(contentsOfFile: path, encoding: .utf8)) != text {
             do {
                 try FileManager.default.createDirectory(

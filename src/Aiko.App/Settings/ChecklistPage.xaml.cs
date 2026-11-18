@@ -232,7 +232,7 @@ public partial class ChecklistPage : UserControl
         StepDots.Children.Clear();
         StepDots.ColumnDefinitions.Clear();
         var place = _rows.FindIndex(row => row.Item == _opened);
-        var bar = new LimitBar { Value = _rows.Count == 0 ? 0 : (place + 1.0) / _rows.Count, Height = 14, TrackHeight = 6, IsHitTestVisible = false };
+        var bar = new LimitBar { Value = _rows.Count == 0 ? 0 : place < 0 ? 1 : (place + 1.0) / _rows.Count, Height = 14, TrackHeight = 6, IsHitTestVisible = false };
         Grid.SetColumnSpan(bar, Math.Max(1, _rows.Count));
         StepDots.Children.Add(bar);
         foreach (var row in _rows)

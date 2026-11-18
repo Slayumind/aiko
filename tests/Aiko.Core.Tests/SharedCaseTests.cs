@@ -438,7 +438,8 @@ public class SharedCaseTests
                 row.GetProperty("started").GetBoolean(),
                 row.TryGetProperty("hooksFile", out var hooks) ? hooks.GetString()! : "",
                 !row.TryGetProperty("onDisk", out var onDisk) || onDisk.GetBoolean(),
-                row.TryGetProperty("conversationId", out var conversation) ? conversation.GetString()! : "");
+                row.TryGetProperty("conversationId", out var conversation) ? conversation.GetString()! : "",
+                row.TryGetProperty("picturesFolder", out var pictures) ? pictures.GetString()! : "");
 
             var plan = ClaudeLaunchPlan.For(request, Strings(row.GetProperty("inherited")));
 
@@ -455,8 +456,6 @@ public class SharedCaseTests
             var folder = row.GetProperty("folder").GetString()!;
             var rule = row.GetProperty("rule").GetString()!;
             Assert.Equal(rule, TerminalHooks.PicturesRule(folder));
-            using var settings = JsonDocument.Parse(TerminalHooks.SettingsJson("bridge", folder));
-            Assert.Equal(rule, settings.RootElement.GetProperty("permissions").GetProperty("allow")[0].GetString());
         }
 
         foreach (var row in cases.GetProperty("shells").EnumerateArray())

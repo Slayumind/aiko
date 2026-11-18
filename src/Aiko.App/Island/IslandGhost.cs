@@ -19,6 +19,10 @@ sealed class IslandGhost : Window
 {
     private const double CutSize = 8;
 
+    /// An older Windows switched the glass off for a window with a region (spike 2026-09-14). This
+    /// build keeps it (2026-11-18); before it the strip stays a plain rectangle of glass.
+    private const int RegionKeepsGlassFrom = 26300;
+
     private ScreenEdge? _edge;
 
     public IslandGhost()
@@ -80,7 +84,7 @@ sealed class IslandGhost : Window
     private void CutCorners()
     {
         var handle = new WindowInteropHelper(this).Handle;
-        if (handle == 0 || _edge is not { } edge || ActualWidth <= 0 || ActualHeight <= 0)
+        if (Environment.OSVersion.Version.Build < RegionKeepsGlassFrom || handle == 0 || _edge is not { } edge || ActualWidth <= 0 || ActualHeight <= 0)
         {
             return;
         }

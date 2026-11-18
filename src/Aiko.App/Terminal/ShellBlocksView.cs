@@ -549,6 +549,9 @@ sealed class ShellBlocksView : FrameworkElement
         if (start < text.Length)
         {
             var word = text.Substring(start, Math.Min(length, text.Length - start));
+
+            // Over the line that is already drawn: its letters must not show around the dark ones.
+            context.DrawRectangle(MatchNow, null, new Rect(TextLeft + (start * _charWidth), top, length * _charWidth, LineHeight));
             context.DrawText(Formatted(word, OnMatch, _face, _fontSize, dpi), new Point(TextLeft + (start * _charWidth), top));
         }
     }

@@ -26,7 +26,7 @@ sealed class TerminalEvents : IDisposable
     /// A session did something: its id and the event. Raised on the window's thread.
     public event Action<string, TerminalEvent>? Changed;
 
-    /// The settings file with the hook of the terminal and the rule for the pictures, written when it is not there or names
+    /// The settings file with the hook of the terminal, written when it is not there or names
     /// another bridge. Empty when there is no bridge or the file cannot be written: the session
     /// then starts without the hook, and its row knows only what the title says.
     public static string HooksFile()
@@ -37,7 +37,7 @@ sealed class TerminalEvents : IDisposable
         }
 
         var path = ThisComputer.Folders.TerminalHooksFile;
-        var text = TerminalHooks.SettingsJson(bridge, ThisComputer.Folders.PicturesRoot);
+        var text = TerminalHooks.SettingsJson(bridge);
         try
         {
             if (!File.Exists(path) || File.ReadAllText(path) != text)

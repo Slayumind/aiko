@@ -93,8 +93,11 @@ extension TerminalHost {
 
     /// A choice of the palette: a session of the list opens, a closed one comes back, and a
     /// conversation started outside Aiko joins the list and continues with --resume.
-    func openFound(_ id: String) {
+    func openFound(_ found: String) {
         let now = Self.now()
+
+        // A conversation a session went on in opens that session, never a second one beside it.
+        let id = sessions.ownerOfConversation(found)?.id ?? found
         if sessions.find(id) != nil {
             sessions = sessions.reopen(id, now: now)
         } else if let conversation = conversations.first(where: { $0.id == id }) {

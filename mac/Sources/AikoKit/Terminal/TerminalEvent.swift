@@ -260,7 +260,7 @@ public struct TerminalEvent: Sendable, Equatable {
 ///
 /// The twin of TerminalHooks in TerminalEvent.cs.
 public enum TerminalHooks {
-    /// A rule that lets Claude Code read the pictures of the editor and nothing else there. An
+    /// A rule that lets Claude Code read the pictures of this session and change nothing there. An
     /// added folder (--add-dir) gave it full access and a question at every start (D-451). Signs
     /// that mean something in a rule become "?", which stands for any one character.
     public static func picturesRule(_ picturesFolder: String) -> String {
@@ -278,7 +278,7 @@ public enum TerminalHooks {
         return "Read(/\(safe)/**)"
     }
 
-    public static func settingsJson(_ bridgeExePath: String, picturesFolder: String) -> String {
+    public static func settingsJson(_ bridgeExePath: String) -> String {
         var events = JsonObject()
         for name in TerminalEvent.hookEvents {
             var hook = JsonObject()
@@ -294,9 +294,6 @@ public enum TerminalHooks {
 
         var root = JsonObject()
         root["hooks"] = .object(events)
-        var permissions = JsonObject()
-        permissions["allow"] = .array([.string(picturesRule(picturesFolder))])
-        root["permissions"] = .object(permissions)
         return JsonNode.object(root).toJsonString(indented: true, escaping: .relaxed) + "\n"
     }
 }

@@ -47,8 +47,9 @@ internal sealed class TitledFrame : PixelElement
     protected override Size MeasureOverride(Size availableSize)
     {
         var free = new Size(double.PositiveInfinity, double.PositiveInfinity);
-        _title?.Measure(free);
         _aside?.Measure(free);
+        var besideTitle = (2 * TitleLeft) + (_aside is null ? 0 : _aside.DesiredSize.Width + (2 * GapAroundLabel));
+        _title?.Measure(new Size(Math.Max(0, availableSize.Width - besideTitle), double.PositiveInfinity));
         var top = LabelHeight();
         var sides = Padding.Left + Padding.Right + 2;
         var ends = top + Padding.Top + Padding.Bottom + 1;

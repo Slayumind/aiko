@@ -14,7 +14,7 @@ internal class PixelBorder : Border
     public PixelBorder()
     {
         SnapsToDevicePixels = false;
-        LayoutUpdated += RedrawWhenMoved;
+        PixelWatch.Follow(this, RedrawWhenMoved);
     }
 
     protected override void OnRender(DrawingContext drawingContext)
@@ -64,7 +64,7 @@ internal class PixelBorder : Border
     private static double Across(double thickness, double scale) =>
         thickness <= 0 ? 0 : Math.Max(1, Math.Round(thickness * scale)) / scale;
 
-    private void RedrawWhenMoved(object? sender, EventArgs e)
+    private void RedrawWhenMoved()
     {
         if (PixelGrid.Of(this) != _drawnOn)
         {

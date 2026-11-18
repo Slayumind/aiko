@@ -76,8 +76,8 @@ sealed class HeaderStripView
     /// The row of cards with the padding of the strip around it.
     public FrameworkElement Root { get; }
 
-    /// signal is the state of the chosen environment: its card has that colour (D-452).
-    public void Show(HeaderView header, HeaderMotion motion, WindowSignal signal)
+    /// signal is the state of the chosen environment, percent its limit: its card shows them (D-452).
+    public void Show(HeaderView header, HeaderMotion motion, WindowSignal signal, int? percent)
     {
         if (motion == HeaderMotion.Open)
         {
@@ -101,7 +101,7 @@ sealed class HeaderStripView
 
             // The bars of the active card grow to their values when the card comes in.
             TimeSpan? grow = !animate ? null : motion == HeaderMotion.Open ? BarsAfterOpen : swaps ? ContentInAt : null;
-            var content = column.Column.Active ? Full(column, grow, _signIn, signal) : Quiet(column);
+            var content = column.Column.Active ? Full(column, grow, _signIn, signal, percent) : Quiet(column);
             if (swaps)
             {
                 card.CrossFade(content, column.Column.Active);
@@ -171,12 +171,12 @@ sealed class HeaderStripView
 
     /// The active card: the head, one line per limit, and the profile. grow is when its bars start
     /// to grow from zero, or null when they stand at their values.
-    private static FrameworkElement Full(HeaderColumnView column, TimeSpan? grow, Action<string> signIn, WindowSignal signal)
+    private static FrameworkElement Full(HeaderColumnView column, TimeSpan? grow, Action<string> signIn, WindowSignal signal, int? percent)
     {
         var stack = new StackPanel();
         // The names, resets and tone words of the rows share their widths, so the bars line up.
         Grid.SetIsSharedSizeScope(stack, true);
-        stack.Children.Add(Head(column, column.Block, signIn, signal));
+        stack.Children.Add(Head(column, column.Block, signIn, signal, percent));
 
         if (column.Block is not { } block)
         {
@@ -209,7 +209,7 @@ sealed class HeaderStripView
     {
         var stack = new StackPanel();
         Grid.SetIsSharedSizeScope(stack, true);
-        stack.Children.Add(Head(column, null, null, WindowSignal.Quiet));
+        stack.Children.Add(Head(column, null, null, WindowSignal.Quiet, null));
 
         var rows = new StackPanel { Margin = new Thickness(0, 8, 0, 0) };
         rows.Children.Add(MiniRow(Strings.CardShortSession, column.Column.FiveHour));
@@ -227,7 +227,7 @@ sealed class HeaderStripView
     }
 
     /// Ring, name, "N waiting", and at the right end "working now" when the environment works.
-    private static FrameworkElement Head(HeaderColumnView column, EnvironmentBlock? block, Action<string>? signIn, WindowSignal signal)
+    private static FrameworkElement Head(HeaderColumnView column, EnvironmentBlock? block, Action<string>? signIn, WindowSignal signal, int? percent)
     {
         var quiet = block is null;
         var head = new DockPanel { Height = 20, LastChildFill = true };
@@ -251,7 +251,7 @@ sealed class HeaderStripView
             head.Children.Add(link);
         }
 
-        if (block is not null && HeadState(column, block, signal) is { } state)
+        if (block is not null && HeadState(block, signal, percent) is { } state)
         {
             state.Margin = new Thickness(12, 0, 0, 0);
             state.VerticalAlignment = VerticalAlignment.Center;
@@ -275,22 +275,18 @@ sealed class HeaderStripView
     /// The state of the chosen environment, as a sign and a word: a question first, then a limit
     /// near its end, a stopped session, then whether it works. It says in words what the frame of
     /// the card shows in colour (D-452).
-    private static FrameworkElement? HeadState(HeaderColumnView column, EnvironmentBlock block, WindowSignal signal)
+    private static FrameworkElement? HeadState(EnvironmentBlock block, WindowSignal signal, int? percent)
     {
-        if (column.Column.Waiting > 0)
+        switch (signal)
         {
-            return StatusMark.Create(StatusLook.Waiting, Strings.TerminalWaiting);
-        }
-
-        if (ToneOf(column) == LimitTone.Critical)
-        {
-            var percent = Math.Max(column.Column.FiveHour ?? 0, column.Column.SevenDay ?? 0);
-            return StatusMark.Create(StatusLook.LimitNearEnd, string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.TerminalLimitMark, percent));
-        }
-
-        if (signal == WindowSignal.Stopped || (signal == WindowSignal.Working && !block.ShowsHalo))
-        {
-            return StatusMark.Of(signal == WindowSignal.Stopped ? RowState.Stopped : RowState.Working);
+            case WindowSignal.Waiting:
+                return StatusMark.Create(StatusLook.Waiting, Strings.TerminalWaiting);
+            case WindowSignal.LimitNearEnd:
+                return StatusMark.Create(StatusLook.LimitNearEnd, string.Format(CultureInfo.CurrentCulture, Strings.TerminalLimitMark, percent ?? 0));
+            case WindowSignal.Stopped:
+                return StatusMark.Of(RowState.Stopped);
+            case WindowSignal.Working when !block.ShowsHalo:
+                return StatusMark.Of(RowState.Working);
         }
 
         return block.ShowsHalo
@@ -374,10 +370,11 @@ sealed class HeaderStripView
     private static LimitBar Bar(int percent, Brush tone, TimeSpan? grow)
     {
         var value = percent / 100.0;
-        var bar = new LimitBar { Value = value, Fill = tone, VerticalAlignment = VerticalAlignment.Center };
-        if (grow is { } after && Motion.IsOn)
+        var grows = grow is not null && Motion.IsOn;
+        var bar = new LimitBar { Value = grows ? 0 : value, Fill = tone, VerticalAlignment = VerticalAlignment.Center };
+        if (grows)
         {
-            bar.BeginAnimation(LimitBar.ValueProperty, new DoubleAnimation(0, value, BarGrow) { BeginTime = after, EasingFunction = Motion.Standard });
+            bar.BeginAnimation(LimitBar.ValueProperty, new DoubleAnimation(value, BarGrow) { BeginTime = grow, EasingFunction = Motion.Standard });
         }
 
         return bar;

@@ -35,6 +35,7 @@ static class LookCheck
         CheckIslandEdge(Check, ScreenEdge.Left);
         CheckIslandEdge(Check, ScreenEdge.Top);
         CheckCrispLines(Check);
+        CheckFrameTitle(Check);
 
         File.WriteAllLines(reportPath, report);
         application.Shutdown();
@@ -117,6 +118,21 @@ static class LookCheck
 
         check("the top line closes where a label was", Alpha(width - 24) == Alpha(width / 2) && Alpha(width / 2) > 0, $"gap {Alpha(width - 24)}, line {Alpha(width / 2)}");
         window.Close();
+    }
+
+    /// A long name stops before the state at the other end of the line.
+    private static void CheckFrameTitle(Action<string, bool, string> check)
+    {
+        var title = new TextBlock { Text = new string('x', 200), TextTrimming = TextTrimming.CharacterEllipsis };
+        var aside = new TextBlock { Text = "stopped" };
+        var frame = new TitledFrame { Title = title, Aside = aside };
+        var window = Offscreen(new Grid { Width = 300, Children = { frame } });
+        window.Show();
+        window.UpdateLayout();
+        var end = title.TranslatePoint(new Point(title.ActualWidth, 0), frame).X;
+        var start = aside.TranslatePoint(new Point(0, 0), frame).X;
+        window.Close();
+        check("a long title stops before the state", end <= start, $"{end:0} and {start:0}");
     }
 
     /// At a zoom of 115% a line of a frame covers whole pixels, with no blurred column beside it.

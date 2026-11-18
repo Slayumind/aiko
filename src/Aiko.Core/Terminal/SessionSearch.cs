@@ -68,7 +68,7 @@ public static class SessionSearch
             Consider(session.Id, session.Environment, session.Folder, session.Name, session.LastUsed, null, session.Closed ? 1 : 0);
         }
 
-        foreach (var conversation in known.Values.Where(conversation => sessions.Find(conversation.Id) is null))
+        foreach (var conversation in known.Values.Where(conversation => sessions.Find(conversation.Id) is null && sessions.OwnerOfConversation(conversation.Id) is null))
         {
             Consider(conversation.Id, conversation.Environment, conversation.Folder, conversation.Name, conversation.LastUsed, conversation.Source, 2);
         }

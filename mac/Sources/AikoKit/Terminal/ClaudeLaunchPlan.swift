@@ -2,6 +2,7 @@ import Foundation
 
 /// What the terminal needs to know to start Claude Code for one session. hooksFile holds the
 /// settings with the hook of the terminal (TerminalHooks); empty when it could not be written.
+/// picturesFolder is where the editor keeps the pictures of this session; empty for none.
 /// conversationId is the conversation to come back to when /clear replaced the first one; empty
 /// for the id of the session. onDisk: the file of the conversation is there. Claude Code writes it only after the first message, so a
 /// session that started and stopped before one has nothing to resume.
@@ -14,10 +15,11 @@ public struct LaunchRequest: Sendable, Equatable {
     public let hooksFile: String
     public let onDisk: Bool
     public let conversationId: String
+    public let picturesFolder: String
 
     public init(
         configDirectory: String, userProfile: String, environmentName: String, sessionId: String, started: Bool,
-        hooksFile: String = "", onDisk: Bool = true, conversationId: String = ""
+        hooksFile: String = "", onDisk: Bool = true, conversationId: String = "", picturesFolder: String = ""
     ) {
         self.configDirectory = configDirectory
         self.userProfile = userProfile
@@ -27,6 +29,7 @@ public struct LaunchRequest: Sendable, Equatable {
         self.hooksFile = hooksFile
         self.onDisk = onDisk
         self.conversationId = conversationId
+        self.picturesFolder = picturesFolder
     }
 }
 
@@ -58,6 +61,12 @@ public struct ClaudeLaunchPlan: Sendable, Equatable {
         // the personality or without it.
         if !request.hooksFile.isEmpty {
             arguments += ["--settings", request.hooksFile]
+        }
+
+        // A picture pasted into the editor lies outside the project. The session may read its own
+        // pictures without a question; an added folder would ask at every start (D-451).
+        if !request.picturesFolder.isEmpty {
+            arguments += ["--allowedTools", TerminalHooks.picturesRule(request.picturesFolder)]
         }
 
         var variables = environment(

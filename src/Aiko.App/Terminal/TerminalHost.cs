@@ -712,7 +712,19 @@ sealed partial class TerminalHost
         }
 
         _lastEvents[id] = terminalEvent;
+        FollowConversation(id, terminalEvent.Conversation);
         Draw();
+    }
+
+    /// /clear moved the session to a new conversation: the next start comes back to that one.
+    private void FollowConversation(string id, string conversation)
+    {
+        var moved = _sessions.MoveToConversation(id, conversation);
+        if (!ReferenceEquals(moved, _sessions))
+        {
+            _sessions = moved;
+            Save();
+        }
     }
 
     /// The person typed into the session: a question it asked is answered.
