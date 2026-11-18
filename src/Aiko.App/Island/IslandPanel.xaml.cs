@@ -51,12 +51,7 @@ public partial class IslandPanel : UserControl
     /// free corner cut and a hairline all round, with its rings already laid out for the edge below.
     public void Show(IReadOnlyList<CardState> cards, ScreenEdge edge, bool docked = true)
     {
-        // Along a top or bottom edge the rings stand in a row; along a side they stand in a
-        // column, so the island takes as little of the edge as it can.
-        var horizontal = IslandPlacement.IsHorizontal(edge);
-        Rings.Orientation = horizontal ? Orientation.Horizontal : Orientation.Vertical;
-        Strip.Orientation = Rings.Orientation;
-        _horizontal = horizontal;
+        // The island is one row at every edge, the same as along the top.
         DrawSessions();
 
         // Docked, the side against the screen has no corners and no line: it reads as part of the edge.
@@ -92,13 +87,13 @@ public partial class IslandPanel : UserControl
             var row = card.IconRow;
             var item = new StackPanel
             {
-                Orientation = horizontal ? Orientation.Horizontal : Orientation.Vertical,
-                Margin = Gap(horizontal, Rings.Children.Count == 0),
+                Orientation = Orientation.Horizontal,
+                Margin = Gap(Rings.Children.Count == 0),
             };
             // Open, each ring says whose it is: the letter of its environment before it (D-421).
-            item.Children.Add(Unfolding(EnvironmentInitial.Of(card.Environment), horizontal, before: true, "Muted"));
+            item.Children.Add(Unfolding(EnvironmentInitial.Of(card.Environment), before: true, "Muted"));
             item.Children.Add(new RingGauge(row?.Percent, row?.Tone ?? LimitTone.Unknown, RingSize));
-            item.Children.Add(Label(row?.Percent, horizontal));
+            item.Children.Add(Label(row?.Percent));
             Rings.Children.Add(item);
         }
 
@@ -115,8 +110,7 @@ public partial class IslandPanel : UserControl
 
     /// Every element from the rings and the percentages up to this panel is marked for measuring.
     /// Otherwise a measure of the panel stops at the first element that did not change, and hands
-    /// back the old size: in hand, a row that turned into a column kept the size of the row, and an
-    /// unfolding percentage would not have widened the window.
+    /// back the old size: an unfolding percentage would not have widened the window.
     public void MarkForMeasure()
     {
         foreach (var start in _labels.Cast<UIElement>().Append(Rings))
@@ -130,12 +124,12 @@ public partial class IslandPanel : UserControl
         InvalidateMeasure();
     }
 
-    /// The percentage beside a ring along a top or bottom edge, under it along a side.
-    private UnfoldPanel Label(int? percent, bool horizontal) =>
-        Unfolding(percent is { } value ? $"{value}%" : "—", horizontal, before: false, "Ink");
+    /// The percentage beside a ring.
+    private UnfoldPanel Label(int? percent) =>
+        Unfolding(percent is { } value ? $"{value}%" : "—", before: false, "Ink");
 
     /// A word that unfolds with the island: after the ring or, with before, in front of it.
-    private UnfoldPanel Unfolding(string text, bool horizontal, bool before, string tone)
+    private UnfoldPanel Unfolding(string text, bool before, string tone)
     {
         var words = new TextBlock
         {
@@ -145,13 +139,7 @@ public partial class IslandPanel : UserControl
             Foreground = Tokens.Brush(tone),
             VerticalAlignment = VerticalAlignment.Center,
             HorizontalAlignment = HorizontalAlignment.Center,
-            Margin = (horizontal, before) switch
-            {
-                (true, true) => new Thickness(0, 0, 6, 0),
-                (true, false) => new Thickness(6, 0, 0, 0),
-                (false, true) => new Thickness(0, 0, 0, 4),
-                (false, false) => new Thickness(0, 4, 0, 0),
-            },
+            Margin = before ? new Thickness(0, 0, 6, 0) : new Thickness(6, 0, 0, 0),
         };
 
         var label = new UnfoldPanel
@@ -166,7 +154,6 @@ public partial class IslandPanel : UserControl
     }
 
     private SessionCounts _sessions = SessionCounts.None;
-    private bool _horizontal = true;
     private FrameworkElement? _waitingMark;
 
     /// The sessions after the rings (D-364, D-409). The window around the panel follows the size.
@@ -256,14 +243,12 @@ public partial class IslandPanel : UserControl
 
     /// "Waits" with an orange pause, "done" with a green tick, "stopped" with a red cross and "work"
     /// with a grey dot, as in the list of sessions; each in a field of 12 with its number 4 units after
-    /// it; 12 units after the rings, in a row along a top or bottom edge and in a column 6 apart along
-    /// a side. With no session to count the island is as it was.
+    /// it; 12 units after the rings, in the same row. With no session to count the island is as it was.
     private void DrawSessions()
     {
         Sessions.Children.Clear();
         _waitingMark = null;
-        Sessions.Orientation = _horizontal ? Orientation.Horizontal : Orientation.Vertical;
-        Sessions.Margin = _sessions.IsEmpty ? new Thickness(0) : _horizontal ? new Thickness(12, 0, 0, 0) : new Thickness(0, 12, 0, 0);
+        Sessions.Margin = _sessions.IsEmpty ? new Thickness(0) : new Thickness(12, 0, 0, 0);
         if (_sessions.Waiting > 0)
         {
             _waitingMark = AddMark(StatusMark.WaitingSign(), _sessions.Waiting);
@@ -291,7 +276,7 @@ public partial class IslandPanel : UserControl
         var mark = SessionMark(sign, count);
         if (Sessions.Children.Count > 0)
         {
-            mark.Margin = _horizontal ? new Thickness(10, 0, 0, 0) : new Thickness(0, 6, 0, 0);
+            mark.Margin = new Thickness(10, 0, 0, 0);
         }
 
         Sessions.Children.Add(mark);
@@ -305,10 +290,5 @@ public partial class IslandPanel : UserControl
         return row;
     }
 
-    private static Thickness Gap(bool horizontal, bool first) => (horizontal, first) switch
-    {
-        (_, true) => new Thickness(0),
-        (true, false) => new Thickness(8, 0, 0, 0),
-        _ => new Thickness(0, 8, 0, 0),
-    };
+    private static Thickness Gap(bool first) => first ? new Thickness(0) : new Thickness(8, 0, 0, 0);
 }
