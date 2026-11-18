@@ -16,11 +16,10 @@
       </ResourceDictionary.MergedDictionaries>
 
       <!-- Her own words in the sample, a little apart from the work in the middle. -->
-      <SolidColorBrush x:Key="VoiceInk" Color="#FFCFE9DF" />
 
       <Style x:Key="ChatText" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource Mono}" />
-        <Setter Property="FontSize" Value="{StaticResource TextNumber}" />
+        <Setter Property="FontSize" Value="{StaticResource TextBody}" />
         <Setter Property="Foreground" Value="{StaticResource Ink}" />
         <Setter Property="TextWrapping" Value="Wrap" />
         <Setter Property="LineHeight" Value="19" />
@@ -31,14 +30,13 @@
   <StackPanel>
     <StackPanel Orientation="Horizontal">
       <Image x:Name="HeaderFace" Width="24" Height="24" Margin="0,0,10,0" VerticalAlignment="Center" />
-      <TextBlock Text="{x:Static core:Strings.NavPersonality}" FontFamily="{StaticResource Mono}" FontSize="16"
-                 FontWeight="Medium" Foreground="{StaticResource Ink}" VerticalAlignment="Center" />
+      <TextBlock Text="{x:Static core:Strings.NavPersonality}" Style="{StaticResource PageTitle}" VerticalAlignment="Center" />
     </StackPanel>
 
     <TextBlock Text="{x:Static core:Strings.SectionWhereAikoIsOn}" Style="{StaticResource SectionLabel}" Margin="0,18,0,8" />
-    <Border Style="{StaticResource Rows}">
+    <local:PixelBorder Style="{StaticResource Rows}">
       <StackPanel x:Name="EnvironmentRows" />
-    </Border>
+    </local:PixelBorder>
     <TextBlock Text="{x:Static core:Strings.AikoOnNote}" Style="{StaticResource RowHint}" Margin="0,8,0,0" />
     <TextBlock Text="{x:Static core:Strings.AikoOnWhat}" Style="{StaticResource RowHint}" Margin="0,4,0,0" />
 
@@ -46,18 +44,18 @@
     <local:MemoryBlock Margin="0,22,0,0" />
 
     <TextBlock Text="{x:Static core:Strings.SectionFace}" Style="{StaticResource SectionLabel}" Margin="0,22,0,8" />
-    <Border Style="{StaticResource SegmentBar}">
+    <local:PixelBorder Style="{StaticResource SegmentBar}">
       <StackPanel Orientation="Horizontal">
         <RadioButton x:Name="FaceChibi" Style="{StaticResource Segment}" GroupName="Face"
                      Content="{x:Static core:Strings.FaceChibi}" Checked="OnFaceChanged" />
         <RadioButton x:Name="FaceEmoji" Style="{StaticResource Segment}" GroupName="Face"
                      Content="{x:Static core:Strings.FaceEmoji}" Checked="OnFaceChanged" />
       </StackPanel>
-    </Border>
+    </local:PixelBorder>
     <TextBlock Text="{x:Static core:Strings.FaceWhere}" Style="{StaticResource RowHint}" Margin="0,8,0,0" />
 
     <TextBlock Text="{x:Static core:Strings.SectionTemperament}" Style="{StaticResource SectionLabel}" Margin="0,22,0,8" />
-    <Border Style="{StaticResource SegmentBar}">
+    <local:PixelBorder Style="{StaticResource SegmentBar}">
       <StackPanel x:Name="TemperamentChoice" Orientation="Horizontal">
         <RadioButton Style="{StaticResource Segment}" GroupName="Temperament" Tag="Quiet"
                      Content="{x:Static core:Strings.TemperamentQuiet}" Checked="OnTemperamentChanged" />
@@ -69,11 +67,11 @@
         <RadioButton Style="{StaticResource Segment}" GroupName="Temperament" Tag="Musou"
                      Content="{x:Static core:Strings.TemperamentMusou}" Checked="OnTemperamentChanged" />
       </StackPanel>
-    </Border>
+    </local:PixelBorder>
     <TextBlock x:Name="TemperamentAbout" Style="{StaticResource RowHint}" Margin="0,8,0,0" />
 
     <TextBlock Text="{x:Static core:Strings.SectionSampleReply}" Style="{StaticResource SectionLabel}" Margin="0,22,0,8" />
-    <Border Background="{StaticResource Background}" BorderBrush="{StaticResource Hairline}"
+    <local:PixelBorder Background="{StaticResource Background}" BorderBrush="{StaticResource Hairline}"
             BorderThickness="1" Padding="12,10">
       <StackPanel>
         <Border Background="{StaticResource Raised}" Padding="10,7" HorizontalAlignment="Right"
@@ -96,11 +94,11 @@
           </StackPanel>
         </Grid>
       </StackPanel>
-    </Border>
+    </local:PixelBorder>
     <TextBlock Style="{StaticResource RowHint}" Margin="0,8,0,0">
       <Run Text="{x:Static core:Strings.SampleCommit}" />
       <LineBreak />
-      <Run x:Name="SampleCommitLine" FontFamily="{StaticResource Mono}" Foreground="{StaticResource Ink}" />
+      <Run x:Name="SampleCommitLine" Foreground="{StaticResource Ink}" />
     </TextBlock>
 
     <TextBlock x:Name="SkillsTitle" Style="{StaticResource SectionLabel}" Margin="0,22,0,8" />

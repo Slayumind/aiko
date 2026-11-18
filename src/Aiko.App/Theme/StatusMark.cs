@@ -34,7 +34,7 @@ internal static class StatusMark
                 {
                     Text = word,
                     Margin = new Thickness(5, 0, 0, 0),
-                    FontFamily = Tokens.Get<FontFamily>("Mono"),
+                    FontFamily = Tokens.Mono,
                     FontSize = Tokens.Get<double>("TextSmall"),
                     Foreground = Tokens.Brush(tone),
                     VerticalAlignment = VerticalAlignment.Center,
@@ -59,7 +59,7 @@ internal static class StatusMark
         StatusLook.Working => "Positive",
         StatusLook.Waiting => "Caution",
         StatusLook.Stopped => "Destructive",
-        StatusLook.LimitNearEnd => "LookLimit",
+        StatusLook.LimitNearEnd => "LimitStrong",
         _ => "Muted",
     };
 
@@ -76,7 +76,7 @@ internal static class StatusMark
     private static TextBlock Letters(string text, string tone) => new()
     {
         Text = text,
-        FontFamily = Tokens.Get<FontFamily>("Mono"),
+        FontFamily = Tokens.Mono,
         FontSize = Tokens.Get<double>("TextSmall"),
         Foreground = Tokens.Brush(tone),
         VerticalAlignment = VerticalAlignment.Center,

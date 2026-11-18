@@ -34,6 +34,7 @@ static class LookCheck
         CheckIsland(Check);
         CheckIslandEdge(Check, ScreenEdge.Left);
         CheckIslandEdge(Check, ScreenEdge.Top);
+        CheckCrispLines(Check);
 
         File.WriteAllLines(reportPath, report);
         application.Shutdown();
@@ -116,6 +117,31 @@ static class LookCheck
 
         check("the top line closes where a label was", Alpha(width - 24) == Alpha(width / 2) && Alpha(width / 2) > 0, $"gap {Alpha(width - 24)}, line {Alpha(width / 2)}");
         window.Close();
+    }
+
+    /// At a zoom of 115% a line of a frame covers whole pixels, with no blurred column beside it.
+    private static void CheckCrispLines(Action<string, bool, string> check)
+    {
+        var frame = new PixelBorder
+        {
+            Width = 101,
+            Height = 41,
+            BorderBrush = Brushes.White,
+            BorderThickness = new Thickness(1),
+            LayoutTransform = new ScaleTransform(1.15, 1.15),
+        };
+        var holder = new Canvas { Width = 200, Height = 100, Background = Brushes.Black, Children = { frame } };
+        var window = Offscreen(holder);
+        window.Show();
+        window.UpdateLayout();
+
+        var bitmap = new RenderTargetBitmap(200, 100, 96, 96, PixelFormats.Pbgra32);
+        bitmap.Render(holder);
+        var row = new byte[200 * 4];
+        bitmap.CopyPixels(new Int32Rect(0, 20, 200, 1), row, 200 * 4, 0);
+        var soft = Enumerable.Range(0, 200).Count(x => row[(x * 4) + 1] is > 8 and < 247);
+        window.Close();
+        check("lines stay sharp at 115%", soft == 0, $"{soft} blurred columns");
     }
 
     /// Docked, the island is solid up to the screen: no strip of the desktop shows between them.

@@ -24,16 +24,16 @@ sealed class ChoicePopup
     public ChoicePopup(UIElement target)
     {
         _popup.PlacementTarget = target;
-        _popup.Child = new Border
+        _popup.Child = new PixelBorder
         {
             MinWidth = 240,
             MaxWidth = 520,
             Margin = new Thickness(12, 12, 12, 4),
             Padding = new Thickness(4),
-            Background = Tokens.Brush("Surface"),
-            BorderBrush = Tokens.Brush("InputLine"),
+            Background = Tokens.Brush("Background"),
+            BorderBrush = Tokens.Brush("Hairline"),
             BorderThickness = new Thickness(1),
-            Effect = Tokens.Get<System.Windows.Media.Effects.Effect>("CardShadow"),
+            Effect = Tokens.FloatShadow,
             Child = _rows,
         };
     }
@@ -54,8 +54,8 @@ sealed class ChoicePopup
         foreach (var (text, start, length) in choices.Take(MostRows))
         {
             var index = _lines.Count;
-            var line = Widgets.Text("", "TextNumber", "Muted", FontWeights.Normal);
-            line.FontFamily = Tokens.Get<FontFamily>("Mono");
+            var line = Widgets.Text("", "TextBody", "Muted", FontWeights.Normal);
+            line.FontFamily = Tokens.Mono;
             line.TextTrimming = TextTrimming.CharacterEllipsis;
             line.Inlines.Add(new Run(text[..start]));
             line.Inlines.Add(new Run(text.Substring(start, length)) { Foreground = Tokens.Brush("Ink") });

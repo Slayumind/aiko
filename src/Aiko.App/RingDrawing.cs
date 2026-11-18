@@ -25,8 +25,8 @@ static class RingDrawing
     public static Color ColourFor(LimitTone tone, bool onDark = true) => tone switch
     {
         LimitTone.Normal => onDark ? Tokens.Colour("InkColor") : Muted,
-        LimitTone.Caution => Tokens.Colour("LookLimitSoftColor"),
-        LimitTone.Critical => Tokens.Colour("LookLimitColor"),
+        LimitTone.Caution => Tokens.Colour("LimitSoftColor"),
+        LimitTone.Critical => Tokens.Colour("LimitStrongColor"),
         _ => Muted,
     };
 

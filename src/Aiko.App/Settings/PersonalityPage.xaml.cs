@@ -97,7 +97,7 @@ public partial class PersonalityPage : UserControl
         {
             Text = environment.Name,
             Style = (Style)FindResource("RowName"),
-            FontSize = Tokens.Get<double>("TextName"),
+            FontSize = Tokens.Get<double>("TextBody"),
             Margin = new Thickness(0, 0, 8, 0),
         });
         var plan = ClaudeAccounts.Read(folder).PlanLabel;
@@ -141,7 +141,7 @@ public partial class PersonalityPage : UserControl
 
         _environmentRows.Add(new EnvironmentRow(environment.Name, toggle, warning, ownStyle));
 
-        return new Border
+        return new PixelBorder
         {
             BorderBrush = Tokens.Brush("Hairline"),
             BorderThickness = new Thickness(0, first ? 0 : 1, 0, 0),
@@ -316,7 +316,7 @@ public partial class PersonalityPage : UserControl
         {
             Text = SkillCatalog.Call(skill),
             Style = (Style)FindResource("RowName"),
-            FontFamily = Tokens.Get<System.Windows.Media.FontFamily>("Mono"),
+            FontFamily = Tokens.Mono,
         });
         rows.Children.Add(new TextBlock
         {
@@ -325,7 +325,7 @@ public partial class PersonalityPage : UserControl
             Margin = new Thickness(0, 2, 0, 0),
         });
 
-        return new Border
+        return new PixelBorder
         {
             BorderBrush = Tokens.Brush("Hairline"),
             BorderThickness = new Thickness(0, topLine ? 1 : 0, 0, 0),

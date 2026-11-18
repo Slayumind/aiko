@@ -14,7 +14,7 @@
 
   <!-- The face of a tip. The tip snapshot of Aiko.Checks draws it too, where a real ToolTip cannot stand. -->
   <ControlTemplate x:Key="TipTemplate" TargetType="ContentControl">
-    <Border Padding="8,4,8,5" MaxWidth="320"
+    <local:PixelBorder Padding="8,4,8,5" MaxWidth="320"
             Background="{StaticResource Background}" BorderBrush="{StaticResource Hairline}" BorderThickness="1">
       <ContentPresenter TextElement.FontFamily="{StaticResource Mono}"
                         TextElement.FontSize="{StaticResource TextSmall}"
@@ -25,7 +25,7 @@
           </Style>
         </ContentPresenter.Resources>
       </ContentPresenter>
-    </Border>
+    </local:PixelBorder>
   </ControlTemplate>
 
   <Style TargetType="ToolTip">

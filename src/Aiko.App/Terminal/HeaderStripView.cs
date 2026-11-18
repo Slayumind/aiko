@@ -264,7 +264,7 @@ sealed class HeaderStripView
         ring.Margin = new Thickness(0, 0, 8, 0);
         left.Children.Add(ring);
 
-        var name = Widgets.Text(column.Column.Environment, "TextNumber", quiet ? "Muted" : "Ink", quiet ? FontWeights.Normal : FontWeights.Medium);
+        var name = Widgets.Text(column.Column.Environment, "TextBody", quiet ? "Muted" : "Ink", quiet ? FontWeights.Normal : FontWeights.Medium);
         name.TextTrimming = TextTrimming.CharacterEllipsis;
         left.Children.Add(name);
 
@@ -411,12 +411,12 @@ sealed class HeaderStripView
     /// The place of the tone word: the word of "running low" in the current language, and the gap
     /// before it.
     private static double ToneReserve() =>
-        Math.Ceiling(TextWidth(Strings.CardToneCaution, Tokens.Get<FontFamily>("Mono"), Tokens.Get<double>("TextSmall"))) + 8;
+        Math.Ceiling(TextWidth(Strings.CardToneCaution, Tokens.Mono, Tokens.Get<double>("TextSmall"))) + 8;
 
     /// The place of the countdown: the longest time it can show, and the gap before it.
     private static double CountdownReserve()
     {
-        var family = Tokens.Get<FontFamily>("Mono");
+        var family = Tokens.Mono;
         var size = Tokens.Get<double>("TextTiny");
         var longest = new[]
         {
@@ -617,7 +617,7 @@ sealed class HeaderStripView
             WindowSignal.Working => "PositiveColor",
             WindowSignal.Waiting => "CautionColor",
             WindowSignal.Stopped => "DestructiveColor",
-            WindowSignal.LimitNearEnd => "LookLimitColor",
+            WindowSignal.LimitNearEnd => "LimitStrongColor",
             _ => "HairlineColor",
         };
 
@@ -642,7 +642,7 @@ sealed class HeaderStripView
             Root.Cursor = active ? null : System.Windows.Input.Cursors.Hand;
             Root.ToolTip = active ? null : Environment;
             Panel.SetZIndex(Root, active ? 1 : 0);
-            Root.Background = active ? Tokens.Brush("LookCard") : Brushes.Transparent;
+            Root.Background = active ? Tokens.Brush("CardFill") : Brushes.Transparent;
             if (active)
             {
                 _hover.BeginAnimation(SolidColorBrush.ColorProperty, null);
@@ -863,7 +863,7 @@ sealed class LimitWindowName : TextBlock
         _long = longName;
         _short = shortName;
         Text = longName;
-        FontFamily = Tokens.Get<FontFamily>("Mono");
+        FontFamily = Tokens.Mono;
         FontSize = Tokens.Get<double>("TextSmall");
         Foreground = Tokens.Brush("Muted");
         VerticalAlignment = VerticalAlignment.Center;

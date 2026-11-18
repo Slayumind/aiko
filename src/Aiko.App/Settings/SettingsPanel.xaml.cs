@@ -243,7 +243,7 @@ public partial class SettingsPanel : UserControl
         var face = new Grid();
         face.Children.Add(new Rectangle
         {
-            Stroke = Tokens.Brush("InputLine"),
+            Stroke = Tokens.Brush("Hairline"),
             StrokeThickness = 1,
             StrokeDashArray = [4, 3],
         });

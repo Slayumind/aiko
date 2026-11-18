@@ -58,7 +58,7 @@ sealed partial class TerminalPanel
         // The list lives in the window or, in a narrow one, under the button with the session name.
         _list.Children.Clear();
         _listPopup.Child = null;
-        var holder = new DockPanel { Background = _narrow ? Brushes.Transparent : Tokens.Brush("Surface") };
+        var holder = new DockPanel { Background = _narrow ? Brushes.Transparent : Tokens.Brush("Background") };
         DockPanel.SetDock(create, Dock.Bottom);
         holder.Children.Add(create);
         holder.Children.Add(new ScrollViewer
@@ -74,16 +74,16 @@ sealed partial class TerminalPanel
         {
             SlideList(0);
             // Drawn anew while open too, so it takes the zoom here and not only on opening.
-            _listPopup.Child = new Border
+            _listPopup.Child = new PixelBorder
             {
                 LayoutTransform = PopupZoom.Of(_listToggle),
                 Width = ListWidth + 20,
                 MaxHeight = 480,
                 Margin = new Thickness(0, 4, 12, 12),
-                BorderBrush = Tokens.Brush("InputLine"),
+                BorderBrush = Tokens.Brush("Hairline"),
                 BorderThickness = new Thickness(1),
-                Background = Tokens.Brush("Surface"),
-                Effect = Tokens.Get<System.Windows.Media.Effects.Effect>("CardShadow"),
+                Background = Tokens.Brush("Background"),
+                Effect = Tokens.FloatShadow,
                 Child = holder,
             };
         }
@@ -277,7 +277,7 @@ sealed partial class TerminalPanel
         ((FrameworkElement)kind).HorizontalAlignment = HorizontalAlignment.Center;
         DockPanel.SetDock(kindBox, Dock.Left);
         top.Children.Add(kindBox);
-        var name = Text(row.Name, "TextName", "Ink", FontWeights.Normal);
+        var name = Text(row.Name, "TextBody", "Ink", FontWeights.Normal);
         name.TextTrimming = TextTrimming.CharacterEllipsis;
         if (whole)
         {

@@ -145,7 +145,7 @@ sealed class RowDrag
     /// The card of the row on the raised fill of a card, tilted, with the shadow of the cards of
     /// Aiko: as tall as the row and at least as wide, wider for a name the list cuts. The row
     /// itself stays in the list as the pale place.
-    private static Border Copy(FrameworkElement row, FrameworkElement card) => new()
+    private static PixelBorder Copy(FrameworkElement row, FrameworkElement card) => new()
     {
         MinWidth = row.ActualWidth,
         MaxWidth = Math.Max(row.ActualWidth, CardMostWidth),
@@ -153,9 +153,9 @@ sealed class RowDrag
         Margin = row.Margin,
         Padding = new Thickness(10, 8, 10, 8),
         Background = Tokens.Brush("Raised"),
-        BorderBrush = Tokens.Brush("InputLine"),
+        BorderBrush = Tokens.Brush("Hairline"),
         BorderThickness = new Thickness(1),
-        Effect = Tokens.Get<System.Windows.Media.Effects.Effect>("CardShadow"),
+        Effect = Tokens.FloatShadow,
         RenderTransformOrigin = new Point(0.5, 0.5),
         RenderTransform = new RotateTransform(Motion.IsOn ? Tilt : 0),
         Child = card,

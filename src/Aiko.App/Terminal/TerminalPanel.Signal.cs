@@ -34,7 +34,7 @@ sealed partial class TerminalPanel
         }
 
         _frameLabels = key;
-        var title = Widgets.Text(view.SessionName ?? "", "TextNumber", "Ink", FontWeights.Normal);
+        var title = Widgets.Text(view.SessionName ?? "", "TextBody", "Ink", FontWeights.Normal);
         title.TextTrimming = TextTrimming.CharacterEllipsis;
         title.MaxWidth = 360;
         _terminalFrame.Title = title;

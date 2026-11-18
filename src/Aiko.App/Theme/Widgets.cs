@@ -13,8 +13,8 @@ internal static class Widgets
 {
     internal static void Field(TextBox box)
     {
-        box.FontFamily = Tokens.Get<FontFamily>("Mono");
-        box.FontSize = Tokens.Get<double>("TextName");
+        box.FontFamily = Tokens.Mono;
+        box.FontSize = Tokens.Get<double>("TextBody");
         box.Foreground = Tokens.Brush("Ink");
         box.CaretBrush = Tokens.Brush("Ink");
         box.Background = Tokens.Brush("Background");
@@ -26,7 +26,7 @@ internal static class Widgets
     internal static TextBlock Text(string text, string size, string tone, FontWeight weight) => new()
     {
         Text = text,
-        FontFamily = Tokens.Get<FontFamily>("Mono"),
+        FontFamily = Tokens.Mono,
         FontSize = Tokens.Get<double>(size),
         FontWeight = weight,
         Foreground = Tokens.Brush(tone),
@@ -36,7 +36,7 @@ internal static class Widgets
     internal static TextBlock Mono(string text, string tone) => new()
     {
         Text = text,
-        FontFamily = Tokens.Get<FontFamily>("Mono"),
+        FontFamily = Tokens.Mono,
         FontSize = Tokens.Get<double>("TextTiny"),
         Foreground = Tokens.Brush(tone),
         VerticalAlignment = VerticalAlignment.Center,
@@ -73,11 +73,11 @@ internal static class Widgets
             row.Children.Add(sign);
         }
 
-        row.Children.Add(Text(text, "TextNumber", ink, main ? FontWeights.Medium : FontWeights.Normal));
+        row.Children.Add(Text(text, "TextBody", ink, main ? FontWeights.Medium : FontWeights.Normal));
 
         var hover = new Border { Background = Tokens.Brush("HoverLayer"), Opacity = 0 };
         var face = new Grid();
-        face.Children.Add(new Border
+        face.Children.Add(new PixelBorder
         {
             Background = Brushes.Transparent,
             BorderBrush = ghost ? Brushes.Transparent : Tokens.Brush(danger ? "Destructive" : main ? "Muted" : "Hairline"),
@@ -131,7 +131,7 @@ internal static class Widgets
     /// The focus of the keyboard: an outline of 2 px, as in the settings (D-308).
     internal static Style FocusRing()
     {
-        var ring = new FrameworkElementFactory(typeof(Border));
+        var ring = new FrameworkElementFactory(typeof(PixelBorder));
         ring.SetValue(Border.BorderBrushProperty, Tokens.Brush("Ink"));
         ring.SetValue(Border.BorderThicknessProperty, new Thickness(2));
         ring.SetValue(FrameworkElement.MarginProperty, new Thickness(-3));

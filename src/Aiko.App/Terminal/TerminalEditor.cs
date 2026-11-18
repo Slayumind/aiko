@@ -50,8 +50,8 @@ sealed partial class TerminalEditor : UserControl, IDictationField
     private readonly TextBlock _voiceWhere = Widgets.Mono("", "Muted");
     private readonly TextBlock _voiceCancel = Widgets.Mono("", "Muted");
     private readonly Border _notice;
-    private readonly TextBlock _noticeText = Widgets.Text("", "TextNumber", "Ink", FontWeights.Normal);
-    private readonly TextBlock _noticeLink = Widgets.Text("", "TextNumber", "Ink", FontWeights.Normal);
+    private readonly TextBlock _noticeText = Widgets.Text("", "TextBody", "Ink", FontWeights.Normal);
+    private readonly TextBlock _noticeLink = Widgets.Text("", "TextBody", "Ink", FontWeights.Normal);
     private readonly Button _mic;
     private readonly Ellipse _micBack = new() { Width = 24, Height = 24, Fill = Brushes.Transparent };
     private readonly Shape _micIcon = MicIcon();
@@ -89,8 +89,8 @@ sealed partial class TerminalEditor : UserControl, IDictationField
         Focusable = false;
         Background = Brushes.Transparent;
 
-        _text.FontFamily = Tokens.Get<FontFamily>("Mono");
-        _text.FontSize = Tokens.Get<double>("TextNumber");
+        _text.FontFamily = Tokens.Mono;
+        _text.FontSize = Tokens.Get<double>("TextBody");
         _text.Foreground = Tokens.Brush("Ink");
         _text.CaretBrush = Tokens.Brush("Ink");
         _text.Background = Brushes.Transparent;
@@ -113,7 +113,7 @@ sealed partial class TerminalEditor : UserControl, IDictationField
         _text.PreviewDragOver += OnDragOver;
         _text.PreviewDrop += OnDrop;
 
-        _placeholder = Widgets.Text(Strings.TerminalEditorPlaceholder, "TextNumber", "Muted", FontWeights.Normal);
+        _placeholder = Widgets.Text(Strings.TerminalEditorPlaceholder, "TextBody", "Muted", FontWeights.Normal);
         _placeholder.FontFamily = _text.FontFamily;
         _placeholder.FontSize = _text.FontSize;
         _placeholder.IsHitTestVisible = false;
@@ -162,7 +162,7 @@ sealed partial class TerminalEditor : UserControl, IDictationField
         var noticeWords = new WrapPanel();
         noticeWords.Children.Add(_noticeText);
         noticeWords.Children.Add(_noticeLink);
-        _notice = new Border
+        _notice = new PixelBorder
         {
             BorderBrush = Tokens.Brush("Caution"),
             BorderThickness = new Thickness(2, 0, 0, 0),

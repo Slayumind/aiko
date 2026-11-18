@@ -154,7 +154,7 @@ sealed class MemoryBlock : StackPanel
             }
         }
 
-        return new Border
+        return new PixelBorder
         {
             BorderBrush = Tokens.Brush("Hairline"),
             BorderThickness = new Thickness(1),
@@ -163,7 +163,7 @@ sealed class MemoryBlock : StackPanel
         };
     }
 
-    private static Border Lined(UIElement child, bool first, double indent = 0) => new()
+    private static PixelBorder Lined(UIElement child, bool first, double indent = 0) => new()
     {
         BorderBrush = Tokens.Brush("Hairline"),
         BorderThickness = new Thickness(0, first ? 0 : 1, 0, 0),
@@ -179,7 +179,7 @@ sealed class MemoryBlock : StackPanel
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(56) });
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(48) });
 
-        grid.Children.Add(new TextBlock { Text = Title(section.Category), Style = StyleOf("RowName"), FontSize = Tokens.Get<double>("TextName") });
+        grid.Children.Add(new TextBlock { Text = Title(section.Category), Style = StyleOf("RowName"), FontSize = Tokens.Get<double>("TextBody") });
 
         var bar = new Grid { Height = 4, VerticalAlignment = VerticalAlignment.Center };
         bar.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(Math.Min(section.Count, section.Quota), GridUnitType.Star) });
@@ -194,7 +194,7 @@ sealed class MemoryBlock : StackPanel
         {
             Text = $"{section.Count}/{section.Quota}",
             Style = StyleOf("RowHint"),
-            FontFamily = Tokens.Get<FontFamily>("Mono"),
+            FontFamily = Tokens.Mono,
             HorizontalAlignment = HorizontalAlignment.Right,
             VerticalAlignment = VerticalAlignment.Center,
         };
@@ -234,7 +234,7 @@ sealed class MemoryBlock : StackPanel
     {
         var fact = shown.Fact;
         var words = new StackPanel { Margin = new Thickness(0, 10, 8, 10) };
-        words.Children.Add(new TextBlock { Text = fact.Text, Style = StyleOf("RowName"), FontSize = Tokens.Get<double>("TextName"), TextWrapping = TextWrapping.Wrap });
+        words.Children.Add(new TextBlock { Text = fact.Text, Style = StyleOf("RowName"), FontSize = Tokens.Get<double>("TextBody"), TextWrapping = TextWrapping.Wrap });
         if (fact.Meaning.Length > 0)
         {
             words.Children.Add(Hint(fact.Meaning, new Thickness(0, 2, 0, 0)));
@@ -263,7 +263,7 @@ sealed class MemoryBlock : StackPanel
             {
                 Text = "● " + string.Format(Strings.MemoryTooLong, shown.Length, MemoryRules.MaxLength),
                 Style = StyleOf("RowHint"),
-                FontFamily = Tokens.Get<FontFamily>("Mono"),
+                FontFamily = Tokens.Mono,
                 Foreground = Tokens.Brush("Caution"),
                 Margin = new Thickness(0, 4, 0, 0),
             });
@@ -347,7 +347,7 @@ sealed class MemoryBlock : StackPanel
         var cancelButton = TextButton(Strings.Cancel, "GhostButton", () => Show(cancel));
         cancelButton.Margin = new Thickness(4, 0, 0, 0);
 
-        var count = new TextBlock { Style = StyleOf("RowHint"), FontFamily = Tokens.Get<FontFamily>("Mono"), VerticalAlignment = VerticalAlignment.Center };
+        var count = new TextBlock { Style = StyleOf("RowHint"), FontFamily = Tokens.Mono, VerticalAlignment = VerticalAlignment.Center };
 
         void Count()
         {
@@ -384,7 +384,7 @@ sealed class MemoryBlock : StackPanel
         {
             Text = text,
             Style = StyleOf("NameBox"),
-            FontSize = Tokens.Get<double>("TextName"),
+            FontSize = Tokens.Get<double>("TextBody"),
             TextWrapping = TextWrapping.Wrap,
             AcceptsReturn = false,
         };
@@ -394,7 +394,7 @@ sealed class MemoryBlock : StackPanel
         {
             Text = placeholder,
             Style = StyleOf("RowHint"),
-            FontSize = Tokens.Get<double>("TextName"),
+            FontSize = Tokens.Get<double>("TextBody"),
             Margin = new Thickness(10, 6, 10, 0),
             IsHitTestVisible = false,
             Visibility = text.Length == 0 ? Visibility.Visible : Visibility.Collapsed,
@@ -466,7 +466,7 @@ sealed class MemoryBlock : StackPanel
         Grid.SetColumn(buttons, 1);
         grid.Children.Add(buttons);
 
-        return new Border
+        return new PixelBorder
         {
             BorderBrush = Tokens.Brush("Hairline"),
             BorderThickness = new Thickness(1),
@@ -569,7 +569,7 @@ sealed class MemoryBlock : StackPanel
     private TextBlock Hint(string text, Thickness margin) => new() { Text = text, Style = StyleOf("RowHint"), Margin = margin };
 
     /// A line that asks for attention: a bar on the left, and the words in full colour.
-    private Border Warning(string text) => new()
+    private PixelBorder Warning(string text) => new()
     {
         BorderBrush = Tokens.Brush("Caution"),
         BorderThickness = new Thickness(2, 0, 0, 0),

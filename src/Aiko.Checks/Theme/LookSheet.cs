@@ -21,7 +21,7 @@ static class LookSheet
             Content = Label("> добавь голосовой ввод в редактор", "Ink"),
         });
         sheet.Children.Add(Gap());
-        foreach (var (value, tone) in new[] { (0.42, "Ink"), (0.78, "LookLimitSoft"), (0.93, "LookLimit") })
+        foreach (var (value, tone) in new[] { (0.42, "Ink"), (0.78, "LimitSoft"), (0.93, "LimitStrong") })
         {
             sheet.Children.Add(new LimitBar { Value = value, Fill = Tokens.Brush(tone), Margin = new Thickness(0, 0, 0, 8) });
         }
@@ -66,8 +66,8 @@ static class LookSheet
     private static TextBlock Label(string text, string tone) => new()
     {
         Text = text,
-        FontFamily = Tokens.Get<FontFamily>("Mono"),
-        FontSize = Tokens.Get<double>("TextNumber"),
+        FontFamily = Tokens.Mono,
+        FontSize = Tokens.Get<double>("TextBody"),
         Foreground = Tokens.Brush(tone),
         Background = Brushes.Transparent,
     };

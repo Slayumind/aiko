@@ -47,7 +47,7 @@ internal sealed class LimitBar : PixelElement
         var bottom = grid.SnapY(ActualHeight);
         var trackTop = grid.SnapY(ActualHeight - TrackHeight);
         var fillEnd = grid.SnapX(ActualWidth * Math.Clamp(Value, 0, 1));
-        FillOnPixels(drawingContext, Tokens.Brush("LookTrack"), new Rect(left, trackTop, Math.Max(0, right - left), Math.Max(0, bottom - trackTop)));
+        FillOnPixels(drawingContext, Tokens.Brush("BarTrack"), new Rect(left, trackTop, Math.Max(0, right - left), Math.Max(0, bottom - trackTop)));
         FillOnPixels(drawingContext, Fill, new Rect(left, grid.SnapY(0), Math.Max(0, fillEnd - left), Math.Max(0, bottom - grid.SnapY(0))));
     }
 }

@@ -15,7 +15,7 @@ internal static class TerminalColors
     ];
 
     /// The ground of the terminal is the surface of every other panel.
-    public static Color Ground => Tokens.Colour("SurfaceColor");
+    public static Color Ground => Tokens.Colour("BackgroundColor");
 
     public static uint Hex(Color colour) => ((uint)colour.R << 16) | ((uint)colour.G << 8) | colour.B;
 }

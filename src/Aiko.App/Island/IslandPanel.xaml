@@ -17,7 +17,7 @@
   <Grid>
     <!-- The shape follows the body. In a canvas it adds nothing to the size of the island. -->
     <Canvas>
-      <Path x:Name="Ground" Fill="{StaticResource Surface}" />
+      <Path x:Name="Ground" Fill="{StaticResource Background}" />
       <Path x:Name="Edge" Stroke="{StaticResource Hairline}" StrokeThickness="1" />
     </Canvas>
     <Border x:Name="Body" SizeChanged="OnBodySized"

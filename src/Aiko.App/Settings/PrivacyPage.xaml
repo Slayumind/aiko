@@ -16,8 +16,7 @@
   </UserControl.Resources>
 
   <StackPanel>
-    <TextBlock Text="{x:Static core:Strings.NavPrivacy}" FontFamily="{StaticResource Mono}" FontSize="16"
-               FontWeight="Medium" Foreground="{StaticResource Ink}" />
+    <TextBlock Text="{x:Static core:Strings.NavPrivacy}" Style="{StaticResource PageTitle}" />
 
     <TextBlock Text="{x:Static core:Strings.SectionConnection}" Style="{StaticResource SectionLabel}" Margin="0,18,0,8" />
 
@@ -50,7 +49,7 @@
 
     <!-- Dimmed while nothing is sent, so the page reads as a list of what would go, not of what
          goes. -->
-    <Border x:Name="Ledger" Background="{StaticResource Surface}"
+    <local:PixelBorder x:Name="Ledger" Background="{StaticResource Background}"
             BorderBrush="{StaticResource Hairline}" BorderThickness="1" Padding="12">
       <Grid>
         <Grid.ColumnDefinitions>
@@ -84,7 +83,7 @@
         <TextBlock Grid.Row="5" Grid.Column="0" Text="p" Style="{StaticResource LedgerKey}" />
         <TextBlock Grid.Row="5" Grid.Column="1" Text="{x:Static core:Strings.SentPersona}" Style="{StaticResource RowHint}" TextWrapping="Wrap" />
       </Grid>
-    </Border>
+    </local:PixelBorder>
 
     <TextBlock x:Name="NothingSent" Text="{x:Static core:Strings.NothingSentYet}" Style="{StaticResource RowHint}"
                Margin="0,8,0,0" />

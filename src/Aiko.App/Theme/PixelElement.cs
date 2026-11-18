@@ -40,6 +40,14 @@ internal readonly record struct PixelGrid(double OriginX, double OriginY, double
     public double SnapX(double x) => (Math.Round(OriginX + (x * ScaleX)) - OriginX) / ScaleX;
 
     public double SnapY(double y) => (Math.Round(OriginY + (y * ScaleY)) - OriginY) / ScaleY;
+
+    /// A guideline puts the first edge on a whole pixel, and the size keeps the second edge there.
+    public static void Fill(DrawingContext context, Brush? brush, Rect shape)
+    {
+        context.PushGuidelineSet(new GuidelineSet([shape.Left], [shape.Top]));
+        context.DrawRectangle(brush, null, shape);
+        context.Pop();
+    }
 }
 
 /// An element that draws straight lines on whole pixels. When layout moves it, it draws again,
@@ -60,13 +68,8 @@ internal abstract class PixelElement : FrameworkElement
         return _drawnOn;
     }
 
-    /// A guideline puts the first edge on a whole pixel, and the size keeps the second edge there.
-    protected static void FillOnPixels(DrawingContext context, Brush? brush, Rect shape)
-    {
-        context.PushGuidelineSet(new GuidelineSet([shape.Left], [shape.Top]));
-        context.DrawRectangle(brush, null, shape);
-        context.Pop();
-    }
+    protected static void FillOnPixels(DrawingContext context, Brush? brush, Rect shape) =>
+        PixelGrid.Fill(context, brush, shape);
 
     private void RedrawWhenMoved(object? sender, EventArgs e)
     {

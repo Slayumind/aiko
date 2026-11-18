@@ -15,7 +15,7 @@ namespace Aiko.App;
 /// closes it too.
 sealed class DropDown : UserControl
 {
-    private readonly Border _button = new();
+    private readonly PixelBorder _button = new();
     private readonly TextBlock _chosen = new();
     private readonly RotateTransform _chevronTurn = new();
     private readonly Popup _popup = new();
@@ -23,7 +23,7 @@ sealed class DropDown : UserControl
     /// PageUp and PageDown move this many rows (Cherry Studio, research of 2026-10-26).
     private const int PageRows = 7;
 
-    private readonly Border _listFrame = new();
+    private readonly PixelBorder _listFrame = new();
     private IReadOnlyList<string> _items = [];
     private IReadOnlyList<string> _short = [];
     private IReadOnlyDictionary<int, string> _headers = new Dictionary<int, string>();
@@ -104,7 +104,7 @@ sealed class DropDown : UserControl
             RenderTransform = _chevronTurn,
         };
 
-        _chosen.FontFamily = Tokens.Get<FontFamily>("Mono");
+        _chosen.FontFamily = Tokens.Mono;
         _chosen.FontSize = Tokens.Get<double>("TextSmall");
         _chosen.Foreground = Brush("Ink");
         _chosen.VerticalAlignment = VerticalAlignment.Center;
@@ -149,7 +149,7 @@ sealed class DropDown : UserControl
         _listFrame.BorderThickness = new Thickness(1);
         _listFrame.Padding = new Thickness(4);
         _listFrame.Margin = new Thickness(0, 4, 0, 12);
-        _listFrame.Effect = Tokens.Get<System.Windows.Media.Effects.Effect>("CardShadow");
+        _listFrame.Effect = Tokens.FloatShadow;
         _listFrame.Child = _list;
 
         // A press on the list bubbles to the page through the drop-down. A scroll viewer there,
@@ -314,7 +314,7 @@ sealed class DropDown : UserControl
     private static TextBlock Header(string text, bool first) => new()
     {
         Text = text,
-        FontFamily = Tokens.Get<FontFamily>("Mono"),
+        FontFamily = Tokens.Mono,
         FontSize = Tokens.Get<double>("TextTiny"),
         Foreground = Tokens.Brush("Muted"),
         Margin = new Thickness(8, first ? 4 : 10, 8, 4),
@@ -325,7 +325,7 @@ sealed class DropDown : UserControl
         var text = new TextBlock
         {
             Text = _items[index],
-            FontFamily = Tokens.Get<FontFamily>("Mono"),
+            FontFamily = Tokens.Mono,
             FontSize = Tokens.Get<double>("TextSmall"),
             Foreground = Brush(index == _selected ? "Ink" : "Muted"),
             VerticalAlignment = VerticalAlignment.Center,

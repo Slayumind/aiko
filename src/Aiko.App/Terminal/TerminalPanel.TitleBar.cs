@@ -339,7 +339,7 @@ sealed partial class TerminalPanel
             // so a pill keeps its width when it is chosen and the background lands on it.
             // The name and its numbers are runs of one text, so they stand on one baseline: two
             // texts of 13 and 11 units, each centred, put the smaller one a pixel higher.
-            var name = Text(tab.Name, "TextNumber", tab.Selected ? "Ink" : "Muted", FontWeights.Medium);
+            var name = Text(tab.Name, "TextBody", tab.Selected ? "Ink" : "Muted", FontWeights.Medium);
             name.Margin = new Thickness(6, 0, 0, 0);
             if (waiting)
             {

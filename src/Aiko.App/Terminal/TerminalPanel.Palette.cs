@@ -151,14 +151,14 @@ sealed partial class TerminalPanel
         var column = new StackPanel { MaxWidth = 520, VerticalAlignment = VerticalAlignment.Center, HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(40, 0, 40, 0) };
         if (title is not null)
         {
-            var head = Text(title, "TextName", "Ink", FontWeights.Medium);
-            head.FontSize = 16;
+            var head = Text(title, "TextBody", "Ink", FontWeights.Medium);
+            head.FontSize = Tokens.Get<double>("TextTitle");
             head.TextWrapping = TextWrapping.Wrap;
             head.Margin = new Thickness(0, 0, 0, 8);
             column.Children.Add(head);
         }
 
-        var text = Text(body, "TextName", "Muted", FontWeights.Normal);
+        var text = Text(body, "TextBody", "Muted", FontWeights.Normal);
         text.TextWrapping = TextWrapping.Wrap;
         text.LineHeight = 21;
         column.Children.Add(text);
@@ -187,10 +187,10 @@ sealed partial class TerminalPanel
         cross.VerticalAlignment = VerticalAlignment.Top;
         cross.Margin = new Thickness(0, -6, -8, 0);
 
-        var title = Text(ask.Title, "TextName", "Ink", FontWeights.Medium);
+        var title = Text(ask.Title, "TextBody", "Ink", FontWeights.Medium);
         title.TextWrapping = TextWrapping.Wrap;
         title.Margin = new Thickness(0, 0, 28, 6);
-        var body = Text(ask.Body, "TextNumber", "Muted", FontWeights.Normal);
+        var body = Text(ask.Body, "TextBody", "Muted", FontWeights.Normal);
         body.TextWrapping = TextWrapping.Wrap;
         body.LineHeight = 20;
 
@@ -202,17 +202,17 @@ sealed partial class TerminalPanel
         inside.Children.Add(column);
         inside.Children.Add(cross);
 
-        var card = new Border
+        var card = new PixelBorder
         {
             Width = 420,
             VerticalAlignment = VerticalAlignment.Top,
             HorizontalAlignment = HorizontalAlignment.Center,
             Margin = new Thickness(20, 28, 20, 0),
             Padding = new Thickness(18, 16, 18, 16),
-            Background = Tokens.Brush("Surface"),
-            BorderBrush = Tokens.Brush("InputLine"),
+            Background = Tokens.Brush("Background"),
+            BorderBrush = Tokens.Brush("Hairline"),
             BorderThickness = new Thickness(1),
-            Effect = Tokens.Get<System.Windows.Media.Effects.Effect>("CardShadow"),
+            Effect = Tokens.FloatShadow,
             Child = inside,
         };
 

@@ -135,7 +135,7 @@ sealed partial class TerminalPanel : UserControl
     /// line. Nothing else in the window names them.
     private readonly TextBlock _keys = new()
     {
-        FontFamily = Tokens.Get<FontFamily>("Mono"),
+        FontFamily = Tokens.Mono,
         FontSize = Tokens.Get<double>("TextTiny"),
         Foreground = Tokens.Brush("Muted"),
         TextTrimming = TextTrimming.CharacterEllipsis,
@@ -162,8 +162,8 @@ sealed partial class TerminalPanel : UserControl
             }
         };
 
-        Background = Tokens.Brush("Surface");
-        FontFamily = Tokens.Get<FontFamily>("Mono");
+        Background = Tokens.Brush("Background");
+        FontFamily = Tokens.Mono;
         Focusable = false;
         PreviewMouseDown += EndRenameOnPressAway;
 
@@ -214,7 +214,7 @@ sealed partial class TerminalPanel : UserControl
         _bar.Children.Add(left);
         Grid.SetColumn(_right, 1);
         _bar.Children.Add(_right);
-        var hairline = new Border { Height = 1, VerticalAlignment = VerticalAlignment.Bottom, Background = Tokens.Brush("Hairline") };
+        var hairline = new PixelBorder { Height = 1, VerticalAlignment = VerticalAlignment.Bottom, Background = Tokens.Brush("Hairline") };
         Grid.SetColumnSpan(hairline, 2);
         _bar.Children.Add(hairline);
         _pills.Refit = FitPills;
@@ -230,7 +230,7 @@ sealed partial class TerminalPanel : UserControl
                 ReleaseBody();
             }
         };
-        _strip.Child = new Border
+        _strip.Child = new PixelBorder
         {
             BorderBrush = Tokens.Brush("Hairline"),
             BorderThickness = new Thickness(0, 0, 0, 1),
@@ -241,7 +241,7 @@ sealed partial class TerminalPanel : UserControl
         _body.ColumnDefinitions.Add(new ColumnDefinition());
         var listSide = new Grid();
         listSide.Children.Add(_list);
-        listSide.Children.Add(new Border { Width = 1, HorizontalAlignment = HorizontalAlignment.Right, Background = Tokens.Brush("Hairline") });
+        listSide.Children.Add(new PixelBorder { Width = 1, HorizontalAlignment = HorizontalAlignment.Right, Background = Tokens.Brush("Hairline") });
         _body.Children.Add(listSide);
         Grid.SetColumn(_main, 1);
         _body.Children.Add(_main);
@@ -266,7 +266,7 @@ sealed partial class TerminalPanel : UserControl
         _resume = Flat(Strings.TerminalResume, () => ResumeAsked?.Invoke(), ghost: false, main: true);
         DockPanel.SetDock(_resume, Dock.Right);
         _stopped.Children.Add(_resume);
-        var stoppedLine = Text(Strings.TerminalStoppedLine, "TextNumber", "Muted", FontWeights.Normal);
+        var stoppedLine = Text(Strings.TerminalStoppedLine, "TextBody", "Muted", FontWeights.Normal);
         stoppedLine.VerticalAlignment = VerticalAlignment.Center;
         stoppedLine.TextWrapping = TextWrapping.Wrap;
         _stopped.Children.Add(stoppedLine);
@@ -431,7 +431,7 @@ sealed partial class TerminalPanel : UserControl
     /// The space before it is a mono space of the same size, about six units, as the gap was.
     private static void AddNumber(TextBlock name, string number, string tone)
     {
-        var family = Tokens.Get<FontFamily>("Mono");
+        var family = Tokens.Mono;
         var size = Tokens.Get<double>("TextTiny");
         name.Inlines.Add(new System.Windows.Documents.Run(" ") { FontFamily = family, FontSize = size });
         name.Inlines.Add(new System.Windows.Documents.Run(number)

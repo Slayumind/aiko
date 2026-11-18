@@ -48,7 +48,7 @@ public partial class IslandPanel : UserControl
     public void SetFace(IconFrame frame, System.Windows.Media.ImageSource? face) => _faces.Set(frame, face);
 
     /// Docked means pressed against the edge. In hand the island is a whole thing of its own: every
-    /// corner rounded and a hairline all round, with its rings already laid out for the edge below.
+    /// free corner cut and a hairline all round, with its rings already laid out for the edge below.
     public void Show(IReadOnlyList<CardState> cards, ScreenEdge edge, bool docked = true)
     {
         // Along a top or bottom edge the rings stand in a row; along a side they stand in a
@@ -140,7 +140,7 @@ public partial class IslandPanel : UserControl
         var words = new TextBlock
         {
             Text = text,
-            FontFamily = Tokens.Get<System.Windows.Media.FontFamily>("Mono"),
+            FontFamily = Tokens.Mono,
             FontSize = Tokens.Get<double>("TextTiny"),
             Foreground = Tokens.Brush(tone),
             VerticalAlignment = VerticalAlignment.Center,
@@ -307,7 +307,7 @@ public partial class IslandPanel : UserControl
         row.Children.Add(new TextBlock
         {
             Text = count.ToString(System.Globalization.CultureInfo.CurrentCulture),
-            FontFamily = Tokens.Get<System.Windows.Media.FontFamily>("Mono"),
+            FontFamily = Tokens.Mono,
             FontSize = Tokens.Get<double>("TextTiny"),
             Foreground = Tokens.Brush("Ink"),
             MinWidth = 7,
