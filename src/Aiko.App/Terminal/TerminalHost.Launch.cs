@@ -160,7 +160,7 @@ sealed partial class TerminalHost
         var claudePlan = ClaudeLaunchPlan.For(
             new LaunchRequest(
                 config, home, environment.Name, session.Id, session.Started, TerminalEvents.HooksFile(),
-                ThisComputer.Folders.PicturesFolder(session.Id), session.Started && ConversationOnDisk(config, session.Id)),
+                session.Started && ConversationOnDisk(config, session.Id)),
             inherited);
         return new PtyLaunch(CommandLine(claude, claudePlan.Arguments), folder, Variables(claudePlan));
     }

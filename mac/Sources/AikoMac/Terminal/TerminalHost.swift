@@ -390,7 +390,6 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
                 LaunchRequest(
                     configDirectory: config, userProfile: Store.home, environmentName: session.environment,
                     sessionId: session.id, started: session.started, hooksFile: TerminalEvents.hooksFile(),
-                    picturesFolder: Store.folders.picturesFolder(session.id),
                     onDisk: Self.conversationOnDisk(config, session.id)),
                 inheritedVariables: ProcessEnvironment.inheritedNames)
             arguments = plan.arguments

@@ -32,8 +32,9 @@ the update check.
   on this computer, and removes the file when you close the session. The title the program sets
   for its terminal gives the name of the session.
 - **Pictures you paste into the editor.** A picture from the clipboard is written as a PNG into
-  a folder of its session on this computer, so Claude Code can take it; its path is what goes to
-  Claude Code. The folder is removed when you close the session.
+  a folder of its session on this computer, and its path goes to Claude Code. Claude Code may
+  read the pictures there and has no other access to them. The folder is removed when you close
+  the session.
 - **Your conversations, when you search them.** The palette of sessions (Ctrl+Shift+K) finds your
   conversations with Claude Code, also the ones you started in another terminal or in VS Code. For
   this Aiko reads the start and the end of each conversation file in the folders of your

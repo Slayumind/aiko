@@ -453,7 +453,7 @@ struct SharedCaseTests {
                 environmentName: row["environment"]?.stringValue ?? "",
                 sessionId: row["sessionId"]?.stringValue ?? "",
                 started: row["started"]?.boolValue ?? false,
-                hooksFile: row["hooksFile"]?.stringValue ?? "", picturesFolder: row["picturesFolder"]?.stringValue ?? "",
+                hooksFile: row["hooksFile"]?.stringValue ?? "",
                 onDisk: row["onDisk"]?.boolValue ?? true)
 
             let plan = ClaudeLaunchPlan.forRequest(platform, request, inheritedVariables: Self.strings(row["inherited"]))
@@ -465,6 +465,13 @@ struct SharedCaseTests {
                     VariableChange($0["name"]?.stringValue ?? "", $0["value"]?.stringValue)
                 },
                 "\(name)")
+        }
+
+        for row in cases["picturesRules"]?.arrayValue ?? [] {
+            let folder = row["folder"]?.stringValue ?? ""
+            let rule = row["rule"]?.stringValue ?? ""
+            #expect(TerminalHooks.picturesRule(folder) == rule, "\(folder)")
+            #expect(TerminalHooks.settingsJson("bridge", picturesFolder: folder).contains("\"\(rule)\""), "\(folder)")
         }
 
         for row in cases["shells"]?.arrayValue ?? [] {

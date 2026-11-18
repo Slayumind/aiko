@@ -49,7 +49,7 @@ static class TerminalHookCheck
         }
 
         var hooks = Path.Combine(folder, "terminal-hooks.json");
-        File.WriteAllText(hooks, TerminalHooks.SettingsJson(bridge));
+        File.WriteAllText(hooks, TerminalHooks.SettingsJson(bridge, Path.Combine(folder, "pictures")));
 
         var id = Guid.NewGuid().ToString();
         var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);

@@ -207,7 +207,22 @@ public sealed record TerminalEvent(TerminalEventKind Kind, string Detail, long A
 /// async hook decides no permission.
 public static class TerminalHooks
 {
-    public static string SettingsJson(string bridgeExePath)
+    /// A rule that lets Claude Code read the pictures of the editor and nothing else there. An
+    /// added folder (--add-dir) gave it full access and a question at every start (D-451). Signs
+    /// that mean something in a rule become "?", which stands for any one character.
+    public static string PicturesRule(string picturesFolder)
+    {
+        var path = picturesFolder.Replace('\\', '/').TrimEnd('/');
+        if (path.Length > 1 && path[1] == ':')
+        {
+            path = "/" + char.ToLowerInvariant(path[0]) + path[2..];
+        }
+
+        var safe = string.Concat(path.Select(sign => "()[]{}*?!#".Contains(sign) ? '?' : sign));
+        return $"Read(/{safe}/**)";
+    }
+
+    public static string SettingsJson(string bridgeExePath, string picturesFolder)
     {
         var events = new JsonObject();
         foreach (var name in TerminalEvent.HookEvents)
@@ -224,7 +239,11 @@ public static class TerminalHooks
             });
         }
 
-        return new JsonObject { ["hooks"] = events }.ToJsonString(new JsonSerializerOptions
+        return new JsonObject
+        {
+            ["hooks"] = events,
+            ["permissions"] = new JsonObject { ["allow"] = new JsonArray(PicturesRule(picturesFolder)) },
+        }.ToJsonString(new JsonSerializerOptions
         {
             WriteIndented = true,
             Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,

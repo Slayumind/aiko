@@ -88,13 +88,13 @@ static class TerminalEditorCheck
         }
 
         var hooks = Path.Combine(folder, "terminal-hooks.json");
-        File.WriteAllText(hooks, TerminalHooks.SettingsJson(bridge));
-        var id = Guid.NewGuid().ToString();
         var pictures = Path.Combine(folder, "pictures");
+        File.WriteAllText(hooks, TerminalHooks.SettingsJson(bridge, pictures));
+        var id = Guid.NewGuid().ToString();
         var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         var config = ClaudeConfigFolder.Resolve(null, home);
         var inherited = Environment.GetEnvironmentVariables().Keys.Cast<string>().ToList();
-        var plan = ClaudeLaunchPlan.For(new LaunchRequest(config, home, "check", id, false, hooks, pictures), inherited);
+        var plan = ClaudeLaunchPlan.For(new LaunchRequest(config, home, "check", id, false, hooks), inherited);
         var arguments = plan.Arguments.Concat(["--model", "haiku", "--permission-mode", "default"])
             .Select(argument => argument.Contains(' ') ? $"\"{argument}\"" : argument);
 
