@@ -345,7 +345,16 @@ struct ListPopView: View {
     /// The bottom of the list button: the bar is 44 high and the button 28, in its middle.
     static let top: CGFloat = (TitleBarView.height + 28) / 2
 
+    /// The list is built only while it is open. Kept hidden in the window, it was laid out again on
+    /// every change of the window, and with Geist Mono its layout never settled while the window
+    /// zoomed: AppKit stopped the app (--try-terminal, 2026-11-19).
     var body: some View {
+        if state.listPopOpen {
+            pop
+        }
+    }
+
+    private var pop: some View {
         ZStack(alignment: .topLeading) {
             Color.clear
                 .contentShape(Rectangle())
