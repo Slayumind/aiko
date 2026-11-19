@@ -40,6 +40,27 @@ enum SiteIcons {
         "M3.65,4.35l.7-.7L12,11.29l7.65-7.64.7.7L12.71,12l7.64,7.65-.7.7L12,12.71l-7.65,7.64-.7-.7L11.29,12Z"
 }
 
+extension NSBezierPath {
+    /// A rectangle with its corners cut at 45 degrees, each by its own size; a size of 0 leaves the
+    /// corner square. The island and its landing strip have this shape (D-448). The corner named top
+    /// is at minY, so it wants a place where y grows downwards.
+    static func cutCorners(_ rect: NSRect, _ corners: Corners) -> NSBezierPath {
+        let (topLeft, topRight) = (CGFloat(corners.topLeft), CGFloat(corners.topRight))
+        let (bottomRight, bottomLeft) = (CGFloat(corners.bottomRight), CGFloat(corners.bottomLeft))
+        let path = NSBezierPath()
+        path.move(to: NSPoint(x: rect.minX + topLeft, y: rect.minY))
+        path.line(to: NSPoint(x: rect.maxX - topRight, y: rect.minY))
+        path.line(to: NSPoint(x: rect.maxX, y: rect.minY + topRight))
+        path.line(to: NSPoint(x: rect.maxX, y: rect.maxY - bottomRight))
+        path.line(to: NSPoint(x: rect.maxX - bottomRight, y: rect.maxY))
+        path.line(to: NSPoint(x: rect.minX + bottomLeft, y: rect.maxY))
+        path.line(to: NSPoint(x: rect.minX, y: rect.maxY - bottomLeft))
+        path.line(to: NSPoint(x: rect.minX, y: rect.minY + topLeft))
+        path.close()
+        return path
+    }
+}
+
 /// A thin line that divides two parts of a screen: across by default, down when asked.
 struct Rule: View {
     var down = false

@@ -9,10 +9,10 @@ import AppKit
 /// page over first.
 enum RingPaint {
     /// percent is nil when nothing has been reported yet, and then the ring is dashed: a different
-    /// state, not zero per cent.
+    /// state, not zero per cent. onDark is false for the menu bar, which may be light.
     static func draw(
         centre: NSPoint, radius: CGFloat, thickness: CGFloat, percent: Int?, tone: LimitTone,
-        alpha: CGFloat = 1
+        alpha: CGFloat = 1, onDark: Bool = true
     ) {
         guard let percent else {
             waiting(centre, radius, thickness, alpha)
@@ -20,7 +20,7 @@ enum RingPaint {
         }
 
         track(centre, radius, thickness, alpha)
-        arc(centre, radius, thickness, percent, tone, alpha)
+        arc(centre, radius, thickness, percent, tone, alpha, onDark)
     }
 
     static func track(_ centre: NSPoint, _ radius: CGFloat, _ thickness: CGFloat, _ alpha: CGFloat) {
@@ -42,7 +42,7 @@ enum RingPaint {
 
     static func arc(
         _ centre: NSPoint, _ radius: CGFloat, _ thickness: CGFloat, _ percent: Int, _ tone: LimitTone,
-        _ alpha: CGFloat
+        _ alpha: CGFloat, _ onDark: Bool
     ) {
         let share = RingArt.arcShare(percent)
         if share <= 0 {
@@ -65,7 +65,7 @@ enum RingPaint {
 
         path.lineWidth = thickness
         path.lineCapStyle = .round
-        colour(RingArt.colour(for: tone), alpha).setStroke()
+        colour(RingArt.limitColour(for: tone, onDark: onDark), alpha).setStroke()
         path.stroke()
     }
 

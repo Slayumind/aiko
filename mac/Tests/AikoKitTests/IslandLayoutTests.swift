@@ -32,7 +32,7 @@ struct IslandLayoutTests {
         #expect(frame.border.top == 0)
         #expect(frame.corners.topLeft == 0)
         #expect(frame.corners.topRight == 0)
-        #expect(frame.corners.bottomLeft == IslandLayout.radius)
+        #expect(frame.corners.bottomLeft == IslandLayout.cut)
     }
 
     @Test(arguments: ScreenEdge.allCases)
@@ -40,7 +40,7 @@ struct IslandLayoutTests {
         let frame = Self.two(edge, docked: false)
 
         #expect(frame.border == Edges(top: 1, right: 1, bottom: 1, left: 1))
-        #expect(frame.corners == Corners.all(IslandLayout.radius))
+        #expect(frame.corners == Corners.all(IslandLayout.cut))
     }
 
     /// The line that appears when the island is picked up comes out of the padding, so the rings
