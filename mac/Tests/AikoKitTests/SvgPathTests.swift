@@ -147,27 +147,26 @@ struct SvgPathTests {
     }
 
     /// The real proof: every shape of every face reads as an outline that starts with a move.
+    /// Aiko has one drawn face now (D-462), so there is no loop over styles.
     @Test
-    func everyFaceOfEveryStyleReads() {
-        for style in FaceStyle.allCases {
-            for face in AikoFace.allCases {
-                for ground in FaceGround.allCases {
-                    for small in [false, true] {
-                        let picture = FaceArt.draw(style, face, ground, small)
-                        for group in picture.groups {
-                            for shape in group.shapes {
-                                let steps = SvgPath.steps(shape.data)
-                                #expect(steps.count > 1, "\(style) \(face) \(ground) small \(small)")
-                                if case .move = steps.first {
-                                    continue
-                                }
-                                Issue.record("a shape does not start with a move")
+    func everyFaceReads() {
+        for face in AikoFace.allCases {
+            for ground in FaceGround.allCases {
+                for small in [false, true] {
+                    let picture = FaceArt.draw(face, ground, small)
+                    for group in picture.groups {
+                        for shape in group.shapes {
+                            let steps = SvgPath.steps(shape.data)
+                            #expect(steps.count > 1, "\(face) \(ground) small \(small)")
+                            if case .move = steps.first {
+                                continue
                             }
+                            Issue.record("a shape does not start with a move")
                         }
+                    }
 
-                        for hole in Self.holes(in: picture) {
-                            #expect(SvgPath.steps(hole).count > 1)
-                        }
+                    for hole in Self.holes(in: picture) {
+                        #expect(SvgPath.steps(hole).count > 1)
                     }
                 }
             }
