@@ -16,24 +16,44 @@ extension TerminalHost {
             stage.addSubview(view)
         }
 
+        let frame = zoomed(TerminalFrameView(state: state))
+        frame.translatesAutoresizingMaskIntoConstraints = false
+        stage.addSubview(frame, positioned: .below, relativeTo: nil)
+        stage.addLayoutGuide(terminalRoom)
+
         let collapsed = editor.heightAnchor.constraint(equalToConstant: 0)
         editorCollapsed = collapsed
         let stoppedAway = stoppedBar.heightAnchor.constraint(equalToConstant: 0)
         stoppedCollapsed = stoppedAway
         stoppedBar.isHidden = true
         stoppedBar.resume = { [weak self] in self?.resume() }
+        // The margins of the two frames and the padding inside the terminal frame, as
+        // _terminalFrame and _editorFrame in TerminalPanel.Signal.cs.
+        let frameLeft = frame.leadingAnchor.constraint(equalTo: stage.leadingAnchor, constant: 12)
+        let frameRight = frame.trailingAnchor.constraint(equalTo: stage.trailingAnchor, constant: -12)
+        let frameTop = frame.topAnchor.constraint(equalTo: stage.topAnchor, constant: 8)
+        let roomLeft = terminalRoom.leadingAnchor.constraint(equalTo: frame.leadingAnchor, constant: 9)
+        let roomRight = terminalRoom.trailingAnchor.constraint(equalTo: frame.trailingAnchor, constant: -9)
+        let roomTop = terminalRoom.topAnchor.constraint(equalTo: frame.topAnchor, constant: TerminalFrameView.top(zoom: 1))
+        let roomBottom = terminalRoom.bottomAnchor.constraint(equalTo: frame.bottomAnchor, constant: -7)
+        let editorLeft = editor.leadingAnchor.constraint(equalTo: stage.leadingAnchor, constant: 12)
+        let editorRight = editor.trailingAnchor.constraint(equalTo: stage.trailingAnchor, constant: -12)
+        let gap = stoppedBar.bottomAnchor.constraint(equalTo: editor.topAnchor)
+        editorGap = gap
         let keysLeft = keysLine.leadingAnchor.constraint(equalTo: stage.leadingAnchor, constant: 16)
         let keysRight = keysLine.trailingAnchor.constraint(equalTo: stage.trailingAnchor, constant: -16)
         let keysTop = keysLine.topAnchor.constraint(equalTo: editor.bottomAnchor, constant: 4)
         let keysBottom = keysLine.bottomAnchor.constraint(equalTo: stage.bottomAnchor, constant: -6)
         NSLayoutConstraint.activate([
-            editor.leadingAnchor.constraint(equalTo: stage.leadingAnchor),
-            editor.trailingAnchor.constraint(equalTo: stage.trailingAnchor),
+            frameLeft, frameRight, frameTop,
+            frame.bottomAnchor.constraint(equalTo: stoppedBar.topAnchor),
+            roomLeft, roomRight, roomTop, roomBottom,
+            editorLeft, editorRight,
             keysLeft, keysRight, keysTop, keysBottom,
             collapsed,
             stoppedBar.leadingAnchor.constraint(equalTo: stage.leadingAnchor),
             stoppedBar.trailingAnchor.constraint(equalTo: stage.trailingAnchor),
-            stoppedBar.bottomAnchor.constraint(equalTo: editor.topAnchor),
+            gap,
             stoppedAway,
         ])
 
@@ -42,6 +62,16 @@ extension TerminalHost {
             self.editor.zoom = zoom
             self.stoppedBar.zoom = zoom
             self.keysLine.font = Theme.monoFont(Theme.textTiny * zoom)
+            frameLeft.constant = 12 * zoom
+            frameRight.constant = -12 * zoom
+            frameTop.constant = 8 * zoom
+            roomLeft.constant = 9 * zoom
+            roomRight.constant = -9 * zoom
+            roomTop.constant = TerminalFrameView.top(zoom: zoom)
+            roomBottom.constant = -7 * zoom
+            editorLeft.constant = 12 * zoom
+            editorRight.constant = -12 * zoom
+            self.placeEditor()
             keysLeft.constant = 16 * zoom
             keysRight.constant = -16 * zoom
             keysTop.constant = 4 * zoom
@@ -94,6 +124,7 @@ extension TerminalHost {
         let shown = editorRoom && editor.wanted
         editor.isHidden = !shown
         editorCollapsed?.isActive = !shown
+        editorGap?.constant = shown ? -10 * zoom : 0
         if !shown {
             editor.choices.close()
         }

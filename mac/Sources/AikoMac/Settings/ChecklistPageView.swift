@@ -12,8 +12,8 @@ struct ChecklistPageView: View {
     @ObservedObject var state: SettingsState
     @ObservedObject var model: ChecklistModel
 
-    /// One item at a time, as the first run in the window shows it (D-391): the open item, the dots
-    /// of every item under it, a way back, a way on, and Finish once every item has an answer.
+    /// One item at a time, as the first run in the window shows it (D-391): the open item, the bar
+    /// of the steps under it, a way back, a way on, and Finish once every item has an answer.
     var steps = false
 
     var body: some View {
@@ -60,7 +60,7 @@ struct ChecklistPageView: View {
             }
 
             HStack(spacing: 8) {
-                if steps { dots }
+                if steps { stepBar }
                 Spacer()
                 if steps {
                     if model.step(-1) != nil {
@@ -103,21 +103,25 @@ struct ChecklistPageView: View {
         .padding(.top, 14)
     }
 
-    /// One dot per item: done ones muted, the open one a wider bar, the rest dim. A dot that is not
-    /// locked opens its item.
-    private var dots: some View {
-        HStack(spacing: 6) {
-            ForEach(ChecklistLayout.order, id: \.self) { item in
-                let open = model.opened == item
-                let itemState = model.state(of: item)
-                Capsule()
-                    .fill(open ? Theme.ink : itemState == .done ? Theme.muted : Theme.raised)
-                    .frame(width: open ? 18 : 6, height: 6)
-                    .contentShape(Rectangle())
-                    .onTapGesture { if itemState != .locked { model.open(item) } }
-                    .tip(ChecklistLayout.title(item))
+    /// How far the steps went, as a bar of the new look (StepDots on Windows): it is filled up to
+    /// the open step. Every step keeps its place on the bar, and a click there opens a step that is
+    /// not locked.
+    private var stepBar: some View {
+        let order = ChecklistLayout.order
+        let place = order.firstIndex { $0 == model.opened }
+        let value = order.isEmpty ? 0 : place.map { Double($0 + 1) / Double(order.count) } ?? 1
+        return LimitBar(value: value, trackHeight: 6, height: 14)
+            .overlay {
+                HStack(spacing: 0) {
+                    ForEach(order, id: \.self) { item in
+                        let itemState = model.state(of: item)
+                        Color.clear
+                            .contentShape(Rectangle())
+                            .onTapGesture { if itemState != .locked { model.open(item) } }
+                            .tip(ChecklistLayout.title(item))
+                    }
+                }
             }
-        }
     }
 
     @ViewBuilder
@@ -159,13 +163,13 @@ struct ChecklistPageView: View {
                     .padding(.top, 10)
                 HStack(spacing: 0) {
                     Text(Strings.installFailedLead)
-                        .font(Theme.sans(Theme.textSmall))
+                        .font(Theme.mono(Theme.textSmall))
                         .foregroundStyle(Theme.muted)
                     LinkButton(title: Strings.installFailedLink) {
                         if let url = URL(string: TerminalHost.claudeInstallPage) { NSWorkspace.shared.open(url) }
                     }
                     Text(".")
-                        .font(Theme.sans(Theme.textSmall))
+                        .font(Theme.mono(Theme.textSmall))
                         .foregroundStyle(Theme.muted)
                 }
                 .padding(.top, 6)
@@ -389,7 +393,7 @@ struct ChecklistPageView: View {
             Control.sectionLabel(Strings.format(Strings.cmdFor, names[index]))
                 .padding(.top, 12).padding(.bottom, 4)
 
-            NameField(text: $model.commandText[index], mono: true,
+            NameField(text: $model.commandText[index],
                       onCommit: { model.commandTyped(index) })
 
             HStack(alignment: .top, spacing: 8) {
@@ -550,9 +554,8 @@ struct ChecklistRowView<Content: View>: View {
         .padding(.horizontal, 12)
         .padding(.vertical, 10)
         .background(hovering && state != .locked && !step ? Theme.hoverLayer : .clear)
-        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
+            Rectangle()
                 .strokeBorder(Theme.hairline, lineWidth: 1))
         .opacity(state == .locked ? 0.55 : 1)
         .padding(.bottom, 6)
@@ -563,7 +566,7 @@ struct ChecklistRowView<Content: View>: View {
             mark.frame(width: 16, height: 16)
 
             Text(title)
-                .font(Theme.sans(Theme.textSmall))
+                .font(Theme.mono(Theme.textSmall))
                 .foregroundStyle(Theme.ink)
                 .lineLimit(1)
                 .truncationMode(.tail)
@@ -604,7 +607,7 @@ struct ChecklistRowView<Content: View>: View {
             }
         case .skipped:
             ZStack {
-                Circle().strokeBorder(Theme.inputLine, lineWidth: 1.4)
+                Circle().strokeBorder(Theme.hairline, lineWidth: 1.4)
                 Rectangle().fill(Theme.muted).frame(width: 6, height: 1.4)
             }
         case .locked:

@@ -467,9 +467,7 @@ public enum Strings {
         "ShellExitCode": ("code {0}", "код {0}"),
         "ShellSeconds": ("{0} s", "{0} с"),
         "ShellCopy": ("Copy", "Копировать"),
-        "ShellCopied": ("Copied", "Скопировано"),
         "ShellFold": ("Fold", "Свернуть"),
-        "ShellUnfold": ("Unfold", "Развернуть"),
         "ShellExplain": ("Explain", "Объяснить"),
         "ShellExplaining": ("Asking Claude Code…", "Спрашиваю Claude Code…"),
         "ShellExplainFailed": ("Claude Code did not answer. Press Explain again in a minute.", "Claude Code не ответил. Нажми «Объяснить» ещё раз через минуту."),
@@ -1851,14 +1849,8 @@ public enum Strings {
     /// Copy
     public static var shellCopy: String { Strings.get("ShellCopy") }
 
-    /// Copied
-    public static var shellCopied: String { Strings.get("ShellCopied") }
-
     /// Fold
     public static var shellFold: String { Strings.get("ShellFold") }
-
-    /// Unfold
-    public static var shellUnfold: String { Strings.get("ShellUnfold") }
 
     /// Explain
     public static var shellExplain: String { Strings.get("ShellExplain") }

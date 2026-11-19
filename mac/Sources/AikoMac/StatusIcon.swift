@@ -68,10 +68,11 @@ enum StatusIcon {
             thickness: thickness,
             percent: percent,
             tone: ring?.tone ?? .unknown,
-            alpha: alpha)
+            alpha: alpha,
+            onDark: false)
 
         if ring != nil, let dot {
-            Theme.nsColour(RingArt.colour(for: dot.tone)).withAlphaComponent(alpha).setFill()
+            Theme.nsColour(RingArt.limitColour(for: dot.tone, onDark: false)).withAlphaComponent(alpha).setFill()
             let dotRadius = RingArt.dotRadius * scale
             NSBezierPath(ovalIn: NSRect(
                 x: centre.x - dotRadius,

@@ -38,7 +38,6 @@ struct SessionListView: View {
                         }
                     }
                 }
-                .padding(.horizontal, 8)
                 .padding(.top, 4)
                 .coordinateSpace(name: RowDragLook.space)
                 .onPreferenceChange(RowFrames.self) { found in
@@ -53,7 +52,10 @@ struct SessionListView: View {
             newSession
         }
         .frame(maxHeight: inCard ? nil : .infinity, alignment: .top)
-        .background(Theme.surface)
+        .background(Theme.background)
+        .overlay(alignment: .trailing) {
+            if !inCard { Rule(down: true) }
+        }
     }
 
     // ---- moving a session in its folder (D-400, D-401), the twin of RowDrag.cs ----
@@ -122,7 +124,7 @@ struct SessionListView: View {
            let row = state.groups.flatMap(\.rows).first(where: { $0.id == drag.id }) {
             SessionRowView(row: row, chosen: row.id == state.chosen, state: state)
                 .frame(width: frame.width)
-                .background(RoundedRectangle(cornerRadius: 10).fill(Theme.raised))
+                .background(Theme.raised)
                 .rotationEffect(.degrees(landing ? 0 : RowDragLook.tilt))
                 .shadow(color: .black.opacity(Theme.shadowOpacity), radius: Theme.shadowBlur / 2, y: Theme.shadowOffset)
                 .offset(x: frame.minX, y: frame.minY + drag.moved.height)
@@ -170,8 +172,8 @@ private struct GroupHeader: View {
             }
             .opacity(hovered ? 1 : 0)
         }
-        .padding(.leading, 10)
-        .padding(.trailing, 4)
+        .padding(.leading, 18)
+        .padding(.trailing, 12)
         .padding(.top, 8)
         .contentShape(Rectangle())
         .tip(group.folder)
@@ -185,7 +187,7 @@ private struct GroupHeader: View {
         Button(action: action) {
             LineMark(data: data)
                 .frame(width: 22, height: 22)
-                .modifier(HoverLayer(radius: 6))
+                .modifier(HoverLayer())
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -213,11 +215,11 @@ private struct SessionRowView: View {
                 if renaming {
                     TextField("", text: $newName)
                         .textFieldStyle(.plain)
-                        .font(Theme.sans(Theme.textName))
+                        .font(Theme.mono(Theme.textBody))
                         .foregroundStyle(Theme.ink)
                         .padding(.horizontal, 4)
                         .padding(.vertical, 1)
-                        .overlay(RoundedRectangle(cornerRadius: 6).stroke(Theme.inputLine, lineWidth: 1))
+                        .hairlineFrame(Theme.muted)
                         .focused($fieldFocused)
                         .onSubmit { finishRename(keep: true) }
                         .onExitCommand { finishRename(keep: false) }
@@ -226,7 +228,7 @@ private struct SessionRowView: View {
                         }
                 } else {
                     Text(row.name)
-                        .font(Theme.sans(Theme.textName))
+                        .font(Theme.mono(Theme.textBody))
                         .foregroundStyle(Theme.ink)
                         .lineLimit(1)
                         .truncationMode(.tail)
@@ -238,22 +240,17 @@ private struct SessionRowView: View {
             let second = SessionListWords.secondLine(row, Date())
             if !second.isEmpty {
                 Text(second)
-                    .font(Theme.sans(Theme.textSmall))
+                    .font(Theme.mono(Theme.textSmall))
                     .foregroundStyle(Theme.muted)
                     .lineLimit(1)
                     .truncationMode(.tail)
                     .padding(.leading, 22)
             }
         }
-        .padding(.horizontal, 10)
+        .padding(.horizontal, 18)
         .padding(.vertical, 8)
-        .modifier(HoverLayer(radius: 10))
-        .background(
-            RoundedRectangle(cornerRadius: 10)
-                .fill(chosen ? Theme.raised : Color.clear))
-        .overlay(
-            RoundedRectangle(cornerRadius: 10)
-                .stroke(chosen ? Theme.inputLine : Color.clear, lineWidth: 1))
+        .modifier(HoverLayer())
+        .background(chosen ? Theme.raised : Color.clear)
         .padding(.vertical, 1)
         .contentShape(Rectangle())
         .onTapGesture { state.onChoose?(row.id) }
@@ -288,54 +285,27 @@ private struct SessionRowView: View {
     }
 }
 
-/// The state of a row on the right: a mark and a word in the mono font, as Mark() on Windows.
+/// The state of a row on the right: a sign and a word, as StatusMark.Of on Windows. A row the
+/// person has seen has none.
 private struct RowMark: View {
     let state: RowState
 
     var body: some View {
-        if let (word, tone) = words {
-            HStack(spacing: 6) {
-                mark
-                Text(word).font(Theme.mono(Theme.textTiny)).foregroundStyle(tone)
-            }
-            .padding(.leading, 8)
-        }
-    }
-
-    private var words: (String, Color)? {
-        switch state {
-        case .working: (Strings.terminalWorking, Theme.muted)
-        case .waiting: (Strings.terminalWaiting, Theme.caution)
-        case .done: (Strings.terminalDone, Theme.positive)
-        case .asleep: (Strings.terminalAsleep, Theme.muted)
-        case .stopped: (Strings.terminalStopped, Theme.destructive)
-        case .read: nil
-        }
-    }
-
-    @ViewBuilder private var mark: some View {
-        switch state {
-        case .working: Circle().fill(Theme.muted).frame(width: 6, height: 6)
-        case .asleep: Circle().stroke(Theme.muted, lineWidth: 1).frame(width: 6, height: 6)
-        case .waiting: LineMark(data: BarMarks.pause, tone: Theme.caution)
-        case .done: FilledMark(data: BarMarks.check, size: 10, tone: Theme.positive)
-        case .stopped: LineMark(data: "M0,0 L8,8 M8,0 L0,8", tone: Theme.destructive)
-        case .read: EmptyView()
+        // The mark keeps its words whole; the name before it gives way, as Dock.Right on Windows.
+        if let look = StatusLook(state) {
+            StatusMark(look: look).fixedSize().padding(.leading, 8)
         }
     }
 }
 
 /// A soft layer under the mouse, as the hover borders of Windows.
 struct HoverLayer: ViewModifier {
-    let radius: CGFloat
     @State private var hovered = false
 
     func body(content: Content) -> some View {
         content
-            .background(RoundedRectangle(cornerRadius: radius).fill(Theme.hoverLayer).opacity(hovered ? 1 : 0))
-            .onHover { inside in
-                withAnimation(Motion.reduceMotion ? nil : .easeOut(duration: 0.12)) { hovered = inside }
-            }
+            .hoverLayer(hovered)
+            .onHover { hovered = $0 }
     }
 }
 
@@ -375,7 +345,16 @@ struct ListPopView: View {
     /// The bottom of the list button: the bar is 44 high and the button 28, in its middle.
     static let top: CGFloat = (TitleBarView.height + 28) / 2
 
+    /// The list is built only while it is open. Kept hidden in the window, it was laid out again on
+    /// every change of the window, and with Geist Mono its layout never settled while the window
+    /// zoomed: AppKit stopped the app (--try-terminal, 2026-11-19).
     var body: some View {
+        if state.listPopOpen {
+            pop
+        }
+    }
+
+    private var pop: some View {
         ZStack(alignment: .topLeading) {
             Color.clear
                 .contentShape(Rectangle())
@@ -384,9 +363,7 @@ struct ListPopView: View {
                 .frame(width: TerminalHost.listWidth + 20)
                 .frame(maxHeight: 480)
                 .fixedSize(horizontal: false, vertical: true)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-                .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Theme.inputLine, lineWidth: 1))
-                .shadow(color: .black.opacity(Theme.shadowOpacity), radius: Theme.shadowBlur / 2, y: Theme.shadowOffset)
+                .floatingPanel()
                 .padding(.top, Self.top + 4)
                 .padding(.leading, Self.left)
                 .padding(.bottom, 12)

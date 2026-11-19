@@ -10,10 +10,6 @@ import AppKit
 /// NSVisualEffectView, so the glass itself is three lines.
 @MainActor
 final class IslandStrip {
-    /// The corner macOS gives its own panes. The strip reaches past the screen edge by exactly
-    /// this, so the two corners on that side fall outside the screen and the edge reads flat.
-    private static let radius: CGFloat = 8
-
     /// How see-through the whole pane is, on top of the material. The owner picks it by eye:
     /// AIKO_STRIP_ALPHA=0.6 and so on.
     private static var alpha: CGFloat {
@@ -22,37 +18,13 @@ final class IslandStrip {
         return CGFloat(min(max(value, 0.1), 1))
     }
 
-    /// The shape of the pane: the side against the screen edge is flat, the others carry the corner
-    /// macOS gives its own panes, exactly as the island does (IslandLayout.corners).
+    /// The shape of the pane: the side against the screen edge is flat, the others are cut, exactly
+    /// as the island is (IslandLayout.corners).
     ///
     /// The corner named top is drawn at minY, so this wants a place where y grows downwards: the
     /// mask image is drawn flipped, and the layer that strokes the line gets the corners turned over.
     private static func shape(_ rect: NSRect, _ corners: Corners) -> NSBezierPath {
-        let path = NSBezierPath()
-        let topLeft = CGFloat(corners.topLeft)
-        let topRight = CGFloat(corners.topRight)
-        let bottomRight = CGFloat(corners.bottomRight)
-        let bottomLeft = CGFloat(corners.bottomLeft)
-
-        path.move(to: NSPoint(x: rect.minX + topLeft, y: rect.minY))
-        path.line(to: NSPoint(x: rect.maxX - topRight, y: rect.minY))
-        path.appendArc(
-            from: NSPoint(x: rect.maxX, y: rect.minY),
-            to: NSPoint(x: rect.maxX, y: rect.minY + topRight), radius: topRight)
-        path.line(to: NSPoint(x: rect.maxX, y: rect.maxY - bottomRight))
-        path.appendArc(
-            from: NSPoint(x: rect.maxX, y: rect.maxY),
-            to: NSPoint(x: rect.maxX - bottomRight, y: rect.maxY), radius: bottomRight)
-        path.line(to: NSPoint(x: rect.minX + bottomLeft, y: rect.maxY))
-        path.appendArc(
-            from: NSPoint(x: rect.minX, y: rect.maxY),
-            to: NSPoint(x: rect.minX, y: rect.maxY - bottomLeft), radius: bottomLeft)
-        path.line(to: NSPoint(x: rect.minX, y: rect.minY + topLeft))
-        path.appendArc(
-            from: NSPoint(x: rect.minX, y: rect.minY),
-            to: NSPoint(x: rect.minX + topLeft, y: rect.minY), radius: topLeft)
-        path.close()
-        return path
+        .cutCorners(rect, corners)
     }
 
     /// The same corners for a place where y grows upwards, which is how a layer counts.
@@ -65,7 +37,7 @@ final class IslandStrip {
     }
 
     /// The mask for NSVisualEffectView, the only thing that cuts the blur: a layer mask leaves it
-    /// whole. Drawn at the pane's own size, so every corner keeps its radius.
+    /// whole. Drawn at the pane's own size, so every corner keeps its cut.
     private static func mask(_ size: NSSize, _ corners: Corners) -> NSImage {
         NSImage(size: size, flipped: true) { rect in
             NSColor.black.setFill()
@@ -139,7 +111,6 @@ final class IslandStrip {
         line.strokeColor = Theme.nsHairline.cgColor
         line.lineWidth = 1
         glass.addSubview(edging)
-
 
         panel.contentView = glass
     }

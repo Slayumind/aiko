@@ -60,8 +60,8 @@ public struct Corners: Sendable, Equatable {
         self.bottomLeft = bottomLeft
     }
 
-    public static func all(_ radius: Double) -> Corners {
-        Corners(topLeft: radius, topRight: radius, bottomRight: radius, bottomLeft: radius)
+    public static func all(_ cut: Double) -> Corners {
+        Corners(topLeft: cut, topRight: cut, bottomRight: cut, bottomLeft: cut)
     }
 }
 
@@ -131,7 +131,8 @@ public enum IslandLayout {
     /// Between two rings, along the edge.
     public static let ringGap = 8.0
 
-    public static let radius = 14.0
+    /// How far a free corner is cut at 45 degrees (D-448), as CutSize in IslandPanel.xaml.cs.
+    public static let cut = 8.0
     public static let line = 1.0
 
     /// The room inside the island, the line included: 22 across and 16 along, so two rings on a
@@ -171,14 +172,14 @@ public enum IslandLayout {
 
     public static func corners(_ edge: ScreenEdge, docked: Bool) -> Corners {
         guard docked else {
-            return .all(radius)
+            return .all(cut)
         }
 
         switch edge {
-        case .top: return Corners(topLeft: 0, topRight: 0, bottomRight: radius, bottomLeft: radius)
-        case .bottom: return Corners(topLeft: radius, topRight: radius, bottomRight: 0, bottomLeft: 0)
-        case .left: return Corners(topLeft: 0, topRight: radius, bottomRight: radius, bottomLeft: 0)
-        case .right: return Corners(topLeft: radius, topRight: 0, bottomRight: 0, bottomLeft: radius)
+        case .top: return Corners(topLeft: 0, topRight: 0, bottomRight: cut, bottomLeft: cut)
+        case .bottom: return Corners(topLeft: cut, topRight: cut, bottomRight: 0, bottomLeft: 0)
+        case .left: return Corners(topLeft: 0, topRight: cut, bottomRight: cut, bottomLeft: 0)
+        case .right: return Corners(topLeft: cut, topRight: 0, bottomRight: 0, bottomLeft: cut)
         }
     }
 

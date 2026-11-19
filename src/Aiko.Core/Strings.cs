@@ -460,9 +460,7 @@ public static class Strings
             ["ShellExitCode"] = ("code {0}", "код {0}"),
             ["ShellSeconds"] = ("{0} s", "{0} с"),
             ["ShellCopy"] = ("Copy", "Копировать"),
-            ["ShellCopied"] = ("Copied", "Скопировано"),
             ["ShellFold"] = ("Fold", "Свернуть"),
-            ["ShellUnfold"] = ("Unfold", "Развернуть"),
             ["ShellExplain"] = ("Explain", "Объяснить"),
             ["ShellExplaining"] = ("Asking Claude Code…", "Спрашиваю Claude Code…"),
             ["ShellExplainFailed"] = ("Claude Code did not answer. Press Explain again in a minute.", "Claude Code не ответил. Нажми «Объяснить» ещё раз через минуту."),
@@ -1847,14 +1845,8 @@ public static class Strings
     /// Copy
     public static string ShellCopy => Get("ShellCopy");
 
-    /// Copied
-    public static string ShellCopied => Get("ShellCopied");
-
     /// Fold
     public static string ShellFold => Get("ShellFold");
-
-    /// Unfold
-    public static string ShellUnfold => Get("ShellUnfold");
 
     /// Explain
     public static string ShellExplain => Get("ShellExplain");

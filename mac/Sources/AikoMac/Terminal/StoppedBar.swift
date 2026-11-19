@@ -21,7 +21,7 @@ final class StoppedBar: NSView {
     override init(frame: NSRect) {
         super.init(frame: frame)
         wantsLayer = true
-        layer?.backgroundColor = Theme.nsSurface.cgColor
+        layer?.backgroundColor = Theme.nsBackground.cgColor
         layer?.masksToBounds = true
         line.textColor = Theme.nsMuted
         line.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
@@ -79,7 +79,7 @@ final class StoppedBar: NSView {
     var hasKeys: Bool { window?.firstResponder === button }
 
     private func applyZoom() {
-        line.font = Theme.sansFont(Theme.textNumber * zoom)
+        line.font = Theme.monoFont(Theme.textBody * zoom)
         line.stringValue = Strings.terminalStoppedLine
         button.show(Strings.terminalResume, zoom: zoom)
         insets[0].constant = 16 * zoom
@@ -92,11 +92,15 @@ final class StoppedBar: NSView {
     }
 }
 
-/// The filled button of the window drawn by AppKit, the twin of WindowButton(look: .main): ink with
-/// dark words, 32 high, 12 on each side. It takes the keys, and Enter or Space presses it.
+/// The main button of the window drawn by AppKit, the twin of WindowButton(look: .main): an outline
+/// in Muted with medium words, 32 high, 12 on each side, and the light layer under the mouse. It
+/// takes the keys, and Enter or Space presses it.
 final class MainButton: NSView {
     private var title = NSAttributedString()
     private var zoom: CGFloat = 1
+    private var hovered = false {
+        didSet { if hovered != oldValue { needsDisplay = true } }
+    }
     var pressed: (() -> Void)?
 
     override var acceptsFirstResponder: Bool { true }
@@ -105,8 +109,8 @@ final class MainButton: NSView {
     func show(_ text: String, zoom: CGFloat) {
         self.zoom = zoom
         title = NSAttributedString(string: text, attributes: [
-            .font: Theme.sansFont(Theme.textNumber * zoom).withWeight(.medium),
-            .foregroundColor: Theme.nsColour(Rgba(0x0A, 0x0A, 0x0A)),
+            .font: Theme.monoFont(Theme.textBody * zoom, weight: .medium),
+            .foregroundColor: Theme.nsInk,
         ])
         invalidateIntrinsicContentSize()
         needsDisplay = true
@@ -117,12 +121,27 @@ final class MainButton: NSView {
     }
 
     override func draw(_ dirtyRect: NSRect) {
-        let face = NSBezierPath(roundedRect: bounds, xRadius: 8 * zoom, yRadius: 8 * zoom)
-        Theme.nsInk.setFill()
-        face.fill()
+        if hovered {
+            Theme.nsHoverLayer.setFill()
+            bounds.fill()
+        }
+        let edge = NSBezierPath(rect: bounds.insetBy(dx: 0.5, dy: 0.5))
+        edge.lineWidth = 1
+        Theme.nsMuted.setStroke()
+        edge.stroke()
         let size = title.size()
         title.draw(at: NSPoint(x: (bounds.width - size.width) / 2, y: (bounds.height - size.height) / 2))
     }
+
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        trackingAreas.forEach(removeTrackingArea)
+        addTrackingArea(NSTrackingArea(rect: bounds, options: [.mouseEnteredAndExited, .activeInKeyWindow], owner: self))
+    }
+
+    override func mouseEntered(with event: NSEvent) { hovered = true }
+
+    override func mouseExited(with event: NSEvent) { hovered = false }
 
     override func keyDown(with event: NSEvent) {
         if [36, 76, 49].contains(event.keyCode) {
@@ -142,12 +161,5 @@ final class MainButton: NSView {
 
     override func resetCursorRects() {
         addCursorRect(bounds, cursor: .pointingHand)
-    }
-}
-
-private extension NSFont {
-    func withWeight(_ weight: NSFont.Weight) -> NSFont {
-        let descriptor = fontDescriptor.addingAttributes([.traits: [NSFontDescriptor.TraitKey.weight: weight]])
-        return NSFont(descriptor: descriptor, size: pointSize) ?? self
     }
 }

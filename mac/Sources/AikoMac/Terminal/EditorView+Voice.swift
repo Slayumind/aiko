@@ -291,7 +291,7 @@ final class NoticeBar: NSView {
     }
 
     func show(_ text: String, link title: String, zoom: CGFloat) {
-        let font = Theme.sansFont(Theme.textNumber * zoom)
+        let font = Theme.monoFont(Theme.textBody * zoom)
         words.font = font
         words.stringValue = text
         link.attributedStringValue = NSAttributedString(string: title, attributes: [

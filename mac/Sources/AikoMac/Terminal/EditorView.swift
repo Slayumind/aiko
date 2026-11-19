@@ -86,7 +86,6 @@ final class EditorView: NSView, NSTextViewDelegate {
     let scroll = NSScrollView()
     let choices = ChoiceList()
     let pictures = FlowRow()
-    private let top = NSView()
     private let sign = NSTextField(labelWithString: "›")
     private let field = NSView()
     let hint = NSTextField(wrappingLabelWithString: "")
@@ -122,11 +121,11 @@ final class EditorView: NSView, NSTextViewDelegate {
     override init(frame: NSRect) {
         super.init(frame: frame)
         wantsLayer = true
-        layer?.backgroundColor = Theme.nsSurface.cgColor
+        // The editor stands in a frame of its own under the terminal, as _editorFrame on Windows.
+        layer?.backgroundColor = Theme.nsBackground.cgColor
+        layer?.borderColor = Theme.nsHairline.cgColor
+        layer?.borderWidth = 1
         layer?.masksToBounds = true
-
-        top.wantsLayer = true
-        top.layer?.backgroundColor = Theme.nsHairline.cgColor
 
         text.owner = self
         text.delegate = self
@@ -220,18 +219,12 @@ final class EditorView: NSView, NSTextViewDelegate {
         // Below required: the host folds the editor to no height while it is away.
         let stackBottom = stack.bottomAnchor.constraint(equalTo: bottomAnchor)
         stackBottom.priority = NSLayoutConstraint.Priority(999)
-        for view in [top, stack] as [NSView] {
-            view.translatesAutoresizingMaskIntoConstraints = false
-            addSubview(view)
-        }
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(stack)
         NSLayoutConstraint.activate([
-            top.leadingAnchor.constraint(equalTo: leadingAnchor),
-            top.trailingAnchor.constraint(equalTo: trailingAnchor),
-            top.topAnchor.constraint(equalTo: topAnchor),
-            top.heightAnchor.constraint(equalToConstant: 1),
             stack.leadingAnchor.constraint(equalTo: leadingAnchor),
             stack.trailingAnchor.constraint(equalTo: trailingAnchor),
-            stack.topAnchor.constraint(equalTo: top.bottomAnchor),
+            stack.topAnchor.constraint(equalTo: topAnchor),
             stackBottom,
         ])
 
@@ -268,9 +261,8 @@ final class EditorView: NSView, NSTextViewDelegate {
 
     var hasKeys: Bool { window?.firstResponder === text }
 
-    /// The text view took the keys or gave them away: the line over the editor shows it.
+    /// The text view gave the keys away: an open list of choices closes with them.
     func focusChanged(_ focused: Bool) {
-        top.layer?.backgroundColor = (focused ? Theme.nsInputLine : Theme.nsHairline).cgColor
         if !focused {
             choices.close()
         }
@@ -458,7 +450,7 @@ final class EditorView: NSView, NSTextViewDelegate {
     // ---- the zoom ----
 
     private func applyZoom() {
-        let font = Theme.monoFont(Theme.textNumber * zoom)
+        let font = Theme.monoFont(Theme.textBody * zoom)
         text.font = font
         text.typingAttributes = [.font: font, .foregroundColor: Theme.nsInk]
         sign.font = font

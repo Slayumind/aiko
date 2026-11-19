@@ -104,7 +104,7 @@ struct PersonalityPageView: View {
         return VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 8) {
                 Text(name)
-                    .font(Theme.sans(Theme.textName))
+                    .font(Theme.mono(Theme.textBody))
                     .foregroundStyle(Theme.ink)
                     .lineLimit(1)
                 if !plan.isEmpty { Chip(text: plan).fixedSize() }
@@ -122,7 +122,7 @@ struct PersonalityPageView: View {
 
             Reveal(isOpen: ownStyle != nil) {
                 Text(Strings.format(Strings.personaOwnStyle, ownStyle ?? ""))
-                    .font(Theme.sans(Theme.textSmall))
+                    .font(Theme.mono(Theme.textSmall))
                     .foregroundStyle(Theme.caution)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.top, 4)
@@ -189,7 +189,6 @@ struct PersonalityPageView: View {
                     .padding(.horizontal, 10)
                     .padding(.vertical, 7)
                     .background(Theme.raised)
-                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                     .frame(maxWidth: 380, alignment: .trailing)
             }
 
@@ -208,9 +207,8 @@ struct PersonalityPageView: View {
         .padding(.vertical, 10)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Theme.background)
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
+            Rectangle()
                 .strokeBorder(Theme.hairline, lineWidth: 1))
     }
 
@@ -219,7 +217,7 @@ struct PersonalityPageView: View {
     /// the work in the middle.
     private func chat(_ text: String, _ colour: Color) -> some View {
         Text(text)
-            .font(Theme.sans(Theme.textNumber))
+            .font(Theme.mono(Theme.textBody))
             .foregroundStyle(colour)
             .fixedSize(horizontal: false, vertical: true)
             .frame(maxWidth: .infinity, alignment: .leading)

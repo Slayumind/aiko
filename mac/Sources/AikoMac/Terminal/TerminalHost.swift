@@ -119,6 +119,13 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
     let keysLine = NSTextField(labelWithString: "")
     var editorCollapsed: NSLayoutConstraint?
 
+    /// The room between the frame of the terminal and the frame of the editor; none while the
+    /// editor is away, as a collapsed frame on Windows takes its margin with it.
+    var editorGap: NSLayoutConstraint?
+
+    /// Where a terminal stands: inside the thin frame that names the session and its state (D-452).
+    let terminalRoom = NSLayoutGuide()
+
     /// The bar in place of the editor when Claude Code ended by itself (D-351).
     let stoppedBar = StoppedBar()
     var stoppedCollapsed: NSLayoutConstraint?
@@ -277,10 +284,10 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
             terminal.translatesAutoresizingMaskIntoConstraints = false
             stage.addSubview(terminal, positioned: .below, relativeTo: editor)
             NSLayoutConstraint.activate([
-                terminal.leadingAnchor.constraint(equalTo: stage.leadingAnchor, constant: 8),
-                terminal.trailingAnchor.constraint(equalTo: stage.trailingAnchor, constant: -8),
-                terminal.topAnchor.constraint(equalTo: stage.topAnchor, constant: 8),
-                terminal.bottomAnchor.constraint(equalTo: stoppedBar.topAnchor, constant: -8),
+                terminal.leadingAnchor.constraint(equalTo: terminalRoom.leadingAnchor),
+                terminal.trailingAnchor.constraint(equalTo: terminalRoom.trailingAnchor),
+                terminal.topAnchor.constraint(equalTo: terminalRoom.topAnchor),
+                terminal.bottomAnchor.constraint(equalTo: terminalRoom.bottomAnchor),
             ])
         }
         terminal.isHidden = false
@@ -311,7 +318,8 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
         return .none
     }
 
-    /// The pills: each environment with the limit closer to its end (D-355) and its waiting sessions.
+    /// The tabs: each environment with the limit closer to its end (D-355) and the sessions that want
+    /// attention.
     func tabs() -> [TabItem] {
         let now = Date()
         return Store.environments().environments.map { environment in
@@ -321,7 +329,9 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
                 selected: environment.name == model.environment,
                 waiting: SessionRows.waiting(sessions, environment.name) { [weak self] id in self?.live(id) },
                 percent: badge?.percent,
-                tone: badge?.tone ?? .unknown)
+                tone: badge?.tone ?? .unknown,
+                done: SessionRows.done(sessions, environment.name) { [weak self] id in self?.live(id) },
+                stopped: SessionRows.stopped(sessions, environment.name) { [weak self] id in self?.live(id) })
         }
     }
 
@@ -409,7 +419,7 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
         if let shell {
             wireShell(view, session, shell)
         }
-        view.nativeBackgroundColor = Theme.nsSurface
+        view.nativeBackgroundColor = Theme.nsBackground
         view.nativeForegroundColor = Theme.nsInk
         view.font = Self.terminalFont()
         view.startProcess(

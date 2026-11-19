@@ -20,7 +20,7 @@ extension TerminalHost {
         window.titleVisibility = .hidden
         window.titlebarAppearsTransparent = true
         window.minSize = NSSize(width: WindowPlace.minWidth, height: WindowPlace.minHeight)
-        window.backgroundColor = Theme.nsSurface
+        window.backgroundColor = Theme.nsBackground
         window.isReleasedWhenClosed = false
         window.delegate = self
         place(window, sessions.window)
@@ -42,7 +42,7 @@ extension TerminalHost {
         listHolder.wantsLayer = true
         listHolder.layer?.masksToBounds = true
         stage.wantsLayer = true
-        stage.layer?.backgroundColor = Theme.nsSurface.cgColor
+        stage.layer?.backgroundColor = Theme.nsBackground.cgColor
 
         let root = NSView()
         for view in [bar, strip, listHolder, list, stage, cover] as [NSView] {

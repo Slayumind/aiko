@@ -52,21 +52,20 @@ final class ShellFindBar: NSView, NSTextFieldDelegate {
         self.view = view
         super.init(frame: .zero)
         wantsLayer = true
-        layer?.backgroundColor = Theme.nsSurface.cgColor
+        layer?.backgroundColor = Theme.nsBackground.cgColor
         layer?.borderColor = Theme.nsHairline.cgColor
         layer?.borderWidth = 1
-        layer?.cornerRadius = 8
         isHidden = true
 
         field.isBordered = false
         field.drawsBackground = false
         field.focusRingType = .none
         field.textColor = Theme.nsInk
-        field.font = Theme.monoFont(Theme.textNumber)
+        field.font = Theme.monoFont(Theme.textBody)
         field.toolTip = Strings.shellFind
         field.delegate = self
         count.textColor = Theme.nsMuted
-        count.font = Theme.monoFont(Theme.textNumber)
+        count.font = Theme.monoFont(Theme.textBody)
 
         for part in [field, count] as [NSView] {
             part.translatesAutoresizingMaskIntoConstraints = false
