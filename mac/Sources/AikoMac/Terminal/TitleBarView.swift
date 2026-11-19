@@ -1,14 +1,16 @@
 import AikoKit
 import SwiftUI
 
-/// One pill of the title bar (D-376): the ring and percentage of an environment, or the waiting
-/// mark and the number of its waiting sessions. The twin of TabView in TerminalView.cs.
+/// One tab of the title bar (D-376): the ring and percentage of an environment, and the sessions
+/// that want attention. The twin of TabView in TerminalView.cs.
 struct TabItem: Equatable {
     let name: String
     let selected: Bool
     let waiting: Int
     let percent: Int?
     let tone: LimitTone
+    var done = 0
+    var stopped = 0
 }
 
 /// The title bar of the terminal window, the twin of TerminalPanel.TitleBar.cs: the list button,
@@ -38,7 +40,7 @@ struct TitleBarView: View {
                     .rotationEffect(.degrees(state.headerOpen ? 180 : 0))
             }
             if !state.headerOpen {
-                HStack(spacing: 4) {
+                HStack(spacing: 0) {
                     ForEach(state.tabs, id: \.name) { tab in
                         pill(tab)
                     }
@@ -65,65 +67,57 @@ struct TitleBarView: View {
         .padding(.trailing, 8)
         .frame(height: Self.height)
         .background(Theme.background)
-        .overlay(alignment: .bottom) {
-            Rectangle().fill(Theme.hairline).frame(height: 1)
-        }
+        .overlay(alignment: .bottom) { Rule() }
         .animation(Motion.reduceMotion ? nil : .easeOut(duration: 0.2), value: state.headerOpen)
         .animation(Motion.reduceMotion ? nil : .easeOut(duration: 0.2), value: state.environment)
     }
 
     /// The name and its number are one line of text, so they stand on one baseline; one weight for
-    /// every pill, so a pill keeps its width when it is chosen and the background lands on it.
-    /// In a narrow window a pill that is not chosen keeps only its first mark, and the number of
-    /// its waiting sessions; the name and the limit move to the tip.
+    /// every tab, so a tab keeps its width when it is chosen and the plate lands on it. The plate
+    /// reaches from the top of the window to the line under the bar, as on Windows. In a narrow
+    /// window a tab that is not chosen keeps only its ring and its marks; the name and the limit
+    /// move to the tip.
     private func pill(_ tab: TabItem) -> some View {
         let small = state.narrow && !tab.selected
         return Button { state.onEnvironment?(tab.name) } label: {
-            HStack(spacing: small ? 4 : 6) {
-                if tab.waiting > 0 {
-                    LineMark(data: BarMarks.pause, tone: Theme.caution)
-                        .frame(width: 14, height: 14)
-                } else {
-                    RingMark(percent: tab.percent, tone: tab.tone)
-                }
+            HStack(spacing: 0) {
+                RingMark(percent: tab.percent, tone: tab.tone)
                 if !small {
                     label(tab)
                         .lineLimit(1)
                         .truncationMode(.tail)
-                } else if tab.waiting > 0 {
-                    Text("\(tab.waiting)").font(Theme.mono(Theme.textTiny)).foregroundColor(Theme.caution)
+                        .padding(.leading, 6)
                 }
+                TabMark(look: .waiting, count: tab.waiting)
+                TabMark(look: .done, count: tab.done)
+                TabMark(look: .stopped, count: tab.stopped)
             }
             .padding(.leading, small ? 8 : 10)
             .padding(.trailing, small ? 8 : 12)
-            .frame(height: 28)
+            .frame(maxHeight: .infinity)
             .background {
                 if tab.selected {
-                    Capsule().fill(Theme.raised).matchedGeometryEffect(id: "chosen", in: pills)
+                    Rectangle().fill(Theme.raised).matchedGeometryEffect(id: "chosen", in: pills)
                 }
             }
-            .contentShape(Capsule())
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .tip(small || tab.waiting > 0 ? tip(tab) : "")
+        .padding(.trailing, 4)
+        .padding(.bottom, 1)
+        .tip(small ? tip(tab) : "")
         .layoutPriority(tab.selected ? 1 : 0)
+        .animation(Motion.curve(Motion.standard, Motion.expand), value: tab)
     }
 
     private func label(_ tab: TabItem) -> Text {
         let name = Text(tab.name)
-            .font(Theme.sans(Theme.textNumber, weight: .medium))
+            .font(Theme.mono(Theme.textBody, weight: .medium))
             .foregroundColor(tab.selected ? Theme.ink : Theme.muted)
-        if tab.waiting > 0 {
-            return name + number("\(tab.waiting)", Theme.caution)
-        }
         if let percent = tab.percent {
-            return name + number("\(percent)%", Theme.muted)
+            return name + Text(" \(percent)%").font(Theme.mono(Theme.textTiny)).foregroundColor(Theme.muted)
         }
         return name
-    }
-
-    private func number(_ text: String, _ tone: Color) -> Text {
-        Text(" " + text).font(Theme.mono(Theme.textTiny)).foregroundColor(tone)
     }
 
     private func tip(_ tab: TabItem) -> String {
@@ -131,8 +125,29 @@ struct TitleBarView: View {
     }
 }
 
-/// A button of the bar, as BarButton on Windows: 28 points high, a soft layer under the mouse, and
-/// the layer kept while what it opens is open.
+/// One mark of the sessions that want attention on a tab, as TabMarks.cs: a sign and its number.
+/// It unfolds when the first such session comes and folds when the last one goes.
+private struct TabMark: View {
+    let look: StatusLook
+    let count: Int
+
+    var body: some View {
+        if count > 0 {
+            HStack(spacing: 4) {
+                StatusSign(look: look).frame(width: 12, height: 12)
+                Text("\(count)")
+                    .font(Theme.mono(Theme.textTiny))
+                    .foregroundStyle(Theme.ink)
+                    .frame(minWidth: 7, alignment: .leading)
+            }
+            .padding(.leading, 8)
+            .transition(.opacity.combined(with: .scale(scale: 0.6, anchor: .leading)))
+        }
+    }
+}
+
+/// A button of the bar, as BarButton on Windows: the plate under the mouse reaches from the top of
+/// the window to the line under the bar, as on the tabs, and stays while what it opens is open.
 struct BarButton<Mark: View>: View {
     let tip: String
     var width: CGFloat = 40
@@ -146,15 +161,14 @@ struct BarButton<Mark: View>: View {
     var body: some View {
         Button(action: action) {
             mark()
-                .frame(width: width, height: 28)
-                .background(
-                    RoundedRectangle(cornerRadius: 6)
-                        .fill(Theme.raised)
-                        .opacity(lit || hovered ? 1 : 0))
+                .frame(width: width)
+                .frame(maxHeight: .infinity)
+                .background(Theme.raised.opacity(lit || hovered ? 1 : 0))
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .padding(.trailing, trailing)
+        .padding(.bottom, 1)
         .onHover { inside in
             withAnimation(Motion.reduceMotion ? nil : .easeOut(duration: 0.12)) { hovered = inside }
         }

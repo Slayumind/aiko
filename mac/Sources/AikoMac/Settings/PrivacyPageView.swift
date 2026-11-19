@@ -124,10 +124,9 @@ struct PrivacyLedger: View {
         }
         .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Theme.surface)
-        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .background(Theme.background)
         .overlay(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
+            Rectangle()
                 .strokeBorder(Theme.hairline, lineWidth: 1))
         .opacity(muted ? 0.45 : 1)
     }

@@ -125,13 +125,11 @@ final class PictureChip: NSView {
         super.init(frame: .zero)
         wantsLayer = true
         layer?.backgroundColor = Theme.nsRaised.cgColor
-        layer?.cornerRadius = 6 * zoom
         toolTip = path
 
         let square = NSView()
         square.wantsLayer = true
         square.layer?.backgroundColor = Theme.nsMuted.cgColor
-        square.layer?.cornerRadius = 2 * zoom
 
         let label = NSTextField(labelWithString: title)
         label.font = Theme.monoFont(Theme.textTiny * zoom)

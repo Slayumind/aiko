@@ -2,8 +2,8 @@ import AppKit
 import SwiftUI
 
 /// The tip of every window of Aiko: the island, the terminal window and the settings. The twin of
-/// Theme/ToolTip.xaml and Tips.cs on Windows: the look of the right-click menu, Surface, one line,
-/// radius 8, the small sans text. A tip of the system would look like another app.
+/// Theme/ToolTip.xaml and Tips.cs on Windows: the look of the right-click menu, the dark ground, one line,
+/// square corners, the small mono text. A tip of the system would look like another app.
 ///
 /// One small window shows it under the pointer, as the tip of the system stands. It takes no
 /// clicks and no keys, and it goes when the pointer leaves or presses.
@@ -96,7 +96,7 @@ struct TipView: View {
 
     private var words: some View {
         Text(text)
-            .font(Theme.sans(Theme.textSmall * zoom))
+            .font(Theme.mono(Theme.textSmall * zoom))
             .foregroundStyle(Theme.ink)
     }
 
@@ -112,8 +112,8 @@ struct TipView: View {
             .padding(.trailing, 8 * zoom)
             .padding(.top, 4 * zoom)
             .padding(.bottom, 5 * zoom)
-            .background(RoundedRectangle(cornerRadius: 8 * zoom).fill(Theme.surface))
-            .overlay(RoundedRectangle(cornerRadius: 8 * zoom).stroke(Theme.inputLine, lineWidth: 1))
+            .background(Theme.background)
+            .hairlineFrame()
     }
 }
 

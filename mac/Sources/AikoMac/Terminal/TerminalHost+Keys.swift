@@ -128,6 +128,6 @@ extension TerminalHost {
     /// The font of the terminal at the zoom of the settings: as large as the text of the window, the
     /// twin of WindowZoom.TerminalPoints on Windows, which counts in the points of Windows.
     static func terminalFont() -> NSFont {
-        Theme.monoFont(Theme.textNumber * CGFloat(WindowZoom.scale(Store.settings().windowZoom)))
+        Theme.monoFont(Theme.textBody * CGFloat(WindowZoom.scale(Store.settings().windowZoom)))
     }
 }

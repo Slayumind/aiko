@@ -80,8 +80,8 @@ struct VoiceSectionView: View {
             if model.running {
                 GeometryReader { room in
                     ZStack(alignment: .leading) {
-                        Capsule().fill(Theme.raised)
-                        Capsule().fill(Theme.ink)
+                        Rectangle().fill(Theme.raised)
+                        Rectangle().fill(Theme.ink)
                             .frame(width: room.size.width * CGFloat(model.done) / CGFloat(VoiceModel.bytes))
                     }
                 }
@@ -102,7 +102,7 @@ struct VoiceSectionView: View {
             HStack(spacing: 0) {
                 Rectangle().fill(Theme.caution).frame(width: 2)
                 Text(Strings.voiceHonest)
-                    .font(Theme.sans(Theme.textSmall))
+                    .font(Theme.mono(Theme.textSmall))
                     .foregroundStyle(Theme.ink)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.leading, 10)
@@ -129,8 +129,7 @@ struct VoiceSectionView: View {
                 .padding(.horizontal, 8)
                 .padding(.vertical, 5)
                 .background(Theme.raised)
-                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-                .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).strokeBorder(Theme.hairline, lineWidth: 1))
+                .overlay(Rectangle().strokeBorder(Theme.hairline, lineWidth: 1))
                 FlatButton(title: model.keyMask == nil ? Strings.voiceKeySave : Strings.voiceKeyRemove) {
                     model.keyAction()
                 }
@@ -140,7 +139,7 @@ struct VoiceSectionView: View {
 
             if let problem = model.keyProblem {
                 Text(problem)
-                    .font(Theme.sans(Theme.textSmall))
+                    .font(Theme.mono(Theme.textSmall))
                     .foregroundStyle(Theme.destructive)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.top, 6)
@@ -159,13 +158,14 @@ struct DotChoice: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: 8) {
+            // A square with a smaller square inside when chosen, the Dot of Controls.xaml.
             ZStack {
-                Circle().strokeBorder(Theme.inputLine, lineWidth: 1.5)
-                Circle().strokeBorder(Theme.ink, lineWidth: 5).opacity(chosen ? 1 : 0)
+                Rectangle().strokeBorder(Theme.hairline, lineWidth: 1)
+                Rectangle().fill(Theme.ink).padding(4).opacity(chosen ? 1 : 0)
             }
             .frame(width: 16, height: 16)
             VStack(alignment: .leading, spacing: 4) {
-                Text(title).font(Theme.sans(Theme.textSmall, weight: .medium)).foregroundStyle(Theme.ink)
+                Text(title).font(Theme.mono(Theme.textSmall, weight: .medium)).foregroundStyle(Theme.ink)
                 Control.rowHint(hint)
             }
         }

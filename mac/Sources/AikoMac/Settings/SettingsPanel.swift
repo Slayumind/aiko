@@ -33,19 +33,17 @@ struct SettingsPanelView: View {
             .padding(.bottom, 32)
             .frame(maxWidth: .infinity)
         }
-        .background(Theme.surface)
+        .background(Theme.background)
     }
 
     private var panel: some View {
         HStack(spacing: 0) {
             SettingsNavView(state: state)
                 .frame(width: menuWidth)
-                .overlay(alignment: .trailing) {
-                    Rectangle().fill(Theme.hairline).frame(width: 1)
-                }
+                .overlay(alignment: .trailing) { Rule(down: true) }
             page
         }
-        .background(Theme.surface)
+        .background(Theme.background)
         .onExitCommand { state.onClose() }
     }
 
@@ -136,10 +134,9 @@ struct SettingsNavView: View {
                 .font(Theme.mono(Theme.textTiny))
                 .foregroundStyle(Theme.muted)
                 .lineLimit(1)
-                .padding(.leading, 10)
+                .padding(.leading, 18)
                 .padding(.top, 8)
         }
-        .padding(.horizontal, 8)
         .padding(.top, 12)
         .padding(.bottom, 10)
         .frame(maxHeight: .infinity, alignment: .top)
@@ -150,7 +147,6 @@ struct SettingsNavView: View {
         switch row {
         case .item(let item):
             NavItemView(item: item, chosen: item.page == state.page) { state.show(item.page) }
-                .padding(.bottom, 2)
 
         case .addSecondEnvironment:
             AddSecondSlot { state.openChecklist(at: .secondEnvironment) }
@@ -173,7 +169,7 @@ private struct NavItemView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 1) {
             Text(item.title)
-                .font(Theme.sans(Theme.textName))
+                .font(Theme.mono(Theme.textBody))
                 .foregroundStyle(chosen || hovering ? Theme.ink : Theme.muted)
                 .lineLimit(1)
                 .truncationMode(.tail)
@@ -186,11 +182,11 @@ private struct NavItemView: View {
                     .truncationMode(.tail)
             }
         }
-        .padding(.horizontal, 10)
+        .padding(.horizontal, 18)
         .padding(.vertical, 7)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(chosen ? Theme.chosenLayer : (hovering ? Theme.hoverLayer : .clear))
-        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+        .hoverLayer(hovering && !chosen)
+        .background(chosen ? Theme.raised : .clear)
         .contentShape(Rectangle())
         .onHover { hovering = $0 }
         .onTapGesture(perform: pick)
@@ -209,7 +205,7 @@ private struct AddSecondSlot: View {
                 .font(.system(size: 10, weight: .medium))
                 .foregroundStyle(Theme.muted)
             Text(Strings.addSecondEnvironment)
-                .font(Theme.sans(Theme.textSmall))
+                .font(Theme.mono(Theme.textSmall))
                 .foregroundStyle(hovering ? Theme.ink : Theme.muted)
                 .lineLimit(1)
                 .truncationMode(.tail)
@@ -217,11 +213,10 @@ private struct AddSecondSlot: View {
         .padding(.horizontal, 10)
         .padding(.vertical, 8)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(hovering ? Theme.hoverLayer : .clear)
-        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+        .hoverLayer(hovering)
         .overlay(
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .strokeBorder(Theme.inputLine, style: StrokeStyle(lineWidth: 1, dash: [4, 3])))
+            Rectangle()
+                .strokeBorder(Theme.hairline, style: StrokeStyle(lineWidth: 1, dash: [4, 3])))
         .contentShape(Rectangle())
         .onHover { hovering = $0 }
         .onTapGesture(perform: press)

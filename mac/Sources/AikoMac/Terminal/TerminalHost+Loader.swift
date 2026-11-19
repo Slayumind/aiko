@@ -56,11 +56,11 @@ private struct LoaderView: View {
                 }
             }
             Text(Strings.terminalStarting)
-                .font(Theme.sans(Theme.textNumber))
+                .font(Theme.mono(Theme.textBody))
                 .foregroundStyle(Theme.muted)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Theme.surface)
+        .background(Theme.background)
     }
 
     private func dots(at seconds: Double?) -> some View {

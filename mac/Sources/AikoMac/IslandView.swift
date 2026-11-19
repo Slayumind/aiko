@@ -115,7 +115,7 @@ final class IslandView: NSView {
             ? NSRect(x: 0, y: cutFromTheTop, width: body.width, height: max(0, body.height - cutFromTheTop))
             : body
         NSBezierPath(rect: shown).setClip()
-        Theme.nsSurface.setFill()
+        Theme.nsCardFill.setFill()
         rounded(body, frame.corners).fill()
 
         // No shadow and no room around it, unlike the card: the island is pressed against the edge

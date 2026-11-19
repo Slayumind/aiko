@@ -34,7 +34,7 @@ struct TerminalPageView: View {
             if badgesRefused {
                 HStack(spacing: 8) {
                     Text(Strings.dockBadgesOffMac)
-                        .font(Theme.sans(Theme.textSmall))
+                        .font(Theme.mono(Theme.textSmall))
                         .foregroundStyle(Theme.caution)
                     LinkButton(title: Strings.dockBadgesSettingsMac) {
                         if let page = URL(string: "x-apple.systempreferences:com.apple.Notifications-Settings.extension") {
