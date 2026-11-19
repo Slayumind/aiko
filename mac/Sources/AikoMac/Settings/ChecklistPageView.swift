@@ -581,9 +581,7 @@ struct ChecklistRowView<Content: View>: View {
                 .lineLimit(1)
 
             if !step {
-                Image(systemName: "chevron.down")
-                    .font(.system(size: 9, weight: .medium))
-                    .foregroundStyle(Theme.muted)
+                PathMark(data: PathMark.chevron, box: CGSize(width: 8, height: 5))
                     .rotationEffect(.degrees(isOpen ? 180 : 0))
                     .animation(Motion.curve(Motion.standard, Motion.expand), value: isOpen)
                     .padding(.leading, 10)
@@ -601,9 +599,7 @@ struct ChecklistRowView<Content: View>: View {
         case .done:
             ZStack {
                 Circle().fill(Theme.positive)
-                Image(systemName: "checkmark")
-                    .font(.system(size: 9, weight: .bold))
-                    .foregroundStyle(Theme.background)
+                PathMark(data: "M4.5,8.2 L7,10.6 L11.6,5.6", box: CGSize(width: 16, height: 16), lineWidth: 1.8, tone: Theme.background)
             }
         case .skipped:
             ZStack {
@@ -611,9 +607,8 @@ struct ChecklistRowView<Content: View>: View {
                 Rectangle().fill(Theme.muted).frame(width: 6, height: 1.4)
             }
         case .locked:
-            Image(systemName: "lock")
-                .font(.system(size: 10, weight: .regular))
-                .foregroundStyle(Theme.muted)
+            PathMark(data: "M5,7.5 L5,5.8 A3,3 0 0 1 11,5.8 L11,7.5 M3.8,7.5 L12.2,7.5 L12.2,13 L3.8,13 Z",
+                     box: CGSize(width: 16, height: 16), lineWidth: 1.2)
         case .open:
             Circle().strokeBorder(Theme.muted, lineWidth: 1.4)
         }

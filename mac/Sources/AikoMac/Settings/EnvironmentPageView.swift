@@ -61,9 +61,7 @@ struct EnvironmentPageView: View {
     private var note: some View {
         Reveal(isOpen: !state.note.isEmpty) {
             HStack(alignment: .top, spacing: 8) {
-                Image(systemName: "checkmark")
-                    .font(.system(size: 9, weight: .bold))
-                    .foregroundStyle(Theme.positive)
+                PathMark(data: PathMark.saved, box: CGSize(width: 10, height: 8), lineWidth: 1.5, tone: Theme.positive)
                     .padding(.top, 4)
                 Text(state.note)
                     .font(Theme.mono(Theme.textSmall))
@@ -205,7 +203,7 @@ struct EnvironmentPageView: View {
                 }
             }
 
-            FlatButton(title: Strings.addFolder, symbol: "plus") { addFolder(to: environment) }
+            FlatButton(title: Strings.addFolder, plus: true) { addFolder(to: environment) }
                 .padding(.top, 4)
 
             HStack(spacing: 12) {
@@ -235,9 +233,7 @@ struct EnvironmentPageView: View {
                 MarkButton(help: Strings.removeBinding, press: {
                     state.editor.commit(EnvironmentEdits.unbind(state.environments, path), "unbound a folder")
                 }) {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 9, weight: .medium))
-                        .foregroundStyle(Theme.muted)
+                    PathMark(data: PathMark.cross, box: CGSize(width: 8, height: 8), lineWidth: 1.5)
                 }
             }
             if let moved, RealClaude.sameFolder(moved.folder, path) {
@@ -261,11 +257,7 @@ struct EnvironmentPageView: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 10)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Theme.caution.opacity(0.05))
-        .overlay(
-            Rectangle()
-                .strokeBorder(Theme.caution.opacity(0.22), lineWidth: 1))
+        .zoneBox(.caution)
     }
 
     /// Binds the folder here. A folder of another environment moves here, and its row says from where.
@@ -329,10 +321,7 @@ struct EnvironmentPageView: View {
                     .padding(.top, 12)
                 }
                 .padding(12)
-                .background(Theme.destructive.opacity(0.06))
-                .overlay(
-                    Rectangle()
-                        .strokeBorder(Theme.destructive.opacity(0.22), lineWidth: 1))
+                .zoneBox(.danger)
             }
         }
     }

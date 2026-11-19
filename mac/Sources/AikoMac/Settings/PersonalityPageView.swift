@@ -10,9 +10,6 @@ import SwiftUI
 struct PersonalityPageView: View {
     @ObservedObject var state: SettingsState
 
-    /// Her own words in the sample, a little apart from the work in the middle.
-    private static let voiceInk = Color(.sRGB, red: 0.81, green: 0.91, blue: 0.87)
-
     /// A commit Aiko would write for the sample fix. It is English in every language, like any
     /// commit.
     private static let sampleCommit = "Round reset countdown to the nearest minute"
@@ -196,10 +193,10 @@ struct PersonalityPageView: View {
                 FaceView(face: face, size: 20)
                 VStack(alignment: .leading, spacing: 10) {
                     if !answer.open.isEmpty {
-                        chat(answer.open, Self.voiceInk)
+                        chat(answer.open, Theme.voiceInk)
                     }
                     chat(answer.body, Theme.ink)
-                    chat(answer.close, Self.voiceInk)
+                    chat(answer.close, Theme.voiceInk)
                 }
             }
         }

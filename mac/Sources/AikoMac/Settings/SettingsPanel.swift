@@ -201,9 +201,7 @@ private struct AddSecondSlot: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            Image(systemName: "plus")
-                .font(.system(size: 10, weight: .medium))
-                .foregroundStyle(Theme.muted)
+            PathMark(data: PathMark.plus, box: CGSize(width: 10, height: 10), lineWidth: 1.5)
             Text(Strings.addSecondEnvironment)
                 .font(Theme.mono(Theme.textSmall))
                 .foregroundStyle(hovering ? Theme.ink : Theme.muted)
