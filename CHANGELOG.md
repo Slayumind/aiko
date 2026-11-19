@@ -6,6 +6,30 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 [semantic versioning](https://semver.org/spec/v2.0.0.html). The same notes in Russian are in
 [CHANGELOG.ru.md](CHANGELOG.ru.md), under the same headings.
 
+## [Unreleased]
+
+### Changed
+
+- **A new look.** The window, the settings and the island now look like a precise work tool: one
+  mono typeface, straight lines and frames with a caption in their top line. Colour comes only where
+  it means something: in the mark of a session with its word, and in the frame of the chosen
+  environment in the open header. Screens, keys and steps stay where they were in 0.5.0.
+- **New state colours.** Working is white, done is green and asleep is paler, in the list, on the
+  tabs, on the island and on the taskbar button. The ring of limits and the app icon are violet.
+- **Marks on the tabs.** The tab of each environment shows how many of its sessions wait, are done or
+  stopped, and the marks unfold the same way as on the island.
+- **The voice of Aiko.** With the personality on, her opening and closing lines come in their own
+  colour in the terminal, and the opening line starts with a face that fits the message. Claude Code
+  still draws everything. The quiet temperament, code, commits and files have no faces.
+- **The island** sits close to the edge of the screen and has cut corners. At a side edge it stays
+  one row, as at the top.
+
+### Fixed
+
+- After `/clear`, a restart of Aiko continues the new conversation of the session, not the old one.
+- A pasted picture no longer makes Claude Code ask about the pictures folder at every start, where
+  Enter closed the session. Claude Code may now only read that folder.
+
 ## [0.5.0] - 2026-11-17
 
 Aiko gets a window. Claude Code and the command line run in it, on Windows and macOS, grouped by
