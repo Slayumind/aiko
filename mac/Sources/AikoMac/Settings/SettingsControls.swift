@@ -23,12 +23,11 @@ enum Control {
             .foregroundStyle(Theme.ink)
     }
 
+    /// Wraps, as RowNote does in most places on Windows; a caller that wants one line says so.
     static func rowNote(_ text: String) -> some View {
         Text(text)
             .font(Theme.mono(Theme.textTiny))
             .foregroundStyle(Theme.muted)
-            .lineLimit(1)
-            .truncationMode(.tail)
     }
 
     static func rowHint(_ text: String) -> some View {
