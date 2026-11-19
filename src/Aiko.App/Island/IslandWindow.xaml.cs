@@ -167,15 +167,14 @@ public partial class IslandWindow : Window
 
     /// The window takes exactly the size of what it holds.
     ///
-    /// Letting the window size itself kept the width from the first layout: the rings stood in a
-    /// column against the side edge while the island stayed as wide as a row, sticking out into
-    /// the screen.
+    /// Letting the window size itself kept the width from the first layout, so an island that grew
+    /// or shrank did not fit what it held.
     private void Fit()
     {
         Panel.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
 
         // Read once: setting the width resizes the window at once, the panel is measured again inside
-        // the old height, and its size then reads as that height. A column in hand stayed one ring tall.
+        // the old height, and its size then reads as that height.
         var size = Panel.DesiredSize;
         Width = size.Width;
         Height = size.Height;
@@ -212,8 +211,8 @@ public partial class IslandWindow : Window
     private bool _dragging;
     private Point _pressedAt;
 
-    /// Where in the island the mouse holds it, as a share of its size: a row that turns into a
-    /// column stays in the hand at the same spot.
+    /// Where in the island the mouse holds it, as a share of its size: an island that changes its
+    /// size stays in the hand at the same spot.
     private Point _grip;
 
     private ScreenEdge _handEdge;
@@ -259,7 +258,7 @@ public partial class IslandWindow : Window
         var edge = IslandPlacement.NearestEdge(cursor.X, cursor.Y, work, _handEdge);
         if (edge != _handEdge)
         {
-            // The rings lay themselves out for the new edge while the island is still in hand.
+            // The island takes the height it has at the new edge while it is still in hand.
             _handEdge = edge;
             Panel.Show(Cards, edge, docked: false);
             Fit();
@@ -271,7 +270,7 @@ public partial class IslandWindow : Window
         var centreX = Left + (ActualWidth / 2);
         var centreY = Top + (ActualHeight / 2);
         var landing = IslandPlacement.DropAt(edge, centreX, centreY, ActualWidth, ActualHeight, work);
-        _ghost?.PlaceOn(IslandPlacement.Place(landing, ActualWidth, ActualHeight, work), edge);
+        _ghost?.PlaceOn(IslandPlacement.Place(landing, ActualWidth, ActualHeight, work), edge, work);
     }
 
     /// Lets the island go where it is, as a mouse button coming up would.
@@ -314,7 +313,7 @@ public partial class IslandWindow : Window
 
         Panel.Show(Cards, _handEdge, docked: false);
         Fit();
-        _ghost = new IslandGhost();
+        _ghost = new IslandGhost(this);
         _ghost.Shown += () => TaskbarOrder.PutOnTop(this);
     }
 

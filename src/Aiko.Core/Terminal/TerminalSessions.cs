@@ -28,6 +28,13 @@ public sealed record TerminalSession(string Id, string Environment, string Folde
 
     /// The person gave the name: the title of Claude Code does not change it any more (D-352).
     public bool Named { get; init; }
+
+    /// The conversation the session went on in after /clear; empty while it is the first one, whose
+    /// id is the id of the session (D-453).
+    public string Conversation { get; init; } = "";
+
+    /// The conversation to come back to.
+    public string ResumeId => Conversation.Length > 0 ? Conversation : Id;
 }
 
 /// The sessions of one folder, as one group of the list.
@@ -130,6 +137,16 @@ public sealed record TerminalSessions(IReadOnlyList<TerminalSession> Sessions, s
 
     /// Claude Code has the conversation now.
     public TerminalSessions MarkStarted(string id) => With(id, session => session with { Started = true });
+
+    /// The session goes on in this conversation. An empty id or the one it has changes nothing.
+    public TerminalSessions MoveToConversation(string id, string conversation) =>
+        conversation.Length == 0 || Find(id) is not { } session || session.ResumeId == conversation
+            ? this
+            : With(id, found => found with { Conversation = conversation == id ? "" : conversation });
+
+    /// The session that went on in this conversation after /clear.
+    public TerminalSession? OwnerOfConversation(string conversation) =>
+        Sessions.FirstOrDefault(session => session.Conversation == conversation);
 
     public TerminalSessions Used(string id, long now) => With(id, session => session with { LastUsed = now });
 
@@ -318,6 +335,11 @@ public sealed record TerminalSessions(IReadOnlyList<TerminalSession> Sessions, s
                     writer.WriteBoolean("named", true);
                 }
                 writer.WriteNumber("lastUsed", session.LastUsed);
+                if (session.Conversation.Length > 0)
+                {
+                    writer.WriteString("conversation", session.Conversation);
+                }
+
                 writer.WriteEndObject();
             }
             foreach (var raw in Kept)
@@ -370,6 +392,8 @@ public sealed record TerminalSessions(IReadOnlyList<TerminalSession> Sessions, s
             Started = Flag(item, "started"),
             Closed = Flag(item, "closed"),
             Named = Flag(item, "named"),
+            // It becomes an argument of Claude Code, so only a real id is taken.
+            Conversation = Guid.TryParseExact(Word(item, "conversation"), "D", out _) ? Word(item, "conversation") : "",
             LastUsed = item.TryGetProperty("lastUsed", out var used) && used.ValueKind == JsonValueKind.Number && used.TryGetInt64(out var seconds)
                 ? seconds
                 : 0,

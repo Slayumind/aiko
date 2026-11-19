@@ -146,7 +146,7 @@ sealed class TrayIcon : IDisposable
     }
 
     /// A face comes onto the icon or goes (D-211). Nothing happens while the icon is not shown.
-    public void ShowFace(AikoFace? face, FaceStyle style)
+    public void ShowFace(AikoFace? face)
     {
         if (!IsShown)
         {
@@ -155,7 +155,7 @@ sealed class TrayIcon : IDisposable
 
         if (face is { } shown)
         {
-            _faceAnimator.Show(FaceDrawing.For(style, shown, TaskbarTheme.Ground(), _iconSize));
+            _faceAnimator.Show(FaceDrawing.For(shown, TaskbarTheme.Ground(), _iconSize));
         }
         else
         {

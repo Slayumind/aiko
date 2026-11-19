@@ -24,17 +24,12 @@ sealed class ChoicePopup
     public ChoicePopup(UIElement target)
     {
         _popup.PlacementTarget = target;
-        _popup.Child = new Border
+        _popup.Child = new FloatingPanel
         {
             MinWidth = 240,
             MaxWidth = 520,
             Margin = new Thickness(12, 12, 12, 4),
             Padding = new Thickness(4),
-            CornerRadius = new CornerRadius(10),
-            Background = Tokens.Brush("Surface"),
-            BorderBrush = Tokens.Brush("InputLine"),
-            BorderThickness = new Thickness(1),
-            Effect = Tokens.Get<System.Windows.Media.Effects.Effect>("CardShadow"),
             Child = _rows,
         };
     }
@@ -55,13 +50,13 @@ sealed class ChoicePopup
         foreach (var (text, start, length) in choices.Take(MostRows))
         {
             var index = _lines.Count;
-            var line = Widgets.Text("", "TextNumber", "Muted", FontWeights.Normal);
-            line.FontFamily = Tokens.Get<FontFamily>("Mono");
+            var line = Widgets.Text("", "TextBody", "Muted", FontWeights.Normal);
+            line.FontFamily = Tokens.Mono;
             line.TextTrimming = TextTrimming.CharacterEllipsis;
             line.Inlines.Add(new Run(text[..start]));
             line.Inlines.Add(new Run(text.Substring(start, length)) { Foreground = Tokens.Brush("Ink") });
             line.Inlines.Add(new Run(text[(start + length)..]));
-            var row = new Border { CornerRadius = new CornerRadius(6), Padding = new Thickness(8, 5, 8, 5), Cursor = Cursors.Hand, Child = line };
+            var row = new Border { Padding = new Thickness(8, 5, 8, 5), Cursor = Cursors.Hand, Child = line };
             row.MouseLeftButtonUp += (_, _) => Clicked?.Invoke(index);
             _lines.Add(row);
             _rows.Children.Add(row);

@@ -8,14 +8,12 @@ struct PersonaSettingsTests {
         let persona = PersonaSettings.default
 
         #expect(persona.temperament == .normal)
-        #expect(persona.face == .chibi)
     }
 
     @Test
     func thePersonaSurvivesATripThroughTheFile() {
         var persona = PersonaSettings.default
         persona.temperament = .musou
-        persona.face = .emoji
 
         let back = PersonaSettings.fromJson(persona.toJson())
 
@@ -26,12 +24,10 @@ struct PersonaSettingsTests {
     func choicesAreWrittenAsWords() {
         var persona = PersonaSettings.default
         persona.temperament = .musou
-        persona.face = .emoji
 
         let json = persona.toJson()
 
         #expect(json.contains("\"Musou\""))
-        #expect(json.contains("\"Emoji\""))
     }
 
     @Test(arguments: [

@@ -82,7 +82,6 @@ static class IconSheet
         var ring = Row(42, LimitTone.Normal);
         var dot = Row(82, LimitTone.Caution);
         var faces = Enum.GetValues<AikoFace>();
-        var styles = Enum.GetValues<FaceStyle>();
         (int Size, Color Ground, FaceGround Face)[] rows =
         [
             (16, Dark, FaceGround.Dark),
@@ -92,7 +91,7 @@ static class IconSheet
         ];
 
         var timeline = Enum.GetValues<FacePhase>().SelectMany(TrayFaceMotion.Frames).ToList();
-        var width = Math.Max(styles.Length * faces.Length * Cell, timeline.Count * timelineCell);
+        var width = Math.Max(faces.Length * Cell, timeline.Count * timelineCell);
         var height = (rows.Length * Cell) + timelineCell;
 
         var visual = new DrawingVisual();
@@ -105,19 +104,16 @@ static class IconSheet
                 context.DrawRectangle(new SolidColorBrush(ground), null, new Rect(0, row * Cell, width, Cell));
 
                 var column = 0;
-                foreach (var style in styles)
+                foreach (var face in faces)
                 {
-                    foreach (var face in faces)
-                    {
-                        var png = RingIcon.RenderPng(size, ring, dot, TrayFaceMotion.At(FacePhase.FaceIn, 1), FaceDrawing.For(style, face, faceGround, size));
-                        Place(context, png, size, column++ * Cell, row * Cell, Cell);
-                    }
+                    var png = RingIcon.RenderPng(size, ring, dot, TrayFaceMotion.At(FacePhase.FaceIn, 1), FaceDrawing.For(face, faceGround, size));
+                    Place(context, png, size, column++ * Cell, row * Cell, Cell);
                 }
             }
 
             var top = rows.Length * Cell;
             context.DrawRectangle(new SolidColorBrush(Dark), null, new Rect(0, top, width, timelineCell));
-            var doneFace = FaceDrawing.For(FaceStyle.Chibi, AikoFace.Done, FaceGround.Dark, 32);
+            var doneFace = FaceDrawing.For(AikoFace.Done, FaceGround.Dark, 32);
             for (var i = 0; i < timeline.Count; i++)
             {
                 Place(context, RingIcon.RenderPng(32, ring, dot, timeline[i], doneFace), 32, i * timelineCell, top, timelineCell);
@@ -173,7 +169,7 @@ static class IconSheet
                     Place(context, RingIcon.RenderPng(size, ring, dot, badge: badges[column]), size, column * Cell, row * Cell, Cell);
                 }
 
-                var face = FaceDrawing.For(FaceStyle.Chibi, AikoFace.Done, faceGround, size);
+                var face = FaceDrawing.For(AikoFace.Done, faceGround, size);
                 Place(context, RingIcon.RenderPng(size, ring, dot, TrayFaceMotion.At(FacePhase.FaceIn, 1), face, badges[0]), size, badges.Length * Cell, row * Cell, Cell);
             }
 

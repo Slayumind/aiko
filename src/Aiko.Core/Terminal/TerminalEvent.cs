@@ -36,7 +36,9 @@ public enum TerminalEventKind
 /// The last hook event of a session of the terminal. The bridge writes it into the file of the
 /// session; the window reads it. Detail is short and safe to show: the name of a file without its
 /// folder, the start of a command, the name of a tool. The prompt and the answers are never read.
-public sealed record TerminalEvent(TerminalEventKind Kind, string Detail, long At)
+/// Conversation is the id Claude Code gave the hook: /clear starts a new conversation in the same
+/// session, and this is the one to come back to (D-453). Empty when the hook named none.
+public sealed record TerminalEvent(TerminalEventKind Kind, string Detail, long At, string Conversation = "")
 {
     /// The variable that tells the hook which session of the terminal it runs for (D-360).
     public const string SessionVariable = "AIKO_TERMINAL_SESSION";
@@ -99,16 +101,24 @@ public sealed record TerminalEvent(TerminalEventKind Kind, string Detail, long A
             _ => null,
         };
 
-        return found is { } one ? new TerminalEvent(one.Kind, Short(one.Detail), now) : null;
+        return found is { } one ? new TerminalEvent(one.Kind, Short(one.Detail), now, ConversationIn(root)) : null;
     }
 
-    public string ToJson() =>
-        new JsonObject
+    public string ToJson()
+    {
+        var root = new JsonObject
         {
             ["kind"] = char.ToLowerInvariant(Kind.ToString()[0]) + Kind.ToString()[1..],
             ["detail"] = Detail,
             ["at"] = At,
-        }.ToJsonString(new JsonSerializerOptions { Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping }) + "\n";
+        };
+        if (Conversation.Length > 0)
+        {
+            root["conversation"] = Conversation;
+        }
+
+        return root.ToJsonString(new JsonSerializerOptions { Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping }) + "\n";
+    }
 
     /// Never throws: a broken or unknown file is no event.
     public static TerminalEvent? FromJson(string? json)
@@ -121,7 +131,7 @@ public sealed record TerminalEvent(TerminalEventKind Kind, string Detail, long A
             return null;
         }
 
-        return new TerminalEvent(Enum.Parse<TerminalEventKind>(kind), Short(Text(root, "detail") ?? ""), time);
+        return new TerminalEvent(Enum.Parse<TerminalEventKind>(kind), Short(Text(root, "detail") ?? ""), time, ConversationIn(root, "conversation"));
     }
 
     private static (TerminalEventKind Kind, string Detail) ToolEvent(string tool, JsonObject? input) => tool switch
@@ -185,6 +195,11 @@ public sealed record TerminalEvent(TerminalEventKind Kind, string Detail, long A
         return clean.Length <= DetailLength ? clean : clean[..(DetailLength - 1)].TrimEnd() + "…";
     }
 
+    /// The id of a conversation is a GUID; anything else is ignored, because it becomes an argument
+    /// of Claude Code at the next start.
+    private static string ConversationIn(JsonObject root, string key = "session_id") =>
+        Guid.TryParseExact(Text(root, key), "D", out _) ? Text(root, key)! : "";
+
     private static JsonObject? Parse(string? json)
     {
         try
@@ -207,6 +222,21 @@ public sealed record TerminalEvent(TerminalEventKind Kind, string Detail, long A
 /// async hook decides no permission.
 public static class TerminalHooks
 {
+    /// A rule that lets Claude Code read the pictures of this session and change nothing there. An
+    /// added folder (--add-dir) gave it full access and a question at every start (D-451). Signs
+    /// that mean something in a rule become "?", which stands for any one character.
+    public static string PicturesRule(string picturesFolder)
+    {
+        var path = picturesFolder.Replace('\\', '/').TrimEnd('/');
+        if (path.Length > 1 && path[1] == ':')
+        {
+            path = "/" + char.ToLowerInvariant(path[0]) + path[2..];
+        }
+
+        var safe = string.Concat(path.Select(sign => "()[]{}*?!#".Contains(sign) ? '?' : sign));
+        return $"Read(/{safe}/**)";
+    }
+
     public static string SettingsJson(string bridgeExePath)
     {
         var events = new JsonObject();

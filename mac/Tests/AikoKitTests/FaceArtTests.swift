@@ -4,21 +4,19 @@ import Testing
 @testable import AikoKit
 
 struct FaceArtTests {
-    static func everyFace() -> [(FaceStyle, AikoFace, FaceGround, Bool)] {
-        var data: [(FaceStyle, AikoFace, FaceGround, Bool)] = []
-        for style in FaceStyle.allCases {
-            for face in AikoFace.allCases {
-                for ground in FaceGround.allCases {
-                    data.append((style, face, ground, false))
-                    data.append((style, face, ground, true))
-                }
+    static func everyFace() -> [(AikoFace, FaceGround, Bool)] {
+        var data: [(AikoFace, FaceGround, Bool)] = []
+        for face in AikoFace.allCases {
+            for ground in FaceGround.allCases {
+                data.append((face, ground, false))
+                data.append((face, ground, true))
             }
         }
         return data
     }
 
     static let palette: Set<String> = [
-        FaceArt.ink, FaceArt.paper, FaceArt.muted, FaceArt.caution, FaceArt.pink, FaceArt.drop, FaceArt.cautionOnLight,
+        FaceArt.ink, FaceArt.paper, FaceArt.muted, FaceArt.caution, FaceArt.pink, FaceArt.drop,
     ]
 
     // Only the commands the mockup used, with plain numbers: a comma for a decimal point from a
@@ -30,9 +28,9 @@ struct FaceArtTests {
     }
 
     @Test(arguments: FaceArtTests.everyFace())
-    func everyFaceIsDrawnInThePaletteWithReadablePathData(each: (FaceStyle, AikoFace, FaceGround, Bool)) {
-        let (style, face, ground, small) = each
-        let picture = FaceArt.draw(style, face, ground, small)
+    func everyFaceIsDrawnInThePaletteWithReadablePathData(each: (AikoFace, FaceGround, Bool)) {
+        let (face, ground, small) = each
+        let picture = FaceArt.draw(face, ground, small)
         let shapes = picture.groups.flatMap(\.shapes)
 
         #expect(!shapes.isEmpty)
@@ -50,8 +48,8 @@ struct FaceArtTests {
 
     @Test
     func theChibiHeadHasAnOutlineOnlyOnALightBackground() {
-        let dark = FaceArt.draw(.chibi, .fresh, .dark, true).groups[0].shapes[0]
-        let light = FaceArt.draw(.chibi, .fresh, .light, true).groups[0].shapes[0]
+        let dark = FaceArt.draw(.fresh, .dark, true).groups[0].shapes[0]
+        let light = FaceArt.draw(.fresh, .light, true).groups[0].shapes[0]
 
         #expect(dark.stroke == nil)
         #expect(light.stroke == FaceArt.ink)
@@ -60,23 +58,12 @@ struct FaceArtTests {
 
     @Test
     func aSmallChibiUsesThickerLinesAndATighterView() {
-        let big = FaceArt.draw(.chibi, .done, .dark, false)
-        let small = FaceArt.draw(.chibi, .done, .dark, true)
+        let big = FaceArt.draw(.done, .dark, false)
+        let small = FaceArt.draw(.done, .dark, true)
 
         #expect(big.viewLeft == 0 && big.viewTop == 0 && big.viewSize == 64)
         #expect(small.viewLeft == 3 && small.viewTop == 1 && small.viewSize == 59)
         #expect(small.groups[1].shapes[0].strokeWidth > big.groups[1].shapes[0].strokeWidth)
-    }
-
-    @Test
-    func emojiHighlightsAreHolesSoTheBackgroundShowsThrough() {
-        let eyes = FaceArt.draw(.emoji, .fresh, .dark, true).groups[0].shapes
-            .filter { ($0.holes?.count ?? 0) > 0 }
-
-        #expect(eyes.count == 2)
-        for eye in eyes {
-            #expect(eye.fill == FaceArt.paper)
-        }
     }
 
     @Test(arguments: [
@@ -85,20 +72,10 @@ struct FaceArtTests {
         (AikoFace.waiting, FaceArt.caution),
     ])
     func signsSitOutsideTheFaceGroup(face: AikoFace, color: String) {
-        let picture = FaceArt.draw(.chibi, face, .dark, true)
+        let picture = FaceArt.draw(face, .dark, true)
 
         #expect(picture.groups[picture.groups.count - 1].shapes.contains { $0.fill == color })
         #expect(!picture.groups[1].shapes.contains { $0.fill == color })
     }
 
-    @Test
-    func aSmallEmojiDrawsThickerLinesToo() {
-        let big = FaceArt.draw(.emoji, .fresh, .dark, false).groups[0].shapes.filter { $0.stroke != nil }
-        let small = FaceArt.draw(.emoji, .fresh, .dark, true).groups[0].shapes.filter { $0.stroke != nil }
-
-        #expect(big.count == small.count)
-        for (first, second) in zip(big, small) {
-            #expect(second.strokeWidth > first.strokeWidth)
-        }
-    }
 }

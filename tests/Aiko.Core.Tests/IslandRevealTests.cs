@@ -12,7 +12,7 @@ public class IslandRevealTests
             Now);
 
     [Theory]
-    [InlineData(70, 76, true)]
+    [InlineData(65, 76, true)]
     [InlineData(80, 91, true)]
     [InlineData(40, 95, true)]
     [InlineData(76, 80, false)]
@@ -33,7 +33,7 @@ public class IslandRevealTests
     [Fact]
     public void Either_environment_crossing_is_enough()
     {
-        var before = new[] { Card("Aiko", 30), Card("Work", 70) };
+        var before = new[] { Card("Aiko", 30), Card("Work", 65) };
         var after = new[] { Card("Aiko", 31), Card("Work", 78) };
 
         Assert.True(IslandReveal.ToneRose(before, after));

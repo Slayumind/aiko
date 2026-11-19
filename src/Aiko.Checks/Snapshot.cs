@@ -18,6 +18,8 @@ static class Snapshot
         ground.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
         ground.Arrange(new Rect(ground.DesiredSize));
         ground.UpdateLayout();
+        // Parts of the new look draw again once their final place on the pixels is known.
+        ground.UpdateLayout();
 
         // Twice the size, so the small numbers stay readable on the picture.
         var bitmap = new RenderTargetBitmap(

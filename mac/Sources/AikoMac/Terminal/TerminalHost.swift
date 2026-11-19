@@ -385,13 +385,20 @@ final class TerminalHost: NSObject, NSWindowDelegate, LocalProcessTerminalViewDe
                 return nil
             }
             executable = claude
+            // After /clear the session goes on in a new conversation. One that was never saved is
+            // not there to come back to, so the session keeps the one it has.
+            var conversation = TerminalEvents.lastConversation(session.id)
+            if conversation.isEmpty { conversation = session.conversation }
+            if !conversation.isEmpty, !Self.conversationOnDisk(config, conversation) {
+                conversation = ""
+            }
             plan = .forRequest(
                 .macOS,
                 LaunchRequest(
                     configDirectory: config, userProfile: Store.home, environmentName: session.environment,
                     sessionId: session.id, started: session.started, hooksFile: TerminalEvents.hooksFile(),
-                    picturesFolder: Store.folders.picturesFolder(session.id),
-                    onDisk: Self.conversationOnDisk(config, session.id)),
+                    onDisk: Self.conversationOnDisk(config, conversation.isEmpty ? session.id : conversation),
+                    conversationId: conversation, picturesFolder: Store.folders.picturesFolder(session.id)),
                 inheritedVariables: ProcessEnvironment.inheritedNames)
             arguments = plan.arguments
         }

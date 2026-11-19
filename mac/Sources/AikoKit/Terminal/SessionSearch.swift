@@ -75,7 +75,7 @@ public enum SessionSearch {
         for session in sessions.sessions {
             consider(session.id, session.environment, session.folder, session.name, session.lastUsed, nil, session.closed ? 1 : 0)
         }
-        for id in knownOrder where sessions.find(id) == nil {
+        for id in knownOrder where sessions.find(id) == nil && sessions.ownerOfConversation(id) == nil {
             if let conversation = known[id] {
                 consider(
                     conversation.id, conversation.environment, conversation.folder, conversation.name,

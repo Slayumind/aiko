@@ -14,7 +14,7 @@ namespace Aiko.App;
 [ContentProperty(nameof(Body))]
 sealed class ChecklistRow : UserControl
 {
-    private readonly Border _frame = new();
+    private readonly PixelBorder _frame = new();
     private readonly Border _hover = new();
     private readonly Grid _mark = new() { Width = 16, Height = 16 };
     private readonly ScaleTransform _markScale = new(1, 1);
@@ -104,14 +104,14 @@ sealed class ChecklistRow : UserControl
 
     private void Build()
     {
-        _title.FontFamily = Tokens.Get<FontFamily>("Sans");
+        _title.FontFamily = Tokens.Mono;
         _title.FontSize = Tokens.Get<double>("TextSmall");
         _title.Foreground = Tokens.Brush("Ink");
         _title.VerticalAlignment = VerticalAlignment.Center;
         _title.Margin = new Thickness(10, 0, 8, 0);
         _title.TextTrimming = TextTrimming.CharacterEllipsis;
 
-        _status.FontFamily = Tokens.Get<FontFamily>("Mono");
+        _status.FontFamily = Tokens.Mono;
         _status.FontSize = Tokens.Get<double>("TextTiny");
         _status.Foreground = Tokens.Brush("Muted");
         _status.VerticalAlignment = VerticalAlignment.Center;
@@ -160,7 +160,6 @@ sealed class ChecklistRow : UserControl
         stack.Children.Add(header);
         stack.Children.Add(_reveal);
 
-        _hover.CornerRadius = new CornerRadius(10);
         _hover.Background = Tokens.Brush("HoverLayer");
         _hover.Opacity = 0;
         _hover.IsHitTestVisible = false;
@@ -169,7 +168,6 @@ sealed class ChecklistRow : UserControl
         layers.Children.Add(_hover);
         layers.Children.Add(new Border { Padding = new Thickness(12, 10, 12, 10), Child = stack });
 
-        _frame.CornerRadius = new CornerRadius(10);
         _frame.BorderBrush = Tokens.Brush("Hairline");
         _frame.BorderThickness = new Thickness(1);
         _frame.Margin = new Thickness(0, 0, 0, 6);
@@ -207,7 +205,7 @@ sealed class ChecklistRow : UserControl
                 break;
 
             case ItemState.Skipped:
-                _mark.Children.Add(new Ellipse { Stroke = Tokens.Brush("InputLine"), StrokeThickness = 1.4 });
+                _mark.Children.Add(new Ellipse { Stroke = Tokens.Brush("Hairline"), StrokeThickness = 1.4 });
                 _mark.Children.Add(new Path { Data = Geometry.Parse("M5,8 L11,8"), Stroke = Tokens.Brush("Muted"), StrokeThickness = 1.4 });
                 break;
 

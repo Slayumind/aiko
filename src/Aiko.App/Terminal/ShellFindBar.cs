@@ -9,7 +9,7 @@ namespace Aiko.App;
 /// The search in the output of a command line (Ctrl+Shift+F, D-358): a field in the top right
 /// corner over the blocks, with how many places it found. The search starts from the newest output
 /// at the bottom: Enter goes to the place above, Shift+Enter to the one below, Esc closes it.
-sealed class ShellFindBar : Border
+sealed class ShellFindBar : PixelBorder
 {
     private readonly ShellBlocksView _view;
     private readonly TextBox _field = new();
@@ -22,8 +22,7 @@ sealed class ShellFindBar : Border
         VerticalAlignment = VerticalAlignment.Top;
         Margin = new Thickness(0, 8, 16, 0);
         Padding = new Thickness(10, 5, 10, 5);
-        CornerRadius = new CornerRadius(8);
-        Background = Tokens.Brush("Surface");
+        Background = Tokens.Brush("Background");
         BorderBrush = Tokens.Brush("Hairline");
         BorderThickness = new Thickness(1);
         Visibility = Visibility.Collapsed;
@@ -33,14 +32,14 @@ sealed class ShellFindBar : Border
         _field.BorderThickness = new Thickness(0);
         _field.Foreground = Tokens.Brush("Ink");
         _field.CaretBrush = Tokens.Brush("Ink");
-        _field.FontFamily = Tokens.Get<FontFamily>("Mono");
+        _field.FontFamily = Tokens.Mono;
         _field.VerticalContentAlignment = VerticalAlignment.Center;
         _field.ToolTip = Strings.ShellFind;
         _field.TextChanged += (_, _) => Search();
         _field.PreviewKeyDown += OnKey;
 
         _count.Foreground = Tokens.Brush("Muted");
-        _count.FontFamily = Tokens.Get<FontFamily>("Mono");
+        _count.FontFamily = Tokens.Mono;
         _count.Margin = new Thickness(10, 0, 0, 0);
         _count.VerticalAlignment = VerticalAlignment.Center;
 

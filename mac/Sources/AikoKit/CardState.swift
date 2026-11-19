@@ -89,7 +89,7 @@ public struct CardState: Sendable, Equatable {
         self.workingUntil = workingUntil
     }
 
-    public static let cautionFrom = 75
+    public static let cautionFrom = 70
     public static let criticalFrom = 90
 
     /// How long after the last word from the status line a session counts as working. Claude Code

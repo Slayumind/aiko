@@ -1,0 +1,80 @@
+{
+  "comment": "The voice of the personality in the terminal (D-457). Output comes in pieces; the result of all pieces together is compared. Italics become the colour 207;233;223 and end with the default colour. Other styles and the numbers inside a colour stay as they are. The dot before a reply becomes a space when italics follow it.",
+  "cases": [
+    {
+      "name": "italics as Claude Code sends them",
+      "pieces": [
+        "\u001b[39m\u001b[3mやった\r\u001b[2B\u001b[23m\u001b[1mbold"
+      ],
+      "output": "\u001b[39m\u001b[38;2;207;233;223mやった\r\u001b[2B\u001b[39m\u001b[1mbold"
+    },
+    {
+      "name": "a sequence cut between two pieces",
+      "pieces": [
+        "a\u001b",
+        "[",
+        "3mb\u001b[2",
+        "3mc"
+      ],
+      "output": "a\u001b[38;2;207;233;223mb\u001b[39mc"
+    },
+    {
+      "name": "the default colour inside the voice keeps the voice",
+      "pieces": [
+        "\u001b[3ma\u001b[38;2;1;2;3mb\u001b[39mc\u001b[0md"
+      ],
+      "output": "\u001b[38;2;207;233;223ma\u001b[38;2;1;2;3mb\u001b[38;2;207;233;223mc\u001b[0md"
+    },
+    {
+      "name": "numbers of a colour are not styles",
+      "pieces": [
+        "\u001b[38;5;3mx\u001b[38;2;3;23;39my\u001b[23mz\u001b[39m"
+      ],
+      "output": "\u001b[38;5;3mx\u001b[38;2;3;23;39my\u001b[23mz\u001b[39m"
+    },
+    {
+      "name": "several styles in one sequence",
+      "pieces": [
+        "\u001b[1;3ma\u001b[22;23mb"
+      ],
+      "output": "\u001b[1;38;2;207;233;223ma\u001b[22;39mb"
+    },
+    {
+      "name": "other sequences pass",
+      "pieces": [
+        "\u001b]0;title\u0007\u001b[?25l\u001b[Hplain"
+      ],
+      "output": "\u001b]0;title\u0007\u001b[?25l\u001b[Hplain"
+    },
+    {
+      "name": "the dot gives way to the voice",
+      "pieces": [
+        "\u001b[38;2;255;255;255m●\u001b[3G\u001b[39m\u001b[3m(^_^)"
+      ],
+      "output": "\u001b[38;2;255;255;255m \u001b[3G\u001b[39m\u001b[38;2;207;233;223m(^_^)"
+    },
+    {
+      "name": "the dot stays before plain text",
+      "pieces": [
+        "●\u001b[3Gplain"
+      ],
+      "output": "●\u001b[3Gplain"
+    },
+    {
+      "name": "the dot waits for the end of a cut sequence",
+      "pieces": [
+        "●",
+        "\u001b[3",
+        "G\u001b[3mx"
+      ],
+      "output": " \u001b[3G\u001b[38;2;207;233;223mx"
+    },
+    {
+      "name": "the dot stays when the cursor goes elsewhere",
+      "pieces": [
+        "●\u001b[?25h"
+      ],
+      "output": "●\u001b[?25h"
+    }
+  ]
+}

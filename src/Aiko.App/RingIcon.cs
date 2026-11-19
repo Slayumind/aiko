@@ -93,12 +93,12 @@ static class RingIcon
 
         // The arc grows back from zero when the rings return.
         int? percent = ring?.Percent is { } value ? (int)Math.Round(value * sweep) : null;
-        RingDrawing.Draw(context, centre, radius, thickness, percent, ring?.Tone ?? LimitTone.Unknown);
+        RingDrawing.Draw(context, centre, radius, thickness, percent, ring?.Tone ?? LimitTone.Unknown, onDark: false);
 
         if (ring is not null && dot is { } second)
         {
             context.DrawEllipse(
-                new SolidColorBrush(RingDrawing.ColourFor(second.Tone)), null, centre, 1.6 * scale, 1.6 * scale);
+                new SolidColorBrush(RingDrawing.ColourFor(second.Tone, onDark: false)), null, centre, 1.6 * scale, 1.6 * scale);
         }
     }
 }

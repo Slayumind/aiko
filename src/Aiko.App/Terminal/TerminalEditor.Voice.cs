@@ -198,7 +198,6 @@ sealed partial class TerminalEditor
             {
                 Width = 2,
                 Height = BarLow,
-                CornerRadius = new CornerRadius(1),
                 Margin = new Thickness(0, 0, i < 13 ? 2 : 0, 0),
                 Background = Tokens.Brush("Destructive"),
                 VerticalAlignment = VerticalAlignment.Center,

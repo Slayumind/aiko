@@ -110,7 +110,7 @@ public sealed class EnvironmentsEditor
             RecycleBin.Send(folder);
         }
 
-        // The persona file stays: the temperament, the face and the skills are kept for next time.
+        // The persona file stays: the temperament and the skills are kept for next time.
         PluginSync.Remove(
             before.Environments.SelectMany(e => e.ConfigDirectories).Except(recycled, StringComparer.OrdinalIgnoreCase).ToList(),
             "started over");

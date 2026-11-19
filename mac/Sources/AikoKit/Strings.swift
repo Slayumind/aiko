@@ -40,6 +40,9 @@ public enum Strings {
     }
 
     public static let table: [String: (english: String, russian: String)] = [
+        "TerminalLimitMark": ("limit {0}%", "лимит {0}%"),
+        "SwitchOff": ("Off", "Выкл"),
+        "SwitchOn": ("On", "Вкл"),
         "CardSession": ("5 hours", "5 часов"),
         "CardWeek": ("Week", "Неделя"),
         "CardModelWeek": ("{0} · week", "{0} · неделя"),
@@ -126,7 +129,7 @@ public enum Strings {
         "WizardBridgeNotFound": ("Aiko can't find its bridge program.", "Aiko не нашла свою программу-посредник."),
         "WizardUpdatesVersion": ("Once a day, Aiko asks slayumind.org for the latest version.", "Раз в сутки Aiko спрашивает у slayumind.org свежую версию."),
         "WizardUpdatesCount": ("With statistics on, the same request says that one copy of Aiko ran today.", "С включённой статистикой вместе с вопросом уходит, что одна копия сегодня работала."),
-        "WizardDoneTray": ("Close the window and Aiko stays by the clock while the sessions keep working. A click on the icon brings the window back.", "Закроешь окно — Aiko останется у часов, а сессии продолжат работу. Щелчок по значку вернёт окно."),
+        "WizardDoneTray": ("Close the window and Aiko stays in the menu bar while the sessions keep working. A click on the icon brings the window back.", "Закроешь окно — Aiko останется в строке меню, а сессии продолжат работу. Щелчок по значку вернёт окно."),
         "WizardDoneOverflow": ("Windows 11 hides the icons of new apps under the arrow by the clock. Drag Aiko onto the taskbar to keep the limit rings in sight.", "Windows 11 прячет значки новых приложений под стрелку у часов. Перетащи Aiko на панель задач, чтобы кольца лимитов было видно всегда."),
         "WizardDoneWindowIsland": ("Close the window and Aiko becomes an island at the top of the screen while the sessions keep working. Drag it to any edge.", "Закроешь окно — Aiko встанет островом вверху экрана, а сессии продолжат работу. Перетащи её к любому краю."),
         "WizardSummaryTitle": ("On Finish, Aiko", "По «Готово» Aiko"),
@@ -320,11 +323,6 @@ public enum Strings {
         "AikoOnWhat": ("Where Aiko is on, she reads each message you send to keep her memory fresh, and adds one line to that environment's settings.json: a permission for her two memory tools. Turning her off does not erase the memory.", "Там, где Aiko включена, она читает каждое твоё сообщение, чтобы память не устаревала, и добавляет в settings.json этой среды одну строку: разрешение на два своих инструмента памяти. Выключение память не стирает."),
         "SkillsWhere": ("Skills work in the environments where Aiko is on.", "Навыки работают в тех средах, где Aiko включена."),
         "PersonaOwnStyle": ("While the personality is on, your style {0} doesn't work. Turn it off and it comes back.", "Пока личность включена, твой стиль {0} не работает. Выключишь — вернётся."),
-        "SectionFace": ("MOOD", "НАСТРОЕНИЕ"),
-        "FaceChibi": ("Chibi", "Чиби"),
-        "FaceEmoji": ("Emoji", "Смайлик"),
-        "FaceWhere": ("Aiko shows her mood in the tray, on the island and in windows, as a drawing or an emoji.", "Aiko показывает настроение в трее, на острове и в окнах — рисунком или смайликом."),
-        "FaceWhereMac": ("Aiko shows her mood in the menu bar, on the island and in windows, as a drawing or an emoji.", "Aiko показывает настроение в строке меню, на острове и в окнах — рисунком или смайликом."),
         "SectionTemperament": ("TEMPERAMENT", "ТЕМПЕРАМЕНТ"),
         "TemperamentQuiet": ("Quiet", "Тихий"),
         "TemperamentNormal": ("Normal", "Обычный"),
@@ -339,13 +337,13 @@ public enum Strings {
         "SampleBody": ("The limits test passed by luck: rounding went down, so a reset at 14:59:30 showed as “in 0 min”. I fixed ResetCountdown and added a test for the edge.", "Тест на разбор лимитов проходил случайно: округление шло вниз, и сброс в 14:59:30 показывался как «через 0 мин». Поправила ResetCountdown и добавила тест на край."),
         "SampleBodyBright": ("The limits test passed by luck: rounding went down, so a reset at 14:59:30 hid behind “in 0 min”, like a mimic chest in Dark Souls. I fixed ResetCountdown and added a test for the edge.", "Тест на разбор лимитов проходил случайно: округление шло вниз, и сброс в 14:59:30 прятался за «через 0 мин», как мимик-сундук в Dark Souls. Поправила ResetCountdown и добавила тест на край."),
         "SampleBodyMusouTail": (" Parried it, like in Elden Ring.", " Парировала его, как в Elden Ring."),
-        "SampleOpenNormal": ("えへへ, got it.", "えへへ, поймала."),
-        "SampleOpenBright": ("やった, got it!", "やった, поймала!"),
-        "SampleOpenMusou": ("やった〜! すごい, what a sneaky one!", "やった〜! すごい, какой хитрый!"),
+        "SampleOpenNormal": ("(^_^) えへへ, got it.", "(^_^) えへへ, поймала."),
+        "SampleOpenBright": ("(^▽^) やった, got it!", "(^▽^) やった, поймала!"),
+        "SampleOpenMusou": ("(^▽^) やった〜! すごい, what a sneaky one!", "(^▽^) やった〜! すごい, какой хитрый!"),
         "SampleCloseQuiet": ("A rare bug. It was nice to find.", "Редкий баг, приятно было найти."),
         "SampleCloseNormal": ("In my own game I'd have hunted a bug like this for half a day.", "Такой баг я бы и в своей игре полдня искала."),
         "SampleCloseBright": ("お疲れ様!", "お疲れ様!"),
-        "SampleCloseMusou": ("よし、行くぞ! On to the next one (^_^)", "よし、行くぞ! Дальше (^_^)"),
+        "SampleCloseMusou": ("よし、行くぞ! On to the next one", "よし、行くぞ! Дальше"),
         "SampleCommit": ("The commit for this fix has no character:", "Коммит к этой правке — без характера:"),
         "SectionMemory": ("MEMORY · {0} OF {1}", "ПАМЯТЬ · {0} ИЗ {1}"),
         "MemoryAdd": ("Add a fact", "Добавить факт"),
@@ -571,6 +569,15 @@ public enum Strings {
         "VoiceCloudNoMoney": ("The OpenAI account is out of money.", "На счёте OpenAI кончились деньги."),
         "VoiceCloudBusy": ("OpenAI asks to wait a minute.", "OpenAI просит подождать минуту."),
     ]
+
+    /// limit {0}%
+    public static var terminalLimitMark: String { Strings.get("TerminalLimitMark") }
+
+    /// Off
+    public static var switchOff: String { Strings.get("SwitchOff") }
+
+    /// On
+    public static var switchOn: String { Strings.get("SwitchOn") }
 
     /// 5 hours
     public static var cardSession: String { Strings.get("CardSession") }
@@ -830,7 +837,7 @@ public enum Strings {
     /// With statistics on, the same request says that one copy of Aiko ran today.
     public static var wizardUpdatesCount: String { Strings.get("WizardUpdatesCount") }
 
-    /// Close the window and Aiko stays by the clock while the sessions keep working. A click on ...
+    /// Close the window and Aiko stays in the menu bar while the sessions keep working. A click ...
     public static var wizardDoneTray: String { Strings.get("WizardDoneTray") }
 
     /// Windows 11 hides the icons of new apps under the arrow by the clock. Drag Aiko onto the t...
@@ -1412,21 +1419,6 @@ public enum Strings {
     /// While the personality is on, your style {0} doesn't work. Turn it off and it comes back.
     public static var personaOwnStyle: String { Strings.get("PersonaOwnStyle") }
 
-    /// MOOD
-    public static var sectionFace: String { Strings.get("SectionFace") }
-
-    /// Chibi
-    public static var faceChibi: String { Strings.get("FaceChibi") }
-
-    /// Emoji
-    public static var faceEmoji: String { Strings.get("FaceEmoji") }
-
-    /// Aiko shows her mood in the tray, on the island and in windows, as a drawing or an emoji.
-    public static var faceWhere: String { Strings.get("FaceWhere") }
-
-    /// Aiko shows her mood in the menu bar, on the island and in windows, as a drawing or an emoji.
-    public static var faceWhereMac: String { Strings.get("FaceWhereMac") }
-
     /// TEMPERAMENT
     public static var sectionTemperament: String { Strings.get("SectionTemperament") }
 
@@ -1469,13 +1461,13 @@ public enum Strings {
     ///  Parried it, like in Elden Ring.
     public static var sampleBodyMusouTail: String { Strings.get("SampleBodyMusouTail") }
 
-    /// えへへ, got it.
+    /// (^_^) えへへ, got it.
     public static var sampleOpenNormal: String { Strings.get("SampleOpenNormal") }
 
-    /// やった, got it!
+    /// (^▽^) やった, got it!
     public static var sampleOpenBright: String { Strings.get("SampleOpenBright") }
 
-    /// やった〜! すごい, what a sneaky one!
+    /// (^▽^) やった〜! すごい, what a sneaky one!
     public static var sampleOpenMusou: String { Strings.get("SampleOpenMusou") }
 
     /// A rare bug. It was nice to find.
@@ -1487,7 +1479,7 @@ public enum Strings {
     /// お疲れ様!
     public static var sampleCloseBright: String { Strings.get("SampleCloseBright") }
 
-    /// よし、行くぞ! On to the next one (^_^)
+    /// よし、行くぞ! On to the next one
     public static var sampleCloseMusou: String { Strings.get("SampleCloseMusou") }
 
     /// The commit for this fix has no character:

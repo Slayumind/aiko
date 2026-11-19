@@ -11,7 +11,7 @@ namespace Aiko.Checks;
 static class TerminalSnapshot
 {
     /// --snapshot-terminal out.png [palette | folders | loader | header | header-work | narrow |
-    /// narrow-header | nolist | settings | settings-personality | settings-terminal | settings-privacy |
+    /// narrow-header | nolist | frame | settings | settings-personality | settings-terminal | settings-privacy |
     /// settings-general]. The settings read the real settings of this computer, as the window does.
     public static void Write(string path, string? part)
     {
@@ -39,13 +39,20 @@ static class TerminalSnapshot
             return;
         }
 
+        Snapshot.Write(Window(part), path);
+    }
+
+    /// The window of the snapshot with its made up sessions, not yet drawn. The idle check shows the
+    /// same one on the screen.
+    public static TerminalPanel Window(string? part)
+    {
         var narrow = part?.StartsWith("narrow", StringComparison.Ordinal) == true;
         var panel = new TerminalPanel { Width = narrow ? 600 : 1000, Height = 620 };
         var now = DateTimeOffset.Now;
         var seconds = now.ToUnixTimeSeconds();
         var active = part == "header-work" ? "Work · Kodland" : "Aiko";
         panel.Show(new TerminalView(
-            [new TabView("Aiko", active == "Aiko", 0, 42, LimitTone.Normal), new TabView("Work · Kodland", active != "Aiko", 1, 82, LimitTone.Caution)],
+            [new TabView("Aiko", active == "Aiko", 0, 42, LimitTone.Normal, Done: 1), new TabView("Work · Kodland", active != "Aiko", 1, 82, LimitTone.Caution, Stopped: 1)],
             Header(part, active, now),
             [
                 new RowGroup("C:\\work\\aiko", "aiko",
@@ -69,12 +76,18 @@ static class TerminalSnapshot
             null,
             now));
         panel.ShowGroupHoverForSnapshot();
+        if (part == "frame")
+        {
+            Prepare(panel.Editor, shell: false);
+            panel.ShowTerminalFramesForSnapshot();
+        }
+
         if (part?.StartsWith("settings", StringComparison.Ordinal) == true)
         {
             panel.ShowSettings(new SettingsPanel(part.Length > 9 ? part[9..] : null));
         }
 
-        Snapshot.Write(panel, path);
+        return panel;
     }
 
     /// The header of the snapshot: open for "header", "header-work" and "narrow-header", the list
@@ -117,13 +130,18 @@ static class TerminalSnapshot
             false))]);
     }
 
+    private static void Prepare(TerminalEditor editor, bool shell)
+    {
+        editor.Show(new EditorSession("s1", shell ? SessionKind.Shell : SessionKind.Claude, "C:\\work", '/', "C:\\work\\pictures"));
+        editor.ShowVoice(new VoiceLine(VoiceWord.None, null, null, false, VoiceButton.Idle, false), VoiceNotice.None);
+    }
+
     /// editor (empty), editor-text, editor-compose, editor-shell, editor-voice.
     private static System.Windows.FrameworkElement Editor(string part)
     {
         var editor = new TerminalEditor { Width = 760 };
         var shell = part == "editor-shell";
-        editor.Show(new EditorSession("s1", shell ? SessionKind.Shell : SessionKind.Claude, "C:\\work", '/', "C:\\work\\pictures"));
-        editor.ShowVoice(new VoiceLine(VoiceWord.None, null, null, false, VoiceButton.Idle, false), VoiceNotice.None);
+        Prepare(editor, shell);
         switch (part)
         {
             case "editor-text":

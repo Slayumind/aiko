@@ -66,7 +66,7 @@ public partial class ChecklistPage : UserControl
         }
 
         InstallHow.Text = string.Format(Strings.InstallHowButton, InstallCommandText);
-        MeetFace.Source = FaceDrawing.For(SettingsStore.LoadPersona().Face, AikoFace.Fresh, FaceGround.Dark, MeetFace.Width);
+        MeetFace.Source = FaceDrawing.For(AikoFace.Fresh, FaceGround.Dark, MeetFace.Width);
         NewName.Text = "";
 
         GatherFacts();
@@ -213,7 +213,7 @@ public partial class ChecklistPage : UserControl
     private readonly bool _steps;
 
     /// Only the open item is on the page, with the dots of every item under it: done ones muted,
-    /// the open one a wider bar, the rest dim. With every answer given, the page says what comes
+    /// on one bar that fills step by step. With every answer given, the page says what comes
     /// next and Finish is the one step left.
     private void ShowSteps()
     {
@@ -230,28 +230,31 @@ public partial class ChecklistPage : UserControl
         FooterLine.Visibility = Visibility.Collapsed;
         StepDots.Visibility = Visibility.Visible;
         StepDots.Children.Clear();
+        StepDots.ColumnDefinitions.Clear();
+        var place = _rows.FindIndex(row => row.Item == _opened);
+        var bar = new LimitBar { Value = _rows.Count == 0 ? 0 : place < 0 ? 1 : (place + 1.0) / _rows.Count, Height = 14, TrackHeight = 6, IsHitTestVisible = false };
+        Grid.SetColumnSpan(bar, Math.Max(1, _rows.Count));
+        StepDots.Children.Add(bar);
         foreach (var row in _rows)
         {
-            var open = row.Item == _opened;
-            var dot = new Border
+            // Every step keeps its place on the bar: a click there opens that step.
+            StepDots.ColumnDefinitions.Add(new ColumnDefinition());
+            var step = new Border
             {
-                Width = open ? 18 : 6,
-                Height = 6,
-                CornerRadius = new CornerRadius(3),
-                Margin = new Thickness(0, 0, 6, 0),
-                Background = Tokens.Brush(open ? "Ink" : row.State is ItemState.Done ? "Muted" : "Raised"),
+                Background = System.Windows.Media.Brushes.Transparent,
                 ToolTip = row.Title,
                 Cursor = row.State is ItemState.Locked ? null : System.Windows.Input.Cursors.Hand,
             };
+            Grid.SetColumn(step, StepDots.ColumnDefinitions.Count - 1);
             var item = row.Item;
-            dot.MouseLeftButtonUp += (_, _) =>
+            step.MouseLeftButtonUp += (_, _) =>
             {
                 if (row.State is not ItemState.Locked)
                 {
                     Open(item);
                 }
             };
-            StepDots.Children.Add(dot);
+            StepDots.Children.Add(step);
         }
 
         var at = _rows.FindIndex(row => row.Item == _opened);

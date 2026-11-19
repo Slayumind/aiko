@@ -437,8 +437,9 @@ public class SharedCaseTests
                 row.GetProperty("sessionId").GetString()!,
                 row.GetProperty("started").GetBoolean(),
                 row.TryGetProperty("hooksFile", out var hooks) ? hooks.GetString()! : "",
-                row.TryGetProperty("picturesFolder", out var pictures) ? pictures.GetString()! : "",
-                !row.TryGetProperty("onDisk", out var onDisk) || onDisk.GetBoolean());
+                !row.TryGetProperty("onDisk", out var onDisk) || onDisk.GetBoolean(),
+                row.TryGetProperty("conversationId", out var conversation) ? conversation.GetString()! : "",
+                row.TryGetProperty("picturesFolder", out var pictures) ? pictures.GetString()! : "");
 
             var plan = ClaudeLaunchPlan.For(request, Strings(row.GetProperty("inherited")));
 
@@ -448,6 +449,13 @@ public class SharedCaseTests
                     variable.GetProperty("name").GetString()!,
                     variable.GetProperty("value").GetString()))],
                 plan.Variables);
+        }
+
+        foreach (var row in cases.GetProperty("picturesRules").EnumerateArray())
+        {
+            var folder = row.GetProperty("folder").GetString()!;
+            var rule = row.GetProperty("rule").GetString()!;
+            Assert.Equal(rule, TerminalHooks.PicturesRule(folder));
         }
 
         foreach (var row in cases.GetProperty("shells").EnumerateArray())
@@ -463,6 +471,9 @@ public class SharedCaseTests
                 plan.Variables);
         }
     }
+
+    private static string EventConversation(JsonElement expected) =>
+        expected.TryGetProperty("conversation", out var conversation) ? conversation.GetString()! : "";
 
     [Fact]
     public void Every_title_of_a_terminal_is_read_the_same()
@@ -523,7 +534,7 @@ public class SharedCaseTests
             }
 
             Assert.True(
-                found == new TerminalEvent(KindIn(expected), expected.GetProperty("detail").GetString()!, now),
+                found == new TerminalEvent(KindIn(expected), expected.GetProperty("detail").GetString()!, now, EventConversation(expected)),
                 $"{name}: {found}");
         }
 
@@ -539,7 +550,7 @@ public class SharedCaseTests
             Assert.Equal(
                 expected.ValueKind == JsonValueKind.Null
                     ? null
-                    : new TerminalEvent(KindIn(expected), expected.GetProperty("detail").GetString()!, expected.GetProperty("at").GetInt64()),
+                    : new TerminalEvent(KindIn(expected), expected.GetProperty("detail").GetString()!, expected.GetProperty("at").GetInt64(), EventConversation(expected)),
                 read);
 
             if (read is not null)

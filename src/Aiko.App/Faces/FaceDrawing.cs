@@ -8,8 +8,8 @@ namespace Aiko.App;
 /// a 16 px tray icon and a 44 px picture in a window.
 static class FaceDrawing
 {
-    public static DrawingImage For(FaceStyle style, AikoFace face, FaceGround ground, double pixels) =>
-        Image(FaceArt.Draw(style, face, ground, small: pixels <= FaceArt.SmallUpTo));
+    public static DrawingImage For(AikoFace face, FaceGround ground, double pixels) =>
+        Image(FaceArt.Draw(face, ground, small: pixels <= FaceArt.SmallUpTo));
 
     public static DrawingImage Image(FacePicture picture)
     {

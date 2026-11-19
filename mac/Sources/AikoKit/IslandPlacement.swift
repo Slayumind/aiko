@@ -73,8 +73,8 @@ public enum IslandPlacement {
     /// to it. Without it the landing strip flickers between two edges near a corner.
     public static let edgeStickiness = 14.0
 
-    /// The edge nearest to the middle of an island in hand. The middle, not the sides: the island
-    /// changes shape when it turns from a row into a column, and the sides jump with it.
+    /// The edge nearest to the middle of an island in hand. The middle, not the sides: the
+    /// island is long, and its sides stand far from the mouse.
     public static func nearestEdge(
         _ centreX: Double, _ centreY: Double, _ work: Box, _ current: ScreenEdge? = nil
     ) -> ScreenEdge {
@@ -132,8 +132,7 @@ public enum IslandPlacement {
         }
     }
 
-    /// Along a top or bottom edge the rings stand in a row; along a left or right edge they stand
-    /// in a column, so the island takes less room along the edge.
+    /// Whether the edge runs along the top or the bottom of the screen.
     public static func isHorizontal(_ edge: ScreenEdge) -> Bool {
         edge == .top || edge == .bottom
     }

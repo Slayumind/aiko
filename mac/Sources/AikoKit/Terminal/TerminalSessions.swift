@@ -28,6 +28,12 @@ public struct TerminalSession: Sendable, Equatable {
 
     /// The person gave the name: the title of Claude Code does not change it any more (D-352).
     public var named = false
+    /// The conversation the session went on in after /clear; empty while it is the first one, whose
+    /// id is the id of the session (D-453).
+    public var conversation = ""
+
+    /// The conversation to come back to.
+    public var resumeId: String { conversation.isEmpty ? id : conversation }
 
     public init(id: String, environment: String, folder: String, name: String) {
         self.id = id
@@ -189,6 +195,17 @@ public struct TerminalSessions: Sendable, Equatable {
     }
 
     /// Claude Code has the conversation now.
+    /// The session goes on in this conversation. An empty id or the one it has changes nothing.
+    public func moveToConversation(_ id: String, _ conversation: String) -> TerminalSessions {
+        guard !conversation.isEmpty, let session = find(id), session.resumeId != conversation else { return self }
+        return with(id) { $0.conversation = conversation == id ? "" : conversation }
+    }
+
+    /// The session that went on in this conversation after /clear.
+    public func ownerOfConversation(_ conversation: String) -> TerminalSession? {
+        sessions.first { $0.conversation == conversation }
+    }
+
     public func markStarted(_ id: String) -> TerminalSessions {
         with(id) { $0.started = true }
     }
@@ -371,6 +388,9 @@ public struct TerminalSessions: Sendable, Equatable {
                 file["named"] = .bool(true)
             }
             file["lastUsed"] = .number(String(session.lastUsed))
+            if !session.conversation.isEmpty {
+                file["conversation"] = .string(session.conversation)
+            }
             return .object(file)
         } + kept)
         if let lastId {
@@ -415,6 +435,10 @@ public struct TerminalSessions: Sendable, Equatable {
         session.closed = item["closed"]?.boolValue == true
         session.named = item["named"]?.boolValue == true
         session.lastUsed = item["lastUsed"]?.int64Value ?? 0
+        // It becomes an argument of Claude Code, so only a real id is taken.
+        if let conversation = item["conversation"]?.stringValue, conversation.utf8.count == 36, UUID(uuidString: conversation) != nil {
+            session.conversation = conversation
+        }
         return session
     }
 }
