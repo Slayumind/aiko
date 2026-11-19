@@ -94,7 +94,7 @@ sealed class IslandHost(Dispatcher dispatcher)
     }
 
     /// A face comes onto the island or goes (D-211). The island is always dark, whatever the taskbar.
-    public void ShowFace(AikoFace? face, FaceStyle style)
+    public void ShowFace(AikoFace? face)
     {
         if (_window is not { } window)
         {
@@ -103,7 +103,7 @@ sealed class IslandHost(Dispatcher dispatcher)
 
         if (face is { } shown)
         {
-            window.ShowFace(FaceDrawing.For(style, shown, FaceGround.Dark, FaceSize));
+            window.ShowFace(FaceDrawing.For(shown, FaceGround.Dark, FaceSize));
         }
         else
         {

@@ -28,7 +28,6 @@ sealed class TerminalWindow : Window
         CaptionHeight = TerminalPanel.BarHeight,
         ResizeBorderThickness = new Thickness(6),
         GlassFrameThickness = new Thickness(0),
-        CornerRadius = new CornerRadius(0),
         UseAeroCaptionButtons = false,
     };
 
@@ -46,7 +45,7 @@ sealed class TerminalWindow : Window
     {
         _panel = panel;
         Title = Strings.TerminalTitle;
-        Background = Tokens.Brush("Surface");
+        Background = Tokens.Brush("Background");
         MinWidth = WindowPlace.MinWidth;
         MinHeight = WindowPlace.MinHeight;
         WindowStartupLocation = WindowStartupLocation.Manual;

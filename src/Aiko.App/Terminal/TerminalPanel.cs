@@ -22,7 +22,7 @@ sealed partial class TerminalPanel : UserControl
     public const double BarHeight = 44;
     private const double ListWidth = 252;
 
-    /// The title bar stays black over the grey body of the window (D-392).
+    /// The title bar has the ground of the window.
     private readonly Grid _bar = new() { Height = BarHeight, Background = Tokens.Brush("Background") };
     private readonly TerminalPills _pills = new();
     private readonly StackPanel _right = new() { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
@@ -41,6 +41,7 @@ sealed partial class TerminalPanel : UserControl
     private readonly Popup _palettePopup = new() { StaysOpen = false, AllowsTransparency = true, Placement = PlacementMode.Relative };
     private readonly Button _listToggle;
     private readonly Button _chevron;
+    private readonly FrameworkElement _chevronMark = Marks.Line("M0,0 L4,4 L8,0");
     private readonly Button _gear;
 
     /// The magnifier left of the gear: the palette of conversations, which only a shortcut opened
@@ -48,7 +49,7 @@ sealed partial class TerminalPanel : UserControl
     private readonly Button _search;
 
     /// The gear stays lit while the settings are open, as a pressed segment.
-    private readonly Border _gearLit = new() { CornerRadius = new CornerRadius(6), Background = Tokens.Brush("Raised"), Visibility = Visibility.Collapsed };
+    private readonly Border _gearLit = new() { Background = Tokens.Brush("Raised"), Visibility = Visibility.Collapsed };
 
     /// A quiet dot on the gear while a newer version is out (D-391); the General page says which.
     private readonly System.Windows.Shapes.Ellipse _gearDot = new()
@@ -134,7 +135,7 @@ sealed partial class TerminalPanel : UserControl
     /// line. Nothing else in the window names them.
     private readonly TextBlock _keys = new()
     {
-        FontFamily = Tokens.Get<FontFamily>("Mono"),
+        FontFamily = Tokens.Mono,
         FontSize = Tokens.Get<double>("TextTiny"),
         Foreground = Tokens.Brush("Muted"),
         TextTrimming = TextTrimming.CharacterEllipsis,
@@ -145,7 +146,7 @@ sealed partial class TerminalPanel : UserControl
     private bool _editorRoom;
 
     private void ShowEditor() =>
-        Editor.Visibility = _editorRoom && Editor.Wanted ? Visibility.Visible : Visibility.Collapsed;
+        _editorFrame.Visibility = _editorRoom && Editor.Wanted ? Visibility.Visible : Visibility.Collapsed;
 
     public TerminalPanel()
     {
@@ -161,8 +162,8 @@ sealed partial class TerminalPanel : UserControl
             }
         };
 
-        Background = Tokens.Brush("Surface");
-        FontFamily = Tokens.Get<FontFamily>("Sans");
+        Background = Tokens.Brush("Background");
+        FontFamily = Tokens.Mono;
         Focusable = false;
         PreviewMouseDown += EndRenameOnPressAway;
 
@@ -181,11 +182,11 @@ sealed partial class TerminalPanel : UserControl
         // The list icon: in a wide window it hides the column of sessions, in a narrow one it opens
         // the list over the terminal (D-376).
         _listToggle = BarButton(ListIcon(), Strings.TerminalSessionList, ToggleList);
-        _listToggle.Margin = new Thickness(6, 0, 2, 0);
+        _listToggle.Margin = new Thickness(6, 0, 2, 1);
         _listPopup.PlacementTarget = _listToggle;
         // The chevron is a small mark: its button is as narrow as it is tall, so the hover shows
         // where a click lands and does not reach towards the pills.
-        _chevron = BarButton(Marks.Line("M0,0 L4,4 L8,0"), Strings.TerminalShowLimits, () => HeaderToggled?.Invoke(), ChevronWidth);
+        _chevron = BarButton(_chevronMark, Strings.TerminalShowLimits, () => HeaderToggled?.Invoke(), ChevronWidth);
         _search = BarButton(Marks.Line("M4.5,0.5 A4,4 0 1 1 4.49,0.5 Z M7.6,7.6 L11,11"), Strings.TerminalFindConversation, () => PaletteAsked?.Invoke());
         _gear = BarButton(GearIcon(), Strings.Settings, () => SettingsAsked?.Invoke());
         ((Grid)_gear.Content).Children.Insert(0, _gearLit);
@@ -213,7 +214,7 @@ sealed partial class TerminalPanel : UserControl
         _bar.Children.Add(left);
         Grid.SetColumn(_right, 1);
         _bar.Children.Add(_right);
-        var hairline = new Border { Height = 1, VerticalAlignment = VerticalAlignment.Bottom, Background = Tokens.Brush("Hairline") };
+        var hairline = new Rule { VerticalAlignment = VerticalAlignment.Bottom };
         Grid.SetColumnSpan(hairline, 2);
         _bar.Children.Add(hairline);
         _pills.Refit = FitPills;
@@ -229,7 +230,7 @@ sealed partial class TerminalPanel : UserControl
                 ReleaseBody();
             }
         };
-        _strip.Child = new Border
+        _strip.Child = new PixelBorder
         {
             BorderBrush = Tokens.Brush("Hairline"),
             BorderThickness = new Thickness(0, 0, 0, 1),
@@ -240,7 +241,7 @@ sealed partial class TerminalPanel : UserControl
         _body.ColumnDefinitions.Add(new ColumnDefinition());
         var listSide = new Grid();
         listSide.Children.Add(_list);
-        listSide.Children.Add(new Border { Width = 1, HorizontalAlignment = HorizontalAlignment.Right, Background = Tokens.Brush("Hairline") });
+        listSide.Children.Add(new Rule { Orientation = Orientation.Vertical, HorizontalAlignment = HorizontalAlignment.Right });
         _body.Children.Add(listSide);
         Grid.SetColumn(_main, 1);
         _body.Children.Add(_main);
@@ -265,7 +266,7 @@ sealed partial class TerminalPanel : UserControl
         _resume = Flat(Strings.TerminalResume, () => ResumeAsked?.Invoke(), ghost: false, main: true);
         DockPanel.SetDock(_resume, Dock.Right);
         _stopped.Children.Add(_resume);
-        var stoppedLine = Text(Strings.TerminalStoppedLine, "TextNumber", "Muted", FontWeights.Normal);
+        var stoppedLine = Text(Strings.TerminalStoppedLine, "TextBody", "Muted", FontWeights.Normal);
         stoppedLine.VerticalAlignment = VerticalAlignment.Center;
         stoppedLine.TextWrapping = TextWrapping.Wrap;
         _stopped.Children.Add(stoppedLine);
@@ -277,10 +278,12 @@ sealed partial class TerminalPanel : UserControl
         terminalSide.Children.Add(_keys);
         DockPanel.SetDock(_stopped, Dock.Bottom);
         terminalSide.Children.Add(_stopped);
-        DockPanel.SetDock(Editor, Dock.Bottom);
-        terminalSide.Children.Add(Editor);
+        _editorFrame.Content = Editor;
+        DockPanel.SetDock(_editorFrame, Dock.Bottom);
+        terminalSide.Children.Add(_editorFrame);
         Editor.WantedChanged += ShowEditor;
-        terminalSide.Children.Add(_terminals);
+        _terminalFrame.Content = _terminals;
+        terminalSide.Children.Add(_terminalFrame);
         _terminalSide = terminalSide;
 
         _palettePopup.PlacementTarget = this;
@@ -412,6 +415,7 @@ sealed partial class TerminalPanel : UserControl
         _narrow = ActualWidth > 0 ? WindowPlace.IsNarrow(ActualWidth) : WindowPlace.IsNarrow(Width);
 
         ShowBar(view);
+        ShowSignal(view);
         ShowList(view);
         ShowMain(view);
     }
@@ -427,7 +431,7 @@ sealed partial class TerminalPanel : UserControl
     /// The space before it is a mono space of the same size, about six units, as the gap was.
     private static void AddNumber(TextBlock name, string number, string tone)
     {
-        var family = Tokens.Get<FontFamily>("Mono");
+        var family = Tokens.Mono;
         var size = Tokens.Get<double>("TextTiny");
         name.Inlines.Add(new System.Windows.Documents.Run(" ") { FontFamily = family, FontSize = size });
         name.Inlines.Add(new System.Windows.Documents.Run(number)
@@ -439,22 +443,13 @@ sealed partial class TerminalPanel : UserControl
         });
     }
 
-    /// The waiting mark in the box of a pill's ring, so the name does not move when one turns
-    /// into the other.
-    private static FrameworkElement WaitingMark()
-    {
-        var pause = Marks.Pause();
-        pause.HorizontalAlignment = HorizontalAlignment.Center;
-        return new Grid { Width = 14, Height = 14, Background = Brushes.Transparent, VerticalAlignment = VerticalAlignment.Center, Children = { pause } };
-    }
-
     private const double ChevronWidth = 28;
 
     /// tip is null for a cross that only puts a thing away: what it does is plain without words.
     private Button BarButton(UIElement icon, string? tip, Action click, double width = 40)
     {
-        var hover = new Border { CornerRadius = new CornerRadius(6), Background = Tokens.Brush("Raised"), Opacity = 0 };
-        var face = new Grid { Width = width, Height = 28 };
+        var hover = new Border { Background = Tokens.Brush("Raised"), Opacity = 0 };
+        var face = new Grid { Width = width };
         face.Children.Add(hover);
         face.Children.Add(new Border { Child = icon, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center });
 
@@ -464,8 +459,9 @@ sealed partial class TerminalPanel : UserControl
             ToolTip = tip,
             Focusable = false,
             Cursor = Cursors.Hand,
-            VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Thickness(0, 0, 4, 0),
+            // The highlight reaches from the top of the window to the line, as on the tabs.
+            VerticalAlignment = VerticalAlignment.Stretch,
+            Margin = new Thickness(0, 0, 4, 1),
             Template = Bare(),
         };
         button.MouseEnter += (_, _) => hover.BeginAnimation(OpacityProperty, Motion.To(1, Motion.Or0(Motion.Hover), Motion.Standard));

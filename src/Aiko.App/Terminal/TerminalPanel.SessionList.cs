@@ -58,7 +58,7 @@ sealed partial class TerminalPanel
         // The list lives in the window or, in a narrow one, under the button with the session name.
         _list.Children.Clear();
         _listPopup.Child = null;
-        var holder = new DockPanel { Background = _narrow ? Brushes.Transparent : Tokens.Brush("Surface") };
+        var holder = new DockPanel { Background = _narrow ? Brushes.Transparent : Tokens.Brush("Background") };
         DockPanel.SetDock(create, Dock.Bottom);
         holder.Children.Add(create);
         holder.Children.Add(new ScrollViewer
@@ -66,7 +66,7 @@ sealed partial class TerminalPanel
             VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
             HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
             Focusable = false,
-            Padding = new Thickness(8, 4, 8, 0),
+            Padding = new Thickness(0, 4, 0, 0),
             Content = _rows,
         });
 
@@ -74,17 +74,12 @@ sealed partial class TerminalPanel
         {
             SlideList(0);
             // Drawn anew while open too, so it takes the zoom here and not only on opening.
-            _listPopup.Child = new Border
+            _listPopup.Child = new FloatingPanel
             {
                 LayoutTransform = PopupZoom.Of(_listToggle),
                 Width = ListWidth + 20,
                 MaxHeight = 480,
                 Margin = new Thickness(0, 4, 12, 12),
-                CornerRadius = new CornerRadius(12),
-                BorderBrush = Tokens.Brush("InputLine"),
-                BorderThickness = new Thickness(1),
-                Background = Tokens.Brush("Surface"),
-                Effect = Tokens.Get<System.Windows.Media.Effects.Effect>("CardShadow"),
                 Child = holder,
             };
         }
@@ -123,7 +118,7 @@ sealed partial class TerminalPanel
             buttons.Children.Add(button);
         }
 
-        var header = new DockPanel { Margin = new Thickness(10, 8, 4, 0), Background = Brushes.Transparent, ToolTip = group.Folder };
+        var header = new DockPanel { Margin = new Thickness(18, 8, 12, 0), Background = Brushes.Transparent, ToolTip = group.Folder };
         DockPanel.SetDock(buttons, Dock.Right);
         header.Children.Add(buttons);
         var name = Mono(group.Name, "Muted");
@@ -232,18 +227,15 @@ sealed partial class TerminalPanel
             }
         };
 
-        var hover = new Border { CornerRadius = new CornerRadius(10), Background = Tokens.Brush("HoverLayer"), Opacity = 0 };
+        var hover = new Border { Background = Tokens.Brush("HoverLayer"), Opacity = 0 };
         var face = new Grid();
         face.Children.Add(hover);
-        face.Children.Add(new Border { Padding = new Thickness(10, 8, 10, 8), Child = lines });
+        face.Children.Add(new Border { Padding = new Thickness(18, 8, 18, 8), Child = lines });
 
         var back = new Border
         {
-            CornerRadius = new CornerRadius(10),
             Margin = new Thickness(0, 1, 0, 1),
             Background = selected ? Tokens.Brush("Raised") : Brushes.Transparent,
-            BorderBrush = selected ? Tokens.Brush("InputLine") : Brushes.Transparent,
-            BorderThickness = new Thickness(1),
             Cursor = Cursors.Hand,
             Child = face,
             ContextMenu = RowMenu(row.Id, () => Rename(row, top, name)),
@@ -281,7 +273,7 @@ sealed partial class TerminalPanel
         ((FrameworkElement)kind).HorizontalAlignment = HorizontalAlignment.Center;
         DockPanel.SetDock(kindBox, Dock.Left);
         top.Children.Add(kindBox);
-        var name = Text(row.Name, "TextName", "Ink", FontWeights.Normal);
+        var name = Text(row.Name, "TextBody", "Ink", FontWeights.Normal);
         name.TextTrimming = TextTrimming.CharacterEllipsis;
         if (whole)
         {
@@ -445,26 +437,10 @@ sealed partial class TerminalPanel
 
     private static UIElement Mark(RowState state)
     {
-        var (icon, word, tone) = state switch
-        {
-            RowState.Working => ((UIElement)Dot(filled: true), Strings.TerminalWorking, "Muted"),
-            RowState.Waiting => (Marks.Pause(), Strings.TerminalWaiting, "Caution"),
-            RowState.Done => (SiteIcons.Draw(SiteIcons.Check, 10, "Positive"), Strings.TerminalDone, "Positive"),
-            RowState.Asleep => (Dot(filled: false), Strings.TerminalAsleep, "Muted"),
-            RowState.Stopped => (Marks.Line("M0,0 L8,8 M8,0 L0,8", "Destructive"), Strings.TerminalStopped, "Destructive"),
-            _ => (new Border(), "", "Muted"),
-        };
-
-        var row = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(8, 0, 0, 0) };
-        if (word.Length > 0)
-        {
-            row.Children.Add(icon);
-            var text = Mono(word, tone);
-            text.Margin = new Thickness(6, 0, 0, 0);
-            row.Children.Add(text);
-        }
-
-        return row;
+        var mark = StatusMark.Of(state) ?? new Border();
+        mark.VerticalAlignment = VerticalAlignment.Center;
+        mark.Margin = new Thickness(8, 0, 0, 0);
+        return mark;
     }
 
     /// What the terminal did last, or, for a sleeping session, when it was used.

@@ -15,17 +15,17 @@
     The settings stand in the terminal window on the place of the list and the terminal (D-374): the
     menu on the left with each environment and the sections, the chosen page on the right.
   -->
-  <Grid x:Name="Body" Background="{StaticResource Surface}">
+  <Grid x:Name="Body" Background="{StaticResource Background}" TextElement.FontFamily="{StaticResource Mono}">
     <Grid.ColumnDefinitions>
       <ColumnDefinition x:Name="NavColumn" Width="188" />
       <ColumnDefinition Width="*" />
     </Grid.ColumnDefinitions>
 
-    <DockPanel Margin="8,12,8,10">
-      <TextBlock x:Name="VersionLine" DockPanel.Dock="Bottom" Style="{StaticResource RowNote}" Margin="10,8,0,0" />
+    <DockPanel Margin="0,12,0,10">
+      <TextBlock x:Name="VersionLine" DockPanel.Dock="Bottom" Style="{StaticResource RowNote}" Margin="18,8,18,0" />
       <StackPanel x:Name="Nav" />
     </DockPanel>
-    <Border x:Name="NavLine" Width="1" HorizontalAlignment="Right" Background="{StaticResource Hairline}" />
+    <local:Rule x:Name="NavLine" Orientation="Vertical" HorizontalAlignment="Right" />
 
     <ScrollViewer x:Name="PageScroll" Grid.Column="1" Style="{StaticResource QuietScroll}">
       <ContentControl x:Name="PageHost" Margin="20,18,20,20" Focusable="False" />

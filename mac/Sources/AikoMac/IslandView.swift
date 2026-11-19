@@ -115,8 +115,8 @@ final class IslandView: NSView {
             ? NSRect(x: 0, y: cutFromTheTop, width: body.width, height: max(0, body.height - cutFromTheTop))
             : body
         NSBezierPath(rect: shown).setClip()
-        Theme.nsSurface.setFill()
-        rounded(body, frame.corners).fill()
+        Theme.nsBackground.setFill()
+        NSBezierPath.cutCorners(body, frame.corners).fill()
 
         // No shadow and no room around it, unlike the card: the island is pressed against the edge
         // of the screen. The line on the docked side is pushed off the view, so that side reads
@@ -128,7 +128,7 @@ final class IslandView: NSView {
         let bottom: CGFloat = line.bottom > 0 ? 0.5 : -1
         let inside = NSRect(
             x: left, y: top, width: body.width - left - right, height: body.height - top - bottom)
-        let edging = rounded(inside, frame.corners)
+        let edging = NSBezierPath.cutCorners(inside, frame.corners)
         edging.lineWidth = IslandLayout.line
         Theme.nsHairline.setStroke()
         edging.stroke()
@@ -139,7 +139,7 @@ final class IslandView: NSView {
     }
 
     /// "Waits" with an orange pause, "done" with a green tick, "stopped" with a red cross and "work"
-    /// with a grey dot, as in the list of sessions; each with its number.
+    /// with the ring of the icon set, as StatusMark on Windows; each with its number.
     private func drawMarks(_ frame: IslandFrame) {
         let alpha = CGFloat(frame.marksOpacity)
         guard alpha > 0 else { return }
@@ -154,11 +154,28 @@ final class IslandView: NSView {
             case .stopped:
                 stroke("M0,0 L8,8 M8,0 L0,8", size: NSSize(width: 8, height: 8), in: sign, colour: Theme.nsDestructive, alpha: alpha)
             case .working:
-                Theme.nsMuted.withAlphaComponent(alpha).setFill()
-                NSBezierPath(ovalIn: NSRect(x: sign.midX - 4, y: sign.midY - 4, width: 8, height: 8)).fill()
+                // The ring of the set, stretched to 8 by its own bounds as WorkingSign on Windows:
+                // in its box of 24 it takes only a third.
+                fitted(SiteIcons.scrubber, side: 8, in: sign, colour: Theme.nsInk, alpha: alpha)
             }
             Self.number(mark.count).draw(at: NSPoint(x: spot.number.x, y: spot.number.y), opacity: alpha)
         }
+    }
+
+    /// A filled mark whose own bounds are stretched to a square of side points, centred in the field.
+    private func fitted(_ data: String, side: CGFloat, in field: NSRect, colour: NSColor, alpha: CGFloat) {
+        guard let context = NSGraphicsContext.current?.cgContext else { return }
+        let path = BarMarks.path(data).cgPath
+        let box = path.boundingBox
+        let scale = side / max(box.width, box.height)
+        context.saveGState()
+        context.translateBy(x: field.midX - box.width * scale / 2, y: field.midY - box.height * scale / 2)
+        context.scaleBy(x: scale, y: scale)
+        context.translateBy(x: -box.minX, y: -box.minY)
+        context.addPath(path)
+        context.setFillColor(colour.withAlphaComponent(alpha).cgColor)
+        context.fillPath(using: .evenOdd)
+        context.restoreGState()
     }
 
     /// A mark of the slayumind set, its box of size units centred in the field.
@@ -286,22 +303,6 @@ final class IslandView: NSView {
             faded[.foregroundColor] = Theme.nsInk.withAlphaComponent(opacity)
             (text as NSString).draw(at: point, withAttributes: faded)
         }
-    }
-
-    private func rounded(_ rect: NSRect, _ corners: Corners) -> NSBezierPath {
-        let path = NSBezierPath()
-        let topLeft = NSPoint(x: rect.minX, y: rect.minY)
-        let topRight = NSPoint(x: rect.maxX, y: rect.minY)
-        let bottomRight = NSPoint(x: rect.maxX, y: rect.maxY)
-        let bottomLeft = NSPoint(x: rect.minX, y: rect.maxY)
-
-        path.move(to: NSPoint(x: rect.minX + corners.topLeft, y: rect.minY))
-        path.appendArc(from: topRight, to: bottomRight, radius: corners.topRight)
-        path.appendArc(from: bottomRight, to: bottomLeft, radius: corners.bottomRight)
-        path.appendArc(from: bottomLeft, to: topLeft, radius: corners.bottomLeft)
-        path.appendArc(from: topLeft, to: topRight, radius: corners.topLeft)
-        path.close()
-        return path
     }
 
     // ---- The mouse ----

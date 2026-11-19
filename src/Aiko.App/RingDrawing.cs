@@ -20,11 +20,13 @@ static class RingDrawing
     public static Color Critical => Tokens.Colour("DestructiveColor");
     public static Color Muted => Tokens.Colour("MutedColor");
 
-    public static Color ColourFor(LimitTone tone) => tone switch
+    /// Limits have their own scale, white to violet (D-440). The taskbar may be light, where white
+    /// is lost, so the tray draws the first step grey.
+    public static Color ColourFor(LimitTone tone, bool onDark = true) => tone switch
     {
-        LimitTone.Normal => Normal,
-        LimitTone.Caution => Caution,
-        LimitTone.Critical => Critical,
+        LimitTone.Normal => onDark ? Tokens.Colour("InkColor") : Muted,
+        LimitTone.Caution => Tokens.Colour("LimitSoftColor"),
+        LimitTone.Critical => Tokens.Colour("LimitStrongColor"),
         _ => Muted,
     };
 
@@ -36,7 +38,8 @@ static class RingDrawing
         double radius,
         double thickness,
         int? percent,
-        LimitTone tone)
+        LimitTone tone,
+        bool onDark = true)
     {
         if (percent is null)
         {
@@ -45,7 +48,7 @@ static class RingDrawing
         }
 
         DrawTrack(context, centre, radius, thickness);
-        DrawArc(context, centre, radius, thickness, percent.Value, tone);
+        DrawArc(context, centre, radius, thickness, percent.Value, tone, onDark);
     }
 
     private static void DrawTrack(DrawingContext context, Point centre, double radius, double thickness) =>
@@ -76,7 +79,8 @@ static class RingDrawing
         double radius,
         double thickness,
         int percent,
-        LimitTone tone)
+        LimitTone tone,
+        bool onDark)
     {
         var share = Math.Clamp(percent / 100.0, 0, 1);
         if (share <= 0)
@@ -84,7 +88,7 @@ static class RingDrawing
             return;
         }
 
-        var pen = new Pen(new SolidColorBrush(ColourFor(tone)), thickness)
+        var pen = new Pen(new SolidColorBrush(ColourFor(tone, onDark)), thickness)
         {
             StartLineCap = PenLineCap.Round,
             EndLineCap = PenLineCap.Round,

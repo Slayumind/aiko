@@ -168,51 +168,6 @@ static class Motion
         element.BeginAnimation(UIElement.OpacityProperty, new DoubleAnimation(0, 1, Pop) { EasingFunction = Standard });
     }
 
-    // ---- Motion.Switch: the knob slides and the track changes colour ----
-
-    public const double KnobTravel = 14;
-
-    public static readonly DependencyProperty SwitchProperty = DependencyProperty.RegisterAttached(
-        "Switch", typeof(bool), typeof(Motion), new PropertyMetadata(false, OnSwitchChanged));
-
-    public static bool GetSwitch(DependencyObject element) => (bool)element.GetValue(SwitchProperty);
-
-    public static void SetSwitch(DependencyObject element, bool value) => element.SetValue(SwitchProperty, value);
-
-    private static void OnSwitchChanged(DependencyObject target, DependencyPropertyChangedEventArgs e)
-    {
-        if (target is not System.Windows.Controls.Primitives.ToggleButton toggle || e.NewValue is not true)
-        {
-            return;
-        }
-
-        // The template has already moved the knob and lit the track by the time these run. Only a
-        // switch on screen plays the way there, from where it was.
-        toggle.Checked += (_, _) => PlayFlip(toggle);
-        toggle.Unchecked += (_, _) => PlayFlip(toggle);
-    }
-
-    private static void PlayFlip(System.Windows.Controls.Primitives.ToggleButton toggle)
-    {
-        if (!toggle.IsLoaded || !IsOn
-            || toggle.Template?.FindName("Knob", toggle) is not FrameworkElement knob
-            || toggle.Template.FindName("TrackOn", toggle) is not UIElement trackOn)
-        {
-            return;
-        }
-
-        var on = toggle.IsChecked == true;
-        var shift = knob.RenderTransform as TranslateTransform ?? new TranslateTransform();
-        knob.RenderTransform = shift;
-
-        shift.BeginAnimation(
-            TranslateTransform.XProperty,
-            new DoubleAnimation(on ? -KnobTravel : KnobTravel, 0, Settle) { EasingFunction = Spring });
-        trackOn.BeginAnimation(
-            UIElement.OpacityProperty,
-            new DoubleAnimation(on ? 0 : 1, on ? 1 : 0, Expand) { EasingFunction = Standard });
-    }
-
     private static T Freeze<T>(T freezable)
         where T : Freezable
     {

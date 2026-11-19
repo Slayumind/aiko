@@ -21,9 +21,8 @@
   </PropertyGroup>
 
   <!--
-    Geist and Geist Mono ship inside the app. The site loads them from Google Fonts, but a tray
-    app has no browser, and without the files WPF quietly falls back to another face and the card
-    changes width. OFL.txt is the licence and has to travel with them.
+    Geist Mono ships inside the app. The site loads it from Google Fonts, but a tray app has no
+    browser, and without the files WPF quietly falls back to another face and the widths change. OFL.txt is the licence and has to travel with them.
   -->
   <ItemGroup>
     <Resource Include="Assets\Fonts\*.ttf" />

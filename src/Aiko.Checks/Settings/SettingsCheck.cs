@@ -143,7 +143,7 @@ static class SettingsCheck
         Width = 1040,
         Height = 640,
         WindowStartupLocation = WindowStartupLocation.CenterScreen,
-        Background = Tokens.Brush("Surface"),
+        Background = Tokens.Brush("Background"),
         Topmost = true,
         Content = panel,
     };

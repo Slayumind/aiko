@@ -12,6 +12,47 @@ struct TerminalRulesTests {
         name.flatMap { TerminalActivity(rawValue: $0.prefix(1).lowercased() + $0.dropFirst()) }
     }
 
+    // ---- window-signal ----
+
+    private static func rowState(_ name: String) -> RowState {
+        switch name {
+        case "working": .working
+        case "waiting": .waiting
+        case "done": .done
+        case "read": .read
+        case "asleep": .asleep
+        default: .stopped
+        }
+    }
+
+    private static func tone(_ name: String) -> LimitTone {
+        switch name {
+        case "normal": .normal
+        case "caution": .caution
+        case "critical": .critical
+        default: .unknown
+        }
+    }
+
+    private static func signal(_ name: String) -> WindowSignal {
+        switch name {
+        case "working": .working
+        case "stopped": .stopped
+        case "limitNearEnd": .limitNearEnd
+        case "waiting": .waiting
+        default: .quiet
+        }
+    }
+
+    @Test
+    func everyWindowSignalCaseGivesTheSameSignal() {
+        for row in SpecCases.json("window-signal")["signals"]?.arrayValue ?? [] {
+            let sessions = (row["sessions"]?.arrayValue ?? []).compactMap(\.stringValue).map(Self.rowState)
+            let limit = Self.tone(row["limit"]?.stringValue ?? "")
+            #expect(WindowSignals.of(sessions, limit: limit) == Self.signal(row["signal"]?.stringValue ?? ""))
+        }
+    }
+
     // ---- notices ----
 
     @Test

@@ -45,9 +45,7 @@ struct HeaderStripView: View {
         }
         .frame(height: Self.height)
         .background(Theme.background)
-        .overlay(alignment: .bottom) {
-            Rectangle().fill(Theme.hairline).frame(height: 1)
-        }
+        .overlay(alignment: .bottom) { Rule() }
     }
 
     /// The height of the strip: the active card with its head, room for every row and the
@@ -73,7 +71,8 @@ struct HeaderStripView: View {
 }
 
 /// One card of the header. A quiet card is a button: a soft fill under the pointer, and a click
-/// makes its environment the active one. The active card is not.
+/// makes its environment the active one. The active card lies on CardFill, and its frame has the
+/// colour of the state of the window (D-452).
 private struct HeaderCard: View {
     let item: HeaderColumnItem
     let width: CGFloat
@@ -88,12 +87,12 @@ private struct HeaderCard: View {
         content
             .padding(12)
             .frame(width: width, alignment: .topLeading)
-            .background(
-                RoundedRectangle(cornerRadius: 14)
-                    .fill(active ? Theme.surface : (hovered ? Theme.hoverLayer : Color.clear)))
             .padding(1)
+            .background(active ? Theme.cardFill : (hovered ? Theme.hoverLayer : Color.clear))
+            .hairlineFrame(active ? frameColour : .clear)
+            .animation(Motion.curve(Motion.standard, 0.3), value: signal)
             .scaleEffect(pressed ? Motion.pressedScale : 1)
-            .contentShape(RoundedRectangle(cornerRadius: 14))
+            .contentShape(Rectangle())
             .onHover { inside in
                 withAnimation(Motion.reduceMotion ? nil : .easeOut(duration: 0.12)) { hovered = inside && !active }
             }
@@ -124,7 +123,7 @@ private struct HeaderCard: View {
                 VStack(alignment: .leading, spacing: 0) {
                     if block.rows.isEmpty {
                         Text(block.note)
-                            .font(Theme.sans(Theme.textSmall))
+                            .font(Theme.mono(Theme.textSmall))
                             .foregroundStyle(Theme.muted)
                             .fixedSize(horizontal: false, vertical: true)
                             .padding(.top, 4)
@@ -143,7 +142,7 @@ private struct HeaderCard: View {
         }
     }
 
-    /// Ring, name, "N waiting", and at the right end "working now" when the environment works, or
+    /// Ring and name, and at the right end the state of the environment as a sign and a word, or
     /// "Sign in" when its account is not connected.
     private var head: some View {
         HStack(spacing: 0) {
@@ -151,33 +150,18 @@ private struct HeaderCard: View {
                 .opacity(active ? 1 : 0.6)
                 .padding(.trailing, 8)
             Text(item.column.environment)
-                .font(Theme.sans(Theme.textNumber, weight: active ? .medium : .regular))
+                .font(Theme.mono(Theme.textBody, weight: active ? .medium : .regular))
                 .foregroundStyle(active ? Theme.ink : Theme.muted)
                 .lineLimit(1)
                 .truncationMode(.tail)
-            if active && item.column.waiting > 0 {
-                Text(HeaderStripView.waitingWords(item.column.waiting))
-                    .font(Theme.sans(Theme.textSmall))
-                    .foregroundStyle(Theme.caution)
-                    .padding(.leading, 8)
-            }
             Spacer(minLength: 0)
             if let block = item.block, active {
-                if block.showsHalo {
-                    HStack(spacing: 4) {
-                        ZStack {
-                            Circle().fill(Theme.positive.opacity(0.18)).frame(width: 12, height: 12)
-                            Circle().fill(Theme.positive).frame(width: 6, height: 6)
-                        }
-                        Text(block.state)
-                            .font(Theme.sans(Theme.textTiny))
-                            .foregroundStyle(block.stateIsBright ? Theme.ink : Theme.muted)
-                    }
-                    .padding(.leading, 12)
+                if let mark = headState(block) {
+                    mark.padding(.leading, 12)
                 }
                 if block.needsSignIn {
                     Text(Strings.signIn)
-                        .font(Theme.sans(Theme.textTiny))
+                        .font(Theme.mono(Theme.textTiny))
                         .foregroundStyle(Theme.ink)
                         .underline()
                         .tip(Strings.stateSignInNeeded)
@@ -189,6 +173,38 @@ private struct HeaderCard: View {
         .frame(height: 20)
     }
 
+    /// The state of the chosen environment, as HeadState on Windows: a question first, then a limit
+    /// near its end, a stopped session, then whether it works. It says in words what the frame of
+    /// the card shows in colour.
+    private func headState(_ block: EnvironmentBlock) -> StatusMark? {
+        switch signal {
+        case .waiting: return StatusMark(look: .waiting)
+        case .limitNearEnd:
+            return StatusMark(look: .limitNearEnd, word: Strings.format(Strings.terminalLimitMark, item.column.fiveHour ?? 0))
+        case .stopped: return StatusMark(look: .stopped)
+        case .working where !block.showsHalo: return StatusMark(look: .working)
+        default: break
+        }
+        guard block.showsHalo else { return nil }
+        let working = block.stateDot == .filled && block.stateIsBright
+        return StatusMark(look: working ? .working : .asleep, word: block.state)
+    }
+
+    /// What the window says about this environment, from its sessions and its limit.
+    private var signal: WindowSignal {
+        WindowSignals.of(state.groups.flatMap { $0.rows.map(\.state) }, limit: tone)
+    }
+
+    private var frameColour: Color {
+        switch signal {
+        case .working: return Theme.ink
+        case .waiting: return Theme.caution
+        case .stopped: return Theme.destructive
+        case .limitNearEnd: return Theme.limitStrong
+        case .quiet: return Theme.hairline
+        }
+    }
+
     /// "Max 5x · Aiko · direct mode off · updated 12:04": who this environment is, on one line.
     private func profile(_ block: EnvironmentBlock) -> some View {
         var parts: [String] = []
@@ -197,8 +213,8 @@ private struct HeaderCard: View {
         parts.append(item.direct ? Strings.terminalDirectOn : Strings.terminalDirectOff)
         if !block.rows.isEmpty { parts.append(block.updated) }
 
-        return Text(parts.joined(separator: "  ·  "))
-            .font(Theme.sans(Theme.textSmall))
+        return Text(parts.joined(separator: " · "))
+            .font(Theme.mono(Theme.textSmall))
             .foregroundStyle(Theme.muted)
             .lineLimit(1)
             .truncationMode(.tail)
@@ -217,7 +233,7 @@ private struct HeaderCard: View {
             .padding(.top, 8)
             if item.column.waiting > 0 {
                 Text(HeaderStripView.waitingWords(item.column.waiting))
-                    .font(Theme.sans(Theme.textSmall))
+                    .font(Theme.mono(Theme.textSmall))
                     .foregroundStyle(Theme.caution)
                     .padding(.top, 8)
             }
@@ -239,13 +255,13 @@ private struct LimitLine: View {
     var body: some View {
         GridRow {
             Text(compact ? row.shortName : row.name)
-                .font(Theme.sans(Theme.textSmall))
+                .font(Theme.mono(Theme.textSmall))
                 .foregroundStyle(Theme.muted)
                 .lineLimit(1)
                 .padding(.trailing, 12)
             // The bar grows from the left edge when the header opens. The height of the line lives
             // on a cell: a modifier on the row itself would make it one cell of the grid.
-            Bar(fill: grown ? row.fill * 100 : 0, height: 4, tone: Theme.tone(row.tone), toneOpacity: 1)
+            LimitBar(value: grown ? row.fill : 0, fill: Theme.tone(row.tone))
                 .frame(height: HeaderStripView.rowHeight)
                 .padding(.trailing, 8)
                 .onAppear {
@@ -257,7 +273,7 @@ private struct LimitLine: View {
                 }
             Text(row.percent)
                 .font(Theme.mono(Theme.textTiny))
-                .foregroundStyle(Theme.ink)
+                .foregroundStyle(Theme.tone(row.tone))
                 .frame(width: 40, alignment: .trailing)
             // The time has a place of its own and is never cut: a longer word widens the place, as
             // on Windows, and the bar gives way.
@@ -270,7 +286,7 @@ private struct LimitLine: View {
             // Only the word of a tone ("running low"), in its colour; a guess about the pace is the
             // card's detail.
             Text(row.paceTakesTone ? row.pace : "")
-                .font(Theme.sans(Theme.textSmall))
+                .font(Theme.mono(Theme.textSmall))
                 .foregroundStyle(Theme.tone(row.tone))
                 .fixedSize()
                 .frame(minWidth: 72, alignment: .leading)
@@ -290,7 +306,7 @@ private struct MiniLine: View {
                 .font(Theme.mono(Theme.textTiny))
                 .foregroundStyle(Theme.muted)
                 .padding(.trailing, 8)
-            Bar(fill: Double(min(max(percent ?? 0, 0), 100)), height: 2, tone: Theme.muted, toneOpacity: 0.5)
+            LimitBar(value: Double(min(max(percent ?? 0, 0), 100)) / 100, fill: Theme.muted, trackHeight: 3, height: 8)
                 .frame(height: 16)
                 .padding(.trailing, 4)
             Text(percent.map { "\($0)%" } ?? "—")
@@ -298,24 +314,5 @@ private struct MiniLine: View {
                 .foregroundStyle(Theme.muted)
                 .frame(width: 32, alignment: .trailing)
         }
-    }
-}
-
-/// A bar: a grey track and the used part from the left, fill from 0 to 100.
-private struct Bar: View {
-    let fill: Double
-    let height: CGFloat
-    let tone: Color
-    let toneOpacity: Double
-
-    var body: some View {
-        GeometryReader { box in
-            ZStack(alignment: .leading) {
-                Capsule().fill(Theme.raised)
-                Capsule().fill(tone).opacity(toneOpacity)
-                    .frame(width: box.size.width * CGFloat(fill / 100))
-            }
-        }
-        .frame(height: height)
     }
 }

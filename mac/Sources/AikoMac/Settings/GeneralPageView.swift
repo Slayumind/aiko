@@ -481,7 +481,7 @@ struct GeneralPageView: View {
                     Text(Strings.format(
                         Strings.deleteLineMac,
                         state.environments.environments.map(\.command).joined(separator: ", ")))
-                        .font(Theme.sans(Theme.textSmall))
+                        .font(Theme.mono(Theme.textSmall))
                         .foregroundStyle(Theme.ink)
                         .fixedSize(horizontal: false, vertical: true)
 
@@ -519,11 +519,7 @@ struct GeneralPageView: View {
                     }
                 }
                 .padding(12)
-                .background(Theme.destructive.opacity(0.06))
-                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .strokeBorder(Theme.destructive.opacity(0.22), lineWidth: 1))
+                .zoneBox(.danger)
             }
         }
     }
@@ -549,7 +545,7 @@ struct GeneralPageView: View {
                     Text(Strings.format(
                         Strings.restartLineMac,
                         state.environments.environments.map(\.command).joined(separator: ", ")))
-                        .font(Theme.sans(Theme.textSmall))
+                        .font(Theme.mono(Theme.textSmall))
                         .foregroundStyle(Theme.ink)
                         .fixedSize(horizontal: false, vertical: true)
 
@@ -577,11 +573,7 @@ struct GeneralPageView: View {
                     .padding(.top, 12)
                 }
                 .padding(12)
-                .background(Theme.destructive.opacity(0.06))
-                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .strokeBorder(Theme.destructive.opacity(0.22), lineWidth: 1))
+                .zoneBox(.danger)
             }
         }
     }

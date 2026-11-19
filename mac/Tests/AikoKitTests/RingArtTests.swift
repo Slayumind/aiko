@@ -14,6 +14,19 @@ struct RingArtTests {
         #expect(RingArt.colour(for: tone) == expected)
     }
 
+    /// Limits have their own scale, white to violet (D-440), as RingDrawing.ColourFor on Windows.
+    /// The menu bar may be light, where white is lost, so the icon draws the first step grey.
+    @Test(arguments: [
+        (LimitTone.normal, true, Rgba(0xFA, 0xFA, 0xFA)),
+        (LimitTone.normal, false, Rgba(0xA1, 0xA1, 0xA1)),
+        (LimitTone.caution, true, Rgba(0xC9, 0xB6, 0xFF)),
+        (LimitTone.critical, false, Rgba(0x9D, 0x7B, 0xFF)),
+        (LimitTone.unknown, true, Rgba(0xA1, 0xA1, 0xA1)),
+    ])
+    func aLimitGoesFromWhiteToViolet(tone: LimitTone, onDark: Bool, expected: Rgba) {
+        #expect(RingArt.limitColour(for: tone, onDark: onDark) == expected)
+    }
+
     @Test
     func theTrackAndTheWaitingRingAreTheSameSeeThroughGrey() {
         #expect(RingArt.track.red == 0x9A)

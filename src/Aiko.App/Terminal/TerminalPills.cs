@@ -12,7 +12,6 @@ namespace Aiko.App;
 [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763")]
 sealed class TerminalPills
 {
-    private const double PillHeight = 28;
     private static readonly Duration Fade = new(TimeSpan.FromMilliseconds(240));
 
     /// The background slides to the chosen pill, and the names change their colour, in this time.
@@ -22,7 +21,7 @@ sealed class TerminalPills
     /// every event; a new name takes the brush that is already moving, so the fade does not jump.
     private readonly Dictionary<string, SolidColorBrush> _fading = [];
 
-    private readonly StackPanel _row = new() { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
+    private readonly StackPanel _row = new() { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Stretch };
     private readonly TranslateTransform _backShift = new();
     private readonly Border _back;
     private readonly TranslateTransform _rootShift = new();
@@ -34,11 +33,11 @@ sealed class TerminalPills
     {
         _back = new Border
         {
-            Height = PillHeight,
-            CornerRadius = new CornerRadius(PillHeight / 2),
+            // From the top edge of the window down to the line under the title bar.
+            Margin = new Thickness(0, 0, 0, 1),
             Background = Tokens.Brush("Raised"),
             HorizontalAlignment = HorizontalAlignment.Left,
-            VerticalAlignment = VerticalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Stretch,
             RenderTransform = _backShift,
             Opacity = 0,
         };
@@ -48,13 +47,22 @@ sealed class TerminalPills
         Root.ClipToBounds = true;
 
         // The numbers in the pills change their widths: the background follows, without a slide.
-        _row.SizeChanged += (_, _) => Place(_selected, slide: false);
+        _row.SizeChanged += (_, _) =>
+        {
+            Place(_selected, slide: false);
+
+            // A mark that unfolds can use up the room: the pills give way as it grows.
+            if (_row.ActualWidth > Root.MaxWidth)
+            {
+                Refit?.Invoke();
+            }
+        };
     }
 
     private int _selected = -1;
     private IReadOnlyList<Pill> _shown = [];
 
-    public Grid Root { get; } = new() { VerticalAlignment = VerticalAlignment.Center };
+    public Grid Root { get; } = new() { VerticalAlignment = VerticalAlignment.Stretch };
 
     /// Asked after the pills are drawn anew, so the panel can say how much room they have.
     public Action? Refit { get; set; }
@@ -175,6 +183,9 @@ sealed class TerminalPills
             return;
         }
 
+        // Whatever the text measures, the pills never reach the buttons after them.
+        Root.MaxWidth = room;
+
         var label = _selected >= 0 && _selected < _shown.Count ? _shown[_selected].Label : null;
         if (label is not null)
         {
@@ -242,7 +253,13 @@ sealed class TerminalPills
 
         _sliding = true;
         var move = Motion.To(x, Slide, Motion.Standard);
-        move.Completed += (_, _) => _sliding = false;
+        move.Completed += (_, _) =>
+        {
+            _sliding = false;
+
+            // The pill may have changed its width while the background was on its way.
+            Place(_selected, slide: false);
+        };
         _backShift.BeginAnimation(TranslateTransform.XProperty, move);
         _back.BeginAnimation(FrameworkElement.WidthProperty, Motion.To(width, Slide, Motion.Standard));
     }

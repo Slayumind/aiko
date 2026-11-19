@@ -48,7 +48,7 @@ struct MemoryBlockView: View {
 
             // While a new fact is being typed the button would open what is already open.
             if model.adding == nil {
-                FlatButton(title: Strings.memoryAdd, symbol: "plus") { model.startAdding() }
+                FlatButton(title: Strings.memoryAdd, plus: true) { model.startAdding() }
             }
         }
     }
@@ -90,9 +90,8 @@ struct MemoryBlockView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Theme.background)
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
+            Rectangle()
                 .strokeBorder(Theme.hairline, lineWidth: 1))
     }
 
@@ -111,7 +110,7 @@ struct MemoryBlockView: View {
         let count = "\(section.count)/\(section.quota)"
         let row = HStack(spacing: 0) {
             Text(title)
-                .font(Theme.sans(Theme.textName))
+                .font(Theme.mono(Theme.textBody))
                 .foregroundStyle(Theme.ink)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -141,8 +140,8 @@ struct MemoryBlockView: View {
 
         return GeometryReader { box in
             ZStack(alignment: .leading) {
-                Capsule().fill(Theme.raised)
-                Capsule().fill(Theme.muted).frame(width: box.size.width * filled)
+                Rectangle().fill(Theme.raised)
+                Rectangle().fill(Theme.muted).frame(width: box.size.width * filled)
             }
         }
     }
@@ -153,7 +152,7 @@ struct MemoryBlockView: View {
         return HStack(alignment: .top, spacing: 0) {
             VStack(alignment: .leading, spacing: 0) {
                 Text(fact.text)
-                    .font(Theme.sans(Theme.textName))
+                    .font(Theme.mono(Theme.textBody))
                     .foregroundStyle(Theme.ink)
                     .fixedSize(horizontal: false, vertical: true)
 
@@ -185,13 +184,13 @@ struct MemoryBlockView: View {
             HStack(spacing: 0) {
                 // A closed lock is a pinned fact, an open one is the rest (D-278).
                 MemoryIconButton(
-                    symbol: fact.pinned ? "lock" : "lock.open",
+                    icon: fact.pinned ? SiteIcons.lock : SiteIcons.unlock,
                     name: fact.pinned ? Strings.memoryUnpin : Strings.memoryPin,
                     colour: fact.pinned ? Theme.ink : Theme.muted) { model.pin(fact) }
-                MemoryIconButton(symbol: "pencil", name: Strings.memoryEdit, colour: Theme.muted) {
+                MemoryIconButton(icon: SiteIcons.pencil, name: Strings.memoryEdit, colour: Theme.muted) {
                     model.startEditing(fact)
                 }
-                MemoryIconButton(symbol: "trash", name: Strings.remove, colour: Theme.muted) {
+                MemoryIconButton(icon: SiteIcons.trash, name: Strings.remove, colour: Theme.muted) {
                     model.remove(fact)
                 }
             }
@@ -264,7 +263,7 @@ struct MemoryBlockView: View {
     private func eraseQuestion(_ page: MemoryPage) -> some View {
         HStack(spacing: 0) {
             Text(Strings.format(Strings.memoryEraseAsk, page.count))
-                .font(Theme.sans(Theme.textSmall))
+                .font(Theme.mono(Theme.textSmall))
                 .foregroundStyle(Theme.ink)
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -280,7 +279,7 @@ struct MemoryBlockView: View {
         .padding(.trailing, 12)
         .padding(.vertical, 12)
         .overlay(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
+            Rectangle()
                 .strokeBorder(Theme.hairline, lineWidth: 1))
         .padding(.top, 10)
     }
@@ -290,7 +289,7 @@ struct MemoryBlockView: View {
     /// A line that asks for attention: a bar on the left, and the words in full colour.
     private func warning(_ text: String) -> some View {
         Text(text)
-            .font(Theme.sans(Theme.textSmall))
+            .font(Theme.mono(Theme.textSmall))
             .foregroundStyle(Theme.ink)
             .fixedSize(horizontal: false, vertical: true)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -381,24 +380,23 @@ private struct MemoryForm: View {
     private func field(_ value: Binding<String>, _ placeholder: String, _ which: Field) -> some View {
         TextField("", text: value, prompt: Text(placeholder).foregroundStyle(Theme.muted), axis: .vertical)
             .textFieldStyle(.plain)
-            .font(Theme.sans(Theme.textName))
+            .font(Theme.mono(Theme.textBody))
             .foregroundStyle(Theme.ink)
             .focused($focus, equals: which)
             .accessibilityLabel(placeholder)
             .padding(.horizontal, 10)
             .padding(.vertical, 6)
             .background(Theme.raised)
-            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
             .overlay(
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .strokeBorder(focus == which ? Theme.inputLine : Theme.hairline, lineWidth: 1))
+                Rectangle()
+                    .strokeBorder(focus == which ? Theme.hairline : Theme.hairline, lineWidth: 1))
     }
 }
 
 /// Pin, edit, remove: a small picture with its name for a pointer that waits and for a screen
 /// reader.
 private struct MemoryIconButton: View {
-    let symbol: String
+    let icon: String
     let name: String
     let colour: Color
     let press: () -> Void
@@ -407,12 +405,9 @@ private struct MemoryIconButton: View {
 
     var body: some View {
         Button(action: press) {
-            Image(systemName: symbol)
-                .font(.system(size: 12))
-                .foregroundStyle(colour)
+            FilledMark(data: icon, size: 13, tone: colour)
                 .frame(width: 26, height: 26)
                 .background(hovering ? Theme.raised : .clear)
-                .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)

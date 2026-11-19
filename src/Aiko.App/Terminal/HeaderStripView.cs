@@ -4,7 +4,9 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using Aiko.Core;
+using Aiko.Core.Terminal;
 
 namespace Aiko.App;
 
@@ -54,6 +56,8 @@ sealed class HeaderStripView
     private static readonly Duration ContentIn = new(TimeSpan.FromMilliseconds(160));
     private static readonly TimeSpan BarsAfterOpen = TimeSpan.FromMilliseconds(120);
     private static readonly Duration BarGrow = new(TimeSpan.FromMilliseconds(480));
+    private static readonly TimeSpan FramePause = TimeSpan.FromMilliseconds(400);
+    private static readonly Duration FrameFade = new(TimeSpan.FromMilliseconds(300));
 
     private readonly Action<string> _pick;
     private readonly Action<string> _signIn;
@@ -72,7 +76,8 @@ sealed class HeaderStripView
     /// The row of cards with the padding of the strip around it.
     public FrameworkElement Root { get; }
 
-    public void Show(HeaderView header, HeaderMotion motion)
+    /// signal is the state of the chosen environment, percent its limit: its card shows them (D-452).
+    public void Show(HeaderView header, HeaderMotion motion, WindowSignal signal, int? percent)
     {
         if (motion == HeaderMotion.Open)
         {
@@ -96,7 +101,7 @@ sealed class HeaderStripView
 
             // The bars of the active card grow to their values when the card comes in.
             TimeSpan? grow = !animate ? null : motion == HeaderMotion.Open ? BarsAfterOpen : swaps ? ContentInAt : null;
-            var content = column.Column.Active ? Full(column, grow, _signIn) : Quiet(column);
+            var content = column.Column.Active ? Full(column, grow, _signIn, signal, percent) : Quiet(column);
             if (swaps)
             {
                 card.CrossFade(content, column.Column.Active);
@@ -106,6 +111,7 @@ sealed class HeaderStripView
                 card.Put(content, column.Column.Active);
             }
 
+            card.ShowFrame(column.Column.Active ? signal : null);
             order.Add(card);
         }
 
@@ -165,12 +171,12 @@ sealed class HeaderStripView
 
     /// The active card: the head, one line per limit, and the profile. grow is when its bars start
     /// to grow from zero, or null when they stand at their values.
-    private static FrameworkElement Full(HeaderColumnView column, TimeSpan? grow, Action<string> signIn)
+    private static FrameworkElement Full(HeaderColumnView column, TimeSpan? grow, Action<string> signIn, WindowSignal signal, int? percent)
     {
         var stack = new StackPanel();
         // The names, resets and tone words of the rows share their widths, so the bars line up.
         Grid.SetIsSharedSizeScope(stack, true);
-        stack.Children.Add(Head(column, column.Block, signIn));
+        stack.Children.Add(Head(column, column.Block, signIn, signal, percent));
 
         if (column.Block is not { } block)
         {
@@ -203,7 +209,7 @@ sealed class HeaderStripView
     {
         var stack = new StackPanel();
         Grid.SetIsSharedSizeScope(stack, true);
-        stack.Children.Add(Head(column, null, null));
+        stack.Children.Add(Head(column, null, null, WindowSignal.Quiet, null));
 
         var rows = new StackPanel { Margin = new Thickness(0, 8, 0, 0) };
         rows.Children.Add(MiniRow(Strings.CardShortSession, column.Column.FiveHour));
@@ -221,7 +227,7 @@ sealed class HeaderStripView
     }
 
     /// Ring, name, "N waiting", and at the right end "working now" when the environment works.
-    private static FrameworkElement Head(HeaderColumnView column, EnvironmentBlock? block, Action<string>? signIn)
+    private static FrameworkElement Head(HeaderColumnView column, EnvironmentBlock? block, Action<string>? signIn, WindowSignal signal, int? percent)
     {
         var quiet = block is null;
         var head = new DockPanel { Height = 20, LastChildFill = true };
@@ -245,16 +251,10 @@ sealed class HeaderStripView
             head.Children.Add(link);
         }
 
-        if (block is { ShowsHalo: true })
+        if (block is not null && HeadState(block, signal, percent) is { } state)
         {
-            var state = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(12, 0, 0, 0) };
-            var dot = new Grid { Width = 12, Height = 12, Margin = new Thickness(0, 0, 4, 0), VerticalAlignment = VerticalAlignment.Center };
-            dot.Children.Add(new Ellipse { Width = 12, Height = 12, Fill = Tokens.Brush("Positive"), Opacity = 0.18 });
-            dot.Children.Add(new Ellipse { Width = 6, Height = 6, Fill = block.StateDot == StateDot.Filled ? Tokens.Brush("Positive") : Brushes.Transparent, Stroke = block.StateDot == StateDot.Filled ? Brushes.Transparent : Tokens.Brush("Muted"), StrokeThickness = 1.5 });
-            state.Children.Add(dot);
-            var words = Widgets.Text(block.State, "TextTiny", "Ink", FontWeights.Normal);
-            words.Foreground = Tokens.Brush(block.StateIsBright ? "Ink" : "Muted");
-            state.Children.Add(words);
+            state.Margin = new Thickness(12, 0, 0, 0);
+            state.VerticalAlignment = VerticalAlignment.Center;
             DockPanel.SetDock(state, Dock.Right);
             head.Children.Add(state);
         }
@@ -264,19 +264,34 @@ sealed class HeaderStripView
         ring.Margin = new Thickness(0, 0, 8, 0);
         left.Children.Add(ring);
 
-        var name = Widgets.Text(column.Column.Environment, "TextNumber", quiet ? "Muted" : "Ink", quiet ? FontWeights.Normal : FontWeights.Medium);
+        var name = Widgets.Text(column.Column.Environment, "TextBody", quiet ? "Muted" : "Ink", quiet ? FontWeights.Normal : FontWeights.Medium);
         name.TextTrimming = TextTrimming.CharacterEllipsis;
         left.Children.Add(name);
 
-        if (!quiet && column.Column.Waiting > 0)
-        {
-            var waiting = Widgets.Text(WaitingWords(column.Column.Waiting), "TextSmall", "Caution", FontWeights.Normal);
-            waiting.Margin = new Thickness(8, 0, 0, 0);
-            left.Children.Add(waiting);
-        }
-
         head.Children.Add(left);
         return head;
+    }
+
+    /// The state of the chosen environment, as a sign and a word: a question first, then a limit
+    /// near its end, a stopped session, then whether it works. It says in words what the frame of
+    /// the card shows in colour (D-452).
+    private static FrameworkElement? HeadState(EnvironmentBlock block, WindowSignal signal, int? percent)
+    {
+        switch (signal)
+        {
+            case WindowSignal.Waiting:
+                return StatusMark.Create(StatusLook.Waiting, Strings.TerminalWaiting);
+            case WindowSignal.LimitNearEnd:
+                return StatusMark.Create(StatusLook.LimitNearEnd, string.Format(CultureInfo.CurrentCulture, Strings.TerminalLimitMark, percent ?? 0));
+            case WindowSignal.Stopped:
+                return StatusMark.Of(RowState.Stopped);
+            case WindowSignal.Working when !block.ShowsHalo:
+                return StatusMark.Of(RowState.Working);
+        }
+
+        return block.ShowsHalo
+            ? StatusMark.Create(block.StateDot == StateDot.Filled && block.StateIsBright ? StatusLook.Working : StatusLook.Asleep, block.State)
+            : null;
     }
 
     /// "Session · 5 hours ━━━━━━──── 42%  1h 6m  running low": one line of 24 px per limit.
@@ -296,12 +311,13 @@ sealed class HeaderStripView
         name.Margin = new Thickness(0, 0, 12, 0);
         grid.Children.Add(name);
 
-        var track = Track(new GridLength(row.Fill, GridUnitType.Star), new GridLength(100 - row.Fill, GridUnitType.Star), 4, Tokens.ToneBrush(row.Tone), 1, grow);
+        var track = Bar(row.Fill, Tokens.ToneBrush(row.Tone), grow);
         track.Margin = new Thickness(0, 0, 8, 0);
         Grid.SetColumn(track, 1);
         grid.Children.Add(track);
 
         var percent = Widgets.Mono(row.Percent, "Ink");
+        percent.Foreground = Tokens.ToneBrush(row.Tone);
         percent.HorizontalAlignment = HorizontalAlignment.Right;
         Grid.SetColumn(percent, 2);
         grid.Children.Add(percent);
@@ -338,7 +354,7 @@ sealed class HeaderStripView
         grid.Children.Add(name);
 
         var used = Math.Clamp(percent ?? 0, 0, 100);
-        var track = Track(new GridLength(used, GridUnitType.Star), new GridLength(100 - used, GridUnitType.Star), 2, Tokens.Brush("Muted"), 0.5);
+        var track = new LimitBar { Value = used / 100.0, Fill = Tokens.Brush("Muted"), Height = 8, TrackHeight = 3, VerticalAlignment = VerticalAlignment.Center };
         track.Margin = new Thickness(0, 0, 4, 0);
         Grid.SetColumn(track, 1);
         grid.Children.Add(track);
@@ -350,28 +366,18 @@ sealed class HeaderStripView
         return grid;
     }
 
-    /// A bar: a grey track and the used part in two star columns, so the fill follows the
-    /// percentage without any measuring in code. grow, when set, is when the used part starts to
-    /// grow from the left edge to its value; a scale, so the layout stays still.
-    private static FrameworkElement Track(GridLength fill, GridLength rest, double height, Brush tone, double toneOpacity, TimeSpan? grow = null)
+    /// A bar of a limit. grow, when set, is when it starts to fill from the left edge to its value.
+    private static LimitBar Bar(int percent, Brush tone, TimeSpan? grow)
     {
-        var track = new Grid { Height = height, VerticalAlignment = VerticalAlignment.Center };
-        track.ColumnDefinitions.Add(new ColumnDefinition { Width = fill });
-        track.ColumnDefinitions.Add(new ColumnDefinition { Width = rest });
-        var back = new Border { CornerRadius = new CornerRadius(height / 2), Background = Tokens.Brush("Raised") };
-        Grid.SetColumnSpan(back, 2);
-        track.Children.Add(back);
-        var used = new Border { CornerRadius = new CornerRadius(height / 2), Background = tone, Opacity = toneOpacity };
-        if (grow is { } after && Motion.IsOn)
+        var value = percent / 100.0;
+        var grows = grow is not null && Motion.IsOn;
+        var bar = new LimitBar { Value = grows ? 0 : value, Fill = tone, VerticalAlignment = VerticalAlignment.Center };
+        if (grows)
         {
-            var scale = new ScaleTransform(0, 1);
-            used.RenderTransformOrigin = new Point(0, 0.5);
-            used.RenderTransform = scale;
-            scale.BeginAnimation(ScaleTransform.ScaleXProperty, new DoubleAnimation(0, 1, BarGrow) { BeginTime = after, EasingFunction = Motion.Standard });
+            bar.BeginAnimation(LimitBar.ValueProperty, new DoubleAnimation(value, BarGrow) { BeginTime = grow, EasingFunction = Motion.Standard });
         }
 
-        track.Children.Add(used);
-        return track;
+        return bar;
     }
 
     /// "Max 5x · Aiko · direct mode off · updated at 12:04": who this environment is, on one line, with its name in Aiko
@@ -393,7 +399,7 @@ sealed class HeaderStripView
             parts.Add(block.Updated);
         }
 
-        var line = Widgets.Text(string.Join("  ·  ", parts), "TextSmall", "Muted", FontWeights.Normal);
+        var line = Widgets.Text(string.Join(" · ", parts), "TextSmall", "Muted", FontWeights.Normal);
         line.Margin = new Thickness(0, 8, 0, 0);
         line.TextTrimming = TextTrimming.CharacterEllipsis;
         return line;
@@ -402,12 +408,12 @@ sealed class HeaderStripView
     /// The place of the tone word: the word of "running low" in the current language, and the gap
     /// before it.
     private static double ToneReserve() =>
-        Math.Ceiling(TextWidth(Strings.CardToneCaution, Tokens.Get<FontFamily>("Sans"), Tokens.Get<double>("TextSmall"))) + 8;
+        Math.Ceiling(TextWidth(Strings.CardToneCaution, Tokens.Mono, Tokens.Get<double>("TextSmall"))) + 8;
 
     /// The place of the countdown: the longest time it can show, and the gap before it.
     private static double CountdownReserve()
     {
-        var family = Tokens.Get<FontFamily>("Mono");
+        var family = Tokens.Mono;
         var size = Tokens.Get<double>("TextTiny");
         var longest = new[]
         {
@@ -437,7 +443,10 @@ sealed class HeaderStripView
     private sealed class Card
     {
         private readonly SolidColorBrush _hover = new(Colors.Transparent);
-        private readonly CardBody _body = new() { Margin = new Thickness(CardPadding), ClipToBounds = true };
+        private readonly SolidColorBrush _frame = new(Colors.Transparent);
+        private readonly CardBody _body = new() { Margin = new Thickness(CardPadding + 1), ClipToBounds = true };
+        private DispatcherTimer? _framePause;
+        private Color _frameColour = Colors.Transparent;
         private readonly TranslateTransform _rise = new();
         private readonly ScaleTransform _press = new();
 
@@ -452,18 +461,15 @@ sealed class HeaderStripView
             _body.Children.Add(_current);
             _body.Children.Add(_leaving);
             var face = new Grid();
-            face.Children.Add(new Border { CornerRadius = new CornerRadius(13), Background = _hover });
+            face.Children.Add(new Border { Background = _hover });
             face.Children.Add(_body);
+            face.Children.Add(new PixelOutline { Line = _frame });
 
-            // The cards are the segments of one switch, as the segmented buttons of Aiko are: the
-            // active one lies on a soft fill, a quiet one has none and lights up under the pointer.
-            // Framed and filled both, the cards looked cramped over the grey body (D-392, D-393).
+            // The cards are the segments of one switch: the active one lies on a soft fill and has
+            // the frame of its state, a quiet one has neither and lights up under the pointer.
             Root = new Border
             {
-                CornerRadius = new CornerRadius(14),
                 Background = Brushes.Transparent,
-                BorderBrush = Brushes.Transparent,
-                BorderThickness = new Thickness(1),
                 Child = face,
                 RenderTransformOrigin = new Point(0.5, 0.5),
                 RenderTransform = new TransformGroup { Children = { _press, _rise } },
@@ -559,6 +565,59 @@ sealed class HeaderStripView
             Role(active);
         }
 
+        /// The frame of the card: the colour of the state, or none on a quiet card. A question or a
+        /// limit shows at once. Work starts and ends between the steps of an agent, so the other
+        /// colours wait a moment and the frame does not blink.
+        public void ShowFrame(WindowSignal? signal)
+        {
+            var colour = signal is { } state ? Tokens.Colour(FrameColour(state)) : Colors.Transparent;
+            if (colour == _frameColour)
+            {
+                return;
+            }
+
+            var roleChanged = _frameColour == Colors.Transparent || colour == Colors.Transparent;
+            _frameColour = colour;
+            _framePause?.Stop();
+            _framePause = null;
+            if (roleChanged || signal is WindowSignal.Waiting or WindowSignal.LimitNearEnd || !Motion.IsOn)
+            {
+                FadeFrame(colour);
+                return;
+            }
+
+            var pause = new DispatcherTimer { Interval = FramePause };
+            pause.Tick += (_, _) =>
+            {
+                pause.Stop();
+                _framePause = null;
+                FadeFrame(colour);
+            };
+            _framePause = pause;
+            pause.Start();
+        }
+
+        private void FadeFrame(Color colour)
+        {
+            if (!Motion.IsOn)
+            {
+                _frame.BeginAnimation(SolidColorBrush.ColorProperty, null);
+                _frame.Color = colour;
+                return;
+            }
+
+            _frame.BeginAnimation(SolidColorBrush.ColorProperty, new ColorAnimation(colour, FrameFade) { EasingFunction = Motion.Standard });
+        }
+
+        private static string FrameColour(WindowSignal signal) => signal switch
+        {
+            WindowSignal.Working => "InkColor",
+            WindowSignal.Waiting => "CautionColor",
+            WindowSignal.Stopped => "DestructiveColor",
+            WindowSignal.LimitNearEnd => "LimitStrongColor",
+            _ => "HairlineColor",
+        };
+
         /// Fades in and rises 4 px when the header opens.
         public void Rise(TimeSpan after)
         {
@@ -580,7 +639,7 @@ sealed class HeaderStripView
             Root.Cursor = active ? null : System.Windows.Input.Cursors.Hand;
             Root.ToolTip = active ? null : Environment;
             Panel.SetZIndex(Root, active ? 1 : 0);
-            Root.Background = active ? Tokens.Brush("Surface") : Brushes.Transparent;
+            Root.Background = active ? Tokens.Brush("CardFill") : Brushes.Transparent;
             if (active)
             {
                 _hover.BeginAnimation(SolidColorBrush.ColorProperty, null);
@@ -801,7 +860,7 @@ sealed class LimitWindowName : TextBlock
         _long = longName;
         _short = shortName;
         Text = longName;
-        FontFamily = Tokens.Get<FontFamily>("Sans");
+        FontFamily = Tokens.Mono;
         FontSize = Tokens.Get<double>("TextSmall");
         Foreground = Tokens.Brush("Muted");
         VerticalAlignment = VerticalAlignment.Center;

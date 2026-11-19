@@ -37,6 +37,23 @@ public enum RingArt {
     public static let critical = Rgba(0xFF, 0x64, 0x67)
     public static let muted = Rgba(0xA1, 0xA1, 0xA1)
 
+    public static let ink = Rgba(0xFA, 0xFA, 0xFA)
+    public static let limitSoft = Rgba(0xC9, 0xB6, 0xFF)
+    public static let limitStrong = Rgba(0x9D, 0x7B, 0xFF)
+
+    /// The colour of a limit: its own scale, white to violet (D-440), so green, orange and red speak
+    /// only about sessions. The menu bar may be light, where white is lost, so the icon draws the
+    /// first step grey. The twin of RingDrawing.ColourFor.
+    public static func limitColour(for tone: LimitTone, onDark: Bool) -> Rgba {
+        switch tone {
+        case .normal: return onDark ? ink : muted
+        case .caution: return limitSoft
+        case .critical: return limitStrong
+        case .unknown: return muted
+        }
+    }
+
+    /// The colours of the palette by tone, for the signs of sessions: green, orange and red.
     public static func colour(for tone: LimitTone) -> Rgba {
         switch tone {
         case .normal:

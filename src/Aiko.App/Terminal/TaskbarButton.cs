@@ -80,15 +80,15 @@ sealed class TaskbarButton
     public void Update() => Draw(sameRows: false);
 
     /// A face comes or goes, at the same moments as on the tray icon (D-211).
-    public void ShowFace(AikoFace? face, FaceStyle style)
+    public void ShowFace(AikoFace? face)
     {
         var ground = TaskbarTheme.Ground();
-        _cornerFace = face is { } small ? Bitmap(FaceDrawing.For(style, small, ground, Pixels(OverlaySize)), Pixels(OverlaySize)) : null;
+        _cornerFace = face is { } small ? Bitmap(FaceDrawing.For(small, ground, Pixels(OverlaySize)), Pixels(OverlaySize)) : null;
         DrawCorner();
 
         if (face is { } shown && !_pinned)
         {
-            _faces.Show(FaceDrawing.For(style, shown, ground, Pixels(Size)));
+            _faces.Show(FaceDrawing.For(shown, ground, Pixels(Size)));
         }
         else
         {

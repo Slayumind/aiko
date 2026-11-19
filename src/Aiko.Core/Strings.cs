@@ -33,6 +33,9 @@ public static class Strings
     public static readonly IReadOnlyDictionary<string, (string English, string Russian)> Table =
         new Dictionary<string, (string English, string Russian)>
         {
+            ["TerminalLimitMark"] = ("limit {0}%", "лимит {0}%"),
+            ["SwitchOff"] = ("Off", "Выкл"),
+            ["SwitchOn"] = ("On", "Вкл"),
             ["CardSession"] = ("5 hours", "5 часов"),
             ["CardWeek"] = ("Week", "Неделя"),
             ["CardModelWeek"] = ("{0} · week", "{0} · неделя"),
@@ -119,7 +122,7 @@ public static class Strings
             ["WizardBridgeNotFound"] = ("Aiko can't find its bridge program.", "Aiko не нашла свою программу-посредник."),
             ["WizardUpdatesVersion"] = ("Once a day, Aiko asks slayumind.org for the latest version.", "Раз в сутки Aiko спрашивает у slayumind.org свежую версию."),
             ["WizardUpdatesCount"] = ("With statistics on, the same request says that one copy of Aiko ran today.", "С включённой статистикой вместе с вопросом уходит, что одна копия сегодня работала."),
-            ["WizardDoneTray"] = ("Close the window and Aiko stays by the clock while the sessions keep working. A click on the icon brings the window back.", "Закроешь окно — Aiko останется у часов, а сессии продолжат работу. Щелчок по значку вернёт окно."),
+            ["WizardDoneTray"] = ("Close the window and Aiko stays in the tray while the sessions keep working. A click on the icon brings the window back.", "Закроешь окно — Aiko останется в трее, а сессии продолжат работу. Щелчок по значку вернёт окно."),
             ["WizardDoneOverflow"] = ("Windows 11 hides the icons of new apps under the arrow by the clock. Drag Aiko onto the taskbar to keep the limit rings in sight.", "Windows 11 прячет значки новых приложений под стрелку у часов. Перетащи Aiko на панель задач, чтобы кольца лимитов было видно всегда."),
             ["WizardDoneWindowIsland"] = ("Close the window and Aiko becomes an island at the top of the screen while the sessions keep working. Drag it to any edge.", "Закроешь окно — Aiko встанет островом вверху экрана, а сессии продолжат работу. Перетащи её к любому краю."),
             ["WizardSummaryTitle"] = ("On Finish, Aiko", "По «Готово» Aiko"),
@@ -313,11 +316,6 @@ public static class Strings
             ["AikoOnWhat"] = ("Where Aiko is on, she reads each message you send to keep her memory fresh, and adds one line to that environment's settings.json: a permission for her two memory tools. Turning her off does not erase the memory.", "Там, где Aiko включена, она читает каждое твоё сообщение, чтобы память не устаревала, и добавляет в settings.json этой среды одну строку: разрешение на два своих инструмента памяти. Выключение память не стирает."),
             ["SkillsWhere"] = ("Skills work in the environments where Aiko is on.", "Навыки работают в тех средах, где Aiko включена."),
             ["PersonaOwnStyle"] = ("While the personality is on, your style {0} doesn't work. Turn it off and it comes back.", "Пока личность включена, твой стиль {0} не работает. Выключишь — вернётся."),
-            ["SectionFace"] = ("MOOD", "НАСТРОЕНИЕ"),
-            ["FaceChibi"] = ("Chibi", "Чиби"),
-            ["FaceEmoji"] = ("Emoji", "Смайлик"),
-            ["FaceWhere"] = ("Aiko shows her mood in the tray, on the island and in windows, as a drawing or an emoji.", "Aiko показывает настроение в трее, на острове и в окнах — рисунком или смайликом."),
-            ["FaceWhereMac"] = ("Aiko shows her mood in the menu bar, on the island and in windows, as a drawing or an emoji.", "Aiko показывает настроение в строке меню, на острове и в окнах — рисунком или смайликом."),
             ["SectionTemperament"] = ("TEMPERAMENT", "ТЕМПЕРАМЕНТ"),
             ["TemperamentQuiet"] = ("Quiet", "Тихий"),
             ["TemperamentNormal"] = ("Normal", "Обычный"),
@@ -332,13 +330,13 @@ public static class Strings
             ["SampleBody"] = ("The limits test passed by luck: rounding went down, so a reset at 14:59:30 showed as “in 0 min”. I fixed ResetCountdown and added a test for the edge.", "Тест на разбор лимитов проходил случайно: округление шло вниз, и сброс в 14:59:30 показывался как «через 0 мин». Поправила ResetCountdown и добавила тест на край."),
             ["SampleBodyBright"] = ("The limits test passed by luck: rounding went down, so a reset at 14:59:30 hid behind “in 0 min”, like a mimic chest in Dark Souls. I fixed ResetCountdown and added a test for the edge.", "Тест на разбор лимитов проходил случайно: округление шло вниз, и сброс в 14:59:30 прятался за «через 0 мин», как мимик-сундук в Dark Souls. Поправила ResetCountdown и добавила тест на край."),
             ["SampleBodyMusouTail"] = (" Parried it, like in Elden Ring.", " Парировала его, как в Elden Ring."),
-            ["SampleOpenNormal"] = ("えへへ, got it.", "えへへ, поймала."),
-            ["SampleOpenBright"] = ("やった, got it!", "やった, поймала!"),
-            ["SampleOpenMusou"] = ("やった〜! すごい, what a sneaky one!", "やった〜! すごい, какой хитрый!"),
+            ["SampleOpenNormal"] = ("(^_^) えへへ, got it.", "(^_^) えへへ, поймала."),
+            ["SampleOpenBright"] = ("(^▽^) やった, got it!", "(^▽^) やった, поймала!"),
+            ["SampleOpenMusou"] = ("(^▽^) やった〜! すごい, what a sneaky one!", "(^▽^) やった〜! すごい, какой хитрый!"),
             ["SampleCloseQuiet"] = ("A rare bug. It was nice to find.", "Редкий баг, приятно было найти."),
             ["SampleCloseNormal"] = ("In my own game I'd have hunted a bug like this for half a day.", "Такой баг я бы и в своей игре полдня искала."),
             ["SampleCloseBright"] = ("お疲れ様!", "お疲れ様!"),
-            ["SampleCloseMusou"] = ("よし、行くぞ! On to the next one (^_^)", "よし、行くぞ! Дальше (^_^)"),
+            ["SampleCloseMusou"] = ("よし、行くぞ! On to the next one", "よし、行くぞ! Дальше"),
             ["SampleCommit"] = ("The commit for this fix has no character:", "Коммит к этой правке — без характера:"),
             ["SectionMemory"] = ("MEMORY · {0} OF {1}", "ПАМЯТЬ · {0} ИЗ {1}"),
             ["MemoryAdd"] = ("Add a fact", "Добавить факт"),
@@ -462,9 +460,7 @@ public static class Strings
             ["ShellExitCode"] = ("code {0}", "код {0}"),
             ["ShellSeconds"] = ("{0} s", "{0} с"),
             ["ShellCopy"] = ("Copy", "Копировать"),
-            ["ShellCopied"] = ("Copied", "Скопировано"),
             ["ShellFold"] = ("Fold", "Свернуть"),
-            ["ShellUnfold"] = ("Unfold", "Развернуть"),
             ["ShellExplain"] = ("Explain", "Объяснить"),
             ["ShellExplaining"] = ("Asking Claude Code…", "Спрашиваю Claude Code…"),
             ["ShellExplainFailed"] = ("Claude Code did not answer. Press Explain again in a minute.", "Claude Code не ответил. Нажми «Объяснить» ещё раз через минуту."),
@@ -567,6 +563,15 @@ public static class Strings
 
     public static string Get(string key) =>
         Table.TryGetValue(key, out var pair) ? (Language == StringLanguage.Russian ? pair.Russian : pair.English) : key;
+
+    /// limit {0}%
+    public static string TerminalLimitMark => Get("TerminalLimitMark");
+
+    /// Off
+    public static string SwitchOff => Get("SwitchOff");
+
+    /// On
+    public static string SwitchOn => Get("SwitchOn");
 
     /// 5 hours
     public static string CardSession => Get("CardSession");
@@ -826,7 +831,7 @@ public static class Strings
     /// With statistics on, the same request says that one copy of Aiko ran today.
     public static string WizardUpdatesCount => Get("WizardUpdatesCount");
 
-    /// Close the window and Aiko stays by the clock while the sessions keep working. A click on ...
+    /// Close the window and Aiko stays in the tray while the sessions keep working. A click on t...
     public static string WizardDoneTray => Get("WizardDoneTray");
 
     /// Windows 11 hides the icons of new apps under the arrow by the clock. Drag Aiko onto the t...
@@ -1408,21 +1413,6 @@ public static class Strings
     /// While the personality is on, your style {0} doesn't work. Turn it off and it comes back.
     public static string PersonaOwnStyle => Get("PersonaOwnStyle");
 
-    /// MOOD
-    public static string SectionFace => Get("SectionFace");
-
-    /// Chibi
-    public static string FaceChibi => Get("FaceChibi");
-
-    /// Emoji
-    public static string FaceEmoji => Get("FaceEmoji");
-
-    /// Aiko shows her mood in the tray, on the island and in windows, as a drawing or an emoji.
-    public static string FaceWhere => Get("FaceWhere");
-
-    /// Aiko shows her mood in the menu bar, on the island and in windows, as a drawing or an emoji.
-    public static string FaceWhereMac => Get("FaceWhereMac");
-
     /// TEMPERAMENT
     public static string SectionTemperament => Get("SectionTemperament");
 
@@ -1465,13 +1455,13 @@ public static class Strings
     ///  Parried it, like in Elden Ring.
     public static string SampleBodyMusouTail => Get("SampleBodyMusouTail");
 
-    /// えへへ, got it.
+    /// (^_^) えへへ, got it.
     public static string SampleOpenNormal => Get("SampleOpenNormal");
 
-    /// やった, got it!
+    /// (^▽^) やった, got it!
     public static string SampleOpenBright => Get("SampleOpenBright");
 
-    /// やった〜! すごい, what a sneaky one!
+    /// (^▽^) やった〜! すごい, what a sneaky one!
     public static string SampleOpenMusou => Get("SampleOpenMusou");
 
     /// A rare bug. It was nice to find.
@@ -1483,7 +1473,7 @@ public static class Strings
     /// お疲れ様!
     public static string SampleCloseBright => Get("SampleCloseBright");
 
-    /// よし、行くぞ! On to the next one (^_^)
+    /// よし、行くぞ! On to the next one
     public static string SampleCloseMusou => Get("SampleCloseMusou");
 
     /// The commit for this fix has no character:
@@ -1855,14 +1845,8 @@ public static class Strings
     /// Copy
     public static string ShellCopy => Get("ShellCopy");
 
-    /// Copied
-    public static string ShellCopied => Get("ShellCopied");
-
     /// Fold
     public static string ShellFold => Get("ShellFold");
-
-    /// Unfold
-    public static string ShellUnfold => Get("ShellUnfold");
 
     /// Explain
     public static string ShellExplain => Get("ShellExplain");

@@ -1,0 +1,13 @@
+{
+  "comment": "What the colour of the terminal window says about the chosen environment: a question first, then a limit near its end, then a stopped session, then work.",
+  "signals": [
+    { "name": "nothing runs", "sessions": ["done", "read", "asleep"], "limit": "normal", "signal": "quiet" },
+    { "name": "no sessions and no numbers", "sessions": [], "limit": "unknown", "signal": "quiet" },
+    { "name": "a session works", "sessions": ["working", "asleep"], "limit": "normal", "signal": "working" },
+    { "name": "a limit near the warning does not colour the window", "sessions": ["working"], "limit": "caution", "signal": "working" },
+    { "name": "a stopped session goes before work", "sessions": ["working", "stopped"], "limit": "normal", "signal": "stopped" },
+    { "name": "a limit near its end goes before a stopped session", "sessions": ["stopped"], "limit": "critical", "signal": "limitNearEnd" },
+    { "name": "a limit near its end shows with nothing running", "sessions": [], "limit": "critical", "signal": "limitNearEnd" },
+    { "name": "a question goes first", "sessions": ["working", "stopped", "waiting"], "limit": "critical", "signal": "waiting" }
+  ]
+}

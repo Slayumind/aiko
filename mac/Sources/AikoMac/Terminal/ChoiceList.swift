@@ -23,8 +23,9 @@ final class ChoiceList: NSView {
     override init(frame: NSRect) {
         super.init(frame: frame)
         wantsLayer = true
-        layer?.backgroundColor = Theme.nsSurface.cgColor
-        layer?.borderColor = Theme.nsInputLine.cgColor
+        // A floating panel, as every list over the window: the dark ground, one line, one shadow.
+        layer?.backgroundColor = Theme.nsBackground.cgColor
+        layer?.borderColor = Theme.nsHairline.cgColor
         layer?.borderWidth = 1
         layer?.masksToBounds = false
         shadow = NSShadow()
@@ -56,7 +57,6 @@ final class ChoiceList: NSView {
     /// stands over the editor, its left edge this far from the left of the editor's field.
     func show(_ choices: [(String, (start: Int, length: Int))], under editor: NSView, left: CGFloat) {
         place(over: editor)
-        layer?.cornerRadius = 10 * zoom
         rows.edgeInsets = NSEdgeInsets(top: 4 * zoom, left: 4 * zoom, bottom: 4 * zoom, right: 4 * zoom)
         rows.setViews([], in: .top)
         lines = choices.prefix(Self.mostRows).enumerated().map { index, choice in
@@ -124,9 +124,8 @@ final class ChoiceRow: NSView {
     init(_ text: String, mark: (start: Int, length: Int), zoom: CGFloat) {
         super.init(frame: .zero)
         wantsLayer = true
-        layer?.cornerRadius = 6 * zoom
 
-        let font = Theme.monoFont(Theme.textNumber * zoom)
+        let font = Theme.monoFont(Theme.textBody * zoom)
         let shown = NSMutableAttributedString(string: text, attributes: [.font: font, .foregroundColor: Theme.nsMuted])
         let length = (text as NSString).length
         let start = min(max(mark.start, 0), length)

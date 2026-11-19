@@ -77,7 +77,10 @@ static class IslandCheck
 
         // Over the bottom edge, where the part past the edge has to hide under the taskbar.
         var frosted = new IslandGhost();
-        frosted.PlaceOn(new Box(work.X + (work.Width / 2) - 120, work.Bottom - 60, 240, 60), ScreenEdge.Bottom);
+        // After the sample is on the screen: the strip takes its picture when it is placed.
+        backdrop.UpdateLayout();
+        Thread.Sleep(300);
+        frosted.PlaceOn(new Box(work.X + (work.Width / 2) - 120, work.Bottom - 60, 240, 60), ScreenEdge.Bottom, new Box(work.X, work.Y, work.Width, work.Height));
 
         // The strip sits just under the taskbar, and a window shown later lands above it, so the
         // sample goes under the strip by hand.
@@ -206,15 +209,15 @@ static class IslandCheck
 
         // A moment with the island in hand, so a screenshot can catch the landing strip.
         await Task.Delay(1500);
-        var columnInHand = island.ActualHeight > island.ActualWidth;
+        var rowInHand = island.ActualWidth > island.ActualHeight;
         MouseInput.Up();
         await Task.Delay(700);
 
         var landedLeft = Math.Abs(island.Left - work.X) < 1;
-        var column = island.ActualHeight > island.ActualWidth;
+        var row = island.ActualWidth > island.ActualHeight;
         var ghostGone = !Application.Current.Windows.OfType<IslandGhost>().Any();
 
-        Log.Write($"--try-island: strip shown in hand={halfway}, column already in hand={columnInHand}, landed on the left={landedLeft} at {island.Left:0},{island.Top:0}, rings in a column={column}, strip gone={ghostGone}, moved raised={moved()}");
-        return halfway && columnInHand && landedLeft && column && ghostGone && moved();
+        Log.Write($"--try-island: strip shown in hand={halfway}, row in hand={rowInHand}, landed on the left={landedLeft} at {island.Left:0},{island.Top:0}, rings in a row={row}, strip gone={ghostGone}, moved raised={moved()}");
+        return halfway && rowInHand && landedLeft && row && ghostGone && moved();
     }
 }

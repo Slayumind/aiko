@@ -9,8 +9,8 @@ public class CardStateTests
 
     [Theory]
     [InlineData(0, LimitTone.Normal)]
-    [InlineData(74, LimitTone.Normal)]
-    [InlineData(75, LimitTone.Caution)]
+    [InlineData(69, LimitTone.Normal)]
+    [InlineData(70, LimitTone.Caution)]
     [InlineData(89, LimitTone.Caution)]
     [InlineData(90, LimitTone.Critical)]
     [InlineData(100, LimitTone.Critical)]

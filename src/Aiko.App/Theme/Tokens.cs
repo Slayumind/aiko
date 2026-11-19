@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Media;
+using System.Windows.Media.Effects;
 using Aiko.Core;
 
 namespace Aiko.App;
@@ -13,6 +14,11 @@ public static class Tokens
         Source = new Uri("pack://application:,,,/Aiko.App;component/Theme/Tokens.xaml", UriKind.Absolute),
     };
 
+    public static FontFamily Mono => Get<FontFamily>("Mono");
+
+    /// The one shadow of Aiko: only what floats over the window has it.
+    public static Effect FloatShadow => Get<Effect>("CardShadow");
+
     public static Brush Brush(string key) => (Brush)Dictionary[key];
 
     /// Any token, for controls built in code: they are drawn before they sit in a window, and
@@ -23,9 +29,9 @@ public static class Tokens
 
     public static Brush ToneBrush(LimitTone tone) => tone switch
     {
-        LimitTone.Normal => Brush("Positive"),
-        LimitTone.Caution => Brush("Caution"),
-        LimitTone.Critical => Brush("Destructive"),
+        LimitTone.Normal => Brush("Ink"),
+        LimitTone.Caution => Brush("LimitSoft"),
+        LimitTone.Critical => Brush("LimitStrong"),
         _ => Brush("Muted"),
     };
 }

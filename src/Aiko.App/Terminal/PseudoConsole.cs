@@ -11,7 +11,11 @@ namespace Aiko.App;
 
 /// What to start in a real terminal: the command line, its folder, and the environment
 /// variables to set (a null value removes one that Aiko itself has).
-sealed record PtyLaunch(string CommandLine, string Folder, IReadOnlyDictionary<string, string?> Variables);
+sealed record PtyLaunch(string CommandLine, string Folder, IReadOnlyDictionary<string, string?> Variables)
+{
+    /// Colours the voice of the personality on the way to the screen; null for none.
+    public VoiceTint? Tint { get; init; }
+}
 
 /// One program in a pseudo console of Windows, the connection the terminal control draws
 /// (D-360). The ConPTY of the package ships next to Aiko: it is newer than the one in Windows.
@@ -200,7 +204,8 @@ sealed class PseudoConsole : ITerminalConnection, IDisposable
             while ((count = _output!.Read(bytes, 0, bytes.Length)) > 0)
             {
                 var length = decoder.GetChars(bytes, 0, count, chars, 0);
-                TerminalOutput?.Invoke(this, new TerminalOutputEventArgs(new string(chars, 0, length)));
+                var text = new string(chars, 0, length);
+                TerminalOutput?.Invoke(this, new TerminalOutputEventArgs(_launch.Tint?.Apply(text) ?? text));
             }
         }
         catch (Exception e) when (e is IOException or ObjectDisposedException)

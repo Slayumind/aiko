@@ -5,18 +5,17 @@ namespace Aiko.Core.Tests;
 public class PersonaSettingsTests
 {
     [Fact]
-    public void By_default_Aiko_is_normal_and_chibi()
+    public void By_default_Aiko_is_normal()
     {
         var persona = PersonaSettings.Default;
 
         Assert.Equal(Temperament.Normal, persona.Temperament);
-        Assert.Equal(FaceStyle.Chibi, persona.Face);
     }
 
     [Fact]
     public void The_persona_survives_a_trip_through_the_file()
     {
-        var persona = PersonaSettings.Default with { Temperament = Temperament.Musou, Face = FaceStyle.Emoji };
+        var persona = PersonaSettings.Default with { Temperament = Temperament.Musou };
 
         var back = PersonaSettings.FromJson(persona.ToJson());
 
@@ -26,10 +25,18 @@ public class PersonaSettingsTests
     [Fact]
     public void Choices_are_written_as_words()
     {
-        var json = (PersonaSettings.Default with { Temperament = Temperament.Musou, Face = FaceStyle.Emoji }).ToJson();
+        var json = (PersonaSettings.Default with { Temperament = Temperament.Musou }).ToJson();
 
         Assert.Contains("\"Musou\"", json);
-        Assert.Contains("\"Emoji\"", json);
+    }
+
+    [Fact]
+    public void The_face_style_of_an_older_file_is_left_behind()
+    {
+        var persona = PersonaSettings.FromJson("{ \"temperament\": \"Musou\", \"face\": \"Emoji\" }");
+
+        Assert.Equal(Temperament.Musou, persona.Temperament);
+        Assert.DoesNotContain("face", persona.ToJson());
     }
 
     [Theory]
@@ -37,7 +44,6 @@ public class PersonaSettingsTests
     [InlineData("not json at all")]
     [InlineData("{ \"temperament\": ")]
     [InlineData("{ \"temperament\": \"Shouting\" }")]
-    [InlineData("{ \"face\": \"Pixel\" }")]
     public void A_broken_file_or_an_unknown_choice_reads_as_the_defaults(string json)
     {
         Assert.Equal(PersonaSettings.Default, PersonaSettings.FromJson(json));

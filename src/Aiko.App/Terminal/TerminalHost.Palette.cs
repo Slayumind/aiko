@@ -124,6 +124,9 @@ sealed partial class TerminalHost
     private void OpenFound(string id)
     {
         var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+
+        // A conversation a session went on in opens that session, never a second one beside it.
+        id = _sessions.OwnerOfConversation(id)?.Id ?? id;
         if (_sessions.Find(id) is not null)
         {
             _sessions = _sessions.Reopen(id, now);

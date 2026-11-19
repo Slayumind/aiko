@@ -60,8 +60,8 @@ public static class IslandPlacement
     /// to it. Without it the landing strip flickers between two edges near a corner.
     public const double EdgeStickiness = 14;
 
-    /// The edge nearest to the middle of an island in hand. The middle, not the sides: the island
-    /// changes shape when it turns from a row into a column, and the sides jump with it.
+    /// The edge nearest to the middle of an island in hand. The middle, not the sides: the
+    /// island is long, and its sides stand far from the mouse.
     public static ScreenEdge NearestEdge(double centreX, double centreY, Box work, ScreenEdge? current = null)
     {
         double DistanceTo(ScreenEdge edge) => edge switch
@@ -100,8 +100,7 @@ public static class IslandPlacement
         };
     }
 
-    /// Along a top or bottom edge the rings stand in a row; along a left or right edge they stand
-    /// in a column, so the island takes less room along the edge.
+    /// Whether the edge runs along the top or the bottom of the screen.
     public static bool IsHorizontal(ScreenEdge edge) => edge is ScreenEdge.Top or ScreenEdge.Bottom;
 
     private static double AlongX(Box island, Box work) => Share(island.X, work.X, work.Width - island.Width);

@@ -78,9 +78,9 @@ struct PaletteView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             field
-            Rectangle().fill(Theme.hairline).frame(height: 1)
+            Rule()
             list
-            Rectangle().fill(Theme.hairline).frame(height: 1)
+            Rule()
             // Russian keys are longer than the card: they go on, never cut at its edge.
             Text(state.keys)
                 .font(Theme.mono(Theme.textTiny))
@@ -90,10 +90,7 @@ struct PaletteView: View {
                 .padding(.top, 8)
                 .padding(.bottom, 9)
         }
-        .background(RoundedRectangle(cornerRadius: 12).fill(Theme.surface))
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Theme.hairline, lineWidth: 1))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .shadow(color: .black.opacity(Theme.shadowOpacity), radius: Theme.shadowBlur / 2, y: Theme.shadowOffset)
+        .floatingPanel()
         .onAppear { focused = true }
     }
 
@@ -103,14 +100,14 @@ struct PaletteView: View {
             ZStack(alignment: .leading) {
                 if state.query.isEmpty {
                     Text(state.hint)
-                        .font(Theme.sans(Theme.textName))
+                        .font(Theme.mono(Theme.textBody))
                         .foregroundStyle(Theme.muted)
                         .padding(.leading, 2)
                         .allowsHitTesting(false)
                 }
                 TextField("", text: $state.query)
                     .textFieldStyle(.plain)
-                    .font(Theme.sans(Theme.textName))
+                    .font(Theme.mono(Theme.textBody))
                     .foregroundStyle(Theme.ink)
                     .focused($focused)
                     .onKeyPress(.downArrow) { state.move(1); return .handled }
@@ -161,21 +158,21 @@ struct PaletteView: View {
         VStack(alignment: .leading, spacing: 3) {
             HStack(spacing: 12) {
                 Self.marked(row.name)
-                    .font(Theme.sans(Theme.textName))
+                    .font(Theme.mono(Theme.textBody))
                     .foregroundStyle(row.quiet ? Theme.muted : Theme.ink)
                     .lineLimit(1)
                     .truncationMode(.tail)
                 Spacer(minLength: 0)
                 if !row.meta.isEmpty {
                     Text(row.meta)
-                        .font(Theme.sans(Theme.textSmall))
+                        .font(Theme.mono(Theme.textSmall))
                         .foregroundStyle(Theme.muted)
                         .lineLimit(1)
                 }
             }
             if !row.snippet.isEmpty {
                 Self.marked(row.snippet)
-                    .font(Theme.sans(Theme.textSmall))
+                    .font(Theme.mono(Theme.textSmall))
                     .foregroundStyle(Theme.muted)
                     .lineLimit(1)
                     .truncationMode(.tail)
@@ -184,7 +181,7 @@ struct PaletteView: View {
         .padding(.horizontal, 8)
         .padding(.vertical, 7)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(RoundedRectangle(cornerRadius: 8).fill(index == state.lit ? Theme.raised : .clear))
+        .background(index == state.lit ? Theme.raised : .clear)
         .contentShape(Rectangle())
         // Only a pointer that moves lights a line: the list changes under a still pointer as the
         // person types.

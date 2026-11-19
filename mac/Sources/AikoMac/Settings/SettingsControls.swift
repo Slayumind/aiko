@@ -2,8 +2,9 @@ import AikoKit
 import AppKit
 import SwiftUI
 
-/// The few controls the settings need, in the shape the site uses. The twin of
-/// Theme/Controls.xaml: a switch, a segmented choice, a quiet button and a card you pick.
+/// The few controls the settings need, in the new look. The twin of Theme/Controls.xaml: a
+/// switch, a segmented choice, a button, a tick and a card you pick. Corners are square, every
+/// line is a hairline, and the one font is Geist Mono (D-435).
 ///
 /// They live in one file so the settings pages and the checklist page cannot drift apart, which
 /// is the same reason the WPF ones share a dictionary.
@@ -18,20 +19,20 @@ enum Control {
 
     static func rowName(_ text: String) -> some View {
         Text(text)
-            .font(Theme.sans(Theme.textSmall))
+            .font(Theme.mono(Theme.textSmall))
             .foregroundStyle(Theme.ink)
     }
 
+    /// Wraps, as RowNote does in most places on Windows; a caller that wants one line says so.
     static func rowNote(_ text: String) -> some View {
         Text(text)
             .font(Theme.mono(Theme.textTiny))
             .foregroundStyle(Theme.muted)
     }
 
-    /// A sentence, not a number: mono is for figures and metadata.
     static func rowHint(_ text: String) -> some View {
         Text(text)
-            .font(Theme.sans(Theme.textSmall))
+            .font(Theme.mono(Theme.textSmall))
             .foregroundStyle(Theme.muted)
             .fixedSize(horizontal: false, vertical: true)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -39,12 +40,35 @@ enum Control {
 
     static func pageTitle(_ text: String) -> some View {
         Text(text)
-            .font(Theme.sans(16, weight: .medium))
+            .font(Theme.mono(Theme.textTitle, weight: .medium))
             .foregroundStyle(Theme.ink)
     }
 
     static func hairline() -> some View {
-        Rectangle().fill(Theme.hairline).frame(height: 1)
+        Rule()
+    }
+}
+
+/// The light layer under the mouse, which fades in and out the same everywhere.
+private struct HoverFade: ViewModifier {
+    let shown: Bool
+    let colour: Color
+
+    func body(content: Content) -> some View {
+        content
+            .background(colour.opacity(shown ? 1 : 0))
+            .animation(Motion.curve(Motion.standard, Motion.hover), value: shown)
+    }
+}
+
+extension View {
+    func hoverLayer(_ shown: Bool, colour: Color = Theme.hoverLayer) -> some View {
+        modifier(HoverFade(shown: shown, colour: colour))
+    }
+
+    /// A hairline frame on the edge of the view, square as every frame of the new look.
+    func hairlineFrame(_ colour: Color = Theme.hairline) -> some View {
+        overlay(Rectangle().strokeBorder(colour, lineWidth: 1))
     }
 }
 
@@ -58,28 +82,36 @@ struct Chip: View {
             .foregroundStyle(Theme.ink)
             .padding(.horizontal, 6)
             .padding(.vertical, 1)
-            .background(Theme.chosenLayer)
-            .clipShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
+            .background(Theme.hoverLayer)
     }
 }
 
-/// The 32 by 18 switch of the site. The knob is where the value says at once, so a window that
-/// opens with the switch on shows it on; only a flip is animated.
+/// Both values stand in a row and the chosen one is in brackets: Off [On] (D-438). The brackets
+/// of the other value keep their place, so nothing moves when it flips.
 struct AikoSwitch: View {
     let isOn: Bool
     var enabled = true
     let set: (Bool) -> Void
 
+    @State private var hovering = false
+
     var body: some View {
-        ZStack(alignment: isOn ? .trailing : .leading) {
-            Capsule().fill(isOn ? Theme.positive : Theme.inputLine)
-            Circle().fill(Theme.ink).frame(width: 14, height: 14).padding(.horizontal, 2)
+        HStack(spacing: 8) {
+            value(Strings.switchOff, chosen: !isOn, tone: Theme.ink)
+            value(Strings.switchOn, chosen: isOn, tone: Theme.positive)
         }
-        .frame(width: 32, height: 18)
+        .padding(.vertical, 3)
         .opacity(enabled ? 1 : 0.5)
-        .animation(Motion.curve(Motion.spring, Motion.settle), value: isOn)
         .contentShape(Rectangle())
+        .onHover { hovering = $0 && enabled }
         .onTapGesture { if enabled { set(!isOn) } }
+    }
+
+    private func value(_ word: String, chosen: Bool, tone: Color) -> some View {
+        let ink = chosen ? tone : (hovering ? Theme.ink : Theme.quietText)
+        let brackets = chosen ? ink : Color.clear
+        return (Text("[").foregroundColor(brackets) + Text(word).foregroundColor(ink) + Text("]").foregroundColor(brackets))
+            .font(Theme.mono(Theme.textBody, weight: chosen ? .medium : .regular))
     }
 }
 
@@ -97,8 +129,8 @@ struct SegmentBar<Value: Hashable>: View {
             }
         }
         .padding(3)
-        .background(Theme.raised)
-        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .hairlineFrame()
+        .fixedSize()
     }
 
     private struct Segment: View {
@@ -110,12 +142,12 @@ struct SegmentBar<Value: Hashable>: View {
 
         var body: some View {
             Text(title)
-                .font(Theme.sans(Theme.textSmall))
+                .font(Theme.mono(Theme.textSmall))
                 .foregroundStyle(chosen || hovering ? Theme.ink : Theme.muted)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 5)
-                .background(chosen ? Theme.inputLine : (hovering ? Theme.hoverLayer : .clear))
-                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                .hoverLayer(hovering && !chosen)
+                .background(chosen ? Theme.raised : .clear)
                 .contentShape(Rectangle())
                 .onHover { hovering = $0 }
                 .onTapGesture(perform: pick)
@@ -135,36 +167,36 @@ struct PickCard<Content: View>: View {
         content()
             .padding(11)
             .frame(maxWidth: .infinity)
-            .background(chosen ? Theme.raised : (hovering ? Theme.hoverLayer : .clear))
-            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .strokeBorder(chosen ? Theme.inputLine : Theme.hairline, lineWidth: 1))
+            .hoverLayer(hovering)
+            .background(chosen ? Theme.raised : .clear)
+            .hairlineFrame()
             .contentShape(Rectangle())
             .onHover { hovering = $0 }
             .onTapGesture(perform: pick)
     }
 }
 
-/// The small buttons of the settings. One shape for all of them: the face and the colour of
-/// the words change, and the hover layer takes the colour of the words.
+/// The buttons of the window. One shape for all of them, as Widgets.Flat on Windows: every
+/// button is outlined, the main action has the brighter line, a ghost one has none.
 struct FlatButton: View {
     enum Look {
         case plain
 
-        /// The one button that finishes what the person typed: light, with dark words.
+        /// The one button that finishes what the person typed: the brighter line, medium words.
         case primary
         case ghost
         case danger
         case ghostDanger
+
+        /// The taller button of a page footer, 32 high.
         case quiet
     }
 
     let title: String
     var look = Look.plain
 
-    /// An SF Symbol before the words, for a button that makes something new.
-    var symbol: String?
+    /// A plus before the words, for a button that makes something new (WithPlus on Windows).
+    var plus = false
     var enabled = true
     let press: () -> Void
 
@@ -173,17 +205,16 @@ struct FlatButton: View {
     var body: some View {
         Button(action: { if enabled { press() } }) {
             HStack(spacing: 6) {
-                if let symbol {
-                    Image(systemName: symbol).font(.system(size: 10, weight: .medium))
+                if plus {
+                    PathMark(data: PathMark.plus, box: CGSize(width: 10, height: 10), lineWidth: 1.2, tone: words)
                 }
-                Text(title).font(Theme.sans(Theme.textSmall))
+                Text(title).font(Theme.mono(Theme.textSmall, weight: look == .primary ? .medium : .regular))
             }
                 .foregroundStyle(words)
                 .padding(.horizontal, look == .quiet ? 12 : 10)
                 .frame(height: look == .quiet ? 32 : 28)
-                .background(face)
-                .background(hovering ? hover : .clear)
-                .clipShape(RoundedRectangle(cornerRadius: look == .quiet ? 10 : 8, style: .continuous))
+                .hoverLayer(hovering)
+                .hairlineFrame(line)
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -195,24 +226,16 @@ struct FlatButton: View {
         switch look {
         case .danger, .ghostDanger: return Theme.destructive
         case .ghost: return hovering ? Theme.ink : Theme.muted
-        case .primary: return Theme.background
         default: return Theme.ink
         }
     }
 
-    private var face: Color {
+    private var line: Color {
         switch look {
         case .ghost, .ghostDanger: return .clear
-        case .danger: return Theme.destructive.opacity(0.16)
-        case .primary: return Theme.ink
-        default: return Theme.raised
-        }
-    }
-
-    private var hover: Color {
-        switch look {
-        case .danger, .ghostDanger: return Theme.destructive.opacity(0.09)
-        default: return Theme.hoverLayer
+        case .danger: return Theme.destructive
+        case .primary: return Theme.muted
+        default: return Theme.hairline
         }
     }
 }
@@ -227,16 +250,17 @@ struct LinkButton: View {
     var body: some View {
         Button(action: press) {
             Text(title)
-                .font(Theme.sans(Theme.textSmall))
+                .font(Theme.mono(Theme.textSmall))
                 .foregroundStyle(Theme.ink)
-                .underline(true, color: hovering ? Theme.ink : Color.white.opacity(0.3))
+                .underline(true, color: hovering ? Theme.ink : Theme.hairline)
         }
         .buttonStyle(.plain)
         .onHover { hovering = $0 }
     }
 }
 
-/// The close cross in a window header, and the small cross that unbinds a folder.
+/// The close cross in a window header, and the small cross that unbinds a folder: 28 by 28, a
+/// light layer on hover.
 struct MarkButton<Mark: View>: View {
     let help: String
     let press: () -> Void
@@ -248,8 +272,7 @@ struct MarkButton<Mark: View>: View {
         Button(action: press) {
             mark()
                 .frame(width: 28, height: 28)
-                .background(hovering ? Theme.raised : .clear)
-                .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                .hoverLayer(hovering, colour: Theme.raised)
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -258,7 +281,7 @@ struct MarkButton<Mark: View>: View {
     }
 }
 
-/// A tick box with its words beside it, which wrap.
+/// A tick box with its words beside it, which wrap. Square, filled with ink when it is on.
 struct Tick: View {
     @Binding var isOn: Bool
     let title: String
@@ -266,19 +289,21 @@ struct Tick: View {
     var body: some View {
         HStack(alignment: .top, spacing: 8) {
             ZStack {
-                RoundedRectangle(cornerRadius: 4, style: .continuous)
-                    .strokeBorder(Theme.inputLine, lineWidth: 1.5)
+                Rectangle().strokeBorder(Theme.hairline, lineWidth: 1.5)
                 if isOn {
-                    RoundedRectangle(cornerRadius: 4, style: .continuous).fill(Theme.ink)
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 9, weight: .bold))
-                        .foregroundStyle(Theme.background)
+                    Rectangle().fill(Theme.ink)
+                    Path { path in
+                        path.move(to: CGPoint(x: 4, y: 8))
+                        path.addLine(to: CGPoint(x: 7, y: 11))
+                        path.addLine(to: CGPoint(x: 12, y: 5))
+                    }
+                    .stroke(Theme.background, style: StrokeStyle(lineWidth: 1.6, lineCap: .round, lineJoin: .round))
                 }
             }
             .frame(width: 16, height: 16)
 
             Text(title)
-                .font(Theme.sans(Theme.textSmall))
+                .font(Theme.mono(Theme.textSmall))
                 .foregroundStyle(Theme.ink)
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -288,10 +313,9 @@ struct Tick: View {
     }
 }
 
-/// A one line field on the raised plate, with the edge lighting up while it has the keyboard.
+/// A one line field in a hairline frame; the frame turns grey while it has the keyboard.
 struct NameField: View {
     @Binding var text: String
-    var mono = false
     var size: CGFloat = Theme.textSmall
     var placeholder = ""
     var onCommit: () -> Void = {}
@@ -301,18 +325,14 @@ struct NameField: View {
     var body: some View {
         TextField(placeholder, text: $text)
             .textFieldStyle(.plain)
-            .font(mono ? Theme.mono(size) : Theme.sans(size))
+            .font(Theme.mono(size))
             .foregroundStyle(Theme.ink)
             .focused($focused)
             .onSubmit(onCommit)
             .onChange(of: focused) { _, now in if !now { onCommit() } }
             .padding(.horizontal, 8)
             .padding(.vertical, 5)
-            .background(Theme.raised)
-            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .strokeBorder(focused ? Theme.inputLine : Theme.hairline, lineWidth: 1))
+            .hairlineFrame(focused ? Theme.muted : Theme.hairline)
     }
 }
 
@@ -330,10 +350,7 @@ struct CodeBlock: View {
             .padding(.horizontal, 10)
             .padding(.vertical, 8)
             .background(Theme.background)
-            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .strokeBorder(Theme.hairline, lineWidth: 1))
+            .hairlineFrame()
     }
 }
 
@@ -358,21 +375,15 @@ struct DropDown: View {
         } label: {
             HStack(spacing: 6) {
                 Text(items.indices.contains(index) ? items[index] : "—")
-                    .font(Theme.sans(Theme.textSmall))
+                    .font(Theme.mono(Theme.textSmall))
                     .foregroundStyle(Theme.ink)
                     .lineLimit(1)
                 Spacer(minLength: 4)
-                Image(systemName: "chevron.down")
-                    .font(.system(size: 9, weight: .medium))
-                    .foregroundStyle(Theme.muted)
+                PathMark(data: PathMark.chevron, box: CGSize(width: 8, height: 5))
             }
             .padding(.horizontal, 8)
             .frame(height: 28)
-            .background(Theme.raised)
-            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .strokeBorder(Theme.hairline, lineWidth: 1))
+            .hairlineFrame()
         }
         // A borderless menu draws an arrow of its own before the label and drops the plate the
         // label asked for, so the button style is the plain one and the whole face is ours.
@@ -390,11 +401,9 @@ struct SavedMark: View {
 
     var body: some View {
         HStack(spacing: 5) {
-            Image(systemName: "checkmark")
-                .font(.system(size: 9, weight: .bold))
-                .foregroundStyle(Theme.positive)
+            PathMark(data: PathMark.saved, box: CGSize(width: 10, height: 8), lineWidth: 1.5, tone: Theme.positive)
             Text(Strings.saved)
-                .font(Theme.sans(Theme.textSmall))
+                .font(Theme.mono(Theme.textSmall))
                 .foregroundStyle(Theme.muted)
         }
         .opacity(shown ? 1 : 0)
@@ -419,21 +428,44 @@ struct Reveal<Content: View>: View {
     }
 }
 
-/// A panel with a hairline edge, holding rows split by hairlines.
+/// Rows of settings in one hairline frame, split by hairlines.
 struct RowsBox<Content: View>: View {
     @ViewBuilder let content: () -> Content
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) { content() }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .overlay(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .strokeBorder(Theme.hairline, lineWidth: 1))
+            .hairlineFrame()
+    }
+}
+
+extension View {
+    /// Puts the view in the box of a step that cannot be undone, or of a warning.
+    func zoneBox(_ kind: ZoneBox<Self>.Kind) -> some View {
+        ZoneBox(kind: kind) { self }
+    }
+}
+
+/// The box around a step that cannot be undone, and around a warning (DangerBox and CautionBox).
+struct ZoneBox<Content: View>: View {
+    enum Kind {
+        case danger
+        case caution
+    }
+
+    let kind: Kind
+    @ViewBuilder let content: () -> Content
+
+    var body: some View {
+        content()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(kind == .danger ? Theme.dangerZone : Theme.cautionZone)
+            .hairlineFrame(kind == .danger ? Theme.dangerZoneLine : Theme.cautionZoneLine)
     }
 }
 
 /// The picture of a screen beside each answer of "where to show Aiko". The menu bar runs along the
-/// top of every Mac screen, so the dot sits up there and not down by a taskbar.
+/// top of every Mac screen, so the mark sits up there and not down by a taskbar.
 struct ScreenPicture: View {
     enum Where {
         case menuBar
@@ -445,25 +477,23 @@ struct ScreenPicture: View {
 
     var body: some View {
         ZStack(alignment: .top) {
-            RoundedRectangle(cornerRadius: 4, style: .continuous).fill(Theme.background)
+            Rectangle().fill(Theme.background)
 
             switch show {
             case .menuBar:
                 ZStack(alignment: .trailing) {
                     Rectangle().fill(Theme.raised).frame(height: 8)
-                    Circle().fill(Theme.positive).frame(width: 5, height: 5).padding(.trailing, 6)
+                    Rectangle().fill(Theme.ink).frame(width: 5, height: 5).padding(.trailing, 6)
                 }
                 .frame(height: 8)
             case .island:
-                UnevenRoundedRectangle(bottomLeadingRadius: 5, bottomTrailingRadius: 5, style: .continuous)
+                Rectangle()
                     .fill(Theme.raised)
                     .frame(width: 38, height: 9)
             }
         }
         .frame(height: height)
-        .overlay(
-            RoundedRectangle(cornerRadius: 4, style: .continuous)
-                .strokeBorder(Theme.hairline, lineWidth: 1))
+        .hairlineFrame()
     }
 }
 

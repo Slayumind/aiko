@@ -10,9 +10,6 @@ import SwiftUI
 struct PersonalityPageView: View {
     @ObservedObject var state: SettingsState
 
-    /// Her own words in the sample, a little apart from the work in the middle.
-    private static let voiceInk = Color(.sRGB, red: 0.81, green: 0.91, blue: 0.87)
-
     /// A commit Aiko would write for the sample fix. It is English in every language, like any
     /// commit.
     private static let sampleCommit = "Round reset countdown to the nearest minute"
@@ -47,7 +44,7 @@ struct PersonalityPageView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 10) {
-                FaceView(style: state.persona.face, face: face, size: 24)
+                FaceView(face: face, size: 24)
                 Control.pageTitle(Strings.navPersonality)
             }
 
@@ -58,16 +55,6 @@ struct PersonalityPageView: View {
 
             // The memory itself: quotas, facts and what a person may do to them.
             MemoryBlockView().padding(.top, 22)
-
-            Control.sectionLabel(Strings.sectionFace).padding(.top, 22).padding(.bottom, 8)
-            SegmentBar(
-                choices: [(FaceStyle.chibi, Strings.faceChibi), (FaceStyle.emoji, Strings.faceEmoji)],
-                picked: state.persona.face) { face in
-                    var next = state.persona
-                    next.face = face
-                    state.savePersona(next)
-                }
-            Control.rowHint(Strings.faceWhereMac).padding(.top, 8)
 
             Control.sectionLabel(Strings.sectionTemperament).padding(.top, 22).padding(.bottom, 8)
             SegmentBar(
@@ -114,7 +101,7 @@ struct PersonalityPageView: View {
         return VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 8) {
                 Text(name)
-                    .font(Theme.sans(Theme.textName))
+                    .font(Theme.mono(Theme.textBody))
                     .foregroundStyle(Theme.ink)
                     .lineLimit(1)
                 if !plan.isEmpty { Chip(text: plan).fixedSize() }
@@ -132,7 +119,7 @@ struct PersonalityPageView: View {
 
             Reveal(isOpen: ownStyle != nil) {
                 Text(Strings.format(Strings.personaOwnStyle, ownStyle ?? ""))
-                    .font(Theme.sans(Theme.textSmall))
+                    .font(Theme.mono(Theme.textSmall))
                     .foregroundStyle(Theme.caution)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.top, 4)
@@ -199,18 +186,17 @@ struct PersonalityPageView: View {
                     .padding(.horizontal, 10)
                     .padding(.vertical, 7)
                     .background(Theme.raised)
-                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                     .frame(maxWidth: 380, alignment: .trailing)
             }
 
             HStack(alignment: .top, spacing: 8) {
-                FaceView(style: state.persona.face, face: face, size: 20)
+                FaceView(face: face, size: 20)
                 VStack(alignment: .leading, spacing: 10) {
                     if !answer.open.isEmpty {
-                        chat(answer.open, Self.voiceInk)
+                        chat(answer.open, Theme.voiceInk)
                     }
                     chat(answer.body, Theme.ink)
-                    chat(answer.close, Self.voiceInk)
+                    chat(answer.close, Theme.voiceInk)
                 }
             }
         }
@@ -218,9 +204,8 @@ struct PersonalityPageView: View {
         .padding(.vertical, 10)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Theme.background)
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
+            Rectangle()
                 .strokeBorder(Theme.hairline, lineWidth: 1))
     }
 
@@ -229,7 +214,7 @@ struct PersonalityPageView: View {
     /// the work in the middle.
     private func chat(_ text: String, _ colour: Color) -> some View {
         Text(text)
-            .font(Theme.sans(Theme.textNumber))
+            .font(Theme.mono(Theme.textBody))
             .foregroundStyle(colour)
             .fixedSize(horizontal: false, vertical: true)
             .frame(maxWidth: .infinity, alignment: .leading)

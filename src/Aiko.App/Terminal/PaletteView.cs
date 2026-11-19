@@ -18,7 +18,7 @@ sealed record PaletteGroup(string Title, IReadOnlyList<PaletteRow> Rows);
 /// keys at the bottom. It sits in a popup, a window of its own, because nothing WPF draws in the
 /// main window can cover a real terminal. The core finds; this only draws and listens to the keys.
 [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763")]
-sealed class PaletteView : Border
+sealed class PaletteView : FloatingPanel
 {
     public const double CardWidth = 520;
     private const double MostHeight = 380;
@@ -38,14 +38,14 @@ sealed class PaletteView : Border
         lens.Margin = new Thickness(0, 0, 10, 0);
         DockPanel.SetDock(lens, Dock.Left);
 
-        _field.FontFamily = Tokens.Get<FontFamily>("Sans");
-        _field.FontSize = Tokens.Get<double>("TextName");
+        _field.FontFamily = Tokens.Mono;
+        _field.FontSize = Tokens.Get<double>("TextBody");
         _field.Foreground = Tokens.Brush("Ink");
         _field.CaretBrush = Tokens.Brush("Ink");
         _field.Background = Brushes.Transparent;
         _field.BorderThickness = new Thickness(0);
         _field.VerticalContentAlignment = VerticalAlignment.Center;
-        var placeholder = Widgets.Text(hint, "TextName", "Muted", FontWeights.Normal);
+        var placeholder = Widgets.Text(hint, "TextBody", "Muted", FontWeights.Normal);
         placeholder.IsHitTestVisible = false;
         placeholder.Margin = new Thickness(2, 0, 0, 0);
         var typed = new Grid();
@@ -87,11 +87,6 @@ sealed class PaletteView : Border
         Width = CardWidth;
         // Room for the shadow inside the popup.
         Margin = new Thickness(16, 0, 16, 16);
-        Background = Tokens.Brush("Surface");
-        BorderBrush = Tokens.Brush("Hairline");
-        BorderThickness = new Thickness(1);
-        CornerRadius = new CornerRadius(12);
-        Effect = Tokens.Get<System.Windows.Media.Effects.Effect>("CardShadow");
         Child = column;
 
         _field.TextChanged += (_, _) =>
@@ -169,7 +164,7 @@ sealed class PaletteView : Border
     private void AddRow(PaletteRow row)
     {
         var index = _lines.Count;
-        var name = Line(row.Name, "TextName", row.Quiet ? "Muted" : "Ink");
+        var name = Line(row.Name, "TextBody", row.Quiet ? "Muted" : "Ink");
         var top = new DockPanel();
         if (row.Meta.Length > 0)
         {
@@ -192,7 +187,6 @@ sealed class PaletteView : Border
 
         var line = new Border
         {
-            CornerRadius = new CornerRadius(8),
             Padding = new Thickness(8, 7, 8, 7),
             Background = Brushes.Transparent,
             Cursor = Cursors.Hand,
@@ -240,5 +234,5 @@ sealed class PaletteView : Border
         }
     }
 
-    private static Border Hairline() => new() { Height = 1, Background = Tokens.Brush("Hairline") };
+    private static Rule Hairline() => new();
 }

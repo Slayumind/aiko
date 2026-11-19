@@ -20,6 +20,12 @@ enum SettingsCheck {
         let state = what == "wizard"
             ? shell.openSettings(at: .checklist, item: item(value))
             : shell.openSettings(at: page(value, shell: shell))
+        // The wizard is the first run as the window shows it, one step at a time, as
+        // --snapshot-wizard on Windows: on a Mac with environments the settings would show the
+        // checklist page instead.
+        if what == "wizard" {
+            state.firstRun = true
+        }
 
         Log.write("self test: settings at \(state.page.key), language \(Strings.language), "
             + "fewer animations: \(Motion.reduceMotion)")

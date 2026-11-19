@@ -6,8 +6,9 @@ public sealed record VariableChange(string Name, string? Value);
 
 /// What the terminal needs to know to start Claude Code for one session. HooksFile holds the
 /// settings with the hook of the terminal (TerminalHooks); empty when it could not be written.
-/// PicturesFolder is where the editor keeps the pictures of the session; empty for none. OnDisk:
-/// the file of the conversation is there. Claude Code writes it only after the first message, so a
+/// PicturesFolder is where the editor keeps the pictures of this session; empty for none.
+/// ConversationId is the conversation to come back to when /clear replaced the first one; empty
+/// for the id of the session. OnDisk: the file of the conversation is there. Claude Code writes it only after the first message, so a
 /// session that started and stopped before one has nothing to resume.
 public sealed record LaunchRequest(
     string ConfigDirectory,
@@ -16,8 +17,9 @@ public sealed record LaunchRequest(
     string SessionId,
     bool Started,
     string HooksFile = "",
-    string PicturesFolder = "",
-    bool OnDisk = true);
+    bool OnDisk = true,
+    string ConversationId = "",
+    string PicturesFolder = "");
 
 /// How the terminal starts a program in a real terminal (D-349, D-360): the arguments of Claude
 /// Code and what changes in the environment of the process. Claude Code chooses its own mode and
@@ -32,7 +34,8 @@ public sealed record ClaudeLaunchPlan(IReadOnlyList<string> Arguments, IReadOnly
         // A conversation gets its id from Aiko before the first turn, so the id is known even when
         // Claude Code never answers. After that the same id brings the conversation back, once
         // Claude Code has saved it.
-        List<string> arguments = [request.Started && request.OnDisk ? "--resume" : "--session-id", request.SessionId];
+        var conversation = request.ConversationId.Length > 0 ? request.ConversationId : request.SessionId;
+        List<string> arguments = [request.Started && request.OnDisk ? "--resume" : "--session-id", conversation];
 
         // The hook of the terminal tells the row what the session does, in every environment, with
         // the personality or without it.
@@ -41,11 +44,11 @@ public sealed record ClaudeLaunchPlan(IReadOnlyList<string> Arguments, IReadOnly
             arguments.AddRange(["--settings", request.HooksFile]);
         }
 
-        // A picture pasted into the editor lies outside the project: without this Claude Code asks
-        // for leave to read it (spike 2026-10).
+        // A picture pasted into the editor lies outside the project. The session may read its own
+        // pictures without a question; an added folder would ask at every start (D-451).
         if (request.PicturesFolder.Length > 0)
         {
-            arguments.AddRange(["--add-dir", request.PicturesFolder]);
+            arguments.AddRange(["--allowedTools", TerminalHooks.PicturesRule(request.PicturesFolder)]);
         }
 
         var variables = Environment(request.ConfigDirectory, request.UserProfile, inheritedVariables);

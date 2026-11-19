@@ -74,7 +74,7 @@ public struct FacePicture: Sendable, Equatable {
     }
 }
 
-/// Aiko's two faces as shapes (D-213, D-214, D-215): the chibi mochi head and the floating emoji.
+/// Aiko's chibi face as shapes (D-213, D-214, D-462).
 /// A port of the accepted mockup generators, with the same numbers, so the app and the mockup match.
 /// The core knows no drawing framework; the app turns these shapes into a picture.
 public enum FaceArt {
@@ -86,14 +86,11 @@ public enum FaceArt {
     public static let pink = "#FF6467"
     public static let drop = "#33A9EE"
 
-    /// A darker caution for the emoji on a light background, where #FE9A00 is too pale to read.
-    public static let cautionOnLight = "#D97F00"
-
     /// Below this size the chibi draws with thicker lines and a tighter view box.
     public static let smallUpTo = 48.0
 
-    public static func draw(_ style: FaceStyle, _ face: AikoFace, _ ground: FaceGround, _ small: Bool) -> FacePicture {
-        style == .emoji ? Emoji.draw(face, ground, small) : Chibi.draw(face, ground, small)
+    public static func draw(_ face: AikoFace, _ ground: FaceGround, _ small: Bool) -> FacePicture {
+        Chibi.draw(face, ground, small)
     }
 
     /// Two places, the invariant way: a comma for a decimal point from a Russian system would break
@@ -290,150 +287,6 @@ public enum FaceArt {
         static func blush(_ shapes: inout [FaceShape], _ opacity: Double) {
             shapes.append(FaceShape(FaceArt.ellipse(l - 4.4, 45, 4.4, 2.5), fill: FaceArt.pink, opacity: opacity))
             shapes.append(FaceShape(FaceArt.ellipse(r + 4.4, 45, 4.4, 2.5), fill: FaceArt.pink, opacity: opacity))
-        }
-    }
-
-    private enum Emoji {
-        static let lx = 18.0
-        static let rx = 46.0
-
-        static func draw(_ face: AikoFace, _ ground: FaceGround, _ small: Bool) -> FacePicture {
-            // At 16 to 32 px the emoji's thin lines fall under a pixel and turn grey. The chibi solves it
-            // the same way.
-            let k = small ? 1.35 : 1
-            let light = ground == .light
-            let ink = light ? FaceArt.ink : FaceArt.paper
-            let caution = light ? FaceArt.cautionOnLight : FaceArt.caution
-
-            // Pink on a dark background looks weaker, so the blush is stronger there.
-            let blushK = light ? 1.0 : 1.55
-
-            var shapes: [FaceShape] = []
-            var extras: [FaceShape] = []
-
-            switch face {
-            case .fresh:
-                brows(&shapes, "soft", ink, k)
-                dome(&shapes, lx, 29, ink)
-                dome(&shapes, rx, 29, ink)
-                shapes.append(FaceArt.line("M24.6 44 Q28.3 49.4 32 44.8 Q35.7 49.4 39.4 44", 3.4 * k, ink))
-                blush(&shapes, blushK)
-
-            case .tired:
-                brows(&shapes, "sad", ink, k)
-                lidded(&shapes, lx, 28.6, -1.8, ink, k)
-                lidded(&shapes, rx, 28.6, 1.8, ink, k)
-                shapes.append(FaceArt.line("M25 47 Q27.4 44.4 29.8 47 T34.6 47 T39.2 46.6", 3.2 * k, ink))
-                blush(&shapes, blushK, 0.35)
-                extras.append(dropShape())
-
-            case .asleep:
-                brows(&shapes, "soft", ink, k)
-                shapes.append(FaceArt.line(
-                    "M\(FaceArt.n(lx - 7)) 28.4 Q\(FaceArt.n(lx)) 35.4 \(FaceArt.n(lx + 7)) 28.4", 3.6 * k, ink))
-                shapes.append(FaceArt.line(
-                    "M\(FaceArt.n(rx - 7)) 28.4 Q\(FaceArt.n(rx)) 35.4 \(FaceArt.n(rx + 7)) 28.4", 3.6 * k, ink))
-                shapes.append(FaceShape(FaceArt.ellipse(32, 46, 2.6, 3), fill: ink))
-                blush(&shapes, blushK, 0.5)
-
-            case .working:
-                brows(&shapes, "focused", ink, k)
-                dome(&shapes, lx, 30, ink, 0.6, 1.6)
-                dome(&shapes, rx, 30, ink, 0.6, 1.6)
-                shapes.append(FaceShape("M31 45.8 L30.8 49.8 Q34.6 56.6 38.6 50.2 L38.6 46.6 Z", fill: FaceArt.pink))
-                shapes.append(FaceArt.line("M24 45.2 L37.6 46.4", 3.4 * k, ink))
-                blush(&shapes, blushK, 0.4)
-                extras.append(FaceArt.line("M56 6 L59.6 1.8 M58 11.6 L62.6 10.2 M51.8 3.6 L52.4 -0.2", 2.8 * k, ink))
-
-            case .waiting:
-                brows(&shapes, "raised", ink, k)
-                roundEye(&shapes, lx, 28.6, ink)
-                roundEye(&shapes, rx, 28.6, ink)
-                shapes.append(FaceShape(FaceArt.ellipse(32, 46.4, 4.2, 5), fill: FaceArt.pink))
-                blush(&shapes, blushK, 0.5)
-                extras.append(FaceShape(FaceArt.roundRect(56, 0.5, 6, 14, 3), fill: caution))
-                extras.append(FaceShape(FaceArt.circle(59, 20, 3.2), fill: caution))
-
-            case .done:
-                brows(&shapes, "soft", ink, k)
-                shapes.append(FaceArt.line(
-                    "M\(FaceArt.n(lx - 7)) 31 Q\(FaceArt.n(lx)) 21.6 \(FaceArt.n(lx + 7)) 31", 3.8 * k, ink))
-                shapes.append(FaceArt.line(
-                    "M\(FaceArt.n(rx - 7)) 31 Q\(FaceArt.n(rx)) 21.6 \(FaceArt.n(rx + 7)) 31", 3.8 * k, ink))
-                shapes.append(FaceShape("M23.4 41 L40.6 41 Q40.6 54.2 32 54.2 Q23.4 54.2 23.4 41 Z", fill: FaceArt.pink))
-                blush(&shapes, blushK)
-
-            case .error:
-                brows(&shapes, "sad", ink, k)
-                shapes.append(FaceArt.line("M12.6 23.4 L22.6 28.4 L12.6 33.4", 3.6 * k, ink))
-                shapes.append(FaceArt.line("M51.4 23.4 L41.4 28.4 L51.4 33.4", 3.6 * k, ink))
-                shapes.append(FaceShape(
-                    "M23.6 51.4 Q23.6 41.2 32 41.2 Q40.4 41.2 40.4 51.4 Q32 48.6 23.6 51.4 Z", fill: FaceArt.pink))
-                extras.append(dropShape())
-            }
-
-            return FacePicture(
-                viewLeft: 0,
-                viewTop: 0,
-                viewSize: 64,
-                groups: [FaceGroup(shapes, offsetY: 3), FaceGroup(extras)])
-        }
-
-        static func dropShape() -> FaceShape {
-            FaceShape("M57.4 1 C51.4 9.8 51.4 16.2 57.4 16.2 C63.4 16.2 63.4 9.8 57.4 1 Z", fill: FaceArt.drop)
-        }
-
-        static func brows(_ shapes: inout [FaceShape], _ kind: String, _ ink: String, _ k: Double) {
-            for (x, side) in [(lx, -1.0), (rx, 1.0)] {
-                func o(_ dx: Double) -> String { FaceArt.n(x + side * dx) }
-                let data: String
-                switch kind {
-                case "soft": data = "M\(o(-6)) 16.4 Q\(o(0)) 11.8 \(o(6)) 15.2"
-                case "sad": data = "M\(o(-6)) 12.6 Q\(o(-0.8)) 16 \(o(6)) 17"
-                case "raised": data = "M\(o(-6)) 12.4 Q\(o(0)) 6.4 \(o(6)) 11.4"
-                default: data = "M\(o(-6.4)) 17 Q\(o(0)) 13.8 \(o(6.6)) 13.2"
-                }
-                shapes.append(FaceArt.line(data, 2.6 * k, ink))
-            }
-        }
-
-        static func dome(
-            _ shapes: inout [FaceShape], _ x: Double, _ y: Double, _ ink: String, _ gx: Double = 0, _ gy: Double = 0
-        ) {
-            shapes.append(FaceShape(
-                "M\(FaceArt.n(x - 7)) \(FaceArt.n(y + 3.6)) C\(FaceArt.n(x - 7.2)) \(FaceArt.n(y - 8)) "
-                    + "\(FaceArt.n(x + 7.2)) \(FaceArt.n(y - 8)) \(FaceArt.n(x + 7)) \(FaceArt.n(y + 3.6)) "
-                    + "Q\(FaceArt.n(x)) \(FaceArt.n(y + 4.6)) \(FaceArt.n(x - 7)) \(FaceArt.n(y + 3.6)) Z",
-                fill: ink,
-                holes: [FaceArt.circle(x + 2.2 + gx, y - 1.8 + gy, 2.6), FaceArt.circle(x - 3 + gx, y + 1.6 + gy, 1.1)]))
-        }
-
-        static func roundEye(_ shapes: inout [FaceShape], _ x: Double, _ y: Double, _ ink: String) {
-            shapes.append(FaceShape(
-                FaceArt.circle(x, y, 7),
-                fill: ink,
-                holes: [FaceArt.circle(x + 2, y - 2.2, 2.9), FaceArt.circle(x - 2.6, y + 2.4, 1.3)]))
-        }
-
-        static func lidded(
-            _ shapes: inout [FaceShape], _ x: Double, _ y: Double, _ tilt: Double, _ ink: String, _ k: Double
-        ) {
-            shapes.append(FaceShape(
-                "M\(FaceArt.n(x - 6.6)) \(FaceArt.n(y - tilt)) L\(FaceArt.n(x + 6.6)) \(FaceArt.n(y + tilt)) "
-                    + "C\(FaceArt.n(x + 6.2)) \(FaceArt.n(y + 8)) \(FaceArt.n(x - 6.2)) \(FaceArt.n(y + 8)) "
-                    + "\(FaceArt.n(x - 6.6)) \(FaceArt.n(y - tilt)) Z",
-                fill: ink,
-                holes: [FaceArt.circle(x + 1.6, y + 3.2, 1.7)]))
-            shapes.append(FaceArt.line(
-                "M\(FaceArt.n(x - 8)) \(FaceArt.n(y - tilt - 0.3)) L\(FaceArt.n(x + 8)) \(FaceArt.n(y + tilt + 0.3))",
-                3.2 * k,
-                ink))
-        }
-
-        static func blush(_ shapes: inout [FaceShape], _ blushK: Double, _ opacity: Double = 0.55) {
-            let alpha = FaceArt.round2(min(0.9, opacity * blushK))
-            shapes.append(FaceShape(FaceArt.ellipse(lx - 6, 39, 5.4, 3.2), fill: FaceArt.pink, opacity: alpha))
-            shapes.append(FaceShape(FaceArt.ellipse(rx + 6, 39, 5.4, 3.2), fill: FaceArt.pink, opacity: alpha))
         }
     }
 }

@@ -61,12 +61,10 @@ struct EnvironmentPageView: View {
     private var note: some View {
         Reveal(isOpen: !state.note.isEmpty) {
             HStack(alignment: .top, spacing: 8) {
-                Image(systemName: "checkmark")
-                    .font(.system(size: 9, weight: .bold))
-                    .foregroundStyle(Theme.positive)
+                PathMark(data: PathMark.saved, box: CGSize(width: 10, height: 8), lineWidth: 1.5, tone: Theme.positive)
                     .padding(.top, 4)
                 Text(state.note)
-                    .font(Theme.sans(Theme.textSmall))
+                    .font(Theme.mono(Theme.textSmall))
                     .foregroundStyle(Theme.ink)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -94,7 +92,7 @@ struct EnvironmentPageView: View {
                 HStack(alignment: .firstTextBaseline, spacing: 12) {
                     Control.rowNote(Strings.emailLabel)
                     Text(account.email ?? "—")
-                        .font(Theme.sans(Theme.textSmall))
+                        .font(Theme.mono(Theme.textSmall))
                         .foregroundStyle(Theme.ink)
                         .lineLimit(1)
                         .truncationMode(.tail)
@@ -113,10 +111,9 @@ struct EnvironmentPageView: View {
             .padding(.horizontal, 12)
             .padding(.vertical, 10)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.white.opacity(0.03))
-            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .background(Theme.blockFill)
             .overlay(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                Rectangle()
                     .strokeBorder(Theme.hairline, lineWidth: 1))
 
             Control.rowNote(shortPath(folder)).padding(.leading, 2).padding(.top, 6)
@@ -132,7 +129,7 @@ struct EnvironmentPageView: View {
             // which Aiko will not read (AikoKit.SignedIn). A switch that cannot keep its promise is
             // worse than no switch, so here the page says what it means instead of offering it.
             Text(Strings.directMode)
-                .font(Theme.sans(Theme.textName))
+                .font(Theme.mono(Theme.textBody))
                 .foregroundStyle(Theme.ink)
                 .padding(.top, 22)
 
@@ -148,22 +145,22 @@ struct EnvironmentPageView: View {
 
         return VStack(alignment: .leading, spacing: 0) {
             Control.sectionLabel(Strings.nameInAiko).padding(.bottom, 6)
-            NameField(text: $state.typedName, size: Theme.textName, onCommit: state.commitName)
+            NameField(text: $state.typedName, size: Theme.textBody, onCommit: state.commitName)
             Reveal(isOpen: state.nameProblem != .none) {
                 Text(words(state.nameProblem))
-                    .font(Theme.sans(Theme.textSmall))
+                    .font(Theme.mono(Theme.textSmall))
                     .foregroundStyle(Theme.caution)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.top, 5)
             }
 
             Control.sectionLabel(Strings.sectionCommand).padding(.top, 16).padding(.bottom, 6)
-            NameField(text: $state.typedCommand, mono: true, size: Theme.textNumber,
+            NameField(text: $state.typedCommand, size: Theme.textBody,
                       onCommit: state.commitCommand)
 
             if state.suggestion == nil {
                 Text(words(state.commandProblem))
-                    .font(Theme.sans(Theme.textSmall))
+                    .font(Theme.mono(Theme.textSmall))
                     .foregroundStyle(state.commandProblem == .none ? Theme.muted : Theme.caution)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.top, 5)
@@ -206,7 +203,7 @@ struct EnvironmentPageView: View {
                 }
             }
 
-            FlatButton(title: Strings.addFolder, symbol: "plus") { addFolder(to: environment) }
+            FlatButton(title: Strings.addFolder, plus: true) { addFolder(to: environment) }
                 .padding(.top, 4)
 
             HStack(spacing: 12) {
@@ -236,9 +233,7 @@ struct EnvironmentPageView: View {
                 MarkButton(help: Strings.removeBinding, press: {
                     state.editor.commit(EnvironmentEdits.unbind(state.environments, path), "unbound a folder")
                 }) {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 9, weight: .medium))
-                        .foregroundStyle(Theme.muted)
+                    PathMark(data: PathMark.cross, box: CGSize(width: 8, height: 8), lineWidth: 1.5)
                 }
             }
             if let moved, RealClaude.sameFolder(moved.folder, path) {
@@ -250,25 +245,19 @@ struct EnvironmentPageView: View {
         .padding(.vertical, 4)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Theme.hoverLayer)
-        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
     }
 
     private var needCommands: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(Strings.foldersNeedCommands)
-                .font(Theme.sans(Theme.textSmall))
+                .font(Theme.mono(Theme.textSmall))
                 .foregroundStyle(Theme.ink)
                 .fixedSize(horizontal: false, vertical: true)
             FlatButton(title: Strings.setUpEnvironments) { state.openChecklist(at: .commands) }
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 10)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Theme.caution.opacity(0.05))
-        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .strokeBorder(Theme.caution.opacity(0.22), lineWidth: 1))
+        .zoneBox(.caution)
     }
 
     /// Binds the folder here. A folder of another environment moves here, and its row says from where.
@@ -310,7 +299,7 @@ struct EnvironmentPageView: View {
             Reveal(isOpen: asking) {
                 VStack(alignment: .leading, spacing: 0) {
                     Text(Strings.format(Strings.removeEnvironmentLine, environment.command, environment.name))
-                        .font(Theme.sans(Theme.textSmall))
+                        .font(Theme.mono(Theme.textSmall))
                         .foregroundStyle(Theme.ink)
                         .fixedSize(horizontal: false, vertical: true)
 
@@ -332,11 +321,7 @@ struct EnvironmentPageView: View {
                     .padding(.top, 12)
                 }
                 .padding(12)
-                .background(Theme.destructive.opacity(0.06))
-                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .strokeBorder(Theme.destructive.opacity(0.22), lineWidth: 1))
+                .zoneBox(.danger)
             }
         }
     }

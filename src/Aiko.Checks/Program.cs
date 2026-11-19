@@ -69,6 +69,13 @@ static class Program
             return;
         }
 
+        // Every part of the new look on one sheet: --snapshot-look out.png [100 | 115 | 130]
+        if (args is ["--snapshot-look", var lookPath, ..])
+        {
+            LookSheet.Write(lookPath, args.Length > 2 && double.TryParse(args[2], out var zoom) ? zoom : 100);
+            return;
+        }
+
         // The tip of the windows in both languages (Theme/ToolTip.xaml).
         if (args is ["--snapshot-tip", var tipPath, ..])
         {
@@ -76,7 +83,7 @@ static class Program
             return;
         }
 
-        // Every face in both styles, on a dark and a light taskbar, at the sizes the tray uses.
+        // Every face, on a dark and a light taskbar, at the sizes the tray uses.
         if (args is ["--snapshot-faces", var facesPath, ..])
         {
             FaceSheet.Write(facesPath);
@@ -229,6 +236,13 @@ static class Program
         if (args is ["--try-crash-guard", ..])
         {
             Environment.Exit(CrashGuardCheck.Run());
+            return;
+        }
+
+        // Layout faults of the new look: frames and the shape of the island.
+        if (args is ["--try-look", var lookReport, ..])
+        {
+            Environment.Exit(LookCheck.Run(lookReport));
             return;
         }
 
@@ -412,6 +426,13 @@ static class Program
             return;
         }
 
+        // The terminal window at rest draws nothing: --try-idle report.txt [part of --snapshot-terminal]
+        if (args is ["--try-idle", var idleReport, ..])
+        {
+            Environment.Exit(IdleCheck.Run(idleReport, args.Length > 2 ? args[2] : null));
+            return;
+        }
+
         // The terminal window on made up sessions: --snapshot-terminal out.png [palette | folders | loader]
         if (args is ["--snapshot-terminal", var terminalPath, ..])
         {
@@ -443,7 +464,7 @@ static class Program
 
             if (args is [.., "face"])
             {
-                panel.SetFace(TrayFaceMotion.At(FacePhase.FaceIn, 1), FaceDrawing.For(FaceStyle.Chibi, AikoFace.Done, FaceGround.Dark, 18));
+                panel.SetFace(TrayFaceMotion.At(FacePhase.FaceIn, 1), FaceDrawing.For(AikoFace.Done, FaceGround.Dark, 18));
                 panel.MarkForMeasure();
             }
 

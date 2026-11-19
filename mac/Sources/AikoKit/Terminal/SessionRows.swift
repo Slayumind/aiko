@@ -102,6 +102,16 @@ public enum SessionRows {
         sessions.open(environment).filter { live($0.id)?.activity == .waiting }.count
     }
 
+    /// How many sessions of the environment finished a turn the person has not seen.
+    public static func done(_ sessions: TerminalSessions, _ environment: String, live: (String) -> LiveTerminal?) -> Int {
+        sessions.open(environment).filter { live($0.id)?.activity == .done }.count
+    }
+
+    /// How many sessions of the environment ended by themselves.
+    public static func stopped(_ sessions: TerminalSessions, _ environment: String, live: (String) -> LiveTerminal?) -> Int {
+        sessions.open(environment).filter { live($0.id)?.activity == .exited }.count
+    }
+
     /// The day a session was used on, counted by the clock of the person: offsetMinutes is how far
     /// that clock is from UTC. A time that is still to come reads as today.
     public static func dayOf(_ usedSeconds: Int64, _ nowSeconds: Int64, offsetMinutes: Int) -> UsedDay {

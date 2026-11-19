@@ -61,14 +61,14 @@ struct StageView: View {
     private func message<Button: View>(_ title: String, _ body: String, @ViewBuilder button: () -> Button) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             Text(title)
-                .font(Theme.sans(16, weight: .medium))
+                .font(Theme.mono(Theme.textTitle, weight: .medium))
                 .foregroundStyle(Theme.ink)
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.bottom, 8)
             Text(body)
-                .font(Theme.sans(Theme.textName))
+                .font(Theme.mono(Theme.textBody))
                 .foregroundStyle(Theme.muted)
-                .lineSpacing(4)
+                .lineSpacing(5)
                 .fixedSize(horizontal: false, vertical: true)
             button()
                 .padding(.top, 14)
@@ -76,7 +76,7 @@ struct StageView: View {
         .frame(maxWidth: 520, alignment: .leading)
         .padding(.horizontal, 40)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-        .background(Theme.surface)
+        .background(Theme.background)
     }
 
     /// The question before a session that still runs is closed: a card at the top over a quieter
@@ -86,13 +86,13 @@ struct StageView: View {
             Theme.scrim
             VStack(alignment: .leading, spacing: 0) {
                 Text(title)
-                    .font(Theme.sans(Theme.textName, weight: .medium))
+                    .font(Theme.mono(Theme.textBody, weight: .medium))
                     .foregroundStyle(Theme.ink)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.trailing, 28)
                     .padding(.bottom, 6)
                 Text(body)
-                    .font(Theme.sans(Theme.textNumber))
+                    .font(Theme.mono(Theme.textBody))
                     .foregroundStyle(Theme.muted)
                     .lineSpacing(4)
                     .fixedSize(horizontal: false, vertical: true)
@@ -111,17 +111,16 @@ struct StageView: View {
             .padding(.horizontal, 18)
             .padding(.vertical, 16)
             .frame(width: 420)
-            .background(RoundedRectangle(cornerRadius: 14).fill(Theme.surface))
-            .overlay(RoundedRectangle(cornerRadius: 14).stroke(Theme.inputLine, lineWidth: 1))
-            .shadow(color: .black.opacity(Theme.shadowOpacity), radius: Theme.shadowBlur / 2, y: Theme.shadowOffset)
+            .floatingPanel()
             .padding(.top, 28)
             .padding(.horizontal, 20)
         }
     }
 }
 
-/// One button for the whole window, the twin of Widgets.Flat: the filled one is the main action, the
-/// outlined one the second, the red one stops something (DESIGN, one fill per control).
+/// One button for the whole window, the twin of Widgets.Flat: every button is outlined. The main
+/// action has the brighter line and medium words, a ghost one has no line, the red one stops
+/// something.
 struct WindowButton: View {
     enum Look {
         case main
@@ -138,13 +137,16 @@ struct WindowButton: View {
 
     var body: some View {
         Button(action: press) {
-            HStack(spacing: 8) {
+            // The gaps of Widgets.Flat: 8 after the plus, 12 before the key at the right end.
+            HStack(spacing: 0) {
                 if plus {
                     LineMark(data: "M5,0 L5,10 M0,5 L10,5", tone: ink)
+                        .padding(.trailing, 8)
                 }
                 Text(title)
-                    .font(Theme.sans(Theme.textNumber, weight: look == .main ? .medium : .regular))
+                    .font(Theme.mono(Theme.textBody, weight: look == .main ? .medium : .regular))
                     .foregroundStyle(ink)
+                    .lineLimit(1)
                 if let aside {
                     Spacer(minLength: 12)
                     Text(aside).font(Theme.mono(Theme.textTiny)).foregroundStyle(Theme.muted)
@@ -152,9 +154,8 @@ struct WindowButton: View {
             }
             .padding(.horizontal, 12)
             .frame(height: 32)
-            .background(RoundedRectangle(cornerRadius: 8).fill(fill))
-            .overlay(RoundedRectangle(cornerRadius: 8).stroke(look == .outlined ? Theme.inputLine : .clear, lineWidth: 1))
-            .modifier(HoverLayer(radius: 8))
+            .modifier(HoverLayer())
+            .hairlineFrame(line)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -162,18 +163,18 @@ struct WindowButton: View {
 
     private var ink: Color {
         switch look {
-        case .main: Theme.background
         case .danger: Theme.destructive
         case .ghost: Theme.muted
-        case .outlined: Theme.ink
+        case .main, .outlined: Theme.ink
         }
     }
 
-    private var fill: Color {
+    private var line: Color {
         switch look {
-        case .main: Theme.ink
-        case .danger: Theme.dangerTint
-        case .ghost, .outlined: .clear
+        case .main: Theme.muted
+        case .danger: Theme.destructive
+        case .outlined: Theme.hairline
+        case .ghost: .clear
         }
     }
 }

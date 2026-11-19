@@ -141,14 +141,13 @@ sealed partial class TerminalEditor
                 ShowHint();
             };
 
-            var square = new Border { Width = 8, Height = 8, CornerRadius = new CornerRadius(2), Background = Tokens.Brush("Muted"), Margin = new Thickness(0, 0, 6, 0) };
+            var square = new Border { Width = 8, Height = 8, Background = Tokens.Brush("Muted"), Margin = new Thickness(0, 0, 6, 0) };
             var label = new StackPanel { Orientation = Orientation.Horizontal };
             label.Children.Add(square);
             label.Children.Add(Widgets.Mono(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.TerminalEditorPicture, at + 1), "Ink"));
             label.Children.Add(cross);
             _pictures.Children.Add(new Border
             {
-                CornerRadius = new CornerRadius(6),
                 Background = Tokens.Brush("Raised"),
                 Padding = new Thickness(8, 3, 8, 3),
                 Margin = new Thickness(0, 0, 6, 0),

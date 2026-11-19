@@ -32,7 +32,17 @@ extension TerminalHost {
     private func eventCame(_ id: String, _ event: TerminalEvent) {
         guard terminals[id] != nil else { return }
         lastEvents[id] = event
+        followConversation(id, event.conversation)
         draw()
+    }
+
+    /// /clear moved the session to a new conversation: the next start comes back to that one.
+    func followConversation(_ id: String, _ conversation: String) {
+        let moved = sessions.moveToConversation(id, conversation)
+        if moved != sessions {
+            sessions = moved
+            save()
+        }
     }
 
     /// The person typed into the session: a question it asked is answered.

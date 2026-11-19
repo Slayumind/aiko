@@ -85,7 +85,8 @@ sealed partial class TerminalHost
         }
 
         _terminals[session.Id] = terminal;
-        // An event left from an earlier run is not news.
+        // An event left from an earlier run is not news, but the conversation it names stays.
+        FollowConversation(session.Id, TerminalEvents.LastConversation(session.Id));
         Forget(session.Id);
         _events.Forget(session.Id);
         _seenAt[session.Id] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
@@ -157,11 +158,26 @@ sealed partial class TerminalHost
             return null;
         }
 
+        // After /clear the session goes on in a new conversation. One that was never saved is not
+        // there to come back to, so the session keeps the one it has.
+        var conversation = TerminalEvents.LastConversation(session.Id);
+        conversation = conversation.Length > 0 ? conversation : session.Conversation;
+        if (conversation.Length > 0 && !ConversationOnDisk(config, conversation))
+        {
+            conversation = "";
+        }
+
         var claudePlan = ClaudeLaunchPlan.For(
             new LaunchRequest(
                 config, home, environment.Name, session.Id, session.Started, TerminalEvents.HooksFile(),
-                ThisComputer.Folders.PicturesFolder(session.Id), session.Started && ConversationOnDisk(config, session.Id)),
+                session.Started && ConversationOnDisk(config, conversation.Length > 0 ? conversation : session.Id),
+                conversation,
+                ThisComputer.Folders.PicturesFolder(session.Id)),
             inherited);
-        return new PtyLaunch(CommandLine(claude, claudePlan.Arguments), folder, Variables(claudePlan));
+        var voice = ((System.Windows.Media.SolidColorBrush)Tokens.Brush("VoiceInk")).Color;
+        return new PtyLaunch(CommandLine(claude, claudePlan.Arguments), folder, Variables(claudePlan))
+        {
+            Tint = environment.Persona ? new VoiceTint(voice.R, voice.G, voice.B) : null,
+        };
     }
 }

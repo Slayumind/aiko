@@ -1,5 +1,6 @@
 import AikoKit
 import AppKit
+import SwiftUI
 
 /// The output of a command line as blocks (D-363, D-412), the twin of ShellBlocksView.cs: each
 /// command with a rule on the left, grey when it passed, red when it failed, orange while it runs;
@@ -22,19 +23,27 @@ final class ShellBlocksView: NSView {
     private static let text = rgb(0xFA, 0xFA, 0xFA)
     private static let output = rgb(0xBD, 0xBD, 0xBD)
     private static let muted = rgb(0xA1, 0xA1, 0xA1)
-    private static let raised = rgb(0x40, 0x40, 0x40)
+    private static let raised = rgb(0x4D, 0x4D, 0x4D)
     private static let destructive = rgb(0xFF, 0x64, 0x67)
     private static let caution = rgb(0xFE, 0x9A, 0x00)
-    private static let ground = rgb(0x14, 0x14, 0x16)
-    private static let hovered = rgb(0x1B, 0x1B, 0x1D)
+    private static let ground = rgb(0x0A, 0x0A, 0x0A)
+    private static let hovered = rgb(0x26, 0x26, 0x26)
+    private static let buttonLit = rgb(0x3A, 0x3A, 0x3A)
+    private static let onMatch = rgb(0x0A, 0x0A, 0x0A)
     private static let match = rgb(0x4A, 0x4A, 0x4A)
-    private static let matchNow = rgb(0x7A, 0x52, 0x10)
-    private static let edge = rgb(0x2A, 0x2A, 0x2C)
-    private static let edgeMain = rgb(0x3B, 0x3B, 0x3D)
+    private static let matchNow = caution
+
+    /// The marks of the buttons of a block, in a box of 24 as the icons of the site: Copy is a
+    /// filled shape, the others are lines.
+    private static let copyIcon = BarMarks.path(SiteIcons.copy)
+    private static let checkIcon = BarMarks.path(SiteIcons.check)
+    private static let foldIcon = BarMarks.path("M2.5,17 L12,7.5 L21.5,17")
+    private static let unfoldIcon = BarMarks.path("M2.5,7 L12,16.5 L21.5,7")
+    private static let explainIcon = BarMarks.path("M6.5,8 A5.5,5.5 0 1 1 15.1,12.5 C13.1,13.9 12,15 12,17 M12,21 L12,21.6")
 
     /// The sixteen colours of the terminal, as TerminalColors.Ansi on Windows.
     private static let ansi: [UInt32] = [
-        0x171717, 0xFF6467, 0x00BC7D, 0xFE9A00, 0x11A9F6, 0xD477CD, 0x00D3F2, 0xA1A1A1,
+        0x0A0A0A, 0xFF6467, 0x00BC7D, 0xFE9A00, 0x11A9F6, 0xD477CD, 0x00D3F2, 0xA1A1A1,
         0x737373, 0xFF8270, 0xAFE773, 0xFE9A00, 0x11A9F6, 0xF7BCF0, 0x24DCC3, 0xFAFAFA,
     ]
 
@@ -51,11 +60,13 @@ final class ShellBlocksView: NSView {
     private var offset: CGFloat = 0
     private var followsEnd = true
     private var hover: Int64?
+    private var pointer = NSPoint.zero
+    private var pointerOnButton = false
     private var copied: Int64?
     private var room: CGFloat = 0
 
-    private var font = Theme.monoFont(13)
-    private var bold = Theme.monoFont(13)
+    private var font = Theme.monoFont(Theme.textBody)
+    private var bold = Theme.monoFont(Theme.textBody)
     private var zoom: CGFloat = 1
     private var charWidth: CGFloat = 7.8
 
@@ -207,12 +218,20 @@ final class ShellBlocksView: NSView {
             needsDisplay = true
         }
         let overButton = buttons.contains { $0.area.contains(at) }
+        // The plate under a button follows the pointer, so the view is drawn again while it moves
+        // over the buttons.
+        if pointer != at && (overButton || pointerOnButton) {
+            needsDisplay = true
+        }
+        pointer = at
+        pointerOnButton = overButton
         let overLink = event.modifierFlags.contains(.command) && row.map { $0.kind == .output && linkAt($0.line, at.x) != nil } == true
         (overButton || overLink ? NSCursor.pointingHand : NSCursor.arrow).set()
     }
 
     override func mouseExited(with event: NSEvent) {
         hover = nil
+        pointerOnButton = false
         NSCursor.arrow.set()
         needsDisplay = true
     }
@@ -311,10 +330,11 @@ final class ShellBlocksView: NSView {
             case .output:
                 drawMatches(row.line, y)
                 drawLine(row.line, y)
+                drawChosenMatch(row.line, y)
             case .more:
                 draw(more(row.line), at: NSPoint(x: textLeft, y: y + 2), font: font.withSize(font.pointSize * 0.9), colour: Self.muted)
             case .note:
-                draw(row.note ?? "", at: NSPoint(x: textLeft, y: y), font: Theme.sansFont(font.pointSize),
+                draw(row.note ?? "", at: NSPoint(x: textLeft, y: y), font: Theme.monoFont(font.pointSize),
                      colour: row.line < 0 ? Self.destructive : Self.text)
             case .gap:
                 break
@@ -345,37 +365,46 @@ final class ShellBlocksView: NSView {
             attributes: [.font: bold, .foregroundColor: Self.text, .paragraphStyle: style])
     }
 
-    /// The buttons of a block under the mouse, laid from the right; answers where they start.
+    /// The buttons of a block under the mouse, laid from the right; answers where they start. Each
+    /// is an icon in a box of 26 by 20, with a plate under the pointer, as on Windows.
     private func drawButtons(_ block: ShellBlock, right: CGFloat, y: CGFloat) -> CGFloat {
         let key = block.startedAt
-        var list: [(label: String, main: Bool, act: () -> Void)] = [
-            (copied == key ? Strings.shellCopied : Strings.shellCopy, false, { [weak self] in self?.copy(block) }),
+        var list: [(icon: Path, line: Bool, act: () -> Void)] = [
+            (copied == key ? Self.checkIcon : Self.copyIcon, false, { [weak self] in self?.copy(block) }),
         ]
         if block.lineCount > 0 {
-            list.append((folded.contains(key) ? Strings.shellUnfold : Strings.shellFold, false, { [weak self] in self?.fold(block) }))
+            list.append((folded.contains(key) ? Self.unfoldIcon : Self.foldIcon, true, { [weak self] in self?.fold(block) }))
         }
         if block.failed {
-            list.append((Strings.shellExplain, true, { [weak self] in self?.explain(block) }))
+            list.append((Self.explainIcon, true, { [weak self] in self?.explain(block) }))
         }
 
-        let labelFont = Theme.sansFont(11.5 * zoom)
-        let height = min(lineHeight - 2, 20 * zoom)
+        let iconSize = 14 * zoom
+        let width = 26 * zoom
+        let height = min(lineHeight, 20 * zoom)
         var x = right
         for button in list.reversed() {
-            let size = (button.label as NSString).size(withAttributes: [.font: labelFont])
-            let width = size.width + 12 * zoom
             x -= width
             let area = NSRect(x: x, y: y + (lineHeight - height) / 2, width: width, height: height)
-            let face = NSBezierPath(roundedRect: area.insetBy(dx: 0.5, dy: 0.5), xRadius: 5 * zoom, yRadius: 5 * zoom)
-            Self.ground.setFill()
-            face.fill()
-            (button.main ? Self.edgeMain : Self.edge).setStroke()
-            face.lineWidth = 1
-            face.stroke()
-            draw(button.label, at: NSPoint(x: x + 6 * zoom, y: area.minY + (height - size.height) / 2), font: labelFont,
-                 colour: button.main ? Self.text : Self.muted)
+            if pointerOnButton && area.contains(pointer) {
+                Self.buttonLit.setFill()
+                area.fill()
+            }
+            let scale = iconSize / 24
+            let place = CGAffineTransform(translationX: x + (width - iconSize) / 2, y: area.minY + (height - iconSize) / 2)
+                .scaledBy(x: scale, y: scale)
+            let icon = NSBezierPath(cgPath: button.icon.cgPath)
+            icon.transform(using: AffineTransform(m11: place.a, m12: place.b, m21: place.c, m22: place.d, tX: place.tx, tY: place.ty))
+            if button.line {
+                Self.muted.setStroke()
+                icon.lineWidth = 1.3
+                icon.stroke()
+            } else {
+                Self.muted.setFill()
+                icon.fill()
+            }
             buttons.append((area, button.act))
-            x -= 4 * zoom
+            x -= 2 * zoom
         }
         return x
     }
@@ -388,6 +417,20 @@ final class ShellBlocksView: NSView {
             NSRect(x: textLeft + CGFloat(found.start) * charWidth, y: y, width: CGFloat(found.length) * charWidth, height: lineHeight).fill()
             index += 1
         }
+    }
+
+    /// The chosen match stands on solid orange, so its letters are dark. It is drawn over the line
+    /// that is already there, so the light letters do not show around the dark ones.
+    private func drawChosenMatch(_ line: Int, _ y: CGFloat) {
+        guard matchAt >= 0, matchAt < matches.count, matches[matchAt].line == line else { return }
+        let found = matches[matchAt]
+        let text = screen.lineText(line) as NSString
+        guard found.start < text.length else { return }
+        let word = text.substring(with: NSRange(location: found.start, length: min(found.length, text.length - found.start)))
+        let x = textLeft + CGFloat(found.start) * charWidth
+        Self.matchNow.setFill()
+        NSRect(x: x, y: y, width: CGFloat(found.length) * charWidth, height: lineHeight).fill()
+        draw(word, at: NSPoint(x: x, y: y), font: font, colour: Self.onMatch)
     }
 
     /// The matches go in the order of the lines, so the first one on a line is found by halves: a
