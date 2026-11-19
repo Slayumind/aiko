@@ -519,10 +519,7 @@ struct GeneralPageView: View {
                     }
                 }
                 .padding(12)
-                .background(Theme.destructive.opacity(0.06))
-                .overlay(
-                    Rectangle()
-                        .strokeBorder(Theme.destructive.opacity(0.22), lineWidth: 1))
+                .zoneBox(.danger)
             }
         }
     }
@@ -576,10 +573,7 @@ struct GeneralPageView: View {
                     .padding(.top, 12)
                 }
                 .padding(12)
-                .background(Theme.destructive.opacity(0.06))
-                .overlay(
-                    Rectangle()
-                        .strokeBorder(Theme.destructive.opacity(0.22), lineWidth: 1))
+                .zoneBox(.danger)
             }
         }
     }

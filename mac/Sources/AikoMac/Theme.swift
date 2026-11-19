@@ -30,7 +30,6 @@ enum Theme {
         static let scrim = Rgba(0x0A, 0x0A, 0x0A, alpha: 0x99 / 255.0)
         static let hairline = Rgba(0xFF, 0xFF, 0xFF, alpha: 0x38 / 255.0)
         static let hoverLayer = Rgba(0xFF, 0xFF, 0xFF, alpha: 0x12 / 255.0)
-        static let glassTint = Rgba(0x17, 0x17, 0x17, alpha: 0x0D / 255.0)
         static let blockFill = Rgba(0xFF, 0xFF, 0xFF, alpha: 0x08 / 255.0)
     }
 
@@ -66,8 +65,6 @@ enum Theme {
     /// Hover lightens whatever is under it by this much, as a layer that fades in.
     static let hoverLayer = colour(Swatch.hoverLayer)
 
-    /// The tone of the glass of the landing strip over its blurred picture.
-    static let glassTint = colour(Swatch.glassTint)
 
     /// A block that stands a little apart from the page.
     static let blockFill = colour(Swatch.blockFill)
@@ -105,10 +102,8 @@ enum Theme {
     /// The same tokens for the parts Aiko draws by hand: the island is an NSView, not SwiftUI,
     /// because it changes its own size every frame while it unfolds, and the editor is AppKit text.
     static var nsBackground: NSColor { nsColour(Swatch.background) }
-    static var nsCardFill: NSColor { nsColour(Swatch.cardFill) }
     static var nsInk: NSColor { nsColour(Swatch.ink) }
     static var nsMuted: NSColor { nsColour(Swatch.muted) }
-    static var nsQuietText: NSColor { nsColour(Swatch.quietText) }
     static var nsRaised: NSColor { nsColour(Swatch.raised) }
     static var nsHairline: NSColor { nsColour(Swatch.hairline) }
     static var nsHoverLayer: NSColor { nsColour(Swatch.hoverLayer) }
@@ -122,25 +117,11 @@ enum Theme {
     static let textBody: CGFloat = 13
     static let textTitle: CGFloat = 16
 
-    static let cardWidth: CGFloat = 296
-    static let cardPadding: CGFloat = 14
-    static let cardRadius: CGFloat = 14
-    static let barHeight: CGFloat = 4
-    static let barRadius: CGFloat = 2
-    static let blockGap: CGFloat = 12
-    static let rowGap: CGFloat = 8
-    static let underBar: CGFloat = 3
-
     /// Only floating things get a shadow, and only this one. WPF measures the blur across the whole
     /// soft edge and SwiftUI from the middle out, so the radius is half of the 24 in Tokens.xaml.
     static let shadowBlur: CGFloat = 24
     static let shadowOffset: CGFloat = 8
     static let shadowOpacity = 0.45
-
-    /// Room around the card inside its window, so the shadow is not cut off at the edge.
-    static let shadowRoom: CGFloat = 20
-
-    // ---- Icons ----
 
     // ---- Fonts ----
 

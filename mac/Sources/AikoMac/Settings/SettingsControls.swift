@@ -195,8 +195,8 @@ struct FlatButton: View {
     let title: String
     var look = Look.plain
 
-    /// An SF Symbol before the words, for a button that makes something new.
-    var symbol: String?
+    /// A plus before the words, for a button that makes something new (WithPlus on Windows).
+    var plus = false
     var enabled = true
     let press: () -> Void
 
@@ -204,9 +204,9 @@ struct FlatButton: View {
 
     var body: some View {
         Button(action: { if enabled { press() } }) {
-            HStack(spacing: 8) {
-                if let symbol {
-                    Image(systemName: symbol).font(.system(size: 10, weight: .light))
+            HStack(spacing: 6) {
+                if plus {
+                    PathMark(data: PathMark.plus, box: CGSize(width: 10, height: 10), lineWidth: 1.2, tone: words)
                 }
                 Text(title).font(Theme.mono(Theme.textSmall, weight: look == .primary ? .medium : .regular))
             }
@@ -379,9 +379,7 @@ struct DropDown: View {
                     .foregroundStyle(Theme.ink)
                     .lineLimit(1)
                 Spacer(minLength: 4)
-                Image(systemName: "chevron.down")
-                    .font(.system(size: 9, weight: .light))
-                    .foregroundStyle(Theme.muted)
+                PathMark(data: PathMark.chevron, box: CGSize(width: 8, height: 5))
             }
             .padding(.horizontal, 8)
             .frame(height: 28)
@@ -403,9 +401,7 @@ struct SavedMark: View {
 
     var body: some View {
         HStack(spacing: 5) {
-            Image(systemName: "checkmark")
-                .font(.system(size: 9, weight: .regular))
-                .foregroundStyle(Theme.positive)
+            PathMark(data: PathMark.saved, box: CGSize(width: 10, height: 8), lineWidth: 1.5, tone: Theme.positive)
             Text(Strings.saved)
                 .font(Theme.mono(Theme.textSmall))
                 .foregroundStyle(Theme.muted)
@@ -440,6 +436,13 @@ struct RowsBox<Content: View>: View {
         VStack(alignment: .leading, spacing: 0) { content() }
             .frame(maxWidth: .infinity, alignment: .leading)
             .hairlineFrame()
+    }
+}
+
+extension View {
+    /// Puts the view in the box of a step that cannot be undone, or of a warning.
+    func zoneBox(_ kind: ZoneBox<Self>.Kind) -> some View {
+        ZoneBox(kind: kind) { self }
     }
 }
 

@@ -48,7 +48,7 @@ struct MemoryBlockView: View {
 
             // While a new fact is being typed the button would open what is already open.
             if model.adding == nil {
-                FlatButton(title: Strings.memoryAdd, symbol: "plus") { model.startAdding() }
+                FlatButton(title: Strings.memoryAdd, plus: true) { model.startAdding() }
             }
         }
     }
@@ -184,13 +184,13 @@ struct MemoryBlockView: View {
             HStack(spacing: 0) {
                 // A closed lock is a pinned fact, an open one is the rest (D-278).
                 MemoryIconButton(
-                    symbol: fact.pinned ? "lock" : "lock.open",
+                    icon: fact.pinned ? SiteIcons.lock : SiteIcons.unlock,
                     name: fact.pinned ? Strings.memoryUnpin : Strings.memoryPin,
                     colour: fact.pinned ? Theme.ink : Theme.muted) { model.pin(fact) }
-                MemoryIconButton(symbol: "pencil", name: Strings.memoryEdit, colour: Theme.muted) {
+                MemoryIconButton(icon: SiteIcons.pencil, name: Strings.memoryEdit, colour: Theme.muted) {
                     model.startEditing(fact)
                 }
-                MemoryIconButton(symbol: "trash", name: Strings.remove, colour: Theme.muted) {
+                MemoryIconButton(icon: SiteIcons.trash, name: Strings.remove, colour: Theme.muted) {
                     model.remove(fact)
                 }
             }
@@ -396,7 +396,7 @@ private struct MemoryForm: View {
 /// Pin, edit, remove: a small picture with its name for a pointer that waits and for a screen
 /// reader.
 private struct MemoryIconButton: View {
-    let symbol: String
+    let icon: String
     let name: String
     let colour: Color
     let press: () -> Void
@@ -405,9 +405,7 @@ private struct MemoryIconButton: View {
 
     var body: some View {
         Button(action: press) {
-            Image(systemName: symbol)
-                .font(.system(size: 12))
-                .foregroundStyle(colour)
+            FilledMark(data: icon, size: 13, tone: colour)
                 .frame(width: 26, height: 26)
                 .background(hovering ? Theme.raised : .clear)
                 .contentShape(Rectangle())

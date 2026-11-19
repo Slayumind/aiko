@@ -65,8 +65,8 @@ final class ShellBlocksView: NSView {
     private var copied: Int64?
     private var room: CGFloat = 0
 
-    private var font = Theme.monoFont(13)
-    private var bold = Theme.monoFont(13)
+    private var font = Theme.monoFont(Theme.textBody)
+    private var bold = Theme.monoFont(Theme.textBody)
     private var zoom: CGFloat = 1
     private var charWidth: CGFloat = 7.8
 

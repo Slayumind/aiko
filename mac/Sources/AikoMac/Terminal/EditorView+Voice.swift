@@ -240,7 +240,7 @@ final class WaveView: NSView {
         for (index, level) in levels.enumerated() {
             let height = (Self.low + (Self.high - Self.low) * CGFloat(level)) * zoom
             let bar = NSRect(x: CGFloat(index) * 4 * zoom, y: (bounds.height - height) / 2, width: 2 * zoom, height: height)
-            NSBezierPath(roundedRect: bar, xRadius: zoom, yRadius: zoom).fill()
+            bar.fill()
         }
     }
 }
