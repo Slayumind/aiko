@@ -308,7 +308,10 @@ public enum SvgPath {
                 at += 1
             }
 
-            while at < characters.count, characters[at].isNumber || characters[at] == "." {
+            // A number has one point: a second one starts the next number, as in "7.64.7".
+            var hasPoint = false
+            while at < characters.count, characters[at].isNumber || (characters[at] == "." && !hasPoint) {
+                hasPoint = hasPoint || characters[at] == "."
                 text.append(characters[at])
                 at += 1
             }

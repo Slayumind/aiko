@@ -138,6 +138,24 @@ struct SvgPathTests {
         #expect(SvgPath.steps("   ") == [])
     }
 
+    /// The icons of the site are written short: in "7.64.7" the second point starts a new number,
+    /// as WPF reads it. Read as one number, the cross of "stopped" lost one of its lines.
+    @Test
+    func aSecondPointStartsANewNumber() {
+        let steps = SvgPath.steps("M1.5.5L7.64.7")
+
+        #expect(steps == [.move(Point(1.5, 0.5)), .line(Point(7.64, 0.7))])
+    }
+
+    /// Every icon of the site the window draws reads to its end, with no step lost.
+    @Test
+    func theSiteIconsReadWhole() {
+        let cross = SvgPath.steps("M3.65,4.35l.7-.7L12,11.29l7.65-7.64.7.7L12.71,12l7.64,7.65-.7.7L12,12.71l-7.65,7.64-.7-.7L11.29,12Z")
+
+        #expect(cross.count == 13)
+        #expect(cross.last == .close)
+    }
+
     /// Path data we cannot read stops there. A face drawn short beats a crash in the menu bar.
     @Test
     func aHalfWrittenCommandStopsThePath() {
