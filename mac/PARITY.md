@@ -213,6 +213,7 @@ AikoKit decided, and it answers the mouse.
 | RingIcon.cs | StatusIcon.swift | draws the ring and the dot into an `NSImage` |
 | Theme/Tokens.xaml | Theme.swift | the tokens of the new look (D-435) and the one font, Geist Mono, as SwiftUI and AppKit values from one set of numbers |
 | Theme/Rule.cs, FloatingPanel.cs, TitledFrame.cs, StatusMark.cs, LimitBar.cs, SiteIcons.cs | ThemeParts.swift | the shared parts of the new look: the rule, the floating panel, the frame with a caption in its line, the sign and word of a state, the bar of a limit, the icons of the site, and the path with cut corners of the island |
+| Aiko.Core.Tests/DesignSystemTests.cs | Tests/AikoKitTests/DesignSystemTests.swift | the rules of the design system read from the source: colours and text sizes only from the tokens, no rounded corners, marks from the icon set, every token in use |
 | Terminal/TerminalPanel.Signal.cs | Terminal/TerminalFrameView.swift | the frame of the terminal with the session name and its state in the line (D-452); the host keeps the terminal inside it with a layout guide |
 | SnapshotWatcher.cs | SnapshotWatch.swift | watches the snapshots folder; a `DispatchSource` in place of `FileSystemWatcher` |
 | Island/IslandWindow.xaml.cs | IslandWindow.swift | the island's window: where it goes, the hover, the drag and the landing |
