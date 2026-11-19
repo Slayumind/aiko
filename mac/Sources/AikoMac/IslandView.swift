@@ -154,11 +154,28 @@ final class IslandView: NSView {
             case .stopped:
                 stroke("M0,0 L8,8 M8,0 L0,8", size: NSSize(width: 8, height: 8), in: sign, colour: Theme.nsDestructive, alpha: alpha)
             case .working:
-                stroke(SiteIcons.scrubber, size: NSSize(width: 24, height: 24), in: sign.insetBy(dx: 2, dy: 2),
-                       colour: Theme.nsInk, alpha: alpha, fill: true)
+                // The ring of the set, stretched to 8 by its own bounds as WorkingSign on Windows:
+                // in its box of 24 it takes only a third.
+                fitted(SiteIcons.scrubber, side: 8, in: sign, colour: Theme.nsInk, alpha: alpha)
             }
             Self.number(mark.count).draw(at: NSPoint(x: spot.number.x, y: spot.number.y), opacity: alpha)
         }
+    }
+
+    /// A filled mark whose own bounds are stretched to a square of side points, centred in the field.
+    private func fitted(_ data: String, side: CGFloat, in field: NSRect, colour: NSColor, alpha: CGFloat) {
+        guard let context = NSGraphicsContext.current?.cgContext else { return }
+        let path = BarMarks.path(data).cgPath
+        let box = path.boundingBox
+        let scale = side / max(box.width, box.height)
+        context.saveGState()
+        context.translateBy(x: field.midX - box.width * scale / 2, y: field.midY - box.height * scale / 2)
+        context.scaleBy(x: scale, y: scale)
+        context.translateBy(x: -box.minX, y: -box.minY)
+        context.addPath(path)
+        context.setFillColor(colour.withAlphaComponent(alpha).cgColor)
+        context.fillPath(using: .evenOdd)
+        context.restoreGState()
     }
 
     /// A mark of the slayumind set, its box of size units centred in the field.
