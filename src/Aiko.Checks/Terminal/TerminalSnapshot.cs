@@ -39,6 +39,13 @@ static class TerminalSnapshot
             return;
         }
 
+        Snapshot.Write(Window(part), path);
+    }
+
+    /// The window of the snapshot with its made up sessions, not yet drawn. The idle check shows the
+    /// same one on the screen.
+    public static TerminalPanel Window(string? part)
+    {
         var narrow = part?.StartsWith("narrow", StringComparison.Ordinal) == true;
         var panel = new TerminalPanel { Width = narrow ? 600 : 1000, Height = 620 };
         var now = DateTimeOffset.Now;
@@ -80,7 +87,7 @@ static class TerminalSnapshot
             panel.ShowSettings(new SettingsPanel(part.Length > 9 ? part[9..] : null));
         }
 
-        Snapshot.Write(panel, path);
+        return panel;
     }
 
     /// The header of the snapshot: open for "header", "header-work" and "narrow-header", the list

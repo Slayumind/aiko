@@ -426,6 +426,13 @@ static class Program
             return;
         }
 
+        // The terminal window at rest draws nothing: --try-idle report.txt [part of --snapshot-terminal]
+        if (args is ["--try-idle", var idleReport, ..])
+        {
+            Environment.Exit(IdleCheck.Run(idleReport, args.Length > 2 ? args[2] : null));
+            return;
+        }
+
         // The terminal window on made up sessions: --snapshot-terminal out.png [palette | folders | loader]
         if (args is ["--snapshot-terminal", var terminalPath, ..])
         {

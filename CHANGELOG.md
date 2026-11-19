@@ -30,6 +30,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - A pasted picture no longer makes Claude Code ask about the pictures folder at every start, where
   Enter closed the session. Claude Code may now only read that folder.
 
+### Removed
+
+- The Mood setting and its emoji face. Aiko's face is always the drawing, and the temperament stays
+  as it was.
+
 ## [0.5.0] - 2026-11-17
 
 Aiko gets a window. Claude Code and the command line run in it, on Windows and macOS, grouped by
