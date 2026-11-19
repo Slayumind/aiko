@@ -8,37 +8,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
-### Changed
-
-- **A new look.** The window, the settings and the island now look like a precise work tool: one
-  mono typeface, straight lines and frames with a caption in their top line. Colour comes only where
-  it means something: in the mark of a session with its word, and in the frame of the chosen
-  environment in the open header. Screens, keys and steps stay where they were in 0.5.0.
-- **New state colours.** Working is white, done is green and asleep is paler, in the list, on the
-  tabs, on the island and on the taskbar button. The ring of limits and the app icon are violet.
-- **Marks on the tabs.** The tab of each environment shows how many of its sessions wait, are done or
-  stopped, and the marks unfold the same way as on the island.
-- **The voice of Aiko.** With the personality on, her opening and closing lines come in their own
-  colour in the terminal, and the opening line starts with a face that fits the message. Claude Code
-  still draws everything. The quiet temperament, code, commits and files have no faces.
-- **The island** sits close to the edge of the screen and has cut corners. At a side edge it stays
-  one row, as at the top.
-
-### Fixed
-
-- After `/clear`, a restart of Aiko continues the new conversation of the session, not the old one.
-- A pasted picture no longer makes Claude Code ask about the pictures folder at every start, where
-  Enter closed the session. Claude Code may now only read that folder.
-
-### Removed
-
-- The Mood setting and its emoji face. Aiko's face is always the drawing, and the temperament stays
-  as it was.
-
-## [0.5.0] - 2026-11-17
+## [0.6.0] - 2026-11-19
 
 Aiko gets a window. Claude Code and the command line run in it, on Windows and macOS, grouped by
-account and project folder.
+account and project folder. Everything in it has a new look: one mono typeface, straight lines,
+and colour only where it means something.
 
 ### Added
 
@@ -71,15 +45,15 @@ account and project folder.
   on the taskbar show how many agents wait for you, in orange. If none wait, they show how many
   stopped, in red, and a green dot says one has finished. The number stays until you open that
   session, and only a question comes with a sound. The button draws the same ring as the tray, and a
-  limit over 90% turns it red; Aiko's face takes its place at the same moments as in the tray. If you
+  limit over 90% turns it violet; Aiko's face takes its place at the same moments as in the tray. If you
   pin Aiko to the taskbar, Windows draws the button from the pin: the ring stays still, and the face
   comes in its corner. While the window is open or minimized, the button stands in for the
   tray icon and the island; close the window and they come back, the island with the agents that
   wait, have finished, stopped and work.
 - **Everything in one window.** A click on the tray icon or the island opens it, and the menu of the
-  icon keeps Open, Settings and Quit. Each environment is a pill in the title bar with its ring and
+  icon keeps Open, Settings and Quit. Each environment is a tab in the title bar with its ring and
   percent; the arrow opens the limits of all of them in place, says how fresh they are and offers
-  Sign in when an account needs it. The gear and Ctrl+, open the settings right there; Esc or a pill takes
+  Sign in when an account needs it. The gear and Ctrl+, open the settings right there; Esc or a tab takes
   you back to the sessions; the project folders are on the page of their environment. The first
   run happens in the same window, one step at a time. The card of limits and the settings window are
   gone.
@@ -106,11 +80,24 @@ account and project folder.
 
 ### Changed
 
+- **A new look.** The window, the settings and the island now look like a precise work tool: one
+  mono typeface, straight lines and frames with a caption in their top line. Colour comes only where
+  it means something: in the mark of a session with its word, and in the frame of the chosen
+  environment in the open header.
+- **New state colours.** Working is white, done is green and asleep is paler, in the list, on the
+  tabs, on the island and on the taskbar button. Limits have their own scale, from white to violet,
+  and the app icon has a violet ring.
+- **Marks on the tabs.** The tab of each environment shows how many of its sessions wait, are done or
+  stopped, and the marks unfold the same way as on the island.
+- **The voice of Aiko.** With the personality on, her opening and closing lines come in their own
+  colour in the terminal, and the opening line starts with a face that fits the message. Claude Code
+  still draws everything. The quiet temperament, code, commits and files have no faces.
+- **The island** sits close to the edge of the screen and has cut corners. At a side edge it stays
+  one row, as at the top.
 - **The first run on a new computer.** A button installs Claude Code in a PowerShell window, and Next
   waits until it is there. The steps go in one order, the counter starts at zero, and the last step
   lists what Finish changes. The privacy step names what is never sent, and the update check
   mentions the count only when statistics are on.
-
 - **The window says what it can do.** A magnifier in the title bar opens the search of conversations,
   and a quiet line under a session names its keys. The open island puts the letter of each
   environment before its ring. A session that did not start says why and offers to start again,
@@ -146,6 +133,11 @@ account and project folder.
   account of the key is out of money, Aiko says so instead of asking you to check the key.
 - The bridge no longer leaves temporary files next to the limit snapshots, and Aiko clears the old
   ones when it starts.
+
+### Removed
+
+- The Mood setting and its emoji face. Aiko's face is always the drawing, and the temperament stays
+  as it was.
 
 ## [0.4.1] - 2026-10-12
 
