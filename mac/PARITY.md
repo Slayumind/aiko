@@ -118,7 +118,7 @@ Swift they are part of AikoKit and have cases of their own:
 
 | C# file | Swift file | C# cases | Swift cases | Notes |
 |---|---|---|---|---|
-| RingIcon.cs, RingDrawing.cs | RingArt.swift | — | 13 | the 16 unit grid, the tones and the dashed ring as numbers; the drawing itself is `AikoMac/StatusIcon.swift` |
+| RingIcon.cs, RingDrawing.cs | RingArt.swift | — | 13 | the 16 unit grid, the tones, the scale of limits from white to violet (`limitColour`, RingDrawing.ColourFor, D-440) and the dashed ring as numbers; the drawing itself is `AikoMac/StatusIcon.swift` |
 | Theme/Motion.cs | Motion.swift | — | — | the durations and the curves of every motion |
 | Island/IslandPanel.xaml.cs, Island/UnfoldPanel.cs, Island/FitPanel.cs | IslandLayout.swift | — | 28 | the size of the island, its line and corners per edge, the padding that keeps the rings still when the docked side loses its line, where every ring and percentage sits, the 34 point square it closes into around the face, and the marks of the sessions after the rings (12 after them, 10 apart along an edge, 6 in a column), which go with the percentages while the island closes in on the face |
 | Island/IslandWindow.xaml.cs | IslandDrag.swift | — | 7 | the 3 point threshold and the grip kept as a share of the size |
@@ -211,7 +211,9 @@ AikoKit decided, and it answers the mouse.
 | StartupChores.cs | StartupChores.swift | what is put right at every start; Windows also repairs status lines and clears old activity files |
 | Aiko.Checks/ShellCheck.cs (`--try-shell`) | the self tests in AikoShell.swift, IslandCheck.swift, SettingsCheck.swift | checks that drive the real shell without writing anything. One difference is left: on a machine that is not set up, the Mac self test still opens the checklist by itself, and the Windows check opens no page |
 | RingIcon.cs | StatusIcon.swift | draws the ring and the dot into an `NSImage` |
-| Theme/Tokens.xaml | Theme.swift | the palette and the sizes, as SwiftUI values |
+| Theme/Tokens.xaml | Theme.swift | the tokens of the new look (D-435) and the one font, Geist Mono, as SwiftUI and AppKit values from one set of numbers |
+| Theme/Rule.cs, FloatingPanel.cs, TitledFrame.cs, StatusMark.cs, LimitBar.cs, SiteIcons.cs | ThemeParts.swift | the shared parts of the new look: the rule, the floating panel, the frame with a caption in its line, the sign and word of a state, the bar of a limit, the icons of the site, and the path with cut corners of the island |
+| Terminal/TerminalPanel.Signal.cs | Terminal/TerminalFrameView.swift | the frame of the terminal with the session name and its state in the line (D-452); the host keeps the terminal inside it with a layout guide |
 | SnapshotWatcher.cs | SnapshotWatch.swift | watches the snapshots folder; a `DispatchSource` in place of `FileSystemWatcher` |
 | Island/IslandWindow.xaml.cs | IslandWindow.swift | the island's window: where it goes, the hover, the drag and the landing |
 | BadgeDrawing.cs | BadgePaint.swift | the sign of the sessions in the corner of the tray and menu bar icon (D-409): the number of waiting sessions in orange, of stopped ones in red, a green dot for a finished turn, with a gap of one unit cut out of the rings around it |
@@ -233,7 +235,7 @@ AikoKit decided, and it answers the mouse.
 | Uninstall.cs | Uninstall.swift | putting everything back on the way out. Windows is called by the installer's hook and then removes the program with `Update.exe uninstall`; macOS has no uninstaller, so the app does the work itself, moves its own bundle to the Bin and quits. Both carry the answer about the memory from the settings page to `UninstallPlan`; the Windows hook has no window and passes "nobody was asked", and macOS has no such path |
 | Settings/SettingsPanel.xaml(.cs), Terminal/TerminalHost.Settings.cs | Settings/SettingsPanel.swift, Terminal/TerminalHost+Settings.swift | the settings inside the terminal window (D-374): the menu on the place of the list, as wide as it, and the page in a column of 640 on the left. The gear, a pill or Esc goes back to the same session |
 | Settings/TerminalPage.xaml(.cs) | Settings/TerminalPageView.swift | the zoom of the window, the sound of a question and voice input |
-| Settings/SavedMark.cs, Theme/Controls.xaml, Theme/DropDown.cs, Theme/RevealPanel.cs | Settings/SettingsControls.swift | the switch, the segments, the picked card, the fields, the buttons (with the light one for Save and a plus before the words), the tick, the chip, the drop down and the "Saved" mark |
+| Settings/SavedMark.cs, Theme/Controls.xaml, Theme/DropDown.cs, Theme/RevealPanel.cs | Settings/SettingsControls.swift | the switch, the segments, the picked card, the fields, the buttons (with the light one for Save and a plus before the words), the tick, the chip, the drop down, the "Saved" mark and the boxes of a danger and a warning |
 | Settings/EnvironmentsEditor.cs | Settings/SettingsState.swift | what the window is looking at, and every change written through one place |
 | Settings/EnvironmentPage.xaml(.cs) | Settings/EnvironmentPageView.swift | one environment: the account, the name, the command, the bound folders with the switch for every other folder (D-398), and removal |
 | Settings/PersonalityPage.xaml(.cs) | Settings/PersonalityPageView.swift | one switch per environment for all of Aiko (her character, her skills and her memory), the memory block, the face, the temperament, the sample answer and the list of skills |
@@ -255,7 +257,7 @@ AikoKit decided, and it answers the mouse.
 | Terminal/HeaderStripView.cs | Terminal/HeaderStripView.swift | the open header of limits (D-373, D-376) |
 | Terminal/PaletteView.cs, TerminalHost.Palette.cs, ConversationShelf.cs | Terminal/PaletteView.swift, TerminalHost+Palette.swift, ConversationShelf.swift | the quick pick of a folder and the search of sessions and conversations (D-347, D-353) |
 | Terminal/TerminalHost.Keys.cs | Terminal/TerminalHost+Keys.swift | the keys of the window from the table of the core, Cmd for Ctrl. The next session is Ctrl+Tab: Cmd+Tab belongs to macOS |
-| Theme/ToolTip.xaml, Theme/Tips.cs | Tips.swift | the tip of every window, the island too: Surface, a thin edge, radius 8, the small text, one line or wrapped in 320. The icon of the menu bar keeps the tip of the system, as the tray icon of Windows does |
+| Theme/ToolTip.xaml, Theme/Tips.cs | Tips.swift | the tip of every window, the island too: the dark ground, a hairline, square corners, the small text, one line or wrapped in 320. The icon of the menu bar keeps the tip of the system, as the tray icon of Windows does |
 | Terminal/TerminalWindow.cs, WorkAreas.cs | Terminal/TerminalHost+Window.swift, Screens.swift | where the window stands on all screens: the place it was closed at, kept while a screen still has it, by the rule of WindowPlace in the core |
 | Terminal/TerminalSurface.cs, PseudoConsole.cs, TerminalLoader.cs; their checks in Aiko.Checks: TerminalSnapshot.cs, TerminalHookCheck.cs, TerminalTabCheck.cs | Terminal/AikoTerminalView.swift, TerminalHost+Loader.swift, TerminalCheck.swift, PulseCheck.swift | the real terminal, on ConPTY and on SwiftTerm (D-360), with the loader until its first letter (D-368) and the copy of whole paragraphs (D-371) |
 | Terminal/TerminalView.cs | Terminal/TerminalState.swift | what the window draws at one moment: Windows hands one record to the panel, the Mac publishes the parts to its SwiftUI views |
